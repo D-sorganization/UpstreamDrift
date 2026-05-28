@@ -815,13 +815,13 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def update_startup_results(self, results: StartupResults) -> None:
         """Transition from loading skeleton to full application."""
-        self.loading = False
         self._startup_time_ms = results.startup_time_ms
         self.orchestrator.initialize_from_results(results)
         self.layout_manager.available_models = self.orchestrator.available_models
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
+        self.loading = False
 
         from PyQt6.QtCore import QTimer as _QTimer
 

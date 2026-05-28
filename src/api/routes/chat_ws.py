@@ -35,6 +35,23 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
+
+def _chat_service_from(holder: Any) -> Any:
+    """Extract ChatService from holder (e.g. Request or WebSocket)."""
+    if holder is None:
+        raise ValueError("holder must be provided")
+    app = getattr(holder, "app", None)
+    if app is None:
+        raise ValueError("holder must have app attribute")
+    state = getattr(app, "state", None)
+    if state is None:
+        raise ValueError("app must have state attribute")
+    chat_service = getattr(state, "chat_service", None)
+    if chat_service is None:
+        raise RuntimeError("ChatService not initialised")
+    return chat_service
+
+
 _INTERNAL_ERROR_DETAIL = "Internal server error"
 _CONNECTION_ERROR_DETAIL = "Connection error"
 
@@ -156,7 +173,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
         return
     await websocket.accept()
 
-    chat_service = websocket.app.state.chat_service
+    chat_service = _chat_service_from(websocket)
 
     # Resolve or create session
     if session_id == "new":
@@ -282,7 +299,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
 @router.get("/chat/sessions")
 async def list_sessions(request: Request) -> list[dict[str, Any]]:
     """List all active chat sessions."""
-    return request.app.state.chat_service.list_sessions()  # type: ignore[no-any-return]
+    return _chat_service_from(request).list_sessions()  # type: ignore[no-any-return]
 
 
 @router.get("/chat/sessions/{session_id}/history")
@@ -294,5 +311,5 @@ async def get_history(request: Request, session_id: str) -> dict[str, Any]:
     """Get message history for a session."""
     if not (request is not None):
         raise ValueError("request must be provided")
-    messages = request.app.state.chat_service.get_session_history(session_id)
+    messages = _chat_service_from(request).get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}

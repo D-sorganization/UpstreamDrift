@@ -55,7 +55,7 @@ class TestUpstreamDriftLauncherLogic:
         launcher.registry = MagicMock()
         launcher.registry.get_all_models.return_value = [mock_model]
         launcher.registry.get_model.return_value = mock_model
-        launcher._build_available_models()
+        launcher.orchestrator.build_available_models()
 
         launcher.engine_manager = MagicMock()
         launcher.btn_launch.setEnabled(False)
@@ -98,7 +98,7 @@ class TestUpstreamDriftLauncherLogic:
         launcher.registry = MagicMock()
         launcher.registry.get_all_models.return_value = [mock_model]
         launcher.registry.get_model.return_value = mock_model
-        launcher._build_available_models()
+        launcher.orchestrator.build_available_models()
 
         launcher.engine_manager = MagicMock()
         launcher.btn_launch.setEnabled(False)
@@ -148,15 +148,16 @@ class TestUpstreamDriftLauncherLogic:
         launcher.registry = MagicMock()
         launcher.registry.get_all_models.return_value = [mock_model]
         launcher.registry.get_model.return_value = mock_model
-        launcher._build_available_models()
+        launcher.orchestrator.build_available_models()
 
         launcher.engine_manager = MagicMock()
         launcher.btn_launch.setEnabled(False)
-        launcher.docker_available = True
+        launcher.docker_available = False
+        launcher.chk_docker.setChecked(False)
         launcher.select_model("generic_mjcf")
 
         # Fake check local dependencies
-        launcher._check_local_dependencies = MagicMock(return_value=True)
+        launcher._check_local_dependencies = MagicMock(return_value=True)  # type: ignore[attr-defined]
 
         mock_mujoco = MagicMock()
         mock_viewer = MagicMock()
@@ -196,12 +197,13 @@ class TestUpstreamDriftLauncherLogic:
         launcher.registry = MagicMock()
         launcher.registry.get_all_models.return_value = [mock_model]
         launcher.registry.get_model.return_value = mock_model
-        launcher._build_available_models()
+        launcher.orchestrator.build_available_models()
         launcher.select_model("matlab_suite")
 
-        with patch(
-            "src.launchers.matlab_suite_dialog.MatlabSuiteDialog"
-        ) as mock_dialog:
+        with (
+            patch.object(launcher, "dock_widget_as_tab") as mock_dock,
+            patch("src.launchers.matlab_suite_dialog.MatlabSuiteWidget") as mock_widget,
+        ):
             launcher.launch_simulation()
-            mock_dialog.assert_called_once_with(launcher)
-            mock_dialog.return_value.exec.assert_called_once()
+            mock_widget.assert_called_once_with(launcher)
+            mock_dock.assert_called_once_with(mock_widget.return_value, "Matlab Suite")

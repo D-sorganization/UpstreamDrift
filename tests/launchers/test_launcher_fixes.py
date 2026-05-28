@@ -436,6 +436,83 @@ class TestJunctionPathSecurityValidation(unittest.TestCase):
             self.assertEqual(validated_path, cwd_path)
 
 
+class TestLauncherConnectivityAndDockingFixes(unittest.TestCase):
+    """Test cases for Docker checkbox startup and tab-docking behavior."""
+
+    def test_docker_mode_changed_silently_unchecks_during_loading_when_docker_unavailable(
+        self,
+    ) -> None:
+        from src.launchers.launcher_dialogs import DialogsManager
+
+        mock_launcher = MagicMock()
+        mock_launcher.loading = True
+        mgr = DialogsManager(mock_launcher)
+        mgr.chk_docker = MagicMock()
+        mgr.chk_wsl = MagicMock()
+        mgr.chk_windows = MagicMock()
+        mgr.lbl_execution_mode = MagicMock()
+        mgr.docker_available = False
+
+        mgr._on_docker_mode_changed(2)  # checked
+        mgr.chk_docker.setChecked.assert_called_with(False)
+        self.assertFalse(mgr.docker_available)
+
+    def test_try_launch_docker_bypasses_embeddable_tools(self) -> None:
+        from src.launchers.launcher_simulation import SimulationManager
+
+        mock_launcher = MagicMock()
+        mgr = SimulationManager(mock_launcher)
+        mgr.chk_docker = MagicMock()
+        mgr.chk_docker.isChecked.return_value = True
+        mgr.docker_available = True
+
+        mock_model = MagicMock()
+        mock_model.embed_adapter = "some_adapter_path"
+
+        # Should return False to bypass Docker launch
+        self.assertFalse(mgr._try_launch_docker(mock_model))
+
+    def test_execute_local_launch_forces_dock_widget_as_tab(self) -> None:
+        from src.launchers.launcher_simulation import SimulationManager
+
+        mock_launcher = MagicMock()
+        mgr = SimulationManager(mock_launcher)
+        mgr.dock_widget_as_tab = MagicMock()
+        mgr.popout_widget = MagicMock()
+        mgr.show_toast = MagicMock()
+        mgr.lbl_status = MagicMock()
+
+        # Mock model with default_launch = window
+        mock_model = MagicMock()
+        mock_model.name = "Test Model"
+        mock_model.type = "special_app"
+        mock_model.launcher = {"default_launch": "window"}
+
+        # Mock handler
+        mock_widget = MagicMock()
+
+        class MockHandler:
+            def get_dockable_ui(self, model, repos_root):
+                return mock_widget
+
+            def launch(self, model, repos_root, process_manager):
+                return True
+
+        mock_handler = MockHandler()
+        mgr.model_handler_registry = MagicMock()
+        mgr.model_handler_registry.get_handler.return_value = mock_handler
+
+        with patch(
+            "src.launchers.launcher_simulation.resolve_model_artifact_path",
+            return_value=Path("."),
+        ):
+            mgr._execute_local_launch(mock_model)
+
+            # Verification: should call dock_widget_as_tab, not popout_widget
+            mgr.dock_widget_as_tab.assert_called_once_with(mock_widget, "Test Model")
+            mgr.popout_widget.assert_not_called()
+
+
 if __name__ == "__main__":
     # Create test suite
     loader = unittest.TestLoader()
@@ -450,6 +527,7 @@ if __name__ == "__main__":
         TestLauncherIntegration,
         TestLauncherUISearchAndRuntimeSettings,
         TestJunctionPathSecurityValidation,
+        TestLauncherConnectivityAndDockingFixes,
     ]
 
     # Add PyQt tests only if available
