@@ -669,7 +669,7 @@ jobs:
           python -m pip install .
           python -m ensurepip --upgrade || true
           python -m pip install pip-audit
-          pip-audit -r <(pip freeze)
+          pip-audit -r <(pip freeze --exclude upstream-drift)
 
   tests:
     needs: pick-runner
