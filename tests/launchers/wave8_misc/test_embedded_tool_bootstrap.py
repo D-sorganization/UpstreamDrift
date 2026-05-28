@@ -139,3 +139,22 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
     with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
         result = bootstrap.bootstrap_embeddable_tools()
     assert "model_explorer" in result
+
+
+def test_bootstrap_registers_all_adapters() -> None:
+    """Assert bootstrap_embeddable_tools registers all 8 first-party tool adapters."""
+    expected_tools = {
+        "model_explorer",
+        "training_controller",
+        "ball_flight_gui",
+        "bunker_shot_gui",
+        "putting_green_gui",
+        "golf_environment",
+        "terrain_engine",
+        "golf_simulation_suite",
+    }
+    result = bootstrap.bootstrap_embeddable_tools()
+    for tool in expected_tools:
+        assert tool in result, (
+            f"Expected tool '{tool}' to be registered, but got {result}"
+        )

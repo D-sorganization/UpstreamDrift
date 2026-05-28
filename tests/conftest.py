@@ -459,10 +459,10 @@ def pytest_configure(config: pytest.Config) -> None:
         sys.path.insert(0, local_path)
         sys.path.append(vendored_path)
 
-    # Prevent dual-loading of shared contracts module under different path aliases.
-    # With both '.' and 'src/shared/python' in sys.path, 'contracts' can be
-    # imported as both 'src.shared.python.contracts' and 'contracts', creating
-    # two distinct class objects that break pytest.raises() catches in Python 3.11+.
+    # Prevent dual-loading of shared contracts and training modules under different path aliases.
+    # With both '.' and 'src/shared/python' in sys.path, contracts/training can be
+    # imported as both 'src.shared.python.contracts'/'src.shared.python.training' and
+    # 'contracts'/'training', creating two distinct class objects that break pytest and type checks.
     # Pre-load via the canonical path and alias all alternate module names.
     try:
         import importlib
@@ -474,6 +474,29 @@ def pytest_configure(config: pytest.Config) -> None:
         # pytest_configure runs, creating a stale second module instance.
         for alias in ("contracts", "shared.python.contracts"):
             sys.modules[alias] = canonical_mod
+
+        # Alias training and all of its submodules recursively
+        training_dir = root_dir / "src/shared/python/training"
+        if training_dir.exists():
+            canonical_tr_name = "src.shared.python.training"
+            canonical_tr_mod = importlib.import_module(canonical_tr_name)
+            sys.modules["training"] = canonical_tr_mod
+            sys.modules["shared.python.training"] = canonical_tr_mod
+
+            for path in training_dir.rglob("*.py"):
+                if path.name == "__init__.py":
+                    if path.parent == training_dir:
+                        continue
+                    rel = path.parent.relative_to(training_dir)
+                else:
+                    rel = path.with_suffix("").relative_to(training_dir)
+
+                sub_path = str(rel).replace(os.path.sep, ".")
+                if sub_path:
+                    sub_name = f"src.shared.python.training.{sub_path}"
+                    mod = importlib.import_module(sub_name)
+                    sys.modules[f"training.{sub_path}"] = mod
+                    sys.modules[f"shared.python.training.{sub_path}"] = mod
     except Exception as e:  # noqa: BLE001, F841
         pass  # Don't block test collection if this fails
 
