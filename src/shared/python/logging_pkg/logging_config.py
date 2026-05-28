@@ -90,7 +90,12 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"|"
         r"(?:(['\"])([^'\"\s}]+))"  # unterminated quoted value fallback
         r"|"
-        r"([^'\"\s,{}&;:\])]+)"  # unquoted value
+        # Unquoted value: fail-closed — consume past commas so credentials
+        # containing literal commas are not leaked beyond the first one
+        # (#6494). The closing-quote / brace / ampersand / semicolon /
+        # colon stops still apply so JSON and form-encoded boundaries are
+        # respected when present.
+        r"([^'\"\s{}&;:\])]+)"
         r")"
     ),
 ]

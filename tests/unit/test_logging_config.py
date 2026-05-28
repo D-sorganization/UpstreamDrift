@@ -146,17 +146,27 @@ class TestSensitiveDataFilter:
         assert "other_var=1" in record.msg
 
     def test_redacts_unquoted_value_containing_comma(self) -> None:
+        # Fail-closed (#6494): secrets can legitimately contain commas, so
+        # the unquoted branch must over-redact past the first comma rather
+        # than leak the suffix.
         flt = SensitiveDataFilter()
         record = self._make_record("password=abc,def")
         flt.filter(record)
         assert "abc" not in record.msg
-        assert record.msg == "password=***REDACTED***,def"
+        assert "def" not in record.msg
+        assert "***REDACTED***" in record.msg
 
     def test_redacts_compact_json_without_consuming_next_key(self) -> None:
+        # In compact JSON with an unquoted (numeric) secret value, the
+        # fail-closed unquoted branch (#6494) consumes the comma before the
+        # next key. The secret is fully redacted; downstream JSON parsers
+        # already could not reliably parse a logged-and-redacted message,
+        # so over-redaction is acceptable here.
         flt = SensitiveDataFilter()
         record = self._make_record('{"password":123,"user":"bob"}')
         flt.filter(record)
-        assert record.msg == '{"password":***REDACTED***,"user":"bob"}'
+        assert "123" not in record.msg
+        assert "***REDACTED***" in record.msg
 
     def test_redacts_quoted_json_value_containing_comma_and_brace(self) -> None:
         flt = SensitiveDataFilter()
