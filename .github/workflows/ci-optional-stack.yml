@@ -84,7 +84,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Reject Raw Merge Conflict Markers
         run: |
@@ -119,7 +119,7 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@82c7b60f580344b90dbb403b250f14003997afe2
         with:
           python-version: ${{ matrix.python }}
 
@@ -357,7 +357,7 @@ jobs:
           done
 
       - name: Upload Test Logs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@60a12c6b21f080709581541097fa6c8793b82a62
         if: always()
         with:
           name: optional-stack-test-logs-${{ matrix.python }}
