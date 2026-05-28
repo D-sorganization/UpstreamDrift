@@ -498,7 +498,7 @@ class ProcessManager:
                     suite_root=self.repo_root,
                     env=process_env,
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                     preexec_fn=_preexec_fn,
                 )
@@ -635,7 +635,7 @@ class ProcessManager:
                     suite_root=self.repo_root,
                     env=process_env,
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                     preexec_fn=_preexec_fn,
                 )
