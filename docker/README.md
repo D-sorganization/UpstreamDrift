@@ -6,11 +6,11 @@ For the full rationale behind the three-Dockerfile policy, see
 
 ## Dockerfile Roles
 
-| Filename                            | Purpose                                                                                                                                                                                 | Used by CI                                                              | When to edit                                                            |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `Dockerfile` (repo root)            | **Canonical production build.** Multi-stage (builder / runtime / training). FastAPI on port 8001. Python 3.12-slim with pinned digest.                                                  | `docker-smoke.yml`, `docker-size-gates.yml`, `docker-security-scan.yml` | Production dependency changes, server config, security hardening        |
-| `Dockerfile.heavy_test` (repo root) | **Test environment** mirroring the `d-sorg-fleet-4core` custom runner. Bookworm base with X11/Xvfb, SDL2, and all physics/robotics engines (best-effort).                               | `heavy-tests-opt-in.yml` (runner, not this image)                       | When the runner's apt packages or test-suite requirements change        |
-| `Dockerfile.modular` (repo root)    | **Experimental / modular-build validation.** Selects features via `--build-arg PROFILE=<name>` or `--build-arg FEATURES=<list>`. Phase 2 validation vehicle — explicitly non-canonical. | None                                                                    | Local exploration of modular profiles only; see constraints in ADR-0021 |
+| Filename                            | Purpose                                                                                                                                                                                 | Used by CI                                                                                                                   | When to edit                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `Dockerfile` (repo root)            | **Canonical production build.** Multi-stage (builder / runtime / training). FastAPI on port 8001. Python 3.12-slim with pinned digest.                                                  | `docker-smoke.yml`, `docker-size-gates.yml`, `docker-security-scan.yml`                                                      | Production dependency changes, server config, security hardening        |
+| `Dockerfile.heavy_test` (repo root) | **Test environment** mirroring the `d-sorg-fleet-4core` custom runner. Bookworm base with X11/Xvfb, SDL2, and all physics/robotics engines (best-effort).                               | `heavy-tests-opt-in.yml` (runner, not this image)                                                                            | When the runner's apt packages or test-suite requirements change        |
+| `Dockerfile.modular` (repo root)    | **Experimental / modular-build validation.** Selects features via `--build-arg PROFILE=<name>` or `--build-arg FEATURES=<list>`. Phase 2 validation vehicle — explicitly non-canonical. | `docker-smoke.yml` (profile capability checks), `docker-size-gates.yml` (profile size matrix) — NOT covered by security scan | Local exploration of modular profiles only; see constraints in ADR-0021 |
 
 ## Docker Compose Variants
 
@@ -41,7 +41,9 @@ docker build --build-arg PROFILE=research -f Dockerfile.modular -t upstream-drif
 docker build --build-arg FEATURES=mujoco,drake,pose-mediapipe -f Dockerfile.modular -t upstream-drift:custom .
 ```
 
-> **Note:** Only `Dockerfile` is monitored by CI security scans and size gates.
-> Changes to `Dockerfile.modular` may silently diverge from production.
+> **Note:** Only `Dockerfile` is covered by the CI security scan and the canonical
+> size gate. `Dockerfile.modular` is covered by the profile smoke tests and the
+> per-profile size budget matrix, but NOT the security scan. Changes to it may
+> silently diverge from production configuration.
 > See [ADR-0021](../docs/adr/0021-container-strategy.md) before promoting
 > `Dockerfile.modular` to production use.

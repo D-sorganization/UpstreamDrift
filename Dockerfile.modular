@@ -1,4 +1,5 @@
-# EXPERIMENTAL — not in the CI build path. See docker/README.md and ADR-0021.
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
+# EXPERIMENTAL — profile-driven build vehicle. See docker/README.md and ADR-0021.
 # Modular UpstreamDrift Dockerfile.
 #
 # Selects features either by named profile or by explicit comma-separated

@@ -2,6 +2,7 @@
 
 Status: Accepted
 Date: 2026-05-25
+Issue: #6097
 
 ## Context
 
@@ -27,9 +28,10 @@ test suite under `xvfb-run`. Built and used locally via
 via named `--build-arg PROFILE=<name>` or `--build-arg FEATURES=<list>`
 arguments. Feature resolution is delegated to
 `scripts/docker/install_features.py` and
-`src/shared/python/feature_registry/features.py`. Described in
-`docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md` as the "Phase 2 validation vehicle"
-and is explicitly non-canonical during Phase 2. Not wired into any CI workflow.
+`src/shared/python/feature_registry/features.py`. Explicitly non-canonical
+during Phase 2. Targeted by `docker-smoke.yml` (profile capability checks)
+and `docker-size-gates.yml` (profile size budget matrix) — but NOT by the
+security scan or the canonical size gate that uses `Dockerfile` directly.
 
 The three options considered were:
 
@@ -44,11 +46,11 @@ The three options considered were:
 
 We adopt **Option 3**: keep all three Dockerfiles with explicit, documented roles.
 
-| File                    | Role                                    | CI scope                                              | When to edit                                                       |
-| ----------------------- | --------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------ |
-| `Dockerfile`            | Canonical production build              | docker-smoke, docker-size-gates, docker-security-scan | Production dependency changes, server config, hardening            |
-| `Dockerfile.heavy_test` | Test environment mirroring fleet runner | heavy-tests-opt-in (uses runner directly)             | When runner apt packages or test-suite requirements change         |
-| `Dockerfile.modular`    | Experimental / modular-build validation | None                                                  | Local exploration of modular profiles only — see constraints below |
+| File                    | Role                                    | CI scope                                                                          | When to edit                                                       |
+| ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `Dockerfile`            | Canonical production build              | docker-smoke, docker-size-gates, docker-security-scan                             | Production dependency changes, server config, hardening            |
+| `Dockerfile.heavy_test` | Test environment mirroring fleet runner | heavy-tests-opt-in (uses runner directly)                                         | When runner apt packages or test-suite requirements change         |
+| `Dockerfile.modular`    | Experimental / modular-build validation | docker-smoke (profile capability checks), docker-size-gates (profile size matrix) | Local exploration of modular profiles only — see constraints below |
 
 Rationale:
 
@@ -66,9 +68,10 @@ Rationale:
   patches, dependency upgrades, and server configuration changes go here first.
 - **`Dockerfile.heavy_test` must stay in sync with the fleet runner.** Changes
   to the runner's apt packages or Python tool versions should be reflected here.
-- **`Dockerfile.modular` is frozen from CI scope.** It may drift from production
-  without alerting CI. Developers using it for local experiments should not
-  assume it reflects the current production dependency set.
+- **`Dockerfile.modular` is in limited CI scope** (profile smoke and size-budget
+  matrix only). It is NOT covered by the security scan or the canonical size
+  gate. Developers using it for local experiments should not assume it reflects
+  the current production dependency set.
 - **Any future modularization effort that promotes `Dockerfile.modular` to
   production must file a new ADR** (superseding this one) rather than silently
   modifying the file or wiring it into CI without governance review.
