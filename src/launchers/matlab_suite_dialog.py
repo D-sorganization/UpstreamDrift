@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 from src.launchers.ui_components import ASSETS_DIR
@@ -62,14 +63,13 @@ class MockModelConfig:
         self.working_dir = None
 
 
-class MatlabSuiteDialog(QDialog):
-    """Dialog to select and launch MATLAB/Simscape models."""
+class MatlabSuiteWidget(QWidget):
+    """Widget to select and launch MATLAB/Simscape models."""
 
-    def __init__(self, parent_launcher: Any) -> None:
+    def __init__(self, parent_launcher: Any, parent_dialog: Any = None) -> None:
         super().__init__(parent_launcher)
         self.parent_launcher = parent_launcher
-        self.setWindowTitle("Matlab Simscape Models")
-        self.setMinimumWidth(600)
+        self.parent_dialog = parent_dialog
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -119,13 +119,35 @@ class MatlabSuiteDialog(QDialog):
             btn.clicked.connect(lambda checked, m=model_data: self.launch_model(m))
             layout.addWidget(btn)
 
-        close_btn = QPushButton("Close")
-        close_btn.setMinimumHeight(40)
-        close_btn.clicked.connect(self.accept)
-        layout.addWidget(close_btn)
+        if self.parent_dialog is not None:
+            close_btn = QPushButton("Close")
+            close_btn.setMinimumHeight(40)
+            close_btn.clicked.connect(self.parent_dialog.accept)
+            layout.addWidget(close_btn)
 
     def launch_model(self, model_data: dict[str, str]) -> None:
-        """Launch the selected model and close dialog."""
+        """Launch the selected model."""
         model_obj = MockModelConfig(model_data)
         self.parent_launcher._launch_matlab_app(model_obj)
-        self.accept()
+        if self.parent_dialog is not None:
+            self.parent_dialog.accept()
+
+
+class MatlabSuiteDialog(QDialog):
+    """Dialog to select and launch MATLAB/Simscape models."""
+
+    def __init__(self, parent_launcher: Any) -> None:
+        super().__init__(parent_launcher)
+        self.setWindowTitle("Matlab Simscape Models")
+        self.setMinimumWidth(600)
+        self.setup_ui(parent_launcher)
+
+    def setup_ui(self, parent_launcher: Any) -> None:
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.widget = MatlabSuiteWidget(parent_launcher, self)
+        layout.addWidget(self.widget)
+
+    def launch_model(self, model_data: dict[str, str]) -> None:
+        """Forward launch to inner widget for backward compatibility."""
+        self.widget.launch_model(model_data)

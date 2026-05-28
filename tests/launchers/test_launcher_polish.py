@@ -69,7 +69,7 @@ def make_card(qapp):
         ("alpha", "Alpha", "warning"),
         ("broken", "Broken", "error"),
         ("deprecated", "Deprecated", "warning"),
-        ("external", "External", "external"),
+        ("external", "Ready", "success"),
     ],
 )
 def test_status_chip_reads_yaml_first(
@@ -99,7 +99,7 @@ def test_status_chip_no_unknown_for_matlab_suite(make_card):
     card = make_card(type_="matlab_suite", status=None)
     text, css = card._get_status_info()
     assert text != "Unknown"
-    assert css == "external"
+    assert css == "success"
 
 
 def test_status_chip_document_renders_as_reference(make_card):
