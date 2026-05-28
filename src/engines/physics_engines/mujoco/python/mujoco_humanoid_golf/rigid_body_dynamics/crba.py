@@ -3,7 +3,8 @@ Composite Rigid Body Algorithm (CRBA) for computing mass matrix.
 """
 
 import numpy as np
-from mujoco_humanoid_golf.spatial_algebra import jcalc
+
+from ..spatial_algebra import jcalc
 
 
 def _crba_forward_pass(

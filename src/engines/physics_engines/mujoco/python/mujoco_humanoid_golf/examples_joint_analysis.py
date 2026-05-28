@@ -16,12 +16,13 @@ from typing import Any
 import matplotlib.pyplot as plt
 import mujoco as mj
 import numpy as np
-from mujoco_humanoid_golf.joint_analysis import (
+
+from .joint_analysis import (
     GimbalJointAnalyzer,
     UniversalJointAnalyzer,
     plot_torque_wobble,
 )
-from mujoco_humanoid_golf.models import (
+from .models import (
     CLUB_CONFIGS,
     GIMBAL_JOINT_DEMO_XML,
     TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,

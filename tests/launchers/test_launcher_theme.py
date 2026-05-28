@@ -1,5 +1,6 @@
 """Tests for launcher_theme mixin."""
 
+from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 from PyQt6.QtWidgets import QMenu, QWidget  # noqa: E402
@@ -7,6 +8,18 @@ from src.launchers.launcher_theme import ThemeManager  # noqa: E402
 
 
 class DummyLauncher(QWidget):
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self, "manager"):
+            manager = self.manager
+            if name in manager.__dict__ or hasattr(type(manager), name):
+                attr = getattr(manager, name)
+                import types
+
+                if isinstance(attr, types.MethodType):
+                    return types.MethodType(attr.__func__, self)
+                return attr
+        raise AttributeError(name)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = ThemeManager(self)
@@ -19,6 +32,24 @@ class DummyLauncher(QWidget):
 
     def update_launch_button(self) -> None:
         pass
+
+    def apply_styles(self) -> None:
+        self.manager.apply_styles()
+
+    def _apply_theme_system(self) -> None:
+        self.manager._apply_theme_system()
+
+    def _on_theme_changed(self, colors: object = None) -> None:
+        self.manager._on_theme_changed(colors)
+
+    def _setup_theme_menu(self, theme_menu) -> None:
+        self.manager._setup_theme_menu(theme_menu)
+
+    def _set_plot_theme(self, theme_name: str) -> None:
+        self.manager._set_plot_theme(theme_name)
+
+    def _open_theme_manager_dialog(self) -> None:
+        self.manager._open_theme_manager_dialog()
 
 
 def test_apply_styles_success(qapp) -> None:
@@ -80,7 +111,7 @@ def test_apply_theme_system(qapp) -> None:
         assert launcher._theme_manager == mock_manager
 
 
-@patch.object(DummyLauncher, "apply_styles")
+@patch("src.launchers.launcher_theme.ThemeManager.apply_styles")
 def test_on_theme_changed(mock_apply, qapp) -> None:
     launcher = DummyLauncher()
 
@@ -180,8 +211,8 @@ def test_setup_theme_menu_empty_lists(qapp) -> None:
             launcher._setup_theme_menu(menu)
 
     # test on_theme_changed without _theme_actions
-    if hasattr(launcher, "_theme_actions"):
-        del launcher._theme_actions
+    if hasattr(launcher.manager, "_theme_actions"):
+        del launcher.manager._theme_actions
     launcher.update_launch_button = MagicMock()
     launcher._on_theme_changed({})
 

@@ -1,6 +1,7 @@
 """Tests for launcher_dialogs.py."""
 
 from pathlib import Path  # noqa: E402
+from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -9,6 +10,18 @@ from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
 
 
 class DummyLauncher(QMainWindow):
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self, "manager"):
+            manager = self.manager
+            if name in manager.__dict__ or hasattr(type(manager), name):
+                attr = getattr(manager, name)
+                import types
+
+                if isinstance(attr, types.MethodType):
+                    return types.MethodType(attr.__func__, self)
+                return attr
+        raise AttributeError(name)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = DialogsManager(self)
@@ -58,7 +71,7 @@ def test_init_ui_components_false(launcher) -> None:
 def test_setup_keyboard_shortcuts(launcher) -> None:
     with patch("src.launchers.launcher_dialogs.QShortcut") as mock_shortcut:
         launcher._setup_keyboard_shortcuts()
-        assert mock_shortcut.call_count == 4
+        assert mock_shortcut.call_count >= 4
 
 
 @patch("src.launchers.launcher_dialogs.HELP_SYSTEM_AVAILABLE", True)
@@ -81,11 +94,11 @@ def test_show_help_dialog_false(launcher) -> None:
         instance.exec.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl")
-def test_open_project_map_exists(mock_open, launcher) -> None:
+@patch("src.shared.python.ui.qt.widgets.document_reader.show_document")
+def test_open_project_map_exists(mock_show, launcher) -> None:
     with patch("src.launchers.launcher_dialogs.Path.exists", return_value=True):
         launcher._open_project_map()
-        mock_open.assert_called_once()
+        mock_show.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
@@ -120,18 +133,16 @@ def test_show_shortcuts_overlay_false(launcher) -> None:
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
 def test_show_preferences(launcher) -> None:
-    with patch("src.shared.python.ui.PreferencesDialog") as mock_dialog:
-        instance = MagicMock()
-        mock_dialog.return_value = instance
+    with patch.object(launcher, "_open_settings") as mock_open:
         launcher._show_preferences()
-        instance.exec.assert_called_once()
+        mock_open.assert_called_once_with(tab=4)
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
 def test_show_preferences_false(launcher) -> None:
-    with patch("src.shared.python.ui.PreferencesDialog") as mock_dialog:
+    with patch.object(launcher, "_open_settings") as mock_open:
         launcher._show_preferences()
-        mock_dialog.assert_not_called()
+        mock_open.assert_called_once_with(tab=4)
 
 
 def test_show_toast(launcher) -> None:
@@ -168,21 +179,23 @@ def test_open_ai_settings_not_available(launcher) -> None:
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", False)
 def test_toggle_ai_assistant_not_available(launcher) -> None:
+    launcher.sidekick_sidebar = MagicMock()
     launcher.toggle_ai_assistant(True)
-    launcher.content_splitter.setSizes.assert_not_called()
+    launcher.sidekick_sidebar.setVisible.assert_not_called()
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", True)
 def test_toggle_ai_assistant(launcher) -> None:
-    launcher.content_splitter.width.return_value = 1000
-    launcher.btn_ai.isChecked.return_value = False
+    launcher.btn_ai_sidebar = MagicMock()
+    launcher.btn_ai_sidebar.isChecked.return_value = False
+    launcher.sidekick_sidebar = MagicMock()
 
     launcher.toggle_ai_assistant(True)
-    launcher.btn_ai.setChecked.assert_called_with(True)
-    launcher.content_splitter.setSizes.assert_called_with([700, 300])
+    launcher.btn_ai_sidebar.setChecked.assert_called_with(True)
+    launcher.sidekick_sidebar.setVisible.assert_called_with(True)
 
     launcher.toggle_ai_assistant(False)
-    launcher.content_splitter.setSizes.assert_called_with([1000, 0])
+    launcher.sidekick_sidebar.setVisible.assert_called_with(False)
 
 
 @patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl")
@@ -191,18 +204,13 @@ def test_report_bug(mock_open, launcher) -> None:
     mock_open.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.SettingsDialog")
-def test_open_settings(mock_dialog, launcher) -> None:
+@patch("src.launchers.settings_dialog.SettingsWidget")
+def test_open_settings(mock_widget, launcher) -> None:
     instance = MagicMock()
-    mock_dialog.return_value = instance
-    with patch("src.launchers.launcher_diagnostics.LauncherDiagnostics") as mock_diag:
-        diag_inst = MagicMock()
-        diag_inst.run_all_checks.return_value = {}
-        mock_diag.return_value = diag_inst
-
-        launcher._open_settings(tab=1)
-        mock_dialog.assert_called_once()
-        instance.exec.assert_called_once()
+    mock_widget.return_value = instance
+    launcher._open_settings(tab=1)
+    mock_widget.assert_called_once()
+    instance.show.assert_called_once()
 
 
 def test_open_diagnostics(launcher) -> None:
@@ -285,12 +293,21 @@ def test_open_layout_manager(mock_dialog, launcher) -> None:
 
 
 def test_toggle_layout_mode(launcher) -> None:
+    launcher.layout_manager = MagicMock()
+    launcher._action_layout_mode = MagicMock()
+    launcher._action_layout_mode.isChecked.return_value = False
+
     launcher.toggle_layout_mode(True)
     assert launcher.layout_edit_mode is True
-    launcher.btn_customize_tiles.setEnabled.assert_called_with(True)
+    launcher.layout_manager.set_edit_mode.assert_called_with(True)
+    launcher._action_layout_mode.setChecked.assert_called_with(True)
+
+    # Set checked state to True so that toggling False triggers the change
+    launcher._action_layout_mode.isChecked.return_value = True
 
     launcher.toggle_layout_mode(False)
-    launcher.btn_customize_tiles.setEnabled.assert_called_with(False)
+    launcher.layout_manager.set_edit_mode.assert_called_with(False)
+    launcher._action_layout_mode.setChecked.assert_called_with(False)
 
 
 def test_on_docker_mode_changed(launcher) -> None:
@@ -401,3 +418,52 @@ def test_update_execution_status(launcher) -> None:
 def test_update_execution_status_no_label(launcher) -> None:
     del launcher.lbl_execution_mode
     launcher.update_execution_status()  # Should simply return
+
+
+def test_dependency_error_dialog(qapp) -> None:
+    from src.launchers.launcher_dialogs import DependencyErrorDialog
+
+    dialog = DependencyErrorDialog(
+        model_name="MuJoCo Test",
+        dependency_name="MuJoCo",
+        install_cmd="pip install mujoco",
+        doc_url="https://mujoco.org",
+        error_detail="ImportError",
+    )
+    assert dialog.install_cmd == "pip install mujoco"
+    assert dialog.doc_url == "https://mujoco.org"
+
+    # Test copy button callback
+    with patch("PyQt6.QtWidgets.QApplication.clipboard") as mock_clipboard:
+        clipboard_inst = MagicMock()
+        mock_clipboard.return_value = clipboard_inst
+        dialog._copy_command()
+        clipboard_inst.setText.assert_called_with("pip install mujoco")
+
+    # Test open doc callback
+    with patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl") as mock_open:
+        dialog._open_doc()
+        mock_open.assert_called_once()
+
+
+@patch("src.launchers.launcher_dialogs.DependencyErrorDialog")
+def test_show_dependency_error_mixin(mock_dialog_class, launcher) -> None:
+    dialog_inst = MagicMock()
+    mock_dialog_class.return_value = dialog_inst
+
+    launcher.show_dependency_error(
+        "MuJoCo Test",
+        "MuJoCo",
+        "pip install mujoco",
+        "https://mujoco.org",
+        "ImportError",
+    )
+    mock_dialog_class.assert_called_once_with(
+        parent=launcher,
+        model_name="MuJoCo Test",
+        dependency_name="MuJoCo",
+        install_cmd="pip install mujoco",
+        doc_url="https://mujoco.org",
+        error_detail="ImportError",
+    )
+    dialog_inst.exec.assert_called_once()

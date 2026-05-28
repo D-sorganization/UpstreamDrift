@@ -38,20 +38,139 @@ from src.shared.python.theme.style_constants import Styles
 logger = get_logger(__name__)
 
 
+DEPENDENCY_MAP: dict[str, dict[str, str]] = {
+    "mujoco_unified": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "custom_humanoid": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "custom_dashboard": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "mjcf": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "drake_golf": {
+        "module": "pydrake",
+        "display_name": "Drake (pydrake)",
+        "install_cmd": "pip install drake",
+        "doc_url": "https://drake.mit.edu/python_bindings.html",
+    },
+    "drake": {
+        "module": "pydrake",
+        "display_name": "Drake (pydrake)",
+        "install_cmd": "pip install drake",
+        "doc_url": "https://drake.mit.edu/python_bindings.html",
+    },
+    "pinocchio_golf": {
+        "module": "pinocchio",
+        "display_name": "Pinocchio",
+        "install_cmd": "pip install pin-project",
+        "doc_url": "https://github.com/stack-of-tasks/pinocchio",
+    },
+    "pinocchio": {
+        "module": "pinocchio",
+        "display_name": "Pinocchio",
+        "install_cmd": "pip install pin-project",
+        "doc_url": "https://github.com/stack-of-tasks/pinocchio",
+    },
+    "opensim_golf": {
+        "module": "opensim",
+        "display_name": "OpenSim",
+        "install_cmd": "conda install -c opensim opensim",
+        "doc_url": "https://opensim.stanford.edu",
+    },
+    "opensim": {
+        "module": "opensim",
+        "display_name": "OpenSim",
+        "install_cmd": "conda install -c opensim opensim",
+        "doc_url": "https://opensim.stanford.edu",
+    },
+    "myosim_suite": {
+        "module": "myosuite",
+        "display_name": "MyoSuite",
+        "install_cmd": "pip install myosuite",
+        "doc_url": "https://github.com/facebookresearch/myosuite",
+    },
+    "myosim": {
+        "module": "myosuite",
+        "display_name": "MyoSuite",
+        "install_cmd": "pip install myosuite",
+        "doc_url": "https://github.com/facebookresearch/myosuite",
+    },
+    "mediapipe_analysis": {
+        "module": "mediapipe",
+        "display_name": "MediaPipe",
+        "install_cmd": "pip install mediapipe",
+        "doc_url": "https://google.github.io/mediapipe/",
+    },
+    "openpose_analysis": {
+        "module": "pyopenpose",
+        "display_name": "OpenPose (pyopenpose)",
+        "install_cmd": "pip install pyopenpose",
+        "doc_url": "https://github.com/CMU-Perceptual-Computing-Lab/openpose",
+    },
+    "bunker_shot": {
+        "module": "pychrono",
+        "display_name": "Project Chrono (pychrono)",
+        "install_cmd": "conda install -c projectchrono pychrono",
+        "doc_url": "https://projectchrono.org",
+    },
+    "bunkershot3d": {
+        "module": "pyqtgraph",
+        "display_name": "PyQtGraph",
+        "install_cmd": "pip install pyqtgraph PyOpenGL",
+        "doc_url": "https://www.pyqtgraph.org/",
+    },
+    "pinn_hybrid": {
+        "module": "jax",
+        "display_name": "JAX / Equinox",
+        "install_cmd": "pip install jax jaxlib equinox",
+        "doc_url": "https://github.com/google/jax",
+    },
+    "physics_informed": {
+        "module": "jax",
+        "display_name": "JAX / Equinox",
+        "install_cmd": "pip install jax jaxlib equinox",
+        "doc_url": "https://github.com/google/jax",
+    },
+}
+
+
 class SimulationManager:
     def __init__(self, launcher):
         self.launcher = launcher
 
     def __getattr__(self, name):
-        return getattr(self.launcher, name)
+        if name == "launcher":
+            raise AttributeError("launcher not initialized")
+        launcher = self.__dict__.get("launcher")
+        if launcher is None:
+            raise AttributeError("launcher not initialized")
+        return getattr(launcher, name)
 
     def __setattr__(self, name, value):
         if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
             super().__setattr__(name, value)
-        elif hasattr(self.launcher, name):
-            setattr(self.launcher, name, value)
         else:
-            super().__setattr__(name, value)
+            launcher = self.__dict__.get("launcher")
+            if launcher is not None and hasattr(launcher, name):
+                setattr(launcher, name, value)
+            else:
+                super().__setattr__(name, value)
 
     """Mixin for UpstreamDriftLauncher simulation launching.
 
@@ -74,36 +193,27 @@ class SimulationManager:
         return env
 
     @precondition(
-        lambda self, model_type: model_type is not None and len(model_type.strip()) > 0,
-        "Model type must be a non-empty string",
+        lambda self, key: key is not None and len(key.strip()) > 0,
+        "Dependency key must be a non-empty string",
     )
-    def _check_module_dependencies(self, model_type: str) -> tuple[bool, str]:
-        """Check if required dependencies for a module type are available.
+    def _check_module_dependencies(self, key: str) -> tuple[bool, str]:
+        """Check if required dependencies for a module type or ID are available.
 
         Args:
-            model_type: The type of model to check dependencies for.
+            key: The type or ID of model to check dependencies for.
 
         Returns:
             Tuple of (success, error_message). If success is True, error_message is empty.
         """
-        # Map model types to their required imports
-        if model_type is None:
-            raise ValueError("model_type must be provided")
-        dependency_checks = {
-            "custom_humanoid": ("mujoco", "MuJoCo"),
-            "custom_dashboard": ("mujoco", "MuJoCo"),
-            "mjcf": ("mujoco", "MuJoCo"),
-            "drake": ("pydrake", "Drake (pydrake)"),
-            "pinocchio": ("pinocchio", "Pinocchio"),
-            "opensim": ("opensim", "OpenSim"),
-            "myosim": ("myosuite", "MyoSuite"),
-        }
+        if key is None:
+            raise ValueError("key must be provided")
 
-        check = dependency_checks.get(model_type)
+        check = DEPENDENCY_MAP.get(key)
         if not check:
             return True, ""  # No specific dependency check needed
 
-        module_name, display_name = check
+        module_name = check["module"]
+        display_name = check["display_name"]
 
         import_check_code = f"""
 import sys
@@ -207,7 +317,18 @@ except (RuntimeError, TypeError, AttributeError) as e:
         self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
-        deps_ok, deps_error = self._check_module_dependencies(model.type)
+        # Retrieve or check dependencies with caching
+        if not hasattr(self.launcher, "_dependency_status_cache"):
+            self.launcher._dependency_status_cache = {}
+
+        key = model.id if model.id in DEPENDENCY_MAP else model.type
+
+        if model.id not in self.launcher._dependency_status_cache:
+            deps_ok, deps_error = self._check_module_dependencies(key)
+            self.launcher._dependency_status_cache[model.id] = (deps_ok, deps_error)
+        else:
+            deps_ok, deps_error = self.launcher._dependency_status_cache[model.id]
+
         if deps_ok:
             return True
 
@@ -223,7 +344,24 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.chk_docker.setChecked(True)
                 self.launch_simulation()
                 return False
-        self._show_dependency_error(model.name, deps_error)
+
+        # Show the custom dependency error dialog
+        dep_info = DEPENDENCY_MAP.get(key, {})
+        dep_name = dep_info.get("display_name", key)
+        install_cmd = dep_info.get("install_cmd", "")
+        doc_url = dep_info.get("doc_url", "")
+
+        if hasattr(self.launcher, "show_dependency_error"):
+            self.launcher.show_dependency_error(
+                model.name,
+                dep_name,
+                install_cmd,
+                doc_url,
+                deps_error,
+            )
+        else:
+            self._show_dependency_error(model.name, deps_error)
+
         self.lbl_status.setText("! Dependency Error")
         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
         return False
@@ -258,9 +396,15 @@ except (RuntimeError, TypeError, AttributeError) as e:
                                 )
 
                         # Check user preference or model default; for now default to docking
-                        launch_mode = getattr(model, "launcher", {}).get(
-                            "default_launch", "tab"
-                        )
+                        launcher = getattr(model, "launcher", None)
+                        if isinstance(launcher, dict):
+                            launch_mode = launcher.get("default_launch", "tab")
+                        else:
+                            launch_mode = (
+                                getattr(launcher, "default_launch", "tab")
+                                if launcher
+                                else "tab"
+                            )
                         if launch_mode == "window" and hasattr(self, "popout_widget"):
                             self.popout_widget(ui_widget, model.name)
                             self.show_toast(f"{model.name} Popped Out", "success")
@@ -547,6 +691,29 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator / Model Explorer application."""
+        # Try to load embedded URDF Generator (Model Explorer) first
+        from src.shared.python.launcher_embed import get_embeddable_tool
+
+        tool = get_embeddable_tool("model_explorer")
+        if tool:
+            try:
+                # Check if already open
+                for idx in range(self.workspace_tabs.count()):
+                    if self.workspace_tabs.tabText(idx) == "Model Explorer":
+                        self.workspace_tabs.setCurrentIndex(idx)
+                        return
+
+                ui_widget = tool.create_main_widget(self.launcher)
+                if ui_widget:
+                    self.dock_widget_as_tab(ui_widget, "Model Explorer")
+                    self.show_toast("Model Explorer loaded as tab.", "success")
+                    self.lbl_status.setText("> Model Explorer Running")
+                    self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                    return
+            except Exception as e:
+                logger.exception("Failed to launch Model Explorer embedded: %s", e)
+
+        # Fallback to separate process launch if tool is not registered or failed
         from src.shared.python.core.constants import URDF_GENERATOR_SCRIPT
 
         script_path = REPOS_ROOT / URDF_GENERATOR_SCRIPT

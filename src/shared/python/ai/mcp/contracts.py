@@ -27,7 +27,7 @@ class StrEnum(str, Enum):
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-class McpTransport(StrEnum):
+class McpTransport(str, Enum):
     """Supported MCP transports."""
 
     STDIO = "stdio"

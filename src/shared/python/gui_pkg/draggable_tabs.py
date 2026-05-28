@@ -263,7 +263,11 @@ class DraggableTabWidget(QTabWidget):
         bar = self.tabBar()
         if not bar:
             return
-        idx = bar.tabAt(position)
+        idx = -1
+        for i in range(bar.count()):
+            if bar.tabRect(i).contains(position):
+                idx = i
+                break
         if idx < 0:
             return
 

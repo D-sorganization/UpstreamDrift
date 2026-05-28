@@ -197,7 +197,7 @@ assert STARTUP_TIMEOUT_SEC > 0, (
     "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 )
 
-SIDEKICK_API_READY_TIMEOUT_SEC: float = 15.0
+SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
 
 
@@ -239,8 +239,8 @@ class LauncherOrchestrator:
         self.registry = None
         self.engine_manager = None
         self.docker_available = False
-        self.available_models = {}
-        self.special_app_lookup = {}
+        self.available_models: dict[str, Any] = {}
+        self.special_app_lookup: dict[str, Any] = {}
 
     def initialize_from_results(self, startup_results: "StartupResults | None") -> None:
         """Initialize domain state from async startup results."""
@@ -316,6 +316,78 @@ class UpstreamDriftLauncher(QMainWindow):
     Composes focused mixins for UI setup, theme management,
     simulation launching, and dialog/settings management.
     """
+
+    sidekick_sidebar: Any | None
+    sidekick_window: Any | None
+    _sidekick_popped_out: bool
+    _sidekick_needs_initial_sizing: bool
+
+    @property
+    def docker_available(self) -> bool:
+        return self.orchestrator.docker_available
+
+    @docker_available.setter
+    def docker_available(self, value: bool) -> None:
+        self.orchestrator.docker_available = value
+
+    @property
+    def registry(self) -> Any:
+        return self.orchestrator.registry
+
+    @registry.setter
+    def registry(self, value: Any) -> None:
+        self.orchestrator.registry = value
+
+    @property
+    def engine_manager(self) -> Any:
+        return self.orchestrator.engine_manager
+
+    @engine_manager.setter
+    def engine_manager(self, value: Any) -> None:
+        self.orchestrator.engine_manager = value
+
+    @property
+    def available_models(self) -> dict:
+        return self.orchestrator.available_models
+
+    @available_models.setter
+    def available_models(self, value: dict) -> None:
+        self.orchestrator.available_models = value
+
+    @property
+    def special_app_lookup(self) -> dict:
+        return self.orchestrator.special_app_lookup
+
+    @special_app_lookup.setter
+    def special_app_lookup(self, value: dict) -> None:
+        self.orchestrator.special_app_lookup = value
+
+    def _get_model(self, model_id: str) -> Any:
+        return self.orchestrator.get_model(model_id)
+
+    def get_model(self, model_id: str) -> Any:
+        return self.orchestrator.get_model(model_id)
+
+    def __getattr__(self, name: str) -> Any:
+        # Check managers to forward attributes dynamically (maintaining mixin-compatibility)
+        for manager_name in (
+            "ui_setup_manager",
+            "theme_manager",
+            "simulation_manager",
+            "dialogs_manager",
+        ):
+            if manager_name in self.__dict__:
+                manager = self.__dict__[manager_name]
+                if name in manager.__dict__ or hasattr(type(manager), name):
+                    attr = getattr(manager, name)
+                    import types
+
+                    if isinstance(attr, types.MethodType):
+                        return types.MethodType(attr.__func__, self)
+                    return attr
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
 
     def __init__(
         self, startup_results: StartupResults | None = None, loading: bool = False
@@ -396,7 +468,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 STARTUP_TIMEOUT_SEC,
             )
             QTimer.singleShot(
-                int(STARTUP_TIMEOUT_SEC * 1000), lambda: self._handle_startup_timeout()
+                int(STARTUP_TIMEOUT_SEC * 1000), self._handle_startup_timeout
             )
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
@@ -584,13 +656,19 @@ class UpstreamDriftLauncher(QMainWindow):
         self._sidekick_api_wait_started_at: float | None = None
         self.layout_edit_mode = False
         self.current_filter_text = ""
+        self._sidekick_needs_initial_sizing = True
+        self.sidekick_sidebar = None
+        self.sidekick_window = None
+        self._sidekick_popped_out = False
+        self._popped_out_windows: list[Any] = []
+        self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
         self.ui_setup_manager._setup_process_console()
         self.process_manager = ProcessManager(
             REPOS_ROOT,
-            output_callback=self._on_process_output,
+            output_callback=self.ui_setup_manager._on_process_output,
         )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
@@ -608,11 +686,12 @@ class UpstreamDriftLauncher(QMainWindow):
             else REPOS_ROOT
         )
 
-        self.background_api_process = self.process_manager.launch_module(
-            name="background_api_server",
-            module_name="src.api.server",
-            cwd=cwd,
-        )
+        if "PYTEST_CURRENT_TEST" not in os.environ:
+            self.background_api_process = self.process_manager.launch_module(
+                name="background_api_server",
+                module_name="src.api.server",
+                cwd=cwd,
+            )
 
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
@@ -674,6 +753,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 "live_visualization": (self.chk_live.isChecked() if True else True),
                 "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
                 "docker_mode": (self.chk_docker.isChecked() if True else False),
+                "wsl_mode": (self.chk_wsl.isChecked() if True else False),
             },
         }
         self.layout_manager.save_layout(window_state)
@@ -840,19 +920,6 @@ class UpstreamDriftLauncher(QMainWindow):
             set_variable("model_registry", self.orchestrator.registry)
         logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
-    def create_model_card(self, model: Any) -> None:
-        """Create a clickable card widget for *model*.
-
-        Raises:
-            NotImplementedError: Always — callers must use
-                :class:`DraggableModelCard` directly or delegate to
-                :class:`LayoutManager` (issue #5488).
-        """
-        raise NotImplementedError(  # tracked: #5488
-            "create_model_card is a deprecated stub. "
-            "Use DraggableModelCard(model, self) or LayoutManager directly."
-        )
-
     def _handle_startup_timeout(self) -> None:
         """Recover from a hung async-startup worker (issue #5490).
 
@@ -883,7 +950,7 @@ class UpstreamDriftLauncher(QMainWindow):
         # constructor wires it up after the timeout is armed, but a
         # mid-init crash could leave it ``None``.
         if self.toast_manager is not None:
-            self.dialogs_manager.show_toast(
+            self.show_toast(
                 f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
@@ -895,7 +962,7 @@ class UpstreamDriftLauncher(QMainWindow):
             raise ValueError("model_id must be provided")
         self.select_model(model_id)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
-        self.simulation_manager.launch_simulation()
+        self.launch_simulation()
 
     # -- Window management --
 
@@ -974,14 +1041,19 @@ class UpstreamDriftLauncher(QMainWindow):
         if True:
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
         if True:
-            # If "docker_mode" is not in options, default to self.orchestrator.docker_available
-            saved_docker = options.get(
-                "docker_mode", self.orchestrator.docker_available
-            )
-            if saved_docker and self.orchestrator.docker_available:
+            saved_docker = options.get("docker_mode", None)
+            if saved_docker is None:
+                saved_docker = self.orchestrator.docker_available
+            if saved_docker:
                 self.chk_docker.setChecked(True)
             else:
                 self.chk_docker.setChecked(False)
+        if True:
+            saved_wsl = options.get("wsl_mode", False)
+            if saved_wsl:
+                self.chk_wsl.setChecked(True)
+            else:
+                self.chk_wsl.setChecked(False)
 
         # Restore selected model
         saved_selection = layout_data.get("selected_model")
@@ -1042,7 +1114,7 @@ class UpstreamDriftLauncher(QMainWindow):
                         """)
 
         # Update launch button
-        model = self.orchestrator.get_model(model_id)
+        model = self._get_model(model_id)
         if model:
             self.update_launch_button(model.name)
 
@@ -1051,6 +1123,49 @@ class UpstreamDriftLauncher(QMainWindow):
             update_context = getattr(context_help, "update_context", None)
             if callable(update_context):
                 update_context(model_id)
+
+            # Run dependency checks on click (select)
+            use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
+            use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
+            if not use_wsl and not use_docker:
+                from src.launchers.launcher_simulation import DEPENDENCY_MAP
+
+                key = model.id if model.id in DEPENDENCY_MAP else model.type
+                if key in DEPENDENCY_MAP:
+                    if model_id not in self._dependency_status_cache:
+                        self.lbl_status.setText(
+                            f"> Checking {model.name} dependencies..."
+                        )
+                        self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
+                        QApplication.processEvents(
+                            QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
+                        )
+
+                        deps_ok, deps_error = (
+                            self.simulation_manager._check_module_dependencies(key)
+                        )
+                        self._dependency_status_cache[model_id] = (deps_ok, deps_error)
+                    else:
+                        deps_ok, deps_error = self._dependency_status_cache[model_id]
+
+                    if not deps_ok:
+                        dep_info = DEPENDENCY_MAP.get(key, {})
+                        dep_name = dep_info.get("display_name", key)
+                        install_cmd = dep_info.get("install_cmd", "")
+                        doc_url = dep_info.get("doc_url", "")
+
+                        self.show_dependency_error(
+                            model.name,
+                            dep_name,
+                            install_cmd,
+                            doc_url,
+                            deps_error,
+                        )
+                        self.lbl_status.setText("! Dependency Error")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+                    else:
+                        self.lbl_status.setText("Ready")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
@@ -1074,7 +1189,7 @@ class UpstreamDriftLauncher(QMainWindow):
             return
 
         name = model_name or self.selected_model
-        model = self.orchestrator.get_model(self.selected_model)
+        model = self._get_model(self.selected_model)
 
         # Check Docker dependency
         if (

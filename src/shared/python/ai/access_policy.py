@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from src.shared.python.ai.tool_registry import Tool, ToolRegistry
 from src.shared.python.ai.tools.codemap_tools import CODEMAP_TOOL_NAMES
 
 
-class ChatAccessMode(StrEnum):
+class ChatAccessMode(str, Enum):
     """Explicit chat repository/tool access modes."""
 
     NO_REPO_ACCESS = "no_repo_access"

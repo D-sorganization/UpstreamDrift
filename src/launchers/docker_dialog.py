@@ -9,12 +9,16 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QScrollArea,
+    QSizePolicy,
     QTabWidget,
     QTextEdit,
     QVBoxLayout,
@@ -23,6 +27,11 @@ from PyQt6.QtWidgets import (
 
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_manager import DockerCheckThread as SharedDockerCheckThread
+from src.launchers.docker_profile_info import (
+    ProfileInfo,
+    format_profile_summary,
+    load_docker_profiles,
+)
 from src.launchers.launcher_constants import DOCKER_STAGES
 from src.shared.python.docker_config import DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -58,11 +67,59 @@ class EnvironmentDialog(QDialog):
 
         # Build Tab
         tab_build = QWidget()
-        build_layout = QVBoxLayout(tab_build)
+        tab_build_layout = QVBoxLayout(tab_build)
+
+        container = QWidget()
+        build_layout = QVBoxLayout(container)
+        build_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Profile metadata for tier details (size, included features, etc.).
+        # Loaded once at dialog construction — the YAML is read-only during a
+        # session, and reloading on every selection would just add latency.
+        self._profile_infos: dict[str, ProfileInfo] = load_docker_profiles()
+
+        build_layout.addWidget(QLabel("Target Stage:"))
         self.combo_stage = QComboBox()
         self.combo_stage.addItems(list(DOCKER_STAGES))
-        build_layout.addWidget(QLabel("Target Stage:"))
+        # Per-item hover tooltips give the user the answer to "what does this
+        # tier mean?" without having to expand the details panel.
+        self._apply_combo_tooltips()
         build_layout.addWidget(self.combo_stage)
+
+        # Tier-details panel: lists max image size, estimated install size,
+        # and every feature the selected profile bakes in. This replaces the
+        # previous opaque "Professional", "Standard" labels with explicit
+        # package-level information.
+        # ``QTextBrowser`` for native scrolling of rich-text content. The
+        # previous QLabel-in-QScrollArea pattern with ``widgetResizable``
+        # was clipping the content rather than producing a usable
+        # scrollbar — Qt sized the label to the viewport so the rich-text
+        # rendering had no overflow region.
+        from PyQt6.QtWidgets import QTextBrowser as _QTextBrowser
+
+        self.tier_details = _QTextBrowser()
+        self.tier_details.setReadOnly(True)
+        self.tier_details.setOpenExternalLinks(False)
+        self.tier_details.setFrameShape(QFrame.Shape.StyledPanel)
+        self.tier_details.setFixedHeight(220)
+        self.tier_details.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.tier_details.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        self.tier_details.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        build_layout.addWidget(self.tier_details)
+
+        # Keep the details panel in sync with the combobox selection.
+        self.combo_stage.currentTextChanged.connect(self._refresh_tier_details)
+        self._refresh_tier_details(self.combo_stage.currentText())
+
+        # Visible gap so a long features list can't visually overlap the
+        # action row below.
+        build_layout.addSpacing(12)
 
         btn_row = QHBoxLayout()
         # Match the Settings → Configuration → Docker Image button label
@@ -85,11 +142,78 @@ class EnvironmentDialog(QDialog):
         self.console.setProperty("class", "console-dark")
         self.console.style().polish(self.console)
         build_layout.addWidget(self.console)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(container)
+
+        # DbC postconditions
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the build container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: build container must have an active layout"
+        )
+
+        tab_build_layout.addWidget(scroll)
         tabs.addTab(tab_build, "Build Docker")
 
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn)
+
+    def _apply_combo_tooltips(self) -> None:
+        """Attach a per-item hover tooltip describing each profile."""
+        for idx in range(self.combo_stage.count()):
+            name = self.combo_stage.itemText(idx)
+            info = self._profile_infos.get(name)
+            if info is None:
+                # Unknown profile (e.g. legacy hardcoded fallback name) —
+                # leave the default tooltip empty rather than fabricate one.
+                continue
+            self.combo_stage.setItemData(
+                idx, format_profile_summary(info), Qt.ItemDataRole.ToolTipRole
+            )
+
+    def _refresh_tier_details(self, profile_name: str) -> None:
+        """Update the details panel for the *profile_name* tier selection."""
+        info = self._profile_infos.get(profile_name)
+        if info is None:
+            self.tier_details.setHtml(
+                f"<i>No metadata available for profile <b>{profile_name}</b>. "
+                "See <code>docker/profiles.yaml</code>.</i>"
+            )
+            return
+
+        # Render as lightweight HTML so we can bold the headline and indent
+        # the feature list without pulling in a richer widget.
+        title = profile_name.replace("-", " ").title()
+        rows: list[str] = []
+        rows.append(f"<b>{title}</b>")
+        if info.description:
+            rows.append(f'<span style="color: palette(mid);">{info.description}</span>')
+        rows.append("")
+        if info.max_size_mb:
+            rows.append(
+                f"<b>Budget:</b> &le; {info.max_size_mb} MB &nbsp;·&nbsp; "
+                f"<b>Estimated install:</b> ~{info.approx_total_mb} MB"
+            )
+        if info.features:
+            rows.append(f"<b>Includes {len(info.features)} feature(s):</b>")
+            items: list[str] = []
+            for f in info.features:
+                size = f"{f.approx_size_mb} MB" if f.approx_size_mb else "—"
+                items.append(
+                    f"<li><b>{f.display_name}</b> "
+                    f'<span style="color: palette(mid);">({size}) — '
+                    f"{f.description}</span></li>"
+                )
+            rows.append("<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>")
+        elif info.feature_names:
+            rows.append("<b>Features:</b> " + ", ".join(info.feature_names))
+
+        self.tier_details.setHtml("<br>".join(rows))
 
     def start_build(self) -> None:
         """Launch the Docker build process in a background thread (issue #2715).
@@ -109,10 +233,24 @@ class EnvironmentDialog(QDialog):
         self._elapsed_timer_id = self.startTimer(1000)
         self.build_status_label.setText("Building...")
 
+        stage = self.combo_stage.currentText()
+        from src.launchers.launcher_constants import DOCKER_STAGES
+
+        if stage in DOCKER_STAGES:
+            context = REPOS_ROOT
+            dockerfile = REPOS_ROOT / "Dockerfile.modular"
+            build_args = {"PROFILE": stage}
+        else:
+            context = self._DOCKER_CONTEXT
+            dockerfile = None
+            build_args = None
+
         self.build_thread = DockerBuildThread(
-            target_stage=self.combo_stage.currentText(),
+            target_stage=stage,
             image_name=DOCKER_IMAGE_NAME,
-            context_path=self._DOCKER_CONTEXT,
+            context_path=context,
+            dockerfile_path=dockerfile,
+            build_args=build_args,
         )
         self.build_thread.log_signal.connect(self._on_build_log)
         self.build_thread.finished_signal.connect(self._on_build_finished)

@@ -9,6 +9,7 @@ context help, and AI panel setup methods.
 from __future__ import annotations
 
 import datetime
+import contextlib
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import QSize, Qt, QTimer
@@ -360,27 +361,12 @@ class UISetupManager:
         self._sidekick_popped_out = False
 
         # Add Workspace Tabs for Unified Architecture
-        from PyQt6.QtWidgets import QTabWidget
+        from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
-        self.workspace_tabs = QTabWidget()
-        self.workspace_tabs.setTabsClosable(True)
+        self.workspace_tabs = DraggableTabWidget(core_tabs={"Home"})
         self.workspace_tabs.setDocumentMode(True)
 
-        def _on_tab_close_requested(index: int) -> None:
-            if index > 0:
-                widget = self.workspace_tabs.widget(index)
-                self.workspace_tabs.removeTab(index)
-                if widget is not None:
-                    widget.deleteLater()
-
-        self.workspace_tabs.tabCloseRequested.connect(_on_tab_close_requested)
-
         self.workspace_tabs.addTab(self.content_splitter, "Home")
-        # Prevent closing the Home tab
-        tab_bar = self.workspace_tabs.tabBar()
-        if tab_bar is not None:
-            tab_bar.setTabButton(0, tab_bar.ButtonPosition.RightSide, None)
-            tab_bar.setTabButton(0, tab_bar.ButtonPosition.LeftSide, None)
 
         self.library_widget = None
         self.library_window = None
@@ -770,6 +756,9 @@ class UISetupManager:
         if True:
             self._rebuild_grid()
 
+        if getattr(self, "workspace_tabs", None):
+            self.workspace_tabs.setCurrentIndex(0)
+
     def _build_menu_bar_widget(self) -> QMenuBar:
         """Build a populated ``QMenuBar`` for the frameless launcher (#5624).
 
@@ -910,8 +899,52 @@ class UISetupManager:
         self._action_console = action_console
 
         view_menu.addSeparator()
+
+        action_popout_tab = QAction("&Pop Out Active Tab", self.launcher)
+        action_popout_tab.setShortcut("Ctrl+D")
+        action_popout_tab.setToolTip("Detach the active tab into a floating window")
+        action_popout_tab.setStatusTip("Pop out active tab")
+        action_popout_tab.triggered.connect(self._popout_active_tab)
+        view_menu.addAction(action_popout_tab)
+        self.action_popout_tab = action_popout_tab
+
+        action_redock_tabs = QAction("&Redock All Tabs", self.launcher)
+        action_redock_tabs.setShortcut("Ctrl+Shift+D")
+        action_redock_tabs.setToolTip(
+            "Redock all floating windows back to workspace tabs"
+        )
+        action_redock_tabs.setStatusTip("Redock all tabs")
+        action_redock_tabs.triggered.connect(self._redock_all_tabs)
+        view_menu.addAction(action_redock_tabs)
+        self.action_redock_tabs = action_redock_tabs
+
+        view_menu.addSeparator()
         theme_menu = view_menu.addMenu("&Theme")
         self._setup_theme_menu(theme_menu)
+
+    def _popout_active_tab(self) -> None:
+        """Pop out the currently active workspace tab into a floating window."""
+        if not getattr(self, "workspace_tabs", None):
+            return
+        idx = self.workspace_tabs.currentIndex()
+        if idx < 0:
+            return
+        tab_text = self.workspace_tabs.tabText(idx)
+        if tab_text == "Home":
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.information(
+                self.launcher,
+                "Cannot Pop Out",
+                "The 'Home' tab is a core view and cannot be popped out.",
+            )
+            return
+        self.workspace_tabs.detach_tab_from_menu(idx)
+
+    def _redock_all_tabs(self) -> None:
+        """Redock all detached workspace tabs."""
+        if getattr(self, "workspace_tabs", None):
+            self.workspace_tabs.redock_all_tabs()
 
     def _setup_tools_menu(self, menubar: Any) -> None:
         if menubar is None:
@@ -1119,6 +1152,40 @@ class UISetupManager:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
+        # Launch button — sits in the top bar next to the search input so the
+        # primary action is always reachable without scrolling and the grid
+        # area below is freed for tiles (no bottom-bar overlap).
+        self._ensure_launch_button()
+        # top_bar.addWidget(self.btn_launch)  # Removed launch button per user request
+
+    def _ensure_launch_button(self) -> None:
+        """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
+
+        Used by both ``_setup_top_bar_status_and_search`` (current home) and
+        ``_setup_bottom_bar`` (legacy callers / tests). Either path produces
+        the same button instance.
+        """
+        if getattr(self, "btn_launch", None) is not None:
+            return
+        btn = QPushButton("Select a Model")
+        btn.setEnabled(False)
+        # Top-bar height: align with search input rather than the old 50px
+        # tile-overlapping bottom bar. Width caps the button so a long model
+        # name (e.g. "Launch golf_swing_pendulum >") doesn't push the rest of
+        # the top bar offscreen.
+        btn.setFixedHeight(32)
+        btn.setMinimumWidth(180)
+        btn.setMaximumWidth(280)
+        btn.setFont(get_display_font(size=10, weight=Weights.BOLD))
+        btn.setProperty("class", "launch-ready")
+        _style = btn.style()
+        if _style:
+            _style.polish(btn)
+        btn.clicked.connect(self.launch_simulation)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.hide()  # Hidden per user request; models are launched via tiles.
+        self.btn_launch = btn
+
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
         """Create config checkboxes and layout controls, adding them to top bar."""
         from PyQt6.QtCore import QSettings
@@ -1204,6 +1271,100 @@ class UISetupManager:
 
     def _setup_view_mode_and_zoom(self, top_bar: QHBoxLayout) -> None:
         """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
+        if top_bar is None:
+            raise ValueError("top_bar must be provided")
+
+        self._top_viewmode_actions: dict[Any, QAction] = {}
+
+        self.view_mode_combo = QComboBox(self.launcher)
+        self.view_mode_combo.addItem("Tile Large", ViewMode.LARGE)
+        self.view_mode_combo.addItem("Tile Medium", ViewMode.MEDIUM)
+        self.view_mode_combo.addItem("Tile Small", ViewMode.SMALL)
+        self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
+        self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
+        self.view_mode_combo.setCurrentIndex(3)  # List Large default
+        self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
+        self.view_mode_combo.setAccessibleName("View mode")
+        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
+
+        self.view_mode_combo.setStyleSheet("""
+            QComboBox {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                padding: 4px 8px;
+                color: #cccccc;
+                font-size: 11px;
+                min-width: 100px;
+            }
+            QComboBox:hover {
+                background: #2a2a2a;
+                border-color: #555555;
+                color: #ffffff;
+            }
+            QComboBox QAbstractItemView {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                color: #cccccc;
+                selection-background-color: #2a2a2a;
+                selection-color: #ffffff;
+            }
+        """)
+        # Kept hidden per user request to hide zoom slider/dropdown from main screen.
+        self.view_mode_combo.hide()
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal, self.launcher)
+        self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
+        self.zoom_slider.setMinimumWidth(140)
+        from PyQt6.QtWidgets import QSizePolicy
+
+        self.zoom_slider.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            self.zoom_slider.sizePolicy().verticalPolicy(),
+        )
+
+        self.zoom_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: 1px solid #3a3a3a;
+                height: 4px;
+                background: #1a1a1a;
+                margin: 0px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: #888888;
+                border: 1px solid #555555;
+                width: 10px;
+                height: 10px;
+                margin: -3px 0;
+                border-radius: 5px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #007acc;
+                border-color: #0098ff;
+            }
+        """)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+        self.zoom_slider.setAccessibleName("Tile zoom")
+        self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
+        self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+        from src.launchers.launcher_constants import TILE_SCALE_DEFAULT
+
+        initial_scale = TILE_SCALE_DEFAULT
+        lm = getattr(self, "layout_manager", None)
+        if lm is not None and hasattr(lm, "tile_scale"):
+            initial_scale = float(lm.tile_scale)
+        self.zoom_slider.setValue(self._scale_to_slider(initial_scale))
+        self.zoom_slider.valueChanged.connect(self._on_zoom_slider_changed)
+        self.zoom_slider.hide()
+
+        self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%", self.launcher)
+        self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
+        self.lbl_zoom_pct.setStyleSheet(
+            "font-size: 10px; color: #888888; font-family: monospace;"
+        )
+        self.lbl_zoom_pct.hide()
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
         sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
@@ -1240,7 +1401,10 @@ class UISetupManager:
             return
         mode = combo.itemData(index)
         if not isinstance(mode, ViewMode):
-            return
+            try:
+                mode = ViewMode(int(mode))
+            except (ValueError, TypeError):
+                return
         self._apply_view_mode(mode, sync_combo=False)
 
     def _set_view_mode_from_menu(self, mode: ViewMode) -> None:
@@ -1254,6 +1418,9 @@ class UISetupManager:
         slider, and the grid in sync regardless of which surface
         triggered the change.
         """
+        if not isinstance(mode, ViewMode):
+            with contextlib.suppress(ValueError, TypeError):
+                mode = ViewMode(int(mode))
         lm = self.layout_manager
         if lm is None:
             return
@@ -1317,6 +1484,7 @@ class UISetupManager:
         top_bar.addWidget(self.btn_toggle_left_sidebar)
 
         self._setup_top_bar_status_and_search(top_bar)
+        self._setup_view_mode_and_zoom(top_bar)
         self._setup_top_bar_config_checkboxes(top_bar)
         self._setup_top_bar_action_buttons(top_bar)
 

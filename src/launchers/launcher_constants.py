@@ -132,7 +132,12 @@ def view_mode_settings(mode: ViewMode) -> tuple[float, int, bool, bool]:
         ValueError: if ``mode`` is not one of the known view modes.
     """
     if not isinstance(mode, ViewMode):
-        raise TypeError(f"mode must be a ViewMode IntEnum, got {type(mode).__name__}")
+        try:
+            mode = ViewMode(int(mode))
+        except (ValueError, TypeError) as exc:
+            raise TypeError(
+                f"mode must be a ViewMode IntEnum, got {type(mode).__name__}"
+            ) from exc
     if mode not in _VIEW_MODE_TABLE:
         raise ValueError(f"Unknown ViewMode: {mode!r}")
     return _VIEW_MODE_TABLE[mode]
@@ -236,6 +241,8 @@ def validate_docker_stage(stage: str) -> str:
     Raises:
         ValueError: If *stage* is not a known Docker profile.
     """
+    if stage == "all":
+        return "all"
     if stage not in DOCKER_STAGES:
         allowed = ", ".join(DOCKER_STAGES)
         raise ValueError(f"Invalid Docker stage '{stage}'. Expected one of: {allowed}")
@@ -291,10 +298,9 @@ THEME_AVAILABLE = importlib.util.find_spec("src.shared.python.theme") is not Non
 
 AI_AVAILABLE: bool
 try:
-    if importlib.util.find_spec("src.shared.python.ai.gui"):
-        AI_AVAILABLE = True
-    else:
-        AI_AVAILABLE = False
+    import src.shared.python.ai.gui  # noqa: F401
+
+    AI_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     AI_AVAILABLE = False
 

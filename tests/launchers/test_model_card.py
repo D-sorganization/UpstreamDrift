@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 from PyQt6.QtCore import QMimeData, QPoint, Qt  # noqa: E402
 from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent  # noqa: E402
-from PyQt6.QtWidgets import QLabel, QWidget  # noqa: E402
+from PyQt6.QtWidgets import QLabel  # noqa: E402
 from src.launchers.model_card import DraggableModelCard  # noqa: E402
 
 
@@ -107,30 +107,30 @@ def test_get_status_info(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     mock_model.type = "custom_humanoid"
-    status, _, _ = card._get_status_info()
+    status, _ = card._get_status_info()
     assert status == "GUI Ready"
 
     mock_model.type = "mjcf"
     mock_model.path = "test.xml"
-    status, _, _ = card._get_status_info()
+    status, _ = card._get_status_info()
     assert status == "Viewer"
 
     mock_model.type = "opensim"
     mock_model.path = ""
-    status, _, _ = card._get_status_info()
+    status, _ = card._get_status_info()
     assert status == "Engine Ready"
 
     mock_model.type = "matlab"
-    status, _, _ = card._get_status_info()
+    status, _ = card._get_status_info()
     assert status == "External"
 
     mock_model.type = "urdf_generator"
-    status, _, _ = card._get_status_info()
+    status, _ = card._get_status_info()
     assert status == "Utility"
 
     mock_model.type = "something_else"
-    status, _, _ = card._get_status_info()
-    assert status == "Unknown"
+    status, _ = card._get_status_info()
+    assert status == "Ready"
 
 
 def test_mouse_press_event(mock_model, parent_launcher, qapp) -> None:
@@ -193,7 +193,7 @@ def test_no_image_widget(mock_model, parent_launcher, qapp) -> None:
         return_value=None,
     ):
         card = DraggableModelCard(mock_model, parent_launcher)
-        img = card.findChild(QWidget, "CardImage")
+        img = card.findChild(QLabel, "CardImage")
         assert img is not None
         assert img.text() == "No Image"
 

@@ -306,6 +306,7 @@ def test_launch_container_capture_output(mock_popen) -> None:
 @patch("subprocess.Popen")
 def test_launch_container_capture_output_posix(mock_popen) -> None:
     launcher = DockerLauncher(repo_root=Path("/fake/repo"), image_name="my_image")
+    repo_path = Path("/fake/repo/script.py")
 
     with (
         patch.object(launcher, "build_launch_command", return_value=["docker", "run"]),
@@ -314,7 +315,7 @@ def test_launch_container_capture_output_posix(mock_popen) -> None:
         process = launcher.launch_container(
             model_type="custom",
             model_name="Custom",
-            repo_path=Path("/fake/repo/script.py"),
+            repo_path=repo_path,
             capture_output=True,
         )
         mock_popen.assert_called_once()

@@ -415,7 +415,12 @@ class LayoutManager:
         The actual grid is not rebuilt here — call :meth:`rebuild_grid` after.
         """
         if not isinstance(mode, ViewMode):
-            raise TypeError(f"mode must be a ViewMode, got {type(mode).__name__}")
+            try:
+                mode = ViewMode(int(mode))
+            except (ValueError, TypeError) as exc:
+                raise TypeError(
+                    f"mode must be a ViewMode, got {type(mode).__name__}"
+                ) from exc
         scale, _cols, show_desc, is_list = view_mode_settings(mode)
         _compact = mode == ViewMode.LIST_SMALL
         self.current_view_mode = mode

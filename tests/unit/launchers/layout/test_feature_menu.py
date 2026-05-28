@@ -115,7 +115,7 @@ def test_auto_hide_jupyter_when_unavailable(qt_real, qapp, monkeypatch) -> None:
             shortcut=e.shortcut,
             status_tip=e.status_tip,
             availability_probe=(
-                fm._nbformat_available
+                (lambda: fm._nbformat_available())
                 if e.feature_id == "jupyter"
                 else e.availability_probe
             ),

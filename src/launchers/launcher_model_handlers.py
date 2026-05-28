@@ -88,13 +88,34 @@ class ModuleHandler:
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the module and get its dockable UI widget."""
         import importlib
+        import sys
 
+        original_sys_path = sys.path.copy()
+        success = False
         try:
-            module = importlib.import_module(self.module_name)
+            # Inject paths
+            paths = get_model_python_paths(model, repo_path)
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+
+            try:
+                module = importlib.import_module(f"{self.module_name}.__main__")
+            except ImportError:
+                module = importlib.import_module(self.module_name)
+
             if hasattr(module, "get_dockable_ui"):
-                return module.get_dockable_ui()
+                ui = module.get_dockable_ui()
+                if ui is not None:
+                    success = True
+                    return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in module %s: %s", self.module_name, e)
+        finally:
+            if not success:
+                sys.path = original_sys_path
         return None
 
 
@@ -156,10 +177,15 @@ class ScriptHandler:
 
         # Add repo_path to sys.path temporarily to resolve imports
         original_sys_path = sys.path.copy()
-        if str(repo_path) not in sys.path:
-            sys.path.insert(0, str(repo_path))
-
+        success = False
         try:
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            paths = get_model_python_paths(model, repo_path)
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+
             module_name = (
                 self._script_path.replace("/", "_")
                 .replace("\\", "_")
@@ -170,11 +196,15 @@ class ScriptHandler:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 if hasattr(module, "get_dockable_ui"):
-                    return module.get_dockable_ui()
+                    ui = module.get_dockable_ui()
+                    if ui is not None:
+                        success = True
+                        return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in script %s: %s", self._script_path, e)
         finally:
-            sys.path = original_sys_path
+            if not success:
+                sys.path = original_sys_path
         return None
 
 
@@ -249,8 +279,19 @@ class SpecialAppHandler:
             adapter_script = repo_path / mod_path
             if adapter_script.exists():
                 import importlib.util
+                import sys
 
+                original_sys_path = sys.path.copy()
+                success = False
                 try:
+                    # Inject paths
+                    paths = get_model_python_paths(model, repo_path)
+                    if str(repo_path) not in sys.path:
+                        sys.path.insert(0, str(repo_path))
+                    for p in paths:
+                        if str(p) not in sys.path:
+                            sys.path.insert(0, str(p))
+
                     spec = importlib.util.spec_from_file_location(
                         "embed_adapter", str(adapter_script)
                     )
@@ -258,11 +299,17 @@ class SpecialAppHandler:
                         module = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(module)
                         if hasattr(module, func_name):
-                            return getattr(module, func_name)()
+                            ui = getattr(module, func_name)()
+                            if ui is not None:
+                                success = True
+                                return ui
                 except Exception as e:  # noqa: BLE001
                     logger.warning(
                         "Failed to load embed_adapter %s: %s", embed_adapter, e
                     )
+                finally:
+                    if not success:
+                        sys.path = original_sys_path
 
         model_path = getattr(model, "path", None) or ""
         if not model_path:
@@ -276,6 +323,7 @@ class SpecialAppHandler:
         import sys
 
         original_sys_path = sys.path.copy()
+        success = False
         try:
             # Inject paths
             paths = get_model_python_paths(model, repo_path)
@@ -291,11 +339,15 @@ class SpecialAppHandler:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 if hasattr(module, "get_dockable_ui"):
-                    return module.get_dockable_ui()
+                    ui = module.get_dockable_ui()
+                    if ui is not None:
+                        success = True
+                        return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in special app %s: %s", script_path, e)
         finally:
-            sys.path = original_sys_path
+            if not success:
+                sys.path = original_sys_path
         return None
 
 
@@ -349,6 +401,10 @@ class PuttingGreenHandler:
         )
         return process is not None
 
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Putting Green handler does not provide a dockable UI widget."""
+        return None
+
 
 class BiomechExerciseHandler:
     """Handler for launching biomechanics exercise dashboards."""
@@ -398,6 +454,10 @@ class BiomechExerciseHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """BiomechExercise handler does not provide a dockable UI widget."""
+        return None
 
 
 class GolfSimulationSuiteHandler:
@@ -451,6 +511,10 @@ class GolfSimulationSuiteHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Golf Simulation Suite handler does not provide a dockable UI widget."""
+        return None
 
 
 def _open_with_system_app(file_path: Path, handler_name: str) -> bool:
@@ -518,6 +582,10 @@ class _SystemFileHandler:
 
         return _open_with_system_app(file_path, self.HANDLER_NAME)
 
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """System file handlers do not provide a dockable UI widget."""
+        return None
+
 
 class MatlabFileHandler(_SystemFileHandler):
     """Handler for opening MATLAB files (.slx, .m) with system MATLAB."""
@@ -584,6 +652,37 @@ class DocumentHandler:
                 "%s: failed to launch document proxy: %s", self.HANDLER_NAME, e
             )
             return False
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Document handler does not provide a dockable UI widget."""
+        return None
+
+
+class ApiBackedHandler:
+    """Handler for API-backed tiles that do not launch local processes directly."""
+
+    MODEL_TYPES = {"api_backed"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """API-backed tiles do not launch local processes directly."""
+        logger.info(
+            "ApiBackedHandler: launch requested for api-backed tile %s",
+            getattr(model, "id", "unknown"),
+        )
+        return True
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """API-backed handler does not provide a dockable UI widget."""
+        return None
 
 
 # ============================================================
@@ -670,6 +769,7 @@ class ModelHandlerRegistry:
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
             DocumentHandler(),
+            ApiBackedHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:

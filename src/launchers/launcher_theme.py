@@ -58,6 +58,7 @@ class ThemeManager:
             self.setStyleSheet(
                 manager.get_current_stylesheet()
                 + f"""
+                QMainWindow {{ background-color: {bg_elevated}; }}
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -219,6 +220,9 @@ class ThemeManager:
 
         except ImportError as e:
             logger.warning(f"Could not populate theme menu: {e}")
+            fallback = QAction("(Theme system unavailable)", self.launcher)
+            fallback.setEnabled(False)
+            theme_menu.addAction(fallback)
 
     def _setup_typography_menu(self, typography_menu: QMenu) -> None:
         """Populate the Typography submenu."""
@@ -289,7 +293,7 @@ class ThemeManager:
         current_plot = settings.value("plot_theme", "follow_ui")
 
         # "Follow UI Theme" option
-        follow_action = QAction("Follow UI Theme (Recommended)", self)
+        follow_action = QAction("Follow UI Theme (Recommended)", self.launcher)
         follow_action.setCheckable(True)
         follow_action.setChecked(current_plot == "follow_ui")
         follow_action.triggered.connect(lambda: self._set_plot_theme("follow_ui"))
@@ -314,7 +318,7 @@ class ThemeManager:
                 group.addAction(action)
                 plot_menu.addAction(action)
         except ImportError:
-            na = QAction("(matplotlib not available)", self)
+            na = QAction("(matplotlib not available)", self.launcher)
             na.setEnabled(False)
             plot_menu.addAction(na)
 

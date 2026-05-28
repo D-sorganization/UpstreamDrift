@@ -111,6 +111,10 @@ MODEL_IMAGES = {
     "Pose Studio": "pose_studio.svg",
     "Dataset Generator": "data_explorer_modern.png",
     "Golf Simulation Suite": "golf_logo.png",
+    "Motion-Match Preview": "motion_target_preview.svg",
+    "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
+    "Data Processor": "data_explorer_modern.png",
+    "Video Processor": "video_analyzer_modern.png",
 }
 
 
@@ -127,18 +131,27 @@ class SkeletonCard(QFrame):
             }
         """)
 
-        # Simple pulsing animation using opacity
         self.effect = QGraphicsDropShadowEffect(self)
         self.effect.setBlurRadius(20)
         self.effect.setColor(QColor(0, 0, 0, 80))
         self.setGraphicsEffect(self.effect)
 
-        self._anim = QPropertyAnimation(self, b"windowOpacity")
+        self._pulse_opacity: float = 0.3
+        self._anim = QPropertyAnimation(self, b"pulseOpacity")
         self._anim.setDuration(1000)
-        self._anim.setStartValue(0.5)
-        self._anim.setEndValue(1.0)
+        self._anim.setStartValue(0.3)
+        self._anim.setEndValue(0.3)
         self._anim.setLoopCount(-1)
         self._anim.start()
+
+    @pyqtProperty(float)
+    def pulseOpacity(self) -> float:
+        return self._pulse_opacity
+
+    @pulseOpacity.setter  # type: ignore[no-redef]
+    def pulseOpacity(self, value: float) -> None:
+        self._pulse_opacity = value
+        self.setWindowOpacity(value)
 
 
 class DraggableModelCard(QFrame):
@@ -381,8 +394,13 @@ class DraggableModelCard(QFrame):
         """Determine the image filename for this model card."""
         # Use explicit launcher metadata if present (ensures Web App/PyQt parity)
         launcher = getattr(self.model, "launcher", None)
-        if launcher and getattr(launcher, "logo", None):
-            return Path(launcher.logo).name
+        logo = None
+        if isinstance(launcher, dict):
+            logo = launcher.get("logo")
+        elif launcher:
+            logo = getattr(launcher, "logo", None)
+        if logo:
+            return Path(logo).name
 
         img_name = MODEL_IMAGES.get(self.model.name)
         if img_name:

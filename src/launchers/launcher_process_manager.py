@@ -258,6 +258,10 @@ class ProcessManager:
         for p in [shared_python, mujoco_python, conda_sp]:
             if p not in current_paths and os.path.isdir(p):
                 paths_to_add.append(p)
+        for p_path in extra_python_paths:
+            p = str(p_path)
+            if p not in current_paths and p not in paths_to_add:
+                paths_to_add.append(p)
 
         if paths_to_add:
             # Security: Safely quote each path entry (issue #2715)

@@ -109,7 +109,7 @@ jobs:
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    runs-on: d-sorg-fleet-14core
+    runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -118,8 +118,8 @@ jobs:
         id: check
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-14core" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-14core"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
   quality-gate:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -147,6 +147,12 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
+      - name: Create Quality Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/quality-ci-venv"
+          echo "$RUNNER_TEMP/quality-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/quality-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
       - name: Install Quality Tools
         run: |
           # Shared self-hosted runners can retain broken tool packages without
@@ -638,6 +644,12 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
+      - name: Create Dependency Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/dep-ci-venv"
+          echo "$RUNNER_TEMP/dep-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/dep-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
       - name: Regenerate dependency artifacts
         shell: bash
         run: |
@@ -1054,6 +1066,12 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
+      - name: Create Alembic Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/alembic-ci-venv"
+          echo "$RUNNER_TEMP/alembic-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/alembic-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
       - name: Install migration test dependencies
@@ -1355,7 +1373,7 @@ jobs:
     # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
     # tauri-build.yml.
     #
-    # Runner choice: Linux-only on self-hosted d-sorg-fleet-14core. The
+    # Runner choice: Linux-only on self-hosted d-sorg-fleet (any bulk runner). The
     # cross-platform matrix entries (windows-latest, macos-latest) were dropped
     # 2026-05-17 because the fleet has no Windows or macOS runners and the org
     # policy forbids fallback to GitHub-hosted runners (Runner_Dashboard#641).
@@ -1368,7 +1386,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-    runs-on: d-sorg-fleet-14core
+    runs-on: d-sorg-fleet
     timeout-minutes: 25
     defaults:
       run:
@@ -1585,7 +1603,7 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
-    runs-on: d-sorg-fleet-14core
+    runs-on: d-sorg-fleet
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects

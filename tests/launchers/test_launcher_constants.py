@@ -97,7 +97,10 @@ def test_lazy_load_model_registry() -> None:
 
 def test_platform_constants_non_win32() -> None:
     """Test platform constants on non-windows."""
-    with patch("sys.platform", "linux"):
+    with (
+        patch("sys.platform", "linux"),
+        patch("platformdirs.user_config_dir", return_value="/tmp"),
+    ):
         import src.launchers.launcher_constants as lc
 
         importlib.reload(lc)

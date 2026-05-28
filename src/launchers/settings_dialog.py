@@ -3,7 +3,7 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
-# mypy: disable-error-code="attr-defined,assignment"
+# mypy: disable-error-code="attr-defined,assignment,union-attr"
 
 from __future__ import annotations
 
@@ -18,11 +18,12 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QMainWindow,
     QPushButton,
+    QScrollArea,
     QTextBrowser,
     QTextEdit,
     QVBoxLayout,
@@ -68,6 +69,198 @@ def validate_tab_index(tab_index: int) -> int:
     return tab_index
 
 
+class WslScriptDialog(QDialog):
+    """Dialog to inspect, copy, and run the WSL dependencies installation script."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("WSL Dependency Setup Script")
+        self.resize(700, 550)
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        layout = QVBoxLayout(self)
+
+        # Header description
+        info_label = QLabel(
+            "<h3>WSL2 Dependency Setup</h3>"
+            "<p>This script installs all system and Python dependencies needed to run "
+            "UpstreamDrift physics engines (including Drake, Pinocchio, MuJoCo, and OpenSim) inside WSL2 Ubuntu.</p>"
+        )
+        info_label.setWordWrap(True)
+        info_label.setTextFormat(Qt.TextFormat.RichText)
+        layout.addWidget(info_label)
+
+        # Commands row
+        cmd_group = QGroupBox("Run Commands")
+        cmd_layout = QVBoxLayout(cmd_group)
+
+        # 1. WSL shell command
+        wsl_cmd_row = QHBoxLayout()
+        wsl_cmd_row.addWidget(QLabel("<b>Inside WSL:</b>"))
+        self.lbl_wsl_cmd = QLabel(
+            "<code>bash scripts/install_wsl_dependencies.sh</code>"
+        )
+        self.lbl_wsl_cmd.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        btn_copy_wsl_cmd = QPushButton("Copy")
+        btn_copy_wsl_cmd.setFixedWidth(60)
+        btn_copy_wsl_cmd.clicked.connect(
+            lambda: self._copy_text(
+                "bash scripts/install_wsl_dependencies.sh", "WSL shell command"
+            )
+        )
+        wsl_cmd_row.addWidget(self.lbl_wsl_cmd)
+        wsl_cmd_row.addStretch()
+        wsl_cmd_row.addWidget(btn_copy_wsl_cmd)
+        cmd_layout.addLayout(wsl_cmd_row)
+
+        # 2. Windows cmd command
+        win_cmd_row = QHBoxLayout()
+        win_cmd_row.addWidget(QLabel("<b>From Windows:</b>"))
+        self.lbl_win_cmd = QLabel(
+            "<code>wsl bash scripts/install_wsl_dependencies.sh</code>"
+        )
+        self.lbl_win_cmd.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        btn_copy_win_cmd = QPushButton("Copy")
+        btn_copy_win_cmd.setFixedWidth(60)
+        btn_copy_win_cmd.clicked.connect(
+            lambda: self._copy_text(
+                "wsl bash scripts/install_wsl_dependencies.sh", "Windows run command"
+            )
+        )
+        win_cmd_row.addWidget(self.lbl_win_cmd)
+        win_cmd_row.addStretch()
+        win_cmd_row.addWidget(btn_copy_win_cmd)
+        cmd_layout.addLayout(win_cmd_row)
+
+        layout.addWidget(cmd_group)
+
+        # Interactive Run button
+        btn_run_row = QHBoxLayout()
+        self.btn_run_terminal = QPushButton(
+            "🚀 Run script in interactive WSL Terminal window"
+        )
+        self.btn_run_terminal.setToolTip(
+            "Open a new Windows Command Prompt that runs the script inside WSL. "
+            "Recommended if sudo password prompt is required."
+        )
+        self.btn_run_terminal.clicked.connect(self._run_in_terminal)
+        self.btn_run_terminal.setStyleSheet("""
+            QPushButton {
+                background-color: #0366d6;
+                color: white;
+                font-weight: bold;
+                padding: 8px;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #0056b3;
+            }
+        """)
+        btn_run_row.addWidget(self.btn_run_terminal)
+        layout.addLayout(btn_run_row)
+
+        # Script content viewer
+        content_group = QGroupBox(
+            "Script Contents (scripts/install_wsl_dependencies.sh)"
+        )
+        content_layout = QVBoxLayout(content_group)
+
+        self.txt_content = QTextEdit()
+        self.txt_content.setReadOnly(True)
+        # Set dark-ish monospace font style
+        self.txt_content.setStyleSheet(
+            "font-family: 'Courier New', monospace; background-color: #1e1e1e; color: #d4d4d4;"
+        )
+
+        # Load script content
+        script_text = self._load_script_content()
+        self.txt_content.setPlainText(script_text)
+        content_layout.addWidget(self.txt_content)
+
+        # Action buttons for content
+        content_btn_row = QHBoxLayout()
+        btn_copy_content = QPushButton("Copy Script Contents")
+        btn_copy_content.clicked.connect(
+            lambda: self._copy_text(self.txt_content.toPlainText(), "Script contents")
+        )
+        content_btn_row.addWidget(btn_copy_content)
+        content_btn_row.addStretch()
+        content_layout.addLayout(content_btn_row)
+
+        layout.addWidget(content_group)
+
+        # Dialog buttons
+        dialog_buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        dialog_buttons.rejected.connect(self.reject)
+        layout.addWidget(dialog_buttons)
+
+    def _load_script_content(self) -> str:
+        from src.shared.python.data_io.path_utils import get_repo_root
+
+        script_path = get_repo_root() / "scripts" / "install_wsl_dependencies.sh"
+        if script_path.exists():
+            try:
+                return script_path.read_text(encoding="utf-8")
+            except OSError as e:
+                return f"# Error loading script contents: {e}"
+        return "# Error: scripts/install_wsl_dependencies.sh not found."
+
+    def _copy_text(self, text: str, name: str) -> None:
+        from PyQt6.QtGui import QGuiApplication
+
+        clipboard = QGuiApplication.clipboard()
+        if clipboard:
+            clipboard.setText(text)
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.information(
+                self, "Copied", f"<p>{name} has been copied to the clipboard.</p>"
+            )
+
+    def _run_in_terminal(self) -> None:
+        import subprocess
+
+        # Use cmd.exe start to run in a separate persistent command prompt window
+        from src.shared.python.data_io.path_utils import get_repo_root
+
+        repo_root = get_repo_root()
+
+        try:
+            subprocess.Popen(
+                [
+                    "cmd.exe",
+                    "/c",
+                    "start",
+                    "cmd.exe",
+                    "/k",
+                    "wsl bash scripts/install_wsl_dependencies.sh",
+                ],
+                cwd=str(repo_root),
+            )
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.information(
+                self,
+                "WSL Setup Script Started",
+                "<p>Launched the WSL setup script in a new terminal window.</p>"
+                "<p>Please check the opened window to monitor progress, enter your password if prompted, "
+                "and verify installation success.</p>",
+            )
+        except OSError as e:
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.critical(
+                self,
+                "Execution Error",
+                f"<p>Failed to launch terminal process: {e}</p>",
+            )
+
+
 class SettingsWidget(QWidget):
     """Settings widget with Layout, Configuration, Diagnostics, MCP Servers, and Preferences tabs.
 
@@ -107,7 +300,7 @@ class SettingsWidget(QWidget):
         self.setWindowTitle("Settings")
         self.resize(850, 650)
         self._diagnostics_data = diagnostics_data
-        self._launcher = launcher
+        self._launcher = launcher or parent
         self._diagnostics_loaded = False
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
@@ -143,9 +336,7 @@ class SettingsWidget(QWidget):
         try:
             from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
-            prefs_parent = (
-                self._launcher if isinstance(self._launcher, QMainWindow) else None
-            )
+            prefs_parent = self._launcher or self
             self._prefs_dialog = PreferencesDialog(prefs_parent)
             self.tabs.addTab(self._prefs_dialog._create_appearance_tab(), "Appearance")
             self.tabs.addTab(self._prefs_dialog._create_startup_tab(), "Startup")
@@ -299,80 +490,112 @@ class SettingsWidget(QWidget):
             show_runtime_mode_help,
         )
 
-        tab = QWidget()
-        tab_layout = QVBoxLayout(tab)
+        container = QWidget()
+        tab_layout = QVBoxLayout(container)
 
         # --- Engine Runtime ---------------------------------------------
         # Renamed from "Execution Environment" — "Engine Runtime" makes
         # explicit that this controls where *engines* run, separate from
         # where the launcher itself runs (always Windows).
-        env_group = QGroupBox("Engine Runtime")
-        env_inner = QVBoxLayout(env_group)
+        # --- Preferences & Engine Runtime --------------------------------
+        pref_group = QGroupBox("Runtime & Preferences")
+        pref_layout = QHBoxLayout(pref_group)
 
-        # Header row: short summary + inline ``?`` help button so users
-        # can read the full explanation without leaving the dialog.
-        env_header = QHBoxLayout()
-        env_header.addWidget(
-            QLabel(
-                "Where physics engines execute. "
-                "Default is Native Windows (no boxes ticked)."
-            )
+        # Column 1: Engine Runtime
+        col_runtime = QVBoxLayout()
+        runtime_header = QHBoxLayout()
+        lbl_runtime = QLabel("<b>Engine Runtime</b> (pick one):")
+        lbl_runtime.setToolTip("Select where physics engines execute.")
+        runtime_header.addWidget(lbl_runtime)
+        runtime_header.addWidget(make_runtime_mode_help_button(self))
+        runtime_header.addStretch()
+        col_runtime.addLayout(runtime_header)
+
+        row_win = QHBoxLayout()
+        self.chk_windows = QCheckBox("Windows")
+        self.chk_windows.setToolTip(
+            "Run physics engines natively on your local Windows system."
         )
-        env_header.addStretch()
-        env_header.addWidget(make_runtime_mode_help_button(self))
-        env_inner.addLayout(env_header)
+        btn_check_win = QPushButton("Check Deps")
+        btn_check_win.setToolTip("Check Windows host environment dependencies")
+        btn_check_win.setFixedWidth(80)
+        btn_check_win.clicked.connect(self._check_windows_deps)
+        row_win.addWidget(self.chk_windows)
+        row_win.addWidget(btn_check_win)
+        col_runtime.addLayout(row_win)
 
-        self.chk_docker = QCheckBox("Docker container (Linux, sandboxed)")
+        row_doc = QHBoxLayout()
+        self.chk_docker = QCheckBox("Docker")
         self.chk_docker.setToolTip(
             "Run engines inside the upstream-drift:engine Linux container. "
             "Full Drake/Pinocchio support; requires Docker installed and the "
             "image built (see Docker Image section below)."
         )
-        env_inner.addWidget(self.chk_docker)
+        btn_check_doc = QPushButton("Check Deps")
+        btn_check_doc.setToolTip("Check Docker container image dependencies")
+        btn_check_doc.setFixedWidth(80)
+        btn_check_doc.clicked.connect(self._check_docker_deps)
+        row_doc.addWidget(self.chk_docker)
+        row_doc.addWidget(btn_check_doc)
+        col_runtime.addLayout(row_doc)
 
-        self.chk_wsl = QCheckBox("WSL2 Ubuntu (Linux, native filesystem)")
+        row_wsl = QHBoxLayout()
+        self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setToolTip(
             "Run engines in your WSL2 Ubuntu user environment. Same Linux "
             "wheels as Docker mode but no container layer — faster file I/O "
             "and easier interactive debugging from a WSL shell."
         )
-        env_inner.addWidget(self.chk_wsl)
+        btn_check_wsl = QPushButton("Check Deps")
+        btn_check_wsl.setToolTip("Check WSL environment dependencies")
+        btn_check_wsl.setFixedWidth(80)
+        btn_check_wsl.clicked.connect(self._check_wsl_deps)
 
-        # Inline footer reminds users what unticked-both means.
-        env_footer = QLabel(
-            "<i>Untick both to fall back to Native Windows (default).</i>"
-        )
-        env_footer.setTextFormat(Qt.TextFormat.RichText)
-        env_inner.addWidget(env_footer)
+        btn_script_wsl = QPushButton("WSL Setup")
+        btn_script_wsl.setToolTip("Inspect and run the WSL installation script")
+        btn_script_wsl.setFixedWidth(80)
+        btn_script_wsl.clicked.connect(self._show_wsl_setup_dialog)
 
-        tab_layout.addWidget(env_group)
+        row_wsl.addWidget(self.chk_wsl)
+        row_wsl.addWidget(btn_check_wsl)
+        row_wsl.addWidget(btn_script_wsl)
+        col_runtime.addLayout(row_wsl)
+        col_runtime.addStretch()
 
-        # --- Simulation options -----------------------------------------
-        sim_group = QGroupBox("Simulation Options")
-        sim_inner = QVBoxLayout(sim_group)
+        from PyQt6.QtWidgets import QButtonGroup
+
+        self.env_group_buttons = QButtonGroup(self)
+        self.env_group_buttons.setExclusive(True)
+        self.env_group_buttons.addButton(self.chk_windows)
+        self.env_group_buttons.addButton(self.chk_docker)
+        self.env_group_buttons.addButton(self.chk_wsl)
+
+        # Column 2: Simulation Options
+        col_sim = QVBoxLayout()
+        lbl_sim = QLabel("<b>Simulation Options</b>:")
+        col_sim.addWidget(lbl_sim)
 
         self.chk_live_viz = QCheckBox("Live visualization")
         self.chk_live_viz.setToolTip(
             "Stream the 3D scene in real time during simulation. Disable "
             "for headless batch runs to save GPU/CPU."
         )
-        sim_inner.addWidget(self.chk_live_viz)
-
-        self.chk_gpu = QCheckBox("GPU acceleration (where available)")
+        self.chk_gpu = QCheckBox("GPU acceleration")
         self.chk_gpu.setToolTip(
             "Use the GPU for physics where the engine supports it (MuJoCo "
             "MJX, JAX backends). Falls back to CPU if no compatible GPU is "
             "detected — safe to leave on."
         )
-        sim_inner.addWidget(self.chk_gpu)
+        col_sim.addWidget(self.chk_live_viz)
+        col_sim.addWidget(self.chk_gpu)
+        col_sim.addStretch()
 
-        tab_layout.addWidget(sim_group)
+        # Column 3: Sidekick AI Assistant
+        col_sidekick = QVBoxLayout()
+        lbl_sidekick = QLabel("<b>Sidekick AI Assistant</b>:")
+        col_sidekick.addWidget(lbl_sidekick)
 
-        # --- Sidekick AI context sharing --------------------------------
-        sidekick_group = QGroupBox("Sidekick AI Assistant")
-        sidekick_inner = QVBoxLayout(sidekick_group)
-
-        self.chk_sidekick_context = QCheckBox("Share app state with AI assistant")
+        self.chk_sidekick_context = QCheckBox("Share app state with AI")
         self.chk_sidekick_context.setToolTip(
             "When enabled, the Sidekick AI assistant receives a compact summary "
             "of recent diagnostic events and simulation activity as context. "
@@ -383,15 +606,31 @@ class SettingsWidget(QWidget):
             os.environ.get("UPSTREAMDRIFT_SIDEKICK_CONTEXT", "1") != "0"
         )
         self.chk_sidekick_context.toggled.connect(self._on_sidekick_context_toggled)
-        sidekick_inner.addWidget(self.chk_sidekick_context)
+        col_sidekick.addWidget(self.chk_sidekick_context)
 
         sidekick_footer = QLabel(
-            "<i>Context is capped at ~4 KB; only the last few events are sent.</i>"
+            "<i>Context is capped at ~4 KB; only recent events sent.</i>"
         )
         sidekick_footer.setTextFormat(Qt.TextFormat.RichText)
-        sidekick_inner.addWidget(sidekick_footer)
+        col_sidekick.addWidget(sidekick_footer)
+        col_sidekick.addStretch()
 
-        tab_layout.addWidget(sidekick_group)
+        # Helper function to create divider line
+        def make_v_divider() -> QFrame:
+            frame = QFrame()
+            frame.setFrameShape(QFrame.Shape.VLine)
+            frame.setFrameShadow(QFrame.Shadow.Sunken)
+            frame.setStyleSheet("color: #3a3a3a;")
+            return frame
+
+        # Add to main horizontal preferences layout
+        pref_layout.addLayout(col_runtime, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sim, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sidekick, stretch=1)
+
+        tab_layout.addWidget(pref_group)
 
         # --- Docker Image build -----------------------------------------
         # Renamed from "Rebuild Environment" — that label conflated the
@@ -463,19 +702,84 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(build_group)
 
         # Sync checkboxes with parent launcher state
-        launcher = self.parent()
-        if launcher and hasattr(launcher, "chk_docker"):
-            self.chk_docker.setChecked(launcher.chk_docker.isChecked())
-            self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
-            self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
-            self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
+        launcher = self._launcher or self.parent()
+        if launcher:
+            # Sync states from launcher
+            if hasattr(launcher, "chk_docker") and hasattr(launcher, "chk_wsl"):
+                self.chk_windows.setChecked(
+                    not launcher.chk_docker.isChecked()
+                    and not launcher.chk_wsl.isChecked()
+                )
+                self.chk_docker.setChecked(launcher.chk_docker.isChecked())
+                self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
+            if hasattr(launcher, "chk_live"):
+                self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
+            if hasattr(launcher, "chk_gpu"):
+                self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
 
-            self.chk_docker.toggled.connect(launcher.chk_docker.setChecked)
-            self.chk_wsl.toggled.connect(launcher.chk_wsl.setChecked)
-            self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
-            self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+            # Define toggled callbacks that safely set launcher state
+            def on_windows_toggled(checked: bool) -> None:
+                if checked:
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(False)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(False)
 
-        return tab
+            def on_docker_toggled(checked: bool) -> None:
+                if checked:
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(True)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(False)
+
+            def on_wsl_toggled(checked: bool) -> None:
+                if checked:
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(False)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(True)
+
+            def invalidate_diagnostics() -> None:
+                self._diagnostics_loaded = False
+
+            self.chk_windows.toggled.connect(on_windows_toggled)
+            self.chk_docker.toggled.connect(on_docker_toggled)
+            self.chk_wsl.toggled.connect(on_wsl_toggled)
+            self.chk_windows.toggled.connect(invalidate_diagnostics)
+            self.chk_docker.toggled.connect(invalidate_diagnostics)
+            self.chk_wsl.toggled.connect(invalidate_diagnostics)
+
+            if hasattr(launcher, "chk_live"):
+                self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
+            if hasattr(launcher, "chk_gpu"):
+                self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+
+            # Two-way sync from launcher to SettingsWidget
+            if hasattr(launcher, "chk_windows"):
+                launcher.chk_windows.toggled.connect(self.chk_windows.setChecked)
+            if hasattr(launcher, "chk_docker"):
+                launcher.chk_docker.toggled.connect(self.chk_docker.setChecked)
+            if hasattr(launcher, "chk_wsl"):
+                launcher.chk_wsl.toggled.connect(self.chk_wsl.setChecked)
+            if hasattr(launcher, "chk_live"):
+                launcher.chk_live.toggled.connect(self.chk_live_viz.setChecked)
+            if hasattr(launcher, "chk_gpu"):
+                launcher.chk_gpu.toggled.connect(self.chk_gpu.setChecked)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(container)
+
+        # DbC postconditions
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the configuration container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: configuration container must have an active layout"
+        )
+
+        return scroll
 
     # ── Diagnostics tab ─────────────────────────────────────────────
 
@@ -521,6 +825,13 @@ class SettingsWidget(QWidget):
         btn_row = QHBoxLayout()
         btn_row.addStretch()
 
+        self.btn_sync_tools = QPushButton("Sync Shared Tools")
+        self.btn_sync_tools.setToolTip(
+            "Synchronize git submodules and fetch latest updates"
+        )
+        self.btn_sync_tools.clicked.connect(self._sync_shared_tools)
+        btn_row.addWidget(self.btn_sync_tools)
+
         btn_refresh = QPushButton("Re-run Diagnostics")
         btn_refresh.setToolTip("Run all diagnostic checks again")
         btn_refresh.clicked.connect(self._refresh_diagnostics)
@@ -538,7 +849,7 @@ class SettingsWidget(QWidget):
 
     def _create_mcp_servers_tab(self) -> QWidget:
         """MCP Servers tab: list, add, disable, remove MCP server configs."""
-        from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
+        from PyQt6.QtWidgets import QVBoxLayout, QWidget
 
         from src.launchers.mcp_servers_preferences import (  # type: ignore[attr-defined]
             McpServersSection,
@@ -774,6 +1085,52 @@ class SettingsWidget(QWidget):
     def _on_reset_layout(self) -> None:
         self.reset_layout_requested.emit()
 
+    def _refresh_tier_details(self, profile_name: str) -> None:
+        """Show packages and feature list for the selected Docker tier.
+
+        Mirrors the build dialog's tier-details panel — same data source so
+        the two views stay in lock-step. Surfaces:
+
+        * Plain-English description of the tier.
+        * Max image-size budget vs. estimated installed size.
+        * Every feature included (after walking the ``extends:`` chain in
+          ``docker/profiles.yaml``) with its display name, approximate size,
+          and one-line description.
+        """
+        info = getattr(self, "_docker_profile_infos", {}).get(profile_name)
+        if info is None:
+            self.tier_details.setHtml(
+                f"<i>No metadata available for profile "
+                f"<b>{profile_name}</b>. See <code>docker/profiles.yaml</code>.</i>"
+            )
+            return
+
+        title = profile_name.replace("-", " ").title()
+        rows: list[str] = [f"<b>{title}</b>"]
+        if info.description:
+            rows.append(f'<span style="color: palette(mid);">{info.description}</span>')
+        rows.append("")
+        if info.max_size_mb:
+            rows.append(
+                f"<b>Budget:</b> &le; {info.max_size_mb} MB &nbsp;·&nbsp; "
+                f"<b>Estimated install:</b> ~{info.approx_total_mb} MB"
+            )
+        if info.features:
+            rows.append(f"<b>Includes {len(info.features)} feature(s):</b>")
+            items: list[str] = []
+            for f in info.features:
+                size = f"{f.approx_size_mb} MB" if f.approx_size_mb else "—"
+                items.append(
+                    f"<li><b>{f.display_name}</b> "
+                    f'<span style="color: palette(mid);">({size}) — '
+                    f"{f.description}</span></li>"
+                )
+            rows.append("<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>")
+        elif info.feature_names:
+            rows.append("<b>Features:</b> " + ", ".join(info.feature_names))
+
+        self.tier_details.setHtml("<br>".join(rows))
+
     def _start_build(self) -> None:
         self.build_console.clear()
         self._btn_build.setEnabled(False)
@@ -782,11 +1139,24 @@ class SettingsWidget(QWidget):
         self._build_timer_id = self.startTimer(1000)
         self._build_status.setText("Building...")
 
-        context = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
+        stage = self.combo_stage.currentText()
+        from src.launchers.launcher_constants import DOCKER_STAGES
+
+        if stage in DOCKER_STAGES:
+            context = REPOS_ROOT
+            dockerfile = REPOS_ROOT / "Dockerfile.modular"
+            build_args = {"PROFILE": stage}
+        else:
+            context = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
+            dockerfile = None
+            build_args = None
+
         self.build_thread = DockerBuildThread(
-            target_stage=self.combo_stage.currentText(),
+            target_stage=stage,
             image_name=DOCKER_IMAGE_NAME,
             context_path=context,
+            dockerfile_path=dockerfile,
+            build_args=build_args,
         )
         self.build_thread.log_signal.connect(self._on_build_log)
         self.build_thread.finished_signal.connect(self._on_build_finished)
@@ -812,6 +1182,15 @@ class SettingsWidget(QWidget):
         status = "SUCCESS" if success else "FAILED"
         self._build_status.setText(f"Build {status} ({elapsed:.0f}s): {message}")
         self.build_console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
+
+        if success and self._launcher:
+            self._launcher.docker_available = True
+            apply_status = getattr(self._launcher, "_apply_docker_status", None)
+            if callable(apply_status):
+                apply_status(True)
+            chk_docker = getattr(self._launcher, "chk_docker", None)
+            if chk_docker is not None and hasattr(chk_docker, "setChecked"):
+                chk_docker.setChecked(True)
 
     def _on_sidekick_context_toggled(self, enabled: bool) -> None:
         """Persist the Sidekick context-sharing toggle to the environment.
@@ -936,6 +1315,530 @@ class SettingsWidget(QWidget):
         self._diag_browser.setHtml(
             f"<p style='color:#f85149;'>Error running diagnostics: {error_msg}</p>"
         )
+
+    def _sync_shared_tools(self) -> None:
+        """Run submodule synchronization and fetch latest remote commits in a background thread."""
+        from PyQt6.QtWidgets import QMessageBox
+
+        reply = QMessageBox.question(
+            self,
+            "Sync Shared Tools",
+            "Are you sure you want to synchronize git submodules and fetch latest remote updates?\n\n"
+            "This will run 'git submodule update --init --recursive' in the background.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        self.btn_sync_tools.setEnabled(False)
+        self.btn_sync_tools.setText("Syncing...")
+        self._diag_browser.append(
+            "<p style='color:#58a6ff;'>Starting sync of shared tools...</p>"
+        )
+
+        from PyQt6.QtCore import QThread, pyqtSignal
+        from src.shared.python.data_io.path_utils import get_repo_root
+        from src.launchers.launcher_diagnostics import LauncherDiagnostics
+        import subprocess
+
+        class SubmoduleSyncWorker(QThread):
+            finished = pyqtSignal(bool, str)
+
+            def __init__(self, repos_root: Path) -> None:
+                super().__init__()
+                self.repos_root = repos_root
+
+            def run(self) -> None:
+                try:
+                    # 1. git submodule update
+                    result = subprocess.run(
+                        ["git", "submodule", "update", "--init", "--recursive"],
+                        cwd=str(self.repos_root),
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        encoding="utf-8",
+                        timeout=60.0,
+                    )
+
+                    # 2. Fetch updates for parent repo
+                    subprocess.run(
+                        ["git", "fetch"],
+                        cwd=str(self.repos_root),
+                        capture_output=True,
+                        timeout=15.0,
+                    )
+
+                    # 3. Fetch updates for submodule
+                    submodule_dir = self.repos_root / "vendor" / "ud-tools"
+                    if submodule_dir.is_dir():
+                        subprocess.run(
+                            ["git", "fetch"],
+                            cwd=str(submodule_dir),
+                            capture_output=True,
+                            timeout=15.0,
+                        )
+
+                    # 4. Fetch updates for sibling Tools
+                    sibling_root = LauncherDiagnostics._find_sibling_tools_root()
+                    if sibling_root:
+                        subprocess.run(
+                            ["git", "fetch"],
+                            cwd=str(sibling_root),
+                            capture_output=True,
+                            timeout=15.0,
+                        )
+
+                    output_msg = (
+                        result.stdout or "Submodules synchronized successfully."
+                    )
+                    self.finished.emit(True, output_msg)
+                except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+                    self.finished.emit(False, str(e))
+
+        repos_root = get_repo_root()
+        self._sync_worker = SubmoduleSyncWorker(repos_root)
+        self._sync_worker.finished.connect(self._on_sync_finished)
+        self._sync_worker.start()
+
+    def _on_sync_finished(self, success: bool, output: str) -> None:
+        """Handle completion of the synchronization worker thread."""
+        self.btn_sync_tools.setEnabled(True)
+        self.btn_sync_tools.setText("Sync Shared Tools")
+
+        from PyQt6.QtWidgets import QMessageBox
+
+        if success:
+            QMessageBox.information(
+                self,
+                "Sync Complete",
+                "Shared tools synchronization completed successfully.",
+            )
+            # Re-run diagnostics to update status
+            self._refresh_diagnostics()
+        else:
+            QMessageBox.critical(
+                self,
+                "Sync Failed",
+                f"Failed to synchronize shared tools:\n\n{output}",
+            )
+
+    def _compare_versions(self, installed: str, required_spec: str) -> bool:
+        """Compare installed version string with required specification (e.g., '>=1.26.4').
+
+        Returns True if the requirement is satisfied.
+        """
+        if installed == "Unknown":
+            return True
+        if installed == "Missing":
+            return False
+
+        if required_spec.startswith(">="):
+            op = ">="
+            req_ver = required_spec[2:]
+        elif required_spec.startswith("=="):
+            op = "=="
+            req_ver = required_spec[2:]
+        else:
+            op = ">="
+            req_ver = required_spec
+
+        try:
+
+            def to_int_list(v_str: str) -> list[int]:
+                parts = []
+                for p in v_str.split("."):
+                    digits = []
+                    for c in p:
+                        if c.isdigit():
+                            digits.append(c)
+                        else:
+                            break
+                    parts.append(int("".join(digits)) if digits else 0)
+                return parts
+
+            inst_parts = to_int_list(installed)
+            req_parts = to_int_list(req_ver)
+
+            # Pad
+            length = max(len(inst_parts), len(req_parts))
+            inst_parts += [0] * (length - len(inst_parts))
+            req_parts += [0] * (length - len(req_parts))
+
+            if op == ">=":
+                return inst_parts >= req_parts
+            if op == "==":
+                return inst_parts == req_parts
+        except (ValueError, TypeError, IndexError):
+            pass
+        return True
+
+    def _generate_dep_table_html(
+        self, title: str, env_name: str, check_results: list[dict[str, Any]]
+    ) -> str:
+        """Generate a beautifully styled HTML table for dependency verification."""
+        html = f"""
+        <div style="font-family: sans-serif; color: #e2e8f0; background-color: #0f172a; padding: 10px; border-radius: 6px;">
+            <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 8px;">{title}</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
+                Checking installed dependencies for <b>{env_name}</b> runtime:
+            </p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #334155; color: #f8fafc; font-size: 12px; text-align: left;">
+                        <th style="padding: 6px 8px;">Package</th>
+                        <th style="padding: 6px 8px;">Required</th>
+                        <th style="padding: 6px 8px;">Installed</th>
+                        <th style="padding: 6px 8px; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        for res in check_results:
+            name = res["name"]
+            req = res["required"]
+            inst = res["installed"]
+            status = res["status"]
+
+            if status == "ok":
+                status_html = (
+                    '<span style="color: #4ade80; font-weight: bold;">✅ Pass</span>'
+                )
+                bg_color = "transparent"
+            elif status == "warn":
+                status_html = (
+                    '<span style="color: #fbbf24; font-weight: bold;">⚠️ Warning</span>'
+                )
+                bg_color = "rgba(251, 191, 36, 0.05)"
+            else:
+                status_html = (
+                    '<span style="color: #f87171; font-weight: bold;">❌ Fail</span>'
+                )
+                bg_color = "rgba(248, 113, 113, 0.05)"
+
+            html += f"""
+                <tr style="border-bottom: 1px solid #1e293b; background-color: {bg_color}; font-size: 12px;">
+                    <td style="padding: 6px 8px; color: #f1f5f9;"><b>{name}</b></td>
+                    <td style="padding: 6px 8px; color: #94a3b8;"><code>{req}</code></td>
+                    <td style="padding: 6px 8px; color: #cbd5e1;"><code>{inst}</code></td>
+                    <td style="padding: 6px 8px; text-align: center;">{status_html}</td>
+                </tr>
+            """
+
+        html += """
+                </tbody>
+            </table>
+        </div>
+        """
+        return html
+
+    def _check_windows_deps(self) -> None:
+        """Check the status of native Windows host packages against requirements."""
+        from PyQt6.QtWidgets import QMessageBox
+        import importlib.metadata
+        import sys
+
+        deps = [
+            ("NumPy", "numpy", ">=1.26.4", False),
+            ("SciPy", "scipy", ">=1.13.1", False),
+            ("MuJoCo", "mujoco", ">=3.6.0", False),
+            ("PyQt6", "PyQt6", ">=6.5.0", False),
+            ("Matplotlib", "matplotlib", ">=3.10.8", False),
+            ("Pandas", "pandas", ">=2.0.0", False),
+            ("Drake", "pydrake", ">=1.22.0", True),
+            ("Pinocchio", "pinocchio", ">=2.6.0", True),
+            ("OpenSim", "opensim", ">=4.4.0", True),
+        ]
+
+        check_results = []
+        for name, import_name, req, is_opt in deps:
+            try:
+                __import__(import_name)
+                try:
+                    v = importlib.metadata.version(import_name)
+                except importlib.metadata.PackageNotFoundError:
+                    mod = sys.modules.get(import_name)
+                    v = getattr(mod, "__version__", None) or getattr(
+                        mod, "version", "Unknown"
+                    )
+
+                is_ok = self._compare_versions(v, req)
+                status = "ok" if is_ok else "error"
+                check_results.append(
+                    {"name": name, "required": req, "installed": v, "status": status}
+                )
+            except ImportError:
+                if is_opt:
+                    check_results.append(
+                        {
+                            "name": name,
+                            "required": "Optional",
+                            "installed": "Not supported natively",
+                            "status": "ok",
+                        }
+                    )
+                else:
+                    check_results.append(
+                        {
+                            "name": name,
+                            "required": req,
+                            "installed": "Missing",
+                            "status": "error",
+                        }
+                    )
+
+        html = self._generate_dep_table_html(
+            "Windows Environment", "Native Windows", check_results
+        )
+        QMessageBox.information(self, "Windows Dependency Check", html)
+
+    def _check_docker_deps(self) -> None:
+        """Verify the built status of the Docker environment container and check package versions inside it."""
+        from PyQt6.QtWidgets import QMessageBox
+        import subprocess
+        from src.launchers.docker_manager import get_docker_cmd
+
+        try:
+            cmd = get_docker_cmd()
+            inspect_cmd = cmd + ["image", "inspect", "upstream-drift:engine"]
+            res = subprocess.run(
+                inspect_cmd, capture_output=True, text=True, timeout=5.0
+            )
+            if res.returncode != 0:
+                msg = (
+                    "<h3>Docker Environment Status: Missing Image</h3>"
+                    "<p>The <b>upstream-drift:engine</b> image has not been built yet.</p>"
+                    "<p>Please click the <b>Build Image</b> button below to build the container first.</p>"
+                )
+                QMessageBox.warning(self, "Docker Dependency Check", msg)
+                return
+        except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+            msg = (
+                "<h3>Docker Environment Status: Error</h3>"
+                f"<p>Failed to communicate with Docker daemon: {e}</p>"
+                "<p>Make sure Docker Desktop or the WSL2 Docker daemon is running.</p>"
+            )
+            QMessageBox.critical(self, "Docker Dependency Check", msg)
+            return
+
+        check_script = (
+            "import importlib.metadata, sys; "
+            "res = []; "
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
+            "  try: "
+            "    __import__(p); "
+            "    try: v = importlib.metadata.version(p) "
+            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
+            "    res.append(f'{p}:{v}') "
+            "  except ImportError: "
+            "    res.append(f'{p}:Missing') "
+            "print(','.join(res))"
+        )
+
+        run_cmd = cmd + [
+            "run",
+            "--rm",
+            "upstream-drift:engine",
+            "python3",
+            "-c",
+            check_script,
+        ]
+        try:
+            res_run = subprocess.run(
+                run_cmd, capture_output=True, text=True, timeout=10.0
+            )
+            if res_run.returncode == 0:
+                output = res_run.stdout.strip()
+                parsed_deps = {}
+                for item in output.split(","):
+                    if ":" in item:
+                        k, val = item.split(":", 1)
+                        parsed_deps[k] = val
+
+                reqs = {
+                    "numpy": ">=1.26.4",
+                    "scipy": ">=1.13.1",
+                    "mujoco": ">=3.6.0",
+                    "pydrake": ">=1.22.0",
+                    "pinocchio": ">=2.6.0",
+                    "opensim": ">=4.4.0",
+                }
+
+                display_names = {
+                    "numpy": "NumPy",
+                    "scipy": "SciPy",
+                    "mujoco": "MuJoCo",
+                    "pydrake": "Drake (PyDrake)",
+                    "pinocchio": "Pinocchio",
+                    "opensim": "OpenSim",
+                }
+
+                check_results = []
+                for p_name, req in reqs.items():
+                    inst_v = parsed_deps.get(p_name, "Missing")
+                    if inst_v == "Missing":
+                        status = "error"
+                    else:
+                        is_ok = self._compare_versions(inst_v, req)
+                        status = "ok" if is_ok else "error"
+                    check_results.append(
+                        {
+                            "name": display_names[p_name],
+                            "required": req,
+                            "installed": inst_v,
+                            "status": status,
+                        }
+                    )
+
+                html = self._generate_dep_table_html(
+                    "Docker Container Environment", "Docker Container", check_results
+                )
+                QMessageBox.information(self, "Docker Dependency Check", html)
+            else:
+                msg = (
+                    "<h3>Docker Environment Status: Degraded</h3>"
+                    f"<p>The image is built, but running probe failed (Exit Code {res_run.returncode}).</p>"
+                    f"<pre style='color:#f87171;'>{res_run.stderr.strip()}</pre>"
+                    "<p>Verify Docker is running and has access to execute containers in WSL.</p>"
+                )
+                QMessageBox.warning(self, "Docker Dependency Check", msg)
+        except subprocess.TimeoutExpired:
+            msg = (
+                "<h3>Docker Environment Status: Timeout</h3>"
+                "<p>Docker container dependency check timed out.</p>"
+                "<p>The Docker image exists, but the check could not be completed within 10 seconds.</p>"
+            )
+            QMessageBox.warning(self, "Docker Dependency Check", msg)
+        except Exception as e:  # noqa: BLE001
+            msg = (
+                "<h3>Docker Environment Status: Error</h3>"
+                f"<p>An unexpected error occurred during check: {e}</p>"
+            )
+            QMessageBox.critical(self, "Docker Dependency Check", msg)
+
+    def _check_wsl_deps(self) -> None:
+        """Verify python dependency statuses inside the WSL2 environment distro."""
+        from PyQt6.QtWidgets import QMessageBox
+        import subprocess
+        from src.shared.python.data_io.path_utils import get_repo_root
+
+        repo_root = get_repo_root()
+        venv_path = repo_root / ".venv-wsl"
+
+        python_exec = "python3"
+        if venv_path.exists():
+            python_exec = "./.venv-wsl/bin/python"
+
+        check_script = (
+            "import importlib.metadata, sys; "
+            "res = []; "
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
+            "  try: "
+            "    __import__(p); "
+            "    try: v = importlib.metadata.version(p) "
+            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
+            "    res.append(f'{p}:{v}') "
+            "  except ImportError: "
+            "    res.append(f'{p}:Missing') "
+            "print(','.join(res))"
+        )
+
+        cmd = ["wsl", python_exec, "-c", check_script]
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
+            if res.returncode == 0:
+                output = res.stdout.strip()
+                parsed_deps = {}
+                for item in output.split(","):
+                    if ":" in item:
+                        k, val = item.split(":", 1)
+                        parsed_deps[k] = val
+
+                reqs = {
+                    "numpy": ">=1.26.4",
+                    "scipy": ">=1.13.1",
+                    "mujoco": ">=3.6.0",
+                    "pydrake": ">=1.22.0",
+                    "pinocchio": ">=2.6.0",
+                    "opensim": ">=4.4.0",
+                }
+
+                display_names = {
+                    "numpy": "NumPy",
+                    "scipy": "SciPy",
+                    "mujoco": "MuJoCo",
+                    "pydrake": "Drake (PyDrake)",
+                    "pinocchio": "Pinocchio",
+                    "opensim": "OpenSim",
+                }
+
+                check_results = []
+                for p_name, req in reqs.items():
+                    inst_v = parsed_deps.get(p_name, "Missing")
+                    if inst_v == "Missing":
+                        status = "error"
+                    else:
+                        is_ok = self._compare_versions(inst_v, req)
+                        status = "ok" if is_ok else "error"
+                    check_results.append(
+                        {
+                            "name": display_names[p_name],
+                            "required": req,
+                            "installed": inst_v,
+                            "status": status,
+                        }
+                    )
+
+                html = self._generate_dep_table_html(
+                    "WSL2 Environment Status", f"WSL ({python_exec})", check_results
+                )
+                QMessageBox.information(self, "WSL Dependency Check", html)
+            else:
+                msg = (
+                    "<h3>WSL Environment Status: Not Set Up</h3>"
+                    "<p>WSL environment could not be checked or has not been initialized.</p>"
+                    f"<p>Details: Exit Code {res.returncode}</p>"
+                    f"<pre style='color:#f87171;'>{res.stderr.strip()}</pre>"
+                    "<p>Please click the <b>WSL Setup</b> button to view the setup script and run it in WSL.</p>"
+                )
+                QMessageBox.warning(self, "WSL Dependency Check", msg)
+        except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+            msg = (
+                "<h3>WSL Environment Status: Error</h3>"
+                f"<p>Failed to execute WSL check command: {e}</p>"
+                "<p>Make sure WSL2 is enabled and default Ubuntu distribution is configured on your Windows system.</p>"
+            )
+            QMessageBox.critical(self, "WSL Dependency Check", msg)
+
+    def _show_wsl_setup_dialog(self) -> None:
+        """Show the WSL dependency setup script dialog."""
+        dialog = WslScriptDialog(self)
+        dialog.exec()
+
+    def _copy_wsl_setup_cmd(self) -> None:
+        """Copy the bash command to run the WSL dependencies installation script."""
+        from PyQt6.QtGui import QGuiApplication
+        from PyQt6.QtWidgets import QMessageBox
+
+        cmd = "bash scripts/install_wsl_dependencies.sh"
+        clipboard = QGuiApplication.clipboard()
+        if clipboard:
+            clipboard.setText(cmd)
+            QMessageBox.information(
+                self,
+                "WSL Setup Command Copied",
+                "<p>The WSL setup command has been copied to your clipboard:</p>"
+                f"<code>{cmd}</code>"
+                "<p>Open your WSL terminal in the repository root and run this command to install all Linux-based engine dependencies.</p>",
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Clipboard Error",
+                "<p>Could not access the system clipboard. The command is:</p>"
+                f"<code>{cmd}</code>",
+            )
 
 
 class SettingsDialog(QDialog):

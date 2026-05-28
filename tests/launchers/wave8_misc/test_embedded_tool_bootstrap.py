@@ -57,7 +57,7 @@ def _make_filtered_import(decide):
     """
 
     def _filtered(name, globals=None, locals=None, fromlist=(), level=0):
-        if _ADAPTER_TOKEN in name:
+        if _ADAPTER_TOKEN in name or "pose_studio.gui" in name:
             return decide(name)
         return _REAL_IMPORT(name, globals, locals, fromlist, level)
 

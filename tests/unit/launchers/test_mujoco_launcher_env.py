@@ -12,13 +12,13 @@ class TestMujocoLauncherEnv:
     """Test that _get_launch_env produces correct PYTHONPATH."""
 
     def test_get_launch_env_has_pythonpath(self) -> None:
-        from src.launchers.mujoco_unified_launcher import MujocoUnifiedLauncher
+        from src.launchers.archive.mujoco_unified_launcher import MujocoUnifiedLauncher
 
         env = MujocoUnifiedLauncher._get_launch_env()
         assert "PYTHONPATH" in env
 
     def test_get_launch_env_includes_repo_root(self) -> None:
-        from src.launchers.mujoco_unified_launcher import (
+        from src.launchers.archive.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
         )
@@ -27,7 +27,7 @@ class TestMujocoLauncherEnv:
         assert str(REPO_ROOT) in env["PYTHONPATH"]
 
     def test_get_launch_env_includes_src(self) -> None:
-        from src.launchers.mujoco_unified_launcher import (
+        from src.launchers.archive.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
         )
@@ -36,7 +36,7 @@ class TestMujocoLauncherEnv:
         assert str(REPO_ROOT / "src") in env["PYTHONPATH"]
 
     def test_get_launch_env_includes_shared_python(self) -> None:
-        from src.launchers.mujoco_unified_launcher import (
+        from src.launchers.archive.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
         )
@@ -45,7 +45,7 @@ class TestMujocoLauncherEnv:
         assert str(REPO_ROOT / "src" / "shared" / "python") in env["PYTHONPATH"]
 
     def test_get_launch_env_includes_mujoco_python(self) -> None:
-        from src.launchers.mujoco_unified_launcher import (
+        from src.launchers.archive.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
         )
@@ -57,7 +57,7 @@ class TestMujocoLauncherEnv:
         assert mujoco_path in env["PYTHONPATH"]
 
     def test_get_launch_env_preserves_existing_pythonpath(self) -> None:
-        from src.launchers.mujoco_unified_launcher import MujocoUnifiedLauncher
+        from src.launchers.archive.mujoco_unified_launcher import MujocoUnifiedLauncher
 
         with patch.dict(os.environ, {"PYTHONPATH": "/custom/path"}):
             env = MujocoUnifiedLauncher._get_launch_env()

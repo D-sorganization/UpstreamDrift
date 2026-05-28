@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import importlib
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -57,15 +57,28 @@ class TestDashboardModulesDoNotEagerlyImportEngines:
             if any(key == p or key.startswith(p + ".") for p in _ENGINE_PACKAGES)
         }
 
-        # Patch PyQt6 so the import works even in headless environments
-        with patch.dict(
-            "sys.modules",
-            {
-                "PyQt6": sys.modules.get("PyQt6", MagicMock()),
-                "PyQt6.QtWidgets": sys.modules.get("PyQt6.QtWidgets", MagicMock()),
-            },
-        ):
+        # Patch PyQt6 manually so the import works even in headless environments
+        # without clearing newly imported modules from sys.modules on exit.
+        pyqt_existed = "PyQt6" in sys.modules
+        pyqt_val = sys.modules.get("PyQt6")
+        widgets_existed = "PyQt6.QtWidgets" in sys.modules
+        widgets_val = sys.modules.get("PyQt6.QtWidgets")
+
+        sys.modules["PyQt6"] = sys.modules.get("PyQt6", MagicMock())
+        sys.modules["PyQt6.QtWidgets"] = sys.modules.get("PyQt6.QtWidgets", MagicMock())
+
+        try:
             importlib.import_module(dashboard_module)
+        finally:
+            if not pyqt_existed or pyqt_val is None:
+                sys.modules.pop("PyQt6", None)
+            else:
+                sys.modules["PyQt6"] = pyqt_val
+
+            if not widgets_existed or widgets_val is None:
+                sys.modules.pop("PyQt6.QtWidgets", None)
+            else:
+                sys.modules["PyQt6.QtWidgets"] = widgets_val
 
         # Snapshot AFTER the import
         after = {

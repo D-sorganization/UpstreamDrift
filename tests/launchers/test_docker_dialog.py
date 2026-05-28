@@ -138,3 +138,14 @@ def test_timer_event(dialog) -> None:
     with patch("src.launchers.docker_dialog.time.monotonic", return_value=15.0):
         dialog.timerEvent(MagicMock())
         assert "10s elapsed" in dialog.build_status_label.text()
+
+
+def test_build_tab_uses_scroll_area(dialog) -> None:
+    """TDD test: Build tab's layout must contain a QScrollArea wrapping the inner container."""
+    from PyQt6.QtWidgets import QScrollArea
+
+    # Locate the QScrollArea in the build tab layout
+    build_tab = dialog.findChild(QScrollArea)
+    assert build_tab is not None, "Build tab must contain a QScrollArea"
+    assert build_tab.widget() is not None, "QScrollArea must have a wrapped widget"
+    assert build_tab.widgetResizable(), "QScrollArea widgetResizable must be True"

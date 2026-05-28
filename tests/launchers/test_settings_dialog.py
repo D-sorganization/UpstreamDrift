@@ -368,3 +368,106 @@ def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(
     dialog.zoom_slider.setValue(75)
 
     parent_launcher._on_zoom_slider_changed.assert_called_with(75)
+
+
+def test_configuration_tab_uses_scroll_area(parent_launcher, qapp) -> None:
+    """TDD test: Configuration tab must return a QScrollArea wrapping the container widget."""
+    from PyQt6.QtWidgets import QScrollArea
+
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    config_tab = dialog.tabs.widget(TAB_CONFIG)
+
+    assert isinstance(config_tab, QScrollArea), (
+        "Configuration tab must be a QScrollArea"
+    )
+    assert config_tab.widget() is not None, "QScrollArea must have a wrapped widget"
+    assert config_tab.widgetResizable(), "QScrollArea widgetResizable must be True"
+
+
+def test_compare_versions(parent_launcher, qapp) -> None:
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    assert dialog._compare_versions("1.26.4", ">=1.26.4") is True
+    assert dialog._compare_versions("1.27.0", ">=1.26.4") is True
+    assert dialog._compare_versions("1.25.0", ">=1.26.4") is False
+    assert dialog._compare_versions("Unknown", ">=1.26.4") is True
+    assert dialog._compare_versions("Missing", ">=1.26.4") is False
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+def test_check_windows_deps(mock_info, parent_launcher, qapp) -> None:
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog._check_windows_deps()
+    mock_info.assert_called_once()
+    args, kwargs = mock_info.call_args
+    assert "Windows Environment" in args[2]
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.warning")
+@patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
+@patch("subprocess.run")
+def test_check_docker_deps_missing_image(
+    mock_run, mock_cmd, mock_warning, parent_launcher, qapp
+) -> None:
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    # Mock subprocess.run for docker image inspect to fail (returncode=1)
+    mock_res = MagicMock()
+    mock_res.returncode = 1
+    mock_run.return_value = mock_res
+
+    dialog._check_docker_deps()
+    mock_warning.assert_called_once()
+    args, kwargs = mock_warning.call_args
+    assert "Missing Image" in args[2]
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+@patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
+@patch("subprocess.run")
+def test_check_docker_deps_success(
+    mock_run, mock_cmd, mock_info, parent_launcher, qapp
+) -> None:
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    # First call: docker image inspect (returncode=0)
+    # Second call: docker run (returncode=0)
+    res_inspect = MagicMock()
+    res_inspect.returncode = 0
+
+    res_run = MagicMock()
+    res_run.returncode = 0
+    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0\n"
+
+    mock_run.side_effect = [res_inspect, res_run]
+
+    dialog._check_docker_deps()
+    mock_info.assert_called_once()
+    args, kwargs = mock_info.call_args
+    assert "Docker Container" in args[2]
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+@patch("subprocess.run")
+@patch("pathlib.Path.exists", autospec=True)
+def test_check_wsl_deps_success(
+    mock_exists, mock_run, mock_info, parent_launcher, qapp
+) -> None:
+    mock_exists.side_effect = lambda self: ".venv-wsl" in str(self)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    res_run = MagicMock()
+    res_run.returncode = 0
+    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0\n"
+    mock_run.return_value = res_run
+
+    dialog._check_wsl_deps()
+    mock_info.assert_called_once()
+    args, kwargs = mock_info.call_args
+    assert "WSL2 Environment Status" in args[2]
+
+
+@patch("PyQt6.QtWidgets.QDialog.exec")
+def test_show_wsl_setup_dialog(mock_exec, parent_launcher, qapp) -> None:
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog._show_wsl_setup_dialog()
+    mock_exec.assert_called_once()

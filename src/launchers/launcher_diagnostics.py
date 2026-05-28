@@ -17,6 +17,8 @@ launcher issues including:
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -36,6 +38,27 @@ REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
 CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
+
+
+def _run_git_cmd(cmd: list[str], cwd: Path | None = None) -> str:
+    """Run a git command and return stripped stdout.
+
+    Returns empty string if any error occurs.
+    """
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(cwd or REPOS_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            timeout=5.0,
+        )
+        return result.stdout.strip()
+    except (subprocess.SubprocessError, FileNotFoundError, OSError) as exc:
+        logger.debug("Git command %s failed: %s", cmd, exc)
+        return ""
 
 
 def _read_manifest_schema(manifest_path: Path | None) -> str | None:
@@ -87,26 +110,15 @@ class DiagnosticResult:
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
-    # Expected tile model IDs
-    EXPECTED_TILE_IDS = [
-        "mujoco_unified",
-        "drake_golf",
-        "pinocchio_golf",
-        "opensim_golf",
-        "myosim_suite",
-        "putting_green",
-        "simscape_2d",
-        "simscape_3d",
-        "dataset_generator",
-        "matlab_analysis",
-        "c3d_viewer",
-        "openpose_analysis",
-        "mediapipe_analysis",
-        "model_explorer",
-        "video_analyzer",
-        "data_explorer",
-        "project_map",
-    ]
+    # Expected tile model IDs - dynamically loaded from models.yaml (issue #5476)
+    EXPECTED_TILE_IDS: list[str] = []
+    try:
+        from src.shared.python.config.model_registry import ModelRegistry
+
+        _registry = ModelRegistry()
+        EXPECTED_TILE_IDS = [m.id for m in _registry.get_all_models()]
+    except (ImportError, ValueError, OSError):
+        pass
 
     # Expected tile names
     EXPECTED_TILE_NAMES = {
@@ -167,6 +179,20 @@ class LauncherDiagnostics:
         """
         self.results.append(result)
         try:
+            from src.shared.python.app_state import get_state_logger
+
+            get_state_logger().log_event(
+                "diagnostic_check",
+                {
+                    "check_name": result.name,
+                    "status": result.status,
+                    "message": result.message,
+                },
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
+        try:
             from src.shared.python.ai.chat_context import record_event
 
             record_event(
@@ -200,6 +226,7 @@ class LauncherDiagnostics:
         self.check_engine_availability()
         self.check_biomech_siblings()
         self.check_tools_sidebar()
+        self.check_shared_tools_freshness()
 
         # Feed all results into the app-state ring buffer so the Sidekick
         # chat assistant can include them via get_chat_context() (issue #5474).
@@ -321,7 +348,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         try:
@@ -333,7 +360,7 @@ class LauncherDiagnostics:
             early_result = self._validate_models_yaml_content(data, details)
             if early_result is not None:
                 early_result.duration_ms = (time.time() - start) * 1000
-                self.results.append(early_result)
+                self._record_result(early_result)
                 return early_result
 
             result = self._check_models_yaml_completeness(data["models"], details)
@@ -358,7 +385,7 @@ class LauncherDiagnostics:
             )
 
         result.duration_ms = (time.time() - start) * 1000
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_model_registry(self) -> DiagnosticResult:
@@ -421,7 +448,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_launcher_provider_compatibility(self) -> DiagnosticResult:
@@ -497,7 +524,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_layout_config(self) -> DiagnosticResult:
@@ -518,7 +545,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         try:
@@ -573,7 +600,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_asset_files(self) -> DiagnosticResult:
@@ -605,7 +632,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         missing_assets = []
@@ -643,7 +670,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_pyqt6_availability(self) -> DiagnosticResult:
@@ -679,7 +706,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_engine_availability(self) -> DiagnosticResult:
@@ -768,7 +795,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_biomech_siblings(self) -> DiagnosticResult:
@@ -846,7 +873,7 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_tools_sidebar(self) -> DiagnosticResult:
@@ -902,7 +929,155 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
+        return result
+
+    @staticmethod
+    def _find_sibling_tools_root() -> Path | None:
+        """Find the sibling Tools repository root, if it exists."""
+        env_tools = os.environ.get("TOOLS_REPO_PATH")
+        if env_tools and Path(env_tools).is_dir():
+            return Path(env_tools)
+
+        parent = REPOS_ROOT.parent
+        for candidate in (
+            parent / "Tools",
+            parent / "Repositories" / "Tools",
+            Path.home() / "Repositories" / "Tools",
+        ):
+            if candidate.is_dir() and (candidate / "src").is_dir():
+                try:
+                    if candidate.resolve() == REPOS_ROOT.resolve():
+                        continue
+                except (OSError, ValueError):
+                    pass
+                return candidate
+        return None
+
+    def check_shared_tools_freshness(self) -> DiagnosticResult:
+        """Check if shared folders / submodules and sibling repository are out of date."""
+        start = time.time()
+        details: dict[str, Any] = {
+            "submodule_path": "vendor/ud-tools",
+            "sibling_path": None,
+            "pinned_sha": None,
+            "checked_out_sha": None,
+            "sibling_sha": None,
+            "submodule_status": "unknown",
+            "sibling_status": "unknown",
+            "is_current": True,
+        }
+
+        # 1. Get pinned SHA from parent repository
+        pinned_sha = ""
+        output = _run_git_cmd(["git", "ls-files", "--stage", "vendor/ud-tools"])
+        for line in output.splitlines():
+            if "vendor/ud-tools" in line:
+                parts = line.split()
+                if len(parts) >= 2:
+                    pinned_sha = parts[1]
+                    break
+
+        if pinned_sha:
+            details["pinned_sha"] = pinned_sha
+
+        # 2. Get checked out SHA from submodule directory
+        submodule_dir = REPOS_ROOT / "vendor" / "ud-tools"
+        checked_out_sha = ""
+        if submodule_dir.is_dir():
+            checked_out_sha = _run_git_cmd(
+                ["git", "rev-parse", "HEAD"], cwd=submodule_dir
+            )
+            if checked_out_sha:
+                details["checked_out_sha"] = checked_out_sha
+
+        # 3. Locate sibling Tools repository and get its SHA
+        sibling_root = self._find_sibling_tools_root()
+        sibling_sha = ""
+        if sibling_root:
+            details["sibling_path"] = str(sibling_root)
+            sibling_sha = _run_git_cmd(["git", "rev-parse", "HEAD"], cwd=sibling_root)
+            if sibling_sha:
+                details["sibling_sha"] = sibling_sha
+
+        # Determine status
+        status = "pass"
+        messages = []
+
+        if not checked_out_sha:
+            status = "warning"
+            details["submodule_status"] = "not_initialized"
+            details["is_current"] = False
+            messages.append(
+                "vendor/ud-tools submodule is not initialized or checked out."
+            )
+        elif pinned_sha and checked_out_sha != pinned_sha:
+            status = "warning"
+            details["submodule_status"] = "out_of_sync_with_pin"
+            details["is_current"] = False
+            messages.append(
+                f"vendor/ud-tools checked-out commit ({checked_out_sha[:8]}) "
+                f"differs from pinned commit ({pinned_sha[:8]})."
+            )
+        else:
+            details["submodule_status"] = "synchronized"
+
+        if sibling_sha:
+            compare_target = pinned_sha or checked_out_sha
+            if compare_target and sibling_sha != compare_target:
+                status = "warning"
+                details["sibling_status"] = "out_of_sync_with_submodule"
+                details["is_current"] = False
+                messages.append(
+                    f"Sibling Tools repository commit ({sibling_sha[:8]}) "
+                    f"differs from UpstreamDrift's expected/pinned version ({compare_target[:8]})."
+                )
+            else:
+                details["sibling_status"] = "synchronized"
+        else:
+            if details["sibling_path"]:
+                details["sibling_status"] = "unreadable"
+            else:
+                details["sibling_status"] = "not_found"
+
+        # Check against remote branch
+        if checked_out_sha and submodule_dir.is_dir():
+            tracking_branch = "main"
+            sub_branch_config = _run_git_cmd(
+                ["git", "config", "submodule.vendor/ud-tools.branch"]
+            )
+            if sub_branch_config:
+                tracking_branch = sub_branch_config
+
+            remote_sha = _run_git_cmd(
+                ["git", "rev-parse", f"origin/{tracking_branch}"], cwd=submodule_dir
+            )
+            if remote_sha and remote_sha != checked_out_sha:
+                merge_base = _run_git_cmd(
+                    ["git", "merge-base", "HEAD", f"origin/{tracking_branch}"],
+                    cwd=submodule_dir,
+                )
+                if merge_base == checked_out_sha:
+                    status = "warning"
+                    details["is_current"] = False
+                    details["remote_sha"] = remote_sha
+                    messages.append(
+                        f"vendor/ud-tools submodule is behind remote origin/{tracking_branch} ({remote_sha[:8]})."
+                    )
+
+        if messages:
+            message = " ".join(messages)
+        else:
+            message = "Shared folders and submodules are fully up to date."
+
+        result = DiagnosticResult(
+            name="shared_tools_freshness",
+            status=status,
+            message=message,
+            details=details,
+            duration_ms=(time.time() - start) * 1000,
+        )
+        self._record_result(result)
         return result
 
     def _generate_recommendations(self) -> list[str]:  # noqa: C901
@@ -943,6 +1118,24 @@ class LauncherDiagnostics:
                     recommendations.append(
                         "Review incompatible provider-backed models before enabling shared external packs in the launcher"
                     )
+                elif result.name == "shared_tools_freshness":
+                    details = result.details
+                    if details.get("submodule_status") == "not_initialized":
+                        recommendations.append(
+                            "Run 'git submodule update --init --recursive' to initialize shared submodule dependencies"
+                        )
+                    elif details.get("submodule_status") == "out_of_sync_with_pin":
+                        recommendations.append(
+                            "Run 'git submodule update --init --recursive' to sync your submodule checkout to the pinned commit"
+                        )
+                    if details.get("sibling_status") == "out_of_sync_with_submodule":
+                        recommendations.append(
+                            "Your sibling Tools repository is out of sync with UpstreamDrift's pinned submodule version"
+                        )
+                    if not details.get("is_current") and details.get("remote_sha"):
+                        recommendations.append(
+                            "A newer version of ud-tools is available. Run 'Sync Shared Tools' in Settings to update"
+                        )
 
         if not recommendations:
             recommendations.append("All systems operational - no issues detected")

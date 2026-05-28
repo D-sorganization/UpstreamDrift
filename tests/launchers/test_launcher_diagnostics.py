@@ -24,16 +24,29 @@ def test_launcher_diagnostics_diagnostic_result_to_dict() -> None:
     assert d["duration_ms"] == 10.12
 
 
-@patch.object(LauncherDiagnostics, "check_python_environment")
-@patch.object(LauncherDiagnostics, "check_models_yaml")
-@patch.object(LauncherDiagnostics, "check_model_registry")
-@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
-@patch.object(LauncherDiagnostics, "check_layout_config")
-@patch.object(LauncherDiagnostics, "check_asset_files")
-@patch.object(LauncherDiagnostics, "check_pyqt6_availability")
+@patch.object(LauncherDiagnostics, "check_shared_tools_freshness")
+@patch.object(LauncherDiagnostics, "check_tools_sidebar")
+@patch.object(LauncherDiagnostics, "check_biomech_siblings")
 @patch.object(LauncherDiagnostics, "check_engine_availability")
+@patch.object(LauncherDiagnostics, "check_pyqt6_availability")
+@patch.object(LauncherDiagnostics, "check_asset_files")
+@patch.object(LauncherDiagnostics, "check_layout_config")
+@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
+@patch.object(LauncherDiagnostics, "check_model_registry")
+@patch.object(LauncherDiagnostics, "check_models_yaml")
+@patch.object(LauncherDiagnostics, "check_python_environment")
 def test_run_all_checks(
-    mock_engine, mock_qt, mock_assets, mock_layout, mock_registry, mock_yaml, mock_env
+    mock_freshness,
+    mock_sidebar,
+    mock_siblings,
+    mock_engine,
+    mock_qt,
+    mock_assets,
+    mock_layout,
+    mock_compatibility,
+    mock_registry,
+    mock_yaml,
+    mock_env,
 ) -> None:
     diag = LauncherDiagnostics()
 
@@ -517,3 +530,120 @@ def test_run_cli_diagnostics_failures_and_warnings(mock_run) -> None:
         "recommendations": ["Do this", "Do that"],
     }
     run_cli_diagnostics()
+
+
+@patch("src.launchers.launcher_diagnostics._run_git_cmd")
+@patch.object(LauncherDiagnostics, "_find_sibling_tools_root")
+@patch("pathlib.Path.is_dir")
+def test_check_shared_tools_freshness_scenarios(
+    mock_is_dir, mock_find_sibling, mock_run_git
+) -> None:
+    diag = LauncherDiagnostics()
+
+    # Scenario 1: Submodule not initialized
+    mock_is_dir.return_value = False
+    mock_find_sibling.return_value = None
+    mock_run_git.side_effect = lambda cmd, **kwargs: (
+        "160000 1234567890abcdef1234567890abcdef12345678 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else ""
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["submodule_status"] == "not_initialized"
+    assert "not initialized" in res.message
+
+    # Scenario 2: Submodule out of sync with pin
+    mock_is_dir.return_value = True
+    mock_run_git.side_effect = lambda cmd, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "2222222222222222222222222222222222222222"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "2222222222222222222222222222222222222222"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else ""
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["submodule_status"] == "out_of_sync_with_pin"
+
+    # Scenario 3: Sibling Tools repo out of sync
+    from pathlib import Path
+
+    mock_find_sibling.return_value = Path("/fake/sibling/Tools")
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1]
+            and "HEAD" in cmd[2]
+            and cwd
+            and "vendor" in str(cwd)
+            else (
+                "3333333333333333333333333333333333333333"
+                if "rev-parse" in cmd[1]
+                and "HEAD" in cmd[2]
+                and cwd
+                and "Tools" in str(cwd)
+                else (
+                    "1111111111111111111111111111111111111111"
+                    if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                    else ""
+                )
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["sibling_status"] == "out_of_sync_with_submodule"
+
+    # Scenario 4: Submodule behind remote branch
+    mock_find_sibling.return_value = None
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "4444444444444444444444444444444444444444"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else (
+                    "1111111111111111111111111111111111111111"
+                    if "merge-base" in cmd[1]
+                    else ""
+                )
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert "behind remote" in res.message
+
+    # Scenario 5: Fully synchronized
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "1111111111111111111111111111111111111111"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else ""
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "pass"

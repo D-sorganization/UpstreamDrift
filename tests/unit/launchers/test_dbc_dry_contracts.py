@@ -21,11 +21,12 @@ from src.launchers.startup import StartupResults
 
 def test_validate_docker_stage_accepts_known_values() -> None:
     """Known launcher Docker stages should pass validation unchanged."""
-    assert validate_docker_stage("all") == "all"
-    assert validate_docker_stage("mujoco") == "mujoco"
-    assert validate_docker_stage("pinocchio") == "pinocchio"
-    assert validate_docker_stage("drake") == "drake"
-    assert validate_docker_stage("base") == "base"
+    assert validate_docker_stage("slim") == "slim"
+    assert validate_docker_stage("standard") == "standard"
+    assert validate_docker_stage("full") == "full"
+    assert validate_docker_stage("biomech") == "biomech"
+    assert validate_docker_stage("research") == "research"
+    assert validate_docker_stage("gpu-training") == "gpu-training"
 
 
 def test_validate_docker_stage_rejects_unknown_value() -> None:

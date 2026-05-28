@@ -160,7 +160,7 @@ def test_main_falls_back_to_headless_when_pyqt_missing() -> None:
 
 def test_create_dashboard_window_class_returns_window_object(qapp) -> None:
     # The factory returns an *instance* of the deferred window class.
-    obj = ced._create_dashboard_window_class()
+    obj = ced._build_qt_window()
     assert obj is not None
     obj.deleteLater()
 
@@ -171,7 +171,7 @@ def test_cross_engine_dashboard_window_new_raises() -> None:
 
 
 def test_dashboard_window_on_run_with_no_engines(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     # Uncheck every engine and click Run — should refuse to start.
     for cb in win._engine_checks.values():
         cb.setChecked(False)
@@ -181,7 +181,7 @@ def test_dashboard_window_on_run_with_no_engines(qapp) -> None:
 
 
 def test_dashboard_window_on_run_starts_worker(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     # Ensure exactly one engine selected
     for name, cb in win._engine_checks.items():
         cb.setChecked(name == "pendulum_stub")
@@ -196,7 +196,7 @@ def test_dashboard_window_on_run_starts_worker(qapp) -> None:
 
 
 def test_dashboard_window_on_comparison_finished_reenables_button(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     win._run_btn.setEnabled(False)
     win._on_comparison_finished(
         ["pendulum_stub"],
@@ -212,7 +212,7 @@ def test_dashboard_window_on_comparison_finished_reenables_button(qapp) -> None:
 
 
 def test_dashboard_window_on_comparison_error_reenables_button(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     win._run_btn.setEnabled(False)
     win._on_comparison_error("boom")
     assert "boom" in win._status_label.text()
@@ -221,14 +221,14 @@ def test_dashboard_window_on_comparison_error_reenables_button(qapp) -> None:
 
 
 def test_dashboard_window_update_charts_with_empty_engines(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     # Should silently no-op when engine list is empty.
     win._update_charts([], {})
     win.deleteLater()
 
 
 def test_dashboard_window_update_charts_redraws_canvases(qapp) -> None:
-    win = ced._create_dashboard_window_class()
+    win = ced._build_qt_window()
     cv = {
         "cv_total_energy_final": 0.1,
         "cv_end_effector_speed_final": 0.05,

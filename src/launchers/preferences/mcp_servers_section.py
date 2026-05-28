@@ -42,6 +42,7 @@ class McpServersSection:
     def __init__(self, *, config_path: Path | None = None) -> None:
         self._config_path = config_path
         self._widget: Any | None = None
+        self._wrapped_widget: Any | None = None
 
     @property
     def widget(self) -> Any | None:
@@ -66,10 +67,40 @@ class McpServersSection:
         # Imported lazily so headless callers (and importers that just
         # want to read ``servers``) don't pay the PyQt6 cost.
         from src.shared.python.ai.mcp.widgets import McpServersPrefsWidget
+        from . import build_prefs_section
 
+        if self._wrapped_widget is None:
+            if self._widget is None:
+                self._widget = McpServersPrefsWidget(config_path=self._config_path)
+            self._wrapped_widget = build_prefs_section(
+                self.SECTION_ID, self.SECTION_LABEL, [self._widget]
+            )
+        return self._wrapped_widget
+
+    def add_server(self, server: Any) -> None:
+        """Add a server to the configuration."""
         if self._widget is None:
-            self._widget = McpServersPrefsWidget(config_path=self._config_path)
-        return self._widget
+            raise RuntimeError("build_widget() must be called before add_server()")
+
+        from src.shared.python.ai.mcp.contracts import McpServerConfig as SharedConfig
+        from src.launchers.mcp_config_writer import McpServerConfig as LauncherConfig
+
+        if isinstance(server, LauncherConfig):
+            server = SharedConfig(
+                name=server.name,
+                command=server.command,
+                args=server.args,
+                env=server.env,
+            )
+        elif not isinstance(server, SharedConfig):
+            raise TypeError("server must be an McpServerConfig instance")
+        self._widget.add_server(server)
+
+    def remove_server(self, name: str) -> bool:
+        """Remove a server by name from the configuration."""
+        if self._widget is None:
+            raise RuntimeError("build_widget() must be called before remove_server()")
+        return self._widget.remove_server(name)
 
     def persist(self) -> Path:
         """Persist any in-memory edits. Building the widget first is required."""

@@ -69,7 +69,6 @@ def test_read_version_file_reads_first_line(tmp_path, monkeypatch) -> None:
     target = tmp_path / "VERSION"
     target.write_text("2.5.0\nignored\n", encoding="utf-8")
 
-    real_resolve = Path.resolve
     # Patch parents lookup so the candidate list contains our tmp file:
     monkeypatch.setattr(
         about_dialog,

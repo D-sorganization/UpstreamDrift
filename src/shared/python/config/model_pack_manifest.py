@@ -229,6 +229,7 @@ class LauncherPresentationMetadata:
     logo: str
     status: str
     web_route: str | None = None
+    default_launch: str = "tab"
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherPresentationMetadata:
@@ -275,6 +276,8 @@ class LauncherPresentationMetadata:
                 web_route_raw,
             )
 
+        default_launch = data.get("default_launch", "tab")
+
         return cls(
             category=category,
             logo=logo,
@@ -282,6 +285,7 @@ class LauncherPresentationMetadata:
             web_route=(
                 web_route_raw.strip() if isinstance(web_route_raw, str) else None
             ),
+            default_launch=default_launch,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -290,6 +294,7 @@ class LauncherPresentationMetadata:
             "category": self.category,
             "logo": self.logo,
             "status": self.status,
+            "default_launch": self.default_launch,
         }
         if self.web_route:
             data["web_route"] = self.web_route

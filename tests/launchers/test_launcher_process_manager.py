@@ -37,33 +37,25 @@ def test_init_log_file_truncates_if_large() -> None:
     mock_stat = MagicMock()
     mock_stat.st_size = 3 * 1024 * 1024  # 3MB
     mock_path.stat.return_value = mock_stat
-    mock_path.read_text.return_value = "line1\nline2\nline3\n"
 
-    with (
-        patch(
-            "src.launchers.launcher_process_manager.Path.home",
-            return_value=PureWindowsPath("/fake/home"),
-        ),
-        patch.object(Path, "mkdir"),
-        patch.object(ProcessManager, "_init_log_file", autospec=True),
-    ):
-        mgr = ProcessManager(repo_root=PureWindowsPath("/fake/repo"))  # type: ignore[arg-type]
-
-        # Now test init_log_file specifically
-        mgr._log_file_path = mock_path
-        mgr._log_dir = MagicMock()
-        # Run the actual method unmocked on our mgr
-        # wait, ProcessManager._init_log_file is bound, so we have to use original
-
-    # Let's test the logic directly:
     mgr2 = ProcessManager.__new__(ProcessManager)
     mgr2._log_dir = MagicMock()
     mgr2._log_file_path = mock_path
 
-    # We call the real init_log_file
-    ProcessManager._init_log_file(mgr2)
-    mock_path.read_text.assert_called_once()
-    mock_path.write_text.assert_called_once()
+    # We use mock_open to mock file reading and writing
+    m = mock_open(read_data="line1\nline2\nline3\n")
+    with patch("builtins.open", m):
+        ProcessManager._init_log_file(mgr2)
+
+    # Verify we opened the path for reading and writing
+    m.assert_any_call(mock_path, encoding="utf-8", errors="replace")
+    m.assert_any_call(mock_path, "w", encoding="utf-8")
+
+    # Verify the contents were written (since maxlen=500 and we had 3 lines, all 3 lines are written)
+    handle = m()
+    handle.writelines.assert_called_once()
+    called_arg = handle.writelines.call_args[0][0]
+    assert list(called_arg) == ["line1\n", "line2\n", "line3\n"]
 
 
 def test_get_subprocess_env(manager) -> None:
@@ -227,7 +219,7 @@ def test_launch_script_separate_term(
 
     with patch("os.name", "posix"):
         # Non-Windows separate-terminal path uses secure_popen
-        manager.launch_script("Test", Path("/fake/script.py"), Path("/fake/cwd"))
+        manager.launch_script("Test", script_path, cwd_path)
         mock_secure_popen.assert_called_once()
         cmd_arg = mock_secure_popen.call_args[0][0]
         assert (
