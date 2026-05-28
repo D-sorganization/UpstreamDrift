@@ -267,6 +267,11 @@ class HoleMDP:
         base_dist = self.baseline.get(action.club).total_mean + (
             skill.distance_offset if skill else 0.0
         )
+        # Player + baseline shot bias (chronic miss). Matches
+        # PlayerProfile.effective_distribution() / sample_transitions(): sigma
+        # gets scaled by condition modifiers, but bias does not.
+        bias_long = cb.bias_long + (skill.bias_long if skill else 0.0)
+        bias_lat = cb.bias_lat + (skill.bias_lat if skill else 0.0)
 
         # Apply rotation matrix once per action.
         ca = np.cos(action.aim_angle_rad)
@@ -298,8 +303,10 @@ class HoleMDP:
 
         for k in range(self.n_samples):
             dlong, dlat = offsets[k]
-            along = base_dist * dist_mult + dlong * sigma_long_mult  # (nx, ny)
-            lat = dlat * cell_mods[..., 2]  # σ_lat scaling
+            along = (
+                base_dist * dist_mult + bias_long + dlong * sigma_long_mult
+            )  # (nx, ny)
+            lat = bias_lat + dlat * cell_mods[..., 2]  # σ_lat scaling
             dx = along * ca - lat * sa
             dy = along * sa + lat * ca
             xn = cx + dx
