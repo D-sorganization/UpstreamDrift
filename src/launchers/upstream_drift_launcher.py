@@ -1327,7 +1327,9 @@ class UpstreamDriftLauncher(QMainWindow):
     def _confirm_exit_if_running_processes(self, event: QCloseEvent | None) -> bool:
         """Return True if it's safe to exit (user confirms or no processes running)."""
         running_names = [
-            k for k, p in self.running_processes.items() if p.poll() is None
+            k
+            for k, p in self.running_processes.items()
+            if p.poll() is None and k != "background_api_server"
         ]
         running_count = len(running_names)
 

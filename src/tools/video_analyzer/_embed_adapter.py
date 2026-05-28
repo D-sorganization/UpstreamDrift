@@ -19,7 +19,7 @@ class VideoAnalyzerAdapter:
 
     def embed_capabilities(self) -> EmbedCapabilities:
         """Return how this tool wants to be embedded."""
-        return EmbedCapabilities.NONE
+        return EmbedCapabilities(supports_embedded=True)
 
     def create_main_widget(self, parent: Any = None) -> Any:
         """Create and return the tool's main window."""
