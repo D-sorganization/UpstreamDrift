@@ -11,6 +11,13 @@ from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
 )
 from PyQt6.QtWidgets import QApplication
 
+# Keep a module-level reference so the QApplication lives for the full test
+# session. Without this, `QApplication.instance() or QApplication(sys.argv)`
+# creates a temporary that is immediately garbage-collected, which can destroy
+# the application before any QWidget constructs and raise "Must construct a
+# QApplication before a QWidget."
+_qapp = QApplication.instance() or QApplication(sys.argv)
+
 
 def test_remote_recorder():
     """Test RemoteRecorder."""
@@ -59,7 +66,6 @@ def test_remote_recorder():
 )
 def test_humanoid_launcher_init(mock_config_manager):
     """Test HumanoidLauncher initialization."""
-    QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
@@ -78,7 +84,6 @@ def test_humanoid_launcher_init(mock_config_manager):
 )
 def test_humanoid_launcher_sim_mixin(mock_config_manager):
     """Test SimulationMixin methods."""
-    QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_config.live_view = False
@@ -125,7 +130,6 @@ def test_humanoid_launcher_sim_mixin(mock_config_manager):
 )
 def test_humanoid_launcher_analysis_mixin(mock_config_manager):
     """Test AnalysisMixin methods."""
-    QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
