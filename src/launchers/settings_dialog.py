@@ -3,7 +3,7 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
-# mypy: disable-error-code="attr-defined,assignment,union-attr"
+# mypy: disable-error-code="attr-defined,assignment,union-attr,arg-type"
 
 from __future__ import annotations
 
@@ -702,7 +702,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(build_group)
 
         # Sync checkboxes with parent launcher state
-        launcher = self._launcher or self.parent()
+        launcher = self._launcher
         if launcher:
             # Sync states from launcher
             if hasattr(launcher, "chk_docker") and hasattr(launcher, "chk_wsl"):

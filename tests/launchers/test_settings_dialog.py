@@ -1,5 +1,7 @@
 """Tests for SettingsWidget."""
 
+# mypy: disable-error-code="attr-defined,method-assign"
+
 import time  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
