@@ -1,5 +1,9 @@
 name: Weekly CI Failure Digest
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   # COST OPTIMIZATION: Schedule removed  -  informational digest, run manually.
   # Was: cron "0 0 * * 0,4" (twice-weekly cloud run creating issues nobody reads daily)

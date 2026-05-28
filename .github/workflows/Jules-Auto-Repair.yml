@@ -1,5 +1,9 @@
 name: Jules Auto-Repair (Worker)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Re-enabled with proper safeguards against PR explosion.
 # This workflow uses the Jules API for intelligent fixes when simple linting isn't enough.
 #

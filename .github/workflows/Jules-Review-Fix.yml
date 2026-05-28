@@ -1,4 +1,8 @@
 name: Jules Review Responder
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request_review:
     types: [submitted]

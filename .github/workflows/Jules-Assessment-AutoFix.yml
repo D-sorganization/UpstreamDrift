@@ -33,7 +33,7 @@ on:
 # HARDENING: Prevent concurrent runs and bot-triggered cascades
 concurrency:
   group: jules-assessment-autofix-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check-kill-switch:
