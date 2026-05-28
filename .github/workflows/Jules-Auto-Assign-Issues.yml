@@ -1,5 +1,9 @@
 name: Jules Auto-Assign Issues
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Automatically comments @jules on new issues to trigger the fix workflow
 # IMPORTANT: Only triggers for AUTOMATED issues, NOT manually created ones
 # To manually request Jules help, add the 'jules-triage' label to an issue

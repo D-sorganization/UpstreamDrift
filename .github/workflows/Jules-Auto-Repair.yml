@@ -1,5 +1,9 @@
 name: Jules Auto-Repair (Worker)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Re-enabled with proper safeguards against PR explosion.
 # This workflow uses the Jules API for intelligent fixes when simple linting isn't enough.
 #
@@ -157,14 +161,14 @@ jobs:
             echo "exceeded=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           python-version: "3.11"
