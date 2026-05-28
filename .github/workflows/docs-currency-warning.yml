@@ -1,5 +1,9 @@
 name: docs-currency-warning
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Advisory check across every engine subtree.
 # Posts a warning comment (does NOT fail) when a PR touches one of the
 # watched engine trees without updating the relevant `*_SPEC.md` /
