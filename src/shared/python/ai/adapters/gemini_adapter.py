@@ -39,7 +39,10 @@ from __future__ import annotations
 
 import threading
 from collections.abc import Iterator, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.ai.types import ChatModelInfo
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
@@ -277,7 +280,7 @@ class GeminiAdapter(BaseAgentAdapter):
         "gemini-1.0-pro",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
+    def list_models(self) -> list[ChatModelInfo]:
         """Return Gemini model info; falls back to a static catalogue.
 
         The ``google-generativeai`` SDK exposes ``genai.list_models()``

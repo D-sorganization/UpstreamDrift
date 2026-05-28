@@ -254,8 +254,8 @@ class TestImportPyQt6:
         fake_qmainwindow = MagicMock()
 
         mock_widgets = types.ModuleType("PyQt6.QtWidgets")
-        mock_widgets.QApplication = fake_qapp
-        mock_widgets.QMainWindow = fake_qmainwindow
+        mock_widgets.QApplication = fake_qapp  # type: ignore[attr-defined]
+        mock_widgets.QMainWindow = fake_qmainwindow  # type: ignore[attr-defined]
 
         mock_pyqt6 = types.ModuleType("PyQt6")
 

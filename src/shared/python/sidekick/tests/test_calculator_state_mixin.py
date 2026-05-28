@@ -480,7 +480,7 @@ def test_exceptions_coverage(qapp) -> None:
     # get_text_from_widget exception
     # pass something that throws RuntimeError when checked type
     class BadWidget:
-        def __class__(self) -> Any:
+        def __class__(self) -> Any:  # type: ignore[override]
             raise RuntimeError
 
     calc.get_text_from_widget(BadWidget())

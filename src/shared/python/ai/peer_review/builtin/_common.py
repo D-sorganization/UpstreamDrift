@@ -55,7 +55,7 @@ async def evaluate_to_verdict(
     verdict_str = str(raw.get("verdict", "abstain"))
     reasoning = str(raw.get("reasoning", ""))
     try:
-        confidence = float(raw.get("confidence", 0.0))
+        confidence = float(raw.get("confidence", 0.0))  # type: ignore[arg-type]
     except (TypeError, ValueError):
         confidence = 0.0
     revisions_raw = raw.get("suggested_revisions") or []

@@ -35,7 +35,7 @@ def clean_env() -> Any:
 def get_cors_origins(app: FastAPI) -> list[str]:
     for middleware in app.user_middleware:
         if middleware.cls == CORSMiddleware:
-            return middleware.kwargs.get("allow_origins", [])
+            return middleware.kwargs.get("allow_origins", [])  # type: ignore[return-value]
     return []
 
 

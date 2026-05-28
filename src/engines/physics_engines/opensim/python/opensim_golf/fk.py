@@ -432,22 +432,23 @@ def _rotmat_to_quat(rot_matrix: object) -> NDArray[np.float64]:
             raise ValueError(f"rot_matrix must be (3, 3); got {mat.shape}")
     else:
         # OpenSim Rotation: has .get(i, j).
+        _rm: Any = rot_matrix
         mat = np.array(
             [
                 [
-                    rot_matrix.get(0, 0),
-                    rot_matrix.get(0, 1),
-                    rot_matrix.get(0, 2),
+                    _rm.get(0, 0),
+                    _rm.get(0, 1),
+                    _rm.get(0, 2),
                 ],
                 [
-                    rot_matrix.get(1, 0),
-                    rot_matrix.get(1, 1),
-                    rot_matrix.get(1, 2),
+                    _rm.get(1, 0),
+                    _rm.get(1, 1),
+                    _rm.get(1, 2),
                 ],
                 [
-                    rot_matrix.get(2, 0),
-                    rot_matrix.get(2, 1),
-                    rot_matrix.get(2, 2),
+                    _rm.get(2, 0),
+                    _rm.get(2, 1),
+                    _rm.get(2, 2),
                 ],
             ],
             dtype=np.float64,

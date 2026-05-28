@@ -238,7 +238,7 @@ def test_process_message_passes_mode_filtered_tools(
     _WorkerStub.created_tools = []
 
     panel = AIAssistantPanel()
-    qtbot.addWidget(panel)
+    qtbot.addWidget(panel)  # type: ignore[attr-defined]
     panel.set_adapter(MagicMock())
 
     panel._access_mode = ChatAccessMode.NO_REPO_ACCESS

@@ -37,7 +37,7 @@ _RUST_AVAILABLE = False
 _rust_mod = None
 
 try:
-    import data_processor_core as _rust_mod  # type: ignore[import-not-found]
+    import data_processor_core as _rust_mod  # type: ignore[import-not-found,no-redef]
 
     _RUST_AVAILABLE = True
     logger.debug("data_processor_core native extension loaded")

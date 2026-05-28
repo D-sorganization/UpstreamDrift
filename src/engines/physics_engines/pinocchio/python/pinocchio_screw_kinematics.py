@@ -76,7 +76,7 @@ class PinocchioScrewKinematics:
         q: np.ndarray,
         v: np.ndarray,
         frame_name: str,
-        reference_frame: pin.ReferenceFrame = None,
+        reference_frame: pin.ReferenceFrame | None = None,
     ) -> Twist:
         """Compute spatial twist for a named frame.
 

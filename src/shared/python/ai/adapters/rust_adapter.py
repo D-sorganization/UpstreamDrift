@@ -3,7 +3,10 @@ from __future__ import annotations
 import logging
 import queue
 from collections.abc import Iterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.ai.types import ChatModelInfo
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
@@ -357,7 +360,7 @@ class RustAgentAdapter(BaseAgentAdapter):
         "gpt-3.5-turbo",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
+    def list_models(self) -> list[ChatModelInfo]:
         """Return Rust-adapter model catalogue; configured model is always present."""
         from src.shared.python.ai.types import ChatModelInfo
 

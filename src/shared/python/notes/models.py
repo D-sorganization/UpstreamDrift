@@ -2,7 +2,32 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+DEFAULT_NOTE_COLOR: str = "#fef08a"  # yellow-200
+
+
+@dataclass(frozen=True)
+class NoteCard:
+    """A single markdown note card."""
+
+    note_id: str
+    title: str
+    markdown_body: str
+    created_at: str
+    updated_at: str
+    color: str = DEFAULT_NOTE_COLOR
+    tags: tuple[str, ...] = field(default_factory=tuple)
+
+
+@dataclass
+class NotesBoardSettings:
+    """Visual / layout settings for the notes board."""
+
+    show_grid: bool = True
+    snap_to_grid: bool = False
+    grid_size: int = 20
+    background_color: str = "#f8fafc"
 
 
 @dataclass(frozen=True)

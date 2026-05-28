@@ -139,7 +139,7 @@ def test_json_serializer(manager) -> Any:
         pass
 
     d = Dummy()
-    d.attr = "val"
+    d.attr = "val"  # type: ignore[attr-defined]
     res = manager._json_serializer(d)
     assert res == {"attr": "val"}
 
