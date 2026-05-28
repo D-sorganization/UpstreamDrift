@@ -59,7 +59,12 @@ def test_remote_recorder():
 )
 def test_humanoid_launcher_init(mock_config_manager):
     """Test HumanoidLauncher initialization."""
-    QApplication.instance() or QApplication(sys.argv)
+    # Keep a live reference to the QApplication for the duration of the test;
+    # PyQt will garbage-collect a temporary QApplication and destroy it before
+    # the QWidget is constructed, causing "Must construct a QApplication
+    # before a QWidget" (#6515).
+    _qapp = QApplication.instance() or QApplication(sys.argv)
+    assert _qapp is not None
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
@@ -78,7 +83,10 @@ def test_humanoid_launcher_init(mock_config_manager):
 )
 def test_humanoid_launcher_sim_mixin(mock_config_manager):
     """Test SimulationMixin methods."""
-    QApplication.instance() or QApplication(sys.argv)
+    # See test_humanoid_launcher_init for why the QApplication must be held
+    # in a local reference (#6515).
+    _qapp = QApplication.instance() or QApplication(sys.argv)
+    assert _qapp is not None
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_config.live_view = False
@@ -125,7 +133,10 @@ def test_humanoid_launcher_sim_mixin(mock_config_manager):
 )
 def test_humanoid_launcher_analysis_mixin(mock_config_manager):
     """Test AnalysisMixin methods."""
-    QApplication.instance() or QApplication(sys.argv)
+    # See test_humanoid_launcher_init for why the QApplication must be held
+    # in a local reference (#6515).
+    _qapp = QApplication.instance() or QApplication(sys.argv)
+    assert _qapp is not None
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
