@@ -75,7 +75,7 @@ jobs:
           - profile: research
             must_have: "api,mujoco,pinocchio,drake"
             must_not_have: "opensim,myosuite"
-            advisory: true  # advisory while fleet cache is cold
+            advisory: true # advisory while fleet cache is cold
 
     continue-on-error: ${{ matrix.advisory }}
     steps:
