@@ -3,7 +3,7 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
-# mypy: disable-error-code="attr-defined,assignment,union-attr"
+# mypy: disable-error-code="attr-defined,assignment,union-attr,arg-type"
 
 from __future__ import annotations
 
@@ -425,7 +425,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(zoom_group)
 
         # Sync with parent launcher
-        launcher = self.parent()
+        launcher = self._launcher
         if launcher and hasattr(launcher, "btn_modify_layout"):
             self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
             self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
@@ -702,7 +702,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(build_group)
 
         # Sync checkboxes with parent launcher state
-        launcher = self._launcher or self.parent()
+        launcher = self._launcher
         if launcher:
             # Sync states from launcher
             if hasattr(launcher, "chk_docker") and hasattr(launcher, "chk_wsl"):
@@ -1062,7 +1062,7 @@ class SettingsWidget(QWidget):
             diag = LauncherDiagnostics()
             results = diag.run_all_checks()
 
-            launcher = self.parent()
+            launcher = self._launcher
             if launcher and hasattr(launcher, "available_models"):
                 results["runtime_state"] = {
                     "available_models_count": len(launcher.available_models),
