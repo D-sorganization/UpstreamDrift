@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   group: jules-code-quality-fixer-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check-kill-switch:

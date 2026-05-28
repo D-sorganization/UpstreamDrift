@@ -31,7 +31,7 @@ permissions:
 # HARDENING: Prevent concurrent runs and limit frequency
 concurrency:
   group: comment-to-issue-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   # HARDENING: Rate limit - max issues to create per run

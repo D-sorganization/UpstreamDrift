@@ -1,5 +1,9 @@
 name: Jules Layman's Terms Writer
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
     inputs:

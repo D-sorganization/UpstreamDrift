@@ -43,7 +43,7 @@ permissions:
 # Prevent concurrent runs
 concurrency:
   group: jules-assessment-remediator
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   # Safety limits

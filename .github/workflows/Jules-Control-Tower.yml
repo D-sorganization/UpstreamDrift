@@ -57,7 +57,7 @@ env:
 
 concurrency:
   group: jules-control-tower-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 # HARDENED PERMISSIONS:
 # - Scheduled runs: read-only by default
