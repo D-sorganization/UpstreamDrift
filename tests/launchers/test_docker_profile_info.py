@@ -105,6 +105,26 @@ def test_load_docker_profiles_malformed_yaml_returns_empty(
     assert load_docker_profiles() == {}
 
 
+def test_load_docker_profiles_non_mapping_top_level_returns_empty(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A YAML whose top-level is a list/string must not crash startup.
+
+    Regression for #6538: removing the ``isinstance(data, dict)`` guard
+    let a malformed profiles.yaml propagate ``AttributeError`` through
+    ``data.get(...)`` and take down the launcher dialog.
+    """
+    # Top-level list.
+    p = _write_yaml(tmp_path, "- not\n- a\n- mapping\n")
+    monkeypatch.setattr(dpi, "_PROFILES_PATH", p)
+    assert load_docker_profiles() == {}
+
+    # Top-level scalar string.
+    p2 = _write_yaml(tmp_path, "just a string\n")
+    monkeypatch.setattr(dpi, "_PROFILES_PATH", p2)
+    assert load_docker_profiles() == {}
+
+
 def test_load_docker_profiles_unknown_feature_is_skipped(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

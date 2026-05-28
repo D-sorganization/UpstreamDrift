@@ -101,6 +101,15 @@ def load_docker_profiles() -> dict[str, ProfileInfo]:
         logger.warning("Could not parse %s: %s", _PROFILES_PATH, exc)
         return {}
 
+    if not isinstance(data, dict):
+        logger.warning(
+            "Expected mapping at top level of %s; got %s. "
+            "Falling back to empty profiles.",
+            _PROFILES_PATH,
+            type(data).__name__,
+        )
+        return {}
+
     raw_profiles: dict[str, Any] = data.get("profiles", {})
     out: dict[str, ProfileInfo] = {}
 
