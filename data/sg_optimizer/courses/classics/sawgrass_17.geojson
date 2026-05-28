@@ -1,0 +1,55 @@
+{
+  "type": "Feature",
+  "properties": {
+    "hole_number": 17,
+    "par": 3,
+    "yardage": 137,
+    "name": "TPC Sawgrass — Hole 17 (Island Green)",
+    "schema_version": "1.1"
+  },
+  "geometry": {
+    "type": "GeometryCollection",
+    "geometries": [
+      {
+        "type": "Point",
+        "role": "tee",
+        "coordinates": [-81.3972, 30.1978]
+      },
+      {
+        "type": "Point",
+        "role": "green_center",
+        "coordinates": [-81.3958, 30.1971]
+      },
+      {
+        "type": "Polygon",
+        "role": "green",
+        "coordinates": [
+          [
+            [-81.3961, 30.1973],
+            [-81.3958, 30.19735],
+            [-81.3955, 30.19725],
+            [-81.39545, 30.19705],
+            [-81.39555, 30.1969],
+            [-81.39585, 30.19685],
+            [-81.3961, 30.19695],
+            [-81.39618, 30.19715],
+            [-81.3961, 30.1973]
+          ]
+        ]
+      },
+      {
+        "type": "Polygon",
+        "role": "water",
+        "coordinates": [
+          [
+            [-81.3973, 30.198],
+            [-81.3953, 30.198],
+            [-81.3953, 30.1966],
+            [-81.3973, 30.1966],
+            [-81.3973, 30.198]
+          ]
+        ]
+      }
+    ]
+  }
+}
