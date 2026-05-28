@@ -30,6 +30,10 @@ click==8.3.1
     # via
     #   flask
     #   uvicorn
+colorama==0.4.6
+    # via
+    #   click
+    #   uvicorn
 contourpy==1.3.3
     # via bokeh
 etils[epath,epy]==1.13.0
@@ -136,8 +140,6 @@ urllib3==2.7.0
     # via requests
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
-uvloop==0.22.1
-    # via uvicorn
 watchfiles==1.1.1
     # via uvicorn
 websockets==16.0
