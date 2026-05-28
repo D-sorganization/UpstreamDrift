@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: jules-supersede-check-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check-kill-switch:

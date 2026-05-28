@@ -15,7 +15,7 @@ permissions:
 # HARDENING: Prevent concurrent runs
 concurrency:
   group: jules-sentinel-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check-kill-switch:

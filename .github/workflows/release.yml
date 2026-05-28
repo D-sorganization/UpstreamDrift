@@ -26,6 +26,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   build:
+    timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
@@ -84,6 +85,7 @@ jobs:
           path: dist/
 
   smoke-python-wheel:
+    timeout-minutes: 30
     needs: [pick-runner, build]
     strategy:
       fail-fast: false
@@ -111,6 +113,7 @@ jobs:
         run: python -m pytest tests/smoke/python_wheel
 
   publish-pypi:
+    timeout-minutes: 30
     needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -134,6 +137,7 @@ jobs:
           skip-existing: true
 
   create-release:
+    timeout-minutes: 30
     needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:

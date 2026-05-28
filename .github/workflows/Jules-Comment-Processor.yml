@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: jules-comment-processor-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check-kill-switch:

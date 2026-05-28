@@ -1,5 +1,9 @@
 name: Jules Physics Auditor (Technical/Scientific Review)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
   workflow_dispatch:

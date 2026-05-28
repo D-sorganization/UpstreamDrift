@@ -1,5 +1,9 @@
 name: Nightly Documentation Organizer
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   # COST OPTIMIZATION: Schedule removed  -  doc organization runs on workflow_dispatch only.
   # Was: cron "0 0 * * 0,4" (twice-weekly cloud run for low-value doc housekeeping)

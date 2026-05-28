@@ -1,5 +1,9 @@
 name: Code Metrics
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Informational code quality metrics - never fails CI
 # Reports complexity (radon) and duplication (jscpd) metrics
 
@@ -27,6 +31,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   complexity-metrics:
+    timeout-minutes: 30
     needs: pick-runner
     name: Complexity Analysis (radon)
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -58,6 +63,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   duplication-metrics:
+    timeout-minutes: 30
     needs: pick-runner
     name: Duplication Analysis (jscpd)
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -112,6 +118,7 @@ jobs:
           fi
 
   summary:
+    timeout-minutes: 30
     name: Metrics Summary
     needs: [pick-runner, complexity-metrics, duplication-metrics]
     if: always()

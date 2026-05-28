@@ -1,5 +1,9 @@
 name: Jules Code Quality Reviewer (Worker)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
   workflow_dispatch:

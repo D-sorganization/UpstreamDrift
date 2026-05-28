@@ -1,5 +1,9 @@
 name: Jules Documentation Auditor (Worker)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Nightly documentation audit workflow
 # Scans codebase for missing docstrings, documentation gaps, and organization issues
 # Creates issues or PRs for documentation improvements

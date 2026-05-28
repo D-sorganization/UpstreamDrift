@@ -1,5 +1,9 @@
 name: Jules Hotfix-Creator (Worker)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Triggers when CI fails on protected branches (main/master)
 # Creates a hotfix branch, triggers Auto-Repair, and opens urgent PR
 
