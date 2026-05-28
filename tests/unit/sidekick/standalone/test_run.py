@@ -255,6 +255,53 @@ def test_protocol_calculator_exception_exits_3(tmp_path: Path) -> None:
         del runner._REGISTRY["_test_proto_exc"]
 
 
+def test_protocol_validate_inputs_exception_exits_3(tmp_path: Path) -> None:
+    """Regression for #6532.
+
+    If a protocol calculator raises ``ValueError``/``AssertionError`` from
+    ``validate_inputs`` (instead of returning ``valid=False``), the runner
+    must exit with code 3 — not crash with an uncaught traceback.
+    """
+    from sidekick.standalone import runner
+
+    class _BadValidator:
+        def validate_inputs(self, inputs: dict) -> Any:
+            raise ValueError("validation rejected input")
+
+        def calculate(self, inputs: dict) -> Any:  # pragma: no cover - unreached
+            return _FakeCalculationResult(values={}, units={}, warnings=[])
+
+    runner._REGISTRY["_test_proto_validate_exc"] = _BadValidator()
+    try:
+        code, _, err = _invoke("_test_proto_validate_exc", {}, tmp_path)
+        assert code == 3
+        payload = json.loads(err)
+        assert "validation rejected input" in payload["errors"][0]
+    finally:
+        del runner._REGISTRY["_test_proto_validate_exc"]
+
+
+def test_protocol_validate_inputs_assertion_error_exits_3(tmp_path: Path) -> None:
+    """Same as #6532 but for ``AssertionError`` from ``validate_inputs``."""
+    from sidekick.standalone import runner
+
+    class _AssertingValidator:
+        def validate_inputs(self, inputs: dict) -> Any:
+            assert False, "assert in validate"  # noqa: B011, PT015
+
+        def calculate(self, inputs: dict) -> Any:  # pragma: no cover - unreached
+            return _FakeCalculationResult(values={}, units={}, warnings=[])
+
+    runner._REGISTRY["_test_proto_validate_assert"] = _AssertingValidator()
+    try:
+        code, _, err = _invoke("_test_proto_validate_assert", {}, tmp_path)
+        assert code == 3
+        payload = json.loads(err)
+        assert "assert in validate" in payload["errors"][0]
+    finally:
+        del runner._REGISTRY["_test_proto_validate_assert"]
+
+
 # ---------------------------------------------------------------------------
 # No PyQt6 on headless path
 # ---------------------------------------------------------------------------

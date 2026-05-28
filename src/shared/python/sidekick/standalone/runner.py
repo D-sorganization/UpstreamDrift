@@ -207,7 +207,12 @@ def run_calculator(
     fn = _REGISTRY[calculator]
 
     if hasattr(fn, "validate_inputs") and hasattr(fn, "calculate"):
-        vr = fn.validate_inputs(inputs)
+        try:
+            vr = fn.validate_inputs(inputs)
+        except (ValueError, AssertionError) as exc:
+            logger.error("Validation failed: %s", exc)
+            sys.stderr.write(json.dumps({"errors": [str(exc)]}) + "\n")
+            return 3
         if not vr.valid:
             sys.stderr.write(json.dumps({"errors": vr.errors}) + "\n")
             return 3
