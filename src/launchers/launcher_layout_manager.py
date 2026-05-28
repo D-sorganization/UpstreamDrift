@@ -324,7 +324,7 @@ class LayoutManager:
                 continue
 
             # Category filter
-            if self.current_category_filter != "All":
+            if self.current_category_filter != "All" and not self.current_filter_text:
                 cat = self._get_model_category(model)
                 if cat != self.current_category_filter:
                     continue

@@ -341,19 +341,21 @@ class PlottingTab(QtWidgets.QWidget):
             progress.setValue(i)
 
             # Save current state
-            qpos_bak, qvel_bak, ctrl_bak = self.sim_widget.get_state()
+            state_bak = self.sim_widget.get_state()
 
             self.sim_widget.set_state_and_forward(
-                frame.joint_positions,
-                frame.joint_velocities,
-                frame.joint_torques,
+                {
+                    "q": frame.joint_positions,
+                    "v": frame.joint_velocities,
+                    "ctrl": frame.joint_torques,
+                }
             )
 
             res = analyzer.compute_induced_acceleration("actuator")
             vals_list.append(res)
 
             # Restore
-            self.sim_widget.set_state_and_forward(qpos_bak, qvel_bak, ctrl_bak)
+            self.sim_widget.set_state_and_forward(state_bak)
 
         progress.setValue(total_frames)
 
@@ -403,7 +405,7 @@ class PlottingTab(QtWidgets.QWidget):
         )
         progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 
-        qpos_bak, qvel_bak, ctrl_bak = self.sim_widget.get_state()
+        state_bak = self.sim_widget.get_state()
 
         for i, frame in enumerate(recorder.frames):
             if progress.wasCanceled():
@@ -411,9 +413,11 @@ class PlottingTab(QtWidgets.QWidget):
             progress.setValue(i)
 
             self.sim_widget.set_state_and_forward(
-                frame.joint_positions,
-                frame.joint_velocities,
-                frame.joint_torques,
+                {
+                    "q": frame.joint_positions,
+                    "v": frame.joint_velocities,
+                    "ctrl": frame.joint_torques,
+                }
             )
 
             cf_results: dict[str, np.ndarray] = analyzer.compute_counterfactuals()
@@ -423,4 +427,4 @@ class PlottingTab(QtWidgets.QWidget):
 
         progress.setValue(total_frames)
 
-        self.sim_widget.set_state_and_forward(qpos_bak, qvel_bak, ctrl_bak)
+        self.sim_widget.set_state_and_forward(state_bak)
