@@ -211,7 +211,12 @@ def run_calculator(
         if not vr.valid:
             sys.stderr.write(json.dumps({"errors": vr.errors}) + "\n")
             return 3
-        calc_result = fn.calculate(inputs)
+        try:
+            calc_result = fn.calculate(inputs)
+        except (ValueError, AssertionError) as exc:
+            logger.error("Calculation failed: %s", exc)
+            sys.stderr.write(json.dumps({"errors": [str(exc)]}) + "\n")
+            return 3
         values: dict[str, Any] = getattr(calc_result, "values", {})
         units: dict[str, str] = getattr(calc_result, "units", {})
         output_data: Any = {"values": values, "units": units}

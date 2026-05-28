@@ -172,7 +172,7 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt

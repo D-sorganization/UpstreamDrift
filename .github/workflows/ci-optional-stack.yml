@@ -85,7 +85,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
       - name: Reject Raw Merge Conflict Markers
         run: |
           if git grep -n '<<<<<<< HEAD' -- . ':!.github'; then
