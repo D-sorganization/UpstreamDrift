@@ -705,6 +705,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Model Explorer")
                     self.show_toast("Model Explorer loaded as tab.", "success")
                     self.lbl_status.setText("> Model Explorer Running")
