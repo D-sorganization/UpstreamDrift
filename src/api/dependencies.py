@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
     from .services.analysis_service import AnalysisService
     from .services.simulation_service import SimulationService
+    from .task_manager import TaskManager
 
 
 def get_engine_manager(request: Request) -> EngineManager:
@@ -98,7 +99,7 @@ def get_video_pipeline(request: Request) -> VideoPosePipeline:
     return cast("VideoPosePipeline", pipeline)
 
 
-def get_task_manager(request: Request) -> Any:
+def get_task_manager(request: Request) -> TaskManager:
     """Retrieve the TaskManager from app state.
 
     Args:
@@ -113,7 +114,7 @@ def get_task_manager(request: Request) -> Any:
     manager = getattr(request.app.state, "task_manager", None)
     if manager is None:
         raise HTTPException(status_code=503, detail="Task manager not initialized")
-    return manager
+    return cast("TaskManager", manager)
 
 
 def get_logger(request: Request) -> Any:

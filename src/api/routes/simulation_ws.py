@@ -353,7 +353,16 @@ async def _wait_for_resume_or_stop(
     """
     await websocket.send_json({"status": "paused"})
     while True:
-        msg = await websocket.receive_json()
+        try:
+            msg = await websocket.receive_json()
+        except json.JSONDecodeError:
+            logger.warning(
+                "Received invalid JSON from WebSocket client while paused; ignoring"
+            )
+            await websocket.send_json(
+                {"error": "invalid_json", "message": "Message must be valid JSON"}
+            )
+            continue
         action = msg.get("action")
         if action == "resume":
             return False
