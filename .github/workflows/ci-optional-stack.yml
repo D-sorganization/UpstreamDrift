@@ -118,7 +118,7 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
 
-      - uses: actions/setup-python@82c7b60f580344b90dbb403b250f14003997afe2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ matrix.python }}
 
@@ -356,7 +356,7 @@ jobs:
           done
 
       - name: Upload Test Logs
-        uses: actions/upload-artifact@60a12c6b21f080709581541097fa6c8793b82a62
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: optional-stack-test-logs-${{ matrix.python }}
