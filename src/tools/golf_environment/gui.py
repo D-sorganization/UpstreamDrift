@@ -164,7 +164,7 @@ class EnvironmentRenderer(QWidget):
             )
             fw_mesh = gl.GLMeshItem(
                 vertexes=self._create_rect(
-                    0, -hole.fairway_width / 2, dist, hole.fairway_width
+                    0, -hole.fairway_width / 2, float(dist), hole.fairway_width
                 ),
                 color=(0.2, 0.7, 0.2, 1.0),
                 smooth=False,
@@ -285,6 +285,47 @@ class EnvironmentWindow(QMainWindow):
             self.renderer.set_environment(
                 CourseHole("Hole 2", 4, 400, pin_position=(400 * 0.9144, 0, 0))
             )
+
+
+class _EmbedAdapter:
+    """Embed adapter for the Golf Environment Viewer."""
+
+    tool_id = "golf_environment"
+
+    def __init__(self) -> None:
+        self._widget: EnvironmentRenderer | None = None
+
+    def embed_capabilities(self) -> Any:
+        from src.shared.python.launcher_embed import EmbedCapabilities
+
+        return EmbedCapabilities(
+            supports_embedded=True,
+            prefers_dock=False,
+            min_size=(800, 600),
+            requires_separate_qapplication=False,
+        )
+
+    def create_main_widget(self, parent: Any) -> Any:
+        self._widget = EnvironmentRenderer(parent=parent)
+        return self._widget
+
+    def cleanup(self) -> None:
+        self._widget = None
+
+    def is_dirty(self) -> bool:
+        return False
+
+
+def _register() -> None:
+    try:
+        from src.shared.python.launcher_embed import register_embeddable_tool
+
+        register_embeddable_tool(_EmbedAdapter())
+    except Exception:  # noqa: BLE001
+        logger.warning("golf_environment: EmbeddableTool registration failed")
+
+
+_register()
 
 
 def get_dockable_ui() -> EnvironmentWindow:

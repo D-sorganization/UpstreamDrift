@@ -101,12 +101,6 @@ def load_docker_profiles() -> dict[str, ProfileInfo]:
         logger.warning("Could not parse %s: %s", _PROFILES_PATH, exc)
         return {}
 
-    if not isinstance(data, dict):
-        logger.warning(
-            "Invalid profiles data format in %s (expected dict)", _PROFILES_PATH
-        )
-        return {}
-
     raw_profiles: dict[str, Any] = data.get("profiles", {})
     out: dict[str, ProfileInfo] = {}
 

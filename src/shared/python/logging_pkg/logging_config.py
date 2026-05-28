@@ -90,7 +90,7 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"|"
         r"(?:(['\"])([^'\"\s}]+))"  # unterminated quoted value fallback
         r"|"
-        r"([^'\"\s,{}&;:\])]+)"  # unquoted value
+        r"([^'\"\s{}&;:\])]+)"  # unquoted value (no comma stop — secrets may contain commas)
         r")"
     ),
 ]
