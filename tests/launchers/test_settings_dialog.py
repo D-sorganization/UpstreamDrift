@@ -452,7 +452,9 @@ def test_check_docker_deps_success(
 def test_check_wsl_deps_success(
     mock_exists, mock_run, mock_info, parent_launcher, qapp
 ) -> None:
-    mock_exists.side_effect = lambda self: ".venv-wsl" in str(self)
+    mock_exists.side_effect = lambda *args, **kwargs: any(
+        ".venv-wsl" in str(arg) for arg in args
+    )
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
     res_run = MagicMock()
