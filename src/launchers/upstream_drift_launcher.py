@@ -557,16 +557,16 @@ class UpstreamDriftLauncher(QMainWindow):
                     _sys.path.insert(0, sibling_src)
                 if sibling_python not in _sys.path:
                     _sys.path.insert(0, sibling_python)
-
-            # Fall back to vendored ud-tools
-            vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
-            vendor_python = str(
-                REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
-            )
-            if vendor_src not in _sys.path:
-                _sys.path.insert(0, vendor_src)
-            if vendor_python not in _sys.path:
-                _sys.path.insert(0, vendor_python)
+            else:
+                # Fall back to vendored ud-tools
+                vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
+                vendor_python = str(
+                    REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
+                )
+                if vendor_src not in _sys.path:
+                    _sys.path.insert(0, vendor_src)
+                if vendor_python not in _sys.path:
+                    _sys.path.insert(0, vendor_python)
             for _name in (
                 "shared.python.sidekick.ui.tools_sidebar",
                 "sidekick.ui.tools_sidebar",
@@ -815,13 +815,13 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def update_startup_results(self, results: StartupResults) -> None:
         """Transition from loading skeleton to full application."""
-        self.loading = False
         self._startup_time_ms = results.startup_time_ms
         self.orchestrator.initialize_from_results(results)
         self.layout_manager.available_models = self.orchestrator.available_models
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
+        self.loading = False
 
         from PyQt6.QtCore import QTimer as _QTimer
 
@@ -1423,6 +1423,9 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 
 def main() -> None:
     """Application entry point."""
+    import os
+
+    os.environ.setdefault("GOLF_SUITE_MODE", "local")
     import traceback
 
     def excepthook(exc_type, exc_value, exc_tb):

@@ -38,6 +38,8 @@ logger = get_logger(__name__)
 
 
 class DialogsManager:
+    docker_available: bool
+
     def __init__(self, launcher):
         self.launcher = launcher
 
@@ -519,15 +521,18 @@ class DialogsManager:
 
             if not self.docker_available:
                 if getattr(self.launcher, "loading", False):
-                    pass
+                    self.chk_docker.setChecked(False)
+                    return
+                reply = QMessageBox.question(
+                    self.launcher,
+                    "Docker Warning",
+                    "Docker was not detected as running during startup. Do you want to enable Docker mode anyway?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No,
+                )
+                if reply == QMessageBox.StandardButton.Yes:
+                    self.docker_available = True
                 else:
-                    QMessageBox.warning(
-                        self.launcher,
-                        "Docker Not Available",
-                        "Docker Desktop is not running or not installed.\n\n"
-                        "Please start Docker Desktop and try again.\n\n"
-                        "The launcher will continue in local mode.",
-                    )
                     self.chk_docker.setChecked(False)
                     return
 

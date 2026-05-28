@@ -287,6 +287,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
         return False
 
     def _try_launch_docker(self, model: Any) -> bool:
+        if getattr(model, "embed_adapter", None):
+            return False
         use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
         if not (use_docker and self.docker_available):
             return False
@@ -398,22 +400,13 @@ except (RuntimeError, TypeError, AttributeError) as e:
                                     "Failed to inject Sidekick session: %s", e
                                 )
 
-                        # Check user preference or model default; for now default to docking
-                        launcher = getattr(model, "launcher", None)
-                        if isinstance(launcher, dict):
-                            launch_mode = launcher.get("default_launch", "tab")
-                        else:
-                            launch_mode = (
-                                getattr(launcher, "default_launch", "tab")
-                                if launcher
-                                else "tab"
-                            )
-                        if launch_mode == "window" and hasattr(self, "popout_widget"):
-                            self.popout_widget(ui_widget, model.name)
-                            self.show_toast(f"{model.name} Popped Out", "success")
-                        elif hasattr(self, "dock_widget_as_tab"):
+                        # Always dock as tab first; pop-out can be triggered post-launch from DraggableTabWidget
+                        if hasattr(self, "dock_widget_as_tab"):
                             self.dock_widget_as_tab(ui_widget, model.name)
                             self.show_toast(f"{model.name} Docked", "success")
+                        elif hasattr(self, "popout_widget"):
+                            self.popout_widget(ui_widget, model.name)
+                            self.show_toast(f"{model.name} Popped Out", "success")
 
                         self.lbl_status.setText(f"* {model.name} Running")
                         self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
@@ -497,10 +490,20 @@ except (RuntimeError, TypeError, AttributeError) as e:
             return
 
         if model.type == "matlab_suite":
-            from src.launchers.matlab_suite_dialog import MatlabSuiteDialog
+            from src.launchers.matlab_suite_dialog import MatlabSuiteWidget
 
-            dialog = MatlabSuiteDialog(self.launcher)
-            dialog.exec()
+            widget = MatlabSuiteWidget(self.launcher)
+
+            # Always dock as tab first; pop-out can be triggered post-launch from DraggableTabWidget
+            if hasattr(self, "dock_widget_as_tab"):
+                self.dock_widget_as_tab(widget, model.name)
+                self.show_toast(f"{model.name} Docked", "success")
+            elif hasattr(self, "popout_widget"):
+                self.popout_widget(widget, model.name)
+                self.show_toast(f"{model.name} Popped Out", "success")
+
+            self.lbl_status.setText(f"* {model.name} Running")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             return
 
         if self._try_launch_docker(model):

@@ -1626,7 +1626,7 @@ class SettingsWidget(QWidget):
             cmd = get_docker_cmd()
             inspect_cmd = cmd + ["image", "inspect", "upstream-drift:engine"]
             res = subprocess.run(
-                inspect_cmd, capture_output=True, text=True, timeout=5.0
+                inspect_cmd, capture_output=True, text=True, timeout=10.0
             )
             if res.returncode != 0:
                 msg = (
@@ -1636,6 +1636,21 @@ class SettingsWidget(QWidget):
                 )
                 QMessageBox.warning(self, "Docker Dependency Check", msg)
                 return
+        except subprocess.TimeoutExpired as e:
+            msg = (
+                "<h3>Docker Connection Timeout</h3>"
+                f"<p>Failed to communicate with the Docker daemon within the timeout limit (10.0s):</p>"
+                f"<pre style='color:#f87171;'>{e}</pre>"
+                "<p>This typically occurs if the WSL2 subsystem or Docker Desktop is starting up, frozen, or not running.</p>"
+                "<p>Please verify that:</p>"
+                "<ol>"
+                "  <li><b>Docker Desktop</b> is running.</li>"
+                "  <li><b>WSL integration</b> is enabled for your distribution in Docker Desktop settings.</li>"
+                "  <li>You can run <code>wsl docker ps</code> in a terminal without hanging.</li>"
+                "</ol>"
+            )
+            QMessageBox.critical(self, "Docker Dependency Check", msg)
+            return
         except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
             msg = (
                 "<h3>Docker Environment Status: Error</h3>"

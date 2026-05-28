@@ -395,6 +395,24 @@ def test_close_event(mock_kill, mock_dialog_cls, qapp) -> None:
         assert not event.isAccepted()
 
 
+@patch("src.launchers.launcher_dialogs.ThemedModalDialog")
+def test_close_event_excludes_background_api(mock_dialog_cls, qapp) -> None:
+    with patch_launcher_ui():
+        launcher = UpstreamDriftLauncher()
+        launcher.docker_checker = None
+        launcher.cleanup_timer = None
+        launcher._save_layout = MagicMock()
+        proc = MagicMock()
+        proc.poll.return_value = None
+        launcher.running_processes = {"background_api_server": proc}
+        from PyQt6.QtGui import QCloseEvent
+
+        event = QCloseEvent()
+        launcher.closeEvent(event)
+        mock_dialog_cls.assert_not_called()
+        assert event.isAccepted()
+
+
 @patch("src.launchers.upstream_drift_launcher.QApplication")
 @patch("src.launchers.upstream_drift_launcher.AsyncStartupWorker")
 @patch("src.launchers.upstream_drift_launcher.sys.exit")

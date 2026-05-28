@@ -288,6 +288,8 @@ logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX
 # Register explicitly excluded WebSocket routes
 app.include_router(chat_ws.router, prefix=API_PREFIX)
 app.include_router(simulation_ws.router, prefix=API_PREFIX)
+app.include_router(chat_ws.router, prefix="/api")
+app.include_router(simulation_ws.router, prefix="/api")
 app.include_router(chat_ws.router, prefix="")
 app.include_router(simulation_ws.router, prefix="")
 
