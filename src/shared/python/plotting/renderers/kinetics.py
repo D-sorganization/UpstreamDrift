@@ -784,7 +784,9 @@ class KineticsRenderer(BaseRenderer):
         if ax is None:
             raise ValueError("ax must be provided")
         acc_f = acc.astype(float, copy=False)
-        norm = np.sqrt(np.einsum("...i,...i->...", acc_f, acc_f))  # ⚡ Bolt: np.einsum avoids temporary allocations
+        norm = np.sqrt(
+            np.einsum("...i,...i->...", acc_f, acc_f)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations
         ax.plot(
             times,
             norm,
