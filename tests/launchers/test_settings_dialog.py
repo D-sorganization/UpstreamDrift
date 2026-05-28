@@ -471,3 +471,34 @@ def test_show_wsl_setup_dialog(mock_exec, parent_launcher, qapp) -> None:
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._show_wsl_setup_dialog()
     mock_exec.assert_called_once()
+
+
+def test_launcher_ref_used_when_parent_is_none(qapp) -> None:
+    """Issue #6508: when launcher kwarg is passed without parent, self._launcher
+    must be used — not self.parent() — so layout and diagnostics tabs work."""
+    launcher = QWidget()
+    launcher.btn_modify_layout = MagicMock()
+    launcher.btn_modify_layout.isChecked.return_value = True
+    launcher.chk_docker = MagicMock()
+    launcher.chk_docker.isChecked.return_value = True
+    launcher.chk_wsl = MagicMock()
+    launcher.chk_wsl.isChecked.return_value = False
+    launcher.chk_live = MagicMock()
+    launcher.chk_live.isChecked.return_value = True
+    launcher.chk_gpu = MagicMock()
+    launcher.chk_gpu.isChecked.return_value = False
+    launcher.available_models = {}
+    launcher.model_order = []
+    launcher.model_cards = {}
+    launcher.selected_model = None
+    launcher.docker_available = False
+    launcher.registry = None
+    launcher.open_layout_manager = MagicMock()
+
+    # Production path: launcher passed explicitly, no parent
+    dialog = SettingsWidget(launcher=launcher, initial_tab=TAB_LAYOUT)
+
+    assert dialog.parent() is None, "Qt parent should be None in this path"
+    assert dialog._launcher is launcher, "_launcher must reference the passed launcher"
+    # Layout tab sync: btn_modify_layout.isChecked was called during _setup_layout_tab
+    launcher.btn_modify_layout.isChecked.assert_called()

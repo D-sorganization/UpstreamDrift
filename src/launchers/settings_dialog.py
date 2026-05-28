@@ -425,7 +425,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(zoom_group)
 
         # Sync with parent launcher
-        launcher = self.parent()
+        launcher = self._launcher
         if launcher and hasattr(launcher, "btn_modify_layout"):
             self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
             self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
@@ -1062,7 +1062,7 @@ class SettingsWidget(QWidget):
             diag = LauncherDiagnostics()
             results = diag.run_all_checks()
 
-            launcher = self.parent()
+            launcher = self._launcher
             if launcher and hasattr(launcher, "available_models"):
                 results["runtime_state"] = {
                     "available_models_count": len(launcher.available_models),
