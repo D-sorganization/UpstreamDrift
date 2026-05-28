@@ -210,6 +210,7 @@ def run_headless(args: argparse.Namespace) -> int:
         calculator=args.calculator,
         inputs_path=str(args.inputs),
         output=output_path,
+        format=args.format,
     )
 
 
