@@ -8,6 +8,9 @@ tests without a display.
 
 from __future__ import annotations
 
+import csv
+import difflib
+import io
 import json
 import logging
 import math
@@ -143,16 +146,26 @@ def _wgs_reactor(inputs: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
-    """Run *calculator* with inputs from *inputs_path* and write JSON results.
+def run_calculator(
+    calculator: str,
+    inputs_path: str,
+    output: str = "-",
+    format: str = "json",
+) -> int:
+    """Run *calculator* with inputs from *inputs_path* and write results.
 
     Args:
         calculator:  Name of the registered calculator (e.g. ``wgs_reactor``).
         inputs_path: Path to a JSON file with calculator inputs.
         output:      Output path; ``"-"`` means stdout.
+        format:      Output format: ``"json"`` (default) or ``"csv"``.
 
     Returns:
-        Exit code (0 = success, non-zero = failure).
+        Exit codes:
+          0 — success
+          1 — I/O error (missing file, JSON parse error, write failure)
+          3 — validation or calculation failure
+          4 — unknown calculator id
 
     Precondition:
         *calculator* must be a non-empty string.
@@ -164,14 +177,21 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
     assert isinstance(inputs_path, str) and inputs_path, "inputs_path must be non-empty"
 
     if calculator not in _REGISTRY:
-        logger.error(
-            "Unknown calculator '%s'. Available: %s", calculator, sorted(_REGISTRY)
+        matches = difflib.get_close_matches(
+            calculator, sorted(_REGISTRY), n=3, cutoff=0.4
         )
-        return 1
+        sys.stderr.write(
+            json.dumps(
+                {"error": f"Unknown calculator '{calculator}'", "closest": matches}
+            )
+            + "\n"
+        )
+        return 4
 
     path = Path(inputs_path)
     if not path.exists():
         logger.error("Inputs file not found: %s", path)
+        sys.stderr.write(json.dumps({"error": f"Inputs file not found: {path}"}) + "\n")
         return 1
 
     try:
@@ -179,26 +199,56 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
             inputs = json.load(fh)
     except json.JSONDecodeError as exc:
         logger.error("Failed to parse inputs JSON: %s", exc)
+        sys.stderr.write(
+            json.dumps({"error": f"Failed to parse inputs JSON: {exc}"}) + "\n"
+        )
         return 1
 
-    try:
-        result = _REGISTRY[calculator](inputs)
-    except (ValueError, AssertionError) as exc:
-        logger.error("Calculation failed: %s", exc)
-        return 1
+    fn = _REGISTRY[calculator]
 
-    output_json = json.dumps(result, indent=2)
+    if hasattr(fn, "validate_inputs") and hasattr(fn, "calculate"):
+        vr = fn.validate_inputs(inputs)
+        if not vr.valid:
+            sys.stderr.write(json.dumps({"errors": vr.errors}) + "\n")
+            return 3
+        calc_result = fn.calculate(inputs)
+        values: dict[str, Any] = getattr(calc_result, "values", {})
+        units: dict[str, str] = getattr(calc_result, "units", {})
+        output_data: Any = {"values": values, "units": units}
+        warnings = getattr(calc_result, "warnings", [])
+        if warnings:
+            output_data["warnings"] = warnings
+    else:
+        try:
+            raw = fn(inputs)
+        except (ValueError, AssertionError) as exc:
+            logger.error("Calculation failed: %s", exc)
+            sys.stderr.write(json.dumps({"errors": [str(exc)]}) + "\n")
+            return 3
+        values = raw if isinstance(raw, dict) else {}
+        units = {}
+        output_data = raw
+
+    if format == "csv":
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["metric", "value", "unit"])
+        for key, val in values.items():
+            writer.writerow([key, val, units.get(key, "")])
+        output_str = buf.getvalue()
+    else:
+        output_str = json.dumps(output_data, indent=2) + "\n"
 
     if output == "-":
-        sys.stdout.write(output_json + "\n")
+        sys.stdout.write(output_str)
     else:
         out_path = Path(output)
         try:
             out_path.parent.mkdir(parents=True, exist_ok=True)
-            out_path.write_text(output_json, encoding="utf-8")
+            out_path.write_text(output_str, encoding="utf-8")
         except OSError as exc:
             logger.error("sidekick run failed: %s", exc)
-            sys.stderr.write(f"sidekick run failed: {exc}\n")
+            sys.stderr.write(json.dumps({"error": f"Write failed: {exc}"}) + "\n")
             return 1
         logger.info("Results written to %s", out_path)
 
