@@ -40,8 +40,8 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-node@601291da961a6753d9014bab2023d900747ddd60
         with: { node-version: "24" }
       - run: npm install -g @google/jules
       - run: jules auth --token ${{ secrets.JULES_API_KEY }}
