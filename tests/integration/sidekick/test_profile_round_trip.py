@@ -272,3 +272,21 @@ def test_round_trip_stability_across_field_matrix(
     standalone_store.save_profile("matrix", payload)
     reloaded = standalone_store.load_profile("matrix")
     assert reloaded.data == state.to_dict()
+
+
+# ---------------------------------------------------------------------------
+# AC#3: saved profiles always carry schema_version on both sides (T5 #5983)
+# ---------------------------------------------------------------------------
+
+
+def test_standalone_saved_profile_carries_schema_version(
+    standalone_store: StandaloneSessionStore,
+) -> None:
+    state = _sample_state()
+    standalone_store.save_profile("ac3_check", wrap_state(state.to_dict()))
+    path = standalone_store._profiles_dir / "ac3_check.json"  # noqa: SLF001
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    assert PROFILE_SCHEMA_VERSION_KEY in raw, (
+        "standalone-saved profile is missing schema_version"
+    )
+    assert raw[PROFILE_SCHEMA_VERSION_KEY] == PROFILE_SCHEMA_VERSION
