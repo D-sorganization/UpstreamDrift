@@ -366,6 +366,25 @@ def test_launch_module_process(launcher) -> None:
         mock_crit.assert_called_once()
 
 
+def test_launch_urdf_generator_embedded_wires_cleanup_signal(launcher) -> None:
+    """Issue #6510: destroyed signal must be connected to tool.cleanup."""
+    mock_widget = MagicMock()
+    mock_tool = MagicMock()
+    mock_tool.create_main_widget.return_value = mock_widget
+    launcher.workspace_tabs = MagicMock()
+    launcher.workspace_tabs.count.return_value = 0
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch(
+        "src.shared.python.launcher_embed.get_embeddable_tool", return_value=mock_tool
+    ):
+        launcher._launch_urdf_generator()
+
+    mock_widget.destroyed.connect.assert_called_once_with(mock_tool.cleanup)
+    launcher.dock_widget_as_tab.assert_called_once_with(mock_widget, "Model Explorer")
+    launcher.show_toast.assert_called_with("Model Explorer loaded as tab.", "success")
+
+
 def test_launch_urdf_generator(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         launcher.process_manager.launch_script.return_value = MagicMock()
