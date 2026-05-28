@@ -80,6 +80,39 @@ def _normalize_host(host: str) -> str:
     return host.replace("://0.0.0.0", "://127.0.0.1")
 
 
+def _tool_declarations_to_ollama(
+    tools: list[ToolDeclaration] | None,
+) -> list[dict[str, Any]]:
+    """Convert internal ``ToolDeclaration``s into Ollama's wire format.
+
+    Uses the OpenAI-compatible function-calling schema supported by llama3.1+.
+    Passing tools here saves ~700 prompt tokens vs. embedding JSON-Schema text
+    in the system prompt (profiler 2026-05-26).
+
+    DbC postcondition: returned list contains only dicts with the
+    ``type=="function"`` shape Ollama expects.
+    """
+    if not tools:
+        return []
+    out: list[dict[str, Any]] = []
+    for td in tools:
+        out.append(
+            {
+                "type": "function",
+                "function": {
+                    "name": td.name,
+                    "description": td.description,
+                    "parameters": {
+                        "type": "object",
+                        "properties": dict(td.parameters or {}),
+                        "required": list(td.required or []),
+                    },
+                },
+            }
+        )
+    return out
+
+
 class OllamaAdapter(BaseAgentAdapter):
     """Adapter for local Ollama LLM inference.
 
@@ -186,8 +219,6 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         if message is None:
             raise ValueError("message must be provided")
-        if message is None:
-            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages for Ollama
@@ -233,20 +264,29 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         if message is None:
             raise ValueError("message must be provided")
-        if message is None:
-            raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message, tools)
+
+        # Tier-1 latency wins (profiler 2026-05-26):
+        # keep_alive: keep model resident for 30 min to avoid cold-load on each chat.
+        # num_ctx: cap KV cache to 4096 (halves prompt-eval vs 8192 default).
+        # tools: native Ollama field saves ~700 prompt tokens vs system-prompt embedding.
+        payload: dict[str, Any] = {
+            "model": self._model,
+            "messages": messages,
+            "stream": True,
+            "keep_alive": "30m",
+            "options": {"num_ctx": 4096},
+        }
+        ollama_tools = _tool_declarations_to_ollama(tools)
+        if ollama_tools:
+            payload["tools"] = ollama_tools
 
         try:
             with client.stream(
                 "POST",
                 f"{self._host}/api/chat",
-                json={
-                    "model": self._model,
-                    "messages": messages,
-                    "stream": True,
-                },
+                json=payload,
             ) as response:
                 response.raise_for_status()
 

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -255,6 +258,47 @@ class TerrainExplorerWidget(QWidget):
         if self._terrain is None:
             raise RuntimeError("terrain must be loaded before querying")
         return self._terrain
+
+
+class _EmbedAdapter:
+    """Embed adapter for the Terrain Engine explorer."""
+
+    tool_id = "terrain_engine"
+
+    def __init__(self) -> None:
+        self._widget: TerrainExplorerWidget | None = None
+
+    def embed_capabilities(self) -> Any:
+        from src.shared.python.launcher_embed import EmbedCapabilities
+
+        return EmbedCapabilities(
+            supports_embedded=True,
+            prefers_dock=False,
+            min_size=(800, 480),
+            requires_separate_qapplication=False,
+        )
+
+    def create_main_widget(self, parent: Any) -> Any:
+        self._widget = TerrainExplorerWidget(parent=parent)
+        return self._widget
+
+    def cleanup(self) -> None:
+        self._widget = None
+
+    def is_dirty(self) -> bool:
+        return False
+
+
+def _register() -> None:
+    try:
+        from src.shared.python.launcher_embed import register_embeddable_tool
+
+        register_embeddable_tool(_EmbedAdapter())
+    except Exception:  # noqa: BLE001
+        logger.warning("terrain_engine: EmbeddableTool registration failed")
+
+
+_register()
 
 
 def get_dockable_ui() -> TerrainExplorerWidget:
