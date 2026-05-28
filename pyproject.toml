@@ -1,7 +1,7 @@
 # Upstream Drift — pyproject.toml
 [project]
 name = "upstream-drift"
-version = "2.1.0"
+version = "2.1.1"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
