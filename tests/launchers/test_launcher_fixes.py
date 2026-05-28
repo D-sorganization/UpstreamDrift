@@ -413,6 +413,28 @@ class TestJunctionPathSecurityValidation(unittest.TestCase):
             # Should not raise any SecureSubprocessError
             validate_script_path(script_path, suite_root)
 
+    def test_process_manager_accepts_tools_sibling_cwd(self) -> None:
+        """Test that ProcessManager allows subprocess context path in sibling Tools folder."""
+        from src.launchers.launcher_process_manager import ProcessManager
+
+        base_dir = Path.cwd() / "fake_root"
+        suite_root = base_dir / "UpstreamDrift"
+        tools_repo = base_dir / "Tools"
+        cwd_path = tools_repo / "src" / "video_analyzer"
+
+        manager = ProcessManager(repo_root=suite_root)
+
+        with (
+            patch(
+                "src.shared.python.security.secure_subprocess._find_tools_repo_for_security",
+                return_value=tools_repo,
+            ),
+            patch.object(Path, "exists", return_value=True),
+        ):
+            # Should not raise ValueError when validating Tools path Cwd
+            validated_path = manager._validate_context_path(cwd_path)
+            self.assertEqual(validated_path, cwd_path)
+
 
 if __name__ == "__main__":
     # Create test suite

@@ -306,9 +306,24 @@ class ProcessManager:
         # Otherwise keep the existing repo-root containment rule.
         if repo_root_exists and repo_root_resolved is not None:
             candidate_resolved = _normalize(resolved)
+
+            # Find sibling Tools repository for security validations
+            from src.shared.python.security.secure_subprocess import (
+                _find_tools_repo_for_security,
+            )
+
+            tools_repo = _find_tools_repo_for_security(self.repo_root)
+            tools_repo_resolved = (
+                _normalize(tools_repo) if tools_repo is not None else None
+            )
+
             if not (
                 _is_within(candidate_resolved, repo_root_resolved)
                 or _is_within(candidate_resolved, temp_root_resolved)
+                or (
+                    tools_repo_resolved is not None
+                    and _is_within(candidate_resolved, tools_repo_resolved)
+                )
             ):
                 raise ValueError(
                     f"Path {context_path} is outside repo_root {self.repo_root}"
