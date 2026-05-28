@@ -67,7 +67,7 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Checkout Repository_Management (for scripts)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: D-sorganization/Repository_Management
           ref: main
@@ -75,7 +75,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        uses: actions/setup-python@82c7b60f580344b90dbb403b250f14003997afe2 # v5
         with:
           python-version: "3.11"
           cache: "pip"

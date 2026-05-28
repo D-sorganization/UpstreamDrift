@@ -49,11 +49,11 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@82c7b60f580344b90dbb403b250f14003997afe2
         with:
           python-version: "3.11"
           cache: 'pip'
@@ -61,7 +61,7 @@ jobs:
             pyproject.toml
             requirements*.txt
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+      - uses: actions/setup-node@601291da961a6753d9014bab2023d900747ddd60
         with:
           node-version: "24"
 
