@@ -34,7 +34,13 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from training import Dataset, DatasetRegistry, JobId, TrainingConfig, TrainingFramework
+from src.shared.python.training import (
+    Dataset,
+    DatasetRegistry,
+    JobId,
+    TrainingConfig,
+    TrainingFramework,
+)
 
 from .controller import TrainingDashboardController
 from .view_model import DashboardModel, MetricSeries, ResourceSnapshot
@@ -583,7 +589,7 @@ class MainWidget(QWidget):
     def _on_cancel_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.cancel_job(selected_id)
@@ -593,7 +599,7 @@ class MainWidget(QWidget):
     def _on_pause_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.pause_job(selected_id)
@@ -603,7 +609,7 @@ class MainWidget(QWidget):
     def _on_resume_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.resume_job(selected_id)
@@ -709,8 +715,12 @@ class SubmitDialog(QDialog):
 
 def build_default_controller() -> TrainingDashboardController:
     """Construct headless controller using a default Scheduler configuration."""
-    from training import CompatibilityChecker, JobRegistry, Scheduler
-    from training.runtime import InProcessDriver, RunnerRegistry
+    from src.shared.python.training import (
+        CompatibilityChecker,
+        JobRegistry,
+        Scheduler,
+    )
+    from src.shared.python.training.runtime import InProcessDriver, RunnerRegistry
 
     runners = RunnerRegistry()
     scheduler = Scheduler(

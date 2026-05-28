@@ -26,7 +26,7 @@ import time
 from collections.abc import Callable, Iterable
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-from training import (
+from src.shared.python.training import (
     CompatibilityChecker,
     CompatibilityReport,
     DatasetRegistry,
@@ -37,9 +37,9 @@ from training import (
     TrainingJob,
     summarize_by_kind,
 )
-from training.metric_summary import RollingMean
-from training.metrics import MetricKind, TrainingMetric
-from training.resource_monitor import ResourceSample
+from src.shared.python.training.metric_summary import RollingMean
+from src.shared.python.training.metrics import MetricKind, TrainingMetric
+from src.shared.python.training.resource_monitor import ResourceSample
 
 from .view_model import (
     DashboardModel,
@@ -384,7 +384,9 @@ class TrainingDashboardController:
     def _compat_error(report: CompatibilityReport, engine: str):
         # Local import keeps the public import block tidy; the error
         # type lives next to the rest of the training errors.
-        from training.errors import CompatibilityError  # noqa: PLC0415
+        from src.shared.python.training.errors import (  # noqa: PLC0415
+            CompatibilityError,
+        )
 
         msgs = "; ".join(i.message for i in report.errors)
         return CompatibilityError(

@@ -139,3 +139,41 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
     with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
         result = bootstrap.bootstrap_embeddable_tools()
     assert "model_explorer" in result
+
+
+# Tools whose adapters live in this repo (not the vendored Tools submodule) and
+# have no heavy/optional runtime dependencies, so they must register on a bare
+# bootstrap run. Regression guard for #6560 (training_controller import bug) and
+# #6561 (six adapters that existed but were never added to adapter_modules).
+_FIRST_PARTY_TOOL_IDS = {
+    "ball_flight_gui",
+    "bunker_shot_gui",
+    "putting_green_gui",
+    "golf_environment",
+    "terrain_engine",
+    "golf_simulation_suite",
+    "training_controller",
+    "video_analyzer",
+}
+
+
+def test_first_party_tools_are_listed_in_adapter_modules() -> None:
+    """Static guard: every first-party tool has an adapter_modules entry."""
+    import inspect
+
+    source = inspect.getsource(bootstrap.bootstrap_embeddable_tools)
+    for tool_id in _FIRST_PARTY_TOOL_IDS:
+        assert f"src.tools.{tool_id}." in source, (
+            f"{tool_id} missing from adapter_modules in bootstrap"
+        )
+
+
+def test_bootstrap_registers_all_first_party_tools(monkeypatch) -> None:
+    """Functional guard: a real bootstrap run registers every first-party tool.
+
+    Runs offscreen so PyQt6 widgets can be constructed headlessly.
+    """
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    registered = set(bootstrap.bootstrap_embeddable_tools())
+    missing = _FIRST_PARTY_TOOL_IDS - registered
+    assert not missing, f"first-party tools failed to bootstrap: {sorted(missing)}"

@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from training import JobId, TrainingJob
-from training.metrics import MetricKind
+from src.shared.python.training import JobId, TrainingJob
+from src.shared.python.training.metrics import MetricKind
 
 
 __all__ = [

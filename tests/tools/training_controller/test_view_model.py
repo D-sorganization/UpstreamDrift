@@ -6,14 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from training import (
+from src.shared.python.training import (
     JobId,
     TrainingConfig,
     TrainingFramework,
     TrainingJob,
     TrainingStatus,
 )
-from training.metrics import MetricKind
+from src.shared.python.training.metrics import MetricKind
 from src.tools.training_controller.view_model import (
     DashboardModel,
     GpuSnapshot,

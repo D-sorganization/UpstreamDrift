@@ -23,7 +23,7 @@ pytestmark = pytest.mark.unit
 
 
 def _make_controller():
-    from training import (
+    from src.shared.python.training import (
         CompatibilityChecker,
         Dataset,
         DatasetRegistry,
@@ -35,8 +35,8 @@ def _make_controller():
         TrainingStatus,
         new_run_id,
     )
-    from training.contracts import CancelToken, ProgressSink
-    from training.runtime import InProcessDriver, RunnerRegistry
+    from src.shared.python.training.contracts import CancelToken, ProgressSink
+    from src.shared.python.training.runtime import InProcessDriver, RunnerRegistry
     from src.tools.training_controller import TrainingDashboardController
 
     class _Runner:
@@ -135,15 +135,19 @@ def test_lifecycle_buttons_call_controller_methods(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     QTest, Qt, _ = _load_qt()
-    from training import JobId
+    from src.shared.python.training import (
+        JobId,
+        TrainingConfig,
+        TrainingFramework,
+    )
     from src.tools.training_controller import TrainingDashboardController
     from src.tools.training_controller.gui import MainWindow
 
     del qapp
     controller, scheduler = _make_controller()
     job = controller.submit_job(
-        __import__("training").TrainingConfig(
-            framework=__import__("training").TrainingFramework.PYTORCH,
+        TrainingConfig(
+            framework=TrainingFramework.PYTORCH,
             entry_point="module:train",
             output_dir=Path("/tmp/training-controller-gui"),
             dataset_id="dataset-1",

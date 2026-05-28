@@ -2,13 +2,46 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from src.shared.python.launcher_embed import (
     get_embeddable_tool,
     unregister_embeddable_tool,
 )
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def test_adapter_imports_without_shared_python_on_path() -> None:
+    """Regression for #6560.
+
+    At launcher runtime the bootstrap does NOT add ``src/shared/python`` to
+    ``sys.path`` (only ``vendor/ud-tools/src/shared/python``). The test suite
+    masked the bug because ``tests/conftest.py`` injects ``src/shared/python``.
+    Import the adapter in a subprocess whose path contains only the repo root
+    so the backend must resolve as ``src.shared.python.training`` — a bare
+    ``from training import`` would raise ``ModuleNotFoundError`` here.
+    """
+    result = subprocess.run(
+        [sys.executable, "-c", "import src.tools.training_controller._embed_adapter"],
+        cwd=str(_REPO_ROOT),
+        env={
+            **os.environ,
+            "PYTHONPATH": str(_REPO_ROOT),
+            "QT_QPA_PLATFORM": "offscreen",
+        },
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, (
+        "training_controller adapter failed to import at simulated runtime:\n"
+        f"{result.stderr}"
+    )
 
 
 def test_embed_adapter_tool_id_and_capabilities() -> None:
