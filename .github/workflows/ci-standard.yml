@@ -140,6 +140,30 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        run: |
+          for cache_root in /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Checking $cache_root/Python for stale 3.11 installations..."
+              for version_dir in "$cache_root/Python"/3.11.*; do
+                if [ -d "$version_dir" ]; then
+                  for arch_dir in "$version_dir"/*; do
+                    if [ -d "$arch_dir" ]; then
+                      if [ ! -x "$arch_dir/bin/python" ] && [ ! -x "$arch_dir/bin/python3" ]; then
+                        echo "Directory $arch_dir is incomplete or broken. Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      elif ! "$arch_dir/bin/python" -c "import zlib" >/dev/null 2>&1; then
+                        echo "Directory $arch_dir is corrupt (zlib import failed). Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      else
+                        echo "Directory $arch_dir is healthy."
+                      fi
+                    fi
+                  done
+                fi
+              done
+            fi
+          done
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
@@ -732,6 +756,31 @@ jobs:
             libxcb-shape0 \
             libxcb-xinerama0 \
             libxcb-xkb1
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        if: steps.core-test-changes.outputs.skip != 'true'
+        run: |
+          for cache_root in /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Checking $cache_root/Python for stale ${{ matrix.python }} installations..."
+              for version_dir in "$cache_root/Python"/${{ matrix.python }}.*; do
+                if [ -d "$version_dir" ]; then
+                  for arch_dir in "$version_dir"/*; do
+                    if [ -d "$arch_dir" ]; then
+                      if [ ! -x "$arch_dir/bin/python" ] && [ ! -x "$arch_dir/bin/python3" ]; then
+                        echo "Directory $arch_dir is incomplete or broken. Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      elif ! "$arch_dir/bin/python" -c "import zlib" >/dev/null 2>&1; then
+                        echo "Directory $arch_dir is corrupt (zlib import failed). Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      else
+                        echo "Directory $arch_dir is healthy."
+                      fi
+                    fi
+                  done
+                fi
+              done
+            fi
+          done
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
@@ -1157,6 +1206,30 @@ jobs:
             libxcb-shape0 \
             libxcb-xinerama0 \
             libxcb-xkb1
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        run: |
+          for cache_root in /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Checking $cache_root/Python for stale 3.11 installations..."
+              for version_dir in "$cache_root/Python"/3.11.*; do
+                if [ -d "$version_dir" ]; then
+                  for arch_dir in "$version_dir"/*; do
+                    if [ -d "$arch_dir" ]; then
+                      if [ ! -x "$arch_dir/bin/python" ] && [ ! -x "$arch_dir/bin/python3" ]; then
+                        echo "Directory $arch_dir is incomplete or broken. Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      elif ! "$arch_dir/bin/python" -c "import zlib" >/dev/null 2>&1; then
+                        echo "Directory $arch_dir is corrupt (zlib import failed). Cleaning..."
+                        sudo rm -rf "$arch_dir" || rm -rf "$arch_dir" || true
+                      else
+                        echo "Directory $arch_dir is healthy."
+                      fi
+                    fi
+                  done
+                fi
+              done
+            fi
+          done
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
