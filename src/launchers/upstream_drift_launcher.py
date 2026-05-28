@@ -557,16 +557,16 @@ class UpstreamDriftLauncher(QMainWindow):
                     _sys.path.insert(0, sibling_src)
                 if sibling_python not in _sys.path:
                     _sys.path.insert(0, sibling_python)
-
-            # Fall back to vendored ud-tools
-            vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
-            vendor_python = str(
-                REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
-            )
-            if vendor_src not in _sys.path:
-                _sys.path.insert(0, vendor_src)
-            if vendor_python not in _sys.path:
-                _sys.path.insert(0, vendor_python)
+            else:
+                # Fall back to vendored ud-tools
+                vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
+                vendor_python = str(
+                    REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
+                )
+                if vendor_src not in _sys.path:
+                    _sys.path.insert(0, vendor_src)
+                if vendor_python not in _sys.path:
+                    _sys.path.insert(0, vendor_python)
             for _name in (
                 "shared.python.sidekick.ui.tools_sidebar",
                 "sidekick.ui.tools_sidebar",
