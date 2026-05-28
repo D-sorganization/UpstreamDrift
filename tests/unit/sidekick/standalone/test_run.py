@@ -235,6 +235,26 @@ def test_wgs_reactor_json_output_structure(tmp_path: Path) -> None:
     assert abs(sum(data["equilibrium_composition"].values()) - 1.0) < 1e-5
 
 
+def test_protocol_calculator_exception_exits_3(tmp_path: Path) -> None:
+    from sidekick.standalone import runner
+
+    class _ExplodingCalculator:
+        def validate_inputs(self, inputs: dict) -> _FakeValidationResult:
+            return _FakeValidationResult(valid=True, errors=[])
+
+        def calculate(self, inputs: dict) -> Any:
+            raise ValueError("protocol calc exploded")
+
+    runner._REGISTRY["_test_proto_exc"] = _ExplodingCalculator()
+    try:
+        code, _, err = _invoke("_test_proto_exc", {}, tmp_path)
+        assert code == 3
+        payload = json.loads(err)
+        assert "protocol calc exploded" in payload["errors"][0]
+    finally:
+        del runner._REGISTRY["_test_proto_exc"]
+
+
 # ---------------------------------------------------------------------------
 # No PyQt6 on headless path
 # ---------------------------------------------------------------------------
@@ -258,7 +278,7 @@ def test_runner_module_does_not_import_pyqt6() -> None:
         def load_module(self, fullname: str) -> Any:
             raise ImportError(f"PyQt6 import blocked in test: {fullname}")
 
-    blocker = _BlockPyQt6()
+    blocker: Any = _BlockPyQt6()
     sys.meta_path.insert(0, blocker)
     try:
         if "sidekick.standalone.runner" in sys.modules:
