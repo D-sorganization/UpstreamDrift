@@ -1,6 +1,6 @@
 {
   "max_lines": 1200,
-  "max_exceptions": 9,
+  "max_exceptions": 10,
   "exceptions": [
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
@@ -54,6 +54,12 @@
       "path": "src/launchers/settings_dialog.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #5922 temporary exception while settings dialog tabs are decomposed into focused UI components.",
+      "expires_on": "2026-07-31"
+    },
+    {
+      "path": "src/launchers/launcher_diagnostics.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #5922 temporary exception: diagnostics module grew to 1236 lines when PR #6506 added dependency checks; decomposition into a focused diagnostics subpackage is tracked there.",
       "expires_on": "2026-07-31"
     }
   ]
