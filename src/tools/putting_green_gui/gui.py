@@ -315,6 +315,49 @@ class PuttingGreenWindow(QMainWindow):
         super().closeEvent(event)
 
 
+class _EmbedAdapter:
+    """Embed adapter for the Putting Green Simulator."""
+
+    tool_id = "putting_green_gui"
+
+    def __init__(self) -> None:
+        self._widget: PuttingGreenWidget | None = None
+
+    def embed_capabilities(self) -> Any:
+        from src.shared.python.launcher_embed import EmbedCapabilities
+
+        return EmbedCapabilities(
+            supports_embedded=True,
+            prefers_dock=False,
+            min_size=(800, 600),
+            requires_separate_qapplication=False,
+        )
+
+    def create_main_widget(self, parent: Any) -> Any:
+        self._widget = PuttingGreenWidget(parent=parent)
+        return self._widget
+
+    def cleanup(self) -> None:
+        if self._widget is not None:
+            self._widget.cleanup()
+        self._widget = None
+
+    def is_dirty(self) -> bool:
+        return False
+
+
+def _register() -> None:
+    try:
+        from src.shared.python.launcher_embed import register_embeddable_tool
+
+        register_embeddable_tool(_EmbedAdapter())
+    except Exception:  # noqa: BLE001
+        logger.warning("putting_green_gui: EmbeddableTool registration failed")
+
+
+_register()
+
+
 def get_dockable_ui() -> PuttingGreenWindow:
     """Return the main window instance for docking in the unified launcher."""
     return PuttingGreenWindow()

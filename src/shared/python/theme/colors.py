@@ -35,6 +35,41 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# ----------------------------------------------------------------------------
+# Legacy theme-name migration
+# ----------------------------------------------------------------------------
+# When a user upgrades, their saved ``QSettings`` preference may name a theme
+# that no longer exists (renamed, removed, or imported from a partner project
+# with a proprietary brand name). The values here are the *current* canonical
+# names; the keys are every deprecated alias we want to keep silently working.
+#
+# Add new mappings here when renaming a theme. Do **not** delete entries — old
+# saved preferences live forever on user machines.
+LEGACY_THEME_NAMES: dict[str, str] = {
+    # 2026-05 — removed brand-specific names from the shared theme registry.
+    "MS Word": "Light",
+    "MS Excel": "Sage Professional",
+    "MS PowerPoint": "Corporate Blue",
+    "Office Blue": "Corporate Blue",
+    "Office Green": "Sage Professional",
+    "Word": "Light",
+    "Excel": "Sage Professional",
+    "PowerPoint": "Corporate Blue",
+}
+
+
+def resolve_legacy_theme_name(name: str | None) -> str | None:
+    """Return the current canonical name for *name*, or *name* unchanged.
+
+    Used at QSettings-load time so a saved preference like ``"MS Word"``
+    transparently resolves to ``"Light"`` without forcing users back to the
+    default theme.
+    """
+    if name is None:
+        return None
+    return LEGACY_THEME_NAMES.get(name, name)
+
+
 # Required base color keys for all themes
 THEME_COLOR_KEYS: tuple[str, ...] = (
     "bg",
@@ -289,10 +324,10 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "button_hover": "#0e9dab",
     },
     # ------------------------------------------------------------------
-    # Office/Productivity Themes
+    # Professional Themes
     # ------------------------------------------------------------------
-    "Office Blue": {
-        "name": "Office Blue",
+    "Corporate Blue": {
+        "name": "Corporate Blue",
         "bg": "#ffffff",
         "group_bg": "#f3f3f3",
         "border": "#d1d1d1",
@@ -308,8 +343,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#f9f9f9",
         "button_hover": "#1e3f6f",
     },
-    "Office Green": {
-        "name": "Office Green",
+    "Sage Professional": {
+        "name": "Sage Professional",
         "bg": "#ffffff",
         "group_bg": "#f3f3f3",
         "border": "#d1d1d1",
