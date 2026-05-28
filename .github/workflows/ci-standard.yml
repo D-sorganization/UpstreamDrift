@@ -206,7 +206,7 @@ jobs:
         run: mkdir -p ui/dist
       - run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -e ".[dev]"
 
       - name: Pin Type Toolchain
         run: |
@@ -376,7 +376,7 @@ jobs:
           "$audit_python" -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install -e ".[dev]"
+          "$audit_python" -m pip install --no-cache-dir -e ".[dev]"
           python -m ensurepip --upgrade || true
           "$audit_python" -m pip install pip-audit
 
@@ -598,7 +598,7 @@ jobs:
           python3 -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python3 -m pip install -e .
+          python3 -m pip install --no-cache-dir -e .
       - name: Verify optional engines are absent from core install
         shell: bash
         run: |
@@ -666,7 +666,7 @@ jobs:
           python -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python -m pip install .
+          python -m pip install --no-cache-dir .
           python -m ensurepip --upgrade || true
           python -m pip install pip-audit
           pip-audit -r <(pip freeze --exclude upstream-drift)
@@ -773,7 +773,7 @@ jobs:
           python="$RUNNER_TEMP/core-ci-venv/bin/python"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --no-cache-dir -e ".[dev,gui-test]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
           python -m ensurepip --upgrade || true
@@ -1014,7 +1014,7 @@ jobs:
       - name: Install parity smoke dependencies
         run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -e ".[dev]"
       - name: Run scheduled parity smoke suite
         run: |
           python -m pytest \
@@ -1079,7 +1079,7 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          python -m pip install -e ".[dev]"
+          python -m pip install --no-cache-dir -e ".[dev]"
           python -m ensurepip --upgrade || true
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
@@ -1200,7 +1200,7 @@ jobs:
           python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --no-cache-dir -e ".[dev,gui-test]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
           python -m ensurepip --upgrade || true
