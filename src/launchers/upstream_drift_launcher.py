@@ -1423,6 +1423,9 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 
 def main() -> None:
     """Application entry point."""
+    import os
+
+    os.environ.setdefault("GOLF_SUITE_MODE", "local")
     import traceback
 
     def excepthook(exc_type, exc_value, exc_tb):

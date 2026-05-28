@@ -791,7 +791,7 @@ class DraggableModelCard(QFrame):
         "alpha": ("Alpha", "warning"),
         "broken": ("Broken", "error"),
         "deprecated": ("Deprecated", "warning"),
-        "external": ("External", "external"),
+        "external": ("Ready", "success"),
     }
 
     def _get_status_info(self) -> tuple[str, str]:
@@ -824,7 +824,7 @@ class DraggableModelCard(QFrame):
         if t in ["opensim", "myosim"]:
             return "Engine Ready", "success"
         if t in ["matlab", "matlab_app", "matlab_suite"]:
-            return "External", "external"
+            return "Ready", "success"
         if t in ["urdf_generator", "c3d_viewer"]:
             return "Utility", "utility"
         if t == "putting_green":
