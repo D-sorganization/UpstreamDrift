@@ -528,3 +528,35 @@ def test_redock_all_tabs_action(launcher) -> None:
     launcher.workspace_tabs = MagicMock()
     launcher._redock_all_tabs()
     launcher.workspace_tabs.redock_all_tabs.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Training sidebar button + routing (issue #6018)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_sidebar_includes_training_button(launcher) -> None:
+    """The sidebar build invokes ``_build_sidebar_button`` for the Training
+    label, demonstrating that the training control is wired in."""
+    build_button_spy = MagicMock(wraps=launcher._build_sidebar_button)
+    with (
+        patch.object(launcher, "_build_sidebar_button", build_button_spy),
+        patch(
+            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            new=MagicMock(),
+            create=True,
+        ),
+    ):
+        launcher._setup_global_sidebar()
+
+    labels_used = [call.args[0] for call in build_button_spy.call_args_list]
+    assert "Training" in labels_used
+
+
+@pytest.mark.unit
+def test_on_sidebar_routed_training_launches_controller(launcher) -> None:
+    """Clicking the Training button (``id=8``) routes to launching the controller."""
+    launcher._launch_training_controller = MagicMock()
+    launcher._on_sidebar_routed(8)
+    launcher._launch_training_controller.assert_called_once()
