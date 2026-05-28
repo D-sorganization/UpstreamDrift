@@ -208,6 +208,23 @@ class TestPublicAccessors:
 # ---------------------------------------------------------------------------
 
 
+class TestNoLaunchersImport:
+    def test_window_module_does_not_import_src_launchers(self) -> None:
+        for key in list(sys.modules):
+            if "sidekick.standalone.window" in key:
+                del sys.modules[key]
+
+        pre = set(sys.modules)
+        try:
+            import sidekick.standalone.window  # noqa: F401
+        except ImportError:
+            pytest.skip("standalone window not importable in this environment")
+
+        new = set(sys.modules) - pre
+        bad = [m for m in new if "src.launchers" in m]
+        assert not bad, f"Unexpected src.launchers imports: {bad}"
+
+
 # ---------------------------------------------------------------------------
 # Profile switching
 # ---------------------------------------------------------------------------
@@ -243,20 +260,3 @@ class TestProfileSwitch:
         assert win._splitter.widget(1) is win._chat_panel
 
         win.close()
-
-
-class TestNoLaunchersImport:
-    def test_window_module_does_not_import_src_launchers(self) -> None:
-        for key in list(sys.modules):
-            if "sidekick.standalone.window" in key:
-                del sys.modules[key]
-
-        pre = set(sys.modules)
-        try:
-            import sidekick.standalone.window  # noqa: F401
-        except ImportError:
-            pytest.skip("standalone window not importable in this environment")
-
-        new = set(sys.modules) - pre
-        bad = [m for m in new if "src.launchers" in m]
-        assert not bad, f"Unexpected src.launchers imports: {bad}"
