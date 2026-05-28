@@ -19,11 +19,13 @@ from PyQt6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFrame,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QScrollArea,
+    QSplitter,
     QTextBrowser,
     QTextEdit,
     QVBoxLayout,
@@ -511,20 +513,23 @@ class SettingsWidget(QWidget):
         runtime_header.addStretch()
         col_runtime.addLayout(runtime_header)
 
-        row_win = QHBoxLayout()
+        grid_runtime = QGridLayout()
+        grid_runtime.setSpacing(6)
+        grid_runtime.setContentsMargins(0, 0, 0, 0)
+
+        # Row 0: Windows
         self.chk_windows = QCheckBox("Windows")
         self.chk_windows.setToolTip(
             "Run physics engines natively on your local Windows system."
         )
         btn_check_win = QPushButton("Check Deps")
         btn_check_win.setToolTip("Check Windows host environment dependencies")
-        btn_check_win.setFixedWidth(80)
+        btn_check_win.setFixedWidth(100)
         btn_check_win.clicked.connect(self._check_windows_deps)
-        row_win.addWidget(self.chk_windows)
-        row_win.addWidget(btn_check_win)
-        col_runtime.addLayout(row_win)
+        grid_runtime.addWidget(self.chk_windows, 0, 0)
+        grid_runtime.addWidget(btn_check_win, 0, 1)
 
-        row_doc = QHBoxLayout()
+        # Row 1: Docker
         self.chk_docker = QCheckBox("Docker")
         self.chk_docker.setToolTip(
             "Run engines inside the upstream-drift:engine Linux container. "
@@ -533,13 +538,12 @@ class SettingsWidget(QWidget):
         )
         btn_check_doc = QPushButton("Check Deps")
         btn_check_doc.setToolTip("Check Docker container image dependencies")
-        btn_check_doc.setFixedWidth(80)
+        btn_check_doc.setFixedWidth(100)
         btn_check_doc.clicked.connect(self._check_docker_deps)
-        row_doc.addWidget(self.chk_docker)
-        row_doc.addWidget(btn_check_doc)
-        col_runtime.addLayout(row_doc)
+        grid_runtime.addWidget(self.chk_docker, 1, 0)
+        grid_runtime.addWidget(btn_check_doc, 1, 1)
 
-        row_wsl = QHBoxLayout()
+        # Row 2: WSL
         self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setToolTip(
             "Run engines in your WSL2 Ubuntu user environment. Same Linux "
@@ -548,18 +552,19 @@ class SettingsWidget(QWidget):
         )
         btn_check_wsl = QPushButton("Check Deps")
         btn_check_wsl.setToolTip("Check WSL environment dependencies")
-        btn_check_wsl.setFixedWidth(80)
+        btn_check_wsl.setFixedWidth(100)
         btn_check_wsl.clicked.connect(self._check_wsl_deps)
+        grid_runtime.addWidget(self.chk_wsl, 2, 0)
+        grid_runtime.addWidget(btn_check_wsl, 2, 1)
 
-        btn_script_wsl = QPushButton("WSL Setup")
+        # Row 3: WSL Setup Script (separate row)
+        btn_script_wsl = QPushButton("WSL Setup Script")
         btn_script_wsl.setToolTip("Inspect and run the WSL installation script")
-        btn_script_wsl.setFixedWidth(80)
+        btn_script_wsl.setFixedWidth(130)
         btn_script_wsl.clicked.connect(self._show_wsl_setup_dialog)
+        grid_runtime.addWidget(btn_script_wsl, 3, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
 
-        row_wsl.addWidget(self.chk_wsl)
-        row_wsl.addWidget(btn_check_wsl)
-        row_wsl.addWidget(btn_script_wsl)
-        col_runtime.addLayout(row_wsl)
+        col_runtime.addLayout(grid_runtime)
         col_runtime.addStretch()
 
         from PyQt6.QtWidgets import QButtonGroup
@@ -639,6 +644,16 @@ class SettingsWidget(QWidget):
         # local image store; *using* it requires ticking Docker above.
         build_group = QGroupBox("Docker Image")
         build_inner = QVBoxLayout(build_group)
+        build_inner.setContentsMargins(8, 8, 8, 8)
+
+        # Create vertical splitter for resizable parts
+        splitter = QSplitter(Qt.Orientation.Vertical)
+
+        # Upper container for Docker stage, status, and buttons
+        upper_widget = QWidget()
+        upper_layout = QVBoxLayout(upper_widget)
+        upper_layout.setContentsMargins(0, 0, 0, 0)
+        upper_layout.setSpacing(6)
 
         build_header = QHBoxLayout()
         build_header.addWidget(
@@ -657,7 +672,7 @@ class SettingsWidget(QWidget):
         build_help.clicked.disconnect()
         build_help.clicked.connect(lambda: show_runtime_mode_help(self))
         build_header.addWidget(build_help)
-        build_inner.addLayout(build_header)
+        upper_layout.addLayout(build_header)
 
         stage_row = QHBoxLayout()
         stage_label = QLabel("Target stage:")
@@ -672,7 +687,7 @@ class SettingsWidget(QWidget):
         self.combo_stage.setToolTip(stage_label.toolTip())
         stage_row.addWidget(self.combo_stage)
         stage_row.addStretch()
-        build_inner.addLayout(stage_row)
+        upper_layout.addLayout(stage_row)
 
         btn_row = QHBoxLayout()
         self._btn_build = QPushButton("Build Image")
@@ -688,16 +703,24 @@ class SettingsWidget(QWidget):
         self._btn_cancel_build.setEnabled(False)
         self._btn_cancel_build.clicked.connect(self._cancel_build)
         btn_row.addWidget(self._btn_cancel_build)
-        build_inner.addLayout(btn_row)
+        upper_layout.addLayout(btn_row)
 
         self._build_status = QLabel("")
-        build_inner.addWidget(self._build_status)
+        upper_layout.addWidget(self._build_status)
 
+        splitter.addWidget(upper_widget)
+
+        # Build Console (Lower part of splitter)
         self.build_console = QTextEdit()
         self.build_console.setReadOnly(True)
-        self.build_console.setMaximumHeight(150)
+        self.build_console.setMinimumHeight(150)
         self.build_console.setStyleSheet(Styles.CONSOLE_BUILD)
-        build_inner.addWidget(self.build_console)
+        splitter.addWidget(self.build_console)
+
+        # Set default proportions
+        splitter.setSizes([120, 250])
+
+        build_inner.addWidget(splitter)
 
         tab_layout.addWidget(build_group)
 
