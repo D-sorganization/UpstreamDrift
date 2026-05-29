@@ -409,6 +409,7 @@ class CaptureExportData:
     )
 
 
+# fmt: off
 @precondition(  # fmt: skip
     lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
         output_path is not None and len(output_path) > 0
@@ -431,6 +432,7 @@ def export_to_c3d(
     frame_rate: float = 60.0,
     units: dict[str, str] | None = None,  # noqa: PLR0913
 ) -> bool:
+# fmt: on
     """Export recording to C3D motion capture format.
 
     Args:

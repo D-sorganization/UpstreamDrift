@@ -107,6 +107,7 @@ async def _validate_video_upload(file: UploadFile) -> None:
         )
 
 
+# fmt: off
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
 @precondition(  # fmt: skip
     lambda file=None, estimator_type="mediapipe", min_confidence=0.5, enable_smoothing=True, video_pipeline=None, logger=None: (
@@ -117,6 +118,7 @@ async def _validate_video_upload(file: UploadFile) -> None:
     "Estimator type must be non-empty and min_confidence must be in [0.0, 1.0]",
 )
 async def analyze_video(
+# fmt: on
     file: UploadFile = File(...),
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
@@ -215,6 +217,7 @@ async def analyze_video(
                     )
 
 
+# fmt: off
 @router.post("/analyze/video/async")
 @precondition(  # fmt: skip
     lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, task_manager=None: (
@@ -225,6 +228,7 @@ async def analyze_video(
     "Estimator type must be non-empty and min_confidence must be in [0.0, 1.0]",
 )
 async def analyze_video_async(
+# fmt: on
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     estimator_type: str = "mediapipe",
