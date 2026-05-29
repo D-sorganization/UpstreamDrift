@@ -49,6 +49,11 @@ dependencies = [
 
     # Geospatial projection for sg_optimizer Phase 2 (#6271).
     "pyproj>=3.6.0",
+
+    # Imported at module load by the API server (rate_limit/auth/server), which
+    # backs the default web-UI launch path — must be core, not dev-only (#6612).
+    "slowapi>=0.1.9",
+    "python-multipart>=0.0.27",
 ]
 
 [project.optional-dependencies]
@@ -116,14 +121,12 @@ dev = [
     "PyYAML>=6.0.3",
     # Required for pydantic email validation in auth models
     "email-validator>=2.0.0",
-    # Required for API rate limiting tests
-    "slowapi>=0.1.9",
+    # NOTE: slowapi and python-multipart moved to core [project] dependencies
+    # (#6612) — they are runtime imports of the API server, not test-only.
     # Required for async streaming tests
     "pytest-asyncio>=1.3.0",
     # Required for symbolic math in controls tab
     "sympy>=1.12",
-    # Required for multipart form data in API tests
-    "python-multipart>=0.0.27",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
     # Required for C3D motion-capture tests (load_club_target_c3d cluster-marker suite)
