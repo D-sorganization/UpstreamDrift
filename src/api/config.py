@@ -67,7 +67,12 @@ def get_cors_origins() -> list[str]:
 
     Delegates to the canonical :class:`Settings` (env var ``CORS_ORIGINS``).
     """
-    return get_settings().cors_origins
+    origins = get_settings().cors_origins
+    if "*" in origins:
+        raise ValueError(
+            "Cannot use wildcard '*' in CORS_ORIGINS when credentials are enabled (fail-closed)"
+        )
+    return origins
 
 
 # Server configuration

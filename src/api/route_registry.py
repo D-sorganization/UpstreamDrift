@@ -106,6 +106,16 @@ async def _current_user_from_bearer_header(request: Request, db: Session) -> Use
     return await get_current_user_flexible(credentials=credentials, db=db)
 
 
+async def _global_auth_dependency(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Enforce authentication on non-public routes globally in cloud mode."""
+    if is_auth_disabled():
+        return None
+    return await _current_user_from_bearer_header(request, db)
+
+
 def _request_time_quota_dependency(
     resource_type: str,
     enforced_dependency: Callable[..., object],
@@ -237,14 +247,15 @@ def register_routes(
         Number of routers registered.
     """
     routes = discover_routes(exclude=exclude)
+    public_modules = {"auth", "observability", "core"}
     for module_name, router in routes:
+        deps = list(_dependencies_for_route(module_name))
+        if module_name not in public_modules:
+            deps.append(_global_auth_dependency)
         app.include_router(
             router,
             prefix=prefix,
-            dependencies=[
-                Depends(dependency)
-                for dependency in _dependencies_for_route(module_name)
-            ],
+            dependencies=[Depends(dependency) for dependency in deps],
         )
         logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
     return len(routes)

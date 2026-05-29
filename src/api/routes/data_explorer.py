@@ -534,7 +534,7 @@ async def list_datasets() -> DatasetListResponse:
                 datasets.append(
                     DatasetInfo(
                         name=filepath.name,
-                        path=str(filepath),
+                        path=str(filepath.relative_to(output_dir)),
                         format=filepath.suffix.lstrip("."),
                         size_bytes=filepath.stat().st_size,
                         columns=columns,
@@ -558,7 +558,7 @@ async def list_datasets() -> DatasetListResponse:
     return DatasetListResponse(
         datasets=datasets,
         total=len(datasets),
-        search_dir=str(output_dir),
+        search_dir=output_dir.name,
     )
 
 

@@ -69,3 +69,27 @@ def test_import_dataset_json(client: TestClient, temp_dataset_dir) -> None:
     assert data["name"] == "test.json"
     assert data["row_count"] == 2
     assert "a" in data["columns"]
+
+
+def test_list_datasets_no_absolute_paths(client: TestClient, temp_dataset_dir) -> None:
+    """Test that listing datasets does not return absolute paths."""
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        filepath = output_dir / "dummy_dataset.csv"
+        filepath.write_text("a,b,c\n1,2,3", encoding="utf-8")
+
+        response = client.get("/tools/data-explorer/datasets")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Check search_dir
+        assert data["search_dir"] == output_dir.name
+
+        # Check path
+        assert len(data["datasets"]) > 0
+        ds = next(d for d in data["datasets"] if d["name"] == "dummy_dataset.csv")
+        assert not Path(ds["path"]).is_absolute()
+        assert ds["path"] == "dummy_dataset.csv"
