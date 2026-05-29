@@ -160,6 +160,7 @@ class ImpactSolverAPI:
         self.params = params or ImpactParameters()
         self.recorder = ImpactRecorder()
 
+    # fmt: off
     @precondition(  # fmt: skip
         lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
             clubhead_mass > 0
@@ -182,6 +183,7 @@ class ImpactSolverAPI:
         clubhead_mass: float = 0.200,
         record: bool = True,
     ) -> PostImpactState:
+    # fmt: on
         """Solve impact and optionally record event.
 
         Simplified API for common use case.
