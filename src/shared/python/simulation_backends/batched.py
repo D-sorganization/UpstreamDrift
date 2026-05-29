@@ -433,7 +433,8 @@ def _stack_controls(traces: list[Trace]) -> np.ndarray | None:
         return None
     if not all(present):
         raise ValueError("inconsistent control presence across per-env traces")
-    return np.stack([tr.u for tr in traces], axis=0)
+    # All ``u`` are non-None here (guarded above); the filter narrows the type.
+    return np.stack([tr.u for tr in traces if tr.u is not None], axis=0)
 
 
 def _check_batch_result(result: BatchTrace, num_envs: int, horizon: int) -> BatchTrace:

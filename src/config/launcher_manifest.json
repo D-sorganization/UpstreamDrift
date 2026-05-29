@@ -737,6 +737,25 @@
       "hidden_owner": "@launcher",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
       "order": 99
+    },
+    {
+      "id": "simulation_backends",
+      "name": "Simulation Backends",
+      "description": "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends: edit the golf double-pendulum model, run rollouts and parameter sweeps, cross-validate dynamics, and export HDF5 traces.",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src.tools.simulation_backends_launcher.__main__",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "backend_selection",
+        "rollout",
+        "parameter_sweep",
+        "cross_validation",
+        "ztcf_zvcf",
+        "hdf5_export"
+      ],
+      "order": 43
     }
   ]
 }

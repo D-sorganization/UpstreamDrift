@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `simulation_backends` package: the golf double-pendulum model is described
+  once (`GolfModelParams`) and run through interchangeable `ode` (CPU analytical
+  reference), `mujoco` (CPU), and `mjwarp` (MuJoCo Warp GPU) backends behind one
+  `SimulationBackend` Protocol, cross-validated CPU↔CPU to ~`1e-9`. Includes the
+  **Simulation Backends** launcher tile (id `simulation_backends`, simulation
+  category) for editing the model, running rollouts and parameter sweeps,
+  cross-validating dynamics, and exporting HDF5 traces; a batched `rollout_batch`
+  API for GPU sweeps; ZTCF/ZVCF acceleration decomposition; HDF5 trace I/O; and
+  user docs in `docs/simulation_backends/`. See ADR-0023 and ADR-0024.
 - Sidekick design-token adapters for React/Tauri CSS variables and guarded PyQt
   Tools sidebar theme handoff (#5384).
 - Release governance guard `scripts/check_version_consistency.py` with CI wiring,

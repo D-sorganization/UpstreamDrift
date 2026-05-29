@@ -78,6 +78,7 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.golf_environment._embed_adapter",
         "src.tools.terrain_engine._embed_adapter",
         "src.tools.golf_simulation_suite._embed_adapter",
+        "src.tools.simulation_backends_launcher._embed_adapter",
     ]
 
     registered = []

@@ -11,6 +11,17 @@ backend from Python.
 - Package reference & module map:
   [`src/shared/python/simulation_backends/README.md`](../../src/shared/python/simulation_backends/README.md)
 
+## Launcher tile (GUI)
+
+Prefer a point-and-click walkthrough? The suite ships as a launcher tile —
+**Simulation Backends**, in the **simulation** category — that lets you edit the
+model, run rollouts and parameter sweeps, cross-validate, and export HDF5 traces
+without writing any code. See the step-by-step [USER_GUIDE.md](USER_GUIDE.md) for
+a tour of every control, and [ADR-0023](../adr/0023-mujoco-warp-backend.md) for
+the design rationale. The tile is registered in
+[`src/config/launcher_manifest.json`](../../src/config/launcher_manifest.json)
+under the id `simulation_backends`.
+
 ## The three backends at a glance
 
 | Name     | Device | Batched | Dynamics primitives | Optional deps               |
