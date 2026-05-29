@@ -92,9 +92,7 @@ def test_mass_matrix_conditioning_fallback(caplog):
         mod.opensim = MagicMock()
         mod.opensim.Matrix = MagicMock
 
-        with patch(
-            "src.engines.physics_engines.opensim.python.muscle_analysis.opensim"
-        ) as mock_opensim_mod:
+        with patch.object(mod, "opensim") as mock_opensim_mod:
             # We mock opensim.Matrix directly
             class FakeOSIM_Matrix:
                 def get(self, r, c):
