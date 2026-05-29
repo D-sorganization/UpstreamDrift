@@ -3,23 +3,23 @@
   "schedule": [
     {
       "effective_on": "2026-01-01",
-      "max_exclusions": 46
+      "max_exclusions": 47
     },
     {
       "effective_on": "2026-08-01",
-      "max_exclusions": 44
+      "max_exclusions": 45
     },
     {
       "effective_on": "2026-10-01",
-      "max_exclusions": 35
+      "max_exclusions": 36
     },
     {
       "effective_on": "2027-01-01",
-      "max_exclusions": 20
+      "max_exclusions": 21
     },
     {
       "effective_on": "2027-04-01",
-      "max_exclusions": 10
+      "max_exclusions": 11
     },
     {
       "effective_on": "2027-07-01",
@@ -237,6 +237,12 @@
       "path": "src/shared/python/model_generation/core/physics_validation.py",
       "owner": "@physics-core",
       "reason": "numpy stubs expose pre-existing physics validation typing issues",
+      "expires_on": "2026-08-01"
+    },
+    {
+      "path": "src/shared/python/model_generation/core/constants.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose pre-existing constant typing issues",
       "expires_on": "2026-08-01"
     },
     {

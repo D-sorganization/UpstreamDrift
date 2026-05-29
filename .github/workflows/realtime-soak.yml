@@ -42,9 +42,9 @@ concurrency:
 jobs:
   soak:
     name: 24h realtime soak
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     # 24 h + headroom for setup/teardown/artifact upload. GitHub-hosted
-    # runners cap at 360 minutes; the nightly run uses the d-sorg-fleet
+    # runners cap at 360 minutes; the nightly run uses the d-sorg-fleet-docker
     # runner via a separate self-hosted dispatch when available. For
     # GitHub-hosted we cap the schedule run at 6 h via SOAK_DURATION_SEC.
     timeout-minutes: 1500
