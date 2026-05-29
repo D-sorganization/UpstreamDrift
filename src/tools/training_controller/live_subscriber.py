@@ -20,11 +20,10 @@ from collections.abc import Callable
 from typing import Any
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-from training import TrainingStatus
-from training.persistence import training_metric_from_dict
-from training.metrics import TrainingMetric
-from training.runtime.progress_sinks import training_channel_for
-
+from src.shared.python.training import TrainingStatus
+from src.shared.python.training.persistence import training_metric_from_dict
+from src.shared.python.training.metrics import TrainingMetric
+from src.shared.python.training.runtime.progress_sinks import training_channel_for
 
 __all__ = [
     "MetricCallback",

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import tempfile
 from pathlib import Path
 from collections.abc import Callable
 from typing import Any
@@ -34,7 +35,13 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from training import Dataset, DatasetRegistry, JobId, TrainingConfig, TrainingFramework
+from src.shared.python.training import (
+    Dataset,
+    DatasetRegistry,
+    JobId,
+    TrainingConfig,
+    TrainingFramework,
+)
 
 from .controller import TrainingDashboardController
 from .view_model import DashboardModel, MetricSeries, ResourceSnapshot
@@ -583,7 +590,7 @@ class MainWidget(QWidget):
     def _on_cancel_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.cancel_job(selected_id)
@@ -593,7 +600,7 @@ class MainWidget(QWidget):
     def _on_pause_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.pause_job(selected_id)
@@ -603,7 +610,7 @@ class MainWidget(QWidget):
     def _on_resume_clicked(self) -> None:
         selected_id = self.controller.selected_job_id
         if selected_id is not None:
-            from training import TrainingError
+            from src.shared.python.training import TrainingError
 
             try:
                 self.controller.resume_job(selected_id)
@@ -650,7 +657,9 @@ class SubmitDialog(QDialog):
 
         # Output Dir Edit
         self.output_edit = QLineEdit(self)
-        self.output_edit.setText(str(Path("/tmp/training-controller-gui")))
+        self.output_edit.setText(
+            str(Path(tempfile.gettempdir()) / "training-controller-gui")
+        )
         self.output_edit.setToolTip("Directory where training outputs will be saved")
         form_layout.addRow("Output Directory:", self.output_edit)
 
@@ -709,8 +718,8 @@ class SubmitDialog(QDialog):
 
 def build_default_controller() -> TrainingDashboardController:
     """Construct headless controller using a default Scheduler configuration."""
-    from training import CompatibilityChecker, JobRegistry, Scheduler
-    from training.runtime import InProcessDriver, RunnerRegistry
+    from src.shared.python.training import CompatibilityChecker, JobRegistry, Scheduler
+    from src.shared.python.training.runtime import InProcessDriver, RunnerRegistry
 
     runners = RunnerRegistry()
     scheduler = Scheduler(
@@ -723,7 +732,7 @@ def build_default_controller() -> TrainingDashboardController:
             Dataset(
                 dataset_id="dataset-1",
                 name="Dataset 1",
-                path=Path("/tmp/dataset-1"),
+                path=Path(tempfile.gettempdir()) / "dataset-1",
                 format="custom",
             ),
         )

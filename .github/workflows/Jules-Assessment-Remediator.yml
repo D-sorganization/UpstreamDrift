@@ -54,7 +54,7 @@ env:
 jobs:
   check-kill-switch:
     timeout-minutes: 30
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -71,7 +71,7 @@ jobs:
   pick-runner:
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -80,8 +80,8 @@ jobs:
         id: check
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   assessment-remediator:
     timeout-minutes: 30
