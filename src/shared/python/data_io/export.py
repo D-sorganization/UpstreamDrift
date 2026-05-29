@@ -674,10 +674,10 @@ def export_recording_all_formats(
             elif fmt == "csv":
                 success = _export_csv(output_path, data_dict)
             elif fmt == "mat":
-                success = export_to_matlab(str(output_path), data_dict)
+                success = bool(export_to_matlab(str(output_path), data_dict))
             elif fmt in ["hdf5", "h5"]:
                 output_path = base_path_obj.with_suffix(".h5")
-                success = export_to_hdf5(str(output_path), data_dict)
+                success = bool(export_to_hdf5(str(output_path), data_dict))
             else:
                 success = False
 
