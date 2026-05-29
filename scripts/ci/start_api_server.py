@@ -92,7 +92,7 @@ def setup_api_environment() -> tuple[str, int]:
 
 def print_server_info(host: str, port: int) -> None:
     """Print connection information for the user."""
-    logger.info("🚀 Golf Modeling Suite API server starting...")
+    logger.info("Golf Modeling Suite API server starting...")
     logger.info(f"   Docs: http://localhost:{port}/docs")
     logger.info(f"   Host: {host}:{port}")
     if not os.getenv("GOLF_ADMIN_PASSWORD"):

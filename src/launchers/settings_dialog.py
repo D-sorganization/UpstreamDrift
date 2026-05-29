@@ -145,7 +145,7 @@ class WslScriptDialog(QDialog):
         # Interactive Run button
         btn_run_row = QHBoxLayout()
         self.btn_run_terminal = QPushButton(
-            "🚀 Run script in interactive WSL Terminal window"
+            "Run script in interactive WSL Terminal window"
         )
         self.btn_run_terminal.setToolTip(
             "Open a new Windows Command Prompt that runs the script inside WSL. "

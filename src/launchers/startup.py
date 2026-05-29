@@ -338,7 +338,7 @@ class AsyncStartupWorker(QThread):
                 # not travel through secure_run's ERROR-logging exception path:
                 # "Docker not installed" is expected degradation, not a failure
                 # (#6613). Timeouts/other errors still raise and are caught below.
-                probe = secure_run(docker_cmd, timeout=2.0, check=False)
+                probe = secure_run(docker_cmd, timeout=10.0, check=False)
                 self.results.docker_available = probe.returncode == 0
                 if probe.returncode != 0:
                     logger.debug(

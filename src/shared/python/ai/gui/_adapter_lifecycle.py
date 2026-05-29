@@ -89,7 +89,7 @@ class AdapterLifecycleManager(QObject):
                 chat_path="/v1/chat/completions",
                 embed_path="/v1/embeddings",
             )
-            self.system_message.emit("🚀 Using high-performance Rust AI backend.")
+            self.system_message.emit("Using high-performance Rust AI backend.")
             return adapter
         except ImportError:
             from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
