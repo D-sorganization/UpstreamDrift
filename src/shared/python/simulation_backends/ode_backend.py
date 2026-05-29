@@ -76,7 +76,9 @@ class ODEBackend:
             theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0
         )
         self._time = 0.0
-        self._u = np.zeros(_DOF, dtype=float)
+        # Annotate as a general ndarray so later slice-copies (which mypy widens
+        # to an any-rank shape under numpy's shape-typed stubs) remain compatible.
+        self._u: np.ndarray = np.zeros(_DOF, dtype=float)
         # Wire the analytical forcing functions to read the live control vector
         # so that the RK4 integrator applies the torques set via set_control.
         self._dyn.forcing_functions = (
@@ -205,6 +207,7 @@ class ODEBackend:
                 than two entries.
         """
         q_arr, v_arr = self._require_state_pair(q, v)
+        tau: np.ndarray
         if u is None:
             tau = np.zeros(_DOF, dtype=float)
         else:
