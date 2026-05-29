@@ -76,7 +76,7 @@ def test_concurrent_load_does_not_crash(tmp_path: Path) -> None:
         try:
             load_any(p)
             return True
-        except Exception:
+        except Exception:  # noqa: BLE001 - any error is an acceptable outcome here
             # Even a clean error from all 4 is acceptable; the test is
             # specifically about not crashing on shared mutable state.
             return True

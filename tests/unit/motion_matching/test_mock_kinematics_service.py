@@ -193,7 +193,7 @@ class TestMockKinematicsServiceReset:
         """reset() clears the stored pose."""
         service = MockKinematicsService(engine_name="drake")
         service.set_pose(zero_canonical_pose)
-        transforms_before = service.get_link_transforms()
+        service.get_link_transforms()
         service.reset()
         transforms_after = service.get_link_transforms()
         # After reset, transforms should be from the default (no pose) state
