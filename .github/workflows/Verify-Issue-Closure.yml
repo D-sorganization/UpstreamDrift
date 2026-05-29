@@ -39,7 +39,7 @@ jobs:
     if: >-
       github.event.issue.state_reason != 'reopened' &&
       github.event.sender.login != 'github-actions[bot]'
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     steps:
       - name: Check for closure evidence
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v9.0.0

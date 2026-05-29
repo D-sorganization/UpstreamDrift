@@ -53,7 +53,7 @@ if repo_src_str not in sys.path:
 try:
     pass
 
-except Exception:
+except Exception:  # noqa: BLE001 - debug script reports any failure
     import traceback
 
     traceback.print_exc()

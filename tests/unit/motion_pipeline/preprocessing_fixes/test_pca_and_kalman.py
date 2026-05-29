@@ -29,7 +29,7 @@ try:
         GapFillStrategy,
         gap_fill,
     )
-except Exception as exc:  # pragma: no cover - defensive
+except Exception as exc:  # noqa: BLE001 # pragma: no cover - defensive
     pytest.skip(
         f"motion_pipeline imports unavailable (pre-existing issue): {exc}",
         allow_module_level=True,
