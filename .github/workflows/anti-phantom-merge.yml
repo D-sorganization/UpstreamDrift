@@ -44,7 +44,7 @@ jobs:
   guard:
     timeout-minutes: 30
     name: phantom-guard
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     if: github.event.pull_request.base.ref == 'main'
     steps:
       - name: Check out PR head with bounded history

@@ -37,7 +37,7 @@ permissions:
 jobs:
   warn:
     timeout-minutes: 30
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     steps:
       - name: Check for docs / tests / opt-out
         env:
