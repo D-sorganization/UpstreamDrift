@@ -70,6 +70,12 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
 
+# Data IO schema validation (issue #6568). pandas + pandera power the
+# additive schema checks in src/shared/python/data_io/_schemas.py. These are
+# optional: the loaders import pandera lazily and degrade to structural-only
+# checks when it is absent, so this stays out of the hard core dependencies.
+data = ["pandas>=2.0.0", "pandera>=0.20.0"]
+
 # Analysis extras
 analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
 
