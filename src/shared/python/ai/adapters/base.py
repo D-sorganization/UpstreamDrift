@@ -266,9 +266,13 @@ class BaseAgentAdapter(ABC):
             raw_usage.get("completion_tokens", 0),
         )
         # Prefer an explicit total; fall back to sum
-        total_tokens: int = raw_usage.get("total_tokens")
-        if total_tokens is None:
-            total_tokens = input_tokens + output_tokens
+        total_tokens_val = raw_usage.get("total_tokens")
+        total_tokens: int = (
+            total_tokens_val
+            if total_tokens_val is not None
+            else (input_tokens + output_tokens)
+        )
+
         return {
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
