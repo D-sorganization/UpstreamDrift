@@ -5,7 +5,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from upstream_drift_tools.utils.state_manager import (
+from sidekick.utils.state_manager import (
     StateManager,
     _StateManagerHolder,
     get_state_manager,

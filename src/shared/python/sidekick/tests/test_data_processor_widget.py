@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from PyQt6.QtCore import QPoint
-from upstream_drift_tools.data_processing.core import DataProcessorEngine
-from upstream_drift_tools.ui.widgets.data_processor_widget import DataProcessorWidget
+from sidekick.data_processing.core import DataProcessorEngine
+from sidekick.ui.widgets.data_processor_widget import DataProcessorWidget
 
 
 @pytest.fixture

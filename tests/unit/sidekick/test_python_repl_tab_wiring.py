@@ -27,7 +27,7 @@ import inspect
 
 import pytest
 
-from src.shared.python.upstream_drift_tools.ui.tools_sidebar import default_tabs
+from src.shared.python.sidekick.ui.tools_sidebar import default_tabs
 
 
 def _walk_names(tree: ast.AST) -> set[str]:

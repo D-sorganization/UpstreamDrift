@@ -6,7 +6,7 @@ Targets: 15% → ~100% coverage
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.calculators.conversion.flow_rate_converter import (
+from sidekick.calculators.conversion.flow_rate_converter import (
     MASS_FLOW_CONVERSIONS,
     STANDARD_CONDITIONS,
     _from_kg_per_s,

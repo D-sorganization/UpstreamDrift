@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from upstream_drift_tools.protocols import (
+from sidekick.protocols import (
     CalculationResult,
     InputValidator,
     ValidationResult,

@@ -1,6 +1,6 @@
 """Regression tests for issue #5738: Sidekick embed adapter path in models.yaml.
 
-PR #5681 deleted src/shared/python/upstream_drift_tools/ui/tools_sidebar/_embed_adapter.py
+PR #5681 deleted src/shared/python/sidekick/ui/tools_sidebar/_embed_adapter.py
 and moved the sidekick adapter to src/tools/sidekick/_embed_adapter.py.  The
 Sidekick tile in src/config/models.yaml was not updated, so SpecialAppHandler.launch()
 fails with "script not found".
@@ -76,7 +76,7 @@ def test_sidekick_path_exists_on_disk() -> None:
 
     This is the primary regression guard.  After the fix models.yaml should
     point to src/tools/sidekick/_embed_adapter.py (which exists), not to
-    the deleted src/shared/python/upstream_drift_tools/ui/tools_sidebar/_embed_adapter.py.
+    the deleted src/shared/python/sidekick/ui/tools_sidebar/_embed_adapter.py.
     """
     models = _load_models()
     sidekick = next((m for m in models if m["id"] == "sidekick"), None)

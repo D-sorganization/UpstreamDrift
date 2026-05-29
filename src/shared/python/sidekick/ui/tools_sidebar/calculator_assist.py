@@ -32,7 +32,7 @@ class CalculatorHelpTopic:
             "summary": self.summary,
             "examples": "\n".join(self.examples),
             "tips": "\n".join(self.tips),
-            "source": "upstream_drift_tools.ui.tools_sidebar.calculator_assist",
+            "source": "sidekick.ui.tools_sidebar.calculator_assist",
         }
 
 

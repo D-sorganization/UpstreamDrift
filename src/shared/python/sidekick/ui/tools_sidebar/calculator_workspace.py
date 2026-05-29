@@ -432,8 +432,8 @@ def default_calculator_workspace_controller(
         registry: The calculator-local workspace registry.
         storage_dir: Directory for workspace files. Defaults to
             ``~/.sidekick`` when ``None``. Pass
-            ``get_default_sidekick_dir("upstream_drift_tools")`` to preserve
-            the legacy ``~/.upstream_drift_tools/sidekick`` path.
+            ``get_default_sidekick_dir("sidekick")`` to preserve
+            the legacy ``~/.sidekick/sidekick`` path.
     """
     directory = storage_dir if storage_dir is not None else get_default_sidekick_dir()
     return CalculatorWorkspaceController(
@@ -453,8 +453,8 @@ def default_global_workspace_controller(
         registry: The shared global workspace registry.
         storage_dir: Directory for workspace files. Defaults to
             ``~/.sidekick`` when ``None``. Pass
-            ``get_default_sidekick_dir("upstream_drift_tools")`` to preserve
-            the legacy ``~/.upstream_drift_tools/sidekick`` path.
+            ``get_default_sidekick_dir("sidekick")`` to preserve
+            the legacy ``~/.sidekick/sidekick`` path.
     """
     directory = storage_dir if storage_dir is not None else get_default_sidekick_dir()
     return GlobalWorkspaceController(

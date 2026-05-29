@@ -1,7 +1,7 @@
-"""API standardization module for upstream_drift_tools.
+"""API standardization module for sidekick.
 
 Provides standardized request/response schemas and utilities for all
-upstream_drift_tools APIs, ensuring consistent interfaces across all tools.
+sidekick APIs, ensuring consistent interfaces across all tools.
 
 Key exports:
     - StandardResponse: Unified response wrapper

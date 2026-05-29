@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from upstream_drift_tools.ui.mixins.base_calculator_mixin import BaseCalculatorMixin
+from sidekick.ui.mixins.base_calculator_mixin import BaseCalculatorMixin
 
 
 class MockCalculator(BaseCalculatorMixin):
@@ -21,8 +21,7 @@ def test_base_calculator_mixin_init_default() -> Any:
     assert isinstance(calc._copyable_widgets, list)
     assert isinstance(calc._state, dict)
     assert (
-        calc._logger.name
-        == "upstream_drift_tools.ui.mixins.base_calculator_mixin.MockCalculator"
+        calc._logger.name == "sidekick.ui.mixins.base_calculator_mixin.MockCalculator"
     )
 
 
@@ -30,8 +29,7 @@ def test_base_calculator_mixin_init_with_name() -> Any:
     calc = MockCalculator("CustomName")
     assert calc.calculator_name == "CustomName"
     assert (
-        calc._logger.name
-        == "upstream_drift_tools.ui.mixins.base_calculator_mixin.MockCalculator"
+        calc._logger.name == "sidekick.ui.mixins.base_calculator_mixin.MockCalculator"
     )
 
 

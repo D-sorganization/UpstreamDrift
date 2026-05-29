@@ -1,5 +1,5 @@
 def test_logging_imports() -> None:
-    from upstream_drift_tools.utils.logging import (
+    from sidekick.utils.logging import (
         DEFAULT_FORMAT,
         SIMPLE_FORMAT,
         get_logger,

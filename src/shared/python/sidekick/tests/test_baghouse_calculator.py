@@ -6,7 +6,7 @@ Targets: 32% → 100% coverage.
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.process_calculators.baghouse_calculator import (
+from sidekick.process_calculators.baghouse_calculator import (
     BaghouseCalculator,
     BaghouseResult,
 )
@@ -347,7 +347,7 @@ class TestConvertFallback:
 
     def test_k_to_c(self):
         """Lines 61-62: K → C conversion."""
-        from upstream_drift_tools.process_calculators import (
+        from sidekick.process_calculators import (
             baghouse_calculator as bh_mod,
         )
 
@@ -357,7 +357,7 @@ class TestConvertFallback:
 
     def test_c_to_k(self):
         """Lines 63-64: C → K conversion."""
-        from upstream_drift_tools.process_calculators import (
+        from sidekick.process_calculators import (
             baghouse_calculator as bh_mod,
         )
 
@@ -367,7 +367,7 @@ class TestConvertFallback:
 
     def test_identity_fallback(self):
         """Line 65: unknown units → identity."""
-        from upstream_drift_tools.process_calculators import (
+        from sidekick.process_calculators import (
             baghouse_calculator as bh_mod,
         )
 

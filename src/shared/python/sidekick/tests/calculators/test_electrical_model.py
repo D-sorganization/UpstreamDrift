@@ -1,9 +1,9 @@
 import numpy as np
-from upstream_drift_tools.calculators.electrical.config import ElectrodeConfig
-from upstream_drift_tools.calculators.electrical.electrical_model import (
+from sidekick.calculators.electrical.config import ElectrodeConfig
+from sidekick.calculators.electrical.electrical_model import (
     ThreePhaseElectricalModelEnhanced,
 )
-from upstream_drift_tools.calculators.electrical.glass_interface import (
+from sidekick.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
 

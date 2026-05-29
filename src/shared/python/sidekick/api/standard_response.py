@@ -1,4 +1,4 @@
-"""Standardized API response wrapper for all upstream_drift_tools endpoints.
+"""Standardized API response wrapper for all sidekick endpoints.
 
 This module provides a consistent response format across all APIs, ensuring
 that clients receive uniform structure for both successful and error responses.
@@ -112,7 +112,7 @@ class StandardResponse:
     - Error responses include error details
     - All responses include metadata with request tracking
 
-    This class is used by all upstream_drift_tools API endpoints to provide
+    This class is used by all sidekick API endpoints to provide
     a uniform interface for downstream consumers.
 
     Attributes:

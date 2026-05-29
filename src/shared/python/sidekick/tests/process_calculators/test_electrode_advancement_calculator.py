@@ -1,4 +1,4 @@
-from upstream_drift_tools.process_calculators.electrode_advancement_calculator import (
+from sidekick.process_calculators.electrode_advancement_calculator import (
     ElectrodeAdvancementCalculator,
 )
 

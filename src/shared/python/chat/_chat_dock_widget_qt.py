@@ -244,7 +244,7 @@ class ChatDockWidget(QDockWidget):
             module intentionally treats the spec as ``Any`` to avoid a
             hard dependency on the upstream plotting package; hosts
             typically pass a function that wraps the JSON dict into a
-            :class:`upstream_drift_tools.ui.tools_sidebar.calculator_plotting.CalculatorPlotRequest`
+            :class:`sidekick.ui.tools_sidebar.calculator_plotting.CalculatorPlotRequest`
             and routes it to their plot tab.
         parent: Parent widget.
     """

@@ -8,7 +8,7 @@ Targets: 41% → ~95%+ coverage of service.py
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.calculators.conversion.service import (
+from sidekick.calculators.conversion.service import (
     IncompatibleUnitsError,
     InvalidValueError,
     UnitConversionService,

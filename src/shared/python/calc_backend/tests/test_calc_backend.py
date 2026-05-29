@@ -140,7 +140,7 @@ class TestPressureDrop:
         Verifies numeric parity: router result must match PressureDropCalculator
         directly called with the same inputs.
         """
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator import (
+        from sidekick.process_calculators.pressure_drop_calculator import (
             PressureDropCalculator,
         )
 

@@ -1,4 +1,4 @@
-from upstream_drift_tools.calculators.electrical.config import ElectrodeConfig
+from sidekick.calculators.electrical.config import ElectrodeConfig
 
 
 def test_electrode_config_initialization() -> None:

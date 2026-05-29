@@ -7,7 +7,7 @@ Targets: 29% → 100% coverage.
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.pipe_database import (
+from sidekick.process_calculators.pressure_drop_calculator.utils.pipe_database import (
     MATERIAL_ROUGHNESS,
     STEEL_PIPE_DIMENSIONS,
     create_custom_pipe,

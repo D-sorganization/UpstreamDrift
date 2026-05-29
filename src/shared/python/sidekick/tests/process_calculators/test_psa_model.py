@@ -10,7 +10,7 @@ to ensure consistency across all implementations (Python core, Jupyter notebook,
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from upstream_drift_tools.process_calculators.psa_package.psa_model import (
+from sidekick.process_calculators.psa_package.psa_model import (
     PSAModel,
     calculate_o2_safety_analysis,
     calculate_sensitivity,

@@ -9,7 +9,7 @@ pytest.importorskip("PyQt6", reason="PyQt6 not installed")
 pytest.importorskip("pytestqt", reason="pytest-qt required for widget tests")
 
 from PyQt6.QtGui import QCloseEvent
-from upstream_drift_tools.ui.widgets.base_calculator_widget import (
+from sidekick.ui.widgets.base_calculator_widget import (
     BaseCalculatorWidget,
     BaseCalculatorWindow,
 )

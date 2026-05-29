@@ -1,5 +1,5 @@
 import pytest
-from upstream_drift_tools.process_calculators.baghouse_calculator import (
+from sidekick.process_calculators.baghouse_calculator import (
     BaghouseCalculator,
     BaghouseResult,
 )

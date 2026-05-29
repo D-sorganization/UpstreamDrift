@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from upstream_drift_tools.process_calculators.ode_solver import ODESolver
+from sidekick.process_calculators.ode_solver import ODESolver
 
 
 def test_ode_solver_initialization() -> None:

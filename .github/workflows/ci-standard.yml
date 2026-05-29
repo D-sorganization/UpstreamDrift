@@ -340,9 +340,6 @@ jobs:
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
 
-      - name: Deprecated Alias Shim Surface
-        run: python3 scripts/ci/check_deprecated_alias_shims.py
-
       - name: Heavy Test Dependency Parity Check
         run: python3 scripts/check_heavy_dep_parity.py
 

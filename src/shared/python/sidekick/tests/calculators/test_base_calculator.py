@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from upstream_drift_tools.calculators.base import BaseCalculationEngine
+from sidekick.calculators.base import BaseCalculationEngine
 
 
 class DummyEngine(BaseCalculationEngine):

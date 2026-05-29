@@ -1,4 +1,4 @@
-"""Comprehensive tests for upstream_drift_tools.data_processing.exceptions module.
+"""Comprehensive tests for sidekick.data_processing.exceptions module.
 
 Covers all custom exception classes, their hierarchy, and ColumnNotFoundError
 custom formatting.
@@ -7,7 +7,7 @@ custom formatting.
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.data_processing.exceptions import (
+from sidekick.data_processing.exceptions import (
     ColumnNotFoundError,
     DataNotLoadedError,
     DataProcessingError,

@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 def test_theme_init_imports() -> None:
     # We will reload the module to ensure the initialization runs during test
-    import upstream_drift_tools.theme as module_under_test
+    import sidekick.theme as module_under_test
 
     importlib.reload(module_under_test)
 
@@ -14,7 +14,7 @@ def test_theme_init_imports() -> None:
 
 
 def test_theme_init_no_theme() -> None:
-    import upstream_drift_tools.theme as module_under_test
+    import sidekick.theme as module_under_test
 
     # Simulate an environment where theme import fails
     with patch.dict("sys.modules", {"theme": None}):
@@ -29,7 +29,7 @@ def test_theme_init_no_theme() -> None:
 
 
 def test_theme_init_sys_path() -> None:
-    import upstream_drift_tools.theme as module_under_test
+    import sidekick.theme as module_under_test
 
     # Remove from sys.path
     path = str(module_under_test._shared_python_dir)

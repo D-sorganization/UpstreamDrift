@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from PyQt6.QtWidgets import QMessageBox
-from upstream_drift_tools.data_processing.core import AggregationType, FitType
-from upstream_drift_tools.ui.widgets.data_processor_widget import DataProcessorWidget
+from sidekick.data_processing.core import AggregationType, FitType
+from sidekick.ui.widgets.data_processor_widget import DataProcessorWidget
 
 
 @pytest.fixture

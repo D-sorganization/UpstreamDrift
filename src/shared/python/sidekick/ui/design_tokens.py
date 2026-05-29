@@ -6,10 +6,10 @@ from typing import Any
 def get_tokens_path() -> Path:
     """Return the absolute path to the shared design_tokens.json file."""
     # Assuming this is installed as a package or run from the repo
-    # Traverse up: ui -> upstream_drift_tools -> python -> shared -> src -> Tools
+    # Traverse up: ui -> sidekick -> python -> shared -> src -> Tools
     # Actually, we should find it relative to this file
     current_dir = Path(__file__).parent
-    # __file__ is src/shared/python/upstream_drift_tools/ui/design_tokens.py
+    # __file__ is src/shared/python/sidekick/ui/design_tokens.py
     # We want to go to src/shared/design_tokens.json
     shared_dir = current_dir.parent.parent.parent
     return shared_dir / "design_tokens.json"

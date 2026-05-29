@@ -1,7 +1,7 @@
 # ruff: noqa: E501
 from typing import Any
 
-from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+from sidekick.process_calculators.wgs_reactor_calculator import (
     WGSReactorEngine,
 )
 
@@ -56,7 +56,7 @@ def test_engine_load_data_none() -> None:
     from unittest.mock import patch
 
     with patch(
-        "upstream_drift_tools.process_calculators.wgs_reactor_calculator.safe_read_json",
+        "sidekick.process_calculators.wgs_reactor_calculator.safe_read_json",
         return_value={},
     ):
         engine._load_data(None)
@@ -86,7 +86,7 @@ def test_minimal_species_db_fallback() -> None:
     import importlib
     import sys
 
-    from upstream_drift_tools.process_calculators import wgs_reactor_calculator
+    from sidekick.process_calculators import wgs_reactor_calculator
 
     # Temporarily mock the db import out
     original_modules = dict(sys.modules)
@@ -130,7 +130,7 @@ class TestWGSReactorWidget:
     @pytest.fixture(autouse=True)
     def patch_state(self, monkeypatch) -> Any:
         try:
-            from upstream_drift_tools.ui.mixins.calculator_state_mixin import (
+            from sidekick.ui.mixins.calculator_state_mixin import (
                 CalculatorStateMixin,
             )
 
@@ -148,7 +148,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_initialization(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -158,7 +158,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_setup_state_management(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -171,7 +171,7 @@ class TestWGSReactorWidget:
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_close_event(self, qtbot) -> Any:
         from PyQt6.QtGui import QCloseEvent
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -185,7 +185,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_calculate(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -230,7 +230,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_calculate_error(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -250,7 +250,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_create_plots(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             WGSReactorCalculatorWidget,
         )
 
@@ -263,7 +263,7 @@ class TestWGSReactorWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_create_wgs_reactor_calculator(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+        from sidekick.process_calculators.wgs_reactor_calculator import (
             create_wgs_reactor_calculator,
         )
 

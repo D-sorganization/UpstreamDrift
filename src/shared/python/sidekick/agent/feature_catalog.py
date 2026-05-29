@@ -317,13 +317,11 @@ def _discover_subtabs() -> list[FeatureEntry]:
         title = meta.get("title") or tab_id.replace("_", " ").title()
         summary = meta.get("summary") or f"{title} subtab."
         raw_module = meta.get("source") or "sidekick.ui.tools_sidebar"
-        # Some `source` values point at upstream_drift_tools (the
-        # deprecated alias) or at submodules that may not be importable
-        # in a given install (e.g. when an optional dependency is
-        # missing). Walk up to the closest importable ancestor so the
+        # Some `source` values point at submodules that may not be
+        # importable in a given install (e.g. when an optional dependency
+        # is missing). Walk up to the closest importable ancestor so the
         # catalog never advertises a broken module path.
-        candidate = raw_module.replace("upstream_drift_tools.", "sidekick.")
-        module = _closest_importable(candidate, fallback="sidekick.ui")
+        module = _closest_importable(raw_module, fallback="sidekick.ui")
         out.append(
             FeatureEntry(
                 feature_id=f"subtab.{tab_id}",

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from upstream_drift_tools.process_calculators.optimization import (
+from sidekick.process_calculators.optimization import (
     _build_override_mapping,
     find_optimal_on_surface,
 )

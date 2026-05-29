@@ -1,5 +1,5 @@
 import pytest
-from upstream_drift_tools.process_calculators.flare_calculator import (
+from sidekick.process_calculators.flare_calculator import (
     FlareCalculator,
     FlareDesign,
 )

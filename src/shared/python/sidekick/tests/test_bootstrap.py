@@ -1,4 +1,4 @@
-"""Tests for upstream_drift_tools.bootstrap (ensure_paths).
+"""Tests for sidekick.bootstrap (ensure_paths).
 
 Full coverage of both branches:
 - Auto-detect repo root from get_repo_root()
@@ -16,12 +16,12 @@ from unittest.mock import patch
 class TestEnsurePaths:
     def test_returns_repo_root_auto_detected(self, tmp_path: Path):
         """Auto-detect branch: calls get_repo_root() when no root given."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         # get_repo_root is imported locally inside ensure_paths;
         # patch it at the source module.
         with patch(
-            "upstream_drift_tools.utils.paths.get_repo_root",
+            "sidekick.utils.paths.get_repo_root",
             return_value=tmp_path,
         ):
             result = ensure_paths()
@@ -29,21 +29,21 @@ class TestEnsurePaths:
 
     def test_explicit_repo_root(self, tmp_path: Path):
         """Explicit repo_root branch: resolves given Path."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         result = ensure_paths(repo_root=tmp_path)
         assert result == tmp_path
 
     def test_explicit_repo_root_as_string(self, tmp_path: Path):
         """Accepts string as repo_root."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         result = ensure_paths(repo_root=str(tmp_path))
         assert result == tmp_path
 
     def test_does_not_add_nonexistent_paths(self, tmp_path: Path):
         """Nonexistent paths are not inserted into sys.path."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         # tmp_path/src/shared/python etc. do not exist
         before = set(sys.path)
@@ -57,7 +57,7 @@ class TestEnsurePaths:
 
     def test_does_not_insert_duplicate(self, tmp_path: Path):
         """Already-present paths don't get inserted again."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         # Create the shared/python dir so it's eligible
         shared = tmp_path / "src" / "shared" / "python"
@@ -76,7 +76,7 @@ class TestEnsurePaths:
 
     def test_adds_existing_paths(self, tmp_path: Path):
         """Creates and registers the standard paths when they exist."""
-        from upstream_drift_tools.bootstrap import ensure_paths
+        from sidekick.bootstrap import ensure_paths
 
         # Set up a synthetic repo structure
         (tmp_path / "src" / "shared" / "python").mkdir(parents=True)

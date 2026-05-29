@@ -28,7 +28,7 @@ from src.shared.python.motion_matching import (
 from src.shared.python.motion_matching.loaders.c3d_body import (
     default_anatomical_marker_set,
 )
-from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
+from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
 
 # Frame counts and rates picked so a uniform timeline cleanly separates an
 # "Impact" event (frame 50, t=0.5 s) from the kinematic-peak frame (80) of a

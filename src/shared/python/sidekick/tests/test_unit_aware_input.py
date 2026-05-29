@@ -5,10 +5,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from PyQt6.QtWidgets import QLabel
-from upstream_drift_tools.ui.managers.unit_preferences_manager import (
+from sidekick.ui.managers.unit_preferences_manager import (
     UnitPreferencesManager,
 )
-from upstream_drift_tools.ui.widgets.unit_aware_input import (
+from sidekick.ui.widgets.unit_aware_input import (
     UnitAwareDisplay,
     UnitAwareInput,
 )
@@ -35,7 +35,7 @@ def mock_prefs(monkeypatch) -> Any:
     )
 
     with patch(
-        "upstream_drift_tools.ui.widgets.unit_aware_input.get_unit_preferences_manager",
+        "sidekick.ui.widgets.unit_aware_input.get_unit_preferences_manager",
         return_value=prefs,
     ):
         yield prefs

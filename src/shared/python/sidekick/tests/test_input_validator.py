@@ -1,4 +1,4 @@
-"""Tests for upstream_drift_tools.protocols.InputValidator.
+"""Tests for sidekick.protocols.InputValidator.
 
 Covers require_positive, require_in_range, require_keys,
 validate_temperature, validate_pressure, validate_composition.
@@ -7,7 +7,7 @@ validate_temperature, validate_pressure, validate_composition.
 from __future__ import annotations
 
 import pytest
-from upstream_drift_tools.protocols import InputValidator
+from sidekick.protocols import InputValidator
 
 
 class TestRequirePositive:

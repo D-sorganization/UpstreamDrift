@@ -2,7 +2,7 @@
 from typing import Any
 
 import pytest
-from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
     AcidGasComposition,
     AcidGasDewpointCalculator,
     DewpointResult,
@@ -117,7 +117,7 @@ def test_dewpoint_result_to_dict(dewpoint_calc: AcidGasDewpointCalculator) -> No
 def test_calculate_vapor_pressure_libraries(
     dewpoint_calc: AcidGasDewpointCalculator, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from upstream_drift_tools.process_calculators import (
+    from sidekick.process_calculators import (
         acid_gas_dewpoint_calculator as agdc,
     )
 
@@ -138,7 +138,7 @@ def test_calculate_dewpoint_zero_denominator(
 ) -> None:
     A = dewpoint_calc.antoine_constants["H2O"]["A"]
     P_mmhg = 10**A
-    from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+    from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
         MMHG_TO_PA_CONV,
     )
 
@@ -194,7 +194,7 @@ def test_generate_dewpoint_curves(dewpoint_calc: AcidGasDewpointCalculator) -> N
 
 
 def test_estimate_condensation_risk_branches() -> None:
-    from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+    from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
         DewpointResult,
         estimate_condensation_risk,
     )
@@ -205,7 +205,7 @@ def test_estimate_condensation_risk_branches() -> None:
     mock_res.limiting_component = "H2O"
 
     with patch(
-        "upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator.AcidGasDewpointCalculator.calculate_dewpoint_mixture",
+        "sidekick.process_calculators.acid_gas_dewpoint_calculator.AcidGasDewpointCalculator.calculate_dewpoint_mixture",
         return_value=mock_res,
     ):
         mock_res.dewpoint_margin_c = np.nan
@@ -252,7 +252,7 @@ class TestAcidGasDewpointWidget:
         if not HAS_PYQT:
             return
         try:
-            from upstream_drift_tools.ui.mixins.calculator_state_mixin import (
+            from sidekick.ui.mixins.calculator_state_mixin import (
                 CalculatorStateMixin,
             )
 
@@ -270,7 +270,7 @@ class TestAcidGasDewpointWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_initialization(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+        from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
             AcidGasDewpointCalculatorWidget,
         )
 
@@ -282,7 +282,7 @@ class TestAcidGasDewpointWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_calculate(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+        from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
             AcidGasComposition,
             AcidGasDewpointCalculatorWidget,
             DewpointResult,
@@ -327,7 +327,7 @@ class TestAcidGasDewpointWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_calculate_error(self, qtbot) -> Any:
-        from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+        from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
             AcidGasDewpointCalculatorWidget,
         )
 
@@ -348,7 +348,7 @@ class TestAcidGasDewpointWidget:
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_close_event(self, qtbot) -> Any:
         from PyQt6.QtGui import QCloseEvent
-        from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+        from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
             AcidGasDewpointCalculatorWidget,
         )
 

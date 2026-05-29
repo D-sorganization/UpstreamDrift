@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from upstream_drift_tools.calculators.electrical.glass_interface import (
+from sidekick.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
 

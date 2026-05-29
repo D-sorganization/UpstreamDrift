@@ -2,10 +2,10 @@
 
 import unittest
 
-from upstream_drift_tools.process_calculators.scrubber.engine.scrubber_engine import (
+from sidekick.process_calculators.scrubber.engine.scrubber_engine import (
     ScrubberEngine,
 )
-from upstream_drift_tools.process_calculators.scrubber.models.scrubber_models import (
+from sidekick.process_calculators.scrubber.models.scrubber_models import (
     ScrubberInputs,
 )
 

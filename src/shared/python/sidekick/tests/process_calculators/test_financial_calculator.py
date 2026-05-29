@@ -1,5 +1,5 @@
 import pytest
-from upstream_drift_tools.process_calculators.financial_calculator import (
+from sidekick.process_calculators.financial_calculator import (
     FinancialModelCalculator,
     FinancialParameters,
     FinancialResults,

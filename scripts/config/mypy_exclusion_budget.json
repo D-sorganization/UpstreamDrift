@@ -222,7 +222,7 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/optimization.py",
+      "path": "src/shared/python/sidekick/process_calculators/optimization.py",
       "owner": "@physics-core",
       "reason": "numpy stubs expose pre-existing process calculator typing issues",
       "expires_on": "2026-08-01"
@@ -300,7 +300,7 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py",
+      "path": "src/shared/python/sidekick/process_calculators/psa_package/psa_gui.py",
       "owner": "@ui-platform",
       "reason": "PSA GUI combines process calculator and UI code with pre-existing typing issues",
       "expires_on": "2026-08-01"
@@ -336,7 +336,7 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/syngas_water_calculator.py",
+      "path": "src/shared/python/sidekick/process_calculators/syngas_water_calculator.py",
       "owner": "@physics-core",
       "reason": "numpy stubs expose floating and signedinteger narrowing divergence",
       "expires_on": "2026-08-01"
