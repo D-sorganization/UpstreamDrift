@@ -88,7 +88,20 @@ class MainWidget(QtWidgets.QWidget):
 
     def _create_central_widget(self) -> None:
         """Create the tab widget with all analysis tabs."""
-        self.tabs = QtWidgets.QTabWidget(self)
+        import sys
+        from pathlib import Path
+
+        root = Path(__file__).resolve()
+        for _ in range(10):
+            if (root / "src" / "shared" / "python" / "gui_pkg").is_dir():
+                break
+            root = root.parent
+        _pkg_path = str(root / "src" / "shared" / "python" / "gui_pkg")
+        if _pkg_path not in sys.path:
+            sys.path.insert(0, _pkg_path)
+        import draggable_tabs
+
+        self.tabs = draggable_tabs.DraggableTabWidget(self)
 
         self.overview_tab = OverviewTab()
         self.marker_plot_tab = MarkerPlotTab()
@@ -119,8 +132,48 @@ class MainWidget(QtWidgets.QWidget):
         self.tabs.addTab(self.force_plot_tab, "Force Plates")
         self.tabs.setTabToolTip(6, "Force plate GRF and COP visualization")
 
+        # Create a local menu bar for file loading and actions when docked/embedded
+        self.menu_bar = QtWidgets.QMenuBar(self)
+        self.file_menu = self.menu_bar.addMenu("&File")
+        self.file_menu.addAction(self.action_open)
+        self.file_menu.addAction(self.action_export_markers)
+        self.file_menu.addAction(self.action_export_animation)
+
+        self.help_menu = self.menu_bar.addMenu("&Help")
+        self.help_menu.addAction(self.action_about)
+
+        # Style the menu bar to match premium dark theme
+        self.menu_bar.setStyleSheet("""
+            QMenuBar {
+                background-color: #1e1e1e;
+                color: #cccccc;
+                border-bottom: 1px solid #3a3a3a;
+                font-size: 12px;
+            }
+            QMenuBar::item {
+                background-color: transparent;
+                padding: 4px 10px;
+                border-radius: 4px;
+            }
+            QMenuBar::item:selected {
+                background-color: #2a2a2a;
+                color: #ffffff;
+            }
+            QMenu {
+                background-color: #1e1e1e;
+                color: #cccccc;
+                border: 1px solid #3a3a3a;
+            }
+            QMenu::item:selected {
+                background-color: #2a2a2a;
+                color: #ffffff;
+            }
+        """)
+
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(self.menu_bar)
         layout.addWidget(self.tabs)
 
     # ---------------------- UI state management ----------------------------
@@ -369,6 +422,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         self._main_widget = MainWidget(self)
         self.setCentralWidget(self._main_widget)
+        if hasattr(self._main_widget, "menu_bar"):
+            self._main_widget.menu_bar.hide()
 
         self._create_menus()
 
