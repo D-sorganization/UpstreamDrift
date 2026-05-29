@@ -47,6 +47,13 @@ class OptimizationResult:
     iterations: int
     gradient_norm: float
 
+    @property
+    def solver_status(self) -> str:
+        """Return a canonical solver status derived from the success flag."""
+        if self.success:
+            return "success"
+        return "failed"
+
 
 class DifferentiableEngine:
     """Differentiable physics simulation.
@@ -355,6 +362,8 @@ class DifferentiableEngine:
 
         best_loss = float("inf")
         best_controls = controls.copy()
+        grad_norm = float("inf")
+        iteration = -1
 
         for iteration in range(max_iterations):
             # Compute gradient
