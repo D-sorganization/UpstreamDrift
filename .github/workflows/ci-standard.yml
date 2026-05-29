@@ -668,7 +668,7 @@ jobs:
           python -m pip install --no-cache-dir .
           python -m ensurepip --upgrade || true
           python -m pip install pip-audit
-          pip-audit -r <(pip freeze --exclude upstream-drift)
+          pip-audit
 
   tests:
     needs: pick-runner
