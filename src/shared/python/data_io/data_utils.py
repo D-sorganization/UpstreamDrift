@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 
 from src.shared.python.core.error_decorators import log_errors
+from src.shared.python.data_io._schemas import validate_csv_dataframe
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.validation_pkg.validation_utils import validate_file_exists
 
@@ -56,6 +57,10 @@ def load_csv_data(
     logger.debug(f"Loading CSV data from {path}")
 
     data: pd.DataFrame = pd.read_csv(path_obj, **kwargs)
+    # Additive structural validation (issue #6568): reject empty/columnless
+    # parses instead of returning a malformed frame. Permissive on dtypes so
+    # mixed-type CSVs keep loading exactly as before.
+    validate_csv_dataframe(data, source=str(path))
     logger.info(f"Loaded {len(data)} rows from {path}")
 
     return data
