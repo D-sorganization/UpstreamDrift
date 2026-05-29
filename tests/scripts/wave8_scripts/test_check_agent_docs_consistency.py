@@ -110,6 +110,28 @@ def test_assert_path_references_exist(
     assert not any("src/exists.py" in e for e in errors)
 
 
+def test_assert_path_references_skips_glob_and_brace_patterns(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Glob/brace references describe patterns, not literal files (#6620)."""
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
+    errors: list[str] = []
+    mod._assert_path_references_exist(
+        "see `scripts/**` and `tests/**` and "
+        "`src/shared/python/codemap/{cli,watcher,mcp_server}.py`",
+        errors,
+    )
+    assert errors == []
+
+
+def test_is_glob_pattern() -> None:
+    assert mod._is_glob_pattern("scripts/**")
+    assert mod._is_glob_pattern("src/x/{a,b}.py")
+    assert mod._is_glob_pattern("src/x/f?.py")
+    assert mod._is_glob_pattern("src/x/[ab].py")
+    assert not mod._is_glob_pattern("src/x/literal.py")
+
+
 def test_assert_no_duplicate_paragraphs() -> None:
     errors: list[str] = []
     mod._assert_no_duplicate_paragraphs("a\n\nb\n\nc", errors)

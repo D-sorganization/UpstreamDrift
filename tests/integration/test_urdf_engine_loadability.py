@@ -61,7 +61,7 @@ def _load_in_opensim(urdf_path: Path) -> None:
     # or if it does, it's not well documented for python wrapper.
     # The requirement: "via existing OpenSim URDF import path or document its absence"
     try:
-        import opensim
+        import opensim  # noqa: F401 - import-only availability probe
     except ImportError:
         pytest.skip("opensim not installed")
 
