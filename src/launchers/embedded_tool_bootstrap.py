@@ -72,6 +72,12 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.sidekick._embed_adapter",
         "src.tools.pose_studio.gui",
         "src.tools.video_analyzer._embed_adapter",
+        "src.tools.ball_flight_gui._embed_adapter",
+        "src.tools.bunker_shot_gui._embed_adapter",
+        "src.tools.putting_green_gui._embed_adapter",
+        "src.tools.golf_environment._embed_adapter",
+        "src.tools.terrain_engine._embed_adapter",
+        "src.tools.golf_simulation_suite._embed_adapter",
     ]
 
     registered = []

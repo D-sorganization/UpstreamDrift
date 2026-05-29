@@ -111,26 +111,17 @@ class OutputManager:
         """Create the standard output directory structure."""
         create_output_structure(self.directories)
 
+    # fmt: off
     @precondition(  # fmt: skip
-        lambda self,
-        results,
-        filename,
-        format_type=OutputFormat.CSV,
-        engine="mujoco",
-        metadata=None,
-        model_path=None,
-        parameters=None: (results is not None),
+        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: (
+            results is not None
+        ),
         "Simulation results must not be None",
     )
     @precondition(  # fmt: skip
-        lambda self,
-        results,
-        filename,
-        format_type=OutputFormat.CSV,
-        engine="mujoco",
-        metadata=None,
-        model_path=None,
-        parameters=None: (filename is not None and len(filename) > 0),
+        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: (
+            filename is not None and len(filename) > 0
+        ),
         "Filename must be a non-empty string",
     )
     def save_simulation_results(
@@ -143,6 +134,7 @@ class OutputManager:
         model_path: Path | str | None = None,
         parameters: dict[str, Any] | None = None,
     ) -> Path:
+    # fmt: on
         """
         Save simulation results to file.
 

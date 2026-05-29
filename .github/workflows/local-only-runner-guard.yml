@@ -39,7 +39,7 @@ jobs:
       - name: Install PyYAML
         run: pip install --disable-pip-version-check pyyaml==6.0.2
 
-      - name: Verify all workflows route to d-sorg-fleet
+      - name: Verify all workflows route to d-sorg-fleet-docker
         shell: python
         run: |
           import re
@@ -130,7 +130,7 @@ jobs:
                       if HOSTED.match(v_clean):
                           violations.append(
                               f"{wf.name}::{job_id}: runs-on '{v_clean}' is a hosted runner; "
-                              f"route to d-sorg-fleet (or `{fleet_expression_hint}`)."
+                              f"route to d-sorg-fleet-docker (or `{fleet_expression_hint}`)."
                           )
 
           if violations:
@@ -143,4 +143,4 @@ jobs:
               )
               sys.exit(1)
 
-          print("All workflows route to d-sorg-fleet.")
+          print("All workflows route to d-sorg-fleet-docker.")

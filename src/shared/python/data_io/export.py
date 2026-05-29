@@ -409,26 +409,17 @@ class CaptureExportData:
     )
 
 
+# fmt: off
 @precondition(  # fmt: skip
-    lambda output_path,
-    times,
-    joint_positions,
-    joint_names,
-    forces=None,
-    moments=None,
-    frame_rate=60.0,
-    units=None: (output_path is not None and len(output_path) > 0),
+    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
+        output_path is not None and len(output_path) > 0
+    ),
     "Output path must be a non-empty string",
 )
 @precondition(  # fmt: skip
-    lambda output_path,
-    times,
-    joint_positions,
-    joint_names,
-    forces=None,
-    moments=None,
-    frame_rate=60.0,
-    units=None: (frame_rate > 0),
+    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
+        frame_rate > 0
+    ),
     "Frame rate must be positive",
 )
 def export_to_c3d(
@@ -441,6 +432,7 @@ def export_to_c3d(
     frame_rate: float = 60.0,
     units: dict[str, str] | None = None,  # noqa: PLR0913
 ) -> bool:
+# fmt: on
     """Export recording to C3D motion capture format.
 
     Args:
@@ -682,10 +674,10 @@ def export_recording_all_formats(
             elif fmt == "csv":
                 success = _export_csv(output_path, data_dict)
             elif fmt == "mat":
-                success = export_to_matlab(str(output_path), data_dict)
+                success = bool(export_to_matlab(str(output_path), data_dict))
             elif fmt in ["hdf5", "h5"]:
                 output_path = base_path_obj.with_suffix(".h5")
-                success = export_to_hdf5(str(output_path), data_dict)
+                success = bool(export_to_hdf5(str(output_path), data_dict))
             else:
                 success = False
 
