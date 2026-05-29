@@ -23,7 +23,7 @@ permissions:
 jobs:
   build-wheel:
     name: Build sdist + wheel
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     outputs:
       wheel-size-kb: ${{ steps.size.outputs.kb }}
@@ -86,7 +86,7 @@ jobs:
   smoke-test-wheel:
     name: Smoke-test wheel (Python ${{ matrix.python }})
     needs: build-wheel
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     strategy:
       fail-fast: false

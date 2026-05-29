@@ -7,7 +7,7 @@ name: Release Sidekick Binary
 #   - workflow_dispatch (manual)
 #   - tags matching sidekick-v*  (e.g. sidekick-v0.2.0)
 #
-# All jobs run on d-sorg-fleet per the repo runner policy
+# All jobs run on d-sorg-fleet-docker per the repo runner policy
 # (local-only-runner-guard.yml).  The matrix uses a label field to
 # distinguish build targets while keeping runner routing correct.
 
@@ -27,14 +27,14 @@ concurrency:
 jobs:
   pick-runner:
     name: Resolve fleet runner
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
       - name: Set runner
         id: check
-        run: echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+        run: echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
 
   build-binary:
     name: Build binary (${{ matrix.label }})
