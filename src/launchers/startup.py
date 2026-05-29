@@ -323,11 +323,19 @@ class AsyncStartupWorker(QThread):
                 from src.launchers.docker_manager import get_docker_cmd
 
                 docker_cmd = get_docker_cmd() + ["--version"]
-                secure_run(docker_cmd, timeout=2.0, check=True)
-                self.results.docker_available = True
+                # check=False so an absent Docker (a normal non-zero exit) does
+                # not travel through secure_run's ERROR-logging exception path:
+                # "Docker not installed" is expected degradation, not a failure
+                # (#6613). Timeouts/other errors still raise and are caught below.
+                probe = secure_run(docker_cmd, timeout=2.0, check=False)
+                self.results.docker_available = probe.returncode == 0
+                if probe.returncode != 0:
+                    logger.debug(
+                        "Docker not available (probe exit code %s)", probe.returncode
+                    )
             except Exception as e:  # noqa: BLE001
                 self.results.docker_available = False
-                logger.debug(f"Docker not available or timed out: {e}")
+                logger.debug(f"Docker probe failed: {e}")
 
             self.progress_signal.emit("Ready", 100)
             self.msleep(

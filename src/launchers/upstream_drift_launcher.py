@@ -818,10 +818,15 @@ class UpstreamDriftLauncher(QMainWindow):
         self._startup_time_ms = results.startup_time_ms
         self.orchestrator.initialize_from_results(results)
         self.layout_manager.available_models = self.orchestrator.available_models
+        # Clear the loading flag BEFORE building the grid: _rebuild_grid()
+        # renders placeholder SkeletonCards while self.loading is True, so if
+        # the flag is still set when _load_layout() rebuilds, the Home view is
+        # left showing skeletons until the next rebuild trigger (e.g. a sidebar
+        # click). Flipping it first makes the startup rebuild render real cards.
+        self.loading = False
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
-        self.loading = False
 
         from PyQt6.QtCore import QTimer as _QTimer
 
