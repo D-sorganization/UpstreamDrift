@@ -87,3 +87,6 @@ jobs:
 
       - name: Docs governance
         run: python3 scripts/check_docs_governance.py
+
+      - name: ADR numbering uniqueness
+        run: python3 scripts/ci/check_adr_numbering.py
