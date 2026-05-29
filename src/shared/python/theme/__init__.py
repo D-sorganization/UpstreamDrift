@@ -51,6 +51,14 @@ from .colors import (
     normalise_hex_color,
 )
 from .protocols import StylesheetGenerator, ThemeProvider, ThemeSwitcher
+from .v1 import (
+    CONTRACT_VERSION,
+    ROLE_TOKENS,
+    SEVERITY_TOKENS,
+    RolePalette,
+    role_palette,
+    severity_palette,
+)
 from .sidekick_tokens import (
     REQUIRED_SIDEKICK_TOKENS,
     get_current_sidekick_tokens,
@@ -205,6 +213,13 @@ def apply_golf_suite_style() -> None:
 
 
 __all__ = [
+    # Versioned theme contract (no PyQt6 dependency)
+    "CONTRACT_VERSION",
+    "ROLE_TOKENS",
+    "SEVERITY_TOKENS",
+    "RolePalette",
+    "role_palette",
+    "severity_palette",
     # Protocols (no PyQt6 dependency)
     "StylesheetGenerator",
     "ThemeProvider",
