@@ -43,7 +43,7 @@ jobs:
   verify:
     timeout-minutes: 30
     name: Verify Diff Substance
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     # Only gate Jules-generated branches. Other PRs pass through automatically.
     if: >
       github.event_name == 'workflow_dispatch' ||

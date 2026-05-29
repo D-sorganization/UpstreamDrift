@@ -376,18 +376,15 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
         return 0.0
 
 
+# fmt: off
 @router.get(
     "/simulation/forces",
     response_model=ForceOverlayResponse,
 )
 @precondition(
-    lambda force_types="applied",
-    color_by_magnitude=True,
-    body_filter=None,
-    show_labels=False,
-    scale_factor=0.01,
-    engine_manager=None,
-    logger=None: (scale_factor > 0 and len(force_types.strip()) > 0),
+    lambda force_types="applied", color_by_magnitude=True, body_filter=None, show_labels=False, scale_factor=0.01, engine_manager=None, logger=None: (
+        scale_factor > 0 and len(force_types.strip()) > 0
+    ),
     "Scale factor must be positive and force_types must be non-empty",
 )
 @handle_api_errors
@@ -400,6 +397,7 @@ async def get_force_overlays(
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> ForceOverlayResponse:
+# fmt: on
     """Get current force/torque vectors for 3D overlay rendering.
 
     Queries the active simulation engine for force data and returns

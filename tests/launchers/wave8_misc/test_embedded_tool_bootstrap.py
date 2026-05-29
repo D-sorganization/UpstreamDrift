@@ -151,6 +151,7 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
 _FIRST_PARTY_TOOL_IDS = {
     "ball_flight_gui",
     "bunker_shot_gui",
+    "model_explorer",
     "putting_green_gui",
     "golf_environment",
     "terrain_engine",

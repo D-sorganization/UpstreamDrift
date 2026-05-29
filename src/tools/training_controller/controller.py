@@ -50,7 +50,6 @@ from .view_model import (
     job_row_from_training_job,
 )
 
-
 __all__ = [
     "DEFAULT_ROLLING_WINDOW",
     "ModelChangeCallback",
@@ -384,9 +383,9 @@ class TrainingDashboardController:
     def _compat_error(report: CompatibilityReport, engine: str):
         # Local import keeps the public import block tidy; the error
         # type lives next to the rest of the training errors.
-        from src.shared.python.training.errors import (  # noqa: PLC0415
+        from src.shared.python.training.errors import (
             CompatibilityError,
-        )
+        )  # noqa: PLC0415
 
         msgs = "; ".join(i.message for i in report.errors)
         return CompatibilityError(

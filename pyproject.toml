@@ -343,6 +343,7 @@ exclude = [
     "src/shared/python/upstream_drift_tools/process_calculators/optimization.py",
     "src/shared/python/perturbation/statistics.py",
     "src/shared/python/model_generation/core/physics_validation.py",
+    "src/shared/python/model_generation/core/constants.py",
     "src/learning/imitation/dataset.py",
     "src/engines/physics_engines/mujoco/docker/",
     "src/deployment/realtime/controller.py",
