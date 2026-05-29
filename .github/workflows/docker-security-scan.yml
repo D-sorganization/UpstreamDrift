@@ -26,7 +26,7 @@ jobs:
   trivy-scan:
     timeout-minutes: 40
     name: Trivy Container Scan
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     permissions:
       security-events: write
       contents: read
