@@ -85,6 +85,11 @@ class FitResult:
     fitted_values: np.ndarray
     residuals: np.ndarray
 
+    @property
+    def theta_optimal(self) -> list[float]:
+        """Get optimal coefficients."""
+        return self.coefficients
+
 
 @dataclass
 class ColumnStats:
@@ -113,6 +118,11 @@ class ProcessingResult:
     data: pd.DataFrame | None = None
     stats: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+    @property
+    def solver_status(self) -> str:
+        """Get the status of the solver."""
+        return "success" if self.success else "failure"
 
 
 class DataProcessorEngine(BaseCalculationEngine):

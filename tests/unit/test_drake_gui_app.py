@@ -54,8 +54,13 @@ def _mock_pydrake() -> Generator[None, None, None]:
 
     # Clean up drake engine modules to prevent pollution
     for module_name in list(sys.modules.keys()):
-        if module_name.startswith("src.engines.physics_engines.drake"):
-            del sys.modules[module_name]
+        if (
+            module_name.startswith(
+                ("src.engines.physics_engines.drake", "pydrake", "torch", "cv2")
+            )
+            or module_name in pydrake_mocks
+        ):
+            sys.modules.pop(module_name, None)
 
     # Restore saved modules
     for module_name, module in saved_modules.items():

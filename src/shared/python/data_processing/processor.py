@@ -67,6 +67,8 @@ def _validate_dataframe_expression(expression: str) -> None:
 
     for node in ast.walk(tree):
         # Reject disallowed node types outright
+        if isinstance(node, ast.Lambda):
+            raise ValueError("Disallowed node type Lambda")
         if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
             raise ValueError(
                 f"Attribute access to dunder name '{node.attr}' is not permitted"
