@@ -1,4 +1,4 @@
-"""Comprehensive tests for upstream_drift_tools.process_calculators.analysis_utils.
+"""Comprehensive tests for sidekick.process_calculators.analysis_utils.
 
 Covers evaluate_output with all branches: successful calculation, engine failure,
 non-dict result, overrides, HHV injection.
@@ -9,7 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-from upstream_drift_tools.process_calculators.analysis_utils import evaluate_output
+from sidekick.process_calculators.analysis_utils import evaluate_output
 
 
 class TestEvaluateOutput:

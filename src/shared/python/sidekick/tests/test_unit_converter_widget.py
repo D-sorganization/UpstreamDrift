@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from PyQt6.QtCore import QSettings
-from upstream_drift_tools.calculators.conversion.service import ConversionResult
-from upstream_drift_tools.ui.widgets.unit_converter_widget import (
+from sidekick.calculators.conversion.service import ConversionResult
+from sidekick.ui.widgets.unit_converter_widget import (
     CaseInsensitiveCompleter,
     ConversionRow,
     UnitConverterWidget,
@@ -45,7 +45,7 @@ def clean_settings() -> Any:
     settings = QSettings("UpstreamDriftTools", "UnitConverter_Test")
     settings.clear()
     with patch(
-        "upstream_drift_tools.ui.widgets.unit_converter_widget.QSettings",
+        "sidekick.ui.widgets.unit_converter_widget.QSettings",
         return_value=settings,
     ):
         yield settings
@@ -68,7 +68,7 @@ def mock_converter(monkeypatch) -> Any:
     mock.convert.side_effect = mock_conv
 
     with patch(
-        "upstream_drift_tools.ui.widgets.unit_converter_widget.get_service",
+        "sidekick.ui.widgets.unit_converter_widget.get_service",
         return_value=mock,
     ):
         yield mock

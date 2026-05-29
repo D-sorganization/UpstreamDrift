@@ -73,7 +73,7 @@ class SidekickCalculatorWidget(QtWidgets.QWidget):
         )
         self._workspace_controller = default_calculator_workspace_controller(
             self._registry,
-            storage_dir=get_default_sidekick_dir("upstream_drift_tools"),
+            storage_dir=get_default_sidekick_dir("sidekick"),
         )
         self._startup_namespace: dict[str, Any] = {}
         self._startup_result = apply_calculator_startup_imports(

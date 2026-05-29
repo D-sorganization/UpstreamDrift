@@ -1,4 +1,4 @@
-"""Tests for upstream_drift_tools.process_calculators.thermal_profile_predictor.
+"""Tests for sidekick.process_calculators.thermal_profile_predictor.
 
 Covers predict_temperature_profile and fit_heating_parameters.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from upstream_drift_tools.process_calculators.thermal_profile_predictor import (
+from sidekick.process_calculators.thermal_profile_predictor import (
     _heating_ode,
     fit_heating_parameters,
     predict_temperature_profile,

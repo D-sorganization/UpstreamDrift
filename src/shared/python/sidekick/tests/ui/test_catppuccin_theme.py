@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from upstream_drift_tools.ui.catppuccin_theme import COLORS, get_stylesheet
+from sidekick.ui.catppuccin_theme import COLORS, get_stylesheet
 
 
 def test_colors_dict() -> None:

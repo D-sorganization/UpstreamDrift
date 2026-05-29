@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from upstream_drift_tools.calculators.thermo.steam_engine import (
+from sidekick.calculators.thermo.steam_engine import (
     SteamCalculationEngine,
     SteamProperties,
 )
@@ -18,18 +18,16 @@ def test_engine_init() -> None:
 def test_select_best_engine() -> None:
     engine = SteamCalculationEngine()
 
-    with patch(
-        "upstream_drift_tools.calculators.thermo.steam_engine.COOLPROP_AVAILABLE", True
-    ):
+    with patch("sidekick.calculators.thermo.steam_engine.COOLPROP_AVAILABLE", True):
         assert engine._select_best_engine("coolprop") == "coolprop"
 
     with (
         patch(
-            "upstream_drift_tools.calculators.thermo.steam_engine.COOLPROP_AVAILABLE",
+            "sidekick.calculators.thermo.steam_engine.COOLPROP_AVAILABLE",
             False,
         ),
         patch(
-            "upstream_drift_tools.calculators.thermo.steam_engine.CANTERA_AVAILABLE",
+            "sidekick.calculators.thermo.steam_engine.CANTERA_AVAILABLE",
             False,
         ),
     ):

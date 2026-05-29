@@ -131,7 +131,7 @@ def _load_module_from_root(module_name: str, root: Path) -> Any | None:
     if not file_path.exists():
         return None
 
-    spec_name = f"_upstream_drift_tools_probe_{module_name.replace('.', '_')}"
+    spec_name = f"_sidekick_probe_{module_name.replace('.', '_')}"
     spec = importlib.util.spec_from_file_location(spec_name, file_path)
     if spec is None or spec.loader is None:
         return None

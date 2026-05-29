@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from upstream_drift_tools.lab.bio.c3d_reader import (
+from sidekick.lab.bio.c3d_reader import (
     C3DDataReader,
     C3DEvent,
     C3DMetadata,
@@ -152,7 +152,7 @@ class TestAnalogEdgeCases:
 
     @pytest.fixture()
     def mock_ezc3d(self):
-        with patch("upstream_drift_tools.lab.bio.c3d_reader.ezc3d") as mock:
+        with patch("sidekick.lab.bio.c3d_reader.ezc3d") as mock:
             yield mock
 
     @pytest.fixture()

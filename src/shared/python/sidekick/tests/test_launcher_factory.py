@@ -15,7 +15,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from upstream_drift_tools.launcher_factory import (
+from sidekick.launcher_factory import (
     LauncherConfig,
     LauncherError,
     create_launcher_config,
@@ -139,11 +139,11 @@ class TestLaunchApp:
 
     def test_returns_1_when_pyqt6_unavailable(self):
         """Lines 172-178: ImportError from _import_pyqt6 → return 1."""
-        from upstream_drift_tools.launcher_factory import launch_app
+        from sidekick.launcher_factory import launch_app
 
         cfg = self._cfg()
         with patch(
-            "upstream_drift_tools.launcher_factory._import_pyqt6",
+            "sidekick.launcher_factory._import_pyqt6",
             side_effect=ImportError("PyQt6 not installed"),
         ):
             result = launch_app(cfg, window_factory=MagicMock())
@@ -151,13 +151,13 @@ class TestLaunchApp:
 
     def test_returns_1_when_window_factory_raises(self):
         """Lines 198-205: RuntimeError from window_factory → return 1."""
-        from upstream_drift_tools.launcher_factory import launch_app
+        from sidekick.launcher_factory import launch_app
 
         cfg = self._cfg()
         mock_app = MagicMock()
         mock_qmainwindow = MagicMock()
         with patch(
-            "upstream_drift_tools.launcher_factory._import_pyqt6",
+            "sidekick.launcher_factory._import_pyqt6",
             return_value=(mock_app, mock_qmainwindow),
         ):
             result = launch_app(
@@ -168,7 +168,7 @@ class TestLaunchApp:
 
     def test_happy_path_returns_app_exit_code(self):
         """Full happy path — mocked QApplication + window."""
-        from upstream_drift_tools.launcher_factory import launch_app
+        from sidekick.launcher_factory import launch_app
 
         cfg = self._cfg()
         mock_window = MagicMock()
@@ -176,7 +176,7 @@ class TestLaunchApp:
         mock_app.exec.return_value = 0
 
         with patch(
-            "upstream_drift_tools.launcher_factory._import_pyqt6",
+            "sidekick.launcher_factory._import_pyqt6",
             return_value=(mock_app, MagicMock()),
         ):
             result = launch_app(cfg, window_factory=lambda: mock_window)
@@ -185,7 +185,7 @@ class TestLaunchApp:
 
     def test_icon_path_triggers_icon_set(self):
         """Lines 187-193: icon_path set → QIcon is applied."""
-        from upstream_drift_tools.launcher_factory import launch_app
+        from sidekick.launcher_factory import launch_app
 
         cfg = self._cfg(icon_path="/path/to/icon.png")
         mock_window = MagicMock()
@@ -194,11 +194,11 @@ class TestLaunchApp:
 
         with (
             patch(
-                "upstream_drift_tools.launcher_factory._import_pyqt6",
+                "sidekick.launcher_factory._import_pyqt6",
                 return_value=(mock_app, MagicMock()),
             ),
             (
-                patch("upstream_drift_tools.launcher_factory.PyQt6.QtGui.QIcon")
+                patch("sidekick.launcher_factory.PyQt6.QtGui.QIcon")
                 if False
                 else patch("builtins.__import__", side_effect=ImportError)
             ) as _,
@@ -209,7 +209,7 @@ class TestLaunchApp:
 
     def test_icon_path_import_error_is_logged_not_raised(self):
         """Lines 192-193: icon import error is caught and logged, app continues."""
-        from upstream_drift_tools.launcher_factory import launch_app
+        from sidekick.launcher_factory import launch_app
 
         cfg = self._cfg(icon_path="/some/icon.png")
         mock_window = MagicMock()
@@ -221,11 +221,11 @@ class TestLaunchApp:
 
         with (
             patch(
-                "upstream_drift_tools.launcher_factory._import_pyqt6",
+                "sidekick.launcher_factory._import_pyqt6",
                 return_value=(mock_app, MagicMock()),
             ),
             patch(
-                "upstream_drift_tools.launcher_factory._import_pyqt6",
+                "sidekick.launcher_factory._import_pyqt6",
                 return_value=(mock_app, MagicMock()),
             ),
         ):
@@ -246,7 +246,7 @@ class TestImportPyQt6:
         import sys
         import types
 
-        from upstream_drift_tools.launcher_factory import _import_pyqt6
+        from sidekick.launcher_factory import _import_pyqt6
 
         # Build fake PyQt6 module hierarchy
         fake_qapp = MagicMock()

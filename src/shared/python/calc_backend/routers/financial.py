@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/calc/financial", tags=["financial"])
 @router.post("", response_model=FinancialResponse)
 def calculate_financial(request: FinancialRequest) -> FinancialResponse:
     """Calculate financial metrics and optional yearly projections."""
-    from upstream_drift_tools.process_calculators.financial_calculator import (
+    from sidekick.process_calculators.financial_calculator import (
         FinancialModelCalculator,
         FinancialParameters,
     )

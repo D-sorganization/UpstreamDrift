@@ -22,7 +22,7 @@ def _tab_help(
     *,
     tips: tuple[str, ...] = (),
     examples: tuple[str, ...] = (),
-    source: str = "upstream_drift_tools.ui.tools_sidebar.help_content",
+    source: str = "sidekick.ui.tools_sidebar.help_content",
 ) -> dict[str, str]:
     metadata = {
         "title": title,
@@ -98,7 +98,7 @@ DEFAULT_SIDEBAR_TAB_HELP: dict[str, dict[str, str]] = {
             "Plot requests stay explicit through the shared PlotSpec contract.",
             "Use calculator or workspace values as the source for plotted series.",
         ),
-        source="upstream_drift_tools.ui.tools_sidebar.calculator_plotting",
+        source="sidekick.ui.tools_sidebar.calculator_plotting",
     ),
     "data_explorer": _tab_help(
         "Data Explorer",
@@ -114,7 +114,7 @@ DEFAULT_SIDEBAR_TAB_HELP: dict[str, dict[str, str]] = {
             "data/example.csv",
             "results/run_001.json",
         ),
-        source="upstream_drift_tools.ui.tools_sidebar.data_explorer_service",
+        source="sidekick.ui.tools_sidebar.data_explorer_service",
     ),
     "data_processor": _tab_help(
         "Data Processor",
@@ -130,7 +130,7 @@ DEFAULT_SIDEBAR_TAB_HELP: dict[str, dict[str, str]] = {
             "temperature",
             "temperature, pressure",
         ),
-        source="upstream_drift_tools.ui.tools_sidebar.data_processor_tab",
+        source="sidekick.ui.tools_sidebar.data_processor_tab",
     ),
     "units": _tab_help(
         "Units",
@@ -179,7 +179,7 @@ DEFAULT_SIDEBAR_TAB_HELP: dict[str, dict[str, str]] = {
             "Generate comprehensive session reports with workspace context",
             "and chat history.",
         ),
-        source="upstream_drift_tools.ui.tools_sidebar.reporting_tab",
+        source="sidekick.ui.tools_sidebar.reporting_tab",
     ),
     "jupyter": _tab_help(
         "Jupyter",
@@ -192,7 +192,7 @@ DEFAULT_SIDEBAR_TAB_HELP: dict[str, dict[str, str]] = {
             "install hint with a copy-to-clipboard button.",
         ),
         examples=("pip install '.[jupyter]'",),
-        source="upstream_drift_tools.ui.tools_sidebar.jupyter_tab",
+        source="sidekick.ui.tools_sidebar.jupyter_tab",
     ),
 }
 

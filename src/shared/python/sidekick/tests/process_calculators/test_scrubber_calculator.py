@@ -1,5 +1,5 @@
 import pytest
-from upstream_drift_tools.process_calculators.scrubber_calculator import (
+from sidekick.process_calculators.scrubber_calculator import (
     PACKING_DATABASE,
     calculate_caustic_requirement,
     calculate_column_diameter,

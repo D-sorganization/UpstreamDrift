@@ -27,7 +27,7 @@ def _sanitize(v: float) -> float:
 def calculate_syngas_water(request: SyngasWaterRequest) -> SyngasWaterResponse:
     """Calculate water content and condensation risk in syngas."""
     try:
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             SyngasWaterCalculator,
             estimate_condensation_risk,
         )

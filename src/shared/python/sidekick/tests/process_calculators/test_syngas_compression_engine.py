@@ -9,7 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from upstream_drift_tools.process_calculators.syngas_compression_calculator import (
+from sidekick.process_calculators.syngas_compression_calculator import (
     HAS_PYQT,
     CompressionCalculationWorker,
     CompressionStage,
@@ -272,7 +272,7 @@ class TestWorkerAndWidget:
     @pytest.fixture(autouse=True)
     def patch_state(self, monkeypatch):
         try:
-            from upstream_drift_tools.ui.mixins.calculator_state_mixin import (
+            from sidekick.ui.mixins.calculator_state_mixin import (
                 CalculatorStateMixin,
             )
 
@@ -316,7 +316,7 @@ class TestWorkerAndWidget:
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_initialization(self, qtbot):
         with patch(
-            "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+            "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
         ) as mock_timer:
             widget = SyngasCompressionCalculatorWidget()
             assert widget.engine is not None
@@ -326,7 +326,7 @@ class TestWorkerAndWidget:
     def test_widget_show_event(self, qtbot):
         widget = SyngasCompressionCalculatorWidget()
         with patch(
-            "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+            "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
         ) as mock_timer:
             from PyQt6.QtGui import QShowEvent
 
@@ -348,7 +348,7 @@ class TestWorkerAndWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_setup_state_management(self, mock_timer, qtbot):
         widget = SyngasCompressionCalculatorWidget()
@@ -356,7 +356,7 @@ class TestWorkerAndWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_set_default_values(self, mock_timer, qtbot):
         widget = SyngasCompressionCalculatorWidget()
@@ -364,7 +364,7 @@ class TestWorkerAndWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_calculate_compression(self, mock_timer, qtbot):
         widget = SyngasCompressionCalculatorWidget()
@@ -387,7 +387,7 @@ class TestWorkerAndWidget:
         ]
 
         with patch(
-            "upstream_drift_tools.process_calculators.syngas_compression_calculator.CompressionCalculationWorker"
+            "sidekick.process_calculators.syngas_compression_calculator.CompressionCalculationWorker"
         ) as mock_worker:
             worker_instance = MagicMock()
             mock_worker.return_value = worker_instance
@@ -396,7 +396,7 @@ class TestWorkerAndWidget:
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_calculate_compression_no_stages(self, mock_timer, qtbot):
         widget = SyngasCompressionCalculatorWidget()
@@ -422,26 +422,26 @@ class TestWorkerAndWidget:
         ]
 
         with patch(
-            "upstream_drift_tools.process_calculators.syngas_compression_calculator.QMessageBox.warning"
+            "sidekick.process_calculators.syngas_compression_calculator.QMessageBox.warning"
         ) as mock_msg:
             widget.calculate_compression()
             mock_msg.assert_called_once()
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_on_calculation_error(self, mock_timer, qtbot):
         widget = SyngasCompressionCalculatorWidget()
         with patch(
-            "upstream_drift_tools.process_calculators.syngas_compression_calculator.QMessageBox.critical"
+            "sidekick.process_calculators.syngas_compression_calculator.QMessageBox.critical"
         ) as mock_msg:
             widget.on_calculation_error("test error")
             mock_msg.assert_called_once()
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     @patch(
-        "upstream_drift_tools.process_calculators.syngas_compression_calculator.QTimer.singleShot"
+        "sidekick.process_calculators.syngas_compression_calculator.QTimer.singleShot"
     )
     def test_widget_on_calculation_finished(self, mock_timer, qtbot, engine):
         widget = SyngasCompressionCalculatorWidget()

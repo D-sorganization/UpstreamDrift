@@ -15,12 +15,12 @@ This ensures consistent client behavior across all endpoints and improves debugg
 
 ## StandardResponse Class
 
-The `StandardResponse` class (in `upstream_drift_tools.api`) provides a reusable wrapper for all API responses.
+The `StandardResponse` class (in `sidekick.api`) provides a reusable wrapper for all API responses.
 
 ### Imports
 
 ```python
-from upstream_drift_tools.api import (
+from sidekick.api import (
     StandardResponse,
     ErrorDetail,
     ErrorCode,
@@ -150,7 +150,7 @@ The `ErrorCode` enum defines standard error codes used across all APIs:
 
 ```python
 from fastapi import APIRouter, HTTPException
-from upstream_drift_tools.api import StandardResponse, ErrorDetail, ErrorCode
+from sidekick.api import StandardResponse, ErrorDetail, ErrorCode
 from calc_backend.models.pressure_drop import PressureDropRequest, PressureDropResponse
 
 router = APIRouter(prefix="/api/calc/pressure-drop", tags=["pressure-drop"])
@@ -264,13 +264,13 @@ To migrate existing clients:
 
 Comprehensive tests are provided:
 
-- `src/shared/python/upstream_drift_tools/tests/test_standard_response.py` - StandardResponse class
+- `src/shared/python/sidekick/tests/test_standard_response.py` - StandardResponse class
 - `tests/calc_backend/test_pressure_drop_models.py` - PressureDropRequest/Response validation
 
 Run tests:
 
 ```bash
-python3 -m pytest src/shared/python/upstream_drift_tools/tests/test_standard_response.py -v
+python3 -m pytest src/shared/python/sidekick/tests/test_standard_response.py -v
 python3 -m pytest tests/calc_backend/test_pressure_drop_models.py -v
 ```
 
@@ -278,6 +278,6 @@ python3 -m pytest tests/calc_backend/test_pressure_drop_models.py -v
 
 - Issue #2411: API Standardization Foundation
 - Issue #613: Calc Backend
-- StandardResponse: `src/shared/python/upstream_drift_tools/api/standard_response.py`
+- StandardResponse: `src/shared/python/sidekick/api/standard_response.py`
 - Models: `src/shared/python/calc_backend/models/pressure_drop.py`
 - Router: `src/shared/python/calc_backend/routers/pressure_drop.py`

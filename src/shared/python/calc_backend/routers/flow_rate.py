@@ -1,14 +1,14 @@
 """Flow rate converter router.  See issue #608.
 
 DRY: reuses the canonical conversion tables from
-upstream_drift_tools.calculators.conversion.flow_rate_converter
+sidekick.calculators.conversion.flow_rate_converter
 instead of duplicating conversion factors.
 """
 
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
-from upstream_drift_tools.calculators.conversion.flow_rate_converter import (
+from sidekick.calculators.conversion.flow_rate_converter import (
     MASS_FLOW_CONVERSIONS,
     MOLAR_FLOW_CONVERSIONS,
     VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S,

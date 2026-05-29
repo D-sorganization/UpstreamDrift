@@ -27,7 +27,7 @@ def calculate_acid_gas_dewpoint(
     request: AcidGasDewpointRequest,
 ) -> AcidGasDewpointResponse:
     """Calculate acid gas dewpoint for a mixture."""
-    from upstream_drift_tools.process_calculators.acid_gas_dewpoint_calculator import (
+    from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
         AcidGasComposition,
         AcidGasDewpointCalculator,
     )

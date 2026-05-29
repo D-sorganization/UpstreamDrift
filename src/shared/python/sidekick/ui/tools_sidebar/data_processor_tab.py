@@ -170,9 +170,7 @@ class SidekickDataProcessorTab(QtWidgets.QWidget):
 
 
 def _build_data_processor_widget(parent: QtWidgets.QWidget) -> QtWidgets.QWidget:
-    module = importlib.import_module(
-        "upstream_drift_tools.ui.widgets.data_processor_widget"
-    )
+    module = importlib.import_module("sidekick.ui.widgets.data_processor_widget")
     widget_class = module.DataProcessorWidget
     return widget_class(parent)
 

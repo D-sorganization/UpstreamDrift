@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from PyQt6.QtCore import QSettings
-from upstream_drift_tools.ui.managers.unit_preferences_manager import (
+from sidekick.ui.managers.unit_preferences_manager import (
     UnitPreferencesManager,
     _PreferencesHolder,
     get_unit_preferences_manager,
@@ -88,9 +88,7 @@ def test_get_si_unit() -> Any:
     assert manager.get_si_unit("invalid_category") == ""
 
 
-@patch(
-    "upstream_drift_tools.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter"
-)
+@patch("sidekick.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter")
 def test_convert_to_si(mock_converter, qapp) -> Any:
     manager = UnitPreferencesManager()
     # Mock the return of converter.convert().value
@@ -107,9 +105,7 @@ def test_convert_to_si(mock_converter, qapp) -> Any:
     assert manager.convert_to_si(100.0, "temperature", "K") == 100.0
 
 
-@patch(
-    "upstream_drift_tools.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter"
-)
+@patch("sidekick.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter")
 def test_convert_from_si(mock_converter, qapp) -> Any:
     manager = UnitPreferencesManager()
     mock_convert_result = MagicMock()
@@ -124,9 +120,7 @@ def test_convert_from_si(mock_converter, qapp) -> Any:
     assert manager.convert_from_si(100.0, "temperature", "K") == 100.0
 
 
-@patch(
-    "upstream_drift_tools.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter"
-)
+@patch("sidekick.ui.managers.unit_preferences_manager.UnitPreferencesManager.converter")
 def test_convert_error_handling(mock_converter, qapp) -> Any:
     manager = UnitPreferencesManager()
     mock_converter.convert.side_effect = ValueError("Bad unit")
@@ -140,7 +134,7 @@ def test_lazy_converter_property(qapp) -> Any:
     # Tests the lazy property initialization
     manager = UnitPreferencesManager()
     with patch(
-        "upstream_drift_tools.calculators.conversion.service.get_service",
+        "sidekick.calculators.conversion.service.get_service",
         return_value="MOCKED_SERVICE",
     ):
         assert manager.converter == "MOCKED_SERVICE"

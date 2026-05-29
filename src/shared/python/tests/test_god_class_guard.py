@@ -58,13 +58,13 @@ def _get_class_method_counts(filepath: Path) -> dict[str, int]:
 
 # Relative paths from _SHARED_PYTHON
 _MONITORED_FILES: list[str] = [
-    "upstream_drift_tools/ui/mixins/calculator_state_mixin.py",
-    "upstream_drift_tools/ui/widgets/data_processor_widget.py",
+    "sidekick/ui/mixins/calculator_state_mixin.py",
+    "sidekick/ui/widgets/data_processor_widget.py",
     "theme/theme_manager.py",
     "signal_toolkit/widget_processing.py",
     "model_generation/editor/frankenstein_editor.py",
     "data_processing/processor.py",
-    "upstream_drift_tools/data_processing/core.py",
+    "sidekick/data_processing/core.py",
 ]
 
 # Classes with documented per-class limits (may be higher than the default ceiling
@@ -138,9 +138,7 @@ def test_calculator_state_mixin_reduced() -> None:
     This is a regression guard: the class was reduced from 35 to 16 methods by
     extracting _SplitterStateMixin and _ClipboardMixin sub-mixins.
     """
-    filepath = (
-        _SHARED_PYTHON / "upstream_drift_tools/ui/mixins/calculator_state_mixin.py"
-    )
+    filepath = _SHARED_PYTHON / "sidekick/ui/mixins/calculator_state_mixin.py"
     counts = _get_class_method_counts(filepath)
 
     mixin_count = counts.get("CalculatorStateMixin", 0)

@@ -14,7 +14,7 @@ sys.modules["pandas"] = MagicMock()
 
 import numpy as np
 import pytest
-from upstream_drift_tools.process_calculators.psa_package.psa_webapp import (
+from sidekick.process_calculators.psa_package.psa_webapp import (
     DEFAULT_COMPONENTS,
     PSAResults,
     StreamCompositions,
@@ -34,9 +34,7 @@ from upstream_drift_tools.process_calculators.psa_package.psa_webapp import (
 @pytest.fixture
 def mock_streamlit():
     """Mock the streamlit module."""
-    with patch(
-        "upstream_drift_tools.process_calculators.psa_package.psa_webapp.st"
-    ) as mock_st:
+    with patch("sidekick.process_calculators.psa_package.psa_webapp.st") as mock_st:
         yield mock_st
 
 
@@ -112,26 +110,14 @@ def test_get_flammability_status():
     assert color == "red"
 
 
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.px.imshow")
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.go.Figure")
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_data_tables_tab"
-)
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_o2_safety_tab"
-)
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_sensitivity_tab"
-)
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_results_tab"
-)
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_key_metrics"
-)
-@patch(
-    "upstream_drift_tools.process_calculators.psa_package.psa_webapp._render_sidebar"
-)
+@patch("sidekick.process_calculators.psa_package.psa_webapp.px.imshow")
+@patch("sidekick.process_calculators.psa_package.psa_webapp.go.Figure")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_data_tables_tab")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_o2_safety_tab")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_sensitivity_tab")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_results_tab")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_key_metrics")
+@patch("sidekick.process_calculators.psa_package.psa_webapp._render_sidebar")
 def test_webapp_main(
     mock_sidebar,
     mock_key,
@@ -228,7 +214,7 @@ def test_render_key_metrics_caution(mock_streamlit, sample_results):
     assert mock_streamlit.warning.called
 
 
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.go.Figure")
+@patch("sidekick.process_calculators.psa_package.psa_webapp.go.Figure")
 def test_render_results_tab(mock_figure, mock_streamlit, sample_results):
     mock_streamlit.columns.return_value = (MagicMock(), MagicMock())
     _render_results_tab(sample_results)
@@ -238,7 +224,7 @@ def test_render_results_tab(mock_figure, mock_streamlit, sample_results):
     assert mock_streamlit.plotly_chart.called
 
 
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.go.Figure")
+@patch("sidekick.process_calculators.psa_package.psa_webapp.go.Figure")
 def test_render_sensitivity_tab(mock_figure, mock_streamlit):
     mock_streamlit.columns.side_effect = [
         (MagicMock(), MagicMock(), MagicMock()),
@@ -250,8 +236,8 @@ def test_render_sensitivity_tab(mock_figure, mock_streamlit):
     assert mock_streamlit.plotly_chart.called
 
 
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.px.imshow")
-@patch("upstream_drift_tools.process_calculators.psa_package.psa_webapp.go.Figure")
+@patch("sidekick.process_calculators.psa_package.psa_webapp.px.imshow")
+@patch("sidekick.process_calculators.psa_package.psa_webapp.go.Figure")
 def test_render_o2_safety_tab(mock_figure, mock_imshow, mock_streamlit):
     mock_streamlit.columns.return_value = (MagicMock(), MagicMock(), MagicMock())
     mock_streamlit.slider.return_value = 2

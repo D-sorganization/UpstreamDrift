@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from upstream_drift_tools.process_calculators.multi_param_analysis import (
+from sidekick.process_calculators.multi_param_analysis import (
     _evaluate_single_point,
     run_multi_parameter_analysis,
     run_multi_parameter_analysis_parallel,
@@ -23,7 +23,7 @@ def analysis_params() -> dict:
 def test_evaluate_single_point() -> None:
     engine = MagicMock()
     with patch(
-        "upstream_drift_tools.process_calculators.multi_param_analysis.evaluate_output"
+        "sidekick.process_calculators.multi_param_analysis.evaluate_output"
     ) as mock_eval:
         mock_eval.return_value = (42.0, None, None)
 
@@ -45,7 +45,7 @@ def test_run_multi_parameter_analysis(analysis_params: dict) -> None:
     p2_vals = np.array([3.0, 4.0])
 
     with patch(
-        "upstream_drift_tools.process_calculators.multi_param_analysis.evaluate_output"
+        "sidekick.process_calculators.multi_param_analysis.evaluate_output"
     ) as mock_eval:
         mock_eval.return_value = (42.0, None, None)
 

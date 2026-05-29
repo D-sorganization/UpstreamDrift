@@ -96,7 +96,7 @@ class NullToolsSidebar:
 
 
 _SIDEBAR_MODULE_CANDIDATES = (
-    "upstream_drift_tools.ui.tools_sidebar",
+    "sidekick.ui.tools_sidebar",
     "sidekick.ui.tools_sidebar",
     "shared.python.sidekick.ui.tools_sidebar",
 )

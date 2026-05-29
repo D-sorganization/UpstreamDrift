@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QWidget,
 )
-from upstream_drift_tools.ui.mixins.calculator_state_mixin import CalculatorStateMixin
+from sidekick.ui.mixins.calculator_state_mixin import CalculatorStateMixin
 
 
 class MockCalculator(QWidget, CalculatorStateMixin):
@@ -189,7 +189,7 @@ def test_get_set_calculator_state(qapp, monkeypatch) -> None:
 
 
 @patch(
-    "upstream_drift_tools.utils.state_manager.StateManager.save_state",
+    "sidekick.utils.state_manager.StateManager.save_state",
     return_value=True,
 )
 def test_save_state_method(mock_save, qapp) -> None:
@@ -202,7 +202,7 @@ def test_save_state_method(mock_save, qapp) -> None:
     assert calc.save_state() is True  # test alias
 
 
-@patch("upstream_drift_tools.utils.state_manager.StateManager.load_state")
+@patch("sidekick.utils.state_manager.StateManager.load_state")
 def test_load_state_method(mock_load, qapp) -> None:
     calc = MockCalculator("MyCalc")
 

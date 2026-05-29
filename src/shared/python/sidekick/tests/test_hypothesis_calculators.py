@@ -30,7 +30,7 @@ def _get_calc():
     """Return a module-level SyngasWaterCalculator instance (cached)."""
     global _CALC
     if _CALC is None:
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             SyngasWaterCalculator,
         )
 
@@ -71,7 +71,7 @@ class TestSyngasCompositionProperties:
         n2: float,
     ) -> None:
         """Normalized composition must sum to exactly 1.0."""
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             SyngasComposition,
         )
 
@@ -87,7 +87,7 @@ class TestSyngasCompositionProperties:
     @_HYP
     def test_normalize_preserves_nonnegativity(self, h2: float, co: float) -> None:
         """All fractions remain non-negative after normalization."""
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             SyngasComposition,
         )
 
@@ -104,7 +104,7 @@ class TestSyngasCompositionProperties:
     @_HYP
     def test_to_dict_round_trip(self, h2: float, co: float) -> None:
         """to_dict() contains all expected species keys."""
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             SyngasComposition,
         )
 
@@ -268,7 +268,7 @@ class TestCondensationRiskProperties:
     @_HYP
     def test_risk_level_consistency(self, temp_c: float, pressure_bar: float) -> None:
         """Risk level must be one of the expected values."""
-        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+        from sidekick.process_calculators.syngas_water_calculator import (
             estimate_condensation_risk,
         )
 

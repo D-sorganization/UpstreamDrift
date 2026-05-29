@@ -13,12 +13,12 @@ import time
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from upstream_drift_tools.api import (
+from sidekick.api import (
     ErrorCode,
     ErrorDetail,
     StandardResponse,
 )
-from upstream_drift_tools.process_calculators.pressure_drop_calculator import (
+from sidekick.process_calculators.pressure_drop_calculator import (
     PressureDropCalculator,
     PressureDropResult,
 )
@@ -38,7 +38,7 @@ def calculate_pressure_drop(
 ) -> dict[str, Any]:
     """Calculate pressure drop using Darcy-Weisbach equation.
 
-    Delegates to PressureDropCalculator from upstream_drift_tools to avoid
+    Delegates to PressureDropCalculator from sidekick to avoid
     duplicating the Darcy-Weisbach implementation inline. See GH1705.
 
     Uses standardized response format (issue #2411).

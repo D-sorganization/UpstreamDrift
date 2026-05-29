@@ -351,7 +351,7 @@ class SidekickPythonReplWidget(QtWidgets.QWidget):
     UpstreamDrift #5617: renamed from ``SidekickTerminalWidget``. The name
     is more honest — this widget runs a bounded Python REPL, not an OS
     shell. The new ``SidekickOsTerminalWidget`` (in
-    :mod:`upstream_drift_tools.ui.tools_sidebar.os_terminal`) provides the
+    :mod:`sidekick.ui.tools_sidebar.os_terminal`) provides the
     real PTY-backed shell. Object name, child widget object names, and
     tooltips are preserved so existing styling and tests continue to work.
 

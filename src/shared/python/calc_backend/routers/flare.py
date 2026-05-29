@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/calc/flare", tags=["flare"])
 @router.post("", response_model=FlareResponse)
 def calculate_flare(request: FlareRequest) -> FlareResponse:
     """Calculate flare size, radiation zones, and combustion efficiency."""
-    from upstream_drift_tools.process_calculators import FlareCalculator
+    from sidekick.process_calculators import FlareCalculator
 
     calc = FlareCalculator()
 

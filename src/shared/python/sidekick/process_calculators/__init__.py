@@ -12,7 +12,7 @@ Categories:
     - Mathematical: ODE solver, thermal profiles, multi-parameter analysis
 
 Usage:
-    from upstream_drift_tools.process_calculators import (
+    from sidekick.process_calculators import (
         AcidGasDewpointCalculator,
         ScrubberCalculator,
         FlareCalculator,

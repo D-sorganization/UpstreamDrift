@@ -1,5 +1,5 @@
 import pytest
-from upstream_drift_tools.calculators.thermo.thermo_properties import (
+from sidekick.calculators.thermo.thermo_properties import (
     ThermoPropertiesCalculator,
     ThermoResult,
 )
