@@ -27,6 +27,8 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0019](0019-mission-drift-calculators.md)          | Mission-Drift Calculators                                       | Accepted | 2026-04-25 |
 | [0020](0020-canonical-urdf-subsystem.md)           | Canonical URDF subsystem                                        | Accepted | 2026-05-08 |
 | [0021](0021-container-strategy.md)                 | Container Strategy — Three-Dockerfile Policy                    | Accepted | 2026-05-25 |
+| [0023](0023-mujoco-warp-backend.md)                | MuJoCo Warp GPU + MuJoCo CPU backends behind one Protocol       | Accepted | 2026-05-29 |
+| [0024](0024-differentiable-backend.md)             | Differentiable backend — MJX (JAX) vs custom Warp kernels       | Proposed | 2026-05-29 |
 
 ## ADR Backlog
 
