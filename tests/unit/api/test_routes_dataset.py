@@ -49,8 +49,8 @@ def test_get_plot_types(client: TestClient) -> None:
         response = client.get("/dataset/plots/types")
         assert response.status_code == 200
         assert isinstance(response.json(), list)
-    except Exception:
-        pass  # Handle if dependencies are missing in test env
+    except Exception:  # noqa: BLE001 - tolerate missing optional deps in test env
+        pass
 
 
 def test_get_export_formats(client: TestClient) -> None:

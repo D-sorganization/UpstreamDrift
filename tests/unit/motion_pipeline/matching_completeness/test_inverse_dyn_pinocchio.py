@@ -37,7 +37,7 @@ def _require_real_pinocchio() -> None:
                 "pinocchio in sys.modules is a MagicMock — real library absent",
                 allow_module_level=True,
             )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - skip when engine import fails
         pytest.skip(
             f"pinocchio appears to be mocked or broken: {exc}",
             allow_module_level=True,

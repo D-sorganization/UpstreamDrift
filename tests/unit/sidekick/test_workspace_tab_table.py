@@ -33,7 +33,7 @@ try:
         and isinstance(_qabt, type)
         and not getattr(_qabt, "_mock_name", None)
     )
-except Exception:
+except Exception:  # noqa: BLE001 - any failure means real Qt is unavailable
     _HAVE_REAL_QT = False
 
 _skip_qt = pytest.mark.skipif(

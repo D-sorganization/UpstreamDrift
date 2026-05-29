@@ -44,7 +44,7 @@ def _has_local_embeddings() -> bool:
         RagPipeline(mem, cfg, True)
     except RuntimeError:
         return False
-    except Exception:
+    except Exception:  # noqa: BLE001 - availability probe treats any error as unavailable
         return False
     return True
 

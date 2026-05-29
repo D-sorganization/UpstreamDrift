@@ -37,7 +37,7 @@ def test_mediapipe_landmarks_key_variant(tmp_path: Path) -> None:
     # Either succeeds or raises a clean adapter error.
     try:
         load_any(p)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - adversarial test inspects any error
         msg = str(e).lower()
         assert "mediapipe" in msg or "landmark" in msg, (
             f"Unexpected adapter error message (not a clean mediapipe/landmark "
