@@ -94,6 +94,8 @@ def test_embed_adapter_cleanup_calls_widget_cleanup() -> None:
 
 
 def test_package_registers_embed_adapter() -> None:
+    sys.modules.pop("src.tools.training_controller", None)
+    sys.modules.pop("src.tools.training_controller._embed_adapter", None)
     import src.tools.training_controller as package
 
     tool = get_embeddable_tool("training_controller")

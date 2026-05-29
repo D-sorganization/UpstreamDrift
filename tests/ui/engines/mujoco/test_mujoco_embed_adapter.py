@@ -164,6 +164,15 @@ def test_import_registers_mujoco_dashboard_in_registry() -> None:
     # ``contextlib.suppress(ImportError)``; subsequent imports are a
     # no-op thanks to the ``get_embeddable_tool`` guard in
     # ``_embed_adapter``.
+    import sys
+
+    sys.modules.pop(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf", None
+    )
+    sys.modules.pop(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._embed_adapter",
+        None,
+    )
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf  # noqa: F401,E501
 
     assert "mujoco_unified" in EMBEDDABLE_TOOL_REGISTRY

@@ -510,6 +510,7 @@ def pytest_configure(config: pytest.Config) -> None:
 _PROTECTED_PREFIXES = (
     "pinocchio",
     "pydrake",
+    "src.engines",
 )
 
 
