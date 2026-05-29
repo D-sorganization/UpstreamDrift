@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.spatial.transform import Rotation as SciPyRotation
@@ -66,7 +66,7 @@ class Rotation:
     def from_euler(cls, a: float, b: float, c: float, convention: str) -> Rotation:
         """Create a rotation from Euler angles in radians."""
         _validate_convention(convention)
-        rotation = SciPyRotation.from_euler(convention, [a, b, c])
+        rotation = SciPyRotation.from_euler(cast(Any, convention), [a, b, c])
         return cls(_scipy_to_wxyz(rotation))
 
     @classmethod
@@ -95,7 +95,7 @@ class Rotation:
     def as_euler(self, convention: str) -> tuple[float, float, float]:
         """Return Euler angles in radians for the given convention."""
         _validate_convention(convention)
-        values = self._rotation.as_euler(convention)
+        values = self._rotation.as_euler(cast(Any, convention))
         return (float(values[0]), float(values[1]), float(values[2]))
 
     def as_axis_angle(self) -> tuple[np.ndarray, float]:
