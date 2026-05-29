@@ -1314,10 +1314,10 @@ class UISetupManager:
         # top_bar.addWidget(self.btn_launch)  # Removed launch button per user request
 
     def _on_status_clicked(self) -> None:
-        """Handle clicking the status label. If in error/dependency error, opens diagnostics."""
+        """Handle clicking the status label. If in error/dependency error, opens environment manager."""
         status_text = self.lbl_status.text()
         if "Dependency Error" in status_text or "Error" in status_text:
-            self.launcher.open_diagnostics()
+            self.launcher.open_environment_manager()
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).

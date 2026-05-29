@@ -1177,7 +1177,7 @@ class UpstreamDriftLauncher(QMainWindow):
                         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                         self.lbl_status.setCursor(Qt.CursorShape.PointingHandCursor)
                         self.lbl_status.setToolTip(
-                            "Click to view details in Settings -> Diagnostics"
+                            "Click to view details in Settings -> Configuration"
                         )
                     else:
                         self.lbl_status.setText("Ready")

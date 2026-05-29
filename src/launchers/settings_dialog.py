@@ -1585,6 +1585,7 @@ class SettingsWidget(QWidget):
             ("Drake", "pydrake", ">=1.22.0", True),
             ("Pinocchio", "pinocchio", ">=2.6.0", True),
             ("OpenSim", "opensim", ">=4.4.0", True),
+            ("MyoSuite", "myosuite", ">=2.0.0", True),
         ]
 
         check_results = []
@@ -1609,9 +1610,9 @@ class SettingsWidget(QWidget):
                     check_results.append(
                         {
                             "name": name,
-                            "required": "Optional",
-                            "installed": "Not supported natively",
-                            "status": "ok",
+                            "required": req,
+                            "installed": "Missing (Use Docker/WSL)",
+                            "status": "warn",
                         }
                     )
                 else:
@@ -1677,7 +1678,7 @@ class SettingsWidget(QWidget):
             "import importlib.metadata\n"
             "import sys\n"
             "res = []\n"
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']:\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
             "    try:\n"
             "        __import__(p)\n"
             "        try:\n"
@@ -1717,6 +1718,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1726,13 +1728,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"
@@ -1788,7 +1792,7 @@ class SettingsWidget(QWidget):
             "import importlib.metadata\n"
             "import sys\n"
             "res = []\n"
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']:\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
             "    try:\n"
             "        __import__(p)\n"
             "        try:\n"
@@ -1819,6 +1823,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1828,13 +1833,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"
