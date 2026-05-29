@@ -317,15 +317,18 @@ def _find_tile_in_manifest(
     Returns:
         Tuple of (manifest dict, tile dict) or (None, None) if not found.
     """
-    manifest = _load_launcher_manifest()
-    if not manifest.get("tiles"):
-        logger.error("[launch] Manifest not available for tile lookup")
+    from src.config.launcher_manifest_loader import LauncherManifest
+
+    try:
+        manifest_obj = LauncherManifest.load()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        logger.error("[launch] Failed to load launcher manifest: %s", exc)
         return None, None
 
-    for t in manifest.get("tiles", []):
-        if t.get("id") == tile_id:
-            return manifest, t
-    return manifest, None
+    for t in manifest_obj.tiles:
+        if t.id == tile_id:
+            return manifest_obj.to_dict(include_hidden=True), t.to_dict()
+    return manifest_obj.to_dict(include_hidden=True), None
 
 
 def _execute_tile_launch(

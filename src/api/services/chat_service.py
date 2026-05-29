@@ -63,8 +63,26 @@ class ChatService:
 
         self._tool_registry = ToolRegistry()
         register_golf_suite_tools(self._tool_registry)
+        self._tool_declarations = self._build_tool_declarations()
 
         self._load_adapter()
+
+    def _build_tool_declarations(self) -> list[Any]:
+        from src.shared.python.ai.adapters.base import ToolDeclaration
+
+        tool_declarations = []
+        for t in self._tool_registry.list_tools():
+            props = {p.name: p.to_json_schema() for p in t.parameters}
+            reqs = [p.name for p in t.parameters if p.required]
+            tool_declarations.append(
+                ToolDeclaration(
+                    name=t.name,
+                    description=t.description,
+                    parameters=props,
+                    required=reqs,
+                )
+            )
+        return tool_declarations
 
     def _load_adapter(self) -> None:
         """Load AI adapter from persisted user settings."""
@@ -288,20 +306,7 @@ class ChatService:
                     current_response = []
                     tool_calls_accumulator = {}
 
-                    from src.shared.python.ai.adapters.base import ToolDeclaration
-
-                    tool_declarations = []
-                    for t in self._tool_registry.list_tools():
-                        props = {p.name: p.to_json_schema() for p in t.parameters}
-                        reqs = [p.name for p in t.parameters if p.required]
-                        tool_declarations.append(
-                            ToolDeclaration(
-                                name=t.name,
-                                description=t.description,
-                                parameters=props,
-                                required=reqs,
-                            )
-                        )
+                    tool_declarations = self._tool_declarations
 
                     for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
                         "",  # message already in context

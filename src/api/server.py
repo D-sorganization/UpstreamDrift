@@ -25,11 +25,12 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import _rate_limit_exceeded_handler
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+
 
 from src.shared.python.config.environment import get_environment
 from src.shared.python.engine_core.engine_manager import EngineManager
@@ -100,6 +101,16 @@ def _init_video_pipeline() -> Any:
 
 # Background task storage with TTL cleanup and concurrency limits
 active_tasks = TaskManager()
+
+
+def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Response:
+    """Build a JSON response with Retry-After header when rate limit is exceeded."""
+    detail = getattr(exc, "detail", "Too Many Requests")
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded: {detail}"},
+        headers={"Retry-After": "60"},
+    )
 
 
 @asynccontextmanager
@@ -253,7 +264,7 @@ app.add_middleware(
 
 # Rate limiting
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 
 # SECURITY: middleware registration
