@@ -26,7 +26,7 @@ def test_example_featherstone():
         patch(
             "src.engines.physics_engines.mujoco.python.examples.example_featherstone_algorithms.aba"
         ) as mock_aba,
-        patch("numpy.linalg.solve") as mock_solve,
+        patch("numpy.linalg.solve"),
     ):
         mock_crba.return_value = np.eye(2)
         mock_rnea.return_value = np.array([0.0, 0.0])
@@ -78,7 +78,7 @@ def test_golf_suite_launcher_init():
     from PyQt6.QtWidgets import QApplication
     from src.engines.physics_engines.mujoco.python import golf_suite_launcher
 
-    app = QApplication.instance() or QApplication(sys.argv)
+    _app = QApplication.instance() or QApplication(sys.argv)
     launcher = golf_suite_launcher.UpstreamDriftLauncher()
 
     assert launcher.mujoco_path.name == "advanced_gui.py"
@@ -92,7 +92,7 @@ def test_golf_suite_launcher_methods():
     from PyQt6.QtWidgets import QApplication
     from src.engines.physics_engines.mujoco.python import golf_suite_launcher
 
-    app = QApplication.instance() or QApplication(sys.argv)
+    _app = QApplication.instance() or QApplication(sys.argv)
     launcher = golf_suite_launcher.UpstreamDriftLauncher()
 
     # Test generic launch script

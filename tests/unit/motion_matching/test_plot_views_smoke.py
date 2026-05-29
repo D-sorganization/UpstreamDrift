@@ -31,7 +31,6 @@ from ._fixtures import make_target  # noqa: E402
 
 
 def _matching_sim(target):
-    n = target.time.shape[0]
     butt = target.butt.copy()
     clubhead = target.clubhead.copy()
     quat = target.club_quat.copy()

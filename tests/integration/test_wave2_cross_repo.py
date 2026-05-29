@@ -26,12 +26,16 @@ class TestToolsSymlinkIntegration:
         """Should be able to import Tools contracts module."""
         try:
             from src.shared.python.contracts import (
-                postcondition_check,
-                precondition_check,
+                postcondition,
+                precondition,
+                require,
+                ensure,
             )
 
-            assert callable(precondition_check)
-            assert callable(postcondition_check)
+            assert callable(precondition)
+            assert callable(postcondition)
+            assert callable(require)
+            assert callable(ensure)
         except ImportError as e:
             pytest.fail(f"Failed to import Tools contracts: {e}")
 
@@ -39,7 +43,8 @@ class TestToolsSymlinkIntegration:
         """Should be able to import common Tools utilities."""
         utilities = [
             "src.shared.python.contracts",
-            "src.shared.python.validators",
+            "src.shared.python.core.contracts.validators",
+            "src.shared.python._contracts_validators",
         ]
         for util in utilities:
             try:
@@ -53,33 +58,37 @@ class TestSharedAnthropometricConfig:
     """Verify golf humanoid anthropometric YAML is accessible."""
 
     def test_anthropometric_yaml_exists(self):
-        """Shared YAML config should exist."""
-        config_path = (
-            Path(__file__).parent.parent.parent
-            / "src"
-            / "data"
-            / "anthropometric"
-            / "golf_humanoid.yaml"
-        )
-        assert config_path.exists(), f"Anthropometric YAML not found at {config_path}"
+        """Shared YAML configs should exist."""
+        models_dir = Path(__file__).parent.parent.parent / "shared" / "models"
+        paths = [
+            models_dir / "golf_humanoid_dimensions.yaml",
+            models_dir / "golf_humanoid_inertia.yaml",
+            models_dir / "golf_humanoid_topology.yaml",
+        ]
+        for path in paths:
+            assert path.exists(), f"Anthropometric YAML not found at {path}"
 
     def test_anthropometric_yaml_loadable(self):
-        """Should be able to load and parse anthropometric YAML."""
+        """Should be able to load and parse anthropometric YAMLs."""
         try:
             import yaml
 
-            config_path = (
-                Path(__file__).parent.parent.parent
-                / "src"
-                / "data"
-                / "anthropometric"
-                / "golf_humanoid.yaml"
-            )
-            with open(config_path) as f:
-                config = yaml.safe_load(f)
-                assert config is not None
-                assert "segments" in config or "masses" in config
-        except Exception as e:
+            models_dir = Path(__file__).parent.parent.parent / "shared" / "models"
+            paths = [
+                models_dir / "golf_humanoid_dimensions.yaml",
+                models_dir / "golf_humanoid_inertia.yaml",
+                models_dir / "golf_humanoid_topology.yaml",
+            ]
+            for path in paths:
+                with open(path, encoding="utf-8") as f:
+                    config = yaml.safe_load(f)
+                    assert config is not None
+                    assert (
+                        "golfer" in config
+                        or "total_dof" in config
+                        or "UpperTorsoLength" in config
+                    )
+        except Exception as e:  # noqa: BLE001 - surface any load failure
             pytest.fail(f"Failed to load anthropometric YAML: {e}")
 
 
@@ -92,7 +101,7 @@ class TestSymlinkPerformance:
         import time
 
         start = time.time()
-        from src.shared.python.contracts import precondition_check  # noqa: F401
+        from src.shared.python.contracts import precondition  # noqa: F401
 
         elapsed = time.time() - start
         # Symlink import should complete in <100ms (generous timeout)
@@ -105,7 +114,7 @@ class TestSymlinkPerformance:
         import time
 
         start = time.time()
-        from src.shared.python.contracts import precondition_check as p2  # noqa: F401
+        from src.shared.python.contracts import precondition as p2  # noqa: F401
 
         elapsed = time.time() - start
         assert elapsed < 0.01, f"Cached import took {elapsed:.3f}s (expected <0.01s)"

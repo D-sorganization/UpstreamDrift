@@ -44,16 +44,8 @@ def _write(tmp_path: Path, name: str, content: bytes) -> Path:
 
 
 @pytest.mark.parametrize("ext", sorted(set(FORMAT_EXT.values())))
-def test_empty_file_rejected(tmp_path: Path, ext: str, request) -> None:
+def test_empty_file_rejected(tmp_path: Path, ext: str) -> None:
     """0-byte files of every recognised extension must be rejected."""
-    if ext == ".c3d":
-        request.node.add_marker(
-            pytest.mark.xfail(
-                strict=True,
-                reason="GH #4721 — c3d adapter raises raw OSError on empty file instead of typed AdapterContractError",
-                raises=OSError,
-            )
-        )
     p = _write(tmp_path, f"empty{ext}", b"")
     with pytest.raises((UnsupportedFormatError, AdapterContractError, ValueError)):
         load_any(p)
@@ -144,7 +136,7 @@ def test_csv_duplicate_timestamps(tmp_path: Path) -> None:
     # Loose: at least no crash. Strict: should raise.
     try:
         result = load_any(p)
-    except Exception:
+    except Exception:  # noqa: BLE001 - malformed input may raise any error
         return
     # If it loaded, contract requires non-decreasing timestamps which is
     # technically satisfied by 0 == 0, but identical timestamps are a smell.

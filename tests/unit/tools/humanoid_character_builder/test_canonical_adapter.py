@@ -12,10 +12,10 @@ migration is tracked as a follow-up.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 import pytest
-from humanoid_character_builder import BodyParameters, CharacterBuilder
+from humanoid_character_builder import BodyParameters
 from humanoid_character_builder.generators._canonical_adapter import (
     to_canonical_lists,
     write_humanoid_urdf_via_canonical,
@@ -25,7 +25,6 @@ from humanoid_character_builder.generators._canonical_adapter import (
 @pytest.fixture(scope="module")
 def humanoid_model_data() -> tuple[dict, list]:
     """Build a humanoid model and return its (links, joints) collections."""
-    builder = CharacterBuilder()
     params = BodyParameters(height_m=1.80, mass_kg=80.0)
     # Use the internal generator path to get GeneratedLink/GeneratedJoint
     # collections without going through XML emission first.

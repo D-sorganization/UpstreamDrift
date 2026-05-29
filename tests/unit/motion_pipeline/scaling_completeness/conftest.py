@@ -13,7 +13,7 @@ def _install_invariant_shim() -> None:
     mod_name = "src.shared.python.contracts"
     try:
         mod = __import__(mod_name, fromlist=["invariant"])
-    except Exception:
+    except Exception:  # noqa: BLE001 - skip when optional module import fails
         return
 
     original = getattr(mod, "invariant", None)

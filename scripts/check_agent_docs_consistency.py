@@ -124,8 +124,24 @@ def _assert_coverage_alignment(
         )
 
 
+_GLOB_METACHARACTERS = frozenset("*{}?[]")
+
+
+def _is_glob_pattern(path_text: str) -> bool:
+    """Return True if the reference is a glob/brace pattern, not a literal path.
+
+    Documentation often cites patterns such as ``scripts/**`` or
+    ``src/shared/python/codemap/{cli,watcher,mcp_server}.py``. These describe a
+    family of files rather than a single literal path, so existence checks do
+    not apply.
+    """
+    return any(char in _GLOB_METACHARACTERS for char in path_text)
+
+
 def _assert_path_references_exist(claude: str, errors: list[str]) -> None:
     for path_text in _iter_repo_relative_paths(claude):
+        if _is_glob_pattern(path_text):
+            continue
         if not (ROOT / path_text.rstrip("/")).exists():
             errors.append(f"CLAUDE.md references a missing path: {path_text}")
 
