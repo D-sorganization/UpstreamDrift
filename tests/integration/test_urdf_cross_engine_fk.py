@@ -176,12 +176,17 @@ def compute_pinocchio_fk(
         pin.updateFramePlacements(model, data)
 
         for b, bname in enumerate(body_names):
-            if model.existBodyName(bname):
-                bid = model.getBodyId(bname)
-                results[i, b] = data.oMi[bid].translation
-            elif model.existFrame(bname):
+            if model.existFrame(bname):
                 fid = model.getFrameId(bname)
                 results[i, b] = data.oMf[fid].translation
+            elif model.existBodyName(bname):
+                bid = model.getBodyId(bname)
+                if bid < len(data.oMi):
+                    results[i, b] = data.oMi[bid].translation
+                else:
+                    results[i, b] = np.zeros(3)
+            else:
+                results[i, b] = np.zeros(3)
 
     return results
 
