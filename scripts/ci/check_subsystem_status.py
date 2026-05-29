@@ -79,7 +79,7 @@ def run_tests_for_path(test_path: str, verbose: bool = False) -> tuple[bool, str
 
     except subprocess.TimeoutExpired:
         return False, f"TIMEOUT: Tests in {test_path} exceeded 5 minutes"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - report any test failure as status
         return False, f"ERROR: {e}"
 
 
