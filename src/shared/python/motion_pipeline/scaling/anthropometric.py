@@ -8,6 +8,7 @@ marker data using segment length estimation.
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -61,8 +62,8 @@ def _compute_segment_length(
     dist = markers.markers[distal_marker]
 
     # Compute Euclidean distance
-    diff = np.array([dist.x - prox.x, dist.y - prox.y, dist.z - prox.z])
-    return float(np.linalg.norm(diff))
+    # ⚡ Bolt: math.hypot avoids temporary array allocation and is faster than np.linalg.norm
+    return float(math.hypot(dist.x - prox.x, dist.y - prox.y, dist.z - prox.z))
 
 
 def _compute_average_segment_lengths(
