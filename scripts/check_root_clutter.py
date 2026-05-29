@@ -36,6 +36,9 @@ ALLOWLIST = frozenset(
         "conftest.py",
         "GEMINI.md",
         "launch_golf_suite.py",
+        # Unified Launcher entry point (#6620). Substantive CLI not yet wired
+        # into [project.scripts]; mirrors launch_golf_suite.py until promoted.
+        "launch_upstream_drift.py",
         "launch.bat",
         "install.sh",
         "VERSION",

@@ -106,10 +106,6 @@ class TestSingularMassMatrix:
         upper = SegmentProperties(
             length_m=1.0, mass_kg=1.0, center_of_mass_ratio=0.5, inertia_about_com=0.1
         )
-        # Zero-mass, zero-inertia lower segment => det(M)=0
-        lower = LowerSegmentProperties(
-            length_m=1.0, shaft_mass_kg=0.0, clubhead_mass_kg=0.0, shaft_com_ratio=0.5
-        )
         # total_mass=0 will divide-by-zero in center_of_mass_distance;
         # instead, force tiny but vanishing parameters via direct override.
         params = DoublePendulumParameters(

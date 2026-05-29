@@ -22,7 +22,7 @@ permissions:
 jobs:
   control:
     timeout-minutes: 30
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
