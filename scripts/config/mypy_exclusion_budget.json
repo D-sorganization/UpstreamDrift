@@ -222,21 +222,9 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/sidekick/process_calculators/",
+      "path": "src/shared/python/sidekick/",
       "owner": "@physics-core",
-      "reason": "process calculators combine numpy-stub-sensitive math with PyQt typing issues",
-      "expires_on": "2026-08-01"
-    },
-    {
-      "path": "src/shared/python/sidekick/ui/",
-      "owner": "@physics-core",
-      "reason": "sidekick PyQt UI widgets have pre-existing Qt typing issues",
-      "expires_on": "2026-08-01"
-    },
-    {
-      "path": "src/shared/python/sidekick/tests/",
-      "owner": "@physics-core",
-      "reason": "sidekick test modules use dynamic fixtures with pre-existing typing issues",
+      "reason": "sidekick package contains complex PyQt and process calculator typing issues",
       "expires_on": "2026-08-01"
     },
     {
