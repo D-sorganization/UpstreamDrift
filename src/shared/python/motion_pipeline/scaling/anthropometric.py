@@ -61,7 +61,6 @@ def _compute_segment_length(
     prox = markers.markers[proximal_marker]
     dist = markers.markers[distal_marker]
 
-    # ⚡ Bolt: math.hypot avoids array allocation and is ~15x faster than np.linalg.norm(np.array(...))
     return float(math.hypot(dist.x - prox.x, dist.y - prox.y, dist.z - prox.z))
 
 
