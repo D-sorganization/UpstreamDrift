@@ -197,6 +197,33 @@ def test_build_dashboard_style_set_default_engine_names() -> None:
     assert "pendulum_stub" in names
 
 
+class TestEngineConventionLabels:
+    def test_known_engine_label_includes_convention_and_units(self) -> None:
+        label = ced._format_engine_result_label("mujoco")
+
+        assert "mujoco" in label
+        assert "velocity: qvel tangent-space" in label
+        assert "units: SI; joint angles rad" in label
+
+    def test_unknown_engine_label_uses_explicit_fallback(self) -> None:
+        label = ced._format_engine_result_label("custom_engine")
+
+        assert label == "custom_engine\nvelocity: engine-native; units: reported SI"
+
+    def test_headless_log_includes_engine_convention(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        caplog.set_level(logging.INFO, logger=ced.logger.name)
+
+        ced._run_headless(["pendulum_stub"], _fast_config())
+
+        assert any(
+            "pendulum_stub [velocity: qdot state; units: SI; angles rad]"
+            in record.message
+            for record in caplog.records
+        )
+
+
 # ---------------------------------------------------------------------------
 # _render_trajectory_overlay
 # ---------------------------------------------------------------------------

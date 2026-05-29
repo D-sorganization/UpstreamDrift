@@ -114,6 +114,58 @@ class _StubEngine:
 
 _ENGINE_NAMES = ("mujoco", "drake", "pinocchio", "pendulum_stub")
 
+_DEFAULT_ENGINE_CONVENTION = {
+    "velocity": "engine-native",
+    "units": "reported SI",
+}
+
+_ENGINE_CONVENTIONS: dict[str, dict[str, str]] = {
+    "drake": {
+        "velocity": "v generalized velocity",
+        "units": "SI; joint angles rad",
+    },
+    "mujoco": {
+        "velocity": "qvel tangent-space",
+        "units": "SI; joint angles rad",
+    },
+    "opensim": {
+        "velocity": "coordinate speeds",
+        "units": "SI; rotational coordinates deg",
+    },
+    "pendulum_stub": {
+        "velocity": "qdot state",
+        "units": "SI; angles rad",
+    },
+    "pinocchio": {
+        "velocity": "tangent vector",
+        "units": "SI; joint angles rad",
+    },
+    "simscape": {
+        "velocity": "Simscape logged derivatives",
+        "units": "SI; angular channels rad",
+    },
+}
+
+
+def _engine_convention(name: str) -> dict[str, str]:
+    """Return user-facing convention metadata for an engine result."""
+    if not isinstance(name, str) or not name:
+        raise ValueError(f"name must be a non-empty string; got {name!r}")
+    return _ENGINE_CONVENTIONS.get(name, _DEFAULT_ENGINE_CONVENTION)
+
+
+def _format_engine_result_label(name: str) -> str:
+    """Return the comparison label with velocity convention and units."""
+    convention = _engine_convention(name)
+    return f"{name}\nvelocity: {convention['velocity']}; units: {convention['units']}"
+
+
+def _format_engine_result_log_label(name: str) -> str:
+    """Return a single-line result label for logs and status text."""
+    convention = _engine_convention(name)
+    return f"{name} [velocity: {convention['velocity']}; units: {convention['units']}]"
+
+
 # ---------------------------------------------------------------------------
 # Plot-style integration (issue #4810)
 # ---------------------------------------------------------------------------
@@ -449,7 +501,7 @@ def _run_headless(
     for eng_name, result in results.items():
         logger.info(
             "  %s: mean_energy=%.4f, mean_speed=%.4f, mean_peak=%.4f",
-            eng_name,
+            _format_engine_result_log_label(eng_name),
             result.mean_total_energy_final,
             result.mean_end_effector_speed_final,
             result.mean_peak_end_effector_speed,
@@ -909,7 +961,10 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
                 width=0.5,
             )
             ax.set_xticks(x)
-            ax.set_xticklabels(engine_names, fontsize=9)
+            ax.set_xticklabels(
+                [_format_engine_result_label(name) for name in engine_names],
+                fontsize=8,
+            )
             ax.set_ylim(0.0, 1.0)
             ax.set_ylabel("Robustness Score", fontsize=9)
             ax.axhline(0.5, color="#ff6060", linewidth=0.8, linestyle="--")
