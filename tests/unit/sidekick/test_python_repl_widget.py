@@ -32,7 +32,7 @@ try:
         and isinstance(_qabt, type)
         and not getattr(_qabt, "_mock_name", None)
     )
-except Exception:
+except Exception:  # noqa: BLE001 - any failure means real Qt is unavailable
     _HAVE_REAL_QT = False
 
 _skip_qt = pytest.mark.skipif(
@@ -48,13 +48,26 @@ def _make_repl(namespace: dict, registry: WorkspaceRegistry | None = None) -> An
     return PythonReplWidget(namespace=namespace, registry=registry)
 
 
+@pytest.fixture(scope="module")
+def qapp() -> Any:
+    """Provide a module-scoped QApplication for the REPL tests."""
+    if not _HAVE_REAL_QT:
+        pytest.skip("Real Qt not available")
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication.instance()
+    if not app:
+        app = QApplication([])
+    return app
+
+
 # ---------------------------------------------------------------------------
 # Qt-dependent tests
 # ---------------------------------------------------------------------------
 
 
 @_skip_qt
-def test_repl_evaluates_expression() -> None:
+def test_repl_evaluates_expression(qapp: Any) -> None:
     """evaluate('2 + 2') returns a string containing '4'."""
     repl = _make_repl(namespace={})
     result = repl.evaluate("2 + 2")
@@ -62,7 +75,7 @@ def test_repl_evaluates_expression() -> None:
 
 
 @_skip_qt
-def test_repl_assignment_updates_registry() -> None:
+def test_repl_assignment_updates_registry(qapp: Any) -> None:
     """Assignment in REPL propagates value to the WorkspaceRegistry."""
     registry = WorkspaceRegistry()
     repl = _make_repl(namespace={}, registry=registry)
@@ -71,7 +84,7 @@ def test_repl_assignment_updates_registry() -> None:
 
 
 @_skip_qt
-def test_repl_history_is_recorded() -> None:
+def test_repl_history_is_recorded(qapp: Any) -> None:
     """Each evaluated expression is appended to history."""
     repl = _make_repl(namespace={})
     repl.evaluate("1 + 1")
@@ -79,7 +92,7 @@ def test_repl_history_is_recorded() -> None:
 
 
 @_skip_qt
-def test_repl_exception_does_not_crash() -> None:
+def test_repl_exception_does_not_crash(qapp: Any) -> None:
     """Exceptions in user code are caught and returned as a string."""
     repl = _make_repl(namespace={})
     result = repl.evaluate("1 / 0")
@@ -87,7 +100,7 @@ def test_repl_exception_does_not_crash() -> None:
 
 
 @_skip_qt
-def test_repl_multiple_assignments() -> None:
+def test_repl_multiple_assignments(qapp: Any) -> None:
     """Multiple assignments update the registry correctly."""
     registry = WorkspaceRegistry()
     repl = _make_repl(namespace={}, registry=registry)
@@ -97,7 +110,7 @@ def test_repl_multiple_assignments() -> None:
 
 
 @_skip_qt
-def test_repl_no_registry_still_evaluates() -> None:
+def test_repl_no_registry_still_evaluates(qapp: Any) -> None:
     """Widget works without a registry."""
     repl = _make_repl(namespace={})
     result = repl.evaluate("3 * 7")
