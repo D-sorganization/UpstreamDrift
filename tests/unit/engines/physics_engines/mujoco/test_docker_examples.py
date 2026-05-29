@@ -115,7 +115,7 @@ def test_example_dynamic_stance_load_and_patch_xml(mock_open, mock_exists):
         mock_root = MagicMock()
         mock_dm_control.mjcf.from_xml_string.return_value = mock_root
 
-        physics = example_dynamic_stance._load_and_patch_xml("/fake/path.xml")
+        example_dynamic_stance._load_and_patch_xml("/fake/path.xml")
 
         mock_dm_control.mjcf.from_xml_string.assert_called_once()
         mock_dm_control.mjcf.Physics.from_mjcf_model.assert_called_once_with(mock_root)
