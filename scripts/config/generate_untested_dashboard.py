@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import os
 
 
@@ -16,7 +16,6 @@ def generate_untested_dashboard(
     untested_modules = []
 
     for package in root.findall(".//package"):
-        package_name = package.get("name")
         for cls in package.findall(".//class"):
             filename = cls.get("filename")
             line_rate = float(cls.get("line-rate", 0))
