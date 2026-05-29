@@ -402,6 +402,15 @@ module = "src.engines.common.*"
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
+module = [
+    "signal_toolkit",
+    "signal_toolkit.*",
+    "src.shared.python.signal_toolkit",
+    "src.shared.python.signal_toolkit.*",
+]
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
 module = "src.api.*"
 disallow_untyped_defs = true
 warn_return_any = true
