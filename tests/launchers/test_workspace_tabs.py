@@ -187,3 +187,60 @@ def test_tab_close_always_prompts(launcher, monkeypatch):
 
     launcher.workspace_tabs.close_tab(idx)
     assert launcher.workspace_tabs.indexOf(dummy_widget) == -1
+
+
+def test_right_click_tab_shows_context_menu(launcher, qtbot) -> None:
+    """Right-clicking a tab bar button should trigger the custom context menu with Undock option."""
+    from unittest.mock import MagicMock, patch
+    from PyQt6.QtCore import QPoint, QRect
+
+    dummy = QWidget()
+    launcher.workspace_tabs.addTab(dummy, "Test Tab")
+    tab_bar = launcher.workspace_tabs.tabBar()
+    assert tab_bar is not None
+
+    # Mock tabBar() to return our custom tab_bar wrapper instance
+    launcher.workspace_tabs.tabBar = MagicMock(return_value=tab_bar)
+
+    # Mock tabRect to bypass offscreen/headless 0-size QRect issue
+    tab_bar.tabRect = lambda idx: QRect(0, 0, 100, 30)
+    center = QPoint(50, 15)
+
+    with patch("PyQt6.QtWidgets.QMenu.exec") as mock_exec:
+        launcher.workspace_tabs._show_tab_context_menu(center)
+        mock_exec.assert_called_once()
+
+
+def test_launch_c3d_viewer_embedded(launcher) -> None:
+    """If the c3d_viewer embeddable tool is registered, _launch_c3d_viewer loads it as a tab."""
+    from unittest.mock import MagicMock, patch
+    from src.shared.python.launcher_embed import (
+        EmbeddableTool,
+        register_embeddable_tool,
+        unregister_embeddable_tool,
+        get_embeddable_tool,
+    )
+
+    # Mock tool adapter
+    mock_tool = MagicMock(spec=EmbeddableTool)
+    mock_tool.tool_id = "c3d_viewer"
+    mock_tool.create_main_widget.return_value = QWidget()
+
+    # Pre-register mock tool
+    if get_embeddable_tool("c3d_viewer") is not None:
+        unregister_embeddable_tool("c3d_viewer")
+    register_embeddable_tool(mock_tool)
+
+    launcher.dock_widget_as_tab = MagicMock()
+
+    try:
+        with patch.object(
+            launcher.process_manager, "launch_script"
+        ) as mock_launch_script:
+            launcher._launch_c3d_viewer()
+            # Verify it was docked as tab rather than spawned as a process
+            launcher.dock_widget_as_tab.assert_called_once()
+            assert launcher.dock_widget_as_tab.call_args[0][1] == "C3D Viewer"
+            mock_launch_script.assert_not_called()
+    finally:
+        unregister_embeddable_tool("c3d_viewer")

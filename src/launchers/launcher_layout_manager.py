@@ -571,6 +571,11 @@ class LayoutManager:
         # window, which made search/filter rebuilds flash every tile onscreen.
         if grid_layout is None:
             raise ValueError("grid_layout must be provided")
+
+        # Clear stretch factors from previous layout
+        for c in range(grid_layout.columnCount()):
+            grid_layout.setColumnStretch(c, 0)
+
         reusable_card_ids = {id(card) for card in self.model_cards.values()}
         while grid_layout.count():
             item = grid_layout.takeAt(0)
@@ -592,6 +597,9 @@ class LayoutManager:
 
         # Dynamically determine columns based on active_scale if not in list mode
         columns = 1 if is_list else max(1, int(4 / active_scale))
+        if not is_list:
+            for c in range(columns):
+                grid_layout.setColumnStretch(c, 1)
 
         # Get filtered model order
         filtered_order = self.get_filtered_order()

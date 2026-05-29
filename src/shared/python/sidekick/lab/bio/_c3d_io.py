@@ -396,8 +396,24 @@ def unit_scale(current_units: str, target_units: str | None) -> float:
     if target_units is None:
         return 1.0
 
-    normalized_current = current_units.lower()
-    normalized_target = target_units.lower()
+    normalized_current = current_units.strip().lower()
+    normalized_target = target_units.strip().lower()
+
+    # Map common aliases to standard keys
+    aliases = {
+        "meters": "m",
+        "meter": "m",
+        "millimeters": "mm",
+        "millimeter": "mm",
+        "centimeters": "cm",
+        "centimeter": "cm",
+        "inches": "in",
+        "inch": "in",
+        "feet": "ft",
+        "foot": "ft",
+    }
+    normalized_current = aliases.get(normalized_current, normalized_current)
+    normalized_target = aliases.get(normalized_target, normalized_target)
 
     if normalized_current == normalized_target:
         return 1.0
@@ -410,10 +426,12 @@ def unit_scale(current_units: str, target_units: str | None) -> float:
         "ft": 0.3048,
     }
 
-    if normalized_current not in to_meters:
-        raise ValueError(f"Unsupported source unit: {current_units}")
-    if normalized_target not in to_meters:
-        raise ValueError(f"Unsupported target unit: {target_units}")
+    if normalized_current not in to_meters or normalized_target not in to_meters:
+        logger.warning(
+            f"Unsupported or unknown unit conversion from '{current_units}' to '{target_units}'. "
+            "Falling back to 1.0 scaling factor."
+        )
+        return 1.0
 
     return to_meters[normalized_current] / to_meters[normalized_target]
 

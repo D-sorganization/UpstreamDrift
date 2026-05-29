@@ -333,7 +333,7 @@ class DraggableTabWidget(QTabWidget):
             menu.addAction(close_action)
             menu.addSeparator()
 
-        pop_action = QAction("Pop Out Tab", self)
+        pop_action = QAction("Undock Tab", self)
         pop_action.triggered.connect(lambda: self.detach_tab_from_menu(idx))
         menu.addAction(pop_action)
         menu.addSeparator()

@@ -251,14 +251,20 @@ def test_unit_scale_pairs(src: str, dst: str, expected: float) -> None:
     assert unit_scale(src, dst) == pytest.approx(expected)
 
 
-def test_unit_scale_unsupported_source() -> None:
-    with pytest.raises(ValueError, match="Unsupported source unit"):
-        unit_scale("furlongs", "m")
+def test_unit_scale_unsupported_source(caplog) -> None:
+    import logging
+
+    with caplog.at_level(logging.WARNING):
+        assert unit_scale("furlongs", "m") == 1.0
+    assert "Unsupported or unknown unit conversion" in caplog.text
 
 
-def test_unit_scale_unsupported_target() -> None:
-    with pytest.raises(ValueError, match="Unsupported target unit"):
-        unit_scale("m", "furlongs")
+def test_unit_scale_unsupported_target(caplog) -> None:
+    import logging
+
+    with caplog.at_level(logging.WARNING):
+        assert unit_scale("m", "furlongs") == 1.0
+    assert "Unsupported or unknown unit conversion" in caplog.text
 
 
 # ----- sanitize_for_csv ------------------------------------------------------

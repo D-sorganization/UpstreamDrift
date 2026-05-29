@@ -1019,10 +1019,10 @@ class UISetupManager:
 
         view_menu.addSeparator()
 
-        action_popout_tab = QAction("&Pop Out Active Tab", self.launcher)
+        action_popout_tab = QAction("&Undock Active Tab", self.launcher)
         action_popout_tab.setShortcut("Ctrl+D")
         action_popout_tab.setToolTip("Detach the active tab into a floating window")
-        action_popout_tab.setStatusTip("Pop out active tab")
+        action_popout_tab.setStatusTip("Undock active tab")
         action_popout_tab.triggered.connect(self._popout_active_tab)
         view_menu.addAction(action_popout_tab)
         self.action_popout_tab = action_popout_tab
@@ -1042,7 +1042,7 @@ class UISetupManager:
         self._setup_theme_menu(theme_menu)
 
     def _popout_active_tab(self) -> None:
-        """Pop out the currently active workspace tab into a floating window."""
+        """Undock the currently active workspace tab into a floating window."""
         if not getattr(self, "workspace_tabs", None):
             return
         idx = self.workspace_tabs.currentIndex()
@@ -1054,8 +1054,8 @@ class UISetupManager:
 
             QMessageBox.information(
                 self.launcher,
-                "Cannot Pop Out",
-                "The 'Home' tab is a core view and cannot be popped out.",
+                "Cannot Undock",
+                "The 'Home' tab is a core view and cannot be undocked.",
             )
             return
         self.workspace_tabs.detach_tab_from_menu(idx)

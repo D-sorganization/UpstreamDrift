@@ -839,15 +839,34 @@ except (RuntimeError, TypeError, AttributeError) as e:
     def _launch_c3d_viewer(self) -> None:
         """Launch the C3D motion viewer application.
 
-        Searches for a C3D viewer entry-point script in (in order):
-        1. The in-repo Simscape 3D viewer wrapper
-           (``src/engines/.../python/src/apps/run_c3d_viewer.py``).
-        2. The fleet-shared vendor viewer
-           (``vendor/ud-tools/src/c3d_viewer/launch_pyqt6.py``).
-        3. Legacy locations under a sibling ``tools/`` directory, kept for
-           backwards-compatibility with installations that pre-date the
-           in-repo viewers.
+        First attempts to load the C3D Viewer embedded as a tab using the
+        shared EmbeddableTool registry. If the embeddable tool is not registered,
+        falls back to spawning a standalone subprocess.
         """
+        try:
+            from src.shared.python.launcher_embed import get_embeddable_tool
+
+            # The adapter registers automatically via embedded_tool_bootstrap.py
+            tool = get_embeddable_tool("c3d_viewer")
+            if tool:
+                # Check if already open as tab
+                for idx in range(self.workspace_tabs.count()):
+                    if self.workspace_tabs.tabText(idx) == "C3D Viewer":
+                        self.workspace_tabs.setCurrentIndex(idx)
+                        return
+
+                ui_widget = tool.create_main_widget(self.launcher)
+                if ui_widget:
+                    ui_widget.destroyed.connect(tool.cleanup)
+                    self.dock_widget_as_tab(ui_widget, "C3D Viewer")
+                    self.show_toast("C3D Viewer loaded as tab.", "success")
+                    self.lbl_status.setText("> C3D Viewer Running")
+                    self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                    return
+        except Exception as e:
+            logger.exception("Failed to launch C3D Viewer embedded: %s", e)
+
+        # Fallback to subprocess if not registered or failed
         candidates = [
             REPOS_ROOT
             / "src"

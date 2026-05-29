@@ -59,9 +59,11 @@ def bootstrap_embeddable_tools() -> list[str]:
         tools_python_src_path = str(Path(tools_src_path) / "python" / "src")
 
     # Also register UpstreamDrift's shared python folder
+    ud_src_path = str(repos_root / "src")
     ud_shared_py_path = str(repos_root / "src" / "shared" / "python")
 
     for p in [
+        ud_src_path,
         ud_shared_py_path,
         tools_python_src_path,
         tools_shared_py_path,
@@ -88,6 +90,7 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.terrain_engine._embed_adapter",
         "src.tools.golf_simulation_suite._embed_adapter",
         "src.tools.simulation_backends_launcher._embed_adapter",
+        "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
     ]
 
     registered = []
@@ -96,11 +99,17 @@ def bootstrap_embeddable_tools() -> list[str]:
             # Import the module - it self-registers at module level
             __import__(module_path)
             # Extract tool_id from module name for tracking
-            tool_id = (
-                module_path.split(".")[-2]
-                if "_embed_adapter" in module_path
-                else module_path.split(".")[-1]
-            )
+            if (
+                module_path
+                == "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
+            ):
+                tool_id = "c3d_viewer"
+            else:
+                tool_id = (
+                    module_path.split(".")[-2]
+                    if "_embed_adapter" in module_path
+                    else module_path.split(".")[-1]
+                )
 
             registered.append(tool_id)
             logger.debug(f"Bootstrapped embeddable tool: {tool_id}")

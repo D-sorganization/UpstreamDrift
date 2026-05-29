@@ -72,10 +72,12 @@ from src.api.routes import (  # noqa: E402
     chat_ws,
     engines,
     export,
+    observability,
     simulation,
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
+from src.api.task_manager import TaskManager  # noqa: E402
 from src.shared.python.app_state import agent_context, get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
@@ -477,6 +479,8 @@ def _register_health_and_diagnostic_endpoints(
     if not (app is not None):
         raise ValueError("app must be provided")
 
+    app.include_router(observability.router, prefix="")
+
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
         """Return server health status and available engines."""
@@ -791,6 +795,13 @@ def create_local_app() -> FastAPI:
     app.state.chat_service = ChatService(
         app_state_provider=lambda: agent_context(get_state_logger().store)
     )
+    task_manager = TaskManager()
+    app.state.task_manager = task_manager
+    app.state.api_started_at = time.time()
+
+    @app.on_event("shutdown")
+    async def shutdown_task_manager() -> None:
+        await task_manager.shutdown()
 
     # Register routes (no auth required in local mode)
     _register_api_routers(app)
