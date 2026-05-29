@@ -1062,7 +1062,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
         # Restore selected model
         saved_selection = layout_data.get("selected_model")
-        if saved_selection and saved_selection in self.model_cards:
+        if saved_selection and saved_selection in self.model_cards and not self.loading:
             self.select_model(saved_selection)
 
         self._rebuild_grid()
