@@ -141,7 +141,6 @@ class TestUDToolCatalog:
     def test_physics_engine_tools_are_registered(self) -> None:
         """Physics engine tiles must be in the catalog."""
         cat = UDToolCatalog()
-        ids = {t.tool_id for t in cat.all_tools()}
         # At least one engine-related tool must be present
         engine_tools = {
             t.tool_id for t in cat.all_tools() if t.category == "Physics Engines"

@@ -46,13 +46,13 @@ def loaded_body():
         from src.shared.python.motion_matching.load_body_target import (
             load_body_target,
         )
-    except Exception as exc:  # pragma: no cover - import-time failure
+    except Exception as exc:  # noqa: BLE001 # pragma: no cover - import-time failure
         pytest.skip(f"load_body_target unavailable: {exc}")
     try:
         return load_body_target(DRIVER_C3D)
     except ImportError as exc:  # ezc3d optional dependency missing
         pytest.skip(f"C3D loader dependency unavailable: {exc}")
-    except Exception as exc:  # pragma: no cover - loader-side failure
+    except Exception as exc:  # noqa: BLE001 # pragma: no cover - loader-side failure
         pytest.skip(f"failed to load C3D fixture: {exc}")
 
 
@@ -88,7 +88,11 @@ def test_controller_renders_body_markers_per_frame(loaded_body, axes_canvas) -> 
     for t in test_frames:
         controller.set_frame(t)
         # Pull artist data back. Line3D.get_data_3d returns three 1-D arrays.
-        xs, ys, zs = art.get_data_3d()
+        # Path3DCollection exposes the 3-D offsets tuple via _offsets3d.
+        if hasattr(art, "get_data_3d"):
+            xs, ys, zs = art.get_data_3d()
+        else:
+            xs, ys, zs = art._offsets3d
         expected = loaded_body.marker_xyz[t]  # (M, 3)
         finite = np.isfinite(expected).all(axis=-1)
         np.testing.assert_allclose(

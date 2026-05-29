@@ -467,7 +467,6 @@ def test_solve_shaft_rz_zero_magnitude_skel_returns_zero():
 
 
 def test_solve_shaft_rz_wraps_to_signed_range():
-    mp = np.zeros(3)
     rz = solve_shaft_rz_deg(
         np.zeros(3),
         np.array([-1.0, 0.0, 0.0]),
