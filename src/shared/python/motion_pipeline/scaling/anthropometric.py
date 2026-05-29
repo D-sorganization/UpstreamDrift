@@ -61,8 +61,6 @@ def _compute_segment_length(
     prox = markers.markers[proximal_marker]
     dist = markers.markers[distal_marker]
 
-    # Compute Euclidean distance
-    # ⚡ Bolt: math.hypot avoids temporary array allocation and is faster than np.linalg.norm
     return float(math.hypot(dist.x - prox.x, dist.y - prox.y, dist.z - prox.z))
 
 
