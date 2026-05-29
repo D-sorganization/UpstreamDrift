@@ -61,6 +61,39 @@ the modules most often missed.
 - `capabilities` — feature-capability declarations per engine.
 - `mock_engine` — fallback for headless / CI tests.
 
+### Simulation backends (GPU-ready, backend-agnostic)
+
+`src/shared/python/simulation_backends/` — interchangeable physics backends
+for the golf double-pendulum behind one Protocol. See
+[ADR 0023](docs/adr/0023-mujoco-warp-backend.md) and the package README.
+
+- `protocol.SimulationBackend` — runtime-checkable Protocol every backend
+  satisfies. `DynamicsProvider` (mass matrix / bias forces) and
+  `BatchedBackend` (parallel `rollout_batch`) are **segregated** optional
+  Protocols — `isinstance`-check the exact capability you need.
+- `protocol.{SimState, Trace, BatchTrace, BackendCapabilities}` — the shared
+  state/output/capability types. `Trace`/`BatchTrace` are the **one** rollout
+  schema across all backends (HDF5 I/O in `trace_io`).
+- `model_params.GolfModelParams` — **the single source of truth** (pydantic).
+  **One model, many renderers:** it renders _both_ the analytical EOM params
+  (`to_double_pendulum_parameters()`) _and_ the MuJoCo MJCF
+  (`mjcf.params_to_mjcf`). **Never hand-edit a derived representation** — change
+  `GolfModelParams` and let both renderers follow. A regression test
+  (`test_foundation.py`, task M2.3) fails if they drift apart.
+- `factory.make_backend(name, params, **kw)` — the only constructor. Names:
+  `"ode"` (CPU reference + dynamics), `"mujoco"` (CPU + dynamics primitives),
+  `"mjwarp"` (GPU, batched, optional `[warp]` extra). Backends are imported
+  **lazily**, so importing the package never needs a GPU.
+- `capabilities.{has_warp, has_mujoco, require_warp, require_mujoco}` — guarded
+  optional-dependency checks; the suite runs fully on CPU with zero GPU.
+- `validation` — cross-backend gate (mass-matrix, bias, trajectory, energy).
+  **All cross-checks are tolerance-based** (`np.allclose`), never `==`: GPU and
+  CPU never bit-match (FMA, non-associative reductions, float32).
+- `ztcf_zvcf` — ZTCF/ZVCF reproduced via MuJoCo/analytical dynamics primitives.
+  These are **pointwise/instantaneous** decompositions sampled along the
+  measured trajectory — _not_ forward-integrated. Do not "fix" them into a time
+  integration (see the `# AGENT-NOTE:` in that module).
+
 ### Motion matching (the big one)
 
 `src/shared/python/motion_matching/`

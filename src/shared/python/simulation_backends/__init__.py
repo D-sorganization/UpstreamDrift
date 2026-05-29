@@ -1,0 +1,71 @@
+"""GPU-ready, backend-agnostic simulation layer for the golf model.
+
+This package provides a clean abstraction over multiple physics backends for the
+double-pendulum / golf-club model:
+
+* ``ode`` — CPU reference backend wrapping the analytical RK4 dynamics.
+* ``mujoco`` — CPU MuJoCo backend; also exposes dynamics primitives
+  (``M(q)``, bias forces) for independent cross-validation.
+* ``mjwarp`` — GPU MuJoCo Warp backend for massively parallel *batched* rollouts
+  (optional ``[warp]`` extra; gracefully unavailable without CUDA).
+
+Construct backends via :func:`make_backend`; the model itself is described once
+by :class:`GolfModelParams` and rendered to every backend. See ADR-0023 and
+``docs/simulation_backends/README.md``.
+
+Importing this package has **no** GPU dependency: optional backends are loaded
+lazily by the factory only when requested.
+"""
+
+from __future__ import annotations
+
+from .capabilities import (
+    has_mujoco,
+    has_warp,
+    require_mujoco,
+    require_warp,
+    warp_device_available,
+)
+from .exceptions import (
+    BackendCapabilityError,
+    BackendError,
+    BackendNotAvailableError,
+    UnknownBackendError,
+)
+from .factory import available_backends, make_backend
+from .model_params import GolfModelParams, LowerSegmentParams, UpperSegmentParams
+from .protocol import (
+    SCHEMA_VERSION,
+    BackendCapabilities,
+    BatchedBackend,
+    BatchTrace,
+    DynamicsProvider,
+    SimState,
+    SimulationBackend,
+    Trace,
+)
+
+__all__ = [
+    "SCHEMA_VERSION",
+    "BackendCapabilities",
+    "BackendCapabilityError",
+    "BackendError",
+    "BackendNotAvailableError",
+    "BatchTrace",
+    "BatchedBackend",
+    "DynamicsProvider",
+    "GolfModelParams",
+    "LowerSegmentParams",
+    "SimState",
+    "SimulationBackend",
+    "Trace",
+    "UnknownBackendError",
+    "UpperSegmentParams",
+    "available_backends",
+    "has_mujoco",
+    "has_warp",
+    "make_backend",
+    "require_mujoco",
+    "require_warp",
+    "warp_device_available",
+]
