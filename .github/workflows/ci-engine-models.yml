@@ -43,7 +43,7 @@ permissions:
 jobs:
   drake-urdf-drift:
     name: drake URDF regeneration drift gate
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5

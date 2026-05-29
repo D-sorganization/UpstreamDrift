@@ -376,6 +376,7 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
         return 0.0
 
 
+# fmt: off
 @router.get(
     "/simulation/forces",
     response_model=ForceOverlayResponse,
@@ -396,6 +397,7 @@ async def get_force_overlays(
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> ForceOverlayResponse:
+# fmt: on
     """Get current force/torque vectors for 3D overlay rendering.
 
     Queries the active simulation engine for force data and returns

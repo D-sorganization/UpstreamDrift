@@ -46,7 +46,7 @@ concurrency:
 jobs:
   publish:
     name: publish cross-engine leaderboard JSON
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
 
     env:
