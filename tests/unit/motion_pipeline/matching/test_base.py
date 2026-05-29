@@ -89,7 +89,6 @@ def test_motion_matching_request_explicit_horizon_preserved() -> None:
 
 
 def test_motion_matching_result_to_contract_round_trip() -> None:
-    rig = make_simple_rig(num_joints=1)
     ref = make_pendulum_reference_trajectory(num_frames=5)
     result = MotionMatchingResult(
         request_id="r1",

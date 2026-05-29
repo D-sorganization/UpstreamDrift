@@ -61,7 +61,7 @@ src_mod.__path__ = [str(engine_src), str(repo_src)]
 try:
     pass
 
-except Exception:
+except Exception:  # noqa: BLE001 - debug script reports any failure
     import traceback
 
     traceback.print_exc()
@@ -76,7 +76,7 @@ try:
 
     pass
 
-except Exception:
+except Exception:  # noqa: BLE001 - debug script reports any failure
     import traceback
 
     traceback.print_exc()
