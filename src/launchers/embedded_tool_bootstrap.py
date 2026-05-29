@@ -51,15 +51,24 @@ def bootstrap_embeddable_tools() -> list[str]:
     if sibling_tools.is_dir():
         tools_src_path = str(sibling_tools / "src")
         tools_shared_py_path = str(sibling_tools / "src" / "shared" / "python")
+        tools_python_src_path = str(sibling_tools / "src" / "python" / "src")
     else:
         # Path to vendor/ud-tools/src
         tools_src_path = str(repos_root / "vendor" / "ud-tools" / "src")
         tools_shared_py_path = str(Path(tools_src_path) / "shared" / "python")
+        tools_python_src_path = str(Path(tools_src_path) / "python" / "src")
 
-    if tools_src_path not in sys.path:
-        sys.path.insert(0, tools_src_path)
-    if tools_shared_py_path not in sys.path:
-        sys.path.insert(0, tools_shared_py_path)
+    # Also register UpstreamDrift's shared python folder
+    ud_shared_py_path = str(repos_root / "src" / "shared" / "python")
+
+    for p in [
+        ud_shared_py_path,
+        tools_python_src_path,
+        tools_shared_py_path,
+        tools_src_path,
+    ]:
+        if p not in sys.path:
+            sys.path.insert(0, p)
 
     # List of tool adapter modules that self-register on import
     # Each module's __init__.py calls register_embeddable_tool()

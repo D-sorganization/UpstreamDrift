@@ -104,6 +104,7 @@ def test_unavailable_tool_window_wraps_widget(qapp) -> None:
     assert "Foo" in win.windowTitle()
     assert "Unavailable" in win.windowTitle()
     assert win.centralWidget() is not None
+    assert win.is_tool_available is False
     win.deleteLater()
 
 

@@ -506,3 +506,16 @@ def test_launcher_ref_used_when_parent_is_none(qapp) -> None:
     assert dialog._launcher is launcher, "_launcher must reference the passed launcher"
     # Layout tab sync: btn_modify_layout.isChecked was called during _setup_layout_tab
     launcher.btn_modify_layout.isChecked.assert_called()
+
+
+def test_settings_dialog_tier_details(parent_launcher, qapp) -> None:
+    """Verify that tier_details browser is instantiated and updates when stage combo changes."""
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    assert hasattr(dialog, "tier_details")
+    assert dialog.tier_details is not None
+
+    # Change stage combo text
+    dialog.combo_stage.setCurrentText("all")
+    # Verify tier details text gets updated
+    html = dialog.tier_details.toHtml()
+    assert html != ""

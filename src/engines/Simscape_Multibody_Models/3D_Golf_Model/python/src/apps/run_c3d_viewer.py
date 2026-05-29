@@ -31,9 +31,13 @@ _REPO_ROOT = _HERE.parents[6]  # apps -> src -> python -> 3D_Golf_Model -> Simsc
 
 # Step 1: import canonical reader from the repo root.
 sys.path.insert(0, str(_REPO_ROOT))
+sys.path.insert(0, str(_REPO_ROOT / "src" / "shared" / "python"))
+# Populate sys.modules with src.shared to prevent ModuleNotFoundError
 from sidekick.lab.bio import (  # noqa: E402
     c3d_reader as _canonical,  # noqa: E402
 )
+
+import src.shared.python  # noqa: E402, F401
 
 # Step 2: pivot ``src`` to the engine's local package so the viewer's
 # relative imports resolve. Keep the canonical module reachable via the
@@ -48,7 +52,7 @@ for _modname in list(sys.modules):
     if _modname == "src" or _modname.startswith("src."):
         if _modname == _canonical_qualname:
             continue
-        if _modname.startswith("src.shared."):
+        if _modname == "src.shared" or _modname.startswith("src.shared."):
             continue  # keep canonical chain hot
         del sys.modules[_modname]
 

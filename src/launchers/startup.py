@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap, QMouseEvent, QKeyEvent
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -281,6 +281,17 @@ class SplashScreen(QSplashScreen):
         )
         self.repaint()
         QApplication.processEvents()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Allow the user to dismiss the splash screen by clicking it."""
+        self.close()
+        super().mousePressEvent(event)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Allow the user to dismiss the splash screen by pressing Escape."""
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
+        super().keyPressEvent(event)
 
 
 class AsyncStartupWorker(QThread):

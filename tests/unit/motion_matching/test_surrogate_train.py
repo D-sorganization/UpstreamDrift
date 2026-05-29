@@ -6,6 +6,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
+pytest.importorskip("torch")
 import torch
 from src.shared.python.motion_matching.dataset import (
     load_sweep_dataset,

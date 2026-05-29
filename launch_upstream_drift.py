@@ -77,10 +77,20 @@ else:
 _paths_to_add = []
 if _TOOLS_ROOT:
     _paths_to_add.extend(
-        [str(_TOOLS_ROOT / "src"), str(_TOOLS_ROOT / "src" / "shared" / "python")]
+        [
+            str(_TOOLS_ROOT / "src"),
+            str(_TOOLS_ROOT / "src" / "shared" / "python"),
+            str(_TOOLS_ROOT / "src" / "python" / "src"),
+        ]
     )
 
-_paths_to_add.extend([str(_REPO_ROOT / "src"), str(_REPO_ROOT)])
+_paths_to_add.extend(
+    [
+        str(_REPO_ROOT / "src" / "shared" / "python"),
+        str(_REPO_ROOT / "src"),
+        str(_REPO_ROOT),
+    ]
+)
 
 _VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 _paths_to_add.append(str(_VENDOR_SHARED))

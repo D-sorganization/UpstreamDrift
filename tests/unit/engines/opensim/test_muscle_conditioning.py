@@ -22,6 +22,9 @@ if not OPENSIM_AVAILABLE:
         class State:
             pass
 
+        class Controller:
+            pass
+
         class Matrix:
             def __init__(self):
                 self.data = np.zeros((2, 2))

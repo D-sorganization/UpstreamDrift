@@ -42,7 +42,7 @@ except ImportError:
 from matplotlib.figure import Figure
 
 try:
-    from engines.physics_engines.opensim.python.opensim_golf.core import (
+    from src.engines.physics_engines.opensim.python.opensim_golf.core import (
         GolfSwingModel,
         OpenSimModelLoadError,
         OpenSimNotInstalledError,

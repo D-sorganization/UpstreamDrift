@@ -129,12 +129,21 @@ class OverviewTab(QtWidgets.QWidget):
         self._init_ui()
 
     def _init_ui(self) -> None:
+        self._current_model = None
         layout = QtWidgets.QVBoxLayout(self)
 
+        top_layout = QtWidgets.QHBoxLayout()
         self.label_file = QtWidgets.QLabel("No file loaded")
         self.label_file.setWordWrap(True)
         self.label_file.setStyleSheet("font-weight: bold;")
-        layout.addWidget(self.label_file)
+        top_layout.addWidget(self.label_file, 1)
+
+        self.chk_show_provenance = QtWidgets.QCheckBox("Show Provenance")
+        self.chk_show_provenance.setChecked(True)
+        self.chk_show_provenance.toggled.connect(self._on_show_provenance_toggled)
+        top_layout.addWidget(self.chk_show_provenance)
+
+        layout.addLayout(top_layout)
 
         # Capture metadata summary (top, always visible).
         summary_group = QtWidgets.QGroupBox("Capture metadata")
@@ -167,6 +176,7 @@ class OverviewTab(QtWidgets.QWidget):
 
     def update_from_model(self, model: C3DDataModel | None) -> None:
         """Update UI with data from the model."""
+        self._current_model = model
         # Reset summary form.
         while self._summary_form.rowCount() > 0:
             self._summary_form.removeRow(0)
@@ -189,22 +199,28 @@ class OverviewTab(QtWidgets.QWidget):
             )
             self._summary_form.addRow(QtWidgets.QLabel(key + ":"), label)
 
-        prov = _collect_provenance(model)
-        if prov:
-            for key, value in prov:
-                label = QtWidgets.QLabel(value)
-                label.setTextInteractionFlags(
-                    QtCore.Qt.TextInteractionFlag.TextSelectableByMouse
-                )
-                self._prov_form.addRow(QtWidgets.QLabel(key + ":"), label)
-            self._prov_group.setVisible(True)
-        else:
-            label = QtWidgets.QLabel("no provenance available")
-            label.setStyleSheet("color: gray; font-style: italic;")
-            self._prov_form.addRow(label)
-            self._prov_group.setVisible(True)
+        show_prov = self.chk_show_provenance.isChecked()
+        self._prov_group.setVisible(show_prov)
+
+        if show_prov:
+            prov = _collect_provenance(model)
+            if prov:
+                for key, value in prov:
+                    label = QtWidgets.QLabel(value)
+                    label.setTextInteractionFlags(
+                        QtCore.Qt.TextInteractionFlag.TextSelectableByMouse
+                    )
+                    self._prov_form.addRow(QtWidgets.QLabel(key + ":"), label)
+            else:
+                label = QtWidgets.QLabel("no provenance available")
+                label.setStyleSheet("color: gray; font-style: italic;")
+                self._prov_form.addRow(label)
 
         self._populate_tree(model)
+
+    def _on_show_provenance_toggled(self, checked: bool) -> None:
+        """Refresh display when the Show Provenance setting is toggled."""
+        self.update_from_model(self._current_model)
 
     @property
     def tree_node_count(self) -> int:
@@ -229,9 +245,14 @@ class OverviewTab(QtWidgets.QWidget):
 
     def _populate_tree(self, model: C3DDataModel) -> None:
         raw = model.raw_parameters
+        show_prov = self.chk_show_provenance.isChecked()
         # Fall back to the flat metadata dict if raw parameters are absent.
         if not isinstance(raw, dict) or not raw:
             for key, value in model.metadata.items():
+                if not show_prov and any(
+                    p in str(key).upper() for p in _PROVENANCE_PATTERNS
+                ):
+                    continue
                 row = [QtGui.QStandardItem(str(key)), QtGui.QStandardItem(str(value))]
                 for item in row:
                     item.setEditable(False)
@@ -254,6 +275,10 @@ class OverviewTab(QtWidgets.QWidget):
             self._tree_model.invisibleRootItem().appendRow([group_item, group_value])
             for key in sorted(group.keys()):
                 if _is_metadata_internal_key(key):
+                    continue
+                if not show_prov and any(
+                    p in str(key).upper() for p in _PROVENANCE_PATTERNS
+                ):
                     continue
                 node = group[key]
                 key_item = QtGui.QStandardItem(str(key))

@@ -8,6 +8,8 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
+
+pytest.importorskip("torch")
 from src.shared.python.motion_matching.surrogate.perstep.extract_dataset import (
     extract_dataset,
 )

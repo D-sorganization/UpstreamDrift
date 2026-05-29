@@ -248,18 +248,18 @@ class TestLauncherUISearchAndRuntimeSettings(unittest.TestCase):
         )
 
         # Mock category helper
-        manager._get_model_category = MagicMock(
-            side_effect=lambda m: "Tools & Data" if m == model1 else "Simulation"
+        manager.get_model_categories = MagicMock(
+            side_effect=lambda m: ["Tools"] if m == model1 else ["Simulation"]
         )
 
-        # Case 1: Search text empty, category Tools & Data active
-        manager.current_category_filter = "Tools & Data"
+        # Case 1: Search text empty, category Tools active
+        manager.current_category_filter = "Tools"
         manager.current_filter_text = ""
         filtered = manager.get_filtered_order()
         self.assertEqual(filtered, ["data_processor"])
 
-        # Case 2: Search text non-empty, category Tools & Data active -> Search should be global!
-        manager.current_category_filter = "Tools & Data"
+        # Case 2: Search text non-empty, category Tools active -> Search should be global!
+        manager.current_category_filter = "Tools"
         manager.current_filter_text = "tracer"
         filtered = manager.get_filtered_order()
         self.assertEqual(

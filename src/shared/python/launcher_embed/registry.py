@@ -49,8 +49,27 @@ def register_embeddable_tool(tool: EmbeddableTool) -> None:
             "register_embeddable_tool: tool.tool_id must be a non-empty string"
         )
     if tool_id in EMBEDDABLE_TOOL_REGISTRY:
+        existing = EMBEDDABLE_TOOL_REGISTRY[tool_id]
+        cls_existing = type(existing)
+        cls_tool = type(tool)
+        q_existing = (
+            f"{cls_existing.__module__}.{cls_existing.__qualname__}"
+            if getattr(cls_existing, "__module__", "")
+            else cls_existing.__name__
+        )
+        q_tool = (
+            f"{cls_tool.__module__}.{cls_tool.__qualname__}"
+            if getattr(cls_tool, "__module__", "")
+            else cls_tool.__name__
+        )
+        if (
+            cls_existing is cls_tool
+            or q_existing == q_tool
+            or q_existing.split(".")[-2:] == q_tool.split(".")[-2:]
+        ):
+            return
         raise ValueError(
-            f"register_embeddable_tool: tool_id {tool_id!r} is already registered"
+            f"register_embeddable_tool: tool_id {tool_id!r} is already registered to {q_existing}; got {q_tool}"
         )
     EMBEDDABLE_TOOL_REGISTRY[tool_id] = tool
 

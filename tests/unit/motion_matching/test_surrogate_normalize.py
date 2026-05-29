@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
+pytest.importorskip("torch")
 import torch
 from src.shared.python.motion_matching.surrogate._normalize import (
     NormalizationStats,

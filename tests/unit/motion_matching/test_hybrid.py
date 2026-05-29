@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
+pytest.importorskip("torch")
 import torch
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.hybrid import (

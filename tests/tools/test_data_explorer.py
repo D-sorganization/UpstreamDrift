@@ -13,16 +13,38 @@ Tests:
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
+
+# Bootstrapping for relocated tools
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+sibling_tools = _REPO_ROOT.parent / "Tools"
+if sibling_tools.is_dir():
+    tools_src_path = str(sibling_tools / "src")
+else:
+    tools_src_path = str(_REPO_ROOT / "vendor" / "ud-tools" / "src")
+
+if tools_src_path not in sys.path:
+    sys.path.insert(0, tools_src_path)
+
 from src.api.routes import data_explorer as data_explorer_routes
-from src.tools.data_explorer.data_explorer_app import (
-    SUPPORTED_EXTENSIONS,
-    discover_datasets,
-    load_dataset,
-    main,
-)
+
+try:
+    from src.tools.data_explorer.data_explorer_app import (
+        SUPPORTED_EXTENSIONS,
+        discover_datasets,
+        load_dataset,
+        main,
+    )
+except ImportError:
+    from data_explorer.data_explorer_app import (
+        SUPPORTED_EXTENSIONS,
+        discover_datasets,
+        load_dataset,
+        main,
+    )
 
 
 class TestSupportedFormats:

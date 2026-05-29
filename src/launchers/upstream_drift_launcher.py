@@ -390,7 +390,10 @@ class UpstreamDriftLauncher(QMainWindow):
         )
 
     def __init__(
-        self, startup_results: StartupResults | None = None, loading: bool = False
+        self,
+        startup_results: StartupResults | None = None,
+        loading: bool = False,
+        splash: SplashScreen | None = None,
     ) -> None:
         """Initialize the main window.
 
@@ -406,6 +409,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self.simulation_manager = SimulationManager(self)
         self.dialogs_manager = DialogsManager(self)
         self.loading = loading
+        self.splash = splash
+        self.toast_manager = None
         self.orchestrator = LauncherOrchestrator()
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
@@ -822,6 +827,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self._apply_docker_status(results.docker_available)
         self._load_layout()
         self.loading = False
+        self._rebuild_grid()
 
         from PyQt6.QtCore import QTimer as _QTimer
 
@@ -955,6 +961,9 @@ class UpstreamDriftLauncher(QMainWindow):
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
             )
+        splash = getattr(self, "splash", None)
+        if splash is not None:
+            splash.close()
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
@@ -1154,18 +1163,27 @@ class UpstreamDriftLauncher(QMainWindow):
                         install_cmd = dep_info.get("install_cmd", "")
                         doc_url = dep_info.get("doc_url", "")
 
-                        self.show_dependency_error(
-                            model.name,
-                            dep_name,
-                            install_cmd,
-                            doc_url,
-                            deps_error,
-                        )
+                        if "PYTEST_CURRENT_TEST" not in os.environ and not getattr(
+                            self, "loading", False
+                        ):
+                            self.show_dependency_error(
+                                model.name,
+                                dep_name,
+                                install_cmd,
+                                doc_url,
+                                deps_error,
+                            )
                         self.lbl_status.setText("! Dependency Error")
                         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+                        self.lbl_status.setCursor(Qt.CursorShape.PointingHandCursor)
+                        self.lbl_status.setToolTip(
+                            "Click to view details in Settings -> Diagnostics"
+                        )
                     else:
                         self.lbl_status.setText("Ready")
                         self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        self.lbl_status.setCursor(Qt.CursorShape.ArrowCursor)
+                        self.lbl_status.setToolTip("")
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
@@ -1499,7 +1517,7 @@ def main() -> None:
     splash.show()
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    main_window = UpstreamDriftLauncher(loading=True)
+    main_window = UpstreamDriftLauncher(loading=True, splash=splash)
     main_window.show()
 
     def on_startup_finished(results: StartupResults) -> None:
@@ -1524,6 +1542,7 @@ def main() -> None:
     def on_startup_error(error_msg: str) -> None:
         """Handle startup failure."""
         logger.error(f"Startup failed: {error_msg}")
+        splash.close()
 
         QMessageBox.critical(
             None, "Startup Error", f"Failed to initialize UpstreamDrift:\n\n{error_msg}"

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from theme import typography as t
+from src.shared.python.theme import typography as t
 
 
 class TestFontStacks:

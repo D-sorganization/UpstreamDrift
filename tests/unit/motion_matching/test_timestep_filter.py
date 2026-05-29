@@ -8,6 +8,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import pytest
+
+pytest.importorskip("torch")
 from src.shared.python.motion_matching.inverse_timestep.filter import (
     filter_timesteps_by_speed,
     realistic_speed_mask,

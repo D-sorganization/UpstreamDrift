@@ -284,6 +284,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if "training_controller" in model_id:
             self._launch_training_controller()
             return True
+        if "library_tool" in model_id:
+            if hasattr(self, "_open_library_tab"):
+                self._open_library_tab()
+            return True
         return False
 
     def _try_launch_docker(self, model: Any) -> bool:
@@ -403,13 +407,23 @@ except (RuntimeError, TypeError, AttributeError) as e:
                         # Always dock as tab first; pop-out can be triggered post-launch from DraggableTabWidget
                         if hasattr(self, "dock_widget_as_tab"):
                             self.dock_widget_as_tab(ui_widget, model.name)
-                            self.show_toast(f"{model.name} Docked", "success")
+                            if getattr(ui_widget, "is_tool_available", True):
+                                self.show_toast(f"{model.name} Docked", "success")
+                            else:
+                                self.show_toast(f"Failed to load {model.name}", "error")
                         elif hasattr(self, "popout_widget"):
                             self.popout_widget(ui_widget, model.name)
-                            self.show_toast(f"{model.name} Popped Out", "success")
+                            if getattr(ui_widget, "is_tool_available", True):
+                                self.show_toast(f"{model.name} Popped Out", "success")
+                            else:
+                                self.show_toast(f"Failed to load {model.name}", "error")
 
-                        self.lbl_status.setText(f"* {model.name} Running")
-                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        if getattr(ui_widget, "is_tool_available", True):
+                            self.lbl_status.setText(f"* {model.name} Running")
+                            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        else:
+                            self.lbl_status.setText("* Launch Error")
+                            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                         return
                 except Exception as e:  # noqa: BLE001
                     logger.error("Failed to load dockable UI for %s: %s", model.name, e)
@@ -476,6 +490,13 @@ except (RuntimeError, TypeError, AttributeError) as e:
             return
 
         model_id = self.selected_model
+
+        if hasattr(self, "layout_manager") and hasattr(
+            self.layout_manager, "record_launch"
+        ):
+            self.layout_manager.record_launch(model_id)
+            if hasattr(self, "_save_layout"):
+                self._save_layout()
 
         if self._try_launch_special_app(model_id):
             return

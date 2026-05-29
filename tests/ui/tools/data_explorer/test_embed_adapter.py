@@ -7,8 +7,21 @@ Run with ``QT_QPA_PLATFORM=offscreen``. PyQt6 is gated via
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
 
 import pytest
+
+# Bootstrapping for relocated tools
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+sibling_tools = _REPO_ROOT.parent / "Tools"
+if sibling_tools.is_dir():
+    tools_src_path = str(sibling_tools / "src")
+else:
+    tools_src_path = str(_REPO_ROOT / "vendor" / "ud-tools" / "src")
+
+if tools_src_path not in sys.path:
+    sys.path.insert(0, tools_src_path)
 
 pytest.importorskip("PyQt6")
 
@@ -19,9 +32,15 @@ from src.shared.python.launcher_embed import (  # noqa: E402
     EmbedCapabilities,
     EmbeddableTool,
 )
-from src.tools.data_explorer._embed_adapter import (  # noqa: E402
-    _DataExplorerEmbedAdapter,
-)
+
+try:
+    from src.tools.data_explorer._embed_adapter import (  # noqa: E402
+        _DataExplorerEmbedAdapter,
+    )
+except ImportError:
+    from data_explorer._embed_adapter import (  # noqa: E402
+        _DataExplorerEmbedAdapter,
+    )
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -109,13 +128,16 @@ def test_cleanup_is_idempotent(
 
 
 def test_importing_package_registers_adapter(_preserve_registry) -> None:
-    """Importing :mod:`src.tools.data_explorer` registers the adapter."""
+    """Importing the data_explorer package registers the adapter."""
     # The package may already be imported earlier in the test session;
     # clear the registry (done by the fixture) and re-run the
     # registration logic by re-executing the package init's body.
     import importlib
 
-    import src.tools.data_explorer as data_explorer_pkg
+    try:
+        import src.tools.data_explorer as data_explorer_pkg
+    except ImportError:
+        import data_explorer as data_explorer_pkg
 
     importlib.reload(data_explorer_pkg)
 

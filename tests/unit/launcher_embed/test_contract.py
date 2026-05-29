@@ -6,7 +6,7 @@ import dataclasses
 
 import pytest
 
-from launcher_embed import EmbedCapabilities
+from src.shared.python.launcher_embed import EmbedCapabilities
 
 
 @pytest.mark.unit

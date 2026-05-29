@@ -118,17 +118,19 @@ def test_library_is_sidebar_button_not_startup_tab(launcher) -> None:
     assert launcher.workspace_tabs.count() == 1
     assert launcher.workspace_tabs.tabText(0) == "Home"
     assert launcher.library_widget is None
-    assert launcher.btn_library_sidebar.accessibleName() == "Library"
-    assert not launcher.btn_library_sidebar.icon().isNull()
+    btn_doc = launcher.sidebar_group.button(5)
+    assert btn_doc is not None
+    assert btn_doc.accessibleName() == "Documentation"
+    assert not btn_doc.icon().isNull()
 
 
 def test_library_sidebar_route_opens_single_workspace_tab(launcher) -> None:
     launcher.init_ui()
 
     with patch("src.launchers.library_widget.LibraryWidget", side_effect=QWidget):
-        launcher._on_sidebar_routed(7)
+        launcher._open_library_tab()
         first_widget = launcher.library_widget
-        launcher._on_sidebar_routed(7)
+        launcher._open_library_tab()
 
     assert first_widget is launcher.library_widget
     assert launcher.workspace_tabs.count() == 2
@@ -437,7 +439,7 @@ def test_on_sidebar_routed_existing_ids_still_work(launcher) -> None:
     assert launcher.layout_manager.current_category_filter == "All"
 
     launcher._on_sidebar_routed(1)
-    assert launcher.layout_manager.current_category_filter == "Physics Engines"
+    assert launcher.layout_manager.current_category_filter == "Engines"
 
 
 # ---------------------------------------------------------------------------
@@ -531,14 +533,13 @@ def test_redock_all_tabs_action(launcher) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Training sidebar button + routing (issue #6018)
+# Condensed Categories sidebar button + routing
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-def test_sidebar_includes_training_button(launcher) -> None:
-    """The sidebar build invokes ``_build_sidebar_button`` for the Training
-    label, demonstrating that the training control is wired in."""
+def test_sidebar_includes_condensed_buttons(launcher) -> None:
+    """The sidebar build invokes ``_build_sidebar_button`` for Tools and Documentation."""
     build_button_spy = MagicMock(wraps=launcher._build_sidebar_button)
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
@@ -551,12 +552,6 @@ def test_sidebar_includes_training_button(launcher) -> None:
         launcher._setup_global_sidebar()
 
     labels_used = [call.args[0] for call in build_button_spy.call_args_list]
-    assert "Training" in labels_used
-
-
-@pytest.mark.unit
-def test_on_sidebar_routed_training_launches_controller(launcher) -> None:
-    """Clicking the Training button (``id=8``) routes to launching the controller."""
-    launcher._launch_training_controller = MagicMock()
-    launcher._on_sidebar_routed(8)
-    launcher._launch_training_controller.assert_called_once()
+    assert "Tools" in labels_used
+    assert "Documentation" in labels_used
+    assert "Training" not in labels_used
