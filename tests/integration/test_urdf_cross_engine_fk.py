@@ -19,7 +19,7 @@ from humanoid_character_builder.interfaces import CharacterBuilder
 
 def get_active_joints(urdf_path: Path) -> dict[str, tuple[float, float]]:
     """Extract all non-fixed joints and their limits from URDF."""
-    import xml.etree.ElementTree as ET
+    import defusedxml.ElementTree as ET
 
     tree = ET.parse(urdf_path)
     root = tree.getroot()
@@ -58,7 +58,7 @@ def compute_mujoco_fk(
     # Determine the root link of the URDF, which MuJoCo fuses into the world body (ID 0)
     root_link = None
     try:
-        import xml.etree.ElementTree as ET
+        import defusedxml.ElementTree as ET
 
         tree = ET.parse(urdf_path)
         root = tree.getroot()
