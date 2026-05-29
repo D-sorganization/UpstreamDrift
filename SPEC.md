@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.202                                            |
-| **Last Spec Update**    | 2026-05-28                                         |
+| **Spec Version**        | 1.0.203                                            |
+| **Last Spec Update**    | 2026-05-29                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-29** - Annotated cross-engine dashboard comparison results with per-engine velocity convention and units metadata in GUI result labels and headless logs so learners can see which native representation each engine result uses before normalized comparison (closes #6659).
 - **2026-05-28** - Resolved python path resolution bug in `embedded_tool_bootstrap.py` and `upstream_drift_launcher.py` to fix launcher boot-time `ModuleNotFoundError` crashes and warnings.
 - **2026-05-28** - Added sg-optimizer Phase 2: GeoJSON I/O (`course_io.py` with `HoleGeometry`, `load_hole_geojson`, `save_hole_geojson`), UTM geometry utilities (`geometry.py` with `LatLonPoint`, `UTMPoint`, `project_to_utm`, `utm_to_latlon`, `haversine_m` via pyproj), classic-holes library (`library.py` with 5 GeoJSON data files for Sawgrass 17, Augusta 13, Pebble 7, Road Hole 17, Cypress 16), `StateFeatures` dataclass factory (`features.py`), and full `TreeModel` with `forced_punch_out_probability` distribution (`mdp/tree_model.py`); adds `pyproj>=3.6.0` optional dependency (closes #6271).
 - **2026-05-28** - Restored production symbols deleted by Bolt commit #6501: `_resolve_default_server` in `chat_dock_widget`, full 60-token `ThemeColors` derivation pipeline in `theme/api.py`, `ThemeColorsCompat` and `_derive_full_palette` in `theme/__init__.py`, `_tool_declarations_to_ollama` + `keep_alive`/`num_ctx` latency optimizations in `ollama_adapter.py`, and `_EmbedAdapter` + `_register()` in all 5 tool GUI modules; closes #6527, #6528, #6529. Also fixes sg_optimizer longitudinal dispersion applying wrong modifier column (closes #6343).
@@ -625,6 +626,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-29 | 1.0.203 | fix(gui): annotate cross-engine dashboard comparison results with per-engine velocity convention and units metadata in headless logs and GUI chart labels; closes #6659. |
 | 2026-05-28 | 1.0.198 | fix(mujoco): `get_dockable_ui()` returns a `QWidget` container wrapping `HumanoidLauncher` (not `QMainWindow`) for tab embedding; `_apply_styling` now calls `apply_theme_to_window` for consistent theming (issue #6509). |
 | 2026-05-27 | 1.0.201 | chore(sidekick): confirm T2 (`StandaloneSidekickWindow` profile switching) and T5 (schema-version persisted in round-trip JSON) acceptance criteria with targeted tests; closes issues #5980 and #5983. |
 | 2026-05-27 | 1.0.202 | feat(sidekick): complete T4 headless calculator invoker — `sidekick run` validates inputs via Calculator Protocol, surfaces structured errors (exit 3 validation/calc, exit 4 unknown-calculator + fuzzy suggestions, exit 1 I/O), supports `--format json` and `--format csv`, with full TDD coverage (issue #5982). |
