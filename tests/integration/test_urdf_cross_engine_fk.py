@@ -30,13 +30,14 @@ def get_active_joints(urdf_path: Path) -> dict[str, tuple[float, float]]:
         if jtype in ("revolute", "prismatic"):
             name = joint.get("name")
             limit = joint.find("limit")
-            if limit is not None:
+            if name is not None and limit is not None:
                 lower = float(limit.get("lower", "-3.14"))
                 upper = float(limit.get("upper", "3.14"))
                 joints[name] = (lower, upper)
         elif jtype == "continuous":
             name = joint.get("name")
-            joints[name] = (-math.pi, math.pi)
+            if name is not None:
+                joints[name] = (-math.pi, math.pi)
 
     return joints
 
@@ -54,9 +55,36 @@ def compute_mujoco_fk(
 
     data = mujoco.MjData(model)
 
+    # Determine the root link of the URDF, which MuJoCo fuses into the world body (ID 0)
+    root_link = None
+    try:
+        import xml.etree.ElementTree as ET
+
+        tree = ET.parse(urdf_path)
+        root = tree.getroot()
+        links = set()
+        for link in root.findall("link"):
+            lname = link.get("name")
+            if lname is not None:
+                links.add(lname)
+        child_links = set()
+        for joint in root.findall("joint"):
+            child = joint.find("child")
+            if child is not None:
+                cname = child.get("link")
+                if cname is not None:
+                    child_links.add(cname)
+        root_links = links - child_links
+        if root_links:
+            root_link = list(root_links)[0]
+    except (ET.ParseError, OSError):
+        pass
+
     body_ids = []
     for name in body_names:
         body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, name)
+        if body_id == -1 and name == root_link:
+            body_id = 0
         body_ids.append(body_id)
 
     results = np.zeros((len(configs), len(body_names), 3))
@@ -71,9 +99,12 @@ def compute_mujoco_fk(
 
         mujoco.mj_kinematics(model, data)
         for b, bid in enumerate(body_ids):
-            results[i, b] = data.xpos[bid]
-            if bid == -1:
-                print(f"Body {body_names[b]} not found in mj")
+            if bid >= 0:
+                results[i, b] = data.xpos[bid]
+            else:
+                results[i, b] = np.zeros(3)
+                if i == 0:
+                    print(f"Body {body_names[b]} not found in mj")
 
     return results
 
