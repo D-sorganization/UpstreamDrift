@@ -106,6 +106,14 @@ def test_create_main_widget_returns_qwidget(qapp, adapter) -> None:  # noqa: ANN
     :class:`MainWidget` constructs a Drake simulator on initialization.
     """
     pytest.importorskip("pydrake")
+    if "pydrake" in sys.modules:
+        pydrake_mod = sys.modules["pydrake"]
+        if (
+            hasattr(pydrake_mod, "_mock_self")
+            or "mock" in str(type(pydrake_mod)).lower()
+        ):
+            pytest.skip("pydrake is mocked")
+
     # ``pydrake`` is a namespace package, so the importorskip above
     # succeeds even when the native wheel failed to load. Probe the
     # specific symbol the dashboard depends on.

@@ -360,7 +360,7 @@ exclude = [
     "setup_golf_suite.py",
     # numpy-stubs version divergence on self-hosted vs GitHub-hosted runners
     # These files have pre-existing type issues exposed by numpy>=2.0 stubs
-    "src/shared/python/sidekick/process_calculators/optimization.py",
+
     "src/shared/python/perturbation/statistics.py",
     "src/shared/python/model_generation/core/physics_validation.py",
     "src/shared/python/model_generation/core/constants.py",
@@ -373,7 +373,7 @@ exclude = [
     "src/shared/python/signal_toolkit/io.py",
     "src/shared/python/engine_core/checkpoint.py",
     "src/shared/python/data_io/export.py",
-    "src/shared/python/sidekick/process_calculators/psa_package/psa_gui.py",
+
     "src/shared/python/signal_toolkit/polynomial_generator.py",
     "src/engines/common/export.py",
     "src/api/routes/putting_green.py",
@@ -382,7 +382,7 @@ exclude = [
     # numpy-stubs floating/signedinteger type-narrowing divergence (mypy 1.20.1 + numpy 2.2.x)
     # These files surface new type errors on runners with numpy 2.2.x stubs but pass
     # on runners with numpy 2.3.x stubs. Excluded until numpy stubs stabilise across runners.
-    "src/shared/python/sidekick/process_calculators/syngas_water_calculator.py",
+
     "src/deployment/digital_twin/twin.py",
     "src/shared/python/analysis/nonlinear_dynamics.py",
     "src/shared/python/optimization/swing_optimizer.py",

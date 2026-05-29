@@ -247,7 +247,7 @@ def register_routes(
         Number of routers registered.
     """
     routes = discover_routes(exclude=exclude)
-    public_modules = {"auth", "observability", "core"}
+    public_modules = {"auth", "observability", "core", "launcher", "theme"}
     for module_name, router in routes:
         deps = list(_dependencies_for_route(module_name))
         if module_name not in public_modules:

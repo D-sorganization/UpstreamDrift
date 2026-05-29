@@ -356,6 +356,22 @@ _cache_lock = asyncio.Lock()
 def get_dataset_storage() -> DatasetStorage:
     """Get or create dataset storage instance."""
     global _dataset_storage
+    if _dataset_storage is not None:
+        current_env_dir = os.environ.get("DATASET_DIR")
+        if not _dataset_storage.db_path.parent.exists() or (
+            current_env_dir
+            and Path(current_env_dir).resolve()
+            != _dataset_storage.db_path.parent.resolve()
+        ):
+            if (
+                hasattr(_dataset_storage._local, "conn")
+                and _dataset_storage._local.conn is not None
+            ):
+                with contextlib.suppress(Exception):
+                    _dataset_storage._local.conn.close()
+                _dataset_storage._local.conn = None
+            _dataset_storage = None
+
     if _dataset_storage is None:
         _dataset_storage = DatasetStorage()
     return _dataset_storage
