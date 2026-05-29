@@ -36,6 +36,7 @@ ALLOWLIST = frozenset(
         "conftest.py",
         "GEMINI.md",
         "launch_golf_suite.py",
+        "launch_upstream_drift.py",
         "launch.bat",
         "install.sh",
         "VERSION",
