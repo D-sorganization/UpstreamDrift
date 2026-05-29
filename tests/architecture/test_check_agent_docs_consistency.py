@@ -119,3 +119,28 @@ def test_agent_docs_consistency_fails_on_black_and_old_coverage(
         in output
     )
     assert "pyproject.toml still defines a [tool.black] section." in output
+
+
+def test_glob_and_brace_references_are_not_treated_as_missing_paths(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Glob/brace patterns are documentation, not literal files (#6620)."""
+    errors: list[str] = []
+    claude = (
+        "See `scripts/**` and `tests/**` for tooling.\n"
+        "Stdout exceptions: `src/shared/python/codemap/{cli,watcher,mcp_server}.py` "
+        "and `src/shared/python/sidekick/{__main__,standalone/runner}.py`.\n"
+    )
+
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    checker._assert_path_references_exist(claude, errors)
+
+    assert errors == []
+
+
+def test_is_glob_pattern_detects_metacharacters() -> None:
+    assert checker._is_glob_pattern("scripts/**")
+    assert checker._is_glob_pattern("src/a/{b,c}.py")
+    assert checker._is_glob_pattern("src/a/file?.py")
+    assert checker._is_glob_pattern("src/a/[abc].py")
+    assert not checker._is_glob_pattern("src/launchers/embedded_host.py")

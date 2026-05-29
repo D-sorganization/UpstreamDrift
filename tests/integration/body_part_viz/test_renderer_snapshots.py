@@ -246,6 +246,7 @@ def test_library_full_body_at_address(fig_ax) -> None:
     ``data/C3D_TA_Driver.c3d`` to keep CI stable across c3d-loader
     upgrades. The renderer code path is identical.
     """
+    pytest.importorskip("trimesh")
     from src.shared.python.body_part_viz.asset_library import ShapeLibrary
     from src.shared.python.body_part_viz.fitters.between_two import (
         BetweenTwoMarkersFitter,
@@ -261,7 +262,7 @@ def test_library_full_body_at_address(fig_ax) -> None:
     for name in library.names():
         try:
             binding = library.binding_template(name)
-        except Exception:
+        except Exception:  # noqa: BLE001 - skip shapes that fail to bind
             continue
         if binding.kind is not BindingKind.BETWEEN_TWO:
             continue
@@ -282,7 +283,7 @@ def test_library_full_body_at_address(fig_ax) -> None:
             fitted = fitter.fit(shape, binding, markers)
             renderer.add_shape(shape, fitted, theme)
             rendered += 1
-        except Exception:
+        except Exception:  # noqa: BLE001 - skip shapes that fail to render
             continue
 
     assert rendered > 0, "library rendered zero shapes"

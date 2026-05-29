@@ -13,8 +13,6 @@ try:
     from python.src.drake_golf_model import (
         GolfModelParams,
         SegmentParams,
-        build_golf_swing_diagram,
-        make_cylinder_inertia,
     )
 except ImportError as e:
     # Skip all tests if pydrake is not available

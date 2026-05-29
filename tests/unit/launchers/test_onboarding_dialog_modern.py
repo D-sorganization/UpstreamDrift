@@ -150,8 +150,8 @@ def test_dialog_instantiates_without_crash() -> None:
     try:
         from PyQt6.QtWidgets import QApplication
 
-        app = QApplication.instance() or QApplication(sys.argv[:1])
-    except Exception:
+        _app = QApplication.instance() or QApplication(sys.argv[:1])
+    except Exception:  # noqa: BLE001 - any import/init failure means skip
         pytest.skip("PyQt6 not available in this environment")
 
     try:

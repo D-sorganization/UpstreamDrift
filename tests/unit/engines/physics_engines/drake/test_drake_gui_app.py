@@ -39,7 +39,7 @@ class TestDrakeSimApp:
         mock_timer = MagicMock()
         mock_timer_cls.return_value = mock_timer
 
-        app = DrakeSimApp()
+        DrakeSimApp()
 
         mock_base_init.assert_called_once()
         mock_scan.assert_called_once()
