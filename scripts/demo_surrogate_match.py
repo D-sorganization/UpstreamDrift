@@ -234,7 +234,6 @@ def normalise_target(target: dict) -> tuple[dict, dict]:
 
 def normalise_prediction(pred: dict, params: dict) -> dict:
     """Normalise a ``predict_trajectory`` output dict to the target frame."""
-    origin = params["origin"]
     shaft_len = params["shaft_len"]
     grip_pred = pred["r_grip"][0]  # (T, 3), remove batch dim
     club_pred = pred["r_clubhead"][0]  # (T, 3)
