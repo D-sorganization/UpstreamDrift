@@ -20,6 +20,7 @@ finite, expected shape) still run because they only depend on numpy/pandas.
 
 from __future__ import annotations
 
+import importlib.util
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
@@ -43,11 +44,7 @@ __all__ = [
 @lru_cache(maxsize=1)
 def pandera_available() -> bool:
     """Return True when the optional ``pandera`` dependency is importable."""
-    try:
-        import pandera  # noqa: F401  (probe import)
-    except ImportError:
-        return False
-    return True
+    return importlib.util.find_spec("pandera") is not None
 
 
 def _pandera_modules() -> tuple[Any, Any] | None:
