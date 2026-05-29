@@ -621,6 +621,50 @@ class _SystemFileHandler:
         return None
 
 
+class SharedRepoHandler:
+    """Handler for opening sibling repositories/folders.
+
+    Handles model types: shared_repo
+    Covers: MuJoCo_Models, Drake_Models, Pinocchio_Models, OpenSim_Models.
+    """
+
+    MODEL_TYPES = {"shared_repo"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Open the sibling repository directory in the default system file manager."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "SharedRepoHandler: model '%s' has no path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        # Find sibling folder
+        folder_path = repo_path.parent / model_path
+        if not folder_path.exists():
+            logger.warning("SharedRepoHandler: directory not found: %s", folder_path)
+            return False
+
+        return _open_with_system_app(folder_path, "SharedRepoHandler")
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Shared repository handler does not provide a dockable UI widget."""
+        return None
+
+
 class MatlabFileHandler(_SystemFileHandler):
     """Handler for opening MATLAB files (.slx, .m) with system MATLAB."""
 
@@ -802,6 +846,7 @@ class ModelHandlerRegistry:
             BiomechExerciseHandler(),
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
+            SharedRepoHandler(),
             DocumentHandler(),
             ApiBackedHandler(),
         ]

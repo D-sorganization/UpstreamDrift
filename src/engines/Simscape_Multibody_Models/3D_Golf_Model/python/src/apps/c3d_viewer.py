@@ -56,7 +56,7 @@ class MainWidget(QtWidgets.QWidget):
 
         self._create_actions()
         self._create_central_widget()
-        self._update_ui_state(False)
+        self._update_ui_state(True)
 
     # ----------------------------- UI setup --------------------------------
 

@@ -244,3 +244,130 @@ def test_launch_c3d_viewer_embedded(launcher) -> None:
             mock_launch_script.assert_not_called()
     finally:
         unregister_embeddable_tool("c3d_viewer")
+
+
+def test_tab_right_click_undock_menu(launcher, qtbot):
+    """Test that right-clicking a tab bar index triggers context menu and can undock it."""
+    from unittest.mock import MagicMock, patch
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtGui import QMouseEvent
+    from PyQt6.QtCore import QEvent
+
+    dummy = QWidget()
+    launcher.workspace_tabs.addTab(dummy, "Undock Test Tab")
+
+    tab_bar = launcher.workspace_tabs.tabBar()
+    assert tab_bar is not None
+
+    tab_bar.tabAt = MagicMock(return_value=1)
+
+    from PyQt6.QtCore import QPointF
+
+    event = QMouseEvent(
+        QEvent.Type.MouseButtonRelease,
+        QPointF(10.0, 10.0),
+        Qt.MouseButton.RightButton,
+        Qt.MouseButton.RightButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+
+    with patch("PyQt6.QtWidgets.QMenu.exec") as mock_exec:
+        res = launcher.workspace_tabs.eventFilter(tab_bar, event)
+        assert res is True
+        mock_exec.assert_called_once()
+
+
+def test_detached_tab_window_redock_via_dialog(launcher, qtbot):
+    """Test DetachedTabWindow close event prompting redocking."""
+    from PyQt6.QtWidgets import QMessageBox
+    from unittest.mock import patch, MagicMock
+
+    dummy = QWidget()
+    launcher.workspace_tabs.addTab(dummy, "Detached Tab")
+
+    from PyQt6.QtCore import QPoint
+
+    launcher.workspace_tabs.detach_tab(1, QPoint(100, 100))
+
+    assert len(launcher.workspace_tabs.detached_tabs) == 1
+    detached_window = list(launcher.workspace_tabs.detached_tabs.keys())[0]
+
+    captured_msg = None
+
+    def mock_exec(self_msg):
+        nonlocal captured_msg
+        captured_msg = self_msg
+        return 0
+
+    with (
+        patch.object(QMessageBox, "exec", mock_exec),
+        patch.object(QMessageBox, "clickedButton") as mock_clicked,
+    ):
+        mock_clicked.side_effect = lambda: next(
+            btn for btn in captured_msg.buttons() if btn.text() == "Redock"
+        )
+
+        close_event = MagicMock()
+        detached_window.closeEvent(close_event)
+
+        close_event.accept.assert_called_once()
+        assert launcher.workspace_tabs.indexOf(dummy) != -1
+        assert len(launcher.workspace_tabs.detached_tabs) == 0
+
+
+def test_detached_tab_window_close_via_dialog(launcher, qtbot):
+    """Test DetachedTabWindow close event prompting closing/deleting tab."""
+    from PyQt6.QtWidgets import QMessageBox
+    from unittest.mock import patch, MagicMock
+
+    dummy = QWidget()
+    launcher.workspace_tabs.addTab(dummy, "Detached Tab 2")
+
+    from PyQt6.QtCore import QPoint
+
+    launcher.workspace_tabs.detach_tab(1, QPoint(100, 100))
+
+    assert len(launcher.workspace_tabs.detached_tabs) == 1
+    detached_window = list(launcher.workspace_tabs.detached_tabs.keys())[0]
+
+    captured_msg = None
+
+    def mock_exec(self_msg):
+        nonlocal captured_msg
+        captured_msg = self_msg
+        return 0
+
+    with (
+        patch.object(QMessageBox, "exec", mock_exec),
+        patch.object(QMessageBox, "clickedButton") as mock_clicked,
+    ):
+        mock_clicked.side_effect = lambda: next(
+            btn for btn in captured_msg.buttons() if btn.text() == "Close Tab"
+        )
+
+        close_event = MagicMock()
+        detached_window.closeEvent(close_event)
+
+        close_event.accept.assert_called_once()
+        assert launcher.workspace_tabs.indexOf(dummy) == -1
+        assert len(launcher.workspace_tabs.detached_tabs) == 0
+
+
+def test_c3d_viewer_tabs_enabled_on_startup(qtbot):
+    """Test that C3D viewer tabs are enabled by default on startup."""
+    import importlib
+
+    try:
+        c3d_viewer_mod = importlib.import_module(
+            "src.engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
+        )
+    except ImportError:
+        c3d_viewer_mod = importlib.import_module(
+            "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
+        )
+    MainWidget = c3d_viewer_mod.MainWidget
+
+    widget = MainWidget()
+    qtbot.addWidget(widget)
+
+    assert widget.tabs.isEnabled() is True

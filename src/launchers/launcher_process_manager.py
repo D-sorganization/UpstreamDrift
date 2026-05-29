@@ -17,6 +17,7 @@ Supports two output modes:
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import os
 import re
@@ -380,6 +381,15 @@ class ProcessManager:
         else:
             logger.info("[%s] %s", name, line)
 
+    def _add_to_running_processes(
+        self, name: str, process: subprocess.Popen[bytes]
+    ) -> None:
+        with self._process_lock:
+            self.running_processes[name] = process
+        if getattr(self, "on_process_list_changed", None):
+            with contextlib.suppress(Exception):
+                self.on_process_list_changed()
+
     def attach_process(self, name: str, process: subprocess.Popen[bytes]) -> None:
         """Attach an externally-created process for output streaming.
 
@@ -389,7 +399,7 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
-        self.running_processes[name] = process
+        self._add_to_running_processes(name, process)
         t = threading.Thread(
             target=self._stream_output,
             args=(name, process),
@@ -529,8 +539,7 @@ class ProcessManager:
             _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
-            with self._process_lock:
-                self.running_processes[name] = process
+            self._add_to_running_processes(name, process)
             logger.info(f"Launched {name} (PID: {process.pid})")
             return process
 
@@ -665,8 +674,7 @@ class ProcessManager:
             _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
-            with self._process_lock:
-                self.running_processes[name] = process
+            self._add_to_running_processes(name, process)
             logger.info(f"Launched module {name} (PID: {process.pid})")
             return process
 
@@ -865,6 +873,9 @@ class ProcessManager:
                 logger.error(f"Error terminating {name}: {e}")
 
         self.running_processes.clear()
+        if getattr(self, "on_process_list_changed", None):
+            with contextlib.suppress(Exception):
+                self.on_process_list_changed()
 
     def is_process_running(self, name: str) -> bool:
         """Check if a named process is still running.

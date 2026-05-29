@@ -106,11 +106,11 @@ class RuntimeButton(QToolButton):
         self.setObjectName("RuntimeButton")
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
 
-        # Subtle shadow
+        # Reduced/extremely subtle shadow
         self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(8)
-        self.shadow.setOffset(0, 2)
-        self.shadow.setColor(QColor(0, 0, 0, 80))
+        self.shadow.setBlurRadius(2)
+        self.shadow.setOffset(0, 1)
+        self.shadow.setColor(QColor(0, 0, 0, 15))
         self.setGraphicsEffect(self.shadow)
 
         # Deferred hide timer to allow moving mouse to the help button
@@ -435,6 +435,7 @@ class UISetupManager:
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(20)
         self._setup_grid_area(left_layout)
+        self._setup_running_processes_panel(left_layout)
         bottom_bar = self._setup_bottom_bar()
         left_layout.addLayout(bottom_bar)
 
@@ -461,6 +462,7 @@ class UISetupManager:
 
         self.workspace_tabs = DraggableTabWidget(core_tabs={"Home"})
         self.workspace_tabs.setDocumentMode(True)
+        self.workspace_tabs.currentChanged.connect(self._sync_console_button_states)
 
         self.workspace_tabs.addTab(self.content_splitter, "Home")
 
@@ -1011,9 +1013,7 @@ class UISetupManager:
         action_console.setShortcut("Ctrl+`")
         action_console.setToolTip("Show or hide the launched-process output console")
         action_console.setStatusTip("Toggles process-output console")
-        action_console.triggered.connect(
-            lambda checked: self._console_dock.setVisible(checked)
-        )
+        action_console.triggered.connect(lambda checked: self.toggle_process_console())
         view_menu.addAction(action_console)
         self._action_console = action_console
 
@@ -1307,6 +1307,31 @@ class UISetupManager:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
+        # Clear Filters Button
+        self.btn_clear_filters = QPushButton("Clear Filters")
+        self.btn_clear_filters.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_clear_filters.setToolTip(
+            "Reset all category and search filters to show all tiles"
+        )
+        self.btn_clear_filters.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+                padding: 4px 10px;
+                color: #e0e0e0;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.25);
+                color: #ffffff;
+            }
+        """)
+        self.btn_clear_filters.clicked.connect(self._clear_all_filters)
+        self.btn_clear_filters.hide()
+        top_bar.addWidget(self.btn_clear_filters)
+
         # Launch button — sits in the top bar next to the search input so the
         # primary action is always reachable without scrolling and the grid
         # area below is freed for tiles (no bottom-bar overlap).
@@ -1314,10 +1339,43 @@ class UISetupManager:
         # top_bar.addWidget(self.btn_launch)  # Removed launch button per user request
 
     def _on_status_clicked(self) -> None:
-        """Handle clicking the status label. If in error/dependency error, opens environment manager."""
+        """Handle clicking the status label. If in error/dependency error, opens environment manager.
+        If there are running processes, shows a menu to kill individual processes or all of them.
+        """
         status_text = self.lbl_status.text()
         if "Dependency Error" in status_text or "Error" in status_text:
             self.launcher.open_environment_manager()
+            return
+
+        # Check active processes
+        running = []
+        with self.process_manager._process_lock:
+            for name, proc in list(self.running_processes.items()):
+                if proc.poll() is None:
+                    running.append(name)
+
+        if running:
+            from PyQt6.QtWidgets import QMenu
+            from PyQt6.QtCore import QPoint
+
+            menu = QMenu(self.launcher)
+            title_act = menu.addAction("Active Processes:")
+            title_act.setEnabled(False)
+            menu.addSeparator()
+
+            for name in running:
+                # Action to kill this specific process
+                act = menu.addAction(f"Kill {name}")
+                act.triggered.connect(
+                    lambda checked=False, n=name: self._kill_process_by_name(n)
+                )
+
+            menu.addSeparator()
+            kill_all_act = menu.addAction("Kill All Processes")
+            kill_all_act.triggered.connect(self._kill_all_processes)
+
+            # Show the menu under the status label
+            menu.exec(self.lbl_status.mapToGlobal(QPoint(0, self.lbl_status.height())))
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
@@ -1765,8 +1823,9 @@ class UISetupManager:
         if _style:
             _style.polish(self._console_text)
 
-        console_container = QWidget()
-        console_layout = QVBoxLayout(console_container)
+        self._console_widget = QWidget()
+        self._console_widget.prevent_deletion_on_close = True
+        console_layout = QVBoxLayout(self._console_widget)
         console_layout.setContentsMargins(0, 0, 0, 0)
         console_layout.setSpacing(0)
         console_layout.addWidget(self._console_text)
@@ -1782,18 +1841,6 @@ class UISetupManager:
         toolbar.addWidget(clear_btn)
         console_layout.addLayout(toolbar)
 
-        from PyQt6.QtWidgets import QDialog
-
-        self._console_dock = QDialog(self.launcher, Qt.WindowType.Window)
-        self._console_dock.setWindowTitle("Process Output")
-        self._console_dock.resize(800, 300)
-
-        dl_layout = QVBoxLayout(self._console_dock)
-        dl_layout.setContentsMargins(0, 0, 0, 0)
-        dl_layout.addWidget(console_container)
-
-        self._console_dock.hide()
-
     def _on_process_output(self, engine_name: str, line: str) -> None:
         """Receive a line of output from a subprocess (thread-safe)."""
         QTimer.singleShot(
@@ -1805,17 +1852,239 @@ class UISetupManager:
         """Append a formatted line to the console widget (GUI thread only)."""
         if engine_name is None:
             raise ValueError("engine_name must be provided")
-        if not self._console_dock.isVisible():
-            self._console_dock.show()
-            if hasattr(self, "_action_console"):
-                self._action_console.setChecked(True)
+
+        idx = self.workspace_tabs.indexOf(self._console_widget)
+        if idx == -1:
+            idx = self.workspace_tabs.addTab(self._console_widget, "Console")
+            self._sync_console_button_states()
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")
         self._console_text.appendPlainText(f"[{ts}] [{engine_name}] {line}")
 
     def toggle_process_console(self) -> None:
-        """Toggle visibility of the Process Output dock."""
-        self._console_dock.setVisible(not self._console_dock.isVisible())
+        """Toggle visibility of the Process Output console tab."""
+        idx = self.workspace_tabs.indexOf(self._console_widget)
+        if idx == -1:
+            idx = self.workspace_tabs.addTab(self._console_widget, "Console")
+            self.workspace_tabs.setCurrentIndex(idx)
+        else:
+            if self.workspace_tabs.currentIndex() == idx:
+                self.workspace_tabs.removeTab(idx)
+            else:
+                self.workspace_tabs.setCurrentIndex(idx)
+        self._sync_console_button_states()
+
+    def _is_console_open(self) -> bool:
+        """Check if the console widget is currently in the tab bar or detached."""
+        if not hasattr(self, "_console_widget"):
+            return False
+        if self.workspace_tabs.indexOf(self._console_widget) != -1:
+            return True
+        # Check detached tabs
+        for widget, _, _ in self.workspace_tabs.detached_tabs.values():
+            if widget is self._console_widget:
+                return True
+        return False
+
+    def _sync_console_button_states(self) -> None:
+        """Synchronize the console action and sidebar button states based on tab presence."""
+        is_open = self._is_console_open()
+        if hasattr(self, "_action_console") and self._action_console:
+            self._action_console.setChecked(is_open)
+        if hasattr(self, "btn_console") and self.btn_console:
+            self.btn_console.setChecked(is_open)
+
+    # -- Clear Filters --
+
+    def _clear_all_filters(self) -> None:
+        """Clear search input and reset category to Home (All)."""
+        self.search_input.clear()
+        if hasattr(self, "sidebar_group"):
+            home_btn = self.sidebar_group.button(0)
+            if home_btn:
+                home_btn.setChecked(True)
+            self._on_sidebar_routed(0)
+
+    # -- Running Processes Panel --
+
+    def _setup_running_processes_panel(self, layout: QVBoxLayout) -> None:
+        """Create the running processes list widget at the bottom of the home grid."""
+        self.running_processes_panel = QFrame()
+        self.running_processes_panel.setObjectName("RunningProcessesPanel")
+        self.running_processes_panel.setStyleSheet("""
+            #RunningProcessesPanel {
+                background-color: rgba(30, 30, 30, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 8px;
+            }
+        """)
+        panel_layout = QVBoxLayout(self.running_processes_panel)
+        panel_layout.setContentsMargins(10, 6, 10, 6)
+        panel_layout.setSpacing(6)
+
+        header = QHBoxLayout()
+        header_title = QLabel("Running Processes")
+        header_title.setStyleSheet(
+            "font-weight: bold; color: #ffffff; font-size: 12px;"
+        )
+        header.addWidget(header_title)
+        header.addStretch()
+
+        # Kill All button
+        self.btn_kill_all_procs = QPushButton("Kill All")
+        self.btn_kill_all_procs.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_kill_all_procs.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(220, 53, 69, 0.2);
+                border: 1px solid rgba(220, 53, 69, 0.4);
+                border-radius: 4px;
+                padding: 2px 8px;
+                color: #ff6b6b;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: rgba(220, 53, 69, 0.4);
+                color: #ffffff;
+            }
+        """)
+        self.btn_kill_all_procs.clicked.connect(self._kill_all_processes)
+        header.addWidget(self.btn_kill_all_procs)
+        panel_layout.addLayout(header)
+
+        # Container for process rows
+        self.processes_container = QWidget()
+        self.processes_container.setProperty("class", "transparent")
+        self.processes_layout = QVBoxLayout(self.processes_container)
+        self.processes_layout.setContentsMargins(0, 0, 0, 0)
+        self.processes_layout.setSpacing(4)
+        panel_layout.addWidget(self.processes_container)
+
+        layout.addWidget(self.running_processes_panel)
+        self.running_processes_panel.hide()
+
+    def update_running_processes_ui(self) -> None:
+        """Update the running processes list panel on the home page (GUI thread only)."""
+        # Clear existing rows
+        while self.processes_layout.count() > 0:
+            item = self.processes_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Check active processes
+        running = []
+        with self.process_manager._process_lock:
+            for name, proc in list(self.running_processes.items()):
+                if proc.poll() is None:
+                    running.append(name)
+
+        if not running:
+            self.running_processes_panel.hide()
+            # Restore status label to Ready if it shows running/launching/● status
+            current_status = self.lbl_status.text()
+            if (
+                "Running" in current_status
+                or "Launching" in current_status
+                or "●" in current_status
+            ):
+                self.lbl_status.setText("Ready")
+                from src.shared.python.theme.style_constants import Styles
+
+                self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
+                self.lbl_status.setToolTip("")
+            return
+
+        # Update status label to indicate running processes
+        if len(running) == 1:
+            self.lbl_status.setText(f"● {running[0]} Running")
+        else:
+            self.lbl_status.setText(f"● {len(running)} Processes Running")
+
+        from src.shared.python.theme.style_constants import Styles
+
+        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS_BOLD)
+        self.lbl_status.setToolTip("Click to view or kill active processes")
+
+        for name in running:
+            row = QWidget()
+            row.setObjectName("ProcessRow")
+            row.setStyleSheet("""
+                #ProcessRow {
+                    background-color: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                }
+                #ProcessRow:hover {
+                    background-color: rgba(255, 255, 255, 0.06);
+                }
+            """)
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(6, 4, 6, 4)
+
+            # Green status dot
+            dot = QLabel("●")
+            dot.setStyleSheet("color: #2ecc71; font-size: 14px; margin-right: 4px;")
+            row_layout.addWidget(dot)
+
+            # Process Name
+            lbl_name = QLabel(name)
+            lbl_name.setStyleSheet("color: #e0e0e0; font-size: 12px;")
+            row_layout.addWidget(lbl_name)
+            row_layout.addStretch()
+
+            # Kill button
+            btn_kill = QPushButton("Kill")
+            btn_kill.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_kill.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(220, 53, 69, 0.1);
+                    border: 1px solid rgba(220, 53, 69, 0.3);
+                    border-radius: 4px;
+                    padding: 1px 6px;
+                    color: #ff6b6b;
+                    font-size: 10px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(220, 53, 69, 0.3);
+                    color: #ffffff;
+                }
+            """)
+            btn_kill.clicked.connect(
+                lambda checked=False, n=name: self._kill_process_by_name(n)
+            )
+            row_layout.addWidget(btn_kill)
+
+            self.processes_layout.addWidget(row)
+
+        self.running_processes_panel.show()
+
+    def _kill_process_by_name(self, name: str) -> None:
+        """Kill a running process by its name."""
+        import contextlib
+
+        with self.process_manager._process_lock:
+            proc = self.running_processes.get(name)
+            if proc:
+                try:
+                    logger.info(
+                        f"Killing process {name} (PID: {proc.pid}) via UI request"
+                    )
+                    from src.shared.python.security.subprocess_utils import (
+                        kill_process_tree,
+                    )
+
+                    kill_process_tree(proc.pid)
+                    proc.terminate()
+                except Exception as e:  # noqa: BLE001
+                    logger.error(f"Error killing process {name}: {e}")
+                finally:
+                    with contextlib.suppress(KeyError):
+                        del self.running_processes[name]
+        self.update_running_processes_ui()
+
+    def _kill_all_processes(self) -> None:
+        """Kill all currently running processes."""
+        self.process_manager.cleanup_processes()
+        self.update_running_processes_ui()
 
     # -- AI Panel (DEPRECATED, removed by UpstreamDrift #5620) --
     #

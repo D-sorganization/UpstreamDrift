@@ -104,6 +104,46 @@ models:
       logo: "assets/putting_green_modern.png"
       status: "ready"
 
+  - id: "mujoco_models_shared"
+    name: "MuJoCo Models"
+    description: "MuJoCo simulation models repository folder"
+    type: "shared_repo"
+    path: "MuJoCo_Models"
+    launcher:
+      category: "simulation"
+      logo: "assets/mujoco.png"
+      status: "ready"
+
+  - id: "drake_models_shared"
+    name: "Drake Models"
+    description: "Drake simulation models repository folder"
+    type: "shared_repo"
+    path: "Drake_Models"
+    launcher:
+      category: "simulation"
+      logo: "assets/drake.png"
+      status: "ready"
+
+  - id: "pinocchio_models_shared"
+    name: "Pinocchio Models"
+    description: "Pinocchio simulation models repository folder"
+    type: "shared_repo"
+    path: "Pinocchio_Models"
+    launcher:
+      category: "simulation"
+      logo: "assets/pinocchio.png"
+      status: "ready"
+
+  - id: "opensim_models_shared"
+    name: "OpenSim Models"
+    description: "OpenSim simulation models repository folder"
+    type: "shared_repo"
+    path: "OpenSim_Models"
+    launcher:
+      category: "simulation"
+      logo: "assets/opensim.png"
+      status: "ready"
+
   - id: "bunkershot3d"
     name: "BunkerShot3D"
     description: "3-D Granular Bunker-Shot Simulation"

@@ -204,25 +204,35 @@ def test_clear_search(launcher) -> None:
 
 
 def test_process_console(launcher) -> None:
+    from PyQt6.QtWidgets import QTabWidget
+
+    tabs = QTabWidget()
+    tabs.detached_tabs = {}
+    launcher.workspace_tabs = tabs
+
+    launcher._action_console = MagicMock()
+    launcher.btn_console = MagicMock()
+
     launcher._setup_process_console()
-    assert hasattr(launcher, "_console_dock")
+    assert hasattr(launcher, "_console_widget")
+    assert launcher._console_widget.prevent_deletion_on_close is True
 
-    # replace the dock with a mock to avoid Qt show/hide state issues
-    dock_mock = MagicMock()
-    dock_mock.isVisible.return_value = False
-    launcher._console_dock = dock_mock
+    # Initially, workspace_tabs should not have the console tab
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == -1
 
-    # toggle
+    # toggle should show it as a tab
     launcher.toggle_process_console()
-    dock_mock.setVisible.assert_called_with(True)
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == 0
+    assert launcher.workspace_tabs.tabText(0) == "Console"
 
-    # append_console_line
-    launcher._console_dock.isVisible.return_value = False
-    # mock the plain text edit to avoid needing a full Qt window text append test
-    launcher._console_text = MagicMock()
+    # toggle again should hide it (remove it from tabs)
+    launcher.toggle_process_console()
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == -1
+
+    # append_console_line should auto-add the tab if not present
     launcher._append_console_line("engine", "test message")
-    launcher._console_dock.show.assert_called_once()
-    launcher._console_text.appendPlainText.assert_called()
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == 0
+    assert "test message" in launcher._console_text.toPlainText()
 
 
 @patch("src.launchers.launcher_ui_setup.QTimer.singleShot")
@@ -555,3 +565,69 @@ def test_sidebar_includes_condensed_buttons(launcher) -> None:
     assert "Tools" in labels_used
     assert "Documentation" in labels_used
     assert "Training" not in labels_used
+
+
+@pytest.mark.unit
+def test_runtime_button_shadow_is_reduced(launcher) -> None:
+    """Verify that RuntimeButton drop shadow radius and color are set to reduced values."""
+    from src.launchers.launcher_ui_setup import RuntimeButton
+
+    btn = RuntimeButton(launcher)
+    assert btn.shadow is not None
+    assert btn.shadow.blurRadius() == 2
+    assert btn.shadow.color().alpha() == 15
+
+
+@pytest.mark.unit
+def test_status_label_updates_on_running_processes(launcher) -> None:
+    """Verify that lbl_status text and style are updated based on running processes."""
+    from PyQt6.QtWidgets import QLabel, QVBoxLayout
+    import threading
+
+    launcher.lbl_status = QLabel("Ready")
+    launcher.running_processes = {}
+    launcher.running_processes_panel = QLabel()  # Dummy
+    launcher.processes_layout = QVBoxLayout()
+    launcher.process_manager = MagicMock()
+    launcher.process_manager._process_lock = threading.Lock()
+
+    # 1. No running processes
+    launcher.update_running_processes_ui()
+    assert launcher.lbl_status.text() == "Ready"
+
+    # 2. One running process
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = None
+    launcher.running_processes["test_proc"] = mock_proc
+    launcher.update_running_processes_ui()
+    assert "test_proc Running" in launcher.lbl_status.text()
+    assert "●" in launcher.lbl_status.text()
+
+    # 3. Two running processes
+    mock_proc2 = MagicMock()
+    mock_proc2.poll.return_value = None
+    launcher.running_processes["test_proc2"] = mock_proc2
+    launcher.update_running_processes_ui()
+    assert "2 Processes Running" in launcher.lbl_status.text()
+
+
+@pytest.mark.unit
+def test_status_clicked_shows_menu(launcher) -> None:
+    """Verify that clicking status label when processes are running opens QMenu with actions."""
+    from PyQt6.QtWidgets import QLabel
+    import threading
+
+    launcher.lbl_status = QLabel("Running")
+    launcher.running_processes = {"test_proc": MagicMock()}
+    launcher.running_processes["test_proc"].poll.return_value = None
+    launcher.process_manager = MagicMock()
+    launcher.process_manager._process_lock = threading.Lock()
+    launcher._kill_process_by_name = MagicMock()
+
+    with (
+        patch("PyQt6.QtWidgets.QMenu.exec") as mock_menu_exec,
+        patch("PyQt6.QtWidgets.QMenu.addAction") as mock_add_action,
+    ):
+        launcher._on_status_clicked()
+        mock_menu_exec.assert_called_once()
+        assert mock_add_action.call_count >= 3

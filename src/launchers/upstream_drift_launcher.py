@@ -675,6 +675,9 @@ class UpstreamDriftLauncher(QMainWindow):
             REPOS_ROOT,
             output_callback=self.ui_setup_manager._on_process_output,
         )
+        self.process_manager.on_process_list_changed = (
+            self.ui_setup_manager.update_running_processes_ui
+        )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
         self.running_processes = self.process_manager.running_processes
@@ -817,6 +820,19 @@ class UpstreamDriftLauncher(QMainWindow):
             return
 
         self.layout_manager.rebuild_grid(self.grid_layout)
+
+        # Update Clear Filters button visibility
+        has_filter = False
+        if hasattr(self, "layout_manager") and self.layout_manager:
+            cat = getattr(self.layout_manager, "current_category_filter", "All")
+            txt = getattr(self.layout_manager, "current_filter_text", "")
+            if cat != "All" or txt:
+                has_filter = True
+        if (
+            hasattr(self.ui_setup_manager, "btn_clear_filters")
+            and self.ui_setup_manager.btn_clear_filters
+        ):
+            self.ui_setup_manager.btn_clear_filters.setVisible(has_filter)
 
     def update_startup_results(self, results: StartupResults) -> None:
         """Transition from loading skeleton to full application."""
@@ -1332,6 +1348,8 @@ class UpstreamDriftLauncher(QMainWindow):
             for key in finished_keys:
                 if key in self.running_processes:
                     del self.running_processes[key]
+
+        self.ui_setup_manager.update_running_processes_ui()
 
         if not self.running_processes and True:
             self.lbl_status.setText("Ready")

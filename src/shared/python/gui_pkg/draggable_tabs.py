@@ -202,9 +202,13 @@ class DraggableTabWidget(QTabWidget):
         if tab_text in self.tab_factories:
             self.closed_tabs[tab_text] = self.tab_factories[tab_text]
 
+        prevent_delete = getattr(widget, "prevent_deletion_on_close", False)
         self.removeTab(index)
         if widget:
-            widget.deleteLater()
+            if prevent_delete:
+                widget.setParent(None)
+            else:
+                widget.deleteLater()
 
     def reopen_closed_tab(self, tab_name: str) -> None:
         """Reopen a previously closed tab by name."""
@@ -229,7 +233,7 @@ class DraggableTabWidget(QTabWidget):
     # ── Drag-to-detach ──────────────────────────────────────────────
 
     def eventFilter(self, watched: QObject | None, event: QEvent | None) -> bool:
-        """Detect tab drag outside the bar to trigger detachment."""
+        """Detect tab drag outside the bar to trigger detachment or right-click to show menu."""
         if watched != self.tabBar() or event is None:
             return super().eventFilter(watched, event)
 
@@ -239,6 +243,17 @@ class DraggableTabWidget(QTabWidget):
                 and event.button() == Qt.MouseButton.LeftButton
             ):
                 self.drag_start_pos = event.globalPosition().toPoint()
+
+        elif (
+            event.type() == QEvent.Type.MouseButtonRelease
+            and isinstance(event, QMouseEvent)
+            and event.button() == Qt.MouseButton.RightButton
+        ):
+            bar = self.tabBar()
+            if bar:
+                pos = event.position().toPoint()
+                self._show_tab_context_menu(pos)
+                return True
 
         elif (
             event.type() == QEvent.Type.MouseMove
@@ -297,6 +312,7 @@ class DraggableTabWidget(QTabWidget):
         self.setCurrentIndex(idx)
         widget.show()
         del self.detached_tabs[detached_window]
+        detached_window.suppress_close_dialog = True
         detached_window.close()
 
     def redock_all_tabs(self) -> None:
@@ -316,11 +332,7 @@ class DraggableTabWidget(QTabWidget):
         bar = self.tabBar()
         if not bar:
             return
-        idx = -1
-        for i in range(bar.count()):
-            if bar.tabRect(i).contains(position):
-                idx = i
-                break
+        idx = bar.tabAt(position)
         if idx < 0:
             return
 
@@ -492,22 +504,41 @@ class DetachedTabWindow(QMainWindow):
         if event is None:
             raise ValueError("event must be provided")
         if self.suppress_close_dialog:
-            self._trigger_redock()
-            event.ignore()
+            event.accept()
             return
 
         msg = QMessageBox(self)
         msg.setWindowTitle("Close Window")
-        msg.setText(f"What to do with '{self.original_title}'?")
+        msg.setText(f"What would you like to do with the '{self.original_title}' tab?")
         redock_btn = msg.addButton("Redock", QMessageBox.ButtonRole.YesRole)
+        msg.addButton("Close Tab", QMessageBox.ButtonRole.NoRole)
         msg.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
         msg.setDefaultButton(redock_btn)
         msg.setIcon(QMessageBox.Icon.Question)
         msg.exec()
 
-        if msg.clickedButton() == redock_btn:
+        clicked = msg.clickedButton()
+        if clicked and clicked.text() == "Redock":
+            self.suppress_close_dialog = True
             self._trigger_redock()
-        event.ignore()
+            event.accept()
+        elif clicked and clicked.text() == "Close Tab":
+            self.suppress_close_dialog = True
+            # Remove from parent's detached tabs registry
+            if self.parent_tab_widget and self in self.parent_tab_widget.detached_tabs:
+                del self.parent_tab_widget.detached_tabs[self]
+            # Delete/clean up the widget, respecting prevent_deletion_on_close
+            if self.widget:
+                prevent_delete = getattr(
+                    self.widget, "prevent_deletion_on_close", False
+                )
+                if prevent_delete:
+                    self.widget.setParent(None)
+                else:
+                    self.widget.deleteLater()
+            event.accept()
+        else:
+            event.ignore()
 
 
 __all__ = ["DetachedTabWindow", "DraggableTabWidget"]
