@@ -99,7 +99,7 @@ async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
 
             # Expunge the user from session to allow closing the session
             db.expunge(user)
-            return user  # type: ignore[no-any-return]
+            return user
         finally:
             db.close()
 

@@ -70,7 +70,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
     if "speed_factor" in config_input:
         raw_sf = config_input["speed_factor"]
         try:
-            sf_value = float(raw_sf)  # type: ignore[arg-type]
+            sf_value = float(raw_sf)
         except (TypeError, ValueError):
             return "speed_factor must be a finite number"
         if not math.isfinite(sf_value):
@@ -79,7 +79,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
     if "duration" in config_input:
         raw_dur = config_input["duration"]
         try:
-            dur_value = float(raw_dur)  # type: ignore[arg-type]
+            dur_value = float(raw_dur)
         except (TypeError, ValueError):
             return "duration must be a positive finite number"
         if not math.isfinite(dur_value) or dur_value <= 0:
@@ -90,7 +90,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
     if "timestep" in config_input:
         raw_ts = config_input["timestep"]
         try:
-            ts_value = float(raw_ts)  # type: ignore[arg-type]
+            ts_value = float(raw_ts)
         except (TypeError, ValueError):
             return "timestep must be a positive finite number"
         if not math.isfinite(ts_value) or ts_value <= 0:
