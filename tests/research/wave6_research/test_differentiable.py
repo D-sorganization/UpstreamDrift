@@ -97,6 +97,21 @@ class TestDifferentiableEngine:
         )
         assert isinstance(res, OptimizationResult)
 
+    def test_optimize_trajectory_zero_iterations_returns_result(
+        self, fake_engine
+    ) -> None:
+        de = DifferentiableEngine(fake_engine)
+        res = de.optimize_trajectory(
+            np.zeros(4),
+            np.array([0.5, 0.0, 0.0, 0.0]),
+            horizon=2,
+            max_iterations=0,
+        )
+        assert isinstance(res, OptimizationResult)
+        assert res.iterations == 0
+        assert np.isinf(res.gradient_norm)
+        assert res.optimal_controls.shape == (2, 2)
+
     def test_optimize_through_contact_nontrivial(self, fake_engine) -> None:
         cd = ContactDifferentiableEngine(
             fake_engine, contact_method="smoothed", smoothing_factor=0.01
