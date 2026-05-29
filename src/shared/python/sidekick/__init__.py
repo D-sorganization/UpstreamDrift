@@ -14,8 +14,6 @@ Subpackages (import by domain):
     utils                 - Logging, paths, state management, physical constants
 """
 
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)
-
 from .protocols import (
     CalculationResult,
     Calculator,

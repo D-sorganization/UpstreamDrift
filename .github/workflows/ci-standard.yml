@@ -242,7 +242,7 @@ jobs:
               echo "No changed source Python files; skipping baseline mypy check."
               exit 0
             fi
-            mypy "${src_py_files[@]}" --config-file pyproject.toml
+            python3 scripts/ci/run_mypy.py "${src_py_files[@]}" --config-file pyproject.toml
           else
             mypy src --config-file pyproject.toml
           fi

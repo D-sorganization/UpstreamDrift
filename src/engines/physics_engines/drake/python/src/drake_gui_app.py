@@ -215,8 +215,11 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
                 LOGGER.info("Meshcat available at: %s", self.meshcat.web_url())
 
                 if self.meshcat:
-                    if "MESHCAT_HOST" not in os.environ:
-                        webbrowser.open(self.meshcat.web_url())
+                    url = self.meshcat.web_url()
+                    if isinstance(url, str) and "MESHCAT_HOST" not in os.environ:
+                        webbrowser.open(url)
+                    elif not isinstance(url, str):
+                        LOGGER.info("Meshcat URL is not a string, skipping open.")
                     else:
                         LOGGER.info(
                             "Running in Docker/Headless mode; "
