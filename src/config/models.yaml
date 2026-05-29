@@ -97,7 +97,7 @@ models:
     name: "Putting Green"
     description: "Realistic putting green with ball-rolling physics"
     type: "putting_green"
-    path: "src/engines/physics_engines/putting_green/python/simulator.py"
+    path: "src/tools/putting_green_gui/gui.py"
     engine_type: "putting_green"
     launcher:
       category: "simulation"
@@ -416,6 +416,16 @@ models:
     description: "Map of every feature and module in the suite"
     type: "document"
     path: "docs/PROJECT_MAP.md"
+    launcher:
+      category: "documentation"
+      logo: "assets/project_map.png"
+      status: "ready"
+
+  - id: "library_tool"
+    name: "Library"
+    description: "Research library for managing publications, LaTeX references, and documents"
+    type: "special_app"
+    path: "virtual/library"
     launcher:
       category: "documentation"
       logo: "assets/project_map.png"

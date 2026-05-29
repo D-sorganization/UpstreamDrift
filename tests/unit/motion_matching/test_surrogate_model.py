@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import pytest
+
+pytest.importorskip("torch")
 import torch
 from src.shared.python.motion_matching.surrogate.model import (
     ClubTrajectory,

@@ -63,7 +63,7 @@ if TYPE_CHECKING or HAS_QT:
 
 # Try to import golf model components
 try:
-    from engines.physics_engines.drake.python.src.drake_golf_model import (
+    from src.engines.physics_engines.drake.python.src.drake_golf_model import (
         GolfModelParams,
         build_golf_swing_diagram,
     )

@@ -41,7 +41,7 @@ def repo_path(tmp_path: Path) -> Path:
         "src/launchers/motion_capture_launcher.py",
         "src/launchers/matlab_launcher_unified.py",
         "src/tools/urdf_generator/launch_urdf_generator.py",
-        "src/engines/physics_engines/putting_green/python/simulator.py",
+        "src/tools/putting_green_gui/gui.py",
     ]
     for script in scripts:
         script_path = tmp_path / script
@@ -182,7 +182,7 @@ class TestPuttingGreenHandler:
         model = MockModel(
             id="putting_green",
             name="Putting Green",
-            path="src/engines/physics_engines/putting_green/python/simulator.py",
+            path="src/tools/putting_green_gui/gui.py",
             type="putting_green",
         )
         handler = PuttingGreenHandler()

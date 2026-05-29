@@ -123,6 +123,15 @@ def test_try_launch_special_app(launcher) -> None:
         assert launcher._try_launch_special_app("shot_tracer") is True
         mock_shot.assert_called_once()
 
+    with patch.object(launcher, "_launch_training_controller") as mock_train:
+        assert launcher._try_launch_special_app("training_controller") is True
+        mock_train.assert_called_once()
+
+    # Stub _open_library_tab to avoid AttributeError or ImportError
+    launcher._open_library_tab = MagicMock()
+    assert launcher._try_launch_special_app("library_tool") is True
+    launcher._open_library_tab.assert_called_once()
+
     assert launcher._try_launch_special_app("normal_model") is False
 
 
@@ -591,3 +600,37 @@ def test_check_local_dependencies_with_dialog(launcher) -> None:
             "https://mujoco.org",
             "Missing dependency info",
         )
+
+
+def test_execute_local_launch_with_unavailable_dockable_ui(launcher) -> None:
+    class DummyHandlerWithUI:
+        def can_handle(self, model_type: str) -> bool:
+            return True
+
+        def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+            return None
+
+        def launch(self, model: Any, repo_path: Path, process_manager: Any) -> bool:
+            return True
+
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+
+    # Mock handler that returns a widget with is_tool_available = False
+    ui_widget = MagicMock(spec=QMainWindow)
+    ui_widget.is_tool_available = False
+
+    handler = DummyHandlerWithUI()
+    handler.get_dockable_ui = MagicMock(return_value=ui_widget)
+    launcher.model_handler_registry.get_handler.return_value = handler
+
+    # Mock docking capability on the launcher
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch("src.launchers.launcher_simulation.Styles") as mock_styles:
+        mock_styles.STATUS_ERROR = "status-error"
+        launcher._execute_local_launch(model)
+
+    launcher.dock_widget_as_tab.assert_called_once_with(ui_widget, "M1")
+    launcher.show_toast.assert_called_with("Failed to load M1", "error")
+    launcher.lbl_status.setText.assert_called_with("* Launch Error")
+    launcher.lbl_status.setStyleSheet.assert_called_with("status-error")

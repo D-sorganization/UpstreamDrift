@@ -33,6 +33,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
+from src.launchers.docker_profile_info import load_docker_profiles
 from src.launchers.launcher_constants import DOCKER_STAGES
 from src.shared.python.docker_config import DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -304,6 +305,7 @@ class SettingsWidget(QWidget):
         self._diagnostics_data = diagnostics_data
         self._launcher = launcher or parent
         self._diagnostics_loaded = False
+        self._docker_profile_infos = load_docker_profiles()
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
         # Connect tab change signal for lazy diagnostics loading
@@ -689,6 +691,17 @@ class SettingsWidget(QWidget):
         stage_row.addStretch()
         upper_layout.addLayout(stage_row)
 
+        # Docker setup details panel (re-integrated)
+        self.tier_details = QTextBrowser()
+        self.tier_details.setStyleSheet(Styles.CONSOLE_DIAGNOSTICS)
+        self.tier_details.setMinimumHeight(100)
+        self.tier_details.setMaximumHeight(150)
+        self.tier_details.setOpenExternalLinks(False)
+        upper_layout.addWidget(self.tier_details)
+
+        self.combo_stage.currentTextChanged.connect(self._refresh_tier_details)
+        self._refresh_tier_details(self.combo_stage.currentText())
+
         btn_row = QHBoxLayout()
         self._btn_build = QPushButton("Build Image")
         self._btn_build.setToolTip(
@@ -718,7 +731,7 @@ class SettingsWidget(QWidget):
         splitter.addWidget(self.build_console)
 
         # Set default proportions
-        splitter.setSizes([120, 250])
+        splitter.setSizes([220, 200])
 
         build_inner.addWidget(splitter)
 
@@ -1572,6 +1585,7 @@ class SettingsWidget(QWidget):
             ("Drake", "pydrake", ">=1.22.0", True),
             ("Pinocchio", "pinocchio", ">=2.6.0", True),
             ("OpenSim", "opensim", ">=4.4.0", True),
+            ("MyoSuite", "myosuite", ">=2.0.0", True),
         ]
 
         check_results = []
@@ -1596,9 +1610,9 @@ class SettingsWidget(QWidget):
                     check_results.append(
                         {
                             "name": name,
-                            "required": "Optional",
-                            "installed": "Not supported natively",
-                            "status": "ok",
+                            "required": req,
+                            "installed": "Missing (Use Docker/WSL)",
+                            "status": "warn",
                         }
                     )
                 else:
@@ -1661,16 +1675,19 @@ class SettingsWidget(QWidget):
             return
 
         check_script = (
-            "import importlib.metadata, sys; "
-            "res = []; "
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
-            "  try: "
-            "    __import__(p); "
-            "    try: v = importlib.metadata.version(p) "
-            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
-            "    res.append(f'{p}:{v}') "
-            "  except ImportError: "
-            "    res.append(f'{p}:Missing') "
+            "import importlib.metadata\n"
+            "import sys\n"
+            "res = []\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
+            "    try:\n"
+            "        __import__(p)\n"
+            "        try:\n"
+            "            v = importlib.metadata.version(p)\n"
+            "        except Exception:\n"
+            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
+            "        res.append(f'{p}:{v}')\n"
+            "    except ImportError:\n"
+            "        res.append(f'{p}:Missing')\n"
             "print(','.join(res))"
         )
 
@@ -1701,6 +1718,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1710,13 +1728,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"
@@ -1769,16 +1789,19 @@ class SettingsWidget(QWidget):
             python_exec = "./.venv-wsl/bin/python"
 
         check_script = (
-            "import importlib.metadata, sys; "
-            "res = []; "
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
-            "  try: "
-            "    __import__(p); "
-            "    try: v = importlib.metadata.version(p) "
-            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
-            "    res.append(f'{p}:{v}') "
-            "  except ImportError: "
-            "    res.append(f'{p}:Missing') "
+            "import importlib.metadata\n"
+            "import sys\n"
+            "res = []\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
+            "    try:\n"
+            "        __import__(p)\n"
+            "        try:\n"
+            "            v = importlib.metadata.version(p)\n"
+            "        except Exception:\n"
+            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
+            "        res.append(f'{p}:{v}')\n"
+            "    except ImportError:\n"
+            "        res.append(f'{p}:Missing')\n"
             "print(','.join(res))"
         )
 
@@ -1800,6 +1823,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1809,13 +1833,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"

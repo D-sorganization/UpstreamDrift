@@ -113,6 +113,7 @@ class _UnavailableToolWidget(QWidget):
         msg.setWordWrap(True)
         msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         msg.setStyleSheet("color: #ff9800;")
+        msg.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(msg)
 
         hint = QLabel(
@@ -122,6 +123,7 @@ class _UnavailableToolWidget(QWidget):
         hint.setWordWrap(True)
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hint.setStyleSheet("color: gray;")
+        hint.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(hint)
 
     def cleanup(self) -> None:
@@ -133,6 +135,7 @@ class _UnavailableToolWindow(QMainWindow):
 
     def __init__(self, tool_name: str, error: str) -> None:
         super().__init__()
+        self.is_tool_available = False
         self.setWindowTitle(f"{tool_name} (Unavailable)")
         self.setMinimumSize(600, 400)
         self._widget = _UnavailableToolWidget(tool_name, error, self)
@@ -211,11 +214,15 @@ def get_data_explorer_dockable_ui() -> QMainWindow:
 
 
 def _import_data_processor() -> QWidget:
-    from data_processing.data_processor.gui import (  # type: ignore[import-untyped]
-        MainWidget,
-    )
+    repo = _find_tools_repo()
+    if repo is not None:
+        dp_path = str(repo / "src" / "data_processing" / "data_processor" / "python")
+        if dp_path not in sys.path:
+            sys.path.insert(0, dp_path)
 
-    return MainWidget()
+    from data_processor.pyqt_widget import DataProcessorWidget
+
+    return DataProcessorWidget()
 
 
 def get_data_processor_dockable_ui() -> QMainWindow:

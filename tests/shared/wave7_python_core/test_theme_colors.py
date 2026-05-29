@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from theme import colors
+from src.shared.python.theme import colors
 
 # ── is_valid_hex_color ─────────────────────────────────────────────────────
 

@@ -10,7 +10,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src" / "shared" / "python"))
 
-from motion_matching.diagnostics.reference_pose import (  # noqa: E402
+from src.shared.python.motion_matching.diagnostics.reference_pose import (  # noqa: E402
     ADDRESS_RANGES,
     REFERENCE_GOLFER_FIELDS,
     compare_to_reference,

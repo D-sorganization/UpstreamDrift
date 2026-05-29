@@ -118,8 +118,44 @@ class DraggableTabWidget(QTabWidget):
 
     # ── Close / reopen ──────────────────────────────────────────────
 
+    def _is_widget_dirty(self, widget: QWidget | None) -> bool:
+        """Check recursively if a widget or its central/embedded widget has unsaved changes."""
+        if widget is None:
+            return False
+
+        # Check attributes and methods
+        for attr in ("is_dirty", "isDirty"):
+            val = getattr(widget, attr, None)
+            if val is not None:
+                if callable(val):
+                    try:
+                        if val():
+                            return True
+                    except Exception:  # noqa: BLE001
+                        pass
+                elif bool(val):
+                    return True
+
+        # Check central widget if it is a QMainWindow
+        if isinstance(widget, QMainWindow):
+            central = widget.centralWidget()
+            if central is not None and self._is_widget_dirty(central):
+                return True
+
+        # Check common inner widget / tool attributes
+        for attr in ("widget", "tool", "_widget", "_tool"):
+            inner = getattr(widget, attr, None)
+            if (
+                inner is not None
+                and inner is not widget
+                and self._is_widget_dirty(inner)
+            ):
+                return True
+
+        return False
+
     def close_tab(self, index: int) -> None:
-        """Close a non-core tab (with confirmation)."""
+        """Close a non-core tab (with confirmation based on user preference)."""
         if index is None:
             raise ValueError("index must be provided")
         if index < 0 or index >= self.count():
@@ -135,20 +171,37 @@ class DraggableTabWidget(QTabWidget):
             )
             return
 
-        reply = QMessageBox.question(
-            self,
-            "Close Tab",
-            f"Close the '{tab_text}' tab?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
+        # Check user preferences for tab close confirmation behavior
+        try:
+            from src.shared.python.ui.preferences_dialog import UserPreferences
+
+            prefs = UserPreferences.load()
+            confirm_pref = getattr(prefs, "confirm_close_tabs", "unsaved")
+        except Exception:  # noqa: BLE001
+            confirm_pref = "unsaved"
+
+        widget = self.widget(index)
+
+        need_prompt = True
+        if confirm_pref == "never":
+            need_prompt = False
+        elif confirm_pref == "unsaved":
+            need_prompt = self._is_widget_dirty(widget)
+
+        if need_prompt:
+            reply = QMessageBox.question(
+                self,
+                "Close Tab",
+                f"Close the '{tab_text}' tab?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                return
 
         if tab_text in self.tab_factories:
             self.closed_tabs[tab_text] = self.tab_factories[tab_text]
 
-        widget = self.widget(index)
         self.removeTab(index)
         if widget:
             widget.deleteLater()

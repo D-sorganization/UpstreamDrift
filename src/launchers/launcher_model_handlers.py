@@ -402,7 +402,41 @@ class PuttingGreenHandler:
         return process is not None
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
-        """Putting Green handler does not provide a dockable UI widget."""
+        """Get the dockable UI widget for the putting green simulation."""
+        if repo_path is None:
+            return None
+        script_path = resolve_model_artifact_path(model, repo_path)
+        if not script_path.exists():
+            return None
+
+        import importlib.util
+        import sys
+
+        original_sys_path = sys.path.copy()
+        success = False
+        try:
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            paths = get_model_python_paths(model, repo_path)
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+
+            module_name = "putting_green_gui_embed"
+            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, "get_dockable_ui"):
+                    ui = module.get_dockable_ui()
+                    if ui is not None:
+                        success = True
+                        return ui
+        except Exception as e:  # noqa: BLE001
+            logger.debug("Failed to get dockable UI for Putting Green: %s", e)
+        finally:
+            if not success:
+                sys.path = original_sys_path
         return None
 
 

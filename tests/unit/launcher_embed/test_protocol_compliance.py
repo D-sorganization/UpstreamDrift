@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from launcher_embed import EmbedCapabilities, EmbeddableTool
+from src.shared.python.launcher_embed import EmbedCapabilities, EmbeddableTool
 
 
 class _FakeEmbeddableTool:
