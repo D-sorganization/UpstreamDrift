@@ -7,14 +7,22 @@ radians.
 Mock-mode by default; if a real Pinocchio ``Model`` is supplied as
 ``model``, pass the per-joint :class:`JointSlot` map alongside (we do
 not introspect Pinocchio's joint table from this adapter).
-Note on "local stub" status (Issue #4095): Pinocchio support is
-currently limited to adapter-level conversions without live engine
-kinematics step evaluation because we avoid pulling the heavy pinocchio
-wheel into the core service layer until real-time IK relies on it.
-Note on "local stub" status (Issue #4095): Pinocchio support is
-currently limited to adapter-level conversions without live engine
-kinematics step evaluation because we avoid pulling the heavy pinocchio
-wheel into the core service layer until real-time IK relies on it.
+
+"Local stub" status (Issue #4095)
+---------------------------------
+
+This adapter is **intentionally** a pure-Python convention adapter: it
+performs canonical <-> engine ``q`` conversions (w-first <-> w-last
+quaternion reordering, joint-angle encode/decode) without depending on
+the Pinocchio wheel. That keeps the adapter layer importable in every
+environment, mock or real. The *live* engine kinematics (forward
+kinematics, ``aba`` dynamics step, frame placements) live in
+:class:`~src.shared.python.pose_interchange.services.pinocchio.PinocchioKinematicsService`,
+which lazily imports the heavy Stack-of-Tasks ``pinocchio`` wheel and
+falls back to a mock when it is absent. So the "local stub" label
+applies only to this conversion layer by design -- it is not an
+incomplete bridge. The real service path is exercised by
+:mod:`tests.integration.pose_interchange.services.test_pinocchio_real`.
 """
 
 from __future__ import annotations
