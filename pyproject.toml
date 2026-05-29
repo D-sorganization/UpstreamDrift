@@ -370,11 +370,9 @@ exclude = [
     "src/shared/python/pendulum_simulator/simulation.py",
     "src/shared/python/club_data/targets.py",
     "src/shared/python/data_io/marker_mapping.py",
-    "src/shared/python/signal_toolkit/io.py",
+    "src/shared/python/signal_toolkit/",
     "src/shared/python/engine_core/checkpoint.py",
     "src/shared/python/data_io/export.py",
-
-    "src/shared/python/signal_toolkit/polynomial_generator.py",
     "src/engines/common/export.py",
     "src/api/routes/putting_green.py",
     "src/api/routes/physics.py",

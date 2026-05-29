@@ -282,9 +282,9 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/signal_toolkit/io.py",
+      "path": "src/shared/python/signal_toolkit/",
       "owner": "@signal-toolkit",
-      "reason": "numpy stubs expose pre-existing signal I/O typing issues",
+      "reason": "shared-path package aliasing and numpy stubs expose pre-existing signal toolkit typing issues",
       "expires_on": "2026-08-01"
     },
     {
@@ -300,12 +300,6 @@
       "expires_on": "2026-08-01"
     },
 
-    {
-      "path": "src/shared/python/signal_toolkit/polynomial_generator.py",
-      "owner": "@signal-toolkit",
-      "reason": "numpy stubs expose pre-existing polynomial generator typing issues",
-      "expires_on": "2026-08-01"
-    },
     {
       "path": "src/engines/common/export.py",
       "owner": "@engine-core",
