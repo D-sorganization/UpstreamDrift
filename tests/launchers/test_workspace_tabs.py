@@ -371,3 +371,58 @@ def test_c3d_viewer_tabs_enabled_on_startup(qtbot):
     qtbot.addWidget(widget)
 
     assert widget.tabs.isEnabled() is True
+
+
+def test_docked_tab_menu_bar_preservation(launcher, qtbot):
+    """Test that a QMainWindow's menu bar is preserved when docked and undocked/redocked."""
+    from PyQt6.QtWidgets import QMainWindow
+    from PyQt6.QtGui import QAction
+    from src.shared.python.gui_pkg.draggable_tabs import DockedTabWrapper
+    from PyQt6.QtCore import QPoint
+
+    # 1. Create a dummy QMainWindow with a menu bar
+    win = QMainWindow()
+    menu_bar = win.menuBar()
+    file_menu = menu_bar.addMenu("&File")
+    test_action = QAction("Test Action", win)
+    file_menu.addAction(test_action)
+
+    # Custom attribute to verify attribute proxying
+    win.my_custom_attribute = "hello_world"
+
+    # 2. Add QMainWindow to the workspace tabs
+    launcher.workspace_tabs.addTab(win, "Main Window Tab")
+
+    # 3. Verify it gets auto-wrapped in DockedTabWrapper
+    wrapped_widget = launcher.workspace_tabs.widget(1)
+    assert isinstance(wrapped_widget, DockedTabWrapper)
+
+    # 4. Verify attribute proxying works
+    assert wrapped_widget.my_custom_attribute == "hello_world"
+    wrapped_widget.my_custom_attribute = "modified_value"
+    assert win.my_custom_attribute == "modified_value"
+
+    # 5. Verify the menu bar layout
+    assert wrapped_widget.layout() is not None
+    assert wrapped_widget.layout().count() == 2  # menu_bar and win
+    assert wrapped_widget.layout().itemAt(0).widget() == menu_bar
+
+    # 6. Detach the tab
+    launcher.workspace_tabs.detach_tab(1, QPoint(100, 100))
+    assert len(launcher.workspace_tabs.detached_tabs) == 1
+    detached_win = list(launcher.workspace_tabs.detached_tabs.keys())[0]
+
+    # 7. Verify DetachedTabWindow set QMainWindow as central and set menu bar natively
+    assert detached_win.centralWidget() == win
+    assert detached_win.menuBar() == menu_bar
+
+    # 8. Re-dock the tab
+    launcher.workspace_tabs.reattach_tab(detached_win)
+    assert len(launcher.workspace_tabs.detached_tabs) == 0
+
+    # 9. Verify wrapped back inside DockedTabWrapper and layout restored
+    re_wrapped_widget = launcher.workspace_tabs.widget(1)
+    assert isinstance(re_wrapped_widget, DockedTabWrapper)
+    assert re_wrapped_widget.layout().count() == 2
+    assert re_wrapped_widget.layout().itemAt(0).widget() == menu_bar
+    assert re_wrapped_widget.layout().itemAt(1).widget() == win

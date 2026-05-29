@@ -35,10 +35,51 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QTabBar,
     QTabWidget,
+    QVBoxLayout,
     QWidget,
 )
 
 logger = logging.getLogger(__name__)
+
+
+class DockedTabWrapper(QWidget):
+    """Wrapper to host QMainWindow and its QMenuBar inside a parent QTabWidget.
+
+    In Qt, when a QMainWindow is parented inside a layout or another widget,
+    its native menu bar is hidden or doesn't render. This wrapper extracts
+    the menu bar and lays it out explicitly above the main window content
+    to keep menus functional and visible.
+    """
+
+    def __init__(self, main_window: QMainWindow, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.main_window = main_window
+        self.menu_bar = main_window.menuBar()
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # Reparent the menu bar and the QMainWindow inside the wrapper
+        if self.menu_bar:
+            layout.addWidget(self.menu_bar)
+            self.menu_bar.show()
+        layout.addWidget(self.main_window)
+        self.main_window.show()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.main_window, name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if (
+            name in ("main_window", "menu_bar")
+            or name.startswith("_")
+            or hasattr(type(self), name)
+            or name in self.__dict__
+        ):
+            super().__setattr__(name, value)
+        else:
+            setattr(self.main_window, name, value)
 
 
 class DraggableTabWidget(QTabWidget):
@@ -85,6 +126,8 @@ class DraggableTabWidget(QTabWidget):
         """Override to apply UX enhancements on new tabs."""
         if widget is None:
             raise ValueError("widget must be provided")
+        if isinstance(widget, QMainWindow) and not isinstance(widget, DockedTabWrapper):
+            widget = DockedTabWrapper(widget)
         index = super().addTab(widget, *args)
         self._update_tab_ux(index)
         return index
@@ -93,6 +136,8 @@ class DraggableTabWidget(QTabWidget):
         """Override to apply UX enhancements on inserted tabs."""
         if index is None:
             raise ValueError("index must be provided")
+        if isinstance(widget, QMainWindow) and not isinstance(widget, DockedTabWrapper):
+            widget = DockedTabWrapper(widget)
         ret_index = super().insertTab(index, widget, *args)
         self._update_tab_ux(ret_index)
         return ret_index
@@ -122,6 +167,9 @@ class DraggableTabWidget(QTabWidget):
         """Check recursively if a widget or its central/embedded widget has unsaved changes."""
         if widget is None:
             return False
+
+        if isinstance(widget, DockedTabWrapper):
+            widget = widget.main_window
 
         # Check attributes and methods
         for attr in ("is_dirty", "isDirty"):
@@ -306,6 +354,27 @@ class DraggableTabWidget(QTabWidget):
         if detached_window not in self.detached_tabs:
             return
         widget, text, icon = self.detached_tabs[detached_window]
+
+        if isinstance(widget, DockedTabWrapper):
+            main_window = widget.main_window
+            menu_bar = widget.menu_bar
+
+            # Remove the View menu added by DetachedTabWindow
+            if hasattr(detached_window, "_view_menu") and detached_window._view_menu:
+                if menu_bar:
+                    menu_bar.removeAction(detached_window._view_menu.menuAction())
+                detached_window._view_menu.deleteLater()
+                detached_window._view_menu = None
+
+            # Remove them from DetachedTabWindow
+            main_window.setParent(None)
+            if menu_bar:
+                menu_bar.setParent(None)
+                widget.layout().addWidget(menu_bar)
+                menu_bar.show()
+            widget.layout().addWidget(main_window)
+            main_window.show()
+
         if widget.parent():
             widget.setParent(None)
         idx = self.addTab(widget, icon, text)
@@ -403,9 +472,24 @@ class DetachedTabWindow(QMainWindow):
         self.setWindowTitle(title)
         self.setWindowIcon(icon)
 
-        if widget.parent():
-            widget.setParent(None)
-        self.setCentralWidget(widget)
+        if isinstance(widget, DockedTabWrapper):
+            main_window = widget.main_window
+            menu_bar = widget.menu_bar
+            if main_window.parent():
+                main_window.setParent(None)
+            if menu_bar:
+                if menu_bar.parent():
+                    menu_bar.setParent(None)
+                self.setMenuBar(menu_bar)
+                menu_bar.show()
+            self.setCentralWidget(main_window)
+            main_window.show()
+        else:
+            if widget.parent():
+                widget.setParent(None)
+            self.setCentralWidget(widget)
+            widget.show()
+
         self.resize(800, 600)
         self.setMinimumSize(400, 300)
         self.setWindowFlags(
@@ -415,7 +499,6 @@ class DetachedTabWindow(QMainWindow):
             | Qt.WindowType.WindowCloseButtonHint
             | Qt.WindowType.WindowSystemMenuHint
         )
-        widget.show()
 
         self._setup_menus()
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -432,26 +515,26 @@ class DetachedTabWindow(QMainWindow):
         if not menubar:
             return
 
-        view_menu = menubar.addMenu("View")
-        if not view_menu:
+        self._view_menu = menubar.addMenu("View")
+        if not self._view_menu:
             return
 
         redock = QAction("Redock Tab", self)
         redock.setShortcut("Ctrl+D")
         redock.triggered.connect(self._trigger_redock)
-        view_menu.addAction(redock)
+        self._view_menu.addAction(redock)
 
         redock_all = QAction("Redock All Tabs", self)
         redock_all.setShortcut("Ctrl+Shift+D")
         redock_all.triggered.connect(self._trigger_redock_all)
-        view_menu.addAction(redock_all)
+        self._view_menu.addAction(redock_all)
 
-        view_menu.addSeparator()
+        self._view_menu.addSeparator()
 
         stay = QAction("Always on Top", self)
         stay.setCheckable(True)
         stay.toggled.connect(self._toggle_on_top)
-        view_menu.addAction(stay)
+        self._view_menu.addAction(stay)
 
     def _show_context_menu(self, position: QPoint) -> None:
         """Right-click context menu for redocking."""
@@ -533,8 +616,12 @@ class DetachedTabWindow(QMainWindow):
                     self.widget, "prevent_deletion_on_close", False
                 )
                 if prevent_delete:
+                    if isinstance(self.widget, DockedTabWrapper):
+                        self.widget.main_window.setParent(None)
                     self.widget.setParent(None)
                 else:
+                    if isinstance(self.widget, DockedTabWrapper):
+                        self.widget.main_window.deleteLater()
                     self.widget.deleteLater()
             event.accept()
         else:
