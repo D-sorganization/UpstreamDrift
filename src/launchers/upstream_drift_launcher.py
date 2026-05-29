@@ -536,6 +536,7 @@ class UpstreamDriftLauncher(QMainWindow):
         return (
             os.environ.get("UPSTREAMDRIFT_DISABLE_ONBOARDING") == "1"
             or "PYTEST_CURRENT_TEST" in os.environ
+            or "pytest" in sys.modules
         )
 
     def _get_sidekick_module(self) -> Any | None:
