@@ -59,3 +59,131 @@ def test_can_popout_engine(launcher):
     assert win.windowTitle() == "Test Popped Out Engine", (
         "Popped out window should have the correct title"
     )
+
+
+def test_tab_close_never_prompt(launcher, monkeypatch):
+    """If confirm_close_tabs is 'never', closing a tab should not prompt and should delete the widget."""
+    from unittest.mock import MagicMock
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+    from PyQt6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="never")),
+    )
+
+    msg_spy = MagicMock()
+    monkeypatch.setattr(QMessageBox, "question", msg_spy)
+
+    dummy_widget = QWidget()
+    launcher.workspace_tabs.addTab(dummy_widget, "Temp Tab")
+    idx = launcher.workspace_tabs.indexOf(dummy_widget)
+
+    launcher.workspace_tabs.close_tab(idx)
+
+    assert launcher.workspace_tabs.indexOf(dummy_widget) == -1
+    msg_spy.assert_not_called()
+
+
+def test_tab_close_unsaved_clean_no_prompt(launcher, monkeypatch):
+    """If confirm_close_tabs is 'unsaved' and widget is clean, closing a tab should not prompt."""
+    from unittest.mock import MagicMock
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+    from PyQt6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="unsaved")),
+    )
+
+    msg_spy = MagicMock()
+    monkeypatch.setattr(QMessageBox, "question", msg_spy)
+
+    class CleanWidget(QWidget):
+        def is_dirty(self) -> bool:
+            return False
+
+    dummy_widget = CleanWidget()
+    launcher.workspace_tabs.addTab(dummy_widget, "Temp Tab")
+    idx = launcher.workspace_tabs.indexOf(dummy_widget)
+
+    launcher.workspace_tabs.close_tab(idx)
+
+    assert launcher.workspace_tabs.indexOf(dummy_widget) == -1
+    msg_spy.assert_not_called()
+
+
+def test_tab_close_unsaved_dirty_prompts(launcher, monkeypatch):
+    """If confirm_close_tabs is 'unsaved' and widget is dirty, closing a tab should prompt and obey reply."""
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+    from PyQt6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="unsaved")),
+    )
+
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.No,
+    )
+
+    class DirtyWidget(QWidget):
+        def is_dirty(self) -> bool:
+            return True
+
+    dummy_widget = DirtyWidget()
+    launcher.workspace_tabs.addTab(dummy_widget, "Temp Tab")
+    idx = launcher.workspace_tabs.indexOf(dummy_widget)
+
+    launcher.workspace_tabs.close_tab(idx)
+
+    assert launcher.workspace_tabs.indexOf(dummy_widget) != -1
+
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
+    )
+
+    launcher.workspace_tabs.close_tab(idx)
+
+    assert launcher.workspace_tabs.indexOf(dummy_widget) == -1
+
+
+def test_tab_close_always_prompts(launcher, monkeypatch):
+    """If confirm_close_tabs is 'always', it should prompt even if the widget is clean."""
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+    from PyQt6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="always")),
+    )
+
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.No,
+    )
+
+    dummy_widget = QWidget()
+    launcher.workspace_tabs.addTab(dummy_widget, "Temp Tab")
+    idx = launcher.workspace_tabs.indexOf(dummy_widget)
+
+    launcher.workspace_tabs.close_tab(idx)
+    assert launcher.workspace_tabs.indexOf(dummy_widget) != -1
+
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
+    )
+
+    launcher.workspace_tabs.close_tab(idx)
+    assert launcher.workspace_tabs.indexOf(dummy_widget) == -1
