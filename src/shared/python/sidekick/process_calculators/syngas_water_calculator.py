@@ -19,7 +19,7 @@ from typing import Any  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from shared.python.contracts import require, require_positive  # noqa: E402
+from src.shared.python.contracts import require, require_positive  # noqa: E402
 
 from .constants import (  # noqa: E402
     ANTOINE_WATER_A,

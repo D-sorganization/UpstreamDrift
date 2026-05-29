@@ -4,7 +4,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from contracts import (
+from src.shared.python.contracts import (
     ContractChecker,
     ContractLevel,
     ContractViolationError,
