@@ -58,7 +58,6 @@ class TestDiagnosticsRingBufferIntegration:
         diag.run_all_checks()
 
         ctx = chat_context.get_chat_context()
-        categories = {ev["payload"].get("category") for ev in ctx["events"]}
         check_names = {
             ev["payload"].get("check")
             for ev in ctx["events"]
@@ -138,7 +137,6 @@ class TestAssistantPanelToolsWiring:
     def test_process_message_passes_non_empty_tools(self) -> None:
         """_process_message must pass non-empty tool declarations to StreamWorker."""
         try:
-            import src.shared.python.ai.gui.assistant_panel as ap_mod
             import src.shared.python.ai.gui.assistant.panel as ap_panel
         except ImportError as exc:
             pytest.skip(f"assistant_panel unavailable: {exc}")
@@ -214,7 +212,6 @@ class TestAssistantPanelToolsWiring:
     def test_tool_declarations_have_name_and_description(self) -> None:
         """Tool declarations passed to StreamWorker have name and description."""
         try:
-            import src.shared.python.ai.gui.assistant_panel as ap_mod
             import src.shared.python.ai.gui.assistant.panel as ap_panel
         except ImportError as exc:
             pytest.skip(f"assistant_panel unavailable: {exc}")
