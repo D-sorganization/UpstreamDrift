@@ -60,9 +60,6 @@ def synthetic_target():
     # Body markers swirl around the origin in metres.
     base = rng.uniform(-0.5, 0.5, size=(M, 3))
     angle = 2 * np.pi * t
-    rot = np.stack(
-        [np.cos(angle), -np.sin(angle), np.zeros_like(angle)], axis=-1
-    )  # placeholder
     marker_xyz = np.stack(
         [base + 0.05 * np.array([np.cos(a), np.sin(a), 0.0]) for a in angle], axis=0
     )

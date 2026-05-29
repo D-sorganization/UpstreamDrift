@@ -81,7 +81,6 @@ def _run_python(u, a0, l_ce, v_ce, params, moment_arms) -> float:
         )
         models.append(HillMuscleModel(p, force_length_width=float(params[i, 6])))
     a = a0.copy()
-    n_joints = moment_arms.shape[0]
     t0 = time.perf_counter()
     for step in range(N_STEPS):
         u_row = u[step]
