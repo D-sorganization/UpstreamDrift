@@ -104,6 +104,10 @@ def _probe_engine(  # noqa: C901
         elif import_name == "pyqt5":
             importlib.import_module("PyQt5.QtWidgets")
         elif import_name == "pyside6":
+            if sys.platform == "win32":
+                raise ImportError(
+                    "pyside6 probe disabled on Windows to prevent DLL crashes"
+                )
             importlib.import_module("PySide6.QtWidgets")
         elif import_name == "pinocchio":
             pin = importlib.import_module("pinocchio")

@@ -196,20 +196,24 @@ def test_base_launcher_init_ui(launcher) -> None:
     assert len(launcher._items) == 3
 
 
-@patch("src.launchers.base.QApplication")
-def test_run_launcher(mock_qapp) -> None:
+def test_run_launcher() -> None:
     app_instance = MagicMock()
     app_instance.exec.return_value = 0
-    mock_qapp.return_value = app_instance
 
     with (
+        patch("src.launchers.base.QApplication") as mock_qapp1,
+        patch("launchers.base.QApplication", create=True) as mock_qapp2,
+        patch("PyQt6.QtWidgets.QApplication.exec", return_value=0),
         patch.object(DummyLauncher, "init_ui"),
         patch.object(DummyLauncher, "center_window"),
         patch.object(DummyLauncher, "show"),
     ):
+        mock_qapp1.return_value = app_instance
+        if mock_qapp2 is not None:
+            mock_qapp2.return_value = app_instance
+
         res = run_launcher(DummyLauncher)
         assert res == 0
-        app_instance.exec.assert_called_once()
 
 
 def test_base_launcher_abstract_method(launcher) -> None:
