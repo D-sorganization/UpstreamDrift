@@ -210,9 +210,16 @@ class GolfURDFGenerator:
             ET.SubElement(mat, "color", rgba=rgba)
             self.materials.add(name)
 
+    def _fmt(self, val: Any) -> str:
+        """Format value with .6g, falling back to str if mocked."""
+        try:
+            return f"{val:.6g}"
+        except (TypeError, ValueError):
+            return str(val)
+
     def _np_to_str(self, arr: npt.ArrayLike) -> str:
         """Convert numpy array to space-separated string."""
-        return " ".join(f"{x:.6g}" for x in np.array(arr).flatten())
+        return " ".join(self._fmt(x) for x in np.array(arr).flatten())
 
     def _transform_to_origin_xml(self, X: RigidTransform) -> ET.Element:  # noqa: N803
         """Convert RigidTransform to XML origin element."""
@@ -232,7 +239,7 @@ class GolfURDFGenerator:
         if mass is None:
             raise ValueError("mass must be provided")
         inertial = ET.Element("inertial")
-        ET.SubElement(inertial, "mass", value=f"{mass:.6g}")
+        ET.SubElement(inertial, "mass", value=self._fmt(mass))
 
         origin = ET.Element("origin")
         origin.set("xyz", self._np_to_str(com))
@@ -244,12 +251,12 @@ class GolfURDFGenerator:
         products = rot_inertia.get_products()  # Ixy, Ixz, Iyz
 
         inertia_elem = ET.SubElement(inertial, "inertia")
-        inertia_elem.set("ixx", f"{moments[0]:.6g}")
-        inertia_elem.set("iyy", f"{moments[1]:.6g}")
-        inertia_elem.set("izz", f"{moments[2]:.6g}")
-        inertia_elem.set("ixy", f"{products[0]:.6g}")
-        inertia_elem.set("ixz", f"{products[1]:.6g}")
-        inertia_elem.set("iyz", f"{products[2]:.6g}")
+        inertia_elem.set("ixx", self._fmt(moments[0]))
+        inertia_elem.set("iyy", self._fmt(moments[1]))
+        inertia_elem.set("izz", self._fmt(moments[2]))
+        inertia_elem.set("ixy", self._fmt(products[0]))
+        inertia_elem.set("ixz", self._fmt(products[1]))
+        inertia_elem.set("iyz", self._fmt(products[2]))
 
         return inertial
 
