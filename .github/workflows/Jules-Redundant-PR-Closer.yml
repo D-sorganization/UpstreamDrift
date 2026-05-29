@@ -55,7 +55,7 @@ concurrency:
 
 jobs:
   close-redundant:
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     steps:
       - name: Generate Jules app token
