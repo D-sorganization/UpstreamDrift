@@ -6,7 +6,7 @@ Calculates electrode consumption and slip rates for arc furnaces.
 
 import warnings
 
-from shared.python.contracts import check_non_negative, require_positive
+from src.shared.python.contracts import check_non_negative, require_positive
 
 try:
     from tools_core.electrode_advisor import (

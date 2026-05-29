@@ -142,7 +142,25 @@ __all__ = [
     "ContractEvaluationError",
 ]
 
-_this_module = sys.modules[__name__]
-for _alias in ("contracts", "shared.python.contracts", "src.shared.python.contracts"):
-    sys.modules[_alias] = _this_module
-del _this_module, _alias
+# Backward-compatibility module aliases.
+#
+# ``src/shared/python`` and its parent ``src`` are both on ``sys.path`` (see
+# ``[tool.pytest.ini_options] pythonpath`` in ``pyproject.toml``), so this one
+# physical file is reachable under three dotted names:
+#
+#   * ``src.shared.python.contracts``  -- the canonical name (this module).
+#   * ``shared.python.contracts``      -- legacy, deprecated.
+#   * ``contracts``                    -- legacy top-level, deprecated.
+#
+# Python treats each name as a *distinct* module object unless they are
+# explicitly unified.  Without unification, exception classes such as
+# ``PreconditionError`` would have two identities and ``pytest.raises`` /
+# ``except`` across import boundaries would silently fail on Python 3.11+.
+#
+# The previous implementation mutated ``sys.modules`` with a blind ``for`` loop
+# (including a self-referential entry for the canonical name).  This replaces it
+# with explicit, static registrations of the *legacy* aliases only.  New code
+# must import from ``src.shared.python.contracts``; the legacy names remain
+# importable for backward compatibility but should be considered deprecated.
+sys.modules["contracts"] = sys.modules[__name__]
+sys.modules["shared.python.contracts"] = sys.modules[__name__]

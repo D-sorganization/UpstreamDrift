@@ -44,8 +44,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from contracts import check_positive as require_positive
-from contracts import require
+from src.shared.python.contracts import check_positive as require_positive
+from src.shared.python.contracts import require
 
 # Optional thermodynamic libraries for more accurate vapor pressure
 try:

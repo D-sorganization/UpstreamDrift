@@ -11,7 +11,7 @@ engine. When the thermo module is not available, it uses simplified ideal gas ca
 from dataclasses import dataclass
 from typing import Any
 
-from shared.python.contracts import require, require_positive
+from src.shared.python.contracts import require, require_positive
 
 from .constants import (
     ATM_PA,
