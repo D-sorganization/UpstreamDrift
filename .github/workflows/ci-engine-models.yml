@@ -82,7 +82,7 @@ jobs:
           # Avoid pulling in pydrake / heavy extras so the gate stays under
           # the 30 s budget (#4129 AC).
           python -m ensurepip --upgrade || true
-          python -m pip install pyyaml numpy defusedxml pandas
+          python -m pip install pyyaml numpy defusedxml pandas scipy
 
       - name: Regenerate drake URDF and assert no drift
         shell: bash
