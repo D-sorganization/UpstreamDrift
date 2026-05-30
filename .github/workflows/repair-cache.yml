@@ -7,11 +7,15 @@ on:
 
 jobs:
   repair:
-    runs-on: d-sorg-local-ControlTower-nvme-7
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [d-sorg-local-ControlTower-nvme-1, d-sorg-local-ControlTower-nvme-2, d-sorg-local-ControlTower-nvme-3, d-sorg-local-ControlTower-nvme-4, d-sorg-local-ControlTower-nvme-5, d-sorg-local-ControlTower-nvme-6, d-sorg-local-ControlTower-nvme-7, d-sorg-local-ControlTower-nvme-8]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Clean Cache Directories
         run: |
-          echo "=== Cleaning caches ==="
+          echo "=== Cleaning caches on $(hostname) ==="
           sudo rm -rf /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python
           sudo rm -rf /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python_stale_*
           
