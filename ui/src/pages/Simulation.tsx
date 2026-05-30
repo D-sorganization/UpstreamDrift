@@ -120,10 +120,14 @@ export function SimulationPage() {
     prevConnectionStatusRef.current = connectionStatus;
     if (connectionStatus === 'connected') {
       showSuccess('Connected to simulation server');
+    } else if (connectionStatus === 'reconnecting') {
+      // F5: a transient drop re-runs connect() which restarts the sim from
+      // t=0; warn the user so a silent restart is not mistaken for a freeze.
+      showInfo('Connection lost — reconnecting (simulation will restart)');
     } else if (connectionStatus === 'failed') {
       showError('Connection failed. Please check the server.');
     }
-  }, [connectionStatus, showSuccess, showError]);
+  }, [connectionStatus, showSuccess, showError, showInfo]);
 
   // Surface WebSocket errors via toast (F2)
   useEffect(() => {
