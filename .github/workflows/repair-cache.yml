@@ -7,7 +7,7 @@ on:
 
 jobs:
   repair:
-    runs-on: d-sorg-fleet-docker
+    runs-on: d-sorg-local-ControlTower-nvme-3
     steps:
       - name: Clean Cache Directories
         run: |
