@@ -113,4 +113,6 @@ except ImportError:  # pragma: no cover - defensive
     # expose ``DrakeFitSwingProvider`` for direct construction.
     pass
 else:
+    from .provider import DrakeFitSwingProvider
+
     _register_provider(DrakeFitSwingProvider())
