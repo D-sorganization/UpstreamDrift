@@ -116,7 +116,8 @@ pub fn init_schema(conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT OR REPLACE INTO meta(key, value) VALUES(?1, ?2)",
         rusqlite::params!["schema_version", SCHEMA_VERSION.to_string()],
-    )?;
+    )
+    .map_err(|e| anyhow::anyhow!("Failed executing INSERT OR REPLACE INTO meta: {:?}", e))?;
     Ok(())
 }
 

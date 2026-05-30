@@ -183,7 +183,15 @@ fn slice_lines(data: &[u8], start: u32, end: u32) -> Vec<u8> {
 fn upsert_file(tx: &Connection, pf: &ParsedFile, stats: &mut RebuildStats) -> Result<()> {
     let rel = pf.rel.as_str();
     // Delete prior symbols.
-    let deleted = tx.execute("DELETE FROM symbols WHERE path = ?1", params![rel])?;
+    let deleted = tx
+        .execute("DELETE FROM symbols WHERE path = ?1", params![rel])
+        .map_err(|e| {
+            anyhow::anyhow!(
+                "Failed DELETE FROM symbols in upsert_file for {}: {:?}",
+                rel,
+                e
+            )
+        })?;
     stats.symbols_deleted += deleted as u64;
 
     tx.execute(
@@ -199,7 +207,14 @@ fn upsert_file(tx: &Connection, pf: &ParsedFile, stats: &mut RebuildStats) -> Re
             serde_json::to_string(&pf.parsed.imports).unwrap_or_else(|_| "[]".into()),
             now_secs(),
         ],
-    )?;
+    )
+    .map_err(|e| {
+        anyhow::anyhow!(
+            "Failed INSERT OR REPLACE INTO files in upsert_file for {}: {:?}",
+            rel,
+            e
+        )
+    })?;
 
     let mut stmt = tx.prepare(
         "INSERT INTO symbols(path, kind, name, qualified, sig, docstring, \
@@ -219,7 +234,15 @@ fn upsert_file(tx: &Connection, pf: &ParsedFile, stats: &mut RebuildStats) -> Re
             sym.end_line as i64,
             serde_json::to_string(&sym.calls_out).unwrap_or_else(|_| "[]".into()),
             sym_hash,
-        ])?;
+        ])
+        .map_err(|e| {
+            anyhow::anyhow!(
+                "Failed INSERT INTO symbols in upsert_file for {} symbol {}: {:?}",
+                rel,
+                sym.name,
+                e
+            )
+        })?;
         stats.symbols_inserted += 1;
     }
     Ok(())
@@ -246,9 +269,23 @@ pub fn rebuild(repo_root: &Path, since: Option<&str>) -> Result<RebuildStats> {
                 for rel in changed {
                     let abs_p = repo.join(&rel);
                     if !abs_p.exists() {
-                        let deleted =
-                            conn.execute("DELETE FROM symbols WHERE path = ?1", params![rel])?;
-                        conn.execute("DELETE FROM files WHERE path = ?1", params![rel])?;
+                        let deleted = conn
+                            .execute("DELETE FROM symbols WHERE path = ?1", params![rel])
+                            .map_err(|e| {
+                                anyhow::anyhow!(
+                                    "Failed incremental DELETE FROM symbols for {}: {:?}",
+                                    rel,
+                                    e
+                                )
+                            })?;
+                        conn.execute("DELETE FROM files WHERE path = ?1", params![rel])
+                            .map_err(|e| {
+                                anyhow::anyhow!(
+                                    "Failed incremental DELETE FROM files for {}: {:?}",
+                                    rel,
+                                    e
+                                )
+                            })?;
                         stats.symbols_deleted += deleted as u64;
                         continue;
                     }
