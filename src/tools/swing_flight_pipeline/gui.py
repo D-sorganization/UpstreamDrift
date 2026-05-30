@@ -27,10 +27,11 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSplitter,
     QStatusBar,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.ui import HoverCopyTextBrowser
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,7 @@ class SwingFlightWidget(QWidget):
             self._gl_view = None
             self._plot_item = None
 
-        self._results_text = QTextEdit()
+        self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
             "Configure swing parameters and click 'Run Full Pipeline' "
