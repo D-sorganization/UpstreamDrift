@@ -27,16 +27,16 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.core.contracts import postcondition, precondition
 
 # ─── Physical Constants ────────────────────────────────────────────────
 # Single source of truth for gravity magnitude (#6638 F5): both the ISA model
-# and the gravity vector now use the canonical GRAVITY (== GRAVITY_M_S2,
+# and the gravity vector now use the canonical GRAVITY_FLOAT (== GRAVITY_M_S2,
 # 9.80665), eliminating the previous ~0.05 m/s^2 drift from a local 9.81.
-STANDARD_GRAVITY: float = GRAVITY  # m/s² (NIST standard gravity)
-GRAVITY_APPROX: float = GRAVITY  # retained alias; resolves to canonical value
-GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY])
+STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
+GRAVITY_APPROX: float = GRAVITY_FLOAT  # m/s² — alias for backward compat
+GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -STANDARD_GRAVITY])
 MIN_VALID_ALTITUDE_M: float = 0.0
 MAX_VALID_TROPOSPHERE_ALTITUDE_M: float = 11_000.0
 
@@ -413,7 +413,7 @@ class BallPhysics:
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)
         self.gravity = (
-            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY])
+            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY_FLOAT])
         )
 
     @precondition(

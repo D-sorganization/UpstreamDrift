@@ -61,25 +61,42 @@ class EngineInitMixin:
     def is_initialized(self) -> bool:
         return self.env is not None and self.sim is not None
 
-    def load_from_path(self, path: str) -> None:
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine).
+
+        For MyoSuite, 'path' is actually a Gym Environment ID string.
+        """
         if not MYOSUITE_AVAILABLE:
             raise ImportError("MyoSuite not installed")
 
         env_id = path.strip()
+        env = gym.make(env_id)
+        env.reset()
+        sim = self._extract_sim_from_env(env)
+
+        self.env = env
+        self.sim = sim
+        self.env_id = env_id
+        self._dt = self.sim.model.opt.timestep
+
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """String loading is not supported for MyoSuite."""
+        raise RuntimeError(
+            "MyoSuite does not support loading from string (requires Env ID registration)"
+        )
+
+    def load_from_path(self, path: str) -> None:
+        if not MYOSUITE_AVAILABLE:
+            raise ImportError("MyoSuite not installed")
 
         try:
-            env = gym.make(env_id)
-            env.reset()
-            sim = self._extract_sim_from_env(env)
-
-            self.env = env
-            self.sim = sim
-            self.env_id = env_id
-            self._dt = self.sim.model.opt.timestep
-
+            self._load_from_path_impl(path)
+            self._is_initialized = True  # type: ignore[attr-defined]
         except (RuntimeError, TypeError, ValueError, AttributeError) as e:
             self._reset_loaded_state()
-            logger.error("Failed to load MyoSuite environment '%s': %s", env_id, e)
+            logger.error(
+                "Failed to load MyoSuite environment '%s': %s", path.strip(), e
+            )
             raise
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
