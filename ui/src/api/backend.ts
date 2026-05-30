@@ -4,7 +4,30 @@
  * Provides functions to start/stop the Python backend server and
  * retrieve diagnostic information when running inside Tauri.
  * Falls back gracefully when running in a regular browser (Vite dev).
+ *
+ * The canonical backend port (8000) must match:
+ *   - `BACKEND_PORT` in `ui/src-tauri/src/lib.rs`
+ *   - `DEFAULT_SERVER_PORT` in `src/shared/python/config/typed_settings.py`
+ * See issue #6637.
  */
+
+/** Single source of truth for the Python backend port (issue #6637). */
+export const BACKEND_PORT = 8000;
+
+/**
+ * Returns the base URL for the Python API.
+ *
+ * - In Tauri mode the UI and backend are on different origins, so we
+ *   return `http://localhost:BACKEND_PORT`.
+ * - In browser/Vite mode the dev-server proxies `/api` so we return
+ *   an empty string (relative URLs work fine).
+ */
+export function getApiBase(): string {
+  if (isTauri()) {
+    return `http://localhost:${BACKEND_PORT}`;
+  }
+  return '';
+}
 
 export interface BackendStatus {
   running: boolean;
@@ -35,7 +58,7 @@ async function invoke<T>(cmd: string): Promise<T> {
 /** Start the Python backend server (Tauri only). */
 export async function startBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8080, error: 'Not running in Tauri' };
+    return { running: false, pid: null, port: BACKEND_PORT, error: 'Not running in Tauri' };
   }
   return invoke<BackendStatus>('start_backend');
 }
@@ -43,7 +66,7 @@ export async function startBackend(): Promise<BackendStatus> {
 /** Stop the Python backend server (Tauri only). */
 export async function stopBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8080, error: 'Not running in Tauri' };
+    return { running: false, pid: null, port: BACKEND_PORT, error: 'Not running in Tauri' };
   }
   return invoke<BackendStatus>('stop_backend');
 }
@@ -51,7 +74,7 @@ export async function stopBackend(): Promise<BackendStatus> {
 /** Get current backend status (Tauri only). */
 export async function getBackendStatus(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8080, error: null };
+    return { running: false, pid: null, port: BACKEND_PORT, error: null };
   }
   return invoke<BackendStatus>('backend_status');
 }
@@ -72,7 +95,7 @@ export async function getDiagnostics(): Promise<DiagnosticInfo> {
         backend: {
           running: false,
           pid: null,
-          port: 8001,
+          port: BACKEND_PORT,
           error: error instanceof Error ? error.message : 'Unknown error',
         },
         python_found: false,
