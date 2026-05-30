@@ -580,54 +580,63 @@ def test_runtime_button_shadow_is_reduced(launcher) -> None:
 
 @pytest.mark.unit
 def test_status_label_updates_on_running_processes(launcher) -> None:
-    """Verify that lbl_status text and style are updated based on running processes."""
-    from PyQt6.QtWidgets import QLabel, QVBoxLayout
+    """Verify that update_running_processes_ui refreshes the settings widget and leaves status label unchanged."""
+    from PyQt6.QtWidgets import QLabel
     import threading
 
     launcher.lbl_status = QLabel("Ready")
     launcher.running_processes = {}
     launcher.running_processes_panel = QLabel()  # Dummy
-    launcher.processes_layout = QVBoxLayout()
     launcher.process_manager = MagicMock()
     launcher.process_manager._process_lock = threading.Lock()
 
-    # 1. No running processes
+    mock_settings = MagicMock()
+    launcher._find_active_settings_widget = MagicMock(return_value=mock_settings)
+
+    # 1. Update UI
     launcher.update_running_processes_ui()
+
+    # Verify status label is unchanged and settings widget is refreshed
     assert launcher.lbl_status.text() == "Ready"
-
-    # 2. One running process
-    mock_proc = MagicMock()
-    mock_proc.poll.return_value = None
-    launcher.running_processes["test_proc"] = mock_proc
-    launcher.update_running_processes_ui()
-    assert "test_proc Running" in launcher.lbl_status.text()
-    assert "●" in launcher.lbl_status.text()
-
-    # 3. Two running processes
-    mock_proc2 = MagicMock()
-    mock_proc2.poll.return_value = None
-    launcher.running_processes["test_proc2"] = mock_proc2
-    launcher.update_running_processes_ui()
-    assert "2 Processes Running" in launcher.lbl_status.text()
+    mock_settings.refresh_processes_ui.assert_called_once()
 
 
 @pytest.mark.unit
 def test_status_clicked_shows_menu(launcher) -> None:
-    """Verify that clicking status label when processes are running opens QMenu with actions."""
+    """Verify that clicking status label when processes are running opens settings Processes tab."""
     from PyQt6.QtWidgets import QLabel
     import threading
 
-    launcher.lbl_status = QLabel("Running")
+    launcher.lbl_status = QLabel("Ready")
     launcher.running_processes = {"test_proc": MagicMock()}
     launcher.running_processes["test_proc"].poll.return_value = None
     launcher.process_manager = MagicMock()
     launcher.process_manager._process_lock = threading.Lock()
-    launcher._kill_process_by_name = MagicMock()
+    launcher._open_settings = MagicMock()
 
-    with (
-        patch("PyQt6.QtWidgets.QMenu.exec") as mock_menu_exec,
-        patch("PyQt6.QtWidgets.QMenu.addAction") as mock_add_action,
-    ):
-        launcher._on_status_clicked()
-        mock_menu_exec.assert_called_once()
-        assert mock_add_action.call_count >= 3
+    launcher._on_status_clicked()
+    launcher._open_settings.assert_called_once_with(tab=8)
+
+
+@pytest.mark.unit
+def test_resizing_scroll_area_triggers_rebuild(launcher) -> None:
+    """Verify that ResizingScrollArea triggers rebuild_grid on the layout manager when resized."""
+    from PyQt6.QtWidgets import QVBoxLayout
+    from PyQt6.QtGui import QResizeEvent
+    from PyQt6.QtCore import QSize
+    from src.launchers.launcher_ui_setup import ResizingScrollArea
+
+    layout = QVBoxLayout()
+    launcher._setup_grid_area(layout)
+
+    assert isinstance(launcher.scroll_area, ResizingScrollArea)
+
+    # Mock the _rebuild_grid method on the launcher
+    launcher._rebuild_grid = MagicMock()
+
+    # Simulate a resize event on the scroll area
+    event = QResizeEvent(QSize(500, 400), QSize(800, 600))
+    launcher.scroll_area.resizeEvent(event)
+
+    # Verify that the launcher's _rebuild_grid method was called
+    launcher._rebuild_grid.assert_called_once()

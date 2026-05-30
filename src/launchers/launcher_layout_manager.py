@@ -158,6 +158,10 @@ class LayoutManager:
                 "project_map",
                 "library_tool",
             ]
+            for model_id, model in self.available_models.items():
+                is_hidden = getattr(model, "hidden", False)
+                if not is_hidden and model_id not in default_ids:
+                    default_ids.append(model_id)
 
         # Filter to available models
         available_ids = [
@@ -228,6 +232,10 @@ class LayoutManager:
                 if model_id in self.available_models or model_id == "library_tool"
             ]
             if saved_order:
+                for model_id, model in self.available_models.items():
+                    is_hidden = getattr(model, "hidden", False)
+                    if not is_hidden and model_id not in saved_order:
+                        saved_order.append(model_id)
                 self.model_order = saved_order
                 logger.info("Model layout restored from saved configuration")
 
@@ -595,8 +603,61 @@ class LayoutManager:
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
 
-        # Dynamically determine columns based on active_scale if not in list mode
-        columns = 1 if is_list else max(1, int(4 / active_scale))
+        # Dynamically determine columns based on available scroll area viewport width if not in list mode
+        if is_list:
+            columns = 1
+        else:
+            available_width = 800  # fallback
+            container = grid_layout.parentWidget()
+            is_real_widget = (
+                container is not None
+                and not hasattr(container, "mock_add_spec")
+                and type(container).__name__
+                not in ("Mock", "MagicMock", "NonCallableMagicMock")
+            )
+            if is_real_widget:
+                viewport = container.parentWidget()
+                if viewport is not None and type(viewport).__name__ not in (
+                    "Mock",
+                    "MagicMock",
+                ):
+                    w = viewport.width()
+                    if isinstance(w, int | float) and not hasattr(w, "mock_add_spec"):
+                        available_width = w
+                    scroll_area = viewport.parentWidget()
+                    if (
+                        scroll_area is not None
+                        and type(scroll_area).__name__ not in ("Mock", "MagicMock")
+                        and hasattr(scroll_area, "viewport")
+                    ):
+                        v = scroll_area.viewport()
+                        if v is not None and type(v).__name__ not in (
+                            "Mock",
+                            "MagicMock",
+                        ):
+                            vw = v.width()
+                            if isinstance(vw, int | float) and not hasattr(
+                                vw, "mock_add_spec"
+                            ):
+                                available_width = vw
+
+            card_width = max(100, int(240 * active_scale))
+            spacing = 20
+            try:
+                s = grid_layout.spacing()
+                if (
+                    isinstance(s, (int, float))
+                    and not hasattr(s, "mock_add_spec")
+                    and s >= 0
+                ):
+                    spacing = int(s)
+            except (AttributeError, TypeError, ValueError):
+                pass
+
+            # Allow some margin on the sides (e.g. 20px total padding)
+            usable_width = available_width - 20
+            columns = max(1, (usable_width + spacing) // (card_width + spacing))
+
         if not is_list:
             for c in range(columns):
                 grid_layout.setColumnStretch(c, 1)

@@ -337,3 +337,77 @@ def test_leave_event(mock_model, parent_launcher, qapp) -> None:
         card.leaveEvent(event)
         mock_start.assert_called_once()
         assert card._hover_anim.endValue() == 0.0
+
+
+def test_quick_launch_button_at_bottom(mock_model, parent_launcher, qapp) -> None:
+    card = DraggableModelCard(mock_model, parent_launcher)
+    card.resize(200, 300)
+    card._reposition_quick_launch_button()
+
+    # Assert launch button is at the bottom (grid mode)
+    btn = card._btn_quick_launch
+    margin = 6
+    expected_y = card.height() - btn.height() - margin
+    assert btn.y() == expected_y
+
+    # Assert top-right position for favorite and info buttons
+    fav_btn = card._btn_favorite
+    info_btn = card._btn_info
+    assert fav_btn.y() == margin
+    assert info_btn.y() == margin
+
+    # Test list mode
+    card = DraggableModelCard(mock_model, parent_launcher, list_mode=True)
+    card.resize(400, 85)
+    card._reposition_quick_launch_button()
+    btn = card._btn_quick_launch
+    expected_list_y = card.height() - btn.height() - margin
+    assert btn.y() == expected_list_y
+
+
+def test_info_and_favorite_buttons_hidden_unless_hovered(
+    mock_model, parent_launcher, qapp
+) -> None:
+    card = DraggableModelCard(mock_model, parent_launcher)
+    fav_btn = card._btn_favorite
+    info_btn = card._btn_info
+    launch_btn = card._btn_quick_launch
+
+    # Initially hidden
+    assert fav_btn.isHidden()
+    assert info_btn.isHidden()
+    assert launch_btn.isHidden()
+
+    # Selecting the card should not show favorite/info buttons
+    card.set_selected(True)
+    assert fav_btn.isHidden()
+    assert info_btn.isHidden()
+
+    # Hover Enter: should show all
+    from PyQt6.QtCore import QPointF
+    from PyQt6.QtGui import QEnterEvent
+
+    enter_ev = QEnterEvent(QPointF(0, 0), QPointF(0, 0), QPointF(0, 0))
+    card.enterEvent(enter_ev)
+    assert not fav_btn.isHidden()
+    assert not info_btn.isHidden()
+    assert not launch_btn.isHidden()
+
+    # Hover Leave (while selected): should hide all
+    from PyQt6.QtCore import QEvent
+
+    leave_ev = QEvent(QEvent.Type.Leave)
+    card.leaveEvent(leave_ev)
+    assert fav_btn.isHidden()
+    assert info_btn.isHidden()
+    assert launch_btn.isHidden()
+
+
+def test_reposition_quick_launch_button_handles_tiny_sizes(
+    mock_model, parent_launcher, qapp
+) -> None:
+    """Verify that repositioning doesn't raise AssertionError when widget is tiny/zero size."""
+    card = DraggableModelCard(mock_model, parent_launcher)
+    card.resize(0, 0)
+    # Should not raise AssertionError
+    card._reposition_quick_launch_button()
