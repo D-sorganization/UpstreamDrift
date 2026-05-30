@@ -34,11 +34,9 @@ pub fn open_db(repo_root: &Path) -> Result<Connection> {
     }
     let conn = Connection::open(&target)
         .with_context(|| format!("failed to open {}", target.display()))?;
-    conn.execute_batch(
-        "PRAGMA journal_mode = WAL;\
-         PRAGMA synchronous = NORMAL;\
-         PRAGMA foreign_keys = ON;",
-    )?;
+    conn.pragma_update_and_check(None, "journal_mode", &"WAL", |_| Ok(()))?;
+    conn.pragma_update(None, "synchronous", &"NORMAL")?;
+    conn.pragma_update(None, "foreign_keys", &"ON")?;
     init_schema(&conn)?;
     Ok(conn)
 }
