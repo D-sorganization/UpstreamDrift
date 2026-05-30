@@ -160,6 +160,8 @@ def _configure_cors(app: FastAPI) -> None:
             "http://localhost:8001",
         ],
         allow_credentials=True,
+        # SECURITY (issue #6636 F3): match server.py hardening — do NOT use "*"
+        # for methods/headers while credentials are enabled.
         allow_methods=["GET", "POST", "PUT", "DELETE"],
         allow_headers=["Content-Type", "Authorization", "X-API-Key"],
     )

@@ -23,6 +23,7 @@ from src.api.auth.models import (
 )
 from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
 from src.api.database import get_db
+from src.api.rate_limit import limiter
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
 
@@ -33,9 +34,10 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 REGISTRATION_RATE_LIMIT = "3/hour"
 LOGIN_RATE_LIMIT = "5/minute"
 
-# Use shared limiter - registered with app.state in server.py
-# This ensures proper rate limiting across all routes
-from src.api.rate_limit import limiter
+# SECURITY (issue #6636 F4): use the SHARED limiter from src.api.rate_limit,
+# which is the instance wired into ``app.state.limiter`` and the SlowAPI
+# middleware in server.py. A separate Limiter() instance here would make the
+# @limiter.limit decorators silently non-enforcing.
 
 
 @router.post("/register", response_model=UserResponse)

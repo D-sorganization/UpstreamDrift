@@ -124,7 +124,15 @@ class LandmarkSession:
         """
         if not self.frames:
             return np.empty((0, 0, 4))
-        # Assume all frames have same number of points
+        # All frames must have the same number of points (#6639 F5). Validate
+        # explicitly so a ragged session raises a clear error instead of an
+        # opaque ``np.stack`` failure.
+        point_counts = {len(f.points) for f in self.frames}
+        if len(point_counts) > 1:
+            raise ValueError(
+                "Ragged landmark session: frames have differing point counts "
+                f"{sorted(point_counts)}; expected a uniform landmark schema."
+            )
         frame_arrays = [f.to_array() for f in self.frames]
         return np.stack(frame_arrays, axis=0)
 
@@ -206,6 +214,18 @@ class FreeMoCapOutputAdapter:
                         landmark_data[name] = {}
                     landmark_data[name][coord] = i
 
+            # Build a FIXED landmark schema from the header (#6639 F5): the set
+            # and order of landmarks is fixed once, so every frame emits the
+            # same number of points in the same column order. Missing or
+            # low-confidence cells become NaN coordinates rather than being
+            # dropped, which previously produced ragged frames and crashed
+            # ``to_array``/``np.stack`` or silently shifted every column.
+            schema: list[str] = [
+                name
+                for name, coords in landmark_data.items()
+                if {"x", "y", "z"} <= coords.keys()
+            ]
+
             # Read data rows
             for row in reader:
                 if not row:
@@ -215,21 +235,30 @@ class FreeMoCapOutputAdapter:
                 timestamp = float(row[1])
 
                 points = []
-                for name, coords in landmark_data.items():
-                    if "x" not in coords or "y" not in coords or "z" not in coords:
-                        continue
+                for name in schema:
+                    coords = landmark_data[name]
+                    conf_idx = coords.get("conf")
                     try:
+                        conf = (
+                            float(row[conf_idx])
+                            if conf_idx is not None and conf_idx < len(row)
+                            else 1.0
+                        )
+                    except (ValueError, IndexError, TypeError):
+                        conf = 0.0
+
+                    # Drop coordinates that fail to parse or are low-confidence:
+                    # represent them as NaN so the row stays fixed-width.
+                    try:
+                        if conf <= 0.5:
+                            raise ValueError("low confidence")
                         x = float(row[coords["x"]])
                         y = float(row[coords["y"]])
                         z = float(row[coords["z"]])
-                        conf_idx = coords.get("conf")
-                        if conf_idx is not None and conf_idx < len(row):
-                            conf = float(row[conf_idx])
-                        else:
-                            conf = 1.0
-                        visible = conf > 0.5
+                        visible = True
                     except (ValueError, IndexError, TypeError):
-                        continue
+                        x = y = z = float("nan")
+                        visible = False
 
                     points.append(
                         LandmarkPoint(

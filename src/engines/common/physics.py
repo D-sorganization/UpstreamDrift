@@ -31,9 +31,12 @@ from src.shared.python.core.constants import GRAVITY
 from src.shared.python.core.contracts import postcondition, precondition
 
 # ─── Physical Constants ────────────────────────────────────────────────
-STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
-GRAVITY_APPROX: float = 9.81  # m/s² (common approximation)
-GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY_APPROX])
+# Single source of truth for gravity magnitude (#6638 F5): both the ISA model
+# and the gravity vector now use the canonical GRAVITY (== GRAVITY_M_S2,
+# 9.80665), eliminating the previous ~0.05 m/s^2 drift from a local 9.81.
+STANDARD_GRAVITY: float = GRAVITY  # m/s² (NIST standard gravity)
+GRAVITY_APPROX: float = GRAVITY  # retained alias; resolves to canonical value
+GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY])
 MIN_VALID_ALTITUDE_M: float = 0.0
 MAX_VALID_TROPOSPHERE_ALTITUDE_M: float = 11_000.0
 

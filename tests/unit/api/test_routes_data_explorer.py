@@ -39,6 +39,38 @@ def test_list_datasets(client: TestClient, temp_dataset_dir) -> None:
     assert "total" in data
 
 
+def test_list_datasets_does_not_leak_absolute_paths(
+    client: TestClient, tmp_path, monkeypatch
+) -> None:
+    """Issue #6636 F6: dataset listing must not expose absolute server paths."""
+    from pathlib import Path
+
+    import src.api.routes.data_explorer as de
+
+    # Build an output dir with a nested dataset file.
+    out_dir = tmp_path / "output"
+    (out_dir / "runs").mkdir(parents=True)
+    (out_dir / "runs" / "swing.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+    monkeypatch.setattr(de, "_get_output_dir", lambda: out_dir)
+
+    response = client.get("/tools/data-explorer/datasets")
+    assert response.status_code == 200
+    data = response.json()
+
+    abs_marker = str(out_dir)
+    # No absolute server path may appear in any dataset path or search_dir.
+    for ds in data["datasets"]:
+        assert abs_marker not in ds["path"]
+        assert not Path(ds["path"]).is_absolute()
+    assert abs_marker not in data["search_dir"]
+
+    # The relative path is still usable (points at the nested file).
+    csv_entries = [d for d in data["datasets"] if d["name"] == "swing.csv"]
+    assert csv_entries
+    assert csv_entries[0]["path"] == str(Path("runs") / "swing.csv")
+
+
 def test_get_export_formats(client: TestClient) -> None:
     """Test getting export formats."""
     response = client.get("/tools/data-explorer/export-formats")
