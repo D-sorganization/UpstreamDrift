@@ -469,7 +469,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         if self.data is None or self.model is None:
             return {}
 
-        sensors = {}
+        sensors: dict[str, float | np.ndarray] = {}
         if self.model.nsensor > 0:
             for i in range(self.model.nsensor):
                 name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_SENSOR, i)
