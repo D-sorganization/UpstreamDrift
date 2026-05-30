@@ -13,11 +13,8 @@ jobs:
         run: |
           echo "=== Hostname ==="
           hostname
-          echo "=== env ==="
-          env | grep -i tool || true
-          echo "=== nvme cache ==="
-          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/ || true
-          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/ || true
-          echo "=== regular cache ==="
-          ls -la /home/dieterolson/actions-runners/.shared-tool-cache/ || true
-          ls -la /home/dieterolson/actions-runners/.shared-tool-cache/Python/ || true
+          echo "=== Find fractions.py in all caches ==="
+          find /home/dieterolson/actions-runners-nvme/.shared-tool-cache/ -name "fractions.py" || true
+          find /home/dieterolson/actions-runners/.shared-tool-cache/ -name "fractions.py" || true
+          echo "=== Find fractions.py in current Python cache ==="
+          find /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/3.11.15/ -name "fractions.py" || true
