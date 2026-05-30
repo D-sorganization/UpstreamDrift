@@ -10,23 +10,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [d-sorg-local-ControlTower-nvme-1, d-sorg-local-ControlTower-nvme-2, d-sorg-local-ControlTower-nvme-3, d-sorg-local-ControlTower-nvme-4, d-sorg-local-ControlTower-nvme-5, d-sorg-local-ControlTower-nvme-6, d-sorg-local-ControlTower-nvme-7, d-sorg-local-ControlTower-nvme-8]
-    runs-on: ${{ matrix.runner }}
+        job_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    runs-on: d-sorg-fleet-docker
     steps:
-      - name: Check/Acquire Lock
+      - name: Check Host and Acquire Lock
         id: check
         run: |
+          echo "=== Runner Info ==="
+          echo "Hostname: $(hostname)"
+          
+          if [ ! -d /home/dieterolson/actions-runners-nvme ]; then
+            echo "Not on NVMe host. Skipping repair."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          echo "On NVMe host. Attempting to acquire lock..."
           lockfile="/home/dieterolson/actions-runners-nvme/.shared-tool-cache/repair_lock"
-          if ln -s "${{ matrix.runner }}" "$lockfile" 2>/dev/null; then
-            echo "Lock acquired! This runner will perform the repair."
+          if ln -s "$(hostname)-${{ matrix.job_index }}" "$lockfile" 2>/dev/null; then
+            echo "Lock acquired by $(hostname)-${{ matrix.job_index }}! Running repair."
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           else
             owner=$(readlink "$lockfile" || true)
-            if [ "$owner" = "${{ matrix.runner }}" ]; then
+            if [ "$owner" = "$(hostname)-${{ matrix.job_index }}" ]; then
               echo "Lock already owned by us."
               echo "should_run=true" >> "$GITHUB_OUTPUT"
             else
-              echo "Lock owned by $owner. Skipping repair on this runner to prevent race condition."
+              echo "Lock owned by $owner. Skipping repair on this runner instance."
               echo "should_run=false" >> "$GITHUB_OUTPUT"
             fi
           fi
@@ -34,7 +44,7 @@ jobs:
       - name: Clean Cache Directories
         if: steps.check.outputs.should_run == 'true'
         run: |
-          echo "=== Cleaning caches on $(hostname) ==="
+          echo "=== Cleaning caches ==="
           sudo rm -rf /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python
           sudo rm -rf /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python_stale_*
           
