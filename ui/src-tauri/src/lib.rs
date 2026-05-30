@@ -3,6 +3,10 @@ use std::process::{Child, Command};
 use std::sync::Mutex;
 use tauri::State;
 
+/// Canonical backend port — must match `DEFAULT_SERVER_PORT` in
+/// `src/shared/python/config/typed_settings.py` (issue #6637).
+const BACKEND_PORT: u16 = 8000;
+
 /// Managed state holding the Python backend server process.
 struct BackendProcess(Mutex<Option<Child>>);
 
@@ -88,7 +92,7 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
                 return Ok(BackendStatus {
                     running: true,
                     pid: Some(child.id()),
-                    port: 8000,
+                    port: BACKEND_PORT,
                     error: None,
                 });
             }
@@ -138,7 +142,7 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
     Ok(BackendStatus {
         running: true,
         pid: Some(pid),
-        port: 8000,
+        port: BACKEND_PORT,
         error: None,
     })
 }
@@ -158,7 +162,7 @@ fn stop_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Strin
     Ok(BackendStatus {
         running: false,
         pid: None,
-        port: 8000,
+        port: BACKEND_PORT,
         error: None,
     })
 }
@@ -174,7 +178,7 @@ fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, Str
                 return Ok(BackendStatus {
                     running: true,
                     pid: Some(child.id()),
-                    port: 8000,
+                    port: BACKEND_PORT,
                     error: None,
                 });
             }
@@ -188,7 +192,7 @@ fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, Str
                 return Ok(BackendStatus {
                     running: false,
                     pid: None,
-                    port: 8000,
+                    port: BACKEND_PORT,
                     error,
                 });
             }
@@ -196,7 +200,7 @@ fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, Str
                 return Ok(BackendStatus {
                     running: false,
                     pid: None,
-                    port: 8000,
+                    port: BACKEND_PORT,
                     error: Some(format!("Failed to check backend status: {}", e)),
                 });
             }
@@ -206,7 +210,7 @@ fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, Str
     Ok(BackendStatus {
         running: false,
         pid: None,
-        port: 8000,
+        port: BACKEND_PORT,
         error: None,
     })
 }
@@ -243,6 +247,14 @@ pub fn run() {
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
+            }
+            // Auto-start the Python backend when the app window opens (issue #6637).
+            // Errors are logged rather than propagated so a missing Python install
+            // does not hard-crash the UI — the diagnostic screen will surface it.
+            let state = app.state::<BackendProcess>();
+            match start_backend(state) {
+                Ok(status) => log::info!("Backend auto-start: running={} pid={:?}", status.running, status.pid),
+                Err(e) => log::warn!("Backend auto-start failed (diagnostic screen will show details): {}", e),
             }
             Ok(())
         })

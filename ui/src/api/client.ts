@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { getApiBase } from './backend';
 
 export interface SimulationFrame {
   frame: number;
@@ -37,7 +38,7 @@ const MAX_RECONNECT_DELAY_MS = 30000;
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
 export async function fetchEngines(): Promise<EngineStatus[]> {
-  const response = await fetch('/api/engines');
+  const response = await fetch(`${getApiBase()}/api/engines`);
   if (!response.ok) {
     throw new Error('Failed to fetch engines');
   }
@@ -92,10 +93,18 @@ export function useSimulation(engineType: string) {
 
     setConnectionStatus('connecting');
 
-    // Determine WS protocol based on current connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/api/ws/simulate/${engineType}`;
+    // Build WS URL: use the API base to handle Tauri vs. browser mode (issue #6637)
+    const apiBase = getApiBase();
+    let wsUrl: string;
+    if (apiBase) {
+      // Tauri: explicit backend origin, swap http(s) → ws(s)
+      wsUrl = apiBase.replace(/^http/, 'ws') + `/api/ws/simulate/${engineType}`;
+    } else {
+      // Browser/Vite: relative URL using current page origin
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      wsUrl = `${protocol}//${host}/api/ws/simulate/${engineType}`;
+    }
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -233,7 +242,7 @@ export function useSimulation(engineType: string) {
   }, []);
 
   const setSpeed = useCallback((speed: number) => {
-    void fetch('/api/simulation/speed', {
+    void fetch(`${getApiBase()}/api/simulation/speed`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ speed_factor: speed }),
