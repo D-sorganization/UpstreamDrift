@@ -384,6 +384,7 @@ class TestEngineCapabilitiesAPI:
             "pinocchio",
             "opensim",
             "myosuite",
+            "jaxsim",
             "pendulum",
             "putting_green",
         }
@@ -450,6 +451,11 @@ class TestEngineCapabilitiesAPI:
             "contact_forces",
             "inverse_dynamics",
             "drift_acceleration",
+            "parameter_gradients",
+            "state_control_gradients",
+            "forward_sim",
+            "contact_step",
+            "trajectory_opt",
             "video_export",
             "dataset_export",
             "force_visualization",
@@ -459,3 +465,17 @@ class TestEngineCapabilitiesAPI:
         for engine_id, profile in data.items():
             missing = required_fields - set(profile.keys())
             assert not missing, f"{engine_id} missing fields: {missing}"
+
+    def test_jaxsim_capabilities(self, client: TestClient) -> None:
+        """JaxSim should advertise the explicit gradient taxonomy."""
+        response = client.get("/api/launcher/engines/jaxsim/capabilities")
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
+        data = response.json()
+        assert data["engine_name"] == "JaxSim"
+        assert data["parameter_gradients"] == "full"
+        assert data["state_control_gradients"] == "full"
+        assert data["forward_sim"] == "full"
+        assert data["contact_step"] == "partial"
+        assert data["trajectory_opt"] == "partial"
