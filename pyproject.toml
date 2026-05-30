@@ -490,6 +490,7 @@ markers = [
     "requires_myosuite: tests that require the myosuite (and mujoco) Python wheels (skipped when `import myosuite` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
+    "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",
     "requires_real_dataset: tests that require the 9 GB raw Simscape parquet on disk (skipped if absent)",
