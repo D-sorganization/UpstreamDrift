@@ -27,10 +27,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-    DoublePendulumDynamics,
-    DoublePendulumState,
-)
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -64,6 +60,11 @@ class ODEBackend:
     """
 
     def __init__(self, params: GolfModelParams, *, dt: float = 0.01) -> None:
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumDynamics,
+            DoublePendulumState,
+        )
+
         require(
             float(dt) > 0.0 and np.isfinite(dt),
             f"dt must be a positive, finite step size; got {dt!r}",
@@ -109,6 +110,10 @@ class ODEBackend:
             The control vector is cleared to zero and the clock is set to
             ``state.time`` (or ``0.0``).
         """
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumState,
+        )
+
         if state is None:
             self._state = DoublePendulumState(
                 theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0

@@ -19,27 +19,47 @@ Units are SI and annotated on every field.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-    DEFAULT_ARM_CENTER_OF_MASS_RATIO,
-    DEFAULT_ARM_INERTIA_SCALING,
-    DEFAULT_ARM_LENGTH_M,
-    DEFAULT_ARM_MASS_KG,
-    DEFAULT_CLUBHEAD_MASS_KG,
-    DEFAULT_DAMPING_SHOULDER,
-    DEFAULT_DAMPING_WRIST,
-    DEFAULT_PLANE_INCLINATION_DEG,
-    DEFAULT_SHAFT_COM_RATIO,
-    DEFAULT_SHAFT_LENGTH_M,
-    DEFAULT_SHAFT_MASS_KG,
-    GRAVITATIONAL_ACCELERATION,
-    DoublePendulumParameters,
-    LowerSegmentProperties,
-    SegmentProperties,
-)
+if TYPE_CHECKING:
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        DoublePendulumParameters,
+    )
+
+
+def _default_plane_inclination() -> float:
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        DEFAULT_PLANE_INCLINATION_DEG,
+    )
+
+    return DEFAULT_PLANE_INCLINATION_DEG
+
+
+def _default_damping_shoulder() -> float:
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        DEFAULT_DAMPING_SHOULDER,
+    )
+
+    return DEFAULT_DAMPING_SHOULDER
+
+
+def _default_damping_wrist() -> float:
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        DEFAULT_DAMPING_WRIST,
+    )
+
+    return DEFAULT_DAMPING_WRIST
+
+
+def _default_gravity() -> float:
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        GRAVITATIONAL_ACCELERATION,
+    )
+
+    return float(GRAVITATIONAL_ACCELERATION)
 
 
 class UpperSegmentParams(BaseModel):
@@ -65,6 +85,10 @@ class UpperSegmentParams(BaseModel):
         """Resolved inertia about COM, defaulting to a uniform rod."""
         if self.inertia_about_com_kg_m2 is not None:
             return self.inertia_about_com_kg_m2
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DEFAULT_ARM_INERTIA_SCALING,
+        )
+
         return DEFAULT_ARM_INERTIA_SCALING * self.mass_kg * self.length_m**2
 
 
@@ -108,11 +132,11 @@ class GolfModelParams(BaseModel):
     upper: UpperSegmentParams
     lower: LowerSegmentParams
     plane_inclination_deg: float = Field(
-        default=DEFAULT_PLANE_INCLINATION_DEG, ge=-90.0, le=90.0
+        default_factory=_default_plane_inclination, ge=-90.0, le=90.0
     )
-    damping_shoulder: float = Field(default=DEFAULT_DAMPING_SHOULDER, ge=0.0)
-    damping_wrist: float = Field(default=DEFAULT_DAMPING_WRIST, ge=0.0)
-    gravity_m_s2: float = Field(default=float(GRAVITATIONAL_ACCELERATION), gt=0.0)
+    damping_shoulder: float = Field(default_factory=_default_damping_shoulder, ge=0.0)
+    damping_wrist: float = Field(default_factory=_default_damping_wrist, ge=0.0)
+    gravity_m_s2: float = Field(default_factory=_default_gravity, gt=0.0)
     gravity_enabled: bool = True
     constrained_to_plane: bool = True
 
@@ -155,6 +179,17 @@ class GolfModelParams(BaseModel):
         construction (shares the same imported constants), guaranteeing the
         analytical and MJCF renderers start from the same baseline.
         """
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DEFAULT_ARM_CENTER_OF_MASS_RATIO,
+            DEFAULT_ARM_INERTIA_SCALING,
+            DEFAULT_ARM_LENGTH_M,
+            DEFAULT_ARM_MASS_KG,
+            DEFAULT_CLUBHEAD_MASS_KG,
+            DEFAULT_SHAFT_COM_RATIO,
+            DEFAULT_SHAFT_LENGTH_M,
+            DEFAULT_SHAFT_MASS_KG,
+        )
+
         return cls(
             upper=UpperSegmentParams(
                 length_m=DEFAULT_ARM_LENGTH_M,
@@ -180,6 +215,12 @@ class GolfModelParams(BaseModel):
         This is the bridge that keeps the analytical model and this single
         source of truth in lock-step (epic task M2.3).
         """
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumParameters,
+            LowerSegmentProperties,
+            SegmentProperties,
+        )
+
         upper = SegmentProperties(
             length_m=self.upper.length_m,
             mass_kg=self.upper.mass_kg,
