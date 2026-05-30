@@ -23,10 +23,6 @@ class CalibrationOptimizer:
         """Objective function to minimize."""
         friction, restitution = x[0], x[1]
 
-        # Clip parameters to physically meaningful bounds during optimization
-        friction = np.clip(friction, 0.01, 1.0)
-        restitution = np.clip(restitution, 0.01, 1.0)
-
         params = {
             "friction_coefficient": float(friction),
             "restitution_coefficient": float(restitution),
@@ -62,7 +58,7 @@ class CalibrationOptimizer:
 
         best_fric, best_rest = res.x
         return {
-            "friction_coefficient": float(np.clip(best_fric, 0.01, 1.0)),
-            "restitution_coefficient": float(np.clip(best_rest, 0.01, 1.0)),
+            "friction_coefficient": float(best_fric),
+            "restitution_coefficient": float(best_rest),
             "error": float(res.fun),
         }
