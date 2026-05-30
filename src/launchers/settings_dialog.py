@@ -51,6 +51,7 @@ TAB_APPEARANCE = 4
 TAB_STARTUP = 5
 TAB_NOTIFICATIONS = 6
 TAB_PERFORMANCE = 7
+TAB_PROCESSES = 8
 
 
 def validate_tab_index(tab_index: int) -> int:
@@ -64,6 +65,7 @@ def validate_tab_index(tab_index: int) -> int:
         TAB_STARTUP,
         TAB_NOTIFICATIONS,
         TAB_PERFORMANCE,
+        TAB_PROCESSES,
     }
     if tab_index not in valid_indexes:
         raise ValueError(
@@ -289,6 +291,7 @@ class SettingsWidget(QWidget):
     TAB_STARTUP = TAB_STARTUP
     TAB_NOTIFICATIONS = TAB_NOTIFICATIONS
     TAB_PERFORMANCE = TAB_PERFORMANCE
+    TAB_PROCESSES = TAB_PROCESSES
 
     def __init__(
         self,
@@ -326,6 +329,7 @@ class SettingsWidget(QWidget):
                 "Startup",
                 "Notifications",
                 "Performance",
+                "Processes",
             }
         )
         self.tabs.setTabsClosable(False)
@@ -350,13 +354,14 @@ class SettingsWidget(QWidget):
             self.tabs.addTab(
                 self._prefs_dialog._create_performance_tab(), "Performance"
             )
+            self.tabs.addTab(self._create_processes_tab(), "Processes")
 
             # Add an Apply Preferences button
             btn_apply = QPushButton("Apply Preferences")
             btn_apply.clicked.connect(self._prefs_dialog._on_apply)
             layout.addWidget(btn_apply)
         except ImportError:
-            pass
+            self.tabs.addTab(self._create_processes_tab(), "Processes")
 
     # ── Layout tab ──────────────────────────────────────────────────
 
@@ -1268,7 +1273,7 @@ class SettingsWidget(QWidget):
             self._build_status.setText(f"Building... ({elapsed:.0f}s elapsed)")
 
     def _on_tab_changed(self, index: int) -> None:
-        """Handle tab change for lazy diagnostics loading.
+        """Handle tab change for lazy diagnostics loading and processes refresh.
 
         When the Diagnostics tab is first selected, run diagnostics
         asynchronously and populate the display. Subsequent selections
@@ -1277,6 +1282,10 @@ class SettingsWidget(QWidget):
         Args:
             index: The new tab index.
         """
+        if index == TAB_PROCESSES:
+            self.refresh_processes_ui()
+            return
+
         if index != TAB_DIAGNOSTICS or self._diagnostics_loaded:
             return
 
@@ -1903,6 +1912,159 @@ class SettingsWidget(QWidget):
                 "<p>Could not access the system clipboard. The command is:</p>"
                 f"<code>{cmd}</code>",
             )
+
+    def _create_processes_tab(self) -> QWidget:
+        """Create the Processes tab for managing running tasks/subprocesses."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+        tab_layout.setContentsMargins(15, 15, 15, 15)
+        tab_layout.setSpacing(10)
+
+        # Status text header
+        self.lbl_processes_status = QLabel("Active Processes")
+        self.lbl_processes_status.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #ffffff;"
+        )
+        tab_layout.addWidget(self.lbl_processes_status)
+
+        # Scroll area for the processes list
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(
+            "background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;"
+        )
+
+        self.processes_container_widget = QWidget()
+        self.processes_container_widget.setStyleSheet("background-color: transparent;")
+        self.processes_layout = QVBoxLayout(self.processes_container_widget)
+        self.processes_layout.setContentsMargins(10, 10, 10, 10)
+        self.processes_layout.setSpacing(6)
+        self.processes_layout.addStretch()  # bottom stretch
+
+        scroll.setWidget(self.processes_container_widget)
+        tab_layout.addWidget(scroll)
+
+        # Bottom row with Kill All button
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        self.btn_kill_all_procs = QPushButton("Kill All Processes")
+        self.btn_kill_all_procs.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_kill_all_procs.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(220, 53, 69, 0.2);
+                border: 1px solid rgba(220, 53, 69, 0.4);
+                border-radius: 4px;
+                padding: 6px 14px;
+                color: #ff6b6b;
+                font-weight: bold;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: rgba(220, 53, 69, 0.4);
+                color: #ffffff;
+            }
+        """)
+        self.btn_kill_all_procs.clicked.connect(self._on_kill_all_clicked)
+        btn_layout.addWidget(self.btn_kill_all_procs)
+        tab_layout.addLayout(btn_layout)
+
+        return tab
+
+    def _on_kill_all_clicked(self) -> None:
+        if self._launcher and hasattr(self._launcher, "_kill_all_processes"):
+            self._launcher._kill_all_processes()
+            self.refresh_processes_ui()
+
+    def _on_kill_clicked(self, name: str) -> None:
+        if self._launcher and hasattr(self._launcher, "_kill_process_by_name"):
+            self._launcher._kill_process_by_name(name)
+            self.refresh_processes_ui()
+
+    def refresh_processes_ui(self) -> None:
+        """Dynamically populate active processes list row-by-row (GUI thread only)."""
+        # Clear existing rows except the stretch spacer at the end
+        while self.processes_layout.count() > 1:
+            item = self.processes_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Check active processes
+        running = []
+        if (
+            self._launcher
+            and hasattr(self._launcher, "running_processes")
+            and hasattr(self._launcher, "process_manager")
+        ):
+            with self._launcher.process_manager._process_lock:
+                for name, proc in list(self._launcher.running_processes.items()):
+                    if proc.poll() is None:
+                        running.append(name)
+
+        if not running:
+            self.lbl_processes_status.setText("No active processes.")
+            self.lbl_processes_status.setStyleSheet(
+                "font-size: 14px; font-weight: bold; color: gray;"
+            )
+            self.btn_kill_all_procs.setEnabled(False)
+            return
+
+        self.lbl_processes_status.setText(f"Active Processes ({len(running)})")
+        self.lbl_processes_status.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #ffffff;"
+        )
+        self.btn_kill_all_procs.setEnabled(True)
+
+        for name in running:
+            row = QWidget()
+            row.setObjectName("ProcessRow")
+            row.setStyleSheet("""
+                #ProcessRow {
+                    background-color: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                }
+                #ProcessRow:hover {
+                    background-color: rgba(255, 255, 255, 0.06);
+                }
+            """)
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(10, 8, 10, 8)
+
+            # Green status dot
+            dot = QLabel("●")
+            dot.setStyleSheet("color: #2ecc71; font-size: 14px; margin-right: 6px;")
+            row_layout.addWidget(dot)
+
+            # Process Name
+            lbl_name = QLabel(name)
+            lbl_name.setStyleSheet("color: #e0e0e0; font-size: 12px; font-weight: 500;")
+            row_layout.addWidget(lbl_name)
+            row_layout.addStretch()
+
+            # Kill button
+            btn_kill = QPushButton("Kill")
+            btn_kill.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_kill.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(220, 53, 69, 0.1);
+                    border: 1px solid rgba(220, 53, 69, 0.3);
+                    border-radius: 4px;
+                    padding: 4px 10px;
+                    color: #ff6b6b;
+                    font-size: 11px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(220, 53, 69, 0.3);
+                    color: #ffffff;
+                }
+            """)
+            btn_kill.clicked.connect(
+                lambda checked=False, n=name: self._on_kill_clicked(n)
+            )
+            row_layout.addWidget(btn_kill)
+
+            # Insert at the top (before the spacer at the end)
+            self.processes_layout.insertWidget(self.processes_layout.count() - 1, row)
 
 
 class SettingsDialog(QDialog):

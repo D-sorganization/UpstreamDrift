@@ -14,6 +14,7 @@ from src.launchers.settings_dialog import (  # noqa: E402
     TAB_LAYOUT,
     TAB_NOTIFICATIONS,
     TAB_PERFORMANCE,
+    TAB_PROCESSES,
     TAB_STARTUP,
     SettingsDialog,
     SettingsWidget,
@@ -32,8 +33,9 @@ def test_validate_tab_index() -> None:
     assert validate_tab_index(TAB_STARTUP) == TAB_STARTUP
     assert validate_tab_index(TAB_NOTIFICATIONS) == TAB_NOTIFICATIONS
     assert validate_tab_index(TAB_PERFORMANCE) == TAB_PERFORMANCE
+    assert validate_tab_index(TAB_PROCESSES) == TAB_PROCESSES
     with pytest.raises(ValueError):
-        validate_tab_index(8)  # out of range
+        validate_tab_index(9)  # out of range
 
 
 @pytest.fixture

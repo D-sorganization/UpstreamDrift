@@ -89,8 +89,8 @@ def test_initialize_model_order(layout_manager) -> None:
 def test_initialize_model_order_empty(layout_manager, available_models) -> None:
     # Using defaults logic
     layout_manager.initialize_model_order(None)
-    # The default lists a bunch, maybe none are available, so it's empty
-    assert len(layout_manager.model_order) == 0
+    # The default lists a bunch, and available models are dynamically appended
+    assert len(layout_manager.model_order) == 2
 
 
 def test_initialize_model_order_all_available(layout_manager, available_models) -> None:
@@ -408,22 +408,28 @@ def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None
     for i in range(5):
         available_models[f"model_{i + 3}"] = MagicMock()
 
-    grid_layout = MagicMock()
-    grid_layout.count.return_value = 0
+    # Create a real QWidget hierarchy to test width calculation
+    mock_viewport = QWidget()
+    mock_viewport.resize(1040, 800)
+    mock_container = QWidget(mock_viewport)
+    grid_layout = QGridLayout(mock_container)
+
     # Force LARGE (4 cols) so that 5 cards wrap to a second row.
     from src.launchers.launcher_constants import ViewMode
 
     layout_manager.set_view_mode(ViewMode.LARGE)
     layout_manager.model_order = ["model_1", "model_2", "model_3", "model_4", "model_5"]
-    layout_manager.rebuild_grid(grid_layout)
 
-    # Check that it wrapped around
-    # 5 widgets = 5 calls
-    assert grid_layout.addWidget.call_count == 5
-    # The last call should be row=1, col=0 because columns=4 and row 0 has no header
-    last_call = grid_layout.addWidget.call_args_list[-1]
-    assert last_call[0][1] == 1  # row
-    assert last_call[0][2] == 0  # col
+    with patch.object(grid_layout, "addWidget") as mock_add_widget:
+        layout_manager.rebuild_grid(grid_layout)
+
+        # Check that it wrapped around
+        # 5 widgets = 5 calls
+        assert mock_add_widget.call_count == 5
+        # The last call should be row=1, col=0 because columns=4 and row 0 has no header
+        last_call = mock_add_widget.call_args_list[-1]
+        assert last_call[0][1] == 1  # row
+        assert last_call[0][2] == 0  # col
 
 
 def test_set_edit_mode(layout_manager) -> None:
@@ -488,3 +494,62 @@ def test_get_model_category_existing_physics_engines_unchanged(
     model.launcher = None
     model.type = "drake"
     assert layout_manager._get_model_category(model) == "Physics Engines"
+
+
+def test_rebuild_grid_dynamic_columns(qapp, available_models, get_model_func) -> None:
+    """Test that rebuild_grid dynamically wraps columns based on container width."""
+    from PyQt6.QtWidgets import QScrollArea
+
+    container = QWidget()
+    scroll_area = QScrollArea()
+    scroll_area.setWidget(container)
+    scroll_area.setWidgetResizable(True)
+
+    grid_layout = QGridLayout(container)
+    grid_layout.setSpacing(20)
+
+    from src.launchers.launcher_layout_manager import LayoutManager
+    from src.launchers.launcher_constants import ViewMode
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+    )
+    manager.model_order = ["model_1", "model_2", "model_3"]
+    # Add dummy spec to available models
+    available_models["model_3"] = available_models["model_1"]
+
+    scroll_area.resize(1000, 600)
+    manager.set_view_mode(ViewMode.MEDIUM)  # active_scale = 0.5
+
+    # Mocking viewport width specifically is safer in headless test runner
+    with (
+        patch.object(scroll_area.viewport(), "width", return_value=500),
+        patch.object(scroll_area, "viewport", return_value=scroll_area.viewport()),
+    ):
+        manager.rebuild_grid(grid_layout)
+        # Available: 500. Usable: 480. (480+20)//140 = 500//140 = 3 columns.
+        # Check first widget is at row 0, col 0, second is at row 0, col 1, third is at row 0, col 2
+        r0, c0, _, _ = grid_layout.getItemPosition(0)
+        r1, c1, _, _ = grid_layout.getItemPosition(1)
+        r2, c2, _, _ = grid_layout.getItemPosition(2)
+        assert c0 == 0 and r0 == 0
+        assert c1 == 1 and r1 == 0
+        assert c2 == 2 and r2 == 0
+
+    with (
+        patch.object(scroll_area.viewport(), "width", return_value=250),
+        patch.object(scroll_area, "viewport", return_value=scroll_area.viewport()),
+    ):
+        manager.rebuild_grid(grid_layout)
+        # Available: 250. Usable: 230. (230+20)//140 = 250//140 = 1 column.
+        # Check first widget is at row 0, col 0, second is at row 1, col 0, third is at row 2, col 0
+        r0, c0, _, _ = grid_layout.getItemPosition(0)
+        r1, c1, _, _ = grid_layout.getItemPosition(1)
+        r2, c2, _, _ = grid_layout.getItemPosition(2)
+        assert c0 == 0 and r0 == 0
+        assert c1 == 0 and r1 == 1
+        assert c2 == 0 and r2 == 2

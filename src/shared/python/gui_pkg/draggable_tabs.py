@@ -148,9 +148,14 @@ class DraggableTabWidget(QTabWidget):
             raise ValueError("index must be provided")
         tab_text = self.tabText(index)
 
-        if tab_text in self.core_tabs:
-            tab_bar = self.tabBar()
-            if tab_bar:
+        tab_bar = self.tabBar()
+        if tab_bar:
+            if tab_bar.contextMenuPolicy() != Qt.ContextMenuPolicy.CustomContextMenu:
+                tab_bar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+                tab_bar.customContextMenuRequested.connect(self._show_tab_context_menu)
+                tab_bar.installEventFilter(self)
+
+            if tab_text in self.core_tabs:
                 tab_bar.setTabButton(index, QTabBar.ButtonPosition.RightSide, None)
                 tab_bar.setTabButton(index, QTabBar.ButtonPosition.LeftSide, None)
 
@@ -293,17 +298,6 @@ class DraggableTabWidget(QTabWidget):
                 self.drag_start_pos = event.globalPosition().toPoint()
 
         elif (
-            event.type() == QEvent.Type.MouseButtonRelease
-            and isinstance(event, QMouseEvent)
-            and event.button() == Qt.MouseButton.RightButton
-        ):
-            bar = self.tabBar()
-            if bar:
-                pos = event.position().toPoint()
-                self._show_tab_context_menu(pos)
-                return True
-
-        elif (
             event.type() == QEvent.Type.MouseMove
             and isinstance(event, QMouseEvent)
             and (event.buttons() & Qt.MouseButton.LeftButton)
@@ -337,6 +331,14 @@ class DraggableTabWidget(QTabWidget):
         self.removeTab(index)
 
         win = DetachedTabWindow(widget, text, icon, self)
+        try:
+            from src.shared.python.theme import get_theme_manager
+
+            mgr = get_theme_manager()
+            if mgr:
+                mgr.apply_theme_to_window(win)
+        except Exception:  # noqa: BLE001
+            pass
         win.move(pos)
         win.show()
         self.detached_tabs[win] = (widget, text, icon)

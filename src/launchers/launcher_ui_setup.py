@@ -216,6 +216,52 @@ class LauncherUIProtocol(Protocol):
     docker_checker: Any
 
 
+class GridContainerWidget(QWidget):
+    """Container widget that listens to resize events to dynamically rebuild the grid.
+
+    This ensures that when the sidebar opens or closes, or the window is resized,
+    the grid wrapping recalculates its columns to avoid a horizontal scrollbar.
+    """
+
+    def __init__(self, parent=None, launcher=None, grid_layout=None):
+        super().__init__(parent)
+        self.launcher = launcher
+        self.grid_layout = grid_layout
+        self._last_width = 0
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        width = self.width()
+        if width != self._last_width and width > 0:
+            self._last_width = width
+            launcher = self.launcher
+            if launcher and hasattr(launcher, "_rebuild_grid"):
+                launcher._rebuild_grid()
+
+
+class ResizingScrollArea(QScrollArea):
+    """A QScrollArea that triggers a grid rebuild when its viewport width changes.
+
+    This ensures that grid wrapping is recalculated based on the actual visible viewport width,
+    avoiding horizontal scrollbars when sidebars are toggled or resized.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._last_width = 0
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        width = self.viewport().width()
+        if width != self._last_width and width > 0:
+            self._last_width = width
+            widget = self.widget()
+            if widget and hasattr(widget, "grid_layout"):
+                launcher = getattr(widget, "launcher", None)
+                if launcher and hasattr(launcher, "_rebuild_grid"):
+                    launcher._rebuild_grid()
+
+
 class UISetupManager:
     def __init__(self, launcher):
         self.launcher = launcher
@@ -1340,7 +1386,7 @@ class UISetupManager:
 
     def _on_status_clicked(self) -> None:
         """Handle clicking the status label. If in error/dependency error, opens environment manager.
-        If there are running processes, shows a menu to kill individual processes or all of them.
+        If there are running processes, routes to the Processes tab in Settings.
         """
         status_text = self.lbl_status.text()
         if "Dependency Error" in status_text or "Error" in status_text:
@@ -1355,27 +1401,7 @@ class UISetupManager:
                     running.append(name)
 
         if running:
-            from PyQt6.QtWidgets import QMenu
-            from PyQt6.QtCore import QPoint
-
-            menu = QMenu(self.launcher)
-            title_act = menu.addAction("Active Processes:")
-            title_act.setEnabled(False)
-            menu.addSeparator()
-
-            for name in running:
-                # Action to kill this specific process
-                act = menu.addAction(f"Kill {name}")
-                act.triggered.connect(
-                    lambda checked=False, n=name: self._kill_process_by_name(n)
-                )
-
-            menu.addSeparator()
-            kill_all_act = menu.addAction("Kill All Processes")
-            kill_all_act.triggered.connect(self._kill_all_processes)
-
-            # Show the menu under the status label
-            menu.exec(self.lbl_status.mapToGlobal(QPoint(0, self.lbl_status.height())))
+            self._open_settings(tab=8)
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
@@ -1754,7 +1780,7 @@ class UISetupManager:
         """Set up the scrollable grid area."""
         if layout is None:
             raise ValueError("layout must be provided")
-        self.scroll_area = QScrollArea()
+        self.scroll_area = ResizingScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll_area.setProperty("class", "transparent")
@@ -1763,7 +1789,7 @@ class UISetupManager:
         if _style:
             _style.polish(self.scroll_area)
 
-        self.grid_container = QWidget()
+        self.grid_container = GridContainerWidget(launcher=self.launcher)
         self.grid_container.setProperty("class", "transparent")
         _style = self.grid_container.style()
 
@@ -1772,6 +1798,7 @@ class UISetupManager:
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(20)
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.grid_container.grid_layout = self.grid_layout
 
         self.scroll_area.setWidget(self.grid_container)
         layout.addWidget(self.scroll_area, 1)
@@ -1963,99 +1990,36 @@ class UISetupManager:
         layout.addWidget(self.running_processes_panel)
         self.running_processes_panel.hide()
 
+    def _find_active_settings_widget(self) -> QWidget | None:
+        """Find the active SettingsWidget, whether docked as a tab or detached/floating."""
+        if hasattr(self, "workspace_tabs") and self.workspace_tabs is not None:
+            # Check docked tabs
+            for i in range(self.workspace_tabs.count()):
+                widget = self.workspace_tabs.widget(i)
+                if widget and widget.__class__.__name__ == "SettingsWidget":
+                    return widget
+            # Check detached/floating tabs
+            if hasattr(self.workspace_tabs, "detached_tabs"):
+                for widget, _, _ in self.workspace_tabs.detached_tabs.values():
+                    if widget and widget.__class__.__name__ == "SettingsWidget":
+                        return widget
+        return None
+
     def update_running_processes_ui(self) -> None:
-        """Update the running processes list panel on the home page (GUI thread only)."""
-        # Clear existing rows
-        while self.processes_layout.count() > 0:
-            item = self.processes_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        # Check active processes
-        running = []
-        with self.process_manager._process_lock:
-            for name, proc in list(self.running_processes.items()):
-                if proc.poll() is None:
-                    running.append(name)
-
-        if not running:
+        """Update the running processes list widget by refreshing the settings tab."""
+        # Ensure the home page running processes panel remains hidden
+        if (
+            hasattr(self, "running_processes_panel")
+            and self.running_processes_panel is not None
+        ):
             self.running_processes_panel.hide()
-            # Restore status label to Ready if it shows running/launching/● status
-            current_status = self.lbl_status.text()
-            if (
-                "Running" in current_status
-                or "Launching" in current_status
-                or "●" in current_status
-            ):
-                self.lbl_status.setText("Ready")
-                from src.shared.python.theme.style_constants import Styles
 
-                self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
-                self.lbl_status.setToolTip("")
-            return
-
-        # Update status label to indicate running processes
-        if len(running) == 1:
-            self.lbl_status.setText(f"● {running[0]} Running")
-        else:
-            self.lbl_status.setText(f"● {len(running)} Processes Running")
-
-        from src.shared.python.theme.style_constants import Styles
-
-        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS_BOLD)
-        self.lbl_status.setToolTip("Click to view or kill active processes")
-
-        for name in running:
-            row = QWidget()
-            row.setObjectName("ProcessRow")
-            row.setStyleSheet("""
-                #ProcessRow {
-                    background-color: rgba(255, 255, 255, 0.03);
-                    border-radius: 6px;
-                }
-                #ProcessRow:hover {
-                    background-color: rgba(255, 255, 255, 0.06);
-                }
-            """)
-            row_layout = QHBoxLayout(row)
-            row_layout.setContentsMargins(6, 4, 6, 4)
-
-            # Green status dot
-            dot = QLabel("●")
-            dot.setStyleSheet("color: #2ecc71; font-size: 14px; margin-right: 4px;")
-            row_layout.addWidget(dot)
-
-            # Process Name
-            lbl_name = QLabel(name)
-            lbl_name.setStyleSheet("color: #e0e0e0; font-size: 12px;")
-            row_layout.addWidget(lbl_name)
-            row_layout.addStretch()
-
-            # Kill button
-            btn_kill = QPushButton("Kill")
-            btn_kill.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn_kill.setStyleSheet("""
-                QPushButton {
-                    background-color: rgba(220, 53, 69, 0.1);
-                    border: 1px solid rgba(220, 53, 69, 0.3);
-                    border-radius: 4px;
-                    padding: 1px 6px;
-                    color: #ff6b6b;
-                    font-size: 10px;
-                }
-                QPushButton:hover {
-                    background-color: rgba(220, 53, 69, 0.3);
-                    color: #ffffff;
-                }
-            """)
-            btn_kill.clicked.connect(
-                lambda checked=False, n=name: self._kill_process_by_name(n)
-            )
-            row_layout.addWidget(btn_kill)
-
-            self.processes_layout.addWidget(row)
-
-        self.running_processes_panel.show()
+        # Refresh the active Settings widget if it is currently instantiated
+        settings_widget = self._find_active_settings_widget()
+        if settings_widget is not None and hasattr(
+            settings_widget, "refresh_processes_ui"
+        ):
+            settings_widget.refresh_processes_ui()
 
     def _kill_process_by_name(self, name: str) -> None:
         """Kill a running process by its name."""

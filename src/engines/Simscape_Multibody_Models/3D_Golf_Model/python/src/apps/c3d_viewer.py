@@ -18,6 +18,18 @@ from pathlib import Path
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
+try:
+    from src.shared.python.theme import apply_golf_suite_style
+    from src.shared.python.theme.integration import ThemedWindowMixin
+
+    apply_golf_suite_style()
+except ImportError:
+
+    class ThemedWindowMixin:
+        def setup_theme_support(self, *args, **kwargs) -> None:
+            pass
+
+
 from .core.models import C3DDataModel
 from .services.loader_thread import C3DLoaderThread
 from .services.marker_export import export_markers
@@ -57,6 +69,16 @@ class MainWidget(QtWidgets.QWidget):
         self._create_actions()
         self._create_central_widget()
         self._update_ui_state(True)
+
+        try:
+            from src.shared.python.theme import get_theme_manager
+
+            mgr = get_theme_manager()
+            if mgr and hasattr(mgr, "themeChanged"):
+                mgr.themeChanged.connect(self._apply_theme_colors)
+        except Exception:
+            pass
+        self._apply_theme_colors()
 
     # ----------------------------- UI setup --------------------------------
 
@@ -142,39 +164,56 @@ class MainWidget(QtWidgets.QWidget):
         self.help_menu = self.menu_bar.addMenu("&Help")
         self.help_menu.addAction(self.action_about)
 
-        # Style the menu bar to match premium dark theme
-        self.menu_bar.setStyleSheet("""
-            QMenuBar {
-                background-color: #1e1e1e;
-                color: #cccccc;
-                border-bottom: 1px solid #3a3a3a;
-                font-size: 12px;
-            }
-            QMenuBar::item {
-                background-color: transparent;
-                padding: 4px 10px;
-                border-radius: 4px;
-            }
-            QMenuBar::item:selected {
-                background-color: #2a2a2a;
-                color: #ffffff;
-            }
-            QMenu {
-                background-color: #1e1e1e;
-                color: #cccccc;
-                border: 1px solid #3a3a3a;
-            }
-            QMenu::item:selected {
-                background-color: #2a2a2a;
-                color: #ffffff;
-            }
-        """)
-
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.menu_bar)
         layout.addWidget(self.tabs)
+
+    def _apply_theme_colors(self, *args, **kwargs) -> None:
+        """Apply active theme colors dynamically to the local menu bar."""
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            colors = get_current_colors()
+            bg_color = colors.get("bg_elevated", colors.get("group_bg", "#1e1e1e"))
+            text_color = colors.get("text_primary", colors.get("text", "#ffffff"))
+            text_sec = colors.get("text_secondary", "#cccccc")
+            border_color = colors.get("border_default", colors.get("border", "#3a3a3a"))
+            hover_bg = colors.get("bg_highlight", colors.get("button_hover", "#2a2a2a"))
+        except Exception:
+            bg_color = "#1e1e1e"
+            text_color = "#ffffff"
+            text_sec = "#cccccc"
+            border_color = "#3a3a3a"
+            hover_bg = "#2a2a2a"
+
+        self.menu_bar.setStyleSheet(f"""
+            QMenuBar {{
+                background-color: {bg_color};
+                color: {text_sec};
+                border-bottom: 1px solid {border_color};
+                font-size: 12px;
+            }}
+            QMenuBar::item {{
+                background-color: transparent;
+                padding: 4px 10px;
+                border-radius: 4px;
+            }}
+            QMenuBar::item:selected {{
+                background-color: {hover_bg};
+                color: {text_color};
+            }}
+            QMenu {{
+                background-color: {bg_color};
+                color: {text_sec};
+                border: 1px solid {border_color};
+            }}
+            QMenu::item:selected {{
+                background-color: {hover_bg};
+                color: {text_color};
+            }}
+        """)
 
     # ---------------------- UI state management ----------------------------
 
@@ -400,7 +439,7 @@ class MainWidget(QtWidgets.QWidget):
 # ---------------------------------------------------------------------------
 
 
-class C3DViewerMainWindow(QtWidgets.QMainWindow):
+class C3DViewerMainWindow(ThemedWindowMixin, QtWidgets.QMainWindow):
     """Standalone main window for the C3D motion analysis viewer.
 
     Wraps :class:`MainWidget` with a menu bar, a status bar, and the
@@ -411,6 +450,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         """Initialize the main window and create UI components."""
         super().__init__()
+
+        self.setup_theme_support(settings_app="FleetTheme")
 
         self.setWindowTitle("C3D Motion Analysis Viewer")
         self.resize(1400, 900)

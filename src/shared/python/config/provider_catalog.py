@@ -53,7 +53,7 @@ KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
     ),
     ProviderRepoDefinition(
         provider_id="movement_optimizer",
-        repo_name="Movement-Optimizer",
+        repo_name="Movement_Optimizer",
         provider_kind="utility",
     ),
 )

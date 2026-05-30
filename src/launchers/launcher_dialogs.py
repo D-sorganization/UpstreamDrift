@@ -383,8 +383,9 @@ class DialogsManager:
         if tab is None:
             raise ValueError("tab must be provided")
 
-        # Check if settings tab is already open
+        # Check if settings tab is already open or detached
         if hasattr(self, "workspace_tabs"):
+            # 1. Check docked tabs
             for i in range(self.workspace_tabs.count()):
                 if self.workspace_tabs.tabText(i) == "Settings":
                     self.workspace_tabs.setCurrentIndex(i)
@@ -392,6 +393,21 @@ class DialogsManager:
                     if hasattr(widget, "tabs"):
                         widget.tabs.setCurrentIndex(tab)
                     return
+
+            # 2. Check detached/floating tabs
+            if hasattr(self.workspace_tabs, "detached_tabs"):
+                for win, (
+                    widget,
+                    text,
+                    _icon,
+                ) in self.workspace_tabs.detached_tabs.items():
+                    if text == "Settings":
+                        win.show()
+                        win.raise_()
+                        win.activateWindow()
+                        if hasattr(widget, "tabs"):
+                            widget.tabs.setCurrentIndex(tab)
+                        return
 
         from src.launchers.settings_dialog import SettingsWidget
 

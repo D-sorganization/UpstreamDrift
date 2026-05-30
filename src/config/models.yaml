@@ -82,7 +82,7 @@ models:
   # =============================================================================
 
   - id: "golf_simulation_suite"
-    name: "Golf Simulation Suite"
+    name: "Simulator"
     description: "Complete golf simulation with ball flight physics and putting green"
     type: "golf_simulation"
     path: "src/tools/golf_simulation_suite/__main__.py"
@@ -501,8 +501,10 @@ models:
     name: "Movement Optimizer"
     description: "Cross-engine trajectory optimization"
     type: "special_app"
-    source_root: "movement_optimizer"
-    path: "src/movement_optimizer/main.py"
+    source_root: "Movement_Optimizer"
+    path: "src/movement_optimizer/__main__.py"
+    python_paths:
+      - "src"
     capabilities:
       - "trajectory_optimization"
       - "cross_engine_analysis"
