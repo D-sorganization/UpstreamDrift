@@ -79,7 +79,7 @@ async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
         # Resolve database session and retrieve real user
         db = SessionLocal()
         try:
-            user = db.query(User).filter(User.id == int(user_id)).first()
+            user: User | None = db.query(User).filter(User.id == int(user_id)).first()
             if user is None:
                 logger.warning(
                     "WebSocket auth rejected: user %s not found. path=%s",
