@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 # Ensure pytest-qt is available
-pytest.importorskip("pytest_qt")
+pytest.importorskip("pytestqt")
 # Ensure PyQt classes are available
 pytest.importorskip("PyQt6")
 
@@ -34,7 +34,7 @@ def test_help_dialog_file_exists(qapp) -> None:
         patch("src.launchers.help_dialogs.Path.read_text", return_value="# Help"),
     ):
         dialog = HelpDialog()
-        assert dialog.windowTitle() == "Golf Suite - Help"
+        assert dialog.windowTitle() == "UpstreamDrift - Help"
         assert "Help" in dialog.text_area.toPlainText()
 
 
