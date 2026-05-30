@@ -20,8 +20,6 @@ concurrency:
   group: pr-comment-collector-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

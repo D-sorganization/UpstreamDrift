@@ -14,8 +14,6 @@ concurrency:
   group: security-osv-monitor-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   osv-monitor:
     timeout-minutes: 30

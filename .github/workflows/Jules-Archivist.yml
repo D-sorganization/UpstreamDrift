@@ -12,8 +12,6 @@ permissions:
   contents: write
   pull-requests: read
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

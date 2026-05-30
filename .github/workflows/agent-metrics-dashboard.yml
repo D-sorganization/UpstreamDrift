@@ -15,8 +15,6 @@ permissions:
   actions: read
   pull-requests: read
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

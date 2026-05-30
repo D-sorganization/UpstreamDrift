@@ -30,8 +30,6 @@ concurrency:
   group: jules-pr-cleanup-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

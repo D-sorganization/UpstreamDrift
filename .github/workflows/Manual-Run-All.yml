@@ -27,8 +27,6 @@ permissions:
   pull-requests: write
   actions: write
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

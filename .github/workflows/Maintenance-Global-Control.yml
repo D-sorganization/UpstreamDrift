@@ -20,8 +20,6 @@ on:
         required: false
         default: "Maintenance"
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

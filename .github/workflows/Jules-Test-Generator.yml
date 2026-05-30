@@ -7,8 +7,6 @@ concurrency:
 on:
   workflow_call:
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

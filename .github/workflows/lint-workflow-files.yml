@@ -13,8 +13,6 @@ concurrency:
   group: lint-workflow-files-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   lint:
     runs-on: d-sorg-fleet-docker

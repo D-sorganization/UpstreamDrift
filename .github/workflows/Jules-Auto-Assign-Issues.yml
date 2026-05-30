@@ -15,8 +15,6 @@ on:
 permissions:
   issues: write
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

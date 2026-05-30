@@ -40,8 +40,6 @@ concurrency:
   group: anti-phantom-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   guard:
     timeout-minutes: 30

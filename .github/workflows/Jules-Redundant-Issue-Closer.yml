@@ -26,8 +26,6 @@ concurrency:
   group: jules-redundant-issue-closer-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   close-redundant:
     runs-on: d-sorg-fleet-docker

@@ -33,8 +33,6 @@ permissions:
   issues: write
   pull-requests: read
 
-env:
-
 jobs:
   verify-closure:
     timeout-minutes: 30
