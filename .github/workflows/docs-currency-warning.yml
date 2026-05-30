@@ -39,6 +39,8 @@ env:
 
 jobs:
   warn:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     steps:

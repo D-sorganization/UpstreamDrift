@@ -46,7 +46,6 @@ permissions:
   checks: read
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   MAX_REPAIR_ATTEMPTS: 5
   REPAIR_WINDOW_HOURS: 72
   CI_WAIT_TIMEOUT: 900
@@ -54,6 +53,8 @@ env:
 
 jobs:
   check-kill-switch:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     outputs:
@@ -71,6 +72,8 @@ jobs:
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet-docker
@@ -85,6 +88,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   intelligent-repair:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'

@@ -44,7 +44,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   # Maximum fix attempts per window (reduced from 10 for cost control)
   MAX_FIX_ATTEMPTS: 5
   FIX_WINDOW_HOURS: 4
@@ -54,6 +53,8 @@ env:
 
 jobs:
   check-kill-switch:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     outputs:
@@ -71,6 +72,8 @@ jobs:
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet-docker
@@ -85,6 +88,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   iterative-fix:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: [check-kill-switch, pick-runner]
     name: Fix and Verify CI (Iterative)
     runs-on: ${{ needs.pick-runner.outputs.runner }}

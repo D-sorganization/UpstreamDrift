@@ -39,9 +39,6 @@ concurrency:
   # when a new push lands — the scheduled cron will re-run.
   cancel-in-progress: true
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   soak:
     name: 24h realtime soak
@@ -52,6 +49,7 @@ jobs:
     # GitHub-hosted we cap the schedule run at 6 h via SOAK_DURATION_SEC.
     timeout-minutes: 1500
     env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
       SOAK: "1"
       SOAK_DURATION_SEC: ${{ github.event.inputs.duration_sec || '86400' }}
       SOAK_PUBLISH_HZ: ${{ github.event.inputs.publish_hz || '1000' }}

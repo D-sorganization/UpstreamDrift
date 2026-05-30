@@ -39,6 +39,8 @@ env:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -53,6 +55,8 @@ jobs:
 
   # -- Legacy monolithic image: keep passing for backward compatibility -------
   docker-smoke-and-size:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90
@@ -110,6 +114,8 @@ jobs:
   # (continue-on-error: true) because their base images are expensive and
   # not always cached on the fleet.
   profile-size-matrix:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 120

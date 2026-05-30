@@ -24,11 +24,10 @@ concurrency:
   group: jules-code-quality-fixer-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   check-kill-switch:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     outputs:
@@ -45,6 +44,8 @@ jobs:
           fi
 
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet-docker
@@ -60,6 +61,8 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   code-quality-fixer:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'

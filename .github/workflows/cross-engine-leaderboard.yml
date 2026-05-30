@@ -38,11 +38,10 @@ concurrency:
   group: cross-engine-leaderboard-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   regenerate:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: regenerate cross-engine leaderboard
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15

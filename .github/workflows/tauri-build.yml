@@ -48,6 +48,8 @@ env:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -60,6 +62,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   check:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     name: Check (Rust + TypeScript)
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -116,6 +120,8 @@ jobs:
   # Build - Full build on main/release
   # ===========================================================================
   build:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Build (${{ matrix.platform }})
     needs: check
     if: github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main')

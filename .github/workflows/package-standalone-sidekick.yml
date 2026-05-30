@@ -20,11 +20,10 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   build-wheel:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Build sdist + wheel
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
@@ -100,6 +99,8 @@ jobs:
           path: dist/
 
   smoke-test-wheel:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Smoke-test wheel (Python ${{ matrix.python }})
     needs: build-wheel
     runs-on: d-sorg-fleet-docker

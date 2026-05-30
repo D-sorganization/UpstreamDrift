@@ -23,11 +23,10 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   reject-hosted-runner-routing:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Reject hosted runner routing
     runs-on: ubuntu-latest
     timeout-minutes: 5

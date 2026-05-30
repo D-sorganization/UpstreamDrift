@@ -43,9 +43,6 @@ concurrency:
   group: cross-engine-leaderboard-publish-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   publish:
     name: publish cross-engine leaderboard JSON
@@ -53,6 +50,7 @@ jobs:
     timeout-minutes: 15
 
     env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
       UD_LEADERBOARD_PUBLISH: "1"
       UD_LEADERBOARD_JSON_PATH: ${{ github.workspace }}/reports/cross_engine_leaderboard.json
       GIT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}

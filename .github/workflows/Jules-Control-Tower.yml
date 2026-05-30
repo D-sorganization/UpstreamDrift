@@ -75,6 +75,8 @@ permissions:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -87,6 +89,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   triage:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -251,6 +255,8 @@ jobs:
   # This parent workflow only routes and passes context
 
   call-repair:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'auto-repair'
     uses: ./.github/workflows/Jules-Auto-Repair.yml
@@ -265,6 +271,8 @@ jobs:
     secrets: inherit
 
   call-hotfix-creator:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'hotfix-creator'
     uses: ./.github/workflows/Jules-Hotfix-Creator.yml
@@ -278,6 +286,8 @@ jobs:
     secrets: inherit
 
   call-scribe:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
     uses: ./.github/workflows/Jules-Documentation-Scribe.yml
@@ -287,6 +297,8 @@ jobs:
     secrets: inherit
 
   call-tests:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'test-generator'
     uses: ./.github/workflows/Jules-Test-Generator.yml
@@ -299,6 +311,8 @@ jobs:
   # call-auto-rebase: archived (was a placeholder stub only) -- issue #2055
 
   call-archivist:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'archivist'
     uses: ./.github/workflows/Jules-Archivist.yml
@@ -308,6 +322,8 @@ jobs:
     secrets: inherit
 
   call-sentinel:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'sentinel'
     uses: ./.github/workflows/Jules-Sentinel.yml
@@ -318,6 +334,8 @@ jobs:
     secrets: inherit
 
   call-code-quality-reviewer:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
@@ -328,6 +346,8 @@ jobs:
     secrets: inherit
 
   call-assessment-generator:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
@@ -338,6 +358,8 @@ jobs:
     secrets: inherit
 
   call-issue-resolver:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'issue-resolver'
     uses: ./.github/workflows/Jules-Issue-Resolver.yml
@@ -348,6 +370,8 @@ jobs:
     secrets: inherit
 
   call-completist:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'completist'
     uses: ./.github/workflows/Jules-Completist.yml
@@ -358,6 +382,8 @@ jobs:
     secrets: inherit
 
   call-documentation-auditor:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'documentation-auditor'
     uses: ./.github/workflows/Jules-Documentation-Auditor.yml
@@ -368,6 +394,8 @@ jobs:
     secrets: inherit
 
   call-pr-compiler:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml

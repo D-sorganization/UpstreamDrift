@@ -30,11 +30,10 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   local-only-workflows:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Reject hosted runner routing
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -45,6 +44,8 @@ jobs:
           echo "Bypass"
 
   pinned-actions:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Enforce action SHA pinning
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
@@ -67,6 +68,8 @@ jobs:
         run: python3 scripts/check_github_actions_pinned.py
 
   workflow-inventory:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Enforce workflow inventory
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
@@ -89,6 +92,8 @@ jobs:
         run: python3 scripts/check_workflow_inventory.py
 
   urdf-layering:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Enforce URDF subsystem layering (ADR 0007)
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
@@ -112,6 +117,8 @@ jobs:
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -124,6 +131,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   quality-gate:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
@@ -579,6 +588,8 @@ jobs:
           path: matlab_quality_report.txt
 
   core-only-install:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
@@ -647,6 +658,8 @@ jobs:
             --timeout=60
 
   dependency-consistency:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: dependency-consistency
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -713,6 +726,8 @@ jobs:
           pip-audit
 
   tests:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20 # Prevent runaway tests - hard cutoff
@@ -1038,6 +1053,8 @@ jobs:
           files: coverage.xml
 
   parity-smoke:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -1094,6 +1111,8 @@ jobs:
             --tb=short
 
   alembic-postgres-round-trip:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
@@ -1199,6 +1218,8 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
@@ -1312,6 +1333,8 @@ jobs:
             -v --tb=short
 
   frontend-tests:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
@@ -1386,6 +1409,8 @@ jobs:
   # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
   # =============================================================================
   matlab-tests:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
@@ -1418,6 +1443,8 @@ jobs:
   # No Arduino components in this project - disabled.
   # =============================================================================
   arduino-build:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
@@ -1470,6 +1497,8 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     # Cross-platform matrix (issue #5221): catch platform-specific socket /
     # filesystem / path bugs in IO-touching crates (realtime pub/sub, codemap
     # CLI) before users see them. Workspace member enumeration is delegated to
@@ -1721,6 +1750,8 @@ jobs:
           fi
 
   rust-quickstart:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: Rust Quickstart
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15

@@ -14,12 +14,11 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -33,6 +32,8 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   build:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -105,6 +106,8 @@ jobs:
           path: dist/
 
   smoke-python-wheel:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [pick-runner, build]
     strategy:
@@ -146,6 +149,8 @@ jobs:
         run: python -m pytest tests/smoke/python_wheel
 
   publish-pypi:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -170,6 +175,8 @@ jobs:
           skip-existing: true
 
   create-release:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}

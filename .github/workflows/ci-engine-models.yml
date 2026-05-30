@@ -40,11 +40,10 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
-
 jobs:
   drake-urdf-drift:
+    env:
+      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: drake URDF regeneration drift gate
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
