@@ -640,3 +640,52 @@ def test_resizing_scroll_area_triggers_rebuild(launcher) -> None:
 
     # Verify that the launcher's _rebuild_grid method was called
     launcher._rebuild_grid.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Clear Filters button — issue #6666 sub-item 3
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_clear_all_filters_clears_search_and_routes_home(launcher) -> None:
+    """_clear_all_filters() must clear the search input and route the sidebar
+    back to 'Home' (button 0)."""
+    home_btn = MagicMock()
+    launcher.search_input = MagicMock()
+    launcher.sidebar_group = MagicMock()
+    launcher.sidebar_group.button.return_value = home_btn
+    launcher._on_sidebar_routed = MagicMock()
+
+    launcher._clear_all_filters()
+
+    launcher.search_input.clear.assert_called_once()
+    launcher.sidebar_group.button.assert_called_once_with(0)
+    home_btn.setChecked.assert_called_once_with(True)
+    launcher._on_sidebar_routed.assert_called_once_with(0)
+
+
+@pytest.mark.unit
+def test_clear_all_filters_no_sidebar_group(launcher) -> None:
+    """_clear_all_filters() must not raise when sidebar_group is absent."""
+    launcher.search_input = MagicMock()
+    # sidebar_group intentionally not set
+
+    launcher._clear_all_filters()
+
+    launcher.search_input.clear.assert_called_once()
+
+
+@pytest.mark.unit
+def test_clear_all_filters_home_btn_none(launcher) -> None:
+    """_clear_all_filters() must not raise when sidebar button 0 returns None."""
+    launcher.search_input = MagicMock()
+    launcher.sidebar_group = MagicMock()
+    launcher.sidebar_group.button.return_value = None
+    launcher._on_sidebar_routed = MagicMock()
+
+    launcher._clear_all_filters()
+
+    launcher.search_input.clear.assert_called_once()
+    # _on_sidebar_routed is still called to reset the category filter
+    launcher._on_sidebar_routed.assert_called_once_with(0)
