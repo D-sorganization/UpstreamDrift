@@ -32,6 +32,7 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
   <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <statistic extent="2.0" center="0 0 1"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -42,18 +43,26 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
 
   <asset>
     <!-- Define materials for better visualization -->
+    <texture name="skybox" type="skybox" builtin="gradient"
+             rgb1="0.3 0.5 0.7" rgb2="0.1 0.1 0.12" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker"
+             rgb1="0.2 0.3 0.2" rgb2="0.3 0.4 0.3" width="512" height="512"
+             mark="edge" markrgb="0.4 0.5 0.4"/>
+    <material name="ground_mat" texture="grid" texrepeat="10 10" texuniform="true"/>
     <material name="torso_mat" rgba="0.7 0.5 0.4 1"/>
     <material name="arm_left_mat" rgba="0.6 0.4 0.3 1"/>
     <material name="arm_right_mat" rgba="0.6 0.4 0.3 1"/>
     <material name="club_mat" rgba="0.2 0.2 0.2 1"/>
     <material name="grip_mat" rgba="0.1 0.1 0.1 1"/>
-    <material name="ground_mat" rgba="0.4 0.6 0.3 1"/>
   </asset>
 
   <worldbody>
     <!-- Ground plane -->
     <geom name="floor" type="plane" size="10 10 0.1" material="ground_mat"/>
-    <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+    <light pos="0 0 4" dir="0 0 -1" directional="true"
+           diffuse="0.6 0.6 0.6" castshadow="true"/>
+    <light pos="3 3 4" dir="-0.5 -0.5 -1" directional="true" diffuse="0.4 0.4 0.4"/>
+    <light pos="-3 -3 4" dir="0.5 0.5 -1" directional="true" diffuse="0.3 0.3 0.3"/>
 
     <!-- Camera views -->
     <camera name="side" pos="-4 -1.5 1.3" euler="0.1 0 0.3" mode="fixed"/>
@@ -228,6 +237,7 @@ FULL_BODY_GOLF_SWING_XML = rf"""
   <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <statistic extent="2.0" center="0 0 1"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -237,18 +247,26 @@ FULL_BODY_GOLF_SWING_XML = rf"""
   </visual>
 
   <asset>
+    <texture name="skybox" type="skybox" builtin="gradient"
+             rgb1="0.3 0.5 0.7" rgb2="0.1 0.1 0.12" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker"
+             rgb1="0.2 0.3 0.2" rgb2="0.3 0.4 0.3" width="512" height="512"
+             mark="edge" markrgb="0.4 0.5 0.4"/>
+    <material name="ground_mat" texture="grid" texrepeat="10 10" texuniform="true"/>
     <material name="torso_mat" rgba="0.7 0.5 0.4 1"/>
     <material name="arm_mat" rgba="0.6 0.4 0.3 1"/>
     <material name="leg_mat" rgba="0.5 0.5 0.6 1"/>
     <material name="club_mat" rgba="0.2 0.2 0.2 1"/>
     <material name="grip_mat" rgba="0.1 0.1 0.1 1"/>
-    <material name="ground_mat" rgba="0.4 0.6 0.3 1"/>
   </asset>
 
   <worldbody>
     <!-- Ground plane -->
     <geom name="floor" type="plane" size="10 10 0.1" material="ground_mat"/>
-    <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+    <light pos="0 0 4" dir="0 0 -1" directional="true"
+           diffuse="0.6 0.6 0.6" castshadow="true"/>
+    <light pos="3 3 4" dir="-0.5 -0.5 -1" directional="true" diffuse="0.4 0.4 0.4"/>
+    <light pos="-3 -3 4" dir="0.5 0.5 -1" directional="true" diffuse="0.3 0.3 0.3"/>
 
     <!-- Camera views -->
     <camera name="side" pos="-5 -2 1.5" euler="0.15 0 0.35" mode="fixed"/>

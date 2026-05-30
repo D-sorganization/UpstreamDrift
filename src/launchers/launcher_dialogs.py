@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
-from PyQt6.QtWidgets import QMessageBox, QDialog
+from PyQt6.QtWidgets import QMessageBox, QDialog, QWidget
 
 from src.launchers.launcher_constants import (
     AI_AVAILABLE,
@@ -911,3 +911,115 @@ class DependencyErrorDialog(QDialog):
         from PyQt6.QtGui import QDesktopServices
 
         QDesktopServices.openUrl(QUrl(self.doc_url))
+
+
+class CriticalErrorDialog(QDialog):
+    """Custom themed critical error dialog with hover copy support for the traceback."""
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        title: str = "Application Error",
+        message: str = "",
+        detail_text: str = "",
+    ) -> None:
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import (
+            QVBoxLayout,
+            QLabel,
+            QHBoxLayout,
+            QPushButton,
+            QGraphicsDropShadowEffect,
+            QFrame,
+        )
+        from src.launchers.hover_copy_browser import HoverCopyTextBrowser
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        style = self.style()
+        if style is not None:
+            style.polish(self)
+
+        layout = QVBoxLayout(self)
+        self.frame = QFrame(self)
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #c92a2a; border-radius: 8px; }"
+        )
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        lbl_title = QLabel(title)
+        lbl_title.setStyleSheet(
+            "color: #ff6b6b; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        lbl_msg = QLabel(message)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+        if detail_text:
+            self.detail_browser = HoverCopyTextBrowser(self)
+            self.detail_browser.setPlainText(detail_text)
+            self.detail_browser.setMinimumHeight(150)
+            self.detail_browser.setMaximumHeight(300)
+            self.detail_browser.setStyleSheet("""
+                QTextBrowser {
+                    background-color: #1e2026;
+                    border: 1px solid #2d3139;
+                    border-radius: 4px;
+                    color: #e0e0e0;
+                    font-family: Consolas, Monaco, monospace;
+                    font-size: 11px;
+                }
+            """)
+            frame_layout.addWidget(self.detail_browser)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        self.btn_copy_all = QPushButton("Copy Error")
+        self.btn_copy_all.setStyleSheet(
+            "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; }"
+            "QPushButton:hover { background-color: #4c6ef5; }"
+        )
+        self.btn_copy_all.clicked.connect(self._copy_all)
+        btn_layout.addWidget(self.btn_copy_all)
+
+        self.btn_close = QPushButton("Close")
+        self.btn_close.setStyleSheet(
+            "QPushButton { background-color: #ae3ec9; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #c225db; }"
+        )
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+
+        frame_layout.addLayout(btn_layout)
+        layout.addWidget(self.frame)
+
+    def _copy_all(self) -> None:
+        from PyQt6.QtWidgets import QApplication
+
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            if hasattr(self, "detail_browser"):
+                clipboard.setText(self.detail_browser.toPlainText())
+            self.btn_copy_all.setText("Copied!")
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(2000, lambda: self.btn_copy_all.setText("Copy Error"))

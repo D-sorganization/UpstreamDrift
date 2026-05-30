@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_profile_info import load_docker_profiles
 from src.launchers.launcher_constants import DOCKER_STAGES
+from src.launchers.hover_copy_browser import HoverCopyTextBrowser
 from src.shared.python.docker_config import DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
@@ -830,7 +831,7 @@ class SettingsWidget(QWidget):
         tab_layout = QVBoxLayout(tab)
 
         # System checks browser
-        self._diag_browser = QTextBrowser()
+        self._diag_browser = HoverCopyTextBrowser()
         self._diag_browser.setOpenExternalLinks(False)
         self._diag_browser.setStyleSheet(Styles.CONSOLE_DIAGNOSTICS)
         tab_layout.addWidget(self._diag_browser, stretch=3)

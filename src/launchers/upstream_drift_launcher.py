@@ -676,7 +676,7 @@ class UpstreamDriftLauncher(QMainWindow):
             REPOS_ROOT,
             output_callback=self.ui_setup_manager._on_process_output,
         )
-        self.process_manager.on_process_list_changed = (
+        self.process_manager.on_process_list_changed = (  # type: ignore[attr-defined]
             self.ui_setup_manager.update_running_processes_ui
         )
         self.model_handler_registry = ModelHandlerRegistry()
@@ -1470,22 +1470,23 @@ def main() -> None:
     import traceback
 
     def excepthook(exc_type, exc_value, exc_tb):
-        from PyQt6.QtWidgets import QMessageBox
+        from src.launchers.launcher_dialogs import CriticalErrorDialog
 
         err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-        with open("crash_traceback.txt", "w") as f:
-            f.write(err_msg)
+        try:
+            with open("crash_traceback.txt", "w", encoding="utf-8") as f:
+                f.write(err_msg)
+        except OSError:
+            pass
 
-        # Don't show MessageBox for SystemExit
+        # Don't show dialog for SystemExit
         if exc_type is not SystemExit:
-            msg_box = QMessageBox()
-            msg_box.setIcon(QMessageBox.Icon.Critical)
-            msg_box.setWindowTitle("Application Crash")
-            msg_box.setText(
-                "UpstreamDrift has encountered an unexpected error and must close."
+            dialog = CriticalErrorDialog(
+                title="Application Crash",
+                message="UpstreamDrift has encountered an unexpected error and must close.",
+                detail_text=err_msg,
             )
-            msg_box.setDetailedText(err_msg)
-            msg_box.exec()
+            dialog.exec()
 
         QApplication.quit()
 

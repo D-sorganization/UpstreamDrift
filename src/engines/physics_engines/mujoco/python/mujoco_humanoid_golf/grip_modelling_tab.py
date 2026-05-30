@@ -13,7 +13,6 @@ Implementation split across:
 from __future__ import annotations
 
 import os
-import re
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +28,16 @@ from src.shared.python.physics.grip_contact_model import (
     compute_pressure_visualization,
 )
 
+from ._grip_modelling_synergies import (
+    AddSynergyDialog,
+    Synergy,
+    SynergyJointBinding,
+    get_descriptive_joint_name,
+)
+
 # Re-export public names for backward compatibility
 from ._grip_modelling_widgets import ContactMetricsWidget, PressureVisualizationWidget
+from ._grip_modelling_xml import prepare_scene_xml
 from .sim_widget import MuJoCoSimWidget
 
 logger = get_logger(__name__)
@@ -68,7 +75,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _setup_left_control_panel(self) -> None:
         self.control_panel = QtWidgets.QWidget()
-        self.control_panel.setFixedWidth(300)
+        self.control_panel.setFixedWidth(450)
         self.control_layout = QtWidgets.QVBoxLayout(self.control_panel)
 
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Hand Model Selection</b>"))
@@ -87,6 +94,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self.control_layout.addSpacing(10)
 
         self._setup_physics_controls()
+        self._setup_synergy_area()
         self._setup_sliders_area()
 
         self.main_layout.addWidget(self.control_panel)
@@ -111,6 +119,24 @@ class GripModellingTab(QtWidgets.QWidget):
 
         self.control_layout.addSpacing(10)
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Joint Controls</b>"))
+
+    def _setup_synergy_area(self) -> None:
+        self.control_layout.addWidget(
+            QtWidgets.QLabel("<b>Synergy (Linked) Sliders</b>")
+        )
+        self.synergy_area = QtWidgets.QScrollArea()
+        self.synergy_area.setWidgetResizable(True)
+        self.synergy_widget = QtWidgets.QWidget()
+        self.synergy_layout = QtWidgets.QVBoxLayout(self.synergy_widget)
+        self.synergy_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.synergy_area.setWidget(self.synergy_widget)
+        self.synergy_area.setFixedHeight(120)
+        self.control_layout.addWidget(self.synergy_area)
+
+        self.btn_add_synergy = QtWidgets.QPushButton("+ Add Custom Synergy")
+        self.btn_add_synergy.clicked.connect(self._on_add_custom_synergy)
+        self.control_layout.addWidget(self.btn_add_synergy)
+        self.control_layout.addSpacing(10)
 
     def _setup_sliders_area(self) -> None:
         self.sliders_area = QtWidgets.QScrollArea()
@@ -152,6 +178,16 @@ class GripModellingTab(QtWidgets.QWidget):
     def _init_internal_state(self) -> None:
         self.joint_sliders: list[QtWidgets.QSlider] = []
         self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
+        self.synergy_sliders: list[QtWidgets.QSlider] = []
+        self.joint_controls: dict[
+            int,
+            tuple[
+                QtWidgets.QSlider,
+                QtWidgets.QDoubleSpinBox,
+                float,
+                float,
+            ],
+        ] = {}
 
         self.grip_contact_model = GripContactModel(GripParameters())
         self.contact_exporter = GripContactExporter(self.grip_contact_model)
@@ -192,7 +228,7 @@ class GripModellingTab(QtWidgets.QWidget):
             return
 
         try:
-            xml_content = self._prepare_scene_xml(scene_path, folder_path, is_both)
+            xml_content = prepare_scene_xml(scene_path, folder_path, is_both)
         except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to prepare XML model from %s", scene_path)
             return
@@ -217,299 +253,6 @@ class GripModellingTab(QtWidgets.QWidget):
         # Apply initial kinematic state
         self._on_kinematic_toggled(self.chk_kinematic.isChecked())
 
-    def _prepare_scene_xml(
-        self, scene_path: Path, folder_path: Path, is_both: bool = False
-    ) -> str:  # noqa: E501
-        """Read scene file and inject absolute paths and cylinder object."""
-        if scene_path is None:
-            raise ValueError("scene_path must be provided")
-        xml_content = scene_path.read_text("utf-8")
-
-        # 1. Inline hand XML includes and extract worldbodies
-        xml_content = self._inline_hand_includes(
-            xml_content, scene_path, folder_path, is_both
-        )  # noqa: E501
-
-        # 2. Ensure offscreen framebuffer is large enough for renderer
-        xml_content = self._ensure_offscreen_visual(xml_content)
-
-        # 3. Inject Cylinder Object (only if not present)
-        xml_content = self._inject_cylinder_object(xml_content)
-
-        # 4. Inject Mocap Bodies and Welds for Hands
-        xml_content = self._inject_mocap_bodies(xml_content, scene_path, is_both)
-
-        logger.info(
-            "Successfully prepared scene XML with movable hands and mocap bodies."
-        )  # noqa: E501
-        return xml_content
-
-    def _get_hand_content(
-        self,
-        folder_path: Path,
-        filename: str,
-        body_name_pattern: str,
-        is_both: bool,
-    ) -> str:
-        """Read a hand XML file, inject freejoint, and strip mujoco tags."""
-        if folder_path is None:
-            raise ValueError("folder_path must be provided")
-        full_path = folder_path / filename
-        if not full_path.exists():
-            return ""
-
-        try:
-            content = full_path.read_text("utf-8")
-
-            # Check if freejoint already exists
-            if "freejoint" not in content:
-                pattern = f'(<body[^>]*name="{body_name_pattern}"[^>]*>)'
-                match = re.search(pattern, content)
-                if match:
-                    logger.info("Injecting freejoint into %s", filename)
-                    insertion = match.group(1) + "\n      <freejoint/>"
-                    content = content.replace(match.group(1), insertion)
-                else:
-                    logger.warning(
-                        "Could not find body '%s' in %s to inject freejoint",
-                        body_name_pattern,
-                        filename,
-                    )
-
-            # Strip <mujoco> tags to allow embedding
-            content = re.sub(r"<mujoco[^>]*>", "", content)
-            content = content.replace("</mujoco>", "")
-
-            # When merging both hands, prefix default class names to avoid
-            # collisions
-            if is_both:
-                hand_prefix = "right" if "right" in filename.lower() else "left"
-                # Find all default class names
-                class_names = re.findall(r'<default class="([^"]+)">', content)
-                for class_name in set(class_names):
-                    new_name = f"{hand_prefix}_{class_name}"
-                    content = content.replace(
-                        f'class="{class_name}"', f'class="{new_name}"'
-                    )  # noqa: E501
-
-            return content
-        except (RuntimeError, ValueError, OSError):
-            logger.exception("Failed to process hand file %s", filename)
-            return ""  # Return empty only on catastrophic failure
-
-    def _inline_hand_includes(  # noqa: C901
-        self,
-        xml_content: str,
-        scene_path: Path,
-        folder_path: Path,
-        is_both: bool,
-    ) -> str:
-        """Inline hand XML includes and inject extracted bodies into worldbody."""
-        if not (xml_content is not None):
-            raise ValueError("xml_content must be provided")
-        extracted_bodies: list[str] = []
-        extracted_post_bodies: list[str] = []
-
-        def extract_sections(filename: str, body_pattern: str) -> str:
-            """Extract worldbody and post-worldbody XML content from a hand model."""
-            if not (filename is not None):
-                raise ValueError("filename must be provided")
-            content = self._get_hand_content(
-                folder_path, filename, body_pattern, is_both
-            )  # noqa: E501
-
-            # Extract worldbody
-            bodies_match = re.search(
-                r"<worldbody[^>]*>(.*?)</worldbody>", content, re.DOTALL
-            )  # noqa: E501
-            if bodies_match:
-                extracted_bodies.append(bodies_match.group(1))
-                content = re.sub(
-                    r"<worldbody[^>]*>.*?</worldbody>", "", content, flags=re.DOTALL
-                )  # noqa: E501
-
-            # Extract post-worldbody elements to prevent out-of-order XML crashes
-            for tag in ["contact", "tendon", "actuator", "equality"]:
-                tag_match = re.search(f"<{tag}[^>]*>(.*?)</{tag}>", content, re.DOTALL)
-                if tag_match:
-                    extracted_post_bodies.append(
-                        f"<{tag}>\n{tag_match.group(1)}\n</{tag}>"
-                    )
-                    content = re.sub(
-                        f"<{tag}[^>]*>.*?</{tag}>", "", content, flags=re.DOTALL
-                    )
-
-            return content
-
-        if is_both:
-            right_defs = extract_sections("right_hand.xml", "rh_forearm")
-            left_defs = extract_sections("left_hand.xml", "lh_forearm")
-
-            xml_content = re.sub(
-                r'<include[^>]*file="right_hand.xml"[^>]*/>', right_defs, xml_content
-            )
-            xml_content = re.sub(
-                r'<include[^>]*file="left_hand.xml"[^>]*/>', left_defs, xml_content
-            )
-        else:
-            if 'file="right_hand.xml"' in xml_content:
-                target_body = "rh_forearm"
-                if "allegro" in str(folder_path).lower():
-                    target_body = "right_hand"
-
-                defs = extract_sections("right_hand.xml", target_body)
-                xml_content = re.sub(
-                    r'<include[^>]*file="right_hand.xml"[^>]*/>',
-                    defs,
-                    xml_content,
-                )
-            elif 'file="left_hand.xml"' in xml_content:
-                target_body = "lh_forearm"
-                if "allegro" in str(folder_path).lower():
-                    target_body = "left_hand"
-
-                defs = extract_sections("left_hand.xml", target_body)
-                xml_content = re.sub(
-                    r'<include[^>]*file="left_hand.xml"[^>]*/>',
-                    defs,
-                    xml_content,
-                )
-
-        # Inject extracted bodies into the scene's worldbody
-        if extracted_bodies:
-            bodies_str = "\n".join(extracted_bodies)
-            xml_content = re.sub(
-                r"(<worldbody[^>]*>)", r"\1\n" + bodies_str, xml_content, count=1
-            )  # noqa: E501
-
-        # Append post-worldbody elements to the end of the file
-        if extracted_post_bodies:
-            post_str = "\n".join(extracted_post_bodies) + "\n"
-            if "</mujoco>" in xml_content:
-                xml_content = xml_content.replace("</mujoco>", post_str + "</mujoco>")
-            else:
-                xml_content += post_str
-
-        return xml_content
-
-    @staticmethod
-    def _ensure_offscreen_visual(xml_content: str) -> str:
-        """Ensure the XML has offscreen framebuffer settings for rendering."""
-        offscreen_global = '<global offwidth="1920" offheight="1080"/>'
-        if "<visual>" in xml_content:
-            if "<global" in xml_content:
-
-                def update_global_tag(m: re.Match) -> str:
-                    """Replace offscreen render dimensions in a global tag."""
-                    attrs = m.group(1).replace("/", "").strip()
-                    attrs = re.sub(r'offwidth="[^"]*"', "", attrs)
-                    attrs = re.sub(r'offheight="[^"]*"', "", attrs)
-                    return f'<global {attrs} offwidth="1920" offheight="1080"/>'
-
-                xml_content = re.sub(
-                    r"<global([^>]*)>", update_global_tag, xml_content, count=1
-                )  # noqa: E501
-            else:
-                xml_content = xml_content.replace(
-                    "<visual>",
-                    f"<visual>\n    {offscreen_global}",
-                )
-        else:
-            xml_content = xml_content.replace(
-                "</mujoco>",
-                f"<visual>\n  {offscreen_global}\n</visual>\n</mujoco>",
-            )
-        return xml_content
-
-    @staticmethod
-    def _inject_cylinder_object(xml_content: str) -> str:
-        """Inject a cylinder grip object into the scene if not present."""
-        if (
-            "club_handle" not in xml_content
-            and 'name="club_handle"' not in xml_content
-            and 'name="object"' not in xml_content
-        ):
-            cylinder_body = """
-    <body name="club_handle" pos="0.3 0 0.1">
-      <freejoint/>
-      <geom type="cylinder" size="0.015 0.15" rgba="0.8 0.2 0.2 1"
-            mass="0.3" condim="4" friction="1 0.5 0.5"/>
-    </body>
-        """
-            last_worldbody_end = xml_content.rfind("</worldbody>")
-            if last_worldbody_end != -1:
-                xml_content = (
-                    xml_content[:last_worldbody_end]
-                    + f"{cylinder_body}\n  "
-                    + xml_content[last_worldbody_end:]
-                )
-        return xml_content
-
-    @staticmethod
-    def _inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> str:
-        """Inject mocap bodies and weld constraints for hand positioning."""
-        if xml_content is None:
-            raise ValueError("xml_content must be provided")
-        mocap_xml = ""
-        equality_xml = "<equality>\n"
-
-        # Right Hand Mocap (only add if not already present)
-        if (
-            is_both or "right" in str(scene_path).lower()
-        ) and 'name="rh_mocap"' not in xml_content:  # noqa: E501
-            mocap_xml += """
-    <body name="rh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="0 1 0 0.5" contype="0"
-              conaffinity="0"/>
-    </body>
-            """
-            equality_xml += (
-                '    <weld body1="rh_mocap" body2="rh_forearm" solref="0.02 1" '
-                'solimp="0.9 0.95 0.001"/>\n'
-            )
-
-        # Left Hand Mocap (only add if not already present)
-        if (
-            is_both or "left" in str(scene_path).lower()
-        ) and 'name="lh_mocap"' not in xml_content:  # noqa: E501
-            mocap_xml += """
-    <body name="lh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="1 0 0 0.5" contype="0"
-              conaffinity="0"/>
-    </body>
-            """
-            equality_xml += (
-                '    <weld body1="lh_mocap" body2="lh_forearm" solref="0.02 1" '
-                'solimp="0.9 0.95 0.001"/>\n'
-            )
-
-        equality_xml += "  </equality>"
-
-        # Insert Mocap bodies before the last </worldbody>
-        if mocap_xml:
-            last_worldbody_end = xml_content.rfind("</worldbody>")
-            if last_worldbody_end != -1:
-                xml_content = (
-                    xml_content[:last_worldbody_end]
-                    + f"{mocap_xml}\n  "
-                    + xml_content[last_worldbody_end:]
-                )
-
-        # Insert Equality section before </mujoco> (or merge if exists)
-        if "</equality>" in xml_content:
-            equality_content = (
-                equality_xml.strip()
-                .replace("<equality>", "")
-                .replace("</equality>", "")  # noqa: E501
-            )
-            xml_content = xml_content.replace(
-                "</equality>", f"{equality_content}\n  </equality>"
-            )  # noqa: E501
-        else:
-            xml_content = xml_content.replace("</mujoco>", f"{equality_xml}\n</mujoco>")
-
-        return xml_content
-
     def rebuild_joint_controls(self) -> None:
         """Rebuild the joint control widgets for the current model."""
         # Clear existing
@@ -522,6 +265,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
         self.joint_sliders.clear()
         self.joint_spinboxes.clear()
+        self.joint_controls.clear()
 
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
@@ -531,6 +275,8 @@ class GripModellingTab(QtWidgets.QWidget):
 
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
+
+        self.rebuild_synergy_controls()
 
     def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
@@ -547,9 +293,11 @@ class GripModellingTab(QtWidgets.QWidget):
         if self.sim_widget.data is None:
             return
 
-        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
-        if not name:
+        raw_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
+        if not raw_name:
             name = f"Joint {i}"
+        else:
+            name = get_descriptive_joint_name(raw_name)
 
         # Create UI row
         row = QtWidgets.QWidget()
@@ -557,7 +305,7 @@ class GripModellingTab(QtWidgets.QWidget):
         row_layout.setContentsMargins(0, 0, 0, 0)
 
         label = QtWidgets.QLabel(name)
-        label.setFixedWidth(120)
+        label.setFixedWidth(180)
         row_layout.addWidget(label)
 
         # Range
@@ -565,6 +313,10 @@ class GripModellingTab(QtWidgets.QWidget):
 
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         slider.setRange(0, 1000)
+        slider.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
 
         spin = QtWidgets.QDoubleSpinBox()
         spin.setRange(range_min, range_max)
@@ -607,6 +359,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self.sliders_layout.addWidget(row)
         self.joint_sliders.append(slider)
         self.joint_spinboxes.append(spin)
+        self.joint_controls[qpos_adr] = (slider, spin, range_min, range_max)
 
     def _val_to_slider(self, val: float, min_v: float, max_v: float) -> int:
         """Convert float value to slider integer position."""
@@ -633,6 +386,228 @@ class GripModellingTab(QtWidgets.QWidget):
         self.sim_widget.set_state_and_forward(state)
         mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
         self.sim_widget.render()
+
+    def _update_joints(self, updates: dict[int, float]) -> None:
+        """Update multiple joints in simulation and UI in a single pass.
+
+        Args:
+            updates: Dict mapping qpos_adr to target float value.
+        """
+        assert self.sim_widget.model is not None, "Model must be loaded"
+        assert self.sim_widget.data is not None, "Data must be loaded"
+
+        state = self.sim_widget.get_state()
+        qpos = state.get("q", [])
+        for q_idx, val in updates.items():
+            if 0 <= q_idx < len(qpos):
+                qpos[q_idx] = val
+
+        self.sim_widget.set_state_and_forward(state)
+        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+        self.sim_widget.render()
+
+        for q_idx, val in updates.items():
+            if q_idx in self.joint_controls:
+                slider, spin, min_v, max_v = self.joint_controls[q_idx]
+                slider.blockSignals(True)
+                spin.blockSignals(True)
+                slider.setValue(self._val_to_slider(val, min_v, max_v))
+                spin.setValue(val)
+                slider.blockSignals(False)
+                spin.blockSignals(False)
+
+    def _find_qpos_adr_by_name(self, name: str) -> int | None:
+        """Find the qpos address of a joint by its name."""
+        if self.sim_widget.model is None:
+            return None
+        model = self.sim_widget.model
+        try:
+            jnt_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+            if jnt_id != -1:
+                return int(model.jnt_qposadr[jnt_id])
+        except (RuntimeError, ValueError):
+            pass
+        return None
+
+    def add_synergy_slider(self, synergy: Synergy) -> None:
+        """Add a synergy slider to the UI.
+
+        Args:
+            synergy: The Synergy mapping configuration.
+        """
+        row = QtWidgets.QWidget()
+        row_layout = QtWidgets.QHBoxLayout(row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+
+        lbl = QtWidgets.QLabel(synergy.name)
+        lbl.setFixedWidth(180)
+        row_layout.addWidget(lbl)
+
+        slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        slider.setRange(0, 1000)
+        slider.setValue(0)
+        slider.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+
+        def _on_synergy_changed(v: int, syn: Synergy = synergy) -> None:
+            t = v / 1000.0
+            updates = {}
+            for binding in syn.bindings:
+                val = binding.min_val + t * (binding.max_val - binding.min_val)
+                updates[binding.qpos_adr] = val
+            self._update_joints(updates)
+
+        slider.valueChanged.connect(_on_synergy_changed)
+        row_layout.addWidget(slider)
+
+        self.synergy_layout.addWidget(row)
+        self.synergy_sliders.append(slider)
+
+    def rebuild_synergy_controls(self) -> None:
+        """Rebuild the synergy controls based on the loaded hand model."""
+        while self.synergy_layout.count():
+            item = self.synergy_layout.takeAt(0)
+            if item is not None:
+                widget = item.widget()
+                if widget:
+                    widget.deleteLater()
+
+        self.synergy_sliders.clear()
+
+        if self.sim_widget.model is None:
+            return
+
+        model_name = self.combo_hand.currentText().lower()
+        is_shadow = "shadow" in model_name
+        is_allegro = "allegro" in model_name
+
+        defaults: list[Synergy] = []
+        prefixes: list[str] = []
+
+        if "both" in model_name:
+            prefixes = ["rh", "lh"]
+        elif "right" in model_name:
+            prefixes = ["rh" if is_shadow else "right"]
+        elif "left" in model_name:
+            prefixes = ["lh" if is_shadow else "left"]
+
+        if is_shadow:
+            fist_bindings = []
+            for p in prefixes:
+                for f in ["FF", "MF", "RF", "LF"]:
+                    for j in [3, 2, 1]:
+                        jnt_name = f"{p}_{f}J{j}"
+                        q_adr = self._find_qpos_adr_by_name(jnt_name)
+                        if q_adr is not None:
+                            fist_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.4))
+            if fist_bindings:
+                defaults.append(Synergy("Fist Curl", fist_bindings))
+
+            index_bindings = []
+            for p in prefixes:
+                for j in [3, 2, 1]:
+                    jnt_name = f"{p}_FFJ{j}"
+                    q_adr = self._find_qpos_adr_by_name(jnt_name)
+                    if q_adr is not None:
+                        index_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.4))
+            if index_bindings:
+                defaults.append(Synergy("Index Curl", index_bindings))
+
+            pinch_bindings = []
+            for p in prefixes:
+                for j in [3, 2, 1]:
+                    q_adr = self._find_qpos_adr_by_name(f"{p}_FFJ{j}")
+                    if q_adr is not None:
+                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
+                for j in [4, 3, 2, 1]:
+                    q_adr = self._find_qpos_adr_by_name(f"{p}_THJ{j}")
+                    if q_adr is not None:
+                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 0.8))
+            if pinch_bindings:
+                defaults.append(Synergy("Pinch Grip", pinch_bindings))
+
+        elif is_allegro:
+            all_joints = []
+            model = self.sim_widget.model
+            for i in range(model.njnt):
+                jnt_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
+                if jnt_name:
+                    all_joints.append(jnt_name)
+
+            fist_bindings = []
+            for jnt_name in all_joints:
+                target_joints = [
+                    "ffj1",
+                    "ffj2",
+                    "ffj3",
+                    "mfj1",
+                    "mfj2",
+                    "mfj3",
+                    "rfj1",
+                    "rfj2",
+                    "rfj3",
+                ]
+                if any(x in jnt_name.lower() for x in target_joints):
+                    q_adr = self._find_qpos_adr_by_name(jnt_name)
+                    if q_adr is not None:
+                        fist_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.5))
+            if fist_bindings:
+                defaults.append(Synergy("Fist Curl", fist_bindings))
+
+            index_bindings = []
+            for jnt_name in all_joints:
+                if any(x in jnt_name.lower() for x in ["ffj1", "ffj2", "ffj3"]):
+                    q_adr = self._find_qpos_adr_by_name(jnt_name)
+                    if q_adr is not None:
+                        index_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.5))
+            if index_bindings:
+                defaults.append(Synergy("Index Curl", index_bindings))
+
+            pinch_bindings = []
+            for jnt_name in all_joints:
+                if any(x in jnt_name.lower() for x in ["ffj1", "ffj2", "ffj3"]):
+                    q_adr = self._find_qpos_adr_by_name(jnt_name)
+                    if q_adr is not None:
+                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
+                if any(x in jnt_name.lower() for x in ["thj1", "thj2", "thj3"]):
+                    q_adr = self._find_qpos_adr_by_name(jnt_name)
+                    if q_adr is not None:
+                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
+            if pinch_bindings:
+                defaults.append(Synergy("Pinch Grip", pinch_bindings))
+
+        for syn in defaults:
+            self.add_synergy_slider(syn)
+
+    def _on_add_custom_synergy(self) -> None:
+        """Open the dialog to define a custom synergy slider."""
+        if self.sim_widget.model is None:
+            return
+
+        model = self.sim_widget.model
+        joints = []
+        for i in range(model.njnt):
+            jnt_type = model.jnt_type[i]
+            if jnt_type in (mujoco.mjtJoint.mjJNT_FREE, mujoco.mjtJoint.mjJNT_BALL):
+                continue
+
+            raw_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
+            if not raw_name:
+                raw_name = f"Joint {i}"
+
+            desc_name = get_descriptive_joint_name(raw_name)
+            qpos_adr = model.jnt_qposadr[i]
+            min_l, max_l = self._get_joint_range(i, model)
+
+            joints.append((qpos_adr, desc_name, min_l, max_l))
+
+        dialog = AddSynergyDialog(joints, self)
+        if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            synergy = dialog.get_synergy()
+            if synergy:
+                self.add_synergy_slider(synergy)
 
     def _on_slider(  # noqa: PLR0913
         self,
