@@ -75,8 +75,21 @@ const DataTable = memo(function DataTable({
             {columns.map((col) => (
               <th
                 key={col}
+                role="button"
+                tabIndex={0}
+                aria-sort={
+                  sortColumn === col
+                    ? sortAscending ? 'ascending' : 'descending'
+                    : 'none'
+                }
                 className="px-3 py-2 text-gray-400 font-medium border-b border-gray-700 cursor-pointer hover:text-gray-200 select-none"
                 onClick={() => onSort(col)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSort(col);
+                  }
+                }}
               >
                 <span className="flex items-center gap-1">
                   {col}
@@ -177,6 +190,7 @@ export function DataExplorerPage() {
   const [stats, setStats] = useState<DatasetStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'stats'>('table');
 
   // Sorting state
@@ -189,19 +203,24 @@ export function DataExplorerPage() {
   const [filterValue, setFilterValue] = useState('');
 
   // Fetch available datasets
-  useEffect(() => {
-    async function fetchDatasets() {
-      try {
-        const response = await fetch('/api/tools/data-explorer/datasets');
-        if (!response.ok) return;
-        const data = await response.json();
-        setDatasets(data.datasets || []);
-      } catch {
-        // API may not be available
+  const refetchDatasets = useCallback(async () => {
+    setFetchError(null);
+    try {
+      const response = await fetch('/api/tools/data-explorer/datasets');
+      if (!response.ok) {
+        setFetchError(`Can't reach the data service (HTTP ${response.status})`);
+        return;
       }
+      const data = await response.json();
+      setDatasets(data.datasets || []);
+    } catch {
+      setFetchError("Can't reach the data service. Check your connection and retry.");
     }
-    fetchDatasets();
   }, []);
+
+  useEffect(() => {
+    refetchDatasets();
+  }, [refetchDatasets]);
 
   // Load dataset preview
   const loadDataset = useCallback(async (name: string) => {
@@ -403,11 +422,22 @@ export function DataExplorerPage() {
             Datasets ({datasets.length})
           </h3>
 
-          {datasets.length === 0 && (
+          {fetchError ? (
+            <div className="text-xs text-red-400 bg-red-900/20 p-3 rounded mx-1" role="alert">
+              <div className="font-medium mb-1">Data service unavailable</div>
+              <div className="mb-2">{fetchError}</div>
+              <button
+                onClick={refetchDatasets}
+                className="underline hover:text-red-300 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          ) : datasets.length === 0 ? (
             <div className="text-xs text-gray-500 italic text-center py-4">
               No datasets found. Import a CSV or JSON file.
             </div>
-          )}
+          ) : null}
 
           {datasets.map((ds) => (
             <button

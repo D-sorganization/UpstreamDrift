@@ -160,6 +160,39 @@ export function useDatasetGenerator() {
     }
   }, []);
 
+  const exportDataset = useCallback(async (format: string): Promise<void> => {
+    if (!generateResult) {
+      setError('No dataset to export. Generate a dataset first.');
+      return;
+    }
+    setLoadState('loading');
+    setError(null);
+    try {
+      const res = await fetch(`/api/dataset/export/${encodeURIComponent(format)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataset_id: generateResult.dataset_id }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error((errData as { detail?: string }).detail || `Export failed: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${generateResult.name}.${format}`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      if (isMountedRef.current) setLoadState('loaded');
+    } catch (err) {
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Export failed');
+        setLoadState('error');
+      }
+    }
+  }, [generateResult]);
+
   const updateControl = useCallback(async (controlId: string, value: unknown) => {
     try {
       const res = await fetch(`/api/dataset/control/${controlId}`, {
@@ -196,6 +229,7 @@ export function useDatasetGenerator() {
     generateDataset,
     importSwing,
     updateControl,
+    exportDataset,
     refetch: () => { fetchFeatures(); fetchPlotTypes(); fetchExportFormats(); fetchControls(); },
   };
 }

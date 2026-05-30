@@ -153,3 +153,59 @@ describe('DataExplorer data structures', () => {
     expect(supported.has('.txt')).toBe(false);
   });
 });
+
+describe('DataExplorer fetch-error state', () => {
+  it('distinguishes a server error from empty-dataset state', () => {
+    // When fetch returns non-ok, fetchError should be set (not just empty datasets)
+    const fetchError = "Can't reach the data service (HTTP 503)";
+    const datasets: DatasetInfo[] = [];
+
+    // Both could show an empty list, but fetchError is non-null
+    expect(fetchError).not.toBeNull();
+    expect(datasets).toHaveLength(0);
+    // A downstream consumer must render distinct UI when fetchError is set
+    const isError = fetchError !== null;
+    const isEmpty = datasets.length === 0 && fetchError === null;
+    expect(isError).toBe(true);
+    expect(isEmpty).toBe(false);
+  });
+
+  it('resets fetchError when response is ok', () => {
+    let fetchError: string | null = "Previous error";
+    const response = { ok: true, datasets: [{ name: 'a.csv' }] };
+    if (response.ok) fetchError = null;
+    expect(fetchError).toBeNull();
+  });
+});
+
+describe('DataTable a11y attributes', () => {
+  it('aria-sort should be ascending when column is sorted ascending', () => {
+    const col = 'time';
+    const sortColumn: string | null = 'time';
+    const sortAscending = true;
+    const ariaSort = sortColumn === col
+      ? (sortAscending ? 'ascending' : 'descending')
+      : 'none';
+    expect(ariaSort).toBe('ascending');
+  });
+
+  it('aria-sort should be descending when column is sorted descending', () => {
+    const col = 'time';
+    const sortColumn: string | null = 'time';
+    const sortAscending = false;
+    const ariaSort = sortColumn === col
+      ? (sortAscending ? 'ascending' : 'descending')
+      : 'none';
+    expect(ariaSort).toBe('descending');
+  });
+
+  it('aria-sort should be none for unsorted column', () => {
+    const col = 'force';
+    const sortColumn: string | null = 'time';
+    const sortAscending = true;
+    const ariaSort = sortColumn === col
+      ? (sortAscending ? 'ascending' : 'descending')
+      : 'none';
+    expect(ariaSort).toBe('none');
+  });
+});

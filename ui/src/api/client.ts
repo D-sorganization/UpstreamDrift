@@ -42,7 +42,10 @@ export async function fetchEngines(): Promise<EngineStatus[]> {
     throw new Error('Failed to fetch engines');
   }
   const data = await response.json();
-  return data.engines;
+  if (!Array.isArray(data.engines)) {
+    throw new Error('Unexpected engines response shape');
+  }
+  return data.engines as EngineStatus[];
 }
 
 export function useSimulation(engineType: string) {
@@ -51,6 +54,7 @@ export function useSimulation(engineType: string) {
   const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(null);
   const [frames, setFrames] = useState<SimulationFrame[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [wsError, setWsError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -150,8 +154,11 @@ export function useSimulation(engineType: string) {
       }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    ws.onerror = () => {
+      console.error('WebSocket error occurred');
+      if (isMountedRef.current) {
+        setWsError('WebSocket connection error — check server status');
+      }
     };
 
     ws.onclose = (event) => {
@@ -232,18 +239,15 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
-  const setSpeed = useCallback((speed: number) => {
-    void fetch('/api/simulation/speed', {
+  const setSpeed = useCallback(async (speed: number): Promise<void> => {
+    const response = await fetch('/api/simulation/speed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ speed_factor: speed }),
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to set simulation speed to ${speed}x`);
-      }
-    }).catch((error) => {
-      console.error('Failed to update simulation speed:', error);
     });
+    if (!response.ok) {
+      throw new Error(`Failed to set simulation speed to ${speed}x`);
+    }
   }, []);
 
   // Track mounted state and cleanup on unmount
@@ -265,10 +269,11 @@ export function useSimulation(engineType: string) {
     currentFrame,
     frames,
     connectionStatus,
+    wsError,
     start,
     stop,
     pause,
     resume,
-    setSpeed
+    setSpeed,
   };
 }

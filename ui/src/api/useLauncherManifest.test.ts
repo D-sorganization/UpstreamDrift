@@ -199,4 +199,55 @@ describe('useLauncherManifest', () => {
 
         expect(mockFetch).toHaveBeenCalledWith('/api/launcher/manifest');
     });
+
+    it('transitions to error state when tiles is not an array', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({ ...MOCK_MANIFEST, tiles: 'bad-shape' }),
+        });
+
+        const { result } = renderHook(() => useLauncherManifest());
+
+        await waitFor(() => {
+            expect(result.current.loadState).toBe('error');
+        });
+
+        expect(result.current.tiles).toHaveLength(0);
+        expect(result.current.error).not.toBeNull();
+    });
+
+    it('filters out hidden tiles', async () => {
+        const manifestWithHidden: LauncherManifest = {
+            ...MOCK_MANIFEST,
+            tiles: [
+                ...MOCK_MANIFEST.tiles,
+                {
+                    id: 'legacy_alias',
+                    name: 'Legacy',
+                    description: 'Hidden tile',
+                    category: 'tool',
+                    type: 'special_app',
+                    path: 'src/legacy.py',
+                    logo: 'legacy.png',
+                    status: 'hidden',
+                    capabilities: [],
+                    order: 99,
+                    hidden: true,
+                },
+            ],
+        };
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve(manifestWithHidden),
+        });
+
+        const { result } = renderHook(() => useLauncherManifest());
+
+        await waitFor(() => {
+            expect(result.current.loadState).toBe('loaded');
+        });
+
+        expect(result.current.tiles.find((t) => t.id === 'legacy_alias')).toBeUndefined();
+        expect(result.current.tiles).toHaveLength(4);
+    });
 });
