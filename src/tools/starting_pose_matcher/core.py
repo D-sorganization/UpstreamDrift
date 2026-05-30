@@ -45,6 +45,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import math
 import numpy as np
 import pandas as pd
 
@@ -704,8 +705,9 @@ def solve_shaft_rz_deg(
     """
     shaft_t_xy = (np.asarray(ch_target) - np.asarray(mp_target))[:2]
     shaft_m_xy = (np.asarray(ch_skel) - np.asarray(mp_skel))[:2]
-    nt = float(np.linalg.norm(shaft_t_xy))
-    nm = float(np.linalg.norm(shaft_m_xy))
+    # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+    nt = float(math.hypot(shaft_t_xy[0], shaft_t_xy[1]))
+    nm = float(math.hypot(shaft_m_xy[0], shaft_m_xy[1]))
     if nt < 1e-9 or nm < 1e-9:
         return 0.0
     a_t = float(np.arctan2(shaft_t_xy[1], shaft_t_xy[0]))

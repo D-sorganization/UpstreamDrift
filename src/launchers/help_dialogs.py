@@ -220,6 +220,8 @@ class ContextHelpDock(QDockWidget):
             return docs_user / "tools" / "model_explorer.md"
         if "data_explorer" in model_id:
             return docs_user / "tools" / "data_explorer.md"
+        if "data_processor" in model_id:
+            return docs_user / "tools" / "data_processor.md"
         if "video_analyzer" in model_id:
             return docs_user / "tools" / "video_analyzer.md"
         if "putting_green" in model_id or "pendulum_putter" in model_id:

@@ -155,6 +155,7 @@ class LayoutManager:
                 "model_explorer",
                 "video_analyzer",
                 "data_explorer",
+                "data_processor",
                 "project_map",
                 "library_tool",
             ]
