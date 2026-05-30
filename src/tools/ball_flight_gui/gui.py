@@ -24,10 +24,11 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSplitter,
     QStatusBar,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.ui import HoverCopyTextBrowser
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +178,7 @@ class BallFlightWidget(QWidget):
             self._gl_view = None
             self._plot_item = None
 
-        self._results_text = QTextEdit()
+        self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
             "Configure launch conditions and click 'Simulate Flight'.\n\n"

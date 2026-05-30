@@ -22,10 +22,11 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSplitter,
     QStatusBar,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.ui import HoverCopyTextBrowser
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +124,7 @@ class BunkerShotWidget(QWidget):
         else:
             self._gl_view = None
 
-        self._results_text = QTextEdit()
+        self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
             "Configure impact parameters and simulate.\n\n"

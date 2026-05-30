@@ -34,6 +34,7 @@ Usage:
 """
 
 from .auto_complete import AutoCompleteLineEdit
+from .hover_copy_browser import HoverCopyTextBrowser
 from .loading_button import IconLoadingButton, LoadingButton, LoadingSpinner
 from .preferences_dialog import PreferencesDialog, UserPreferences
 from .recent_models import RecentModelItem, RecentModelsPanel
@@ -48,6 +49,8 @@ from .toast import Toast, ToastManager, ToastType
 __all__ = [
     # Auto Complete
     "AutoCompleteLineEdit",
+    # Hover Copy Text Browser
+    "HoverCopyTextBrowser",
     # Toast
     "Toast",
     "ToastManager",
