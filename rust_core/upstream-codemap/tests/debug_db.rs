@@ -5,7 +5,8 @@ fn debug_db_error() {
     std::fs::write(
         root.join("hello.py"),
         b"class Greeter:\n    def say_hi(self):\n        pass\n",
-    ).unwrap();
+    )
+    .unwrap();
 
     let res = upstream_codemap::indexer::rebuild(root, None);
     println!("REBUILD RESULT: {:?}", res);
