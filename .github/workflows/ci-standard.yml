@@ -137,18 +137,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
@@ -593,18 +582,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -663,18 +641,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -759,18 +726,7 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - name: Install System Dependencies
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
@@ -1056,18 +1012,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -1127,18 +1072,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -1233,18 +1167,7 @@ jobs:
             exit 1
           fi
 
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - name: Install System Dependencies
         run: |
           apt_retry() {
@@ -1439,18 +1362,7 @@ jobs:
               rm -rf .git
             fi
           fi
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -1575,18 +1487,7 @@ jobs:
       #    PyO3's maximum supported version (3.13)"
       # 3.12 is the safe middle of pyo3 0.24's supported range (3.7-3.13).
       # Tracked: issue #5221.
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - name: Set up Python (for PyO3 builds)
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
@@ -1771,18 +1672,7 @@ jobs:
             echo "No Rust changes detected  -  skipping Rust quickstart."
           fi
 
-      - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          # Redirect setup-python to a per-job private tool cache under
-          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
-          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
-          # cache raced setup-python and corrupted Python (dir-not-empty /
-          # "python: command not found" / missing stdlib). RUNNER_TEMP is
-          # unique per job and reset between runs, so there is no contention.
-          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+
       - name: Setup Python
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
