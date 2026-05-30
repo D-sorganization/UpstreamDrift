@@ -29,6 +29,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0021](0021-container-strategy.md)                 | Container Strategy — Three-Dockerfile Policy                    | Accepted | 2026-05-25 |
 | [0023](0023-mujoco-warp-backend.md)                | MuJoCo Warp GPU + MuJoCo CPU backends behind one Protocol       | Accepted | 2026-05-29 |
 | [0024](0024-differentiable-backend.md)             | Differentiable backend — MJX (JAX) vs custom Warp kernels       | Proposed | 2026-05-29 |
+| [0025](0025-jaxsim-backend-home.md)                | JaxSim backend home and bridge contract                         | Proposed | 2026-05-30 |
 
 ## ADR Backlog
 
