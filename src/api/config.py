@@ -70,7 +70,7 @@ def get_cors_origins() -> list[str]:
     origins = get_settings().cors_origins
     if "*" in origins:
         raise ValueError(
-            "Cannot use wildcard '*' in CORS_ORIGINS when credentials are enabled (fail-closed)"
+            "CORS_ORIGINS must not contain '*' when credentials are enabled (fail-closed)"
         )
     return origins
 
