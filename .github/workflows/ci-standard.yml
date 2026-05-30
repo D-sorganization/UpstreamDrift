@@ -142,8 +142,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -587,8 +585,6 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -648,8 +644,6 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.12"
           cache: "pip"
@@ -760,8 +754,6 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
@@ -1023,8 +1015,6 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1085,8 +1075,6 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1206,8 +1194,6 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1379,8 +1365,6 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1488,8 +1472,6 @@ jobs:
       # Tracked: issue #5221.
 
       - name: Set up Python (for PyO3 builds)
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -1675,8 +1657,6 @@ jobs:
 
 
       - name: Setup Python
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
