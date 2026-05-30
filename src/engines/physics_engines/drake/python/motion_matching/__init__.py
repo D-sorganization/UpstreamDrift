@@ -6,15 +6,9 @@ for Drake. See ``DRAKE_PARITY_SPEC.md`` for the architecture overview.
 
 from __future__ import annotations
 
-from .compute_cost_drake import compute_cost_drake, drake_simout_to_shared
-from .fit_swing import fit_swing_drake, polynomial_parameter_bounds
-from .fit_swing_autodiff import (
-    DEFAULT_COEFFICIENT_BOUNDS,
-    FitOptions,
-    FitResult,
-    default_theta_bounds,
-    fit_swing_drake_autodiff,
-)
+import importlib
+from typing import TYPE_CHECKING, Any
+
 from .humanoid_urdf import (
     CANONICAL_URDF,
     SHARED_DIMENSIONS_YAML,
@@ -23,17 +17,24 @@ from .humanoid_urdf import (
     load_humanoid_into_plant,
 )
 
-# Note: ``fit_swing.FitOptions`` / ``FitResult`` shadow the autodiff variants
-# above when imported directly from ``.fit_swing``; the top-level package
-# re-exports the autodiff dataclasses for backwards compatibility.
-from .provider import DrakeFitSwingProvider
-from .simulate import (
-    COEFFS_PER_JOINT,
-    SimOptions,
-    SimOut,
-    evaluate_torque_polynomial,
-    simulate_with_coefficients,
-)
+if TYPE_CHECKING:
+    from .compute_cost_drake import compute_cost_drake, drake_simout_to_shared
+    from .fit_swing import fit_swing_drake, polynomial_parameter_bounds
+    from .fit_swing_autodiff import (
+        DEFAULT_COEFFICIENT_BOUNDS,
+        FitOptions,
+        FitResult,
+        default_theta_bounds,
+        fit_swing_drake_autodiff,
+    )
+    from .provider import DrakeFitSwingProvider
+    from .simulate import (
+        COEFFS_PER_JOINT,
+        SimOptions,
+        SimOut,
+        evaluate_torque_polynomial,
+        simulate_with_coefficients,
+    )
 
 __all__ = [
     "CANONICAL_URDF",
@@ -57,6 +58,41 @@ __all__ = [
     "polynomial_parameter_bounds",
     "simulate_with_coefficients",
 ]
+
+_LAZY_EXPORTS = {
+    "compute_cost_drake": ".compute_cost_drake",
+    "drake_simout_to_shared": ".compute_cost_drake",
+    "fit_swing_drake": ".fit_swing",
+    "polynomial_parameter_bounds": ".fit_swing",
+    "DEFAULT_COEFFICIENT_BOUNDS": ".fit_swing_autodiff",
+    "FitOptions": ".fit_swing_autodiff",
+    "FitResult": ".fit_swing_autodiff",
+    "default_theta_bounds": ".fit_swing_autodiff",
+    "fit_swing_drake_autodiff": ".fit_swing_autodiff",
+    "DrakeFitSwingProvider": ".provider",
+    "COEFFS_PER_JOINT": ".simulate",
+    "SimOptions": ".simulate",
+    "SimOut": ".simulate",
+    "evaluate_torque_polynomial": ".simulate",
+    "simulate_with_coefficients": ".simulate",
+}
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_EXPORTS:
+        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return list(_LAZY_EXPORTS.keys()) + [
+        "CANONICAL_URDF",
+        "SHARED_DIMENSIONS_YAML",
+        "build_humanoid_urdf",
+        "load_humanoid_dimensions",
+        "load_humanoid_into_plant",
+    ]
 
 
 # ---------------------------------------------------------------------------
