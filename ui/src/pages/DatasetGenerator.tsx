@@ -30,6 +30,7 @@ export function DatasetGeneratorPage() {
     generateDataset,
     importSwing,
     updateControl,
+    exportDataset,
   } = useDatasetGenerator();
 
   const [sidebarTab, setSidebarTab] = useState<'features' | 'plots' | 'export'>('features');
@@ -269,6 +270,7 @@ export function DatasetGeneratorPage() {
                   </select>
                 </div>
                 <button
+                  onClick={() => exportDataset(exportFormat)}
                   disabled={!generateResult || isLoading}
                   className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                 >

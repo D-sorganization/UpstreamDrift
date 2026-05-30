@@ -1,9 +1,59 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fetchEngines } from './client';
 
 /**
  * Tests for the API client module.
  * Verifies WebSocket connections and API calls work correctly.
  */
+
+describe('fetchEngines', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should throw when engines is not an array', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ engines: 'not-an-array' }),
+    });
+
+    await expect(fetchEngines()).rejects.toThrow('Unexpected engines response shape');
+  });
+
+  it('should throw when engines key is missing', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ data: [] }),
+    });
+
+    await expect(fetchEngines()).rejects.toThrow('Unexpected engines response shape');
+  });
+
+  it('should return an array of EngineStatus when the response is valid', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          engines: [
+            { name: 'mujoco', available: true, loaded: false, capabilities: [] },
+          ],
+        }),
+    });
+
+    const result = await fetchEngines();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0].name).toBe('mujoco');
+  });
+
+  it('should throw on non-ok HTTP status', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+    });
+
+    await expect(fetchEngines()).rejects.toThrow('Failed to fetch engines');
+  });
+});
 
 describe('API Client', () => {
   beforeEach(() => {

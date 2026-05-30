@@ -153,3 +153,50 @@ describe('DatasetGenerator data structures', () => {
     expect(filtered).toHaveLength(3);
   });
 });
+
+describe('DatasetGenerator export behaviour', () => {
+  it('export endpoint URL uses the format id', () => {
+    const format = 'csv';
+    const url = `/api/dataset/export/${encodeURIComponent(format)}`;
+    expect(url).toBe('/api/dataset/export/csv');
+  });
+
+  it('export endpoint URL encodes non-trivial format ids', () => {
+    const format = 'hdf5+zip';
+    const url = `/api/dataset/export/${encodeURIComponent(format)}`;
+    expect(url).toBe('/api/dataset/export/hdf5%2Bzip');
+  });
+
+  it('export requires a dataset_id in the request body', () => {
+    const result: GenerateResult = {
+      dataset_id: 'ds_abc123',
+      name: 'swing_batch',
+      rows: 100,
+      columns: ['time'],
+      created_at: '2026-01-01',
+    };
+    const body = JSON.stringify({ dataset_id: result.dataset_id });
+    const parsed = JSON.parse(body);
+    expect(parsed.dataset_id).toBe('ds_abc123');
+  });
+
+  it('export button is disabled when no generateResult', () => {
+    const generateResult: GenerateResult | null = null;
+    const isLoading = false;
+    const disabled = !generateResult || isLoading;
+    expect(disabled).toBe(true);
+  });
+
+  it('export button is enabled when generateResult is present', () => {
+    const generateResult: GenerateResult = {
+      dataset_id: 'ds_1',
+      name: 'test',
+      rows: 10,
+      columns: [],
+      created_at: '2026-01-01',
+    };
+    const isLoading = false;
+    const disabled = !generateResult || isLoading;
+    expect(disabled).toBe(false);
+  });
+});

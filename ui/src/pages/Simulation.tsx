@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSimulation } from '@/api/client';
-import { useEngineStore } from '@/stores/useEngineStore';
+import type { ConnectionStatus } from '@/api/client';
+import { useEngineStore, selectEffectiveEngine } from '@/stores/useEngineStore';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
@@ -16,27 +17,16 @@ import { useToast } from '@/components/ui/Toast';
 export function SimulationPage() {
   // ── Global stores ─────────────────────────────────────────────────────
   const engines = useEngineStore((s) => s.engines);
-  const selectedEngine = useEngineStore((s) => s.selectedEngine);
   const selectEngine = useEngineStore((s) => s.selectEngine);
   const requestLoad = useEngineStore((s) => s.requestLoad);
   const unloadEngine = useEngineStore((s) => s.unloadEngine);
+  // Uses the canonical selector from the store (F8: removes duplicated derivation)
+  const effectiveEngine = useEngineStore(selectEffectiveEngine);
 
-  // Derive values with useMemo to avoid new-reference re-render loops
   const loadedEngines = useMemo(
     () => engines.filter((e) => e.loadState === 'loaded'),
     [engines]
   );
-
-  const effectiveEngine = useMemo(() => {
-    if (selectedEngine) {
-      const eng = engines.find(
-        (e) => e.name === selectedEngine && e.loadState === 'loaded'
-      );
-      if (eng) return selectedEngine;
-    }
-    const firstLoaded = engines.find((e) => e.loadState === 'loaded');
-    return firstLoaded ? firstLoaded.name : null;
-  }, [engines, selectedEngine]);
 
   const parameters = useSimulationStore((s) => s.parameters);
   const replaceParameters = useSimulationStore((s) => s.replaceParameters);
@@ -55,6 +45,7 @@ export function SimulationPage() {
     currentFrame,
     frames,
     connectionStatus,
+    wsError,
     start,
     stop,
     pause,
@@ -62,10 +53,14 @@ export function SimulationPage() {
     setSpeed,
   } = useSimulation(activeEngine);
 
-  const handleSpeedChange = useCallback((value: number) => {
+  const handleSpeedChange = useCallback(async (value: number) => {
     setSpeedFactor(value);
-    setSpeed(value);
-  }, [setSpeed]);
+    try {
+      await setSpeed(value);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to update speed');
+    }
+  }, [setSpeed, showError]);
 
   // ── Event handlers ────────────────────────────────────────────────────
 
@@ -118,14 +113,24 @@ export function SimulationPage() {
     showInfo('Simulation stopped');
   }, [stop, showInfo]);
 
-  // Show toast on connection status changes
+  // Show toast only when connection status transitions (F9: prevents spam)
+  const prevConnectionStatusRef = useRef<ConnectionStatus | null>(null);
   useEffect(() => {
+    if (connectionStatus === prevConnectionStatusRef.current) return;
+    prevConnectionStatusRef.current = connectionStatus;
     if (connectionStatus === 'connected') {
       showSuccess('Connected to simulation server');
     } else if (connectionStatus === 'failed') {
       showError('Connection failed. Please check the server.');
     }
   }, [connectionStatus, showSuccess, showError]);
+
+  // Surface WebSocket errors via toast (F2)
+  useEffect(() => {
+    if (wsError) {
+      showError(wsError);
+    }
+  }, [wsError, showError]);
 
   // See issue #1199: Convert force vectors to Scene3D overlay format
   const sceneForceOverlays = useMemo(() => {
