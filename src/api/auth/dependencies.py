@@ -72,7 +72,7 @@ async def get_current_user(
         raise _unauthorized("Inactive user")
 
     _assert_type(user, User, "current_user")
-    return user  # type: ignore[return-value]
+    return user
 
 
 def _validate_api_key_format(api_key: str) -> None:
@@ -91,7 +91,7 @@ def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
         return None
 
     _assert_type(record, APIKey, "cached_api_key")
-    return record  # type: ignore[return-value]
+    return record
 
 
 def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
@@ -125,7 +125,7 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
             _assert_type(key_candidate, APIKey, "api_key_candidate")
-            return key_candidate  # type: ignore[return-value]
+            return key_candidate
 
     raise _unauthorized("Invalid API key")
 
@@ -135,7 +135,7 @@ def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
     if not user or not user.is_active:
         raise _unauthorized("User not found or inactive")
     _assert_type(user, User, "api_key_user")
-    return user  # type: ignore[return-value]
+    return user
 
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:

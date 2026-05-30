@@ -290,7 +290,7 @@ def _count_active_admins(db: Session) -> int:
     """Return the number of active admin users."""
     return (
         db.query(User)
-        .filter(User.role == UserRole.ADMIN.value, User.is_active)  # type: ignore[arg-type]
+        .filter(User.role == UserRole.ADMIN.value, User.is_active)
         .count()
     )
 
