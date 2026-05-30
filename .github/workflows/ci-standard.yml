@@ -144,7 +144,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -598,7 +599,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -666,7 +668,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -760,7 +763,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Install System Dependencies
@@ -1055,7 +1059,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -1124,7 +1129,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -1228,7 +1234,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Install System Dependencies
@@ -1432,7 +1439,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -1566,7 +1574,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Set up Python (for PyO3 builds)
@@ -1760,7 +1769,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Setup Python

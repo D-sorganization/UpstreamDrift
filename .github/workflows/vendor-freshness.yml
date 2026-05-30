@@ -59,7 +59,8 @@ jobs:
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Set up Python
