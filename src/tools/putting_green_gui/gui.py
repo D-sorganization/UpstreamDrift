@@ -202,8 +202,10 @@ class PuttingGreenWidget(QWidget):
             config = SimulationConfig()
             # NOTE: `config` is a keyword argument; the first positional slot
             # is `green` (see PuttingGreenSimulator signature).
-            sim = PuttingGreenSimulator(config=config)
-            _ = sim  # reserved for future physics integration
+            # Simulator is constructed for future integration; run() is not yet called.
+            # The trajectory below is a procedural preview, not a physics simulation.
+            _sim = PuttingGreenSimulator(config=config)
+            del _sim
 
             speed = self._speed_spin.value()
             aim = self._aim_spin.value()
@@ -259,7 +261,7 @@ class PuttingGreenWidget(QWidget):
                 f"Aim Angle:    {aim:.1f}°\n"
                 f"Stimpmeter:   {stimp:.1f}\n"
                 f"Slope:        {self._slope_spin.value():.1f}°\n\n"
-                f"Simulator loaded successfully.\n"
+                f"[Preview only — PuttingGreenSimulator.run() not yet wired]\n"
                 f"Terrain generated procedurally.\n"
             )
 

@@ -86,3 +86,15 @@ def get_state_logger() -> StateLogger:
             if _singleton is None:
                 _singleton = StateLogger()
     return _singleton
+
+
+def get_agent_state_store() -> HistoryStore:
+    """Return the :class:`HistoryStore` backing the process-level singleton.
+
+    Convenience accessor that avoids ``get_state_logger().store`` chains
+    at call sites (Law of Demeter).
+
+    Returns:
+        The shared :class:`HistoryStore` instance.
+    """
+    return get_state_logger().store

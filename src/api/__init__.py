@@ -13,9 +13,12 @@ resolve on first access rather than at module-load time.
 from __future__ import annotations
 
 import importlib
+import logging
 import sys
 from types import ModuleType
 from typing import Any
+
+_logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Eagerly-available names: versioning lives here and has no heavy dependencies.
@@ -114,8 +117,8 @@ def _preload_versioning() -> None:
         # the first call, and so ``import src.api.versioning`` succeeds without
         # triggering __getattr__ again.
         sys.modules[__name__].__dict__["versioning"] = versioning_mod
-    except ImportError:
-        pass  # tolerate missing versioning in minimal environments
+    except (ImportError, ModuleNotFoundError) as exc:
+        _logger.debug("versioning module unavailable in this environment: %s", exc)
 
 
 _preload_versioning()
