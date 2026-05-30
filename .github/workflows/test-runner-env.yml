@@ -1,0 +1,23 @@
+name: Test Runner Env
+
+on:
+  push:
+    branches: [ fix/toolcache-shared-race ]
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: d-sorg-fleet-docker
+    steps:
+      - name: Inspect Tool Caches
+        run: |
+          echo "=== Hostname ==="
+          hostname
+          echo "=== env ==="
+          env | grep -i tool || true
+          echo "=== nvme cache ==="
+          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/ || true
+          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/ || true
+          echo "=== regular cache ==="
+          ls -la /home/dieterolson/actions-runners/.shared-tool-cache/ || true
+          ls -la /home/dieterolson/actions-runners/.shared-tool-cache/Python/ || true
