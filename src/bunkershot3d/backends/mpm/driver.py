@@ -61,11 +61,12 @@ class MPMDriver:
                 </body>
         """
 
-        # Add grains
+        # Add grains — seeded for reproducibility (mirrors Chrono backend seed=42)
+        rng = np.random.default_rng(seed=42)
         for i in range(num_grains):
-            px = np.random.uniform(-lx / 2 + r, lx / 2 - r)
-            py = np.random.uniform(-ly / 2 + r, ly / 2 - r)
-            pz = np.random.uniform(r, lz - r)
+            px = rng.uniform(-lx / 2 + r, lx / 2 - r)
+            py = rng.uniform(-ly / 2 + r, ly / 2 - r)
+            pz = rng.uniform(r, lz - r)
             xml += f"""
                 <body name="g{i}" pos="{px} {py} {pz}">
                     <freejoint/>

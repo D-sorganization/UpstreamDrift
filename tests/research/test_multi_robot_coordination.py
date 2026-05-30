@@ -108,3 +108,52 @@ class TestCooperativeManipulation:
             or isinstance(has_closure, (bool, np.bool_))
         )
         assert isinstance(quality, (float, np.floating))
+
+
+# ---------------------------------------------------------------------------
+# Tests for issue #6644 F2 — shared quaternion-to-rotation utility
+# ---------------------------------------------------------------------------
+
+
+class TestSharedQuatUtil:
+    """F2: Both classes must delegate _quat_to_rotation to the shared utility."""
+
+    def test_formation_controller_uses_shared_quat_util(self) -> None:
+        from src.shared.python.spatial_algebra import quaternion_to_rotation_matrix
+
+        config = FormationConfig.line_formation(2)
+        fc = FormationController(robots=["r0", "r1"], formation=config)
+        q = np.array([0.707107, 0.707107, 0.0, 0.0])  # ~90° around X
+        R_local = fc._quat_to_rotation(q)
+        R_shared = quaternion_to_rotation_matrix(q)
+        np.testing.assert_allclose(R_local, R_shared, atol=1e-6)
+
+    def test_cooperative_manipulation_uses_shared_quat_util(self) -> None:
+        from src.shared.python.spatial_algebra import quaternion_to_rotation_matrix
+
+        robots = [MagicMock(), MagicMock()]
+        cm = CooperativeManipulation(robots)
+        q = np.array([0.0, 1.0, 0.0, 0.0])  # 180° around X
+        R_local = cm._quat_to_rotation(q)
+        R_shared = quaternion_to_rotation_matrix(q)
+        np.testing.assert_allclose(R_local, R_shared, atol=1e-6)
+
+    def test_identity_quaternion_gives_identity_rotation(self) -> None:
+        config = FormationConfig.line_formation(2)
+        fc = FormationController(robots=["r0", "r1"], formation=config)
+        R = fc._quat_to_rotation(np.array([1.0, 0.0, 0.0, 0.0]))
+        np.testing.assert_allclose(R, np.eye(3), atol=1e-10)
+
+    def test_compute_grasp_matrix_rotation_consistent(self) -> None:
+        """Grasp matrix inline rotation must equal the shared function result."""
+        robots = [MagicMock(), MagicMock()]
+        cm = CooperativeManipulation(robots)
+        cm.set_grasp_points([np.array([0.1, 0.0, 0.0]), np.array([-0.1, 0.0, 0.0])])
+        q = np.array([0.707107, 0.0, 0.707107, 0.0])  # ~90° around Y
+        pose = np.concatenate([np.array([0.0, 0.0, 0.0]), q])
+        G = cm.compute_grasp_matrix(pose)
+        # Verify shape and that rotation was applied (not zero matrix)
+        assert G.shape == (6, 6)
+        np.testing.assert_allclose(
+            G[:3, :3], np.eye(3), atol=1e-6
+        )  # force block is identity

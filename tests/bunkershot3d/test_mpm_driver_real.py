@@ -140,3 +140,19 @@ def test_driver_output_changes_with_input(dummy_config: Path, tmp_path: Path) ->
         f"Driver output did not change with input state: "
         f"pos1_end={pos1_end}, pos2_end={pos2_end}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Tests for issue #6644 F4 — seeded RNG for grain placement
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_grain_placement_is_reproducible(dummy_config: Path) -> None:
+    """F4: _generate_xml must produce identical grain positions on repeated calls."""
+    driver = MPMDriver(dummy_config)
+    xml1 = driver._generate_xml()
+    xml2 = driver._generate_xml()
+    assert xml1 == xml2, (
+        "Grain placement is non-deterministic — use a seeded RNG (np.random.default_rng)"
+    )
