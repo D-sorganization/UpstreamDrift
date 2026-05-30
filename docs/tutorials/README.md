@@ -24,9 +24,15 @@ Welcome to the Golf Modeling Suite tutorial series!
    - Time: 60 minutes
 
 2. **[Video Analysis](content/04_video_analysis.md)**
+
    - Extract poses from video using MediaPipe
    - Map video markers to biomechanical model
    - Time: 75 minutes
+
+3. **[Same Swing in Three Engines](content/05_same_swing_three_engines.md)**
+   - Compare one swing across MuJoCo, Pinocchio, and JaxSim-compatible paths
+   - Track units and velocity conventions before interpreting differences
+   - Time: 60 minutes
 
 ## Tutorial Format
 
@@ -53,4 +59,4 @@ Help us improve tutorials! See [Contributing Guide](../development/contributing.
 
 ---
 
-Last updated: 2026-02-03
+Last updated: 2026-05-29
