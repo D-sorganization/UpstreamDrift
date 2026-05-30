@@ -44,6 +44,7 @@ on:
 # =============================================================================
 # SAFEGUARD: Maximum iterations to prevent infinite repair loops
 env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   MAX_REPAIR_ITERATIONS: 3
   MAX_ITERATIONS_WINDOW_HOURS: 1
   # Path allowlist: Jules workflows can only modify these paths

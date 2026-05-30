@@ -12,6 +12,9 @@ permissions:
   contents: write
   pull-requests: read
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   check-kill-switch:
     timeout-minutes: 30

@@ -44,6 +44,9 @@ concurrency:
   group: motion-matching-leaderboard-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   check-leaderboard:
     name: check LEADERBOARD.md is committed

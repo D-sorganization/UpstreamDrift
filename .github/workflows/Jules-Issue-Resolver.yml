@@ -22,6 +22,9 @@ concurrency:
   group: jules-issue-resolver-${{ github.repository }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   check-kill-switch:
     timeout-minutes: 30

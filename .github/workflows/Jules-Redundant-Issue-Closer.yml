@@ -26,6 +26,9 @@ concurrency:
   group: jules-redundant-issue-closer-${{ github.repository }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   close-redundant:
     runs-on: d-sorg-fleet-docker

@@ -30,6 +30,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

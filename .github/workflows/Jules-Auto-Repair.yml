@@ -46,6 +46,7 @@ permissions:
   checks: read
 
 env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   MAX_REPAIR_ATTEMPTS: 5
   REPAIR_WINDOW_HOURS: 72
   CI_WAIT_TIMEOUT: 900

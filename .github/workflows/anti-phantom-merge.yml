@@ -40,6 +40,9 @@ concurrency:
   group: anti-phantom-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   guard:
     timeout-minutes: 30

@@ -22,7 +22,10 @@ except ImportError:
         pink.tasks = MagicMock()
 
 # Type alias for transformation matrices
-Transform = pin.SE3 | np.ndarray
+if hasattr(pin, "SE3"):
+    Transform = pin.SE3 | np.ndarray
+else:
+    Transform = np.ndarray
 
 
 def create_frame_task(

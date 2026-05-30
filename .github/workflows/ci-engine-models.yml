@@ -40,6 +40,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   drake-urdf-drift:
     name: drake URDF regeneration drift gate

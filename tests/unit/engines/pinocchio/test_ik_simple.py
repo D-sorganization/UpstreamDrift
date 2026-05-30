@@ -4,7 +4,15 @@ import numpy as np
 import pytest
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
-pin = pytest.importorskip("pinocchio")
+try:
+    import pinocchio as pin
+
+    if not hasattr(pin, "Model") or not hasattr(pin, "SE3"):
+        pytest.skip(
+            "pinocchio is a stub/mock, not the full library", allow_module_level=True
+        )
+except ImportError:
+    pytest.skip("pinocchio not installed", allow_module_level=True)
 
 try:
     from dtack.ik.pink_solver import PinkSolver

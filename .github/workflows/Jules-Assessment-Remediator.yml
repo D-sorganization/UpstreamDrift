@@ -46,6 +46,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   # Safety limits
   MAX_ISSUES_PER_RUN: 3
   MAX_ISSUES_PER_WEEK: 10

@@ -9,6 +9,9 @@ on:
     paths:
       - "**/*.pdf"
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   check-pdf-size:
     timeout-minutes: 30

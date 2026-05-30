@@ -27,6 +27,9 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   guard:
     timeout-minutes: 30

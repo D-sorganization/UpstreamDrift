@@ -19,6 +19,9 @@ on:
 permissions:
   contents: write
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   control:
     timeout-minutes: 30
