@@ -112,8 +112,8 @@ class InducedAccelerationAnalyzer:
     ) -> np.ndarray:
         """Compute acceleration due to external forces only."""
         # a_ext = M^{-1} @ sum(J_i^T @ f_ext_i)
-        pin.computeAllTerms(self.model, self.data, q, v)
-        M = self.data.M
+        pin.computeAllTerms(self.model, self.data, q, v)  # type: ignore[attr-defined]
+        M = self.data.M  # type: ignore[attr-defined]
         nv = int(self.model.nv)
         if nv == 0:
             return np.zeros(0, dtype=float)
@@ -121,7 +121,9 @@ class InducedAccelerationAnalyzer:
         tau_ext = np.zeros(nv, dtype=float)
         for frame_id, wrench in f_ext.items():
             # use pin.LOCAL for reference_frame if needed, else try default
-            J = pin.computeFrameJacobian(self.model, self.data, q, frame_id)
+            J = pin.computeFrameJacobian(
+                self.model, self.data, q, frame_id, pin.ReferenceFrame.LOCAL
+            )
             contribution = np.asarray(J.T @ wrench, dtype=float).reshape(-1)
             if contribution.size == 0:
                 contribution = np.zeros_like(tau_ext)
