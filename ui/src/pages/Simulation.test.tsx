@@ -375,4 +375,28 @@ describe('SimulationPage', () => {
       expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5);
     });
   });
+
+  // F5 (#6642): a silent auto-reconnect restarts the sim from t=0 — the user
+  // must be notified rather than left thinking the app froze.
+  describe('connection status notifications', () => {
+    it('shows a reconnecting notice when the socket drops mid-run', async () => {
+      Object.assign(mockSimulation, { connectionStatus: 'reconnecting' });
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/reconnecting \(simulation will restart\)/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('surfaces a failure notice when reconnection gives up', async () => {
+      Object.assign(mockSimulation, { connectionStatus: 'failed' });
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getByText(/connection failed/i)).toBeInTheDocument();
+      });
+    });
+  });
 });
