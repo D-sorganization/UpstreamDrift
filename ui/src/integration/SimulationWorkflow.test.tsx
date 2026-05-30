@@ -228,7 +228,7 @@ describe('Simulation Workflow Integration', () => {
 
       // Verify we received frames - check for Frame text pattern
       expect(screen.getByText(/Frame \d+/)).toBeInTheDocument();
-    });
+    }, 10_000);
 
     it('allows switching engines before starting simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });

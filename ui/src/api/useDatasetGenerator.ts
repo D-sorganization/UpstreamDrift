@@ -73,6 +73,68 @@ function catalogArray<T>(data: unknown, keys: string[]): T[] {
   return [];
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+}
+
+function stringField(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
+  return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function labelFromId(id: string): string {
+  return id
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function normalizePlotType(value: unknown): PlotType | null {
+  const record = asRecord(value);
+  if (!record) return null;
+
+  const id = stringField(record, 'id') ?? stringField(record, 'type');
+  if (!id) return null;
+
+  const axes = Array.isArray(record.axes)
+    ? record.axes.filter((axis): axis is string => typeof axis === 'string')
+    : [];
+
+  return {
+    id,
+    name: stringField(record, 'name') ?? labelFromId(id),
+    description: stringField(record, 'description') ?? '',
+    axes,
+  };
+}
+
+function normalizeExportFormat(value: unknown): ExportFormat | null {
+  const record = asRecord(value);
+  if (!record) return null;
+
+  const id = stringField(record, 'id') ?? stringField(record, 'format');
+  if (!id) return null;
+
+  const extension = stringField(record, 'extension') ?? id.replace(/^\./, '');
+  const name = stringField(record, 'name') ?? extension.toUpperCase();
+
+  return {
+    id,
+    name,
+    extension,
+    mime_type: stringField(record, 'mime_type') ?? stringField(record, 'description') ?? '',
+  };
+}
+
+function normalizeCatalog<T>(
+  data: unknown,
+  keys: string[],
+  normalize: (value: unknown) => T | null,
+): T[] {
+  return catalogArray<unknown>(data, keys).map(normalize).filter((value): value is T => value !== null);
+}
+
 // ── Hook ───────────────────────────────────────────────────────────────
 
 export function useDatasetGenerator() {
@@ -103,7 +165,7 @@ export function useDatasetGenerator() {
       const data = await apiFetch<unknown>(
         '/api/dataset/plots/types',
       );
-      const list = catalogArray<PlotType>(data, ['plot_types', 'types']);
+      const list = normalizeCatalog<PlotType>(data, ['plot_types', 'types'], normalizePlotType);
       if (isMountedRef.current) setPlotTypes(list);
     } catch (err) {
       if (isMountedRef.current)
@@ -116,7 +178,7 @@ export function useDatasetGenerator() {
       const data = await apiFetch<unknown>(
         '/api/dataset/export/formats',
       );
-      const list = catalogArray<ExportFormat>(data, ['formats']);
+      const list = normalizeCatalog<ExportFormat>(data, ['formats'], normalizeExportFormat);
       if (isMountedRef.current) setExportFormats(list);
     } catch (err) {
       if (isMountedRef.current)
