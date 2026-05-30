@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::process::{Child, Command};
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{Manager, State};
 
 /// Canonical backend port — must match `DEFAULT_SERVER_PORT` in
 /// `src/shared/python/config/typed_settings.py` (issue #6637).
