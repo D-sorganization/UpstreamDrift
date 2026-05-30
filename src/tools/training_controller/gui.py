@@ -742,3 +742,14 @@ def build_default_controller() -> TrainingDashboardController:
         datasets,
         CompatibilityChecker(),
     )
+
+
+def main() -> int:
+    import sys
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication.instance() or QApplication(sys.argv)
+    controller = build_default_controller()
+    win = MainWindow(controller)
+    win.show()
+    return app.exec()
