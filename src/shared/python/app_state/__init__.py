@@ -28,7 +28,11 @@ from src.shared.python.app_state._agent_context import agent_context
 from src.shared.python.app_state._diagnostic import DiagnosticEngine, DiagnosticResult
 from src.shared.python.app_state._events import AppEvent
 from src.shared.python.app_state._history_store import HistoryStore
-from src.shared.python.app_state._state_logger import StateLogger, get_state_logger
+from src.shared.python.app_state._state_logger import (
+    StateLogger,
+    get_agent_state_store,
+    get_state_logger,
+)
 
 __all__ = [
     "AppEvent",
@@ -37,5 +41,6 @@ __all__ = [
     "HistoryStore",
     "StateLogger",
     "agent_context",
+    "get_agent_state_store",
     "get_state_logger",
 ]

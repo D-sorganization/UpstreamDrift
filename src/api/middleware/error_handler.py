@@ -25,7 +25,7 @@ def _handle_common_exceptions(e: Exception, func_name: str) -> None:
         func_name: Name of the function where the exception occurred
 
     Raises:
-        HTTPException: With appropriate status code based on exception type
+        HTTPException: Always — no code path returns None.
     """
     if isinstance(e, HTTPException):
         raise e
@@ -40,6 +40,10 @@ def _handle_common_exceptions(e: Exception, func_name: str) -> None:
     if isinstance(e, (RuntimeError, TypeError, KeyError, AttributeError, OSError)):
         logger.exception("Unhandled error in %s: %s", func_name, e)
         raise HTTPException(status_code=500, detail="Internal server error") from e
+    # Exhaustive fallback: any exception type not listed above still produces a
+    # well-formed 500 response rather than silently returning None.
+    logger.exception("Unexpected error type in %s: %s", func_name, e)
+    raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: C901

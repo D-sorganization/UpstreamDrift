@@ -56,7 +56,7 @@ from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
 from .versioning import get_app_version
 from .routes import chat_ws, realtime as realtime_route, simulation_ws
-from src.shared.python.app_state import agent_context, get_state_logger
+from src.shared.python.app_state import agent_context, get_agent_state_store
 
 setup_logging()
 logger = get_logger(__name__)
@@ -164,7 +164,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
 
         # Initialize chat service wired to app state (issue #5470)
         fastapi_app.state.chat_service = ChatService(
-            app_state_provider=lambda: agent_context(get_state_logger().store)
+            app_state_provider=lambda: agent_context(get_agent_state_store())
         )
 
         # All routes now use FastAPI Depends() for dependency injection.

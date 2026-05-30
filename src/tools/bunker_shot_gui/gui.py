@@ -100,7 +100,7 @@ class BunkerShotWidget(QWidget):
         # Right: results
         right = QWidget()
         right_layout = QVBoxLayout(right)
-        results_group = QGroupBox("Simulation Results (Chrono DEM)")
+        results_group = QGroupBox("Visualization Preview (Chrono DEM not yet wired)")
         results_layout = QVBoxLayout(results_group)
 
         if PYQTGRAPH_AVAILABLE:
@@ -127,9 +127,9 @@ class BunkerShotWidget(QWidget):
         self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
-            "Configure impact parameters and simulate.\n\n"
-            "Backend: Chrono DEM (Discrete Element Method)\n"
-            "Visualizing sand particle displacement and impact forces."
+            "Configure impact parameters and click Run.\n\n"
+            "Note: Chrono DEM physics engine is not yet wired.\n"
+            "Values shown are a procedural preview, not a physics simulation."
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
@@ -163,7 +163,7 @@ class BunkerShotWidget(QWidget):
             f"Entry Depth:   {depth * 100:.1f} cm\n"
             f"Est. Force:    {impact_force:.1f} N\n\n"
             f"Displaced sand particles: ~{num_particles * 10}\n"
-            f"Chrono DEM simulation mock completed."
+            f"[Preview only — Chrono DEM physics not yet wired]"
         )
 
         if getattr(self, "_gl_view", None) is not None:
