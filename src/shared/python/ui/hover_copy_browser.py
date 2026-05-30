@@ -52,7 +52,7 @@ class HoverCopyTextBrowser(QTextBrowser):
             renderer.render(painter)
             painter.end()
             self.copy_btn.setIcon(QIcon(pixmap))
-        except Exception:  # noqa: BLE001
+        except (TypeError, ValueError, AttributeError, RuntimeError):
             self.copy_btn.setText("\ud83d\udccb")
 
         self.copy_btn.setToolTip("Copy to clipboard")

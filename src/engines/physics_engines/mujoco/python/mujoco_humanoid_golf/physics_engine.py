@@ -125,7 +125,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
             if name:
                 return name
-        except Exception:  # noqa: BLE001 – MuJoCo C-extension errors vary
+        except (TypeError, ValueError, AttributeError):
             pass
         return "MuJoCo Model"
 
