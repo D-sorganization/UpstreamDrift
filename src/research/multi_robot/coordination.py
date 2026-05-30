@@ -230,7 +230,7 @@ class FormationController:
         """Convert quaternion [w, x, y, z] to a 3×3 rotation matrix."""
         if quat is None:
             raise ValueError("quat must be provided")
-        return quaternion_to_rotation_matrix(quat)
+        return quaternion_to_rotation_matrix(np.asarray(quat, dtype=np.float64))
 
     def set_formation(self, formation: FormationConfig) -> None:
         """Change the formation.
@@ -357,7 +357,7 @@ class CooperativeManipulation:
             object_pose[3:7] if len(object_pose) >= 7 else np.array([1, 0, 0, 0])
         )
 
-        R = quaternion_to_rotation_matrix(object_quat)
+        R = quaternion_to_rotation_matrix(np.asarray(object_quat, dtype=np.float64))
 
         for i in range(n_contacts):
             # Contact point in world frame
@@ -521,7 +521,7 @@ class CooperativeManipulation:
         """Convert quaternion [w, x, y, z] to a 3×3 rotation matrix."""
         if quat is None:
             raise ValueError("quat must be provided")
-        return quaternion_to_rotation_matrix(quat)
+        return quaternion_to_rotation_matrix(np.asarray(quat, dtype=np.float64))
 
     def check_force_closure(
         self,

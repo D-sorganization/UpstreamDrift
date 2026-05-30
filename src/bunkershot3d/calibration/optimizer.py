@@ -49,7 +49,7 @@ class CalibrationOptimizer:
         # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
         res = differential_evolution(
             self._objective,
-            bounds,
+            bounds,  # type: ignore[arg-type]
             strategy="best1bin",
             maxiter=50,
             popsize=5,
