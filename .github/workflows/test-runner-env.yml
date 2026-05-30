@@ -9,12 +9,9 @@ jobs:
   inspect:
     runs-on: d-sorg-fleet-docker
     steps:
-      - name: Inspect Tool Caches
+      - name: Inspect Runner Hooks
         run: |
-          echo "=== Hostname ==="
-          hostname
-          echo "=== Find fractions.py in all caches ==="
-          find /home/dieterolson/actions-runners-nvme/.shared-tool-cache/ -name "fractions.py" || true
-          find /home/dieterolson/actions-runners/.shared-tool-cache/ -name "fractions.py" || true
-          echo "=== Find fractions.py in current Python cache ==="
-          find /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/3.11.15/ -name "fractions.py" || true
+          echo "=== job-started.sh ==="
+          cat /usr/local/bin/runner-hooks/job-started.sh || true
+          echo "=== runner-post-job.sh ==="
+          cat /home/dieterolson/actions-runners/fleet/runner-post-job.sh || true
