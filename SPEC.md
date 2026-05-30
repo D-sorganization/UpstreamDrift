@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.205                                            |
+| **Spec Version**        | 1.0.206                                            |
 | **Last Spec Update**    | 2026-05-30                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-30** - Declared `pyarrow>=14.0.0` in the data/dev dependency surfaces and regenerated dependency artifacts so Parquet compactor/loader tests can collect in CI; `tests/unit/test_build_install_contracts.py` now falls back to `tomli` on Python 3.10.
 - **2026-05-30** - Widen pinocchio version limit from `<3.0.0` to `<5.0.0` in `pyproject.toml` to resolve numpy 2.0 version compatibility conflict.
 - **2026-05-29** - API security hardening (issue #6643): introduced `_assert_type` guard in `src/api/auth/dependencies.py` to narrow SQLAlchemy query-result types for MyPy strict mode, replaced the previous `type: ignore[return-value]` workarounds with explicit runtime assertions, and added `_lookup_cached_api_key`, `_lookup_api_key_by_prefix`, and `_get_active_user_for_api_key` helper functions for testability. Added `src/api/auth/dependencies.py` prefix-hash API-key lookup regression coverage in `tests/unit/api/test_api_hardening_6643.py`. Sim GUI honest messaging (issue #6641): updated `src/tools/bunker_shot_gui/gui.py` and `src/tools/putting_green_gui/gui.py` to surface explicit error and loading states instead of silently showing stale data; regression tests added in `tests/unit/test_sim_gui_honest_messaging_6641.py`.
 - **2026-05-29** - Documented differentiable trajectory optimization behavior for zero-iteration runs: `optimize_trajectory()` now returns a valid `OptimizationResult` with the initial control sequence and an infinite gradient norm sentinel instead of reading an uninitialized gradient value.
@@ -537,6 +538,7 @@ Beyond standard tools, CI enforces custom checks:
 | mediapipe    | 0.9+    | Motion capture integration (pose detection) |
 | scikit-learn | 1.0+    | RL policy learning and clustering           |
 | sympy        | 1.11+   | Symbolic trajectory optimization            |
+| pyarrow      | 14.0+   | Parquet IO for compact swing dataset paths  |
 
 ### Development Dependencies
 
@@ -546,6 +548,7 @@ Beyond standard tools, CI enforces custom checks:
 | pytest-cov | 4.0+    | Coverage measurement                                                               |
 | hypothesis | 6.0+    | Property-based testing                                                             |
 | pip-tools  | 7.4+    | Regenerate Python dependency lockfiles from `pyproject.toml`                       |
+| pyarrow    | 14.0+   | Parquet IO test coverage for compact swing dataset paths                           |
 | ruff       | latest  | Linting and formatting                                                             |
 | mypy       | 1.7+    | Type checking                                                                      |
 | bandit     | 1.7+    | Security scanning                                                                  |
