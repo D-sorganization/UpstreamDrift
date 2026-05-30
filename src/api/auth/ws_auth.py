@@ -70,7 +70,7 @@ async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
         user_id = payload.get("sub")
         if user_id is None:
             logger.warning(
-                "WebSocket auth rejected: token sub claim missing. path=%s",
+                "WebSocket auth rejected: sub claim missing. path=%s",
                 websocket.url.path,
             )
             await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
@@ -105,7 +105,7 @@ async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
 
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "WebSocket auth rejected: invalid or expired token (%s). path=%s",
+            "WebSocket auth rejected: invalid or expired session (%s). path=%s",
             exc,
             websocket.url.path,
         )
