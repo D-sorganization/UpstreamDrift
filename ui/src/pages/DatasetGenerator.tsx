@@ -16,6 +16,23 @@ export type {
 } from '@/api/useDatasetGenerator';
 
 /**
+ * CatalogSkeleton — placeholder rows shown while catalog data is loading.
+ * Prevents "No features available" from flashing on first render (F7).
+ */
+function CatalogSkeleton() {
+  return (
+    <div className="space-y-2" aria-busy="true" aria-label="Loading catalog data">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="p-3 rounded-md border border-gray-700/50 bg-gray-700/20 animate-pulse">
+          <div className="h-3 w-2/3 bg-gray-600/60 rounded mb-1" />
+          <div className="h-2 w-full bg-gray-600/40 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * DatasetGeneratorPage - Full dataset generation tool page.
  */
 export function DatasetGeneratorPage() {
@@ -26,10 +43,12 @@ export function DatasetGeneratorPage() {
     controls,
     generateResult,
     loadState,
+    catalogLoading,
     error,
     generateDataset,
     importSwing,
     updateControl,
+    exportDataset,
   } = useDatasetGenerator();
 
   const [sidebarTab, setSidebarTab] = useState<'features' | 'plots' | 'export'>('features');
@@ -52,6 +71,12 @@ export function DatasetGeneratorPage() {
     setControlValues((prev) => ({ ...prev, [controlId]: value }));
     updateControl(controlId, value);
   }, [updateControl]);
+
+  // F1: wire Export button
+  const handleExport = useCallback(() => {
+    if (!generateResult) return;
+    exportDataset(generateResult.dataset_id, exportFormat);
+  }, [generateResult, exportFormat, exportDataset]);
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100">
@@ -83,7 +108,9 @@ export function DatasetGeneratorPage() {
           {/* Features Tab */}
           {sidebarTab === 'features' && (
             <div className="space-y-2">
-              {features.length === 0 ? (
+              {catalogLoading ? (
+                <CatalogSkeleton />
+              ) : features.length === 0 ? (
                 <div className="text-xs text-gray-500 italic text-center py-4">No features available</div>
               ) : (
                 features.map((f: FeatureInfo) => (
@@ -102,7 +129,9 @@ export function DatasetGeneratorPage() {
           {/* Plots Tab */}
           {sidebarTab === 'plots' && (
             <div className="space-y-2">
-              {plotTypes.length === 0 ? (
+              {catalogLoading ? (
+                <CatalogSkeleton />
+              ) : plotTypes.length === 0 ? (
                 <div className="text-xs text-gray-500 italic text-center py-4">No plot types available</div>
               ) : (
                 plotTypes.map((pt: PlotType) => (
@@ -125,7 +154,9 @@ export function DatasetGeneratorPage() {
           {/* Export Tab */}
           {sidebarTab === 'export' && (
             <div className="space-y-2">
-              {exportFormats.length === 0 ? (
+              {catalogLoading ? (
+                <CatalogSkeleton />
+              ) : exportFormats.length === 0 ? (
                 <div className="text-xs text-gray-500 italic text-center py-4">No export formats available</div>
               ) : (
                 exportFormats.map((ef: ExportFormat) => (
@@ -269,7 +300,9 @@ export function DatasetGeneratorPage() {
                   </select>
                 </div>
                 <button
+                  onClick={handleExport}
                   disabled={!generateResult || isLoading}
+                  data-testid="export-button"
                   className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                 >
                   Export

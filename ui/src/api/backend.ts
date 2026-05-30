@@ -84,3 +84,15 @@ export async function getDiagnostics(): Promise<DiagnosticInfo> {
   }
   return invoke<DiagnosticInfo>('get_diagnostics');
 }
+
+/**
+ * Get the base URL for API calls.
+ *
+ * In Tauri, the frontend and backend run on different origins so we need an
+ * explicit `http://localhost:8000` prefix.  In a browser (Vite dev server /
+ * production web build) the backend is proxied at the same origin, so an
+ * empty string (i.e. relative URLs) is correct.
+ */
+export function getApiBase(): string {
+  return isTauri() ? 'http://localhost:8000' : '';
+}

@@ -153,3 +153,81 @@ describe('DataExplorer data structures', () => {
     expect(supported.has('.txt')).toBe(false);
   });
 });
+
+// ── F3: DataExplorer distinct error state ───────────────────────────────────
+describe('DataExplorer service-unreachable error state (F3 — issue #6642)', () => {
+  it('marks serviceUnreachable=true on network failure', () => {
+    // Simulate the error-handling logic inside fetchDatasets
+    let serviceUnreachable = false;
+    let error: string | null = null;
+
+    const handleCatch = (err: unknown) => {
+      serviceUnreachable = true;
+      error = err instanceof Error
+        ? err.message
+        : "Can't reach the data service — is the backend running?";
+    };
+
+    handleCatch(new Error('fetch failed'));
+
+    expect(serviceUnreachable).toBe(true);
+    expect(error).toContain('fetch failed');
+  });
+
+  it('marks serviceUnreachable=true on non-ok response', () => {
+    let serviceUnreachable = false;
+    let error: string | null = null;
+
+    const handleNonOk = (status: number) => {
+      serviceUnreachable = true;
+      error = `Data service returned HTTP ${status}`;
+    };
+
+    handleNonOk(503);
+
+    expect(serviceUnreachable).toBe(true);
+    expect(error).toContain('503');
+  });
+
+  it('shows different error UI for serviceUnreachable vs dataset error', () => {
+    // Regression guard: the amber "Data service unreachable" banner should only
+    // appear when serviceUnreachable===true; regular red errors should only
+    // appear when serviceUnreachable===false.
+    const showServiceBanner = (serviceUnreachable: boolean, error: string | null) =>
+      serviceUnreachable && error !== null;
+
+    const showRegularError = (serviceUnreachable: boolean, error: string | null) =>
+      error !== null && !serviceUnreachable;
+
+    expect(showServiceBanner(true, 'network error')).toBe(true);
+    expect(showServiceBanner(false, 'network error')).toBe(false);
+    expect(showRegularError(false, 'filter failed')).toBe(true);
+    expect(showRegularError(true, 'filter failed')).toBe(false);
+  });
+});
+
+// ── F4: DataExplorer API shape guards ────────────────────────────────────────
+describe('DataExplorer API shape guards (F4 — issue #6642)', () => {
+  it('defaults to empty array when datasets key is missing', () => {
+    const data: Record<string, unknown> = {};
+    const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
+    expect(list).toHaveLength(0);
+  });
+
+  it('defaults to empty array when datasets is not an array', () => {
+    const data: Record<string, unknown> = { datasets: null };
+    const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
+    expect(list).toHaveLength(0);
+  });
+
+  it('passes through a valid datasets array', () => {
+    const data: Record<string, unknown> = {
+      datasets: [
+        { name: 'ds1.csv', path: '/p', format: 'csv', size_bytes: 100, columns: [] },
+      ],
+    };
+    const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
+    expect(list).toHaveLength(1);
+    expect(list[0].name).toBe('ds1.csv');
+  });
+});

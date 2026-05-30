@@ -73,15 +73,31 @@ const DataTable = memo(function DataTable({
         <thead className="sticky top-0 bg-gray-800 z-10">
           <tr>
             {columns.map((col) => (
+              // F6: keyboard-accessible sortable header
               <th
                 key={col}
-                className="px-3 py-2 text-gray-400 font-medium border-b border-gray-700 cursor-pointer hover:text-gray-200 select-none"
+                role="columnheader"
+                tabIndex={0}
+                aria-sort={
+                  sortColumn === col
+                    ? sortAscending
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none'
+                }
+                className="px-3 py-2 text-gray-400 font-medium border-b border-gray-700 cursor-pointer hover:text-gray-200 select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
                 onClick={() => onSort(col)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSort(col);
+                  }
+                }}
               >
                 <span className="flex items-center gap-1">
                   {col}
                   {sortColumn === col && (
-                    <span className="text-blue-400">
+                    <span className="text-blue-400" aria-hidden="true">
                       {sortAscending ? ' ^' : ' v'}
                     </span>
                   )}
@@ -177,6 +193,8 @@ export function DataExplorerPage() {
   const [stats, setStats] = useState<DatasetStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // F3: track whether the data service is unreachable (distinct from empty)
+  const [serviceUnreachable, setServiceUnreachable] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'stats'>('table');
 
   // Sorting state
@@ -193,11 +211,24 @@ export function DataExplorerPage() {
     async function fetchDatasets() {
       try {
         const response = await fetch('/api/tools/data-explorer/datasets');
-        if (!response.ok) return;
-        const data = await response.json();
-        setDatasets(data.datasets || []);
-      } catch {
-        // API may not be available
+        if (!response.ok) {
+          // F3: non-2xx means backend is up but returned an error — still show it
+          setServiceUnreachable(true);
+          setError(`Data service returned HTTP ${response.status}`);
+          return;
+        }
+        const data = (await response.json()) as Record<string, unknown>;
+        // F4: guard against malformed response shapes
+        const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
+        setDatasets(list);
+      } catch (err) {
+        // F3: network failure — backend is down; show distinct actionable error
+        setServiceUnreachable(true);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Can't reach the data service — is the backend running?",
+        );
       }
     }
     fetchDatasets();
@@ -483,9 +514,37 @@ export function DataExplorerPage() {
           </div>
         )}
 
-        {/* Error */}
-        {error && (
-          <div className="mx-4 mb-4 text-xs text-red-400 bg-red-900/20 p-2 rounded">
+        {/* F3: Service unreachable — distinct actionable error */}
+        {serviceUnreachable && error && (
+          <div className="mx-4 mb-2 text-xs text-amber-300 bg-amber-900/30 border border-amber-700/50 p-3 rounded" role="alert">
+            <div className="font-semibold mb-1">⚠ Data service unreachable</div>
+            <div className="text-amber-200/80">{error}</div>
+            <button
+              className="mt-2 text-xs underline text-amber-300 hover:text-amber-100"
+              onClick={() => {
+                setServiceUnreachable(false);
+                setError(null);
+                // Re-trigger the effect by temporarily clearing + re-fetching
+                // (simple approach: reload datasets inline)
+                fetch('/api/tools/data-explorer/datasets')
+                  .then((r) => r.json())
+                  .then((data: Record<string, unknown>) => {
+                    const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
+                    setDatasets(list);
+                  })
+                  .catch((err: unknown) => {
+                    setServiceUnreachable(true);
+                    setError(err instanceof Error ? err.message : 'Still unreachable');
+                  });
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {/* Regular error (dataset-level, not service-level) */}
+        {error && !serviceUnreachable && (
+          <div className="mx-4 mb-4 text-xs text-red-400 bg-red-900/20 p-2 rounded" role="alert">
             {error}
           </div>
         )}
