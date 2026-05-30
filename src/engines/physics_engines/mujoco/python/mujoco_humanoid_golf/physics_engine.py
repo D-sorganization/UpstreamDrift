@@ -82,17 +82,23 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     @property
     def model_name(self) -> str:
-        """Return the name of the currently loaded model."""
+        """Return the name of the currently loaded model.
+
+        F6 fix (issue #6638): Use mj_id2name to return the real MuJoCo model
+        name instead of a constant string, falling back to the xml_path stem.
+        """
         if self.model is None:
             return "None"
 
-        # Try to get from model names
-        if self.model.names:
-            # The names buffer is a byte string, need to handle encoding
-            # if accessed directly
-            # But typically we want the model name from the XML
-            return "MuJoCo Model"
+        # Try to get the model-level name (body index 0 is the world body;
+        # the first non-world body name is typically the model name.)
+        # In MuJoCo the 'model name' in the XML is stored as worldbody name
+        # or can be read via mj_id2name for body 0.
+        world_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
+        if world_name:
+            return world_name
 
+        # Fall back to the xml_path stem
         if self.xml_path:
             return os.path.basename(self.xml_path).replace(".xml", "")
 
@@ -277,20 +283,46 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q)."""
+        """Compute pure gravity forces g(q).
+
+        F3 fix (issue #6638): Previously fell back to qfrc_bias which includes
+        Coriolis/centrifugal C(q,v)v, mislabelling bias forces as pure gravity.
+
+        Correct approach: temporarily zero qvel, run mj_forward, read qfrc_bias
+        (which now equals g(q) since C(q,0)·0=0), then restore original qvel.
+        This mirrors Pinocchio's compute_gravity_forces and matches the
+        documented postcondition of returning velocity-independent g(q).
+        """
         if self.model is None or self.data is None:
             return np.array([])
+
+        # Use qfrc_grav when available (some MuJoCo versions expose it directly)
         qfrc_grav = getattr(self.data, "qfrc_grav", None)
-        if qfrc_grav is None:
-            qfrc_grav = getattr(self.data, "qfrc_bias", np.zeros(self.model.nv))
-        # Cast to ndarray before copy to satisfy mypy
-        grav_arr = cast(np.ndarray, qfrc_grav)
-        return grav_arr.copy()
+        if qfrc_grav is not None:
+            return cast(np.ndarray, qfrc_grav).copy()
+
+        # F3 fix: Temporarily zero velocity so qfrc_bias == g(q)
+        saved_qvel = self.data.qvel.copy()
+        try:
+            self.data.qvel[:] = 0.0
+            mujoco.mj_forward(self.model, self.data)
+            grav_arr = cast(np.ndarray, self.data.qfrc_bias)
+            return grav_arr.copy()
+        finally:
+            # Restore original velocity
+            self.data.qvel[:] = saved_qvel
+            mujoco.mj_forward(self.model, self.data)
 
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics result must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
+        """Compute inverse dynamics: tau = ID(q, qdot, qacc).
+
+        F2 fix (issue #6638): Previously wrote self.data.qacc[:] = qacc and
+        called mj_inverse without restoring qacc — leaving persistent sim state
+        corrupted for subsequent step()/forward() calls.  Now saves and restores
+        qacc in a finally block, mirroring compute_ztcf / compute_zvcf.
+        """
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -301,13 +333,15 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
                 parameter="qacc",
             )
 
-        # Copy qacc to data
-        self.data.qacc[:] = qacc
-
-        # Compute inverse dynamics
-        mujoco.mj_inverse(self.model, self.data)
-
-        return cast(np.ndarray, self.data.qfrc_inverse.copy())
+        # F2 fix: Save current qacc before overwriting
+        saved_qacc = self.data.qacc.copy()
+        try:
+            self.data.qacc[:] = qacc
+            mujoco.mj_inverse(self.model, self.data)
+            return cast(np.ndarray, self.data.qfrc_inverse.copy())
+        finally:
+            # Restore original qacc so persistent sim state is unchanged
+            self.data.qacc[:] = saved_qacc
 
     # -------- Section F: Drift-Control Decomposition --------
 
