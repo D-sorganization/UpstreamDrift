@@ -24,6 +24,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   pick-runner:
     name: Resolve fleet runner

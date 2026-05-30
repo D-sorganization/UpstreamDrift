@@ -43,6 +43,9 @@ concurrency:
   group: cross-engine-leaderboard-publish-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   publish:
     name: publish cross-engine leaderboard JSON

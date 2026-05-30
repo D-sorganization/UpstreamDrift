@@ -39,6 +39,9 @@ concurrency:
   # when a new push lands — the scheduled cron will re-run.
   cancel-in-progress: true
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   soak:
     name: 24h realtime soak

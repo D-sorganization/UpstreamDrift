@@ -34,6 +34,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
   # HARDENING: Rate limit - max issues to create per run
   MAX_ISSUES_PER_RUN: 5
 

@@ -23,6 +23,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
