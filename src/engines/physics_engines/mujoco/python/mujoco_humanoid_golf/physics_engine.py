@@ -92,8 +92,8 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
     def model_name(self) -> str:
         """Return the name of the currently loaded model.
 
-        Prefers the XML path stem, then attempts mj_id2name for the
-        worldbody (body 0), then falls back to a generic label.
+        F6 fix (issue #6638): Use mj_id2name to return the real MuJoCo model
+        name instead of a constant string, falling back to the xml_path stem.
         """
         if self.model is None:
             return "None"
@@ -109,7 +109,15 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             except (TypeError, ValueError, UnicodeDecodeError):
                 pass
 
-        # Prefer file-based name (most informative)
+        # Try to get the model-level name (body index 0 is the world body;
+        # the first non-world body name is typically the model name.)
+        # In MuJoCo the 'model name' in the XML is stored as worldbody name
+        # or can be read via mj_id2name for body 0.
+        world_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
+        if world_name:
+            return world_name
+
+        # Fall back to the xml_path stem
         if self.xml_path:
             return os.path.basename(self.xml_path).replace(".xml", "")
         # Try to read a real body name from MuJoCo's names buffer
@@ -306,12 +314,18 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute pure gravity forces g(q) with zero velocity (F3 fix).
 
-        Temporarily zeroes qvel so that qfrc_bias reflects only gravity
-        (not Coriolis/centrifugal terms).  State is restored in a finally
-        block regardless of exceptions.
+        F3 fix (issue #6638): Previously fell back to qfrc_bias which includes
+        Coriolis/centrifugal C(q,v)v, mislabelling bias forces as pure gravity.
+
+        Correct approach: temporarily zero qvel, run mj_forward, read qfrc_bias
+        (which now equals g(q) since C(q,0)·0=0), then restore original qvel.
+        This mirrors Pinocchio's compute_gravity_forces and matches the
+        documented postcondition of returning velocity-independent g(q).
         """
         if self.model is None or self.data is None:
             return np.array([])
+
+        # Use qfrc_grav when available (some MuJoCo versions expose it directly)
         qfrc_grav = getattr(self.data, "qfrc_grav", None)
         if qfrc_grav is not None:
             return cast(np.ndarray, qfrc_grav).copy()
@@ -336,6 +350,11 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
         Saves and restores ``data.qacc`` in a finally block so that this
         pure-query method does not corrupt persistent simulation state (F2 fix).
+
+        F2 fix (issue #6638): Previously wrote self.data.qacc[:] = qacc and
+        called mj_inverse without restoring qacc — leaving persistent sim state
+        corrupted for subsequent step()/forward() calls.  Now saves and restores
+        qacc in a finally block, mirroring compute_ztcf / compute_zvcf.
         """
         if self.model is None or self.data is None:
             return np.array([])
