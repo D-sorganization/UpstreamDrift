@@ -73,6 +73,16 @@ jobs:
           fetch-depth: 1
           submodules: false
 
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Cleaning $cache_root/Python (pre-setup-python)"
+              sudo rm -rf "$cache_root/Python"
+            fi
+          done
       - name: Set up Python
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
         with:
@@ -82,6 +92,8 @@ jobs:
             pyproject.toml
             requirements*.txt
 
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
       - name: Install minimal deps
         shell: bash
         run: |

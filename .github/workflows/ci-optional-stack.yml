@@ -92,6 +92,16 @@ jobs:
             exit 1
           fi
 
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Cleaning $cache_root/Python (pre-setup-python)"
+              sudo rm -rf "$cache_root/Python"
+            fi
+          done
       - name: Install System Dependencies
         run: |
           apt_retry() {
@@ -125,6 +135,8 @@ jobs:
       # Cache pip download cache. The optional-stack lane installs ~1.5GB of
       # wheels (fastapi[all], pinocchio, pink, crocoddyl, pyqt6, etc.) and a
       # warm cache avoids re-downloading them on every PR.
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
       - name: Cache pip wheels
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v5.0.5
         with:
