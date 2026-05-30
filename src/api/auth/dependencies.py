@@ -1,4 +1,4 @@
-﻿"""Authentication dependencies for FastAPI endpoints."""
+"""Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
 from typing import cast
