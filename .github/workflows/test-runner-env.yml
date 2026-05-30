@@ -9,9 +9,11 @@ jobs:
   inspect:
     runs-on: d-sorg-fleet-docker
     steps:
-      - name: Inspect Runner Hooks
+      - name: Search Python Tarballs
         run: |
-          echo "=== job-started.sh ==="
-          cat /usr/local/bin/runner-hooks/job-started.sh || true
-          echo "=== runner-post-job.sh ==="
-          cat /home/dieterolson/actions-runners/fleet/runner-post-job.sh || true
+          echo "=== Search Python Archives ==="
+          find /home/dieterolson/ -maxdepth 4 -name "*3.11.15*" 2>/dev/null | grep -E '\.(tar\.gz|tgz|zip|tar\.xz)$' || true
+          echo "=== List dieterolson home files ==="
+          ls -la /home/dieterolson/ || true
+          ls -la /home/dieterolson/actions-runners-nvme/ || true
+          ls -la /home/dieterolson/actions-runners/ || true
