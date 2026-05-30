@@ -2,6 +2,7 @@
 
 # Python 3.10 compatibility: UTC constant was added in 3.11
 from datetime import datetime, timedelta
+from typing import cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -288,10 +289,11 @@ async def list_users(
 
 def _count_active_admins(db: Session) -> int:
     """Return the number of active admin users."""
-    return (
+    return cast(
+        int,
         db.query(User)
         .filter(User.role == UserRole.ADMIN.value, User.is_active)
-        .count()
+        .count(),
     )
 
 
