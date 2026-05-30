@@ -7,7 +7,7 @@ on:
 
 jobs:
   repair:
-    runs-on: d-sorg-local-ControlTower-nvme-3
+    runs-on: d-sorg-local-ControlTower-nvme-7
     steps:
       - name: Clean Cache Directories
         run: |
