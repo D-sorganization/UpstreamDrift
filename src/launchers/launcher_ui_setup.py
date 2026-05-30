@@ -1784,6 +1784,13 @@ class UISetupManager:
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll_area.setProperty("class", "transparent")
+        # Issue #6679: disable horizontal scrollbar so the viewport width
+        # actually shrinks when the Sidekick panel opens.  When the scrollbar
+        # is enabled Qt expands content rather than wrapping — the
+        # ResizingScrollArea.resizeEvent never fires, columns never re-wrap.
+        self.scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         _style = self.scroll_area.style()
 
         if _style:
@@ -1791,6 +1798,11 @@ class UISetupManager:
 
         self.grid_container = GridContainerWidget(launcher=self.launcher)
         self.grid_container.setProperty("class", "transparent")
+        # Allow the container to shrink below its preferred width so the
+        # scroll area can compute a narrower available_width for column wraps.
+        self.grid_container.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
+        )
         _style = self.grid_container.style()
 
         if _style:
