@@ -313,15 +313,19 @@ class CollisionAvoidance:
                     # Get repulsion direction
                     gradient = obstacle.get_gradient(link_pos)
 
-                    # Map to joint space (simplified - use Jacobian for full)
-                    # For now, distribute to all joints
-                    repulsion += (
-                        gradient[:n_joints]
-                        if n_joints <= 3
-                        else (np.concatenate([gradient, np.zeros(n_joints - 3)]))
-                        * magnitude
-                        / len(link_positions)
-                    )
+                    # Map to joint space (simplified - use Jacobian for full).
+                    # Build the joint-space gradient vector FIRST, then apply
+                    # magnitude scaling and averaging to BOTH branches. The
+                    # previous expression let ``* magnitude / len(...)`` bind
+                    # only to the ``else`` branch, so for n_joints <= 3 the raw
+                    # unit gradient was added with no scaling (#6640 F1).
+                    if n_joints <= 3:
+                        joint_gradient = gradient[:n_joints]
+                    else:
+                        joint_gradient = np.concatenate(
+                            [gradient, np.zeros(n_joints - 3)]
+                        )
+                    repulsion += joint_gradient * magnitude / len(link_positions)
 
         return repulsion
 

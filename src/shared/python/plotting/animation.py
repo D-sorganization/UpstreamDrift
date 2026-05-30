@@ -167,7 +167,7 @@ class SwingAnimator:
         return body_data, times
 
     def _plot_desired_trajectories(
-        self, ax: Axes, desired_positions: dict[str, Any], cfg: AnimationConfig
+        self, ax: Axes, desired_positions: dict[str, Any] | None, cfg: AnimationConfig
     ) -> None:
         if not desired_positions:
             return

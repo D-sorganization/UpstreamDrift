@@ -557,7 +557,10 @@ class TargetNormalizer:
                 f"target-normalizer state must contain 'mean' and 'std'; got keys={list(state)}"
             )
         eps_list = state.get("eps", [1e-6])
-        eps = float(eps_list[0]) if isinstance(eps_list, Sequence) else float(eps_list)
+        if isinstance(eps_list, (int, float)):
+            eps = float(eps_list)
+        else:
+            eps = float(eps_list[0])
         mean = torch.tensor(list(state["mean"]), dtype=torch.float32)
         std = torch.tensor(list(state["std"]), dtype=torch.float32)
         return cls(mean=mean, std=std, eps=eps)

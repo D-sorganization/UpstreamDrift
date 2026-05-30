@@ -63,6 +63,9 @@ SHARED_YAML = REPO_ROOT / "shared" / "models" / "golf_humanoid_dimensions.yaml"
 # from the repo root.
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+shared_python = REPO_ROOT / "src" / "shared" / "python"
+if str(shared_python) not in sys.path:
+    sys.path.insert(0, str(shared_python))
 
 #: All engines this orchestrator knows about, in canonical order.
 ENGINES: tuple[str, ...] = ("drake", "pinocchio", "mujoco", "opensim")

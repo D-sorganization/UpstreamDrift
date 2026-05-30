@@ -86,6 +86,30 @@ def client(app: FastAPI) -> TestClient:
     return TestClient(app)
 
 
+def test_auth_uses_shared_limiter() -> None:
+    """Issue #6636 F4: auth must use the SHARED limiter, not a private one.
+
+    SlowAPI only enforces ``@limiter.limit(...)`` when the decorator's limiter
+    is the same instance wired into ``app.state.limiter`` and the middleware
+    (set in server.py to ``src.api.rate_limit.limiter``). A separate Limiter()
+    in auth.py would make the advertised login/register limits silently
+    non-enforcing.
+    """
+    from src.api import rate_limit
+    from src.api.routes import auth as auth_module
+
+    assert auth_module.limiter is rate_limit.limiter
+
+
+def test_refresh_and_usage_use_typed_response_models() -> None:
+    """Issue #6636 F4: /refresh and /usage use typed Pydantic response models."""
+    from src.api.auth.models import RefreshTokenResponse, UsageSummaryResponse
+
+    routes = {r.path: r for r in router.routes}
+    assert routes["/auth/refresh"].response_model is RefreshTokenResponse
+    assert routes["/auth/usage"].response_model is UsageSummaryResponse
+
+
 def test_register_user_success(client: TestClient, app: FastAPI) -> None:
     """Test registering a new user."""
     app.dependency_overrides[get_db] = mock_get_db_factory(user=None)

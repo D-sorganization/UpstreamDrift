@@ -41,6 +41,22 @@ def test_cors_origins_default(monkeypatch: pytest.MonkeyPatch) -> None:
     assert config.get_cors_origins() == config.DEFAULT_CORS_ORIGINS
 
 
+def test_cors_origins_rejects_wildcard(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Issue #6636 F2: '*' must be rejected since credentials are enabled."""
+    monkeypatch.setenv("CORS_ORIGINS", "*")
+    with pytest.raises(ValueError, match="must not contain"):
+        config.get_cors_origins()
+
+
+def test_cors_origins_rejects_wildcard_in_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Issue #6636 F2: a '*' mixed with explicit origins is still rejected."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://ok , *")
+    with pytest.raises(ValueError, match="must not contain"):
+        config.get_cors_origins()
+
+
 def test_server_host_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("API_HOST", raising=False)
     assert config.get_server_host() == config.DEFAULT_SERVER_HOST

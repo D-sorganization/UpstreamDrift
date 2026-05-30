@@ -128,11 +128,14 @@ class MPMDriver:
                 # Extract the 6-DOF contact wrench in the contact frame
                 raw = np.zeros(6)
                 mujoco.mj_contactForce(self.model, self.data, i, raw)
-                # raw[:3] is force, raw[3:] is torque in contact frame
-                # Rotate to world frame via the contact frame matrix
+                # raw[:3] is force, raw[3:] is torque in the contact frame.
+                # MuJoCo's contact.frame stores the contact-frame basis vectors
+                # as ROWS in world coordinates, i.e. it maps world->contact.
+                # Converting a contact-frame vector to world therefore needs the
+                # TRANSPOSE (#6639 F3): world = frame.T @ contact.
                 frame = contact.frame.reshape(3, 3)
-                force_total += frame @ raw[:3]
-                torque_total += frame @ raw[3:]
+                force_total += frame.T @ raw[:3]
+                torque_total += frame.T @ raw[3:]
 
         return force_total, torque_total
 

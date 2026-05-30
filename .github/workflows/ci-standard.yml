@@ -142,6 +142,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -585,6 +587,8 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -644,6 +648,8 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.12"
           cache: "pip"
@@ -754,6 +760,8 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
@@ -1015,6 +1023,8 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1075,6 +1085,8 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1194,6 +1206,8 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1365,6 +1379,8 @@ jobs:
 
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1387,23 +1403,6 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
-    # Cross-platform matrix (issue #5221): catch platform-specific socket /
-    # filesystem / path bugs in IO-touching crates (realtime pub/sub, codemap
-    # CLI) before users see them. Workspace member enumeration is delegated to
-    # cargo (`--all`, `--all-targets`, `--workspace`) so new crates joining
-    # `[workspace] members = [...]` in the root Cargo.toml are automatically
-    # covered without editing this matrix. The Tauri shell stays excluded via
-    # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
-    # tauri-build.yml.
-    #
-    # Runner choice: Linux-only on self-hosted d-sorg-fleet-docker (any bulk runner). The
-    # cross-platform matrix entries (windows-latest, macos-latest) were dropped
-    # 2026-05-17 because the fleet has no Windows or macOS runners and the org
-    # policy forbids fallback to GitHub-hosted runners (Runner_Dashboard#641).
-    # The os axis is retained as a single-entry matrix so step-level
-    # `if: matrix.os == 'ubuntu-latest'` guards continue to fire and artifact
-    # naming keyed on `${{ matrix.os }}` stays stable. Restoring Windows and
-    # macOS coverage is tracked in Runner_Dashboard#642 (macOS) and #643 (Windows).
     needs: pick-runner
     strategy:
       fail-fast: false
@@ -1489,6 +1488,8 @@ jobs:
       # Tracked: issue #5221.
 
       - name: Set up Python (for PyO3 builds)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -1674,6 +1675,8 @@ jobs:
 
 
       - name: Setup Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:

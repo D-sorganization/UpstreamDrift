@@ -22,7 +22,13 @@ except ImportError:
         pink.tasks = MagicMock()
 
 # Type alias for transformation matrices
-Transform = pin.SE3 | np.ndarray
+if typing.TYPE_CHECKING:
+    Transform: typing.TypeAlias = pin.SE3 | np.ndarray
+else:
+    try:
+        Transform = pin.SE3 | np.ndarray
+    except (AttributeError, TypeError):
+        Transform = np.ndarray
 
 
 def create_frame_task(
