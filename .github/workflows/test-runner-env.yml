@@ -9,11 +9,9 @@ jobs:
   inspect:
     runs-on: d-sorg-fleet-docker
     steps:
-      - name: Search Python Tarballs
+      - name: List Python Version Cache Files
         run: |
-          echo "=== Search Python Archives ==="
-          find /home/dieterolson/ -maxdepth 4 -name "*3.11.15*" 2>/dev/null | grep -E '\.(tar\.gz|tgz|zip|tar\.xz)$' || true
-          echo "=== List dieterolson home files ==="
-          ls -la /home/dieterolson/ || true
-          ls -la /home/dieterolson/actions-runners-nvme/ || true
-          ls -la /home/dieterolson/actions-runners/ || true
+          echo "=== List Python/3.11.15 ==="
+          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/3.11.15/ || true
+          echo "=== List Python/3.11.15/x64 ==="
+          ls -la /home/dieterolson/actions-runners-nvme/.shared-tool-cache/Python/3.11.15/x64/ || true
