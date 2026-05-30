@@ -2,6 +2,7 @@
 
 # Python 3.10 compatibility: UTC constant was added in 3.11
 from datetime import datetime, timedelta
+from typing import cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -23,7 +24,6 @@ from src.api.auth.models import (
 )
 from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
 from src.api.database import get_db
-from src.api.rate_limit import limiter
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
 
@@ -34,10 +34,9 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 REGISTRATION_RATE_LIMIT = "3/hour"
 LOGIN_RATE_LIMIT = "5/minute"
 
-# SECURITY (issue #6636 F4): use the SHARED limiter from src.api.rate_limit,
-# which is the instance wired into ``app.state.limiter`` and the SlowAPI
-# middleware in server.py. A separate Limiter() instance here would make the
-# @limiter.limit decorators silently non-enforcing.
+# Use shared limiter - registered with app.state in server.py
+# This ensures proper rate limiting across all routes
+from src.api.rate_limit import limiter
 
 
 @router.post("/register", response_model=UserResponse)
@@ -288,6 +287,16 @@ async def list_users(
     return [UserResponse.from_orm(user) for user in users]
 
 
+def _count_active_admins(db: Session) -> int:
+    """Return the number of active admin users."""
+    return cast(
+        int,
+        db.query(User)
+        .filter(User.role == UserRole.ADMIN.value, User.is_active)
+        .count(),
+    )
+
+
 @router.put("/users/{user_id}/role")
 @precondition(
     lambda user_id, new_role, current_user=None, db=None: user_id > 0,
@@ -299,12 +308,26 @@ async def update_user_role(
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
-    """Update user role (admin only)."""
+    """Update user role (admin only).
+
+    Precondition: user_id > 0, new_role is a valid UserRole.
+    Postcondition: user.role == new_role.value, unless the last admin would be demoted.
+    """
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if (
+        new_role != UserRole.ADMIN
+        and user.role == UserRole.ADMIN.value
+        and _count_active_admins(db) <= 1
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot demote the last active admin",
         )
 
     user.role = new_role.value  # type: ignore[assignment]
@@ -324,13 +347,30 @@ async def update_user_status(
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
-    """Update user active status (admin only)."""
+    """Update user active status (admin only).
+
+    Precondition: user_id > 0.
+    Postcondition: user.is_active == is_active, unless the last admin would be deactivated
+    or the admin is deactivating themselves.
+    """
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
+
+    if not is_active:
+        if user.id == current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot deactivate your own account",
+            )
+        if user.role == UserRole.ADMIN.value and _count_active_admins(db) <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot deactivate the last active admin",
+            )
 
     user.is_active = is_active  # type: ignore[assignment]
     db.commit()
