@@ -55,19 +55,26 @@ export interface GenerateResult {
 
 export type DatasetLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
-function catalogArray<T>(data: unknown, keys: string[]): T[] {
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (!data || typeof data !== 'object') {
-    return [];
-  }
+// ── Helpers ──────────────────────────────────────────────────────────────
 
-  const record = data as Record<string, unknown>;
-  for (const key of keys) {
-    const value = record[key];
-    if (Array.isArray(value)) {
-      return value;
+/**
+ * Normalize a catalog response into a typed array.
+ *
+ * The dataset catalog endpoints in `src/api/routes/dataset.py` return BARE
+ * arrays. This tolerates that shape, a future `{<key>: [...]}` wrapper (for
+ * any of `keys`), and any malformed/null payload (→ `[]`), so the sidebar is
+ * populated against the existing API contract (review-feedback #6703).
+ *
+ * @param data - Parsed JSON body (array, wrapper object, or anything)
+ * @param keys - Candidate wrapper keys to probe, in priority order
+ * @returns A `T[]` — never throws, never returns a non-array
+ */
+function asCatalogArray<T>(data: unknown, keys: readonly string[]): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === 'object') {
+    for (const key of keys) {
+      const value = (data as Record<string, unknown>)[key];
+      if (Array.isArray(value)) return value as T[];
     }
   }
   return [];
@@ -90,7 +97,7 @@ export function useDatasetGenerator() {
   const fetchFeatures = useCallback(async () => {
     try {
       const data = await apiFetch<unknown>('/api/dataset/features');
-      const list = catalogArray<FeatureInfo>(data, ['features']);
+      const list = asCatalogArray<FeatureInfo>(data, ['features']);
       if (isMountedRef.current) setFeatures(list);
     } catch (err) {
       if (isMountedRef.current)
@@ -100,10 +107,8 @@ export function useDatasetGenerator() {
 
   const fetchPlotTypes = useCallback(async () => {
     try {
-      const data = await apiFetch<unknown>(
-        '/api/dataset/plots/types',
-      );
-      const list = catalogArray<PlotType>(data, ['plot_types', 'types']);
+      const data = await apiFetch<unknown>('/api/dataset/plots/types');
+      const list = asCatalogArray<PlotType>(data, ['plot_types', 'types']);
       if (isMountedRef.current) setPlotTypes(list);
     } catch (err) {
       if (isMountedRef.current)
@@ -113,10 +118,8 @@ export function useDatasetGenerator() {
 
   const fetchExportFormats = useCallback(async () => {
     try {
-      const data = await apiFetch<unknown>(
-        '/api/dataset/export/formats',
-      );
-      const list = catalogArray<ExportFormat>(data, ['formats']);
+      const data = await apiFetch<unknown>('/api/dataset/export/formats');
+      const list = asCatalogArray<ExportFormat>(data, ['formats']);
       if (isMountedRef.current) setExportFormats(list);
     } catch (err) {
       if (isMountedRef.current)

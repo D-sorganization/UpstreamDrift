@@ -1,78 +1,99 @@
+/**
+ * TDD tests for useDatasetGenerator catalog fetching.
+ *
+ * Regression for review-feedback #6703: the dataset catalog endpoints
+ * (`/api/dataset/features`, `/plots/types`, `/export/formats`) return BARE
+ * ARRAYS from the backend (src/api/routes/dataset.py). The hook must populate
+ * its state from those bare arrays, while still tolerating a future
+ * `{features: [...]}` / `{plot_types: [...]}` / `{formats: [...]}` wrapper.
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { apiFetch } from './fetch';
 import { useDatasetGenerator } from './useDatasetGenerator';
+import type { FeatureInfo, PlotType, ExportFormat } from './useDatasetGenerator';
 
-vi.mock('./fetch', () => ({
-  apiFetch: vi.fn(),
-}));
+const FEATURES: FeatureInfo[] = [
+  { id: 'f1', name: 'Feature One', description: 'desc', category: 'control' },
+];
+const PLOT_TYPES: PlotType[] = [
+  { id: 'scatter', name: 'Scatter', description: 'desc', axes: ['x', 'y'] },
+];
+const EXPORT_FORMATS: ExportFormat[] = [
+  { id: 'csv', name: 'CSV', extension: '.csv', mime_type: 'text/csv' },
+];
 
-const feature = {
-  id: 'club_speed',
-  name: 'Club Speed',
-  description: 'Club head speed',
-  category: 'kinematics',
-};
+const originalFetch = global.fetch;
 
-const plotType = {
-  id: 'scatter',
-  name: 'Scatter Plot',
-  description: 'Two-variable scatter plot',
-  axes: ['x', 'y'],
-};
+/** Route a mocked fetch by URL suffix to the supplied JSON payloads. */
+function mockCatalog(payloads: {
+  features: unknown;
+  plots: unknown;
+  formats: unknown;
+  controls?: unknown;
+}) {
+  global.fetch = vi.fn((input: RequestInfo | URL) => {
+    const url = String(input);
+    const pick = url.endsWith('/api/dataset/features')
+      ? payloads.features
+      : url.endsWith('/api/dataset/plots/types')
+        ? payloads.plots
+        : url.endsWith('/api/dataset/export/formats')
+          ? payloads.formats
+          : (payloads.controls ?? { controls: [] });
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(pick),
+    } as Response);
+  }) as typeof fetch;
+}
 
-const exportFormat = {
-  id: 'csv',
-  name: 'CSV',
-  extension: 'csv',
-  mime_type: 'text/csv',
-};
-
-describe('useDatasetGenerator catalog responses', () => {
-  const apiFetchMock = vi.mocked(apiFetch);
-
+describe('useDatasetGenerator catalog parsing', () => {
   beforeEach(() => {
-    apiFetchMock.mockReset();
+    vi.clearAllMocks();
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
-  it('preserves bare-array catalog responses', async () => {
-    apiFetchMock.mockImplementation(async (path) => {
-      if (path === '/api/dataset/features') return [feature];
-      if (path === '/api/dataset/plots/types') return [plotType];
-      if (path === '/api/dataset/export/formats') return [exportFormat];
-      if (path === '/api/dataset/control') return { controls: [] };
-      throw new Error(`Unexpected path: ${path}`);
+  it('populates catalogs from BARE-ARRAY backend responses (#6703)', async () => {
+    mockCatalog({ features: FEATURES, plots: PLOT_TYPES, formats: EXPORT_FORMATS });
+
+    const { result } = renderHook(() => useDatasetGenerator());
+
+    await waitFor(() => expect(result.current.catalogLoading).toBe(false));
+
+    expect(result.current.features).toEqual(FEATURES);
+    expect(result.current.plotTypes).toEqual(PLOT_TYPES);
+    expect(result.current.exportFormats).toEqual(EXPORT_FORMATS);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('still tolerates wrapped-object responses', async () => {
+    mockCatalog({
+      features: { features: FEATURES },
+      plots: { plot_types: PLOT_TYPES },
+      formats: { formats: EXPORT_FORMATS },
     });
 
     const { result } = renderHook(() => useDatasetGenerator());
 
-    await waitFor(() => {
-      expect(result.current.catalogLoading).toBe(false);
-    });
+    await waitFor(() => expect(result.current.catalogLoading).toBe(false));
 
-    expect(result.current.features).toEqual([feature]);
-    expect(result.current.plotTypes).toEqual([plotType]);
-    expect(result.current.exportFormats).toEqual([exportFormat]);
+    expect(result.current.features).toEqual(FEATURES);
+    expect(result.current.plotTypes).toEqual(PLOT_TYPES);
+    expect(result.current.exportFormats).toEqual(EXPORT_FORMATS);
   });
 
-  it('keeps wrapper-object catalog response support', async () => {
-    apiFetchMock.mockImplementation(async (path) => {
-      if (path === '/api/dataset/features') return { features: [feature] };
-      if (path === '/api/dataset/plots/types') return { plot_types: [plotType] };
-      if (path === '/api/dataset/export/formats') return { formats: [exportFormat] };
-      if (path === '/api/dataset/control') return { controls: [] };
-      throw new Error(`Unexpected path: ${path}`);
-    });
+  it('falls back to empty arrays on malformed payloads', async () => {
+    mockCatalog({ features: 'nope', plots: 42, formats: null });
 
     const { result } = renderHook(() => useDatasetGenerator());
 
-    await waitFor(() => {
-      expect(result.current.catalogLoading).toBe(false);
-    });
+    await waitFor(() => expect(result.current.catalogLoading).toBe(false));
 
-    expect(result.current.features).toEqual([feature]);
-    expect(result.current.plotTypes).toEqual([plotType]);
-    expect(result.current.exportFormats).toEqual([exportFormat]);
+    expect(result.current.features).toEqual([]);
+    expect(result.current.plotTypes).toEqual([]);
+    expect(result.current.exportFormats).toEqual([]);
   });
 });
