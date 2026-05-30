@@ -73,22 +73,19 @@ jobs:
           fetch-depth: 1
           submodules: false
 
-      - name: Force-clean stale Python tool cache (NVMe runners)
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
-            if [ -d "$cache_root/Python" ]; then
-              echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
-              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
-            fi
-          done
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
       - name: Set up Python
-        env:
-          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
         with:
           python-version: "3.11"
