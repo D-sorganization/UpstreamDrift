@@ -55,6 +55,24 @@ export interface GenerateResult {
 
 export type DatasetLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
+function catalogArray<T>(data: unknown, keys: string[]): T[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (!data || typeof data !== 'object') {
+    return [];
+  }
+
+  const record = data as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (Array.isArray(value)) {
+      return value;
+    }
+  }
+  return [];
+}
+
 // ── Hook ───────────────────────────────────────────────────────────────
 
 export function useDatasetGenerator() {
@@ -71,8 +89,8 @@ export function useDatasetGenerator() {
 
   const fetchFeatures = useCallback(async () => {
     try {
-      const data = await apiFetch<{ features?: FeatureInfo[] }>('/api/dataset/features');
-      const list = Array.isArray(data.features) ? data.features : [];
+      const data = await apiFetch<unknown>('/api/dataset/features');
+      const list = catalogArray<FeatureInfo>(data, ['features']);
       if (isMountedRef.current) setFeatures(list);
     } catch (err) {
       if (isMountedRef.current)
@@ -82,14 +100,10 @@ export function useDatasetGenerator() {
 
   const fetchPlotTypes = useCallback(async () => {
     try {
-      const data = await apiFetch<{ plot_types?: PlotType[]; types?: PlotType[] }>(
+      const data = await apiFetch<unknown>(
         '/api/dataset/plots/types',
       );
-      const list = Array.isArray(data.plot_types)
-        ? data.plot_types
-        : Array.isArray(data.types)
-          ? data.types
-          : [];
+      const list = catalogArray<PlotType>(data, ['plot_types', 'types']);
       if (isMountedRef.current) setPlotTypes(list);
     } catch (err) {
       if (isMountedRef.current)
@@ -99,10 +113,10 @@ export function useDatasetGenerator() {
 
   const fetchExportFormats = useCallback(async () => {
     try {
-      const data = await apiFetch<{ formats?: ExportFormat[] }>(
+      const data = await apiFetch<unknown>(
         '/api/dataset/export/formats',
       );
-      const list = Array.isArray(data.formats) ? data.formats : [];
+      const list = catalogArray<ExportFormat>(data, ['formats']);
       if (isMountedRef.current) setExportFormats(list);
     } catch (err) {
       if (isMountedRef.current)
