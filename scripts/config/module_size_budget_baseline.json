@@ -22,7 +22,7 @@
     {
       "path": "src/launchers/launcher_ui_setup.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher UI setup module (1764 lines, pending decomposition under #5922)",
+      "reason": "Legacy launcher UI setup module (2105 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     },
     {
@@ -53,18 +53,6 @@
       "path": "src/shared/python/physics/terrain_representation.py",
       "owner": "@physics-core",
       "reason": "Terrain representation (1228 lines) combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher diagnostics (1236 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/launchers/settings_dialog.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy settings dialog UI (1915 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     }
   ]
