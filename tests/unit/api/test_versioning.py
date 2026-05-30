@@ -10,7 +10,7 @@ from src.api import versioning
 def test_get_app_version_matches_pyproject() -> None:
     """Fallback version source should match pyproject version."""
     versioning.get_app_version.cache_clear()
-    assert versioning.get_app_version() == "2.1.0"
+    assert versioning.get_app_version() == "2.1.1"
 
 
 def test_get_app_version_prefers_package_metadata(monkeypatch) -> None:

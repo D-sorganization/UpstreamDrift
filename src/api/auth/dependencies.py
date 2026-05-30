@@ -13,6 +13,7 @@ except ImportError:
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from src.api.database import get_db
@@ -29,6 +30,26 @@ from .security import (
 security = HTTPBearer()
 
 
+def _unauthorized(detail: str) -> HTTPException:
+    """Return a 401 HTTPException with the standard Bearer WWW-Authenticate header."""
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=detail,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+def _assert_type(obj: object, cls: type, name: str = "object") -> None:
+    """Raise ValueError if obj is not an instance of cls.
+
+    Used to satisfy mypy where SQLAlchemy query results are typed ambiguously.
+    """
+    if not isinstance(obj, cls):
+        raise ValueError(
+            f"Expected {cls.__name__}, got {type(obj).__name__} for {name}"
+        )
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
@@ -40,42 +61,23 @@ async def get_current_user(
     user_id = payload.get("sub")
 
     if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("Could not validate credentials")
 
     # Get user from database
     user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("User not found")
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Inactive user",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("Inactive user")
 
-    # In mypy, SQLAlchemy query results are sometimes ambiguous
-    # We assert user is of type User to satisfy mypy
-    if not isinstance(user, User):
-        raise ValueError(f"Expected User, got {type(user).__name__}")
-    return user
+    _assert_type(user, User, "current_user")
+    return user  # type: ignore[return-value]
 
 
 def _validate_api_key_format(api_key: str) -> None:
     if not api_key.startswith("gms_"):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key format",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("Invalid API key format")
 
 
 def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
@@ -88,19 +90,14 @@ def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
     if not record or not record.is_active:
         return None
 
-    if not isinstance(record, APIKey):
-        raise ValueError(f"Expected APIKey, got {type(record).__name__}")
-    return record
+    _assert_type(record, APIKey, "cached_api_key")
+    return record  # type: ignore[return-value]
 
 
 def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
     key_body = api_key[4:]
     if len(key_body) < 8:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key format",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("Invalid API key format")
 
     prefix_for_index = key_body[:8]
     prefix_hash = compute_prefix_hash(prefix_for_index)
@@ -111,41 +108,34 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
             .filter(APIKey.is_active, APIKey.key_prefix == prefix_hash)
             .all()
         )
-    except (RuntimeError, ValueError, OSError):
-        # Fallback: key_prefix column not yet migrated (schema pending)
+    except (OperationalError, ProgrammingError):
+        # Fallback only for schema-missing errors (key_prefix column not yet migrated).
+        # Broad exceptions like RuntimeError/OSError are NOT suppressed here to avoid
+        # masking real DB failures and to prevent O(n) bcrypt DoS amplification.
+        import logging as _logging
+
+        _logging.getLogger(__name__).debug(
+            "key_prefix index unavailable, falling back to full key scan"
+        )
         active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     if not active_keys:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _unauthorized("Invalid API key")
 
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
-            if not isinstance(key_candidate, APIKey):
-                raise ValueError(f"Expected APIKey, got {type(key_candidate).__name__}")
-            return key_candidate
+            _assert_type(key_candidate, APIKey, "api_key_candidate")
+            return key_candidate  # type: ignore[return-value]
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid API key",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    raise _unauthorized("Invalid API key")
 
 
 def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
     user = db.query(User).filter(User.id == api_key_record.user_id).first()
     if not user or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found or inactive",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    if not isinstance(user, User):
-        raise ValueError(f"Expected User, got {type(user).__name__}")
-    return user
+        raise _unauthorized("User not found or inactive")
+    _assert_type(user, User, "api_key_user")
+    return user  # type: ignore[return-value]
 
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
