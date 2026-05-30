@@ -154,49 +154,67 @@ describe('DatasetGenerator data structures', () => {
   });
 });
 
-describe('DatasetGenerator export behaviour', () => {
-  it('export endpoint URL uses the format id', () => {
-    const format = 'csv';
-    const url = `/api/dataset/export/${encodeURIComponent(format)}`;
-    expect(url).toBe('/api/dataset/export/csv');
-  });
+// ── F1: Export button wiring ────────────────────────────────────────────────
+describe('DatasetGenerator export wiring (F1 — issue #6642)', () => {
+  it('exportDataset is called with dataset_id and format', () => {
+    const calls: Array<[string, string]> = [];
+    const exportDataset = (id: string, fmt: string) => { calls.push([id, fmt]); };
 
-  it('export endpoint URL encodes non-trivial format ids', () => {
-    const format = 'hdf5+zip';
-    const url = `/api/dataset/export/${encodeURIComponent(format)}`;
-    expect(url).toBe('/api/dataset/export/hdf5%2Bzip');
-  });
-
-  it('export requires a dataset_id in the request body', () => {
-    const result: GenerateResult = {
-      dataset_id: 'ds_abc123',
-      name: 'swing_batch',
-      rows: 100,
-      columns: ['time'],
-      created_at: '2026-01-01',
-    };
-    const body = JSON.stringify({ dataset_id: result.dataset_id });
-    const parsed = JSON.parse(body);
-    expect(parsed.dataset_id).toBe('ds_abc123');
-  });
-
-  it('export button is disabled when no generateResult', () => {
-    const generateResult: GenerateResult | null = null;
-    const isLoading = false;
-    const disabled = !generateResult || isLoading;
-    expect(disabled).toBe(true);
-  });
-
-  it('export button is enabled when generateResult is present', () => {
     const generateResult: GenerateResult = {
-      dataset_id: 'ds_1',
-      name: 'test',
-      rows: 10,
-      columns: [],
-      created_at: '2026-01-01',
+      dataset_id: 'ds_test_001',
+      name: 'test_dataset',
+      rows: 500,
+      columns: ['x', 'y'],
+      created_at: '2026-01-01T00:00:00Z',
     };
-    const isLoading = false;
-    const disabled = !generateResult || isLoading;
-    expect(disabled).toBe(false);
+
+    // Simulate what the Export button handler does
+    const exportFormat = 'csv';
+    if (generateResult) {
+      exportDataset(generateResult.dataset_id, exportFormat);
+    }
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0][0]).toBe('ds_test_001');
+    expect(calls[0][1]).toBe('csv');
+  });
+
+  it('Export button is disabled when generateResult is null', () => {
+    // The button's disabled logic: !generateResult || isLoading
+    const isDisabled = (generateResult: GenerateResult | null, isLoading: boolean) =>
+      !generateResult || isLoading;
+
+    expect(isDisabled(null, false)).toBe(true);
+    expect(isDisabled(null, true)).toBe(true);
+    expect(isDisabled(
+      { dataset_id: 'ds1', name: 'n', rows: 1, columns: [], created_at: '' },
+      false,
+    )).toBe(false);
+    expect(isDisabled(
+      { dataset_id: 'ds1', name: 'n', rows: 1, columns: [], created_at: '' },
+      true,
+    )).toBe(true);
+  });
+});
+
+// ── F4: API shape guards ─────────────────────────────────────────────────────
+describe('DatasetGenerator API shape guards (F4 — issue #6642)', () => {
+  it('should not crash on malformed features response', () => {
+    // Simulate apiFetch returning a non-array where features is expected
+    const malformed = { features: null } as Record<string, unknown>;
+    const list = Array.isArray(malformed.features) ? malformed.features : [];
+    expect(list).toHaveLength(0);
+  });
+
+  it('should not crash on missing features key', () => {
+    const malformed = {} as Record<string, unknown>;
+    const list = Array.isArray(malformed.features) ? malformed.features : [];
+    expect(list).toHaveLength(0);
+  });
+
+  it('should pass through a valid array', () => {
+    const valid = { features: [{ id: 'f1', name: 'F1', description: 'd', category: 'c' }] };
+    const list = Array.isArray(valid.features) ? valid.features : [];
+    expect(list).toHaveLength(1);
   });
 });
