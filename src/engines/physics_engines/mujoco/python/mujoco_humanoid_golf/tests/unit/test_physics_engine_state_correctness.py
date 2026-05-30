@@ -38,9 +38,9 @@ _MINIMAL_XML = """
 @pytest.fixture()
 def engine():
     """Return a loaded MuJoCoPhysicsEngine fixture."""
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
-        MuJoCoPhysicsEngine,
-    )
+    from src.engines.physics_engines.mujoco import python as mj_py
+
+    MuJoCoPhysicsEngine = mj_py.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine
 
     eng = MuJoCoPhysicsEngine()
     eng.load_from_string(_MINIMAL_XML)
@@ -50,9 +50,9 @@ def engine():
 @pytest.fixture()
 def unloaded_engine():
     """Return an unloaded MuJoCoPhysicsEngine fixture."""
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
-        MuJoCoPhysicsEngine,
-    )
+    from src.engines.physics_engines.mujoco import python as mj_py
+
+    MuJoCoPhysicsEngine = mj_py.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine
 
     return MuJoCoPhysicsEngine()
 
