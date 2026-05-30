@@ -145,8 +145,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -599,8 +599,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -669,8 +669,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -759,7 +759,6 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-
       - name: Install System Dependencies
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
@@ -790,8 +789,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1062,8 +1061,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1133,8 +1132,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1233,7 +1232,6 @@ jobs:
             exit 1
           fi
 
-
       - name: Install System Dependencies
         run: |
           apt_retry() {
@@ -1263,8 +1261,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1445,8 +1443,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1563,8 +1561,8 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
@@ -1754,13 +1752,12 @@ jobs:
             echo "No Rust changes detected  -  skipping Rust quickstart."
           fi
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else

@@ -61,13 +61,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ -f /.dockerenv ]; then
-            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+          if [ -f /.dockerenv ] || grep -qiE 'docker|container|sandbox' /proc/1/cgroup 2>/dev/null || grep -q 'VERSION_ID="24.04"' /etc/os-release 2>/dev/null; then
+            echo "Running inside Docker container or Ubuntu 24.04. Redirecting tool cache to private temp directory..."
             mkdir -p "$RUNNER_TEMP/hostedtoolcache"
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else

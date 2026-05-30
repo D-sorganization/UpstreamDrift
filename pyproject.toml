@@ -69,7 +69,7 @@ mocap-io = ["upstream-mocap-io>=0.1.0"]
 # Upper bounds added per issue #5914 to prevent silent breakage on
 # upstream major releases of these physics engines.
 drake = ["drake>=1.22.0,<2.0.0"]
-pinocchio = ["pin>=2.6.0,<3.0.0", "meshcat>=0.3.0,<1.0.0"]
+pinocchio = ["pin>=2.6.0,<4.0.0", "meshcat>=0.3.0,<1.0.0"]
 chrono = ["pychrono>=8.0,<10.0"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
