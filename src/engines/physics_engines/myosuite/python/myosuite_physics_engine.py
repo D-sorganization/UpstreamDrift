@@ -20,7 +20,7 @@ from __future__ import annotations
 
 # Path: src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py -> need 6 parents
 from src.engines.tiers import warn_if_experimental
-from src.shared.python.engine_core.interfaces import PhysicsEngine  # noqa: E402
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 from ._drift_control import DriftControlMixin
@@ -38,7 +38,7 @@ class MyoSuitePhysicsEngine(
     DynamicsMixin,
     DriftControlMixin,
     MuscleInterfaceMixin,
-    PhysicsEngine,
+    BasePhysicsEngine,
 ):
     """MyoSuite Engine Wrapper.
 
@@ -48,12 +48,20 @@ class MyoSuitePhysicsEngine(
 
     Accesses underlying MuJoCo simulation for dynamics where possible.
 
+    Inherits checkpoint save/restore (Checkpointable contract) from BasePhysicsEngine.
+
     """
 
     def __init__(self) -> None:
         """Initialize."""
         warn_if_experimental("myosuite", "MyoSuite")
+        BasePhysicsEngine.__init__(self)
         EngineInitMixin.__init__(self)
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "myosuite"
 
 
 def main() -> None:

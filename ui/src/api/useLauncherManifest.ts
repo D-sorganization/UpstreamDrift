@@ -65,6 +65,10 @@ export function useLauncherManifest(): UseLauncherManifestResult {
             }
             const data: LauncherManifest = await response.json();
 
+            if (!Array.isArray(data.tiles)) {
+                throw new Error('Invalid manifest: tiles must be an array');
+            }
+
             // Filter hidden tiles (e.g. legacy aliases retained for saved
             // layout resolution) so the dashboard does not render duplicate
             // cards for the same app (issue #4507).

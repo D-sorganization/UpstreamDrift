@@ -39,6 +39,9 @@ globals().update({name: getattr(_physics_constants, name) for name in __all__})
 
 # Pre-computed float values for commonly used constants
 # (Avoids repeated float() conversions from PhysicalConstant in multiple modules)
+# F5 fix: single source of truth for gravitational acceleration.
+# Use GRAVITY_FLOAT (9.80665 m/s²) everywhere; GRAVITY is preserved for backward
+# compatibility only.  New code MUST use GRAVITY_FLOAT.
 GRAVITY_FLOAT: float = float(GRAVITY_M_S2)
 # Single source of truth for gravity magnitude (#6638 F5). Previously this was a
 # separate 9.81 literal that drifted ~0.05 m/s^2 from GRAVITY_M_S2 (~9.80665),

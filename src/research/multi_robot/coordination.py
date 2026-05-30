@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
+from src.shared.python.spatial_algebra import quaternion_to_rotation_matrix
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -226,36 +227,10 @@ class FormationController:
         self,
         quat: NDArray[np.floating],
     ) -> NDArray[np.floating]:
-        """Convert quaternion to rotation matrix.
-
-        Args:
-            quat: Quaternion [w, x, y, z].
-
-        Returns:
-            3x3 rotation matrix.
-        """
+        """Convert quaternion [w, x, y, z] to a 3×3 rotation matrix."""
         if quat is None:
             raise ValueError("quat must be provided")
-        w, x, y, z = quat
-        return np.array(
-            [
-                [
-                    1 - 2 * y * y - 2 * z * z,
-                    2 * x * y - 2 * z * w,
-                    2 * x * z + 2 * y * w,
-                ],
-                [
-                    2 * x * y + 2 * z * w,
-                    1 - 2 * x * x - 2 * z * z,
-                    2 * y * z - 2 * x * w,
-                ],
-                [
-                    2 * x * z - 2 * y * w,
-                    2 * y * z + 2 * x * w,
-                    1 - 2 * x * x - 2 * y * y,
-                ],
-            ]
-        )
+        return quaternion_to_rotation_matrix(np.asarray(quat, dtype=np.float64))
 
     def set_formation(self, formation: FormationConfig) -> None:
         """Change the formation.
@@ -382,27 +357,7 @@ class CooperativeManipulation:
             object_pose[3:7] if len(object_pose) >= 7 else np.array([1, 0, 0, 0])
         )
 
-        # Rotation matrix
-        w, x, y, z = object_quat
-        R = np.array(
-            [
-                [
-                    1 - 2 * y * y - 2 * z * z,
-                    2 * x * y - 2 * z * w,
-                    2 * x * z + 2 * y * w,
-                ],
-                [
-                    2 * x * y + 2 * z * w,
-                    1 - 2 * x * x - 2 * z * z,
-                    2 * y * z - 2 * x * w,
-                ],
-                [
-                    2 * x * z - 2 * y * w,
-                    2 * y * z + 2 * x * w,
-                    1 - 2 * x * x - 2 * y * y,
-                ],
-            ]
-        )
+        R = quaternion_to_rotation_matrix(np.asarray(object_quat, dtype=np.float64))
 
         for i in range(n_contacts):
             # Contact point in world frame
@@ -563,29 +518,10 @@ class CooperativeManipulation:
         self,
         quat: NDArray[np.floating],
     ) -> NDArray[np.floating]:
-        """Convert quaternion to rotation matrix."""
+        """Convert quaternion [w, x, y, z] to a 3×3 rotation matrix."""
         if quat is None:
             raise ValueError("quat must be provided")
-        w, x, y, z = quat
-        return np.array(
-            [
-                [
-                    1 - 2 * y * y - 2 * z * z,
-                    2 * x * y - 2 * z * w,
-                    2 * x * z + 2 * y * w,
-                ],
-                [
-                    2 * x * y + 2 * z * w,
-                    1 - 2 * x * x - 2 * z * z,
-                    2 * y * z - 2 * x * w,
-                ],
-                [
-                    2 * x * z - 2 * y * w,
-                    2 * y * z + 2 * x * w,
-                    1 - 2 * x * x - 2 * y * y,
-                ],
-            ]
-        )
+        return quaternion_to_rotation_matrix(np.asarray(quat, dtype=np.float64))
 
     def check_force_closure(
         self,

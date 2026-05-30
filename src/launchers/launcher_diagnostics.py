@@ -138,6 +138,7 @@ class LauncherDiagnostics:
         "model_explorer": "Model Explorer",
         "video_analyzer": "Video Analyzer",
         "data_explorer": "Data Explorer",
+        "data_processor": "Data Processor",
         "project_map": "Project Map",
     }
 

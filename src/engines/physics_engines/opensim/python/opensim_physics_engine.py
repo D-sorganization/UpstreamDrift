@@ -22,7 +22,7 @@ from src.shared.python.core.contracts import (
     precondition,
 )
 from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
-from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Configure logging
@@ -38,10 +38,15 @@ else:
     )
 
 
-class OpenSimPhysicsEngine(PhysicsEngine):
-    """OpenSim Physics Engine Implementation."""
+class OpenSimPhysicsEngine(BasePhysicsEngine):
+    """OpenSim Physics Engine Implementation.
+
+    Inherits checkpoint save/restore (Checkpointable contract), path validation,
+    and model name tracking from BasePhysicsEngine.
+    """
 
     def __init__(self) -> None:
+        super().__init__()
         warn_if_experimental("opensim", "OpenSim")
         self._model = None
         self._state = None
@@ -51,6 +56,11 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         if opensim is None:
             logger.error("OpenSim library is not installed.")
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "opensim"
 
     @property
     def model_name(self) -> str:
@@ -63,6 +73,45 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def is_initialized(self) -> bool:
         """Check if the engine has a loaded model."""
         return self._model is not None and self._state is not None
+
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine)."""
+        if opensim is None:
+            raise ImportError("OpenSim library not installed")
+
+        self._model = opensim.Model(path)
+        self._model_path = path
+        if self._model is None:
+            raise ValueError("Failed to create OpenSim Model object")
+        # Initialize the system and state
+        self._state = self._model.initSystem()
+        self._manager = opensim.Manager(self._model)
+        logger.info("Loaded OpenSim model from %s", path)
+
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific string loading (called by BasePhysicsEngine)."""
+        import tempfile
+
+        suffix = f".{extension}" if extension else ".osim"
+        tmp_path = ""
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=suffix, delete=False
+            ) as tmp:
+                tmp.write(content)
+                tmp_path = tmp.name
+
+            self._load_from_path_impl(tmp_path)
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except (RuntimeError, ValueError, OSError) as cleanup_error:
+                    logger.warning(
+                        "Failed to remove temporary file %s: %s",
+                        tmp_path,
+                        cleanup_error,
+                    )
 
     def load_from_path(self, path: str) -> None:
         """Load an OpenSim model from a file path."""
@@ -78,16 +127,10 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             raise FileNotFoundError(f"Model file not found: {path}")
 
         try:
-            self._model = opensim.Model(path)
-            self._model_path = path
-            if self._model is None:
-                raise ValueError("Failed to create OpenSim Model object")
-            # Initialize the system and state
-            self._state = self._model.initSystem()
-            self._manager = opensim.Manager(self._model)
-            logger.info(f"Loaded OpenSim model from {path}")
+            self._load_from_path_impl(path)
+            self._is_initialized = True
         except ImportError as e:
-            logger.error(f"Failed to load OpenSim model: {e}")
+            logger.error("Failed to load OpenSim model: %s", e)
             raise
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
@@ -95,30 +138,12 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if opensim is None:
             raise ImportError("OpenSim library not installed")
 
-        import tempfile
-
-        suffix = f".{extension}" if extension else ".osim"
-        tmp_path = ""
         try:
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=suffix, delete=False
-            ) as tmp:
-                tmp.write(content)
-                tmp_path = tmp.name
-
-            self.load_from_path(tmp_path)
+            self._load_from_string_impl(content, extension)
+            self._is_initialized = True
         except (PermissionError, OSError) as e:
-            logger.error(f"Failed to load OpenSim model from string: {e}")
+            logger.error("Failed to load OpenSim model from string: %s", e)
             raise
-        finally:
-            # Clean up the temporary file if it was created
-            if tmp_path and os.path.exists(tmp_path):
-                try:
-                    os.remove(tmp_path)
-                except (RuntimeError, ValueError, OSError) as cleanup_error:
-                    logger.warning(
-                        f"Failed to remove temporary file {tmp_path}: {cleanup_error}"
-                    )
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:

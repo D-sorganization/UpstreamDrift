@@ -6,7 +6,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-import trimesh
+
+trimesh = pytest.importorskip("trimesh")
 
 from src.shared.python.body_part_viz import BodyPartShape
 from src.shared.python.body_part_viz.shapes import MeshShape

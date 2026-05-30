@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-import trimesh
+
+trimesh = pytest.importorskip("trimesh")
 
 from src.shared.python.body_part_viz.shapes._mesh_decimation import decimate
 

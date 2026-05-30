@@ -343,9 +343,9 @@ fn parse_point_params(
 
             if group_name == "POINT" {
                 match name.as_str() {
-                    "LABELS" => {
+                    "LABELS"
                         // 2D char array: dims = [string_len, n_strings]
-                        if element_size == -1 && dims.len() == 2 {
+                        if element_size == -1 && dims.len() == 2 => {
                             let slen = dims[0];
                             let n_str = dims[1];
                             for i in 0..n_str {
@@ -359,21 +359,18 @@ fn parse_point_params(
                                 labels.push(s);
                             }
                         }
-                    }
-                    "UNITS" => {
-                        if element_size == -1 && dims.len() == 2 {
+                    "UNITS"
+                        if element_size == -1 && dims.len() == 2 => {
                             let slen = dims[0];
                             // First string is the unit.
                             if slen <= data.len() {
                                 units = String::from_utf8_lossy(&data[..slen]).trim().to_string();
                             }
                         }
-                    }
-                    "RATE" => {
-                        if element_size == 4 && data.len() >= 4 {
+                    "RATE"
+                        if element_size == 4 && data.len() >= 4 => {
                             fps = endian.read_f32(&data[..4]);
                         }
-                    }
                     "FRAMES" => {
                         if element_size == 2 && data.len() >= 2 {
                             frames = endian.read_u16(&data[..2]) as usize;

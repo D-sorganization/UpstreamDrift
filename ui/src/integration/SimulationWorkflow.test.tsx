@@ -219,20 +219,15 @@ describe('Simulation Workflow Integration', () => {
       await vi.advanceTimersByTimeAsync(50);
 
       // Verify simulation starts
-      await waitFor(() => {
-        const ws = MockWebSocket.getLastInstance();
-        expect(ws).toBeDefined();
-        expect(ws!.url).toContain('mujoco');
-      });
+      const ws = MockWebSocket.getLastInstance();
+      expect(ws).toBeDefined();
+      expect(ws!.url).toContain('mujoco');
 
       // Advance timers for frames to be received
       await vi.advanceTimersByTimeAsync(200);
 
       // Verify we received frames - check for Frame text pattern
-      await waitFor(() => {
-        // The status should show frame count
-        expect(screen.getByText(/Frame \d+/)).toBeInTheDocument();
-      });
+      expect(screen.getByText(/Frame \d+/)).toBeInTheDocument();
     });
 
     it('allows switching engines before starting simulation', async () => {

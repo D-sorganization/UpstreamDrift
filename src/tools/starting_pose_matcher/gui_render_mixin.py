@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 
+import math
 import numpy as np
 
 from src.shared.python.motion_matching.diagnostics._skeleton_render import (
@@ -137,13 +138,15 @@ class _RenderMixin:
                 "dx_mm": float(d_mid[0]),
                 "dy_mm": float(d_mid[1]),
                 "dz_mm": float(d_mid[2]),
-                "norm_mm": float(np.linalg.norm(d_mid)),
+                # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+                "norm_mm": float(math.hypot(d_mid[0], d_mid[1], d_mid[2])),
             }
             ch_target = self._mocap_pos_for(slot, "club")
             if ch_target is not None and "ch" in slot.skeleton.joints:
                 moved_ch = self.transform.apply(slot.skeleton.joints["ch"][None, :])[0]
+                diff_ch = (moved_ch - ch_target) * 1000.0
                 entry["clubhead_norm_mm"] = float(
-                    np.linalg.norm((moved_ch - ch_target) * 1000.0)
+                    math.hypot(diff_ch[0], diff_ch[1], diff_ch[2])
                 )
             out[key] = entry
         return out
@@ -509,22 +512,23 @@ class _RenderMixin:
             n = hub - torso
         else:
             n = np.array([0.0, 0.0, 1.0])
-        nn = float(np.linalg.norm(n))
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        nn = float(math.hypot(n[0], n[1], n[2]))
         n = np.array([0.0, 0.0, 1.0]) if nn < 1e-6 else n / nn
 
         # In-plane axis: project (rs - ls) onto the plane orthogonal to n.
         rs_dir = rs - ls
         rs_dir = rs_dir - np.dot(rs_dir, n) * n
-        rd = float(np.linalg.norm(rs_dir))
+        rd = float(math.hypot(rs_dir[0], rs_dir[1], rs_dir[2]))
         if rd < 1e-6:
             # Pick any perpendicular if shoulders are degenerate.
             rs_dir = np.array([1.0, 0.0, 0.0])
             rs_dir = rs_dir - np.dot(rs_dir, n) * n
-            rd = float(np.linalg.norm(rs_dir))
+            rd = float(math.hypot(rs_dir[0], rs_dir[1], rs_dir[2]))
             if rd < 1e-6:
                 rs_dir = np.array([0.0, 1.0, 0.0])
                 rs_dir = rs_dir - np.dot(rs_dir, n) * n
-                rd = float(np.linalg.norm(rs_dir))
+                rd = float(math.hypot(rs_dir[0], rs_dir[1], rs_dir[2]))
                 if rd < 1e-6:
                     return
         rs_dir = rs_dir / rd

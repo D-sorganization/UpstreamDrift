@@ -50,7 +50,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -80,6 +79,10 @@ jobs:
         run: |
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
+          python -m venv "$RUNNER_TEMP/leaderboard-venv"
+          echo "$RUNNER_TEMP/leaderboard-venv/bin" >> "$GITHUB_PATH"
+          export PATH="$RUNNER_TEMP/leaderboard-venv/bin:$PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/leaderboard-venv" >> "$GITHUB_ENV"
           python -m ensurepip --upgrade || true
           sudo rm -f /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-*.list || true
           sudo apt-get update || true

@@ -27,7 +27,7 @@ fn rebuild_then_query() {
     let root = tmp.path();
     write_fixture(root);
 
-    let stats = indexer::rebuild(root, None).expect("rebuild");
+    let stats = indexer::rebuild(root, None).unwrap_or_else(|e| panic!("rebuild failed: {:?}", e));
     assert!(stats.files_parsed >= 3, "expected >=3 files, got {stats:?}");
     assert!(stats.symbols_inserted >= 4);
     assert!(stats.elapsed_s >= 0.0);
@@ -86,7 +86,7 @@ fn rebuild_skips_unchanged_files() {
     let root = tmp.path();
     write_fixture(root);
 
-    let first = indexer::rebuild(root, None).expect("first");
+    let first = indexer::rebuild(root, None).unwrap_or_else(|e| panic!("first failed: {:?}", e));
     assert!(first.files_parsed >= 3);
 
     let second = indexer::rebuild(root, None).expect("second");

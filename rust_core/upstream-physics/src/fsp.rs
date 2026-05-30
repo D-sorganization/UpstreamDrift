@@ -182,10 +182,8 @@ pub fn fsp_direction_deg(plane: &Plane, target_line: &[f64; 3]) -> f64 {
         ref_vec[1] - ref_dot * n[1],
         ref_vec[2] - ref_dot * n[2],
     ];
-    let ref_mag = (ref_proj[0] * ref_proj[0]
-        + ref_proj[1] * ref_proj[1]
-        + ref_proj[2] * ref_proj[2])
-        .sqrt();
+    let ref_mag =
+        (ref_proj[0] * ref_proj[0] + ref_proj[1] * ref_proj[1] + ref_proj[2] * ref_proj[2]).sqrt();
 
     if ref_mag < 1e-12 {
         // Normal is along X; use Y as reference instead
@@ -200,10 +198,9 @@ pub fn fsp_direction_deg(plane: &Plane, target_line: &[f64; 3]) -> f64 {
     let proj_unit = [proj[0] / proj_mag, proj[1] / proj_mag, proj[2] / proj_mag];
 
     // cos θ = ref_unit · proj_unit
-    let cos_theta = (ref_unit[0] * proj_unit[0]
-        + ref_unit[1] * proj_unit[1]
-        + ref_unit[2] * proj_unit[2])
-        .clamp(-1.0, 1.0);
+    let cos_theta =
+        (ref_unit[0] * proj_unit[0] + ref_unit[1] * proj_unit[1] + ref_unit[2] * proj_unit[2])
+            .clamp(-1.0, 1.0);
 
     // sin θ via cross product (ref_unit × proj_unit) · normal → sign of rotation
     let cross = [
@@ -531,7 +528,10 @@ mod tests {
             above * below < 0.0,
             "distances on opposite sides must have opposite signs"
         );
-        assert!((above.abs() - below.abs()).abs() < TOL, "magnitudes must match");
+        assert!(
+            (above.abs() - below.abs()).abs() < TOL,
+            "magnitudes must match"
+        );
     }
 
     // ── fsp_direction_deg ─────────────────────────────────────────────────────

@@ -4,9 +4,12 @@
  *
  * Provides methods for generating datasets, importing swing data, and
  * managing dataset control parameters.
+ *
+ * Issue #6642: F1 (export wired), F7 (catalog loading state), F8 (apiFetch)
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { apiFetch } from './fetch';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -61,50 +64,60 @@ export function useDatasetGenerator() {
   const [controls, setControls] = useState<DatasetControl[]>([]);
   const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null);
   const [loadState, setLoadState] = useState<DatasetLoadState>('idle');
+  // F7: separate state for the initial catalog fetch (4 concurrent requests)
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
 
   const fetchFeatures = useCallback(async () => {
     try {
-      const res = await fetch('/api/dataset/features');
-      if (!res.ok) throw new Error(`Failed to fetch features: ${res.status}`);
-      const data = await res.json();
-      if (isMountedRef.current) setFeatures(data.features ?? data ?? []);
+      const data = await apiFetch<{ features?: FeatureInfo[] }>('/api/dataset/features');
+      const list = Array.isArray(data.features) ? data.features : [];
+      if (isMountedRef.current) setFeatures(list);
     } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch features');
+      if (isMountedRef.current)
+        setError(err instanceof Error ? err.message : 'Failed to fetch features');
     }
   }, []);
 
   const fetchPlotTypes = useCallback(async () => {
     try {
-      const res = await fetch('/api/dataset/plots/types');
-      if (!res.ok) throw new Error(`Failed to fetch plot types: ${res.status}`);
-      const data = await res.json();
-      if (isMountedRef.current) setPlotTypes(data.plot_types ?? data.types ?? data ?? []);
+      const data = await apiFetch<{ plot_types?: PlotType[]; types?: PlotType[] }>(
+        '/api/dataset/plots/types',
+      );
+      const list = Array.isArray(data.plot_types)
+        ? data.plot_types
+        : Array.isArray(data.types)
+          ? data.types
+          : [];
+      if (isMountedRef.current) setPlotTypes(list);
     } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch plot types');
+      if (isMountedRef.current)
+        setError(err instanceof Error ? err.message : 'Failed to fetch plot types');
     }
   }, []);
 
   const fetchExportFormats = useCallback(async () => {
     try {
-      const res = await fetch('/api/dataset/export/formats');
-      if (!res.ok) throw new Error(`Failed to fetch export formats: ${res.status}`);
-      const data = await res.json();
-      if (isMountedRef.current) setExportFormats(data.formats ?? data ?? []);
+      const data = await apiFetch<{ formats?: ExportFormat[] }>(
+        '/api/dataset/export/formats',
+      );
+      const list = Array.isArray(data.formats) ? data.formats : [];
+      if (isMountedRef.current) setExportFormats(list);
     } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch export formats');
+      if (isMountedRef.current)
+        setError(err instanceof Error ? err.message : 'Failed to fetch export formats');
     }
   }, []);
 
   const fetchControls = useCallback(async () => {
     try {
-      const res = await fetch('/api/dataset/control');
-      if (!res.ok) throw new Error(`Failed to fetch controls: ${res.status}`);
-      const data = await res.json();
-      if (isMountedRef.current) setControls(data.controls ?? data ?? []);
+      const data = await apiFetch<{ controls?: DatasetControl[] }>('/api/dataset/control');
+      const list = Array.isArray(data.controls) ? data.controls : [];
+      if (isMountedRef.current) setControls(list);
     } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch controls');
+      if (isMountedRef.current)
+        setError(err instanceof Error ? err.message : 'Failed to fetch controls');
     }
   }, []);
 
@@ -112,16 +125,10 @@ export function useDatasetGenerator() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/dataset/generate', {
+      const data = await apiFetch<GenerateResult>('/api/dataset/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || `Generation failed: ${res.status}`);
-      }
-      const data = await res.json();
       if (isMountedRef.current) {
         setGenerateResult(data);
         setLoadState('loaded');
@@ -138,16 +145,10 @@ export function useDatasetGenerator() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/dataset/import-swing', {
+      const data = await apiFetch<GenerateResult>('/api/dataset/import-swing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ file_path: filePath, format }),
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || `Import failed: ${res.status}`);
-      }
-      const data = await res.json();
       if (isMountedRef.current) {
         setGenerateResult(data);
         setLoadState('loaded');
@@ -160,29 +161,82 @@ export function useDatasetGenerator() {
     }
   }, []);
 
-  const updateControl = useCallback(async (controlId: string, value: unknown) => {
-    try {
-      const res = await fetch(`/api/dataset/control/${controlId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value }),
-      });
-      if (!res.ok) throw new Error(`Control update failed: ${res.status}`);
-      // Refresh controls after update
-      await fetchControls();
-    } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Control update failed');
-    }
-  }, [fetchControls]);
+  const updateControl = useCallback(
+    async (controlId: string, value: unknown) => {
+      try {
+        await apiFetch(`/api/dataset/control/${controlId}`, {
+          method: 'POST',
+          body: JSON.stringify({ value }),
+        });
+        // Refresh controls after update
+        await fetchControls();
+      } catch (err) {
+        if (isMountedRef.current)
+          setError(err instanceof Error ? err.message : 'Control update failed');
+      }
+    },
+    [fetchControls],
+  );
 
-  // Fetch catalog data on mount
+  /**
+   * F1 — Export dataset to the chosen format.
+   *
+   * Triggers a browser download via a temporary anchor element so the file
+   * lands in the user's Downloads folder without a separate download page.
+   *
+   * @param datasetId - The `dataset_id` from a `GenerateResult`
+   * @param format    - Export format id (e.g. "csv", "json", "hdf5")
+   */
+  const exportDataset = useCallback(
+    async (datasetId: string, format: string) => {
+      setError(null);
+      try {
+        // Use raw fetch so we can read the blob response
+        const { getApiBase } = await import('./backend');
+        const url = `${getApiBase()}/api/dataset/export/${encodeURIComponent(datasetId)}?format=${encodeURIComponent(format)}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          let detail: string | undefined;
+          try {
+            const body = (await res.json()) as Record<string, unknown>;
+            if (typeof body.detail === 'string') detail = body.detail;
+          } catch {
+            // ignore
+          }
+          throw new Error(detail ?? `Export failed: HTTP ${res.status}`);
+        }
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = `${datasetId}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (err) {
+        if (isMountedRef.current)
+          setError(err instanceof Error ? err.message : 'Export failed');
+      }
+    },
+    [],
+  );
+
+  // F7: Fetch catalog data on mount, set catalogLoading=false when all done
   useEffect(() => {
     isMountedRef.current = true;
-    fetchFeatures();
-    fetchPlotTypes();
-    fetchExportFormats();
-    fetchControls();
-    return () => { isMountedRef.current = false; };
+    setCatalogLoading(true);
+    Promise.allSettled([
+      fetchFeatures(),
+      fetchPlotTypes(),
+      fetchExportFormats(),
+      fetchControls(),
+    ]).finally(() => {
+      if (isMountedRef.current) setCatalogLoading(false);
+    });
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [fetchFeatures, fetchPlotTypes, fetchExportFormats, fetchControls]);
 
   return {
@@ -192,10 +246,17 @@ export function useDatasetGenerator() {
     controls,
     generateResult,
     loadState,
+    catalogLoading,
     error,
     generateDataset,
     importSwing,
     updateControl,
-    refetch: () => { fetchFeatures(); fetchPlotTypes(); fetchExportFormats(); fetchControls(); },
+    exportDataset,
+    refetch: () => {
+      fetchFeatures();
+      fetchPlotTypes();
+      fetchExportFormats();
+      fetchControls();
+    },
   };
 }

@@ -86,7 +86,10 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(pyo3::wrap_pyfunction!(fsp::python::calculate_fsp, m)?)?;
     m.add_function(pyo3::wrap_pyfunction!(fsp::python::fsp_slope_deg, m)?)?;
     m.add_function(pyo3::wrap_pyfunction!(fsp::python::fsp_direction_deg, m)?)?;
-    m.add_function(pyo3::wrap_pyfunction!(fsp::python::point_to_fsp_distance, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(
+        fsp::python::point_to_fsp_distance,
+        m
+    )?)?;
 
     // Aerodynamics
     m.add_class::<aerodynamics::AirProperties>()?;

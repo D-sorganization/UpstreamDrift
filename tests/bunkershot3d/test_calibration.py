@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from bunkershot3d.calibration.angle_of_repose import AngleOfReposeExperiment
 from bunkershot3d.calibration.drained_shear_cell import DrainedShearCellExperiment
@@ -54,6 +55,48 @@ def test_angle_of_repose_bad_backend() -> None:
 
     with pytest.raises(BackendNotImplementedError):
         AngleOfReposeExperiment(backend="liggghts")
+
+
+# ---------------------------------------------------------------------------
+# Tests for issue #6644 F5 — calibration optimizer removes internal clip
+# ---------------------------------------------------------------------------
+
+
+def test_optimizer_objective_does_not_clip_internally() -> None:
+    """F5: _objective must pass raw params to experiment without clipping them."""
+    from unittest.mock import MagicMock
+
+    from bunkershot3d.calibration.optimizer import CalibrationOptimizer
+
+    received = {}
+    exp = MagicMock()
+    exp.target_angle = 30.0
+    exp.run_simulation.side_effect = lambda params: received.update(params) or 28.0
+
+    opt = CalibrationOptimizer(exp)
+    # Call with values below the old clip threshold (0.01)
+    x = np.array([0.005, 0.003])
+    opt._objective(x)
+
+    # Without internal clipping, the experiment receives the raw 0.005 / 0.003 values
+    assert abs(received["friction_coefficient"] - 0.005) < 1e-9, (
+        f"Expected 0.005 passed through; got {received['friction_coefficient']}"
+    )
+    assert abs(received["restitution_coefficient"] - 0.003) < 1e-9, (
+        f"Expected 0.003 passed through; got {received['restitution_coefficient']}"
+    )
+
+
+def test_optimizer_converges_without_clip() -> None:
+    """F5: CalibrationOptimizer.optimize() still converges after removing internal clip."""
+    from bunkershot3d.calibration.optimizer import CalibrationOptimizer
+
+    exp = AngleOfReposeExperiment(backend="mock")
+    opt = CalibrationOptimizer(exp)
+    result = opt.optimize()
+    assert "friction_coefficient" in result
+    assert "error" in result
+    assert 0.01 <= result["friction_coefficient"] <= 1.0
 
 
 @pytest.mark.slow

@@ -26,10 +26,11 @@ from PyQt6.QtWidgets import (  # noqa: E402
     QLabel,
     QMessageBox,
     QPushButton,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.ui import HoverCopyTextBrowser
 
 from src.shared.python.logging_pkg.logger_utils import get_logger  # noqa: E402
 
@@ -122,7 +123,7 @@ class ModelLoaderDialog(QDialog):
         info_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
         layout.addWidget(info_label)
 
-        self.info_display = QTextEdit()
+        self.info_display = HoverCopyTextBrowser()
         self.info_display.setReadOnly(True)
         self.info_display.setMaximumHeight(150)
         self.info_display.setPlainText(
