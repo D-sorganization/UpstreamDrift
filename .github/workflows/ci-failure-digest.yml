@@ -14,8 +14,6 @@ permissions:
   issues: write
   actions: read
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

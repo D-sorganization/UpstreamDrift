@@ -27,8 +27,6 @@ permissions:
   contents: read
   pull-requests: read
 
-env:
-
 jobs:
   guard:
     timeout-minutes: 30

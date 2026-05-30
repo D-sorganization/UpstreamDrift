@@ -22,8 +22,6 @@ concurrency:
   group: docker-security-scan-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   trivy-scan:
     timeout-minutes: 40

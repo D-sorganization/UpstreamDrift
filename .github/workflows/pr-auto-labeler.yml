@@ -13,8 +13,6 @@ permissions:
   pull-requests: write
   issues: write
 
-env:
-
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:

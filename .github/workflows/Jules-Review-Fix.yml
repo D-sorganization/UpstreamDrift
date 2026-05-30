@@ -7,8 +7,6 @@ on:
   pull_request_review:
     types: [submitted]
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

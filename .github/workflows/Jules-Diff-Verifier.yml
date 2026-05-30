@@ -39,8 +39,6 @@ concurrency:
   group: jules-diff-verifier-${{ github.event.pull_request.number || inputs.pr_number }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   verify:
     timeout-minutes: 30

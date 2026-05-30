@@ -9,8 +9,6 @@ on:
     paths:
       - "**/*.pdf"
 
-env:
-
 jobs:
   check-pdf-size:
     timeout-minutes: 30

@@ -18,8 +18,6 @@ concurrency:
   group: jules-supersede-check-${{ github.repository }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   check-kill-switch:
     timeout-minutes: 30

@@ -44,8 +44,6 @@ concurrency:
   group: motion-matching-leaderboard-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   check-leaderboard:
     name: check LEADERBOARD.md is committed
