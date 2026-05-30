@@ -44,16 +44,18 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
-      - name: Force-clean stale Python tool cache (NVMe runners)
+      - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
-            if [ -d "$cache_root/Python" ]; then
-              echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
-            fi
-          done
+          # Redirect setup-python to a per-job private tool cache under
+          # RUNNER_TEMP so concurrent jobs on the same NVMe host never race on
+          # the shared .shared-tool-cache. The previous `rm -rf` of the shared
+          # cache raced setup-python and corrupted Python (dir-not-empty /
+          # "python: command not found" / missing stdlib). RUNNER_TEMP is
+          # unique per job and reset between runs, so there is no contention.
+          echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/hostedtoolcache"
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
