@@ -49,7 +49,13 @@ def test_core_install_guard_reports_forbidden_modules_loaded(
 
 def test_core_install_guard_has_explicit_contract() -> None:
     """The forbidden and core import surfaces are intentionally small."""
-    assert FORBIDDEN_OPTIONAL_MODULES == ("drake", "pinocchio", "opensim", "myosuite")
+    assert FORBIDDEN_OPTIONAL_MODULES == (
+        "drake",
+        "pinocchio",
+        "opensim",
+        "myosuite",
+        "jaxsim",
+    )
     assert CORE_IMPORT_MODULES == (
         "src.api",
         "src.engines.physics_engines.mujoco",

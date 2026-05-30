@@ -13,7 +13,7 @@ for import_root in (PROJECT_ROOT, PROJECT_ROOT / "src"):
     if import_path not in sys.path:
         sys.path.insert(0, import_path)
 
-FORBIDDEN_OPTIONAL_MODULES = ("drake", "pinocchio", "opensim", "myosuite")
+FORBIDDEN_OPTIONAL_MODULES = ("drake", "pinocchio", "opensim", "myosuite", "jaxsim")
 CORE_IMPORT_MODULES = (
     "src.api",
     "src.engines.physics_engines.mujoco",
