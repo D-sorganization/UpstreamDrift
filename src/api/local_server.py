@@ -72,10 +72,12 @@ from src.api.routes import (  # noqa: E402
     chat_ws,
     engines,
     export,
+    observability,
     simulation,
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
+from src.api.task_manager import TaskManager  # noqa: E402
 from src.shared.python.app_state import agent_context, get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
@@ -158,8 +160,8 @@ def _configure_cors(app: FastAPI) -> None:
             "http://localhost:8001",
         ],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Content-Type", "Authorization", "X-API-Key"],
     )
 
 
@@ -317,15 +319,18 @@ def _find_tile_in_manifest(
     Returns:
         Tuple of (manifest dict, tile dict) or (None, None) if not found.
     """
-    manifest = _load_launcher_manifest()
-    if not manifest.get("tiles"):
-        logger.error("[launch] Manifest not available for tile lookup")
+    from src.config.launcher_manifest_loader import LauncherManifest
+
+    try:
+        manifest_obj = LauncherManifest.load()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        logger.error("[launch] Failed to load launcher manifest: %s", exc)
         return None, None
 
-    for t in manifest.get("tiles", []):
-        if t.get("id") == tile_id:
-            return manifest, t
-    return manifest, None
+    for t in manifest_obj.tiles:
+        if t.id == tile_id:
+            return manifest_obj.to_dict(include_hidden=True), t.to_dict()
+    return manifest_obj.to_dict(include_hidden=True), None
 
 
 def _execute_tile_launch(
@@ -473,6 +478,8 @@ def _register_health_and_diagnostic_endpoints(
 
     if not (app is not None):
         raise ValueError("app must be provided")
+
+    app.include_router(observability.router, prefix="")
 
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
@@ -788,6 +795,13 @@ def create_local_app() -> FastAPI:
     app.state.chat_service = ChatService(
         app_state_provider=lambda: agent_context(get_state_logger().store)
     )
+    task_manager = TaskManager()
+    app.state.task_manager = task_manager
+    app.state.api_started_at = time.time()
+
+    @app.on_event("shutdown")
+    async def shutdown_task_manager() -> None:
+        await task_manager.shutdown()
 
     # Register routes (no auth required in local mode)
     _register_api_routers(app)

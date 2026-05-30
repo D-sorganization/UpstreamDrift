@@ -1,11 +1,19 @@
-"""Centralized theme module for the Pendulum Simulator GUI.
+"""Pendulum Simulator GUI theme — thin adapter over ``theme/v1``.
 
-All colors, fonts, and stylesheet templates are defined here to ensure
-a consistent dark theme across the entire application.  Widget modules
-should import constants from this module rather than defining inline
-styles.
+This module used to be a free-standing, hand-rolled dark palette. It is now a
+**thin adapter** that declares the pendulum dark palette as a
+:class:`src.shared.python.theme.v1.RolePalette` conforming to the fleet-wide
+versioned theme contract (``theme/v1``), then derives its public colour
+constants from that single source.
+
+The exact hex values are unchanged — visual output is preserved byte-for-byte
+— but the palette now speaks the canonical role-token vocabulary
+(``bg``, ``group_bg``, ``accent`` …) and the diagnostics severity colours are
+sourced from the contract's :func:`~src.shared.python.theme.v1.severity_palette`
+rather than being duplicated here.
 
 Closes #1197: DRY — Define every piece of knowledge in exactly one place.
+Refactored under #6566: unify the three theme implementations.
 
 Design by Contract
 ------------------
@@ -16,33 +24,65 @@ Design by Contract
 
 from __future__ import annotations
 
+from src.shared.python.theme.v1 import RolePalette, severity_palette
+
 # ---------------------------------------------------------------------------
-# Color palette — dark theme
+# Color palette — dark theme (declared via the versioned theme contract)
+# ---------------------------------------------------------------------------
+# The pendulum dark palette expressed in the canonical ``theme/v1`` role
+# vocabulary. Module-level constants below delegate to this single object so
+# there is exactly one place each colour is defined.
+PALETTE = RolePalette(
+    name="Pendulum Dark",
+    tokens={
+        "bg": "#12121c",  # Main panel background
+        "group_bg": "#1a1a2e",  # Card / group box background
+        "input_bg": "#0e0e1e",  # Deep background (text editors, code areas)
+        "border": "#2a2a4a",  # Default border
+        "text": "#c0c0e0",  # Primary text
+        "text_secondary": "#9090c8",  # Secondary text, labels
+        "label": "#808090",  # Muted text, metadata
+        "focus": "#4888c8",  # Primary accent (selections, links)
+        "accent": "#4888c8",  # Primary accent (selections, links)
+        "title_bg": "#1a1a2e",  # Title/header background (= group bg)
+        "title_border": "#2a2a4a",  # Title/header border (= default border)
+        "table_header": "#1a1a2e",  # Table header background (= group bg)
+        "table_alt": "#12121c",  # Alternating table row (= main bg)
+        "button_hover": "#303060",  # Hover state
+        "success": "#50a060",  # Success, positive values
+        "warning": "#e0a060",  # Warning, attention
+        "error": "#d06060",  # Error, negative values, critical
+        "info": "#8060c0",  # Special, info
+    },
+)
+
+# ---------------------------------------------------------------------------
+# Color constants — delegate to the versioned-contract palette
 # ---------------------------------------------------------------------------
 
 # Base backgrounds (darkest → lightest)
-BG_DARKEST = "#0e0e1e"  # Deep background (text editors, code areas)
-BG_DARK = "#12121c"  # Main panel background
-BG_MEDIUM = "#1a1a2e"  # Card / group box background
+BG_DARKEST = PALETTE["input_bg"]  # Deep background (text editors, code areas)
+BG_DARK = PALETTE["bg"]  # Main panel background
+BG_MEDIUM = PALETTE["group_bg"]  # Card / group box background
 BG_ELEVATED = "#252540"  # Elevated surfaces (buttons, inputs)
-BG_HOVER = "#303060"  # Hover state
+BG_HOVER = PALETTE["button_hover"]  # Hover state
 BG_ACTIVE = "#404060"  # Active/selected state
 
 # Text colors
-TEXT_PRIMARY = "#c0c0e0"  # Primary text
-TEXT_SECONDARY = "#9090c8"  # Secondary text, labels
-TEXT_MUTED = "#808090"  # Muted text, metadata
+TEXT_PRIMARY = PALETTE["text"]  # Primary text
+TEXT_SECONDARY = PALETTE["text_secondary"]  # Secondary text, labels
+TEXT_MUTED = PALETTE["label"]  # Muted text, metadata
 TEXT_DISABLED = "#505070"  # Disabled text
 
 # Accent colors
-ACCENT_BLUE = "#4888c8"  # Primary accent (selections, links)
-ACCENT_GREEN = "#50a060"  # Success, positive values
-ACCENT_RED = "#d06060"  # Error, negative values, critical
-ACCENT_AMBER = "#e0a060"  # Warning, attention
-ACCENT_PURPLE = "#8060c0"  # Special, info
+ACCENT_BLUE = PALETTE["accent"]  # Primary accent (selections, links)
+ACCENT_GREEN = PALETTE["success"]  # Success, positive values
+ACCENT_RED = PALETTE["error"]  # Error, negative values, critical
+ACCENT_AMBER = PALETTE["warning"]  # Warning, attention
+ACCENT_PURPLE = PALETTE["info"]  # Special, info
 
 # Border colors
-BORDER_DEFAULT = "#2a2a4a"  # Default border
+BORDER_DEFAULT = PALETTE["border"]  # Default border
 BORDER_ACCENT = "#404060"  # Accent border (inputs, focused)
 
 # Matrix / physics display
@@ -274,12 +314,9 @@ QLabel {{
 # Severity colors (for diagnostics)
 # ---------------------------------------------------------------------------
 
-SEVERITY_COLORS: dict[str, str] = {
-    "info": "#6080c0",
-    "warning": "#c0a040",
-    "error": "#d06060",
-    "critical": "#e03030",
-}
+# Sourced from the versioned theme contract so diagnostics severity colours
+# stay consistent fleet-wide (values unchanged from the historical palette).
+SEVERITY_COLORS: dict[str, str] = severity_palette()
 
 
 # ---------------------------------------------------------------------------
@@ -287,6 +324,8 @@ SEVERITY_COLORS: dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 __all__ = [
+    # Versioned-contract palette
+    "PALETTE",
     # Colors
     "BG_DARKEST",
     "BG_DARK",

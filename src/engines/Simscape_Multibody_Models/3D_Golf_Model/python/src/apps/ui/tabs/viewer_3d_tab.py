@@ -62,6 +62,7 @@ from ...services.segment_set_io import SegmentSpec, spec_v1_to_v2
 from ..widgets.mpl_canvas import MplCanvas
 from ._plot_style_helpers import StylePersistence, default_style_for
 from .marker_plot_tab import _open_style_dialog
+from .overview_tab import _scalar_value
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -698,6 +699,62 @@ class Viewer3DTab(QtWidgets.QWidget):
     def _on_selection_changed(self) -> None:
         self._rebuild_scene()
 
+    def _transform_positions(self, pos: np.ndarray) -> np.ndarray:
+        """Apply axis convention transformation based on X_SCREEN and Y_SCREEN."""
+        if self.model is None or pos.size == 0:
+            return pos
+        raw = self.model.raw_parameters or {}
+        point = raw.get("POINT", {}) if isinstance(raw, dict) else {}
+
+        x_screen = point.get("X_SCREEN") if isinstance(point, dict) else None
+        y_screen = point.get("Y_SCREEN") if isinstance(point, dict) else None
+
+        x_val = _scalar_value(x_screen) if x_screen is not None else None
+        y_val = _scalar_value(y_screen) if y_screen is not None else None
+
+        # If no convention parameters, defaults are +X and +Z
+        x_str = str(x_val).upper().strip() if x_val else "+X"
+        y_str = str(y_val).upper().strip() if y_val else "+Z"
+
+        # Validate format (must be like +X, -Y, etc.)
+        def parse_axis(
+            s: str, default_axis: int, default_sign: float
+        ) -> tuple[int, float]:
+            if len(s) >= 2 and s[0] in ("+", "-") and s[1] in ("X", "Y", "Z"):
+                axis = {"X": 0, "Y": 1, "Z": 2}[s[1]]
+                sign = 1.0 if s[0] == "+" else -1.0
+                return axis, sign
+            # Fallback if sign is omitted, e.g. "X"
+            if len(s) == 1 and s in ("X", "Y", "Z"):
+                return {"X": 0, "Y": 1, "Z": 2}[s], 1.0
+            return default_axis, default_sign
+
+        x_axis, x_sign = parse_axis(x_str, 0, 1.0)
+        z_axis, z_sign = parse_axis(y_str, 2, 1.0)
+
+        # If axes are same (invalid convention), fallback to identity
+        if x_axis == z_axis:
+            return pos
+
+        y_axis = 3 - x_axis - z_axis
+
+        # Levi-Civita permutation symbol
+        def levi_civita(i: int, j: int, k: int) -> float:
+            if {i, j, k} != {0, 1, 2}:
+                return 0.0
+            if (i, j, k) in ((0, 1, 2), (1, 2, 0), (2, 0, 1)):
+                return 1.0
+            return -1.0
+
+        y_sign = x_sign * z_sign * levi_civita(x_axis, y_axis, z_axis)
+
+        # Apply transformation: pos has shape (..., 3)
+        transformed = np.empty_like(pos)
+        transformed[..., 0] = pos[..., x_axis] * x_sign
+        transformed[..., 1] = pos[..., y_axis] * y_sign
+        transformed[..., 2] = pos[..., z_axis] * z_sign
+        return transformed
+
     def _rebuild_scene(self) -> None:
         """Tear down and recreate artists when the selection changes."""
         if self.model is None:
@@ -722,6 +779,7 @@ class Viewer3DTab(QtWidgets.QWidget):
                 continue
             n = min(m.position.shape[0], self._n_frames)
             positions[i, :n, :] = m.position[:n, :]
+        positions = self._transform_positions(positions)
         self._selected_positions = positions
 
         # Build colors from a perceptually-distinct map.
@@ -1080,7 +1138,7 @@ class Viewer3DTab(QtWidgets.QWidget):
                 arr = padded
             elif arr.shape[0] > self._n_frames:
                 arr = arr[: self._n_frames]
-            out[name] = arr
+            out[name] = self._transform_positions(arr)
         return out
 
     def _theme_for_spec(self, spec: SegmentVizSpec) -> ShapeTheme:

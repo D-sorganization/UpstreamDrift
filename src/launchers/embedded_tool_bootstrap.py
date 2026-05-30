@@ -51,15 +51,26 @@ def bootstrap_embeddable_tools() -> list[str]:
     if sibling_tools.is_dir():
         tools_src_path = str(sibling_tools / "src")
         tools_shared_py_path = str(sibling_tools / "src" / "shared" / "python")
+        tools_python_src_path = str(sibling_tools / "src" / "python" / "src")
     else:
         # Path to vendor/ud-tools/src
         tools_src_path = str(repos_root / "vendor" / "ud-tools" / "src")
         tools_shared_py_path = str(Path(tools_src_path) / "shared" / "python")
+        tools_python_src_path = str(Path(tools_src_path) / "python" / "src")
 
-    if tools_src_path not in sys.path:
-        sys.path.insert(0, tools_src_path)
-    if tools_shared_py_path not in sys.path:
-        sys.path.insert(0, tools_shared_py_path)
+    # Also register UpstreamDrift's shared python folder
+    ud_src_path = str(repos_root / "src")
+    ud_shared_py_path = str(repos_root / "src" / "shared" / "python")
+
+    for p in [
+        ud_src_path,
+        ud_shared_py_path,
+        tools_python_src_path,
+        tools_shared_py_path,
+        tools_src_path,
+    ]:
+        if p not in sys.path:
+            sys.path.insert(0, p)
 
     # List of tool adapter modules that self-register on import
     # Each module's __init__.py calls register_embeddable_tool()
@@ -78,6 +89,8 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.golf_environment._embed_adapter",
         "src.tools.terrain_engine._embed_adapter",
         "src.tools.golf_simulation_suite._embed_adapter",
+        "src.tools.simulation_backends_launcher._embed_adapter",
+        "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
     ]
 
     registered = []
@@ -86,11 +99,17 @@ def bootstrap_embeddable_tools() -> list[str]:
             # Import the module - it self-registers at module level
             __import__(module_path)
             # Extract tool_id from module name for tracking
-            tool_id = (
-                module_path.split(".")[-2]
-                if "_embed_adapter" in module_path
-                else module_path.split(".")[-1]
-            )
+            if (
+                module_path
+                == "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
+            ):
+                tool_id = "c3d_viewer"
+            else:
+                tool_id = (
+                    module_path.split(".")[-2]
+                    if "_embed_adapter" in module_path
+                    else module_path.split(".")[-1]
+                )
 
             registered.append(tool_id)
             logger.debug(f"Bootstrapped embeddable tool: {tool_id}")

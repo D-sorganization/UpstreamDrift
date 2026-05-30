@@ -97,10 +97,25 @@ def test_register_missing_id_attribute_raises() -> None:
 
 
 def test_register_duplicate_raises() -> None:
+    class _DifferentTool:
+        tool_id = "dup"
+
+        def embed_capabilities(self) -> EmbedCapabilities:
+            return EmbedCapabilities()
+
+        def create_main_widget(self, parent: object) -> object:
+            return object()
+
+        def cleanup(self) -> None:
+            pass
+
+        def is_dirty(self) -> bool:
+            return False
+
     tool = _Tool("dup")
     register_embeddable_tool(tool)
     with pytest.raises(ValueError, match="already registered"):
-        register_embeddable_tool(tool)
+        register_embeddable_tool(_DifferentTool())
 
 
 def test_is_embeddable_true() -> None:

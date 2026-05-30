@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from training import (
+from src.shared.python.training import (
     CompatibilityChecker,
     CompatibilityError,
     Dataset,
@@ -26,10 +26,10 @@ from training import (
     TrainingStatus,
     new_run_id,
 )
-from training.contracts import CancelToken, ProgressSink
-from training.metrics import MetricKind, TrainingMetric
-from training.resource_monitor import GpuSample, ResourceSample
-from training.runtime import InProcessDriver, RunnerRegistry
+from src.shared.python.training.contracts import CancelToken, ProgressSink
+from src.shared.python.training.metrics import MetricKind, TrainingMetric
+from src.shared.python.training.resource_monitor import GpuSample, ResourceSample
+from src.shared.python.training.runtime import InProcessDriver, RunnerRegistry
 from src.tools.training_controller.controller import (
     DEFAULT_ROLLING_WINDOW,
     TrainingDashboardController,
@@ -356,7 +356,7 @@ class TestSelection:
     def test_select_unknown_job_raises(self) -> None:
         controller, scheduler = _make_controller()
         try:
-            from training import JobId  # local import for readability
+            from src.shared.python.training import JobId  # local import for readability
 
             with pytest.raises(KeyError):
                 controller.select_job(JobId("unknown"))
@@ -585,7 +585,7 @@ class TestMetricIngest:
     def test_metrics_for_unknown_returns_empty(self) -> None:
         controller, scheduler = _make_controller()
         try:
-            from training import JobId
+            from src.shared.python.training import JobId
 
             assert controller.metrics_for(JobId("never-seen")) == ()
         finally:

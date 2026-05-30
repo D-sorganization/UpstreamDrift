@@ -66,6 +66,16 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
+      - name: Force-clean stale Python tool cache (NVMe runners)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
+            if [ -d "$cache_root/Python" ]; then
+              echo "Cleaning $cache_root/Python (pre-setup-python)"
+              sudo rm -rf "$cache_root/Python"
+            fi
+          done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
@@ -78,6 +88,8 @@ jobs:
             pyproject.toml
             requirements*.txt
 
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
       - name: Check Queue
         id: queue
         run: |

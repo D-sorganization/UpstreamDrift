@@ -33,6 +33,8 @@ click==8.3.1
     #   uvicorn
 contourpy==1.3.3
     # via bokeh
+deprecated==1.3.1
+    # via limits
 etils[epath,epy]==1.13.0
     # via mujoco
 fastapi==0.128.0
@@ -69,6 +71,8 @@ jinja2==3.1.6
     #   bokeh
     #   flask
     #   upstream-drift (pyproject.toml)
+limits==5.8.0
+    # via slowapi
 markupsafe==3.0.3
     # via
     #   flask
@@ -87,7 +91,9 @@ numpy==2.2.6
     #   scipy
     #   upstream-drift (pyproject.toml)
 packaging==26.2
-    # via bokeh
+    # via
+    #   bokeh
+    #   limits
 pillow==12.2.0
     # via
     #   bokeh
@@ -97,17 +103,23 @@ platformdirs==4.3.8
 pydantic==2.12.5
     # via
     #   fastapi
+    #   pydantic-settings
     #   upstream-drift (pyproject.toml)
 pydantic-core==2.41.5
     # via pydantic
+pydantic-settings==2.14.1
+    # via upstream-drift (pyproject.toml)
 pyopengl==3.1.10
     # via mujoco
 pyproj==3.7.2
     # via upstream-drift (pyproject.toml)
 python-dotenv==1.2.2
     # via
+    #   pydantic-settings
     #   upstream-drift (pyproject.toml)
     #   uvicorn
+python-multipart==0.0.29
+    # via upstream-drift (pyproject.toml)
 pyyaml==6.0.2
     # via
     #   bokeh
@@ -117,6 +129,8 @@ requests==2.33.1
 scipy==1.13.1
     # via upstream-drift (pyproject.toml)
 simpleeval==1.0.5
+    # via upstream-drift (pyproject.toml)
+slowapi==0.1.9
     # via upstream-drift (pyproject.toml)
 starlette==0.50.0
     # via fastapi
@@ -129,12 +143,15 @@ typing-extensions==4.15.0
     #   anyio
     #   etils
     #   fastapi
+    #   limits
     #   pydantic
     #   pydantic-core
     #   starlette
     #   typing-inspection
 typing-inspection==0.4.2
-    # via pydantic
+    # via
+    #   pydantic
+    #   pydantic-settings
 urllib3==2.7.0
     # via requests
 uvicorn[standard]==0.40.0
@@ -147,6 +164,8 @@ websockets==16.0
     # via uvicorn
 werkzeug==3.1.8
     # via flask
+wrapt==2.2.1
+    # via deprecated
 xyzservices==2026.3.0
     # via bokeh
 zipp==3.23.0

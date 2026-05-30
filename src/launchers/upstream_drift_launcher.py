@@ -390,7 +390,10 @@ class UpstreamDriftLauncher(QMainWindow):
         )
 
     def __init__(
-        self, startup_results: StartupResults | None = None, loading: bool = False
+        self,
+        startup_results: StartupResults | None = None,
+        loading: bool = False,
+        splash: SplashScreen | None = None,
     ) -> None:
         """Initialize the main window.
 
@@ -406,6 +409,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self.simulation_manager = SimulationManager(self)
         self.dialogs_manager = DialogsManager(self)
         self.loading = loading
+        self.splash = splash
+        self.toast_manager = None
         self.orchestrator = LauncherOrchestrator()
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
@@ -531,6 +536,7 @@ class UpstreamDriftLauncher(QMainWindow):
         return (
             os.environ.get("UPSTREAMDRIFT_DISABLE_ONBOARDING") == "1"
             or "PYTEST_CURRENT_TEST" in os.environ
+            or "pytest" in sys.modules
         )
 
     def _get_sidekick_module(self) -> Any | None:
@@ -669,6 +675,9 @@ class UpstreamDriftLauncher(QMainWindow):
         self.process_manager = ProcessManager(
             REPOS_ROOT,
             output_callback=self.ui_setup_manager._on_process_output,
+        )
+        self.process_manager.on_process_list_changed = (  # type: ignore[attr-defined]
+            self.ui_setup_manager.update_running_processes_ui
         )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
@@ -813,15 +822,33 @@ class UpstreamDriftLauncher(QMainWindow):
 
         self.layout_manager.rebuild_grid(self.grid_layout)
 
+        # Update Clear Filters button visibility
+        has_filter = False
+        if hasattr(self, "layout_manager") and self.layout_manager:
+            cat = getattr(self.layout_manager, "current_category_filter", "All")
+            txt = getattr(self.layout_manager, "current_filter_text", "")
+            if cat != "All" or txt:
+                has_filter = True
+        if (
+            hasattr(self.ui_setup_manager, "btn_clear_filters")
+            and self.ui_setup_manager.btn_clear_filters
+        ):
+            self.ui_setup_manager.btn_clear_filters.setVisible(has_filter)
+
     def update_startup_results(self, results: StartupResults) -> None:
         """Transition from loading skeleton to full application."""
         self._startup_time_ms = results.startup_time_ms
         self.orchestrator.initialize_from_results(results)
         self.layout_manager.available_models = self.orchestrator.available_models
+        # Clear the loading flag BEFORE building the grid: _rebuild_grid()
+        # renders placeholder SkeletonCards while self.loading is True, so if
+        # the flag is still set when _load_layout() rebuilds, the Home view is
+        # left showing skeletons until the next rebuild trigger (e.g. a sidebar
+        # click). Flipping it first makes the startup rebuild render real cards.
+        self.loading = False
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
-        self.loading = False
 
         from PyQt6.QtCore import QTimer as _QTimer
 
@@ -955,6 +982,9 @@ class UpstreamDriftLauncher(QMainWindow):
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
             )
+        splash = getattr(self, "splash", None)
+        if splash is not None:
+            splash.close()
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
@@ -1154,18 +1184,27 @@ class UpstreamDriftLauncher(QMainWindow):
                         install_cmd = dep_info.get("install_cmd", "")
                         doc_url = dep_info.get("doc_url", "")
 
-                        self.show_dependency_error(
-                            model.name,
-                            dep_name,
-                            install_cmd,
-                            doc_url,
-                            deps_error,
-                        )
+                        if "PYTEST_CURRENT_TEST" not in os.environ and not getattr(
+                            self, "loading", False
+                        ):
+                            self.show_dependency_error(
+                                model.name,
+                                dep_name,
+                                install_cmd,
+                                doc_url,
+                                deps_error,
+                            )
                         self.lbl_status.setText("! Dependency Error")
                         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+                        self.lbl_status.setCursor(Qt.CursorShape.PointingHandCursor)
+                        self.lbl_status.setToolTip(
+                            "Click to view details in Settings -> Configuration"
+                        )
                     else:
                         self.lbl_status.setText("Ready")
                         self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        self.lbl_status.setCursor(Qt.CursorShape.ArrowCursor)
+                        self.lbl_status.setToolTip("")
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
@@ -1311,6 +1350,8 @@ class UpstreamDriftLauncher(QMainWindow):
                 if key in self.running_processes:
                     del self.running_processes[key]
 
+        self.ui_setup_manager.update_running_processes_ui()
+
         if not self.running_processes and True:
             self.lbl_status.setText("Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
@@ -1429,22 +1470,23 @@ def main() -> None:
     import traceback
 
     def excepthook(exc_type, exc_value, exc_tb):
-        from PyQt6.QtWidgets import QMessageBox
+        from src.launchers.launcher_dialogs import CriticalErrorDialog
 
         err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-        with open("crash_traceback.txt", "w") as f:
-            f.write(err_msg)
+        try:
+            with open("crash_traceback.txt", "w", encoding="utf-8") as f:
+                f.write(err_msg)
+        except OSError:
+            pass
 
-        # Don't show MessageBox for SystemExit
+        # Don't show dialog for SystemExit
         if exc_type is not SystemExit:
-            msg_box = QMessageBox()
-            msg_box.setIcon(QMessageBox.Icon.Critical)
-            msg_box.setWindowTitle("Application Crash")
-            msg_box.setText(
-                "UpstreamDrift has encountered an unexpected error and must close."
+            dialog = CriticalErrorDialog(
+                title="Application Crash",
+                message="UpstreamDrift has encountered an unexpected error and must close.",
+                detail_text=err_msg,
             )
-            msg_box.setDetailedText(err_msg)
-            msg_box.exec()
+            dialog.exec()
 
         QApplication.quit()
 
@@ -1499,7 +1541,7 @@ def main() -> None:
     splash.show()
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    main_window = UpstreamDriftLauncher(loading=True)
+    main_window = UpstreamDriftLauncher(loading=True, splash=splash)
     main_window.show()
 
     def on_startup_finished(results: StartupResults) -> None:
@@ -1524,6 +1566,7 @@ def main() -> None:
     def on_startup_error(error_msg: str) -> None:
         """Handle startup failure."""
         logger.error(f"Startup failed: {error_msg}")
+        splash.close()
 
         QMessageBox.critical(
             None, "Startup Error", f"Failed to initialize UpstreamDrift:\n\n{error_msg}"

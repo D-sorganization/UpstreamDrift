@@ -11,17 +11,21 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import QSize, Qt, QTimer
+from PyQt6.QtCore import QSize, Qt, QTimer, pyqtSignal, QEvent, QObject
 from PyQt6.QtGui import (
     QAction,
     QKeySequence,
     QShortcut,
+    QColor,
+    QMouseEvent,
+    QEnterEvent,
 )
 from PyQt6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
     QComboBox,
     QFrame,
+    QGraphicsDropShadowEffect,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -54,6 +58,96 @@ if TYPE_CHECKING:
     pass
 
 logger = get_logger(__name__)
+
+
+def _resolve_theme_color(c_obj: Any, ns_key: str, dict_key: str, default: str) -> str:
+    """Helper to resolve colors from namespace/dict theme tokens."""
+    if isinstance(c_obj, dict):
+        return c_obj.get(dict_key, default)
+    return getattr(c_obj, ns_key, getattr(c_obj, dict_key, default))
+
+
+class ClickableLabel(QLabel):
+    """QLabel subclass that emits a clicked signal on mouse click."""
+
+    clicked = pyqtSignal()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        self.clicked.emit()
+        super().mousePressEvent(event)
+
+    def enterEvent(self, event: QEnterEvent) -> None:
+        if self.cursor().shape() == Qt.CursorShape.PointingHandCursor:
+            font = self.font()
+            font.setUnderline(True)
+            self.setFont(font)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        font = self.font()
+        font.setUnderline(False)
+        self.setFont(font)
+        super().leaveEvent(event)
+
+
+class RuntimeButton(QToolButton):
+    """QToolButton subclass designed to mimic model card tiles.
+
+    Supports custom drop shadow, theme-matching styling, and deferred hover-hide behavior
+    for its associated help button.
+    """
+
+    def __init__(
+        self, parent: QWidget | None = None, help_button: QWidget | None = None
+    ) -> None:
+        super().__init__(parent)
+        self.help_button = help_button
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setObjectName("RuntimeButton")
+        self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+
+        # Reduced/extremely subtle shadow
+        self.shadow = QGraphicsDropShadowEffect(self)
+        self.shadow.setBlurRadius(2)
+        self.shadow.setOffset(0, 1)
+        self.shadow.setColor(QColor(0, 0, 0, 15))
+        self.setGraphicsEffect(self.shadow)
+
+        # Deferred hide timer to allow moving mouse to the help button
+        self._hide_timer = QTimer(self)
+        self._hide_timer.setSingleShot(True)
+        self._hide_timer.setInterval(300)  # 300ms delay
+        self._hide_timer.timeout.connect(self._do_hide)
+
+    def enterEvent(self, event: QEnterEvent) -> None:
+        self._hide_timer.stop()
+        if self.help_button:
+            self.help_button.show()
+            self.help_button.raise_()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        self._hide_timer.start()
+        super().leaveEvent(event)
+
+    def _do_hide(self) -> None:
+        if self.help_button and not self.help_button.underMouse():
+            self.help_button.hide()
+
+
+class HelpButtonHoverFilter(QObject):
+    """Event filter to prevent hiding the help button when hovered directly."""
+
+    def __init__(self, runtime_button: RuntimeButton) -> None:
+        super().__init__()
+        self.runtime_button = runtime_button
+
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.Enter:
+            self.runtime_button._hide_timer.stop()
+        elif event.type() == QEvent.Type.Leave:
+            self.runtime_button._hide_timer.start()
+        return super().eventFilter(obj, event)
 
 
 def _build_zoom_accessible_description() -> str:
@@ -120,6 +214,52 @@ class LauncherUIProtocol(Protocol):
     layout_manager: Any
     toast_manager: Any
     docker_checker: Any
+
+
+class GridContainerWidget(QWidget):
+    """Container widget that listens to resize events to dynamically rebuild the grid.
+
+    This ensures that when the sidebar opens or closes, or the window is resized,
+    the grid wrapping recalculates its columns to avoid a horizontal scrollbar.
+    """
+
+    def __init__(self, parent=None, launcher=None, grid_layout=None):
+        super().__init__(parent)
+        self.launcher = launcher
+        self.grid_layout = grid_layout
+        self._last_width = 0
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        width = self.width()
+        if width != self._last_width and width > 0:
+            self._last_width = width
+            launcher = self.launcher
+            if launcher and hasattr(launcher, "_rebuild_grid"):
+                launcher._rebuild_grid()
+
+
+class ResizingScrollArea(QScrollArea):
+    """A QScrollArea that triggers a grid rebuild when its viewport width changes.
+
+    This ensures that grid wrapping is recalculated based on the actual visible viewport width,
+    avoiding horizontal scrollbars when sidebars are toggled or resized.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._last_width = 0
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        width = self.viewport().width()
+        if width != self._last_width and width > 0:
+            self._last_width = width
+            widget = self.widget()
+            if widget and hasattr(widget, "grid_layout"):
+                launcher = getattr(widget, "launcher", None)
+                if launcher and hasattr(launcher, "_rebuild_grid"):
+                    launcher._rebuild_grid()
 
 
 class UISetupManager:
@@ -341,6 +481,7 @@ class UISetupManager:
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(20)
         self._setup_grid_area(left_layout)
+        self._setup_running_processes_panel(left_layout)
         bottom_bar = self._setup_bottom_bar()
         left_layout.addLayout(bottom_bar)
 
@@ -367,6 +508,7 @@ class UISetupManager:
 
         self.workspace_tabs = DraggableTabWidget(core_tabs={"Home"})
         self.workspace_tabs.setDocumentMode(True)
+        self.workspace_tabs.currentChanged.connect(self._sync_console_button_states)
 
         self.workspace_tabs.addTab(self.content_splitter, "Home")
 
@@ -639,40 +781,37 @@ class UISetupManager:
             checkable=True,
         )
 
-        btn_motion_matching = self._build_sidebar_button(
-            "Motion Match",
-            "directions_run",
-            checkable=True,
-        )
-
-        btn_motion_capture = self._build_sidebar_button(
-            "MoCap",
-            "videocam",
-            checkable=True,
-        )
-
         btn_tools = self._build_sidebar_button(
             "Tools",
             "build",
             checkable=True,
         )
 
-        btn_library = self._build_sidebar_button(
-            "Library",
+        btn_documentation = self._build_sidebar_button(
+            "Documentation",
             "book",
             checkable=True,
         )
-        btn_library.setAccessibleDescription("Open the document library tab")
+        btn_documentation.setAccessibleDescription(
+            "Filter tiles to show documentation and library tools"
+        )
 
-        btn_training = self._build_sidebar_button(
-            "Training",
-            "brain",
+        btn_favorites = self._build_sidebar_button(
+            "Favorites",
+            "star",
             checkable=True,
         )
-        btn_training.setAccessibleDescription("Open the training controller tab")
+        btn_favorites.setAccessibleDescription("Filter tiles to show your favorites")
 
-        # If _show_preferences exists in the mixed-in class, use it.
-        # Otherwise, we gracefully handle it to avoid crashes in tests.
+        btn_history = self._build_sidebar_button(
+            "History",
+            "history",
+            checkable=True,
+        )
+        btn_history.setAccessibleDescription(
+            "Filter tiles to show recently and frequently used tools"
+        )
+
         btn_settings = self._build_sidebar_button(
             "Settings",
             "settings",
@@ -698,15 +837,14 @@ class UISetupManager:
         self.sidebar_group.addButton(btn_engines, 1)
         self.sidebar_group.addButton(btn_biomechanics, 2)
         self.sidebar_group.addButton(btn_simulation, 3)
-        self.sidebar_group.addButton(btn_motion_matching, 4)
-        self.sidebar_group.addButton(btn_motion_capture, 5)
-        self.sidebar_group.addButton(btn_tools, 6)
-        self.sidebar_group.addButton(btn_library, 7)
-        self.sidebar_group.addButton(btn_training, 8)
+        self.sidebar_group.addButton(btn_tools, 4)
+        self.sidebar_group.addButton(btn_documentation, 5)
+        self.sidebar_group.addButton(btn_favorites, 6)
+        self.sidebar_group.addButton(btn_history, 7)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
-        self.btn_library_sidebar = btn_library
-        self.btn_training_sidebar = btn_training
+        self.btn_library_sidebar = None
+        self.btn_training_sidebar = None
 
         # Space navigation buttons evenly to fill available height
         layout.addWidget(btn_home)
@@ -717,15 +855,13 @@ class UISetupManager:
         layout.addStretch(1)
         layout.addWidget(btn_simulation)
         layout.addStretch(1)
-        layout.addWidget(btn_motion_matching)
-        layout.addStretch(1)
-        layout.addWidget(btn_motion_capture)
-        layout.addStretch(1)
         layout.addWidget(btn_tools)
         layout.addStretch(1)
-        layout.addWidget(btn_library)
+        layout.addWidget(btn_documentation)
         layout.addStretch(1)
-        layout.addWidget(btn_training)
+        layout.addWidget(btn_favorites)
+        layout.addStretch(1)
+        layout.addWidget(btn_history)
         layout.addStretch(3)  # larger gap before bottom group
         layout.addWidget(btn_console)
         layout.addWidget(btn_settings)
@@ -735,12 +871,11 @@ class UISetupManager:
         QWidget.setTabOrder(btn_home, btn_engines)
         QWidget.setTabOrder(btn_engines, btn_biomechanics)
         QWidget.setTabOrder(btn_biomechanics, btn_simulation)
-        QWidget.setTabOrder(btn_simulation, btn_motion_matching)
-        QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
-        QWidget.setTabOrder(btn_motion_capture, btn_tools)
-        QWidget.setTabOrder(btn_tools, btn_library)
-        QWidget.setTabOrder(btn_library, btn_training)
-        QWidget.setTabOrder(btn_training, btn_console)
+        QWidget.setTabOrder(btn_simulation, btn_tools)
+        QWidget.setTabOrder(btn_tools, btn_documentation)
+        QWidget.setTabOrder(btn_documentation, btn_favorites)
+        QWidget.setTabOrder(btn_favorites, btn_history)
+        QWidget.setTabOrder(btn_history, btn_console)
         QWidget.setTabOrder(btn_console, btn_settings)
 
         scroll_area = QScrollArea()
@@ -764,33 +899,29 @@ class UISetupManager:
         Button IDs
         ----------
         0  All (Home)
-        1  Physics Engines
+        1  Engines
         2  Biomechanics
+        3  Simulation
+        4  Tools
+        5  Documentation
+        6  Favorites
+        7  History
         """
-        if button_id == 7:
-            self._open_library_tab()
-            return
-        if button_id == 8:
-            self._launch_training_controller()
-            return
-        if not True:
-            return
-
         _CATEGORY_MAP: dict[int, str] = {
             0: "All",
-            1: "Physics Engines",
+            1: "Engines",
             2: "Biomechanics",
             3: "Simulation",
-            4: "Motion Matching",
-            5: "Motion Capture",
-            6: "Tools & Data",
+            4: "Tools",
+            5: "Documentation",
+            6: "Favorites",
+            7: "History",
         }
         self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
             button_id, "All"
         )
 
-        if True:
-            self._rebuild_grid()
+        self._rebuild_grid()
 
         if getattr(self, "workspace_tabs", None):
             self.workspace_tabs.setCurrentIndex(0)
@@ -928,18 +1059,16 @@ class UISetupManager:
         action_console.setShortcut("Ctrl+`")
         action_console.setToolTip("Show or hide the launched-process output console")
         action_console.setStatusTip("Toggles process-output console")
-        action_console.triggered.connect(
-            lambda checked: self._console_dock.setVisible(checked)
-        )
+        action_console.triggered.connect(lambda checked: self.toggle_process_console())
         view_menu.addAction(action_console)
         self._action_console = action_console
 
         view_menu.addSeparator()
 
-        action_popout_tab = QAction("&Pop Out Active Tab", self.launcher)
+        action_popout_tab = QAction("&Undock Active Tab", self.launcher)
         action_popout_tab.setShortcut("Ctrl+D")
         action_popout_tab.setToolTip("Detach the active tab into a floating window")
-        action_popout_tab.setStatusTip("Pop out active tab")
+        action_popout_tab.setStatusTip("Undock active tab")
         action_popout_tab.triggered.connect(self._popout_active_tab)
         view_menu.addAction(action_popout_tab)
         self.action_popout_tab = action_popout_tab
@@ -959,7 +1088,7 @@ class UISetupManager:
         self._setup_theme_menu(theme_menu)
 
     def _popout_active_tab(self) -> None:
-        """Pop out the currently active workspace tab into a floating window."""
+        """Undock the currently active workspace tab into a floating window."""
         if not getattr(self, "workspace_tabs", None):
             return
         idx = self.workspace_tabs.currentIndex()
@@ -971,8 +1100,8 @@ class UISetupManager:
 
             QMessageBox.information(
                 self.launcher,
-                "Cannot Pop Out",
-                "The 'Home' tab is a core view and cannot be popped out.",
+                "Cannot Undock",
+                "The 'Home' tab is a core view and cannot be undocked.",
             )
             return
         self.workspace_tabs.detach_tab_from_menu(idx)
@@ -1135,51 +1264,70 @@ class UISetupManager:
         # Status Indicator
         if top_bar is None:
             raise ValueError("top_bar must be provided")
-        self.lbl_status = QLabel("Checking Docker...")
+        self.lbl_status = ClickableLabel("Checking Docker...")
         self.lbl_status.setProperty("status", "inactive-bold")
         _style = self.lbl_status.style()
 
         if _style:
             _style.polish(self.lbl_status)
+        self.lbl_status.clicked.connect(self._on_status_clicked)
         top_bar.addWidget(self.lbl_status)
 
         # Engine-runtime indicator. Shows where physics engines run:
         # Native Windows (host Python), Docker container, or WSL2.
-        # The accompanying ``?`` button opens a single help dialog
-        # shared with the Settings → Engine Runtime group, so the
-        # explanation lives in exactly one place.
         from src.launchers.runtime_mode_help import make_runtime_mode_help_button
 
-        # Engine-runtime indicator is now a clickable button: clicking jumps
-        # straight to Settings → Configuration where the Engine Runtime group
-        # lives, so the user can change Native / Docker / WSL2 from one click
-        # instead of hunting for it. The ``?`` button beside it keeps the
-        # help-only entry point. The attribute name stays ``lbl_execution_mode``
-        # for backwards compatibility with launcher_dialogs.py call sites
-        # (setText / setStyleSheet work identically on QToolButton).
-        self.lbl_execution_mode = QToolButton()
+        self.btn_runtime_help = make_runtime_mode_help_button(self.launcher)
+        self.btn_runtime_help.hide()  # Hidden by default, shown on hover
+
+        try:
+            import src.shared.python.theme as _theme
+
+            c = _theme.get_current_colors()  # type: ignore[attr-defined]
+        except (ImportError, AttributeError):
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
+
+        bg = _resolve_theme_color(c, "surface_hover", "group_bg", "#2d2d2d")
+        border = _resolve_theme_color(c, "border_light", "border", "#444444")
+        bg_hover = _resolve_theme_color(c, "surface_active", "input_bg", "#3a3a3a")
+        border_hover = _resolve_theme_color(c, "border_strong", "focus", "#666666")
+        text_color = _resolve_theme_color(c, "text_primary", "text", "#ffffff")
+
+        # Engine-runtime indicator is now a styled RuntimeButton with shadow, border, and hover help triggers
+        self.lbl_execution_mode = RuntimeButton(help_button=self.btn_runtime_help)
         self.lbl_execution_mode.setText("Runtime: Windows")
-        self.lbl_execution_mode.setAutoRaise(True)  # flat / borderless look
-        self.lbl_execution_mode.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl_execution_mode.setProperty("exec_mode", "warning")
-        self.lbl_execution_mode.setToolButtonStyle(
-            Qt.ToolButtonStyle.ToolButtonTextOnly
-        )
         _style = self.lbl_execution_mode.style()
         if _style:
             _style.polish(self.lbl_execution_mode)
         self.lbl_execution_mode.setToolTip(
             "Click to change the engine runtime (Windows, Docker, or "
-            "WSL2 Ubuntu) in Settings → Configuration. The ‘?’ button "
-            "explains each runtime in detail."
+            "WSL2 Ubuntu) in Settings → Configuration. Hover to explain."
         )
+        self.lbl_execution_mode.setStyleSheet(f"""
+            QToolButton#RuntimeButton {{
+                background-color: {bg};
+                border: 1px solid {border};
+                border-radius: 8px;
+                padding: 4px 12px;
+                color: {text_color};
+                font-weight: bold;
+                margin-left: 10px;
+            }}
+            QToolButton#RuntimeButton:hover {{
+                background-color: {bg_hover};
+                border: 1px solid {border_hover};
+            }}
+        """)
         # tab=1 → Configuration tab, which hosts the Engine Runtime group.
         self.lbl_execution_mode.clicked.connect(
             lambda: self.launcher._open_settings(tab=1)
         )
         top_bar.addWidget(self.lbl_execution_mode)
 
-        self.btn_runtime_help = make_runtime_mode_help_button(self.launcher)
+        # Wire event filter to help button to prevent hiding it when hovered directly
+        self._help_button_filter = HelpButtonHoverFilter(self.lbl_execution_mode)
+        self.btn_runtime_help.installEventFilter(self._help_button_filter)
         top_bar.addWidget(self.btn_runtime_help)
 
         top_bar.addStretch()
@@ -1205,11 +1353,55 @@ class UISetupManager:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
+        # Clear Filters Button
+        self.btn_clear_filters = QPushButton("Clear Filters")
+        self.btn_clear_filters.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_clear_filters.setToolTip(
+            "Reset all category and search filters to show all tiles"
+        )
+        self.btn_clear_filters.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+                padding: 4px 10px;
+                color: #e0e0e0;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.25);
+                color: #ffffff;
+            }
+        """)
+        self.btn_clear_filters.clicked.connect(self._clear_all_filters)
+        self.btn_clear_filters.hide()
+        top_bar.addWidget(self.btn_clear_filters)
+
         # Launch button — sits in the top bar next to the search input so the
         # primary action is always reachable without scrolling and the grid
         # area below is freed for tiles (no bottom-bar overlap).
         self._ensure_launch_button()
         # top_bar.addWidget(self.btn_launch)  # Removed launch button per user request
+
+    def _on_status_clicked(self) -> None:
+        """Handle clicking the status label. If in error/dependency error, opens environment manager.
+        If there are running processes, routes to the Processes tab in Settings.
+        """
+        status_text = self.lbl_status.text()
+        if "Dependency Error" in status_text or "Error" in status_text:
+            self.launcher.open_environment_manager()
+            return
+
+        # Check active processes
+        running = []
+        with self.process_manager._process_lock:
+            for name, proc in list(self.running_processes.items()):
+                if proc.poll() is None:
+                    running.append(name)
+
+        if running:
+            self._open_settings(tab=8)
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
@@ -1588,7 +1780,7 @@ class UISetupManager:
         """Set up the scrollable grid area."""
         if layout is None:
             raise ValueError("layout must be provided")
-        self.scroll_area = QScrollArea()
+        self.scroll_area = ResizingScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll_area.setProperty("class", "transparent")
@@ -1597,7 +1789,7 @@ class UISetupManager:
         if _style:
             _style.polish(self.scroll_area)
 
-        self.grid_container = QWidget()
+        self.grid_container = GridContainerWidget(launcher=self.launcher)
         self.grid_container.setProperty("class", "transparent")
         _style = self.grid_container.style()
 
@@ -1606,6 +1798,7 @@ class UISetupManager:
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(20)
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.grid_container.grid_layout = self.grid_layout
 
         self.scroll_area.setWidget(self.grid_container)
         layout.addWidget(self.scroll_area, 1)
@@ -1657,8 +1850,9 @@ class UISetupManager:
         if _style:
             _style.polish(self._console_text)
 
-        console_container = QWidget()
-        console_layout = QVBoxLayout(console_container)
+        self._console_widget = QWidget()
+        self._console_widget.prevent_deletion_on_close = True
+        console_layout = QVBoxLayout(self._console_widget)
         console_layout.setContentsMargins(0, 0, 0, 0)
         console_layout.setSpacing(0)
         console_layout.addWidget(self._console_text)
@@ -1674,18 +1868,6 @@ class UISetupManager:
         toolbar.addWidget(clear_btn)
         console_layout.addLayout(toolbar)
 
-        from PyQt6.QtWidgets import QDialog
-
-        self._console_dock = QDialog(self.launcher, Qt.WindowType.Window)
-        self._console_dock.setWindowTitle("Process Output")
-        self._console_dock.resize(800, 300)
-
-        dl_layout = QVBoxLayout(self._console_dock)
-        dl_layout.setContentsMargins(0, 0, 0, 0)
-        dl_layout.addWidget(console_container)
-
-        self._console_dock.hide()
-
     def _on_process_output(self, engine_name: str, line: str) -> None:
         """Receive a line of output from a subprocess (thread-safe)."""
         QTimer.singleShot(
@@ -1697,17 +1879,176 @@ class UISetupManager:
         """Append a formatted line to the console widget (GUI thread only)."""
         if engine_name is None:
             raise ValueError("engine_name must be provided")
-        if not self._console_dock.isVisible():
-            self._console_dock.show()
-            if hasattr(self, "_action_console"):
-                self._action_console.setChecked(True)
+
+        idx = self.workspace_tabs.indexOf(self._console_widget)
+        if idx == -1:
+            idx = self.workspace_tabs.addTab(self._console_widget, "Console")
+            self._sync_console_button_states()
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")
         self._console_text.appendPlainText(f"[{ts}] [{engine_name}] {line}")
 
     def toggle_process_console(self) -> None:
-        """Toggle visibility of the Process Output dock."""
-        self._console_dock.setVisible(not self._console_dock.isVisible())
+        """Toggle visibility of the Process Output console tab."""
+        idx = self.workspace_tabs.indexOf(self._console_widget)
+        if idx == -1:
+            idx = self.workspace_tabs.addTab(self._console_widget, "Console")
+            self.workspace_tabs.setCurrentIndex(idx)
+        else:
+            if self.workspace_tabs.currentIndex() == idx:
+                self.workspace_tabs.removeTab(idx)
+            else:
+                self.workspace_tabs.setCurrentIndex(idx)
+        self._sync_console_button_states()
+
+    def _is_console_open(self) -> bool:
+        """Check if the console widget is currently in the tab bar or detached."""
+        if not hasattr(self, "_console_widget"):
+            return False
+        if self.workspace_tabs.indexOf(self._console_widget) != -1:
+            return True
+        # Check detached tabs
+        for widget, _, _ in self.workspace_tabs.detached_tabs.values():
+            if widget is self._console_widget:
+                return True
+        return False
+
+    def _sync_console_button_states(self) -> None:
+        """Synchronize the console action and sidebar button states based on tab presence."""
+        is_open = self._is_console_open()
+        if hasattr(self, "_action_console") and self._action_console:
+            self._action_console.setChecked(is_open)
+        if hasattr(self, "btn_console") and self.btn_console:
+            self.btn_console.setChecked(is_open)
+
+    # -- Clear Filters --
+
+    def _clear_all_filters(self) -> None:
+        """Clear search input and reset category to Home (All)."""
+        self.search_input.clear()
+        if hasattr(self, "sidebar_group"):
+            home_btn = self.sidebar_group.button(0)
+            if home_btn:
+                home_btn.setChecked(True)
+            self._on_sidebar_routed(0)
+
+    # -- Running Processes Panel --
+
+    def _setup_running_processes_panel(self, layout: QVBoxLayout) -> None:
+        """Create the running processes list widget at the bottom of the home grid."""
+        self.running_processes_panel = QFrame()
+        self.running_processes_panel.setObjectName("RunningProcessesPanel")
+        self.running_processes_panel.setStyleSheet("""
+            #RunningProcessesPanel {
+                background-color: rgba(30, 30, 30, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 8px;
+            }
+        """)
+        panel_layout = QVBoxLayout(self.running_processes_panel)
+        panel_layout.setContentsMargins(10, 6, 10, 6)
+        panel_layout.setSpacing(6)
+
+        header = QHBoxLayout()
+        header_title = QLabel("Running Processes")
+        header_title.setStyleSheet(
+            "font-weight: bold; color: #ffffff; font-size: 12px;"
+        )
+        header.addWidget(header_title)
+        header.addStretch()
+
+        # Kill All button
+        self.btn_kill_all_procs = QPushButton("Kill All")
+        self.btn_kill_all_procs.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_kill_all_procs.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(220, 53, 69, 0.2);
+                border: 1px solid rgba(220, 53, 69, 0.4);
+                border-radius: 4px;
+                padding: 2px 8px;
+                color: #ff6b6b;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: rgba(220, 53, 69, 0.4);
+                color: #ffffff;
+            }
+        """)
+        self.btn_kill_all_procs.clicked.connect(self._kill_all_processes)
+        header.addWidget(self.btn_kill_all_procs)
+        panel_layout.addLayout(header)
+
+        # Container for process rows
+        self.processes_container = QWidget()
+        self.processes_container.setProperty("class", "transparent")
+        self.processes_layout = QVBoxLayout(self.processes_container)
+        self.processes_layout.setContentsMargins(0, 0, 0, 0)
+        self.processes_layout.setSpacing(4)
+        panel_layout.addWidget(self.processes_container)
+
+        layout.addWidget(self.running_processes_panel)
+        self.running_processes_panel.hide()
+
+    def _find_active_settings_widget(self) -> QWidget | None:
+        """Find the active SettingsWidget, whether docked as a tab or detached/floating."""
+        if hasattr(self, "workspace_tabs") and self.workspace_tabs is not None:
+            # Check docked tabs
+            for i in range(self.workspace_tabs.count()):
+                widget = self.workspace_tabs.widget(i)
+                if widget and widget.__class__.__name__ == "SettingsWidget":
+                    return widget
+            # Check detached/floating tabs
+            if hasattr(self.workspace_tabs, "detached_tabs"):
+                for widget, _, _ in self.workspace_tabs.detached_tabs.values():
+                    if widget and widget.__class__.__name__ == "SettingsWidget":
+                        return widget
+        return None
+
+    def update_running_processes_ui(self) -> None:
+        """Update the running processes list widget by refreshing the settings tab."""
+        # Ensure the home page running processes panel remains hidden
+        if (
+            hasattr(self, "running_processes_panel")
+            and self.running_processes_panel is not None
+        ):
+            self.running_processes_panel.hide()
+
+        # Refresh the active Settings widget if it is currently instantiated
+        settings_widget = self._find_active_settings_widget()
+        if settings_widget is not None and hasattr(
+            settings_widget, "refresh_processes_ui"
+        ):
+            settings_widget.refresh_processes_ui()
+
+    def _kill_process_by_name(self, name: str) -> None:
+        """Kill a running process by its name."""
+        import contextlib
+
+        with self.process_manager._process_lock:
+            proc = self.running_processes.get(name)
+            if proc:
+                try:
+                    logger.info(
+                        f"Killing process {name} (PID: {proc.pid}) via UI request"
+                    )
+                    from src.shared.python.security.subprocess_utils import (
+                        kill_process_tree,
+                    )
+
+                    kill_process_tree(proc.pid)
+                    proc.terminate()
+                except Exception as e:  # noqa: BLE001
+                    logger.error(f"Error killing process {name}: {e}")
+                finally:
+                    with contextlib.suppress(KeyError):
+                        del self.running_processes[name]
+        self.update_running_processes_ui()
+
+    def _kill_all_processes(self) -> None:
+        """Kill all currently running processes."""
+        self.process_manager.cleanup_processes()
+        self.update_running_processes_ui()
 
     # -- AI Panel (DEPRECATED, removed by UpstreamDrift #5620) --
     #

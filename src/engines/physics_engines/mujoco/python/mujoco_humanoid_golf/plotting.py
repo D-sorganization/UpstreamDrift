@@ -14,7 +14,7 @@ from src.shared.python.plotting import GolfSwingPlotter as SharedGolfSwingPlotte
 from src.shared.python.plotting import MplCanvas
 
 if TYPE_CHECKING:
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (  # noqa: E501
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (  # noqa: E501
         SwingRecorder,
     )
 

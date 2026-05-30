@@ -90,7 +90,11 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
-        rgb = self.renderer.render()
+        try:
+            rgb = self.renderer.render()
+        except MemoryError as exc:
+            logger.error("MemoryError during renderer.render(): %s", exc)
+            raise
 
         # Add force/torque/accel overlays
         rgb = self._add_force_torque_overlays(rgb)

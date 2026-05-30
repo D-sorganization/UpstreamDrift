@@ -14,6 +14,12 @@
       "expires_on": "2026-07-31"
     },
     {
+      "path": "src/launchers/settings_dialog.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Legacy launcher settings dialog (1900 lines, pending decomposition under #5922)",
+      "expires_on": "2026-07-31"
+    },
+    {
       "path": "src/launchers/launcher_ui_setup.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy launcher UI setup module (1764 lines, pending decomposition under #5922)",
@@ -22,7 +28,7 @@
     {
       "path": "src/launchers/upstream_drift_launcher.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher entrypoint (1423 lines, pending decomposition under #5922)",
+      "reason": "Legacy launcher entrypoint (1542 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     },
     {
@@ -35,6 +41,12 @@
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy 3D viewer tab (1364 lines, pending decomposition under #5922)",
+      "expires_on": "2026-07-31"
+    },
+    {
+      "path": "src/launchers/launcher_diagnostics.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Legacy launcher diagnostics module (1236 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     },
     {

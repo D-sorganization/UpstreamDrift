@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd  # type: ignore[import]
 
 from ..core.datetime_utils import format_datetime, timestamp_iso
+from ._schemas import validate_csv_dataframe
 from .common_utils import get_logger
 from .provenance import ProvenanceInfo, add_provenance_header_file
 
@@ -154,7 +155,10 @@ def dispatch_load(
 ) -> pd.DataFrame | dict[str, Any] | list[dict[str, Any]]:
     """Route a load operation to the correct format handler."""
     if format_type == OutputFormat.CSV:
-        return pd.read_csv(file_path, comment="#")
+        # Additive structural validation (issue #6568).
+        return validate_csv_dataframe(
+            pd.read_csv(file_path, comment="#"), source=str(file_path)
+        )
 
     if format_type == OutputFormat.JSON:
         with open(file_path) as f:

@@ -5,7 +5,7 @@ model-registry consumers, and engine discovery all rely on one path policy.
 
 It also hosts the **sibling-repo** discovery layer used by UpstreamDrift's
 launcher to find the five biomech sibling repos (MuJoCo_Models, Drake_Models,
-Pinocchio_Models, OpenSim_Models, Movement-Optimizer). See
+Pinocchio_Models, OpenSim_Models, Movement_Optimizer). See
 ``docs/adr/0014-shared-biomech-models.md`` and UpstreamDrift#5184.
 """
 
@@ -783,7 +783,7 @@ _SIBLINGS: tuple[_SiblingSpec, ...] = (
     ),
     _SiblingSpec(
         "movement_optimizer",
-        "Movement-Optimizer",
+        "Movement_Optimizer",
         "movement_optimizer",
         "MOVEMENT_OPTIMIZER_HOME",
     ),

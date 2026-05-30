@@ -22,7 +22,7 @@ _PKG_PARENT = Path(__file__).resolve().parents[3] / "src" / "shared" / "python"
 if str(_PKG_PARENT) not in sys.path:
     sys.path.insert(0, str(_PKG_PARENT))
 
-from motion_matching.diagnostics.initial_state_diff import (  # noqa: E402
+from src.shared.python.motion_matching.diagnostics.initial_state_diff import (  # noqa: E402
     InitialStateDiffReport,
     load_diff_report,
     plot_cartesian_delta_summary,

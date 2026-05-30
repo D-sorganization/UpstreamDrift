@@ -88,3 +88,12 @@ def test_get_server_port_env_out_of_bounds() -> None:
         pytest.raises(ValueError, match="Invalid API_PORT value: '70000'"),
     ):
         get_server_port()
+
+
+def test_get_cors_origins_wildcard_rejected() -> None:
+    """Test that wildcard '*' in CORS_ORIGINS is rejected."""
+    with (
+        patch.dict(os.environ, {"CORS_ORIGINS": "https://a.com,*,https://b.com"}),
+        pytest.raises(ValueError, match="Cannot use wildcard '\\*' in CORS_ORIGINS"),
+    ):
+        get_cors_origins()

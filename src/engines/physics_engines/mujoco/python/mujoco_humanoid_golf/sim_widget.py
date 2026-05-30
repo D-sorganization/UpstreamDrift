@@ -1039,7 +1039,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.compute_ellipsoids()
         self._record_club_trajectory_point()
         self._update_swing_plane_overlays()
-        self._render_once()
+        try:
+            self._render_once()
+        except MemoryError as exc:
+            logger.error("MemoryError caught during simulation stepping: %s", exc)
+            self.set_running(False)
+            self.label.setText("Out of memory: rendering paused.")
+            self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def _enforce_interactive_constraints(self) -> None:
         if self.manipulator is None or self.model is None or self.data is None:

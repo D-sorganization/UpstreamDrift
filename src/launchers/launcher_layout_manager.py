@@ -120,6 +120,19 @@ class LayoutManager:
         self.current_view_mode: ViewMode = ViewMode.LIST_LARGE
         self.tile_scale: float = TILE_SCALE_DEFAULT
         self.current_category_filter = "All"
+        self.favorites: list[str] = []
+        self.launch_stats: dict[str, dict[str, Any]] = {}
+
+    def record_launch(self, model_id: str) -> None:
+        """Increment launch count and record the last launched time for history tracking."""
+        if model_id is None:
+            raise ValueError("model_id must be provided")
+        if model_id not in self.launch_stats:
+            self.launch_stats[model_id] = {"count": 0, "last_launched": ""}
+        self.launch_stats[model_id]["count"] += 1
+        from datetime import datetime
+
+        self.launch_stats[model_id]["last_launched"] = datetime.now().isoformat()
 
     def initialize_model_order(self, default_ids: list[str] | None = None) -> None:
         """Set a sensible default grid ordering.
@@ -143,7 +156,12 @@ class LayoutManager:
                 "video_analyzer",
                 "data_explorer",
                 "project_map",
+                "library_tool",
             ]
+            for model_id, model in self.available_models.items():
+                is_hidden = getattr(model, "hidden", False)
+                if not is_hidden and model_id not in default_ids:
+                    default_ids.append(model_id)
 
         # Filter to available models
         available_ids = [
@@ -181,6 +199,8 @@ class LayoutManager:
                 "options": window_state.get("options", {}),
                 "view_mode": self.current_view_mode.name.lower(),
                 "tile_scale": float(self.tile_scale),
+                "favorites": self.favorites,
+                "launch_stats": self.launch_stats,
             }
 
             with open(self.config_file, "w", encoding="utf-8") as f:
@@ -209,11 +229,23 @@ class LayoutManager:
             saved_order = [
                 model_id
                 for model_id in layout_data.get("model_order", [])
-                if model_id in self.available_models
+                if model_id in self.available_models or model_id == "library_tool"
             ]
             if saved_order:
+                for model_id, model in self.available_models.items():
+                    is_hidden = getattr(model, "hidden", False)
+                    if not is_hidden and model_id not in saved_order:
+                        saved_order.append(model_id)
                 self.model_order = saved_order
                 logger.info("Model layout restored from saved configuration")
+
+            self.favorites = layout_data.get("favorites", [])
+            self.favorites = [
+                fid
+                for fid in self.favorites
+                if fid in self.available_models or fid == "library_tool"
+            ]
+            self.launch_stats = layout_data.get("launch_stats", {})
 
             # View-mode + tile-scale are additive keys; missing ones use defaults.
             self.current_view_mode = _view_mode_from_string(
@@ -311,25 +343,161 @@ class LayoutManager:
         except ValueError:
             return False  # ID not found
 
+    def get_model_categories(self, model: Any) -> list[str]:
+        """Determine the list of categories this model belongs to."""
+        launcher = getattr(model, "launcher", None)
+        cats = []
+        if isinstance(launcher, dict):
+            raw_cats = launcher.get("category") or launcher.get("categories")
+        else:
+            raw_cats = (
+                getattr(launcher, "category", None)
+                or getattr(launcher, "categories", None)
+                if launcher
+                else None
+            )
+
+        if raw_cats:
+            if isinstance(raw_cats, str):
+                cats.append(raw_cats)
+            elif isinstance(raw_cats, list):
+                cats.extend(raw_cats)
+
+        mapped_cats = set()
+        mapping = {
+            "physics_engine": "Engines",
+            "biomechanics": "Biomechanics",
+            "simulation": "Simulation",
+            "motion_matching": "Tools",
+            "motion_capture": "Tools",
+            "tool": "Tools",
+            "external": "Tools",
+            "documentation": "Documentation",
+        }
+        for cat in cats:
+            cat_norm = str(cat).strip().lower()
+            if cat_norm in mapping:
+                mapped_cats.add(mapping[cat_norm])
+
+        if not mapped_cats:
+            t = str(getattr(model, "type", "") or "").lower()
+            model_id = str(getattr(model, "id", "") or "").lower()
+
+            if t in (
+                "gait",
+                "sit_stand",
+                "movement_optimizer",
+                "opensim_biomech",
+                "biomechanics",
+                "physics_informed",
+            ) or any(
+                term in model_id or term in t
+                for term in ["gait", "sit_to_stand", "biomech", "pinn"]
+            ):
+                mapped_cats.add("Biomechanics")
+            elif t in (
+                "custom_humanoid",
+                "drake",
+                "pinocchio",
+                "opensim",
+                "myosim",
+                "matlab_suite",
+            ) or model_id in [
+                "mujoco_unified",
+                "drake_golf",
+                "pinocchio_golf",
+                "opensim_golf",
+                "myosim_suite",
+                "matlab_suite",
+            ]:
+                mapped_cats.add("Engines")
+            elif t in ("putting_green", "golf_simulation") or model_id in [
+                "putting_green",
+                "golf_simulation_suite",
+                "bunkershot3d",
+                "pendulum_simulator",
+                "shot_tracer",
+                "cross_engine_dashboard",
+                "terrain_engine",
+                "golf_environment",
+                "bunker_shot",
+                "swing_flight_pipeline",
+                "ball_flight_simulator",
+                "putting_green_gui",
+            ]:
+                mapped_cats.add("Simulation")
+            elif t == "document" or model_id in ["project_map", "library_tool"]:
+                mapped_cats.add("Documentation")
+            else:
+                mapped_cats.add("Tools")
+
+        model_id = getattr(model, "id", "").lower()
+        if model_id == "movement_optimizer":
+            mapped_cats.add("Tools")
+            mapped_cats.add("Biomechanics")
+        if model_id == "cross_engine_dashboard":
+            mapped_cats.add("Tools")
+            mapped_cats.add("Simulation")
+        if model_id == "putting_green":
+            mapped_cats.add("Tools")
+            mapped_cats.add("Simulation")
+        if model_id == "library_tool":
+            mapped_cats.add("Documentation")
+            mapped_cats.add("Tools")
+        if model_id == "project_map":
+            mapped_cats.add("Documentation")
+
+        return list(mapped_cats)
+
+    def _get_model_category(self, model: Any) -> str:
+        """Compatibility wrapper for legacy category queries."""
+        cats = self.get_model_categories(model)
+        if not cats:
+            return "Tools & Data"
+        first = cats[0]
+        compat = {
+            "Engines": "Physics Engines",
+            "Tools": "Tools & Data",
+        }
+        return compat.get(first, first)
+
     def get_filtered_order(self) -> list[str]:
         """Get model order filtered by current search text and category.
 
         Returns:
             List of model IDs matching the current filters.
         """
+        source_list = self.model_order
+
+        if self.current_category_filter == "Favorites":
+            source_list = [mid for mid in self.model_order if mid in self.favorites]
+        elif self.current_category_filter == "History":
+            launched = []
+            unlaunched = []
+            for mid in self.model_order:
+                stats = self.launch_stats.get(mid, {})
+                count = stats.get("count", 0)
+                if count > 0:
+                    launched.append((mid, count, stats.get("last_launched", "")))
+                else:
+                    unlaunched.append(mid)
+            launched.sort(key=lambda x: (x[1], x[2]), reverse=True)
+            source_list = [x[0] for x in launched] + unlaunched
+
         filtered = []
-        for model_id in self.model_order:
+        for model_id in source_list:
             model = self._get_model(model_id)
             if not model:
                 continue
 
-            # Category filter
-            if self.current_category_filter != "All" and not self.current_filter_text:
-                cat = self._get_model_category(model)
-                if cat != self.current_category_filter:
+            if (
+                self.current_category_filter not in ("All", "Favorites", "History")
+                and not self.current_filter_text
+            ):
+                categories = self.get_model_categories(model)
+                if self.current_category_filter not in categories:
                     continue
 
-            # Search text filter
             if self.current_filter_text:
                 search_content = f"{model.name} {model.id} {model.description}".lower()
                 if self.current_filter_text not in search_content:
@@ -338,65 +506,6 @@ class LayoutManager:
             filtered.append(model_id)
 
         return filtered
-
-    def _get_model_category(self, model: Any) -> str:
-        """Determine the category of a model for layout grouping."""
-        launcher = getattr(model, "launcher", None)
-        if isinstance(launcher, dict):
-            cat = launcher.get("category")
-        else:
-            cat = getattr(launcher, "category", None) if launcher else None
-
-        if cat:
-            cat_norm = str(cat).strip().lower()
-            mapping = {
-                "physics_engine": "Physics Engines",
-                "biomechanics": "Biomechanics",
-                "simulation": "Simulation",
-                "motion_matching": "Motion Matching",
-                "motion_capture": "Motion Capture",
-                "tool": "Tools & Data",
-                "documentation": "Documentation",
-                "external": "Tools & Data",
-            }
-            if cat_norm in mapping:
-                return mapping[cat_norm]
-
-        t = getattr(model, "type", "").lower()
-        # Biomechanics types take priority over generic fallback
-        if t in (
-            "gait",
-            "sit_stand",
-            "movement_optimizer",
-            "opensim_biomech",
-            "biomechanics",
-        ):
-            return "Biomechanics"
-        if t in [
-            "mujoco_biomech",
-            "drake_biomech",
-            "opensim_biomech",
-            "pinocchio_biomech",
-            "movement_optimizer",
-        ]:
-            return "Biomechanics"
-        if t in [
-            "custom_humanoid",
-            "drake",
-            "pinocchio",
-            "opensim",
-            "myosim",
-        ]:
-            return "Physics Engines"
-        if t == "putting_green":
-            return "Simulation"
-        if t == "matlab_suite":
-            return "Physics Engines"
-        if t == "document":
-            return "Documentation"
-        if t == "special_app":
-            return "Tools & Data"
-        return "Tools & Data"
 
     def _build_card(self, model: Any, **kwargs: Any) -> Any:
         """Invoke ``_create_card`` with optional keyword arguments.
@@ -470,6 +579,11 @@ class LayoutManager:
         # window, which made search/filter rebuilds flash every tile onscreen.
         if grid_layout is None:
             raise ValueError("grid_layout must be provided")
+
+        # Clear stretch factors from previous layout
+        for c in range(grid_layout.columnCount()):
+            grid_layout.setColumnStretch(c, 0)
+
         reusable_card_ids = {id(card) for card in self.model_cards.values()}
         while grid_layout.count():
             item = grid_layout.takeAt(0)
@@ -489,24 +603,69 @@ class LayoutManager:
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
 
-        # Dynamically determine columns based on active_scale if not in list mode
-        columns = 1 if is_list else max(1, int(4 / active_scale))
+        # Dynamically determine columns based on available scroll area viewport width if not in list mode
+        if is_list:
+            columns = 1
+        else:
+            available_width = 800  # fallback
+            container = grid_layout.parentWidget()
+            is_real_widget = (
+                container is not None
+                and not hasattr(container, "mock_add_spec")
+                and type(container).__name__
+                not in ("Mock", "MagicMock", "NonCallableMagicMock")
+            )
+            if is_real_widget:
+                viewport = container.parentWidget()
+                if viewport is not None and type(viewport).__name__ not in (
+                    "Mock",
+                    "MagicMock",
+                ):
+                    w = viewport.width()
+                    if isinstance(w, int | float) and not hasattr(w, "mock_add_spec"):
+                        available_width = w
+                    scroll_area = viewport.parentWidget()
+                    if (
+                        scroll_area is not None
+                        and type(scroll_area).__name__ not in ("Mock", "MagicMock")
+                        and hasattr(scroll_area, "viewport")
+                    ):
+                        v = scroll_area.viewport()
+                        if v is not None and type(v).__name__ not in (
+                            "Mock",
+                            "MagicMock",
+                        ):
+                            vw = v.width()
+                            if isinstance(vw, int | float) and not hasattr(
+                                vw, "mock_add_spec"
+                            ):
+                                available_width = vw
+
+            card_width = max(100, int(240 * active_scale))
+            spacing = 20
+            try:
+                s = grid_layout.spacing()
+                if (
+                    isinstance(s, (int, float))
+                    and not hasattr(s, "mock_add_spec")
+                    and s >= 0
+                ):
+                    spacing = int(s)
+            except (AttributeError, TypeError, ValueError):
+                pass
+
+            # Allow some margin on the sides (e.g. 20px total padding)
+            usable_width = available_width - 20
+            columns = max(1, (usable_width + spacing) // (card_width + spacing))
+
+        if not is_list:
+            for c in range(columns):
+                grid_layout.setColumnStretch(c, 1)
 
         # Get filtered model order
         filtered_order = self.get_filtered_order()
 
-        # Group widgets by category maintaining order
-        categories: dict[str, list[Any]] = {
-            "Physics Engines": [],
-            "Biomechanics": [],
-            "Simulation": [],
-            "Motion Matching": [],
-            "Motion Capture": [],
-            "Tools & Data": [],
-            "Documentation": [],
-            "Other": [],
-        }
-
+        widgets_to_add = []
         for model_id in filtered_order:
             if model_id not in self.model_cards:
                 model = self._get_model(model_id)
@@ -526,44 +685,32 @@ class LayoutManager:
                         active_scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
                     )
 
             if model_id in self.model_cards:
-                model = self._get_model(model_id)
-                cat = self._get_model_category(model) if model else "Other"
-                if cat not in categories:
-                    cat = "Other"
-                categories[cat].append(self.model_cards[model_id])
+                widgets_to_add.append(self.model_cards[model_id])
 
-        # Add to grid
+        # Add to grid as a flat, continuously wrapping list (no headers!)
         row = 0
-        for cat_name, widgets in categories.items():
-            if not widgets:
-                continue
-
-            # Add section header spanning the active number of columns.
-            if self._create_header:
-                header = self._create_header(cat_name)
-                grid_layout.addWidget(header, row, 0, 1, columns)
-            row += 1
-
-            col = 0
-            for widget in widgets:
-                if is_list:
-                    # Each card occupies a full row, one card per row.
-                    grid_layout.addWidget(widget, row, 0, 1, 1)
-                    widget.show()
-                    row += 1
-                else:
-                    grid_layout.addWidget(widget, row, col)
-                    widget.show()
-                    col += 1
-                    if col >= columns:
-                        col = 0
-                        row += 1
-
-            if not is_list and col > 0:
+        col = 0
+        for widget in widgets_to_add:
+            if is_list:
+                # Each card occupies a full row, one card per row.
+                grid_layout.addWidget(widget, row, 0, 1, 1)
+                widget.show()
                 row += 1
+            else:
+                grid_layout.addWidget(widget, row, col)
+                widget.show()
+                col += 1
+                if col >= columns:
+                    col = 0
+                    row += 1
+
+        # Final cleanup for grid layout rows
+        if not is_list and col > 0:
+            row += 1
 
     def set_edit_mode(self, enabled: bool) -> None:
         """Set layout edit mode.

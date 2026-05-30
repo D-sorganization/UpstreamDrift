@@ -13,10 +13,10 @@ from typing import Any
 
 import pytest
 
-from training import TrainingStatus
-from training.metrics import MetricKind, TrainingMetric
-from training.persistence import training_metric_to_dict
-from training.runtime.progress_sinks import training_channel_for
+from src.shared.python.training import TrainingStatus
+from src.shared.python.training.metrics import MetricKind, TrainingMetric
+from src.shared.python.training.persistence import training_metric_to_dict
+from src.shared.python.training.runtime.progress_sinks import training_channel_for
 from src.tools.training_controller.live_subscriber import (
     TrainingJobLiveSubscriber,
 )

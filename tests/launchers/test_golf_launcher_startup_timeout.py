@@ -275,3 +275,44 @@ def test_handler_logic_safe_without_toast_manager() -> None:
 
     assert fake.loading is False
     assert fake.toast_calls == []
+
+
+@_REQUIRES_REAL_QT
+def test_startup_clears_loading_before_grid_rebuild(qapp) -> None:
+    """Regression #6611: Home tiles must render on launch, not after a sidebar click.
+
+    ``_rebuild_grid`` paints placeholder ``SkeletonCard``s while ``self.loading``
+    is True. ``update_startup_results`` must therefore clear ``loading`` *before*
+    ``_load_layout`` triggers the grid rebuild, otherwise the Home view is left
+    showing skeletons until the next rebuild trigger (a sidebar click).
+    """
+    with (
+        _patch_launcher_ui(),
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+        ) as mock_reg,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+        ) as mock_eng,
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
+    ):
+        mock_reg.return_value = MagicMock()
+        mock_eng.return_value = (MagicMock(), MagicMock())
+
+        launcher = UpstreamDriftLauncher(loading=True)
+
+        observed: dict[str, bool] = {}
+        real_load_layout = launcher._load_layout
+
+        def _spy_load_layout() -> None:
+            observed["loading_at_load_layout"] = launcher.loading
+            real_load_layout()
+
+        launcher._load_layout = _spy_load_layout  # type: ignore[method-assign]
+        launcher.update_startup_results(_make_startup_results())
+
+    assert observed.get("loading_at_load_layout") is False, (
+        "loading must be cleared before _load_layout rebuilds the grid, "
+        "so the startup rebuild renders real cards instead of skeletons"
+    )
+    assert launcher.loading is False

@@ -136,14 +136,14 @@ def layout_manager(tmp_path):
     [
         ("physics_engine", "Physics Engines"),
         ("simulation", "Simulation"),
-        ("motion_matching", "Motion Matching"),
-        ("motion_capture", "Motion Capture"),
+        ("motion_matching", "Tools & Data"),
+        ("motion_capture", "Tools & Data"),
         ("tool", "Tools & Data"),
         ("documentation", "Documentation"),
         ("external", "Tools & Data"),
         # Case-insensitive
         ("Physics_Engine", "Physics Engines"),
-        ("MOTION_MATCHING", "Motion Matching"),
+        ("MOTION_MATCHING", "Tools & Data"),
     ],
 )
 def test_category_dispatch_from_launcher_yaml(layout_manager, category, expected):

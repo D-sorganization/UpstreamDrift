@@ -43,7 +43,7 @@ def update_upstream_drift() -> bool:
         cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
         try:
-            logger.info("🚀 Running: %s", " ".join(cmd))
+            logger.info("Running: %s", " ".join(cmd))
             logger.info(
                 "📦 This should be quick since we're just adding one package..."
             )  # noqa: E501

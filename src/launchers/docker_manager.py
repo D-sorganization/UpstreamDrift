@@ -74,7 +74,7 @@ class DockerCheckThread(QThread):
         try:
             secure_run(
                 cmd,
-                timeout=5.0,
+                timeout=10.0,
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,

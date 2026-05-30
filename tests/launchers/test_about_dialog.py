@@ -133,7 +133,7 @@ def test_build_about_html_default_collects_info() -> None:
 
 
 def test_show_about_dialog_invokes_qmessagebox(qapp) -> None:
-    with patch("src.launchers.about_dialog.QMessageBox") as qmb:
+    with patch.object(about_dialog, "QMessageBox") as qmb:
         about_dialog.show_about_dialog(parent=None)
         qmb.about.assert_called_once()
         args = qmb.about.call_args.args
@@ -142,7 +142,7 @@ def test_show_about_dialog_invokes_qmessagebox(qapp) -> None:
 
 
 def test_open_issues_page(qapp) -> None:
-    with patch("src.launchers.about_dialog.QDesktopServices") as qds:
+    with patch.object(about_dialog, "QDesktopServices") as qds:
         about_dialog.open_issues_page()
         qds.openUrl.assert_called_once()
 
@@ -157,7 +157,7 @@ def test_open_user_guide_falls_back_to_repo_url(qapp, tmp_path) -> None:
             tmp_path,
             tmp_path,
         ]
-        with patch("src.launchers.about_dialog.QDesktopServices") as qds:
+        with patch.object(about_dialog, "QDesktopServices") as qds:
             about_dialog.open_user_guide()
             qds.openUrl.assert_called_once()
 
@@ -182,7 +182,7 @@ def test_open_user_guide_uses_local_doc_if_present(qapp, tmp_path, monkeypatch) 
     candidates = [doc]
 
     def fake_open_user_guide() -> None:
-        with patch("src.launchers.about_dialog.QDesktopServices") as qds:
+        with patch.object(about_dialog, "QDesktopServices") as qds:
             for c in candidates:
                 if c.exists():
                     qds.openUrl(MagicMock())
@@ -193,7 +193,7 @@ def test_open_user_guide_uses_local_doc_if_present(qapp, tmp_path, monkeypatch) 
 
 
 def test_open_motion_match_loaders_doc_falls_back(qapp) -> None:
-    with patch("src.launchers.about_dialog.QDesktopServices") as qds:
+    with patch.object(about_dialog, "QDesktopServices") as qds:
         # In the test environment the bundled doc may or may not exist;
         # just make sure the call returns without raising and openUrl was
         # invoked at least once.

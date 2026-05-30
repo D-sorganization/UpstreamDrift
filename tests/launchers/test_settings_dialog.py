@@ -14,6 +14,7 @@ from src.launchers.settings_dialog import (  # noqa: E402
     TAB_LAYOUT,
     TAB_NOTIFICATIONS,
     TAB_PERFORMANCE,
+    TAB_PROCESSES,
     TAB_STARTUP,
     SettingsDialog,
     SettingsWidget,
@@ -32,8 +33,9 @@ def test_validate_tab_index() -> None:
     assert validate_tab_index(TAB_STARTUP) == TAB_STARTUP
     assert validate_tab_index(TAB_NOTIFICATIONS) == TAB_NOTIFICATIONS
     assert validate_tab_index(TAB_PERFORMANCE) == TAB_PERFORMANCE
+    assert validate_tab_index(TAB_PROCESSES) == TAB_PROCESSES
     with pytest.raises(ValueError):
-        validate_tab_index(8)  # out of range
+        validate_tab_index(9)  # out of range
 
 
 @pytest.fixture
@@ -396,12 +398,24 @@ def test_compare_versions(parent_launcher, qapp) -> None:
 
 
 @patch("PyQt6.QtWidgets.QMessageBox.information")
-def test_check_windows_deps(mock_info, parent_launcher, qapp) -> None:
+@patch("src.launchers.settings_dialog.SettingsWidget._generate_dep_table_html")
+def test_check_windows_deps(mock_gen_html, mock_info, parent_launcher, qapp) -> None:
+    mock_gen_html.return_value = "mock_html"
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._check_windows_deps()
     mock_info.assert_called_once()
     args, kwargs = mock_info.call_args
-    assert "Windows Environment" in args[2]
+    assert "mock_html" in args[2]
+
+    # Verify check_results structure
+    check_results = mock_gen_html.call_args[0][2]
+    myosuite_res = next((r for r in check_results if r["name"] == "MyoSuite"), None)
+    assert myosuite_res is not None
+    assert myosuite_res["required"] == ">=2.0.0"
+
+    drake_res = next((r for r in check_results if r["name"] == "Drake"), None)
+    if drake_res and drake_res["installed"] == "Missing (Use Docker/WSL)":
+        assert drake_res["status"] == "warn"
 
 
 @patch("PyQt6.QtWidgets.QMessageBox.warning")
@@ -438,7 +452,7 @@ def test_check_docker_deps_success(
 
     res_run = MagicMock()
     res_run.returncode = 0
-    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0\n"
+    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0,myosuite:2.0.0\n"
 
     mock_run.side_effect = [res_inspect, res_run]
 
@@ -461,7 +475,7 @@ def test_check_wsl_deps_success(
 
     res_run = MagicMock()
     res_run.returncode = 0
-    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0\n"
+    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0,pydrake:1.22.0,pinocchio:2.6.0,opensim:4.4.0,myosuite:2.0.0\n"
     mock_run.return_value = res_run
 
     dialog._check_wsl_deps()
@@ -506,3 +520,16 @@ def test_launcher_ref_used_when_parent_is_none(qapp) -> None:
     assert dialog._launcher is launcher, "_launcher must reference the passed launcher"
     # Layout tab sync: btn_modify_layout.isChecked was called during _setup_layout_tab
     launcher.btn_modify_layout.isChecked.assert_called()
+
+
+def test_settings_dialog_tier_details(parent_launcher, qapp) -> None:
+    """Verify that tier_details browser is instantiated and updates when stage combo changes."""
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    assert hasattr(dialog, "tier_details")
+    assert dialog.tier_details is not None
+
+    # Change stage combo text
+    dialog.combo_stage.setCurrentText("all")
+    # Verify tier details text gets updated
+    html = dialog.tier_details.toHtml()
+    assert html != ""

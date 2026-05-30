@@ -17,7 +17,7 @@ from src.shared.python.gui_launcher.tools_sidebar_integration import (
 
 #: All module names that _import_sidebar_module() tries in order.
 _ALL_CANDIDATES = (
-    "upstream_drift_tools.ui.tools_sidebar",
+    "sidekick.ui.tools_sidebar",
     "sidekick.ui.tools_sidebar",
     "shared.python.sidekick.ui.tools_sidebar",
 )

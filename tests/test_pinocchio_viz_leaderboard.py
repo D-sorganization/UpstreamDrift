@@ -178,7 +178,7 @@ def test_plot_trajectory_overlay_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from motion_matching.viz import plot_trajectory_overlay
+    from src.shared.python.motion_matching.viz import plot_trajectory_overlay
 
     out = tmp_path / "traj.png"
     fig = plot_trajectory_overlay(fake_target, fake_result, out_path=out)
@@ -194,7 +194,7 @@ def test_plot_error_timecourse_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from motion_matching.viz import plot_error_timecourse
+    from src.shared.python.motion_matching.viz import plot_error_timecourse
 
     out = tmp_path / "err.png"
     fig = plot_error_timecourse(fake_target, fake_result, out_path=out)
@@ -210,7 +210,7 @@ def test_plot_fit_quality_card_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from motion_matching.viz import plot_fit_quality_card
+    from src.shared.python.motion_matching.viz import plot_fit_quality_card
 
     out = tmp_path / "card.png"
     fig = plot_fit_quality_card(fake_target, fake_result, out_path=out)
@@ -226,7 +226,7 @@ def test_visualize_fit_emits_three_views(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from motion_matching.viz import visualize_fit
+    from src.shared.python.motion_matching.viz import visualize_fit
 
     artefacts = visualize_fit(fake_target, fake_result, out_dir=tmp_path)
     assert {"trajectory_overlay", "error_timecourse", "fit_quality_card"} <= set(

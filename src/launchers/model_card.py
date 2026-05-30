@@ -280,20 +280,28 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(4.0)
         self._hover_anim.start()
-        # Reveal the per-tile launch button and info button.
+        # Reveal the per-tile launch button, info button, and favorite button.
         btn = getattr(self, "_btn_quick_launch", None)
         info_btn = getattr(self, "_btn_info", None)
+        fav_btn = getattr(self, "_btn_favorite", None)
         if btn is not None:
             btn.show()
             btn.raise_()
         if info_btn is not None:
             info_btn.show()
             info_btn.raise_()
+        if fav_btn is not None:
+            fav_btn.show()
+            fav_btn.raise_()
         self._reposition_quick_launch_button()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent | None) -> None:
         """Reverse micro-animation on hover leave."""
+        # Preconditions
+        if event is not None:
+            assert isinstance(event, QEvent), "event must be a QEvent instance"
+
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(0.0)
         self._hover_anim.start()
@@ -301,22 +309,21 @@ class DraggableModelCard(QFrame):
         if btn is not None:
             btn.hide()
         info_btn = getattr(self, "_btn_info", None)
-        if info_btn is not None and not self.is_selected:
+        if info_btn is not None:
             info_btn.hide()
-        self._reposition_quick_launch_button()  # update info button position
+        fav_btn = getattr(self, "_btn_favorite", None)
+        if fav_btn is not None:
+            fav_btn.hide()
+        self._reposition_quick_launch_button()  # update buttons position
         super().leaveEvent(event)
 
     def set_selected(self, is_selected: bool) -> None:
         """Update the glassmorphism styling to reflect selection state."""
+        # Preconditions
+        assert isinstance(is_selected, bool), "is_selected must be a boolean"
+
         self.is_selected = is_selected
         self.setStyleSheet(self._selected_style if is_selected else self._base_style)
-        info_btn = getattr(self, "_btn_info", None)
-        if info_btn is not None:
-            if is_selected:
-                info_btn.show()
-                info_btn.raise_()
-            else:
-                info_btn.hide()
 
     def resizeEvent(self, event: Any) -> None:  # type: ignore[override]
         """Keep the quick-launch button anchored to the top-right corner."""
@@ -324,31 +331,83 @@ class DraggableModelCard(QFrame):
         self._reposition_quick_launch_button()
 
     def _reposition_quick_launch_button(self) -> None:
+        """Reposition the quick launch, info, and favorite buttons on the card.
+
+        Follows Design-by-Contract (DbC) and Law of Demeter (LoD).
+        """
         btn = getattr(self, "_btn_quick_launch", None)
         info_btn = getattr(self, "_btn_info", None)
+        fav_btn = getattr(self, "_btn_favorite", None)
         margin = 6
 
-        # Position launch button at top right
+        # Position Launch Button at the bottom-right corner for all tiles
         if btn is not None:
             btn_w = btn.sizeHint().width()
             btn_h = btn.sizeHint().height()
             btn.setFixedSize(btn_w, btn_h)
-            btn.move(self.width() - btn_w - margin, margin)
 
-        # Position info button to the left of launch button
+            if self.height() >= btn_h + margin and self.width() >= btn_w + margin:
+                y_pos = self.height() - btn_h - margin
+                x_pos = self.width() - btn_w - margin
+
+                # DbC assertions
+                assert y_pos >= 0, (
+                    "Calculated y position of launch button must be non-negative"
+                )
+                assert x_pos >= 0, (
+                    "Calculated x position of launch button must be non-negative"
+                )
+
+                btn.move(x_pos, y_pos)
+
+        # Position Favorite Button at top-right corner
+        fav_w = 0
+        if fav_btn is not None:
+            fav_w = fav_btn.sizeHint().width()
+            fav_h = fav_btn.sizeHint().height()
+            fav_btn.setFixedSize(fav_w, fav_h)
+
+            if self.width() >= fav_w + margin:
+                y_pos = margin
+                x_pos = self.width() - fav_w - margin
+
+                # DbC assertions
+                assert y_pos >= 0, (
+                    "Calculated y position of favorite button must be non-negative"
+                )
+                assert x_pos >= 0, (
+                    "Calculated x position of favorite button must be non-negative"
+                )
+
+                fav_btn.move(x_pos, y_pos)
+
+        # Position Info Button to the left of the Favorite Button at the top
         if info_btn is not None:
             info_w = info_btn.sizeHint().width()
             info_h = info_btn.sizeHint().height()
             info_btn.setFixedSize(info_w, info_h)
 
-            # If launch button is visible, put info button to its left
-            if btn is not None and not btn.isHidden():
-                info_btn.move(
-                    self.width() - btn_w - info_w - margin * 2,
-                    margin + (btn_h - info_h) // 2,
-                )
+            y_pos = margin
+            if fav_btn is not None and not fav_btn.isHidden():
+                needed_w = fav_w + info_w + margin * 2
             else:
-                info_btn.move(self.width() - info_w - margin, margin)
+                needed_w = info_w + margin
+
+            if self.width() >= needed_w:
+                if fav_btn is not None and not fav_btn.isHidden():
+                    x_pos = self.width() - fav_w - info_w - margin * 2
+                else:
+                    x_pos = self.width() - info_w - margin
+
+                # DbC assertions
+                assert y_pos >= 0, (
+                    "Calculated y position of info button must be non-negative"
+                )
+                assert x_pos >= 0, (
+                    "Calculated x position of info button must be non-negative"
+                )
+
+                info_btn.move(x_pos, y_pos)
 
     def _build_quick_launch_button(self) -> None:
         """Create the per-tile hover launch button (hidden until hover)."""
@@ -552,6 +611,9 @@ class DraggableModelCard(QFrame):
         # Info button, also floating top right
         self._build_info_button()
 
+        # Favorite button, also floating top right
+        self._build_favorite_button()
+
         self._reposition_quick_launch_button()
 
         # Tile-level help text.  Tooltip is a one-line preview; What's-this
@@ -574,7 +636,7 @@ class DraggableModelCard(QFrame):
         btn = QPushButton("ℹ", self)
         btn.setObjectName("CardInfoButton")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setToolTip("Click for details")
+        btn.setToolTip(f"<b>{self.model.name}</b><br>{self.model.description}")
         btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         btn.setFixedSize(18, 18)
         btn.setStyleSheet(
@@ -596,6 +658,99 @@ class DraggableModelCard(QFrame):
         self._btn_info = btn
         return btn
 
+    def _build_favorite_button(self) -> QPushButton:
+        """Create a small star favorite button."""
+        favs = (
+            getattr(self.parent_launcher.layout_manager, "favorites", [])
+            if self.parent_launcher
+            else []
+        )
+        is_fav = self.model.id in favs
+        star_char = "★" if is_fav else "☆"
+        btn = QPushButton(star_char, self)
+        btn.setObjectName("CardFavoriteButton")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setToolTip("Remove from favorites" if is_fav else "Add to favorites")
+        btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        btn.setFixedSize(18, 18)
+        btn.setStyleSheet(
+            "QPushButton#CardFavoriteButton {"
+            "  background: rgba(255, 255, 255, 0.1);"
+            "  color: " + ("#ffb700" if is_fav else "#aaaaaa") + ";"
+            "  border: none;"
+            "  border-radius: 9px;"
+            "  font-size: 11px;"
+            "  font-weight: bold;"
+            "}"
+            "QPushButton#CardFavoriteButton:hover {"
+            "  background: rgba(255, 255, 255, 0.2);"
+            "  color: #ffb700;"
+            "}"
+        )
+        btn.clicked.connect(self._toggle_favorite)
+        btn.hide()
+        self._btn_favorite = btn
+        return btn
+
+    def _toggle_favorite(self) -> None:
+        """Toggle whether this model is marked as favorite."""
+        if not self.parent_launcher or not self.parent_launcher.layout_manager:
+            return
+        favs = self.parent_launcher.layout_manager.favorites
+        if self.model.id in favs:
+            favs.remove(self.model.id)
+            self._btn_favorite.setText("☆")
+            self._btn_favorite.setToolTip("Add to favorites")
+            self._btn_favorite.setStyleSheet(
+                "QPushButton#CardFavoriteButton {"
+                "  background: rgba(255, 255, 255, 0.1);"
+                "  color: #aaaaaa;"
+                "  border: none;"
+                "  border-radius: 9px;"
+                "  font-size: 11px;"
+                "  font-weight: bold;"
+                "}"
+                "QPushButton#CardFavoriteButton:hover {"
+                "  background: rgba(255, 255, 255, 0.2);"
+                "  color: #ffb700;"
+                "}"
+            )
+            if hasattr(self.parent_launcher, "show_toast"):
+                self.parent_launcher.show_toast(
+                    f"Removed {self.model.name} from favorites", "info"
+                )
+        else:
+            favs.append(self.model.id)
+            self._btn_favorite.setText("★")
+            self._btn_favorite.setToolTip("Remove from favorites")
+            self._btn_favorite.setStyleSheet(
+                "QPushButton#CardFavoriteButton {"
+                "  background: rgba(255, 255, 255, 0.1);"
+                "  color: #ffb700;"
+                "  border: none;"
+                "  border-radius: 9px;"
+                "  font-size: 11px;"
+                "  font-weight: bold;"
+                "}"
+                "QPushButton#CardFavoriteButton:hover {"
+                "  background: rgba(255, 255, 255, 0.2);"
+                "  color: #ffb700;"
+                "}"
+            )
+            if hasattr(self.parent_launcher, "show_toast"):
+                self.parent_launcher.show_toast(
+                    f"Added {self.model.name} to favorites", "success"
+                )
+
+        if hasattr(self.parent_launcher, "_save_layout"):
+            self.parent_launcher._save_layout()
+
+        if (
+            self.parent_launcher.layout_manager.current_category_filter == "Favorites"
+            and hasattr(self.parent_launcher, "_rebuild_grid")
+        ):
+            self.parent_launcher._rebuild_grid()
+
     def _show_info_dialog(self) -> None:
         """Show a dialog with full tile information."""
         from PyQt6.QtWidgets import QMessageBox
@@ -614,7 +769,7 @@ class DraggableModelCard(QFrame):
         self._create_image_widget(layout)
 
         name_pt = scaled_font_pt(self.tile_scale)
-        self.lbl_name = QLabel(self.model.name)
+        self.lbl_name = QLabel(str(self.model.name))
         self.lbl_name.setObjectName("CardName")
         self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
         self.lbl_name.setWordWrap(True)
@@ -628,7 +783,7 @@ class DraggableModelCard(QFrame):
         layout.addLayout(title_layout)
 
         desc_pt = max(scaled_font_pt(self.tile_scale, base_pt=9), 9)
-        self.lbl_desc = QLabel(self.model.description)
+        self.lbl_desc = QLabel(str(self.model.description or ""))
         self.lbl_desc.setFont(get_qfont(size=desc_pt))
         self.lbl_desc.setObjectName("CardDescription")
         self.lbl_desc.setWordWrap(True)
@@ -653,11 +808,11 @@ class DraggableModelCard(QFrame):
             self._create_image_widget(outer)
 
             name_pt = max(scaled_font_pt(self.tile_scale, base_pt=10), 9)
-            self.lbl_name = QLabel(self.model.name)
+            self.lbl_name = QLabel(str(self.model.name))
             self.lbl_name.setObjectName("CardName")
             self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
-            self.lbl_desc = QLabel(self.model.description)
+            self.lbl_desc = QLabel(str(self.model.description or ""))
             self.lbl_desc.setObjectName("CardDescription")
             self.lbl_desc.setFont(get_qfont(size=8))
             self.lbl_desc.setVisible(False)
@@ -673,7 +828,7 @@ class DraggableModelCard(QFrame):
             text_box = QVBoxLayout()
             text_box.setSpacing(2)
             name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
-            self.lbl_name = QLabel(self.model.name)
+            self.lbl_name = QLabel(str(self.model.name))
             self.lbl_name.setObjectName("CardName")
             self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
@@ -682,7 +837,7 @@ class DraggableModelCard(QFrame):
             name_layout.addStretch()
             text_box.addLayout(name_layout)
 
-            self.lbl_desc = QLabel(self.model.description)
+            self.lbl_desc = QLabel(str(self.model.description or ""))
             self.lbl_desc.setObjectName("CardDescription")
             self.lbl_desc.setFont(get_qfont(size=9))
             self.lbl_desc.setVisible(self._show_description)

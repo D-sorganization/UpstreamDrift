@@ -38,6 +38,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.data_io._schemas import validate_trajectory_array
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -327,6 +328,12 @@ class SwingCaptureImporter:
 
         if data.ndim == 1:
             data = data.reshape(1, -1)
+
+        # Additive schema validation (issue #6568): require a numeric,
+        # finite [time, joint_0, ...] matrix with at least one joint column
+        # so a malformed capture raises a typed error instead of producing a
+        # garbage trajectory downstream.
+        validate_trajectory_array(data, source=str(filepath), min_columns=2)
 
         # First column is time
         times = data[:, 0]

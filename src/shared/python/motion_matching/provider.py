@@ -179,24 +179,25 @@ def register_provider(provider: FitSwingProvider) -> None:
                 name,
             )
             return
-        if existing is not None and (
-            type(existing) is type(provider)
-            or _provider_qualname(existing) == _provider_qualname(provider)
-        ):
-            # Same logical class — covers both ordinary re-imports and
-            # ``importlib.reload`` shadows (which rebuild the class object,
-            # so plain ``type`` identity is not enough).
-            _logger.debug(
-                "register_provider: %r already registered to %s; no-op",
-                name,
-                _provider_qualname(existing),
-            )
-            return
         if existing is not None:
+            q_existing = _provider_qualname(existing)
+            q_provider = _provider_qualname(provider)
+            if (
+                type(existing) is type(provider)
+                or q_existing == q_provider
+                or q_existing.split(".")[-2:] == q_provider.split(".")[-2:]
+            ):
+                # Same logical class — covers both ordinary re-imports,
+                # ``importlib.reload`` shadows, and import-path aliases.
+                _logger.debug(
+                    "register_provider: %r already registered to %s; no-op",
+                    name,
+                    q_existing,
+                )
+                return
             raise ValueError(
                 f"engine_name {name!r} is already registered to "
-                f"{_provider_qualname(existing)}; got "
-                f"{_provider_qualname(provider)}"
+                f"{q_existing}; got {q_provider}"
             )
         _REGISTRY[name] = provider
 

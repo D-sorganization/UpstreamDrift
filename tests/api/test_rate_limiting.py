@@ -30,6 +30,7 @@ def _build_app(monkeypatch: pytest.MonkeyPatch, simulate_limit: str = "2/minute"
     and reload the relevant modules to pick up the override.
     """
     monkeypatch.setenv("API_LIMIT_SIMULATE", simulate_limit)
+    monkeypatch.setenv("GOLF_AUTH_DISABLED", "true")
 
     # Re-import the module graph so the @limiter.limit(...) decorator sees the
     # patched env var. Order matters: rate_limit -> routes.simulation -> server.
@@ -72,7 +73,7 @@ def test_simulate_over_limit_returns_429(monkeypatch: pytest.MonkeyPatch) -> Non
         statuses = []
         for _ in range(5):
             resp = client.post(
-                "/api/v1/simulation/simulate",
+                "/api/v1/simulate",
                 json={"engine_type": "mujoco", "duration": 0.1},
             )
             statuses.append(resp.status_code)

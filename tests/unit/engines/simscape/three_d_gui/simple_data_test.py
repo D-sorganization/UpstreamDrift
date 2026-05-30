@@ -148,7 +148,7 @@ def check_required_signals() -> bool:
 
 def main() -> bool:
     """Main analysis function"""
-    logger.info("🚀 Starting Signal Bus Analysis")
+    logger.info("Starting Signal Bus Analysis")
     logger.info("=" * 50)
 
     # Change to script directory

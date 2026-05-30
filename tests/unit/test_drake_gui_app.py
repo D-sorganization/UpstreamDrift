@@ -22,35 +22,17 @@ except ImportError:
 
 skip_if_no_pyqt6 = pytest.mark.skipif(not HAS_PYQT6, reason="PyQt6 not installed")
 
-# Drake engine module paths that may get imported and must be cleaned up
-_DRAKE_ENGINE_MODULES = [
-    "src.engines.physics_engines.drake",
-    "src.engines.physics_engines.drake.python",
-    "src.engines.physics_engines.drake.python.src",
-    "src.engines.physics_engines.drake.python.src.drake_gui_app",
-    "src.engines.physics_engines.drake.python.src.drake_gui_ui",
-    "src.engines.physics_engines.drake.python.src.drake_gui_sim",
-    "src.engines.physics_engines.drake.python.src.drake_gui_viz",
-    "src.engines.physics_engines.drake.python.src.drake_gui_analysis",
-    "src.engines.physics_engines.drake.python.src.drake_analysis",
-]
-
 
 @pytest.fixture(autouse=True, scope="function")
 def _mock_pydrake() -> Generator[None, None, None]:
     """Provide mock pydrake modules only during test execution.
 
-    Also cleanup drake engine modules to prevent pollution of test_drake_wrapper.py.
-    When drake_gui_app is imported, it brings in the parent package
-    src.engines.physics_engines.drake.python into sys.modules. This causes
-    test_drake_wrapper.py to fail when it tries to patch
-    src.engines.physics_engines.drake.python.drake_physics_engine, because the
-    parent package exists but drake_physics_engine was never imported.
+    Also cleanup drake engine modules to prevent pollution of other tests.
     """
     # Save existing drake modules so we can restore them
     saved_modules = {}
-    for module_name in _DRAKE_ENGINE_MODULES:
-        if module_name in sys.modules:
+    for module_name in list(sys.modules.keys()):
+        if module_name.startswith("src.engines.physics_engines.drake"):
             saved_modules[module_name] = sys.modules[module_name]
 
     # Create fresh mocks for each test session to prevent pollution
@@ -71,9 +53,14 @@ def _mock_pydrake() -> Generator[None, None, None]:
         yield
 
     # Clean up drake engine modules to prevent pollution
-    for module_name in _DRAKE_ENGINE_MODULES:
-        if module_name in sys.modules:
-            del sys.modules[module_name]
+    for module_name in list(sys.modules.keys()):
+        if (
+            module_name.startswith(
+                ("src.engines.physics_engines.drake", "pydrake", "torch", "cv2")
+            )
+            or module_name in pydrake_mocks
+        ):
+            sys.modules.pop(module_name, None)
 
     # Restore saved modules
     for module_name, module in saved_modules.items():

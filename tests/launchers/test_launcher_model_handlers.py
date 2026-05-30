@@ -465,3 +465,56 @@ class TestManifestTileHandlerRegistration:
             if tile.id in static_ids and tile.name not in MODEL_IMAGES:
                 missing.append(f"{tile.id!r} (name={tile.name!r})")
         assert not missing, f"MODEL_IMAGES missing entries for: {', '.join(missing)}"
+
+
+class TestSharedRepoHandler:
+    """Tests for SharedRepoHandler."""
+
+    def test_can_handle_shared_repo(self) -> None:
+        from src.launchers.launcher_model_handlers import SharedRepoHandler
+
+        handler = SharedRepoHandler()
+        assert handler.can_handle("shared_repo") is True
+        assert handler.can_handle("other") is False
+
+    @patch("src.launchers.launcher_model_handlers._open_with_system_app")
+    def test_launch_success(self, mock_open) -> None:
+        from src.launchers.launcher_model_handlers import SharedRepoHandler
+
+        handler = SharedRepoHandler()
+
+        class DummyModel:
+            path = "MuJoCo_Models"
+            id = "mujoco_shared"
+
+        mock_manager = MagicMock()
+        mock_open.return_value = True
+
+        with patch.object(Path, "exists", return_value=True):
+            res = handler.launch(DummyModel(), Path("/repo"), mock_manager)
+            assert res is True
+            mock_open.assert_called_once_with(
+                Path("/repo").parent / "MuJoCo_Models", "SharedRepoHandler"
+            )
+
+    def test_launch_no_path(self) -> None:
+        from src.launchers.launcher_model_handlers import SharedRepoHandler
+
+        handler = SharedRepoHandler()
+
+        class NoPathModel:
+            id = "none"
+
+        assert handler.launch(NoPathModel(), Path("/repo"), MagicMock()) is False
+
+    def test_launch_missing_directory(self) -> None:
+        from src.launchers.launcher_model_handlers import SharedRepoHandler
+
+        handler = SharedRepoHandler()
+
+        class DummyModel:
+            path = "MuJoCo_Models"
+            id = "mujoco_shared"
+
+        with patch.object(Path, "exists", return_value=False):
+            assert handler.launch(DummyModel(), Path("/repo"), MagicMock()) is False

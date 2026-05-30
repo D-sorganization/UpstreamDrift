@@ -2,17 +2,31 @@
 
 from __future__ import annotations
 
-from src.launchers.launcher_dialogs import LauncherDialogsMixin
+from typing import Any
+from src.launchers.launcher_dialogs import DialogsManager
 
 
-class _LauncherHarness(LauncherDialogsMixin):
+class _LauncherHarness:
     def __init__(self, sidebar=None, embedded_host=None) -> None:
         self.sidekick_sidebar = sidebar
         self.embedded_host = embedded_host
         self.toasts: list[tuple[str, str]] = []
+        self.dialogs_manager = DialogsManager(self)
 
     def show_toast(self, message: str, toast_type: str = "info") -> None:
         self.toasts.append((message, toast_type))
+
+    def __getattr__(self, name: str) -> Any:
+        if name == "dialogs_manager":
+            raise AttributeError
+        if hasattr(self.dialogs_manager, name):
+            attr = getattr(self.dialogs_manager, name)
+            import types
+
+            if isinstance(attr, types.MethodType):
+                return types.MethodType(attr.__func__, self)
+            return attr
+        raise AttributeError(name)
 
 
 class _Sidebar:

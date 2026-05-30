@@ -132,7 +132,7 @@ def test_list_mode_yields_one_card_per_row(make_layout_manager) -> None:
     assert cols_seen == {0}
 
 
-def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
+def test_grid_mode_columns_drive_wrap(make_layout_manager, qapp) -> None:
     lm = make_layout_manager()
     # Use 8 cards to ensure wrap in LARGE (4 cols) -> 2 rows of cards.
     for i in range(5, 9):
@@ -146,8 +146,17 @@ def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
     lm.model_order = [f"model_{i}" for i in range(1, 9)]
     lm.set_view_mode(ViewMode.LARGE)
 
+    # Use a real widget hierarchy to mock a width of 1040 (gives 4 columns)
+    from PyQt6.QtWidgets import QWidget
+
+    mock_viewport = QWidget()
+    mock_viewport.resize(1040, 800)
+    mock_container = QWidget(mock_viewport)
+
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
+    grid_layout.parentWidget.return_value = mock_container
+    grid_layout.spacing.return_value = 20
     lm.rebuild_grid(grid_layout)
 
     # LARGE => 4 columns; the last card (8th) should land at col == 3.

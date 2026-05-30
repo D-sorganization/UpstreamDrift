@@ -56,7 +56,7 @@ class TestResolveWsUserLocalMode:
         from src.api.auth.middleware import LocalUser
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket()
+        ws: Any = _MockWebSocket()
         with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
             user = await resolve_ws_user(ws)
 
@@ -65,7 +65,7 @@ class TestResolveWsUserLocalMode:
     async def test_does_not_close_connection(self) -> None:
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket()
+        ws: Any = _MockWebSocket()
         with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
             await resolve_ws_user(ws)
 
@@ -74,7 +74,7 @@ class TestResolveWsUserLocalMode:
     async def test_logs_warning(self) -> None:
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket()
+        ws: Any = _MockWebSocket()
         with (
             patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}),
             patch("src.api.auth.ws_auth.logger") as mock_logger,
@@ -100,7 +100,7 @@ class TestResolveWsUserCloudMode:
     async def test_no_auth_header_returns_none(self) -> None:
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket(auth_header="")
+        ws: Any = _MockWebSocket(auth_header="")
         with patch.dict(os.environ, self._cloud_env(), clear=True):
             result = await resolve_ws_user(ws)
 
@@ -109,7 +109,7 @@ class TestResolveWsUserCloudMode:
     async def test_no_auth_header_closes_with_1008(self) -> None:
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket(auth_header="")
+        ws: Any = _MockWebSocket(auth_header="")
         with patch.dict(os.environ, self._cloud_env(), clear=True):
             await resolve_ws_user(ws)
 
@@ -119,7 +119,7 @@ class TestResolveWsUserCloudMode:
     async def test_non_bearer_scheme_closes_with_1008(self) -> None:
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket(auth_header="Basic dXNlcjpwYXNz")
+        ws: Any = _MockWebSocket(auth_header="Basic dXNlcjpwYXNz")
         with patch.dict(os.environ, self._cloud_env(), clear=True):
             result = await resolve_ws_user(ws)
 
@@ -131,7 +131,7 @@ class TestResolveWsUserCloudMode:
 
         from src.api.auth.ws_auth import resolve_ws_user
 
-        ws = _MockWebSocket(auth_header="Bearer badtoken")
+        ws: Any = _MockWebSocket(auth_header="Bearer badtoken")
         with (
             patch.dict(os.environ, self._cloud_env(), clear=True),
             patch("src.api.auth.ws_auth.security_manager") as mock_sm,
@@ -145,21 +145,86 @@ class TestResolveWsUserCloudMode:
         assert ws.close_called
         assert ws.close_code == 1008
 
-    async def test_valid_token_returns_local_user(self) -> None:
-        from src.api.auth.middleware import LocalUser
-
+    async def test_valid_token_returns_real_user(self) -> None:
+        from src.api.auth.models import User
         from src.api.auth.ws_auth import resolve_ws_user
+        from unittest.mock import MagicMock
 
-        ws = _MockWebSocket(auth_header="Bearer validtoken")
+        ws: Any = _MockWebSocket(auth_header="Bearer validtoken")
+        mock_user = MagicMock(spec=User)
+        mock_user.id = 42
+        mock_user.is_active = True
+
         with (
             patch.dict(os.environ, self._cloud_env(), clear=True),
             patch("src.api.auth.ws_auth.security_manager") as mock_sm,
+            patch("src.api.auth.ws_auth.SessionLocal") as mock_session_local,
         ):
             mock_sm.verify_token.return_value = {"sub": "42", "type": "access"}
+
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                mock_user
+            )
+            mock_session_local.return_value = mock_session
+
             result = await resolve_ws_user(ws)
 
-        assert isinstance(result, LocalUser)
+        assert result == mock_user
         assert not ws.close_called
+
+    async def test_user_not_found_closes_with_1008(self) -> None:
+        from src.api.auth.ws_auth import resolve_ws_user
+        from unittest.mock import MagicMock
+
+        ws: Any = _MockWebSocket(auth_header="Bearer validtoken")
+        with (
+            patch.dict(os.environ, self._cloud_env(), clear=True),
+            patch("src.api.auth.ws_auth.security_manager") as mock_sm,
+            patch("src.api.auth.ws_auth.SessionLocal") as mock_session_local,
+        ):
+            mock_sm.verify_token.return_value = {"sub": "42", "type": "access"}
+
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+            mock_session_local.return_value = mock_session
+
+            result = await resolve_ws_user(ws)
+
+        assert result is None
+        assert ws.close_called
+        assert ws.close_code == 1008
+
+    async def test_inactive_user_closes_with_1008(self) -> None:
+        from src.api.auth.models import User
+        from src.api.auth.ws_auth import resolve_ws_user
+        from unittest.mock import MagicMock
+
+        ws: Any = _MockWebSocket(auth_header="Bearer validtoken")
+        mock_user = MagicMock(spec=User)
+        mock_user.id = 42
+        mock_user.is_active = False
+
+        with (
+            patch.dict(os.environ, self._cloud_env(), clear=True),
+            patch("src.api.auth.ws_auth.security_manager") as mock_sm,
+            patch("src.api.auth.ws_auth.SessionLocal") as mock_session_local,
+        ):
+            mock_sm.verify_token.return_value = {"sub": "42", "type": "access"}
+
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                mock_user
+            )
+            mock_session_local.return_value = mock_session
+
+            result = await resolve_ws_user(ws)
+
+        assert result is None
+        assert ws.close_called
+        assert ws.close_code == 1008
 
 
 # ---------------------------------------------------------------------------

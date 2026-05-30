@@ -59,6 +59,15 @@ class SimulationResponse(BaseModel):
             raise ValueError("Successful simulation must include non-empty data")
         return self
 
+    @property
+    def solver_status(self) -> str:
+        """Get the solver status string.
+
+        Returns:
+            "success" if execution succeeded, "failed" otherwise.
+        """
+        return "success" if self.success else "failed"
+
 
 class VideoAnalysisResponse(BaseModel):
     """Response model for video analysis results."""
@@ -95,6 +104,15 @@ class AnalysisResponse(BaseModel):
         if self.success and not self.results:
             raise ValueError("Successful analysis must include non-empty results")
         return self
+
+    @property
+    def solver_status(self) -> str:
+        """Get the solver status string.
+
+        Returns:
+            "success" if execution succeeded, "failed" otherwise.
+        """
+        return "success" if self.success else "failed"
 
 
 class TaskStatusResponse(BaseModel):

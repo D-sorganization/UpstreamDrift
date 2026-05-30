@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 
 import pytest
+
+pytest.importorskip("torch")
 import torch
 
 ML_DIR = (

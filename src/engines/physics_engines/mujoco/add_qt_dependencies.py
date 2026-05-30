@@ -58,7 +58,7 @@ def update_upstream_drift_qt() -> bool:
         cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
         try:
-            logger.info("🚀 Running: %s", " ".join(cmd))
+            logger.info("Running: %s", " ".join(cmd))
             logger.info("📦 Installing Qt system libraries and PyQt6...")
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)

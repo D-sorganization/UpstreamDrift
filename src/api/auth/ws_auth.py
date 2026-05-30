@@ -19,28 +19,30 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import HTTPException, WebSocket
+from fastapi import WebSocket
 
 from src.api.auth.middleware import LocalUser, is_local_mode
+from src.api.auth.models import User
 from src.api.auth.security import security_manager
+from src.api.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
 _WS_CLOSE_POLICY_VIOLATION = 1008
 
 
-async def resolve_ws_user(websocket: WebSocket) -> LocalUser | None:
+async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
     """Authenticate a WebSocket connection before ``websocket.accept()``.
 
     In local mode, returns :class:`LocalUser` after logging a WARNING.
-    In cloud mode, validates the ``Authorization: Bearer`` header.  Returns
-    :class:`LocalUser` on success.
+    In cloud mode, validates the ``Authorization: Bearer`` header, resolves
+    and verifies the active user from the database. Returns the :class:`User` on success.
 
     Args:
         websocket: The incoming WebSocket connection (not yet accepted).
 
     Returns:
-        :class:`LocalUser` on success, ``None`` if authentication failed.
+        :class:`User` or :class:`LocalUser` on success, ``None`` if authentication failed.
 
     Postcondition:
         If ``None`` is returned, the WebSocket has been closed (code 1008)
@@ -64,11 +66,47 @@ async def resolve_ws_user(websocket: WebSocket) -> LocalUser | None:
 
     token = auth_header.split(" ", 1)[1]
     try:
-        security_manager.verify_token(token, "access")
-        return LocalUser()
-    except HTTPException:
+        payload = security_manager.verify_token(token, "access")
+        user_id = payload.get("sub")
+        if user_id is None:
+            logger.warning(
+                "WebSocket auth rejected: token sub claim missing. path=%s",
+                websocket.url.path,
+            )
+            await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
+            return None
+
+        # Resolve database session and retrieve real user
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.id == int(user_id)).first()
+            if user is None:
+                logger.warning(
+                    "WebSocket auth rejected: user %s not found. path=%s",
+                    user_id,
+                    websocket.url.path,
+                )
+                await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
+                return None
+            if not user.is_active:
+                logger.warning(
+                    "WebSocket auth rejected: user %s is inactive. path=%s",
+                    user_id,
+                    websocket.url.path,
+                )
+                await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
+                return None
+
+            # Expunge the user from session to allow closing the session
+            db.expunge(user)
+            return user
+        finally:
+            db.close()
+
+    except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "WebSocket auth rejected: invalid or expired token. path=%s",
+            "WebSocket auth rejected: invalid or expired token (%s). path=%s",
+            exc,
             websocket.url.path,
         )
         await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)

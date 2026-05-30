@@ -63,7 +63,10 @@ def _is_document(path: Path) -> bool:
 
 
 def _is_excluded(path: Path) -> bool:
-    return any(part in EXCLUDED_PARTS for part in path.parts)
+    return any(
+        part in EXCLUDED_PARTS or (part.startswith(".") and part != ".github")
+        for part in path.parts
+    )
 
 
 def _iter_documents() -> list[Path]:

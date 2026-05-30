@@ -11,7 +11,7 @@ from cors import (
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from contracts import (
+from src.shared.python.contracts import (
     ContractLevel,
     PreconditionError,
     get_contract_level,

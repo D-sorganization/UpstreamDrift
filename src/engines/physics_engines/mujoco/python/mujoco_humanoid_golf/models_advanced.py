@@ -38,6 +38,7 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
 
   <compiler angle="radian" coordinate="local"
             inertiafromgeom="false" balanceinertia="true"/>
+  <statistic extent="2.0" center="0 0 1"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -53,6 +54,12 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
   </default>
 
   <asset>
+    <texture name="skybox" type="skybox" builtin="gradient"
+             rgb1="0.3 0.5 0.7" rgb2="0.1 0.1 0.12" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker"
+             rgb1="0.2 0.3 0.2" rgb2="0.3 0.4 0.3" width="512" height="512"
+             mark="edge" markrgb="0.4 0.5 0.4"/>
+    <material name="ground_mat" texture="grid" texrepeat="10 10" texuniform="true"/>
     <material name="torso_mat" rgba="0.75 0.55 0.45 1"
               specular="0.3" shininess="0.2"/>
     <material name="arm_mat" rgba="0.65 0.45 0.35 1"
@@ -67,12 +74,13 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
               specular="0.8" shininess="0.6"/>
     <material name="club_head_mat" rgba="0.15 0.15 0.18 1"
               specular="0.9" shininess="0.8"/>
-    <material name="ground_mat" rgba="0.35 0.55 0.25 1"/>
   </asset>
 
   <worldbody>
     <!-- Ground -->
     <geom name="floor" type="plane" size="15 15 0.1" material="ground_mat"/>
+    <light pos="0 0 5" dir="0 0 -1" directional="true"
+           diffuse="0.6 0.6 0.6" castshadow="true"/>
     <light pos="3 -3 4" dir="-0.3 0.3 -1" directional="true" diffuse="0.8 0.8 0.8"/>
     <light pos="-3 -3 4" dir="0.3 0.3 -1" directional="true" diffuse="0.4 0.4 0.4"/>
 

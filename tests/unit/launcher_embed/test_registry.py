@@ -6,7 +6,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from launcher_embed import (
+from src.shared.python.launcher_embed import (
     EMBEDDABLE_TOOL_REGISTRY,
     EmbedCapabilities,
     EmbeddableTool,
@@ -82,8 +82,24 @@ def test_is_embeddable_false_when_capabilities_disable_embedding() -> None:
 @pytest.mark.unit
 def test_duplicate_registration_raises() -> None:
     register_embeddable_tool(_FakeEmbeddableTool("alpha"))
+
+    class _DifferentTool:
+        tool_id = "alpha"
+
+        def embed_capabilities(self) -> EmbedCapabilities:
+            return EmbedCapabilities()
+
+        def create_main_widget(self, parent: object) -> object:
+            return object()
+
+        def cleanup(self) -> None:
+            pass
+
+        def is_dirty(self) -> bool:
+            return False
+
     with pytest.raises(ValueError, match="already registered"):
-        register_embeddable_tool(_FakeEmbeddableTool("alpha"))
+        register_embeddable_tool(_DifferentTool())
 
 
 @pytest.mark.unit

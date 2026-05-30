@@ -2,6 +2,17 @@
 
 Frozen dataclass; validates colour strings via matplotlib's
 ``is_color_like`` so the renderers can rely on well-formed input.
+
+Relationship to the versioned theme contract (``theme/v1``)
+-----------------------------------------------------------
+``ShapeTheme`` describes *per-shape geometry styling* — a single shape's fill
+colour, opacity, edge colour/width and shading mode. This is deliberately
+*outside* the ``theme/v1`` colour-role contract
+(:mod:`src.shared.python.theme.v1`), which governs application *palette role
+tokens* (``bg``, ``accent``, ``text`` …). The two concerns are orthogonal:
+a ``ShapeTheme`` colour is a free matplotlib colour for one mesh, not a named
+role in an app palette. Unified under #6566: the palette/role contract lives
+in ``theme/v1``; shape styling stays here.
 """
 
 from __future__ import annotations

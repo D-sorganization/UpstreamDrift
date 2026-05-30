@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap, QMouseEvent, QKeyEvent
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -282,6 +282,17 @@ class SplashScreen(QSplashScreen):
         self.repaint()
         QApplication.processEvents()
 
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Allow the user to dismiss the splash screen by clicking it."""
+        self.close()
+        super().mousePressEvent(event)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Allow the user to dismiss the splash screen by pressing Escape."""
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
+        super().keyPressEvent(event)
+
 
 class AsyncStartupWorker(QThread):
     """Background worker for async application startup."""
@@ -323,11 +334,19 @@ class AsyncStartupWorker(QThread):
                 from src.launchers.docker_manager import get_docker_cmd
 
                 docker_cmd = get_docker_cmd() + ["--version"]
-                secure_run(docker_cmd, timeout=2.0, check=True)
-                self.results.docker_available = True
+                # check=False so an absent Docker (a normal non-zero exit) does
+                # not travel through secure_run's ERROR-logging exception path:
+                # "Docker not installed" is expected degradation, not a failure
+                # (#6613). Timeouts/other errors still raise and are caught below.
+                probe = secure_run(docker_cmd, timeout=10.0, check=False)
+                self.results.docker_available = probe.returncode == 0
+                if probe.returncode != 0:
+                    logger.debug(
+                        "Docker not available (probe exit code %s)", probe.returncode
+                    )
             except Exception as e:  # noqa: BLE001
                 self.results.docker_available = False
-                logger.debug(f"Docker not available or timed out: {e}")
+                logger.debug(f"Docker probe failed: {e}")
 
             self.progress_signal.emit("Ready", 100)
             self.msleep(

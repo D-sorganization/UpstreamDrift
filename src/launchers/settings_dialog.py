@@ -33,7 +33,9 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
+from src.launchers.docker_profile_info import load_docker_profiles
 from src.launchers.launcher_constants import DOCKER_STAGES
+from src.launchers.hover_copy_browser import HoverCopyTextBrowser
 from src.shared.python.docker_config import DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
@@ -50,6 +52,7 @@ TAB_APPEARANCE = 4
 TAB_STARTUP = 5
 TAB_NOTIFICATIONS = 6
 TAB_PERFORMANCE = 7
+TAB_PROCESSES = 8
 
 
 def validate_tab_index(tab_index: int) -> int:
@@ -63,6 +66,7 @@ def validate_tab_index(tab_index: int) -> int:
         TAB_STARTUP,
         TAB_NOTIFICATIONS,
         TAB_PERFORMANCE,
+        TAB_PROCESSES,
     }
     if tab_index not in valid_indexes:
         raise ValueError(
@@ -144,7 +148,7 @@ class WslScriptDialog(QDialog):
         # Interactive Run button
         btn_run_row = QHBoxLayout()
         self.btn_run_terminal = QPushButton(
-            "🚀 Run script in interactive WSL Terminal window"
+            "Run script in interactive WSL Terminal window"
         )
         self.btn_run_terminal.setToolTip(
             "Open a new Windows Command Prompt that runs the script inside WSL. "
@@ -288,6 +292,7 @@ class SettingsWidget(QWidget):
     TAB_STARTUP = TAB_STARTUP
     TAB_NOTIFICATIONS = TAB_NOTIFICATIONS
     TAB_PERFORMANCE = TAB_PERFORMANCE
+    TAB_PROCESSES = TAB_PROCESSES
 
     def __init__(
         self,
@@ -304,6 +309,7 @@ class SettingsWidget(QWidget):
         self._diagnostics_data = diagnostics_data
         self._launcher = launcher or parent
         self._diagnostics_loaded = False
+        self._docker_profile_infos = load_docker_profiles()
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
         # Connect tab change signal for lazy diagnostics loading
@@ -324,6 +330,7 @@ class SettingsWidget(QWidget):
                 "Startup",
                 "Notifications",
                 "Performance",
+                "Processes",
             }
         )
         self.tabs.setTabsClosable(False)
@@ -348,13 +355,14 @@ class SettingsWidget(QWidget):
             self.tabs.addTab(
                 self._prefs_dialog._create_performance_tab(), "Performance"
             )
+            self.tabs.addTab(self._create_processes_tab(), "Processes")
 
             # Add an Apply Preferences button
             btn_apply = QPushButton("Apply Preferences")
             btn_apply.clicked.connect(self._prefs_dialog._on_apply)
             layout.addWidget(btn_apply)
         except ImportError:
-            pass
+            self.tabs.addTab(self._create_processes_tab(), "Processes")
 
     # ── Layout tab ──────────────────────────────────────────────────
 
@@ -689,6 +697,17 @@ class SettingsWidget(QWidget):
         stage_row.addStretch()
         upper_layout.addLayout(stage_row)
 
+        # Docker setup details panel (re-integrated)
+        self.tier_details = QTextBrowser()
+        self.tier_details.setStyleSheet(Styles.CONSOLE_DIAGNOSTICS)
+        self.tier_details.setMinimumHeight(100)
+        self.tier_details.setMaximumHeight(150)
+        self.tier_details.setOpenExternalLinks(False)
+        upper_layout.addWidget(self.tier_details)
+
+        self.combo_stage.currentTextChanged.connect(self._refresh_tier_details)
+        self._refresh_tier_details(self.combo_stage.currentText())
+
         btn_row = QHBoxLayout()
         self._btn_build = QPushButton("Build Image")
         self._btn_build.setToolTip(
@@ -718,7 +737,7 @@ class SettingsWidget(QWidget):
         splitter.addWidget(self.build_console)
 
         # Set default proportions
-        splitter.setSizes([120, 250])
+        splitter.setSizes([220, 200])
 
         build_inner.addWidget(splitter)
 
@@ -812,7 +831,7 @@ class SettingsWidget(QWidget):
         tab_layout = QVBoxLayout(tab)
 
         # System checks browser
-        self._diag_browser = QTextBrowser()
+        self._diag_browser = HoverCopyTextBrowser()
         self._diag_browser.setOpenExternalLinks(False)
         self._diag_browser.setStyleSheet(Styles.CONSOLE_DIAGNOSTICS)
         tab_layout.addWidget(self._diag_browser, stretch=3)
@@ -1255,7 +1274,7 @@ class SettingsWidget(QWidget):
             self._build_status.setText(f"Building... ({elapsed:.0f}s elapsed)")
 
     def _on_tab_changed(self, index: int) -> None:
-        """Handle tab change for lazy diagnostics loading.
+        """Handle tab change for lazy diagnostics loading and processes refresh.
 
         When the Diagnostics tab is first selected, run diagnostics
         asynchronously and populate the display. Subsequent selections
@@ -1264,6 +1283,10 @@ class SettingsWidget(QWidget):
         Args:
             index: The new tab index.
         """
+        if index == TAB_PROCESSES:
+            self.refresh_processes_ui()
+            return
+
         if index != TAB_DIAGNOSTICS or self._diagnostics_loaded:
             return
 
@@ -1572,6 +1595,7 @@ class SettingsWidget(QWidget):
             ("Drake", "pydrake", ">=1.22.0", True),
             ("Pinocchio", "pinocchio", ">=2.6.0", True),
             ("OpenSim", "opensim", ">=4.4.0", True),
+            ("MyoSuite", "myosuite", ">=2.0.0", True),
         ]
 
         check_results = []
@@ -1596,9 +1620,9 @@ class SettingsWidget(QWidget):
                     check_results.append(
                         {
                             "name": name,
-                            "required": "Optional",
-                            "installed": "Not supported natively",
-                            "status": "ok",
+                            "required": req,
+                            "installed": "Missing (Use Docker/WSL)",
+                            "status": "warn",
                         }
                     )
                 else:
@@ -1661,16 +1685,19 @@ class SettingsWidget(QWidget):
             return
 
         check_script = (
-            "import importlib.metadata, sys; "
-            "res = []; "
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
-            "  try: "
-            "    __import__(p); "
-            "    try: v = importlib.metadata.version(p) "
-            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
-            "    res.append(f'{p}:{v}') "
-            "  except ImportError: "
-            "    res.append(f'{p}:Missing') "
+            "import importlib.metadata\n"
+            "import sys\n"
+            "res = []\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
+            "    try:\n"
+            "        __import__(p)\n"
+            "        try:\n"
+            "            v = importlib.metadata.version(p)\n"
+            "        except Exception:\n"
+            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
+            "        res.append(f'{p}:{v}')\n"
+            "    except ImportError:\n"
+            "        res.append(f'{p}:Missing')\n"
             "print(','.join(res))"
         )
 
@@ -1701,6 +1728,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1710,13 +1738,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"
@@ -1769,16 +1799,19 @@ class SettingsWidget(QWidget):
             python_exec = "./.venv-wsl/bin/python"
 
         check_script = (
-            "import importlib.metadata, sys; "
-            "res = []; "
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim']: "
-            "  try: "
-            "    __import__(p); "
-            "    try: v = importlib.metadata.version(p) "
-            "    except Exception: v = getattr(sys.modules[p], '__version__', 'Unknown') "
-            "    res.append(f'{p}:{v}') "
-            "  except ImportError: "
-            "    res.append(f'{p}:Missing') "
+            "import importlib.metadata\n"
+            "import sys\n"
+            "res = []\n"
+            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
+            "    try:\n"
+            "        __import__(p)\n"
+            "        try:\n"
+            "            v = importlib.metadata.version(p)\n"
+            "        except Exception:\n"
+            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
+            "        res.append(f'{p}:{v}')\n"
+            "    except ImportError:\n"
+            "        res.append(f'{p}:Missing')\n"
             "print(','.join(res))"
         )
 
@@ -1800,6 +1833,7 @@ class SettingsWidget(QWidget):
                     "pydrake": ">=1.22.0",
                     "pinocchio": ">=2.6.0",
                     "opensim": ">=4.4.0",
+                    "myosuite": ">=2.0.0",
                 }
 
                 display_names = {
@@ -1809,13 +1843,15 @@ class SettingsWidget(QWidget):
                     "pydrake": "Drake (PyDrake)",
                     "pinocchio": "Pinocchio",
                     "opensim": "OpenSim",
+                    "myosuite": "MyoSuite",
                 }
 
+                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
                 check_results = []
                 for p_name, req in reqs.items():
                     inst_v = parsed_deps.get(p_name, "Missing")
                     if inst_v == "Missing":
-                        status = "error"
+                        status = "warn" if p_name in optional_deps else "error"
                     else:
                         is_ok = self._compare_versions(inst_v, req)
                         status = "ok" if is_ok else "error"
@@ -1877,6 +1913,159 @@ class SettingsWidget(QWidget):
                 "<p>Could not access the system clipboard. The command is:</p>"
                 f"<code>{cmd}</code>",
             )
+
+    def _create_processes_tab(self) -> QWidget:
+        """Create the Processes tab for managing running tasks/subprocesses."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+        tab_layout.setContentsMargins(15, 15, 15, 15)
+        tab_layout.setSpacing(10)
+
+        # Status text header
+        self.lbl_processes_status = QLabel("Active Processes")
+        self.lbl_processes_status.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #ffffff;"
+        )
+        tab_layout.addWidget(self.lbl_processes_status)
+
+        # Scroll area for the processes list
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(
+            "background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;"
+        )
+
+        self.processes_container_widget = QWidget()
+        self.processes_container_widget.setStyleSheet("background-color: transparent;")
+        self.processes_layout = QVBoxLayout(self.processes_container_widget)
+        self.processes_layout.setContentsMargins(10, 10, 10, 10)
+        self.processes_layout.setSpacing(6)
+        self.processes_layout.addStretch()  # bottom stretch
+
+        scroll.setWidget(self.processes_container_widget)
+        tab_layout.addWidget(scroll)
+
+        # Bottom row with Kill All button
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        self.btn_kill_all_procs = QPushButton("Kill All Processes")
+        self.btn_kill_all_procs.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_kill_all_procs.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(220, 53, 69, 0.2);
+                border: 1px solid rgba(220, 53, 69, 0.4);
+                border-radius: 4px;
+                padding: 6px 14px;
+                color: #ff6b6b;
+                font-weight: bold;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: rgba(220, 53, 69, 0.4);
+                color: #ffffff;
+            }
+        """)
+        self.btn_kill_all_procs.clicked.connect(self._on_kill_all_clicked)
+        btn_layout.addWidget(self.btn_kill_all_procs)
+        tab_layout.addLayout(btn_layout)
+
+        return tab
+
+    def _on_kill_all_clicked(self) -> None:
+        if self._launcher and hasattr(self._launcher, "_kill_all_processes"):
+            self._launcher._kill_all_processes()
+            self.refresh_processes_ui()
+
+    def _on_kill_clicked(self, name: str) -> None:
+        if self._launcher and hasattr(self._launcher, "_kill_process_by_name"):
+            self._launcher._kill_process_by_name(name)
+            self.refresh_processes_ui()
+
+    def refresh_processes_ui(self) -> None:
+        """Dynamically populate active processes list row-by-row (GUI thread only)."""
+        # Clear existing rows except the stretch spacer at the end
+        while self.processes_layout.count() > 1:
+            item = self.processes_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Check active processes
+        running = []
+        if (
+            self._launcher
+            and hasattr(self._launcher, "running_processes")
+            and hasattr(self._launcher, "process_manager")
+        ):
+            with self._launcher.process_manager._process_lock:
+                for name, proc in list(self._launcher.running_processes.items()):
+                    if proc.poll() is None:
+                        running.append(name)
+
+        if not running:
+            self.lbl_processes_status.setText("No active processes.")
+            self.lbl_processes_status.setStyleSheet(
+                "font-size: 14px; font-weight: bold; color: gray;"
+            )
+            self.btn_kill_all_procs.setEnabled(False)
+            return
+
+        self.lbl_processes_status.setText(f"Active Processes ({len(running)})")
+        self.lbl_processes_status.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #ffffff;"
+        )
+        self.btn_kill_all_procs.setEnabled(True)
+
+        for name in running:
+            row = QWidget()
+            row.setObjectName("ProcessRow")
+            row.setStyleSheet("""
+                #ProcessRow {
+                    background-color: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                }
+                #ProcessRow:hover {
+                    background-color: rgba(255, 255, 255, 0.06);
+                }
+            """)
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(10, 8, 10, 8)
+
+            # Green status dot
+            dot = QLabel("●")
+            dot.setStyleSheet("color: #2ecc71; font-size: 14px; margin-right: 6px;")
+            row_layout.addWidget(dot)
+
+            # Process Name
+            lbl_name = QLabel(name)
+            lbl_name.setStyleSheet("color: #e0e0e0; font-size: 12px; font-weight: 500;")
+            row_layout.addWidget(lbl_name)
+            row_layout.addStretch()
+
+            # Kill button
+            btn_kill = QPushButton("Kill")
+            btn_kill.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_kill.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(220, 53, 69, 0.1);
+                    border: 1px solid rgba(220, 53, 69, 0.3);
+                    border-radius: 4px;
+                    padding: 4px 10px;
+                    color: #ff6b6b;
+                    font-size: 11px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(220, 53, 69, 0.3);
+                    color: #ffffff;
+                }
+            """)
+            btn_kill.clicked.connect(
+                lambda checked=False, n=name: self._on_kill_clicked(n)
+            )
+            row_layout.addWidget(btn_kill)
+
+            # Insert at the top (before the spacer at the end)
+            self.processes_layout.insertWidget(self.processes_layout.count() - 1, row)
 
 
 class SettingsDialog(QDialog):

@@ -247,6 +247,31 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class RefreshTokenResponse(BaseModel):
+    """Response model for token refresh endpoint."""
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+
+class UsageQuotaItem(BaseModel):
+    """Usage quota item schema."""
+
+    used: int
+    limit: int
+    remaining: int
+
+
+class UsageSummaryResponse(BaseModel):
+    """Response model for usage info endpoint."""
+
+    subscription_tier: str
+    api_calls: UsageQuotaItem
+    video_analyses: UsageQuotaItem
+    simulations: UsageQuotaItem
+
+
 class UsageQuotas(BaseModel):
     """Usage quotas for different subscription tiers."""
 

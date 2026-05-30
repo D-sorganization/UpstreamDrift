@@ -2,11 +2,8 @@
 
 # Python 3.10 compatibility: UTC constant was added in 3.11
 from datetime import datetime, timedelta
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from src.api.auth.dependencies import RequireAdmin, RequireAuth
@@ -17,10 +14,12 @@ from src.api.auth.models import (
     LoginRequest,
     LoginResponse,
     RefreshTokenRequest,
+    RefreshTokenResponse,
     User,
     UserCreate,
     UserResponse,
     UserRole,
+    UsageSummaryResponse,
 )
 from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
 from src.api.database import get_db
@@ -36,7 +35,7 @@ LOGIN_RATE_LIMIT = "5/minute"
 
 # Use shared limiter - registered with app.state in server.py
 # This ensures proper rate limiting across all routes
-limiter = Limiter(key_func=get_remote_address)
+from src.api.rate_limit import limiter
 
 
 @router.post("/register", response_model=UserResponse)
@@ -129,7 +128,7 @@ async def login(
     )
 
 
-@router.post("/refresh", response_model=dict)
+@router.post("/refresh", response_model=RefreshTokenResponse)
 @precondition(
     lambda body, db=None: (
         body is not None
@@ -140,7 +139,7 @@ async def login(
 )
 async def refresh_token(
     body: RefreshTokenRequest, db: Session = Depends(get_db)
-) -> dict[str, Any]:
+) -> RefreshTokenResponse:
     """Refresh access token using refresh token.
 
     Args:
@@ -175,11 +174,11 @@ async def refresh_token(
         expires_delta=access_token_expires,
     )
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "expires_in": int(access_token_expires.total_seconds()),
-    }
+    return RefreshTokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=int(access_token_expires.total_seconds()),
+    )
 
 
 @router.get("/me", response_model=UserResponse)
@@ -188,10 +187,10 @@ async def get_current_user_info(current_user: User = RequireAuth) -> UserRespons
     return current_user
 
 
-@router.get("/usage", response_model=dict)
-async def get_usage_info(current_user: User = RequireAuth) -> dict[str, Any]:
+@router.get("/usage", response_model=UsageSummaryResponse)
+async def get_usage_info(current_user: User = RequireAuth) -> UsageSummaryResponse:
     """Get current user's usage information."""
-    return usage_tracker.get_usage_summary(current_user)
+    return UsageSummaryResponse(**usage_tracker.get_usage_summary(current_user))
 
 
 @router.post("/api-keys", response_model=APIKeyResponse)

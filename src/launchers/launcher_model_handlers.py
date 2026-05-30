@@ -402,7 +402,41 @@ class PuttingGreenHandler:
         return process is not None
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
-        """Putting Green handler does not provide a dockable UI widget."""
+        """Get the dockable UI widget for the putting green simulation."""
+        if repo_path is None:
+            return None
+        script_path = resolve_model_artifact_path(model, repo_path)
+        if not script_path.exists():
+            return None
+
+        import importlib.util
+        import sys
+
+        original_sys_path = sys.path.copy()
+        success = False
+        try:
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            paths = get_model_python_paths(model, repo_path)
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+
+            module_name = "putting_green_gui_embed"
+            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, "get_dockable_ui"):
+                    ui = module.get_dockable_ui()
+                    if ui is not None:
+                        success = True
+                        return ui
+        except Exception as e:  # noqa: BLE001
+            logger.debug("Failed to get dockable UI for Putting Green: %s", e)
+        finally:
+            if not success:
+                sys.path = original_sys_path
         return None
 
 
@@ -587,6 +621,50 @@ class _SystemFileHandler:
         return None
 
 
+class SharedRepoHandler:
+    """Handler for opening sibling repositories/folders.
+
+    Handles model types: shared_repo
+    Covers: MuJoCo_Models, Drake_Models, Pinocchio_Models, OpenSim_Models.
+    """
+
+    MODEL_TYPES = {"shared_repo"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Open the sibling repository directory in the default system file manager."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "SharedRepoHandler: model '%s' has no path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        # Find sibling folder
+        folder_path = repo_path.parent / model_path
+        if not folder_path.exists():
+            logger.warning("SharedRepoHandler: directory not found: %s", folder_path)
+            return False
+
+        return _open_with_system_app(folder_path, "SharedRepoHandler")
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Shared repository handler does not provide a dockable UI widget."""
+        return None
+
+
 class MatlabFileHandler(_SystemFileHandler):
     """Handler for opening MATLAB files (.slx, .m) with system MATLAB."""
 
@@ -768,6 +846,7 @@ class ModelHandlerRegistry:
             BiomechExerciseHandler(),
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
+            SharedRepoHandler(),
             DocumentHandler(),
             ApiBackedHandler(),
         ]

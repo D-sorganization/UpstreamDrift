@@ -219,6 +219,7 @@ def test_startup_worker_run_success(
     worker.progress_signal = MagicMock()
     worker.finished_signal = MagicMock()
     worker.error_signal = MagicMock()
+    mock_secure_run.return_value.returncode = 0
 
     with patch.object(worker, "msleep"):
         worker.run()
@@ -240,6 +241,7 @@ def test_startup_worker_run_engine_import_error(
     worker = AsyncStartupWorker(root)
     worker.progress_signal = MagicMock()
     worker.finished_signal = MagicMock()
+    mock_secure_run.return_value.returncode = 0
 
     mock_engine_mgr.side_effect = ImportError("Test error")
 

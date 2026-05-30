@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.shared.python.ai.gui.assistant_panel import _rust_ollama_endpoint_paths
+from src.shared.python.ai.gui.assistant.panel import _rust_ollama_endpoint_paths
 
 
 def test_rust_ollama_paths_do_not_duplicate_v1_prefix() -> None:

@@ -112,13 +112,16 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     data_path = Path(data_path)
     import pandas as pd
 
+    from src.shared.python.data_io._schemas import validate_csv_dataframe
+
     suffix = data_path.suffix.lower()
     if suffix == ".csv":
-        return pd.read_csv(data_path)
+        # Additive structural validation (issue #6568).
+        return validate_csv_dataframe(pd.read_csv(data_path), source=str(data_path))
     if suffix in [".xlsx", ".xls"]:
-        return pd.read_excel(data_path)
+        return validate_csv_dataframe(pd.read_excel(data_path), source=str(data_path))
     if suffix == ".json":
-        return pd.read_json(data_path)
+        return validate_csv_dataframe(pd.read_json(data_path), source=str(data_path))
     raise ValueError(f"Unsupported file format: {suffix}")
 
 

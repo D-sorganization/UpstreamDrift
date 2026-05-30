@@ -61,6 +61,3 @@ shadows:
   ui:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  upstream_drift_tools:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"

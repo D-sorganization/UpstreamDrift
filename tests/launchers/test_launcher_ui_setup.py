@@ -118,17 +118,19 @@ def test_library_is_sidebar_button_not_startup_tab(launcher) -> None:
     assert launcher.workspace_tabs.count() == 1
     assert launcher.workspace_tabs.tabText(0) == "Home"
     assert launcher.library_widget is None
-    assert launcher.btn_library_sidebar.accessibleName() == "Library"
-    assert not launcher.btn_library_sidebar.icon().isNull()
+    btn_doc = launcher.sidebar_group.button(5)
+    assert btn_doc is not None
+    assert btn_doc.accessibleName() == "Documentation"
+    assert not btn_doc.icon().isNull()
 
 
 def test_library_sidebar_route_opens_single_workspace_tab(launcher) -> None:
     launcher.init_ui()
 
     with patch("src.launchers.library_widget.LibraryWidget", side_effect=QWidget):
-        launcher._on_sidebar_routed(7)
+        launcher._open_library_tab()
         first_widget = launcher.library_widget
-        launcher._on_sidebar_routed(7)
+        launcher._open_library_tab()
 
     assert first_widget is launcher.library_widget
     assert launcher.workspace_tabs.count() == 2
@@ -202,25 +204,35 @@ def test_clear_search(launcher) -> None:
 
 
 def test_process_console(launcher) -> None:
+    from PyQt6.QtWidgets import QTabWidget
+
+    tabs = QTabWidget()
+    tabs.detached_tabs = {}
+    launcher.workspace_tabs = tabs
+
+    launcher._action_console = MagicMock()
+    launcher.btn_console = MagicMock()
+
     launcher._setup_process_console()
-    assert hasattr(launcher, "_console_dock")
+    assert hasattr(launcher, "_console_widget")
+    assert launcher._console_widget.prevent_deletion_on_close is True
 
-    # replace the dock with a mock to avoid Qt show/hide state issues
-    dock_mock = MagicMock()
-    dock_mock.isVisible.return_value = False
-    launcher._console_dock = dock_mock
+    # Initially, workspace_tabs should not have the console tab
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == -1
 
-    # toggle
+    # toggle should show it as a tab
     launcher.toggle_process_console()
-    dock_mock.setVisible.assert_called_with(True)
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == 0
+    assert launcher.workspace_tabs.tabText(0) == "Console"
 
-    # append_console_line
-    launcher._console_dock.isVisible.return_value = False
-    # mock the plain text edit to avoid needing a full Qt window text append test
-    launcher._console_text = MagicMock()
+    # toggle again should hide it (remove it from tabs)
+    launcher.toggle_process_console()
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == -1
+
+    # append_console_line should auto-add the tab if not present
     launcher._append_console_line("engine", "test message")
-    launcher._console_dock.show.assert_called_once()
-    launcher._console_text.appendPlainText.assert_called()
+    assert launcher.workspace_tabs.indexOf(launcher._console_widget) == 0
+    assert "test message" in launcher._console_text.toPlainText()
 
 
 @patch("src.launchers.launcher_ui_setup.QTimer.singleShot")
@@ -437,7 +449,7 @@ def test_on_sidebar_routed_existing_ids_still_work(launcher) -> None:
     assert launcher.layout_manager.current_category_filter == "All"
 
     launcher._on_sidebar_routed(1)
-    assert launcher.layout_manager.current_category_filter == "Physics Engines"
+    assert launcher.layout_manager.current_category_filter == "Engines"
 
 
 # ---------------------------------------------------------------------------
@@ -531,14 +543,13 @@ def test_redock_all_tabs_action(launcher) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Training sidebar button + routing (issue #6018)
+# Condensed Categories sidebar button + routing
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-def test_sidebar_includes_training_button(launcher) -> None:
-    """The sidebar build invokes ``_build_sidebar_button`` for the Training
-    label, demonstrating that the training control is wired in."""
+def test_sidebar_includes_condensed_buttons(launcher) -> None:
+    """The sidebar build invokes ``_build_sidebar_button`` for Tools and Documentation."""
     build_button_spy = MagicMock(wraps=launcher._build_sidebar_button)
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
@@ -551,12 +562,81 @@ def test_sidebar_includes_training_button(launcher) -> None:
         launcher._setup_global_sidebar()
 
     labels_used = [call.args[0] for call in build_button_spy.call_args_list]
-    assert "Training" in labels_used
+    assert "Tools" in labels_used
+    assert "Documentation" in labels_used
+    assert "Training" not in labels_used
 
 
 @pytest.mark.unit
-def test_on_sidebar_routed_training_launches_controller(launcher) -> None:
-    """Clicking the Training button (``id=8``) routes to launching the controller."""
-    launcher._launch_training_controller = MagicMock()
-    launcher._on_sidebar_routed(8)
-    launcher._launch_training_controller.assert_called_once()
+def test_runtime_button_shadow_is_reduced(launcher) -> None:
+    """Verify that RuntimeButton drop shadow radius and color are set to reduced values."""
+    from src.launchers.launcher_ui_setup import RuntimeButton
+
+    btn = RuntimeButton(launcher)
+    assert btn.shadow is not None
+    assert btn.shadow.blurRadius() == 2
+    assert btn.shadow.color().alpha() == 15
+
+
+@pytest.mark.unit
+def test_status_label_updates_on_running_processes(launcher) -> None:
+    """Verify that update_running_processes_ui refreshes the settings widget and leaves status label unchanged."""
+    from PyQt6.QtWidgets import QLabel
+    import threading
+
+    launcher.lbl_status = QLabel("Ready")
+    launcher.running_processes = {}
+    launcher.running_processes_panel = QLabel()  # Dummy
+    launcher.process_manager = MagicMock()
+    launcher.process_manager._process_lock = threading.Lock()
+
+    mock_settings = MagicMock()
+    launcher._find_active_settings_widget = MagicMock(return_value=mock_settings)
+
+    # 1. Update UI
+    launcher.update_running_processes_ui()
+
+    # Verify status label is unchanged and settings widget is refreshed
+    assert launcher.lbl_status.text() == "Ready"
+    mock_settings.refresh_processes_ui.assert_called_once()
+
+
+@pytest.mark.unit
+def test_status_clicked_shows_menu(launcher) -> None:
+    """Verify that clicking status label when processes are running opens settings Processes tab."""
+    from PyQt6.QtWidgets import QLabel
+    import threading
+
+    launcher.lbl_status = QLabel("Ready")
+    launcher.running_processes = {"test_proc": MagicMock()}
+    launcher.running_processes["test_proc"].poll.return_value = None
+    launcher.process_manager = MagicMock()
+    launcher.process_manager._process_lock = threading.Lock()
+    launcher._open_settings = MagicMock()
+
+    launcher._on_status_clicked()
+    launcher._open_settings.assert_called_once_with(tab=8)
+
+
+@pytest.mark.unit
+def test_resizing_scroll_area_triggers_rebuild(launcher) -> None:
+    """Verify that ResizingScrollArea triggers rebuild_grid on the layout manager when resized."""
+    from PyQt6.QtWidgets import QVBoxLayout
+    from PyQt6.QtGui import QResizeEvent
+    from PyQt6.QtCore import QSize
+    from src.launchers.launcher_ui_setup import ResizingScrollArea
+
+    layout = QVBoxLayout()
+    launcher._setup_grid_area(layout)
+
+    assert isinstance(launcher.scroll_area, ResizingScrollArea)
+
+    # Mock the _rebuild_grid method on the launcher
+    launcher._rebuild_grid = MagicMock()
+
+    # Simulate a resize event on the scroll area
+    event = QResizeEvent(QSize(500, 400), QSize(800, 600))
+    launcher.scroll_area.resizeEvent(event)
+
+    # Verify that the launcher's _rebuild_grid method was called
+    launcher._rebuild_grid.assert_called_once()

@@ -222,9 +222,9 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/optimization.py",
+      "path": "src/shared/python/sidekick/",
       "owner": "@physics-core",
-      "reason": "numpy stubs expose pre-existing process calculator typing issues",
+      "reason": "sidekick package contains complex PyQt and process calculator typing issues",
       "expires_on": "2026-08-01"
     },
     {
@@ -282,9 +282,9 @@
       "expires_on": "2026-08-01"
     },
     {
-      "path": "src/shared/python/signal_toolkit/io.py",
+      "path": "src/shared/python/signal_toolkit/",
       "owner": "@signal-toolkit",
-      "reason": "numpy stubs expose pre-existing signal I/O typing issues",
+      "reason": "shared-path package aliasing and numpy stubs expose pre-existing signal toolkit typing issues",
       "expires_on": "2026-08-01"
     },
     {
@@ -299,18 +299,7 @@
       "reason": "numpy stubs expose pre-existing data export typing issues",
       "expires_on": "2026-08-01"
     },
-    {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py",
-      "owner": "@ui-platform",
-      "reason": "PSA GUI combines process calculator and UI code with pre-existing typing issues",
-      "expires_on": "2026-08-01"
-    },
-    {
-      "path": "src/shared/python/signal_toolkit/polynomial_generator.py",
-      "owner": "@signal-toolkit",
-      "reason": "numpy stubs expose pre-existing polynomial generator typing issues",
-      "expires_on": "2026-08-01"
-    },
+
     {
       "path": "src/engines/common/export.py",
       "owner": "@engine-core",
@@ -335,12 +324,7 @@
       "reason": "numpy stubs expose pre-existing analysis route typing issues",
       "expires_on": "2026-08-01"
     },
-    {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/syngas_water_calculator.py",
-      "owner": "@physics-core",
-      "reason": "numpy stubs expose floating and signedinteger narrowing divergence",
-      "expires_on": "2026-08-01"
-    },
+
     {
       "path": "src/deployment/digital_twin/twin.py",
       "owner": "@deployment",
