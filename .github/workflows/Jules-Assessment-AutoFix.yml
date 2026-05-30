@@ -37,8 +37,6 @@ concurrency:
 
 jobs:
   check-kill-switch:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     outputs:
@@ -55,8 +53,6 @@ jobs:
           fi
 
   pick-runner:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet-docker
@@ -72,8 +68,6 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   run-assessments:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
@@ -92,6 +86,8 @@ jobs:
           echo "ASSESSMENT_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -103,6 +99,8 @@ jobs:
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
@@ -258,8 +256,6 @@ jobs:
   # HARDENING: Consolidated auto-fix job - creates ONE PR instead of 4 separate PRs
   # This prevents PR proliferation from matrix strategy
   auto-fix-issues:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     name: Auto-Fix All Issues (Consolidated)
     needs: [pick-runner, run-assessments]
@@ -277,6 +273,8 @@ jobs:
           fetch-depth: 0
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -288,6 +286,8 @@ jobs:
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
@@ -453,8 +453,6 @@ jobs:
             --head "$BRANCH_NAME"
 
   create-github-issues:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     name: Create GitHub Issues for Untracked Problems
     needs: [pick-runner, run-assessments]
@@ -472,6 +470,8 @@ jobs:
           name: assessment-reports
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -483,6 +483,8 @@ jobs:
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
@@ -522,8 +524,6 @@ jobs:
 
   # Close source PR if specified (prevents PR proliferation)
   close-source-pr:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     name: Close Source PR (Superseded)
     needs: [pick-runner, run-assessments, auto-fix-issues]
@@ -582,8 +582,6 @@ jobs:
 
   # Dry run summary - runs independently when dry_run is true
   dry-run-summary:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: pick-runner
     name: Dry Run Summary

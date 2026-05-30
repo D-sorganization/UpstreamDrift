@@ -45,12 +45,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   check-leaderboard:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     name: check LEADERBOARD.md is committed
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5

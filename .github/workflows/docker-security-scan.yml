@@ -23,12 +23,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   trivy-scan:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 40
     name: Trivy Container Scan
     runs-on: d-sorg-fleet-docker

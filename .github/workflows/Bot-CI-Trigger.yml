@@ -38,13 +38,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -62,7 +59,6 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     continue-on-error: true
     env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
       BOT_TRIGGER_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN || github.token }}
     # Only run for bot-authored PRs or scheduled/manual runs
     if: |

@@ -28,8 +28,6 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -47,7 +45,6 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90
     env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
       HEAVY_TEST_SLACK_WEBHOOK: ${{ secrets.HEAVY_TEST_SLACK_WEBHOOK }}
 
     steps:
@@ -55,6 +52,8 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -66,6 +65,8 @@ jobs:
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ inputs.python_version || '3.11' }}

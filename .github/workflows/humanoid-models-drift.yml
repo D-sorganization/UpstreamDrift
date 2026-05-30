@@ -45,8 +45,6 @@ permissions:
 
 jobs:
   pick-runner:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
@@ -60,8 +58,6 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   drift-check:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: pick-runner
     name: Verify humanoid models match shared YAML
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -78,6 +74,8 @@ jobs:
           submodules: false
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -89,6 +87,8 @@ jobs:
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
         with:
           python-version: "3.11"

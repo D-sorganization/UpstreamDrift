@@ -8,8 +8,6 @@ on:
 
 jobs:
   check-kill-switch:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     outputs:
@@ -26,8 +24,6 @@ jobs:
           fi
 
   pick-runner:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet-docker
@@ -43,14 +39,14 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   tech-custodian:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -63,6 +59,8 @@ jobs:
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"

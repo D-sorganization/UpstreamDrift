@@ -15,12 +15,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   osv-monitor:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     steps:

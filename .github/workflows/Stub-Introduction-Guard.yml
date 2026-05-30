@@ -28,12 +28,9 @@ permissions:
   pull-requests: read
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   guard:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     steps:

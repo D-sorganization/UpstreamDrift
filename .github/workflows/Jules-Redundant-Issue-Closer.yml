@@ -27,12 +27,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
 
 jobs:
   close-redundant:
-    env:
-      AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     steps:
