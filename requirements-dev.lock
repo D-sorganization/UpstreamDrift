@@ -182,6 +182,8 @@ pluggy==1.6.0
     #   pytest-cov
 py-cpuinfo==9.0.0
     # via pytest-benchmark
+pyarrow==24.0.0
+    # via upstream-drift (pyproject.toml)
 pycparser==3.0
     # via cffi
 pydantic==2.12.5
