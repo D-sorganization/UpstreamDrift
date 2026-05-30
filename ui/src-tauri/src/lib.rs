@@ -253,8 +253,15 @@ pub fn run() {
             // does not hard-crash the UI — the diagnostic screen will surface it.
             let state = app.state::<BackendProcess>();
             match start_backend(state) {
-                Ok(status) => log::info!("Backend auto-start: running={} pid={:?}", status.running, status.pid),
-                Err(e) => log::warn!("Backend auto-start failed (diagnostic screen will show details): {}", e),
+                Ok(status) => log::info!(
+                    "Backend auto-start: running={} pid={:?}",
+                    status.running,
+                    status.pid
+                ),
+                Err(e) => log::warn!(
+                    "Backend auto-start failed (diagnostic screen will show details): {}",
+                    e
+                ),
             }
             Ok(())
         })
