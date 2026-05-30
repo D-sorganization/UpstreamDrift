@@ -39,8 +39,11 @@ globals().update({name: getattr(_physics_constants, name) for name in __all__})
 
 # Pre-computed float values for commonly used constants
 # (Avoids repeated float() conversions from PhysicalConstant in multiple modules)
+# F5 fix: single source of truth for gravitational acceleration.
+# Use GRAVITY_FLOAT (9.80665 m/s²) everywhere; GRAVITY is preserved for backward
+# compatibility only.  New code MUST use GRAVITY_FLOAT.
 GRAVITY_FLOAT: float = float(GRAVITY_M_S2)
-GRAVITY: float = 9.81  # Approximate gravity for general simulation use
+GRAVITY: float = GRAVITY_FLOAT  # Deprecated alias – use GRAVITY_FLOAT
 GOLF_BALL_MASS_FLOAT: float = float(GOLF_BALL_MASS_KG)
 GOLF_BALL_RADIUS_FLOAT: float = float(GOLF_BALL_RADIUS_M)
 GOLF_BALL_DIAMETER_FLOAT: float = float(GOLF_BALL_DIAMETER_M)

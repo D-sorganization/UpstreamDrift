@@ -54,7 +54,7 @@ if DRAKE_AVAILABLE:
     from pydrake.multibody.tree import JointActuatorIndex
 
 from src.shared.python.core import constants
-from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 
 logger = get_logger(__name__)
 
@@ -65,10 +65,12 @@ DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
     lambda self: not self._is_finalized or self.plant_context is not None,
     "Finalized engine must have a valid plant context",
 )
-class DrakePhysicsEngine(PhysicsEngine):
+class DrakePhysicsEngine(BasePhysicsEngine):
     """Encapsulates Drake MultibodyPlant and simulation control.
 
-    Implements the shared PhysicsEngine protocol.
+    Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
+    gaining checkpoint save/restore (Checkpointable contract), path validation,
+    and model name tracking from the base class.
     """
 
     def __init__(self, time_step: float = DEFAULT_TIME_STEP) -> None:
@@ -77,6 +79,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         Args:
             time_step: Simulation time step in seconds.
         """
+        super().__init__()
         if time_step is None:
             raise ValueError("time_step must be provided")
         self.builder = DiagramBuilder()
@@ -94,6 +97,11 @@ class DrakePhysicsEngine(PhysicsEngine):
         self.model_name_str: str = ""
         self._is_finalized = False
         self.simulator: analysis.Simulator | None = None
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "drake"
 
     @property
     def is_initialized(self) -> bool:
@@ -117,44 +125,44 @@ class DrakePhysicsEngine(PhysicsEngine):
             self.simulator.Initialize()
             self._is_finalized = True
 
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine)."""
+        parser = Parser(self.plant)
+        model_name = path.split("/")[-1].split(".")[0]
+        self.model_name_str = model_name
+        parser.AddModels(Path(path))
+        self._ensure_finalized()
+
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific string loading (called by BasePhysicsEngine)."""
+        parser = Parser(self.plant)
+        ext = extension if extension else "urdf"
+        parser.AddModelsFromString(content, ext)
+        self.model_name_str = "StringLoadedModel"
+        self._ensure_finalized()
+
     def load_from_path(self, path: str) -> None:
         """Load model from file path (URDF, SDF, MJCF if supported)."""
         # Drake Parser supports SDF, URDF, MJCF (experimental)
         if path is None:
             raise ValueError("path must be provided")
-        parser = Parser(self.plant)
-        # We can try to infer model name from path
-        model_name = path.split("/")[-1].split(".")[0]
-        self.model_name_str = model_name
-
         try:
-            # Add model to plant
-            parser.AddModels(Path(path))  # Path() for pydrake PathLike requirement
+            self._load_from_path_impl(path)
+            self._is_initialized = True
         except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load Drake model from path %s: %s", path, e)
             raise
-
-        # We don't finalize here immediately to allow adding more models if needed?
-        # But protocol implies "load then run".
-        # So we should finalize implicitly on first usage or explicit?
-        # For simplicity, we assume one load call per "engine setup".
-        self._ensure_finalized()
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string content."""
         if content is None:
             raise ValueError("content must be provided")
-        parser = Parser(self.plant)
-        ext = extension if extension else "urdf"  # Default to URDF if unknown?
-
         try:
-            parser.AddModelsFromString(content, ext)
-            self.model_name_str = "StringLoadedModel"
+            self._load_from_string_impl(content, extension)
+            self._is_initialized = True
         except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load Drake model from string: %s", e)
             raise
-
-        self._ensure_finalized()
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:

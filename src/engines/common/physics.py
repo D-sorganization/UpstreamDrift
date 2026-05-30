@@ -27,13 +27,15 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.core.contracts import postcondition, precondition
 
 # ─── Physical Constants ────────────────────────────────────────────────
 STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
-GRAVITY_APPROX: float = 9.81  # m/s² (common approximation)
-GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY_APPROX])
+GRAVITY_APPROX: float = (
+    GRAVITY_FLOAT  # m/s² — alias for backward compat; prefer STANDARD_GRAVITY
+)
+GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -STANDARD_GRAVITY])
 MIN_VALID_ALTITUDE_M: float = 0.0
 MAX_VALID_TROPOSPHERE_ALTITUDE_M: float = 11_000.0
 
@@ -410,7 +412,7 @@ class BallPhysics:
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)
         self.gravity = (
-            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY])
+            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY_FLOAT])
         )
 
     @precondition(

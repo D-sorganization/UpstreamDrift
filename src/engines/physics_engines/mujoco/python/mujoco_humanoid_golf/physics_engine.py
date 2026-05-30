@@ -25,10 +25,10 @@ from src.shared.python.core.contracts import (
     postcondition,
     precondition,
 )
+from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.data_io.path_utils import get_repo_root
-from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.security_utils import validate_path
 
 logger = get_logger(__name__)
 
@@ -50,10 +50,12 @@ ALLOWED_MODEL_DIRS = [
     lambda self: self.model is None or self.data is not None,
     "If model is loaded, data must also be initialized",
 )
-class MuJoCoPhysicsEngine(PhysicsEngine):
+class MuJoCoPhysicsEngine(BasePhysicsEngine):
     """Encapsulates MuJoCo model, data, and simulation control.
 
-    Implements the shared PhysicsEngine protocol with Design by Contract.
+    Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
+    gaining checkpoint save/restore (Checkpointable contract), path validation,
+    and model name tracking from the base class.
 
     Design by Contract:
         Preconditions:
@@ -71,6 +73,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     def __init__(self) -> None:
         """Initialize the physics engine."""
+        super().__init__(allowed_dirs=ALLOWED_MODEL_DIRS)
         self.model: mujoco.MjModel | None = None
         self.data: mujoco.MjData | None = None
         self.xml_path: str | None = None
@@ -81,47 +84,52 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return self.model is not None and self.data is not None
 
     @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "mujoco"
+
+    @property
     def model_name(self) -> str:
-        """Return the name of the currently loaded model."""
+        """Return the name of the currently loaded model.
+
+        Prefers the XML path stem, then attempts mj_id2name for the
+        worldbody (body 0), then falls back to a generic label.
+        """
         if self.model is None:
             return "None"
-
-        # Try to get from model names
-        if self.model.names:
-            # The names buffer is a byte string, need to handle encoding
-            # if accessed directly
-            # But typically we want the model name from the XML
-            return "MuJoCo Model"
-
+        # Prefer file-based name (most informative)
         if self.xml_path:
             return os.path.basename(self.xml_path).replace(".xml", "")
-
+        # Try to read a real body name from MuJoCo's names buffer
+        try:
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
+            if name:
+                return name
+        except Exception:  # noqa: BLE001 – MuJoCo C-extension errors vary
+            pass
         return "MuJoCo Model"
 
-    def load_from_string(self, content: str, extension: str | None = None) -> None:
-        """Load model from XML string."""
-        try:
-            self.model = mujoco.MjModel.from_xml_string(content)
-            self.data = mujoco.MjData(self.model)
-            self.xml_path = None
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error("Failed to load model from XML string: %s", e)
-            raise
+    # ------------------------------------------------------------------
+    # BasePhysicsEngine abstract implementation
+    # ------------------------------------------------------------------
 
-    def load_from_path(self, path: str) -> None:
-        """Load model from file path."""
-        try:
-            # Security: Validate path is within allowed directories
-            # Hardening against path traversal (F-004)
-            resolved = validate_path(path, ALLOWED_MODEL_DIRS, strict=True)
-            path_str = str(resolved)
+    @log_errors("Failed to load MuJoCo model from string", reraise=True)
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific XML string loading (called by BasePhysicsEngine)."""
+        self.model = mujoco.MjModel.from_xml_string(content)
+        self.data = mujoco.MjData(self.model)
+        self.xml_path = None
 
-            self.model = mujoco.MjModel.from_xml_path(path_str)
-            self.data = mujoco.MjData(self.model)
-            self.xml_path = path_str
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error("Failed to load model from path %s: %s", path, e)
-            raise
+    @log_errors("Failed to load MuJoCo model from path", reraise=True)
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine).
+
+        BasePhysicsEngine already validates existence and allowed-dirs before
+        calling this method, so we only need the MuJoCo-specific logic here.
+        """
+        self.model = mujoco.MjModel.from_xml_path(path)
+        self.data = mujoco.MjData(self.model)
+        self.xml_path = path
 
     def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Set model and data manually (e.g. from async loader)."""
@@ -173,37 +181,44 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             return np.array([]), np.array([])
         return self.data.qpos.copy(), self.data.qvel.copy()
 
-    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set the current state."""
-        if self.data is not None:
-            # Validate dimensions
-            if len(q) != len(self.data.qpos):
-                raise ValueError(
-                    f"State q size mismatch: got {len(q)}, "
-                    f"expected {len(self.data.qpos)}"  # noqa: E501
-                )
-            self.data.qpos[:] = q
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:  # type: ignore[override]
+        """Set the current state.
 
-            if len(v) != len(self.data.qvel):
-                raise ValueError(
-                    f"State v size mismatch: got {len(v)}, "
-                    f"expected {len(self.data.qvel)}"  # noqa: E501
-                )
-            self.data.qvel[:] = v
+        Raises StateError when called on an uninitialised engine instead of
+        silently no-oping (F4 fix).
+        """
+        self.require_initialized("set_state")  # F4: typed error on unloaded engine
+        assert self.data is not None  # guaranteed by require_initialized
+        # Validate dimensions
+        if len(q) != len(self.data.qpos):
+            raise ValueError(
+                f"State q size mismatch: got {len(q)}, expected {len(self.data.qpos)}"
+            )
+        self.data.qpos[:] = q
 
-            # Critical: Update derived quantities (accelerations, sensors, etc.)
-            self.forward()
+        if len(v) != len(self.data.qvel):
+            raise ValueError(
+                f"State v size mismatch: got {len(v)}, expected {len(self.data.qvel)}"
+            )
+        self.data.qvel[:] = v
+
+        # Critical: Update derived quantities (accelerations, sensors, etc.)
+        self.forward()
 
     def set_control(self, u: np.ndarray) -> None:
-        """Set control vector."""
-        if self.data is not None and self.model is not None:
-            # Strict size validation
-            if len(u) != self.model.nu:
-                raise ValueError(
-                    f"Control vector size mismatch: got {len(u)}, "
-                    f"expected {self.model.nu}"  # noqa: E501
-                )
-            self.data.ctrl[:] = u
+        """Set control vector.
+
+        Raises StateError when called on an uninitialised engine instead of
+        silently no-oping (F4 fix).
+        """
+        self.require_initialized("set_control")  # F4: typed error on unloaded engine
+        assert self.data is not None and self.model is not None
+        # Strict size validation
+        if len(u) != self.model.nu:
+            raise ValueError(
+                f"Control vector size mismatch: got {len(u)}, expected {self.model.nu}"
+            )
+        self.data.ctrl[:] = u
 
     def get_time(self) -> float:
         """Get the current simulation time."""
@@ -277,20 +292,31 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q)."""
+        """Compute pure gravity forces g(q) with zero velocity (F3 fix).
+
+        Temporarily zeroes qvel so that qfrc_bias reflects only gravity
+        (not Coriolis/centrifugal terms).  State is restored in a finally
+        block regardless of exceptions.
+        """
         if self.model is None or self.data is None:
             return np.array([])
-        qfrc_grav = getattr(self.data, "qfrc_grav", None)
-        if qfrc_grav is None:
-            qfrc_grav = getattr(self.data, "qfrc_bias", np.zeros(self.model.nv))
-        # Cast to ndarray before copy to satisfy mypy
-        grav_arr = cast(np.ndarray, qfrc_grav)
-        return grav_arr.copy()
+        saved_qvel = self.data.qvel.copy()
+        try:
+            self.data.qvel[:] = 0.0
+            mujoco.mj_forward(self.model, self.data)
+            return cast(np.ndarray, self.data.qfrc_bias.copy())
+        finally:
+            self.data.qvel[:] = saved_qvel
+            mujoco.mj_forward(self.model, self.data)  # restore derived quantities
 
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics result must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
+        """Compute inverse dynamics: tau = ID(q, qdot, qacc).
+
+        Saves and restores ``data.qacc`` in a finally block so that this
+        pure-query method does not corrupt persistent simulation state (F2 fix).
+        """
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -301,13 +327,13 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
                 parameter="qacc",
             )
 
-        # Copy qacc to data
-        self.data.qacc[:] = qacc
-
-        # Compute inverse dynamics
-        mujoco.mj_inverse(self.model, self.data)
-
-        return cast(np.ndarray, self.data.qfrc_inverse.copy())
+        saved_qacc = self.data.qacc.copy()  # F2: snapshot before mutation
+        try:
+            self.data.qacc[:] = qacc
+            mujoco.mj_inverse(self.model, self.data)
+            return cast(np.ndarray, self.data.qfrc_inverse.copy())
+        finally:
+            self.data.qacc[:] = saved_qacc  # F2: always restore
 
     # -------- Section F: Drift-Control Decomposition --------
 

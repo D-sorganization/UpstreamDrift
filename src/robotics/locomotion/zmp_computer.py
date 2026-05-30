@@ -19,7 +19,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.core.protocols import HumanoidCapable, RoboticsCapable
-from src.shared.python.core.constants import GRAVITY as _GRAVITY_CONST
+from src.shared.python.core.constants import GRAVITY_FLOAT as _GRAVITY_CONST
 from src.shared.python.core.contracts import ContractChecker
 from model_generation.core.constants import DEFAULT_MASS_KG
 
