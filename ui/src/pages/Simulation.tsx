@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSimulation } from '@/api/client';
-import type { ConnectionStatus } from '@/api/client';
+import type { ConnectionStatus as ConnectionStatusType } from '@/api/client';
 import { useEngineStore, selectEffectiveEngine } from '@/stores/useEngineStore';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
@@ -114,7 +114,7 @@ export function SimulationPage() {
   }, [stop, showInfo]);
 
   // Show toast only when connection status transitions (F9: prevents spam)
-  const prevConnectionStatusRef = useRef<ConnectionStatus | null>(null);
+  const prevConnectionStatusRef = useRef<ConnectionStatusType | null>(null);
   useEffect(() => {
     if (connectionStatus === prevConnectionStatusRef.current) return;
     prevConnectionStatusRef.current = connectionStatus;

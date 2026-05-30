@@ -512,10 +512,8 @@ fn parse_worldbody<B: std::io::BufRead>(reader: &mut Reader<B>) -> UrdfResult<Wo
                     }
                 }
             }
-            Event::End(e) => {
-                if tag_name_end(&e)? == "worldbody" {
-                    return Ok(wb);
-                }
+            Event::End(e) if tag_name_end(&e)? == "worldbody" => {
+                return Ok(wb);
             }
             _ => {}
         }
@@ -589,10 +587,8 @@ fn parse_body<B: std::io::BufRead>(
                     }
                 }
             }
-            Event::End(e) => {
-                if tag_name_end(&e)? == "body" {
-                    return Ok(body);
-                }
+            Event::End(e) if tag_name_end(&e)? == "body" => {
+                return Ok(body);
             }
             _ => {}
         }
@@ -773,10 +769,8 @@ fn parse_actuator_section<B: std::io::BufRead>(
                 });
                 skip_until_close(reader, &tag)?;
             }
-            Event::End(e) => {
-                if tag_name_end(&e)? == "actuator" {
-                    return Ok(());
-                }
+            Event::End(e) if tag_name_end(&e)? == "actuator" => {
+                return Ok(());
             }
             _ => {}
         }
