@@ -81,7 +81,10 @@ sg-optimizer = ["pyproj>=3.6.0"]
 # additive schema checks in src/shared/python/data_io/_schemas.py. These are
 # optional: the loaders import pandera lazily and degrade to structural-only
 # checks when it is absent, so this stays out of the hard core dependencies.
-data = ["pandas>=2.0.0", "pandera>=0.20.0"]
+# pyarrow powers the Parquet IO in scripts/compact_swing_dataset.py and the
+# dataset_tools loaders (hard top-level imports, not lazy), so it ships with
+# the data extra rather than being treated as optional.
+data = ["pandas>=2.0.0", "pandera>=0.20.0", "pyarrow>=14.0.0"]
 
 # Analysis extras
 analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
@@ -122,6 +125,8 @@ dev = [
     "build",
     # Required for tests that import common_utils and model_explorer
     "pandas>=2.0.0",
+    # Required for Parquet IO tests (compact_swing_dataset compactor/loader suites)
+    "pyarrow>=14.0.0",
     "defusedxml>=0.7.0",
     # Required for plotting tests
     "matplotlib>=3.10.8",
