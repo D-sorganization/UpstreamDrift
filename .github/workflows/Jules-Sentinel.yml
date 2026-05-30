@@ -56,13 +56,16 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -70,6 +73,8 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         with:
           python-version: "3.11"
           cache: "pip"

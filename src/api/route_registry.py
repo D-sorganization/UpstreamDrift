@@ -106,16 +106,6 @@ async def _current_user_from_bearer_header(request: Request, db: Session) -> Use
     return await get_current_user_flexible(credentials=credentials, db=db)
 
 
-async def _global_auth_dependency(
-    request: Request,
-    db: Session = Depends(get_db),
-) -> User | None:
-    """Enforce authentication on non-public routes globally in cloud mode."""
-    if is_auth_disabled():
-        return None
-    return await _current_user_from_bearer_header(request, db)
-
-
 def _request_time_quota_dependency(
     resource_type: str,
     enforced_dependency: Callable[..., object],
@@ -145,14 +135,52 @@ _VIDEO_QUOTA_DEPENDENCY = _request_time_quota_dependency(
     CheckVideoQuota.dependency,
 )
 
+
+async def _global_auth_dependency(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Require an authenticated bearer token for protected routers.
+
+    In local/auth-disabled mode this is a no-op (returns ``None``). In cloud
+    mode it enforces a valid ``Authorization: Bearer`` header, raising 401 on
+    failure. Applied at registration time to every router not in
+    ``_PUBLIC_ROUTERS`` so authentication can never depend on a per-quota side
+    effect (issue #6636 F1).
+    """
+    if is_auth_disabled():
+        return None
+    return await _current_user_from_bearer_header(request, db)
+
+
 _ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
     "simulation": (_SIMULATION_QUOTA_DEPENDENCY,),
     "video": (_VIDEO_QUOTA_DEPENDENCY,),
 }
 
+# Routers that must remain reachable without authentication. Everything else
+# gets ``_global_auth_dependency`` injected at registration time. Keep this set
+# as small as possible (issue #6636 F1): health/liveness, auth (login/register
+# themselves), and capability discovery are intentionally public.
+_PUBLIC_ROUTERS: frozenset[str] = frozenset(
+    {
+        "auth",
+        "core",
+        "observability",
+        "capabilities",
+    }
+)
+
 
 def _dependencies_for_route(module_name: str) -> tuple[Callable[..., object], ...]:
-    return _ROUTE_DEPENDENCIES.get(module_name, ())
+    explicit = _ROUTE_DEPENDENCIES.get(module_name, ())
+    if module_name in _PUBLIC_ROUTERS:
+        return explicit
+    # The quota dependencies already enforce auth as part of their flow, so we
+    # avoid double-resolving the bearer header for those routers.
+    if explicit:
+        return explicit
+    return (_global_auth_dependency,)
 
 
 def discover_routes(
@@ -247,11 +275,8 @@ def register_routes(
         Number of routers registered.
     """
     routes = discover_routes(exclude=exclude)
-    public_modules = {"auth", "observability", "core", "launcher", "theme"}
     for module_name, router in routes:
-        deps = list(_dependencies_for_route(module_name))
-        if module_name not in public_modules:
-            deps.append(_global_auth_dependency)
+        deps = _dependencies_for_route(module_name)
         app.include_router(
             router,
             prefix=prefix,

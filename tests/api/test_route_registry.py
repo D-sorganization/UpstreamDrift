@@ -97,6 +97,31 @@ def test_dependencies_for_route(route_registry):
     assert len(deps) == 0
 
 
+def test_protected_routers_get_global_auth_dependency(route_registry):
+    """Issue #6636 F1: non-public routers receive a global auth dependency.
+
+    Previously only ``simulation``/``video`` carried auth (as a quota side
+    effect) and every other router was registered with ``dependencies=[]`` —
+    so an unauthenticated client could drive physics, enumerate datasets, and
+    command actuators in cloud mode.
+    """
+    for module_name in (
+        "physics",
+        "data_explorer",
+        "dataset",
+        "models",
+        "actuator_controls",
+    ):
+        deps = route_registry._dependencies_for_route(module_name)
+        assert deps == (route_registry._global_auth_dependency,), module_name
+
+
+def test_public_routers_have_no_auth_dependency(route_registry):
+    """Issue #6636 F1: explicitly public routers stay reachable without auth."""
+    for module_name in ("auth", "core", "observability", "capabilities"):
+        assert route_registry._dependencies_for_route(module_name) == (), module_name
+
+
 def test_database_module_not_leaked_after_tests():
     """Regression: importing this test module must not leak ``MagicMock``
     into ``sys.modules['src.api.database']``.

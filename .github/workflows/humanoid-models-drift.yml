@@ -74,16 +74,21 @@ jobs:
           submodules: false
 
       - name: Force-clean stale Python tool cache (NVMe runners)
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         if: runner.os != 'Windows'
         shell: bash
         run: |
           for cache_root in /opt/runner-tool-cache /home/dieterolson/actions-runners/.shared-tool-cache /home/dieterolson/actions-runners-nvme/.shared-tool-cache; do
             if [ -d "$cache_root/Python" ]; then
               echo "Cleaning $cache_root/Python (pre-setup-python)"
-              sudo rm -rf "$cache_root/Python"
+              sudo mv "$cache_root/Python" "$cache_root/Python_stale_$RANDOM" || true
+              sudo rm -rf "$cache_root/Python_stale_$RANDOM" || true
             fi
           done
       - name: Set up Python
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/_tool_cache
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
         with:
           python-version: "3.11"
@@ -104,7 +109,7 @@ jobs:
           # builders import lazily, so missing engine deps just degrade
           # gracefully (drake → fail, opensim → warn-skip).
           python -m ensurepip --upgrade || true
-          python3 -m pip install pyyaml
+          python3 -m pip install pyyaml pandas
 
       - name: Run drift check (advisory)
         id: drift

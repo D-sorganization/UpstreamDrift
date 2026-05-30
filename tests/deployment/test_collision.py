@@ -166,6 +166,69 @@ def test_collision_avoidance_computation(mock_sim: MagicMock) -> None:
     assert scale_with_human == 0.0  # because it's inside inflation
 
 
+def _single_link_repulsion(n_joints: int) -> np.ndarray:
+    """Drive ``compute_repulsive_field`` with one link inside one obstacle.
+
+    Uses a model that lacks ``get_link_positions`` so the fallback kinematic
+    chain produces exactly ``n_joints`` links at z = 0.1*(i+1). A sphere centred
+    at the first link guarantees a single in-collision contact with a known
+    (max) magnitude, isolating the magnitude-scaling/averaging code path.
+    """
+    model = MagicMock()
+    del model.get_link_positions  # force fallback chain
+    del model.set_joint_positions
+    avoid = CollisionAvoidance(robot_model=model)
+    # Tighten the repulsion radius so only the single nearest link interacts,
+    # giving a clean single-contact magnitude to assert against.
+    avoid._repulsion_distance = 0.03
+    # Fallback links sit on the z-axis at z = 0.1*(i+1). Place the sphere
+    # offset along +x from link_0 so its distance gradient has a non-zero x
+    # component (which survives the gradient[:n_joints] slice for low DOF) and
+    # link_0 is inside it (distance <= 0 -> max repulsion).
+    sphere = Obstacle(
+        name="s",
+        obstacle_type=ObstacleType.SPHERE,
+        position=np.array([0.06, 0.0, 0.1]),
+        dimensions=np.array([0.08]),
+        inflation=0.0,
+    )
+    avoid.add_obstacle(sphere)
+    state = RobotState(
+        timestamp=0.0,
+        joint_positions=np.zeros(n_joints),
+        joint_velocities=np.zeros(n_joints),
+        joint_torques=np.zeros(n_joints),
+    )
+    return avoid.compute_repulsive_field(state)
+
+
+def test_repulsion_magnitude_scaled_for_low_dof() -> None:
+    """Issue #6640 F1: <=3-DOF branch must apply magnitude/len scaling.
+
+    Before the precedence fix, ``* magnitude / len(...)`` bound only to the
+    ``else`` branch, so a <=3-DOF robot received the raw unit gradient
+    (norm ~1) with no scaling. With the fix the repulsion is scaled by
+    ``max_repulsion / n_links``.
+    """
+    rep = _single_link_repulsion(n_joints=2)
+    assert len(rep) == 2
+    norm = float(np.linalg.norm(rep))
+    # max_repulsion (10.0) / n_links (2) = 5.0 (only link_0 is in collision).
+    assert np.isclose(norm, 5.0), norm
+    # Sanity: the buggy unscaled value would have had norm ~1.0.
+    assert norm > 1.5
+
+
+def test_repulsion_consistent_across_dof_branches() -> None:
+    """Both the <=3 and >3 DOF branches scale by max_repulsion / n_links."""
+    rep7 = _single_link_repulsion(n_joints=7)
+    norm7 = float(np.linalg.norm(rep7))
+    # Only link_0 in collision: max_repulsion (10.0) / 7 links.
+    assert np.isclose(norm7, 10.0 / 7), norm7
+    # Padding joints (index >= 3) carry no repulsion.
+    assert np.allclose(rep7[3:], 0.0)
+
+
 def test_collision_avoidance_no_obstacles(mock_sim: MagicMock) -> None:
     """Test behavior with no obstacles."""
     avoid = CollisionAvoidance(robot_model=mock_sim)

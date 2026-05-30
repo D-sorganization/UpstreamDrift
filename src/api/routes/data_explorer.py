@@ -547,10 +547,18 @@ async def list_datasets() -> DatasetListResponse:
                         "Could not read columns from %s: %s", filepath.name, exc
                     )
 
+                # SECURITY (issue #6636 F6): never return absolute server
+                # paths. Expose only the path relative to the output dir so
+                # the filesystem layout is not leaked to clients.
+                try:
+                    rel_path = str(filepath.relative_to(output_dir))
+                except ValueError:
+                    rel_path = filepath.name
+
                 datasets.append(
                     DatasetInfo(
                         name=filepath.name,
-                        path=str(filepath.relative_to(output_dir)),
+                        path=rel_path,
                         format=filepath.suffix.lstrip("."),
                         size_bytes=filepath.stat().st_size,
                         columns=columns,
@@ -571,6 +579,7 @@ async def list_datasets() -> DatasetListResponse:
                     )
                 )
 
+    # SECURITY (issue #6636 F6): do not leak the absolute output directory.
     return DatasetListResponse(
         datasets=datasets,
         total=len(datasets),

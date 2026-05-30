@@ -9,6 +9,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 def prefix_hand_assets(content: str, hand_prefix: str) -> str:
     """Prefix all mesh and material definitions.
 
@@ -366,9 +367,7 @@ def inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> st
     # Insert Equality section before </mujoco> (or merge if exists)
     if "</equality>" in xml_content:
         equality_content = (
-            equality_xml.strip()
-            .replace("<equality>", "")
-            .replace("</equality>", "")
+            equality_xml.strip().replace("<equality>", "").replace("</equality>", "")
         )
         xml_content = xml_content.replace(
             "</equality>", f"{equality_content}\n  </equality>"

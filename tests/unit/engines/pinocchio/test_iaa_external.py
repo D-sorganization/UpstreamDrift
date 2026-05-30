@@ -1,7 +1,15 @@
 import numpy as np
 import pytest
 
-pin = pytest.importorskip("pinocchio", reason="pinocchio not installed")
+try:
+    import pinocchio as pin
+
+    if not hasattr(pin, "Model") or not hasattr(pin, "SE3"):
+        pytest.skip(
+            "pinocchio is a stub/mock, not the full library", allow_module_level=True
+        )
+except ImportError:
+    pytest.skip("pinocchio not installed", allow_module_level=True)
 
 from src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (  # noqa: E402
     InducedAccelerationAnalyzer,
