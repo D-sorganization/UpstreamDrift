@@ -71,6 +71,10 @@ mocap-io = ["upstream-mocap-io>=0.1.0"]
 drake = ["drake>=1.22.0,<2.0.0"]
 pinocchio = ["pin>=2.6.0,<5.0.0", "meshcat>=0.3.0,<1.0.0"]
 chrono = ["pychrono>=8.0,<10.0"]
+# JaxSim is isolated from all-engines until the Linux Pinocchio/JaxSim
+# coexistence gate is proven. The base wheel resolves on Windows with CPU JAX,
+# but URDF conversion still requires gz/ign sdformat tooling for follow-up #6648.
+jaxsim = ["jaxsim==0.9.0"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
@@ -485,6 +489,7 @@ markers = [
     "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
     "requires_myosuite: tests that require the myosuite (and mujoco) Python wheels (skipped when `import myosuite` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
+    "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",
     "requires_real_dataset: tests that require the 9 GB raw Simscape parquet on disk (skipped if absent)",
