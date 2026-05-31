@@ -81,6 +81,9 @@ jaxsim = ["jaxsim==0.9.0"]
 # marker.
 nimble-oracle = ["nimblephysics==0.10.52.2", "torch>=2.0.0"]
 
+# Differentiable MuJoCo rollouts via MJX (MuJoCo on JAX).
+mjx = ["mujoco-mjx>=3.6.0", "jax>=0.4.30", "jaxlib>=0.4.30"]
+
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
