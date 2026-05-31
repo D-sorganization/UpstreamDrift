@@ -17,8 +17,10 @@ Public surface:
 - :func:`canonical_from_reference_setup` — the canonical address pose
   derived from :func:`reference_golfer_setup`.
 
-The canonical convention is documented in
-`docs/adr/0012-canonical-pose-interchange.md`.
+The canonical pose convention is documented in
+`docs/adr/0012-canonical-pose-interchange.md`. The additive dynamic-state
+contract for velocities, accelerations, and quaternion floating bases is
+documented in `docs/conventions/canonical-v2.md`.
 """
 
 from __future__ import annotations

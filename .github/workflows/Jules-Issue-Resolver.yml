@@ -60,7 +60,6 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
-
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
@@ -102,7 +101,12 @@ jobs:
           fi
           python -m ensurepip --upgrade || true
           pip install ruff black mypy
-          npm install -g @google/jules
+          if command -v jules >/dev/null 2>&1; then
+            echo "jules CLI is already present; refreshing package in place."
+            npm update -g @google/jules || npm install -g @google/jules --force
+          else
+            npm install -g @google/jules
+          fi
 
       - name: Gather Priority Issues
         id: gather

@@ -44,6 +44,14 @@ from .protocol import (
     SimulationBackend,
     Trace,
 )
+from .provenance import (
+    PROVENANCE_FLAT_PREFIX,
+    PROVENANCE_META_KEY,
+    ProvenanceStamp,
+    attach_provenance_to_checkpoint,
+    attach_provenance_to_trace,
+    serialize_provenance,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -56,16 +64,22 @@ __all__ = [
     "DynamicsProvider",
     "GolfModelParams",
     "LowerSegmentParams",
+    "PROVENANCE_FLAT_PREFIX",
+    "PROVENANCE_META_KEY",
+    "ProvenanceStamp",
     "SimState",
     "SimulationBackend",
     "Trace",
     "UnknownBackendError",
     "UpperSegmentParams",
+    "attach_provenance_to_checkpoint",
+    "attach_provenance_to_trace",
     "available_backends",
     "has_mujoco",
     "has_warp",
     "make_backend",
     "require_mujoco",
     "require_warp",
+    "serialize_provenance",
     "warp_device_available",
 ]
