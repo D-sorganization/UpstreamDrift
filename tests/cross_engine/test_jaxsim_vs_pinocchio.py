@@ -38,26 +38,23 @@ ABS_TOL = 1e-7
 _PIN_TO_CANONICAL = np.array([3, 4, 5, 0, 1, 2], dtype=int)
 _CANONICAL_TO_PIN = np.array([3, 4, 5, 0, 1, 2], dtype=int)
 
-_SINGLE_BODY_SDF = f"""<?xml version="1.0"?>
+_SINGLE_BODY_SDF = """<?xml version="1.0"?>
 <sdf version="1.7">
-  <world name="default">
-    <gravity>{CANONICAL_GRAVITY_INERTIAL[0]} {CANONICAL_GRAVITY_INERTIAL[1]} {CANONICAL_GRAVITY_INERTIAL[2]}</gravity>
-    <model name="free_body">
-      <link name="base_link">
-        <inertial>
-          <mass>1.0</mass>
-          <inertia>
-            <ixx>1.0</ixx>
-            <ixy>0.0</ixy>
-            <ixz>0.0</ixz>
-            <iyy>2.0</iyy>
-            <iyz>0.0</iyz>
-            <izz>3.0</izz>
-          </inertia>
-        </inertial>
-      </link>
-    </model>
-  </world>
+  <model name="inline_model">
+    <link name="base_link">
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>3.0</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
 </sdf>
 """
 
