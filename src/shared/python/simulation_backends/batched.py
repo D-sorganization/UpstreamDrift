@@ -214,6 +214,76 @@ def run_batched(
     return _check_batch_result(result, num_envs, horizon)
 
 
+def run_estimation_windows_batched(
+    backend: BatchedBackend,
+    controls_windows: np.ndarray,
+    dt: float,
+    max_batch: int | None = None,
+) -> BatchTrace:
+    """Run multi-trial, windowed estimation controls through a batched backend.
+
+    CC-20 multi-trial and CC-23 windowed estimation workloads naturally carry
+    controls as ``(trial, window, step, control_dim)``. Batched backends consume
+    a flat env axis, so this helper reshapes ``trial * window`` into ``N`` and
+    delegates to :func:`run_batched`. The returned :class:`BatchTrace` keeps that
+    flat env axis and stamps layout metadata so estimators can map results back
+    to their source trial/window grid.
+
+    Args:
+        backend: A backend implementing :class:`BatchedBackend`.
+        controls_windows: Rank-4 controls
+            ``(num_trials, num_windows, horizon, nu)``.
+        dt: Integration step size [s] (``> 0``).
+        max_batch: Optional per-launch chunk size.
+
+    Returns:
+        A :class:`BatchTrace` with ``num_trials * num_windows`` environments.
+
+    Raises:
+        ValueError: If ``controls_windows`` is not rank-4 or has an empty axis.
+    """
+    controls = np.asarray(controls_windows, dtype=float)
+    if controls.ndim != 4:
+        raise ValueError(
+            "controls_windows must be rank-4 "
+            "(num_trials, num_windows, horizon, control_dim)"
+        )
+    num_trials, num_windows, horizon, control_dim = controls.shape
+    if min(num_trials, num_windows, horizon, control_dim) <= 0:
+        raise ValueError(
+            f"controls_windows axes must all be non-empty; got {controls.shape}"
+        )
+
+    num_envs = num_trials * num_windows
+    flat_controls = controls.reshape(num_envs, horizon, control_dim)
+    batch = run_batched(
+        backend,
+        controls=flat_controls,
+        horizon=horizon,
+        dt=dt,
+        num_envs=num_envs,
+        max_batch=max_batch,
+    )
+    meta = dict(batch.meta)
+    meta.update(
+        {
+            "layout": "trial_window",
+            "num_trials": num_trials,
+            "num_windows": num_windows,
+            "control_dim": control_dim,
+        }
+    )
+    return BatchTrace(
+        t=batch.t,
+        q=batch.q,
+        v=batch.v,
+        u=batch.u,
+        dt=batch.dt,
+        backend=batch.backend,
+        meta=meta,
+    )
+
+
 def cpu_batch_rollout(
     make_backend_fn: Callable[[int], SimulationBackend],
     controls_batch: np.ndarray | None,
