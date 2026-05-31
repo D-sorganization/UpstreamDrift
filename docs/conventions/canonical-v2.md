@@ -107,7 +107,21 @@ Every materialised state and result is stamped (CC-6 `ProvenanceStamp`) with the
 `convention`, `frame`, and `units` tags above, so a consumer can reject a state
 whose convention it does not recognise and a result can be reproduced exactly.
 
-## 6. Migration from `canonical-v1`
+## 6. Shared estimation parameters
+
+Canonical-core MAP fits use `SharedParameterBlock` as the ordered theta contract.
+For multi-trial or multi-view fits, every observation owns its own spline
+trajectory block while unlocked shared parameters appear once at the end of the
+global decision vector. Locked shared parameters are still present in serialized
+run manifests and result mappings, but they are excluded from optimizer columns
+and keep their initial values.
+
+Posterior-tightening checks should stack shared-parameter Jacobian rows across
+all trials/views and compare the approximate covariance of identifiable
+directions. Adding independent views of the same shared theta must reduce the
+reported variance on those directions in synthetic validation data.
+
+## 7. Migration from `canonical-v1`
 
 - A `CanonicalPose` (v1) maps to a `canonical-v2` `q` by converting the pelvis
   SE(3) (`euler_xyz_deg` → quaternion `wxyz`) and joint degrees → radians, with
