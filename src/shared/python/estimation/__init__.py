@@ -9,6 +9,25 @@ from src.shared.python.estimation.identifiability import (
     probe_identifiability,
     sweep_parameter,
 )
+from src.shared.python.estimation.map_estimator import (
+    CubicHermiteSplineTrajectory,
+    MapEstimatorOptions,
+    MapEstimatorProblem,
+    MapEstimatorResult,
+    SharedParameterBlock,
+    SharedParameterSpec,
+    SplineTrajectoryEvaluation,
+    solve_single_trial_map,
+)
+from src.shared.python.estimation.multi_trial import (
+    MultiTrialDecisionLayout,
+    MultiTrialMapProblem,
+    MultiTrialMapResult,
+    MultiTrialObservation,
+    shared_parameter_covariance,
+    solve_multi_trial_map,
+    stack_shared_parameter_jacobians,
+)
 from src.shared.python.estimation.residuals import (
     ResidualFunction,
     RneaFunction,
@@ -35,16 +54,27 @@ from src.shared.python.estimation.synthetic_ground_truth import (
 )
 
 __all__ = [
+    "CubicHermiteSplineTrajectory",
     "ForwardModel",
     "GroundTruthRigResult",
     "IdentifiabilityReport",
+    "MapEstimatorOptions",
+    "MapEstimatorProblem",
+    "MapEstimatorResult",
+    "MultiTrialDecisionLayout",
+    "MultiTrialMapProblem",
+    "MultiTrialMapResult",
+    "MultiTrialObservation",
     "NoiseModel",
     "ObservationPolicy",
     "ParameterSpec",
     "ProjectionRecord",
     "ResidualFunction",
     "RneaFunction",
+    "SharedParameterBlock",
+    "SharedParameterSpec",
     "SkeletonRigForwardModel",
+    "SplineTrajectoryEvaluation",
     "SyntheticCamera",
     "SyntheticObservationRig",
     "anthropometric_prior_residual",
@@ -58,6 +88,10 @@ __all__ = [
     "reprojection_residual",
     "reprojection_residual_from_points",
     "residual_jacobian",
+    "shared_parameter_covariance",
     "smoothness_residual",
+    "solve_multi_trial_map",
+    "solve_single_trial_map",
+    "stack_shared_parameter_jacobians",
     "sweep_parameter",
 ]
