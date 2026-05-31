@@ -397,6 +397,16 @@ class DraggableTabWidget(QTabWidget):
                     if idx >= 0:
                         self.detach_tab(idx, pos)
                         return True
+        elif (
+            event.type() == QEvent.Type.MouseButtonRelease
+            and isinstance(event, QMouseEvent)
+            and event.button() == Qt.MouseButton.RightButton
+        ):
+            position = event.position().toPoint()
+            bar = self.tabBar()
+            if bar is not None and bar.tabAt(position) >= 0:
+                self._show_tab_context_menu(position)
+                return True
 
         return super().eventFilter(watched, event)
 
