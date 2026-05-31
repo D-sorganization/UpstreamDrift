@@ -131,6 +131,8 @@ def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
 
 def _pinocchio_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     pin = pytest.importorskip("pinocchio")
+    if not hasattr(pin, "Model"):
+        pytest.skip("Pinocchio module does not expose the dynamics API")
 
     model = pin.Model()
     model.gravity.linear = np.asarray(CANONICAL_GRAVITY_INERTIAL, dtype=np.float64)
