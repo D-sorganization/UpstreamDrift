@@ -436,6 +436,17 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "config_setup_wizard"
+    name: "Setup Wizard"
+    description: "Validate canonical-core units, model dimensions, and calibration before a run."
+    type: "special_app"
+    path: "src/tools/config_setup_wizard/_embed_adapter.py"
+    launcher:
+      category: "tool"
+      logo: "assets/project_map.png"
+      status: "beta"
+      default_launch: "tab"
+
   # =============================================================================
   # DOCUMENTATION
   # =============================================================================

@@ -48,3 +48,30 @@ Each engine has its specific configuration assets located in `engines/physics_en
 - **Pinocchio**: `models/*.urdf`
 
 To use a custom model, place your asset file in the respective directory and reference it by name when loading the engine.
+
+## Canonical-Core Setup Validation
+
+Canonical-core runs can be checked before launch with the deterministic setup
+wizard API:
+
+```python
+from src.shared.python.config import validate_canonical_setup_config
+
+report = validate_canonical_setup_config(candidate_config)
+if not report.is_valid:
+    for issue in report.errors:
+        print(issue.message, issue.suggested_fix)
+```
+
+The MVP validates the stable pre-run gates from CC-36:
+
+- `convention="canonical-v2"`, SI units, `frame="world_Zup"`, and optional
+  gravity `[0.0, 0.0, -9.80665]`.
+- A canonical `model` block with `canonical_id`, non-empty `joint_names`, and
+  floating-base dimensions where `nq == nv + 1`.
+- A completed or validated `calibration` block with a subject or
+  anthropometrics reference.
+
+The launcher also exposes this as the **Setup Wizard** embeddable tool. The
+wizard is validation-only; it explains issues and suggested fixes but does not
+mutate configs or perform LLM-driven actions.
