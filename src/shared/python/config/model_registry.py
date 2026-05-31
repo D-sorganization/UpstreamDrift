@@ -63,6 +63,14 @@ def _format_registry_errors(errors: list[str]) -> str:
     return "Model registry strict validation failed: " + "; ".join(errors)
 
 
+# Built-in registry entry types that describe non-file-backed metadata. These
+# records (biomechanics exercises, PINN modes) are launched indirectly via an
+# engine/mode rather than a concrete model file, so they legitimately lack a
+# ``path``. We synthesize a stable ``virtual/<type>/<id>`` path so they satisfy
+# the strict manifest contract without emitting startup errors (#6882).
+_METADATA_ONLY_TYPES = frozenset({"biomech_exercise", "physics_informed"})
+
+
 def _normalize_legacy_model_entry(model_data: dict[str, Any]) -> dict[str, Any]:
     """Coerce legacy registry entries into the stricter manifest contract shape."""
     normalized = dict(model_data)
@@ -71,6 +79,19 @@ def _normalize_legacy_model_entry(model_data: dict[str, Any]) -> dict[str, Any]:
         fallback_name = normalized.get("name")
         if isinstance(fallback_name, str) and fallback_name.strip():
             normalized["description"] = fallback_name.strip()
+
+    entry_type = normalized.get("type")
+    entry_id = normalized.get("id")
+    has_path = isinstance(normalized.get("path"), str) and bool(
+        normalized["path"].strip()
+    )
+    if (
+        not has_path
+        and entry_type in _METADATA_ONLY_TYPES
+        and isinstance(entry_id, str)
+        and entry_id.strip()
+    ):
+        normalized["path"] = f"virtual/{entry_type}/{entry_id.strip()}"
     return normalized
 
 
@@ -156,6 +177,9 @@ class ModelRegistry(ContractChecker):
             config_path = self._DEFAULT_CONFIG_PATH
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
+        # Deterministic record of non-fatal load errors for observability and
+        # tests (#6882). Populated by ``_load_registry``.
+        self.load_errors: list[str] = []
         self.strict = (
             _strict_mode_from_env(
                 os.environ.get("UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT")
@@ -256,6 +280,7 @@ class ModelRegistry(ContractChecker):
                 if self.discovery_mode == "hybrid":
                     errors.extend(self._load_provider_manifests())
             self._validate_required_models(errors)
+            self.load_errors = list(errors)
             if self.strict and errors:
                 raise ModelRegistryLoadError(_format_registry_errors(errors))
             logger.info(f"Loaded {len(self.models)} models from {self.config_path}")

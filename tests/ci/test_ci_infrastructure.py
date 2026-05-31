@@ -261,6 +261,23 @@ class TestCIEnvironmentCompatibility:
         assert 'pip install -e ".[jaxsim]"' in workflow
         assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
 
+    def test_cross_engine_equivalence_hardens_against_skipped_parity(self) -> None:
+        """The required parity gate must fail when JaxSim parity is all-skipped.
+
+        Issue #6881: a green gate on skipped assertions is a false pass. The
+        workflow must (a) assert the parity prerequisites are importable before
+        pytest and (b) assert at least one parity case actually ran afterwards.
+        """
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        # Prerequisite import gate before the parity test runs.
+        assert "import jax, jaxlib, jaxsim, pinocchio" in workflow
+        # Post-pytest assertion that a required parity case passed (not skipped).
+        assert "scripts/ci/assert_required_parity_ran.py" in workflow
+        assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
+
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
         self,
     ) -> None:

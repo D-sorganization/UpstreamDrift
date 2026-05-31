@@ -20,6 +20,8 @@ from ..data_io.common_utils import (
     setup_structured_logging,
 )
 from ..data_io.path_utils import get_src_root
+from .engine_availability import EngineStatus as RuntimeEngineStatus
+from .engine_availability import get_engine_status as get_runtime_engine_status
 from .engine_registry import (
     EngineRegistration,
     EngineStatus,
@@ -31,6 +33,33 @@ from .interfaces import PhysicsEngine
 # Configure structured logging
 setup_structured_logging()
 logger = get_logger(__name__)
+
+
+# Map runtime-backed engine types to the importable Python package that the
+# availability layer probes. Engines absent from this map (pendulum-family,
+# putting-green, MATLAB) have no importable runtime dependency and are gated by
+# source/asset presence alone. Centralizing this (LOD/DRY) keeps the discovery
+# guard in one place instead of repeating ad hoc imports per caller (#6880).
+_RUNTIME_DEPENDENCY_NAMES: dict[EngineType, str] = {
+    EngineType.MUJOCO: "mujoco",
+    EngineType.DRAKE: "drake",
+    EngineType.PINOCCHIO: "pinocchio",
+    EngineType.JAXSIM: "jaxsim",
+    EngineType.OPENSIM: "opensim",
+    EngineType.MYOSIM: "myosuite",
+}
+
+
+def runtime_dependency_name(engine_type: EngineType) -> str | None:
+    """Return the importable runtime package name for an engine, if any.
+
+    Returns ``None`` for engines that have no importable runtime dependency
+    (pendulum-family, putting-green, MATLAB), which remain gated on source or
+    asset presence rather than a Python import.
+    """
+    if engine_type is None:
+        raise ValueError("engine_type must be provided")
+    return _RUNTIME_DEPENDENCY_NAMES.get(engine_type)
 
 
 class EngineManager(ContractChecker):
@@ -214,35 +243,64 @@ class EngineManager(ContractChecker):
             self.engine_status[engine_type] = EngineStatus.ERROR
             return False
 
+    @staticmethod
+    def _runtime_ready(engine_type: EngineType) -> bool:
+        """Return True when an engine's runtime dependency is importable.
+
+        DbC: ``EngineStatus.AVAILABLE`` for a runtime-backed engine means both
+        adapter/source presence *and* runtime dependency readiness (#6880,
+        #6884). Engines with no importable runtime dependency
+        (:func:`runtime_dependency_name` returns ``None``) are always
+        considered runtime-ready and remain gated on source presence alone.
+        """
+        dependency = runtime_dependency_name(engine_type)
+        if dependency is None:
+            return True
+        return get_runtime_engine_status(dependency) == RuntimeEngineStatus.AVAILABLE
+
     def _discover_engines(self) -> None:
-        """Discover available engines by checking their directories."""
+        """Discover available engines by checking directories and runtime deps.
+
+        A runtime-backed engine is only ``AVAILABLE`` when its adapter/source
+        path (or provider path) exists *and* its runtime dependency imports
+        successfully. Path presence with a missing runtime dependency is
+        reported as ``UNAVAILABLE`` so callers cannot mistake source presence
+        for a live engine (#6884).
+        """
         for engine_type, engine_path in self.engine_paths.items():
             provider_paths = self.provider_engine_paths.get(engine_type, ())
             available_provider_path = next(
                 (path for path in provider_paths if path.exists()),
                 None,
             )
-            if engine_path.exists():
-                self.engine_status[engine_type] = EngineStatus.AVAILABLE
-                logger.info(
-                    "engine_discovered engine=%s path=%s status=available",
-                    engine_type.value,
-                    engine_path,
-                )
-            elif available_provider_path is not None:
-                self.engine_status[engine_type] = EngineStatus.AVAILABLE
-                logger.info(
-                    "engine_discovered_via_provider engine=%s path=%s status=available",
-                    engine_type.value,
-                    available_provider_path,
-                )
-            else:
+            source_present = engine_path.exists() or available_provider_path is not None
+            if not source_present:
                 self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
                 logger.warning(
                     "engine_not_found engine=%s path=%s status=unavailable",
                     engine_type.value,
                     engine_path,
                 )
+                continue
+
+            if not self._runtime_ready(engine_type):
+                self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
+                logger.info(
+                    "engine_runtime_missing engine=%s dependency=%s status=unavailable",
+                    engine_type.value,
+                    runtime_dependency_name(engine_type),
+                )
+                continue
+
+            self.engine_status[engine_type] = EngineStatus.AVAILABLE
+            discovered_path = (
+                engine_path if engine_path.exists() else (available_provider_path)
+            )
+            logger.info(
+                "engine_discovered engine=%s path=%s status=available",
+                engine_type.value,
+                discovered_path,
+            )
 
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
