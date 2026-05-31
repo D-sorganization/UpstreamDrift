@@ -564,14 +564,14 @@ def extract_grf_from_contacts(  # noqa: C901
         # Known limitation: fallback calculation is inaccurate for dynamic movements.
         # It only accounts for static weight (W=mg) and ignores dynamic acceleration forces (F=m(g+a)).
         # Need to implement proper inverse dynamics or force estimation.
-        g = engine.compute_gravity_forces()
+        g = np.asarray(engine.compute_gravity_forces(), dtype=float).reshape(-1)
 
-        for body_name in contact_body_names:
-            jac_dict = engine.compute_jacobian(body_name)
-            if jac_dict is None:
-                continue
-            if len(g) > 0:
-                total_force[2] += abs(np.sum(g))
+        # Total support weight equals the magnitude of the generalized gravity
+        # force, computed ONCE for the whole body. Summing g (a generalized-force
+        # vector mixing unrelated joint terms) or re-adding it per contact body
+        # double-counts the weight (issue #6894).
+        if g.size > 0 and contact_body_names:
+            total_force[2] = float(np.linalg.norm(g))
 
         logger.debug("GRF estimated from gravity approximation (no contact data)")
 

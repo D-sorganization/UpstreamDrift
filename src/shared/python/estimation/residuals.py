@@ -101,19 +101,48 @@ def _validate_confidence(confidence: object, keypoint_count: int) -> None:
         raise ValueError("confidence values must be in the inclusive range [0, 1]")
 
 
+DistortionLike: TypeAlias = "ArrayLike | None"
+
+
+def _apply_brown_conrady(
+    x_norm: Array, y_norm: Array, distortion: ArrayLike, xp: Any
+) -> tuple[Array, Array]:
+    """Apply the Brown-Conrady radial/tangential distortion model.
+
+    ``distortion`` is ordered ``(k1, k2, p1, p2)`` and operates on normalized
+    image coordinates (camera-frame coordinates divided by depth), matching the
+    synthetic rig in ``synthetic_ground_truth.project_world_point``.
+    """
+
+    _validate_numeric_array(distortion, "distortion", shape=(4,))
+    coeffs = _as_array(distortion, xp)
+    k1, k2, p1, p2 = coeffs[0], coeffs[1], coeffs[2], coeffs[3]
+    radius_2 = x_norm * x_norm + y_norm * y_norm
+    radial = 1.0 + k1 * radius_2 + k2 * radius_2 * radius_2
+    x_dist = x_norm * radial + 2.0 * p1 * x_norm * y_norm
+    x_dist = x_dist + p2 * (radius_2 + 2.0 * x_norm * x_norm)
+    y_dist = y_norm * radial + p1 * (radius_2 + 2.0 * y_norm * y_norm)
+    y_dist = y_dist + 2.0 * p2 * x_norm * y_norm
+    return x_dist, y_dist
+
+
 def project_pinhole(
     points_world: ArrayLike,
     camera_matrix: ArrayLike,
     *,
     rotation_world_to_camera: ArrayLike | None = None,
     translation_world_to_camera: ArrayLike | None = None,
+    distortion: DistortionLike = None,
     depth_epsilon: float = 1.0e-9,
 ) -> Array:
-    """Project world points with a pinhole camera.
+    """Project world points with a pinhole camera and optional lens distortion.
 
     Parameters use the usual computer-vision convention:
-    ``p_camera = R_world_to_camera @ p_world + t_world_to_camera`` and
-    ``uv_h = K @ p_camera``.
+    ``p_camera = R_world_to_camera @ p_world + t_world_to_camera``. Points are
+    normalized by depth, the optional Brown-Conrady ``distortion`` model
+    ``(k1, k2, p1, p2)`` is applied, and the intrinsics ``camera_matrix`` map the
+    distorted normalized coordinates to pixels. ``distortion=None`` (the default)
+    is the plain pinhole model.
     """
 
     _validate_numeric_array(points_world, "points_world", ndim=2, shape=(None, 3))
@@ -146,14 +175,20 @@ def project_pinhole(
         translation = _as_array(translation_world_to_camera, xp)
 
     points_camera = points @ rotation.T + translation
-    homogeneous = points_camera @ camera.T
-    depth = homogeneous[:, 2:3]
+    depth = points_camera[:, 2:3]
     safe_depth = xp.where(
         xp.abs(depth) < depth_epsilon,
         xp.where(depth < 0.0, -depth_epsilon, depth_epsilon),
         depth,
     )
-    return homogeneous[:, :2] / safe_depth
+    normalized = points_camera[:, :2] / safe_depth
+    if distortion is not None:
+        x_dist, y_dist = _apply_brown_conrady(
+            normalized[:, 0:1], normalized[:, 1:2], distortion, xp
+        )
+        normalized = xp.concatenate([x_dist, y_dist], axis=1)
+    homogeneous = xp.concatenate([normalized, xp.ones_like(normalized[:, :1])], axis=1)
+    return (homogeneous @ camera.T)[:, :2]
 
 
 def reprojection_residual_from_points(
@@ -165,13 +200,16 @@ def reprojection_residual_from_points(
     keypoint_offsets_m: ArrayLike | None = None,
     rotation_world_to_camera: ArrayLike | None = None,
     translation_world_to_camera: ArrayLike | None = None,
+    distortion: DistortionLike = None,
 ) -> Array:
     """Return weighted reprojection residuals for explicit 3-D keypoint points.
 
     Residuals are flattened as ``[u0, v0, u1, v1, ...]`` and weighted by
     ``sqrt(confidence)`` so missing keypoints with confidence 0 contribute zero.
     ``keypoint_offsets_m`` is the CC-15 local offset model evaluated in world
-    coordinates by the caller.
+    coordinates by the caller. ``distortion`` threads the Brown-Conrady
+    ``(k1, k2, p1, p2)`` coefficients into projection so a fit against a
+    calibrated camera with nonzero distortion is unbiased.
     """
 
     _validate_numeric_array(points_world, "points_world", ndim=2, shape=(None, 3))
@@ -201,6 +239,7 @@ def reprojection_residual_from_points(
         camera_matrix,
         rotation_world_to_camera=rotation_world_to_camera,
         translation_world_to_camera=translation_world_to_camera,
+        distortion=distortion,
     )
     weights = xp.sqrt(_as_array(confidence, xp))[:, None]
     return ((projected - observed) * weights).reshape(-1)
@@ -216,6 +255,7 @@ def reprojection_residual(
     keypoint_offsets_m: ArrayLike | None = None,
     rotation_world_to_camera: ArrayLike | None = None,
     translation_world_to_camera: ArrayLike | None = None,
+    distortion: DistortionLike = None,
 ) -> Array:
     """Return weighted reprojection residuals from a canonical-v2 ``q`` vector."""
 
@@ -231,6 +271,7 @@ def reprojection_residual(
         keypoint_offsets_m=keypoint_offsets_m,
         rotation_world_to_camera=rotation_world_to_camera,
         translation_world_to_camera=translation_world_to_camera,
+        distortion=distortion,
     )
 
 
