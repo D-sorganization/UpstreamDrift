@@ -57,7 +57,9 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     continue-on-error: true
     env:
-      BOT_TRIGGER_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN || github.token }}
+      BOT_PAT_TOKEN: ${{ secrets.BOT_PAT }}
+      RUNNER_CHECK_TOKEN_VALUE: ${{ secrets.RUNNER_CHECK_TOKEN }}
+      DEFAULT_GITHUB_TOKEN: ${{ github.token }}
     # Only run for bot-authored PRs or scheduled/manual runs
     if: |
       github.event_name == 'schedule' ||
@@ -159,15 +161,28 @@ jobs:
       - name: Validate bot trigger token
         id: token-check
         if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != ''
-        env:
-          GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
         run: |
-          if gh api graphql -f query='{ viewer { login } }' >/dev/null 2>&1; then
-            echo "can_trigger=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "can_trigger=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Bot trigger token is unavailable or invalid; skipping authenticated CI trigger."
-          fi
+          for candidate in BOT_PAT_TOKEN RUNNER_CHECK_TOKEN_VALUE DEFAULT_GITHUB_TOKEN; do
+            token="${!candidate:-}"
+            if [ -z "$token" ]; then
+              continue
+            fi
+
+            if GH_TOKEN="$token" gh auth status >/dev/null 2>&1 &&
+               GH_TOKEN="$token" gh api graphql -f query='{ viewer { login } }' >/dev/null 2>&1; then
+              echo "::add-mask::$token"
+              echo "BOT_TRIGGER_TOKEN=$token" >> "$GITHUB_ENV"
+              echo "can_trigger=true" >> "$GITHUB_OUTPUT"
+              echo "token_source=$candidate" >> "$GITHUB_OUTPUT"
+              echo "Using authenticated CI trigger token from $candidate"
+              exit 0
+            fi
+
+            echo "::warning::Bot trigger token candidate $candidate is unavailable or invalid; trying next candidate."
+          done
+
+          echo "can_trigger=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::Bot trigger token is unavailable or invalid; skipping authenticated CI trigger."
 
       - name: Trigger CI for PRs
         if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != '' && steps.token-check.outputs.can_trigger == 'true'
