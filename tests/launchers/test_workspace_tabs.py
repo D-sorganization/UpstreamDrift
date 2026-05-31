@@ -211,6 +211,42 @@ def test_right_click_tab_shows_context_menu(launcher, qtbot) -> None:
         mock_exec.assert_called_once()
 
 
+def test_right_click_release_on_tab_bar_opens_context_menu(launcher, monkeypatch):
+    """Right-click release events on the tab bar should open the tab menu."""
+    from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
+    from PyQt6.QtGui import QMouseEvent
+
+    dummy = QWidget()
+    launcher.workspace_tabs.addTab(dummy, "Test Tab")
+    tab_bar = launcher.workspace_tabs.tabBar()
+    assert tab_bar is not None
+
+    tab_bar.tabRect = lambda idx: QRect(0, 0, 100, 30)
+    center = QPoint(50, 15)
+    shown_positions: list[QPoint] = []
+
+    def record_context_menu(position: QPoint) -> None:
+        shown_positions.append(position)
+
+    monkeypatch.setattr(
+        launcher.workspace_tabs,
+        "_show_tab_context_menu",
+        record_context_menu,
+    )
+
+    event = QMouseEvent(
+        QEvent.Type.MouseButtonRelease,
+        QPointF(center),
+        QPointF(tab_bar.mapToGlobal(center)),
+        Qt.MouseButton.RightButton,
+        Qt.MouseButton.RightButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+
+    assert launcher.workspace_tabs.eventFilter(tab_bar, event) is True
+    assert shown_positions == [center]
+
+
 def test_launch_c3d_viewer_embedded(launcher) -> None:
     """If the c3d_viewer embeddable tool is registered, _launch_c3d_viewer loads it as a tab."""
     from unittest.mock import MagicMock, patch

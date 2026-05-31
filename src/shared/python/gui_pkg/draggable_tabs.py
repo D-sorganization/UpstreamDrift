@@ -309,7 +309,7 @@ class DraggableTabWidget(QTabWidget):
         """
         if widget is None:
             raise ValueError("widget must be provided")
-        widget.background_eligible = True
+        widget.background_eligible = True  # type: ignore[attr-defined]
         return self.addTab(widget, *args)
 
     def _background_tab(self, index: int, title: str, widget: QWidget) -> None:
@@ -464,11 +464,14 @@ class DraggableTabWidget(QTabWidget):
 
             # Remove them from DetachedTabWindow
             main_window.setParent(None)
+            wrapper_layout = widget.layout()
+            if wrapper_layout is None:
+                return
             if menu_bar:
                 menu_bar.setParent(None)
-                widget.layout().addWidget(menu_bar)
+                wrapper_layout.addWidget(menu_bar)
                 menu_bar.show()
-            widget.layout().addWidget(main_window)
+            wrapper_layout.addWidget(main_window)
             main_window.show()
 
         if widget.parent():
