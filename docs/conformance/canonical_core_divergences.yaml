@@ -1,0 +1,14 @@
+schema_version: 1
+divergences:
+  - id: drake-hydroelastic-vs-pinocchio-rigid-contact
+    check_name: differential_cross_engine_reference
+    metric_name: position
+    engines:
+      - drake
+      - pinocchio
+    tolerance: 5.0e-3
+    rationale: >
+      Drake may use hydroelastic contact pressures while Pinocchio's
+      canonical-core path is rigid/contact-impulse based. Contact-rich
+      rollouts are accepted within this tolerance and must be reported as a
+      registered divergence instead of an unexplained conformance failure.

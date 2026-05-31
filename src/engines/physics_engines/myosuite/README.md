@@ -63,6 +63,22 @@ Simplified bilateral arm model for rapid analysis:
 - Muscle-induced accelerations
 - Joint reaction forces
 
+### Canonical-Core Adapter
+
+The CC-30 adapter exposes MyoSuite as an activation-driven canonical-core
+engine:
+
+- Supported capability IDs: `MUSCLES`, `FORWARD_DYN`, `CONTACT`
+- Unsupported capability ID: `JOINT_TORQUE_INVERSE_DYN`
+- State remap: MuJoCo/MyoSuite MJCF `qpos=[xyz, quat_wxyz, joints...]` and
+  body-local `qvel` map directly into `canonical-v2` after validation and
+  quaternion normalization.
+- Muscle activations and forces route through the shared `upstream-muscle`
+  facade, with pure-Python fallback when the Rust wheel is absent.
+- Muscle output histories persist in Trace v2.1 fields:
+  `muscle_names`, `muscle_activations`, `muscle_forces`, `muscle_lengths`, and
+  `muscle_velocities`.
+
 ## Installation
 
 MyoSuite is integrated with the main Golf Modeling Suite installation:

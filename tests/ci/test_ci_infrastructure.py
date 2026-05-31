@@ -261,6 +261,33 @@ class TestCIEnvironmentCompatibility:
         assert 'pip install -e ".[jaxsim]"' in workflow
         assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
 
+    def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
+        self,
+    ) -> None:
+        """JaxSim bumps must be deliberate and guarded by parity checks."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "jaxsim-upgrade-guard.yml"
+        ).read_text(encoding="utf-8")
+        pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        assert 'jaxsim = ["jaxsim==0.9.0"]' in pyproject
+        assert 'pip install -e ".[dev,jaxsim]"' in workflow
+        assert 'expected = "0.9.0"' in workflow
+        assert "tests/motion_matching/test_cross_engine_equivalence.py" in workflow
+        assert (
+            "tests/unit/engines/pinocchio/test_fit_swing_gradient_math.py" in workflow
+        )
+        assert 'PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"' in workflow
+
+    def test_cross_engine_equivalence_runs_on_pyproject_changes(self) -> None:
+        """The JaxSim pin guard must run when the declared extra changes."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert '      - "pyproject.toml"' in workflow
+        assert workflow.count('      - "pyproject.toml"') == 2
+
     def test_cross_engine_leaderboard_removes_conflicting_pytest_plugins(
         self,
     ) -> None:
@@ -276,6 +303,21 @@ class TestCIEnvironmentCompatibility:
         )
 
         assert install_index < uninstall_index < pytest_index
+
+    def test_cross_engine_workflows_let_pydantic_resolve_core(self) -> None:
+        """Cross-engine jobs must not force an incompatible pydantic-core wheel."""
+        workflow_names = [
+            "cross-engine-equivalence.yml",
+            "cross-engine-leaderboard.yml",
+            "cross-engine-leaderboard-publish.yml",
+        ]
+
+        for workflow_name in workflow_names:
+            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
+                encoding="utf-8"
+            )
+            assert "pydantic-core==" not in workflow
+            assert "--no-deps pydantic-core" not in workflow
 
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,

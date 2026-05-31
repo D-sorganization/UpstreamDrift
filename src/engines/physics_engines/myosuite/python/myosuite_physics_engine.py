@@ -21,8 +21,13 @@ from __future__ import annotations
 # Path: src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py -> need 6 parents
 from src.engines.tiers import warn_if_experimental
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine  # noqa: E402
+from src.shared.python.engine_core.capabilities import (  # noqa: E402
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
+from .canonical_adapter import SUPPORTED_CAPABILITIES, UNSUPPORTED_CAPABILITIES
 from ._drift_control import DriftControlMixin
 from ._dynamics import DynamicsMixin
 from ._engine_init import EngineInitMixin
@@ -62,6 +67,31 @@ class MyoSuitePhysicsEngine(
     def engine_type(self) -> str:
         """Get engine type identifier (Checkpointable contract)."""
         return "myosuite"
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report activation-driven MyoSuite canonical-core capabilities.
+
+        MyoSuite supports forward, contact-rich muscle simulation. It does not
+        claim joint-torque inverse dynamics because controls are muscle
+        excitations/activations, not generalized joint torques.
+        """
+        return EngineCapabilities(
+            engine_name="MyoSuite",
+            mass_matrix=CapabilityLevel.PARTIAL,
+            jacobian=CapabilityLevel.PARTIAL,
+            contact_forces=CapabilityLevel.PARTIAL,
+            inverse_dynamics=CapabilityLevel.NONE,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            muscles=CapabilityLevel.FULL,
+            dataset_export=CapabilityLevel.PARTIAL,
+            extra={
+                "canonical_core": "canonical-v2",
+                "supported_capabilities": SUPPORTED_CAPABILITIES,
+                "unsupported_capabilities": UNSUPPORTED_CAPABILITIES,
+                "control_mode": "activation_driven",
+            },
+        )
 
 
 def main() -> None:

@@ -55,6 +55,10 @@ if DRAKE_AVAILABLE:
 
 from src.shared.python.core import constants
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 
 logger = get_logger(__name__)
 
@@ -260,6 +264,26 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             return
 
         self.plant.get_actuation_input_port().FixValue(self.plant_context, u)
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Drake's verified canonical-core capability surface."""
+        return EngineCapabilities(
+            engine_name="Drake",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.FULL,
+            inverse_dynamics=CapabilityLevel.FULL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            trajectory_opt=CapabilityLevel.FULL,
+            extra={
+                "gradient_scalar": "AutoDiffXd",
+                "contact_model": "hydroelastic_or_point_contact",
+                "model_exports": ("urdf", "sdf"),
+            },
+        )
 
     def get_time(self) -> float:
         """Get the current simulation time."""

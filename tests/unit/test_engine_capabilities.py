@@ -4,9 +4,55 @@ from __future__ import annotations
 
 import pytest
 from src.shared.python.engine_core.capabilities import (
+    Capability,
     CapabilityLevel,
     EngineCapabilities,
+    normalize_capability,
 )
+
+# ---------------------------------------------------------------------------
+# Capability enum/query contract
+# ---------------------------------------------------------------------------
+
+
+class TestCapabilityQueryContract:
+    def test_capability_enum_contains_existing_engine_fields(self) -> None:
+        assert Capability.MASS_MATRIX.value == "mass_matrix"
+        assert Capability.FORWARD_SIM.value == "forward_sim"
+        assert Capability.DIFFERENTIABLE_ROLLOUT.value == "differentiable_rollout"
+
+    def test_normalize_capability_accepts_backend_flag_aliases(self) -> None:
+        assert normalize_capability("supports_batched") is Capability.BATCHED_ROLLOUT
+        assert normalize_capability("is_differentiable") is (
+            Capability.DIFFERENTIABLE_ROLLOUT
+        )
+        assert normalize_capability("provides_dynamics") is (
+            Capability.DYNAMICS_PRIMITIVES
+        )
+
+    def test_level_for_uses_canonical_capability(self) -> None:
+        caps = EngineCapabilities(jacobian=CapabilityLevel.FULL)
+        assert caps.level_for(Capability.JACOBIAN) == CapabilityLevel.FULL
+        assert caps.level_for("jacobian") == CapabilityLevel.FULL
+        assert caps.level_for(Capability.BATCHED_ROLLOUT) == CapabilityLevel.NONE
+
+    def test_supports_honors_minimum_level(self) -> None:
+        caps = EngineCapabilities(contact_forces=CapabilityLevel.PARTIAL)
+        assert caps.supports(Capability.CONTACT_FORCES) is True
+        assert (
+            caps.supports(
+                Capability.CONTACT_FORCES,
+                minimum=CapabilityLevel.FULL,
+            )
+            is False
+        )
+
+    def test_to_capability_map_includes_adapter_boundary_as_none(self) -> None:
+        caps = EngineCapabilities(forward_sim=CapabilityLevel.FULL)
+        capability_map = caps.to_capability_map()
+        assert capability_map[Capability.FORWARD_SIM] == CapabilityLevel.FULL
+        assert capability_map[Capability.BATCHED_ROLLOUT] == CapabilityLevel.NONE
+
 
 # ---------------------------------------------------------------------------
 # CapabilityLevel enum

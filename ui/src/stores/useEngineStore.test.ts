@@ -4,6 +4,8 @@ import {
   useEngineStore,
   selectLoadedEngines,
   selectEffectiveEngine,
+  selectCapabilityUnavailableReason,
+  selectEngineSupportsCapability,
 } from './useEngineStore';
 
 describe('useEngineStore', () => {
@@ -15,9 +17,9 @@ describe('useEngineStore', () => {
   });
 
   describe('initial state', () => {
-    it('starts with 6 engines in idle state', () => {
+    it('starts with 7 engines in idle state', () => {
       const { engines } = useEngineStore.getState();
-      expect(engines).toHaveLength(6);
+      expect(engines).toHaveLength(7);
       engines.forEach((e) => {
         expect(e.loadState).toBe('idle');
         expect(e.available).toBe(true);
@@ -35,6 +37,20 @@ describe('useEngineStore', () => {
       expect(mujoco).toBeDefined();
       expect(mujoco?.displayName).toBe('MuJoCo');
       expect(mujoco?.capabilities).toContain('rigid_body');
+    });
+
+    it('includes JaxSim in registry with differentiable analysis tags', () => {
+      const jaxsim = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'jaxsim');
+      expect(jaxsim).toBeDefined();
+      expect(jaxsim?.displayName).toBe('JaxSim');
+      expect(jaxsim?.capabilities).toEqual([
+        'rigid_body',
+        'differentiable',
+        'gradients',
+        'parameter_sensitivity',
+      ]);
     });
   });
 
@@ -203,6 +219,34 @@ describe('useEngineStore', () => {
   });
 
   describe('selectors', () => {
+    it('reports capability support for analysis gating', () => {
+      const state = useEngineStore.getState();
+
+      expect(
+        selectEngineSupportsCapability('jaxsim', 'parameter_sensitivity')(state)
+      ).toBe(true);
+      expect(
+        selectEngineSupportsCapability('pinocchio', 'parameter_sensitivity')(
+          state
+        )
+      ).toBe(false);
+    });
+
+    it('returns a tooltip reason when a capability is unavailable', () => {
+      const state = useEngineStore.getState();
+
+      expect(
+        selectCapabilityUnavailableReason('jaxsim', 'parameter_sensitivity')(
+          state
+        )
+      ).toBeNull();
+      expect(
+        selectCapabilityUnavailableReason('pinocchio', 'parameter_sensitivity')(
+          state
+        )
+      ).toBe('Pinocchio does not support parameter_sensitivity.');
+    });
+
     it('selectLoadedEngines returns only loaded engines', () => {
       useEngineStore.setState((state) => ({
         engines: state.engines.map((e) =>

@@ -194,6 +194,40 @@ Every engine's fit driver writes its `FitResult` to
 `shared/python/motion_matching/leaderboard.py` aggregates them into a
 comparison table. Issue #PARITY-LEADERBOARD wires this up.
 
+### 2.9 Adapter conformance merge gate
+
+Every adapter that touches engine I/O must pass the CC-7 conformance harness
+before merge:
+
+```bash
+python -m pytest tests/integration/cross_engine -q
+```
+
+The harness extends
+`src/shared/python/engine_core/cross_engine_validator.py` and runs five
+canonical-v2 checks against each registered adapter or stub:
+
+1. `round_trip_state_remap` verifies
+   `from_canonical(to_canonical(q)) == q` to `1e-9` across rigid and
+   quaternion DOFs.
+2. `forward_kinematics_reference_pose` compares FK against known address,
+   top-of-backswing, and impact reference poses using the 5 mm end-effector
+   tolerance.
+3. `inverse_forward_dynamics_consistency` checks that inverse-dynamics torques
+   reproduce the requested acceleration through forward dynamics.
+4. `post_export_mass_properties` checks post-export mass, CoM, and inertia
+   against canonical CC-3 properties.
+5. `differential_cross_engine_reference` compares perturbed outputs against the
+   selected reference engine within tolerance.
+
+Capability-aware skips are allowed only when the adapter's declared capability
+set does not include the tested surface, for example a rigid-only engine
+skipping muscle-specific checks. Numerical differences caused by legitimate
+solver or contact-model behavior must be recorded in
+`tests/integration/cross_engine/divergence_registry.yaml` with engine pair,
+check, metric, tolerance, and rationale. An unregistered divergence is a hard
+failure.
+
 ---
 
 ## 3. Per-engine target architecture (summary)

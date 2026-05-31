@@ -212,6 +212,27 @@ Asking `mjwarp` for `mass_matrix` raises `BackendCapabilityError` — its
 (or `backend.capabilities.provides_dynamics`) rather than assuming every backend
 offers every service.
 
+### Wrench and GRF extraction
+
+Canonical traces carry engine contact output in `Trace.wrench` with columns
+`[fx, fy, fz, tx, ty, tz]` in world-frame newtons and newton-metres. The shared
+`simulation_backends.wrench_extractor` helpers convert between that `(T, 6)`
+array and the existing `bunkershot3d.postproc.WrenchTrace` primitive, so GRF and
+free-moment impulses use the same integration convention as the BunkerShot3D
+post-processing path.
+
+```python
+from src.shared.python.simulation_backends.wrench_extractor import (
+    static_support_wrench_trace,
+    trace_with_wrench_trace,
+    trace_wrench_impulses,
+)
+
+wrench_trace = static_support_wrench_trace(trace.t, body_mass_kg=80.0)
+trace = trace_with_wrench_trace(trace, wrench_trace)
+impulses = trace_wrench_impulses(trace)
+```
+
 ## Cross-engine comparison reports
 
 The CC-27 report service runs the same input across selected backends and emits

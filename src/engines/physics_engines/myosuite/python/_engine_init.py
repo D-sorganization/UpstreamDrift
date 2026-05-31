@@ -22,6 +22,8 @@ class EngineInitMixin:
         self.env: Any = None
         self.sim: Any = None
         self.env_id: str = ""
+        if not hasattr(self, "_model_override"):
+            self._model_override: Any = None
         self._dt = 0.002
         self._terminated: bool = False
 
@@ -29,6 +31,7 @@ class EngineInitMixin:
         self.env = None
         self.sim = None
         self.env_id = ""
+        self._model_override = None
         self._dt = 0.002
 
     @staticmethod
@@ -55,7 +58,11 @@ class EngineInitMixin:
     def model(self) -> Any:
         if self.sim is not None:
             return self.sim.model
-        return None
+        return self._model_override
+
+    @model.setter
+    def model(self, value: Any) -> None:
+        self._model_override = value
 
     @property
     def is_initialized(self) -> bool:

@@ -2,7 +2,7 @@
 
 **Implemented by:** CC-4 (#6776)  
 **Canonical module:** `src/shared/python/simulation_backends/trace_io.py`  
-**Schema version constant:** `SCHEMA_VERSION = "2.0.0"` (in `protocol.py`)
+**Schema version constant:** `SCHEMA_VERSION = "2.1.0"` (in `protocol.py`)
 
 This document is the authoritative reference for the unified HDF5 result
 format that covers every simulation backend (ODE, MuJoCo, MuJoCo Warp) and
@@ -48,16 +48,48 @@ wrench groups. BunkerShot3D files can be imported via
 
 ### Optional datasets (v2+, single Trace only)
 
-| Dataset    | Shape                | dtype   | Description                                        |
-| ---------- | -------------------- | ------- | -------------------------------------------------- |
-| `u`        | `(T, nu)`            | float64 | Applied controls [N·m]; omitted if passive         |
-| `torques`  | `(T, nu)`            | float64 | Joint torques / generalised forces [N·m]           |
-| `wrench`   | `(T, 6)`             | float64 | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
-| `markers`  | `(T, n_markers, 3)`  | float64 | Predicted marker positions [m]                     |
-| `contacts` | `(T, n_contacts, 3)` | float64 | Contact point positions [m]                        |
+| Dataset              | Shape                | dtype        | Description                                        |
+| -------------------- | -------------------- | ------------ | -------------------------------------------------- |
+| `u`                  | `(T, nu)`            | float64      | Applied controls [N·m]; omitted if passive         |
+| `torques`            | `(T, nu)`            | float64      | Joint torques / generalised forces [N·m]           |
+| `wrench`             | `(T, 6)`             | float64      | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
+| `markers`            | `(T, n_markers, 3)`  | float64      | Predicted marker positions [m]                     |
+| `contacts`           | `(T, n_contacts, 3)` | float64      | Contact point positions [m]                        |
+| `muscle_names`       | `(n_muscles,)`       | UTF-8 string | Muscle output column labels                        |
+| `muscle_activations` | `(T, n_muscles)`     | float64      | Muscle activations `[0, 1]`                        |
+| `muscle_forces`      | `(T, n_muscles)`     | float64      | Muscle forces [N]                                  |
+| `muscle_lengths`     | `(T, n_muscles)`     | float64      | Muscle-tendon lengths [m]                          |
+| `muscle_velocities`  | `(T, n_muscles)`     | float64      | Muscle contraction velocities [m/s]                |
 
 Datasets that are `None` are **omitted** from the file; the reader returns
 `None` for absent datasets.
+
+The muscle-output datasets are additive v2.1 fields used by the MyoSuite
+adapter. They are activation-driven outputs, not joint-torque inverse-dynamics
+results. Writers should provide `muscle_names` whenever any muscle history is
+present so downstream analysis can map columns to muscles.
+
+### ZTCF/ZVCF analysis profile
+
+`persist_ztcf_zvcf_analysis` writes pointwise canonical-v2 analysis artifacts
+using the same CC-4 root attributes and required state datasets. These files
+set `kind = "ztcf_zvcf_analysis"` and are not forward rollout traces.
+
+| Dataset                | Shape     | dtype   | Description                                              |
+| ---------------------- | --------- | ------- | -------------------------------------------------------- |
+| `t`                    | `(T,)`    | float64 | Sample times [s]                                         |
+| `q`                    | `(T, nq)` | float64 | canonical-v2 configurations                              |
+| `v`                    | `(T, nv)` | float64 | canonical-v2 generalized velocities                      |
+| `u`                    | `(T, nv)` | float64 | Applied generalized controls, zero-filled when passive   |
+| `ztcf_acceleration`    | `(T, nv)` | float64 | Drift acceleration `solve(M(q), -bias(q, v))`            |
+| `zvcf_acceleration`    | `(T, nv)` | float64 | Zero-velocity acceleration `solve(M(q), u - bias(q, 0))` |
+| `drift_acceleration`   | `(T, nv)` | float64 | Affine drift term; equal to `ztcf_acceleration`          |
+| `control_acceleration` | `(T, nv)` | float64 | Control contribution `solve(M(q), u)`                    |
+
+For floating-base canonical-v2 states, `nq` may differ from `nv` because the
+base quaternion is a configuration manifold coordinate while velocity and
+acceleration live in tangent space. Analysis code must size accelerations from
+`nv`, not from `nq`.
 
 ### AffineDrift coupling artifact
 

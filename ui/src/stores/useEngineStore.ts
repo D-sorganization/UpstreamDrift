@@ -67,6 +67,17 @@ const ENGINE_REGISTRY: Omit<ManagedEngine, 'loadState' | 'available' | 'error'>[
     capabilities: ['rigid_body', 'inverse_kinematics'],
   },
   {
+    name: 'jaxsim',
+    displayName: 'JaxSim',
+    description: 'Differentiable multibody dynamics for parameter sensitivity',
+    capabilities: [
+      'rigid_body',
+      'differentiable',
+      'gradients',
+      'parameter_sensitivity',
+    ],
+  },
+  {
     name: 'opensim',
     displayName: 'OpenSim',
     description: 'Musculoskeletal modeling and biomechanics simulation',
@@ -239,3 +250,21 @@ export const selectEffectiveEngine = (state: EngineStore): string | null => {
 /** Get a specific engine by name */
 export const selectEngine = (name: string) => (state: EngineStore): ManagedEngine | undefined =>
   state.engines.find((e) => e.name === name);
+
+/** Check whether a known engine advertises a specific capability tag. */
+export const selectEngineSupportsCapability =
+  (name: string, capability: string) =>
+  (state: EngineStore): boolean =>
+    state.engines.some(
+      (e) => e.name === name && e.capabilities.includes(capability)
+    );
+
+/** Message suitable for disabling capability-gated analysis controls. */
+export const selectCapabilityUnavailableReason =
+  (name: string, capability: string) =>
+  (state: EngineStore): string | null => {
+    const engine = state.engines.find((e) => e.name === name);
+    if (!engine) return `Unknown engine: ${name}`;
+    if (engine.capabilities.includes(capability)) return null;
+    return `${engine.displayName} does not support ${capability}.`;
+  };

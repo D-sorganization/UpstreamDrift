@@ -1,0 +1,40 @@
+{
+  "id": "pose2sim-sample",
+  "source_fps": 30.0,
+  "unit_system": "meters",
+  "world_up_axis": "+Y",
+  "cameras": {
+    "cam0": {
+      "intrinsics": {
+        "fx": 1000.0,
+        "fy": 1002.0,
+        "cx": 640.0,
+        "cy": 360.0
+      },
+      "extrinsics": {
+        "rotation": [
+          [1.0, 0.0, 0.0],
+          [0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0]
+        ],
+        "translation": [0.0, 0.0, 0.0]
+      }
+    },
+    "cam1": {
+      "intrinsics": {
+        "fx": 998.0,
+        "fy": 999.0,
+        "cx": 638.0,
+        "cy": 358.0
+      },
+      "extrinsics": {
+        "rotation": [
+          [0.9961947, 0.0, 0.0871557],
+          [0.0, 1.0, 0.0],
+          [-0.0871557, 0.0, 0.9961947]
+        ],
+        "translation": [1.5, 0.0, 0.0]
+      }
+    }
+  }
+}

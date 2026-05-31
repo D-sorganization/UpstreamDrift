@@ -14,6 +14,10 @@ class MuscleInterfaceMixin:
     if TYPE_CHECKING:
         sim: Any
 
+        def get_state(self) -> tuple[np.ndarray, np.ndarray]: ...
+
+        def get_time(self) -> float: ...
+
     def get_muscle_analyzer(self) -> Any | None:
         if not self.sim:
             logger.warning("Cannot create muscle analyzer - simulation not initialized")
@@ -109,6 +113,36 @@ class MuscleInterfaceMixin:
             forces=analyzer.get_muscle_forces(),
             lengths=analyzer.get_muscle_lengths(),
             velocities=analyzer.get_muscle_velocities(),
+        )
+
+    def get_muscle_outputs(self) -> Any | None:
+        """Return canonical Trace-ready muscle outputs for the current frame."""
+        analyzer = self.get_muscle_analyzer()
+
+        if analyzer is None:
+            return None
+
+        from .canonical_adapter import MyoSuiteMuscleOutputs
+
+        return MyoSuiteMuscleOutputs.from_analyzer(analyzer)
+
+    def build_canonical_muscle_trace(self) -> Any | None:
+        """Build a one-frame canonical Trace containing MyoSuite muscle outputs."""
+        outputs = self.get_muscle_outputs()
+
+        if outputs is None:
+            return None
+
+        from .canonical_adapter import MyoSuiteCanonicalAdapter
+
+        q, v = self.get_state()
+        adapter = MyoSuiteCanonicalAdapter()
+        return adapter.build_trace(
+            t=np.array([self.get_time()], dtype=float),
+            q=np.asarray(q, dtype=float).reshape(1, -1),
+            v=np.asarray(v, dtype=float).reshape(1, -1),
+            muscle_outputs=outputs,
+            dt=float(getattr(self, "_dt", 0.0)),
         )
 
     def get_muscle_names(self) -> list[str]:

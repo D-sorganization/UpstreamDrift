@@ -13,11 +13,48 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from src.shared.python.engine_core.capabilities import (
+    Capability,
+    CapabilityLevel,
+    CapabilityRef,
+    EngineCapabilities,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .exceptions import BackendNotAvailableError
+from .protocol import BackendCapabilities
 
 logger = get_logger(__name__)
+
+
+def backend_capability_level(
+    backend_capabilities: BackendCapabilities,
+    capability: CapabilityRef,
+) -> CapabilityLevel:
+    """Answer a canonical capability query from a backend descriptor."""
+    return backend_capabilities.level_for(capability)
+
+
+def backend_to_engine_capabilities(
+    backend_capabilities: BackendCapabilities,
+) -> EngineCapabilities:
+    """Return an engine-core capability view for a simulation backend.
+
+    This is intentionally a narrow adapter: backend-only flags remain on
+    :class:`BackendCapabilities`, while shared engine-core fields are populated
+    through the canonical query contract.
+    """
+    return EngineCapabilities(
+        engine_name=backend_capabilities.name,
+        mass_matrix=backend_capabilities.level_for(Capability.MASS_MATRIX),
+        forward_sim=backend_capabilities.level_for(Capability.FORWARD_SIM),
+        extra={
+            "backend_device": backend_capabilities.device,
+            "supports_batched": backend_capabilities.supports_batched,
+            "is_differentiable": backend_capabilities.is_differentiable,
+            "provides_dynamics": backend_capabilities.provides_dynamics,
+        },
+    )
 
 
 @lru_cache(maxsize=1)

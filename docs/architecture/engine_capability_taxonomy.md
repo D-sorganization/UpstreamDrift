@@ -24,15 +24,22 @@ integration gates in #6651. The levels use
 
 ## Contract
 
-`EngineCapabilities` is the source of truth surfaced to the API and UI. New
-gradient/rollout capabilities must be added there first, with:
+`src.shared.python.engine_core.capabilities.Capability` is the canonical
+capability id taxonomy. Capability reports expose a shared query contract:
+`level_for(capability)` returns a `CapabilityLevel`, and `supports(capability)`
+checks whether that level is at least `PARTIAL` by default.
+
+`EngineCapabilities` remains the source of truth surfaced to the API and UI for
+engine-core fields. New engine-core gradient/rollout capabilities must be added
+there first, with:
 
 - an immutable dataclass field defaulting to `CapabilityLevel.NONE`;
 - a `has_*` accessor;
 - `to_dict()` and `from_dict()` round-trip support;
 - a documented profile update when an engine advertises non-`NONE` support.
 
-The `simulation_backends.BackendCapabilities.is_differentiable` flag remains the
-rollout-backend flag from ADR-0023/ADR-0024. It must not be duplicated into
-`EngineCapabilities`; the engine-core taxonomy instead records which gradient
-surfaces are available.
+Backend-only flags stay at the adapter boundary. `simulation_backends.
+BackendCapabilities` keeps the backward-compatible `supports_batched`,
+`is_differentiable`, and `provides_dynamics` booleans, but now answers canonical
+`Capability` queries and can be adapted to an `EngineCapabilities` view through
+`simulation_backends.capabilities.backend_to_engine_capabilities()`.

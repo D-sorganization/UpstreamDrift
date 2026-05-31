@@ -1,5 +1,14 @@
-"""Canonical-core estimation helpers."""
+"""Canonical-core estimation primitives and synthetic-data utilities."""
 
+from __future__ import annotations
+
+from src.shared.python.estimation.identifiability import (
+    IdentifiabilityReport,
+    ParameterSpec,
+    finite_difference_jacobian as identifiability_finite_difference_jacobian,
+    probe_identifiability,
+    sweep_parameter,
+)
 from src.shared.python.estimation.map_estimator import (
     CubicHermiteSplineTrajectory,
     MapEstimatorOptions,
@@ -25,9 +34,36 @@ from src.shared.python.estimation.multi_trial import (
     solve_multi_trial_map,
     stack_shared_parameter_jacobians,
 )
+from src.shared.python.estimation.residuals import (
+    ResidualFunction,
+    RneaFunction,
+    anthropometric_prior_residual,
+    autodiff_jacobian,
+    dynamics_residual,
+    finite_difference_jacobian,
+    project_pinhole,
+    reprojection_residual,
+    reprojection_residual_from_points,
+    residual_jacobian,
+    smoothness_residual,
+)
+from src.shared.python.estimation.synthetic_ground_truth import (
+    ForwardModel,
+    GroundTruthRigResult,
+    NoiseModel,
+    ObservationPolicy,
+    ProjectionRecord,
+    SkeletonRigForwardModel,
+    SyntheticCamera,
+    SyntheticObservationRig,
+    project_world_point,
+)
 
 __all__ = [
     "CubicHermiteSplineTrajectory",
+    "ForwardModel",
+    "GroundTruthRigResult",
+    "IdentifiabilityReport",
     "MapEstimatorOptions",
     "MapEstimatorProblem",
     "MapEstimatorResult",
@@ -39,13 +75,33 @@ __all__ = [
     "MultiTrialMapProblem",
     "MultiTrialMapResult",
     "MultiTrialObservation",
+    "NoiseModel",
+    "ObservationPolicy",
+    "ParameterSpec",
+    "ProjectionRecord",
+    "ResidualFunction",
+    "RneaFunction",
     "SharedParameterBlock",
     "SharedParameterSpec",
+    "SkeletonRigForwardModel",
     "SplineTrajectoryEvaluation",
+    "SyntheticCamera",
+    "SyntheticObservationRig",
+    "anthropometric_prior_residual",
+    "autodiff_jacobian",
+    "dynamics_residual",
+    "finite_difference_jacobian",
+    "identifiability_finite_difference_jacobian",
+    "probe_identifiability",
+    "project_pinhole",
+    "project_world_point",
+    "reprojection_residual",
+    "reprojection_residual_from_points",
+    "residual_jacobian",
     "shared_parameter_covariance",
-    "solve_multi_trial_map",
-    "solve_single_trial_map",
+    "smoothness_residual",
     "solve_multi_trial_map",
     "solve_single_trial_map",
     "stack_shared_parameter_jacobians",
+    "sweep_parameter",
 ]

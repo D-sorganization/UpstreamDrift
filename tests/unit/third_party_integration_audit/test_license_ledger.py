@@ -31,11 +31,37 @@ def test_license_ledger_covers_declared_dependencies() -> None:
 
 def test_license_ledger_flags_openpose_as_non_commercial_opt_in() -> None:
     """OpenPose must stay visibly fenced for commercial builds."""
-    ledger = (ROOT / "docs" / "legal" / "licenses.md").read_text(encoding="utf-8")
+    errors = validate_license_ledger(
+        pyproject_path=ROOT / "pyproject.toml",
+        ledger_path=ROOT / "docs" / "legal" / "licenses.md",
+    )
 
-    assert "`openpose`" in ledger
-    assert "Non-commercial" in ledger
-    assert "Opt-in" in ledger
+    assert "missing OpenPose commercialization-gate row" not in errors
+    assert "OpenPose row must state Non-commercial and Opt-in" not in errors
+
+
+def test_license_ledger_validates_openpose_row_cells(tmp_path: Path) -> None:
+    """OpenPose status and notes must be validated on its own table row."""
+    ledger = (ROOT / "docs" / "legal" / "licenses.md").read_text(encoding="utf-8")
+    bad_lines = []
+    for line in ledger.splitlines():
+        if line.startswith("| `openpose`"):
+            bad_lines.append(
+                "| `openpose` | external tool | not packaged in `pyproject.toml` | "
+                "Commercial | Default | Approved for default commercial ingestion. |"
+            )
+        else:
+            bad_lines.append(line)
+    bad_ledger = "\n".join(bad_lines) + "\n"
+    ledger_path = tmp_path / "licenses.md"
+    ledger_path.write_text(bad_ledger, encoding="utf-8")
+
+    errors = validate_license_ledger(
+        pyproject_path=ROOT / "pyproject.toml",
+        ledger_path=ledger_path,
+    )
+
+    assert "OpenPose row must state Non-commercial and Opt-in" in errors
 
 
 def test_license_ledger_script_reports_clean() -> None:

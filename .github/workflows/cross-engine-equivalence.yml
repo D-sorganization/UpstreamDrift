@@ -6,6 +6,11 @@
 # orientation RMSE / (5 mm + max club-length difference) clubhead RMSE at
 # three canonical poses (impact, top-of-backswing, address).
 #
+# CC-8 also makes this workflow the Canonical Core conformance gate. The
+# light lane runs adapter/validator conformance that is safe for the standard
+# fleet runner. When CC-7's tests/integration/cross_engine harness exists on
+# the branch, the same lane automatically includes it.
+#
 # Triggered on every PR (and main push) that touches src/engines/. Engines
 # whose Python deps fail to install are gracefully skipped by the test
 # itself via `requires_<engine>` markers + dynamic availability probing.
@@ -17,23 +22,35 @@ on:
     branches: [main]
     paths:
       - "src/engines/**"
+      - "src/shared/python/engine_core/cross_engine_validator.py"
       - "shared/models/**"
+      - "tests/integration/test_cross_engine_validation.py"
+      - "tests/integration/cross_engine/**"
+      - "tests/unit/pose_interchange/adapters/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
+      - ".jules/templates/**"
+      - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "src/engines/**"
+      - "src/shared/python/engine_core/cross_engine_validator.py"
       - "shared/models/**"
+      - "tests/integration/test_cross_engine_validation.py"
+      - "tests/integration/cross_engine/**"
+      - "tests/unit/pose_interchange/adapters/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
+      - ".jules/templates/**"
+      - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -108,8 +125,6 @@ jobs:
           python -m pip install --ignore-installed --no-deps pip
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
-          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
-          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
@@ -125,6 +140,8 @@ jobs:
           pip install -e ".[jaxsim]" || echo "::warning::jaxsim install failed"
           python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
+          python -m ensurepip --upgrade || true
+          pip install --force-reinstall "pydantic==2.12.5" "pydantic-core==2.41.5"
 
       - name: Guard JaxSim version pin (issue #6660)
         # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,
@@ -172,3 +189,81 @@ jobs:
           else
             echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  canonical-conformance-gate:
+    name: Canonical Core Conformance Gate
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: adapter-core
+            python-version: "3.11"
+            marker: "not requires_pinocchio and not requires_drake and not requires_jaxsim and not requires_mujoco and not slow and not live_simulation"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Install conformance dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-deps pip
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          python -m ensurepip --upgrade || true
+          pip install --force-reinstall "pydantic==2.12.5"
+          pip uninstall -y pytest-vcr pytest-recording || true
+
+      - name: Run canonical conformance gate
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_paths=(
+            tests/integration/test_cross_engine_validation.py
+            tests/unit/pose_interchange/adapters
+          )
+          if [ -d tests/integration/cross_engine ]; then
+            test_paths+=(tests/integration/cross_engine)
+          fi
+          python3 -m pytest \
+            -o addopts="" \
+            "${test_paths[@]}" \
+            -m "${{ matrix.marker }}" \
+            -v -rs --tb=short -p no:xvfb \
+            --junitxml="test-results/canonical-conformance-${{ matrix.engine }}-junit.xml"
+
+      - name: Upload conformance report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
+          path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
+          if-no-files-found: warn
