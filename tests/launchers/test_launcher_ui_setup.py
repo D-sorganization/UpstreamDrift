@@ -153,6 +153,42 @@ def test_library_can_pop_out_from_workspace_tab(launcher) -> None:
     mock_popout.assert_called_once_with(widget, "Library")
 
 
+def test_library_reopen_after_widget_destroyed_does_not_raise(launcher) -> None:
+    # Regression for #6902: a detached Library closed via "Close Tab" is
+    # deleteLater()'d. The cached singleton must be nulled when its C++ object
+    # is destroyed so the next open rebuilds it instead of touching a deleted
+    # object (RuntimeError: wrapped C/C++ object deleted).
+    from PyQt6.QtCore import QEvent
+    from PyQt6.QtWidgets import QApplication
+
+    launcher.init_ui()
+
+    with patch("src.launchers.library_widget.LibraryWidget", side_effect=QWidget):
+        launcher._open_library_tab()
+        first_widget = launcher.library_widget
+        assert first_widget is not None
+
+        # Simulate the detach-close destruction of the singleton: remove it
+        # from the tab widget (drop the parent reference) and deleteLater().
+        idx = launcher.workspace_tabs.indexOf(first_widget)
+        if idx >= 0:
+            launcher.workspace_tabs.removeTab(idx)
+        first_widget.setParent(None)
+        first_widget.deleteLater()
+        QApplication.sendPostedEvents(first_widget, QEvent.Type.DeferredDelete.value)
+        QApplication.processEvents()
+
+        # The destroyed signal must have nulled the cache.
+        assert launcher.library_widget is None
+
+        # Re-opening rebuilds a fresh widget without raising.
+        launcher._open_library_tab()
+        second_widget = launcher.library_widget
+
+    assert second_widget is not None
+    assert second_widget is not first_widget
+
+
 @patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", True)
 @patch("src.shared.python.gui_pkg.help_system.TooltipManager.register_tooltip")
 def test_setup_top_bar_with_help(mock_register, launcher) -> None:
