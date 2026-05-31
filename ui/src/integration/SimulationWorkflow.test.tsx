@@ -125,6 +125,12 @@ vi.mock('three', () => ({
 // Import after mocks
 import { SimulationPage } from '@/pages/Simulation';
 
+const expectEngineOption = async (engineName: RegExp) => {
+  await waitFor(() => {
+    expect(screen.getByRole('radio', { name: engineName })).toBeInTheDocument();
+  });
+};
+
 const createTestWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -197,9 +203,7 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       // Wait for engines to be listed (from registry)
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Click Load button for MuJoCo
       const loadButton = screen.getByRole('button', { name: /load mujoco/i });
@@ -234,10 +238,8 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       // Wait for engines to be listed
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-        expect(screen.getByText('Drake')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
+      await expectEngineOption(/drake/i);
 
       // Load Drake
       const loadDrakeBtn = screen.getByRole('button', { name: /load drake/i });
@@ -267,9 +269,7 @@ describe('Simulation Workflow Integration', () => {
     it('disables engine switching while simulation is running', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Load MuJoCo
       fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
@@ -298,9 +298,7 @@ describe('Simulation Workflow Integration', () => {
     it('allows pausing and resuming simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Load MuJoCo
       fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
@@ -361,9 +359,7 @@ describe('Simulation Workflow Integration', () => {
     it('allows stopping simulation and returning to ready state', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Load MuJoCo
       fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
@@ -418,9 +414,7 @@ describe('Simulation Workflow Integration', () => {
 
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Try to load
       fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
@@ -434,9 +428,7 @@ describe('Simulation Workflow Integration', () => {
     it('shows unavailable engines as disabled', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('Pinocchio')).toBeInTheDocument();
-      });
+      await expectEngineOption(/pinocchio/i);
 
       // Click Load for Pinocchio
       const loadBtn = screen.getByRole('button', { name: /load pinocchio/i });
@@ -453,9 +445,7 @@ describe('Simulation Workflow Integration', () => {
     it('displays simulation state during running simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      await waitFor(() => {
-        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-      });
+      await expectEngineOption(/mujoco/i);
 
       // Load MuJoCo
       fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
@@ -528,9 +518,7 @@ describe('Multi-session workflow', () => {
   it('creates new WebSocket connection on each simulation start', async () => {
     render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-    await waitFor(() => {
-      expect(screen.getByText('MuJoCo')).toBeInTheDocument();
-    });
+    await expectEngineOption(/mujoco/i);
 
     // Load MuJoCo once
     fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
