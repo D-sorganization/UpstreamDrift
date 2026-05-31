@@ -54,6 +54,18 @@ def test_numeric_field_sets_tooltip_and_whatsthis(qt_app, registry) -> None:
     assert fm.default_source in field.whatsThis()
 
 
+def test_free_form_field_uses_editable_line_edit(qt_app, registry) -> None:
+    from PyQt6.QtWidgets import QLineEdit
+
+    from src.shared.python.ui.helpful_field import HelpfulField
+
+    field = HelpfulField("simulation.model", registry=registry)
+
+    assert isinstance(field.editor(), QLineEdit)
+    field.editor().setText("custom_golf_model")
+    assert field.value() == "custom_golf_model"
+
+
 def test_numeric_field_clamps_validator_to_range(qt_app, registry) -> None:
     from src.shared.python.ui.helpful_field import HelpfulField
 
