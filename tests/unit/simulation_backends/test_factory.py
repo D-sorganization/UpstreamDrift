@@ -3,7 +3,7 @@
 These tests exercise :func:`make_backend` / :func:`available_backends` purely
 through the package's public surface. They confirm that:
 
-* the registry advertises exactly the three planned backends,
+* the registry advertises exactly the four planned backends,
 * the ODE backend constructs and structurally satisfies both the
   :class:`SimulationBackend` and :class:`DynamicsProvider` Protocols,
 * name lookup is case-insensitive and forwards keyword arguments,
@@ -30,6 +30,7 @@ from src.shared.python.simulation_backends import (
     UnknownBackendError,
     available_backends,
     has_mujoco,
+    has_mjx,
     has_warp,
     make_backend,
 )
@@ -53,9 +54,9 @@ def _params() -> GolfModelParams:
     return GolfModelParams.default()
 
 
-def test_available_backends_is_exact_sorted_triple() -> None:
-    """The registry advertises exactly the three planned backends, sorted."""
-    assert available_backends() == ("mjwarp", "mujoco", "ode")
+def test_available_backends_is_exact_sorted_quad() -> None:
+    """The registry advertises exactly the four planned backends, sorted."""
+    assert available_backends() == ("mjwarp", "mjx", "mujoco", "ode")
 
 
 def test_make_ode_satisfies_both_protocols() -> None:
@@ -100,6 +101,13 @@ def test_make_mjwarp_without_warp_raises_not_available() -> None:
     """
     with pytest.raises(BackendNotAvailableError):
         make_backend("mjwarp", _params())
+
+
+@pytest.mark.skipif(has_mjx(), reason="MJX/JAX stack installed")
+def test_make_mjx_without_mjx_raises_not_available() -> None:
+    """Requesting the differentiable backend without MJX/JAX fails clearly."""
+    with pytest.raises(BackendNotAvailableError):
+        make_backend("mjx", _params())
 
 
 @pytest.mark.requires_mujoco
