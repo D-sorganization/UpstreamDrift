@@ -560,12 +560,28 @@ class UISetupManager:
         if existing is None:
             existing = LibraryWidget(self.launcher)
             self.library_widget = existing
+            # The cached singleton may be detached and closed via "Close Tab",
+            # which deleteLater()s the underlying C++ object (#6902). Null the
+            # cache when that happens so the next open rebuilds it instead of
+            # re-using a deleted object (RuntimeError: wrapped C/C++ object
+            # deleted).
+            existing.destroyed.connect(self._on_library_widget_destroyed)
 
         index = self.workspace_tabs.indexOf(existing)
         if index < 0:
             self.dock_widget_as_tab(existing, "Library")
         else:
             self.workspace_tabs.setCurrentIndex(index)
+
+    def _on_library_widget_destroyed(self, *_args: object) -> None:
+        """Null the cached Library singleton once its C++ object is destroyed.
+
+        Connected to ``LibraryWidget.destroyed`` so a detached-and-closed
+        Library (which ``deleteLater()``s the widget) cannot leave a dangling
+        reference in ``self.library_widget`` (#6902).
+        """
+        self.library_widget = None
+        self.library_window = None
 
     def _popout_library(self) -> None:
         """Open the Library in a floating window, preserving one widget instance."""
