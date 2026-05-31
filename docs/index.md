@@ -28,6 +28,7 @@ navigation should start with the rendered documentation URL.
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                                              |
 | `competitive_analysis/` | @product-team         | draft     | Market and ecosystem comparisons used for planning context.                                                                         |
 | `config/`               | @platform-team        | draft     | Configuration and settings documentation (e.g. the pydantic-settings migration guide).                                              |
+| `conformance/`          | @physics-team         | stable    | Cross-engine conformance notes, divergence ledgers, and canonical-core parity records.                                              |
 | `conventions/`          | @architecture-team    | stable    | Cross-subsystem data contracts and naming conventions, including canonical pose/state interchange.                                  |
 | `deployment/`           | @platform-team        | stable    | Deployment procedures, packaging notes, and release environment guidance.                                                           |
 | `design/`               | @architecture-team    | draft     | Feature design sketches and deeper design rationale before ADR promotion.                                                           |
