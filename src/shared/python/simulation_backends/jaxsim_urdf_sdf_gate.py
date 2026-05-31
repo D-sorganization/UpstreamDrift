@@ -11,10 +11,11 @@ from __future__ import annotations
 import math
 import shutil
 import subprocess
-import xml.etree.ElementTree as ET  # noqa: N817
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+
+import defusedxml.ElementTree as ET  # noqa: N817, S314
 
 SDFORMAT_TOOL_NAMES = ("gz", "ign", "sdf")
 INERTIA_FIELDS = ("ixx", "ixy", "ixz", "iyy", "iyz", "izz")
