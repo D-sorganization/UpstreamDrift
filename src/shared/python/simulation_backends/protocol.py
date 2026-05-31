@@ -26,6 +26,14 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.engine_core.capabilities import (
+    Capability,
+    CapabilityLevel,
+    CapabilityRef,
+    capability_level_supported,
+    normalize_capability,
+)
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
@@ -56,6 +64,45 @@ class BackendCapabilities:
     supports_batched: bool = False
     is_differentiable: bool = False
     provides_dynamics: bool = False
+
+    def level_for(self, capability: CapabilityRef) -> CapabilityLevel:
+        """Return support level for a canonical capability query.
+
+        Legacy boolean flags remain the storage format for backend descriptors;
+        this method adapts them to the engine-core taxonomy.
+        """
+        normalized = normalize_capability(capability)
+        if normalized is Capability.FORWARD_SIM:
+            return CapabilityLevel.FULL
+        if normalized in (Capability.DYNAMICS_PRIMITIVES, Capability.MASS_MATRIX):
+            return (
+                CapabilityLevel.FULL if self.provides_dynamics else CapabilityLevel.NONE
+            )
+        if normalized is Capability.BATCHED_ROLLOUT:
+            return (
+                CapabilityLevel.FULL if self.supports_batched else CapabilityLevel.NONE
+            )
+        if normalized is Capability.DIFFERENTIABLE_ROLLOUT:
+            return (
+                CapabilityLevel.FULL if self.is_differentiable else CapabilityLevel.NONE
+            )
+        return CapabilityLevel.NONE
+
+    def supports(
+        self,
+        capability: CapabilityRef,
+        *,
+        minimum: CapabilityLevel = CapabilityLevel.PARTIAL,
+    ) -> bool:
+        """Return whether ``capability`` is supported at ``minimum`` level."""
+        return capability_level_supported(
+            self.level_for(capability),
+            minimum=minimum,
+        )
+
+    def to_capability_map(self) -> dict[Capability, CapabilityLevel]:
+        """Return a canonical capability-to-level mapping for this backend."""
+        return {capability: self.level_for(capability) for capability in Capability}
 
 
 @dataclass
