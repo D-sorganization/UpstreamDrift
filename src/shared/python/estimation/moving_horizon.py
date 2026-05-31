@@ -128,15 +128,15 @@ class _SampleBuffer:
         sample_q = np.asarray(q_samples, dtype=float)
         require(sample_times.ndim == 1, "times must be a 1D array")
         require(sample_q.shape == (sample_times.size, n_dof), "q_samples shape invalid")
-        require(np.all(np.isfinite(sample_times)), "times must be finite")
-        require(np.all(np.isfinite(sample_q)), "q_samples must be finite")
+        require(bool(np.all(np.isfinite(sample_times))), "times must be finite")
+        require(bool(np.all(np.isfinite(sample_q))), "q_samples must be finite")
         if self.times and sample_times.size:
             require(
                 sample_times[0] > self.times[-1],
                 "new samples must advance monotonically",
             )
         if sample_times.size > 1:
-            require(np.all(np.diff(sample_times) > 0.0), "times must increase")
+            require(bool(np.all(np.diff(sample_times) > 0.0)), "times must increase")
         self.times.extend(float(value) for value in sample_times)
         self.q_rows.extend(np.array(row, dtype=float) for row in sample_q)
 
