@@ -290,7 +290,8 @@ class JaxSimBackend:
     def _dofs(self) -> int:
         model, data, _apis = self._loaded()
         if hasattr(model, "dofs"):
-            return int(model.dofs)
+            dofs = model.dofs
+            return int(dofs() if callable(dofs) else dofs)
         return int(_array_attr(data, "joint_positions").shape[0])
 
     def _build_data(self, **kwargs: Any) -> Any:
@@ -369,7 +370,10 @@ def _load_jaxsim_apis() -> _JaxSimApis:
 
 
 def _array_attr(obj: Any, name: str) -> np.ndarray:
-    return np.asarray(getattr(obj, name), dtype=np.float64).reshape(-1)
+    value = getattr(obj, name, None)
+    if value is None:
+        value = getattr(obj, f"_{name}")
+    return np.asarray(value, dtype=np.float64).reshape(-1)
 
 
 def _vector_attr(obj: Any, name: str, size: int) -> np.ndarray:

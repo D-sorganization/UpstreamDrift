@@ -252,6 +252,15 @@ class TestCIEnvironmentCompatibility:
         assert 'PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"' in workflow
         assert "mutually incompatible pytest plugins" in workflow
 
+    def test_cross_engine_equivalence_runs_jaxsim_pinocchio_gate(self) -> None:
+        """The equivalence workflow must run the JaxSim dynamics parity gate."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert 'pip install -e ".[jaxsim]"' in workflow
+        assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
+
     def test_cross_engine_leaderboard_removes_conflicting_pytest_plugins(
         self,
     ) -> None:

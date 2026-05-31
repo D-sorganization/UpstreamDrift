@@ -50,3 +50,24 @@ velocities]` for generalized velocity, matching the suite's
 `SPATIAL_JACOBIAN_ORDER = ("angular", "linear")` convention for the floating
 base block. The adapter declares the JaxSim capability profile and is registered
 as `EngineType.JAXSIM` in `LOADER_MAP`.
+
+## Cross-Engine Dynamics Gate
+
+Issue #6654 adds `tests/cross_engine/test_jaxsim_vs_pinocchio.py` as the
+JaxSim 2.1 dynamics parity gate. The test loads the same single free rigid
+body in JaxSim and Pinocchio, normalizes Pinocchio's free-flyer vectors from
+`[linear; angular]` into the suite canonical `[angular; linear]` order, and
+compares the following quantities at sampled `(q, qd)` states:
+
+- `M(q)` free-floating mass matrix
+- `h(q, qd)` bias forces
+- `g(q)` gravity forces
+- `C(q, qd)` Coriolis matrix
+
+The gate follows `src/engines/CROSS_ENGINE_PARITY_SPEC.md`'s cross-engine
+tolerance policy: normalized RMSE must stay below `20%` for matrices and
+vectors, with `1e-7` absolute floor for near-zero reference terms. Local core
+installs skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are
+missing; the self-hosted `cross-engine-equivalence.yml` workflow installs the
+optional JaxSim extra and Pinocchio best-effort so installed-engine
+disagreement fails the build.
