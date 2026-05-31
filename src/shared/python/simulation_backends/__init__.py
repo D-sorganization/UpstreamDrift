@@ -21,8 +21,10 @@ from __future__ import annotations
 
 from .capabilities import (
     has_mujoco,
+    has_mjx,
     has_warp,
     require_mujoco,
+    require_mjx,
     require_warp,
     warp_device_available,
 )
@@ -91,9 +93,11 @@ __all__ = [
     "compute_wrench_impulses",
     "force_torque_from_wrench_array",
     "has_mujoco",
+    "has_mjx",
     "has_warp",
     "make_backend",
     "require_mujoco",
+    "require_mjx",
     "require_warp",
     "serialize_provenance",
     "static_support_wrench_trace",

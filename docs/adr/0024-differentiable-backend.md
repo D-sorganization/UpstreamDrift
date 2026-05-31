@@ -1,6 +1,6 @@
 # ADR-0024: Differentiable backend — MJX (JAX) vs custom Warp kernels
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-05-29
 - Decision Makers: @D-sorganization/maintainers
 - Related Issues/PRs: GPU-accelerated simulation-backend epic; follows ADR-0023
@@ -33,22 +33,21 @@ implementation, and there are two credible ways to build one.
 
 ## Decision
 
-**Recommend MJX (JAX) as the differentiable backend, but defer building it until
-a concrete gradient-based use-case exists.** Whichever option is eventually
-chosen, it implements the **same** `SimulationBackend` Protocol from ADR-0023 —
-the differentiable engine is another interchangeable backend (e.g.
-`make_backend('mjx', params)`), not a parallel architecture. It would advertise
-`is_differentiable=True` and, like `mjwarp`, would be an optional extra that
-degrades gracefully when its stack is absent.
+**Use MJX (JAX) as the differentiable backend.** It implements the **same**
+`SimulationBackend` Protocol from ADR-0023 — the differentiable engine is
+another interchangeable backend (`make_backend('mjx', params)`), not a parallel
+architecture. It advertises `is_differentiable=True` and, like `mjwarp`, is an
+optional extra that degrades gracefully when its stack is absent.
 
 Concretely:
 
-- Do **not** implement a differentiable backend now. No current workload in the
-  epic needs rollout gradients; the sampling-based optimisation served by
-  `mjwarp` covers the present need.
-- When a concrete gradient use-case lands, **prefer MJX** (see rationale below)
-  and revisit this ADR (promote to Accepted, fill in the chosen pin and the
-  gradient cross-validation plan).
+- `mjx_backend.MJXBackend` is the rollout-layer differentiable adapter.
+- It reuses `simulation_backends.mjcf.params_to_mjcf()` so MJX, MuJoCo CPU and
+  MJWarp consume the same model source.
+- Host-facing methods still return the existing `Trace` / `BatchTrace` schema.
+  JAX-native arrays remain available through `rollout_batch_arrays()`, and
+  `final_state_control_jacobian()` demonstrates the autodiff path before host
+  conversion.
 - Keep the door open structurally: the Protocol and capability flag
   (`is_differentiable`) already exist precisely so a differentiable backend
   slots in without disturbing callers.
@@ -92,32 +91,28 @@ Concretely:
     contributor does not waste time trying to backprop through `mjwarp`.
   - Names the recommended path (MJX) and the same-Protocol constraint, so the
     eventual implementation is a drop-in backend, not a redesign.
-  - Defers cost until a real gradient use-case justifies the extra dependency
-    and validation burden (YAGNI).
+  - Reuses the existing `BatchedBackend` and `BackendCapabilities` path for
+    CC-20 multi-trial and CC-23 windowed rollout workloads.
 
 - **Negative:**
 
-  - The capability `is_differentiable=True` remains unsatisfied by any backend
-    until this is implemented; gradient-based optimisation is unavailable in the
-    interim (sampling-based via `mjwarp` is the workaround).
-  - When built, MJX adds a second accelerator stack (JAX) alongside Warp, with
+  - MJX adds a second accelerator stack (JAX) alongside Warp, with
     its own version-pinning and CUDA-compatibility surface.
 
 - **Follow-ups:**
-  - On the first concrete gradient-based trajectory-optimisation requirement:
-    promote this ADR to Accepted, pin the MJX/JAX versions in an optional
-    extra, define the gradient cross-validation (compare MJX gradients to
-    finite-difference gradients of the `ode` reference within tolerance), and
-    add `make_backend('mjx', ...)` to the factory registry.
+  - Add a real MJX/JAX lane that compares MJX rollout gradients to
+    finite-difference gradients of the `ode` reference within tolerance.
+  - Promote trajectory-optimization examples only after a concrete optimizer
+    consumes the new `final_state_control_jacobian()` surface.
 
 ## Validation
 
-- This ADR is **Proposed**; no code ships with it. Validation is deferred to the
-  implementation ADR.
-- When implemented, validation will mirror ADR-0023's discipline: the MJX
-  backend honours the `SimulationBackend` Protocol (structural `isinstance`
-  check), advertises `is_differentiable=True`, degrades gracefully without its
-  optional extra (`BackendNotAvailableError`), and its gradients are
-  cross-validated against finite-difference gradients of the analytical `ode`
+- Validation mirrors ADR-0023's discipline: the MJX backend honours the
+  `SimulationBackend` and `BatchedBackend` contracts, advertises
+  `is_differentiable=True`, degrades gracefully without its optional extra
+  (`BackendNotAvailableError`), and exercises host-side rollout/autodiff
+  plumbing through mocked MJX/JAX unit tests on CPU-only CI.
+- Full numerical gradient validation remains an optional-dependency lane:
+  compare MJX gradients to finite-difference gradients of the analytical `ode`
   reference using `np.allclose` with a documented tolerance (never `==`, per the
   float32/float64 rule in ADR-0023).
