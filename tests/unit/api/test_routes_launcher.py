@@ -91,8 +91,8 @@ def test_get_engine_capabilities(client: TestClient) -> None:
     assert "mujoco" in data
     assert "drake" in data
     assert data["jaxsim"]["engine_name"] == "JaxSim"
-    assert data["jaxsim"]["contact_forces"] == "none"
-    assert data["jaxsim"]["inverse_dynamics"] == "partial"
+    assert data["jaxsim"]["contact_forces"] == "partial"
+    assert data["jaxsim"]["inverse_dynamics"] == "full"
 
 
 def test_get_single_engine_capabilities(client: TestClient) -> None:
