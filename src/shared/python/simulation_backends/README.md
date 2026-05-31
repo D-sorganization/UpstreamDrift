@@ -18,12 +18,14 @@ in [`docs/simulation_backends/README.md`](../../../../docs/simulation_backends/R
 | `model_params.py`   | `GolfModelParams` — the single source of truth. `to_double_pendulum_parameters()`, `projected_gravity`, `default()`.                                                   |
 | `mjcf.py`           | `params_to_mjcf()` — renders `GolfModelParams` to MuJoCo MJCF XML (the second renderer of the one model).                                                              |
 | `factory.py`        | `make_backend(name, params, **kwargs)` and `available_backends()`. Imports backends **lazily**.                                                                        |
+| `comparison.py`     | CC-27 cross-engine report service: `compare()`, `compare_traces()`, divergence annotations, and Markdown/JSON rendering.                                               |
+| `compare_cli.py`    | One-command report entry point: `python -m src.shared.python.simulation_backends.compare_cli --engines ode,mujoco ...`.                                                |
 | `capabilities.py`   | Guarded optional-dependency probes: `has_mujoco`, `has_warp`, `warp_device_available`, `require_*`.                                                                    |
 | `exceptions.py`     | Typed hierarchy: `BackendError`, `UnknownBackendError`, `BackendNotAvailableError`, `BackendCapabilityError`.                                                          |
 | `ode_backend.py`    | `ode` — CPU reference backend wrapping the analytical RK4 dynamics; provides `M(q)` / bias forces.                                                                     |
 | `mujoco_backend.py` | `mujoco` — CPU MuJoCo backend; independent dynamics primitives for cross-validation.                                                                                   |
 | `mjwarp_backend.py` | `mjwarp` — GPU MuJoCo Warp backend for batched rollouts (optional `[warp]` extra).                                                                                     |
-| `trace.py`          | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                      |
+| `trace_io.py`       | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                      |
 
 ## Choosing a backend
 
@@ -63,3 +65,20 @@ Backends are interchangeable behind the Protocol; swap `"ode"` for `"mujoco"`
 extra) without touching the analysis code. Requesting a backend whose optional
 dependencies are missing raises a `BackendNotAvailableError` with an install
 hint — importing this package itself never pulls in any GPU dependency.
+
+## Cross-engine reports
+
+The CC-27 comparison service produces user-facing reports from the same
+Protocol surface:
+
+```bash
+python -m src.shared.python.simulation_backends.compare_cli \
+  --engines ode,mujoco \
+  --horizon 200 \
+  --dt 0.005 \
+  --output reports/ode_vs_mujoco.md
+```
+
+Reports include kinematics, kinetics, ZTCF/ZVCF when the selected backend
+implements `DynamicsProvider`, optional wrench comparison, divergence registry
+links, and provenance for every panel.
