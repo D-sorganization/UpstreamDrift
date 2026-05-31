@@ -334,6 +334,20 @@ class TestExtractGRFFromContacts:
 
         np.testing.assert_allclose(grf.force, 0.0, atol=1e-10)
 
+    def test_gravity_fallback_not_doubled_for_two_bodies(self) -> None:
+        """Gravity fallback must report total weight once, not once per contact
+        body (issue #6894). Two feet must not double the vertical force."""
+        gravity = np.array([0.0, 0.0, -800.0])  # total weight magnitude 800 N
+
+        engine_one = self._make_engine(contact_force=np.zeros(3), gravity=gravity)
+        engine_two = self._make_engine(contact_force=np.zeros(3), gravity=gravity)
+
+        grf_one = extract_grf_from_contacts(engine_one, ["left_foot"])
+        grf_two = extract_grf_from_contacts(engine_two, ["left_foot", "right_foot"])
+
+        np.testing.assert_allclose(grf_one.force[2], 800.0, rtol=1e-9)
+        np.testing.assert_allclose(grf_two.force[2], 800.0, rtol=1e-9)
+
     def test_moment_computed_from_contact_data(self) -> None:
         """When contact data is available, moment should be computed from COP x force."""
         contact = np.array([0.0, 0.0, 1000.0])
