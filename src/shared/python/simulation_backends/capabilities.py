@@ -74,6 +74,12 @@ def has_warp() -> bool:
 
 
 @lru_cache(maxsize=1)
+def has_mjx() -> bool:
+    """Return ``True`` if the ``mujoco-mjx`` + JAX stack imports successfully."""
+    return _can_import("jax") and _can_import("jaxlib") and _can_import("mujoco.mjx")
+
+
+@lru_cache(maxsize=1)
 def warp_device_available() -> bool:
     """Return ``True`` if Warp reports at least one usable CUDA device.
 
@@ -110,6 +116,17 @@ def require_warp() -> None:
             "(provides 'mujoco-warp' and 'warp-lang'). "
             "The suite runs fully on CPU via the 'ode' and 'mujoco' backends "
             "without this extra."
+        )
+
+
+def require_mjx() -> None:
+    """Raise :class:`BackendNotAvailableError` if MJX/JAX is unavailable."""
+    if not has_mjx():
+        raise BackendNotAvailableError(
+            "The MJX backend requires MuJoCo's JAX stack. Install it with: "
+            "pip install 'upstream-drift[mjx]' (adds mujoco-mjx, JAX, and "
+            "JAXLIB). The suite runs fully on CPU via the 'ode' and 'mujoco' "
+            "backends without this extra."
         )
 
 

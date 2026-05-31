@@ -52,11 +52,12 @@ GPU modules. Interface segregation (LOD) is enforced by splitting the optional
 services into their own Protocols: `DynamicsProvider` (`mass_matrix`,
 `bias_forces`) and `BatchedBackend` (`rollout_batch`).
 
-| Backend | `name`     | Device | `supports_batched` | `is_differentiable` | `provides_dynamics` | Role                                                           |
-| ------- | ---------- | ------ | ------------------ | ------------------- | ------------------- | -------------------------------------------------------------- |
-| ODE     | `"ode"`    | `cpu`  | no                 | no                  | **yes**             | CPU **reference** — wraps the analytical RK4 EOM + `M(q)`/bias |
-| MuJoCo  | `"mujoco"` | `cpu`  | no                 | no                  | **yes**             | CPU MuJoCo — independent dynamics **primitives** for the gate  |
-| MJWarp  | `"mjwarp"` | `cuda` | **yes**            | no                  | no                  | GPU **batched** rollouts; no per-call dynamics primitives      |
+| Backend | `name`     | Device | `supports_batched` | `is_differentiable` | `provides_dynamics` | Role                                                            |
+| ------- | ---------- | ------ | ------------------ | ------------------- | ------------------- | --------------------------------------------------------------- |
+| ODE     | `"ode"`    | `cpu`  | no                 | no                  | **yes**             | CPU **reference** — wraps the analytical RK4 EOM + `M(q)`/bias  |
+| MuJoCo  | `"mujoco"` | `cpu`  | no                 | no                  | **yes**             | CPU MuJoCo — independent dynamics **primitives** for the gate   |
+| MJWarp  | `"mjwarp"` | `cuda` | **yes**            | no                  | no                  | GPU **batched** rollouts; no per-call dynamics primitives       |
+| MJX     | `"mjx"`    | `jax`  | **yes**            | **yes**             | no                  | JAX-native differentiable batched rollouts; no dense primitives |
 
 Read across the matrix:
 
@@ -75,6 +76,10 @@ Read across the matrix:
   capability `False` and route any `mass_matrix` request to a
   `BackendCapabilityError`. Asking for a capability a backend doesn't have is a
   loud failure, not a silent wrong answer.
+- **`mjx`** is the differentiable rollout engine. It also reuses the generated
+  MJCF, returns the same host-side `Trace` / `BatchTrace` schema, and exposes a
+  JAX-native array path for rollout-control gradients. Dense `M(q)` / bias
+  primitive requests still belong to `ode` or `mujoco`.
 
 ### Honest value assessment — GPU pays off for batches, not single 2-DoF rollouts
 
