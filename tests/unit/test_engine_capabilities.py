@@ -42,6 +42,11 @@ class TestEngineCapabilitiesDefaults:
             "contact_forces",
             "inverse_dynamics",
             "drift_acceleration",
+            "parameter_gradients",
+            "state_control_gradients",
+            "forward_sim",
+            "contact_step",
+            "trajectory_opt",
             "video_export",
             "dataset_export",
             "force_visualization",
@@ -97,6 +102,20 @@ class TestEngineCapabilitiesHasProperties:
     def test_has_measurements_false_by_default(self) -> None:
         assert EngineCapabilities().has_measurements is False
 
+    def test_has_gradient_and_rollout_capabilities(self) -> None:
+        caps = EngineCapabilities(
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.PARTIAL,
+            trajectory_opt=CapabilityLevel.FULL,
+        )
+        assert caps.has_parameter_gradients is True
+        assert caps.has_state_control_gradients is True
+        assert caps.has_forward_sim is True
+        assert caps.has_contact_step is True
+        assert caps.has_trajectory_opt is True
+
 
 class TestEngineCapabilitiesToDict:
     def test_engine_capabilities_returns_dict(self) -> None:
@@ -130,6 +149,11 @@ class TestEngineCapabilitiesToDict:
             "contact_forces",
             "inverse_dynamics",
             "drift_acceleration",
+            "parameter_gradients",
+            "state_control_gradients",
+            "forward_sim",
+            "contact_step",
+            "trajectory_opt",
             "video_export",
             "dataset_export",
             "force_visualization",
@@ -145,11 +169,21 @@ class TestEngineCapabilitiesFromDict:
             engine_name="Pinocchio",
             jacobian=CapabilityLevel.FULL,
             contact_forces=CapabilityLevel.PARTIAL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.PARTIAL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.PARTIAL,
+            trajectory_opt=CapabilityLevel.PARTIAL,
         )
         restored = EngineCapabilities.from_dict(original.to_dict())
         assert restored.engine_name == original.engine_name
         assert restored.jacobian == original.jacobian
         assert restored.contact_forces == original.contact_forces
+        assert restored.parameter_gradients == original.parameter_gradients
+        assert restored.state_control_gradients == original.state_control_gradients
+        assert restored.forward_sim == original.forward_sim
+        assert restored.contact_step == original.contact_step
+        assert restored.trajectory_opt == original.trajectory_opt
 
     def test_unknown_level_falls_back_to_none(self) -> None:
         caps = EngineCapabilities.from_dict({"mass_matrix": "unknown_value"})

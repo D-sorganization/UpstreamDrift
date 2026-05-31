@@ -34,6 +34,11 @@ class TestEngineCapabilitiesDefaults:
         caps = EngineCapabilities()
         assert caps.mass_matrix == CapabilityLevel.NONE
         assert caps.jacobian == CapabilityLevel.NONE
+        assert caps.parameter_gradients == CapabilityLevel.NONE
+        assert caps.state_control_gradients == CapabilityLevel.NONE
+        assert caps.forward_sim == CapabilityLevel.NONE
+        assert caps.contact_step == CapabilityLevel.NONE
+        assert caps.trajectory_opt == CapabilityLevel.NONE
         assert caps.video_export == CapabilityLevel.NONE
 
     def test_has_video_export_false_by_default(self) -> None:
@@ -52,6 +57,14 @@ class TestEngineCapabilitiesDefaults:
         caps = EngineCapabilities()
         assert caps.has_measurements is False
 
+    def test_has_gradient_and_rollout_capabilities_false_by_default(self) -> None:
+        caps = EngineCapabilities()
+        assert caps.has_parameter_gradients is False
+        assert caps.has_state_control_gradients is False
+        assert caps.has_forward_sim is False
+        assert caps.has_contact_step is False
+        assert caps.has_trajectory_opt is False
+
 
 class TestEngineCapabilitiesCustom:
     def _make_caps(self) -> EngineCapabilities:
@@ -62,6 +75,11 @@ class TestEngineCapabilitiesCustom:
             video_export=CapabilityLevel.FULL,
             dataset_export=CapabilityLevel.PARTIAL,
             contact_forces=CapabilityLevel.FULL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.PARTIAL,
+            trajectory_opt=CapabilityLevel.PARTIAL,
             measurements=CapabilityLevel.PARTIAL,
         )
 
@@ -85,6 +103,14 @@ class TestEngineCapabilitiesCustom:
         caps = self._make_caps()
         assert caps.has_measurements is True
 
+    def test_has_gradient_and_rollout_capabilities_true(self) -> None:
+        caps = self._make_caps()
+        assert caps.has_parameter_gradients is True
+        assert caps.has_state_control_gradients is True
+        assert caps.has_forward_sim is True
+        assert caps.has_contact_step is True
+        assert caps.has_trajectory_opt is True
+
 
 class TestEngineCapabilitiesToDict:
     def test_to_dict_has_engine_name(self) -> None:
@@ -95,7 +121,17 @@ class TestEngineCapabilitiesToDict:
     def test_to_dict_has_required_keys(self) -> None:
         caps = EngineCapabilities()
         d = caps.to_dict()
-        for key in ["mass_matrix", "jacobian", "video_export", "dataset_export"]:
+        for key in [
+            "mass_matrix",
+            "jacobian",
+            "parameter_gradients",
+            "state_control_gradients",
+            "forward_sim",
+            "contact_step",
+            "trajectory_opt",
+            "video_export",
+            "dataset_export",
+        ]:
             assert key in d
 
     def test_to_dict_level_strings(self) -> None:
@@ -114,12 +150,22 @@ class TestEngineCapabilitiesFromDict:
         original = EngineCapabilities(
             engine_name="RoundTrip",
             mass_matrix=CapabilityLevel.FULL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.PARTIAL,
+            trajectory_opt=CapabilityLevel.PARTIAL,
             video_export=CapabilityLevel.PARTIAL,
         )
         d = original.to_dict()
         restored = EngineCapabilities.from_dict(d)
         assert restored.engine_name == "RoundTrip"
         assert restored.mass_matrix == CapabilityLevel.FULL
+        assert restored.parameter_gradients == CapabilityLevel.PARTIAL
+        assert restored.state_control_gradients == CapabilityLevel.FULL
+        assert restored.forward_sim == CapabilityLevel.FULL
+        assert restored.contact_step == CapabilityLevel.PARTIAL
+        assert restored.trajectory_opt == CapabilityLevel.PARTIAL
         assert restored.video_export == CapabilityLevel.PARTIAL
 
     def test_from_dict_missing_keys_defaults_to_none(self) -> None:

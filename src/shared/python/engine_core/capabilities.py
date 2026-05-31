@@ -64,6 +64,11 @@ class EngineCapabilities:
         contact_forces: Level of contact force reporting
         inverse_dynamics: Level of inverse dynamics support
         drift_acceleration: Level of drift (ZTCF) support
+        parameter_gradients: Level of model-parameter gradient support
+        state_control_gradients: Level of state/control gradient support
+        forward_sim: Level of forward simulation support
+        contact_step: Level of contact-aware step support
+        trajectory_opt: Level of trajectory optimization support
         video_export: Level of video export support
         dataset_export: Level of CSV/JSON/HDF5 export support
         force_visualization: Level of force vector overlay support
@@ -79,6 +84,11 @@ class EngineCapabilities:
     contact_forces: CapabilityLevel = CapabilityLevel.NONE
     inverse_dynamics: CapabilityLevel = CapabilityLevel.NONE
     drift_acceleration: CapabilityLevel = CapabilityLevel.NONE
+    parameter_gradients: CapabilityLevel = CapabilityLevel.NONE
+    state_control_gradients: CapabilityLevel = CapabilityLevel.NONE
+    forward_sim: CapabilityLevel = CapabilityLevel.NONE
+    contact_step: CapabilityLevel = CapabilityLevel.NONE
+    trajectory_opt: CapabilityLevel = CapabilityLevel.NONE
 
     # Export (#1176)
     video_export: CapabilityLevel = CapabilityLevel.NONE
@@ -113,6 +123,31 @@ class EngineCapabilities:
         return self.contact_forces != CapabilityLevel.NONE
 
     @property
+    def has_parameter_gradients(self) -> bool:
+        """Check if model-parameter gradients are available."""
+        return self.parameter_gradients != CapabilityLevel.NONE
+
+    @property
+    def has_state_control_gradients(self) -> bool:
+        """Check if state/control gradients are available."""
+        return self.state_control_gradients != CapabilityLevel.NONE
+
+    @property
+    def has_forward_sim(self) -> bool:
+        """Check if forward simulation is available."""
+        return self.forward_sim != CapabilityLevel.NONE
+
+    @property
+    def has_contact_step(self) -> bool:
+        """Check if contact-aware stepping is available."""
+        return self.contact_step != CapabilityLevel.NONE
+
+    @property
+    def has_trajectory_opt(self) -> bool:
+        """Check if trajectory optimization support is available."""
+        return self.trajectory_opt != CapabilityLevel.NONE
+
+    @property
     def has_measurements(self) -> bool:
         """Check if measurement tools are available."""
         return self.measurements != CapabilityLevel.NONE
@@ -130,6 +165,11 @@ class EngineCapabilities:
             "contact_forces": self.contact_forces.name.lower(),
             "inverse_dynamics": self.inverse_dynamics.name.lower(),
             "drift_acceleration": self.drift_acceleration.name.lower(),
+            "parameter_gradients": self.parameter_gradients.name.lower(),
+            "state_control_gradients": self.state_control_gradients.name.lower(),
+            "forward_sim": self.forward_sim.name.lower(),
+            "contact_step": self.contact_step.name.lower(),
+            "trajectory_opt": self.trajectory_opt.name.lower(),
             "video_export": self.video_export.name.lower(),
             "dataset_export": self.dataset_export.name.lower(),
             "force_visualization": self.force_visualization.name.lower(),
@@ -167,6 +207,11 @@ class EngineCapabilities:
             contact_forces=_get_level("contact_forces"),
             inverse_dynamics=_get_level("inverse_dynamics"),
             drift_acceleration=_get_level("drift_acceleration"),
+            parameter_gradients=_get_level("parameter_gradients"),
+            state_control_gradients=_get_level("state_control_gradients"),
+            forward_sim=_get_level("forward_sim"),
+            contact_step=_get_level("contact_step"),
+            trajectory_opt=_get_level("trajectory_opt"),
             video_export=_get_level("video_export"),
             dataset_export=_get_level("dataset_export"),
             force_visualization=_get_level("force_visualization"),

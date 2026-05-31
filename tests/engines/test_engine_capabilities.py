@@ -56,6 +56,11 @@ class TestEngineCapabilities:
         caps = EngineCapabilities()
         assert caps.engine_name == ""
         assert caps.mass_matrix == CapabilityLevel.NONE
+        assert caps.parameter_gradients == CapabilityLevel.NONE
+        assert caps.state_control_gradients == CapabilityLevel.NONE
+        assert caps.forward_sim == CapabilityLevel.NONE
+        assert caps.contact_step == CapabilityLevel.NONE
+        assert caps.trajectory_opt == CapabilityLevel.NONE
         assert caps.video_export == CapabilityLevel.NONE
         assert caps.dataset_export == CapabilityLevel.NONE
 
@@ -72,6 +77,11 @@ class TestEngineCapabilities:
         assert not caps.has_dataset_export
         assert not caps.has_force_visualization
         assert not caps.has_contact_forces
+        assert not caps.has_parameter_gradients
+        assert not caps.has_state_control_gradients
+        assert not caps.has_forward_sim
+        assert not caps.has_contact_step
+        assert not caps.has_trajectory_opt
         assert not caps.has_measurements
 
     def test_convenience_properties_full(self) -> None:
@@ -81,12 +91,22 @@ class TestEngineCapabilities:
             dataset_export=CapabilityLevel.FULL,
             force_visualization=CapabilityLevel.FULL,
             contact_forces=CapabilityLevel.FULL,
+            parameter_gradients=CapabilityLevel.FULL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            trajectory_opt=CapabilityLevel.FULL,
             measurements=CapabilityLevel.FULL,
         )
         assert caps.has_video_export
         assert caps.has_dataset_export
         assert caps.has_force_visualization
         assert caps.has_contact_forces
+        assert caps.has_parameter_gradients
+        assert caps.has_state_control_gradients
+        assert caps.has_forward_sim
+        assert caps.has_contact_step
+        assert caps.has_trajectory_opt
         assert caps.has_measurements
 
     def test_convenience_properties_partial(self) -> None:
@@ -120,6 +140,11 @@ class TestEngineCapabilities:
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
             contact_forces=CapabilityLevel.PARTIAL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.PARTIAL,
+            trajectory_opt=CapabilityLevel.FULL,
             video_export=CapabilityLevel.NONE,
         )
         d = original.to_dict()
@@ -127,6 +152,11 @@ class TestEngineCapabilities:
         assert restored.engine_name == "Drake"
         assert restored.mass_matrix == CapabilityLevel.FULL
         assert restored.contact_forces == CapabilityLevel.PARTIAL
+        assert restored.parameter_gradients == CapabilityLevel.PARTIAL
+        assert restored.state_control_gradients == CapabilityLevel.FULL
+        assert restored.forward_sim == CapabilityLevel.FULL
+        assert restored.contact_step == CapabilityLevel.PARTIAL
+        assert restored.trajectory_opt == CapabilityLevel.FULL
         assert restored.video_export == CapabilityLevel.NONE
 
     def test_from_dict_invalid_level(self) -> None:

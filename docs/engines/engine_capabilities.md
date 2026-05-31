@@ -8,6 +8,8 @@ with known limitations, tolerance targets, and reference tests per
 
 **Last Updated**: January 5, 2026
 
+**JaxSim Taxonomy Update**: May 30, 2026 (#6651)
+
 ---
 
 ## Feature Support Matrix
@@ -38,6 +40,21 @@ with known limitations, tolerance targets, and reference tests per
 | **K. MyoSuite Muscle**          | ❌            | ❌            | ❌            | ❌           | ❌      | ❌ Stub  |
 | **L. Closed-Loop Constraints**  | ✅ Full       | ✅ Full       | ✅ Full       | ⚠️ Simple    | ❌      | ❌       |
 | **M2. Cross-Engine Validation** | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Reference | ➖ N/A  | ➖ N/A   |
+
+## Gradient and Rollout Capability Taxonomy
+
+The JaxSim planning work extends the structured engine manifest with five
+capability fields. See `docs/architecture/engine_capability_taxonomy.md` for
+the source notes and `CapabilityLevel` contract.
+
+| Engine    | Parameter gradients | State/control gradients | Forward simulation | Contact step | Trajectory optimization |
+| --------- | ------------------- | ----------------------- | ------------------ | ------------ | ----------------------- |
+| MuJoCo    | Partial             | Partial                 | Full               | Full         | Partial                 |
+| Drake     | Partial             | Full                    | Full               | Full         | Full                    |
+| Pinocchio | Partial             | Partial                 | Full               | Partial      | Partial                 |
+| OpenSim   | Partial             | Partial                 | Full               | Partial      | Partial                 |
+| MyoSuite  | None                | None                    | Full               | Full         | None                    |
+| JaxSim    | Full                | Full                    | Full               | Partial      | Partial                 |
 
 **Legend**:
 
