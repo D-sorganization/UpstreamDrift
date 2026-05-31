@@ -132,6 +132,59 @@ def test_five_conformance_checks_pass_against_stub_adapter() -> None:
     assert not any(result.skipped for result in results)
 
 
+class _RaisingCapabilities:
+    """A capability descriptor whose ``supports()`` always raises."""
+
+    def supports(self, capability: str) -> bool:
+        raise RuntimeError(f"capability backend offline for {capability}")
+
+
+class _AdvertisesButMissingMethodAdapter:
+    """Advertises every capability but implements none of the methods."""
+
+    engine_name = "mock-half-implemented"
+    capabilities = _Capabilities(
+        frozenset({"forward_sim", "inverse_dynamics", "mass_matrix"})
+    )
+
+
+class _SupportsRaisesAdapter:
+    """Advertises nothing because ``supports()`` raises for every query."""
+
+    engine_name = "mock-supports-raises"
+    capabilities = _RaisingCapabilities()
+
+
+def test_missing_method_for_advertised_capability_is_failure_not_skip() -> None:
+    """A half-implemented adapter must FAIL, not clear the gate via a skip."""
+    validator = CrossEngineValidator()
+    adapter = _AdvertisesButMissingMethodAdapter()
+    reference = _reference()
+
+    fk = validator.validate_forward_kinematics(adapter, reference)
+    idfd = validator.validate_inverse_forward_dynamics_consistency(adapter, reference)
+    mass = validator.validate_post_export_mass_properties(adapter, reference)
+    round_trip = validator.validate_round_trip_state_remap(adapter, reference)
+
+    for result in (fk, idfd, *mass, round_trip):
+        assert not result.passed, result.check_name
+        assert not result.skipped, result.check_name
+        assert "missing adapter method" in result.message
+
+
+def test_supports_exception_is_failure_not_free_pass() -> None:
+    """A throwing ``supports()`` must NOT route to a passing skip (#6891)."""
+    validator = CrossEngineValidator()
+    adapter = _SupportsRaisesAdapter()
+    reference = _reference()
+
+    result = validator.validate_inverse_forward_dynamics_consistency(adapter, reference)
+
+    assert not result.passed
+    assert not result.skipped
+    assert "raised" in result.message
+
+
 def test_capability_aware_skip_for_missing_inverse_dynamics() -> None:
     validator = CrossEngineValidator()
     adapter = _MockAdapter(capabilities=frozenset({"forward_sim", "mass_matrix"}))
