@@ -108,8 +108,6 @@ jobs:
           python -m pip install --ignore-installed --no-deps pip
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
-          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
-          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
