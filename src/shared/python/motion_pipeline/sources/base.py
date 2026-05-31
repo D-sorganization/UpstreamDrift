@@ -31,6 +31,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.motion_pipeline.contracts import (
     Calibration,
+    CanonicalObservations,
     JointTrajectory,
     KeypointSequence,
     MarkerTrajectory,
@@ -38,7 +39,13 @@ from src.shared.python.motion_pipeline.contracts import (
 )
 
 #: Union of all CIR payload types that an adapter may return.
-LoadedPayload = KeypointSequence | MarkerTrajectory | JointTrajectory | MotionTrajectory
+LoadedPayload = (
+    KeypointSequence
+    | MarkerTrajectory
+    | CanonicalObservations
+    | JointTrajectory
+    | MotionTrajectory
+)
 
 #: Unit systems an adapter may report.
 UnitSystem = Literal[
