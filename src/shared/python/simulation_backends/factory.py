@@ -30,6 +30,7 @@ _REGISTRY: dict[str, tuple[str, str]] = {
     "ode": ("ode_backend", "ODEBackend"),
     "mujoco": ("mujoco_backend", "MuJoCoBackend"),
     "mjwarp": ("mjwarp_backend", "MJWarpBackend"),
+    "mjx": ("mjx_backend", "MJXBackend"),
 }
 
 
