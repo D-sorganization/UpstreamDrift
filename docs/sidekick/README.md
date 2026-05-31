@@ -179,6 +179,23 @@ registered tools to the assistant automatically — no prompt edits needed.
 
 ---
 
+## Canonical Core Retrieval Q&A
+
+Sidekick includes a bounded Canonical Core Q&A tool for setup questions such as
+"how do I set up `canonical-v2` state?" or "which docs define adapter quaternion
+order?". The chat service registers `answer_canonical_core_question`, which
+indexes only the local Canonical Core docs and schema corpus and returns
+deterministic excerpts with `path:start-end` citations.
+
+The implementation lives in
+[`src/shared/python/canonical_core/sidekick_retrieval_qa.py`](../../src/shared/python/canonical_core/sidekick_retrieval_qa.py)
+and is specified in
+[`docs/specs/active/sidekick-canonical-core-retrieval-qa.md`](../specs/active/sidekick-canonical-core-retrieval-qa.md).
+It is read-only: it does not run commands, write files, or ask the model to
+perform autonomous setup actions.
+
+---
+
 ## See also
 
 - [AGENTS.md §B "Sidekick"](../../AGENTS.md) — contributor quick-reference

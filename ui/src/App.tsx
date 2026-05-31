@@ -11,6 +11,7 @@ import { TerrainPage } from './pages/Terrain';
 import { DatasetGeneratorPage } from './pages/DatasetGenerator';
 import { AnalysisToolsPage } from './pages/AnalysisTools';
 import { CharacterBuilderPage } from './pages/CharacterBuilder';
+import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
@@ -36,6 +37,14 @@ function App() {
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
           <Route path="/tools/character-builder" element={<CharacterBuilderPage />} />
+          <Route
+            path="/tools/canonical-core/estimation"
+            element={<CanonicalCoreShellPage mode="estimation" />}
+          />
+          <Route
+            path="/tools/canonical-core/comparison"
+            element={<CanonicalCoreShellPage mode="comparison" />}
+          />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
         </Routes>

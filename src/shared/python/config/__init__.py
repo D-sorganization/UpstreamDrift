@@ -88,6 +88,14 @@ from .provider_catalog import (
     iter_known_utility_provider_ids,
     iter_provider_manifest_specs,
 )
+from .setup_wizard import (
+    SetupValidationIssue,
+    SetupValidationReport,
+    SetupWizardSnapshot,
+    SetupWizardStep,
+    SetupWizardViewModel,
+    validate_canonical_setup_config,
+)
 from .standard_models import StandardModelManager
 
 __all__: list[str] = [
@@ -178,6 +186,13 @@ __all__: list[str] = [
     "iter_known_provider_repo_names",
     "iter_known_utility_provider_ids",
     "iter_provider_manifest_specs",
+    # setup_wizard
+    "SetupValidationIssue",
+    "SetupValidationReport",
+    "SetupWizardSnapshot",
+    "SetupWizardStep",
+    "SetupWizardViewModel",
+    "validate_canonical_setup_config",
     # standard_models
     "StandardModelManager",
 ]

@@ -12,11 +12,23 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+export type LauncherCategory =
+    | 'physics_engine'
+    | 'biomechanics'
+    | 'simulation'
+    | 'motion_matching'
+    | 'motion_capture'
+    | 'analysis'
+    | 'documentation'
+    | 'external'
+    | 'developer_tools'
+    | 'tool';
+
 export interface LauncherTile {
     id: string;
     name: string;
     description: string;
-    category: 'physics_engine' | 'tool' | 'external';
+    category: LauncherCategory;
     type: string;
     path: string;
     logo: string;
@@ -24,6 +36,9 @@ export interface LauncherTile {
     capabilities: string[];
     order: number;
     engine_type?: string;
+    web_route?: string;
+    default_launch?: 'tab' | 'dock' | 'window' | 'external' | string;
+    shell_surfaces?: Array<'pyqt6' | 'react' | string>;
     hidden?: boolean;
 }
 
@@ -92,7 +107,7 @@ export function useLauncherManifest(): UseLauncherManifestResult {
 
     const tiles = manifest?.tiles ?? [];
     const engines = tiles.filter((t) => t.category === 'physics_engine');
-    const tools = tiles.filter((t) => t.category === 'tool' || t.category === 'external');
+    const tools = tiles.filter((t) => t.category !== 'physics_engine');
     const launcherCsrfToken = manifest?.launcher_csrf_token ?? null;
     const launcherCsrfHeader = manifest?.launcher_csrf_header ?? 'X-Launcher-CSRF-Token';
 

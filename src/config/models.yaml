@@ -436,6 +436,17 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "config_setup_wizard"
+    name: "Setup Wizard"
+    description: "Validate canonical-core units, model dimensions, and calibration before a run."
+    type: "special_app"
+    path: "src/tools/config_setup_wizard/_embed_adapter.py"
+    launcher:
+      category: "tool"
+      logo: "assets/project_map.png"
+      status: "beta"
+      default_launch: "tab"
+
   # =============================================================================
   # DOCUMENTATION
   # =============================================================================
@@ -514,6 +525,40 @@ models:
       logo: "project_map.svg"
       status: "ready"
       default_launch: "tab"
+
+  - id: "canonical_core_estimation"
+    name: "Canonical-Core Estimation"
+    description: "CC-19 estimation services in the unified workspace"
+    type: "special_app"
+    path: "src/tools/canonical_core/estimation.py"
+    capabilities:
+      - "canonical_core"
+      - "estimation"
+      - "services_layer"
+      - "biomechanics"
+    launcher:
+      category: "biomechanics"
+      logo: "biomechanics.svg"
+      status: "beta"
+      default_launch: "tab"
+      web_route: "/tools/canonical-core/estimation"
+
+  - id: "canonical_core_comparison"
+    name: "Canonical-Core Comparison"
+    description: "CC-27 comparison services in the unified workspace"
+    type: "special_app"
+    path: "src/tools/canonical_core/comparison.py"
+    capabilities:
+      - "canonical_core"
+      - "comparison"
+      - "services_layer"
+      - "biomechanics"
+    launcher:
+      category: "biomechanics"
+      logo: "biomechanics.svg"
+      status: "beta"
+      default_launch: "tab"
+      web_route: "/tools/canonical-core/comparison"
 
   # =============================================================================
   # PHYSICS-INFORMED NEURAL NETWORKS

@@ -19,6 +19,7 @@ add a new host integration, write a workflow, or extend the chip UI.
 | `planner.py`         | Validates LLM tool calls into `PlannedStep`s; exports tool-registry entries + system prompt. |
 | `action_audit.py`    | `MemoryActionAudit` + `JsonlActionAudit` sinks (with redaction).                             |
 | `access_policy.py`   | Default-deny policy with per-side-effects allowlists + confirmation gating.                  |
+| `canonical_tools.py` | CC-38 canonical-core action adapter: configure, validate, run, compare, interpret.           |
 | `workflow_bridge.py` | Composes actions into workflows with `abort`/`retry`/`skip`/`ask_user` recovery.             |
 | `chat_surface.py`    | Wire-shaped `ActionChipModel` consumed by both PyQt and React surfaces.                      |
 
@@ -36,6 +37,7 @@ add a new host integration, write a workflow, or extend the chip UI.
 │ SidekickActionService  ← action_service.py                      │
 │   ├─ SubtabAdapter   → SubtabActionPort  → tools_sidebar        │
 │   ├─ HostAdapter     → HostActionPort    → launcher / ...       │
+│   ├─ CanonicalToolAdapter → CanonicalActionPort → canonical APIs │
 │   ├─ FeatureCatalog  (read-only catalogue of installed actions) │
 │   ├─ Policy gating   ← access_policy.py                         │
 │   ├─ Undo tokens                                                │
@@ -46,6 +48,47 @@ add a new host integration, write a workflow, or extend the chip UI.
 Every agentic action is one call to `service.invoke(action_id, params)`.
 Adapters never reach into each other; UI code never reaches into the
 service.
+
+## Canonical-Core Tool Surface
+
+CC-38 adds a bounded canonical-operation adapter for the setup assistant.
+Register `CanonicalToolAdapter` only with a host-provided
+`CanonicalActionPort`; the adapter itself never imports raw engine modules.
+The allowlist is fixed:
+
+- `canonical.configure` prepares a canonical setup request.
+- `canonical.validate` checks canonical artifacts, conformance, and units.
+- `canonical.run` submits a confirmed canonical run request and returns
+  provenance in result metadata.
+- `canonical.compare` compares canonical run outputs or validation reports.
+- `canonical.interpret` summarizes canonical outputs for the user.
+
+`canonical.run` is marked `destructive` and also checks `_confirmed=True` in
+the handler. This is intentional: a permissive or missing policy still cannot
+make an LLM-run action execute without explicit user confirmation. The
+service-level `dry_run=True` path remains available for previews and never
+reaches the port.
+
+Recommended wiring:
+
+```python
+from sidekick.agent import (
+    CanonicalToolAdapter,
+    SidekickActionPolicy,
+    SidekickActionService,
+)
+
+service = SidekickActionService(
+    policy=SidekickActionPolicy(
+        allow_destructive=frozenset({"canonical.run"}),
+    ),
+)
+service.register(CanonicalToolAdapter(port=host_canonical_port))
+```
+
+The port is the boundary that resolves session-local artifacts and calls the
+canonical API. It must not expose arbitrary method dispatch, module imports, or
+engine-native handles.
 
 ## Worked example: add a new subtab action
 

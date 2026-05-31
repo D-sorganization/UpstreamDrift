@@ -53,7 +53,7 @@ impl PyServer {
             .as_ref()
             .ok_or_else(|| PyRuntimeError::new_err("server stopped"))?;
         h.publish(channel, payload_json.to_string())
-            .map_err(PyValueError::new_err)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// Subscribe in-process (no socket, no asyncio). Returns a
@@ -66,7 +66,9 @@ impl PyServer {
         let h = guard
             .as_ref()
             .ok_or_else(|| PyRuntimeError::new_err("server stopped"))?;
-        let sub = h.subscribe_local(channel).map_err(PyValueError::new_err)?;
+        let sub = h
+            .subscribe_local(channel)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(PySubscriber {
             inner: Arc::new(sub),
         })
@@ -99,13 +101,24 @@ impl PySubscriber {
     fn recv(&self, py: Python<'_>, timeout: Option<f64>) -> PyResult<Option<String>> {
         let sub = self.inner.clone();
         py.allow_threads(move || sub.recv_blocking(timeout))
-            .map_err(PyRuntimeError::new_err)
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))
     }
 }
 
 #[pyfunction]
 fn validate_channel(name: &str) -> PyResult<()> {
-    crate::channels::validate_channel(name).map_err(PyValueError::new_err)
+    crate::channels::validate_channel(name).map_err(|e| PyValueError::new_err(e.to_string()))
+}
+
+#[pyfunction]
+fn benchmark_recorded_swing_json(payload_json: &str, config_json: &str) -> PyResult<String> {
+    let swing: crate::moving_horizon::RecordedSwing =
+        serde_json::from_str(payload_json).map_err(|e| PyValueError::new_err(e.to_string()))?;
+    let config: crate::moving_horizon::MovingHorizonConfig =
+        serde_json::from_str(config_json).map_err(|e| PyValueError::new_err(e.to_string()))?;
+    let report = crate::moving_horizon::benchmark_recorded_swing(&swing, &config)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    serde_json::to_string(&report).map_err(|e| PyRuntimeError::new_err(e.to_string()))
 }
 
 #[pymodule]
@@ -113,5 +126,6 @@ fn upstream_realtime(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyServer>()?;
     m.add_class::<PySubscriber>()?;
     m.add_function(wrap_pyfunction!(validate_channel, m)?)?;
+    m.add_function(wrap_pyfunction!(benchmark_recorded_swing_json, m)?)?;
     Ok(())
 }

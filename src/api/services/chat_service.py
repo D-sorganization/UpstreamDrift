@@ -63,9 +63,26 @@ class ChatService:
 
         self._tool_registry = ToolRegistry()
         register_golf_suite_tools(self._tool_registry)
+        self._register_canonical_core_retrieval_tool()
         self._tool_declarations = self._build_tool_declarations()
 
         self._load_adapter()
+
+    def _register_canonical_core_retrieval_tool(self) -> None:
+        """Register the bounded Canonical Core docs/schema Q&A tool."""
+        from src.shared.python.ai.tool_registry import ToolCategory
+        from src.shared.python.canonical_core import answer_canonical_core_question
+
+        self._tool_registry.register(
+            name="answer_canonical_core_question",
+            description=(
+                "Answer Canonical Core setup questions from the bounded local "
+                "docs/schema index. Returns deterministic text with source "
+                "citations; does not write files or run commands."
+            ),
+            category=ToolCategory.EDUCATIONAL,
+            expertise_level=1,
+        )(answer_canonical_core_question)
 
     def _build_tool_declarations(self) -> list[Any]:
         from src.shared.python.ai.adapters.base import ToolDeclaration

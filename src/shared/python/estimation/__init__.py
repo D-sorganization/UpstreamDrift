@@ -19,6 +19,12 @@ from src.shared.python.estimation.map_estimator import (
     SplineTrajectoryEvaluation,
     solve_single_trial_map,
 )
+from src.shared.python.estimation.moving_horizon import (
+    MovingHorizonEstimator,
+    MovingHorizonOptions,
+    MovingHorizonProblem,
+    MovingHorizonResult,
+)
 from src.shared.python.estimation.multi_trial import (
     MultiTrialDecisionLayout,
     MultiTrialMapProblem,
@@ -61,6 +67,10 @@ __all__ = [
     "MapEstimatorOptions",
     "MapEstimatorProblem",
     "MapEstimatorResult",
+    "MovingHorizonEstimator",
+    "MovingHorizonOptions",
+    "MovingHorizonProblem",
+    "MovingHorizonResult",
     "MultiTrialDecisionLayout",
     "MultiTrialMapProblem",
     "MultiTrialMapResult",

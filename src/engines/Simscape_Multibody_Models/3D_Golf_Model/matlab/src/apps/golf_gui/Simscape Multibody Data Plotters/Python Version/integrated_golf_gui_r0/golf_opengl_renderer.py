@@ -11,6 +11,7 @@ Fixed for moderngl 5.x compatibility with correct uniform API
 from __future__ import annotations
 
 import logging
+import math
 import time
 import traceback
 from dataclasses import dataclass
@@ -746,7 +747,8 @@ class OpenGLRenderer:
 
         # Calculate transformation
         direction = end - start
-        length = np.linalg.norm(direction)
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        length = math.sqrt(np.dot(direction, direction))
         if length < 1e-6:
             obj.visible = False
             return
@@ -843,16 +845,20 @@ class OpenGLRenderer:
         Returns a unit vector perpendicular to the shaft direction.
         """
         shaft_direction = frame_data.clubhead - frame_data.butt
-        shaft_direction = shaft_direction / np.linalg.norm(shaft_direction)
+        # Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays.
+        shaft_direction = shaft_direction / math.sqrt(
+            np.dot(shaft_direction, shaft_direction)
+        )
 
         # Face normal points perpendicular to shaft
         # (this is simplified - real clubs have loft)
         face_normal = np.cross(
             shaft_direction, np.array([0, 1, 0])
         )  # Cross with up vector  # noqa: E501
-        if np.linalg.norm(face_normal) < 1e-6:
+        # Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays.
+        if math.sqrt(np.dot(face_normal, face_normal)) < 1e-6:
             face_normal = np.cross(shaft_direction, np.array([1, 0, 0]))  # Fallback
-        face_normal = face_normal / np.linalg.norm(face_normal)
+        face_normal = face_normal / math.sqrt(np.dot(face_normal, face_normal))
 
         return face_normal
 

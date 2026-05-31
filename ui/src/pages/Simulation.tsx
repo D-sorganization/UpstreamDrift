@@ -7,9 +7,17 @@ import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
 import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
+import { EngineComparisonPanel } from '@/components/simulation/EngineComparisonPanel';
+import {
+  buildEngineComparisonOptions,
+  buildEngineComparisonViewModel,
+  coerceComparisonSelection,
+  toggleComparisonEngine,
+} from '@/components/simulation/engineComparisonViewModel';
 import { Scene3D } from '@/components/visualization/Scene3D';
 import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel';
 import type { ForceVector3D } from '@/components/visualization/ForceOverlay';
+import type { SimulationFrame } from '@/api/client';
 import { LivePlot } from '@/components/analysis/LivePlot';
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
 import { useToast } from '@/components/ui/Toast';
@@ -36,6 +44,10 @@ export function SimulationPage() {
   const { showSuccess, showError, showInfo } = useToast();
   const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
   const [speedFactor, setSpeedFactor] = useState<number>(1.0);
+  const [comparisonSelection, setComparisonSelection] = useState<string[]>([]);
+  const [comparisonFrames, setComparisonFrames] = useState<
+    Record<string, SimulationFrame | null>
+  >({});
 
   // Only connect to the simulation when an engine is selected AND loaded
   const activeEngine = effectiveEngine || 'mujoco';
@@ -86,6 +98,22 @@ export function SimulationPage() {
     [unloadEngine, showInfo]
   );
 
+  const rememberCurrentComparisonFrame = useCallback(() => {
+    if (!effectiveEngine || !currentFrame) return;
+    setComparisonFrames((current) => ({
+      ...current,
+      [effectiveEngine]: currentFrame,
+    }));
+  }, [effectiveEngine, currentFrame]);
+
+  const handleSelectEngine = useCallback(
+    (engineName: string) => {
+      rememberCurrentComparisonFrame();
+      selectEngine(engineName);
+    },
+    [rememberCurrentComparisonFrame, selectEngine],
+  );
+
   const handleParameterChange = useCallback(
     (params: SimulationParameters) => {
       replaceParameters(params);
@@ -109,9 +137,10 @@ export function SimulationPage() {
   }, [start, parameters, effectiveEngine, showInfo, showError, markRun]);
 
   const handleStop = useCallback(() => {
+    rememberCurrentComparisonFrame();
     stop();
     showInfo('Simulation stopped');
-  }, [stop, showInfo]);
+  }, [rememberCurrentComparisonFrame, stop, showInfo]);
 
   // Show toast only when connection status transitions (F9: prevents spam)
   const prevConnectionStatusRef = useRef<ConnectionStatusType | null>(null);
@@ -149,6 +178,54 @@ export function SimulationPage() {
 
   const canStart = effectiveEngine !== null && !isRunning;
 
+  const comparisonOptions = useMemo(
+    () => buildEngineComparisonOptions(engines),
+    [engines],
+  );
+
+  const effectiveComparisonSelection = useMemo(
+    () => coerceComparisonSelection(comparisonSelection, comparisonOptions),
+    [comparisonSelection, comparisonOptions],
+  );
+
+  const effectiveComparisonFrames = useMemo(() => {
+    if (!effectiveEngine || !currentFrame) return comparisonFrames;
+    return {
+      ...comparisonFrames,
+      [effectiveEngine]: currentFrame,
+    };
+  }, [comparisonFrames, effectiveEngine, currentFrame]);
+
+  const comparisonViewModel = useMemo(
+    () =>
+      buildEngineComparisonViewModel({
+        engines,
+        selectedEngineNames: effectiveComparisonSelection,
+        framesByEngine: effectiveComparisonFrames,
+        datasetLabel: `Dataset: active run, ${parameters.duration.toFixed(1)}s @ ${parameters.timestep.toFixed(4)}s`,
+      }),
+    [
+      engines,
+      effectiveComparisonSelection,
+      effectiveComparisonFrames,
+      parameters.duration,
+      parameters.timestep,
+    ],
+  );
+
+  const handleToggleComparisonEngine = useCallback(
+    (engineName: string) => {
+      setComparisonSelection((current) =>
+        toggleComparisonEngine(
+          coerceComparisonSelection(current, comparisonOptions),
+          engineName,
+          comparisonOptions,
+        ),
+      );
+    },
+    [comparisonOptions],
+  );
+
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
       {/* Left Sidebar - Controls */}
@@ -169,7 +246,7 @@ export function SimulationPage() {
           <EngineSelector
             engines={engines}
             selectedEngine={effectiveEngine}
-            onSelect={selectEngine}
+            onSelect={handleSelectEngine}
             onLoad={handleLoadEngine}
             onUnload={handleUnloadEngine}
             disabled={isRunning}
@@ -285,6 +362,14 @@ export function SimulationPage() {
         </div>
 
         <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Live Analysis</h3>
+
+        <div className="mb-6 border-b border-gray-700 pb-4">
+          <EngineComparisonPanel
+            viewModel={comparisonViewModel}
+            onToggleEngine={handleToggleComparisonEngine}
+            disabled={isRunning}
+          />
+        </div>
 
         {currentFrame ? (
           <div className="space-y-4">

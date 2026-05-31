@@ -36,6 +36,11 @@ You should use it when:
 - A small tool (status panel, preview, parameter editor) belongs as
   a sidebar to a larger workspace tool.
 
+Canonical-core entries follow the same path. `canonical_core_estimation`
+and `canonical_core_comparison` are registered as embeddable PyQt6 tools and
+also expose React routes in the shared launcher manifest, so both desktop and
+React shells show the same Biomechanics workspace entries.
+
 You should still launch in a **new window** when:
 
 - You want the tool fullscreen.

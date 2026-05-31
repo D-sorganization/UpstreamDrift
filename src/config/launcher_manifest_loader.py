@@ -122,6 +122,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         provider=model.provider,
         source_root=model.source_root,
         web_route=metadata.web_route,
+        default_launch=metadata.default_launch,
         hidden=model.hidden,
         hidden_reason=model.hidden_reason,
         hidden_owner=model.hidden_owner,
@@ -165,6 +166,8 @@ class LauncherTile:
     working_dir: str | None = None
     python_paths: tuple[str, ...] = ()
     web_route: str | None = None
+    default_launch: str = "tab"
+    shell_surfaces: tuple[str, ...] = ()
     hidden: bool = False
     hidden_reason: str | None = None
     hidden_owner: str | None = None
@@ -217,6 +220,8 @@ class LauncherTile:
             working_dir=data.get("working_dir"),
             python_paths=tuple(data.get("python_paths", [])),
             web_route=data.get("web_route"),
+            default_launch=data.get("default_launch", "tab"),
+            shell_surfaces=tuple(data.get("shell_surfaces", [])),
             hidden=hidden,
             hidden_reason=(
                 hidden_reason.strip() if isinstance(hidden_reason, str) else None
@@ -256,6 +261,10 @@ class LauncherTile:
             result["python_paths"] = list(self.python_paths)
         if self.web_route:
             result["web_route"] = self.web_route
+        if self.default_launch:
+            result["default_launch"] = self.default_launch
+        if self.shell_surfaces:
+            result["shell_surfaces"] = list(self.shell_surfaces)
         if self.tags:
             result["tags"] = list(self.tags)
         if self.hidden:

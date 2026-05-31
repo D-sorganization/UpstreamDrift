@@ -79,7 +79,9 @@ def bootstrap_embeddable_tools() -> list[str]:
         "data_explorer._embed_adapter",  # Moved from src.tools in vendor
         "src.tools.starting_pose_matcher._embed_adapter",
         "src.tools.training_controller._embed_adapter",
+        "src.tools.config_setup_wizard._embed_adapter",
         "src.tools.pose_subscriber_demo._embed_adapter",
+        "src.tools.canonical_core._embed_adapter",
         "src.tools.sidekick._embed_adapter",
         "src.tools.pose_studio.gui",
         "src.tools.video_analyzer._embed_adapter",
@@ -99,6 +101,12 @@ def bootstrap_embeddable_tools() -> list[str]:
             # Import the module - it self-registers at module level
             __import__(module_path)
             # Extract tool_id from module name for tracking
+            if module_path == "src.tools.canonical_core._embed_adapter":
+                registered.extend(
+                    ["canonical_core_estimation", "canonical_core_comparison"]
+                )
+                logger.debug("Bootstrapped canonical-core embeddable tools")
+                continue
             if (
                 module_path
                 == "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
