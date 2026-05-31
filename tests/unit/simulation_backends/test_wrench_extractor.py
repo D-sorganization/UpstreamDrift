@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from src.bunkershot3d.postproc.wrench_trace import WrenchTrace
@@ -49,8 +50,8 @@ def test_wrench_trace_from_force_torque_reuses_existing_primitive() -> None:
 
 
 def test_wrench_array_round_trip_preserves_force_torque_components() -> None:
-    force = np.arange(30, dtype=float).reshape(10, 3)
-    torque = force + 100.0
+    force: npt.NDArray[np.float64] = np.arange(30, dtype=float).reshape(10, 3)
+    torque: npt.NDArray[np.float64] = force + 100.0
 
     wrench = wrench_array_from_force_torque(force, torque)
     force_rt, torque_rt = force_torque_from_wrench_array(wrench)
