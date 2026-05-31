@@ -25,7 +25,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
@@ -48,7 +48,7 @@ from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
 from .rate_limit import limiter
-from .route_registry import register_routes
+from .route_registry import register_routes, ws_compatible_auth_dependency
 from .services.analysis_service import AnalysisService
 from .services.chat_service import ChatService
 from .services.simulation_service import SimulationService
@@ -296,19 +296,30 @@ logger.info("Registered %d route modules under /api", _legacy_api_count)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
 
-# Register explicitly excluded WebSocket routes
-app.include_router(chat_ws.router, prefix=API_PREFIX)
+# Register explicitly excluded WebSocket routes.
+#
+# These routers mix WebSocket endpoints (which self-authenticate via
+# resolve_ws_user) with HTTP endpoints. The HTTP endpoints were previously
+# unauthenticated in cloud mode (issues #6888, #6889), allowing unauthenticated
+# broadcast injection (POST /realtime/publish) and chat-session enumeration
+# (GET /chat/sessions, /history). ws_compatible_auth_dependency enforces the
+# bearer header on HTTP requests only; WebSocket connections fall through to the
+# route handler's own auth check, and local/auth-disabled mode remains open.
+_excluded_ws_auth = [Depends(ws_compatible_auth_dependency)]
+app.include_router(chat_ws.router, prefix=API_PREFIX, dependencies=_excluded_ws_auth)
 app.include_router(simulation_ws.router, prefix=API_PREFIX)
-app.include_router(chat_ws.router, prefix="/api")
+app.include_router(chat_ws.router, prefix="/api", dependencies=_excluded_ws_auth)
 app.include_router(simulation_ws.router, prefix="/api")
-app.include_router(chat_ws.router, prefix="")
+app.include_router(chat_ws.router, prefix="", dependencies=_excluded_ws_auth)
 app.include_router(simulation_ws.router, prefix="")
 
 # Realtime IPC layer (issue #4997) — combined HTTP + WS endpoints under
 # /realtime; mounted at root so cross-process clients (WSPubSub) can use the
 # canonical "/realtime/publish" and "/realtime/subscribe" paths.
-app.include_router(realtime_route.router, prefix="")
-app.include_router(realtime_route.router, prefix=API_PREFIX)
+app.include_router(realtime_route.router, prefix="", dependencies=_excluded_ws_auth)
+app.include_router(
+    realtime_route.router, prefix=API_PREFIX, dependencies=_excluded_ws_auth
+)
 
 
 if __name__ == "__main__":
