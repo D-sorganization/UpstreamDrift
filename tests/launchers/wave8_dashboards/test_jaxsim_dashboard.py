@@ -75,6 +75,30 @@ class TestJaxSimDashboard:
         finally:
             win.deleteLater()
 
+    def test_feature_controls_are_readonly_indicators(self, qapp) -> None:
+        # Regression for #6901: feature rows must be read-only capability
+        # indicators, never clickable controls that advertise "Supported"
+        # while doing nothing. They expose no actionable ``clicked`` signal
+        # (QLabel has none) and their tooltips say "read-only".
+        from PyQt6.QtWidgets import QAbstractButton, QLabel
+
+        from src.launchers.jaxsim_dashboard import _FEATURE_ROWS
+
+        win = JaxSimDashboard(exercise_filter="gait")
+        try:
+            # Every control (including the gated stub) must be a
+            # non-interactive label, never a clickable button.
+            for label, control in win.feature_controls.items():
+                assert isinstance(control, QLabel), label
+                assert not isinstance(control, QAbstractButton), label
+            # Capability rows must not advertise "Supported" as an actionable
+            # label; their tooltips identify them as read-only indicators.
+            for label, _attr in _FEATURE_ROWS:
+                tip = win.feature_controls[label].toolTip().lower()
+                assert "read-only" in tip, label
+        finally:
+            win.deleteLater()
+
     def test_blank_exercise_filter_rejected(self, qapp) -> None:
         with pytest.raises(ValueError, match="exercise_filter"):
             JaxSimDashboard(exercise_filter="   ")
