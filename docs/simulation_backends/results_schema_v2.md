@@ -2,7 +2,7 @@
 
 **Implemented by:** CC-4 (#6776)  
 **Canonical module:** `src/shared/python/simulation_backends/trace_io.py`  
-**Schema version constant:** `SCHEMA_VERSION = "2.0.0"` (in `protocol.py`)
+**Schema version constant:** `SCHEMA_VERSION = "2.1.0"` (in `protocol.py`)
 
 This document is the authoritative reference for the unified HDF5 result
 format that covers every simulation backend (ODE, MuJoCo, MuJoCo Warp) and
@@ -15,9 +15,9 @@ is self-describing and versioned.
 
 Two formats existed before CC-4:
 
-| Format | Owner | Groups |
-|---|---|---|
-| `Trace` v1.x | `simulation_backends` | `/t`, `/q`, `/v`, `/u` |
+| Format       | Owner                    | Groups                                           |
+| ------------ | ------------------------ | ------------------------------------------------ |
+| `Trace` v1.x | `simulation_backends`    | `/t`, `/q`, `/v`, `/u`                           |
 | BunkerShot3D | `bunkershot3d.io.schema` | `/clubhead/<t>/`, `/wrench/<t>/`, `/grains/<t>/` |
 
 **v2 unifies them** by extending `Trace` with optional trajectory and
@@ -30,34 +30,44 @@ wrench groups. BunkerShot3D files can be imported via
 
 ### Root attributes
 
-| Attribute | Type | Description |
-|---|---|---|
-| `schema_version` | str | `"MAJOR.MINOR.PATCH"` stamped at write time |
-| `backend` | str | Backend name, e.g. `"ode"`, `"mujoco"`, `"bunkershot3d"` |
-| `dt` | float | Integration step [s] |
-| `kind` | str | `"single"` (Trace) or `"batch"` (BatchTrace) |
-| `meta_<key>` | scalar | One attribute per scalar provenance entry |
+| Attribute        | Type   | Description                                              |
+| ---------------- | ------ | -------------------------------------------------------- |
+| `schema_version` | str    | `"MAJOR.MINOR.PATCH"` stamped at write time              |
+| `backend`        | str    | Backend name, e.g. `"ode"`, `"mujoco"`, `"bunkershot3d"` |
+| `dt`             | float  | Integration step [s]                                     |
+| `kind`           | str    | `"single"` (Trace) or `"batch"` (BatchTrace)             |
+| `meta_<key>`     | scalar | One attribute per scalar provenance entry                |
 
 ### Required datasets
 
-| Dataset | Shape | dtype | Description |
-|---|---|---|---|
-| `t` | `(T,)` | float64 | Sample times [s] |
-| `q` | `(T, nq)` or `(N, T, nq)` | float64 | Generalised positions [rad] |
-| `v` | `(T, nv)` or `(N, T, nv)` | float64 | Generalised velocities [rad/s] |
+| Dataset | Shape                     | dtype   | Description                    |
+| ------- | ------------------------- | ------- | ------------------------------ |
+| `t`     | `(T,)`                    | float64 | Sample times [s]               |
+| `q`     | `(T, nq)` or `(N, T, nq)` | float64 | Generalised positions [rad]    |
+| `v`     | `(T, nv)` or `(N, T, nv)` | float64 | Generalised velocities [rad/s] |
 
 ### Optional datasets (v2+, single Trace only)
 
-| Dataset | Shape | dtype | Description |
-|---|---|---|---|
-| `u` | `(T, nu)` | float64 | Applied controls [N·m]; omitted if passive |
-| `torques` | `(T, nu)` | float64 | Joint torques / generalised forces [N·m] |
-| `wrench` | `(T, 6)` | float64 | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
-| `markers` | `(T, n_markers, 3)` | float64 | Predicted marker positions [m] |
-| `contacts` | `(T, n_contacts, 3)` | float64 | Contact point positions [m] |
+| Dataset              | Shape                | dtype        | Description                                        |
+| -------------------- | -------------------- | ------------ | -------------------------------------------------- |
+| `u`                  | `(T, nu)`            | float64      | Applied controls [N·m]; omitted if passive         |
+| `torques`            | `(T, nu)`            | float64      | Joint torques / generalised forces [N·m]           |
+| `wrench`             | `(T, 6)`             | float64      | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
+| `markers`            | `(T, n_markers, 3)`  | float64      | Predicted marker positions [m]                     |
+| `contacts`           | `(T, n_contacts, 3)` | float64      | Contact point positions [m]                        |
+| `muscle_names`       | `(n_muscles,)`       | UTF-8 string | Muscle output column labels                        |
+| `muscle_activations` | `(T, n_muscles)`     | float64      | Muscle activations `[0, 1]`                        |
+| `muscle_forces`      | `(T, n_muscles)`     | float64      | Muscle forces [N]                                  |
+| `muscle_lengths`     | `(T, n_muscles)`     | float64      | Muscle-tendon lengths [m]                          |
+| `muscle_velocities`  | `(T, n_muscles)`     | float64      | Muscle contraction velocities [m/s]                |
 
 Datasets that are `None` are **omitted** from the file; the reader returns
 `None` for absent datasets.
+
+The muscle-output datasets are additive v2.1 fields used by the MyoSuite
+adapter. They are activation-driven outputs, not joint-torque inverse-dynamics
+results. Writers should provide `muscle_names` whenever any muscle history is
+present so downstream analysis can map columns to muscles.
 
 ---
 
@@ -67,12 +77,12 @@ BunkerShot3D files use a legacy time-keyed sub-group layout under
 `/clubhead/`, `/wrench/`, and `/grains/`. They are **import-only**:
 `read_bunkershot3d_result` maps them to the unified schema as follows:
 
-| BunkerShot3D | Trace v2 field |
-|---|---|
-| `/clubhead/t_<t>/position` (3,) | `markers[:, 0, :]` shape `(T, 1, 3)` |
-| `/wrench/t_<t>/force` + `torque` (3,) each | `wrench` columns `[:3]` + `[3:]` |
-| `/grains/…` | dropped (not mapped) |
-| — | `q`, `v` → empty `(T, 0)` arrays |
+| BunkerShot3D                               | Trace v2 field                       |
+| ------------------------------------------ | ------------------------------------ |
+| `/clubhead/t_<t>/position` (3,)            | `markers[:, 0, :]` shape `(T, 1, 3)` |
+| `/wrench/t_<t>/force` + `torque` (3,) each | `wrench` columns `[:3]` + `[3:]`     |
+| `/grains/…`                                | dropped (not mapped)                 |
+| —                                          | `q`, `v` → empty `(T, 0)` arrays     |
 
 BunkerShot3D results are **never** written back in the BunkerShot3D format
 by the analysis layer; all downstream analysis reads `Trace` objects.
@@ -81,11 +91,11 @@ by the analysis layer; all downstream analysis reads `Trace` objects.
 
 ## Versioning Policy
 
-| File major | Accepted | Notes |
-|---|---|---|
-| `1` | ✓ (auto-migrated) | v1.x files lack optional datasets; all default to `None` |
-| `2` | ✓ (current) | Full v2 support |
-| other | ✗ | `ValueError` raised |
+| File major | Accepted          | Notes                                                    |
+| ---------- | ----------------- | -------------------------------------------------------- |
+| `1`        | ✓ (auto-migrated) | v1.x files lack optional datasets; all default to `None` |
+| `2`        | ✓ (current)       | Full v2 support                                          |
+| other      | ✗                 | `ValueError` raised                                      |
 
 Minor and patch differences within an accepted major are always accepted
 (additive changes only).

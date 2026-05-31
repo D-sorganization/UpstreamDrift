@@ -68,6 +68,7 @@ class EngineCapabilities:
         state_control_gradients: Level of state/control gradient support
         forward_sim: Level of forward simulation support
         contact_step: Level of contact-aware step support
+        muscles: Level of muscle dynamics / activation-output support
         trajectory_opt: Level of trajectory optimization support
         video_export: Level of video export support
         dataset_export: Level of CSV/JSON/HDF5 export support
@@ -88,6 +89,7 @@ class EngineCapabilities:
     state_control_gradients: CapabilityLevel = CapabilityLevel.NONE
     forward_sim: CapabilityLevel = CapabilityLevel.NONE
     contact_step: CapabilityLevel = CapabilityLevel.NONE
+    muscles: CapabilityLevel = CapabilityLevel.NONE
     trajectory_opt: CapabilityLevel = CapabilityLevel.NONE
 
     # Export (#1176)
@@ -121,6 +123,11 @@ class EngineCapabilities:
     def has_contact_forces(self) -> bool:
         """Check if contact force reporting is available."""
         return self.contact_forces != CapabilityLevel.NONE
+
+    @property
+    def has_muscles(self) -> bool:
+        """Check if muscle dynamics / activation outputs are available."""
+        return self.muscles != CapabilityLevel.NONE
 
     @property
     def has_parameter_gradients(self) -> bool:
@@ -169,6 +176,7 @@ class EngineCapabilities:
             "state_control_gradients": self.state_control_gradients.name.lower(),
             "forward_sim": self.forward_sim.name.lower(),
             "contact_step": self.contact_step.name.lower(),
+            "muscles": self.muscles.name.lower(),
             "trajectory_opt": self.trajectory_opt.name.lower(),
             "video_export": self.video_export.name.lower(),
             "dataset_export": self.dataset_export.name.lower(),
@@ -211,6 +219,7 @@ class EngineCapabilities:
             state_control_gradients=_get_level("state_control_gradients"),
             forward_sim=_get_level("forward_sim"),
             contact_step=_get_level("contact_step"),
+            muscles=_get_level("muscles"),
             trajectory_opt=_get_level("trajectory_opt"),
             video_export=_get_level("video_export"),
             dataset_export=_get_level("dataset_export"),
