@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.220                                            |
+| **Spec Version**        | 1.0.221                                            |
 | **Last Spec Update**    | 2026-05-31                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-05-31** - Added the CC-35 workspace project/session spine and
+  results-browser view models (#6808): `src/shared/python/workspace/` now
+  persists project, subject, session, and dataset metadata in `project.json`
+  and indexes CC-4 HDF5 trace artifacts with CC-6 `provenance_*` metadata for
+  session/backend/text filtering.
 
 - **2026-05-31** - Added the CC-16 output-only canonical C3D exporter (#6789): motion capture can now export marker trajectories from canonical state arrays to terminal C3D files with unit, label, sample-rate, and architecture guards that prevent C3D from becoming an internal intermediate.
 
@@ -226,6 +232,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
+| Workspace Metadata       | `src/shared/python/workspace/`           | Project/session/dataset metadata store and CC-4 HDF5 result browser view models            |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
 
 ### Engine Tier Policy
