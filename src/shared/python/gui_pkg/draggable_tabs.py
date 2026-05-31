@@ -382,14 +382,6 @@ class DraggableTabWidget(QTabWidget):
                 self.drag_start_pos = event.globalPosition().toPoint()
 
         elif (
-            event.type() == QEvent.Type.MouseButtonRelease
-            and isinstance(event, QMouseEvent)
-            and event.button() == Qt.MouseButton.RightButton
-        ):
-            self._show_tab_context_menu(event.position().toPoint())
-            return True
-
-        elif (
             event.type() == QEvent.Type.MouseMove
             and isinstance(event, QMouseEvent)
             and (event.buttons() & Qt.MouseButton.LeftButton)
