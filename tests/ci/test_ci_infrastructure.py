@@ -261,6 +261,15 @@ class TestCIEnvironmentCompatibility:
         assert 'pip install -e ".[jaxsim]"' in workflow
         assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
 
+    def test_cross_engine_equivalence_runs_on_pyproject_changes(self) -> None:
+        """The JaxSim pin guard must run when the declared extra changes."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert '      - "pyproject.toml"' in workflow
+        assert workflow.count('      - "pyproject.toml"') == 2
+
     def test_cross_engine_leaderboard_removes_conflicting_pytest_plugins(
         self,
     ) -> None:
