@@ -61,7 +61,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -93,7 +92,7 @@ jobs:
           sudo apt-get update || true
           sudo apt-get install -y xvfb
           python -m ensurepip --upgrade || true
-          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
+          pip install --ignore-installed --no-deps pydantic-core==2.41.5 || true
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
