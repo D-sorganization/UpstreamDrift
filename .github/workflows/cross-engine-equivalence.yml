@@ -33,6 +33,7 @@ on:
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
       - ".jules/templates/**"
+      - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -49,6 +50,7 @@ on:
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
       - ".jules/templates/**"
+      - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
 
