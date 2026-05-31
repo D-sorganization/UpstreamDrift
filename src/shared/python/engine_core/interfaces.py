@@ -15,6 +15,7 @@ The PhysicsEngine Protocol is composed of focused sub-protocols defined in
     - **Steppable**: Time stepping (3 methods)
     - **Queryable**: State inspection (4 methods)
     - **DynamicsComputable**: Physics computation (7 methods)
+    - **SupportsParameterGradients**: Parameter-gradient analysis (2 methods)
     - **CounterfactualComputable**: What-if analysis (2 methods)
     - **Recordable**: Data collection (3 methods, on RecorderInterface)
 
@@ -51,6 +52,7 @@ from src.shared.python.engine_core.sub_protocols import (
     Queryable,
     Recordable,
     Steppable,
+    SupportsParameterGradients,
 )
 
 # Re-export sub-protocols for convenient access
@@ -63,6 +65,7 @@ __all__ = [
     "Recordable",
     "RecorderInterface",
     "Steppable",
+    "SupportsParameterGradients",
 ]
 
 

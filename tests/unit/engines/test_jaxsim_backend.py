@@ -16,6 +16,7 @@ from src.shared.python.engine_core.sub_protocols import (
     DynamicsComputable,
     Loadable,
     Queryable,
+    SupportsParameterGradients,
 )
 from src.shared.python.engine_core.velocity_conventions import (
     CANONICAL_VELOCITY_REPRESENTATION,
@@ -256,6 +257,7 @@ def test_jaxsim_backend_satisfies_core_sub_protocols() -> None:
     assert isinstance(backend, Loadable)
     assert isinstance(backend, Queryable)
     assert isinstance(backend, DynamicsComputable)
+    assert isinstance(backend, SupportsParameterGradients)
     assert (
         backend.convention.velocity_representation is CANONICAL_VELOCITY_REPRESENTATION
     )
