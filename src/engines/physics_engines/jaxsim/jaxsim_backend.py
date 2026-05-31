@@ -6,7 +6,7 @@ import importlib
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -316,6 +316,50 @@ class JaxSimBackend:
         if tau.shape != (expected_v,):
             raise ValueError(f"tau must have shape ({expected_v},)")
         return np.linalg.solve(self.compute_mass_matrix(), tau)
+
+    def parameter_jacobian(
+        self,
+        parameter_vector: np.ndarray,
+        q: np.ndarray,
+        v: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        """Differentiate the pointwise ZTCF drift field by model parameters."""
+
+        from src.engines.physics_engines.jaxsim.parameter_gradients import (
+            GradientMode,
+            parameter_jacobian,
+        )
+
+        return parameter_jacobian(
+            parameter_vector,
+            q,
+            v,
+            mode=cast("GradientMode", mode),
+        )
+
+    def evaluate_ztcf_parameter_sensitivity_along_trajectory(
+        self,
+        parameter_vector: np.ndarray,
+        q_traj: np.ndarray,
+        v_traj: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        """Evaluate pointwise ZTCF parameter sensitivity along measured states."""
+
+        from src.engines.physics_engines.jaxsim.parameter_gradients import (
+            GradientMode,
+            evaluate_ztcf_parameter_sensitivity_along_trajectory,
+        )
+
+        return evaluate_ztcf_parameter_sensitivity_along_trajectory(
+            parameter_vector,
+            q_traj,
+            v_traj,
+            mode=cast("GradientMode", mode),
+        )
 
     def get_capabilities(self) -> EngineCapabilities:
         """Declare JaxSim support through the engine capability taxonomy."""

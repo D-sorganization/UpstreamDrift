@@ -5,7 +5,7 @@ Cross-repo install: pip install upstream-drift-shared
 
 Sub-protocols (Interface Segregation):
     Loadable, Steppable, Queryable, DynamicsComputable,
-    CounterfactualComputable, Recordable
+    CounterfactualComputable, SupportsParameterGradients, Recordable
 """
 
 __all__: list[str] = [
@@ -18,4 +18,5 @@ __all__: list[str] = [
     "Queryable",
     "Recordable",
     "Steppable",
+    "SupportsParameterGradients",
 ]

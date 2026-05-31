@@ -96,3 +96,34 @@ linear/angular velocity through its private-backed dataclass fields. When a
 rollout supplies `dt`, the adapter updates JaxSim's model timestep through
 `model.replace(time_step=dt)` for versions whose `step` function does not
 accept a `dt` keyword.
+
+## Parameter-Gradient Sensitivity
+
+Issue #6656 adds the `SupportsParameterGradients` seam for JaxSim-backed
+parameter sensitivity. The current production surface is intentionally
+pointwise: `parameter_jacobian(parameter_vector, q, v)` differentiates the
+ZTCF drift field `f_ZTCF(q, v, p)` with respect to the five anthropometric
+parameters documented by `PARAMETER_NAMES`:
+
+- `upper_length_m`
+- `upper_mass_kg`
+- `lower_length_m`
+- `shaft_mass_kg`
+- `clubhead_mass_kg`
+
+`evaluate_ztcf_parameter_sensitivity_along_trajectory(...)` applies that same
+Jacobian row-by-row over measured `(q, v)` samples. It does not integrate a
+counterfactual rollout and does not mutate live JaxSim model inertias in place;
+callers get the instantaneous sensitivity of the drift field at each measured
+state. This keeps the API aligned with ZTCF/ZVCF semantics while the broader
+ADR-0024/Warp parameter-tree policy is still being settled.
+
+The acceptance script writes a deterministic sample plot:
+
+```bash
+python scripts/jaxsim/plot_parameter_sensitivity.py --output artifacts/jaxsim_parameter_sensitivity.png
+```
+
+The gradient gate validates JAX autodiff against central finite differences
+and verifies forward- and reverse-mode autodiff agree on the same measured
+state.
