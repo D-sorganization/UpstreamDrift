@@ -6,16 +6,17 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 
 ## Quick Navigation
 
-| I want to...            | Go to...                                            |
-| ----------------------- | --------------------------------------------------- |
-| Get started quickly     | [Quick Start](#quick-start)                         |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
-| Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
-| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)        |
-| Review architecture     | [ADRs](adr/)                                        |
-| Read the specification  | [SPEC](../SPEC.md)                                  |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
+| I want to...            | Go to...                                               |
+| ----------------------- | ------------------------------------------------------ |
+| Get started quickly     | [Quick Start](#quick-start)                            |
+| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)            |
+| Develop new features    | [Development Guide](api/DEVELOPMENT.md)                |
+| Add a physics engine    | [Adapter Authoring Guide](adapters/authoring_guide.md) |
+| Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md)    |
+| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)           |
+| Review architecture     | [ADRs](adr/)                                           |
+| Read the specification  | [SPEC](../SPEC.md)                                     |
+| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                    |
 
 ---
 
@@ -55,6 +56,9 @@ docs/
 │   ├── DEVELOPMENT.md        # Developer guide
 │   ├── engines.md            # Engine APIs
 │   └── shared.md             # Shared utilities
+│
+├── adapters/              # Engine adapter authoring
+│   └── authoring_guide.md    # Contract, remap, capability, and conformance checklist
 │
 ├── user_guide/            # End User Documentation
 │   ├── installation.md       # Setup instructions

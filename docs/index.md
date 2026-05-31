@@ -16,6 +16,7 @@ navigation should start with the rendered documentation URL.
 
 | Directory               | Owner                 | Stability | Description                                                                                                                         |
 | ----------------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `adapters/`             | @physics-team         | stable    | Adapter authoring guidance for engine contracts, canonical state remaps, capabilities, and conformance gates.                       |
 | `adr/`                  | @architecture-team    | stable    | Architecture decision records and templates for durable design decisions.                                                           |
 | `ai_implementation/`    | @automation-team      | draft     | AI-assisted implementation notes and operational agent guidance.                                                                    |
 | `api/`                  | @api-team             | stable    | REST API architecture, endpoint references, and integration guidance.                                                               |
