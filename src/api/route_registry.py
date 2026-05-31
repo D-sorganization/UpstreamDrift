@@ -168,6 +168,8 @@ _PUBLIC_ROUTERS: frozenset[str] = frozenset(
         "core",
         "observability",
         "capabilities",
+        "launcher",
+        "theme",
     }
 )
 
