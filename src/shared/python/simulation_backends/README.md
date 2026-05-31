@@ -23,7 +23,8 @@ in [`docs/simulation_backends/README.md`](../../../../docs/simulation_backends/R
 | `ode_backend.py`    | `ode` — CPU reference backend wrapping the analytical RK4 dynamics; provides `M(q)` / bias forces.                                                                     |
 | `mujoco_backend.py` | `mujoco` — CPU MuJoCo backend; independent dynamics primitives for cross-validation.                                                                                   |
 | `mjwarp_backend.py` | `mjwarp` — GPU MuJoCo Warp backend for batched rollouts (optional `[warp]` extra).                                                                                     |
-| `trace.py`          | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                      |
+| `trace_io.py`       | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                      |
+| `ztcf_zvcf.py`      | Pointwise ZTCF/ZVCF and affine drift/control analysis over `DynamicsProvider`, including canonical-v2 trajectory input and HDF5 analysis persistence.                  |
 
 ## Choosing a backend
 
@@ -63,3 +64,33 @@ Backends are interchangeable behind the Protocol; swap `"ode"` for `"mujoco"`
 extra) without touching the analysis code. Requesting a backend whose optional
 dependencies are missing raises a `BackendNotAvailableError` with an install
 hint — importing this package itself never pulls in any GPU dependency.
+
+## Pointwise ZTCF/ZVCF on canonical-v2 samples
+
+The ZTCF/ZVCF helpers consume engine-neutral dynamics primitives rather than
+engine objects. Engine adapters should convert native state samples into the
+canonical-v2 layout first, then pass those samples through
+`CanonicalDynamicsTrajectory`:
+
+```python
+from src.shared.python.simulation_backends import (
+    CanonicalDynamicsTrajectory,
+    evaluate_ztcf_zvcf_on_canonical_trajectory,
+    make_backend,
+    persist_ztcf_zvcf_analysis,
+)
+
+backend = make_backend("ode", params)
+trajectory = CanonicalDynamicsTrajectory(t=t, q=q, v=v, tau=u)
+result = evaluate_ztcf_zvcf_on_canonical_trajectory(backend, trajectory)
+persist_ztcf_zvcf_analysis(
+    trajectory,
+    result,
+    "ztcf_zvcf_analysis.h5",
+    backend="ode",
+)
+```
+
+These helpers are pointwise analysis only. They sample the drift and control
+terms along an already measured or estimated trajectory; they do not integrate a
+zero-torque or zero-velocity rollout.

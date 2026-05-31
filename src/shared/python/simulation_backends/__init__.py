@@ -52,6 +52,12 @@ from .provenance import (
     attach_provenance_to_trace,
     serialize_provenance,
 )
+from .ztcf_zvcf import (
+    CanonicalDynamicsTrajectory,
+    ZtcfZvcfResult,
+    evaluate_ztcf_zvcf_on_canonical_trajectory,
+    persist_ztcf_zvcf_analysis,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -61,6 +67,7 @@ __all__ = [
     "BackendNotAvailableError",
     "BatchTrace",
     "BatchedBackend",
+    "CanonicalDynamicsTrajectory",
     "DynamicsProvider",
     "GolfModelParams",
     "LowerSegmentParams",
@@ -75,11 +82,14 @@ __all__ = [
     "attach_provenance_to_checkpoint",
     "attach_provenance_to_trace",
     "available_backends",
+    "evaluate_ztcf_zvcf_on_canonical_trajectory",
     "has_mujoco",
     "has_warp",
     "make_backend",
+    "persist_ztcf_zvcf_analysis",
     "require_mujoco",
     "require_warp",
     "serialize_provenance",
     "warp_device_available",
+    "ZtcfZvcfResult",
 ]
