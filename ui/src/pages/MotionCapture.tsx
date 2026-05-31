@@ -9,6 +9,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { apiFetch } from '@/api/fetch';
 
 /** Capture source from the API. See issue #1206 */
 export interface CaptureSource {
@@ -191,9 +192,7 @@ export function MotionCapturePage() {
   useEffect(() => {
     async function fetchSources() {
       try {
-        const response = await fetch('/api/tools/motion-capture/sources');
-        if (!response.ok) return;
-        const data = await response.json();
+        const data = await apiFetch<CaptureSource[]>('/api/tools/motion-capture/sources');
         setSources(data);
       } catch {
         // API may not be available
@@ -206,11 +205,9 @@ export function MotionCapturePage() {
   useEffect(() => {
     async function fetchSkeleton() {
       try {
-        const response = await fetch(
+        const data = await apiFetch<JointData[]>(
           `/api/tools/motion-capture/skeleton/${selectedSource}`,
         );
-        if (!response.ok) return;
-        const data: JointData[] = await response.json();
         setJoints(data);
       } catch {
         // API may not be available
@@ -222,9 +219,7 @@ export function MotionCapturePage() {
   // Fetch recordings
   const fetchRecordings = useCallback(async () => {
     try {
-      const response = await fetch('/api/tools/motion-capture/recordings');
-      if (!response.ok) return;
-      const data = await response.json();
+      const data = await apiFetch<RecordingInfo[]>('/api/tools/motion-capture/recordings');
       setRecordings(data);
     } catch {
       // API may not be available
@@ -241,24 +236,16 @@ export function MotionCapturePage() {
     setError(null);
 
     try {
-      const response = await fetch(
+      const data = await apiFetch<CaptureSession>(
         '/api/tools/motion-capture/session/start',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             source_type: selectedSource,
             frame_rate: 30.0,
           }),
         },
       );
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: CaptureSession = await response.json();
       setActiveSession(data);
     } catch (err) {
       setError(
@@ -276,15 +263,10 @@ export function MotionCapturePage() {
     setError(null);
 
     try {
-      const response = await fetch(
+      await apiFetch<unknown>(
         `/api/tools/motion-capture/session/${activeSession.session_id}/stop`,
         { method: 'POST' },
       );
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
 
       setActiveSession(null);
       await fetchRecordings();
@@ -305,11 +287,10 @@ export function MotionCapturePage() {
       setError(null);
 
       try {
-        const response = await fetch(
+        const data = await apiFetch<PlaybackState>(
           '/api/tools/motion-capture/playback',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               recording_name: selectedRecording,
               action,
@@ -317,13 +298,6 @@ export function MotionCapturePage() {
             }),
           },
         );
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.detail || `HTTP ${response.status}`);
-        }
-
-        const data: PlaybackState = await response.json();
         setPlayback(data);
       } catch (err) {
         setError(

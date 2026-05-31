@@ -9,6 +9,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { apiFetch } from '@/api/fetch';
 
 /** Putt simulation result from the API. See issue #1206 */
 export interface PuttResult {
@@ -256,9 +257,8 @@ export function PuttingGreenPage() {
     setScatterResult(null);
 
     try {
-      const response = await fetch('/api/tools/putting-green/simulate', {
+      const data = await apiFetch<PuttResult>('/api/tools/putting-green/simulate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ball_x: ballX,
           ball_y: ballY,
@@ -275,13 +275,6 @@ export function PuttingGreenPage() {
           wind_direction_y: 0.0,
         }),
       });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: PuttResult = await response.json();
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Simulation failed');
@@ -296,9 +289,8 @@ export function PuttingGreenPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/tools/putting-green/read-green', {
+      const data = await apiFetch<GreenReading>('/api/tools/putting-green/read-green', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ball_x: ballX,
           ball_y: ballY,
@@ -309,13 +301,6 @@ export function PuttingGreenPage() {
           stimp_rating: stimpRating,
         }),
       });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: GreenReading = await response.json();
       setReading(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Green reading failed');
@@ -331,9 +316,8 @@ export function PuttingGreenPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/tools/putting-green/scatter', {
+      const data = await apiFetch<ScatterResult>('/api/tools/putting-green/scatter', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ball_x: ballX,
           ball_y: ballY,
@@ -348,13 +332,6 @@ export function PuttingGreenPage() {
           stimp_rating: stimpRating,
         }),
       });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: ScatterResult = await response.json();
       setScatterResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scatter analysis failed');

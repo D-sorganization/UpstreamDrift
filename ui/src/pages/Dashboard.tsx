@@ -9,6 +9,7 @@ import { useState, useCallback } from 'react';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
 import { useToast } from '@/components/ui/Toast';
+import { apiFetch } from '@/api/fetch';
 
 export function DashboardPage() {
     const {
@@ -32,18 +33,10 @@ export function DashboardPage() {
 
             // Launch all engines/tools as subprocesses via the backend API
             showInfo(`Launching ${tile.name}...`);
-            fetch(`/api/launcher/launch/${tile.id}`, {
+            apiFetch<{ name?: string }>(`/api/launcher/launch/${tile.id}`, {
                 method: 'POST',
                 headers: launcherCsrfToken ? { [launcherCsrfHeader]: launcherCsrfToken } : {},
             })
-                .then((res) => {
-                    if (!res.ok) {
-                        return res.json().then((body) => {
-                            throw new Error(body.detail || `HTTP ${res.status}`);
-                        });
-                    }
-                    return res.json();
-                })
                 .then((data) => {
                     showInfo(`${data.name || tile.name} launched successfully`);
                 })

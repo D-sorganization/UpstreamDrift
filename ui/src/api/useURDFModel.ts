@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { URDFModel } from '@/components/visualization/URDFViewer';
+import { apiFetch } from './fetch';
 
 export function useURDFModel(modelName: string | null) {
   const [model, setModel] = useState<URDFModel | null>(null);
@@ -18,12 +19,7 @@ export function useURDFModel(modelName: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/models/${encodeURIComponent(name)}/urdf`);
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `Failed to load model: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await apiFetch<URDFModel>(`/api/models/${encodeURIComponent(name)}/urdf`);
       setModel(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

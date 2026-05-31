@@ -107,6 +107,36 @@ describe('EngineSelector', () => {
       expect(onLoad).toHaveBeenCalledWith('drake');
     });
 
+    it('renders an unavailable engine as disabled and not loadable (#6900)', () => {
+      const engines = [
+        createEngine({
+          name: 'opensim',
+          displayName: 'OpenSim',
+          loadState: 'idle',
+          available: false,
+        }),
+      ];
+      const onLoad = vi.fn();
+      render(
+        <EngineSelector
+          {...defaultProps}
+          engines={engines}
+          selectedEngine={null}
+          onLoad={onLoad}
+        />,
+      );
+
+      const btn = screen.getByRole('button', {
+        name: /opensim engine not installed/i,
+      });
+      expect(btn).toBeDisabled();
+      expect(btn).toHaveTextContent('Unavailable');
+
+      // Clicking the disabled control must not trigger a load attempt.
+      fireEvent.click(btn);
+      expect(onLoad).not.toHaveBeenCalled();
+    });
+
     it('shows Unload button for loaded engines', () => {
       render(<EngineSelector {...defaultProps} />);
 

@@ -155,7 +155,9 @@ describe('useEngineStore', () => {
         .getState()
         .engines.find((e) => e.name === 'mujoco');
       expect(mujoco?.loadState).toBe('error');
-      expect(mujoco?.error).toBe('Network error');
+      // probeEngine wraps low-level fetch/apiFetch failures in a descriptive
+      // message so the user sees which engine failed to probe.
+      expect(mujoco?.error).toBe('Failed to probe engine: mujoco');
     });
 
     it('sets engine to loaded on successful probe + load', async () => {
@@ -289,6 +291,55 @@ describe('useEngineStore', () => {
       useEngineStore.setState({ selectedEngine: 'mujoco' });
       // mujoco is idle, not loaded
       expect(selectEffectiveEngine(useEngineStore.getState())).toBeNull();
+    });
+  });
+
+  describe('probeAvailability (#6900)', () => {
+    it('marks an engine unavailable when its probe reports not installed', async () => {
+      // Backend says pinocchio is missing, everything else is installed.
+      global.fetch = vi.fn((url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        const available = !urlStr.includes('pinocchio');
+        return Promise.resolve(new Response(JSON.stringify({ available })));
+      }) as typeof fetch;
+
+      // Optimistic seed: everything starts available before probing.
+      expect(
+        useEngineStore.getState().engines.every((e) => e.available)
+      ).toBe(true);
+
+      await act(async () => {
+        await useEngineStore.getState().probeAvailability();
+      });
+
+      const pinocchio = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'pinocchio');
+      const mujoco = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'mujoco');
+
+      expect(pinocchio?.available).toBe(false);
+      // An unavailable engine must remain unloaded (renders disabled, not loadable).
+      expect(pinocchio?.loadState).toBe('idle');
+      expect(mujoco?.available).toBe(true);
+    });
+
+    it('leaves the optimistic seed intact when every probe errors', async () => {
+      // A backend that is still starting up (all probes reject) must not wrongly
+      // disable engines that may in fact be installed — only a definitive
+      // `available: false` flips the flag.
+      global.fetch = vi.fn(() =>
+        Promise.reject(new Error('Network error'))
+      ) as typeof fetch;
+
+      await act(async () => {
+        await useEngineStore.getState().probeAvailability();
+      });
+
+      expect(
+        useEngineStore.getState().engines.every((e) => e.available === true)
+      ).toBe(true);
     });
   });
 

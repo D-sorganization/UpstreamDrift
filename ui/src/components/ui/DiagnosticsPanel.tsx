@@ -6,6 +6,7 @@ import {
   getDiagnostics,
   type DiagnosticInfo,
 } from '@/api/backend';
+import { apiFetch } from '@/api/fetch';
 
 /**
  * Diagnostics panel that shows backend server status, Python environment info,
@@ -33,9 +34,10 @@ export function DiagnosticsPanel() {
 
   const checkBackendHealth = useCallback(async () => {
     try {
-      const response = await fetch('/api/engines', { signal: AbortSignal.timeout(3000) });
-      setBackendHealth(response.ok ? 'healthy' : 'unreachable');
+      await apiFetch<unknown>('/api/engines', { signal: AbortSignal.timeout(3000) });
+      setBackendHealth('healthy');
     } catch {
+      // apiFetch throws on network error, timeout, or non-2xx status.
       setBackendHealth('unreachable');
     }
   }, []);

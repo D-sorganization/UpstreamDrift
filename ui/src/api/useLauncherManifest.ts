@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from './fetch';
 
 export type LauncherCategory =
     | 'physics_engine'
@@ -74,11 +75,7 @@ export function useLauncherManifest(): UseLauncherManifestResult {
         setError(null);
 
         try {
-            const response = await fetch('/api/launcher/manifest');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch manifest: ${response.status}`);
-            }
-            const data: LauncherManifest = await response.json();
+            const data = await apiFetch<LauncherManifest>('/api/launcher/manifest');
 
             if (!Array.isArray(data.tiles)) {
                 throw new Error('Invalid manifest: tiles must be an array');
