@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "detector_layout": {
+    "name": "coco-3",
+    "keypoint_names": ["pelvis", "neck", "head"]
+  },
+  "cameras": [
+    {
+      "camera_id": "front",
+      "image_size_px": [1280, 720],
+      "intrinsics": {
+        "matrix": [
+          [900.0, 0.0, 640.0],
+          [0.0, 900.0, 360.0],
+          [0.0, 0.0, 1.0]
+        ],
+        "distortion": [0.01, -0.02, 0.0, 0.0, 0.0]
+      },
+      "extrinsics": {
+        "rotation_world_from_camera": [
+          [1.0, 0.0, 0.0],
+          [0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0]
+        ],
+        "translation_world_from_camera_m": [0.0, -2.0, 1.2]
+      }
+    },
+    {
+      "camera_id": "side",
+      "image_size_px": [1280, 720],
+      "intrinsics": {
+        "matrix": [
+          [880.0, 0.0, 640.0],
+          [0.0, 880.0, 360.0],
+          [0.0, 0.0, 1.0]
+        ],
+        "distortion": [0.0, 0.0, 0.0, 0.0, 0.0]
+      },
+      "extrinsics": {
+        "rotation_world_from_camera": [
+          [0.0, -1.0, 0.0],
+          [1.0, 0.0, 0.0],
+          [0.0, 0.0, 1.0]
+        ],
+        "translation_world_from_camera_m": [2.0, 0.0, 1.2]
+      }
+    }
+  ],
+  "frames": [
+    {
+      "camera_id": "front",
+      "time_s": 0.0,
+      "keypoints_px": [
+        [610.0, 540.0],
+        [620.0, 400.0],
+        [625.0, 310.0]
+      ],
+      "confidence": [0.96, 0.88, 0.82]
+    },
+    {
+      "camera_id": "side",
+      "time_s": 0.0,
+      "keypoints_px": [
+        [700.0, 535.0],
+        [710.0, 398.0],
+        [712.0, 306.0]
+      ],
+      "confidence": [0.94, 0.84, 0.8]
+    },
+    {
+      "camera_id": "front",
+      "time_s": 0.03333333333333333,
+      "keypoints_px": [
+        [612.0, 539.0],
+        [623.0, 399.0],
+        [629.0, 309.0]
+      ],
+      "confidence": [0.95, 0.87, 0.83]
+    },
+    {
+      "camera_id": "side",
+      "time_s": 0.03333333333333333,
+      "keypoints_px": [
+        [702.0, 534.0],
+        [713.0, 397.0],
+        [716.0, 305.0]
+      ],
+      "confidence": [0.93, 0.85, 0.81]
+    }
+  ],
+  "keypoints_3d_m": [
+    [
+      [0.0, 0.0, 0.95],
+      [0.0, 0.0, 1.25],
+      [0.0, 0.0, 1.48]
+    ],
+    [
+      [0.02, 0.0, 0.95],
+      [0.02, 0.0, 1.25],
+      [0.02, 0.0, 1.48]
+    ]
+  ],
+  "keypoints_3d_confidence": [
+    [0.92, 0.86, 0.81],
+    [0.91, 0.86, 0.82]
+  ],
+  "provenance": {
+    "source_format": "synthetic-json",
+    "detector": "test-fixture",
+    "trial_id": "canonical-observations-demo"
+  }
+}

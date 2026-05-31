@@ -43,6 +43,7 @@ This will return a JSON response containing the solved kinematics and motion mat
 ## Next Steps
 
 - [Format Matrix](formats.md) — Auto-generated support matrix for each mocap source
+- [Canonical Observations](canonical_observations.md) — Multi-camera markerless keypoints, calibration, and confidence schema
 - [Troubleshooting](troubleshooting.md) — Common failure modes and fixes
 - [Architecture ADR](../adr/0007-motion-pipeline-architecture.md) — Design decisions and alternatives
 - [Biomech Workspace Setup](../biomech-workspace.md) — Wire up the five sibling biomechanics repos as the source of truth for models (ADR-0014)
