@@ -31,7 +31,9 @@ if TYPE_CHECKING:
 
 #: Versioned schema stamped into every serialised trace. Bump on any breaking
 #: change to the on-disk layout (see :mod:`simulation_backends.trace`).
-SCHEMA_VERSION = "1.0.0"
+#: v2.0.0 adds optional /torques, /wrench, /markers, /contacts groups.
+#: v1.x files are auto-migrated by :func:`simulation_backends.trace_io.read_trace`.
+SCHEMA_VERSION = "2.0.0"
 
 
 @dataclass(frozen=True)
@@ -103,6 +105,12 @@ class Trace:
         dt: Integration step [s].
         backend: Name of the backend that produced the trace.
         meta: Free-form provenance metadata (scalars/strings only).
+        torques: Generalised joint forces, shape ``(T, nu)`` [N*m], or ``None``.
+        wrench: Contact wrench [fx,fy,fz,tx,ty,tz], shape ``(T, 6)``, or ``None``.
+        markers: Predicted marker positions, shape ``(T, n_markers, 3)`` [m], or
+            ``None``.
+        contacts: Contact point positions, shape ``(T, n_contacts, 3)`` [m], or
+            ``None``.
     """
 
     t: np.ndarray
@@ -113,6 +121,10 @@ class Trace:
     backend: str = "unknown"
     meta: Mapping[str, object] = field(default_factory=dict)
     schema_version: str = SCHEMA_VERSION
+    torques: np.ndarray | None = None
+    wrench: np.ndarray | None = None
+    markers: np.ndarray | None = None
+    contacts: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Validate array shapes are mutually consistent (postcondition guard)."""
@@ -130,6 +142,40 @@ class Trace:
             if self.u.shape[0] != n:
                 raise ValueError(
                     f"control history has {self.u.shape[0]} rows, expected {n}"
+                )
+        if self.torques is not None:
+            self.torques = np.atleast_2d(np.asarray(self.torques, dtype=float))
+            if self.torques.shape[0] != n:
+                raise ValueError(
+                    f"torques has {self.torques.shape[0]} rows, expected {n}"
+                )
+        if self.wrench is not None:
+            self.wrench = np.asarray(self.wrench, dtype=float)
+            if self.wrench.ndim != 2 or self.wrench.shape != (n, 6):
+                raise ValueError(
+                    f"wrench must have shape ({n}, 6), got {self.wrench.shape}"
+                )
+        if self.markers is not None:
+            self.markers = np.asarray(self.markers, dtype=float)
+            if (
+                self.markers.ndim != 3
+                or self.markers.shape[0] != n
+                or self.markers.shape[2] != 3
+            ):
+                raise ValueError(
+                    f"markers must have shape ({n}, n_markers, 3), "
+                    f"got {self.markers.shape}"
+                )
+        if self.contacts is not None:
+            self.contacts = np.asarray(self.contacts, dtype=float)
+            if (
+                self.contacts.ndim != 3
+                or self.contacts.shape[0] != n
+                or self.contacts.shape[2] != 3
+            ):
+                raise ValueError(
+                    f"contacts must have shape ({n}, n_contacts, 3), "
+                    f"got {self.contacts.shape}"
                 )
 
     @property
