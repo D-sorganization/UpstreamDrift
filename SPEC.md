@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.219                                            |
+| **Spec Version**        | 1.0.220                                            |
 | **Last Spec Update**    | 2026-05-31                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-05-31** - Added the CC-24 canonical ZTCF/ZVCF analysis bridge (#6797): simulation backends now expose canonical zero-torque crossing and zero-velocity crossing analysis helpers, extend the results schema v2 documentation, and cover AffineDrift-compatible event extraction and result serialization with focused unit tests.
 
 - **2026-05-31** - Added the canonical run `ProvenanceStamp` primitive for issue #6778: simulation traces, batch traces, and state checkpoints can now carry deterministic run metadata covering engine/model identifiers, timestamp, adapter version, units, feature flags, and dependency versions without changing the existing trace/checkpoint schemas.
 - **2026-05-31** - Added a third-party license ledger for issue #6781 under `docs/legal/licenses.md`, with a CI-sized advisory checker that covers direct dependency declarations, keeps OpenPose visibly fenced as non-commercial opt-in, supports Python 3.10 via `tomli`, and avoids false core-install optional-engine findings from the local `scripts/jaxsim` helper directory.
@@ -843,5 +845,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-22 | 1.0.170 | Hardened the shared BitNet subprocess adapter by rejecting non-UTF-8 and oversize prompts before `llama-cli` launch, and added focused regression coverage for the synchronous and streaming guard paths (issue #5913). |
 | 2026-05-25 | 1.0.171 | Removed stale "raises NotImplementedError" and scaffold-era caveats from the module and class docstrings of the Drake, OpenSim, and Simscape `LiveKinematicsService` implementations; updated the Simscape transform-query TODO to reference the current tracking issue #6093 instead of closed epic #4963 (issue #6092). |
 | 2026-05-29 | 1.0.172 | Bolt: Optimized `np.linalg.norm(np.array(...))` to `math.hypot(...)` in `anthropometric.py` to avoid temporary array allocation and speed up calculation. |
+| 2026-05-31 | 1.0.220 | Added the CC-24 canonical ZTCF/ZVCF analysis bridge (#6797), including simulation backend helper exports, results schema v2 documentation, AffineDrift-compatible event extraction, result serialization, and focused tests. |
 | 2026-05-31 | 1.0.219 | Added the canonical-v2 pose interchange contract export surface, ADR, and conventions guide for durable cross-engine state exchange (#6773). |
 ````
