@@ -75,6 +75,11 @@ chrono = ["pychrono>=8.0,<10.0"]
 # coexistence gate is proven. The base wheel resolves on Windows with CPU JAX,
 # but URDF conversion still requires gz/ign sdformat tooling for follow-up #6648.
 jaxsim = ["jaxsim==0.9.0"]
+# Offline validation only: Stanford Nimble is a differentiable-physics oracle,
+# not a runtime engine dependency. Wheels are uneven across platforms, so keep
+# it out of core/all-engines and run tests under the explicit requires_nimble
+# marker.
+nimble-oracle = ["nimblephysics==0.10.52.2", "torch>=2.0.0"]
 
 # Differentiable MuJoCo rollouts via MJX (MuJoCo on JAX).
 mjx = ["mujoco-mjx>=3.6.0", "jax>=0.4.30", "jaxlib>=0.4.30"]
@@ -247,8 +252,11 @@ artifacts = [
 [tool.hatch.build.targets.wheel]
 packages = [
     "src",
-    "src/shared/python/sidekick",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/shared/python/sidekick" = "sidekick"
+"launch_golf_suite.py" = "launch_golf_suite.py"
 
 
 [tool.hatch.build.hooks.custom]
@@ -506,6 +514,7 @@ markers = [
     "requires_myosuite: tests that require the myosuite (and mujoco) Python wheels (skipped when `import myosuite` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
+    "requires_nimble: offline Nimble gradient-oracle tests (skipped when `import nimblephysics` fails)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",
