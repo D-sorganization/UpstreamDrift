@@ -18,9 +18,10 @@ Usage:
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any
+from typing import Any, Protocol, TypeAlias
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,39 @@ returning ``spatial``.
 """
 
 
+class Capability(str, Enum):
+    """Canonical engine capability identifiers.
+
+    The enum is the stable query key shared across engine-core capability
+    reports and narrower adapter-specific descriptors.
+    """
+
+    MASS_MATRIX = "mass_matrix"
+    JACOBIAN = "jacobian"
+    CONTACT_FORCES = "contact_forces"
+    INVERSE_DYNAMICS = "inverse_dynamics"
+    DRIFT_ACCELERATION = "drift_acceleration"
+    PARAMETER_GRADIENTS = "parameter_gradients"
+    STATE_CONTROL_GRADIENTS = "state_control_gradients"
+    FORWARD_SIM = "forward_sim"
+    CONTACT_STEP = "contact_step"
+    TRAJECTORY_OPT = "trajectory_opt"
+    VIDEO_EXPORT = "video_export"
+    DATASET_EXPORT = "dataset_export"
+    FORCE_VISUALIZATION = "force_visualization"
+    MODEL_POSITIONING = "model_positioning"
+    MEASUREMENTS = "measurements"
+
+    # Adapter-boundary capabilities. These are queryable through the same
+    # contract without forcing every engine report to grow backend-only fields.
+    BATCHED_ROLLOUT = "batched_rollout"
+    DIFFERENTIABLE_ROLLOUT = "differentiable_rollout"
+    DYNAMICS_PRIMITIVES = "dynamics_primitives"
+
+
+CapabilityRef: TypeAlias = Capability | str
+
+
 class CapabilityLevel(Enum):
     """Support level for an engine capability.
 
@@ -47,6 +81,95 @@ class CapabilityLevel(Enum):
     FULL = auto()
     PARTIAL = auto()
     NONE = auto()
+
+
+class CapabilityQuery(Protocol):
+    """Shared query contract for capability descriptors."""
+
+    def level_for(self, capability: CapabilityRef) -> CapabilityLevel:
+        """Return the advertised support level for ``capability``."""
+        ...
+
+    def supports(
+        self,
+        capability: CapabilityRef,
+        *,
+        minimum: CapabilityLevel = CapabilityLevel.PARTIAL,
+    ) -> bool:
+        """Return whether ``capability`` meets ``minimum`` support."""
+        ...
+
+
+ENGINE_CAPABILITY_FIELDS: Mapping[Capability, str] = {
+    Capability.MASS_MATRIX: "mass_matrix",
+    Capability.JACOBIAN: "jacobian",
+    Capability.CONTACT_FORCES: "contact_forces",
+    Capability.INVERSE_DYNAMICS: "inverse_dynamics",
+    Capability.DRIFT_ACCELERATION: "drift_acceleration",
+    Capability.PARAMETER_GRADIENTS: "parameter_gradients",
+    Capability.STATE_CONTROL_GRADIENTS: "state_control_gradients",
+    Capability.FORWARD_SIM: "forward_sim",
+    Capability.CONTACT_STEP: "contact_step",
+    Capability.TRAJECTORY_OPT: "trajectory_opt",
+    Capability.VIDEO_EXPORT: "video_export",
+    Capability.DATASET_EXPORT: "dataset_export",
+    Capability.FORCE_VISUALIZATION: "force_visualization",
+    Capability.MODEL_POSITIONING: "model_positioning",
+    Capability.MEASUREMENTS: "measurements",
+}
+"""Capabilities stored directly on :class:`EngineCapabilities`."""
+
+ADAPTER_BOUNDARY_CAPABILITIES = (
+    Capability.BATCHED_ROLLOUT,
+    Capability.DIFFERENTIABLE_ROLLOUT,
+    Capability.DYNAMICS_PRIMITIVES,
+)
+"""Canonical capabilities answered by narrower backend adapter descriptors."""
+
+_CAPABILITY_ALIASES: Mapping[str, Capability] = {
+    "batched": Capability.BATCHED_ROLLOUT,
+    "batched_rollouts": Capability.BATCHED_ROLLOUT,
+    "supports_batched": Capability.BATCHED_ROLLOUT,
+    "differentiable": Capability.DIFFERENTIABLE_ROLLOUT,
+    "is_differentiable": Capability.DIFFERENTIABLE_ROLLOUT,
+    "provides_dynamics": Capability.DYNAMICS_PRIMITIVES,
+}
+
+_CAPABILITY_LEVEL_RANK: Mapping[CapabilityLevel, int] = {
+    CapabilityLevel.NONE: 0,
+    CapabilityLevel.PARTIAL: 1,
+    CapabilityLevel.FULL: 2,
+}
+
+
+def normalize_capability(capability: CapabilityRef) -> Capability:
+    """Return the canonical :class:`Capability` for ``capability``.
+
+    Existing backend flag names such as ``"supports_batched"`` are accepted as
+    aliases so callers can migrate to the enum without a hard flag day.
+    """
+    if isinstance(capability, Capability):
+        return capability
+
+    key = str(capability).strip().lower()
+    if key in _CAPABILITY_ALIASES:
+        return _CAPABILITY_ALIASES[key]
+    try:
+        return Capability(key)
+    except ValueError as exc:
+        valid = ", ".join(c.value for c in Capability)
+        raise ValueError(
+            f"unknown capability {capability!r}; expected one of {valid}"
+        ) from exc
+
+
+def capability_level_supported(
+    level: CapabilityLevel,
+    *,
+    minimum: CapabilityLevel = CapabilityLevel.PARTIAL,
+) -> bool:
+    """Return whether ``level`` satisfies the requested support threshold."""
+    return _CAPABILITY_LEVEL_RANK[level] >= _CAPABILITY_LEVEL_RANK[minimum]
 
 
 @dataclass(frozen=True)
@@ -152,31 +275,51 @@ class EngineCapabilities:
         """Check if measurement tools are available."""
         return self.measurements != CapabilityLevel.NONE
 
+    def level_for(self, capability: CapabilityRef) -> CapabilityLevel:
+        """Return the support level for a canonical capability.
+
+        Adapter-boundary capabilities are known query keys but are not stored on
+        this engine-core report, so they answer ``NONE`` here.
+        """
+        normalized = normalize_capability(capability)
+        field_name = ENGINE_CAPABILITY_FIELDS.get(normalized)
+        if field_name is None:
+            return CapabilityLevel.NONE
+        return getattr(self, field_name)
+
+    def supports(
+        self,
+        capability: CapabilityRef,
+        *,
+        minimum: CapabilityLevel = CapabilityLevel.PARTIAL,
+    ) -> bool:
+        """Return whether ``capability`` is supported at ``minimum`` level."""
+        return capability_level_supported(
+            self.level_for(capability),
+            minimum=minimum,
+        )
+
+    def to_capability_map(self) -> dict[Capability, CapabilityLevel]:
+        """Return a complete canonical capability-to-level mapping."""
+        return {capability: self.level_for(capability) for capability in Capability}
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize to API-friendly dictionary.
 
         Returns:
             Dictionary with capability names and their levels as strings.
         """
-        return {
+        data = {
             "engine_name": self.engine_name,
-            "mass_matrix": self.mass_matrix.name.lower(),
-            "jacobian": self.jacobian.name.lower(),
-            "contact_forces": self.contact_forces.name.lower(),
-            "inverse_dynamics": self.inverse_dynamics.name.lower(),
-            "drift_acceleration": self.drift_acceleration.name.lower(),
-            "parameter_gradients": self.parameter_gradients.name.lower(),
-            "state_control_gradients": self.state_control_gradients.name.lower(),
-            "forward_sim": self.forward_sim.name.lower(),
-            "contact_step": self.contact_step.name.lower(),
-            "trajectory_opt": self.trajectory_opt.name.lower(),
-            "video_export": self.video_export.name.lower(),
-            "dataset_export": self.dataset_export.name.lower(),
-            "force_visualization": self.force_visualization.name.lower(),
-            "model_positioning": self.model_positioning.name.lower(),
-            "measurements": self.measurements.name.lower(),
             "spatial_jacobian_order": "_".join(SPATIAL_JACOBIAN_ORDER),
         }
+        data.update(
+            {
+                capability.value: self.level_for(capability).name.lower()
+                for capability in ENGINE_CAPABILITY_FIELDS
+            }
+        )
+        return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> EngineCapabilities:
@@ -200,21 +343,26 @@ class EngineCapabilities:
             raw = data.get(key, "none")
             return level_map.get(str(raw).lower(), CapabilityLevel.NONE)
 
+        levels: dict[str, Any] = {
+            field_name: _get_level(capability.value)
+            for capability, field_name in ENGINE_CAPABILITY_FIELDS.items()
+        }
+
         return cls(
             engine_name=data.get("engine_name", ""),
-            mass_matrix=_get_level("mass_matrix"),
-            jacobian=_get_level("jacobian"),
-            contact_forces=_get_level("contact_forces"),
-            inverse_dynamics=_get_level("inverse_dynamics"),
-            drift_acceleration=_get_level("drift_acceleration"),
-            parameter_gradients=_get_level("parameter_gradients"),
-            state_control_gradients=_get_level("state_control_gradients"),
-            forward_sim=_get_level("forward_sim"),
-            contact_step=_get_level("contact_step"),
-            trajectory_opt=_get_level("trajectory_opt"),
-            video_export=_get_level("video_export"),
-            dataset_export=_get_level("dataset_export"),
-            force_visualization=_get_level("force_visualization"),
-            model_positioning=_get_level("model_positioning"),
-            measurements=_get_level("measurements"),
+            **levels,
         )
+
+
+__all__ = [
+    "ADAPTER_BOUNDARY_CAPABILITIES",
+    "ENGINE_CAPABILITY_FIELDS",
+    "SPATIAL_JACOBIAN_ORDER",
+    "Capability",
+    "CapabilityLevel",
+    "CapabilityQuery",
+    "CapabilityRef",
+    "EngineCapabilities",
+    "capability_level_supported",
+    "normalize_capability",
+]
