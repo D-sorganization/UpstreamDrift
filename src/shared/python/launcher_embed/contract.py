@@ -164,9 +164,11 @@ class BackgroundableTool(Protocol):
     Hosts must resolve each hook structurally —
     ``getattr(tool, name, default)`` — rather than requiring conformance
     to this protocol, so that a tool may implement *any subset* of the
-    four hooks (or none). The documented defaults are:
+    six hooks (or none). The documented defaults are:
 
     - :meth:`pause` / :meth:`resume`: no-op.
+    - :meth:`pause_widget` / :meth:`resume_widget`: fall back to adapter-level
+      :meth:`pause` / :meth:`resume`.
     - :meth:`can_background`: ``True``.
     - :meth:`detach_to_window`: ``True``.
     """
@@ -182,6 +184,16 @@ class BackgroundableTool(Protocol):
         """
         ...
 
+    def pause_widget(self, widget: Any) -> None:
+        """Suspend background activity for one mounted widget only.
+
+        Hosts call this hook when a tool can be mounted more than once
+        through the same adapter instance, for example as both a tab and
+        a dock. Implementations should pause only ``widget`` and leave
+        any still-visible sibling widgets active.
+        """
+        ...
+
     def resume(self) -> None:
         """Resume activity when a backgrounded widget is re-surfaced.
 
@@ -190,6 +202,10 @@ class BackgroundableTool(Protocol):
 
         Expected default: no-op for tools with no background activity.
         """
+        ...
+
+    def resume_widget(self, widget: Any) -> None:
+        """Resume activity for one previously backgrounded widget only."""
         ...
 
     def can_background(self) -> bool:
