@@ -16,7 +16,7 @@ import sys
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
@@ -124,8 +124,6 @@ class MultiModelShotTracerWidget(QWidget):
         super().__init__(parent)
         self.results: dict[str, FlightResult] = {}
         self.trajectory_plots: dict[str, Any] = {}
-        self.animation_timer = QTimer()
-        self.animation_index = 0
 
         self._setup_ui()
         self._connect_signals()
