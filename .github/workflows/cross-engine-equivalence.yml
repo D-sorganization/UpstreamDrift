@@ -164,6 +164,14 @@ jobs:
         shell: bash
         run: python3 scripts/jaxsim/check_jaxsim_pin.py
 
+      - name: Assert JaxSim parity prerequisites importable (issue #6881)
+        # A required parity gate is meaningful only if its engines actually
+        # import. Best-effort installs above can silently leave the stack
+        # missing; this check makes that fail loudly instead of greening on
+        # skipped assertions.
+        shell: bash
+        run: python -c "import jax, jaxlib, jaxsim, pinocchio"
+
       - name: Run cross-engine forward-sim equivalence test
         env:
           UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
@@ -182,6 +190,16 @@ jobs:
             tests/cross_engine/test_jaxsim_forward_sim.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
+
+      - name: Assert JaxSim parity cases actually ran (issue #6881)
+        # Even with deps present, a JUnit report of only skipped JaxSim parity
+        # cases must not green this required gate. This post-pytest assertion
+        # fails unless at least one JaxSim/Pinocchio parity case passed.
+        shell: bash
+        run: |
+          python3 scripts/ci/assert_required_parity_ran.py \
+            --junit test-results/cross-engine-equivalence-junit.xml \
+            --require-name test_jaxsim_pinocchio_free_body_dynamics_terms_match
 
       - name: Upload equivalence report
         if: always()

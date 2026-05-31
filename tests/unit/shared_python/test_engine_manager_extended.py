@@ -98,11 +98,41 @@ def test_engine_manager_extended_initialization(
     assert len(engine_manager.engine_status) > 0
 
 
-def test_discover_engines(engine_manager) -> None:
-    """Test all engine directories are discovered as available."""
-    # All directories were created in fixture, so all should be available
-    for status in engine_manager.engine_status.values():
-        assert status == EngineStatus.AVAILABLE
+def test_discover_engines(mock_suite_root) -> None:
+    """Engines with a present dir AND importable runtime are AVAILABLE (#6884).
+
+    Runtime-backed engines (MuJoCo/Drake/Pinocchio/OpenSim/MyoSim) require the
+    availability layer to report the package as installed, so it is patched to
+    AVAILABLE. Engines whose directories the fixture does not create (JaxSim,
+    golf_swing_pendulum) remain UNAVAILABLE.
+    """
+    from src.shared.python.engine_core import engine_manager as em
+    from src.shared.python.engine_core.engine_availability import (
+        EngineStatus as RuntimeStatus,
+    )
+
+    with patch.object(
+        em, "get_runtime_engine_status", lambda name: RuntimeStatus.AVAILABLE
+    ):
+        manager = EngineManager(mock_suite_root)
+
+    present_engines = (
+        EngineType.MUJOCO,
+        EngineType.DRAKE,
+        EngineType.PINOCCHIO,
+        EngineType.OPENSIM,
+        EngineType.MYOSIM,
+        EngineType.PENDULUM,
+        EngineType.MATLAB_2D,
+        EngineType.MATLAB_3D,
+        EngineType.PUTTING_GREEN,
+        EngineType.GOLF_SWING_PENDULUM,
+    )
+    for engine_type in present_engines:
+        assert manager.engine_status[engine_type] == EngineStatus.AVAILABLE
+
+    # JaxSim has no directory in the fixture, so it stays unavailable.
+    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.UNAVAILABLE
 
 
 def test_discover_engines_missing(mock_suite_root) -> None:

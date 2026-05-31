@@ -29,6 +29,93 @@ _CAPABILITY_ALIASES = {
 }
 
 
+_MODEL_PACK_V1_SCHEMA = "model_pack/v1"
+
+
+def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a provider ``schema: model_pack/v1`` manifest to strict shape.
+
+    The provider shape declares ``engine``, ``models_root`` and an
+    ``exercises`` list (``{id, path}``). Some providers instead supply a
+    pre-shaped ``models`` list; both are supported. Validation errors are
+    raised with version-aware context so malformed provider manifests fail
+    loudly (#6882).
+
+    Returns
+    -------
+    dict
+        A dict in the strict ``ModelPackManifest`` shape.
+    """
+    require(isinstance(data, dict), "model_pack/v1 manifest must be a mapping", data)
+    repo = str(data.get("repo", "")).strip()
+    package = str(data.get("package", repo)).strip()
+    engine = str(data.get("engine", "")).strip()
+    fmt = str(data.get("format", "")).strip()
+    provider = data.get("provider") or engine or repo
+
+    if not (provider and str(provider).strip()):
+        raise ValueError(
+            "model_pack/v1 manifest missing a provider: declare 'engine', "
+            "'provider', or 'repo'."
+        )
+
+    if "models" in data:
+        models = data["models"]
+    elif "exercises" in data:
+        exercises = data["exercises"]
+        require(
+            isinstance(exercises, list),
+            "model_pack/v1 'exercises' must be a list",
+            exercises,
+        )
+        prefix = package or repo or str(provider)
+        models = []
+        for exercise in exercises:
+            require(
+                isinstance(exercise, dict),
+                "model_pack/v1 exercise entries must be mappings",
+                exercise,
+            )
+            exercise_id = str(exercise.get("id", "")).strip()
+            path = str(exercise.get("path", "")).strip()
+            if not exercise_id or not path:
+                raise ValueError(
+                    "model_pack/v1 exercise entries require non-empty 'id' "
+                    f"and 'path'; got {exercise!r}"
+                )
+            models.append(
+                {
+                    "id": f"{prefix}-{exercise_id}",
+                    "name": exercise.get("name", exercise_id.replace("_", " ").title()),
+                    "description": exercise.get(
+                        "description", f"{engine or provider} {exercise_id} model"
+                    ),
+                    "type": exercise.get("type", fmt or engine or "model"),
+                    "path": path,
+                    "engine_type": engine or None,
+                    **{
+                        key: exercise[key]
+                        for key in ("launcher", "identity", "capabilities", "tags")
+                        if key in exercise
+                    },
+                }
+            )
+    else:
+        raise ValueError(
+            "model_pack/v1 manifest must declare either 'models' or 'exercises'."
+        )
+
+    return {
+        "manifest_version": str(data.get("manifest_version", "1.0.0")),
+        "pack_id": str(data.get("pack_id", package or repo or provider)),
+        "pack_name": str(data.get("pack_name", repo or package or provider)),
+        "provider": str(provider),
+        "models": models,
+        "description": data.get("description", ""),
+        "source_repo": data.get("source_repo", repo or None),
+    }
+
+
 def _slugify(value: str) -> str:
     """Normalize human-readable metadata to a stable lowercase slug."""
     require(isinstance(value, str), "metadata values must be strings", value)
@@ -522,8 +609,17 @@ class ModelPackManifest(ContractChecker):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackManifest:
-        """Create a strict model-pack manifest from a dictionary."""
+        """Create a strict model-pack manifest from a dictionary.
+
+        Provider repositories declare ``schema: model_pack/v1`` with a simpler
+        shape (``engine``/``models_root``/``exercises``). Such manifests are
+        normalized into the strict internal contract before validation so a
+        single runtime path serves both built-in and provider packs (#6882).
+        """
         require(isinstance(data, dict), "manifest must be a mapping", data)
+
+        if str(data.get("schema", "")).strip() == _MODEL_PACK_V1_SCHEMA:
+            data = _normalize_model_pack_v1(data)
 
         required = {"manifest_version", "pack_id", "pack_name", "provider", "models"}
         missing = required - set(data.keys())

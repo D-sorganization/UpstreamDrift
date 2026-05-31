@@ -44,7 +44,12 @@ class TestEngineManager:
             assert manager.engines_root == engines_dir
 
     def test_engine_discovery_with_existing_engines(self) -> None:
-        """Test engine discovery when engines exist."""
+        """Test engine discovery when engines exist and runtime deps import.
+
+        Runtime-backed engines require both an adapter directory and an
+        importable runtime dependency (#6884), so the availability layer is
+        patched to report the packages as installed.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             engines_dir = temp_path / "engines"
@@ -56,7 +61,17 @@ class TestEngineManager:
             drake_dir = engines_dir / "physics_engines" / "drake"
             drake_dir.mkdir(parents=True)
 
-            manager = EngineManager(suite_root=temp_path)
+            from src.shared.python.engine_core import engine_manager as em
+            from src.shared.python.engine_core.engine_availability import (
+                EngineStatus as RuntimeStatus,
+            )
+
+            with patch.object(
+                em,
+                "get_runtime_engine_status",
+                lambda name: RuntimeStatus.AVAILABLE,
+            ):
+                manager = EngineManager(suite_root=temp_path)
             available_engines = manager.get_available_engines()
 
             # Should detect the created engines
@@ -247,6 +262,7 @@ class TestEngineTypes:
             "mujoco",
             "drake",
             "pinocchio",
+            "jaxsim",
             "opensim",
             "myosim",
             "matlab_2d",
