@@ -8,16 +8,71 @@ This module provides automated cross-engine validation to ensure MuJoCo, Drake,
 and Pinocchio produce consistent results within specified tolerances.
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Literal
+from pathlib import Path
+from typing import Literal, Protocol, cast
 
 import numpy as np
+import yaml
 
-from src.shared.python.core.contracts import ContractChecker, invariant
+from src.shared.python.core.contracts import ContractChecker, invariant, require
+from src.shared.python.engine_core.capabilities import CapabilityLevel
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+MetricName = Literal[
+    "position",
+    "velocity",
+    "acceleration",
+    "torque",
+    "jacobian",
+    "state_round_trip",
+    "end_effector",
+    "mass",
+    "center_of_mass",
+    "inertia",
+]
+
+
+class _StateRemapAdapter(Protocol):
+    def from_canonical(self, state: Mapping[str, np.ndarray]) -> object: ...
+
+    def to_canonical(self, state: object) -> Mapping[str, object]: ...
+
+
+class _ForwardKinematicsAdapter(Protocol):
+    def forward_kinematics(
+        self,
+        state: Mapping[str, np.ndarray],
+    ) -> Mapping[str, Mapping[str, object]]: ...
+
+
+class _DynamicsAdapter(Protocol):
+    def inverse_dynamics(
+        self,
+        q: np.ndarray,
+        v: np.ndarray,
+        a: np.ndarray,
+    ) -> np.ndarray: ...
+
+    def forward_dynamics(
+        self,
+        q: np.ndarray,
+        v: np.ndarray,
+        tau: np.ndarray,
+    ) -> np.ndarray: ...
+
+
+class _MassPropertiesAdapter(Protocol):
+    def exported_mass_properties(self) -> Mapping[str, object]: ...
+
+
+class _DifferentialAdapter(Protocol):
+    def differential_state(self, state: np.ndarray) -> np.ndarray: ...
 
 
 @dataclass
@@ -43,6 +98,81 @@ class ValidationResult:
     engine2: str
     message: str
     severity: str = "PASSED"  # PASSED, WARNING, ERROR, BLOCKER
+
+
+@dataclass(frozen=True)
+class DivergenceEntry:
+    """Registered, explained cross-engine divergence."""
+
+    id: str
+    check_name: str
+    metric_name: str
+    engines: tuple[str, str]
+    tolerance: float
+    rationale: str
+
+
+@dataclass(frozen=True)
+class ConformanceCheckResult:
+    """Result for one canonical-v2 conformance check."""
+
+    check_name: str
+    engine_name: str
+    passed: bool
+    skipped: bool = False
+    message: str = ""
+    validation: ValidationResult | None = None
+    divergence: DivergenceEntry | None = None
+
+
+@dataclass(frozen=True)
+class ConformanceReference:
+    """Reference data used by the canonical-v2 conformance harness."""
+
+    canonical_state: Mapping[str, np.ndarray]
+    rigid_dofs: Sequence[str]
+    quaternion_dofs: Sequence[str]
+    fk_poses: Mapping[str, Mapping[str, np.ndarray]]
+    inverse_dynamics_q: np.ndarray
+    inverse_dynamics_v: np.ndarray
+    inverse_dynamics_a: np.ndarray
+    mass_properties: Mapping[str, np.ndarray]
+    differential_state: np.ndarray
+
+
+class DivergenceRegistry:
+    """Machine-readable registry for explained cross-engine divergences."""
+
+    def __init__(self, entries: Sequence[DivergenceEntry] | None = None) -> None:
+        self._entries = tuple(entries or ())
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> DivergenceRegistry:
+        """Load a divergence registry from YAML."""
+        registry_path = Path(path)
+        with registry_path.open(encoding="utf-8") as handle:
+            raw = yaml.safe_load(handle) or {}
+        entries = raw.get("divergences", [])
+        if not isinstance(entries, list):
+            raise ValueError("divergence registry must contain a divergences list")
+        return cls([_parse_divergence_entry(entry) for entry in entries])
+
+    def find(
+        self,
+        *,
+        check_name: str,
+        metric_name: str,
+        engine1: str,
+        engine2: str,
+    ) -> DivergenceEntry | None:
+        """Return the matching divergence entry, if one is registered."""
+        engine_pair = {engine1, engine2}
+        for entry in self._entries:
+            if entry.check_name != check_name or entry.metric_name != metric_name:
+                continue
+            if set(entry.engines) == engine_pair:
+                return entry
+        return None
 
 
 @invariant(
@@ -102,6 +232,11 @@ class CrossEngineValidator(ContractChecker):
         "acceleration": 1e-4,  # m/s²
         "torque": 1e-3,  # N⋅m
         "jacobian": 1e-8,  # dimensionless
+        "state_round_trip": 1e-9,  # canonical-v2 state remap identity
+        "end_effector": 5e-3,  # meters; v1 parity spec target
+        "mass": 1e-9,  # kilograms
+        "center_of_mass": 1e-9,  # meters
+        "inertia": 1e-9,  # kg m²
     }
 
     # Severity thresholds (Assessment C Finding C-003)
@@ -110,15 +245,224 @@ class CrossEngineValidator(ContractChecker):
     ERROR_THRESHOLD = 10.0  # 10× tolerance → error (investigation required)
     BLOCKER_THRESHOLD = 100.0  # 100× tolerance → blocker (fundamental model error)
 
+    def validate_round_trip_state_remap(
+        self,
+        adapter: object,
+        reference: ConformanceReference,
+    ) -> ConformanceCheckResult:
+        """Validate ``from_canonical(to_canonical(q)) == q`` for canonical-v2."""
+        check_name = "round_trip_state_remap"
+        missing = _missing_methods(adapter, ("to_canonical", "from_canonical"))
+        if missing:
+            return _skipped_result(adapter, check_name, missing)
+
+        remap_adapter = cast(_StateRemapAdapter, adapter)
+        native_state = remap_adapter.from_canonical(reference.canonical_state)
+        round_tripped = remap_adapter.to_canonical(native_state)
+        dof_names = [*reference.rigid_dofs, *reference.quaternion_dofs]
+        expected = _flatten_named_arrays(reference.canonical_state, dof_names)
+        actual = _flatten_named_arrays(round_tripped, dof_names)
+        validation = self.compare_states(
+            _adapter_name(adapter),
+            actual,
+            "canonical-v2",
+            expected,
+            metric="state_round_trip",
+        )
+        return _conformance_result(adapter, check_name, validation)
+
+    def validate_forward_kinematics(
+        self,
+        adapter: object,
+        reference: ConformanceReference,
+    ) -> ConformanceCheckResult:
+        """Validate FK against known reference poses."""
+        check_name = "forward_kinematics_reference_pose"
+        if not _supports_capability(adapter, "forward_sim"):
+            return _capability_skip(adapter, check_name, "forward_sim")
+        missing = _missing_methods(adapter, ("forward_kinematics",))
+        if missing:
+            return _skipped_result(adapter, check_name, missing)
+
+        fk_adapter = cast(_ForwardKinematicsAdapter, adapter)
+        actual_poses = fk_adapter.forward_kinematics(reference.canonical_state)
+        expected = _flatten_pose_map(reference.fk_poses)
+        actual = _flatten_pose_map(actual_poses)
+        validation = self.compare_states(
+            _adapter_name(adapter),
+            actual,
+            "canonical-v2-reference",
+            expected,
+            metric="end_effector",
+        )
+        return _conformance_result(adapter, check_name, validation)
+
+    def validate_inverse_forward_dynamics_consistency(
+        self,
+        adapter: object,
+        reference: ConformanceReference,
+    ) -> ConformanceCheckResult:
+        """Validate inverse-dynamics torques reproduce acceleration via FD."""
+        check_name = "inverse_forward_dynamics_consistency"
+        if not _supports_capability(adapter, "inverse_dynamics"):
+            return _capability_skip(adapter, check_name, "inverse_dynamics")
+        if not _supports_capability(adapter, "forward_sim"):
+            return _capability_skip(adapter, check_name, "forward_sim")
+        missing = _missing_methods(adapter, ("inverse_dynamics", "forward_dynamics"))
+        if missing:
+            return _skipped_result(adapter, check_name, missing)
+
+        dynamics_adapter = cast(_DynamicsAdapter, adapter)
+        tau = dynamics_adapter.inverse_dynamics(
+            reference.inverse_dynamics_q,
+            reference.inverse_dynamics_v,
+            reference.inverse_dynamics_a,
+        )
+        actual_acceleration = dynamics_adapter.forward_dynamics(
+            reference.inverse_dynamics_q,
+            reference.inverse_dynamics_v,
+            tau,
+        )
+        validation = self.compare_states(
+            _adapter_name(adapter),
+            np.asarray(actual_acceleration, dtype=float),
+            "canonical-v2-reference",
+            np.asarray(reference.inverse_dynamics_a, dtype=float),
+            metric="acceleration",
+        )
+        return _conformance_result(adapter, check_name, validation)
+
+    def validate_post_export_mass_properties(
+        self,
+        adapter: object,
+        reference: ConformanceReference,
+    ) -> list[ConformanceCheckResult]:
+        """Validate exported mass, CoM, and inertia against canonical CC-3."""
+        check_name = "post_export_mass_properties"
+        if not _supports_capability(adapter, "mass_matrix"):
+            return [_capability_skip(adapter, check_name, "mass_matrix")]
+        missing = _missing_methods(adapter, ("exported_mass_properties",))
+        if missing:
+            return [_skipped_result(adapter, check_name, missing)]
+
+        mass_adapter = cast(_MassPropertiesAdapter, adapter)
+        actual = mass_adapter.exported_mass_properties()
+        results = []
+        mass_metrics: tuple[MetricName, ...] = ("mass", "center_of_mass", "inertia")
+        for metric_name in mass_metrics:
+            validation = self.compare_states(
+                _adapter_name(adapter),
+                np.asarray(actual[metric_name], dtype=float),
+                "canonical-v2-reference",
+                np.asarray(reference.mass_properties[metric_name], dtype=float),
+                metric=metric_name,
+            )
+            results.append(_conformance_result(adapter, check_name, validation))
+        return results
+
+    def validate_differential_against_reference(
+        self,
+        adapter: object,
+        reference_adapter: object,
+        reference: ConformanceReference,
+        divergence_registry: DivergenceRegistry | None = None,
+    ) -> ConformanceCheckResult:
+        """Validate differential behavior against a reference engine."""
+        check_name = "differential_cross_engine_reference"
+        if not _supports_capability(adapter, "forward_sim"):
+            return _capability_skip(adapter, check_name, "forward_sim")
+        missing = _missing_methods(adapter, ("differential_state",))
+        if missing:
+            return _skipped_result(adapter, check_name, missing)
+
+        differential_adapter = cast(_DifferentialAdapter, adapter)
+        reference_differential = cast(_DifferentialAdapter, reference_adapter)
+        actual = differential_adapter.differential_state(reference.differential_state)
+        expected = reference_differential.differential_state(
+            reference.differential_state
+        )
+        validation = self.compare_states(
+            _adapter_name(adapter),
+            np.asarray(actual, dtype=float),
+            _adapter_name(reference_adapter),
+            np.asarray(expected, dtype=float),
+            metric="position",
+        )
+        return self.enforce_divergence_registry(
+            check_name,
+            validation,
+            divergence_registry,
+        )
+
+    def enforce_divergence_registry(
+        self,
+        check_name: str,
+        validation: ValidationResult,
+        divergence_registry: DivergenceRegistry | None,
+    ) -> ConformanceCheckResult:
+        """Apply the "unregistered divergence = failure" rule."""
+        engine_name = validation.engine1
+        if validation.passed:
+            return ConformanceCheckResult(
+                check_name=check_name,
+                engine_name=engine_name,
+                passed=True,
+                validation=validation,
+            )
+        if divergence_registry is None:
+            message = f"unregistered divergence: {validation.message}"
+            return ConformanceCheckResult(
+                check_name=check_name,
+                engine_name=engine_name,
+                passed=False,
+                message=message,
+                validation=validation,
+            )
+
+        entry = divergence_registry.find(
+            check_name=check_name,
+            metric_name=validation.metric_name,
+            engine1=validation.engine1,
+            engine2=validation.engine2,
+        )
+        if entry is None:
+            message = f"unregistered divergence: {validation.message}"
+            return ConformanceCheckResult(
+                check_name=check_name,
+                engine_name=engine_name,
+                passed=False,
+                message=message,
+                validation=validation,
+            )
+        if validation.max_deviation > entry.tolerance:
+            message = (
+                f"registered divergence {entry.id} exceeded registry tolerance "
+                f"{entry.tolerance:.2e}: {validation.message}"
+            )
+            return ConformanceCheckResult(
+                check_name=check_name,
+                engine_name=engine_name,
+                passed=False,
+                message=message,
+                validation=validation,
+                divergence=entry,
+            )
+        return ConformanceCheckResult(
+            check_name=check_name,
+            engine_name=engine_name,
+            passed=True,
+            message=f"accepted registered divergence {entry.id}: {entry.rationale}",
+            validation=validation,
+            divergence=entry,
+        )
+
     def compare_states(
         self,
         engine1_name: str,
         engine1_state: np.ndarray,
         engine2_name: str,
         engine2_state: np.ndarray,
-        metric: Literal[
-            "position", "velocity", "acceleration", "torque", "jacobian"
-        ] = "position",
+        metric: MetricName = "position",
     ) -> ValidationResult:
         """Compare states from two engines against tolerance targets.
 
@@ -353,3 +697,150 @@ class CrossEngineValidator(ContractChecker):
                 else f"RMS difference {rms_pct:.2f}% exceeds {rms_threshold_pct:.2f}%"
             ),
         )
+
+
+def _parse_divergence_entry(raw: object) -> DivergenceEntry:
+    """Parse one divergence registry entry."""
+    if not isinstance(raw, Mapping):
+        raise ValueError("each divergence registry entry must be a mapping")
+    engines = raw.get("engines", ())
+    if not isinstance(engines, Sequence) or isinstance(engines, str):
+        raise ValueError("divergence entry engines must list two engine names")
+    require(len(engines) == 2, "divergence entry engines must list two names")
+    tolerance = float(raw.get("tolerance", 0.0))
+    require(tolerance > 0.0, "divergence entry tolerance must be positive")
+    entry_id = str(raw.get("id", "")).strip()
+    check_name = str(raw.get("check", "")).strip()
+    metric_name = str(raw.get("metric", "")).strip()
+    rationale = str(raw.get("rationale", "")).strip()
+    require(bool(entry_id), "divergence entry id must be provided")
+    require(bool(check_name), "divergence entry check must be provided")
+    require(bool(metric_name), "divergence entry metric must be provided")
+    require(bool(rationale), "divergence entry rationale must be provided")
+    return DivergenceEntry(
+        id=entry_id,
+        check_name=check_name,
+        metric_name=metric_name,
+        engines=(str(engines[0]), str(engines[1])),
+        tolerance=tolerance,
+        rationale=rationale,
+    )
+
+
+def _adapter_name(adapter: object) -> str:
+    """Return a stable display name for an adapter-like object."""
+    return str(getattr(adapter, "engine_name", adapter.__class__.__name__))
+
+
+def _missing_methods(adapter: object, method_names: Sequence[str]) -> tuple[str, ...]:
+    """Return required method names not implemented by ``adapter``."""
+    return tuple(
+        name for name in method_names if not callable(getattr(adapter, name, None))
+    )
+
+
+def _skipped_result(
+    adapter: object,
+    check_name: str,
+    missing_methods: Sequence[str],
+) -> ConformanceCheckResult:
+    """Build a skip result for incomplete adapters."""
+    missing = ", ".join(missing_methods)
+    return ConformanceCheckResult(
+        check_name=check_name,
+        engine_name=_adapter_name(adapter),
+        passed=True,
+        skipped=True,
+        message=f"missing adapter method(s): {missing}",
+    )
+
+
+def _capability_skip(
+    adapter: object,
+    check_name: str,
+    capability: str,
+) -> ConformanceCheckResult:
+    """Build a capability-aware skip result."""
+    return ConformanceCheckResult(
+        check_name=check_name,
+        engine_name=_adapter_name(adapter),
+        passed=True,
+        skipped=True,
+        message=f"capability not supported: {capability}",
+    )
+
+
+def _conformance_result(
+    adapter: object,
+    check_name: str,
+    validation: ValidationResult,
+) -> ConformanceCheckResult:
+    """Convert a numeric validation result into a conformance result."""
+    return ConformanceCheckResult(
+        check_name=check_name,
+        engine_name=_adapter_name(adapter),
+        passed=validation.passed,
+        message=validation.message,
+        validation=validation,
+    )
+
+
+def _supports_capability(adapter: object, capability: str) -> bool:
+    """Return whether an adapter advertises a capability.
+
+    This supports both the current ``EngineCapabilities`` fields and the
+    canonical ``supports()`` query contract from PR #6824.
+    """
+    descriptor = _capability_descriptor(adapter)
+    if descriptor is None:
+        return False
+
+    supports = getattr(descriptor, "supports", None)
+    if callable(supports):
+        try:
+            return bool(supports(capability))
+        except (AttributeError, TypeError, ValueError):
+            logger.debug("capability supports() query failed for %s", capability)
+
+    raw = getattr(descriptor, capability, None)
+    if raw is None:
+        raw = getattr(descriptor, f"has_{capability}", None)
+    if isinstance(raw, CapabilityLevel):
+        return raw is not CapabilityLevel.NONE
+    if isinstance(raw, bool):
+        return raw
+    return False
+
+
+def _capability_descriptor(adapter: object) -> object | None:
+    """Return a capability descriptor from an adapter-like object."""
+    get_capabilities = getattr(adapter, "get_capabilities", None)
+    if callable(get_capabilities):
+        return get_capabilities()
+    return getattr(adapter, "capabilities", None)
+
+
+def _flatten_named_arrays(
+    named_arrays: Mapping[str, object],
+    names: Sequence[str],
+) -> np.ndarray:
+    """Flatten named canonical state arrays in deterministic order."""
+    values = []
+    for name in names:
+        require(name in named_arrays, f"canonical state missing {name}")
+        values.append(np.asarray(named_arrays[name], dtype=float).reshape(-1))
+    if not values:
+        return np.array([], dtype=float)
+    return np.concatenate(values)
+
+
+def _flatten_pose_map(poses: Mapping[str, Mapping[str, object]]) -> np.ndarray:
+    """Flatten nested pose maps in deterministic order."""
+    values = []
+    for pose_name in sorted(poses):
+        pose = poses[pose_name]
+        for body_name in sorted(pose):
+            values.append(np.asarray(pose[body_name], dtype=float).reshape(-1))
+    if not values:
+        return np.array([], dtype=float)
+    return np.concatenate(values)

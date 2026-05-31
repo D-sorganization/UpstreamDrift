@@ -16,6 +16,7 @@ navigation should start with the rendered documentation URL.
 
 | Directory               | Owner                 | Stability | Description                                                                                                                         |
 | ----------------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `adapters/`             | @physics-team         | stable    | Adapter authoring guidance for engine contracts, canonical state remaps, capabilities, and conformance gates.                       |
 | `adr/`                  | @architecture-team    | stable    | Architecture decision records and templates for durable design decisions.                                                           |
 | `ai_implementation/`    | @automation-team      | draft     | AI-assisted implementation notes and operational agent guidance.                                                                    |
 | `api/`                  | @api-team             | stable    | REST API architecture, endpoint references, and integration guidance.                                                               |
@@ -28,12 +29,14 @@ navigation should start with the rendered documentation URL.
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                                              |
 | `competitive_analysis/` | @product-team         | draft     | Market and ecosystem comparisons used for planning context.                                                                         |
 | `config/`               | @platform-team        | draft     | Configuration and settings documentation (e.g. the pydantic-settings migration guide).                                              |
+| `conformance/`          | @physics-team         | stable    | Cross-engine conformance notes, divergence ledgers, and canonical-core parity records.                                              |
 | `conventions/`          | @architecture-team    | stable    | Cross-subsystem data contracts and naming conventions, including canonical pose/state interchange.                                  |
 | `deployment/`           | @platform-team        | stable    | Deployment procedures, packaging notes, and release environment guidance.                                                           |
 | `design/`               | @architecture-team    | draft     | Feature design sketches and deeper design rationale before ADR promotion.                                                           |
 | `development/`          | @engineering-team     | stable    | Developer workflow notes, implementation reports, and local contribution guidance.                                                  |
 | `engineering/`          | @engineering-team     | stable    | Engineering practices and cross-cutting technical standards.                                                                        |
 | `engines/`              | @physics-team         | stable    | Physics engine support tiers, capabilities, and backend-specific documentation.                                                     |
+| `estimation/`           | @engineering-team     | stable    | Estimation validation, synthetic fixtures, identifiability probes, and offline estimator readiness notes.                           |
 | `examples/`             | @developer-experience | stable    | Example workflows and sample usage for common simulation tasks.                                                                     |
 | `golf-model/`           | @physics-team         | draft     | Golf-model investigation notes and motion-matching diagnostics.                                                                     |
 | `governance/`           | @maintainers          | stable    | Repository governance policies, documentation rules, and maintenance process.                                                       |
@@ -70,6 +73,7 @@ navigation should start with the rendered documentation URL.
 | `ui/`                   | @ui-team              | draft     | Launcher/UI feature parity matrix and frontend-facing notes.                                                                        |
 | `user_guide/`           | @docs-team            | stable    | User-facing guides for common workflows and product capabilities.                                                                   |
 | `ux/`                   | @ui-team              | draft     | UX infrastructure for epic #5968: field metadata registry, copy style, walkthrough specs, and contributor guidance.                 |
+| `validation/`           | @quality-team         | stable    | Cross-engine validation artifacts, differential reports, and machine-readable evidence snapshots.                                   |
 | `workflows/`            | @platform-team        | stable    | Automation workflow documentation and CI/CD process references.                                                                     |
 
 ## Governance Checks

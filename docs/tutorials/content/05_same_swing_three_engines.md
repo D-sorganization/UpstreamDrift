@@ -7,7 +7,8 @@
 
 - Completed [Tutorial 3: Engine Comparison](03_engine_comparison.md)
 - MuJoCo and Pinocchio installed
-- JaxSim installed if you want to run the differentiable backend locally
+- JaxSim installed from the pinned optional extra if you want to run the
+  differentiable backend locally
 - A single exported swing trajectory or the bundled golfer URDF sample
 
 ## Learning Objectives
@@ -121,6 +122,13 @@ When JaxSim is installed, run the JaxSim-compatible path with the same initial
 state. If it is not installed, mark the run as skipped and keep the MuJoCo and
 Pinocchio comparison results.
 
+Install JaxSim through the repository extra so the version matches the upgrade
+guard:
+
+```bash
+python3 -m pip install -e ".[jaxsim]"
+```
+
 ```python
 try:
     jaxsim_engine_type = EngineType("jaxsim")
@@ -220,5 +228,7 @@ normalizing each to the suite canonical `[angular; linear]` inertial convention
   `cross-engine-equivalence.yml`; run it locally before bumping the pin.
 - Extend this tutorial with a checked-in, runnable sample once the JaxSim backend
   API is stable in the repository.
+- Read the [JaxSim version policy](../../development/jaxsim_version_policy.md)
+  before changing the optional dependency pin.
 - Use [Tutorial 4: Video Analysis](04_video_analysis.md) to generate a real
   swing trajectory for the same workflow.

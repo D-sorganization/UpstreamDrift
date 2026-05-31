@@ -9,6 +9,7 @@ Models:
 - KeypointFrame: 2D or 3D keypoints with confidences
 - KeypointSequence: Timestamped sequence of KeypointFrame
 - MarkerFrame / MarkerTrajectory: Labeled 3D markers
+- CanonicalObservations: Unified marker/keypoint observations for ingestion
 - SkeletonRig: Joints, parents, T-pose offsets, axes, limits
 - JointStateFrame / JointTrajectory: q, qdot, qddot, time
 - MotionTrajectory: Skeleton + joint trajectory + metadata
@@ -327,6 +328,110 @@ class MarkerTrajectory(BaseModel):
             if frame_markers != reference_markers:
                 # Allow for occlusions, but names should be consistent
                 pass  # Relaxing this constraint for practical use
+        return self
+
+    @property
+    def num_frames(self) -> int:
+        return len(self.frames)
+
+    @property
+    def marker_names(self) -> list[str]:
+        return self.frames[0].marker_names if self.frames else []
+
+    @property
+    def duration(self) -> float:
+        if len(self.frames) < 2:
+            return 0.0
+        return self.frames[-1].timestamp - self.frames[0].timestamp
+
+
+# =============================================================================
+# Canonical Observations
+# =============================================================================
+
+
+class CanonicalObservationFrame(BaseModel):
+    """Single canonical observation frame.
+
+    Frames may carry 3D markers, keypoints, or both. The model is intentionally
+    capture-system neutral so source adapters can preserve raw observations
+    before IK or engine-specific conversion.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    timestamp: float = Field(..., description="Frame timestamp (seconds)", ge=0)
+    markers: dict[str, Marker] = Field(
+        default_factory=dict,
+        description="OpenSim-aligned marker name -> marker data",
+    )
+    keypoints: list[Keypoint] = Field(
+        default_factory=list,
+        description="Capture-system keypoints in source schema order",
+    )
+    frame_index: int | None = Field(default=None, description="Frame index")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Frame-level provenance"
+    )
+
+    @field_validator("timestamp")
+    @classmethod
+    def check_timestamp_finite(cls, v: float) -> float:
+        if not np.isfinite(v):
+            raise ValueError("Timestamp must be finite")
+        return v
+
+    @model_validator(mode="after")
+    def check_has_observations(self) -> CanonicalObservationFrame:
+        if not self.markers and not self.keypoints:
+            raise ValueError(
+                "CanonicalObservationFrame requires markers, keypoints, or both"
+            )
+        return self
+
+    @property
+    def marker_names(self) -> list[str]:
+        return list(self.markers.keys())
+
+
+class CanonicalObservations(BaseModel):
+    """Canonical, engine-neutral observation stream.
+
+    This is the ingestion boundary for markerless systems such as OpenCap:
+    adapters normalize units and marker names here, while downstream IK stages
+    still receive the source observations without engine-specific state.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    id: str = Field(..., description="Unique observation-stream identifier")
+    frames: list[CanonicalObservationFrame] = Field(
+        ..., description="Canonical observation frames", min_length=1
+    )
+    calibration: Calibration | None = Field(
+        default=None, description="Associated calibration data"
+    )
+    marker_set_name: str | None = Field(
+        default=None, description="Marker-set identifier after normalization"
+    )
+    keypoint_schema: SchemaName | None = Field(
+        default=None, description="Keypoint schema when keypoints are present"
+    )
+    subject: dict[str, Any] | None = Field(
+        default=None, description="Subject metadata from source session"
+    )
+    source_provenance: dict[str, Any] = Field(
+        default_factory=dict, description="Source data provenance"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
+
+    @model_validator(mode="after")
+    def check_monotonic_timestamps(self) -> CanonicalObservations:
+        timestamps = [f.timestamp for f in self.frames]
+        if timestamps != sorted(timestamps):
+            raise ValueError("Timestamps must be monotonically increasing")
         return self
 
     @property
@@ -959,6 +1064,8 @@ __all__ = [
     "Marker",
     "MarkerFrame",
     "MarkerTrajectory",
+    "CanonicalObservationFrame",
+    "CanonicalObservations",
     # Skeleton types
     "JointDef",
     "JointLimit",

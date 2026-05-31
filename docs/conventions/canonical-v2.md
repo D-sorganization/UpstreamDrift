@@ -66,13 +66,14 @@ this table rather than re-deriving it. **The conformance suite (CC-7) verifies
 each row** via the round-trip and ID↔FD checks — if a quaternion order or
 angular-velocity frame is wrong, those tests fail.
 
-| Engine           | Native base quaternion             | Native base layout                                                                 | Angular-velocity frame                                                                    | Notes                                                                                         |
-| ---------------- | ---------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **Pinocchio**    | `(x, y, z, w)` — **w-last**        | `[xyz, quat_xyzw]` free-flyer                                                      | LOCAL (body)                                                                              | Reference engine; canonical ang-vel frame matches it. Only the quaternion order is reordered. |
-| **MuJoCo / MJX** | `(w, x, y, z)` — **w-first**       | `qpos = [xyz, quat_wxyz]` free joint                                               | free-joint `qvel` angular part — **verify frame per adapter** against `mj_objectVelocity` | Quaternion order matches canonical; confirm ang-vel frame in CC-10/CC-29.                     |
-| **Drake**        | `(w, x, y, z)` — w-first           | `QuaternionFloatingJoint`: `[quat_wxyz, xyz]` (or URDF RPY floating: `[xyz, rpy]`) | spatial velocity `V_WB` — **verify frame per adapter**                                    | Base block ordering differs (quat first); RPY-floating URDFs convert via `se3` Euler path.    |
-| **OpenSim**      | coordinate-based (3 rot + 3 trans) | `FreeJoint` coordinates, often XYZ Euler                                           | per-coordinate speeds                                                                     | Some `.osim` models invert Y for shoulder external rotation (see ADR-0012).                   |
-| **Simscape**     | parameter-bus, **degrees**         | `*StartPosition*` Simulink params                                                  | n/a (pose import)                                                                         | Degrees → radians at the boundary.                                                            |
+| Engine           | Native base quaternion             | Native base layout                                                                 | Angular-velocity frame                                                                                                                                          | Notes                                                                                                                                                                                                               |
+| ---------------- | ---------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pinocchio**    | `(x, y, z, w)` — **w-last**        | `[xyz, quat_xyzw]` free-flyer                                                      | LOCAL (body)                                                                                                                                                    | Reference engine; canonical ang-vel frame matches it. Only the quaternion order is reordered.                                                                                                                       |
+| **MuJoCo / MJX** | `(w, x, y, z)` — **w-first**       | `qpos = [xyz, quat_wxyz]` free joint                                               | MuJoCo free-joint `qvel = [linear_world, angular_body]`                                                                                                         | CC-10 chooses MuJoCo first for contact-rich forward simulation; quaternion and qvel ordering match canonical-v2. MuJoCo soft/compliant contact is documented as divergent from rigid-contact Pinocchio comparisons. |
+| **MyoSuite**     | `(w, x, y, z)` — **w-first**       | MuJoCo MJCF `qpos = [xyz, quat_wxyz]` free joint                                   | body-local free-joint `qvel` angular part, matching the canonical MyoSuite adapter                                                                              | Activation-driven; declares `MUSCLES`, `FORWARD_DYN`, `CONTACT`, and no joint-torque ID.                                                                                                                            |
+| **Drake**        | `(w, x, y, z)` — w-first           | `QuaternionFloatingJoint`: `[quat_wxyz, xyz]` (or URDF RPY floating: `[xyz, rpy]`) | `QuaternionFloatingJoint` velocity is `(w_FM, v_FM)` expressed in parent/world; CC-28 maps canonical body-local angular velocity through `R_FM` at the boundary | Base block ordering differs (quat first); RPY-floating URDFs convert via `se3` Euler path.                                                                                                                          |
+| **OpenSim**      | coordinate-based (3 rot + 3 trans) | `FreeJoint` coordinates, often XYZ Euler                                           | per-coordinate speeds                                                                                                                                           | Some `.osim` models invert Y for shoulder external rotation (see ADR-0012).                                                                                                                                         |
+| **Simscape**     | parameter-bus, **degrees**         | `*StartPosition*` Simulink params                                                  | n/a (pose import)                                                                                                                                               | Degrees -> radians at the boundary.                                                                                                                                                                                 |
 
 > **Rule:** any cell marked _verify per adapter_ must be pinned down in that
 > adapter's PR with a unit test, and the result recorded back here. The frame of
@@ -107,7 +108,21 @@ Every materialised state and result is stamped (CC-6 `ProvenanceStamp`) with the
 `convention`, `frame`, and `units` tags above, so a consumer can reject a state
 whose convention it does not recognise and a result can be reproduced exactly.
 
-## 6. Double-pendulum AffineDrift coupling
+## 6. Shared estimation parameters
+
+Canonical-core MAP fits use `SharedParameterBlock` as the ordered theta contract.
+For multi-trial or multi-view fits, every observation owns its own spline
+trajectory block while unlocked shared parameters appear once at the end of the
+global decision vector. Locked shared parameters are still present in serialized
+run manifests and result mappings, but they are excluded from optimizer columns
+and keep their initial values.
+
+Posterior-tightening checks should stack shared-parameter Jacobian rows across
+all trials/views and compare the approximate covariance of identifiable
+directions. Adding independent views of the same shared theta must reduce the
+reported variance on those directions in synthetic validation data.
+
+## 7. Double-pendulum AffineDrift coupling
 
 The analysis-layer helper
 `src.shared.python.analysis.affine_drift_coupling.couple_trace_to_affine_drift`
@@ -126,7 +141,7 @@ For each sample, the result exposes the AffineDrift state
 `M(q)^-1`. The calculation is pointwise on the measured trajectory; it does not
 forward-integrate a zero-torque or zero-velocity counterfactual.
 
-## 7. Migration from `canonical-v1`
+## 8. Migration from `canonical-v1`
 
 - A `CanonicalPose` (v1) maps to a `canonical-v2` `q` by converting the pelvis
   SE(3) (`euler_xyz_deg` → quaternion `wxyz`) and joint degrees → radians, with

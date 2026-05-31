@@ -112,6 +112,23 @@ def _pin_array(value: object, name: str) -> np.ndarray:
     return value
 
 
+def _require_pinocchio_dynamics_api(pin: object) -> None:
+    """Skip partial Pinocchio installs that lack model or dynamics APIs."""
+
+    required = (
+        "Model",
+        "JointModelFreeFlyer",
+        "SE3",
+        "Inertia",
+        "crba",
+        "rnea",
+        "computeCoriolisMatrix",
+    )
+    missing = [name for name in required if not hasattr(pin, name)]
+    if missing:
+        pytest.skip(f"Pinocchio install lacks required dynamics APIs: {missing}")
+
+
 def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     pytest.importorskip("jax")
     pytest.importorskip("jaxlib")
@@ -131,6 +148,7 @@ def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
 
 def _pinocchio_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     pin = pytest.importorskip("pinocchio")
+    _require_pinocchio_dynamics_api(pin)
 
     model = pin.Model()
     model.gravity.linear = np.asarray(CANONICAL_GRAVITY_INERTIAL, dtype=np.float64)

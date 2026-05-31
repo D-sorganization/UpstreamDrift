@@ -33,6 +33,61 @@ either (a) consume URDF emitted by `write_urdf_inertial`, or (b)
 implement an `EngineAdapter` that translates `SegmentProperties`
 directly into the engine's native representation.
 
+## AddBiomechanics calibration priors
+
+Markerless-only fitting cannot identify absolute segment mass scale or
+player-specific inertias. The supported path for strong inertia priors is:
+
+1. Run an occasional force-plate calibration session through
+   AddBiomechanics.
+2. Export scaled segment masses, CoMs, and 3 x 3 inertia tensors in SI
+   units.
+3. Import that export with
+   `anthropometrics.load_addbiomechanics_inertia_priors`.
+4. Pass `CalibrationInertiaPriorSet.to_estimator_parameter_block_payload()`
+   to the canonical estimator as `theta_prior`.
+
+The importer validates every scaled segment through `SegmentProperties`,
+so non-symmetric, non-positive-definite, or triangle-inequality-violating
+inertias fail before they reach an optimizer. The generated estimator
+payload uses bounded `kind="inertia"` parameter specs named like
+`theta_prior.pelvis.inertia.ixx`; by default each prior allows a 10 %
+bounded correction and applies a 2 % Gaussian prior scale. Those bounds
+are deliberate: AddBiomechanics supplies the identifiable absolute
+inertia anchor, while the estimator may make only small corrections.
+
+Accepted AddBiomechanics JSON shape:
+
+```json
+{
+  "source": "AddBiomechanics",
+  "session_id": "forceplate-2026-05-31",
+  "subject": {
+    "subject_id": "athlete-9",
+    "height_m": 1.74,
+    "mass_kg": 68.0,
+    "sex": "F"
+  },
+  "segments": [
+    {
+      "name": "torso",
+      "body_part_id": "torso",
+      "length_m": 0.55,
+      "mass_kg": 22.0,
+      "com_xyz_m": [0.0, 0.12, 0.0],
+      "inertia_tensor": [
+        [0.4, 0.01, 0.0],
+        [0.01, 0.35, 0.02],
+        [0.0, 0.02, 0.3]
+      ]
+    }
+  ]
+}
+```
+
+The same loader also accepts canonical `SubjectAnthropometrics` JSON and
+the saved prior-set schema written by `save_inertia_priors`.
+
 ## The `EngineAdapter` Protocol
 
 Defined in `src/shared/python/anthropometrics/contracts.py`:

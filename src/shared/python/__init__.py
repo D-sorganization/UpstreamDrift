@@ -10,6 +10,7 @@ Available packages:
     - signal_toolkit: Signal processing and analysis
     - humanoid_character_builder: anthropometric domain layer for humanoid generation
     - model_generation: canonical generic URDF/MJCF toolkit and conversion surface
+    - estimation: canonical-core MAP estimation helpers
 
 Preferred imports (direct from package, since src/shared/python is on sys.path):
     from shared.python.theme import ThemeManager, get_theme_manager  # theme: keep prefix
@@ -41,6 +42,7 @@ __all__ = [
     "calc_backend",
     "chat",
     "config",
+    "estimation",
     "humanoid_character_builder",
     "model_generation",
     "notes",
@@ -55,6 +57,7 @@ _LAZY_SUBPACKAGES = {
     "calc_backend",
     "chat",
     "config",
+    "estimation",
     "humanoid_character_builder",
     "model_generation",
     "notes",

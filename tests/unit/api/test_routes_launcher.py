@@ -90,6 +90,9 @@ def test_get_engine_capabilities(client: TestClient) -> None:
     data = response.json()
     assert "mujoco" in data
     assert "drake" in data
+    assert data["jaxsim"]["engine_name"] == "JaxSim"
+    assert data["jaxsim"]["contact_forces"] == "partial"
+    assert data["jaxsim"]["inverse_dynamics"] == "full"
 
 
 def test_get_single_engine_capabilities(client: TestClient) -> None:
@@ -98,6 +101,16 @@ def test_get_single_engine_capabilities(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["engine_name"] == "MuJoCo"
+
+
+def test_get_jaxsim_capabilities(client: TestClient) -> None:
+    """JaxSim capability profile supports selector grey-out decisions."""
+    response = client.get("/launcher/engines/jaxsim/capabilities")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["engine_name"] == "JaxSim"
+    assert data["jacobian"] == "full"
+    assert data["force_visualization"] == "none"
 
 
 def test_get_single_engine_capabilities_not_found(client: TestClient) -> None:

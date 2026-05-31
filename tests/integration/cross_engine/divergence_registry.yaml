@@ -1,0 +1,10 @@
+version: 1
+divergences:
+  - id: soft-vs-hard-contact-smoke
+    check: differential_cross_engine_reference
+    metric: position
+    engines: [mock-soft-contact, mock-reference]
+    tolerance: 0.01
+    rationale: >
+      Stub fixture for the CC-7 registry contract. Real entries must name the
+      contact model or solver difference and the tolerance accepted by review.

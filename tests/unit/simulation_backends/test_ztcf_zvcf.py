@@ -10,11 +10,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import h5py
 import numpy as np
 import pytest
 
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
+    DoublePendulumState,
 )
 from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
@@ -26,8 +28,11 @@ from src.shared.python.simulation_backends import (
     make_backend,
 )
 from src.shared.python.simulation_backends.ztcf_zvcf import (
+    CanonicalDynamicsTrajectory,
     drift_and_control_split,
     evaluate_ztcf_along_trajectory,
+    evaluate_ztcf_zvcf_on_canonical_trajectory,
+    persist_ztcf_zvcf_analysis,
     ztcf_acceleration,
     zvcf_acceleration,
 )
@@ -167,6 +172,35 @@ def test_evaluate_ztcf_along_trajectory_is_pointwise() -> None:
         assert np.allclose(out[i], ztcf_acceleration(provider, q_traj[i], v_traj[i]))
 
 
+def test_canonical_v2_allows_configuration_and_tangent_dim_to_differ() -> None:
+    """canonical-v2 accepts ``nq != nv`` without changing the dynamics math."""
+
+    class FloatingBaseLikeProvider:
+        def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+            assert q.shape == (3,)
+            return np.array([[2.0, 0.25], [0.25, 1.5]])
+
+        def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            assert q.shape == (3,)
+            assert v.shape == (2,)
+            return np.array([q[0] + 0.5 * v[0], q[1] - v[1]])
+
+    provider = FloatingBaseLikeProvider()
+    q = np.array([0.4, -0.2, 0.99])
+    v = np.array([1.2, -0.7])
+    tau = np.array([0.3, -0.4])
+    mass = provider.mass_matrix(q)
+
+    np.testing.assert_allclose(
+        ztcf_acceleration(provider, q, v),
+        np.linalg.solve(mass, -provider.bias_forces(q, v)),
+    )
+    np.testing.assert_allclose(
+        zvcf_acceleration(provider, q, tau),
+        np.linalg.solve(mass, tau - provider.bias_forces(q, np.zeros_like(v))),
+    )
+
+
 def test_zvcf_reduces_to_control_minus_gravity() -> None:
     """At ``v = 0`` the ZVCF bias is gravity only (Coriolis/damping vanish)."""
     dyn = DoublePendulumDynamics(
@@ -181,6 +215,87 @@ def test_zvcf_reduces_to_control_minus_gravity() -> None:
         mass = np.asarray(dyn.mass_matrix(float(q[1])), dtype=float)
         expected = np.linalg.solve(mass, tau - np.array([g1, g2]))
         assert np.allclose(zvcf_acceleration(provider, q, tau), expected, atol=1e-12)
+
+
+def test_canonical_trajectory_matches_affine_drift_reference() -> None:
+    """Canonical-v2 wrapper matches the existing control-affine reference."""
+    dyn = DoublePendulumDynamics(
+        GolfModelParams.default().to_double_pendulum_parameters()
+    )
+    provider = _AnalyticalProvider(GolfModelParams.default())
+    t = np.array([0.0, 0.01, 0.02])
+    q = np.array([[0.1, -0.2], [0.15, -0.25], [0.2, -0.3]])
+    v = np.array([[0.4, -0.1], [0.3, 0.05], [0.2, 0.15]])
+    tau = np.array([[1.0, -0.2], [0.5, 0.25], [0.1, 0.4]])
+
+    trajectory = CanonicalDynamicsTrajectory(
+        t=t,
+        q=q,
+        v=v,
+        tau=tau,
+        meta={"issue": 6797},
+    )
+    result = evaluate_ztcf_zvcf_on_canonical_trajectory(provider, trajectory)
+
+    for idx in range(trajectory.num_steps):
+        state = DoublePendulumState(
+            theta1=float(q[idx, 0]),
+            theta2=float(q[idx, 1]),
+            omega1=float(v[idx, 0]),
+            omega2=float(v[idx, 1]),
+        )
+        f_ref, g_ref = dyn.control_affine(state)
+        g_tau = np.asarray(g_ref, dtype=float) @ tau[idx]
+        np.testing.assert_allclose(result.drift_acceleration[idx], f_ref[2:])
+        np.testing.assert_allclose(result.ztcf_acceleration[idx], f_ref[2:])
+        np.testing.assert_allclose(result.control_acceleration[idx], g_tau[2:])
+        np.testing.assert_allclose(
+            result.drift_acceleration[idx] + result.control_acceleration[idx],
+            np.asarray(f_ref[2:]) + g_tau[2:],
+        )
+
+
+def test_persist_ztcf_zvcf_analysis_writes_cc4_style_datasets(
+    tmp_path: Path,
+) -> None:
+    """ZTCF/ZVCF arrays persist beside canonical-v2 q/v/u datasets."""
+    provider = _AnalyticalProvider(GolfModelParams.default())
+    trajectory = CanonicalDynamicsTrajectory(
+        t=np.array([0.0, 0.01]),
+        q=np.array([[0.1, -0.2], [0.2, -0.3]]),
+        v=np.array([[0.4, -0.1], [0.2, 0.15]]),
+        tau=np.array([[1.0, -0.2], [0.1, 0.4]]),
+        meta={"analysis": "ztcf_zvcf"},
+    )
+    result = evaluate_ztcf_zvcf_on_canonical_trajectory(provider, trajectory)
+    path = tmp_path / "ztcf_zvcf_analysis.h5"
+
+    persist_ztcf_zvcf_analysis(
+        trajectory,
+        result,
+        path,
+        backend="ode",
+    )
+
+    with h5py.File(path, "r") as handle:
+        assert handle.attrs["schema_version"] == "2.0.0"
+        assert handle.attrs["kind"] == "ztcf_zvcf_analysis"
+        assert handle.attrs["convention"] == "canonical-v2"
+        assert handle.attrs["meta_analysis"] == "ztcf_zvcf"
+        for name in (
+            "t",
+            "q",
+            "v",
+            "u",
+            "ztcf_acceleration",
+            "zvcf_acceleration",
+            "drift_acceleration",
+            "control_acceleration",
+        ):
+            assert name in handle
+        np.testing.assert_allclose(
+            handle["drift_acceleration"][()], result.drift_acceleration
+        )
 
 
 # --------------------------------------------------------------------------- #

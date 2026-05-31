@@ -190,6 +190,23 @@ def test_forward_dynamics_passive_equals_negative_solve_bias() -> None:
     )
 
 
+@pytest.mark.requires_mujoco
+@_skip_no_mujoco
+def test_inverse_dynamics_matches_mass_accel_plus_bias() -> None:
+    """``mj_inverse`` returns ``M(q) a + bias(q,v)`` for rigid phases."""
+    backend = _make_backend()
+    dyn = DoublePendulumDynamics(_params().to_double_pendulum_parameters())
+    q = np.array([0.5, -0.4], dtype=float)
+    v = np.array([1.0, -2.0], dtype=float)
+    a = np.array([0.25, -0.75], dtype=float)
+
+    tau_mj = backend.inverse_dynamics(q, v, a)
+    m_an = _analytical_mass(dyn, float(q[1]))
+    bias_an = _analytical_bias(dyn, q, v)
+
+    np.testing.assert_allclose(tau_mj, m_an @ a + bias_an, atol=1e-8, rtol=0.0)
+
+
 # --------------------------------------------------------------------------- #
 # Simulation loop / rollout contract
 # --------------------------------------------------------------------------- #

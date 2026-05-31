@@ -102,6 +102,88 @@ fields:
     producers: []
     example: "constant"
 
+  - id: actuator.value
+    label: Command value
+    short_help: Commanded torque or force for this actuator.
+    long_help: |
+      The control signal sent to the actuator each step.  Interpreted in
+      the actuator's own `units` (N*m for torque joints, N for linear
+      actuators).  Must lie within [`actuator.min_value`,
+      `actuator.max_value`]; values outside the range are clamped by the
+      engine and flagged by preflight.
+    units: ~
+    valid_range: ~
+    default: 0.0
+    default_source: Zero command is the safe neutral start for every control type.
+    consumers: []
+    producers: [actuator.min_value, actuator.max_value]
+    example: "0.0"
+
+  - id: actuator.min_value
+    label: Minimum command
+    short_help: Lower bound of the actuator's command range.
+    long_help: |
+      Engine-reported lower limit for this actuator's command, taken from
+      the model's actuator definition.  ActuatorPanel uses it as the left
+      end of each slider.  Read-only in the UI; it comes from the loaded
+      model, not user input.
+    units: ~
+    valid_range: ~
+    default: -1.0
+    default_source: Model actuator ctrlrange lower bound (engine capabilities query).
+    consumers: [actuator.value]
+    producers: []
+    example: "-1.0"
+
+  - id: actuator.max_value
+    label: Maximum command
+    short_help: Upper bound of the actuator's command range.
+    long_help: |
+      Engine-reported upper limit for this actuator's command, taken from
+      the model's actuator definition.  ActuatorPanel uses it as the right
+      end of each slider.  Read-only in the UI; it comes from the loaded
+      model, not user input.
+    units: ~
+    valid_range: ~
+    default: 1.0
+    default_source: Model actuator ctrlrange upper bound (engine capabilities query).
+    consumers: [actuator.value]
+    producers: []
+    example: "1.0"
+
+  - id: actuator.polynomial_coefficients
+    label: Polynomial coefficients
+    short_help: Coefficients of the time-parameterised command polynomial.
+    long_help: |
+      Ordered coefficients `[c0, c1, c2, ...]` for the polynomial
+      `c0 + c1*t + c2*t^2 + ...` evaluated at simulation time `t`.
+      Only used when `actuator.control_type` is `polynomial`.  The
+      Polynomial Generator panel writes these.
+    units: ~
+    valid_range: ~
+    default: "[0.0]"
+    default_source: Constant-zero polynomial matches the neutral default command.
+    consumers: []
+    producers: [actuator.control_type]
+    example: "[0.0, 1.5, -0.25]"
+
+  # ---- simulation parameters (continued — ParameterPanel)
+  - id: simulation.model
+    label: Model
+    short_help: Which musculoskeletal/robot model the simulation loads.
+    long_help: |
+      Identifier of the model the engine instantiates (URDF/MJCF/OSIM name
+      or canonical model key).  Determines the available actuators and
+      joints shown in ActuatorPanel.  Switching models reloads the
+      actuator list.
+    units: ~
+    valid_range: ~
+    default: ""
+    default_source: Empty means "use the engine's bundled default model" (ParameterPanel).
+    consumers: []
+    producers: []
+    example: "humanoid"
+
   # ---- pose studio (desktop)
   - id: pose_studio.show_radians
     label: Show in radians

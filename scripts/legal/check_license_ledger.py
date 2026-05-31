@@ -63,6 +63,22 @@ def ledger_package_names(ledger_path: Path) -> set[str]:
     return rows
 
 
+def _markdown_table_cells(line: str) -> list[str]:
+    """Return stripped cells from a simple pipe-delimited markdown row."""
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def _ledger_row_for_package(ledger_path: Path, package_name: str) -> list[str] | None:
+    """Return the markdown table row cells for a normalized package name."""
+    for line in ledger_path.read_text(encoding="utf-8").splitlines():
+        match = _LEDGER_PACKAGE_RE.match(line)
+        if match is None or match.group(1).lower() == "package":
+            continue
+        if normalize_package_name(match.group(1)) == package_name:
+            return _markdown_table_cells(line)
+    return None
+
+
 def validate_license_ledger(pyproject_path: Path, ledger_path: Path) -> list[str]:
     """Return validation errors for the dependency ledger."""
     declared = declared_dependency_names(pyproject_path)
@@ -72,10 +88,12 @@ def validate_license_ledger(pyproject_path: Path, ledger_path: Path) -> list[str
         f"missing license ledger row for {name}" for name in sorted(declared - ledgered)
     ]
 
-    ledger_text = ledger_path.read_text(encoding="utf-8")
-    if "`openpose`" not in ledger_text:
+    openpose_row = _ledger_row_for_package(ledger_path, "openpose")
+    if openpose_row is None:
         errors.append("missing OpenPose commercialization-gate row")
-    if "Non-commercial" not in ledger_text or "Opt-in" not in ledger_text:
+    elif len(openpose_row) < 5 or not (
+        "Non-commercial" in openpose_row[3] and "Opt-in" in openpose_row[4]
+    ):
         errors.append("OpenPose row must state Non-commercial and Opt-in")
 
     return errors

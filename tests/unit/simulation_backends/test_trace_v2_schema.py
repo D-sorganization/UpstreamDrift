@@ -34,6 +34,7 @@ _NQ = 2
 _NU = 2
 _N_MARKERS = 4
 _N_CONTACTS = 3
+_N_MUSCLES = 2
 
 
 def _base_trace(**kwargs) -> Trace:
@@ -133,6 +134,33 @@ def test_trace_v2_round_trip_all_optional_groups(tmp_path) -> None:
     np.testing.assert_allclose(loaded.contacts, contacts)
 
 
+def test_trace_v2_round_trip_with_muscle_outputs(tmp_path) -> None:
+    """A Trace with MyoSuite muscle-output groups round-trips losslessly."""
+    muscle_names = ("biceps", "triceps")
+    activations = _RNG.random((_T, _N_MUSCLES))
+    forces = _RNG.standard_normal((_T, _N_MUSCLES))
+    lengths = _RNG.random((_T, _N_MUSCLES))
+    velocities = _RNG.standard_normal((_T, _N_MUSCLES))
+    trace = _base_trace(
+        muscle_names=muscle_names,
+        muscle_activations=activations,
+        muscle_forces=forces,
+        muscle_lengths=lengths,
+        muscle_velocities=velocities,
+    )
+    path = tmp_path / "muscles.h5"
+
+    write_trace(trace, path)
+    loaded = read_trace(path)
+
+    assert isinstance(loaded, Trace)
+    assert loaded.muscle_names == muscle_names
+    np.testing.assert_allclose(loaded.muscle_activations, activations)
+    np.testing.assert_allclose(loaded.muscle_forces, forces)
+    np.testing.assert_allclose(loaded.muscle_lengths, lengths)
+    np.testing.assert_allclose(loaded.muscle_velocities, velocities)
+
+
 def test_trace_v2_optional_groups_absent_when_none(tmp_path) -> None:
     """When optional arrays are None the HDF5 file has no corresponding dataset."""
     trace = _base_trace()
@@ -145,12 +173,22 @@ def test_trace_v2_optional_groups_absent_when_none(tmp_path) -> None:
         assert "wrench" not in f
         assert "markers" not in f
         assert "contacts" not in f
+        assert "muscle_names" not in f
+        assert "muscle_activations" not in f
+        assert "muscle_forces" not in f
+        assert "muscle_lengths" not in f
+        assert "muscle_velocities" not in f
 
     loaded = read_trace(path)
     assert loaded.torques is None
     assert loaded.wrench is None
     assert loaded.markers is None
     assert loaded.contacts is None
+    assert loaded.muscle_names == ()
+    assert loaded.muscle_activations is None
+    assert loaded.muscle_forces is None
+    assert loaded.muscle_lengths is None
+    assert loaded.muscle_velocities is None
 
 
 def test_trace_v2_schema_version_stamped(tmp_path) -> None:
@@ -222,6 +260,11 @@ def test_migrate_from_v1_returns_trace(tmp_path) -> None:
     assert trace.wrench is None
     assert trace.markers is None
     assert trace.contacts is None
+    assert trace.muscle_names == ()
+    assert trace.muscle_activations is None
+    assert trace.muscle_forces is None
+    assert trace.muscle_lengths is None
+    assert trace.muscle_velocities is None
 
 
 def test_migrate_from_v1_rejects_non_v1_file(tmp_path) -> None:
@@ -342,3 +385,20 @@ def test_trace_v2_contacts_wrong_first_dim_raises() -> None:
     contacts = _RNG.standard_normal((_T + 2, _N_CONTACTS, 3))
     with pytest.raises(ValueError, match="contacts"):
         _base_trace(contacts=contacts)
+
+
+def test_trace_v2_muscle_outputs_wrong_first_dim_raises() -> None:
+    """muscle histories with wrong time dimension raise ValueError."""
+    activations = _RNG.random((_T + 1, _N_MUSCLES))
+    with pytest.raises(ValueError, match="muscle_activations"):
+        _base_trace(muscle_activations=activations)
+
+
+def test_trace_v2_muscle_names_wrong_width_raises() -> None:
+    """muscle_names must match muscle-output columns when provided."""
+    activations = _RNG.random((_T, _N_MUSCLES))
+    with pytest.raises(ValueError, match="muscle_names"):
+        _base_trace(
+            muscle_names=("one_name",),
+            muscle_activations=activations,
+        )

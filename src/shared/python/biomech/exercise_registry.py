@@ -11,6 +11,7 @@ def discover_exercise(exercise_name: str) -> list[str]:
         "mujoco_models": "MuJoCo_Models",
         "drake_models": "Drake_Models",
         "pinocchio_models": "Pinocchio_Models",
+        "jaxsim_models": "JaxSim_Models",
         "opensim_models": "OpenSim_Models",
     }
 

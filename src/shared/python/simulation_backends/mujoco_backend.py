@@ -158,6 +158,27 @@ class MuJoCoBackend:
         self._mujoco.mj_forward(self._model, d)
         return (d.qfrc_bias - d.qfrc_passive).copy()
 
+    def inverse_dynamics(
+        self, q: np.ndarray, v: np.ndarray, a: np.ndarray
+    ) -> np.ndarray:
+        """Return MuJoCo inverse dynamics ``qfrc_inverse`` via ``mj_inverse``.
+
+        MuJoCo includes its configured compliant-contact model in this
+        calculation. Cross-engine conformance should therefore compare rigid
+        phases directly and register contact-phase divergence against
+        rigid-contact engines such as Pinocchio.
+        """
+        q_arr = self._as_state_vector(q, "q")
+        v_arr = self._as_state_vector(v, "v")
+        a_arr = self._as_state_vector(a, "a")
+        d = self._data
+        d.qpos[:] = q_arr
+        d.qvel[:] = v_arr
+        d.qacc[:] = a_arr
+        d.qfrc_applied[:] = 0.0
+        self._mujoco.mj_inverse(self._model, d)
+        return d.qfrc_inverse.copy()
+
     # ------------------------------------------------------------------ #
     # SimulationBackend
     # ------------------------------------------------------------------ #

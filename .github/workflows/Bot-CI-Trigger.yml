@@ -191,16 +191,17 @@ jobs:
         run: |
           for pr in ${{ steps.find-prs.outputs.prs }}; do
             echo "Triggering CI for PR #$pr"
+            branch=$(gh pr view "$pr" --json headRefName --jq '.headRefName') || {
+              echo "::warning::Cannot resolve head branch for PR #$pr; skipping."
+              continue
+            }
 
             # Method 1: Try to trigger workflow_dispatch on ci-standard
             # Method 2: If workflow_dispatch fails, add empty commit to trigger
             if ! gh workflow run ci-standard.yml \
-              --ref "$(gh pr view $pr --json headRefName --jq '.headRefName')" \
+              --ref "$branch" \
               2>/dev/null; then
               echo "workflow_dispatch failed, trying empty commit method"
-
-              # Get PR branch
-              branch=$(gh pr view $pr --json headRefName --jq '.headRefName')
 
               git fetch origin "$branch"
               git checkout "$branch"

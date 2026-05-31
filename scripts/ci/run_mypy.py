@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -46,6 +48,35 @@ def load_exclusions() -> list[str]:
     return exclusions_list
 
 
+def _sanitized_mypy_env() -> dict[str, str]:
+    """Remove shared package roots that make mypy see duplicate modules."""
+    env = os.environ.copy()
+    pythonpath = env.get("PYTHONPATH")
+    if not pythonpath:
+        return env
+
+    repo_root = Path.cwd().resolve()
+    duplicate_roots = {
+        repo_root / "src" / "shared" / "python",
+        repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python",
+    }
+
+    kept_entries: list[str] = []
+    for entry in pythonpath.split(os.pathsep):
+        if not entry:
+            continue
+        with contextlib.suppress(OSError):
+            if Path(entry).expanduser().resolve() in duplicate_roots:
+                continue
+        kept_entries.append(entry)
+
+    if kept_entries:
+        env["PYTHONPATH"] = os.pathsep.join(kept_entries)
+    else:
+        env.pop("PYTHONPATH", None)
+    return env
+
+
 def main() -> None:
     """Filter files using exclusions and run mypy."""
     exclusions = load_exclusions()
@@ -82,7 +113,7 @@ def main() -> None:
 
     cmd = [sys.executable, "-m", "mypy"] + other_args + filtered_files
     print(f"Running command: {' '.join(cmd)}")
-    res = subprocess.run(cmd, check=False)
+    res = subprocess.run(cmd, check=False, env=_sanitized_mypy_env())
     sys.exit(res.returncode)
 
 

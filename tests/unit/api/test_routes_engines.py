@@ -33,7 +33,7 @@ class MockEngine:
 
 class MockEngineManager:
     def get_available_engines(self):
-        return [EngineType.MUJOCO, EngineType.DRAKE]
+        return [EngineType.MUJOCO, EngineType.DRAKE, EngineType.JAXSIM]
 
     def get_current_engine(self):
         return EngineType.MUJOCO
@@ -85,6 +85,22 @@ def test_routes_engines_get_engines(client: TestClient) -> None:
     assert "engines" in data
     assert "mode" in data
     assert len(data["engines"]) > 0
+
+
+def test_routes_engines_surfaces_jaxsim_capabilities(client: TestClient) -> None:
+    """JaxSim appears in /engines with differentiable-analysis capability tags."""
+    response = client.get("/engines")
+    assert response.status_code == 200
+    engines = response.json()["engines"]
+
+    jaxsim = next(engine for engine in engines if engine["name"] == "jaxsim")
+    assert jaxsim["available"] is True
+    assert jaxsim["capabilities"] == [
+        "rigid_body",
+        "differentiable",
+        "gradients",
+        "parameter_sensitivity",
+    ]
 
 
 def test_load_engine(client: TestClient) -> None:

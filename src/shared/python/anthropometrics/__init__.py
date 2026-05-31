@@ -16,18 +16,32 @@ invariants at construction time (Design by Contract).
 
 from __future__ import annotations
 
-from . import engine_adapters as engine_adapters
+try:  # pragma: no cover - optional engine adapter dependencies vary by install
+    from . import engine_adapters as engine_adapters
+except ModuleNotFoundError:  # pragma: no cover
+    engine_adapters = None  # type: ignore[assignment]
 from ._subject_anthropometrics import SubjectAnthropometrics  # noqa: F401
 from ._types import Sex  # noqa: F401
+from .addbiomechanics_priors import (
+    PRIOR_SCHEMA_VERSION as PRIOR_SCHEMA_VERSION,
+    CalibrationInertiaPriorSet as CalibrationInertiaPriorSet,
+    InertiaPriorParameter as InertiaPriorParameter,
+    build_inertia_priors_from_subject as build_inertia_priors_from_subject,
+    load_addbiomechanics_inertia_priors as load_addbiomechanics_inertia_priors,
+    save_inertia_priors as save_inertia_priors,
+)
 from .contracts import EngineAdapter, Estimator, Reader, Writer  # noqa: F401
-from .engine_adapters import ADAPTER_REGISTRY  # noqa: F401
 from .persistence import (
     SCHEMA_VERSION,  # noqa: F401
     default_subjects_dir,  # noqa: F401
     load_subject,  # noqa: F401
     save_subject,  # noqa: F401
 )
-from .pipeline import run_pipeline  # noqa: F401
+
+try:  # pragma: no cover - pipeline imports engine adapters
+    from .pipeline import run_pipeline as run_pipeline
+except ModuleNotFoundError:  # pragma: no cover
+    run_pipeline = None  # type: ignore[assignment]
 from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body  # noqa: F401
 from .segment_properties import SegmentProperties  # noqa: F401
 from .writers import write_mjcf_body  # noqa: F401
@@ -50,14 +64,25 @@ except Exception:  # pragma: no cover - PyQt6 missing or unloadable  # noqa: BLE
 else:
     SubjectCalibrationDialog = _Dialog
 
-# UNION resolution: combine top-level public names with the
+if engine_adapters is None:
+    ADAPTER_REGISTRY = {}
+    _ENGINE_ADAPTER_ALL: list[str] = []
+else:
+    ADAPTER_REGISTRY = engine_adapters.ADAPTER_REGISTRY
+    _ENGINE_ADAPTER_ALL = list(engine_adapters.__all__)
+
+# UNION resolution: combine top-level public names with the optional
 # engine_adapters subpackage's own __all__ so e.g.
-# ``from anthropometrics import DrakeAdapter`` works.
+# ``from anthropometrics import DrakeAdapter`` works when adapter
+# dependencies are installed.
 _LOCAL_ALL = [
     "ADAPTER_REGISTRY",
+    "CalibrationInertiaPriorSet",
     "C3DSubjectMetadata",
     "EngineAdapter",
     "Estimator",
+    "InertiaPriorParameter",
+    "PRIOR_SCHEMA_VERSION",
     "Reader",
     "SCHEMA_VERSION",
     "SegmentProperties",
@@ -66,19 +91,23 @@ _LOCAL_ALL = [
     "SubjectAnthropometrics",
     "SubjectCalibrationDialog",
     "Writer",
+    "build_inertia_priors_from_subject",
     "default_subjects_dir",
     "engine_adapters",
+    "load_addbiomechanics_inertia_priors",
     "load_subject",
     "read_c3d_subject_metadata",
     "read_mjcf_body",
     "run_pipeline",
+    "save_inertia_priors",
     "save_subject",
     "write_mjcf_body",
 ]
-__all__ = sorted(set(_LOCAL_ALL) | set(engine_adapters.__all__))  # noqa: PLE0605
+__all__ = sorted(set(_LOCAL_ALL) | set(_ENGINE_ADAPTER_ALL))  # noqa: PLE0605
 
 # Re-export every concrete adapter at the top level for ergonomic
 # ``from anthropometrics import DrakeAdapter`` imports.
-for _name in engine_adapters.__all__:
+for _name in _ENGINE_ADAPTER_ALL:
     globals()[_name] = getattr(engine_adapters, _name)
-del _name
+if _ENGINE_ADAPTER_ALL:
+    del _name

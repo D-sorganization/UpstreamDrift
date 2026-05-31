@@ -16,3 +16,19 @@ import contextlib
 # keeps working in headless contexts where PyQt6 is unavailable.
 with contextlib.suppress(ImportError):
     from . import _embed_adapter  # noqa: F401
+
+from .canonical_adapter import (
+    MyoSuiteCanonicalAdapter,
+    MyoSuiteCanonicalState,
+    MyoSuiteMuscleOutputs,
+    NativeMyoSuiteState,
+)
+from .myosuite_physics_engine import MyoSuitePhysicsEngine
+
+__all__ = [
+    "MyoSuiteCanonicalAdapter",
+    "MyoSuiteCanonicalState",
+    "MyoSuiteMuscleOutputs",
+    "MyoSuitePhysicsEngine",
+    "NativeMyoSuiteState",
+]
