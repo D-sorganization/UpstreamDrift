@@ -31,6 +31,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0024](0024-differentiable-backend.md)             | Differentiable backend — MJX (JAX) vs custom Warp kernels       | Accepted | 2026-05-29 |
 | [0025](0025-jaxsim-backend-home.md)                | JaxSim Backend Home                                             | Accepted | 2026-05-30 |
 | [0026](0026-canonical-dynamic-state-v2.md)         | Canonical Dynamic State v2                                      | Accepted | 2026-05-31 |
+| [0027](0027-canonical-viewport-backend.md)         | Canonical 3D Viewport Backend                                   | Accepted | 2026-05-31 |
 
 ## ADR Backlog
 
