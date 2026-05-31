@@ -244,8 +244,15 @@ class TestCloseTabTargeting:
         tool = _Tool("signal_t")
         register_embeddable_tool(tool)
         host.open_tab(tool.tool_id)
-        # Emit signal directly to exercise _on_tab_close_requested.
-        host.tab_widget.tabCloseRequested.emit(0)
+        # The close button now prompts background-vs-destroy for
+        # backgroundable tools (#6013); patch the prompt to choose
+        # "Destroy" so the legacy cleanup assertion still holds.
+        with patch.object(
+            EmbeddedHostWidget,
+            "_prompt_close_disposition",
+            return_value=True,
+        ):
+            host.tab_widget.tabCloseRequested.emit(0)
         assert tool.cleanup_called is True
 
 

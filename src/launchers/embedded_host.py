@@ -16,11 +16,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import (
     QDockWidget,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QTabWidget,
     QVBoxLayout,
@@ -63,6 +64,51 @@ class _OpenDock:
     widget: QWidget
     dock: QDockWidget
     area: Qt.DockWidgetArea
+
+
+@dataclass(slots=True)
+class _Backgrounded:
+    """Bookkeeping record for a tool that is paused and stashed (hidden).
+
+    The widget is kept alive (not cleaned up) so it can be re-surfaced
+    later via :meth:`EmbeddedHostWidget.open_tab` with its state intact.
+    """
+
+    tool: EmbeddableTool
+    widget: QWidget
+
+
+@dataclass(slots=True)
+class _PoppedOut:
+    """Bookkeeping record for a tool re-parented into its own window."""
+
+    tool: EmbeddableTool
+    widget: QWidget
+    window: QMainWindow
+
+
+class _PopOutWindow(QMainWindow):
+    """Top-level window that re-docks its tool when closed.
+
+    Created by :meth:`EmbeddedHostWidget.pop_out_tab`. On
+    :meth:`closeEvent` it asks the host to dock the tool back into a
+    tab so closing the window never destroys a live tool.
+    """
+
+    def __init__(self, host: EmbeddedHostWidget, tool_id: str) -> None:
+        super().__init__()
+        self._host = host
+        self._tool_id = tool_id
+        # Closing the window should re-dock, not delete the tool widget.
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
+        """Re-dock the tool back into the host on window close."""
+        # Re-parent the widget out before the window tears down so it is
+        # not destroyed with the window. ``dock_back`` is idempotent: if
+        # the host already docked back (programmatic call), this no-ops.
+        self._host.dock_back(self._tool_id)
+        super().closeEvent(event)
 
 
 def _resolve_tool(tool_id: str) -> EmbeddableTool:
@@ -111,6 +157,63 @@ def _safe_cleanup(tool: EmbeddableTool) -> None:
         logger.exception("cleanup raised for tool %s", tool.tool_id)
 
 
+def _safe_can_background(tool: EmbeddableTool) -> bool:
+    """Return ``tool.can_background()`` defensively, defaulting to ``True``.
+
+    Tools that omit the optional :meth:`EmbeddableTool.can_background`
+    hook (the common case for the ~17 pre-existing adapters) default to
+    backgroundable. A raising implementation is treated as ``True`` so a
+    buggy tool still gets the non-destructive close path.
+    """
+    can_background = getattr(tool, "can_background", None)
+    if can_background is None:
+        return True
+    try:
+        return bool(can_background())
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("can_background raised for tool %s", tool.tool_id)
+        return True
+
+
+def _safe_detach_to_window(tool: EmbeddableTool) -> bool:
+    """Return ``tool.detach_to_window()`` defensively, defaulting to ``True``.
+
+    Tools that omit the optional :meth:`EmbeddableTool.detach_to_window`
+    hook default to pop-out-able. A raising implementation is treated as
+    pin-only (``False``) so a buggy tool is not yanked out of the host.
+    """
+    detach = getattr(tool, "detach_to_window", None)
+    if detach is None:
+        return True
+    try:
+        return bool(detach())
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("detach_to_window raised for tool %s", tool.tool_id)
+        return False
+
+
+def _safe_pause(tool: EmbeddableTool) -> None:
+    """Call the optional ``tool.pause()`` hook, swallowing exceptions."""
+    pause = getattr(tool, "pause", None)
+    if pause is None:
+        return
+    try:
+        pause()
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("pause raised for tool %s", tool.tool_id)
+
+
+def _safe_resume(tool: EmbeddableTool) -> None:
+    """Call the optional ``tool.resume()`` hook, swallowing exceptions."""
+    resume = getattr(tool, "resume", None)
+    if resume is None:
+        return
+    try:
+        resume()
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("resume raised for tool %s", tool.tool_id)
+
+
 class EmbeddedHostWidget(QWidget):
     """Widget that hosts embeddable tools as tabs and dock panels.
 
@@ -130,6 +233,11 @@ class EmbeddedHostWidget(QWidget):
         super().__init__(parent)
         self._active_tabs: dict[str, _OpenTab] = {}
         self._active_docks: dict[str, _OpenDock] = {}
+        # Tools the user closed with "keep running": paused + hidden but
+        # not cleaned up, keyed by tool_id (#6013).
+        self._backgrounded: dict[str, _Backgrounded] = {}
+        # Tools re-parented into their own top-level window (#6013).
+        self._popped_out: dict[str, _PoppedOut] = {}
 
         # Internal QMainWindow gives us a dock area without forcing the
         # host widget to be a top-level window itself.
@@ -140,6 +248,14 @@ class EmbeddedHostWidget(QWidget):
         self._tab_widget.tabCloseRequested.connect(self._on_tab_close_requested)
         self._tab_widget.tabBarDoubleClicked.connect(self._on_tab_bar_double_clicked)
         self._host_window.setCentralWidget(self._tab_widget)
+
+        # Right-click on the tab bar offers per-tab close/pop-out actions.
+        tab_bar = self._tab_widget.tabBar()
+        if tab_bar is not None:
+            tab_bar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            tab_bar.customContextMenuRequested.connect(
+                self._on_tab_context_menu_requested
+            )
 
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
@@ -186,6 +302,17 @@ class EmbeddedHostWidget(QWidget):
             self._tab_widget.setCurrentIndex(existing.index)
             return existing.index
 
+        # If the tool is popped out into its own window, re-dock it
+        # rather than constructing a fresh widget.
+        if tool_id in self._popped_out:
+            return self.dock_back(tool_id)
+
+        # Re-surface a backgrounded (paused, stashed) widget instead of
+        # rebuilding it, preserving its in-memory state (#6013).
+        stashed = self._backgrounded.pop(tool_id, None)
+        if stashed is not None:
+            return self._resurface_backgrounded(stashed)
+
         tool = _resolve_tool(tool_id)
         widget = tool.create_main_widget(self)
         if widget is None:
@@ -196,7 +323,20 @@ class EmbeddedHostWidget(QWidget):
         self._active_tabs[tool_id] = _OpenTab(tool=tool, widget=widget, index=index)
         return index
 
-    def close_tab(self, target: int | str) -> bool:
+    def _resurface_backgrounded(self, stashed: _Backgrounded) -> int:
+        """Re-mount a stashed widget as a tab and resume the tool."""
+        widget = stashed.widget
+        widget.setParent(self._tab_widget)
+        widget.show()
+        index = self._tab_widget.addTab(widget, stashed.tool.tool_id)
+        self._tab_widget.setCurrentIndex(index)
+        self._active_tabs[stashed.tool.tool_id] = _OpenTab(
+            tool=stashed.tool, widget=widget, index=index
+        )
+        _safe_resume(stashed.tool)
+        return index
+
+    def close_tab(self, target: int | str, *, destroy: bool = True) -> bool:
         """Close a tab by index or by ``tool_id``.
 
         If the tool reports :meth:`EmbeddableTool.is_dirty`, the user is
@@ -205,21 +345,53 @@ class EmbeddedHostWidget(QWidget):
 
         Args:
             target: Tab index (int) or tool id (str).
+            destroy: When ``True`` (default) the tool is cleaned up and
+                its widget destroyed (legacy behaviour). When ``False``
+                and the tool reports :meth:`EmbeddableTool.can_background`
+                is truthy, the tool is paused and stashed (kept running,
+                hidden) instead of destroyed. If the tool cannot be
+                backgrounded this falls back to destroy.
 
         Returns:
-            ``True`` if the tab was closed; ``False`` if the tab does
-            not exist or the user cancelled a dirty-close prompt.
+            ``True`` if the tab was closed (destroyed or backgrounded);
+            ``False`` if the tab does not exist or the user cancelled a
+            dirty-close prompt.
         """
         record = self._lookup_tab(target)
         if record is None:
             return False
 
-        if _safe_is_dirty(record.tool) and not self._confirm_dirty_close(record.tool):
+        background = not destroy and _safe_can_background(record.tool)
+
+        # The dirty prompt only matters for destructive closes; a
+        # backgrounded tool keeps its state, so there is nothing to lose.
+        if (
+            destroy
+            and _safe_is_dirty(record.tool)
+            and not self._confirm_dirty_close(record.tool)
+        ):
             return False
 
-        _safe_cleanup(record.tool)
-        self._remove_tab_widget(record)
+        if background:
+            self._background_tab(record)
+        else:
+            _safe_cleanup(record.tool)
+            self._remove_tab_widget(record)
         return True
+
+    def _background_tab(self, record: _OpenTab) -> None:
+        """Pause ``record``'s tool and stash its widget hidden (#6013)."""
+        _safe_pause(record.tool)
+        index = self._tab_widget.indexOf(record.widget)
+        if index != -1:
+            self._tab_widget.removeTab(index)
+        record.widget.setParent(None)
+        record.widget.hide()
+        self._active_tabs.pop(record.tool.tool_id, None)
+        self._backgrounded[record.tool.tool_id] = _Backgrounded(
+            tool=record.tool, widget=record.widget
+        )
+        self._reindex_tabs()
 
     def _lookup_tab(self, target: int | str) -> _OpenTab | None:
         """Return the tab record for ``target`` or ``None`` if missing."""
@@ -257,8 +429,49 @@ class EmbeddedHostWidget(QWidget):
             record.index = self._tab_widget.indexOf(record.widget)
 
     def _on_tab_close_requested(self, index: int) -> None:
-        """Slot connected to ``QTabWidget.tabCloseRequested``."""
-        self.close_tab(index)
+        """Slot connected to ``QTabWidget.tabCloseRequested``.
+
+        When the tool supports backgrounding, prompt the user to choose
+        between keeping it running (paused + stashed) and destroying it.
+        Tools that cannot be backgrounded take the legacy destroy path
+        without a prompt.
+        """
+        record = self._lookup_tab(index)
+        if record is None:
+            return
+        if not _safe_can_background(record.tool):
+            self.close_tab(index, destroy=True)
+            return
+
+        destroy = self._prompt_close_disposition(record.tool)
+        if destroy is None:
+            return  # user cancelled
+        self.close_tab(index, destroy=destroy)
+
+    def _prompt_close_disposition(self, tool: EmbeddableTool) -> bool | None:
+        """Ask whether to destroy a tool or keep it running in background.
+
+        Returns:
+            ``True`` to destroy, ``False`` to background (keep running),
+            or ``None`` if the user cancelled.
+        """
+        box = QMessageBox(self)
+        box.setWindowTitle("Close tab")
+        box.setText(
+            f"Close {tool.tool_id!r}?\n\n"
+            "Keep it running in the background, or destroy it now."
+        )
+        keep = box.addButton("Close (keep running)", QMessageBox.ButtonRole.AcceptRole)
+        destroy = box.addButton("Destroy", QMessageBox.ButtonRole.DestructiveRole)
+        box.addButton(QMessageBox.StandardButton.Cancel)
+        box.setDefaultButton(keep)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked is keep:
+            return False
+        if clicked is destroy:
+            return True
+        return None
 
     def _on_tab_bar_double_clicked(self, index: int) -> None:
         """Slot: double-click on the tab bar toggles focus mode."""
@@ -281,6 +494,122 @@ class EmbeddedHostWidget(QWidget):
             QMessageBox.StandardButton.Cancel,
         )
         return result == QMessageBox.StandardButton.Yes
+
+    # ------------------------------------------------------------------
+    # Tab context menu + pop-out / dock-back (#6013)
+    # ------------------------------------------------------------------
+
+    def _on_tab_context_menu_requested(self, point: QPoint) -> None:
+        """Slot: build and show the per-tab right-click context menu."""
+        tab_bar = self._tab_widget.tabBar()
+        if tab_bar is None:
+            return
+        index = tab_bar.tabAt(point)
+        if index < 0:
+            return
+        record = self._lookup_tab(index)
+        if record is None:
+            return
+
+        menu = QMenu(self)
+        if _safe_can_background(record.tool):
+            keep = menu.addAction("Close (keep running)")
+            keep.triggered.connect(
+                lambda _=False, i=index: self.close_tab(i, destroy=False)
+            )
+        destroy = menu.addAction("Destroy")
+        destroy.triggered.connect(
+            lambda _=False, i=index: self.close_tab(i, destroy=True)
+        )
+        if _safe_detach_to_window(record.tool):
+            pop_out = menu.addAction("Pop out")
+            pop_out.triggered.connect(
+                lambda _=False, tid=record.tool.tool_id: self.pop_out_tab(tid)
+            )
+        menu.exec(tab_bar.mapToGlobal(point))
+
+    def pop_out_tab(self, tool_id: str) -> bool:
+        """Re-parent ``tool_id``'s tab widget into its own top-level window.
+
+        The tab is removed from the host; closing the popped-out window
+        re-docks the tool via :meth:`dock_back`.
+
+        Args:
+            tool_id: Registry key of an open tab.
+
+        Returns:
+            ``True`` if the tool was popped out; ``False`` if it is not
+            open as a tab or its :meth:`EmbeddableTool.detach_to_window`
+            hook is pin-only.
+
+        Raises:
+            ValueError: If ``tool_id`` is not a non-empty string.
+        """
+        if not isinstance(tool_id, str) or not tool_id.strip():
+            raise ValueError("tool_id must be a non-empty string")
+        record = self._active_tabs.get(tool_id)
+        if record is None:
+            return False
+        if not _safe_detach_to_window(record.tool):
+            logger.info("pop_out_tab: %s is pin-only; ignoring", tool_id)
+            return False
+
+        index = self._tab_widget.indexOf(record.widget)
+        if index != -1:
+            self._tab_widget.removeTab(index)
+        self._active_tabs.pop(tool_id, None)
+        self._reindex_tabs()
+
+        window = _PopOutWindow(self, tool_id)
+        window.setWindowTitle(record.tool.tool_id)
+        window.setCentralWidget(record.widget)
+        record.widget.show()
+        self._popped_out[tool_id] = _PoppedOut(
+            tool=record.tool, widget=record.widget, window=window
+        )
+        window.show()
+        window.raise_()
+        return True
+
+    def dock_back(self, tool_id: str) -> int:
+        """Re-dock a popped-out tool as a tab and return its tab index.
+
+        The reverse of :meth:`pop_out_tab`. Safe to call from the
+        popped-out window's close handler.
+
+        Args:
+            tool_id: Registry key of a popped-out tool.
+
+        Returns:
+            The integer tab index of the re-docked tab, or ``-1`` if no
+            popped-out window exists for ``tool_id``.
+        """
+        record = self._popped_out.pop(tool_id, None)
+        if record is None:
+            return -1
+
+        widget = record.widget
+        widget.setParent(self._tab_widget)
+        widget.show()
+        index = self._tab_widget.addTab(widget, record.tool.tool_id)
+        self._tab_widget.setCurrentIndex(index)
+        self._active_tabs[tool_id] = _OpenTab(
+            tool=record.tool, widget=widget, index=index
+        )
+
+        # Detach the (now empty) window and dispose of it.
+        record.window.setCentralWidget(None)
+        record.window.close()
+        record.window.deleteLater()
+        return index
+
+    def backgrounded_tools(self) -> set[str]:
+        """Return the set of tool ids currently paused in the background.
+
+        Surfaced for callers (e.g. the training-controller tab) that
+        need to know which tools are alive-but-hidden.
+        """
+        return set(self._backgrounded.keys())
 
     # ------------------------------------------------------------------
     # Dock API
@@ -370,8 +699,17 @@ class EmbeddedHostWidget(QWidget):
     # ------------------------------------------------------------------
 
     def active_tool_ids(self) -> set[str]:
-        """Return the set of currently mounted tool ids (tabs + docks)."""
-        return set(self._active_tabs.keys()) | set(self._active_docks.keys())
+        """Return the set of currently mounted tool ids.
+
+        Includes tabs, docks, and popped-out windows. Backgrounded
+        (paused, hidden) tools are intentionally excluded — query
+        :meth:`backgrounded_tools` for those.
+        """
+        return (
+            set(self._active_tabs.keys())
+            | set(self._active_docks.keys())
+            | set(self._popped_out.keys())
+        )
 
     def state_snapshot(self) -> dict[str, Any]:
         """Return a serialisable snapshot of currently mounted tools.
@@ -452,13 +790,27 @@ class EmbeddedHostWidget(QWidget):
     # ------------------------------------------------------------------
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
-        """Run :meth:`EmbeddableTool.cleanup` on every active tool."""
-        for record in list(self._active_tabs.values()):
-            _safe_cleanup(record.tool)
-        for record in list(self._active_docks.values()):
-            _safe_cleanup(record.tool)
+        """Run :meth:`EmbeddableTool.cleanup` on every live tool.
+
+        Covers tabs, docks, backgrounded (paused) tools, and popped-out
+        windows — host shutdown destroys everything regardless of how it
+        was mounted.
+        """
+        for tab_record in list(self._active_tabs.values()):
+            _safe_cleanup(tab_record.tool)
+        for dock_record in list(self._active_docks.values()):
+            _safe_cleanup(dock_record.tool)
+        for bg_record in list(self._backgrounded.values()):
+            _safe_cleanup(bg_record.tool)
+        for pop_record in list(self._popped_out.values()):
+            _safe_cleanup(pop_record.tool)
+            pop_record.window.setCentralWidget(None)
+            pop_record.window.close()
+            pop_record.window.deleteLater()
         self._active_tabs.clear()
         self._active_docks.clear()
+        self._backgrounded.clear()
+        self._popped_out.clear()
         super().closeEvent(event)
 
     # ------------------------------------------------------------------

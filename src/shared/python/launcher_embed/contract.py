@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, ClassVar, Protocol, runtime_checkable
 
-__all__ = ["EmbedCapabilities", "EmbeddableTool"]
+__all__ = ["BackgroundableTool", "EmbedCapabilities", "EmbeddableTool"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,6 +99,14 @@ class EmbeddableTool(Protocol):
       that should prompt the user before close. Implementations that do
       not track dirty state should return ``False``.
 
+    Optional lifecycle hooks (see #6013) — ``pause``, ``resume``,
+    ``can_background``, and ``detach_to_window`` — are defined in the
+    separate :class:`BackgroundableTool` protocol. They are deliberately
+    kept *out* of this protocol so the ``runtime_checkable``
+    ``isinstance`` check still accepts the ~17 existing adapters that do
+    not implement them. A tool may implement any subset of those hooks;
+    hosts resolve them structurally with ``getattr(tool, name, default)``.
+
     Notes:
         Because :class:`typing.Protocol` cannot define method bodies, the
         ``is_dirty`` "default of ``False``" is a documentation contract
@@ -138,5 +146,69 @@ class EmbeddableTool(Protocol):
 
         Expected default: ``False`` for tools that do not track dirty
         state.
+        """
+        ...
+
+
+@runtime_checkable
+class BackgroundableTool(Protocol):
+    """Optional backgrounding / pop-out lifecycle hooks (#6013).
+
+    This is a **separate, additive** protocol from
+    :class:`EmbeddableTool`. It is intentionally *not* folded into
+    :class:`EmbeddableTool` so that the ``runtime_checkable``
+    ``isinstance(tool, EmbeddableTool)`` check continues to pass for the
+    ~17 existing adapters that predate this extension and do not
+    implement these hooks.
+
+    Hosts must resolve each hook structurally —
+    ``getattr(tool, name, default)`` — rather than requiring conformance
+    to this protocol, so that a tool may implement *any subset* of the
+    four hooks (or none). The documented defaults are:
+
+    - :meth:`pause` / :meth:`resume`: no-op.
+    - :meth:`can_background`: ``True``.
+    - :meth:`detach_to_window`: ``True``.
+    """
+
+    def pause(self) -> None:
+        """Suspend background activity while the widget is hidden.
+
+        Called by the host when the user backgrounds the tab
+        ("keep running" close). Implementations should stop timers,
+        polling, or live IPC subscriptions so a hidden tool is cheap.
+
+        Expected default: no-op for tools with no background activity.
+        """
+        ...
+
+    def resume(self) -> None:
+        """Resume activity when a backgrounded widget is re-surfaced.
+
+        Called by the host when a previously paused tab is reopened or
+        refocused. The inverse of :meth:`pause`.
+
+        Expected default: no-op for tools with no background activity.
+        """
+        ...
+
+    def can_background(self) -> bool:
+        """Return ``True`` if the tool may keep running while hidden.
+
+        When ``False`` the host skips the background prompt and applies
+        legacy cleanup-on-close behaviour (the widget is destroyed via
+        :meth:`EmbeddableTool.cleanup`).
+
+        Expected default: ``True``.
+        """
+        ...
+
+    def detach_to_window(self) -> bool:
+        """Return ``True`` if the tool may be popped out to its own window.
+
+        When ``False`` the tab is pin-only: the host omits the
+        "Pop out" affordance and refuses programmatic pop-out.
+
+        Expected default: ``True``.
         """
         ...
