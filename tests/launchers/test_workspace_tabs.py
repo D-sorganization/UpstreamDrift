@@ -428,3 +428,85 @@ def test_docked_tab_menu_bar_preservation(launcher, qtbot):
     assert re_wrapped_widget.layout().count() == 2
     assert re_wrapped_widget.layout().itemAt(0).widget() == menu_bar
     assert re_wrapped_widget.layout().itemAt(1).widget() == win
+
+
+# ── Epic #6013: close-in-background (keep running hidden) ──────────────
+
+
+def _add_background_tab(launcher, monkeypatch, title="BG Tool"):
+    """Add a background-eligible tab and return (widget, index).
+
+    Forces 'never' confirmation so close_tab does not prompt.
+    """
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="never")),
+    )
+    tabs = launcher.workspace_tabs
+    widget = QWidget()
+    idx = tabs.add_background_tab(widget, title)
+    return widget, idx
+
+
+def test_close_keeps_widget_alive_when_background(launcher, monkeypatch):
+    """Closing a background-eligible tab hides it but keeps the widget alive."""
+    widget, idx = _add_background_tab(launcher, monkeypatch)
+    tabs = launcher.workspace_tabs
+    assert tabs.indexOf(widget) == idx
+
+    tabs.close_tab(idx)
+
+    # Tab removed from the bar...
+    assert tabs.indexOf(widget) == -1
+    # ...but the widget itself is still a live, retained object.
+    assert "BG Tool" in tabs.list_background_tabs()
+    # Widget not deleted: attribute access must still work (no RuntimeError).
+    assert widget.objectName() == ""
+
+
+def test_restore_background_tab(launcher, monkeypatch):
+    """A backgrounded tab can be restored back into the tab bar."""
+    widget, idx = _add_background_tab(launcher, monkeypatch)
+    tabs = launcher.workspace_tabs
+
+    tabs.close_tab(idx)
+    assert tabs.indexOf(widget) == -1
+
+    tabs.restore_background_tab("BG Tool")
+
+    restored_idx = tabs.indexOf(widget)
+    assert restored_idx != -1
+    assert tabs.tabText(restored_idx) == "BG Tool"
+    assert "BG Tool" not in tabs.list_background_tabs()
+
+
+def test_background_tab_state_preserved(launcher, monkeypatch):
+    """State set on a background tab's widget survives close + restore."""
+    from src.shared.python.ui.preferences_dialog import UserPreferences
+
+    monkeypatch.setattr(
+        UserPreferences,
+        "load",
+        classmethod(lambda cls: UserPreferences(confirm_close_tabs="never")),
+    )
+
+    class StatefulWidget(QWidget):
+        def __init__(self) -> None:
+            super().__init__()
+            self.counter = 0
+
+    tabs = launcher.workspace_tabs
+    widget = StatefulWidget()
+    idx = tabs.add_background_tab(widget, "Stateful")
+    widget.counter = 42
+
+    tabs.close_tab(idx)
+    assert widget.counter == 42  # retained while hidden
+
+    tabs.restore_background_tab("Stateful")
+    restored = tabs.widget(tabs.indexOf(widget))
+    assert restored is widget
+    assert restored.counter == 42
