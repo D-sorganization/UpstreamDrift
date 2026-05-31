@@ -45,5 +45,7 @@ __all__ = [
     "shared_parameter_covariance",
     "solve_multi_trial_map",
     "solve_single_trial_map",
+    "solve_multi_trial_map",
+    "solve_single_trial_map",
     "stack_shared_parameter_jacobians",
 ]
