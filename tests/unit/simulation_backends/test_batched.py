@@ -18,6 +18,7 @@ from src.shared.python.simulation_backends.batched import (
     estimate_trace_bytes,
     plan_chunks,
     run_batched,
+    run_estimation_windows_batched,
 )
 from src.shared.python.simulation_backends.factory import make_backend
 from src.shared.python.simulation_backends.model_params import GolfModelParams
@@ -329,3 +330,36 @@ def test_run_batched_rejects_backend_without_rollout_batch() -> None:
 def test_run_batched_rejects_bad_args(kwargs: dict[str, float], match: str) -> None:
     with pytest.raises(ValueError, match=match):
         run_batched(_FakeBatchedBackend(), controls=None, max_batch=2, **kwargs)
+
+
+# --------------------------------------------------------------------------- #
+# Estimation trial-window batching                                            #
+# --------------------------------------------------------------------------- #
+def test_run_estimation_windows_batched_flattens_trial_windows() -> None:
+    backend = _FakeBatchedBackend()
+    controls = _RNG.normal(size=(2, 3, 4, _NQ))
+
+    batch = run_estimation_windows_batched(
+        backend,
+        controls_windows=controls,
+        dt=0.01,
+        max_batch=4,
+    )
+
+    assert batch.num_envs == 6
+    assert batch.num_steps == 5
+    assert batch.u is None
+    assert backend.calls == [4, 2]
+    assert batch.meta["layout"] == "trial_window"
+    assert batch.meta["num_trials"] == 2
+    assert batch.meta["num_windows"] == 3
+    assert batch.meta["control_dim"] == _NQ
+
+
+def test_run_estimation_windows_batched_rejects_bad_controls() -> None:
+    with pytest.raises(ValueError, match="rank-4"):
+        run_estimation_windows_batched(
+            _FakeBatchedBackend(),
+            controls_windows=np.zeros((2, 4, _NQ)),
+            dt=0.01,
+        )
