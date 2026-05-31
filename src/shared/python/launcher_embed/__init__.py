@@ -10,6 +10,10 @@ Public surface:
   to be embedded.
 - :class:`EmbeddableTool` — runtime-checkable :class:`typing.Protocol` that
   tools implement to participate in embedding.
+- :class:`BackgroundableTool` — additive, runtime-checkable protocol for the
+  optional ``pause`` / ``resume`` / ``can_background`` / ``detach_to_window``
+  lifecycle hooks (#6013). Hosts resolve these structurally so the hooks are
+  fully optional.
 - :func:`register_embeddable_tool` / :func:`get_embeddable_tool` /
   :func:`is_embeddable` / :func:`unregister_embeddable_tool` — registry API.
 - :data:`EMBEDDABLE_TOOL_REGISTRY` — the underlying registry mapping
@@ -21,7 +25,7 @@ protocol so that consumers do not need to import a Qt binding to satisfy
 the contract.
 """
 
-from .contract import EmbedCapabilities, EmbeddableTool
+from .contract import BackgroundableTool, EmbedCapabilities, EmbeddableTool
 from .registry import (
     EMBEDDABLE_TOOL_REGISTRY,
     get_embeddable_tool,
@@ -40,19 +44,21 @@ from .registry import (
 #   methods with default implementations, new capability fields with
 #   defaults, new registry helpers).
 # - PATCH: bug fixes that do not change the public surface.
-__version__ = "1.0.0"
+#
+# 1.1.0: added optional ``pause`` / ``resume`` / ``can_background`` /
+#   ``detach_to_window`` lifecycle hooks to ``EmbeddableTool`` (#6013).
+__version__ = "1.1.0"
 
 # Contract version exposed to embedded tools. Hosts may refuse tools
 # declaring a higher major.
 SCHEMA_VERSION = "1.0.0"
 
 __all__ = [
-    "SCHEMA_VERSION",
-    "__version__",
     "EMBEDDABLE_TOOL_REGISTRY",
+    "SCHEMA_VERSION",
+    "BackgroundableTool",
     "EmbedCapabilities",
     "EmbeddableTool",
-    "SCHEMA_VERSION",
     "__version__",
     "get_embeddable_tool",
     "is_embeddable",
