@@ -26,6 +26,9 @@ from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 from src.shared.python.motion_pipeline.sources.sto_mot_adapter import (
     OpenSimSTOMOTAdapter,
 )
+from src.shared.python.motion_pipeline.sources.opencap_adapter import (
+    OpenCapSessionAdapter,
+)
 from src.shared.python.motion_pipeline.sources.mediapipe_json_adapter import (
     MediaPipeJSONAdapter,
 )
@@ -52,6 +55,7 @@ __all__ = [
     "MediaPipeJSONAdapter",
     "MocapSourceAdapter",
     "OpenPoseJSONAdapter",
+    "OpenCapSessionAdapter",
     "OpenSimSTOMOTAdapter",
     "SourceMetadata",
     "TRCAdapter",
