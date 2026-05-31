@@ -47,6 +47,14 @@ def test_widget_init(tracer_widget) -> None:
     assert tracer_widget.speed_spin.value() == 163.0
 
 
+def test_no_dead_animation_timer(tracer_widget) -> None:
+    # Regression for #6903: the never-started/connected animation QTimer (and
+    # its orphaned animation_index counter) were dead code and have been
+    # removed.
+    assert not hasattr(tracer_widget, "animation_timer")
+    assert not hasattr(tracer_widget, "animation_index")
+
+
 def test_apply_preset(tracer_widget) -> None:
     tracer_widget._apply_preset("7iron")
     assert tracer_widget.speed_spin.value() == 118.0
