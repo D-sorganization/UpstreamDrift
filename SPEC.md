@@ -71,6 +71,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-05-31** - Added the CC-27 cross-engine comparison report module (#6800): `simulation_backends.compare()` now runs selected backends from identical user input and emits structured side-by-side kinematics, kinetics, ZTCF/ZVCF, and wrench panels with divergence registry annotations and per-panel provenance; `compare_cli.py` provides a one-command Markdown/JSON report path.
+- **2026-05-31** - Added the CC-16 output-only canonical C3D exporter (#6789): motion capture can now export marker trajectories from canonical state arrays to terminal C3D files with unit, label, sample-rate, and architecture guards that prevent C3D from becoming an internal intermediate.
+
 - **2026-05-31** - Added the canonical run `ProvenanceStamp` primitive for issue #6778: simulation traces, batch traces, and state checkpoints can now carry deterministic run metadata covering engine/model identifiers, timestamp, adapter version, units, feature flags, and dependency versions without changing the existing trace/checkpoint schemas.
 - **2026-05-31** - Added a third-party license ledger for issue #6781 under `docs/legal/licenses.md`, with a CI-sized advisory checker that covers direct dependency declarations, keeps OpenPose visibly fenced as non-commercial opt-in, supports Python 3.10 via `tomli`, and avoids false core-install optional-engine findings from the local `scripts/jaxsim` helper directory.
 - **2026-05-31** - Added the canonical-v2 pose interchange contract (#6773) with public exports from `src/shared/python/pose_interchange/__init__.py`, a conventions guide under `docs/conventions/canonical-v2.md`, and ADR coverage in `docs/adr/0026-canonical-dynamic-state-v2.md`.
@@ -844,5 +846,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-22 | 1.0.170 | Hardened the shared BitNet subprocess adapter by rejecting non-UTF-8 and oversize prompts before `llama-cli` launch, and added focused regression coverage for the synchronous and streaming guard paths (issue #5913). |
 | 2026-05-25 | 1.0.171 | Removed stale "raises NotImplementedError" and scaffold-era caveats from the module and class docstrings of the Drake, OpenSim, and Simscape `LiveKinematicsService` implementations; updated the Simscape transform-query TODO to reference the current tracking issue #6093 instead of closed epic #4963 (issue #6092). |
 | 2026-05-29 | 1.0.172 | Bolt: Optimized `np.linalg.norm(np.array(...))` to `math.hypot(...)` in `anthropometric.py` to avoid temporary array allocation and speed up calculation. |
+| 2026-05-31 | 1.0.220 | Added the CC-16 output-only canonical C3D exporter (#6789), including marker trajectory export to terminal C3D files, unit/label/sample-rate preservation, and architecture guards preventing C3D as an internal intermediate. |
 | 2026-05-31 | 1.0.219 | Added the canonical-v2 pose interchange contract export surface, ADR, and conventions guide for durable cross-engine state exchange (#6773). |
 ````
