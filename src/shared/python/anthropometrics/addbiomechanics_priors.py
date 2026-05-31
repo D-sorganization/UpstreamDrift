@@ -364,7 +364,7 @@ def _optional_str(value: object) -> str | None:
     if value is None:
         return None
     text = str(value)
-    return text if text else None
+    return text or None
 
 
 def _require_non_empty(value: object, label: str) -> None:
