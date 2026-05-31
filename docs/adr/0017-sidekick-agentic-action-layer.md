@@ -132,6 +132,21 @@ Destructive chips start `LOCKED`; `with_confirmation()` stamps
 sits on top of this contract and is intentionally separated so this
 module is fully headless-testable.
 
+### 8. Canonical-core tool adapter (CC-38 / #6811)
+
+`canonical_tools.py` extends the same action-service choke-point for the
+Canonical Core setup assistant. It exposes a fixed action allowlist:
+`canonical.configure`, `canonical.validate`, `canonical.run`,
+`canonical.compare`, and `canonical.interpret`. The adapter depends on a
+host-supplied `CanonicalActionPort`, so Sidekick calls canonical APIs but
+never imports or dispatches raw engine methods.
+
+`canonical.run` is marked destructive for the existing policy layer and
+also enforces `_confirmed=True` in the handler. Dry-runs still short-circuit
+inside `SidekickActionService`, producing safe previews without reaching the
+port. Port results carry provenance metadata back through `ActionResult` so
+run artifacts remain auditable with the existing action audit sink.
+
 ## Alternatives Considered
 
 1. **Extend `ai.tool_registry` directly.** Rejected — registry is
@@ -159,6 +174,8 @@ module is fully headless-testable.
     source, eliminating drift.
   - Host integrations are dependency-inverted: launcher → sidekick,
     never the reverse.
+  - Canonical-core tools are bounded to a fixed operation allowlist and
+    cannot perform arbitrary engine dispatch.
   - Headless-testable end-to-end: 157 unit tests covering catalog,
     service, adapters, planner, audit, policy, undo, workflows, chips.
 - **Negative:**

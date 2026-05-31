@@ -24,6 +24,12 @@ from .chat_surface import (
     build_chip,
     serialize_envelope,
 )
+from .canonical_tools import (
+    CANONICAL_ACTION_IDS,
+    CanonicalActionPort,
+    CanonicalOperationResult,
+    CanonicalToolAdapter,
+)
 from .action_service import (
     ActionDescriptor,
     ActionResult,
@@ -73,7 +79,11 @@ __all__ = [
     "ActionChipState",
     "ActionDescriptor",
     "ActionResult",
+    "CANONICAL_ACTION_IDS",
     "CalculatorRun",
+    "CanonicalActionPort",
+    "CanonicalOperationResult",
+    "CanonicalToolAdapter",
     "ChatActionEnvelope",
     "FeatureEntry",
     "FeatureKind",
