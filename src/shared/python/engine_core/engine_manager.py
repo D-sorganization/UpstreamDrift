@@ -155,6 +155,7 @@ class EngineManager(ContractChecker):
         # Initialize probes
         from .engine_probes import (
             DrakeProbe,
+            JaxSimProbe,
             MatlabProbe,
             MuJoCoProbe,
             MyoSimProbe,
@@ -167,6 +168,7 @@ class EngineManager(ContractChecker):
             EngineType.MUJOCO: MuJoCoProbe(self.suite_root),
             EngineType.DRAKE: DrakeProbe(self.suite_root),
             EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
+            EngineType.JAXSIM: JaxSimProbe(self.suite_root),
             EngineType.OPENSIM: OpenSimProbe(self.suite_root),
             EngineType.MYOSIM: MyoSimProbe(self.suite_root),
             EngineType.PENDULUM: PendulumProbe(self.suite_root),

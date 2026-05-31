@@ -56,6 +56,11 @@ KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
         repo_name="Movement_Optimizer",
         provider_kind="utility",
     ),
+    ProviderRepoDefinition(
+        provider_id="movement_optimizer",
+        repo_name="Movement-Optimizer",
+        provider_kind="utility",
+    ),
 )
 
 _DEFAULT_MANIFEST_RELATIVE_PATHS = (
