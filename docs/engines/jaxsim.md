@@ -62,12 +62,37 @@ compares the following quantities at sampled `(q, qd)` states:
 - `M(q)` free-floating mass matrix
 - `h(q, qd)` bias forces
 - `g(q)` gravity forces
-- `C(q, qd)` Coriolis matrix
+- `C(q, qd) v` Coriolis action
 
 The gate follows `src/engines/CROSS_ENGINE_PARITY_SPEC.md`'s cross-engine
 tolerance policy: normalized RMSE must stay below `20%` for matrices and
-vectors, with `1e-7` absolute floor for near-zero reference terms. Local core
-installs skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are
-missing; the self-hosted `cross-engine-equivalence.yml` workflow installs the
-optional JaxSim extra and Pinocchio best-effort so installed-engine
-disagreement fails the build.
+vectors, with `1e-7` absolute floor for near-zero reference terms. The
+Coriolis matrix itself is not unique across rigid-body libraries, so the gate
+compares its product against the canonical velocity vector. Local core installs
+skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are missing; the
+self-hosted `cross-engine-equivalence.yml` workflow installs the optional
+JaxSim extra and Pinocchio best-effort so installed-engine disagreement fails
+the build.
+
+## Forward Simulation Rollout
+
+Issue #6655 adds a canonical `JaxSimBackend.rollout(controls, horizon, dt)`
+path over `jaxsim.api.model.step`. Rollouts follow the shared
+`src.shared.python.simulation_backends.protocol.Trace` schema:
+
+- `trace.t` has `horizon + 1` rows: the initial sample at `0.0`, then each
+  post-step sample through `horizon * dt`.
+- `trace.q` is ordered `[base position; base quaternion; joint positions]`.
+- `trace.v` is ordered `[base angular velocity; base linear velocity; joint
+velocities]`, preserving the suite's canonical inertial representation.
+- `trace.u` is `None` for passive rollouts, or `(horizon + 1, nu)` with the
+  final row zero-padded so controls share the trace time axis.
+- `trace.meta` records `model_name`, `nq`, `nv`, `nu`,
+  `velocity_representation`, and `spatial_jacobian_order`.
+
+The adapter accepts both the fake test seam and live JaxSim 0.9.0 API shapes:
+`model.dofs` may be a method, and live `JaxSimModelData` exposes base
+linear/angular velocity through its private-backed dataclass fields. When a
+rollout supplies `dt`, the adapter updates JaxSim's model timestep through
+`model.replace(time_step=dt)` for versions whose `step` function does not
+accept a `dt` keyword.

@@ -6,7 +6,7 @@ the dynamics terms named in the JaxSim 2.1 acceptance criteria:
 - ``M(q)`` free-floating mass matrix
 - ``h(q, qd)`` bias forces
 - ``g(q)`` gravity forces
-- ``C(q, qd)`` Coriolis matrix
+- ``C(q, qd) v`` Coriolis action
 
 The model is intentionally small because the purpose of this gate is the
 cross-engine convention contract, not full humanoid coverage. Optional engine
@@ -104,6 +104,14 @@ def _relative_rmse(actual: np.ndarray, expected: np.ndarray) -> float:
     return numerator / max(denominator, ABS_TOL)
 
 
+def _pin_array(value: object, name: str) -> np.ndarray:
+    """Return a real Pinocchio ndarray or skip local mocked Pinocchio modules."""
+
+    if not isinstance(value, np.ndarray):
+        pytest.skip(f"Pinocchio {name} did not return an ndarray")
+    return value
+
+
 def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     pytest.importorskip("jax")
     pytest.importorskip("jaxlib")
@@ -144,11 +152,17 @@ def _pinocchio_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     v_pin = _canonical_to_pin_velocity(v)
     zero_acc = np.zeros(6, dtype=np.float64)
 
-    mass = pin.crba(model, data, q_pin)
+    mass = _pin_array(pin.crba(model, data, q_pin), "crba")
     mass = (mass + mass.T) / 2.0
-    bias = pin.rnea(model, data, q_pin, v_pin, zero_acc)
-    gravity = pin.rnea(model, data, q_pin, np.zeros(6, dtype=np.float64), zero_acc)
-    coriolis = pin.computeCoriolisMatrix(model, data, q_pin, v_pin)
+    bias = _pin_array(pin.rnea(model, data, q_pin, v_pin, zero_acc), "rnea")
+    gravity = _pin_array(
+        pin.rnea(model, data, q_pin, np.zeros(6, dtype=np.float64), zero_acc),
+        "gravity rnea",
+    )
+    coriolis = _pin_array(
+        pin.computeCoriolisMatrix(model, data, q_pin, v_pin),
+        "computeCoriolisMatrix",
+    )
 
     return DynamicsTerms(
         mass=_pin_to_canonical_matrix(mass),
@@ -183,7 +197,12 @@ def test_jaxsim_pinocchio_free_body_dynamics_terms_match(
     assert _relative_rmse(jaxsim_terms.mass, pinocchio_terms.mass) < MATRIX_RTOL
     assert _relative_rmse(jaxsim_terms.bias, pinocchio_terms.bias) < VECTOR_RTOL
     assert _relative_rmse(jaxsim_terms.gravity, pinocchio_terms.gravity) < VECTOR_RTOL
-    assert _relative_rmse(jaxsim_terms.coriolis, pinocchio_terms.coriolis) < MATRIX_RTOL
+    np.testing.assert_allclose(
+        jaxsim_terms.coriolis @ v,
+        pinocchio_terms.coriolis @ v,
+        rtol=VECTOR_RTOL,
+        atol=ABS_TOL,
+    )
 
 
 def test_parity_metric_reports_zero_for_identical_terms() -> None:
