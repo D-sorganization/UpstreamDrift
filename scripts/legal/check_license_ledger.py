@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - exercised on Python 3.10 CI
 
 _NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+")
 _LEDGER_PACKAGE_RE = re.compile(r"^\|\s*`([^`]+)`\s*\|")
+_OPENPOSE_ROW_RE = re.compile(r"^\|\s*`openpose`\s*\|", re.IGNORECASE)
 
 
 def normalize_package_name(name: str) -> str:
@@ -63,6 +64,22 @@ def ledger_package_names(ledger_path: Path) -> set[str]:
     return rows
 
 
+def _openpose_row_status(ledger_text: str) -> str | None:
+    """Return the stripped Status column of the openpose table row, or None.
+
+    Parses the specific openpose row rather than searching the whole file, so
+    legend text that contains 'Non-commercial' / 'Opt-in' as definition prose
+    does not produce a false-positive gate result.
+    """
+    for line in ledger_text.splitlines():
+        if _OPENPOSE_ROW_RE.match(line):
+            # Pipe-split yields: ['', package, scope, version, license, status, notes, '']
+            cols = [c.strip() for c in line.split("|")]
+            if len(cols) >= 7:  # noqa: PLR2004
+                return cols[5]
+    return None
+
+
 def validate_license_ledger(pyproject_path: Path, ledger_path: Path) -> list[str]:
     """Return validation errors for the dependency ledger."""
     declared = declared_dependency_names(pyproject_path)
@@ -75,8 +92,10 @@ def validate_license_ledger(pyproject_path: Path, ledger_path: Path) -> list[str
     ledger_text = ledger_path.read_text(encoding="utf-8")
     if "`openpose`" not in ledger_text:
         errors.append("missing OpenPose commercialization-gate row")
-    if "Non-commercial" not in ledger_text or "Opt-in" not in ledger_text:
-        errors.append("OpenPose row must state Non-commercial and Opt-in")
+    else:
+        status = _openpose_row_status(ledger_text)
+        if status is None or "Non-commercial" not in status or "Opt-in" not in status:
+            errors.append("OpenPose row must state Non-commercial and Opt-in")
 
     return errors
 
