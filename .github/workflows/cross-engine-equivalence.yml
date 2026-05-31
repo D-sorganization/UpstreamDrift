@@ -20,7 +20,9 @@ on:
       - "shared/models/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
+      - "scripts/jaxsim/check_jaxsim_pin.py"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -29,7 +31,9 @@ on:
       - "shared/models/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
+      - "scripts/jaxsim/check_jaxsim_pin.py"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -122,6 +126,12 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
 
+      - name: Guard JaxSim version pin (issue #6660)
+        # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,
+        # either in pyproject or in the installed optional stack.
+        shell: bash
+        run: python3 scripts/jaxsim/check_jaxsim_pin.py
+
       - name: Run cross-engine forward-sim equivalence test
         env:
           UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
@@ -137,6 +147,7 @@ jobs:
             -o addopts="" \
             tests/motion_matching/test_cross_engine_equivalence.py \
             tests/cross_engine/test_jaxsim_vs_pinocchio.py \
+            tests/cross_engine/test_jaxsim_forward_sim.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 

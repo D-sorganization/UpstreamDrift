@@ -97,6 +97,32 @@ rollout supplies `dt`, the adapter updates JaxSim's model timestep through
 `model.replace(time_step=dt)` for versions whose `step` function does not
 accept a `dt` keyword.
 
+## Forward-Sim Validation Gate
+
+Issue #6655 adds `tests/cross_engine/test_jaxsim_forward_sim.py`, a
+`requires_jaxsim` gate that validates the _integrated_ rollout (not just the
+instantaneous dynamics terms covered by the parity gate). It loads a
+contact-free single free rigid body with an asymmetric diagonal inertia and
+asserts that the JaxSim passive rollout:
+
+- conforms to the canonical `Trace` schema (`t`, `q`, `v=None u`, `meta`),
+- tracks the analytic torque-free base-velocity trajectory integrated from
+  `single_floating_body_h_g` within a loose tolerance, and
+- conserves the rotational kinetic energy of the torque-free top.
+
+The dependency-free analytic reference is validated independently so the gate
+fails loudly if the closed-form integration regresses. The gate runs on the
+Linux fleet through `cross-engine-equivalence.yml`.
+
+## Pin Upgrade Guard
+
+Issue #6660 adds `scripts/jaxsim/check_jaxsim_pin.py`, an upgrade-guard that
+fails if the `jaxsim` requirement drifts from the gated `==0.9.0` in
+`pyproject.toml` or if an installed `jaxsim` reports a different version. It
+runs as a CI step in `cross-engine-equivalence.yml` and is covered locally by
+`tests/unit/test_jaxsim_pin_guard.py`. The pin is the single source of truth
+shared with `tests/unit/test_jaxsim_optional_dependency.py`.
+
 ## Parameter-Gradient Sensitivity
 
 Issue #6656 adds the `SupportsParameterGradients` seam for JaxSim-backed
