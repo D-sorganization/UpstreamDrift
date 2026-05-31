@@ -10,8 +10,8 @@ internals.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import asdict, dataclass
+from typing import Any, Literal
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -38,6 +38,7 @@ class SharedParameterSpec:
     upper: float | None = None
     prior: float | None = None
     prior_scale: float | None = None
+    locked: bool = False
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -57,6 +58,25 @@ class SharedParameterSpec:
             raise ValueError("inertia parameters must be bounded around a prior")
         if self.prior_scale is not None and self.prior_scale <= 0.0:
             raise ValueError(f"{self.name}.prior_scale must be positive")
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-safe parameter specification payload."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> SharedParameterSpec:
+        """Build a parameter specification from a JSON-safe payload."""
+        data = dict(payload)
+        return cls(
+            name=str(data["name"]),
+            initial=float(data["initial"]),
+            kind=data.get("kind", "generic"),
+            lower=_optional_float(data.get("lower")),
+            upper=_optional_float(data.get("upper")),
+            prior=_optional_float(data.get("prior")),
+            prior_scale=_optional_float(data.get("prior_scale")),
+            locked=bool(data.get("locked", False)),
+        )
 
 
 @dataclass(frozen=True)
@@ -80,9 +100,47 @@ class SharedParameterBlock:
         """Number of scalar parameters in the shared block."""
         return len(self.specs)
 
+    @property
+    def free_specs(self) -> tuple[SharedParameterSpec, ...]:
+        """Unlocked parameters that are part of an estimator decision vector."""
+        return tuple(spec for spec in self.specs if not spec.locked)
+
+    @property
+    def free_size(self) -> int:
+        """Number of unlocked scalar parameters."""
+        return len(self.free_specs)
+
+    @property
+    def parameter_names(self) -> tuple[str, ...]:
+        """All parameter names in deterministic block order."""
+        return tuple(spec.name for spec in self.specs)
+
+    @property
+    def free_parameter_names(self) -> tuple[str, ...]:
+        """Unlocked parameter names in deterministic decision-vector order."""
+        return tuple(spec.name for spec in self.free_specs)
+
+    def index(self, name: str) -> int:
+        """Return the all-parameter block index for ``name``."""
+        try:
+            return self.parameter_names.index(name)
+        except ValueError as exc:
+            raise KeyError(name) from exc
+
+    def free_index(self, name: str) -> int:
+        """Return the unlocked-parameter index for ``name``."""
+        try:
+            return self.free_parameter_names.index(name)
+        except ValueError as exc:
+            raise KeyError(name) from exc
+
     def initial_vector(self) -> np.ndarray:
         """Return initial parameter values in block order."""
         return np.array([spec.initial for spec in self.specs], dtype=float)
+
+    def free_initial_vector(self) -> np.ndarray:
+        """Return initial values for unlocked parameters only."""
+        return np.array([spec.initial for spec in self.free_specs], dtype=float)
 
     def bounds(self) -> tuple[np.ndarray, np.ndarray]:
         """Return lower/upper bounds in block order."""
@@ -94,6 +152,18 @@ class SharedParameterBlock:
         ]
         return np.array(lower, dtype=float), np.array(upper, dtype=float)
 
+    def free_bounds(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return lower/upper bounds for unlocked parameters only."""
+        lower = [
+            -np.inf if spec.lower is None else float(spec.lower)
+            for spec in self.free_specs
+        ]
+        upper = [
+            np.inf if spec.upper is None else float(spec.upper)
+            for spec in self.free_specs
+        ]
+        return np.array(lower, dtype=float), np.array(upper, dtype=float)
+
     def to_mapping(self, vector: np.ndarray) -> dict[str, float]:
         """Map an ordered vector back to named scalar parameters."""
         values = np.asarray(vector, dtype=float)
@@ -102,6 +172,34 @@ class SharedParameterBlock:
         return {
             spec.name: float(values[index]) for index, spec in enumerate(self.specs)
         }
+
+    def expand_free_vector(self, free_vector: np.ndarray) -> np.ndarray:
+        """Expand unlocked values into the full block, preserving locked initials."""
+        values = np.asarray(free_vector, dtype=float)
+        if values.shape != (self.free_size,):
+            raise ValueError(
+                f"free parameter vector must have shape {(self.free_size,)}"
+            )
+        expanded = self.initial_vector()
+        free_index = 0
+        for index, spec in enumerate(self.specs):
+            if spec.locked:
+                continue
+            expanded[index] = values[free_index]
+            free_index += 1
+        return expanded
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-safe block payload."""
+        return {"parameters": [spec.to_dict() for spec in self.specs]}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> SharedParameterBlock:
+        """Build a parameter block from a JSON-safe payload."""
+        specs = payload.get("parameters")
+        if not isinstance(specs, Sequence) or isinstance(specs, (str, bytes)):
+            raise ValueError("parameter block payload must contain 'parameters'")
+        return cls.from_specs([SharedParameterSpec.from_dict(spec) for spec in specs])
 
     def prior_residuals(self, vector: np.ndarray) -> np.ndarray:
         """Return Gaussian prior residuals for specs with prior and scale."""
@@ -498,6 +596,12 @@ def _has_finite_bounds(lower: np.ndarray, upper: np.ndarray) -> bool:
 def _require_finite_scalar(value: float, name: str) -> None:
     if not np.isfinite(float(value)):
         raise ValueError(f"{name} must be finite")
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    return float(value)
 
 
 @dataclass(frozen=True)
