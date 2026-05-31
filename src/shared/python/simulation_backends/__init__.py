@@ -52,6 +52,18 @@ from .provenance import (
     attach_provenance_to_trace,
     serialize_provenance,
 )
+from .wrench_extractor import (
+    WrenchImpulses,
+    compute_wrench_impulses,
+    force_torque_from_wrench_array,
+    static_support_wrench_trace,
+    trace_with_wrench_trace,
+    trace_wrench_impulses,
+    wrench_array_from_force_torque,
+    wrench_array_from_trace,
+    wrench_trace_from_array,
+    wrench_trace_from_force_torque,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -72,14 +84,24 @@ __all__ = [
     "Trace",
     "UnknownBackendError",
     "UpperSegmentParams",
+    "WrenchImpulses",
     "attach_provenance_to_checkpoint",
     "attach_provenance_to_trace",
     "available_backends",
+    "compute_wrench_impulses",
+    "force_torque_from_wrench_array",
     "has_mujoco",
     "has_warp",
     "make_backend",
     "require_mujoco",
     "require_warp",
     "serialize_provenance",
+    "static_support_wrench_trace",
+    "trace_with_wrench_trace",
+    "trace_wrench_impulses",
     "warp_device_available",
+    "wrench_array_from_force_torque",
+    "wrench_array_from_trace",
+    "wrench_trace_from_array",
+    "wrench_trace_from_force_torque",
 ]
