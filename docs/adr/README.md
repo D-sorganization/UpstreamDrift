@@ -32,6 +32,9 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0025](0025-jaxsim-backend-home.md)                | JaxSim Backend Home                                             | Accepted | 2026-05-30 |
 | [0026](0026-canonical-dynamic-state-v2.md)         | Canonical Dynamic State v2                                      | Accepted | 2026-05-31 |
 
+Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
+canonical-core app-shell registry reuse of the embeddable-tool contract.
+
 ## ADR Backlog
 
 1. Engine adapter boundary ownership and contract lifecycle.
