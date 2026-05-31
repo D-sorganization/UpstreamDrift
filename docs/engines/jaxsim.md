@@ -50,3 +50,17 @@ velocities]` for generalized velocity, matching the suite's
 `SPATIAL_JACOBIAN_ORDER = ("angular", "linear")` convention for the floating
 base block. The adapter declares the JaxSim capability profile and is registered
 as `EngineType.JAXSIM` in `LOADER_MAP`.
+
+## Cross-Engine Dynamics Gate
+
+Issue #6654 adds a self-hosted CI gate for JaxSim/Pinocchio free-floating
+dynamics parity. The gate starts with the smallest shared model:
+`tests/fixtures/jaxsim/single_link.sdf`, a one-link floating rigid body with
+unit mass and unit inertia.
+
+The test compares normalized `M`, `h`, `g`, and `C` snapshots from
+`JaxSimBackend` against a Pinocchio `JointModelFreeFlyer` model using the
+cross-engine tolerance policy from `src/engines/CROSS_ENGINE_PARITY_SPEC.md`:
+20% relative error for mass/gravity cross-engine comparisons, near-zero
+absolute tolerance for zero-velocity bias and Coriolis terms, and strict
+shape/symmetry/positive-definiteness invariants for `M`.

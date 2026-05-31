@@ -19,7 +19,9 @@ on:
       - "src/engines/**"
       - "shared/models/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/cross_engine/test_jaxsim_pinocchio_dynamics_gate.py"
       - "tests/fixtures/test_poses.json"
+      - "tests/fixtures/jaxsim/**"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -27,7 +29,9 @@ on:
       - "src/engines/**"
       - "shared/models/**"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/cross_engine/test_jaxsim_pinocchio_dynamics_gate.py"
       - "tests/fixtures/test_poses.json"
+      - "tests/fixtures/jaxsim/**"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -65,7 +69,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -117,6 +120,8 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install "pin>=2.6.0" || echo "::warning::pinocchio install failed"
           python -m ensurepip --upgrade || true
+          pip install -e ".[jaxsim]" || echo "::warning::jaxsim install failed"
+          python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
 
       - name: Run cross-engine forward-sim equivalence test
@@ -133,6 +138,7 @@ jobs:
           python3 -m pytest \
             -o addopts="" \
             tests/motion_matching/test_cross_engine_equivalence.py \
+            tests/cross_engine/test_jaxsim_pinocchio_dynamics_gate.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 
