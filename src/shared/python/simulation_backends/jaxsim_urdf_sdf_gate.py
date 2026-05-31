@@ -199,6 +199,16 @@ def compare_inertials(
                         tolerance=tolerance,
                     )
                 )
+    for link_name in sorted(set(actual) - set(expected)):
+        mismatches.append(
+            InertialMismatch(
+                link=link_name,
+                field="<unexpected link>",
+                expected=0.0,
+                actual=1.0,
+                tolerance=0.0,
+            )
+        )
     return mismatches
 
 
