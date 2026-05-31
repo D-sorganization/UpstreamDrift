@@ -12,6 +12,7 @@ from src.shared.python.engine_core.sub_protocols import (
     Queryable,
     Recordable,
     Steppable,
+    SupportsParameterGradients,
 )
 
 # ---------------------------------------------------------------------------
@@ -39,6 +40,9 @@ class TestProtocolsRuntimeCheckable:
 
     def test_recordable_plain_object_false(self) -> None:
         assert isinstance(object(), Recordable) is False
+
+    def test_parameter_gradients_plain_object_false(self) -> None:
+        assert isinstance(object(), SupportsParameterGradients) is False
 
 
 # ---------------------------------------------------------------------------
@@ -94,6 +98,28 @@ class _MockRecordable:
         pass
 
 
+class _MockParameterGradients:
+    def parameter_jacobian(
+        self,
+        parameter_vector: np.ndarray,
+        q: np.ndarray,
+        v: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        return np.zeros((2, 5))
+
+    def evaluate_ztcf_parameter_sensitivity_along_trajectory(
+        self,
+        parameter_vector: np.ndarray,
+        q_traj: np.ndarray,
+        v_traj: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        return np.zeros((len(q_traj), 2, 5))
+
+
 class TestMockImplementations:
     def test_mock_loadable_isinstance(self) -> None:
         assert isinstance(_MockLoadable(), Loadable)
@@ -107,6 +133,9 @@ class TestMockImplementations:
     def test_mock_recordable_isinstance(self) -> None:
         assert isinstance(_MockRecordable(), Recordable)
 
+    def test_mock_parameter_gradients_isinstance(self) -> None:
+        assert isinstance(_MockParameterGradients(), SupportsParameterGradients)
+
     def test_plain_object_not_loadable(self) -> None:
         assert not isinstance(object(), Loadable)
 
@@ -118,3 +147,6 @@ class TestMockImplementations:
 
     def test_plain_object_not_recordable(self) -> None:
         assert not isinstance(object(), Recordable)
+
+    def test_plain_object_not_parameter_gradients(self) -> None:
+        assert not isinstance(object(), SupportsParameterGradients)

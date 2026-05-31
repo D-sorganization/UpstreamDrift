@@ -12,6 +12,7 @@ Sub-protocols:
     Steppable: Time stepping (3 methods)
     Queryable: State inspection (4 methods)
     DynamicsComputable: Physics computation (7 methods)
+    SupportsParameterGradients: Parameter-gradient analysis (2 methods)
     CounterfactualComputable: What-if analysis (2 methods)
     Recordable: Data collection (3 methods)
 
@@ -383,7 +384,70 @@ class DynamicsComputable(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# Sub-protocol 5: CounterfactualComputable - What-if analysis
+# Sub-protocol 5: SupportsParameterGradients - Parameter-gradient analysis
+# ---------------------------------------------------------------------------
+
+
+@runtime_checkable
+class SupportsParameterGradients(Protocol):
+    """Protocol for pointwise dynamics sensitivity to model parameters.
+
+    Implementations expose JAX autodiff-backed Jacobians for callers that need
+    parameter sensitivities without depending on a concrete engine adapter.
+
+    Invariants:
+        - Parameter vectors are finite and positive.
+        - Returned Jacobians use acceleration rows by parameter columns.
+        - Trajectory APIs are pointwise over measured states, not rollouts.
+    """
+
+    @abstractmethod
+    def parameter_jacobian(
+        self,
+        parameter_vector: np.ndarray,
+        q: np.ndarray,
+        v: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        """Differentiate the pointwise drift field with respect to parameters.
+
+        Args:
+            parameter_vector: Positive model parameters.
+            q: Generalized positions at one measured sample.
+            v: Generalized velocities at one measured sample.
+            mode: Autodiff mode, normally ``"forward"`` or ``"reverse"``.
+
+        Returns:
+            Jacobian with acceleration rows by parameter columns.
+        """
+        ...
+
+    @abstractmethod
+    def evaluate_ztcf_parameter_sensitivity_along_trajectory(
+        self,
+        parameter_vector: np.ndarray,
+        q_traj: np.ndarray,
+        v_traj: np.ndarray,
+        *,
+        mode: str = "forward",
+    ) -> np.ndarray:
+        """Evaluate ZTCF parameter sensitivity at each measured trajectory row.
+
+        Args:
+            parameter_vector: Positive model parameters.
+            q_traj: Measured positions with one sample per row.
+            v_traj: Measured velocities with one sample per row.
+            mode: Autodiff mode, normally ``"forward"`` or ``"reverse"``.
+
+        Returns:
+            Array with shape ``(samples, acceleration_dim, parameter_dim)``.
+        """
+        ...
+
+
+# ---------------------------------------------------------------------------
+# Sub-protocol 6: CounterfactualComputable - What-if analysis
 # ---------------------------------------------------------------------------
 
 
