@@ -11,6 +11,8 @@ This module exposes pure-numpy helpers; it has no engine dependencies.
 
 from __future__ import annotations
 
+from typing import Final
+
 import numpy as np
 import numpy.typing as npt
 
@@ -137,3 +139,154 @@ def inverse_se3(matrix: npt.ArrayLike) -> npt.NDArray[np.float64]:
     out[:3, :3] = rt
     out[:3, 3] = -rt @ m[:3, 3]
     return out
+
+
+# ---------------------------------------------------------------------------
+# canonical-v2 quaternion + manifold helpers (CC-2, ADR-0026)
+#
+# Quaternions are unit, scalar-first ``(w, x, y, z)`` per
+# ``docs/conventions/canonical-v2.md``. ``quat_exp`` maps a rotation vector
+# (axis * angle, radians) to a unit quaternion; ``quat_log`` is its inverse on
+# the principal branch ``||rotvec|| < pi``. These are the building blocks the
+# canonical-v2 ``CanonicalState`` and the engine adapters (CC-9/CC-10) use to
+# update the floating base on its manifold instead of by naive vector addition.
+# ---------------------------------------------------------------------------
+
+_EPS_QUAT: Final[float] = 1e-12
+_EPS_SMALL_ANGLE: Final[float] = 1e-8
+
+
+def quat_normalize(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Return *q* scaled to unit norm. Raises if *q* has (near-)zero norm."""
+    arr = np.asarray(q, dtype=float)
+    if arr.shape != (4,):
+        raise ValueError(f"quaternion must have shape (4,), got {arr.shape}")
+    norm = float(np.linalg.norm(arr))
+    if norm < _EPS_QUAT:
+        raise ValueError("cannot normalize a zero-norm quaternion")
+    return arr / norm
+
+
+def quat_conjugate(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Return the conjugate ``(w, -x, -y, -z)``; the inverse for a unit quaternion."""
+    arr = np.asarray(q, dtype=float)
+    if arr.shape != (4,):
+        raise ValueError(f"quaternion must have shape (4,), got {arr.shape}")
+    return np.array([arr[0], -arr[1], -arr[2], -arr[3]], dtype=float)
+
+
+def quat_multiply(a: npt.ArrayLike, b: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Hamilton product ``a (x) b`` of two scalar-first quaternions."""
+    qa = np.asarray(a, dtype=float)
+    qb = np.asarray(b, dtype=float)
+    if qa.shape != (4,) or qb.shape != (4,):
+        raise ValueError("both quaternions must have shape (4,)")
+    w1, x1, y1, z1 = qa
+    w2, x2, y2, z2 = qb
+    return np.array(
+        [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ],
+        dtype=float,
+    )
+
+
+def quat_exp(rotvec: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Exponential map: rotation vector (axis * angle, rad) -> unit quaternion.
+
+    ``rotvec`` is ``axis * theta`` with ``theta`` in radians. Returns the unit
+    quaternion ``(cos(theta/2), sin(theta/2) * axis)``, scalar-first. The
+    small-angle branch uses a Taylor series for numerical stability.
+    """
+    v = np.asarray(rotvec, dtype=float)
+    if v.shape != (3,):
+        raise ValueError(f"rotvec must have shape (3,), got {v.shape}")
+    theta = float(np.linalg.norm(v))
+    half = 0.5 * theta
+    w = float(np.cos(half))
+    if theta < _EPS_SMALL_ANGLE:
+        # sin(theta/2) / theta -> 1/2 - theta^2/48 as theta -> 0
+        scale = 0.5 - theta * theta / 48.0
+    else:
+        scale = float(np.sin(half)) / theta
+    return quat_normalize(np.array([w, v[0] * scale, v[1] * scale, v[2] * scale]))
+
+
+def quat_log(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Logarithm map: unit quaternion -> rotation vector (axis * angle, rad).
+
+    Inverse of :func:`quat_exp` on the principal branch ``||rotvec|| < pi``.
+    The sign is canonicalised so ``q`` and ``-q`` (the same rotation) return the
+    same minimal rotation vector.
+    """
+    arr = quat_normalize(q)
+    if arr[0] < 0.0:  # shortest-path: keep the half-angle in [0, pi/2]
+        arr = -arr
+    w = float(np.clip(arr[0], -1.0, 1.0))
+    v = arr[1:4]
+    nv = float(np.linalg.norm(v))
+    if nv < _EPS_SMALL_ANGLE:
+        # theta -> 0: rotvec = 2 v / w to leading order (w -> 1 here)
+        return v * (2.0 / w)
+    theta = 2.0 * float(np.arctan2(nv, w))
+    return v * (theta / nv)
+
+
+def quat_to_matrix(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Convert a scalar-first unit quaternion to a 3x3 rotation matrix."""
+    w, x, y, z = quat_normalize(q)
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+            [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+            [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)],
+        ],
+        dtype=float,
+    )
+
+
+def matrix_to_quat(matrix: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Convert a 3x3 rotation matrix to a scalar-first unit quaternion (Shepperd)."""
+    m = np.asarray(matrix, dtype=float)
+    if m.shape != (3, 3):
+        raise ValueError(f"matrix must have shape (3, 3), got {m.shape}")
+    trace = m[0, 0] + m[1, 1] + m[2, 2]
+    if trace > 0.0:
+        s = np.sqrt(trace + 1.0) * 2.0
+        w = 0.25 * s
+        x = (m[2, 1] - m[1, 2]) / s
+        y = (m[0, 2] - m[2, 0]) / s
+        z = (m[1, 0] - m[0, 1]) / s
+    elif m[0, 0] > m[1, 1] and m[0, 0] > m[2, 2]:
+        s = np.sqrt(1.0 + m[0, 0] - m[1, 1] - m[2, 2]) * 2.0
+        w = (m[2, 1] - m[1, 2]) / s
+        x = 0.25 * s
+        y = (m[0, 1] + m[1, 0]) / s
+        z = (m[0, 2] + m[2, 0]) / s
+    elif m[1, 1] > m[2, 2]:
+        s = np.sqrt(1.0 + m[1, 1] - m[0, 0] - m[2, 2]) * 2.0
+        w = (m[0, 2] - m[2, 0]) / s
+        x = (m[0, 1] + m[1, 0]) / s
+        y = 0.25 * s
+        z = (m[1, 2] + m[2, 1]) / s
+    else:
+        s = np.sqrt(1.0 + m[2, 2] - m[0, 0] - m[1, 1]) * 2.0
+        w = (m[1, 0] - m[0, 1]) / s
+        x = (m[0, 2] + m[2, 0]) / s
+        y = (m[1, 2] + m[2, 1]) / s
+        z = 0.25 * s
+    return quat_normalize(np.array([w, x, y, z], dtype=float))
+
+
+def euler_xyz_deg_to_quat_wxyz(
+    rotation_xyz_deg: npt.ArrayLike,
+) -> npt.NDArray[np.float64]:
+    """Convert a ``canonical-v1`` intrinsic-XYZ-degrees rotation to a quaternion.
+
+    Reuses :func:`euler_xyz_deg_to_matrix` so the v1 -> v2 migration shares one
+    Euler convention (DRY); the result is a scalar-first unit quaternion.
+    """
+    return matrix_to_quat(euler_xyz_deg_to_matrix(rotation_xyz_deg))

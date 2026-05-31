@@ -29,6 +29,11 @@ from src.shared.python.pose_interchange.canonical import (
     canonical_from_reference_setup,
     canonical_zero_pose,
 )
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
+    canonical_state_zero,
+)
 from src.shared.python.pose_interchange.live_kinematics import (
     CapabilityError,
     LiveKinematicsService,
@@ -40,7 +45,11 @@ from src.shared.python.pose_interchange.protocol import (
 )
 from src.shared.python.pose_interchange.se3 import (
     compose_se3,
+    euler_xyz_deg_to_quat_wxyz,
     inverse_se3,
+    quat_exp,
+    quat_log,
+    quat_to_matrix,
     se3_from_xyz_xyz_deg,
     se3_to_xyz_xyz_deg,
 )
@@ -54,18 +63,23 @@ from src.shared.python.pose_interchange.se3 import (
 # - MINOR: backwards-compatible additions (new helpers, new adapter
 #   methods with defaults, new optional fields).
 # - PATCH: bug fixes that do not change the public surface.
-__version__ = "1.0.0"
+#
+# 2.0.0 (CC-2, ADR-0026): adds the ``canonical-v2`` dynamic state surface
+# (``CanonicalState`` + manifold ops). The ``canonical-v1`` pose API below is
+# unchanged and remains valid for pose-only callers.
+__version__ = "2.0.0"
 
-# Canonical pose schema version. Mirrors ``CONVENTION_TAG`` for
+# Canonical *pose* (v1) schema version. Mirrors ``CONVENTION_TAG`` for
 # downstream consumers that prefer numeric comparison; the string tag
-# (``canonical-v1``) remains the on-the-wire identifier.
+# (``canonical-v1``) remains the on-the-wire identifier. The canonical-v2
+# dynamic state carries its own ``CONVENTION_TAG_V2`` ("canonical-v2").
 SCHEMA_VERSION = "1.0.0"
 
 __all__ = [
-    "SCHEMA_VERSION",
-    "__version__",
     "CONVENTION_TAG",
+    "CONVENTION_TAG_V2",
     "CanonicalPose",
+    "CanonicalState",
     "CapabilityError",
     "JointSlot",
     "LiveKinematicsService",
@@ -74,9 +88,14 @@ __all__ = [
     "ServiceCapabilities",
     "__version__",
     "canonical_from_reference_setup",
+    "canonical_state_zero",
     "canonical_zero_pose",
     "compose_se3",
+    "euler_xyz_deg_to_quat_wxyz",
     "inverse_se3",
+    "quat_exp",
+    "quat_log",
+    "quat_to_matrix",
     "se3_from_xyz_xyz_deg",
     "se3_to_xyz_xyz_deg",
 ]
