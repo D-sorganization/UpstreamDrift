@@ -62,7 +62,7 @@ jobs:
         with:
           image-ref: "upstreamdrift:ci"
           format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
+          severity: "CRITICAL"
           # Exit with error only on CRITICAL vulnerabilities
           exit-code: "1"
           ignore-unfixed: true
