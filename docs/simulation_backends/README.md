@@ -8,6 +8,7 @@ backend from Python.
 
 - Architecture & rationale: [ADR-0023](../adr/0023-mujoco-warp-backend.md)
 - Differentiable backend (future): [ADR-0024](../adr/0024-differentiable-backend.md)
+- Cross-engine reports: [cross_engine_comparison.md](cross_engine_comparison.md)
 - Package reference & module map:
   [`src/shared/python/simulation_backends/README.md`](../../src/shared/python/simulation_backends/README.md)
 
@@ -231,6 +232,24 @@ wrench_trace = static_support_wrench_trace(trace.t, body_mass_kg=80.0)
 trace = trace_with_wrench_trace(trace, wrench_trace)
 impulses = trace_wrench_impulses(trace)
 ```
+
+## Cross-engine comparison reports
+
+The CC-27 report service runs the same input across selected backends and emits
+a side-by-side Markdown or JSON report with kinematics, kinetics, ZTCF/ZVCF
+where dynamics primitives exist, optional wrench comparison, divergence
+annotations, and per-panel provenance:
+
+```bash
+python -m src.shared.python.simulation_backends.compare_cli \
+  --engines ode,mujoco \
+  --horizon 200 \
+  --dt 0.005 \
+  --output reports/ode_vs_mujoco.md
+```
+
+See [cross_engine_comparison.md](cross_engine_comparison.md) for control input,
+registry keys, and Python API examples.
 
 ## A runnable example
 
