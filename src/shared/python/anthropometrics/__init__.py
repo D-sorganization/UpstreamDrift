@@ -19,6 +19,14 @@ from __future__ import annotations
 from . import engine_adapters as engine_adapters
 from ._subject_anthropometrics import SubjectAnthropometrics  # noqa: F401
 from ._types import Sex  # noqa: F401
+from .addbiomechanics_priors import (  # noqa: F401
+    PRIOR_SCHEMA_VERSION,
+    CalibrationInertiaPriorSet,
+    InertiaPriorParameter,
+    build_inertia_priors_from_subject,
+    load_addbiomechanics_inertia_priors,
+    save_inertia_priors,
+)
 from .contracts import EngineAdapter, Estimator, Reader, Writer  # noqa: F401
 from .engine_adapters import ADAPTER_REGISTRY  # noqa: F401
 from .persistence import (
@@ -55,9 +63,12 @@ else:
 # ``from anthropometrics import DrakeAdapter`` works.
 _LOCAL_ALL = [
     "ADAPTER_REGISTRY",
+    "CalibrationInertiaPriorSet",
     "C3DSubjectMetadata",
     "EngineAdapter",
     "Estimator",
+    "InertiaPriorParameter",
+    "PRIOR_SCHEMA_VERSION",
     "Reader",
     "SCHEMA_VERSION",
     "SegmentProperties",
@@ -66,12 +77,15 @@ _LOCAL_ALL = [
     "SubjectAnthropometrics",
     "SubjectCalibrationDialog",
     "Writer",
+    "build_inertia_priors_from_subject",
     "default_subjects_dir",
     "engine_adapters",
+    "load_addbiomechanics_inertia_priors",
     "load_subject",
     "read_c3d_subject_metadata",
     "read_mjcf_body",
     "run_pipeline",
+    "save_inertia_priors",
     "save_subject",
     "write_mjcf_body",
 ]
