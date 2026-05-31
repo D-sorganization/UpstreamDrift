@@ -12,6 +12,7 @@ Migration:
 from src.engines.loaders import (
     LOADER_MAP,
     load_drake_engine,
+    load_jaxsim_engine,
     load_mujoco_engine,
     load_myosim_engine,
     load_opensim_engine,
@@ -23,6 +24,7 @@ from src.engines.loaders import (
 __all__ = [
     "LOADER_MAP",
     "load_drake_engine",
+    "load_jaxsim_engine",
     "load_mujoco_engine",
     "load_myosim_engine",
     "load_opensim_engine",

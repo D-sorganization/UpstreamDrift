@@ -28,3 +28,25 @@ python -m pytest tests/unit/test_jaxsim_urdf_sdf_gate.py -m "requires_jaxsim and
 `src.shared.python.simulation_backends.jaxsim_urdf_sdf_gate` detects `gz`, `ign`, or `sdf`, runs the equivalent of `gz sdf -p golfer.urdf`, writes the converted SDF, checks every URDF link mass/inertia against the SDF payload with `1e-9` absolute and relative tolerance, then loads the SDF through `jaxsim.api` and asserts `model.dofs() == 25`.
 
 No manual fix-ups are encoded in the repository gate. If BRICK conversion requires a hand edit, document the exact source URDF element, converted SDF element, reason, and tolerance impact in the PR before relaxing the test.
+
+## Backend Adapter
+
+Issue #6653 adds `src.engines.physics_engines.jaxsim.JaxSimBackend` as the
+first engine-core adapter for JaxSim dynamics terms. The adapter is import-safe
+for core installs: JaxSim is imported only when a live model is loaded.
+
+The adapter maps these JaxSim functional APIs into the engine-core protocols:
+
+- `free_floating_mass_matrix`
+- `free_floating_bias_forces`
+- `free_floating_gravity_forces`
+- `free_floating_coriolis_matrix`
+- `inverse_dynamics`
+- `generalized_free_floating_jacobian`
+
+Model data is built in the suite's canonical inertial velocity representation.
+State vectors use `[base angular velocity; base linear velocity; joint
+velocities]` for generalized velocity, matching the suite's
+`SPATIAL_JACOBIAN_ORDER = ("angular", "linear")` convention for the floating
+base block. The adapter declares the JaxSim capability profile and is registered
+as `EngineType.JAXSIM` in `LOADER_MAP`.

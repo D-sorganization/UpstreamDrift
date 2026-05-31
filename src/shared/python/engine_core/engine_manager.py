@@ -105,6 +105,7 @@ class EngineManager(ContractChecker):
             EngineType.MUJOCO: (self.engines_root / "physics_engines" / "mujoco"),
             EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
             EngineType.PINOCCHIO: (self.engines_root / "physics_engines" / "pinocchio"),
+            EngineType.JAXSIM: (self.engines_root / "physics_engines" / "jaxsim"),
             EngineType.OPENSIM: (self.engines_root / "physics_engines" / "opensim"),
             EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosuite"),
             EngineType.MATLAB_2D: (
