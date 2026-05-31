@@ -209,7 +209,7 @@ def shared_parameter_covariance(
     matrix = np.asarray(jacobian, dtype=float)
     require(matrix.ndim == 2, "jacobian must be 2D")
     require(matrix.shape[1] > 0, "jacobian must have at least one column")
-    require(np.all(np.isfinite(matrix)), "jacobian must be finite")
+    require(bool(np.all(np.isfinite(matrix))), "jacobian must be finite")
     require(noise_variance > 0.0, "noise_variance must be positive")
     require(regularization >= 0.0, "regularization must be non-negative")
     fisher = matrix.T @ matrix
@@ -235,13 +235,13 @@ def _validate_observation(observation: MultiTrialObservation) -> None:
     require(bool(observation.trial_id.strip()), "trial_id must be non-empty")
     times = np.asarray(observation.evaluation_times, dtype=float)
     require(times.ndim == 1, "evaluation_times must be a 1D array")
-    require(np.all(np.isfinite(times)), "evaluation_times must be finite")
+    require(bool(np.all(np.isfinite(times))), "evaluation_times must be finite")
     coeffs = np.asarray(observation.initial_coefficients, dtype=float)
     require(
         coeffs.shape == (observation.trajectory.coefficient_size,),
         "initial_coefficients shape must match trajectory",
     )
-    require(np.all(np.isfinite(coeffs)), "initial_coefficients must be finite")
+    require(bool(np.all(np.isfinite(coeffs))), "initial_coefficients must be finite")
 
 
 def _build_layout(problem: MultiTrialMapProblem) -> MultiTrialDecisionLayout:
