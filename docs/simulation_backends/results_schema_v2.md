@@ -59,6 +59,28 @@ wrench groups. BunkerShot3D files can be imported via
 Datasets that are `None` are **omitted** from the file; the reader returns
 `None` for absent datasets.
 
+### ZTCF/ZVCF analysis profile
+
+`persist_ztcf_zvcf_analysis` writes pointwise canonical-v2 analysis artifacts
+using the same CC-4 root attributes and required state datasets. These files
+set `kind = "ztcf_zvcf_analysis"` and are not forward rollout traces.
+
+| Dataset                | Shape     | dtype   | Description                                              |
+| ---------------------- | --------- | ------- | -------------------------------------------------------- |
+| `t`                    | `(T,)`    | float64 | Sample times [s]                                         |
+| `q`                    | `(T, nq)` | float64 | canonical-v2 configurations                              |
+| `v`                    | `(T, nv)` | float64 | canonical-v2 generalized velocities                      |
+| `u`                    | `(T, nv)` | float64 | Applied generalized controls, zero-filled when passive   |
+| `ztcf_acceleration`    | `(T, nv)` | float64 | Drift acceleration `solve(M(q), -bias(q, v))`            |
+| `zvcf_acceleration`    | `(T, nv)` | float64 | Zero-velocity acceleration `solve(M(q), u - bias(q, 0))` |
+| `drift_acceleration`   | `(T, nv)` | float64 | Affine drift term; equal to `ztcf_acceleration`          |
+| `control_acceleration` | `(T, nv)` | float64 | Control contribution `solve(M(q), u)`                    |
+
+For floating-base canonical-v2 states, `nq` may differ from `nv` because the
+base quaternion is a configuration manifold coordinate while velocity and
+acceleration live in tangent space. Analysis code must size accelerations from
+`nv`, not from `nq`.
+
 ### AffineDrift coupling artifact
 
 Double-pendulum coupling back to AffineDrift is exposed through

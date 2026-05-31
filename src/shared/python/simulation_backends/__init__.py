@@ -70,6 +70,12 @@ from .provenance import (
     attach_provenance_to_trace,
     serialize_provenance,
 )
+from .ztcf_zvcf import (
+    CanonicalDynamicsTrajectory,
+    ZtcfZvcfResult,
+    evaluate_ztcf_zvcf_on_canonical_trajectory,
+    persist_ztcf_zvcf_analysis,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -79,6 +85,7 @@ __all__ = [
     "BackendNotAvailableError",
     "BatchTrace",
     "BatchedBackend",
+    "CanonicalDynamicsTrajectory",
     "ComparisonInput",
     "ComparisonPanel",
     "ComparisonReport",
@@ -102,6 +109,7 @@ __all__ = [
     "attach_provenance_to_checkpoint",
     "attach_provenance_to_trace",
     "available_backends",
+    "evaluate_ztcf_zvcf_on_canonical_trajectory",
     "compare",
     "compare_runs",
     "compare_traces",
@@ -109,6 +117,7 @@ __all__ = [
     "has_mjx",
     "has_warp",
     "make_backend",
+    "persist_ztcf_zvcf_analysis",
     "render_markdown_report",
     "require_mujoco",
     "require_mjx",
@@ -116,4 +125,5 @@ __all__ = [
     "serialize_provenance",
     "write_report",
     "warp_device_available",
+    "ZtcfZvcfResult",
 ]

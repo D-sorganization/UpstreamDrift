@@ -33,6 +33,10 @@ analytical ground truth in
 
 from __future__ import annotations
 
+import os
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Any
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -46,11 +50,161 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 __all__ = [
+    "CanonicalDynamicsTrajectory",
+    "ZtcfZvcfResult",
     "drift_and_control_split",
     "evaluate_ztcf_along_trajectory",
+    "evaluate_ztcf_zvcf_on_canonical_trajectory",
+    "persist_ztcf_zvcf_analysis",
     "ztcf_acceleration",
     "zvcf_acceleration",
 ]
+
+_CANONICAL_V2 = "canonical-v2"
+_WORLD_Z_UP = "world_Zup"
+_SI_UNITS = "SI"
+_ANALYSIS_SCHEMA_VERSION = "2.0.0"
+
+
+@dataclass(frozen=True)
+class CanonicalDynamicsTrajectory:
+    """Pointwise canonical-v2 state samples for ZTCF/ZVCF analysis.
+
+    This is an analysis-boundary adapter: engine adapters convert native state
+    layouts to ``canonical-v2`` before constructing this value, and the math in
+    this module still runs only through ``DynamicsProvider`` primitives.
+
+    ``q`` is configuration-space data and may be longer than ``v`` in
+    canonical-v2 because a floating-base quaternion has one redundant
+    coordinate (``nq = nv + 1``). ``v`` and ``tau`` live in tangent space.
+    """
+
+    t: np.ndarray
+    q: np.ndarray
+    v: np.ndarray
+    tau: np.ndarray | None = None
+    convention: str = _CANONICAL_V2
+    frame: str = _WORLD_Z_UP
+    units: str = _SI_UNITS
+    meta: Mapping[str, object] | None = None
+
+    def __post_init__(self) -> None:
+        t = np.asarray(self.t, dtype=float).reshape(-1)
+        q = np.asarray(self.q, dtype=float)
+        v = np.asarray(self.v, dtype=float)
+        require(t.size > 0, "t must be non-empty", value=t.shape)
+        require(q.ndim == 2, "q must be 2-D (T, nq)", value=q.shape)
+        require(v.ndim == 2, "v must be 2-D (T, nv)", value=v.shape)
+        require(
+            q.shape[0] == t.size and v.shape[0] == t.size,
+            "t, q, and v must share the same sample count",
+            value=(t.shape, q.shape, v.shape),
+        )
+        require(q.shape[1] > 0, "q must have at least one coordinate", value=q.shape)
+        require(v.shape[1] > 0, "v must have at least one velocity", value=v.shape)
+        require(
+            check_finite(t) and check_finite(q) and check_finite(v),
+            "t, q, and v must contain only finite values",
+        )
+
+        tau = None
+        if self.tau is not None:
+            tau = np.asarray(self.tau, dtype=float)
+            require(tau.ndim == 2, "tau must be 2-D (T, nv)", value=tau.shape)
+            require(
+                tau.shape == v.shape,
+                f"tau must match v shape {v.shape}; got {tau.shape}",
+                value=tau.shape,
+            )
+            require(check_finite(tau), "tau must contain only finite values")
+
+        require(
+            self.convention == _CANONICAL_V2,
+            f"convention must be {_CANONICAL_V2!r}",
+            value=self.convention,
+        )
+        require(
+            self.frame == _WORLD_Z_UP,
+            f"frame must be {_WORLD_Z_UP!r}",
+            value=self.frame,
+        )
+        require(self.units == _SI_UNITS, f"units must be {_SI_UNITS!r}")
+
+        object.__setattr__(self, "t", t)
+        object.__setattr__(self, "q", q)
+        object.__setattr__(self, "v", v)
+        object.__setattr__(self, "tau", tau)
+        object.__setattr__(self, "meta", dict(self.meta or {}))
+
+    @property
+    def num_steps(self) -> int:
+        """Number of sampled states."""
+        return int(self.t.shape[0])
+
+    @property
+    def tangent_dim(self) -> int:
+        """Dimension of tangent-space vectors (``nv``)."""
+        return int(self.v.shape[1])
+
+    def controls_or_zeros(self) -> np.ndarray:
+        """Return applied controls, defaulting passive samples to zeros."""
+        if self.tau is None:
+            return np.zeros_like(self.v)
+        return self.tau.copy()
+
+
+@dataclass(frozen=True)
+class ZtcfZvcfResult:
+    """Pointwise ZTCF/ZVCF and affine drift/control analysis result."""
+
+    t: np.ndarray
+    ztcf_acceleration: np.ndarray
+    zvcf_acceleration: np.ndarray
+    drift_acceleration: np.ndarray
+    control_acceleration: np.ndarray
+    convention: str = _CANONICAL_V2
+    frame: str = _WORLD_Z_UP
+    units: str = _SI_UNITS
+
+    def __post_init__(self) -> None:
+        t = np.asarray(self.t, dtype=float).reshape(-1)
+        arrays = {
+            "ztcf_acceleration": np.asarray(self.ztcf_acceleration, dtype=float),
+            "zvcf_acceleration": np.asarray(self.zvcf_acceleration, dtype=float),
+            "drift_acceleration": np.asarray(self.drift_acceleration, dtype=float),
+            "control_acceleration": np.asarray(self.control_acceleration, dtype=float),
+        }
+        require(t.size > 0, "t must be non-empty", value=t.shape)
+        for name, value in arrays.items():
+            require(value.ndim == 2, f"{name} must be 2-D (T, nv)", value=value.shape)
+            require(
+                value.shape[0] == t.size,
+                f"{name} sample count must match t",
+                value=(value.shape, t.shape),
+            )
+            require(check_finite(value), f"{name} must contain only finite values")
+        expected_shape = arrays["ztcf_acceleration"].shape
+        for name, value in arrays.items():
+            require(
+                value.shape == expected_shape,
+                f"{name} must share shape {expected_shape}; got {value.shape}",
+                value=value.shape,
+            )
+        require(
+            self.convention == _CANONICAL_V2,
+            f"convention must be {_CANONICAL_V2!r}",
+            value=self.convention,
+        )
+        require(
+            self.frame == _WORLD_Z_UP,
+            f"frame must be {_WORLD_Z_UP!r}",
+            value=self.frame,
+        )
+        require(self.units == _SI_UNITS, f"units must be {_SI_UNITS!r}")
+
+        object.__setattr__(self, "t", t)
+        for name, value in arrays.items():
+            object.__setattr__(self, name, value)
 
 
 def _as_state_vector(name: str, value: np.ndarray) -> np.ndarray:
@@ -139,15 +293,10 @@ def ztcf_acceleration(
     """
     q_arr = _as_state_vector("q", q)
     v_arr = _as_state_vector("v", v)
-    require(
-        q_arr.shape == v_arr.shape,
-        f"q and v must share shape; got {q_arr.shape} vs {v_arr.shape}",
-        value=(q_arr.shape, v_arr.shape),
-    )
     bias = np.asarray(provider.bias_forces(q_arr, v_arr), dtype=float)
     require(
-        bias.shape == q_arr.shape,
-        f"bias_forces(q, v) must be {q_arr.shape}; got {bias.shape}",
+        bias.shape == v_arr.shape,
+        f"bias_forces(q, v) must be {v_arr.shape}; got {bias.shape}",
         value=bias.shape,
     )
     return _solve_mass(provider, q_arr, -bias)
@@ -189,17 +338,12 @@ def zvcf_acceleration(
     """
     q_arr = _as_state_vector("q", q)
     tau_arr = _as_state_vector("tau", tau)
-    require(
-        q_arr.shape == tau_arr.shape,
-        f"q and tau must share shape; got {q_arr.shape} vs {tau_arr.shape}",
-        value=(q_arr.shape, tau_arr.shape),
-    )
     bias_zero_v = np.asarray(
-        provider.bias_forces(q_arr, np.zeros_like(q_arr)), dtype=float
+        provider.bias_forces(q_arr, np.zeros_like(tau_arr)), dtype=float
     )
     require(
-        bias_zero_v.shape == q_arr.shape,
-        f"bias_forces(q, 0) must be {q_arr.shape}; got {bias_zero_v.shape}",
+        bias_zero_v.shape == tau_arr.shape,
+        f"bias_forces(q, 0) must be {tau_arr.shape}; got {bias_zero_v.shape}",
         value=bias_zero_v.shape,
     )
     return _solve_mass(provider, q_arr, tau_arr - bias_zero_v)
@@ -240,8 +384,8 @@ def evaluate_ztcf_along_trajectory(
     require(q_mat.ndim == 2, "q_traj must be 2-D (T, n)", value=q_mat.shape)
     require(v_mat.ndim == 2, "v_traj must be 2-D (T, n)", value=v_mat.shape)
     require(
-        q_mat.shape == v_mat.shape,
-        f"q_traj and v_traj must share shape; got {q_mat.shape} vs {v_mat.shape}",
+        q_mat.shape[0] == v_mat.shape[0],
+        "q_traj and v_traj must share sample count",
         value=(q_mat.shape, v_mat.shape),
     )
     require(
@@ -249,7 +393,7 @@ def evaluate_ztcf_along_trajectory(
         "q_traj and v_traj must contain only finite values",
     )
 
-    out = np.empty_like(q_mat)
+    out = np.empty_like(v_mat)
     for idx in range(q_mat.shape[0]):
         out[idx] = ztcf_acceleration(provider, q_mat[idx], v_mat[idx])
     return out
@@ -297,10 +441,130 @@ def drift_and_control_split(
     drift = ztcf_acceleration(provider, q, v)
     q_arr = _as_state_vector("q", q)
     tau_arr = _as_state_vector("tau", tau)
-    require(
-        q_arr.shape == tau_arr.shape,
-        f"q and tau must share shape; got {q_arr.shape} vs {tau_arr.shape}",
-        value=(q_arr.shape, tau_arr.shape),
-    )
     control = _solve_mass(provider, q_arr, tau_arr)
     return drift, control
+
+
+def evaluate_ztcf_zvcf_on_canonical_trajectory(
+    provider: DynamicsProvider,
+    trajectory: CanonicalDynamicsTrajectory,
+) -> ZtcfZvcfResult:
+    """Evaluate pointwise ZTCF/ZVCF on canonical-v2 state samples.
+
+    Args:
+        provider: Backend exposing ``mass_matrix`` and ``bias_forces`` in the
+            same canonical-v2 coordinates as ``trajectory.q``/``trajectory.v``.
+        trajectory: Canonical-v2 state samples and optional controls.
+
+    Returns:
+        Pointwise accelerations and affine split arrays, all shape ``(T, nv)``.
+
+    Postcondition:
+        ``drift_acceleration`` equals ``ztcf_acceleration`` sample-by-sample.
+    """
+    require(
+        isinstance(trajectory, CanonicalDynamicsTrajectory),
+        "trajectory must be a CanonicalDynamicsTrajectory",
+        value=type(trajectory).__name__,
+    )
+    tau = trajectory.controls_or_zeros()
+    ztcf = np.empty_like(trajectory.v)
+    zvcf = np.empty_like(trajectory.v)
+    drift = np.empty_like(trajectory.v)
+    control = np.empty_like(trajectory.v)
+
+    for idx in range(trajectory.num_steps):
+        q_i = trajectory.q[idx]
+        v_i = trajectory.v[idx]
+        tau_i = tau[idx]
+        ztcf[idx] = ztcf_acceleration(provider, q_i, v_i)
+        zvcf[idx] = zvcf_acceleration(provider, q_i, tau_i)
+        drift[idx], control[idx] = drift_and_control_split(provider, q_i, v_i, tau_i)
+
+    return ZtcfZvcfResult(
+        t=trajectory.t,
+        ztcf_acceleration=ztcf,
+        zvcf_acceleration=zvcf,
+        drift_acceleration=drift,
+        control_acceleration=control,
+        convention=trajectory.convention,
+        frame=trajectory.frame,
+        units=trajectory.units,
+    )
+
+
+def _validate_path(path: str | os.PathLike[str]) -> str:
+    """Return ``path`` as a filesystem string after basic DbC validation."""
+    if not isinstance(path, (str, os.PathLike)):
+        raise TypeError(f"path must be str or os.PathLike, got {type(path).__name__}")
+    path_str = os.fspath(path)
+    require(bool(path_str.strip()), "path must be a non-empty filesystem path")
+    return path_str
+
+
+def _write_scalar_meta(handle: Any, meta: Mapping[str, object]) -> None:
+    """Persist scalar metadata as root attributes using the CC-4 meta prefix."""
+    for key, value in meta.items():
+        if isinstance(value, (str, bool, int, float)):
+            handle.attrs[f"meta_{key}"] = value
+
+
+def persist_ztcf_zvcf_analysis(
+    trajectory: CanonicalDynamicsTrajectory,
+    result: ZtcfZvcfResult,
+    path: str | os.PathLike[str],
+    *,
+    backend: str,
+) -> None:
+    """Persist canonical-v2 ZTCF/ZVCF arrays into a CC-4-style HDF5 file.
+
+    The file uses the shared CC-4 root attributes and required ``t``/``q``/``v``
+    datasets, then adds the analysis datasets ``ztcf_acceleration``,
+    ``zvcf_acceleration``, ``drift_acceleration``, and
+    ``control_acceleration``. It is intentionally an analysis artifact rather
+    than a forward rollout trace.
+    """
+    require(
+        isinstance(trajectory, CanonicalDynamicsTrajectory),
+        "trajectory must be a CanonicalDynamicsTrajectory",
+        value=type(trajectory).__name__,
+    )
+    require(
+        isinstance(result, ZtcfZvcfResult),
+        "result must be a ZtcfZvcfResult",
+        value=type(result).__name__,
+    )
+    require(
+        bool(backend.strip()),
+        "backend must be a non-empty backend identifier",
+        value=backend,
+    )
+    require(
+        result.t.shape == trajectory.t.shape
+        and result.ztcf_acceleration.shape == trajectory.v.shape,
+        "result must match trajectory sample count and tangent dimension",
+        value=(result.t.shape, result.ztcf_acceleration.shape, trajectory.v.shape),
+    )
+    path_str = _validate_path(path)
+    import h5py
+
+    with h5py.File(path_str, "w") as handle:
+        handle.attrs["schema_version"] = _ANALYSIS_SCHEMA_VERSION
+        handle.attrs["backend"] = backend
+        handle.attrs["dt"] = (
+            float(np.median(np.diff(trajectory.t))) if trajectory.t.size > 1 else 0.0
+        )
+        handle.attrs["kind"] = "ztcf_zvcf_analysis"
+        handle.attrs["convention"] = trajectory.convention
+        handle.attrs["frame"] = trajectory.frame
+        handle.attrs["units"] = trajectory.units
+        _write_scalar_meta(handle, trajectory.meta or {})
+
+        handle.create_dataset("t", data=trajectory.t)
+        handle.create_dataset("q", data=trajectory.q)
+        handle.create_dataset("v", data=trajectory.v)
+        handle.create_dataset("u", data=trajectory.controls_or_zeros())
+        handle.create_dataset("ztcf_acceleration", data=result.ztcf_acceleration)
+        handle.create_dataset("zvcf_acceleration", data=result.zvcf_acceleration)
+        handle.create_dataset("drift_acceleration", data=result.drift_acceleration)
+        handle.create_dataset("control_acceleration", data=result.control_acceleration)
