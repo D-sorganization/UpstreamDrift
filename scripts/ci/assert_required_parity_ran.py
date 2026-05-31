@@ -28,7 +28,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from xml.etree import ElementTree
+import defusedxml.ElementTree as ElementTree  # XXE-safe (semgrep use-defused-xml)
 
 
 class ParityGateError(RuntimeError):
