@@ -323,7 +323,8 @@ class JaxSimBackend(BasePhysicsEngine):
         js = self._require_api()
         if not hasattr(js, "ode") or not hasattr(js.ode, "system_acceleration"):
             raise NotImplementedError(
-                "JaxSim ode.system_acceleration is required for acceleration terms"
+                "JaxSim ode.system_acceleration is required for acceleration terms "
+                "(tracked: #6653)"
             )
         base_acceleration, joint_acceleration, _ = js.ode.system_acceleration(
             self.model,
