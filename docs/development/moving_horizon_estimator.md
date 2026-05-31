@@ -18,11 +18,16 @@ facade over the CC-19 single-trial MAP solver:
   `callback_payload()` is JSON-serialisable for realtime bridge publishing.
 
 The default latency budget is 50 ms per window, matching the local realtime IPC
-p99 guidance. The current Python facade records achieved per-window latency and
-flags `over_budget`; production Rust integration should drive the residual and
-Jacobian hot path through `rust_core/upstream-realtime` while preserving this
-API contract.
+p99 guidance. The Python facade records achieved per-window latency and flags
+`over_budget`. The latency-critical recorded-swing proof path lives in
+`rust_core/upstream-realtime/src/moving_horizon.rs`; it advances bounded windows,
+keeps fixed theta, carries warm-start state, evaluates the residual/Jacobian hot
+path in Rust, and reports max/mean/p99 latency against the stated budget. The
+PyO3 surface exposes `benchmark_recorded_swing_json()` for callers that need the
+same benchmark from Python without moving the hot path out of Rust.
 
 Focused coverage is in `tests/unit/estimation/test_moving_horizon_estimator.py`
 for window advancement, state carryover, fixed-parameter objective construction,
-and callback payloads.
+and callback payloads. Rust coverage is in the `upstream-realtime` crate tests
+and proves recorded-swing window advancement stays within the 50 ms per-window
+budget on the deterministic fixture.
