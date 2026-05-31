@@ -92,9 +92,9 @@ def _analytic_base_velocity_rollout(
 
     Returns an ``(horizon + 1, 6)`` array of canonical ``[angular; linear]``
     base velocities. The base origin is the centre of mass, so gravity exerts
-    no torque; the angular velocity obeys Euler's equations, and the linear
-    velocity follows ballistic free fall under the canonical gravity vector.
-    Both are integrated here with a small fixed step for an independent
+    no torque; linear velocity changes by the canonical inertial gravity vector
+    and angular velocity obeys Euler's equations, integrated here with the
+    documented analytic ``h`` term and a small fixed step for an independent
     reference.
     """
 
@@ -118,7 +118,10 @@ def _analytic_base_velocity_rollout(
         angular_accel = -inertia_inv @ dynamics.h[:3]
         v = v.copy()
         v[:3] = v[:3] + angular_accel * dt
-        v[3:] = v[3:] + dynamics.g[3:] / _MASS_KG * dt
+        v[3:] = v[3:] + dt * np.asarray(
+            CANONICAL_GRAVITY_INERTIAL,
+            dtype=np.float64,
+        )
         history[k + 1] = v
     return history
 
