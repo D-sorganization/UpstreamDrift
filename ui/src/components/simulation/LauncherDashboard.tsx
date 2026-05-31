@@ -256,7 +256,7 @@ export function LauncherDashboard({
     onRefetch,
 }: Props) {
     const engines = tiles.filter((t) => t.category === 'physics_engine');
-    const toolsAndExternal = tiles.filter((t) => t.category === 'tool' || t.category === 'external');
+    const toolsAndExternal = tiles.filter((t) => t.category !== 'physics_engine');
     const selectedTile = tiles.find((t) => t.id === selectedTileId);
     const tileSections = buildTileSections(tiles);
 

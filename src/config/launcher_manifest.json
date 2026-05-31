@@ -581,6 +581,46 @@
       "order": 31
     },
     {
+      "id": "canonical_core_estimation",
+      "name": "Canonical-Core Estimation",
+      "description": "Workspace entry point for CC-19 estimation services and canonical-state fit handoff.",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/tools/canonical_core/estimation.py",
+      "web_route": "/tools/canonical-core/estimation",
+      "logo": "biomechanics.svg",
+      "status": "beta",
+      "default_launch": "tab",
+      "shell_surfaces": ["pyqt6", "react"],
+      "capabilities": [
+        "canonical_core",
+        "estimation",
+        "services_layer",
+        "biomechanics"
+      ],
+      "order": 36
+    },
+    {
+      "id": "canonical_core_comparison",
+      "name": "Canonical-Core Comparison",
+      "description": "Workspace entry point for CC-27 comparison services and cross-engine canonical-state review.",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/tools/canonical_core/comparison.py",
+      "web_route": "/tools/canonical-core/comparison",
+      "logo": "biomechanics.svg",
+      "status": "beta",
+      "default_launch": "tab",
+      "shell_surfaces": ["pyqt6", "react"],
+      "capabilities": [
+        "canonical_core",
+        "comparison",
+        "services_layer",
+        "biomechanics"
+      ],
+      "order": 37
+    },
+    {
       "id": "analysis_tools_api",
       "name": "Analysis Tools",
       "description": "REST API access to 6 analysis endpoints (swing metrics, biomechanics)",
@@ -591,7 +631,7 @@
       "logo": "data_explorer.svg",
       "status": "ready",
       "capabilities": ["swing_metrics", "biomechanics", "api"],
-      "order": 32
+      "order": 38
     },
     {
       "id": "motion_pipeline",

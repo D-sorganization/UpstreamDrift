@@ -151,6 +151,8 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
 _FIRST_PARTY_TOOL_IDS = {
     "ball_flight_gui",
     "bunker_shot_gui",
+    "canonical_core_comparison",
+    "canonical_core_estimation",
     "model_explorer",
     "putting_green_gui",
     "golf_environment",
@@ -167,9 +169,11 @@ def test_first_party_tools_are_listed_in_adapter_modules() -> None:
 
     source = inspect.getsource(bootstrap.bootstrap_embeddable_tools)
     for tool_id in _FIRST_PARTY_TOOL_IDS:
-        assert f"src.tools.{tool_id}." in source, (
-            f"{tool_id} missing from adapter_modules in bootstrap"
-        )
+        if tool_id.startswith("canonical_core_"):
+            expected = "src.tools.canonical_core._embed_adapter"
+        else:
+            expected = f"src.tools.{tool_id}."
+        assert expected in source, f"{tool_id} missing from adapter_modules"
 
 
 def test_bootstrap_registers_all_first_party_tools(monkeypatch) -> None:
