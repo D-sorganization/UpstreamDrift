@@ -1,7 +1,7 @@
 # Cross-engine differential-testing report v1
 
 - Schema: `upstreamdrift.cross_engine_differential.v1`
-- Generated: `2026-05-31T06:34:14+00:00`
+- Generated: `2026-05-31T11:13:43+00:00`
 - Status: `blocked_by_draft_dependencies`
 - Source shape: `cc11`
 - Engines: mujoco-canonical-v2, pinocchio-canonical-v2
