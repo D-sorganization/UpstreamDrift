@@ -44,6 +44,13 @@ from .protocol import (
     SimulationBackend,
     Trace,
 )
+from .wrench_extractor import (
+    WrenchImpulses,
+    compute_wrench_impulses,
+    force_torque_from_wrench_array,
+    trace_wrench_impulses,
+    wrench_array_from_force_torque,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -61,11 +68,16 @@ __all__ = [
     "Trace",
     "UnknownBackendError",
     "UpperSegmentParams",
+    "WrenchImpulses",
     "available_backends",
+    "compute_wrench_impulses",
+    "force_torque_from_wrench_array",
     "has_mujoco",
     "has_warp",
     "make_backend",
     "require_mujoco",
     "require_warp",
+    "trace_wrench_impulses",
     "warp_device_available",
+    "wrench_array_from_force_torque",
 ]
