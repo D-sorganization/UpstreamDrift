@@ -131,6 +131,21 @@ def _jaxsim_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
 
 def _pinocchio_terms(q: np.ndarray, v: np.ndarray) -> DynamicsTerms:
     pin = pytest.importorskip("pinocchio")
+    required_api = (
+        "Model",
+        "JointModelFreeFlyer",
+        "SE3",
+        "Inertia",
+        "crba",
+        "rnea",
+        "computeCoriolisMatrix",
+    )
+    missing = [name for name in required_api if not hasattr(pin, name)]
+    if missing:
+        pytest.skip(
+            "Pinocchio install does not expose the required dynamics API: "
+            + ", ".join(missing)
+        )
 
     model = pin.Model()
     model.gravity.linear = np.asarray(CANONICAL_GRAVITY_INERTIAL, dtype=np.float64)

@@ -124,7 +124,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+          pip install --force-reinstall "pydantic==2.12.5" "pydantic-core==2.41.5"
 
       - name: Guard JaxSim version pin (issue #6660)
         # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,

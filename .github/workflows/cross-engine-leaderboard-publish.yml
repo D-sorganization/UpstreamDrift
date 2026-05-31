@@ -94,7 +94,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+          pip install --force-reinstall "pydantic==2.12.5" "pydantic-core==2.41.5"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
 
