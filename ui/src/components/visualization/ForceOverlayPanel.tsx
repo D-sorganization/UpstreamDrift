@@ -9,6 +9,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { ForceVector3D, ForceOverlayConfig } from './ForceOverlay';
+import { apiFetch } from '@/api/fetch';
 
 interface ForceOverlayPanelProps {
   /** Callback when vectors update */
@@ -67,10 +68,11 @@ export function ForceOverlayPanel({
         params.set('body_filter', config.bodyFilter.join(','));
       }
 
-      const response = await fetch(`/api/simulation/forces?${params}`);
-      if (!response.ok) return;
-
-      const data = await response.json();
+      const data = await apiFetch<{
+        vectors?: ForceVector3D[];
+        total_force_magnitude?: number;
+        total_torque_magnitude?: number;
+      }>(`/api/simulation/forces?${params}`);
       onVectorsChange(data.vectors || []);
       setTotalForce(data.total_force_magnitude || 0);
       setTotalTorque(data.total_torque_magnitude || 0);

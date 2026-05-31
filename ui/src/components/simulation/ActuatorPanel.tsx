@@ -11,6 +11,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { PolynomialGeneratorPanel } from './PolynomialGeneratorPanel';
 import { ActuatorSlider } from './ActuatorSlider';
+import { apiFetch } from '@/api/fetch';
 
 /** Actuator descriptor from the API. See issue #1198 */
 export interface ActuatorInfo {
@@ -108,11 +109,7 @@ export function ActuatorPanel({
 
   const fetchActuators = useCallback(async () => {
     try {
-      const response = await fetch('/api/simulation/actuators');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data: ActuatorPanelState = await response.json();
+      const data = await apiFetch<ActuatorPanelState>('/api/simulation/actuators');
       setPanelState(data);
       setError(null);
     } catch (err) {
@@ -121,45 +118,56 @@ export function ActuatorPanel({
   }, []);
 
   useEffect(() => {
-    fetchActuators();
+    // fetchActuators is async (awaits apiFetch before any setState), so the
+    // updates never run synchronously inside the effect. Scheduling via a
+    // microtask makes that explicit for react-hooks/set-state-in-effect.
+    const refresh = () => void Promise.resolve().then(fetchActuators);
+    refresh();
 
     if (isRunning && refreshInterval > 0) {
-      const interval = setInterval(fetchActuators, refreshInterval);
+      const interval = setInterval(refresh, refreshInterval);
       return () => clearInterval(interval);
     }
   }, [fetchActuators, isRunning, refreshInterval]);
 
   const handleValueChange = useCallback(async (index: number, value: number) => {
+    // #6898: surface failures (bad index, engine not loaded) via setError
+    // instead of silently swallowing them, which left the slider moved while
+    // the engine was unchanged.
     try {
-      await fetch('/api/simulation/actuators', {
+      await apiFetch('/api/simulation/actuators', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           actuator_index: index,
           value,
           control_type: 'constant',
         }),
       });
-    } catch {
-      // Silently fail
+      setError(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to update actuator value',
+      );
     }
   }, []);
 
   const handleControlTypeChange = useCallback(
     async (index: number, controlType: string) => {
       try {
-        await fetch('/api/simulation/actuators', {
+        await apiFetch('/api/simulation/actuators', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             actuator_index: index,
             value: 0,
             control_type: controlType,
           }),
         });
+        setError(null);
         fetchActuators();
-      } catch {
-        // Silently fail
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to change control type',
+        );
       }
     },
     [fetchActuators],
@@ -168,9 +176,8 @@ export function ActuatorPanel({
   const handleApplyPolynomial = useCallback(
     async (index: number, coefficients: number[]) => {
       try {
-        await fetch('/api/simulation/actuators', {
+        await apiFetch('/api/simulation/actuators', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             actuator_index: index,
             value: 0,
@@ -178,9 +185,12 @@ export function ActuatorPanel({
             parameters: { coefficients },
           }),
         });
+        setError(null);
         fetchActuators();
-      } catch {
-        // Silently fail
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to apply polynomial',
+        );
       }
     },
     [fetchActuators],

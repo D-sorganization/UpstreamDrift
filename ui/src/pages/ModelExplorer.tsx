@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useURDFModel } from '@/api/useURDFModel';
+import { apiFetch } from '@/api/fetch';
 import { ModelPreviewViewport } from '@/components/model-explorer/ModelPreviewViewport';
 import { ModelTree } from '@/components/model-explorer/ModelTree';
 import { PropertyInspector, JointManipulator } from '@/components/model-explorer/InspectorPanel';
@@ -51,9 +52,7 @@ export function ModelExplorerPage() {
   useEffect(() => {
     async function fetchModels() {
       try {
-        const response = await fetch('/api/models');
-        if (!response.ok) return;
-        const data = await response.json();
+        const data = await apiFetch<{ models?: string[] }>('/api/models');
         setModels(data.models || []);
       } catch {
         // Fallback or offline
@@ -67,11 +66,9 @@ export function ModelExplorerPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/tools/model-explorer/${encodeURIComponent(modelName)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await apiFetch<{ tree?: URDFTreeNode[] }>(
+        `/api/tools/model-explorer/${encodeURIComponent(modelName)}`,
+      );
       if (type === 'single') {
         setSingleTree(data.tree || []);
         setSelectedNodeId(null);

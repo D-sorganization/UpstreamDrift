@@ -21,6 +21,7 @@ import {
   Crosshair,
   ArrowUpDown,
 } from 'lucide-react';
+import { apiFetch } from '@/api/fetch';
 
 /** Joint angle data from the measurement tools endpoint. */
 export interface JointAngleDisplay {
@@ -91,28 +92,31 @@ export function SimulationToolbar({
   // Fetch joint angles from the measurement tools endpoint
   const fetchMeasurements = useCallback(async () => {
     try {
-      const response = await fetch('/api/simulation/measurements');
-      if (!response.ok) {
-        if (response.status === 400) {
-          // No engine loaded -- not an error
-          return;
-        }
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await apiFetch<{
+        joint_angles?: JointAngleDisplay[];
+        measurements?: MeasurementResult[];
+      }>('/api/simulation/measurements');
       setJointAngles(data.joint_angles ?? []);
       setMeasurements(data.measurements ?? []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fetch failed');
+      const message = err instanceof Error ? err.message : 'Fetch failed';
+      // A 400 means no engine is loaded yet -- not an error to surface.
+      if (message.includes('400')) {
+        return;
+      }
+      setError(message);
     }
   }, []);
 
   // Poll for joint angles when showing and simulation is running
   useEffect(() => {
+    // fetchMeasurements is async (awaits apiFetch before any setState); a
+    // microtask makes the deferral explicit for react-hooks/set-state-in-effect.
+    const refresh = () => void Promise.resolve().then(fetchMeasurements);
     if (showJoints && isRunning) {
-      fetchMeasurements();
-      pollRef.current = setInterval(fetchMeasurements, pollInterval);
+      refresh();
+      pollRef.current = setInterval(refresh, pollInterval);
     } else {
       if (pollRef.current) {
         clearInterval(pollRef.current);

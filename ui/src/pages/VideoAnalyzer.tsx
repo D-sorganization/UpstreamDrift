@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { apiFetchForm } from '@/api/fetch';
 
 /** Video analysis result from the API. See issue #1206 */
 export interface VideoAnalysisResult {
@@ -169,20 +170,10 @@ export function VideoAnalyzerPage() {
         enable_smoothing: 'true',
       });
 
-      const response = await fetch(
+      const data = await apiFetchForm<VideoAnalysisResult>(
         `/api/analyze/video?${params.toString()}`,
-        {
-          method: 'POST',
-          body: formData,
-        },
+        formData,
       );
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: VideoAnalysisResult = await response.json();
       setAnalysis(data);
       setCurrentFrameIdx(0);
     } catch (err) {
