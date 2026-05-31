@@ -79,6 +79,7 @@ def bootstrap_embeddable_tools() -> list[str]:
         "data_explorer._embed_adapter",  # Moved from src.tools in vendor
         "src.tools.starting_pose_matcher._embed_adapter",
         "src.tools.training_controller._embed_adapter",
+        "src.tools.config_setup_wizard._embed_adapter",
         "src.tools.pose_subscriber_demo._embed_adapter",
         "src.tools.sidekick._embed_adapter",
         "src.tools.pose_studio.gui",
