@@ -713,6 +713,56 @@ class MyoSimProbe(EngineProbe):
         )
 
 
+class JaxSimProbe(EngineProbe):
+    """Probe for the optional JaxSim backend."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize JaxSim probe."""
+        if suite_root is None:
+            raise ValueError("suite_root must be provided")
+        super().__init__("JaxSim", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check JaxSim optional dependency readiness."""
+        try:
+            import jaxsim
+            import jaxsim.api  # noqa: F401
+
+            version = getattr(jaxsim, "__version__", "unknown")
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["jaxsim"],
+                diagnostic_message=(
+                    "JaxSim optional dependency is not installed. "
+                    'Install with: python -m pip install "upstream-drift[jaxsim]"'
+                ),
+            )
+
+        engine_dir = (
+            _resolve_engines_root(self.suite_root) / "physics_engines" / "jaxsim"
+        )
+        if not engine_dir.exists():
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=["engine directory"],
+                diagnostic_message=f"JaxSim {version} installed but missing adapter files",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"JaxSim {version} ready",
+            details={"engine_dir": str(engine_dir)},
+        )
+
+
 class OpenPoseProbe(EngineProbe):
     """Probe for OpenPose system."""
 

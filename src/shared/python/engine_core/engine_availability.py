@@ -153,6 +153,7 @@ _MODULE_MAPPING = {
     "drake": "drake",
     "opensim": "opensim",
     "myosuite": "myosuite",
+    "jaxsim": "jaxsim.api",
     "dm_control": "dm_control",
     "pytorch": "torch",
     "torch": "torch",

@@ -31,6 +31,7 @@ Supported engines
 - ``PENDULUM`` — :func:`load_pendulum_engine`
 - ``GOLF_SWING_PENDULUM`` — :func:`load_golf_swing_pendulum_engine`
 - ``PUTTING_GREEN`` — :func:`load_putting_green_engine`
+- ``JAXSIM`` — :func:`load_jaxsim_engine`
 - ``MATLAB_3D`` — :func:`load_matlab_3d_engine` (Simscape Multibody bridge,
   see ``motion_matching/option4_python_bridge``)
 """
@@ -60,6 +61,7 @@ __all__ = [
     "load_pendulum_engine",
     "load_golf_swing_pendulum_engine",
     "load_putting_green_engine",
+    "load_jaxsim_engine",
     "load_matlab_3d_engine",
     "LOADER_MAP",
     "DEFAULT_MATLAB_3D_SLX_RELPATH",
@@ -434,6 +436,40 @@ def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG00
         raise GolfModelingError("Putting Green engine not found.") from e
 
 
+def load_jaxsim_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load the optional JaxSim backend adapter.
+
+    The adapter itself performs lazy optional imports so callers can import the
+    loader map on machines without the ``jaxsim`` extra installed. Calling this
+    loader requires the extra because it returns an initialized adapter object.
+    """
+    try:
+        from src.engines.physics_engines.jaxsim.python.jaxsim_backend import (
+            JaxSimBackend,
+        )
+    except ImportError as exc:
+        raise GolfModelingError("JaxSim backend module not found.") from exc
+
+    if not JaxSimBackend.is_available():
+        raise GolfModelingError(
+            "JaxSim optional dependency is not installed. "
+            'Install with: python -m pip install "upstream-drift[jaxsim]"'
+        )
+
+    engine = JaxSimBackend()
+    from src.shared.python.engine_core.engine_probes import JaxSimProbe
+
+    probe_result = JaxSimProbe(suite_root).probe()
+    if not probe_result.is_available():
+        raise GolfModelingError(
+            f"JaxSim not ready:\n{probe_result.diagnostic_message}\n"
+            f"Fix: {probe_result.get_fix_instructions()}"
+        )
+    logger.info("JaxSim backend adapter loaded successfully")
+    _ensure_engine_loaded(engine, "JaxSim")
+    return engine  # type: ignore[return-value]
+
+
 def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
     """Load Simscape Multibody (MATLAB_3D) engine via the Python bridge.
 
@@ -505,5 +541,6 @@ LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
     EngineType.PENDULUM: load_pendulum_engine,
     EngineType.GOLF_SWING_PENDULUM: load_golf_swing_pendulum_engine,
     EngineType.PUTTING_GREEN: load_putting_green_engine,
+    EngineType.JAXSIM: load_jaxsim_engine,
     EngineType.MATLAB_3D: load_matlab_3d_engine,
 }

@@ -21,6 +21,7 @@ class EngineType(Enum):
     MYOSIM = "myosim"
     MATLAB_2D = "matlab_2d"
     MATLAB_3D = "matlab_3d"
+    JAXSIM = "jaxsim"
     PENDULUM = "pendulum"
     GOLF_SWING_PENDULUM = "golf_swing_pendulum"
     PUTTING_GREEN = "putting_green"
