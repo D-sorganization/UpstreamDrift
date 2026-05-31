@@ -8,6 +8,7 @@ backend from Python.
 
 - Architecture & rationale: [ADR-0023](../adr/0023-mujoco-warp-backend.md)
 - Differentiable backend (future): [ADR-0024](../adr/0024-differentiable-backend.md)
+- Cross-engine reports: [cross_engine_comparison.md](cross_engine_comparison.md)
 - Package reference & module map:
   [`src/shared/python/simulation_backends/README.md`](../../src/shared/python/simulation_backends/README.md)
 
@@ -210,6 +211,24 @@ Asking `mjwarp` for `mass_matrix` raises `BackendCapabilityError` — its
 `provides_dynamics` flag is `False`. Branch on the `DynamicsProvider` Protocol
 (or `backend.capabilities.provides_dynamics`) rather than assuming every backend
 offers every service.
+
+## Cross-engine comparison reports
+
+The CC-27 report service runs the same input across selected backends and emits
+a side-by-side Markdown or JSON report with kinematics, kinetics, ZTCF/ZVCF
+where dynamics primitives exist, optional wrench comparison, divergence
+annotations, and per-panel provenance:
+
+```bash
+python -m src.shared.python.simulation_backends.compare_cli \
+  --engines ode,mujoco \
+  --horizon 200 \
+  --dt 0.005 \
+  --output reports/ode_vs_mujoco.md
+```
+
+See [cross_engine_comparison.md](cross_engine_comparison.md) for control input,
+registry keys, and Python API examples.
 
 ## A runnable example
 
