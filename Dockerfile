@@ -71,14 +71,20 @@ RUN python -m pip install --upgrade --no-cache-dir pip==26.1
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
+    apt-get install -y --no-install-recommends \
+    libc-bin \
+    libc6 \
     libcap2 \
+    libsystemd0 \
+    libudev1 \
     libgl1 \
     libosmesa6 \
     libglew2.2 \
     libegl1 \
     libglib2.0-0t64 \
     patchelf \
+    sed \
     ffmpeg \
     curl \
     && rm -rf /var/lib/apt/lists/*

@@ -315,6 +315,33 @@ def test_tab_right_click_undock_menu(launcher, qtbot):
         mock_exec.assert_called_once()
 
 
+def test_tab_right_click_release_ignores_tab_bar_background(launcher, qtbot):
+    """Right-click releases outside a tab should not open the tab context menu."""
+    from unittest.mock import patch
+    from PyQt6.QtCore import QEvent, QPointF, Qt
+    from PyQt6.QtGui import QMouseEvent
+    from PyQt6.QtWidgets import QTabBar
+
+    tab_bar = launcher.workspace_tabs.tabBar()
+    assert tab_bar is not None
+
+    event = QMouseEvent(
+        QEvent.Type.MouseButtonRelease,
+        QPointF(200.0, 10.0),
+        Qt.MouseButton.RightButton,
+        Qt.MouseButton.RightButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+
+    with (
+        patch.object(QTabBar, "tabAt", return_value=-1),
+        patch("PyQt6.QtWidgets.QMenu.exec") as mock_exec,
+    ):
+        res = launcher.workspace_tabs.eventFilter(tab_bar, event)
+        assert res is False
+        mock_exec.assert_not_called()
+
+
 def test_detached_tab_window_redock_via_dialog(launcher, qtbot):
     """Test DetachedTabWindow close event prompting redocking."""
     from PyQt6.QtWidgets import QMessageBox
