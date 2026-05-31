@@ -19,8 +19,8 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any
 
-from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
-from src.shared.python.model_generation.core.types import (
+from model_generation.builders.urdf_writer import URDFWriter
+from model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,
@@ -32,7 +32,7 @@ from src.shared.python.model_generation.core.types import (
     Material,
     Origin,
 )
-from src.shared.python.model_generation.core.validation import (
+from model_generation.core.validation import (
     ValidationResult,
     Validator,
 )
