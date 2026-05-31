@@ -8,7 +8,7 @@ import os
 import re
 import tempfile
 from dataclasses import asdict, dataclass, field, replace
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -234,8 +234,23 @@ class SessionProjectStore:
             raise StateError(f"could not write project metadata: {self._path}") from exc
 
 
-def _replace_project(project: ProjectMetadata, **changes: object) -> ProjectMetadata:
-    return replace(project, **changes)
+def _replace_project(
+    project: ProjectMetadata,
+    *,
+    root: str | None = None,
+    updated_at: str | None = None,
+    subjects: dict[str, SubjectMetadata] | None = None,
+    sessions: dict[str, SessionMetadata] | None = None,
+    datasets: dict[str, DatasetMetadata] | None = None,
+) -> ProjectMetadata:
+    return replace(
+        project,
+        root=project.root if root is None else root,
+        updated_at=project.updated_at if updated_at is None else updated_at,
+        subjects=project.subjects if subjects is None else subjects,
+        sessions=project.sessions if sessions is None else sessions,
+        datasets=project.datasets if datasets is None else datasets,
+    )
 
 
 def _project_from_dict(raw: dict[str, Any]) -> ProjectMetadata:
@@ -274,7 +289,7 @@ def _validate_non_empty(value: str, name: str) -> None:
 
 
 def _utc_now() -> str:
-    timestamp = datetime.now(UTC).replace(microsecond=0)
+    timestamp = datetime.now(timezone.utc).replace(microsecond=0)
     iso_text = timestamp.isoformat()
     return iso_text.replace("+00:00", "Z")
 

@@ -199,9 +199,9 @@ def _coerce_attr(value: Any) -> Any:
 
 
 def _mtime_to_iso(mtime: float) -> str:
-    from datetime import UTC, datetime
+    from datetime import datetime, timezone
 
-    timestamp = datetime.fromtimestamp(mtime, UTC)
+    timestamp = datetime.fromtimestamp(mtime, timezone.utc)
     iso_text = timestamp.isoformat()
     return iso_text.replace("+00:00", "Z")
 
