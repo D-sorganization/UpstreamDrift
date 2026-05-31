@@ -55,7 +55,14 @@ def _landmark_to_keypoint(lm: object) -> Keypoint | None:
             confidence = max(0.0, min(1.0, float(vis)))
         except (TypeError, ValueError):
             confidence = 1.0
-        return Keypoint(x=x, y=y, z=z, confidence=confidence)
+        name = lm.get("name")
+        return Keypoint(
+            x=x,
+            y=y,
+            z=z,
+            confidence=confidence,
+            name=str(name) if name is not None else None,
+        )
     if isinstance(lm, (list, tuple)) and len(lm) >= 2:
         try:
             x = float(lm[0])
