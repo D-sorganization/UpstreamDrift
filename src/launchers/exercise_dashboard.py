@@ -3,12 +3,12 @@
 import sys
 from PyQt6.QtWidgets import (
     QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
     QComboBox,
-    QToolBar,
     QLabel,
+    QMainWindow,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
 )
 from src.shared.python.biomech.exercise_registry import discover_exercise
 
@@ -28,7 +28,12 @@ class ExerciseDashboard(QMainWindow):
         self.engines = discover_exercise(exercise)
         if not self.engines:
             # Fallback for UI if engines aren't discovered correctly in tests
-            self.engines = ["MuJoCo_Models", "Drake_Models", "Pinocchio_Models"]
+            self.engines = [
+                "MuJoCo_Models",
+                "Drake_Models",
+                "Pinocchio_Models",
+                "JaxSim_Models",
+            ]
 
         # JaxSim is a dependency-light analysis backend (no sibling model repo),
         # so it is offered as an always-available engine rather than discovered

@@ -86,6 +86,12 @@ async def get_engines(
         EngineType.MUJOCO: ["physics", "contacts", "muscles", "tendons"],
         EngineType.DRAKE: ["physics", "optimization", "control"],
         EngineType.PINOCCHIO: ["kinematics", "dynamics", "collision"],
+        EngineType.JAXSIM: [
+            "rigid_body",
+            "differentiable",
+            "gradients",
+            "parameter_sensitivity",
+        ],
         EngineType.OPENSIM: ["musculoskeletal", "biomechanics"],
         EngineType.MYOSIM: ["muscle", "tendon", "control"],
         EngineType.MATLAB_2D: ["2d-simulation", "simscape"],
