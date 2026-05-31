@@ -5,6 +5,13 @@ human pose / joint angles from video or mocap data.
 """
 
 from .interface import PoseEstimationResult, PoseEstimator
+from .keypoint_offsets import (
+    KeypointOffsetEstimate,
+    KeypointOffsetModel,
+    KeypointOffsetSite,
+    estimate_keypoint_offset,
+    estimate_keypoint_offset_model,
+)
 from .observations import (
     CANONICAL_OBSERVATIONS_SCHEMA_VERSION,
     TRACE_META_OBSERVATIONS_JSON,
@@ -24,9 +31,14 @@ __all__ = [
     "CameraIntrinsics",
     "CanonicalObservations",
     "DetectorLayout",
+    "KeypointOffsetEstimate",
+    "KeypointOffsetModel",
+    "KeypointOffsetSite",
     "KeypointObservation",
     "OpenPoseEstimator",
     "PoseEstimationResult",
     "PoseEstimator",
     "TRACE_META_OBSERVATIONS_JSON",
+    "estimate_keypoint_offset",
+    "estimate_keypoint_offset_model",
 ]
