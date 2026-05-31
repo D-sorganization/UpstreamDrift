@@ -19,6 +19,8 @@ from src.shared.python.estimation.map_estimator import (
     MapEstimatorOptions,
     SharedParameterBlock,
     SplineTrajectoryEvaluation,
+    _require_times_within_knot_span,
+    _sentinel_for_non_finite,
 )
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
 
@@ -236,6 +238,7 @@ def _validate_observation(observation: MultiTrialObservation) -> None:
     times = np.asarray(observation.evaluation_times, dtype=float)
     require(times.ndim == 1, "evaluation_times must be a 1D array")
     require(bool(np.all(np.isfinite(times))), "evaluation_times must be finite")
+    _require_times_within_knot_span(times, observation.trajectory.knot_times)
     coeffs = np.asarray(observation.initial_coefficients, dtype=float)
     require(
         coeffs.shape == (observation.trajectory.coefficient_size,),
@@ -297,8 +300,7 @@ def _objective_residual(
         )
         if residual.ndim != 1:
             raise ValueError("residual callable must return a 1D array")
-        if not np.all(np.isfinite(residual)):
-            raise ValueError("residual callable returned non-finite values")
+        residual = _sentinel_for_non_finite(residual)
         residuals.append(residual)
     residuals.append(problem.shared_parameters.prior_residuals(parameter_values))
     return np.concatenate(residuals)
