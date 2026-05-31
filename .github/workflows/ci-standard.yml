@@ -1580,11 +1580,19 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Configure Cargo Git dependency fetches
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> "$GITHUB_ENV"
+          git config --global --unset-all url.git@github.com:.insteadOf || true
+          git config --global --unset-all url.ssh://git@github.com/.insteadOf || true
+          git config --global --unset-all url.https://github.com/.insteadOf || true
+          git config --global --add url.https://github.com/.insteadOf git@github.com:
+          git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
       - name: Enable long Cargo git dependency paths on Windows
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
         run: |
           git config --global core.longpaths true
-          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> "$GITHUB_ENV"
 
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
