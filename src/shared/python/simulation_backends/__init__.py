@@ -21,8 +21,10 @@ from __future__ import annotations
 
 from .capabilities import (
     has_mujoco,
+    has_mjx,
     has_warp,
     require_mujoco,
+    require_mjx,
     require_warp,
     warp_device_available,
 )
@@ -84,10 +86,12 @@ __all__ = [
     "available_backends",
     "evaluate_ztcf_zvcf_on_canonical_trajectory",
     "has_mujoco",
+    "has_mjx",
     "has_warp",
     "make_backend",
     "persist_ztcf_zvcf_analysis",
     "require_mujoco",
+    "require_mjx",
     "require_warp",
     "serialize_provenance",
     "warp_device_available",

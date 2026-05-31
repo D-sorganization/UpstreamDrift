@@ -3,8 +3,8 @@
 Welcome! The **Simulation Backends** suite lets you drive the golf
 double-pendulum / club model through several interchangeable physics engines
 that all share one interface. You describe the model once, then run it on an
-analytical CPU reference, on MuJoCo's CPU solver, or — when you have an NVIDIA
-GPU — on MuJoCo Warp for massively parallel batched runs.
+analytical CPU reference, on MuJoCo's CPU solver, on MuJoCo Warp for massively
+parallel CUDA batched runs, or on MJX/JAX for differentiable batched rollouts.
 
 This guide is the friendly, step-by-step companion. It covers:
 
@@ -24,7 +24,7 @@ the design rationale in
 
 ## What it is and when to use each backend
 
-There are three backends behind one `SimulationBackend` interface. They are
+There are four backends behind one `SimulationBackend` interface. They are
 fully interchangeable: swap the name, keep the rest of your code.
 
 | Backend  | Device   | Batched sweeps | Dynamics primitives (`M`, bias) | When to reach for it                                         |
@@ -32,6 +32,7 @@ fully interchangeable: swap the name, keep the rest of your code.
 | `ode`    | CPU      | no             | **yes**                         | Your default. Single rollouts and the ground-truth reference |
 | `mujoco` | CPU      | no             | **yes**                         | An independent dynamics check; cross-validation              |
 | `mjwarp` | CUDA GPU | **yes**        | no                              | Hundreds-to-thousands of rollouts at once (sweeps, MPPI/CEM) |
+| `mjx`    | JAX      | **yes**        | no                              | Batched rollouts with control gradients                      |
 
 A few rules of thumb so you pick the right tool:
 
@@ -48,10 +49,13 @@ A few rules of thumb so you pick the right tool:
   memory transfer dwarf the tiny 2×2 arithmetic. The GPU wins only when one
   launch is amortised across many parallel environments. Treat it as a
   throughput engine for `rollout_batch`, not a faster way to do one run.
+- **Need gradients through rollout controls? Use `mjx`.** It shares the same
+  MJCF model source and `Trace` / `BatchTrace` schema, but keeps a JAX-native
+  array path for autodiff before converting results back to NumPy.
 
 Only the two CPU backends (`ode`, `mujoco`) expose the dynamics primitives —
-the mass matrix `M(q)` and the bias (Coriolis + gravity) forces. `mjwarp` is a
-batched rollout engine and does not offer them.
+the mass matrix `M(q)` and the bias (Coriolis + gravity) forces. `mjwarp` and
+`mjx` are batched rollout engines and do not offer them.
 
 ## Opening the launcher tile (GUI)
 
@@ -72,8 +76,9 @@ python -m src.tools.simulation_backends_launcher
 ```
 
 The window opens on the always-available `ode` backend, so it works on a
-CPU-only machine out of the box. MuJoCo (CPU) and MuJoCo Warp (GPU) light up in
-the backend picker only when their optional dependencies are installed.
+CPU-only machine out of the box. MuJoCo (CPU), MuJoCo Warp (GPU), and MJX/JAX
+light up in the backend picker only when their optional dependencies are
+installed.
 
 ## A tour of every GUI control
 
@@ -82,7 +87,7 @@ one of the actions. Here is what each control does and what output to expect.
 
 ### 1. Backend picker (with availability)
 
-A dropdown lets you choose `ode`, `mujoco`, or `mjwarp`. Each entry shows its
+A dropdown lets you choose `ode`, `mujoco`, `mjwarp`, or `mjx`. Each entry shows its
 availability so you are never guessing:
 
 - `ode` — always available.
@@ -90,6 +95,8 @@ availability so you are never guessing:
 - `mjwarp` — available only when the `[warp]` extra is installed **and** a usable
   CUDA device is visible. On a CPU-only box it appears disabled (or greyed) with
   a hint, rather than letting you pick it and then fail.
+- `mjx` — available when the `[mjx]` extra provides `mujoco-mjx`, JAX/JAXLIB and
+  `mujoco.mjx`.
 
 Switching the backend re-renders the same model parameters onto the newly
 selected engine; you do not re-enter anything.
@@ -132,8 +139,8 @@ Runs a **single** rollout on the selected backend and plots the result.
 - **What you get:** a **trajectory plot** of the joint angles (and/or velocities)
   versus time. This is the quickest way to sanity-check a parameter change.
 - **Which backend:** any. On `ode`/`mujoco` it runs on the CPU; if you select
-  `mjwarp` it still works but, as noted, a single rollout is not where the GPU
-  shines.
+  `mjwarp` or `mjx` it still works but, as noted, a single rollout is not where
+  accelerator-backed engines shine.
 
 ### 4. Run Parameter Sweep
 
@@ -181,8 +188,11 @@ Prefer code? The same capabilities are a few lines away. This mirrors the
 [package README](../../src/shared/python/simulation_backends/README.md).
 
 ```python
+import numpy as np
+
 from src.shared.python.simulation_backends import (
     GolfModelParams,
+    has_mjx,
     has_mujoco,
     make_backend,
 )
@@ -195,6 +205,15 @@ params = GolfModelParams.default()
 ode = make_backend("ode", params)
 trace = ode.rollout(controls=None, horizon=200, dt=0.005)  # passive swing
 print(trace.backend, trace.num_steps, trace.final_state().v)
+
+if has_mjx():
+    controls = np.zeros((4, 200, 2))
+    mjx = make_backend("mjx", params)
+    batch = mjx.rollout_batch(controls, horizon=200, dt=0.005, num_envs=4)
+    jacobian = mjx.final_state_control_jacobian(
+        controls, horizon=200, dt=0.005, num_envs=4
+    )
+    print(batch.backend, jacobian.shape)
 ```
 
 ### Cross-validate against the CPU MuJoCo backend
@@ -246,6 +265,7 @@ dependency** — it runs everywhere, including CPU-only machines and CI.
 pip install upstream-drift            # ode backend only
 pip install 'upstream-drift[mujoco]'  # adds the mujoco CPU backend
 pip install 'upstream-drift[warp]'    # adds the mjwarp GPU backend (needs CUDA)
+pip install 'upstream-drift[mjx]'     # adds mujoco-mjx + JAX/JAXLIB
 ```
 
 The `[warp]` extra pulls in pinned, known-good versions of MuJoCo Warp and
@@ -264,7 +284,8 @@ assert warp_device_available(), "no usable CUDA device visible to Warp"
 Importing the package never pulls in a GPU dependency, the GUI opens on `ode`,
 and everything except batched GPU rollouts works on a plain CPU. If you only
 ever run single rollouts, skip `[warp]` entirely — the GPU would be pure
-overhead. For Docker GPU invocation and CUDA environment variables, see
+overhead. Use `[mjx]` when you need rollout gradients. For Docker GPU
+invocation and CUDA environment variables, see
 [`docs/docker-gpu.md`](../docker-gpu.md).
 
 ## Troubleshooting
@@ -308,14 +329,14 @@ comparison.
 
 ### "BackendCapabilityError" when asking mjwarp for the mass matrix
 
-`mjwarp` is a batched rollout engine; its `provides_dynamics` flag is `False`.
-Asking it for `mass_matrix` / `bias_forces` raises `BackendCapabilityError`. Use
-`ode` or `mujoco` for dynamics primitives, or branch on
+`mjwarp` and `mjx` are batched rollout engines; their `provides_dynamics` flags
+are `False`. Asking them for `mass_matrix` / `bias_forces` raises
+`BackendCapabilityError`. Use `ode` or `mujoco` for dynamics primitives, or branch on
 `backend.capabilities.provides_dynamics` first.
 
 ### "UnknownBackendError"
 
 The backend name must be one of `available_backends()` —
-`("mjwarp", "mujoco", "ode")`. A typo (or a different name) raises
+`("mjwarp", "mjx", "mujoco", "ode")`. A typo (or a different name) raises
 `UnknownBackendError`. All of these exceptions subclass `BackendError`, so you
 can catch the whole family with a single `except BackendError`.
