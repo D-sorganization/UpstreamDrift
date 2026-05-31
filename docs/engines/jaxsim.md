@@ -153,3 +153,22 @@ python scripts/jaxsim/plot_parameter_sensitivity.py --output artifacts/jaxsim_pa
 The gradient gate validates JAX autodiff against central finite differences
 and verifies forward- and reverse-mode autodiff agree on the same measured
 state.
+
+## State and Units Conventions
+
+- Model input: SDF for the current smoke gate; canonical humanoid URDF only
+  through the checked URDF-to-SDF conversion path above.
+- Position units: meters for translations and radians for joint coordinates.
+- Time units: seconds.
+- Velocity layout: JaxSim-native generalized velocity order at the adapter
+  boundary. Normalize before comparing with MuJoCo, Drake, or Pinocchio output.
+- Comparison output: convert into the suite convention before applying
+  cross-engine tolerances.
+
+## Version Upgrade Policy
+
+JaxSim stays pinned exactly until an upgrade PR passes the guard in
+`.github/workflows/jaxsim-upgrade-guard.yml`. Do not widen or bump the optional
+extra as part of a broad dependency refresh. Follow
+`docs/development/jaxsim_version_policy.md` and include the equivalence and
+gradient guard results in the PR body.
