@@ -410,13 +410,13 @@ def _validate_problem(problem: MapEstimatorProblem) -> None:
     require(problem.trajectory is not None, "trajectory must be provided")
     eval_times = np.asarray(problem.evaluation_times, dtype=float)
     require(eval_times.ndim == 1, "evaluation_times must be a 1D array")
-    require(np.all(np.isfinite(eval_times)), "evaluation_times must be finite")
+    require(bool(np.all(np.isfinite(eval_times))), "evaluation_times must be finite")
     coeffs = np.asarray(problem.initial_coefficients, dtype=float)
     require(
         coeffs.shape == (problem.trajectory.coefficient_size,),
         "initial_coefficients shape must match trajectory",
     )
-    require(np.all(np.isfinite(coeffs)), "initial_coefficients must be finite")
+    require(bool(np.all(np.isfinite(coeffs))), "initial_coefficients must be finite")
     require(problem.options.max_iterations > 0, "max_iterations must be positive")
 
 
