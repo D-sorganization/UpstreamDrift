@@ -153,6 +153,44 @@ async def _global_auth_dependency(
     return await _current_user_from_bearer_header(request, db)
 
 
+async def _ws_compatible_auth_dependency(
+    request: Request = None,  # type: ignore[assignment]
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Auth dependency safe to attach to routers that mix HTTP and WS routes.
+
+    The realtime and chat_ws routers are excluded from auto-discovery
+    (issues #6888, #6889) because they expose WebSocket endpoints that
+    authenticate themselves via ``resolve_ws_user`` before ``accept()``.
+    Their *HTTP* endpoints (``POST /realtime/publish``,
+    ``GET /chat/sessions``, ``GET /chat/sessions/{id}/history``) previously
+    had no auth at all, allowing unauthenticated broadcast injection and
+    session enumeration in cloud mode.
+
+    Attaching :func:`_global_auth_dependency` directly would break the WS
+    routes: it declares ``request: Request`` which FastAPI cannot inject into
+    a WebSocket scope, raising ``TypeError`` and dropping the connection. This
+    variant declares ``request`` as an optional special parameter: FastAPI
+    injects the HTTP ``Request`` and leaves it ``None`` in a WebSocket scope, so
+    the bearer header is enforced only on HTTP. WS connections fall through to
+    the route's own ``resolve_ws_user`` check.
+
+    In local/auth-disabled mode this is a no-op (returns ``None``).
+    """
+    if request is None:
+        # WebSocket scope: the route handler self-authenticates.
+        return None
+    if is_auth_disabled():
+        return None
+    return await _current_user_from_bearer_header(request, db)
+
+
+# Public alias for server.py: the chat_ws and realtime routers are mounted
+# explicitly there (they are excluded from auto-discovery) and need this
+# WS-safe auth dependency attached to close issues #6888 and #6889.
+ws_compatible_auth_dependency = _ws_compatible_auth_dependency
+
+
 _ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
     "simulation": (_SIMULATION_QUOTA_DEPENDENCY,),
     "video": (_VIDEO_QUOTA_DEPENDENCY,),
