@@ -1,0 +1,33 @@
+{
+  "comparisons": [],
+  "dependencies": [
+    {
+      "name": "CC-7 conformance harness",
+      "status": "draft PR #6826",
+      "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6826"
+    },
+    {
+      "name": "CC-9 Pinocchio canonical-v2 adapter",
+      "status": "draft PR #6828",
+      "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6828"
+    },
+    {
+      "name": "CC-10 MuJoCo canonical-v2 adapter",
+      "status": "draft PR #6829",
+      "url": "https://github.com/D-sorganization/UpstreamDrift/pull/6829"
+    }
+  ],
+  "engines": ["mujoco-canonical-v2", "pinocchio-canonical-v2"],
+  "generated_at": "2026-05-31T06:34:14+00:00",
+  "schema": "upstreamdrift.cross_engine_differential.v1",
+  "source_shape": "cc11",
+  "status": "blocked_by_draft_dependencies",
+  "summary": {
+    "comparison_count": 0,
+    "contact_free_torque_max_pct_of_peak": null,
+    "failed_count": 0,
+    "passed_count": 0,
+    "registered_divergence_count": 0,
+    "worst_tolerance_ratio": 0.0
+  }
+}
