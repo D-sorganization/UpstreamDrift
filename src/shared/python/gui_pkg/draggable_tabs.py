@@ -92,6 +92,8 @@ class DraggableTabWidget(QTabWidget):
 
     tab_detached = pyqtSignal(int, QPoint)
     tab_moved = pyqtSignal(int, int)
+    tab_backgrounded = pyqtSignal(str)
+    tab_restored = pyqtSignal(str)
 
     def __init__(
         self,
@@ -109,6 +111,11 @@ class DraggableTabWidget(QTabWidget):
         # Track closed tabs for "Open Tab" functionality
         self.closed_tabs: dict[str, Callable[[], QWidget | None]] = {}
         self.tab_factories: dict[str, Callable[[], QWidget | None]] = {}
+
+        # Background tabs: closing a background-eligible tab hides it and
+        # retains the live widget + its state instead of deleting it, so it
+        # keeps running and can be restored. Keyed by tab title.
+        self.background_tabs: dict[str, tuple[QWidget, QIcon]] = {}
 
         # Core tabs cannot be closed
         self.core_tabs: set[str] = core_tabs if core_tabs is not None else set()
@@ -129,6 +136,7 @@ class DraggableTabWidget(QTabWidget):
         if isinstance(widget, QMainWindow) and not isinstance(widget, DockedTabWrapper):
             widget = DockedTabWrapper(widget)
         index = super().addTab(widget, *args)
+        self._drop_background_entry(widget)
         self._update_tab_ux(index)
         return index
 
@@ -139,8 +147,20 @@ class DraggableTabWidget(QTabWidget):
         if isinstance(widget, QMainWindow) and not isinstance(widget, DockedTabWrapper):
             widget = DockedTabWrapper(widget)
         ret_index = super().insertTab(index, widget, *args)
+        self._drop_background_entry(widget)
         self._update_tab_ux(ret_index)
         return ret_index
+
+    def _drop_background_entry(self, widget: QWidget) -> None:
+        """Forget any background record for ``widget`` once it is shown again.
+
+        Keeps the background registry consistent when a widget is re-added
+        through a side channel (e.g. the console toggle) rather than via
+        ``restore_background_tab``.
+        """
+        for title, (bg_widget, _icon) in list(self.background_tabs.items()):
+            if bg_widget is widget:
+                del self.background_tabs[title]
 
     def _update_tab_ux(self, index: int) -> None:
         """Hide close button for core tabs and add tooltip hints."""
@@ -252,16 +272,80 @@ class DraggableTabWidget(QTabWidget):
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
+        # Background-eligible tabs keep running hidden instead of being
+        # destroyed. This subsumes the legacy ``prevent_deletion_on_close``
+        # flag into a single, generic lifecycle (DRY).
+        if widget is not None and self._is_background_eligible(widget):
+            self._background_tab(index, tab_text, widget)
+            return
+
         if tab_text in self.tab_factories:
             self.closed_tabs[tab_text] = self.tab_factories[tab_text]
 
-        prevent_delete = getattr(widget, "prevent_deletion_on_close", False)
         self.removeTab(index)
         if widget:
-            if prevent_delete:
-                widget.setParent(None)
-            else:
-                widget.deleteLater()
+            widget.deleteLater()
+
+    # ── Background (keep-running-hidden) lifecycle ──────────────────
+
+    @staticmethod
+    def _is_background_eligible(widget: QWidget) -> bool:
+        """Return True if closing ``widget`` should background it, not delete.
+
+        Opt-in is generic: any widget carrying a truthy ``background_eligible``
+        attribute qualifies. The legacy ``prevent_deletion_on_close`` flag is
+        honoured as an alias so existing call sites keep working.
+        """
+        return bool(
+            getattr(widget, "background_eligible", False)
+            or getattr(widget, "prevent_deletion_on_close", False)
+        )
+
+    def add_background_tab(self, widget: QWidget, *args) -> int:
+        """Add a tab whose widget keeps running when its tab is closed.
+
+        Marks ``widget`` background-eligible and adds it like ``addTab``.
+        Returns the new tab index.
+        """
+        if widget is None:
+            raise ValueError("widget must be provided")
+        widget.background_eligible = True
+        return self.addTab(widget, *args)
+
+    def _background_tab(self, index: int, title: str, widget: QWidget) -> None:
+        """Remove ``widget``'s tab but retain the live widget + state."""
+        if not title:
+            raise ValueError("title must be provided for a background tab")
+        icon = self.tabIcon(index)
+        self.removeTab(index)
+        widget.setParent(None)
+        widget.hide()
+        self.background_tabs[title] = (widget, icon)
+        self.tab_backgrounded.emit(title)
+
+    def list_background_tabs(self) -> list[str]:
+        """Return titles of tabs currently running hidden in the background."""
+        return sorted(self.background_tabs)
+
+    def restore_background_tab(self, title: str) -> None:
+        """Restore a backgrounded tab back into the tab bar by title."""
+        if title is None:
+            raise ValueError("title must be provided")
+        entry = self.background_tabs.pop(title, None)
+        if entry is None:
+            return
+        widget, icon = entry
+        if widget.parent():
+            widget.setParent(None)
+        idx = self.addTab(widget, icon, title)
+        widget.show()
+        self.setCurrentIndex(idx)
+        self.tab_restored.emit(title)
+
+    def restore_all_background_tabs(self) -> None:
+        """Restore every backgrounded tab."""
+        for title in list(self.background_tabs):
+            self.restore_background_tab(title)
 
     def reopen_closed_tab(self, tab_name: str) -> None:
         """Reopen a previously closed tab by name."""
@@ -296,6 +380,14 @@ class DraggableTabWidget(QTabWidget):
                 and event.button() == Qt.MouseButton.LeftButton
             ):
                 self.drag_start_pos = event.globalPosition().toPoint()
+
+        elif (
+            event.type() == QEvent.Type.MouseButtonRelease
+            and isinstance(event, QMouseEvent)
+            and event.button() == Qt.MouseButton.RightButton
+        ):
+            self._show_tab_context_menu(event.position().toPoint())
+            return True
 
         elif (
             event.type() == QEvent.Type.MouseMove
@@ -612,15 +704,21 @@ class DetachedTabWindow(QMainWindow):
             # Remove from parent's detached tabs registry
             if self.parent_tab_widget and self in self.parent_tab_widget.detached_tabs:
                 del self.parent_tab_widget.detached_tabs[self]
-            # Delete/clean up the widget, respecting prevent_deletion_on_close
+            # Background-eligible widgets keep running hidden; others are
+            # destroyed. Mirrors DraggableTabWidget.close_tab (DRY intent).
             if self.widget:
-                prevent_delete = getattr(
-                    self.widget, "prevent_deletion_on_close", False
-                )
-                if prevent_delete:
+                parent_tabs = self.parent_tab_widget
+                background = DraggableTabWidget._is_background_eligible(self.widget)
+                if background and parent_tabs is not None:
                     if isinstance(self.widget, DockedTabWrapper):
                         self.widget.main_window.setParent(None)
                     self.widget.setParent(None)
+                    self.widget.hide()
+                    parent_tabs.background_tabs[self.original_title] = (
+                        self.widget,
+                        self.windowIcon(),
+                    )
+                    parent_tabs.tab_backgrounded.emit(self.original_title)
                 else:
                     if isinstance(self.widget, DockedTabWrapper):
                         self.widget.main_window.deleteLater()
