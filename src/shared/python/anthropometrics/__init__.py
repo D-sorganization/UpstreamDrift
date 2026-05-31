@@ -19,13 +19,13 @@ from __future__ import annotations
 from . import engine_adapters as engine_adapters
 from ._subject_anthropometrics import SubjectAnthropometrics  # noqa: F401
 from ._types import Sex  # noqa: F401
-from .addbiomechanics_priors import (  # noqa: F401
-    PRIOR_SCHEMA_VERSION,
-    CalibrationInertiaPriorSet,
-    InertiaPriorParameter,
-    build_inertia_priors_from_subject,
-    load_addbiomechanics_inertia_priors,
-    save_inertia_priors,
+from .addbiomechanics_priors import (
+    PRIOR_SCHEMA_VERSION as PRIOR_SCHEMA_VERSION,
+    CalibrationInertiaPriorSet as CalibrationInertiaPriorSet,
+    InertiaPriorParameter as InertiaPriorParameter,
+    build_inertia_priors_from_subject as build_inertia_priors_from_subject,
+    load_addbiomechanics_inertia_priors as load_addbiomechanics_inertia_priors,
+    save_inertia_priors as save_inertia_priors,
 )
 from .contracts import EngineAdapter, Estimator, Reader, Writer  # noqa: F401
 from .engine_adapters import ADAPTER_REGISTRY  # noqa: F401
