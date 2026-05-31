@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.220                                            |
+| **Spec Version**        | 1.0.221                                            |
 | **Last Spec Update**    | 2026-05-31                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-05-31** - Added the CC-38 Sidekick canonical-core tool adapter (#6811): Sidekick can now expose bounded `canonical.configure`, `canonical.validate`, `canonical.run`, `canonical.compare`, and `canonical.interpret` actions through `CanonicalToolAdapter` and a host-supplied `CanonicalActionPort`, preserving the existing audit, policy, dry-run, and destructive-confirmation gates.
 
 - **2026-05-31** - Added the CC-16 output-only canonical C3D exporter (#6789): motion capture can now export marker trajectories from canonical state arrays to terminal C3D files with unit, label, sample-rate, and architecture guards that prevent C3D from becoming an internal intermediate.
 
@@ -661,6 +663,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-31 | 1.0.221 | Added the CC-38 Sidekick canonical-core tool adapter for issue #6811: `src/shared/python/sidekick/agent/canonical_tools.py` registers a fixed canonical action allowlist behind `CanonicalActionPort`, `canonical.run` remains destructive and confirmation-gated, docs update ADR-0017 plus `docs/sidekick/agent.md`, and unit coverage validates descriptors, dry-run behavior, policy interaction, and result provenance. |
 | 2026-05-31 | 1.0.218 | Added the issue #6781 third-party license ledger and advisory validation path: `docs/legal/licenses.md` records commercial-readiness status for direct dependencies, OpenPose remains a non-commercial opt-in external tool, `scripts/legal/check_license_ledger.py` validates declared dependency coverage on Python 3.10+, and the core-install isolation guard ignores its own `scripts/` path so helper directories cannot masquerade as installed optional engines. |
 | 2026-05-30 | 1.0.216 | Added the JaxSim parameter-gradient capability for issue #6656: `SupportsParameterGradients` defines the segregated engine-core seam, `JaxSimBackend` exposes pointwise ZTCF parameter Jacobians through a JAX autodiff module over documented anthropometric parameters, finite-difference tests validate the gradient, and `scripts/jaxsim/plot_parameter_sensitivity.py` writes the sample sensitivity plot. |
 | 2026-05-30 | 1.0.209 | Added the JaxSim M0 dependency gate for issue #6649: `upstream-drift[jaxsim]` pins `jaxsim==0.9.0`, keeps JaxSim out of the core and `all-engines` rollups until Linux native-engine coexistence is proven, documents the CPU-JAX-first platform decision in `docs/engines/jaxsim.md`, and adds optional SDF step smoke coverage via `tests/fixtures/jaxsim/single_link.sdf`. |
