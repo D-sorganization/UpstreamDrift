@@ -28,6 +28,7 @@ import pytest
 
 from src.engines.physics_engines.jaxsim import JaxSimBackend
 from src.shared.python.engine_core.velocity_conventions import (
+    CANONICAL_GRAVITY_INERTIAL,
     CANONICAL_VELOCITY_REPRESENTATION,
     VelocityRepresentation,
     single_floating_body_h_g,
@@ -91,9 +92,10 @@ def _analytic_base_velocity_rollout(
 
     Returns an ``(horizon + 1, 6)`` array of canonical ``[angular; linear]``
     base velocities. The base origin is the centre of mass, so gravity exerts
-    no torque and the linear velocity is conserved; the angular velocity obeys
-    Euler's equations, integrated here with the documented analytic ``h`` term
-    and a small fixed step for an independent reference.
+    no torque; the angular velocity obeys Euler's equations, and the linear
+    velocity follows ballistic free fall under the canonical gravity vector.
+    Both are integrated here with a small fixed step for an independent
+    reference.
     """
 
     history = np.empty((horizon + 1, 6), dtype=np.float64)
@@ -111,12 +113,12 @@ def _analytic_base_velocity_rollout(
             angular_velocity=v[:3],
             representation=CANONICAL_VELOCITY_REPRESENTATION,
             rotation_inertial_from_body=_identity_rotation(),
-            gravity_inertial_mps2=(0.0, 0.0, 0.0),
+            gravity_inertial_mps2=CANONICAL_GRAVITY_INERTIAL,
         )
         angular_accel = -inertia_inv @ dynamics.h[:3]
         v = v.copy()
         v[:3] = v[:3] + angular_accel * dt
-        # Linear velocity is conserved for a torque-free body in zero gravity.
+        v[3:] = v[3:] + dynamics.g[3:] / _MASS_KG * dt
         history[k + 1] = v
     return history
 
@@ -195,16 +197,16 @@ def test_jaxsim_free_body_rollout_conserves_linear_velocity() -> None:
 
 
 def test_analytic_reference_is_deterministic_and_conserves_energy() -> None:
-    """The dependency-free analytic reference conserves rotational energy."""
+    """The analytic reference is deterministic and conserves rotational energy."""
 
     v0_base = np.array([0.4, -0.3, 0.2, 0.05, -0.02, 0.03], dtype=np.float64)
     history = _analytic_base_velocity_rollout(v0_base, _HORIZON, _DT)
 
     assert history.shape == (_HORIZON + 1, 6)
-    # Linear block is exactly conserved by construction.
-    np.testing.assert_allclose(
-        history[:, 3:], np.broadcast_to(v0_base[3:], (_HORIZON + 1, 3))
+    expected_linear = v0_base[3:] + np.arange(_HORIZON + 1)[:, None] * (
+        np.asarray(CANONICAL_GRAVITY_INERTIAL, dtype=np.float64) * _DT
     )
+    np.testing.assert_allclose(history[:, 3:], expected_linear)
     # Rotational kinetic energy of a torque-free top is conserved.
     energies = np.array([_kinetic_energy(row[:3]) for row in history])
     np.testing.assert_allclose(energies, energies[0], rtol=5.0e-2)
