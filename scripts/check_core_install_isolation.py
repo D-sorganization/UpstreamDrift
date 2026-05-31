@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_ROOT = Path(__file__).resolve().parent
+sys.path = [entry for entry in sys.path if Path(entry or ".").resolve() != SCRIPT_ROOT]
 for import_root in (PROJECT_ROOT, PROJECT_ROOT / "src"):
     import_path = str(import_root)
     if import_path not in sys.path:

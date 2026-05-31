@@ -6,6 +6,7 @@ import subprocess
 import sys
 import types
 from importlib.machinery import ModuleSpec
+from pathlib import Path
 
 import pytest
 from scripts.check_core_install_isolation import (
@@ -62,6 +63,13 @@ def test_core_install_guard_has_explicit_contract() -> None:
         "src.shared.python.physics",
         "src.shared.python.spatial_algebra",
     )
+
+
+def test_core_install_guard_removes_script_directory_from_import_search() -> None:
+    """Running the guard as a script must not expose scripts/jaxsim as jaxsim."""
+    script_root = Path("scripts").resolve()
+
+    assert script_root not in {Path(entry or ".").resolve() for entry in sys.path}
 
 
 def test_config_import_does_not_require_pandas() -> None:
