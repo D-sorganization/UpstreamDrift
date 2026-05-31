@@ -212,7 +212,9 @@ describe('useLauncherManifest', () => {
             expect(result.current.loadState).toBe('loaded');
         });
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/launcher/manifest');
+        // Routed through apiFetch, which prepends getApiBase() (empty in tests)
+        // and passes a RequestInit, so assert on the URL argument only.
+        expect(mockFetch.mock.calls[0][0]).toBe('/api/launcher/manifest');
     });
 
     it('transitions to error state when tiles is not an array', async () => {

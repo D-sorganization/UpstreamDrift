@@ -69,6 +69,8 @@ export function EngineSelector({
           const isLoaded = engine.loadState === 'loaded';
           const isLoading = engine.loadState === 'loading';
           const isError = engine.loadState === 'error';
+          // #6900: an engine whose package is not installed must not be loadable.
+          const isUnavailable = engine.available === false;
 
           return (
             <div
@@ -154,21 +156,34 @@ export function EngineSelector({
                       e.stopPropagation();
                       onLoad(engine.name);
                     }}
-                    disabled={disabled || isLoading}
-                    aria-label={`Load ${engine.displayName} engine`}
+                    disabled={disabled || isLoading || isUnavailable}
+                    aria-label={
+                      isUnavailable
+                        ? `${engine.displayName} engine not installed`
+                        : `Load ${engine.displayName} engine`
+                    }
+                    title={
+                      isUnavailable
+                        ? `${engine.displayName} is not installed on this system`
+                        : undefined
+                    }
                     className={`
                       px-3 py-1.5 rounded-md text-xs font-medium transition-all
-                      ${isLoading
+                      ${isUnavailable
+                        ? 'bg-gray-600/30 text-gray-500 border border-gray-600/50'
+                        : isLoading
                         ? 'bg-blue-500/20 text-blue-400 cursor-wait'
                         : isError
                           ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-600/50'
                           : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-600/50'
                       }
-                      ${disabled ? 'cursor-not-allowed opacity-60' : ''}
+                      ${disabled || isUnavailable ? 'cursor-not-allowed opacity-60' : ''}
                       focus:outline-none focus:ring-2 focus:ring-emerald-400
                     `}
                   >
-                    {isLoading ? (
+                    {isUnavailable ? (
+                      'Unavailable'
+                    ) : isLoading ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : isError ? (
                       'Retry'

@@ -44,6 +44,15 @@ const STATUS_CONFIG = {
     bgColor: 'bg-red-900/50',
     pulseColor: '',
   },
+  // #6896: connection dropped mid-run and cannot be resumed — the user must
+  // explicitly restart. We do NOT imply continuity ("Reconnecting…") here.
+  lost: {
+    icon: AlertTriangle,
+    text: 'Connection lost — restart required',
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-900/50',
+    pulseColor: '',
+  },
 };
 
 export function ConnectionStatus({ status, className = '' }: Props) {

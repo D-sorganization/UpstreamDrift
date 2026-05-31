@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { apiFetch } from './fetch';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -51,9 +52,7 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/analysis/metrics');
-      if (!res.ok) throw new Error(`Failed to fetch metrics: ${res.status}`);
-      const data = await res.json();
+      const data = await apiFetch<{ metrics?: MetricInfo[] } & MetricInfo[]>('/api/analysis/metrics');
       if (isMountedRef.current) {
         setMetrics(data.metrics ?? data ?? []);
         setLoadState('loaded');
@@ -70,9 +69,7 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/analysis/statistics');
-      if (!res.ok) throw new Error(`Failed to fetch statistics: ${res.status}`);
-      const data = await res.json();
+      const data = await apiFetch<StatisticsSummary>('/api/analysis/statistics');
       if (isMountedRef.current) {
         setStatistics(data);
         setLoadState('loaded');
@@ -89,16 +86,10 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/analysis/export', {
+      const data = await apiFetch<ExportResult>('/api/analysis/export', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ format, dataset_id: datasetId }),
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || `Export failed: ${res.status}`);
-      }
-      const data = await res.json();
       if (isMountedRef.current) {
         setExportResult(data);
         setLoadState('loaded');

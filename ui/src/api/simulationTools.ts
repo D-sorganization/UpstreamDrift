@@ -8,6 +8,7 @@
  */
 
 import type { MeasurementResult } from '@/components/simulation/SimulationToolbar';
+import { apiFetch } from './fetch';
 
 /**
  * Set the position of a body in the active simulation.
@@ -20,19 +21,13 @@ export async function positionBody(
   bodyName: string,
   position: [number, number, number],
 ): Promise<{ body_name: string; position: number[]; rotation: number[]; status: string }> {
-  const response = await fetch('/api/simulation/position', {
+  return apiFetch('/api/simulation/position', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       body_name: bodyName,
       position,
     }),
   });
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.detail || `HTTP ${response.status}`);
-  }
-  return response.json();
 }
 
 /**
@@ -46,14 +41,8 @@ export async function measureDistance(
   bodyA: string,
   bodyB: string,
 ): Promise<MeasurementResult> {
-  const response = await fetch('/api/simulation/measure', {
+  return apiFetch('/api/simulation/measure', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ body_a: bodyA, body_b: bodyB }),
   });
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.detail || `HTTP ${response.status}`);
-  }
-  return response.json();
 }

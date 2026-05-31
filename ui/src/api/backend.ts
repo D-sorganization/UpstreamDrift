@@ -82,9 +82,12 @@ export async function getBackendStatus(): Promise<BackendStatus> {
 /** Get comprehensive diagnostic info (Tauri only). */
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
-    // In browser mode, call the backend API endpoint
+    // In browser mode, call the backend API endpoint.
+    // NOTE: cannot use apiFetch here — fetch.ts imports getApiBase from this
+    // module, so importing apiFetch back would create a circular dependency.
+    // We build the URL via getApiBase() directly to stay Tauri-safe (#6897).
     try {
-      const response = await fetch('/api/diagnostics');
+      const response = await fetch(`${getApiBase()}/api/diagnostics`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }

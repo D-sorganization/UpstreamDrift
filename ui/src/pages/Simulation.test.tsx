@@ -376,16 +376,16 @@ describe('SimulationPage', () => {
     });
   });
 
-  // F5 (#6642): a silent auto-reconnect restarts the sim from t=0 — the user
-  // must be notified rather than left thinking the app froze.
+  // #6896: an unclean drop is NOT silently auto-reconnected (which would
+  // restart the sim from t=0). The user is told a manual restart is required.
   describe('connection status notifications', () => {
-    it('shows a reconnecting notice when the socket drops mid-run', async () => {
-      Object.assign(mockSimulation, { connectionStatus: 'reconnecting' });
+    it('shows a restart-required notice when the socket drops mid-run', async () => {
+      Object.assign(mockSimulation, { connectionStatus: 'lost' });
       render(<SimulationPage />, { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(
-          screen.getByText(/reconnecting \(simulation will restart\)/i),
+          screen.getByText(/connection lost — restart required/i),
         ).toBeInTheDocument();
       });
     });

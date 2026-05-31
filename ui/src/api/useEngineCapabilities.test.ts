@@ -52,7 +52,9 @@ describe('useEngineCapabilities', () => {
     });
 
     expect(result.current.capabilities).toEqual(mockCapabilities);
-    expect(fetchMock).toHaveBeenCalledWith('/api/engines/mujoco/capabilities');
+    // Routed through apiFetch, which prepends getApiBase() (empty in tests) and
+    // passes a RequestInit, so assert on the URL argument only.
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/engines/mujoco/capabilities');
   });
 
   it('handles fetch errors', async () => {
@@ -144,7 +146,11 @@ describe('useEngineCapabilities', () => {
 
     rerender({ engineType: undefined });
 
-    expect(result.current.capabilities).toBeNull();
-    expect(result.current.loadState).toBe('idle');
+    // The reset is scheduled on a microtask (react-hooks/set-state-in-effect),
+    // so wait for it to flush.
+    await waitFor(() => {
+      expect(result.current.capabilities).toBeNull();
+      expect(result.current.loadState).toBe('idle');
+    });
   });
 });
