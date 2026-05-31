@@ -21,6 +21,7 @@ from src.shared.python.engine_core.velocity_conventions import (
     FloatingBaseConvention,
     VelocityRepresentation,
 )
+from src.shared.python.simulation_backends.protocol import Trace
 
 
 @dataclass(frozen=True)
@@ -160,10 +161,83 @@ class JaxSimBackend:
         if dt is not None and dt <= 0.0:
             raise ValueError("dt must be positive")
         kwargs: dict[str, Any] = {"joint_force_references": self._control}
-        if dt is not None:
-            kwargs["dt"] = dt
-        self._data = apis.model.step(model, data, **kwargs)
-        self._time += float(dt if dt is not None else getattr(model, "time_step", 0.0))
+        step_dt = float(dt if dt is not None else getattr(model, "time_step", 0.0))
+        if dt is None:
+            self._data = apis.model.step(model, data, **kwargs)
+        else:
+            try:
+                self._data = apis.model.step(model, data, dt=step_dt, **kwargs)
+            except TypeError as exc:
+                if "dt" not in str(exc) or not hasattr(model, "replace"):
+                    raise
+                self._model = model.replace(time_step=step_dt)
+                self._data = apis.model.step(self._model, data, **kwargs)
+        self._time += step_dt
+
+    def rollout(
+        self,
+        controls: np.ndarray | None,
+        horizon: int,
+        dt: float,
+    ) -> Trace:
+        """Integrate a forward simulation and return the canonical trace schema.
+
+        The trace follows the simulation-backend rollout contract: row 0 is the
+        current state at t=0, rows 1..horizon are the post-step states, and a
+        supplied control history is zero-padded with a terminal row so ``u``
+        shares the same time axis as ``q`` and ``v``.
+        """
+
+        self._require_loaded()
+        if not isinstance(horizon, int) or horizon <= 0:
+            raise ValueError(f"horizon must be a positive int, got {horizon!r}")
+        if not isinstance(dt, (int, float)) or dt <= 0.0 or not np.isfinite(dt):
+            raise ValueError(f"dt must be a positive finite float, got {dt!r}")
+
+        nq = 7 + self._dofs()
+        nv = 6 + self._dofs()
+        nu = self._dofs()
+        controls_arr = self._validate_rollout_controls(controls, horizon, nu)
+
+        q_hist = np.empty((horizon + 1, nq), dtype=np.float64)
+        v_hist = np.empty((horizon + 1, nv), dtype=np.float64)
+        t_hist = np.arange(horizon + 1, dtype=np.float64) * float(dt)
+        u_hist = (
+            None
+            if controls_arr is None
+            else np.zeros((horizon + 1, nu), dtype=np.float64)
+        )
+
+        self._time = 0.0
+        self._record_rollout_sample(0, q_hist, v_hist)
+
+        zero_control = np.zeros(nu, dtype=np.float64)
+        for k in range(horizon):
+            step_control = zero_control if controls_arr is None else controls_arr[k]
+            self.set_control(step_control)
+            if u_hist is not None:
+                u_hist[k] = step_control
+            self.step(float(dt))
+            self._record_rollout_sample(k + 1, q_hist, v_hist)
+
+        return Trace(
+            t=t_hist,
+            q=q_hist,
+            v=v_hist,
+            u=u_hist,
+            dt=float(dt),
+            backend="jaxsim",
+            meta={
+                "model_name": self._model_name,
+                "nq": nq,
+                "nv": nv,
+                "nu": nu,
+                "velocity_representation": self._convention.velocity_representation.value,
+                "spatial_jacobian_order": ",".join(
+                    self._convention.spatial_jacobian_order
+                ),
+            },
+        )
 
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the canonical free-floating inertia matrix M(q)."""
@@ -335,6 +409,34 @@ class JaxSimBackend:
                 f"{name} returned shape {vector.shape}, expected ({expected_v},)"
             )
         return vector
+
+    def _record_rollout_sample(
+        self,
+        index: int,
+        q_hist: np.ndarray,
+        v_hist: np.ndarray,
+    ) -> None:
+        q, v = self.get_state()
+        q_hist[index] = q
+        v_hist[index] = v
+
+    @staticmethod
+    def _validate_rollout_controls(
+        controls: np.ndarray | None,
+        horizon: int,
+        nu: int,
+    ) -> np.ndarray | None:
+        if controls is None:
+            return None
+        controls_arr = np.asarray(controls, dtype=np.float64)
+        if controls_arr.shape != (horizon, nu):
+            raise ValueError(
+                f"controls must have shape ({horizon}, {nu}), "
+                f"got {tuple(controls_arr.shape)}"
+            )
+        if not np.all(np.isfinite(controls_arr)):
+            raise ValueError("controls must be finite")
+        return controls_arr
 
     def _frame_index(self, body_name: str) -> int | None:
         self._require_loaded()

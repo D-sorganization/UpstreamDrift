@@ -71,3 +71,26 @@ installs skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are
 missing; the self-hosted `cross-engine-equivalence.yml` workflow installs the
 optional JaxSim extra and Pinocchio best-effort so installed-engine
 disagreement fails the build.
+
+## Forward Simulation Rollout
+
+Issue #6655 adds a canonical `JaxSimBackend.rollout(controls, horizon, dt)`
+path over `jaxsim.api.model.step`. Rollouts follow the shared
+`src.shared.python.simulation_backends.protocol.Trace` schema:
+
+- `trace.t` has `horizon + 1` rows: the initial sample at `0.0`, then each
+  post-step sample through `horizon * dt`.
+- `trace.q` is ordered `[base position; base quaternion; joint positions]`.
+- `trace.v` is ordered `[base angular velocity; base linear velocity; joint
+velocities]`, preserving the suite's canonical inertial representation.
+- `trace.u` is `None` for passive rollouts, or `(horizon + 1, nu)` with the
+  final row zero-padded so controls share the trace time axis.
+- `trace.meta` records `model_name`, `nq`, `nv`, `nu`,
+  `velocity_representation`, and `spatial_jacobian_order`.
+
+The adapter accepts both the fake test seam and live JaxSim 0.9.0 API shapes:
+`model.dofs` may be a method, and live `JaxSimModelData` exposes base
+linear/angular velocity through its private-backed dataclass fields. When a
+rollout supplies `dt`, the adapter updates JaxSim's model timestep through
+`model.replace(time_step=dt)` for versions whose `step` function does not
+accept a `dt` keyword.
