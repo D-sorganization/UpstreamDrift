@@ -65,6 +65,20 @@ const MOCK_MANIFEST: LauncherManifest = {
             capabilities: ['simscape'],
             order: 8,
         },
+        {
+            id: 'canonical_core_estimation',
+            name: 'Canonical-Core Estimation',
+            description: 'Canonical-core estimation workspace',
+            category: 'biomechanics',
+            type: 'special_app',
+            path: 'src/tools/canonical_core/__main__.py',
+            logo: 'biomechanics.svg',
+            status: 'beta',
+            capabilities: ['canonical_core'],
+            order: 9,
+            web_route: '/tools/canonical-core/estimation',
+            shell_surfaces: ['pyqt6', 'react'],
+        },
     ],
 };
 
@@ -96,7 +110,7 @@ describe('useLauncherManifest', () => {
         });
 
         expect(result.current.manifest).not.toBeNull();
-        expect(result.current.tiles).toHaveLength(4);
+        expect(result.current.tiles).toHaveLength(5);
         expect(result.current.launcherCsrfToken).toBe('test-token');
         expect(result.current.launcherCsrfHeader).toBe('X-Launcher-CSRF-Token');
     });
@@ -139,7 +153,7 @@ describe('useLauncherManifest', () => {
         expect(result.current.engines.every((e) => e.category === 'physics_engine')).toBe(true);
     });
 
-    it('correctly filters tools and external tiles', async () => {
+    it('correctly filters tools, biomechanics, and external tiles', async () => {
         global.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: () => Promise.resolve(MOCK_MANIFEST),
@@ -151,9 +165,10 @@ describe('useLauncherManifest', () => {
             expect(result.current.loadState).toBe('loaded');
         });
 
-        expect(result.current.tools).toHaveLength(2);
+        expect(result.current.tools).toHaveLength(3);
         expect(result.current.tools.some((t) => t.id === 'model_explorer')).toBe(true);
         expect(result.current.tools.some((t) => t.id === 'matlab_unified')).toBe(true);
+        expect(result.current.tools.some((t) => t.id === 'canonical_core_estimation')).toBe(true);
     });
 
     it('transitions to error state on fetch failure', async () => {
@@ -248,6 +263,6 @@ describe('useLauncherManifest', () => {
         });
 
         expect(result.current.tiles.find((t) => t.id === 'legacy_alias')).toBeUndefined();
-        expect(result.current.tiles).toHaveLength(4);
+        expect(result.current.tiles).toHaveLength(5);
     });
 });

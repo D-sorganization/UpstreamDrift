@@ -190,6 +190,11 @@ embeddable tool, and the WebSocket transport carrying
   - Layout persistence is free: `EmbeddedHostWidget.state_snapshot()`
     serialises to a small JSON dict that the launcher can save and
     restore between sessions.
+  - Canonical-core app-shell entries (CC-32 / #6805) reuse the same
+    registry: `canonical_core_estimation` and
+    `canonical_core_comparison` register PyQt6 adapters through
+    `launcher_embed` and expose matching React routes through the
+    shared launcher manifest.
 - **Negative:**
   - `EmbeddedHostWidget` keeps a hidden internal `QMainWindow` to
     host docks, which means dock state lives one level deeper than a
@@ -217,6 +222,9 @@ embeddable tool, and the WebSocket transport carrying
     arrangement across sessions) is wired in `state_snapshot()` /
     `restore_state()` but the launcher does not yet persist it to
     disk — tracked separately.
+  - Canonical-core service bodies for estimation and comparison remain
+    behind the CC-19 / CC-27 service/API work; ADR-0013 only owns their
+    common shell registration and launch metadata.
 
 ## Validation
 
