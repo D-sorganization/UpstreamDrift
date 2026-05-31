@@ -2,13 +2,13 @@
  * Engine Store — Global Engine State Management
  *
  * Centralizes physics engine selection, loading, and status.
- * Replaces per-component `useEngineManager()` calls with a single
- * source of truth that can be consumed from any component.
+ * The single source of truth for engine state, consumed from any component.
  *
  * @module stores/useEngineStore
  */
 
 import { create } from 'zustand';
+import { apiFetch } from '@/api/fetch';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -35,6 +35,15 @@ export interface EngineStoreState {
 export interface EngineStoreActions {
   /** Select an engine by name */
   selectEngine: (name: string | null) => void;
+  /**
+   * Probe availability of all engines without loading them (#6900).
+   *
+   * The registry seeds every engine as `available: true` optimistically so the
+   * UI renders immediately, but an uninstalled engine must not appear loadable.
+   * This action probes each engine's `/probe` endpoint and flips `available`
+   * to reflect what is actually installed. Safe to call once on first render.
+   */
+  probeAvailability: () => Promise<void>;
   /** Request loading an engine (async) */
   requestLoad: (name: string) => Promise<void>;
   /** Unload an engine */
@@ -106,21 +115,21 @@ interface EngineStatus {
 }
 
 async function probeEngine(engineName: string): Promise<EngineStatus> {
-  const response = await fetch(`/api/engines/${engineName}/probe`);
-  if (!response.ok) {
+  try {
+    return await apiFetch<EngineStatus>(`/api/engines/${engineName}/probe`);
+  } catch {
     throw new Error(`Failed to probe engine: ${engineName}`);
   }
-  return response.json();
 }
 
 async function loadEngineApi(engineName: string): Promise<EngineStatus> {
-  const response = await fetch(`/api/engines/${engineName}/load`, {
-    method: 'POST',
-  });
-  if (!response.ok) {
+  try {
+    return await apiFetch<EngineStatus>(`/api/engines/${engineName}/load`, {
+      method: 'POST',
+    });
+  } catch {
     throw new Error(`Failed to load engine: ${engineName}`);
   }
-  return response.json();
 }
 
 // ── Initial state ─────────────────────────────────────────────────────────
@@ -140,6 +149,38 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   selectedEngine: null,
 
   selectEngine: (name) => set({ selectedEngine: name }),
+
+  probeAvailability: async () => {
+    const names = get().engines.map((e) => e.name);
+    const results = await Promise.all(
+      names.map(async (name) => {
+        try {
+          const status = await probeEngine(name);
+          // Only a definitive `available: false` flips the flag. A probe that
+          // errors (backend still starting, transient network blip) leaves the
+          // optimistic seed intact so we don't wrongly disable a real engine.
+          return { name, available: status.available };
+        } catch {
+          return { name, available: undefined };
+        }
+      })
+    );
+    const definitive = new Map(
+      results
+        .filter((r): r is { name: string; available: boolean } =>
+          typeof r.available === 'boolean'
+        )
+        .map((r) => [r.name, r.available])
+    );
+    if (definitive.size === 0) return;
+    set((state) => ({
+      engines: state.engines.map((e) =>
+        definitive.has(e.name)
+          ? { ...e, available: definitive.get(e.name) ?? e.available }
+          : e
+      ),
+    }));
+  },
 
   requestLoad: async (engineName) => {
     // Set to loading
@@ -206,7 +247,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   unloadEngine: async (engineName) => {
     const { selectedEngine } = get();
     try {
-      await fetch(`/api/engines/${engineName}/unload`, { method: 'POST' });
+      await apiFetch<unknown>(`/api/engines/${engineName}/unload`, { method: 'POST' });
     } catch {
       // Best-effort: still update client state even if backend call fails
     }

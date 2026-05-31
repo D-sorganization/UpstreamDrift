@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
+import { apiFetch } from './fetch';
 
 export interface SimulationFrame {
   frame: number;
@@ -30,19 +31,24 @@ export interface EngineStatus {
 // Maximum number of frames to keep in history to prevent memory leaks
 const MAX_FRAMES_HISTORY = 1000;
 
-// WebSocket reconnection configuration
-const MAX_RECONNECT_ATTEMPTS = 5;
-const BASE_RECONNECT_DELAY_MS = 1000;
-const MAX_RECONNECT_DELAY_MS = 30000;
-
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+export type ConnectionStatus =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting'
+  | 'failed'
+  // #6896: connection dropped mid-run. The server has no resume protocol — a
+  // reconnect always restarts from t=0 and wipes the timeline — so instead of
+  // silently doing that we surface this state and require an explicit restart.
+  | 'lost';
 
 export async function fetchEngines(): Promise<EngineStatus[]> {
-  const response = await fetch(`${getApiBase()}/api/engines`);
-  if (!response.ok) {
+  let data: { engines?: unknown };
+  try {
+    data = await apiFetch<{ engines?: unknown }>('/api/engines');
+  } catch {
     throw new Error('Failed to fetch engines');
   }
-  const data = await response.json();
   if (!Array.isArray(data.engines)) {
     throw new Error('Unexpected engines response shape');
   }
@@ -59,36 +65,8 @@ export function useSimulation(engineType: string) {
   const wsRef = useRef<WebSocket | null>(null);
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
-  const reconnectAttemptsRef = useRef(0);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingConfigRef = useRef<SimulationConfig | null>(null);
-
-  // Calculate exponential backoff delay
-  const getReconnectDelay = useCallback((attempt: number): number => {
-    const delay = Math.min(
-      BASE_RECONNECT_DELAY_MS * Math.pow(2, attempt),
-      MAX_RECONNECT_DELAY_MS
-    );
-    // Add jitter to prevent thundering herd
-    return delay + Math.random() * 1000;
-  }, []);
-
-  // Clear any pending reconnect timeout
-  const clearReconnectTimeout = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-  }, []);
-
-  // Ref to store connect function for reconnection logic (avoids circular reference)
-  const connectRef = useRef<((config: SimulationConfig) => void) | null>(null);
-
 
   const connect = useCallback((config: SimulationConfig = {}) => {
-    // Store config for potential reconnection
-    pendingConfigRef.current = config;
-
     // Close any existing WebSocket connection before creating a new one
     if (wsRef.current) {
       wsRef.current.close();
@@ -116,10 +94,12 @@ export function useSimulation(engineType: string) {
     ws.onopen = () => {
       if (!isMountedRef.current) return;
 
-      // Reset reconnection attempts on successful connection
-      reconnectAttemptsRef.current = 0;
       setConnectionStatus('connected');
+      setWsError(null);
       setIsRunning(true);
+      // A fresh connection always begins a new run from t=0 (the server has no
+      // resume protocol), so clearing the timeline here is correct — this path
+      // is only reached on an explicit start(), never on a silent reconnect.
       setFrames([]);
 
       ws.send(JSON.stringify({
@@ -175,51 +155,43 @@ export function useSimulation(engineType: string) {
 
       setIsRunning(false);
 
-      // Don't reconnect if this was a clean close (code 1000) or user-initiated
+      // Clean close (code 1000) or user-initiated stop — nothing to recover.
       if (event.wasClean || event.code === 1000) {
         setConnectionStatus('disconnected');
-        reconnectAttemptsRef.current = 0;
         return;
       }
 
-      // Attempt reconnection with exponential backoff
-      if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
-        const delay = getReconnectDelay(reconnectAttemptsRef.current);
-        console.log(`WebSocket closed unexpectedly. Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
-
-        setConnectionStatus('reconnecting');
-
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (isMountedRef.current && connectRef.current) {
-            reconnectAttemptsRef.current++;
-            connectRef.current(pendingConfigRef.current || {});
-          }
-        }, delay);
-      } else {
-        console.error('Max reconnection attempts reached. Connection failed.');
-        setConnectionStatus('failed');
-        reconnectAttemptsRef.current = 0;
-      }
+      // #6896: SAFE behaviour on an unclean drop.
+      //
+      // Previously we auto-reconnected here, and the reopened socket's onopen
+      // wiped `frames` and sent {action:'start'} — which the server always runs
+      // from time_elapsed=0.0 (it has no resume/offset protocol). A transient
+      // blip therefore silently restarted a multi-second run from the beginning
+      // while the UI implied continuity ("Reconnecting…").
+      //
+      // Until the server supports resume (tracked as a follow-up), we DO NOT
+      // silently reconnect-and-restart. We preserve the captured frames and the
+      // last frame's time, mark the connection 'lost', and require an explicit
+      // user restart (calling start()) to begin a new run. This guarantees we
+      // never reset frames/time without user action.
+      console.warn(
+        'WebSocket closed unexpectedly. Connection lost — an explicit restart ' +
+          'is required (the simulation cannot resume from where it stopped).',
+      );
+      setConnectionStatus('lost');
+      setWsError(
+        'Connection lost — the simulation cannot resume. Restart to run again.',
+      );
     };
-  }, [engineType, getReconnectDelay]);
-
-  // Sync connectRef with latest connect function (in effect, not during render)
-  useEffect(() => {
-    connectRef.current = connect;
-  }, [connect]);
+  }, [engineType]);
 
   const start = useCallback((config: SimulationConfig = {}) => {
-    // Reset reconnection state when starting fresh
-    clearReconnectTimeout();
-    reconnectAttemptsRef.current = 0;
+    // Explicit user restart: open a fresh connection. onopen clears the
+    // timeline, which is the only place frames are reset (#6896).
     connect(config);
-  }, [connect, clearReconnectTimeout]);
+  }, [connect]);
 
   const stop = useCallback(() => {
-    // Clear any pending reconnection
-    clearReconnectTimeout();
-    reconnectAttemptsRef.current = 0;
-
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ action: 'stop' }));
@@ -230,7 +202,7 @@ export function useSimulation(engineType: string) {
       wsRef.current = null;
     }
     setConnectionStatus('disconnected');
-  }, [clearReconnectTimeout]);
+  }, []);
 
   const pause = useCallback(() => {
     const ws = wsRef.current;
@@ -249,12 +221,12 @@ export function useSimulation(engineType: string) {
   }, []);
 
   const setSpeed = useCallback(async (speed: number): Promise<void> => {
-    const response = await fetch(`${getApiBase()}/api/simulation/speed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ speed_factor: speed }),
-    });
-    if (!response.ok) {
+    try {
+      await apiFetch<unknown>('/api/simulation/speed', {
+        method: 'POST',
+        body: JSON.stringify({ speed_factor: speed }),
+      });
+    } catch {
       throw new Error(`Failed to set simulation speed to ${speed}x`);
     }
   }, []);
@@ -264,13 +236,12 @@ export function useSimulation(engineType: string) {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      clearReconnectTimeout();
       if (wsRef.current) {
         wsRef.current.close(1000, 'Component unmounted');
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimeout]);
+  }, []);
 
   return {
     isRunning,
