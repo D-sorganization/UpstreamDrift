@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QComboBox, QDoubleSpinBox, QWidget
+from PyQt6.QtWidgets import QComboBox, QDoubleSpinBox, QLineEdit, QWidget
 
 from src.shared.python.contracts import require
 from src.shared.python.ux.field_metadata import FieldMetadata, FieldRegistry
@@ -113,13 +113,17 @@ class HelpfulField(QWidget):
             if fm.units:
                 spin.setSuffix(f" {fm.units}")
             return spin
-        combo = QComboBox(self)
         if fm.valid_range is not None:
+            combo = QComboBox(self)
             combo.addItems([str(v) for v in fm.valid_range])
             idx = combo.findText(str(fm.default))
             if idx >= 0:
                 combo.setCurrentIndex(idx)
-        return combo
+            return combo
+        line = QLineEdit(self)
+        if fm.default is not None:
+            line.setText(str(fm.default))
+        return line
 
     def _apply_help(self, fm: FieldMetadata) -> None:
         self.setToolTip(fm.short_help)
@@ -149,6 +153,8 @@ class HelpfulField(QWidget):
         """Return the current editor value (float for numeric fields)."""
         if isinstance(self._editor, QDoubleSpinBox):
             return self._editor.value()
+        if isinstance(self._editor, QLineEdit):
+            return self._editor.text()
         return self._editor.currentText()
 
     def check_value(self, value: float) -> bool:
