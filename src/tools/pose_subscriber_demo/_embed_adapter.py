@@ -4,6 +4,11 @@ Implements the :class:`~src.shared.python.launcher_embed.EmbeddableTool`
 protocol so the launcher can host the demo as a tab or dock widget.
 """
 
+# background: yes (pause/resume); cleanup idempotent (swap-then-clear). This
+# tool holds a live ``pose/canonical`` realtime subscription — a scarce-ish
+# resource. ``pause`` releases the subscription so a hidden subscriber stops
+# consuming traffic; ``resume`` re-acquires it on re-surface (#6013).
+
 from __future__ import annotations
 
 from typing import Any
@@ -59,3 +64,37 @@ class _PoseSubscriberDemoEmbedAdapter:
     def is_dirty(self) -> bool:
         # Read-only mirror of Pose Studio's pose; nothing to save.
         return False
+
+    def pause_widget(self, widget: Any) -> None:
+        """Pause only the widget instance being backgrounded."""
+
+        self._call_widget_lifecycle(widget, "pause")
+
+    def resume_widget(self, widget: Any) -> None:
+        """Resume only the widget instance being re-surfaced."""
+
+        self._call_widget_lifecycle(widget, "resume")
+
+    def pause(self) -> None:
+        # Backgrounding hook (#6013): release each live widget's
+        # ``pose/canonical`` subscription so a hidden subscriber stops
+        # consuming realtime traffic. Idempotent; never raises so the
+        # host's background path cannot fail on us.
+        for widget in list(self._widgets):
+            self.pause_widget(widget)
+
+    def resume(self) -> None:
+        # Inverse of :meth:`pause`: re-acquire each widget's
+        # subscription when the tab is re-surfaced. Idempotent.
+        for widget in list(self._widgets):
+            self.resume_widget(widget)
+
+    @staticmethod
+    def _call_widget_lifecycle(widget: Any, method_name: str) -> None:
+        method = getattr(widget, method_name, None)
+        if not callable(method):
+            return
+        try:
+            method()
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("pose_subscriber_demo widget %s raised", method_name)

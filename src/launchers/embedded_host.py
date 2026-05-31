@@ -192,8 +192,16 @@ def _safe_detach_to_window(tool: EmbeddableTool) -> bool:
         return False
 
 
-def _safe_pause(tool: EmbeddableTool) -> None:
-    """Call the optional ``tool.pause()`` hook, swallowing exceptions."""
+def _safe_pause(tool: EmbeddableTool, widget: QWidget | None = None) -> None:
+    """Call the optional pause hook, preferring per-widget pause when present."""
+    if widget is not None:
+        pause_widget = getattr(tool, "pause_widget", None)
+        if pause_widget is not None:
+            try:
+                pause_widget(widget)
+            except Exception:  # pragma: no cover - defensive
+                logger.exception("pause_widget raised for tool %s", tool.tool_id)
+            return
     pause = getattr(tool, "pause", None)
     if pause is None:
         return
@@ -203,8 +211,16 @@ def _safe_pause(tool: EmbeddableTool) -> None:
         logger.exception("pause raised for tool %s", tool.tool_id)
 
 
-def _safe_resume(tool: EmbeddableTool) -> None:
-    """Call the optional ``tool.resume()`` hook, swallowing exceptions."""
+def _safe_resume(tool: EmbeddableTool, widget: QWidget | None = None) -> None:
+    """Call the optional resume hook, preferring per-widget resume when present."""
+    if widget is not None:
+        resume_widget = getattr(tool, "resume_widget", None)
+        if resume_widget is not None:
+            try:
+                resume_widget(widget)
+            except Exception:  # pragma: no cover - defensive
+                logger.exception("resume_widget raised for tool %s", tool.tool_id)
+            return
     resume = getattr(tool, "resume", None)
     if resume is None:
         return
@@ -333,7 +349,7 @@ class EmbeddedHostWidget(QWidget):
         self._active_tabs[stashed.tool.tool_id] = _OpenTab(
             tool=stashed.tool, widget=widget, index=index
         )
-        _safe_resume(stashed.tool)
+        _safe_resume(stashed.tool, stashed.widget)
         return index
 
     def close_tab(self, target: int | str, *, destroy: bool = True) -> bool:
@@ -381,7 +397,7 @@ class EmbeddedHostWidget(QWidget):
 
     def _background_tab(self, record: _OpenTab) -> None:
         """Pause ``record``'s tool and stash its widget hidden (#6013)."""
-        _safe_pause(record.tool)
+        _safe_pause(record.tool, record.widget)
         index = self._tab_widget.indexOf(record.widget)
         if index != -1:
             self._tab_widget.removeTab(index)

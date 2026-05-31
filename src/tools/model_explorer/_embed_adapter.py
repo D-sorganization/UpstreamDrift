@@ -9,6 +9,10 @@ process-wide registry.
 Part of Subtask 5 / #4998 of EPIC #4993.
 """
 
+# background: yes (defaults); cleanup idempotent (swap-then-clear). Holds an
+# in-memory URDFBuilder worth keeping alive while hidden, so backgrounding is
+# beneficial; no scarce GPU context held at the adapter level (#6013).
+
 from __future__ import annotations
 
 from typing import Any

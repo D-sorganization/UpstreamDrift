@@ -8,6 +8,10 @@ launcher-embed contract. The actual widget class is imported lazily inside
 :meth:`_EmbedAdapter.create_main_widget`.
 """
 
+# background: yes (defaults); cleanup idempotent (drops widget ref). Holds only
+# transient in-memory traces; no scarce GPU context at the adapter level, so
+# structural defaults apply (#6013).
+
 from __future__ import annotations
 
 from typing import Any
