@@ -287,6 +287,12 @@ class TestCIEnvironmentCompatibility:
 
         assert "id: token-check" in workflow
         assert "gh auth status" in workflow
+        assert (
+            "for candidate in BOT_PAT_TOKEN RUNNER_CHECK_TOKEN_VALUE DEFAULT_GITHUB_TOKEN"
+            in workflow
+        )
+        assert "trying next candidate" in workflow
+        assert "BOT_TRIGGER_TOKEN=$token" in workflow
         assert "steps.token-check.outputs.can_trigger == 'true'" in workflow
 
     def test_frontend_cleanup_runs_before_ui_working_directory_default(self) -> None:
