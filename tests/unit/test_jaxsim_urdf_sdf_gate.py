@@ -79,6 +79,36 @@ def test_compare_inertials_reports_field_level_mismatches(tmp_path: Path) -> Non
     assert [(m.link, m.field) for m in mismatches] == [("base", "iyy")]
 
 
+def test_compare_inertials_reports_unexpected_sdf_links(tmp_path: Path) -> None:
+    urdf = tmp_path / "sample.urdf"
+    sdf = tmp_path / "sample.sdf"
+    extra_link = """\
+    <link name="sdformat_added_link">
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>
+"""
+    urdf.write_text(_URDF, encoding="utf-8")
+    sdf.write_text(
+        _SDF.replace("  </model>", extra_link + "  </model>"), encoding="utf-8"
+    )
+
+    mismatches = compare_inertials(read_urdf_inertials(urdf), read_sdf_inertials(sdf))
+
+    assert [(m.link, m.field) for m in mismatches] == [
+        ("sdformat_added_link", "<unexpected link>")
+    ]
+
+
 def test_find_sdformat_tool_prefers_gz_command_shape(tmp_path: Path) -> None:
     tool_path = tmp_path / ("gz.exe" if sys.platform == "win32" else "gz")
     tool_path.write_text("", encoding="utf-8")
