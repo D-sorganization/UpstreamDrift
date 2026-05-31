@@ -114,6 +114,24 @@ class MainWidget(QtWidgets.QWidget):
         except Exception:  # pragma: no cover - defensive
             logger.exception("pose_subscriber_demo: unsubscribe raised")
 
+    def pause(self) -> None:
+        """Drop the live subscription while the widget is backgrounded.
+
+        Idempotent. Releasing the realtime subscription means a hidden
+        pose subscriber stops consuming ``pose/canonical`` traffic
+        (#6013). Re-acquired by :meth:`resume`.
+        """
+        self.cleanup()
+
+    def resume(self) -> None:
+        """Re-acquire the live subscription when re-surfaced.
+
+        Idempotent: :meth:`_subscribe` is a no-op-on-failure and we only
+        re-subscribe when no subscription is currently held.
+        """
+        if self._subscription is None:
+            self._subscribe()
+
     # ---- payload handling --------------------------------------------
 
     def _on_realtime_payload(self, payload: Any) -> None:

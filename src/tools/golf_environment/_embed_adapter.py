@@ -1,5 +1,8 @@
 """Adapter to expose the Golf Environment as an EmbeddableTool."""
 
+# background: yes (defaults); cleanup idempotent (no-op). CPU widget — no
+# scarce resources to release on pause, so structural defaults apply (#6013).
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any

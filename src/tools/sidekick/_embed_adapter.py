@@ -12,6 +12,10 @@ beyond dropping references: the panel manages its own session
 persistence and there is no save state to flush.
 """
 
+# background: yes (defaults); cleanup idempotent (swap-then-clear). Keeping the
+# chat panel alive while hidden preserves conversation state cheaply; no scarce
+# resources to release on pause, so structural defaults apply (#6013).
+
 from __future__ import annotations
 
 from typing import Any

@@ -4,6 +4,11 @@ Implements the :class:`~src.shared.python.launcher_embed.EmbeddableTool`
 protocol so the launcher can host the demo as a tab or dock widget.
 """
 
+# background: yes (pause/resume); cleanup idempotent (swap-then-clear). This
+# tool holds a live ``pose/canonical`` realtime subscription — a scarce-ish
+# resource. ``pause`` releases the subscription so a hidden subscriber stops
+# consuming traffic; ``resume`` re-acquires it on re-surface (#6013).
+
 from __future__ import annotations
 
 from typing import Any
@@ -59,3 +64,29 @@ class _PoseSubscriberDemoEmbedAdapter:
     def is_dirty(self) -> bool:
         # Read-only mirror of Pose Studio's pose; nothing to save.
         return False
+
+    def pause(self) -> None:
+        # Backgrounding hook (#6013): release each live widget's
+        # ``pose/canonical`` subscription so a hidden subscriber stops
+        # consuming realtime traffic. Idempotent; never raises so the
+        # host's background path cannot fail on us.
+        for widget in list(self._widgets):
+            pause = getattr(widget, "pause", None)
+            if not callable(pause):
+                continue
+            try:
+                pause()
+            except Exception:  # pragma: no cover - defensive
+                logger.exception("pose_subscriber_demo widget pause raised")
+
+    def resume(self) -> None:
+        # Inverse of :meth:`pause`: re-acquire each widget's
+        # subscription when the tab is re-surfaced. Idempotent.
+        for widget in list(self._widgets):
+            resume = getattr(widget, "resume", None)
+            if not callable(resume):
+                continue
+            try:
+                resume()
+            except Exception:  # pragma: no cover - defensive
+                logger.exception("pose_subscriber_demo widget resume raised")

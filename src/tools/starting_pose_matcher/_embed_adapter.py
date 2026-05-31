@@ -10,6 +10,11 @@ but the launcher tile id is ``motion_target_preview`` (see
 ``src/config/models.yaml``); the adapter advertises the latter.
 """
 
+# background: yes (defaults); cleanup idempotent (swap-then-clear). The
+# Motion-Match Preview holds expensive loaded-mocap / pose-edit state, so
+# backgrounding (keep-running on close) preserves it cheaply; no scarce GPU
+# context held at the adapter level, so structural defaults apply (#6013).
+
 from __future__ import annotations
 
 from typing import Any
