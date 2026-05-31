@@ -11,10 +11,11 @@ from __future__ import annotations
 import math
 import shutil
 import subprocess
-import xml.etree.ElementTree as ET  # noqa: N817
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+
+import defusedxml.ElementTree as ET  # noqa: N817
 
 SDFORMAT_TOOL_NAMES = ("gz", "ign", "sdf")
 INERTIA_FIELDS = ("ixx", "ixy", "ixz", "iyy", "iyz", "izz")
@@ -199,6 +200,16 @@ def compare_inertials(
                         tolerance=tolerance,
                     )
                 )
+    for link_name in sorted(set(actual) - set(expected)):
+        mismatches.append(
+            InertialMismatch(
+                link=link_name,
+                field="<unexpected link>",
+                expected=0.0,
+                actual=1.0,
+                tolerance=0.0,
+            )
+        )
     return mismatches
 
 
