@@ -12,5 +12,31 @@ from src.shared.python.visualization.fsp_renderer import (
     FspRenderer,
     Viewport,
 )
+from src.shared.python.visualization.viewport import (
+    PROVIDER_METADATA,
+    ProviderAvailability,
+    ViewportOverlayPayload,
+    ViewportProvider,
+    ViewportProviderMetadata,
+    ViewportProviderStatus,
+    ViewportSelection,
+    evaluate_viewport_providers,
+    select_viewport_provider,
+    selected_viewport_decision,
+)
 
-__all__ = ["FspRenderConfig", "FspRenderer", "Viewport"]
+__all__ = [
+    "FspRenderConfig",
+    "FspRenderer",
+    "PROVIDER_METADATA",
+    "ProviderAvailability",
+    "Viewport",
+    "ViewportOverlayPayload",
+    "ViewportProvider",
+    "ViewportProviderMetadata",
+    "ViewportProviderStatus",
+    "ViewportSelection",
+    "evaluate_viewport_providers",
+    "select_viewport_provider",
+    "selected_viewport_decision",
+]
