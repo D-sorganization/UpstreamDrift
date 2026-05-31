@@ -254,7 +254,8 @@ class CanonicalGeometry:
             GeometryType.SPHERE.value: 1,
             GeometryType.CAPSULE.value: 2,
         }
-        expected = expected_dimensions.get(self.geometry_type)
+        geometry_type = _geometry_type_value(self.geometry_type)
+        expected = expected_dimensions.get(geometry_type)
         if expected is not None and len(self.dimensions) != expected:
             result.add_error(
                 "CANONICAL_GEOMETRY_DIMENSIONS",
