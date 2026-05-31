@@ -30,6 +30,13 @@ class ExerciseDashboard(QMainWindow):
             # Fallback for UI if engines aren't discovered correctly in tests
             self.engines = ["MuJoCo_Models", "Drake_Models", "Pinocchio_Models"]
 
+        # JaxSim is a dependency-light analysis backend (no sibling model repo),
+        # so it is offered as an always-available engine rather than discovered
+        # from disk (issue #6658). The dashboard greys out unsupported features
+        # from the backend's declared capabilities.
+        if "JaxSim_Models" not in self.engines:
+            self.engines.append("JaxSim_Models")
+
         self.engine_selector.addItems(self.engines)
         self.engine_selector.currentTextChanged.connect(self._on_engine_changed)
 
@@ -66,6 +73,10 @@ class ExerciseDashboard(QMainWindow):
                 from src.launchers.pinocchio_dashboard import PinocchioDashboard
 
                 self._current_widget = PinocchioDashboard(exercise_filter=self.exercise)
+            elif name == "JaxSim_Models":
+                from src.launchers.jaxsim_dashboard import JaxSimDashboard
+
+                self._current_widget = JaxSimDashboard(exercise_filter=self.exercise)
             elif name == "OpenSim_Models":
                 self._current_widget = QLabel("OpenSim dashboard not yet available.")
             else:

@@ -142,7 +142,11 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 
 - `CanonicalPose` — frozen dataclass; pelvis SE(3) + joint angles in
   the canonical convention (intrinsic XYZ Euler in degrees, joint names
-  matching `reference_golfer_setup`). See ADR 0012.
+  matching `reference_golfer_setup`). See ADR 0012. **For full dynamic
+  state (q, v, a + quaternion floating base), see the `canonical-v2`
+  contract — [ADR-0026](docs/adr/0026-canonical-dynamic-state-v2.md) /
+  [`docs/conventions/canonical-v2.md`](docs/conventions/canonical-v2.md)
+  (Canonical Core EPIC #6772).**
 - `PoseConventionAdapter` — runtime-checkable Protocol; one
   implementation per engine in `adapters/`.
 - `LiveKinematicsService` — Protocol; one implementation per engine in

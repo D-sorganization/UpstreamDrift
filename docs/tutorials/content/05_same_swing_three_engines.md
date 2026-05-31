@@ -191,9 +191,33 @@ Check whether one API reports spatial velocity as angular then linear while
 another reports linear then angular. Normalize the layout before treating the
 result as a physics mismatch.
 
+## Step 7 (Optional): Roll Out a Forward Simulation
+
+Each engine adapter exposes a canonical `rollout(controls, horizon, dt)` that
+returns the shared `Trace` schema (`t`, `q`, `v`, `u`, `meta`). For the JaxSim
+path this is validated against an analytic torque-free body in
+`tests/cross_engine/test_jaxsim_forward_sim.py` (issue #6655):
+
+```python
+# JaxSim path (Linux only); skips cleanly when jaxsim is unavailable.
+from src.engines.physics_engines.jaxsim import JaxSimBackend
+
+backend = JaxSimBackend()
+backend.load_from_path(str(model_path))
+backend.set_state(q0, v0)
+trace = backend.rollout(controls=None, horizon=100, dt=1e-3)
+print({"backend": trace.backend, "steps": trace.num_steps, "nv": trace.meta["nv"]})
+```
+
+Compare `trace.q`/`trace.v` against the MuJoCo and Pinocchio traces only after
+normalizing each to the suite canonical `[angular; linear]` inertial convention
+(Step 5).
+
 ## Next Steps
 
-- Add the JaxSim upgrade-guard CI job from issue #6660.
+- The JaxSim upgrade-guard from issue #6660 now ships as
+  `scripts/jaxsim/check_jaxsim_pin.py` and runs as a CI step in
+  `cross-engine-equivalence.yml`; run it locally before bumping the pin.
 - Extend this tutorial with a checked-in, runnable sample once the JaxSim backend
   API is stable in the repository.
 - Use [Tutorial 4: Video Analysis](04_video_analysis.md) to generate a real

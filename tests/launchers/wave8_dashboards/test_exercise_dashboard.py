@@ -75,7 +75,8 @@ class TestExerciseDashboard:
         win = ExerciseDashboard("gait")
         try:
             assert "Gait" in win.windowTitle()
-            assert win.engines == ["MuJoCo_Models"]
+            # JaxSim is always appended as an analysis backend (issue #6658).
+            assert win.engines == ["MuJoCo_Models", "JaxSim_Models"]
         finally:
             win.close()
 
@@ -93,6 +94,7 @@ class TestExerciseDashboard:
                 "MuJoCo_Models",
                 "Drake_Models",
                 "Pinocchio_Models",
+                "JaxSim_Models",
             }
         finally:
             win.close()
@@ -144,6 +146,42 @@ class TestExerciseDashboard:
             patched_child_dashboards["PinocchioDashboard"].assert_called_once_with(
                 exercise_filter="run"
             )
+        finally:
+            win.close()
+
+    def test_jaxsim_always_offered_as_engine(
+        self, qapp, patched_child_dashboards, monkeypatch
+    ) -> None:
+        # JaxSim has no sibling model repo, so it is appended to the selector
+        # regardless of what discover_exercise returns (issue #6658).
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("gait")
+        try:
+            assert "JaxSim_Models" in win.engines
+        finally:
+            win.close()
+
+    def test_swap_to_jaxsim_uses_capability_dashboard(self, qapp, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+        from src.launchers.jaxsim_dashboard import JaxSimDashboard
+
+        win = ExerciseDashboard("gait")
+        try:
+            win._on_engine_changed("JaxSim_Models")
+            assert isinstance(win._current_widget, JaxSimDashboard)
+            # Capability-driven: partial contact-forces feature is greyed out.
+            assert not win._current_widget.feature_controls[
+                "Contact forces"
+            ].isEnabled()
         finally:
             win.close()
 
