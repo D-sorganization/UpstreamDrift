@@ -162,7 +162,7 @@ jobs:
         env:
           GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
         run: |
-          if gh api graphql -f query='{ viewer { login } }' >/dev/null 2>&1; then
+          if gh auth status >/dev/null 2>&1 && gh api graphql -f query='{ viewer { login } }' >/dev/null 2>&1; then
             echo "can_trigger=true" >> "$GITHUB_OUTPUT"
           else
             echo "can_trigger=false" >> "$GITHUB_OUTPUT"
