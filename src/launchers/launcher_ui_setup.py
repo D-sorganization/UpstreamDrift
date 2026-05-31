@@ -530,12 +530,16 @@ class UISetupManager:
         self._setup_search_shortcuts()
 
     def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
-        """Dock a submodule widget as a new tab in the workspace."""
-        if not True:
-            logger.error("Workspace tabs not initialized; cannot dock widget.")
-            return
+        """Dock a submodule/tool widget as a new tab in the workspace.
 
-        index = self.workspace_tabs.addTab(widget, title)
+        Tool tabs are background-eligible (#6013): closing one keeps the
+        widget running hidden and restorable via the View > Background Tabs
+        menu, rather than destroying it.
+        """
+        if widget is None:
+            raise ValueError("widget must be provided")
+
+        index = self.workspace_tabs.add_background_tab(widget, title)
         self.workspace_tabs.setCurrentIndex(index)
 
     def _open_library_tab(self) -> None:
@@ -1083,9 +1087,46 @@ class UISetupManager:
         view_menu.addAction(action_redock_tabs)
         self.action_redock_tabs = action_redock_tabs
 
+        background_menu = view_menu.addMenu("&Background Tabs")
+        self._background_tabs_menu = background_menu
+        background_menu.aboutToShow.connect(self._refresh_background_tabs_menu)
+
         view_menu.addSeparator()
         theme_menu = view_menu.addMenu("&Theme")
         self._setup_theme_menu(theme_menu)
+
+    def _refresh_background_tabs_menu(self) -> None:
+        """Populate the Background Tabs menu with restore actions (#6013).
+
+        Lists tool tabs that were closed but kept running hidden, so the
+        user can bring them back. Rebuilt each time the menu opens.
+        """
+        menu = getattr(self, "_background_tabs_menu", None)
+        if menu is None:
+            return
+        menu.clear()
+
+        tabs = getattr(self, "workspace_tabs", None)
+        titles = tabs.list_background_tabs() if tabs is not None else []
+
+        if not titles:
+            empty = QAction("(no background tabs)", self.launcher)
+            empty.setEnabled(False)
+            menu.addAction(empty)
+            return
+
+        for title in titles:
+            act = QAction(f"Restore: {title}", self.launcher)
+            act.setToolTip(f"Bring the hidden '{title}' tab back into view")
+            act.triggered.connect(
+                lambda _checked=False, t=title: tabs.restore_background_tab(t)
+            )
+            menu.addAction(act)
+
+        menu.addSeparator()
+        restore_all = QAction("Restore All", self.launcher)
+        restore_all.triggered.connect(tabs.restore_all_background_tabs)
+        menu.addAction(restore_all)
 
     def _popout_active_tab(self) -> None:
         """Undock the currently active workspace tab into a floating window."""
