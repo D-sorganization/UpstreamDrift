@@ -425,6 +425,19 @@ module = [
 follow_imports = "skip"
 
 [[tool.mypy.overrides]]
+module = "src.shared.python.gui_pkg.draggable_tabs"
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = [
+    "src.shared.python.gui_pkg.plotting_utils",
+    "src.shared.python.ui.auto_complete",
+    "src.shared.python.ui.preferences_dialog",
+    "src.shared.python.validation_pkg.comparative_plotting",
+]
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
 module = "src.api.*"
 disallow_untyped_defs = true
 warn_return_any = true
