@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import math
 
 import moderngl as mgl
 import numpy as np
@@ -504,7 +505,8 @@ class OpenGLRenderer:
         if start is None:
             raise ValueError("start must be provided")
         direction = end - start
-        length = np.linalg.norm(direction)
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        length = math.sqrt(np.dot(direction, direction))
         if length < 1e-6:
             return
         direction_normalized = direction / length
@@ -512,7 +514,8 @@ class OpenGLRenderer:
         if abs(np.dot(direction_normalized, up)) > 0.99:
             up = np.array([1, 0, 0])
         right = np.cross(direction_normalized, up)
-        right = right / np.linalg.norm(right)
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        right = right / math.sqrt(np.dot(right, right))
         up = np.cross(right, direction_normalized)
         rotation_matrix = np.column_stack([right, direction_normalized, up])
         model_matrix = np.eye(4, dtype=np.float32)
@@ -547,7 +550,7 @@ class OpenGLRenderer:
             if (
                 config.show_forces.get(dataset, True)
                 and np.isfinite(force).all()
-                and np.linalg.norm(force) > 1e-6
+                and math.sqrt(np.dot(force, force)) > 1e-6
             ):
                 scaled_force = (
                     force * config.vector_scale / self.max_force_magnitude * 0.3
@@ -564,7 +567,7 @@ class OpenGLRenderer:
             if (
                 config.show_torques.get(dataset, True)
                 and np.isfinite(torque).all()
-                and np.linalg.norm(torque) > 1e-6
+                and math.sqrt(np.dot(torque, torque)) > 1e-6
             ):
                 scaled_torque = (
                     torque * config.vector_scale / self.max_torque_magnitude * 0.2
@@ -701,7 +704,8 @@ class OpenGLRenderer:
         if "cone" not in self.vaos:
             return
         direction = vector
-        length = np.linalg.norm(direction)
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        length = math.sqrt(np.dot(direction, direction))
         if length < 1e-6:
             return
         direction_normalized = direction / length
@@ -709,7 +713,8 @@ class OpenGLRenderer:
         if abs(np.dot(direction_normalized, up)) > 0.99:
             up = np.array([1, 0, 0])
         right = np.cross(direction_normalized, up)
-        right = right / np.linalg.norm(right)
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        right = right / math.sqrt(np.dot(right, right))
         up = np.cross(right, direction_normalized)
         rotation_matrix = np.column_stack([right, direction_normalized, up])
         model_matrix = np.eye(4, dtype=np.float32)
