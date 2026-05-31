@@ -26,6 +26,7 @@ Supported engines
 - ``MUJOCO`` — :func:`load_mujoco_engine`
 - ``DRAKE`` — :func:`load_drake_engine`
 - ``PINOCCHIO`` — :func:`load_pinocchio_engine`
+- ``JAXSIM`` — :func:`load_jaxsim_engine`
 - ``OPENSIM`` — :func:`load_opensim_engine`
 - ``MYOSIM`` — :func:`load_myosim_engine`
 - ``PENDULUM`` — :func:`load_pendulum_engine`
@@ -55,6 +56,7 @@ __all__ = [
     "load_mujoco_engine",
     "load_drake_engine",
     "load_pinocchio_engine",
+    "load_jaxsim_engine",
     "load_opensim_engine",
     "load_myosim_engine",
     "load_pendulum_engine",
@@ -495,11 +497,35 @@ def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
     return engine
 
 
+def load_jaxsim_engine(suite_root: Path) -> PhysicsEngine:
+    """Load the optional JaxSim backend adapter.
+
+    The backend imports JaxSim lazily so core installations remain importable.
+    Live loading requires the ``upstream-drift[jaxsim]`` extra and a model
+    path supplied by the caller after construction.
+    """
+
+    if not isinstance(suite_root, Path):
+        raise TypeError(f"suite_root must be a Path, got {type(suite_root).__name__}")
+    try:
+        from src.engines.physics_engines.jaxsim import JaxSimBackend
+    except ImportError as exc:
+        raise GolfModelingError(
+            "JaxSim backend adapter is not available. "
+            "Install with `pip install upstream-drift[jaxsim]`."
+        ) from exc
+
+    engine: PhysicsEngine = JaxSimBackend()  # type: ignore[assignment]
+    _ensure_engine_loaded(engine, "JaxSim")
+    return engine
+
+
 # Helper for loaders map
 LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
     EngineType.MUJOCO: load_mujoco_engine,
     EngineType.DRAKE: load_drake_engine,
     EngineType.PINOCCHIO: load_pinocchio_engine,
+    EngineType.JAXSIM: load_jaxsim_engine,
     EngineType.OPENSIM: load_opensim_engine,
     EngineType.MYOSIM: load_myosim_engine,
     EngineType.PENDULUM: load_pendulum_engine,

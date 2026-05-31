@@ -15,6 +15,7 @@ _ENGINE_NAME_MAP: dict[str, EngineType] = {
     "mujoco": EngineType.MUJOCO,
     "drake": EngineType.DRAKE,
     "pinocchio": EngineType.PINOCCHIO,
+    "jaxsim": EngineType.JAXSIM,
     "opensim": EngineType.OPENSIM,
     "myosuite": EngineType.MYOSIM,
     "putting_green": EngineType.PUTTING_GREEN,

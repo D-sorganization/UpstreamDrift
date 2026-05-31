@@ -17,6 +17,7 @@ class EngineType(Enum):
     MUJOCO = "mujoco"
     DRAKE = "drake"
     PINOCCHIO = "pinocchio"
+    JAXSIM = "jaxsim"
     OPENSIM = "opensim"
     MYOSIM = "myosim"
     MATLAB_2D = "matlab_2d"
