@@ -108,7 +108,26 @@ Every materialised state and result is stamped (CC-6 `ProvenanceStamp`) with the
 `convention`, `frame`, and `units` tags above, so a consumer can reject a state
 whose convention it does not recognise and a result can be reproduced exactly.
 
-## 6. Migration from `canonical-v1`
+## 6. Double-pendulum AffineDrift coupling
+
+The analysis-layer helper
+`src.shared.python.analysis.affine_drift_coupling.couple_trace_to_affine_drift`
+samples the golf double-pendulum drift/control split on estimated
+`canonical-v2` kinematics. It accepts a `Trace` whose `q`/`v` arrays are either:
+
+- a native two-coordinate double-pendulum trace, where all `q`/`v` columns are
+  the pendulum state; or
+- a `canonical-v2` floating-base trace, where the helper deterministically uses
+  the last two internal-joint columns from `q` and `v` unless explicit
+  `q_indices`/`v_indices` are supplied.
+
+For each sample, the result exposes the AffineDrift state
+`x = [q0, q1, v0, v1]`, drift vector
+`[v, solve(M(q), -bias(q, v))]`, and control matrix whose lower block is
+`M(q)^-1`. The calculation is pointwise on the measured trajectory; it does not
+forward-integrate a zero-torque or zero-velocity counterfactual.
+
+## 7. Migration from `canonical-v1`
 
 - A `CanonicalPose` (v1) maps to a `canonical-v2` `q` by converting the pelvis
   SE(3) (`euler_xyz_deg` → quaternion `wxyz`) and joint degrees → radians, with

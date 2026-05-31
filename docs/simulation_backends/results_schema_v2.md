@@ -69,6 +69,28 @@ adapter. They are activation-driven outputs, not joint-torque inverse-dynamics
 results. Writers should provide `muscle_names` whenever any muscle history is
 present so downstream analysis can map columns to muscles.
 
+### AffineDrift coupling artifact
+
+Double-pendulum coupling back to AffineDrift is exposed through
+`src.shared.python.analysis.affine_drift_coupling`. The coupling consumes the
+shared `Trace` kinematics above, then persists a separate HDF5 artifact with
+`kind = "affine_drift_coupling"` instead of mutating the base Trace schema.
+
+| Dataset                 | Shape       | dtype   | Description                                        |
+| ----------------------- | ----------- | ------- | -------------------------------------------------- |
+| `t`                     | `(T,)`      | float64 | Sample times [s] from the source Trace             |
+| `q`                     | `(T, 2)`    | float64 | Extracted double-pendulum joint positions [rad]    |
+| `v`                     | `(T, 2)`    | float64 | Extracted double-pendulum joint velocities [rad/s] |
+| `tau`                   | `(T, 2)`    | float64 | Applied torques from `u`/`torques`, or zeros       |
+| `drift_acceleration`    | `(T, 2)`    | float64 | `solve(M(q), -bias(q, v))`                         |
+| `control_acceleration`  | `(T, 2)`    | float64 | `M(q)^-1 tau`                                      |
+| `total_acceleration`    | `(T, 2)`    | float64 | Drift plus control acceleration                    |
+| `affine_drift`          | `(T, 4)`    | float64 | State drift `[v, drift_acceleration]`              |
+| `affine_control_matrix` | `(T, 4, 2)` | float64 | Control-affine map for `x = [q0, q1, v0, v1]`      |
+
+The artifact is pointwise on estimated kinematics and is not a forward
+counterfactual rollout.
+
 ---
 
 ## BunkerShot3D Profile
