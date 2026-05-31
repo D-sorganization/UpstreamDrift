@@ -7,7 +7,10 @@ headless TrainingDashboardController.
 from __future__ import annotations
 
 import datetime
-import logging
+import json
+import os
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from collections.abc import Callable
@@ -18,12 +21,14 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QDialog,
+    QFileDialog,
     QFormLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QListWidget,
     QMainWindow,
+    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QSplitter,
@@ -35,19 +40,97 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.training import (
     Dataset,
     DatasetRegistry,
     JobId,
     TrainingConfig,
+    TrainingError,
     TrainingFramework,
+    best_per_metric,
 )
 
+from ._style import DARK_STYLE
 from .controller import TrainingDashboardController
 from .view_model import DashboardModel, MetricSeries, ResourceSnapshot
 
-# Setup Logger per PEP 8 & GEMINI.md
-logger = logging.getLogger(__name__)
+# Setup Logger per CLAUDE.md (shared logging facade).
+logger = get_logger(__name__)
+
+# Sentinel meaning "do not run the engine-compatibility preflight".
+_NO_ENGINE = ""
+
+
+def _available_engine_names() -> list[str]:
+    """Return engine identifiers for the submit dialog's target dropdown.
+
+    Sourced from :meth:`EngineRegistry.all_types`. When the global
+    registry has no engines registered (common in a headless GUI-only
+    process), fall back to the full :class:`EngineType` enumeration so
+    the dropdown is never empty and the compatibility preflight has
+    something to validate against.
+    """
+
+    from src.shared.python.engine_core.engine_registry import (  # noqa: PLC0415
+        EngineType,
+        get_registry,
+    )
+
+    registered = [t.value for t in get_registry().all_types()]
+    if registered:
+        return sorted(registered)
+    return sorted(t.value for t in EngineType)
+
+
+def _open_in_file_browser(path: Path) -> None:
+    """Open ``path`` in the OS file browser (best-effort, cross-platform).
+
+    The directory is created if missing — a job's output dir is created
+    lazily by the worker, so on a freshly-queued job it may not exist
+    yet. All failures are logged and swallowed: opening a folder is a
+    convenience, never a critical path.
+    """
+
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        logger.warning("Open Output Dir: could not create %s: %s", path, exc)
+        return
+    try:
+        if sys.platform.startswith("win"):
+            os.startfile(str(path))  # type: ignore[attr-defined]  # noqa: S606
+        elif sys.platform == "darwin":
+            subprocess.run(["open", str(path)], check=False)  # noqa: S603, S607
+        else:
+            subprocess.run(["xdg-open", str(path)], check=False)  # noqa: S603, S607
+    except (OSError, ValueError) as exc:
+        logger.warning("Open Output Dir: failed to open %s: %s", path, exc)
+
+
+def _folder_size_bytes(path: Path) -> int:
+    """Best-effort recursive byte count for ``path``.
+
+    Returns ``0`` when the path does not exist or cannot be walked —
+    :class:`Dataset` accepts a ``0`` (unknown) size, so failures degrade
+    gracefully rather than blocking registration.
+    """
+
+    if not path.exists():
+        return 0
+    total = 0
+    try:
+        for entry in path.rglob("*"):
+            if entry.is_file():
+                try:
+                    total += entry.stat().st_size
+                except OSError:
+                    continue
+    except OSError as exc:
+        logger.warning("Could not size dataset folder %s: %s", path, exc)
+        return 0
+    return total
+
 
 try:
     from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -56,113 +139,6 @@ try:
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
-
-# Sleek Dark QSS Theme
-DARK_STYLE = """
-QWidget {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    font-family: "Segoe UI", "Arial", sans-serif;
-    font-size: 13px;
-}
-QTableWidget {
-    background-color: #252526;
-    alternate-background-color: #1e1e1e;
-    gridline-color: #2d2d2d;
-    border: 1px solid #3e3e42;
-    border-radius: 4px;
-}
-QTableWidget::item:selected {
-    background-color: #0A84FF;
-    color: #ffffff;
-}
-QHeaderView::section {
-    background-color: #2d2d2d;
-    color: #d4d4d4;
-    border: 1px solid #3e3e42;
-    padding: 6px;
-    font-weight: bold;
-}
-QListWidget {
-    background-color: #252526;
-    border: 1px solid #3e3e42;
-    border-radius: 4px;
-    padding: 4px;
-}
-QListWidget::item:hover {
-    background-color: #2d2d2d;
-}
-QListWidget::item:selected {
-    background-color: #0A84FF;
-    color: #ffffff;
-}
-QTabWidget::pane {
-    border: 1px solid #3e3e42;
-    background-color: #1e1e1e;
-    border-radius: 4px;
-}
-QTabBar::tab {
-    background-color: #2d2d2d;
-    color: #888888;
-    padding: 8px 16px;
-    margin-right: 4px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border: 1px solid #3e3e42;
-    border-bottom: none;
-}
-QTabBar::tab:hover {
-    background-color: #333333;
-    color: #d4d4d4;
-}
-QTabBar::tab:selected {
-    background-color: #1e1e1e;
-    color: #ffffff;
-    border-bottom: 2px solid #0A84FF;
-}
-QPushButton {
-    background-color: #333333;
-    border: 1px solid #444444;
-    border-radius: 4px;
-    color: #ffffff;
-    padding: 6px 14px;
-    font-weight: 500;
-}
-QPushButton:hover {
-    background-color: #444444;
-    border-color: #555555;
-}
-QPushButton:pressed {
-    background-color: #0A84FF;
-    border-color: #0A84FF;
-}
-QPushButton:disabled {
-    background-color: #222222;
-    border-color: #333333;
-    color: #666666;
-}
-QPushButton#submit-btn {
-    background-color: #0A84FF;
-    border-color: #0A84FF;
-    font-weight: bold;
-}
-QPushButton#submit-btn:hover {
-    background-color: #2997FF;
-}
-QLineEdit, QComboBox {
-    background-color: #2d2d2d;
-    border: 1px solid #3e3e42;
-    border-radius: 4px;
-    padding: 6px;
-    color: #ffffff;
-}
-QLineEdit:focus, QComboBox:focus {
-    border: 1px solid #0A84FF;
-}
-QDialog {
-    background-color: #1e1e1e;
-}
-"""
 
 
 class MainWindow(QMainWindow):
@@ -201,6 +177,10 @@ class MainWidget(QWidget):
         super().__init__(parent)
         self.controller = controller
         self._unsubscribe: Callable[[], None] | None = None
+        # Live realtime subscribers, keyed by job id, populated on
+        # resume() and torn down on pause()/cleanup().
+        self._subscribers: dict[str, Any] = {}
+        self._backgrounded = False
 
         self._init_layout()
         self._connect_signals()
@@ -240,12 +220,34 @@ class MainWidget(QWidget):
         self.resume_button = QPushButton("Resume", self)
         self.resume_button.setToolTip("Resume execution of the paused job")
 
+        self.open_output_button = QPushButton("Open Output Dir", self)
+        self.open_output_button.setToolTip(
+            "Open the selected job's output directory in the file browser"
+        )
+
         actions_layout.addWidget(self.submit_button)
         actions_layout.addWidget(self.cancel_button)
         actions_layout.addWidget(self.pause_button)
         actions_layout.addWidget(self.resume_button)
+        actions_layout.addWidget(self.open_output_button)
         actions_layout.addStretch(1)
         left_layout.addLayout(actions_layout)
+
+        # Status filter for the job list.
+        filter_layout = QHBoxLayout()
+        filter_layout.setSpacing(8)
+        filter_label = QLabel("Filter status:", self)
+        filter_label.setStyleSheet("color: #aaaaaa;")
+        self.status_filter = QComboBox(self)
+        self.status_filter.addItem("All", None)
+        from src.shared.python.training import TrainingStatus  # noqa: PLC0415
+
+        for status in TrainingStatus:
+            self.status_filter.addItem(status.value, status.value)
+        filter_layout.addWidget(filter_label)
+        filter_layout.addWidget(self.status_filter)
+        filter_layout.addStretch(1)
+        left_layout.addLayout(filter_layout)
 
         # Job List Table
         self.job_table = QTableWidget(self)
@@ -262,6 +264,7 @@ class MainWidget(QWidget):
         self.job_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.job_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.job_table.setAlternatingRowColors(True)
+        self.job_table.setSortingEnabled(True)
         left_layout.addWidget(self.job_table)
 
         # Resource status strip at bottom left
@@ -316,6 +319,8 @@ class MainWidget(QWidget):
         self.summary_label.setAlignment(
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
         )
+        self.summary_label.setOpenExternalLinks(False)
+        self.summary_label.linkActivated.connect(self._on_summary_link)
         self.summary_scroll.setWidget(self.summary_label)
 
         self.tabs.addTab(self.summary_scroll, "Job Detail Summary")
@@ -333,6 +338,26 @@ class MainWidget(QWidget):
 
         self.dataset_list = QListWidget(self)
         dock_layout.addWidget(self.dataset_list)
+
+        # Dataset library controls: add / remove / re-scan a folder.
+        dataset_btn_layout = QHBoxLayout()
+        dataset_btn_layout.setSpacing(6)
+        self.dataset_add_button = QPushButton("Add Folder", self)
+        self.dataset_add_button.setToolTip(
+            "Register a folder as a dataset in the library"
+        )
+        self.dataset_remove_button = QPushButton("Remove", self)
+        self.dataset_remove_button.setToolTip("Remove the selected dataset")
+        self.dataset_rescan_button = QPushButton("Re-scan", self)
+        self.dataset_rescan_button.setToolTip(
+            "Re-scan the selected dataset's folder to refresh its on-disk size"
+        )
+        dataset_btn_layout.addWidget(self.dataset_add_button)
+        dataset_btn_layout.addWidget(self.dataset_remove_button)
+        dataset_btn_layout.addWidget(self.dataset_rescan_button)
+        dataset_btn_layout.addStretch(1)
+        dock_layout.addLayout(dataset_btn_layout)
+
         right_splitter.addWidget(dataset_dock)
 
         right_splitter.setSizes([450, 200])
@@ -346,6 +371,11 @@ class MainWidget(QWidget):
         self.cancel_button.clicked.connect(self._on_cancel_clicked)
         self.pause_button.clicked.connect(self._on_pause_clicked)
         self.resume_button.clicked.connect(self._on_resume_clicked)
+        self.open_output_button.clicked.connect(self._on_open_output_clicked)
+        self.status_filter.currentIndexChanged.connect(self.update_ui)
+        self.dataset_add_button.clicked.connect(self._on_dataset_add_clicked)
+        self.dataset_remove_button.clicked.connect(self._on_dataset_remove_clicked)
+        self.dataset_rescan_button.clicked.connect(self._on_dataset_rescan_clicked)
 
         self.job_table.itemSelectionChanged.connect(self._on_selection_changed)
 
@@ -357,6 +387,7 @@ class MainWidget(QWidget):
 
     def cleanup(self) -> None:
         """Unsubscribe from controller observers on closed tab."""
+        self._stop_live_subscribers()
         if self._unsubscribe is not None:
             try:
                 self._unsubscribe()
@@ -364,14 +395,98 @@ class MainWidget(QWidget):
                 logger.debug(f"Failed to unsubscribe cleanly: {e}")
             self._unsubscribe = None
 
+    # ------------------------------------------------------ backgrounding
+
+    def pause(self) -> None:
+        """Background hook (#6013): detach live realtime subscriptions.
+
+        The scheduler keeps running, so this is a *cheapness* measure
+        only — it tears down the per-job realtime watchers so a hidden
+        tab is not paying for IPC it cannot display. The authoritative
+        job state remains in the scheduler registry and is re-read on
+        :meth:`resume`.
+        """
+
+        self._backgrounded = True
+        self._stop_live_subscribers()
+
+    def resume(self) -> None:
+        """Background hook (#6013): re-bind to scheduler status + progress.
+
+        Re-renders the dashboard from the (still-bound) controller and
+        re-establishes a :class:`TrainingJobLiveSubscriber` for every
+        non-terminal job so live metrics resume flowing into the
+        controller's in-memory series.
+        """
+
+        self._backgrounded = False
+        self._sync_live_subscribers()
+        self.update_ui()
+
+    def _sync_live_subscribers(self) -> None:
+        """Ensure exactly one live subscriber per non-terminal job."""
+
+        from src.shared.python.training import JobId  # noqa: PLC0415
+
+        from .live_subscriber import TrainingJobLiveSubscriber  # noqa: PLC0415
+
+        active: set[str] = set()
+        for job in self.controller.scheduler.registry.list():
+            if job.status.is_terminal:
+                continue
+            active.add(job.job_id.value)
+            if job.job_id.value in self._subscribers:
+                continue
+            job_value = job.job_id.value
+
+            def _on_metric(metric: Any, _jid: str = job_value) -> None:
+                self.controller.ingest_metric(JobId(_jid), metric)
+
+            subscriber = TrainingJobLiveSubscriber(job_value, on_metric=_on_metric)
+            try:
+                subscriber.start()
+            except (RuntimeError, OSError, ValueError) as exc:
+                logger.warning(
+                    "Live subscriber start failed for %s: %s", job_value, exc
+                )
+                continue
+            self._subscribers[job_value] = subscriber
+        # Drop subscribers whose jobs are gone or terminal.
+        for job_value in list(self._subscribers):
+            if job_value not in active:
+                self._stop_subscriber(job_value)
+
+    def _stop_subscriber(self, job_value: str) -> None:
+        subscriber = self._subscribers.pop(job_value, None)
+        if subscriber is None:
+            return
+        try:
+            subscriber.stop()
+        except (RuntimeError, OSError, ValueError) as exc:
+            logger.debug("Subscriber stop failed for %s: %s", job_value, exc)
+
+    def _stop_live_subscribers(self) -> None:
+        for job_value in list(self._subscribers):
+            self._stop_subscriber(job_value)
+
     def update_ui(self) -> None:
         """Update widgets state from the latest DashboardModel."""
         model = self.controller.current_model()
 
-        # Update Job Table
+        # Apply the status filter (None == show all).
+        status_filter = self.status_filter.currentData()
+        visible_jobs = [
+            job
+            for job in model.jobs
+            if status_filter is None or job.status == status_filter
+        ]
+
+        # Update Job Table. Disable sorting while we repopulate so row
+        # indices stay stable, then re-enable it afterwards.
         self.job_table.blockSignals(True)
-        self.job_table.setRowCount(len(model.jobs))
-        for row_idx, job in enumerate(model.jobs):
+        self.job_table.setSortingEnabled(False)
+        self.job_table.setRowCount(len(visible_jobs))
+        for row_idx, job in enumerate(visible_jobs):
             self.job_table.setItem(row_idx, 0, QTableWidgetItem(job.job_id))
             self.job_table.setItem(row_idx, 1, QTableWidgetItem(job.framework))
             self.job_table.setItem(row_idx, 2, QTableWidgetItem(job.status))
@@ -402,6 +517,7 @@ class MainWidget(QWidget):
                     break
         else:
             self.job_table.clearSelection()
+        self.job_table.setSortingEnabled(True)
         self.job_table.blockSignals(False)
 
         # Update lifecycle button states
@@ -422,12 +538,15 @@ class MainWidget(QWidget):
             self.cancel_button.setEnabled(False)
             self.pause_button.setEnabled(False)
             self.resume_button.setEnabled(False)
+            self.open_output_button.setEnabled(False)
             return
 
-        # Enable actions when a job is selected, letting the controller validate transitions
+        # Enable actions when a job is selected, letting the controller
+        # validate transitions.
         self.cancel_button.setEnabled(True)
         self.pause_button.setEnabled(True)
         self.resume_button.setEnabled(True)
+        self.open_output_button.setEnabled(True)
 
     def _update_resources(self, resources: ResourceSnapshot) -> None:
         if not resources.available:
@@ -451,10 +570,82 @@ class MainWidget(QWidget):
         self.resource_label.setText(text)
 
     def _update_datasets(self) -> None:
+        from PyQt6.QtWidgets import QListWidgetItem  # noqa: PLC0415
+
         self.dataset_list.clear()
         datasets = self.controller.dataset_registry.list()
         for ds in datasets:
-            self.dataset_list.addItem(f"{ds.name} ({ds.dataset_id})")
+            label = f"{ds.name} ({ds.dataset_id}) — {ds.format}"
+            if ds.size_bytes:
+                label += f", {ds.size_bytes / (1024 * 1024):.1f} MB"
+            item = QListWidgetItem(label)
+            item.setData(Qt.ItemDataRole.UserRole, ds.dataset_id)
+            self.dataset_list.addItem(item)
+
+    def _selected_dataset_id(self) -> str | None:
+        item = self.dataset_list.currentItem()
+        if item is None:
+            return None
+        return item.data(Qt.ItemDataRole.UserRole)
+
+    def _on_dataset_add_clicked(self) -> None:
+        """Register a chosen folder as a ``custom`` dataset."""
+
+        folder = QFileDialog.getExistingDirectory(self, "Select dataset folder")
+        if not folder:
+            return
+        path = Path(folder)
+        dataset_id = path.name or "dataset"
+        # De-duplicate the id if the registry already has one.
+        registry = self.controller.dataset_registry
+        candidate = dataset_id
+        suffix = 1
+        while registry.has(candidate):
+            suffix += 1
+            candidate = f"{dataset_id}-{suffix}"
+        try:
+            registry.register(
+                Dataset(
+                    dataset_id=candidate,
+                    name=path.name or candidate,
+                    path=path,
+                    format="custom",
+                    size_bytes=_folder_size_bytes(path),
+                )
+            )
+        except TrainingError as exc:
+            logger.warning("Add dataset failed: %s", exc)
+            return
+        self.update_ui()
+
+    def _on_dataset_remove_clicked(self) -> None:
+        dataset_id = self._selected_dataset_id()
+        if dataset_id is None:
+            return
+        try:
+            self.controller.dataset_registry.remove(dataset_id)
+        except TrainingError as exc:
+            logger.warning("Remove dataset failed: %s", exc)
+            return
+        self.update_ui()
+
+    def _on_dataset_rescan_clicked(self) -> None:
+        """Re-scan the selected dataset's folder to refresh its size."""
+
+        dataset_id = self._selected_dataset_id()
+        if dataset_id is None:
+            return
+        registry = self.controller.dataset_registry
+        try:
+            existing = registry.get(dataset_id)
+        except TrainingError as exc:
+            logger.warning("Re-scan dataset failed: %s", exc)
+            return
+        from dataclasses import replace as _replace  # noqa: PLC0415
+
+        refreshed = _replace(existing, size_bytes=_folder_size_bytes(existing.path))
+        registry.replace(refreshed)
+        self.update_ui()
 
     def _update_right_panel(self, model: DashboardModel) -> None:
         selected_id = model.selected_job_id
@@ -512,6 +703,8 @@ class MainWidget(QWidget):
                     html += f"<tr><td style='color: #888888; width: 150px;'>{k}:</td><td>{v}</td></tr>"
                 html += "</table>"
 
+            html += self._best_so_far_html(selected_id)
+            html += self._artifacts_html(job)
             html += "</div>"
             self.summary_label.setText(html)
 
@@ -522,6 +715,66 @@ class MainWidget(QWidget):
             self.plot_stack.setCurrentIndex(1)
         else:
             self.plot_stack.setCurrentIndex(0)
+
+    def _best_so_far_html(self, job_id: JobId) -> str:
+        """Render the "best so far" card from buffered metrics.
+
+        Uses :func:`best_per_metric`, which honours each
+        :class:`MetricKind`'s direction-of-improvement, so the card
+        shows the optimal value seen for minimised metrics (loss) and
+        maximised ones (reward / accuracy) alike.
+        """
+
+        best = best_per_metric(self.controller.metrics_for(job_id))
+        if not best:
+            return ""
+        rows = "".join(
+            f"<tr><td style='color: #888888; width: 150px;'>{name}:</td>"
+            f"<td>{bm.value:.4g} <span style='color: #666666;'>"
+            f"(step {bm.step})</span></td></tr>"
+            for name, bm in sorted(best.items())
+        )
+        return (
+            '<h4 style="color: #ffffff; margin-top: 15px; margin-bottom: 5px; '
+            'border-bottom: 1px solid #3e3e42; padding-bottom: 3px;">'
+            "Best so far</h4>"
+            '<table cellpadding="4" cellspacing="0" style="width: 100%;">'
+            f"{rows}</table>"
+        )
+
+    def _artifacts_html(self, job: Any) -> str:
+        """Render the output directory as a clickable artifact link.
+
+        :class:`RunResult.artifacts` paths are written under the job's
+        configured ``output_dir``; surfacing that directory as a single
+        click-to-open link gives the user access to checkpoints,
+        ``metrics.json``, and logs without leaking absolute paths into
+        the table.
+        """
+
+        output_dir = job.config.output_dir
+        return (
+            '<h4 style="color: #ffffff; margin-top: 15px; margin-bottom: 5px; '
+            'border-bottom: 1px solid #3e3e42; padding-bottom: 3px;">'
+            "Artifacts</h4>"
+            "<p><a style='color: #0A84FF;' href='artifact:output_dir'>"
+            f"{output_dir}</a></p>"
+        )
+
+    def _on_summary_link(self, href: str) -> None:
+        """Handle clicks on artifact links in the summary panel."""
+
+        if href != "artifact:output_dir":
+            return
+        selected_id = self.controller.selected_job_id
+        if selected_id is None:
+            return
+        try:
+            job = self.controller.scheduler.registry.get(selected_id)
+        except (TrainingError, KeyError) as exc:
+            logger.warning("Artifact link: job lookup failed: %s", exc)
+            return
+        _open_in_file_browser(job.config.output_dir)
 
     def _update_plot(self, series_list: tuple[MetricSeries, ...]) -> None:
         self.figure.clear()
@@ -587,39 +840,59 @@ class MainWidget(QWidget):
         dialog = SubmitDialog(self.controller, self)
         dialog.exec()
 
-    def _on_cancel_clicked(self) -> None:
-        selected_id = self.controller.selected_job_id
-        if selected_id is not None:
-            from src.shared.python.training import TrainingError
+    def _run_lifecycle_action(
+        self,
+        verb: str,
+        action: Callable[[JobId], object],
+    ) -> None:
+        """Run a controller lifecycle call against the selection, logging errors.
 
-            try:
-                self.controller.cancel_job(selected_id)
-            except (TrainingError, TypeError, ValueError) as e:
-                logger.error(f"Failed to cancel job: {e}")
+        Centralises the cancel/pause/resume try/except so each handler
+        is a one-liner and the narrowed exception tuple lives in one
+        place (DRY per CLAUDE.md).
+        """
+
+        selected_id = self.controller.selected_job_id
+        if selected_id is None:
+            return
+        try:
+            action(selected_id)
+        except (TrainingError, TypeError, ValueError) as exc:
+            logger.warning("Failed to %s job: %s", verb, exc)
+
+    def _on_cancel_clicked(self) -> None:
+        self._run_lifecycle_action("cancel", self.controller.cancel_job)
 
     def _on_pause_clicked(self) -> None:
-        selected_id = self.controller.selected_job_id
-        if selected_id is not None:
-            from src.shared.python.training import TrainingError
-
-            try:
-                self.controller.pause_job(selected_id)
-            except (TrainingError, TypeError, ValueError) as e:
-                logger.error(f"Failed to pause job: {e}")
+        self._run_lifecycle_action("pause", self.controller.pause_job)
 
     def _on_resume_clicked(self) -> None:
-        selected_id = self.controller.selected_job_id
-        if selected_id is not None:
-            from src.shared.python.training import TrainingError
+        self._run_lifecycle_action("resume", self.controller.resume_job)
 
-            try:
-                self.controller.resume_job(selected_id)
-            except (TrainingError, TypeError, ValueError) as e:
-                logger.error(f"Failed to resume job: {e}")
+    def _on_open_output_clicked(self) -> None:
+        """Open the selected job's configured output directory."""
+
+        selected_id = self.controller.selected_job_id
+        if selected_id is None:
+            return
+        try:
+            job = self.controller.scheduler.registry.get(selected_id)
+        except (TrainingError, KeyError) as exc:
+            logger.warning("Open Output Dir: job lookup failed: %s", exc)
+            return
+        _open_in_file_browser(job.config.output_dir)
 
 
 class SubmitDialog(QDialog):
-    """Dialogue window to configure and submit training configurations."""
+    """Dialogue window to configure and submit training configurations.
+
+    Builds a :class:`TrainingConfig` from the form. When a target engine
+    is chosen, an idiot-proof *preflight* runs
+    :meth:`CompatibilityChecker.check` and surfaces any error-severity
+    issues in a non-dismissable banner; the Submit button stays disabled
+    while errors are present, so an incompatible (config, engine) pair
+    can never be dispatched.
+    """
 
     def __init__(
         self,
@@ -630,15 +903,27 @@ class SubmitDialog(QDialog):
         self.controller = controller
         self.setObjectName("training-submit-dialog")
         self.setWindowTitle("Submit Training Job")
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(480)
         self.setStyleSheet(DARK_STYLE)
 
         self._init_layout()
+        self._run_preflight()
 
     def _init_layout(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(15)
+        layout.setSpacing(12)
+
+        # Non-dismissable preflight banner (hidden until a compat error).
+        self.preflight_banner = QLabel("", self)
+        self.preflight_banner.setObjectName("preflight-banner")
+        self.preflight_banner.setWordWrap(True)
+        self.preflight_banner.setStyleSheet(
+            "background-color: #4a1015; border: 1px solid #FF375F; "
+            "border-radius: 4px; color: #ffd0d6; padding: 8px;"
+        )
+        self.preflight_banner.setVisible(False)
+        layout.addWidget(self.preflight_banner)
 
         form_layout = QFormLayout()
         form_layout.setSpacing(10)
@@ -648,6 +933,17 @@ class SubmitDialog(QDialog):
         for fw in TrainingFramework:
             self.framework_combo.addItem(fw.value.upper(), fw)
         form_layout.addRow("Framework:", self.framework_combo)
+
+        # Target-engine Selector (drives the compatibility preflight).
+        self.engine_combo = QComboBox(self)
+        self.engine_combo.addItem("(no engine — skip preflight)", _NO_ENGINE)
+        for engine_name in _available_engine_names():
+            self.engine_combo.addItem(engine_name, engine_name)
+        self.engine_combo.setToolTip(
+            "Target physics engine. Selecting one runs a compatibility "
+            "preflight before the job is queued."
+        )
+        form_layout.addRow("Target Engine:", self.engine_combo)
 
         # Entry Point Edit
         self.entry_edit = QLineEdit(self)
@@ -665,12 +961,26 @@ class SubmitDialog(QDialog):
 
         # Dataset Selector
         self.dataset_combo = QComboBox(self)
+        self.dataset_combo.addItem("(none)", None)
         datasets = self.controller.dataset_registry.list()
         for ds in datasets:
             self.dataset_combo.addItem(ds.name, ds.dataset_id)
         form_layout.addRow("Dataset:", self.dataset_combo)
 
         layout.addLayout(form_layout)
+
+        # Hyperparameter JSON editor.
+        hp_label = QLabel("Hyperparameters (JSON object):", self)
+        hp_label.setStyleSheet("color: #aaaaaa;")
+        layout.addWidget(hp_label)
+        self.hyperparams_edit = QPlainTextEdit(self)
+        self.hyperparams_edit.setPlainText("{}")
+        self.hyperparams_edit.setFixedHeight(90)
+        self.hyperparams_edit.setStyleSheet(
+            "background-color: #2d2d2d; border: 1px solid #3e3e42; "
+            "border-radius: 4px; color: #ffffff; font-family: Consolas, monospace;"
+        )
+        layout.addWidget(self.hyperparams_edit)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -688,32 +998,93 @@ class SubmitDialog(QDialog):
         # Signals
         self.submit_button.clicked.connect(self._on_submit_clicked)
         self.cancel_btn.clicked.connect(self.reject)
+        self.engine_combo.currentIndexChanged.connect(self._run_preflight)
+        self.framework_combo.currentIndexChanged.connect(self._run_preflight)
 
-    def _on_submit_clicked(self) -> None:
-        framework = self.framework_combo.currentData()
+    def _selected_engine(self) -> str | None:
+        """Return the chosen engine name, or ``None`` when preflight is skipped."""
+
+        engine = self.engine_combo.currentData()
+        return engine or None
+
+    def _build_config(self) -> TrainingConfig | None:
+        """Assemble a :class:`TrainingConfig` from the form, or ``None``.
+
+        Returns ``None`` (and surfaces the reason in the banner) when an
+        input is invalid — empty entry point / output dir or malformed
+        hyperparameter JSON.
+        """
+
         entry_point = self.entry_edit.text().strip()
         output_dir_str = self.output_edit.text().strip()
-        dataset_id = self.dataset_combo.currentData()
-
-        # Basic inputs validation
         if not entry_point:
-            logger.warning("Submission blocked: empty entry point")
-            return
+            self._show_banner("Entry point must not be empty.")
+            return None
         if not output_dir_str:
-            logger.warning("Submission blocked: empty output directory")
-            return
-
+            self._show_banner("Output directory must not be empty.")
+            return None
+        raw_hp = self.hyperparams_edit.toPlainText().strip() or "{}"
         try:
-            config = TrainingConfig(
-                framework=framework,
+            hyperparameters = json.loads(raw_hp)
+        except json.JSONDecodeError as exc:
+            self._show_banner(f"Hyperparameters must be valid JSON: {exc}")
+            return None
+        if not isinstance(hyperparameters, dict):
+            self._show_banner("Hyperparameters must be a JSON object ({...}).")
+            return None
+        try:
+            return TrainingConfig(
+                framework=self.framework_combo.currentData(),
                 entry_point=entry_point,
                 output_dir=Path(output_dir_str),
-                dataset_id=dataset_id,
+                dataset_id=self.dataset_combo.currentData(),
+                hyperparameters=hyperparameters,
             )
-            self.controller.submit_job(config)
-            self.accept()
-        except Exception as e:
-            logger.exception(f"Failed to submit training job: {e}")
+        except TrainingError as exc:
+            self._show_banner(f"Invalid configuration: {exc}")
+            return None
+
+    def _run_preflight(self) -> None:
+        """Validate (config, engine) and enable/disable Submit accordingly."""
+
+        engine = self._selected_engine()
+        if engine is None:
+            self._clear_banner()
+            return
+        config = self._build_config()
+        if config is None:
+            # _build_config already surfaced the reason and left submit
+            # disabled via _show_banner.
+            return
+        report = self.controller.compatibility_checker.check(config, engine)
+        if report.is_compatible:
+            self._clear_banner()
+            return
+        messages = "; ".join(issue.message for issue in report.errors)
+        self._show_banner(f"Engine {engine!r} is incompatible: {messages}")
+
+    def _show_banner(self, message: str) -> None:
+        self.preflight_banner.setText(message)
+        self.preflight_banner.setVisible(True)
+        self.submit_button.setEnabled(False)
+
+    def _clear_banner(self) -> None:
+        self.preflight_banner.clear()
+        self.preflight_banner.setVisible(False)
+        self.submit_button.setEnabled(True)
+
+    def _on_submit_clicked(self) -> None:
+        config = self._build_config()
+        if config is None:
+            return
+        engine = self._selected_engine()
+        try:
+            self.controller.submit_job(config, target_engine=engine)
+        except TrainingError as exc:
+            logger.warning("Submission blocked by backend: %s", exc)
+            self._show_banner(str(exc))
+            return
+        self.accept()
 
 
 def build_default_controller() -> TrainingDashboardController:

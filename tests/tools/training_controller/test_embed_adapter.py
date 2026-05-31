@@ -93,6 +93,48 @@ def test_embed_adapter_cleanup_calls_widget_cleanup() -> None:
     assert adapter._widgets == []
 
 
+def test_embed_adapter_backgroundable_defaults() -> None:
+    """Sub-PR A (#6013) hooks: backgrounding on, pop-out on."""
+    from src.tools.training_controller._embed_adapter import (
+        _TrainingControllerEmbedAdapter,
+    )
+
+    adapter = _TrainingControllerEmbedAdapter()
+    assert adapter.can_background() is True
+    assert adapter.detach_to_window() is True
+
+
+def test_embed_adapter_pause_resume_delegate_to_widgets() -> None:
+    """pause()/resume() fan out to each live widget's matching hook."""
+    from src.tools.training_controller._embed_adapter import (
+        _TrainingControllerEmbedAdapter,
+    )
+
+    adapter = _TrainingControllerEmbedAdapter()
+    widget = MagicMock()
+    adapter._widgets.append(widget)
+
+    adapter.pause()
+    widget.pause.assert_called_once_with()
+
+    adapter.resume()
+    widget.resume.assert_called_once_with()
+
+
+def test_embed_adapter_pause_resume_tolerate_widget_without_hooks() -> None:
+    """A widget missing pause/resume must not break the adapter fan-out."""
+    from src.tools.training_controller._embed_adapter import (
+        _TrainingControllerEmbedAdapter,
+    )
+
+    adapter = _TrainingControllerEmbedAdapter()
+    # An object with no pause/resume attributes at all.
+    adapter._widgets.append(object())
+    # Should be a no-op, not raise.
+    adapter.pause()
+    adapter.resume()
+
+
 def test_package_registers_embed_adapter() -> None:
     sys.modules.pop("src.tools.training_controller", None)
     sys.modules.pop("src.tools.training_controller._embed_adapter", None)
