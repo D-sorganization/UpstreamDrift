@@ -62,15 +62,17 @@ compares the following quantities at sampled `(q, qd)` states:
 - `M(q)` free-floating mass matrix
 - `h(q, qd)` bias forces
 - `g(q)` gravity forces
-- `C(q, qd)` Coriolis matrix
+- `C(q, qd) v` Coriolis action
 
 The gate follows `src/engines/CROSS_ENGINE_PARITY_SPEC.md`'s cross-engine
 tolerance policy: normalized RMSE must stay below `20%` for matrices and
-vectors, with `1e-7` absolute floor for near-zero reference terms. Local core
-installs skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are
-missing; the self-hosted `cross-engine-equivalence.yml` workflow installs the
-optional JaxSim extra and Pinocchio best-effort so installed-engine
-disagreement fails the build.
+vectors, with `1e-7` absolute floor for near-zero reference terms. The
+Coriolis matrix itself is not unique across rigid-body libraries, so the gate
+compares its product against the canonical velocity vector. Local core installs
+skip cleanly when `jax`, `jaxlib`, `jaxsim`, or `pinocchio` are missing; the
+self-hosted `cross-engine-equivalence.yml` workflow installs the optional
+JaxSim extra and Pinocchio best-effort so installed-engine disagreement fails
+the build.
 
 ## Forward Simulation Rollout
 

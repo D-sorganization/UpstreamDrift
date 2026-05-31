@@ -272,11 +272,11 @@ class JaxSimBackend:
         base_force, joint_forces = self._with_canonical_data(
             apis.model.inverse_dynamics,
             joint_accelerations=qacc[6:],
-            base_acceleration=qacc[:6],
+            base_acceleration=_canonical_base_to_jaxsim(qacc[:6]),
         )
         return np.concatenate(
             [
-                np.asarray(base_force, dtype=np.float64).reshape(6),
+                _jaxsim_base_to_canonical(np.asarray(base_force, dtype=np.float64)),
                 np.asarray(joint_forces, dtype=np.float64).reshape(self._dofs()),
             ]
         )
@@ -399,7 +399,13 @@ class JaxSimBackend:
     def _call_model_array(self, name: str) -> np.ndarray:
         _model, _data, apis = self._loaded()
         value = self._with_canonical_data(getattr(apis.model, name))
-        return np.asarray(value, dtype=np.float64)
+        array = np.asarray(value, dtype=np.float64)
+        expected_v = 6 + self._dofs()
+        if array.shape == (expected_v,):
+            return _jaxsim_free_floating_vector_to_canonical(array)
+        if array.shape == (expected_v, expected_v):
+            return _jaxsim_free_floating_matrix_to_canonical(array)
+        return array
 
     def _call_model_vector(self, name: str) -> np.ndarray:
         vector = self._call_model_array(name).reshape(-1)
@@ -483,6 +489,44 @@ def _vector_attr(obj: Any, name: str, size: int) -> np.ndarray:
     if vector.shape != (size,):
         raise ValueError(f"{name} must have shape ({size},)")
     return vector
+
+
+def _jaxsim_base_to_canonical(value: np.ndarray) -> np.ndarray:
+    """Convert JaxSim base vectors from ``[linear; angular]`` to canonical."""
+
+    vector = np.asarray(value, dtype=np.float64).reshape(6)
+    return vector[[3, 4, 5, 0, 1, 2]]
+
+
+def _canonical_base_to_jaxsim(value: np.ndarray) -> np.ndarray:
+    """Convert canonical base vectors from ``[angular; linear]`` to JaxSim."""
+
+    vector = np.asarray(value, dtype=np.float64).reshape(6)
+    return vector[[3, 4, 5, 0, 1, 2]]
+
+
+def _free_floating_permutation(size: int) -> np.ndarray:
+    if size < 6:
+        raise ValueError("free-floating vector must include a six-DOF base block")
+    return np.concatenate(
+        [
+            np.array([3, 4, 5, 0, 1, 2], dtype=int),
+            np.arange(6, size, dtype=int),
+        ]
+    )
+
+
+def _jaxsim_free_floating_vector_to_canonical(value: np.ndarray) -> np.ndarray:
+    vector = np.asarray(value, dtype=np.float64).reshape(-1)
+    return vector[_free_floating_permutation(vector.shape[0])]
+
+
+def _jaxsim_free_floating_matrix_to_canonical(value: np.ndarray) -> np.ndarray:
+    matrix = np.asarray(value, dtype=np.float64)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError(f"free-floating matrix must be square, got {matrix.shape}")
+    permutation = _free_floating_permutation(matrix.shape[0])
+    return matrix[np.ix_(permutation, permutation)]
 
 
 def _assert_spd(matrix: np.ndarray, name: str) -> None:
