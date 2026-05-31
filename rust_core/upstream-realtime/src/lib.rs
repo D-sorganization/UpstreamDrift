@@ -14,6 +14,7 @@
 //! (no asyncio) so the GIL is released across the wait.
 
 pub mod channels;
+pub mod moving_horizon;
 pub mod protocol;
 pub mod server;
 
@@ -21,4 +22,8 @@ pub mod server;
 mod bindings;
 
 pub use channels::{validate_channel, ChannelRegistry};
+pub use moving_horizon::{
+    benchmark_recorded_swing, MovingHorizonConfig, RecordedSwing, RecordedSwingBenchmark,
+    WindowSolveReport,
+};
 pub use server::{Server, ServerHandle, Subscriber};

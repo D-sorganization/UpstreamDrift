@@ -108,10 +108,22 @@ fn validate_channel(name: &str) -> PyResult<()> {
     crate::channels::validate_channel(name).map_err(PyValueError::new_err)
 }
 
+#[pyfunction]
+fn benchmark_recorded_swing_json(payload_json: &str, config_json: &str) -> PyResult<String> {
+    let swing: crate::moving_horizon::RecordedSwing =
+        serde_json::from_str(payload_json).map_err(PyValueError::new_err)?;
+    let config: crate::moving_horizon::MovingHorizonConfig =
+        serde_json::from_str(config_json).map_err(PyValueError::new_err)?;
+    let report = crate::moving_horizon::benchmark_recorded_swing(&swing, &config)
+        .map_err(PyValueError::new_err)?;
+    serde_json::to_string(&report).map_err(PyRuntimeError::new_err)
+}
+
 #[pymodule]
 fn upstream_realtime(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyServer>()?;
     m.add_class::<PySubscriber>()?;
     m.add_function(wrap_pyfunction!(validate_channel, m)?)?;
+    m.add_function(wrap_pyfunction!(benchmark_recorded_swing_json, m)?)?;
     Ok(())
 }
