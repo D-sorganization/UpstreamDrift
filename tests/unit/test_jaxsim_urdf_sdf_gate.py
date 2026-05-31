@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from defusedxml.common import EntitiesForbidden
 
 from src.shared.python.simulation_backends.jaxsim_urdf_sdf_gate import (
     SdformatTool,
@@ -77,6 +78,24 @@ def test_compare_inertials_reports_field_level_mismatches(tmp_path: Path) -> Non
     mismatches = compare_inertials(read_urdf_inertials(urdf), read_sdf_inertials(sdf))
 
     assert [(m.link, m.field) for m in mismatches] == [("base", "iyy")]
+
+
+def test_urdf_reader_rejects_xml_entities(tmp_path: Path) -> None:
+    urdf = tmp_path / "entity.urdf"
+    urdf.write_text(
+        """\
+<!DOCTYPE robot [
+  <!ENTITY payload "unsafe">
+]>
+<robot name="sample">
+  <link name="&payload;"/>
+</robot>
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(EntitiesForbidden):
+        read_urdf_inertials(urdf)
 
 
 def test_find_sdformat_tool_prefers_gz_command_shape(tmp_path: Path) -> None:
