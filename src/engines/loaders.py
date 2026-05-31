@@ -507,6 +507,22 @@ def load_jaxsim_engine(suite_root: Path) -> PhysicsEngine:
 
     if not isinstance(suite_root, Path):
         raise TypeError(f"suite_root must be a Path, got {type(suite_root).__name__}")
+
+    # Validate the JaxSim runtime import surface *before* reporting success.
+    # The backend imports ``jaxsim.api`` lazily (deep inside method bodies), so
+    # constructing the adapter alone does not prove the runtime is installed.
+    # Probe it up front so a missing optional dependency cannot be mistaken for
+    # a live engine (#6880).
+    import importlib
+
+    try:
+        importlib.import_module("jaxsim.api")
+    except ImportError as exc:
+        raise GolfModelingError(
+            "JaxSim runtime is not available (could not import 'jaxsim.api'). "
+            "Install with `pip install upstream-drift[jaxsim]`."
+        ) from exc
+
     try:
         from src.engines.physics_engines.jaxsim import JaxSimBackend
     except ImportError as exc:

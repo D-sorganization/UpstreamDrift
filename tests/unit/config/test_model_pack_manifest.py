@@ -452,3 +452,86 @@ class TestModelPackV1LegacySchema:
         assert entry.identity is not None
         assert entry.identity.canonical_id == "golf.swing.main"
         assert entry.identity.exercise == "driver-full-swing"
+
+
+@pytest.mark.unit
+class TestModelPackV1RuntimeAdapter:
+    """`ModelPackManifest.load()` must accept real provider `model_pack/v1` files.
+
+    Issue #6882: prior tests manually rewrote the provider schema into the
+    strict shape. These tests prove the *runtime* loader normalizes the real
+    `schema: model_pack/v1` manifest (with an `exercises:` list and `engine`/
+    `models_root` keys) without manual conversion.
+    """
+
+    def _v1_manifest(self, engine: str, package: str) -> dict:
+        return {
+            "schema": "model_pack/v1",
+            "repo": f"{engine.capitalize()}_Models",
+            "package": package,
+            "engine": engine,
+            "engine_version": ">=1.0",
+            "anthropometrics": "winter_2009",
+            "format": "urdf",
+            "models_root": f"src/{package}/exercises",
+            "exercises": [
+                {"id": "squat", "path": f"src/{package}/exercises/squat"},
+                {"id": "gait", "path": f"src/{package}/exercises/gait"},
+            ],
+        }
+
+    def test_load_accepts_real_provider_v1_manifest(self, tmp_path: Path) -> None:
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(manifest_path, self._v1_manifest("mujoco", "mujoco_models"))
+
+        manifest = ModelPackManifest.load(manifest_path)
+
+        assert manifest.manifest_version
+        assert manifest.provider == "mujoco"
+        assert {m.id for m in manifest.models} == {
+            "mujoco_models-squat",
+            "mujoco_models-gait",
+        }
+        squat = next(m for m in manifest.models if m.id.endswith("squat"))
+        assert squat.engine_type == "mujoco"
+        assert squat.path == "src/mujoco_models/exercises/squat"
+        assert squat.type == "urdf"
+
+    @pytest.mark.parametrize(
+        ("engine", "package"),
+        [
+            ("mujoco", "mujoco_models"),
+            ("drake", "drake_models"),
+            ("pinocchio", "pinocchio_models"),
+            ("opensim", "opensim_models"),
+        ],
+    )
+    def test_load_accepts_each_provider_engine(
+        self, tmp_path: Path, engine: str, package: str
+    ) -> None:
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(manifest_path, self._v1_manifest(engine, package))
+
+        manifest = ModelPackManifest.load(manifest_path)
+
+        assert manifest.provider == engine
+        assert all(m.engine_type == engine for m in manifest.models)
+
+    def test_load_rejects_malformed_v1_with_version_aware_error(
+        self, tmp_path: Path
+    ) -> None:
+        manifest_path = tmp_path / "model_pack.yaml"
+        # model_pack/v1 with neither `exercises` nor `models` is malformed.
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Broken_Models",
+                "package": "broken_models",
+                "engine": "mujoco",
+            },
+        )
+
+        with pytest.raises(ValueError) as excinfo:
+            ModelPackManifest.load(manifest_path)
+        assert "model_pack/v1" in str(excinfo.value)
