@@ -7,7 +7,7 @@ import json
 import xml.etree.ElementTree as ET
 
 import pytest
-from model_generation.canonical_model import (
+from src.shared.python.model_generation.canonical_model import (
     CanonicalGeometry,
     CanonicalInertia,
     CanonicalJoint,
@@ -16,7 +16,7 @@ from model_generation.canonical_model import (
     CanonicalMaterial,
     CanonicalModel,
 )
-from model_generation.core.types import (
+from src.shared.python.model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,

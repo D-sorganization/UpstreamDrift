@@ -331,7 +331,7 @@ max-complexity = 10
 
 [tool.mypy]
 python_version = "3.10"
-mypy_path = "stubs:src/shared/python"
+mypy_path = "stubs"
 namespace_packages = true
 explicit_package_bases = true
 ignore_missing_imports = true
@@ -411,13 +411,6 @@ disallow_untyped_defs = true
 [[tool.mypy.overrides]]
 module = "src.engines.common.*"
 disallow_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = [
-    "model_generation.builders.*",
-    "model_generation.core.*",
-]
-follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = [
