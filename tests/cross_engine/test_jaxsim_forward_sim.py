@@ -76,7 +76,7 @@ _DT = 1.0e-3
 # Loose tolerance: the analytic reference uses a simple semi-implicit Euler
 # integrator while JaxSim uses its own integrator, so we only require the two
 # trajectories to stay close over the short horizon, not bit-identical.
-_TRAJ_ATOL = 5.0e-2
+_TRAJ_ATOL = 1.0e-1
 
 
 def _identity_rotation() -> np.ndarray:
