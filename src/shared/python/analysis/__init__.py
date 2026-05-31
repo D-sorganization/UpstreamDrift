@@ -27,6 +27,13 @@ For new code, prefer importing specific modules:
 """
 
 from src.shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
+from src.shared.python.analysis.affine_drift_coupling import (
+    AffineDriftCouplingResult,
+    couple_trace_to_affine_drift,
+    extract_double_pendulum_kinematics,
+    read_affine_drift_coupling,
+    write_affine_drift_coupling,
+)
 from src.shared.python.analysis.basic_stats import BasicStatsMixin
 from src.shared.python.analysis.coordination_metrics import CoordinationMetricsMixin
 from src.shared.python.analysis.dataclasses import (
@@ -75,6 +82,11 @@ __all__ = [
     "SummaryStatistics",
     "SwingPhase",
     "SwingProfileMetrics",
+    "AffineDriftCouplingResult",
+    "couple_trace_to_affine_drift",
+    "extract_double_pendulum_kinematics",
+    "read_affine_drift_coupling",
+    "write_affine_drift_coupling",
     # Mixins
     "BasicStatsMixin",
     "SwingMetricsMixin",
