@@ -21,8 +21,10 @@ from __future__ import annotations
 
 from .capabilities import (
     has_mujoco,
+    has_mjx,
     has_warp,
     require_mujoco,
+    require_mjx,
     require_warp,
     warp_device_available,
 )
@@ -104,10 +106,12 @@ __all__ = [
     "compare_runs",
     "compare_traces",
     "has_mujoco",
+    "has_mjx",
     "has_warp",
     "make_backend",
     "render_markdown_report",
     "require_mujoco",
+    "require_mjx",
     "require_warp",
     "serialize_provenance",
     "write_report",

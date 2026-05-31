@@ -23,17 +23,19 @@ the design rationale. The tile is registered in
 [`src/config/launcher_manifest.json`](../../src/config/launcher_manifest.json)
 under the id `simulation_backends`.
 
-## The three backends at a glance
+## The four backends at a glance
 
 | Name     | Device | Batched | Dynamics primitives | Optional deps               |
 | -------- | ------ | ------- | ------------------- | --------------------------- |
 | `ode`    | CPU    | no      | yes (`M`, bias)     | none (always available)     |
 | `mujoco` | CPU    | no      | yes (`M`, bias)     | `mujoco`                    |
 | `mjwarp` | CUDA   | **yes** | no                  | `[warp]` extra + NVIDIA GPU |
+| `mjx`    | JAX    | **yes** | no                  | `[mjx]` extra               |
 
 `ode` is the analytical ground-truth reference. `mujoco` is an independent
 dynamics derivation used to cross-validate it. `mjwarp` is the GPU engine for
-_batched_ throughput.
+_batched_ throughput. `mjx` is the JAX-native MuJoCo path for batched
+differentiable rollouts and rollout-control Jacobians.
 
 ## Installation
 
@@ -44,6 +46,7 @@ dependency** — it runs everywhere, including CPU-only CI.
 pip install upstream-drift            # ode backend only
 pip install 'upstream-drift[mujoco]'  # adds the mujoco CPU backend
 pip install 'upstream-drift[warp]'    # adds the mjwarp GPU backend (CUDA)
+pip install 'upstream-drift[mjx]'     # adds mujoco-mjx + JAX/JAXLIB
 ```
 
 The `[warp]` extra pulls in pinned versions of `mujoco-warp` (MJWarp) and
@@ -60,12 +63,14 @@ the guarded helpers — they never raise:
 
 ```python
 from src.shared.python.simulation_backends import (
+    has_mjx,
     has_mujoco,
     has_warp,
     warp_device_available,
 )
 
 has_mujoco()             # True if the mujoco CPU bindings import
+has_mjx()                # True if mujoco-mjx, jax, and jaxlib import
 has_warp()               # True if both warp and mujoco_warp import
 warp_device_available()  # True only if a usable CUDA device is also visible
 ```
@@ -117,6 +122,7 @@ environments running in parallel.
 | Need `M(q)` / bias forces                            | `ode`/`mujoco` | only the CPU backends expose dynamics primitives     |
 | Independent dynamics cross-check                     | `mujoco`       | second derivation of the EOM                         |
 | Hundreds-to-thousands of rollouts (sweeps, MPPI/CEM) | `mjwarp`       | parallelism dominates the fixed launch/transfer cost |
+| Need gradients through batched rollout controls      | `mjx`          | JAX autodiff over the MJX stepper                    |
 
 We do **not** claim the GPU accelerates the golf model in general — only that it
 accelerates _batched_ workloads. The capability matrix exposes this via the
@@ -146,8 +152,11 @@ construction and will flake.
 The model is described once and rendered to whichever backend you pick:
 
 ```python
+import numpy as np
+
 from src.shared.python.simulation_backends import (
     GolfModelParams,
+    has_mjx,
     has_mujoco,
     make_backend,
     warp_device_available,
@@ -172,6 +181,16 @@ if warp_device_available():
     # batched: many parallel envs amortise the single GPU launch.
     batch = gpu.rollout_batch(controls=None, horizon=200, dt=0.005, num_envs=1024)
     print(batch.num_envs, batch.num_steps)
+
+# --- MJX/JAX differentiable rollouts (needs the [mjx] extra) -----------
+if has_mjx():
+    mjx = make_backend("mjx", params)
+    controls = np.zeros((16, 200, 2))
+    batch = mjx.rollout_batch(controls, horizon=200, dt=0.005, num_envs=16)
+    jac = mjx.final_state_control_jacobian(
+        controls, horizon=200, dt=0.005, num_envs=16
+    )
+    print(batch.backend, jac.shape)
 ```
 
 ### Dynamics primitives (CPU backends only)
