@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from src.engines.physics_engines.jaxsim import JaxSimBackend
 from src.engines.physics_engines.jaxsim.jaxsim_backend import make_mock_jaxsim_apis
@@ -16,10 +17,12 @@ from src.shared.python.engine_core.sub_protocols import (
     DynamicsComputable,
     Loadable,
     Queryable,
+    Steppable,
 )
 from src.shared.python.engine_core.velocity_conventions import (
     CANONICAL_VELOCITY_REPRESENTATION,
 )
+from src.shared.python.simulation_backends import Trace
 
 
 class _FakeModel:
@@ -89,6 +92,8 @@ class _FakeDataApi:
 
 
 class _FakeModelApi:
+    step_calls: list[dict[str, object]] = []
+
     class JaxSimModel:
         @staticmethod
         def build_from_model_description(
@@ -131,7 +136,7 @@ class _FakeModelApi:
         output_vel_repr: str,
     ) -> np.ndarray:
         assert output_vel_repr == "inertial"
-        first = np.arange(42, dtype=np.float64).reshape(6, 7)
+        first: NDArray[np.float64] = np.arange(42, dtype=np.float64).reshape(6, 7)
         second = first + 100.0
         return np.stack([first, second])
 
@@ -147,7 +152,20 @@ class _FakeModelApi:
         joint_force_references: np.ndarray,
         dt: float | None = None,
     ) -> _FakeData:
-        return data
+        step_dt = model.time_step if dt is None else dt
+        control = np.asarray(joint_force_references, dtype=np.float64).reshape(1)
+        _FakeModelApi.step_calls.append(
+            {"dt": step_dt, "joint_force_references": control.copy()}
+        )
+        return _FakeData(
+            base_position=data.base_position,
+            base_quaternion=data.base_quaternion,
+            joint_positions=data.joint_positions + data.joint_velocities * step_dt,
+            base_angular_velocity=data.base_angular_velocity,
+            base_linear_velocity=data.base_linear_velocity,
+            joint_velocities=data.joint_velocities + control * step_dt,
+            velocity_representation=data.velocity_representation,
+        )
 
 
 class _FakeFrameApi:
@@ -159,6 +177,7 @@ class _FakeFrameApi:
 
 
 def _backend() -> JaxSimBackend:
+    _FakeModelApi.step_calls.clear()
     backend = JaxSimBackend(
         apis=make_mock_jaxsim_apis(
             model_api=_FakeModelApi,
@@ -175,6 +194,7 @@ def test_jaxsim_backend_satisfies_core_sub_protocols() -> None:
 
     assert isinstance(backend, Loadable)
     assert isinstance(backend, Queryable)
+    assert isinstance(backend, Steppable)
     assert isinstance(backend, DynamicsComputable)
     assert (
         backend.convention.velocity_representation is CANONICAL_VELOCITY_REPRESENTATION
@@ -209,9 +229,67 @@ def test_jaxsim_backend_dynamics_terms_have_expected_shapes_and_invariants() -> 
     assert coriolis.shape == (7, 7)
 
 
+def test_jaxsim_step_uses_js_model_step_and_canonical_control_order() -> None:
+    backend = _backend()
+    q = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.25])
+    v = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5])
+    backend.set_state(q, v)
+    backend.set_control(np.array([2.0]))
+
+    backend.step(0.02)
+
+    assert backend.get_time() == pytest.approx(0.02)
+    assert len(_FakeModelApi.step_calls) == 1
+    assert _FakeModelApi.step_calls[0]["dt"] == pytest.approx(0.02)
+    np.testing.assert_allclose(
+        _FakeModelApi.step_calls[0]["joint_force_references"], [2.0]
+    )
+    returned_q, returned_v = backend.get_state()
+    np.testing.assert_allclose(returned_q[7:], [0.28])
+    np.testing.assert_allclose(returned_v[6:], [1.54])
+
+
+def test_jaxsim_rollout_returns_canonical_trace_schema() -> None:
+    backend = _backend()
+    q = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.25])
+    v = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5])
+    backend.set_state(q, v)
+    controls = np.array([[2.0], [3.0], [4.0]])
+
+    trace = backend.rollout(controls=controls, horizon=3, dt=0.02)
+
+    assert isinstance(trace, Trace)
+    assert trace.backend == "jaxsim"
+    assert trace.q.shape == (4, 8)
+    assert trace.v.shape == (4, 7)
+    assert trace.u is not None
+    assert trace.u.shape == (4, 1)
+    np.testing.assert_allclose(trace.t, [0.0, 0.02, 0.04, 0.06])
+    np.testing.assert_allclose(trace.q[0], q)
+    np.testing.assert_allclose(trace.v[0], v)
+    np.testing.assert_allclose(trace.u[:3], controls)
+    np.testing.assert_allclose(trace.u[3], [0.0])
+    np.testing.assert_allclose(trace.q[:, 7], [0.25, 0.28, 0.3108, 0.3428])
+    np.testing.assert_allclose(trace.v[:, 6], [1.5, 1.54, 1.6, 1.68])
+    final_q, final_v = backend.get_state()
+    np.testing.assert_allclose(final_q, trace.q[-1])
+    np.testing.assert_allclose(final_v, trace.v[-1])
+
+
+def test_jaxsim_rollout_rejects_bad_controls_or_step_contract() -> None:
+    backend = _backend()
+
+    with pytest.raises(ValueError):
+        backend.rollout(controls=None, horizon=0, dt=0.01)
+    with pytest.raises(ValueError):
+        backend.rollout(controls=None, horizon=2, dt=0.0)
+    with pytest.raises(ValueError):
+        backend.rollout(controls=np.zeros((2, 2)), horizon=2, dt=0.01)
+
+
 def test_jaxsim_backend_inverse_dynamics_and_acceleration_decomposition() -> None:
     backend = _backend()
-    qacc = np.arange(7, dtype=np.float64)
+    qacc: NDArray[np.float64] = np.arange(7, dtype=np.float64)
 
     tau = backend.compute_inverse_dynamics(qacc)
     drift = backend.compute_drift_acceleration()

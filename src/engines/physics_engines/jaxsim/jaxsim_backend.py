@@ -21,6 +21,7 @@ from src.shared.python.engine_core.velocity_conventions import (
     FloatingBaseConvention,
     VelocityRepresentation,
 )
+from src.shared.python.simulation_backends.protocol import Trace
 
 
 @dataclass(frozen=True)
@@ -157,13 +158,70 @@ class JaxSimBackend:
         """Advance the JaxSim model by one step."""
 
         model, data, apis = self._loaded()
-        if dt is not None and dt <= 0.0:
-            raise ValueError("dt must be positive")
+        if dt is not None and (dt <= 0.0 or not np.isfinite(dt)):
+            raise ValueError("dt must be a positive, finite step size")
         kwargs: dict[str, Any] = {"joint_force_references": self._control}
         if dt is not None:
             kwargs["dt"] = dt
         self._data = apis.model.step(model, data, **kwargs)
         self._time += float(dt if dt is not None else getattr(model, "time_step", 0.0))
+
+    def rollout(
+        self,
+        controls: np.ndarray | None,
+        horizon: int,
+        dt: float,
+    ) -> Trace:
+        """Integrate a JaxSim forward simulation and return the canonical trace.
+
+        The trace records the initial state plus one sample after each
+        ``js.model.step`` call. Controls are joint-force references of shape
+        ``(horizon, dofs)``; the final trace control row is zero-padded because
+        no step departs the terminal state.
+        """
+
+        self._require_loaded()
+        if horizon <= 0:
+            raise ValueError(f"horizon must be positive; got {horizon}")
+        step_dt = float(dt)
+        if step_dt <= 0.0 or not np.isfinite(step_dt):
+            raise ValueError("dt must be a positive, finite step size")
+        controls_arr = self._validate_rollout_controls(controls, horizon)
+        dofs = self._dofs()
+
+        initial_q, initial_v = self.get_state()
+        q_hist: NDArray[np.float64] = np.empty(
+            (horizon + 1, initial_q.size), dtype=np.float64
+        )
+        v_hist: NDArray[np.float64] = np.empty(
+            (horizon + 1, initial_v.size), dtype=np.float64
+        )
+        t_hist = np.arange(horizon + 1, dtype=np.float64) * step_dt
+        u_hist = None if controls_arr is None else np.zeros((horizon + 1, dofs))
+
+        q_hist[0] = initial_q
+        v_hist[0] = initial_v
+        zero_control: NDArray[np.float64] = np.zeros(dofs, dtype=np.float64)
+        for index in range(horizon):
+            control = zero_control if controls_arr is None else controls_arr[index]
+            self.set_control(control)
+            if u_hist is not None:
+                u_hist[index] = control
+            self.step(step_dt)
+            q_hist[index + 1], v_hist[index + 1] = self.get_state()
+
+        return Trace(
+            t=t_hist,
+            q=q_hist,
+            v=v_hist,
+            u=u_hist,
+            dt=step_dt,
+            backend="jaxsim",
+            meta={
+                "model_name": self._model_name,
+                "velocity_representation": self._convention.velocity_representation.value,
+            },
+        )
 
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the canonical free-floating inertia matrix M(q)."""
@@ -334,6 +392,21 @@ class JaxSimBackend:
                 f"{name} returned shape {vector.shape}, expected ({expected_v},)"
             )
         return vector
+
+    def _validate_rollout_controls(
+        self, controls: np.ndarray | None, horizon: int
+    ) -> np.ndarray | None:
+        if controls is None:
+            return None
+        controls_arr = np.asarray(controls, dtype=np.float64)
+        expected_shape = (horizon, self._dofs())
+        if controls_arr.shape != expected_shape:
+            raise ValueError(
+                f"controls must have shape {expected_shape}; got {controls_arr.shape}"
+            )
+        if not np.all(np.isfinite(controls_arr)):
+            raise ValueError("controls must be finite")
+        return controls_arr
 
     def _frame_index(self, body_name: str) -> int | None:
         self._require_loaded()
