@@ -9,6 +9,7 @@ from src.shared.python.estimation.residuals import (
     finite_difference_jacobian,
     project_pinhole,
     reprojection_residual,
+    reprojection_residual_from_points,
     residual_jacobian,
     smoothness_residual,
 )
@@ -202,6 +203,83 @@ def test_autodiff_jacobian_matches_finite_difference_when_jax_available() -> Non
     )
 
     np.testing.assert_allclose(auto, finite, rtol=1e-5, atol=1e-5)
+
+
+def test_project_pinhole_matches_brown_conrady_rig(monkeypatch=None) -> None:
+    """project_pinhole with distortion must match the synthetic rig's
+    Brown-Conrady projection (issue #6892)."""
+    from src.shared.python.estimation.synthetic_ground_truth import (
+        SyntheticCamera,
+        project_world_point,
+    )
+    from src.shared.python.motion_pipeline import (
+        CameraExtrinsics,
+        CameraIntrinsics,
+    )
+
+    intr = CameraIntrinsics(
+        fx=600.0,
+        fy=550.0,
+        cx=320.0,
+        cy=240.0,
+        k1=-0.21,
+        k2=0.08,
+        p1=0.001,
+        p2=-0.002,
+    )
+    rotation = np.array(
+        [[0.0, 0.0, 1.0], [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0]], dtype=float
+    )
+    translation = np.array([0.1, -0.2, 4.0])
+    extr = CameraExtrinsics(
+        rotation=rotation.tolist(), translation=translation.tolist()
+    )
+    camera = SyntheticCamera("cam", intr, extr)
+
+    points = np.array([[0.3, 0.1, 0.2], [-0.4, 0.25, -0.1]])
+    camera_matrix = np.array(
+        [[intr.fx, 0.0, intr.cx], [0.0, intr.fy, intr.cy], [0.0, 0.0, 1.0]]
+    )
+
+    projected = project_pinhole(
+        points,
+        camera_matrix,
+        rotation_world_to_camera=rotation,
+        translation_world_to_camera=translation,
+        distortion=(intr.k1, intr.k2, intr.p1, intr.p2),
+    )
+
+    expected = np.array([project_world_point(camera, p)[:2] for p in points])
+    np.testing.assert_allclose(projected, expected, rtol=1e-9, atol=1e-9)
+
+
+def test_project_pinhole_zero_distortion_is_pinhole() -> None:
+    """Zero distortion must reproduce the plain pinhole projection."""
+    points = np.array([[2.0, 4.0, 2.0], [3.0, -6.0, 3.0]])
+    camera = np.eye(3)
+    plain = project_pinhole(points, camera)
+    with_zero = project_pinhole(points, camera, distortion=(0.0, 0.0, 0.0, 0.0))
+    np.testing.assert_allclose(plain, with_zero)
+
+
+def test_reprojection_residual_threads_distortion() -> None:
+    """A fit with nonzero distortion recovers truth when residual threads
+    the distortion coefficients (issue #6892)."""
+    points = np.array([[0.2, -0.1, 0.05]])
+    camera_matrix = np.array(
+        [[500.0, 0.0, 320.0], [0.0, 500.0, 240.0], [0.0, 0.0, 1.0]]
+    )
+    distortion = (-0.15, 0.05, 0.0, 0.0)
+    observed = project_pinhole(points, camera_matrix, distortion=distortion)
+
+    residual = reprojection_residual_from_points(
+        points,
+        observed,
+        camera_matrix,
+        np.array([1.0]),
+        distortion=distortion,
+    )
+    np.testing.assert_allclose(residual, np.zeros(2), atol=1e-9)
 
 
 def test_invalid_confidence_rejected() -> None:

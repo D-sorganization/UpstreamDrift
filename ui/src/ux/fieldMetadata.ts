@@ -138,6 +138,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       "opensim",
       "myosim",
       "myosuite",
+      "jaxsim",
       "pendulum_stub"
     ],
     "default": "mujoco",

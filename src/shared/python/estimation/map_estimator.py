@@ -19,6 +19,11 @@ from scipy.optimize import least_squares
 from src.shared.python.contracts import require
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
 
+# Large finite value substituted for non-finite residual entries so the
+# trust-region optimizer rejects an infeasible finite-difference step instead of
+# the callback raising and aborting the entire least_squares solve (issue #6893).
+NON_FINITE_RESIDUAL_SENTINEL = 1.0e12
+
 ParameterKind = Literal["length", "inertia", "generic"]
 ResidualFn = Callable[["SplineTrajectoryEvaluation", Mapping[str, float]], np.ndarray]
 JacobianFn = Callable[
@@ -509,6 +514,7 @@ def _validate_problem(problem: MapEstimatorProblem) -> None:
     eval_times = np.asarray(problem.evaluation_times, dtype=float)
     require(eval_times.ndim == 1, "evaluation_times must be a 1D array")
     require(bool(np.all(np.isfinite(eval_times))), "evaluation_times must be finite")
+    _require_times_within_knot_span(eval_times, problem.trajectory.knot_times)
     coeffs = np.asarray(problem.initial_coefficients, dtype=float)
     require(
         coeffs.shape == (problem.trajectory.coefficient_size,),
@@ -516,6 +522,27 @@ def _validate_problem(problem: MapEstimatorProblem) -> None:
     )
     require(bool(np.all(np.isfinite(coeffs))), "initial_coefficients must be finite")
     require(problem.options.max_iterations > 0, "max_iterations must be positive")
+
+
+def _require_times_within_knot_span(
+    eval_times: np.ndarray, knot_times: np.ndarray
+) -> None:
+    """Require evaluation times to lie within the spline knot span.
+
+    Out-of-range samples would otherwise be silently clamped to the first/last
+    segment and flat-extrapolated, fitting against the wrong instant with no
+    error (issue #6895). Extrapolation is not supported.
+    """
+    if eval_times.size == 0:
+        return
+    knots = np.asarray(knot_times, dtype=float)
+    lower = float(knots[0])
+    upper = float(knots[-1])
+    require(
+        float(eval_times.min()) >= lower and float(eval_times.max()) <= upper,
+        f"evaluation_times must lie within the knot span [{lower}, {upper}]; "
+        "extrapolation is not supported",
+    )
 
 
 def _pack_decision(
@@ -553,10 +580,28 @@ def _objective_residual(
     data_residual = np.asarray(problem.residual(evaluation, parameters), dtype=float)
     if data_residual.ndim != 1:
         raise ValueError("residual callable must return a 1D array")
-    if not np.all(np.isfinite(data_residual)):
-        raise ValueError("residual callable returned non-finite values")
+    data_residual = _sentinel_for_non_finite(data_residual)
     prior_residual = problem.shared_parameters.prior_residuals(parameter_values)
     return np.concatenate([data_residual, prior_residual])
+
+
+def _sentinel_for_non_finite(residual: np.ndarray) -> np.ndarray:
+    """Replace non-finite residual entries with a large finite sentinel.
+
+    SciPy's ``least_squares`` perturbs the decision vector for its 2-point
+    Jacobian; a probe into an infeasible region (e.g. RNEA at a singular config,
+    near-zero projection depth) can yield NaN/Inf. Returning a large finite value
+    lets the trust region reject the step instead of raising and aborting the
+    whole solve (issue #6893).
+    """
+    if np.all(np.isfinite(residual)):
+        return residual
+    return np.nan_to_num(
+        residual,
+        nan=NON_FINITE_RESIDUAL_SENTINEL,
+        posinf=NON_FINITE_RESIDUAL_SENTINEL,
+        neginf=-NON_FINITE_RESIDUAL_SENTINEL,
+    )
 
 
 def _objective_jacobian(
