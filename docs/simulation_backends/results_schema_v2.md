@@ -2,7 +2,7 @@
 
 **Implemented by:** CC-4 (#6776)  
 **Canonical module:** `src/shared/python/simulation_backends/trace_io.py`  
-**Schema version constant:** `SCHEMA_VERSION = "2.0.0"` (in `protocol.py`)
+**Schema version constant:** `SCHEMA_VERSION = "2.1.0"` (in `protocol.py`)
 
 This document is the authoritative reference for the unified HDF5 result
 format that covers every simulation backend (ODE, MuJoCo, MuJoCo Warp) and
@@ -48,16 +48,26 @@ wrench groups. BunkerShot3D files can be imported via
 
 ### Optional datasets (v2+, single Trace only)
 
-| Dataset    | Shape                | dtype   | Description                                        |
-| ---------- | -------------------- | ------- | -------------------------------------------------- |
-| `u`        | `(T, nu)`            | float64 | Applied controls [N·m]; omitted if passive         |
-| `torques`  | `(T, nu)`            | float64 | Joint torques / generalised forces [N·m]           |
-| `wrench`   | `(T, 6)`             | float64 | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
-| `markers`  | `(T, n_markers, 3)`  | float64 | Predicted marker positions [m]                     |
-| `contacts` | `(T, n_contacts, 3)` | float64 | Contact point positions [m]                        |
+| Dataset              | Shape                | dtype        | Description                                        |
+| -------------------- | -------------------- | ------------ | -------------------------------------------------- |
+| `u`                  | `(T, nu)`            | float64      | Applied controls [N·m]; omitted if passive         |
+| `torques`            | `(T, nu)`            | float64      | Joint torques / generalised forces [N·m]           |
+| `wrench`             | `(T, 6)`             | float64      | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
+| `markers`            | `(T, n_markers, 3)`  | float64      | Predicted marker positions [m]                     |
+| `contacts`           | `(T, n_contacts, 3)` | float64      | Contact point positions [m]                        |
+| `muscle_names`       | `(n_muscles,)`       | UTF-8 string | Muscle output column labels                        |
+| `muscle_activations` | `(T, n_muscles)`     | float64      | Muscle activations `[0, 1]`                        |
+| `muscle_forces`      | `(T, n_muscles)`     | float64      | Muscle forces [N]                                  |
+| `muscle_lengths`     | `(T, n_muscles)`     | float64      | Muscle-tendon lengths [m]                          |
+| `muscle_velocities`  | `(T, n_muscles)`     | float64      | Muscle contraction velocities [m/s]                |
 
 Datasets that are `None` are **omitted** from the file; the reader returns
 `None` for absent datasets.
+
+The muscle-output datasets are additive v2.1 fields used by the MyoSuite
+adapter. They are activation-driven outputs, not joint-torque inverse-dynamics
+results. Writers should provide `muscle_names` whenever any muscle history is
+present so downstream analysis can map columns to muscles.
 
 ### ZTCF/ZVCF analysis profile
 

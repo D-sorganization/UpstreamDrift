@@ -52,6 +52,7 @@ class Capability(str, Enum):
     STATE_CONTROL_GRADIENTS = "state_control_gradients"
     FORWARD_SIM = "forward_sim"
     CONTACT_STEP = "contact_step"
+    MUSCLES = "muscles"
     TRAJECTORY_OPT = "trajectory_opt"
     VIDEO_EXPORT = "video_export"
     DATASET_EXPORT = "dataset_export"
@@ -110,6 +111,7 @@ ENGINE_CAPABILITY_FIELDS: Mapping[Capability, str] = {
     Capability.STATE_CONTROL_GRADIENTS: "state_control_gradients",
     Capability.FORWARD_SIM: "forward_sim",
     Capability.CONTACT_STEP: "contact_step",
+    Capability.MUSCLES: "muscles",
     Capability.TRAJECTORY_OPT: "trajectory_opt",
     Capability.VIDEO_EXPORT: "video_export",
     Capability.DATASET_EXPORT: "dataset_export",
@@ -191,6 +193,7 @@ class EngineCapabilities:
         state_control_gradients: Level of state/control gradient support
         forward_sim: Level of forward simulation support
         contact_step: Level of contact-aware step support
+        muscles: Level of muscle dynamics / activation-output support
         trajectory_opt: Level of trajectory optimization support
         video_export: Level of video export support
         dataset_export: Level of CSV/JSON/HDF5 export support
@@ -211,6 +214,7 @@ class EngineCapabilities:
     state_control_gradients: CapabilityLevel = CapabilityLevel.NONE
     forward_sim: CapabilityLevel = CapabilityLevel.NONE
     contact_step: CapabilityLevel = CapabilityLevel.NONE
+    muscles: CapabilityLevel = CapabilityLevel.NONE
     trajectory_opt: CapabilityLevel = CapabilityLevel.NONE
 
     # Export (#1176)
@@ -244,6 +248,11 @@ class EngineCapabilities:
     def has_contact_forces(self) -> bool:
         """Check if contact force reporting is available."""
         return self.contact_forces != CapabilityLevel.NONE
+
+    @property
+    def has_muscles(self) -> bool:
+        """Check if muscle dynamics / activation outputs are available."""
+        return self.muscles != CapabilityLevel.NONE
 
     @property
     def has_parameter_gradients(self) -> bool:

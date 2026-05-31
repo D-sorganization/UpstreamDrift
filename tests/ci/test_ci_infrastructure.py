@@ -304,6 +304,21 @@ class TestCIEnvironmentCompatibility:
 
         assert install_index < uninstall_index < pytest_index
 
+    def test_cross_engine_workflows_let_pydantic_resolve_core(self) -> None:
+        """Cross-engine jobs must not force an incompatible pydantic-core wheel."""
+        workflow_names = [
+            "cross-engine-equivalence.yml",
+            "cross-engine-leaderboard.yml",
+            "cross-engine-leaderboard-publish.yml",
+        ]
+
+        for workflow_name in workflow_names:
+            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
+                encoding="utf-8"
+            )
+            assert "pydantic-core==" not in workflow
+            assert "--no-deps pydantic-core" not in workflow
+
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
     ) -> None:

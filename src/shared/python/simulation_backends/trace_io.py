@@ -30,6 +30,11 @@ Datasets (all single traces):
   present (v2+).
 * ``contacts`` -- contact points ``(T, n_contacts, 3)``; written only when
   present (v2+).
+* ``muscle_names`` -- UTF-8 muscle output column labels; written only when
+  present (v2.1+).
+* ``muscle_activations`` / ``muscle_forces`` / ``muscle_lengths`` /
+  ``muscle_velocities`` -- MyoSuite muscle histories ``(T, n_muscles)``;
+  written only when present (v2.1+).
 
 Versioning policy
 -----------------
@@ -125,6 +130,25 @@ def _read_optional_dataset(root: h5py.Group, name: str) -> np.ndarray | None:
     return np.asarray(root[name][()], dtype=float)
 
 
+def _write_string_dataset(root: h5py.Group, name: str, data: tuple[str, ...]) -> None:
+    """Write UTF-8 string tuple ``data`` as dataset ``name`` iff non-empty."""
+    if data:
+        root.create_dataset(
+            name,
+            data=np.asarray(data, dtype=h5py.string_dtype(encoding="utf-8")),
+        )
+
+
+def _read_string_dataset(root: h5py.Group, name: str) -> tuple[str, ...]:
+    """Return UTF-8 strings from dataset ``name``, or an empty tuple if absent."""
+    if name not in root:
+        return ()
+    raw = root[name][()]
+    return tuple(
+        item.decode("utf-8") if isinstance(item, bytes) else str(item) for item in raw
+    )
+
+
 def _write_common(
     root: h5py.Group,
     *,
@@ -141,6 +165,11 @@ def _write_common(
     wrench: np.ndarray | None = None,
     markers: np.ndarray | None = None,
     contacts: np.ndarray | None = None,
+    muscle_names: tuple[str, ...] = (),
+    muscle_activations: np.ndarray | None = None,
+    muscle_forces: np.ndarray | None = None,
+    muscle_lengths: np.ndarray | None = None,
+    muscle_velocities: np.ndarray | None = None,
 ) -> None:
     """Write the shared attribute/dataset payload for either trace kind.
 
@@ -162,6 +191,11 @@ def _write_common(
         wrench: Optional contact wrench ``(T, 6)``.
         markers: Optional marker-position array ``(T, n_markers, 3)``.
         contacts: Optional contact-point array ``(T, n_contacts, 3)``.
+        muscle_names: Optional muscle output column labels.
+        muscle_activations: Optional activation history ``(T, n_muscles)``.
+        muscle_forces: Optional force history ``(T, n_muscles)``.
+        muscle_lengths: Optional length history ``(T, n_muscles)``.
+        muscle_velocities: Optional velocity history ``(T, n_muscles)``.
 
     Postconditions:
         ``root`` has ``schema_version``/``backend``/``dt``/``kind`` attrs, the
@@ -182,6 +216,11 @@ def _write_common(
     _write_optional_dataset(root, "wrench", wrench)
     _write_optional_dataset(root, "markers", markers)
     _write_optional_dataset(root, "contacts", contacts)
+    _write_string_dataset(root, "muscle_names", muscle_names)
+    _write_optional_dataset(root, "muscle_activations", muscle_activations)
+    _write_optional_dataset(root, "muscle_forces", muscle_forces)
+    _write_optional_dataset(root, "muscle_lengths", muscle_lengths)
+    _write_optional_dataset(root, "muscle_velocities", muscle_velocities)
 
 
 def write_trace(trace: Trace | BatchTrace, path: str | os.PathLike[str]) -> None:
@@ -216,6 +255,11 @@ def write_trace(trace: Trace | BatchTrace, path: str | os.PathLike[str]) -> None
         wrench = getattr(trace, "wrench", None)
         markers = getattr(trace, "markers", None)
         contacts = getattr(trace, "contacts", None)
+        muscle_names = getattr(trace, "muscle_names", ())
+        muscle_activations = getattr(trace, "muscle_activations", None)
+        muscle_forces = getattr(trace, "muscle_forces", None)
+        muscle_lengths = getattr(trace, "muscle_lengths", None)
+        muscle_velocities = getattr(trace, "muscle_velocities", None)
         _write_common(
             handle,
             kind=kind,
@@ -231,6 +275,11 @@ def write_trace(trace: Trace | BatchTrace, path: str | os.PathLike[str]) -> None
             wrench=wrench,
             markers=markers,
             contacts=contacts,
+            muscle_names=muscle_names,
+            muscle_activations=muscle_activations,
+            muscle_forces=muscle_forces,
+            muscle_lengths=muscle_lengths,
+            muscle_velocities=muscle_velocities,
         )
 
 
@@ -368,6 +417,11 @@ def read_trace(path: str | os.PathLike[str]) -> Trace | BatchTrace:
         wrench = _read_optional_dataset(handle, "wrench")
         markers = _read_optional_dataset(handle, "markers")
         contacts = _read_optional_dataset(handle, "contacts")
+        muscle_names = _read_string_dataset(handle, "muscle_names")
+        muscle_activations = _read_optional_dataset(handle, "muscle_activations")
+        muscle_forces = _read_optional_dataset(handle, "muscle_forces")
+        muscle_lengths = _read_optional_dataset(handle, "muscle_lengths")
+        muscle_velocities = _read_optional_dataset(handle, "muscle_velocities")
 
     if kind == _KIND_SINGLE:
         return Trace(
@@ -383,6 +437,11 @@ def read_trace(path: str | os.PathLike[str]) -> Trace | BatchTrace:
             wrench=wrench,
             markers=markers,
             contacts=contacts,
+            muscle_names=muscle_names,
+            muscle_activations=muscle_activations,
+            muscle_forces=muscle_forces,
+            muscle_lengths=muscle_lengths,
+            muscle_velocities=muscle_velocities,
         )
     if kind == _KIND_BATCH:
         return BatchTrace(

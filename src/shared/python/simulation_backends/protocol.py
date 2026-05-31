@@ -40,8 +40,9 @@ if TYPE_CHECKING:
 #: Versioned schema stamped into every serialised trace. Bump on any breaking
 #: change to the on-disk layout (see :mod:`simulation_backends.trace`).
 #: v2.0.0 adds optional /torques, /wrench, /markers, /contacts groups.
+#: v2.1.0 adds optional MyoSuite muscle-output datasets.
 #: v1.x files are auto-migrated by :func:`simulation_backends.trace_io.read_trace`.
-SCHEMA_VERSION = "2.0.0"
+SCHEMA_VERSION = "2.1.0"
 
 
 @dataclass(frozen=True)
@@ -158,6 +159,14 @@ class Trace:
             ``None``.
         contacts: Contact point positions, shape ``(T, n_contacts, 3)`` [m], or
             ``None``.
+        muscle_names: Names corresponding to muscle-output columns.
+        muscle_activations: Muscle activations, shape ``(T, n_muscles)``, or
+            ``None``.
+        muscle_forces: Muscle forces, shape ``(T, n_muscles)`` [N], or ``None``.
+        muscle_lengths: Muscle-tendon lengths, shape ``(T, n_muscles)`` [m], or
+            ``None``.
+        muscle_velocities: Muscle contraction velocities, shape
+            ``(T, n_muscles)`` [m/s], or ``None``.
     """
 
     t: np.ndarray
@@ -172,6 +181,11 @@ class Trace:
     wrench: np.ndarray | None = None
     markers: np.ndarray | None = None
     contacts: np.ndarray | None = None
+    muscle_names: tuple[str, ...] = ()
+    muscle_activations: np.ndarray | None = None
+    muscle_forces: np.ndarray | None = None
+    muscle_lengths: np.ndarray | None = None
+    muscle_velocities: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Validate array shapes are mutually consistent (postcondition guard)."""
@@ -224,6 +238,42 @@ class Trace:
                     f"contacts must have shape ({n}, n_contacts, 3), "
                     f"got {self.contacts.shape}"
                 )
+        self.muscle_names = tuple(str(name) for name in self.muscle_names)
+        self._validate_muscle_history("muscle_activations", n)
+        self._validate_muscle_history("muscle_forces", n)
+        self._validate_muscle_history("muscle_lengths", n)
+        self._validate_muscle_history("muscle_velocities", n)
+        muscle_arrays = [
+            arr
+            for arr in (
+                self.muscle_activations,
+                self.muscle_forces,
+                self.muscle_lengths,
+                self.muscle_velocities,
+            )
+            if arr is not None
+        ]
+        if muscle_arrays:
+            n_muscles = muscle_arrays[0].shape[1]
+            if any(arr.shape[1] != n_muscles for arr in muscle_arrays):
+                raise ValueError("all muscle-output arrays must have same columns")
+            if self.muscle_names and len(self.muscle_names) != n_muscles:
+                raise ValueError(
+                    f"muscle_names has {len(self.muscle_names)} entries but "
+                    f"muscle histories have {n_muscles} columns"
+                )
+
+    def _validate_muscle_history(self, attr_name: str, n: int) -> None:
+        """Validate an optional ``(T, n_muscles)`` muscle-output array."""
+        value = getattr(self, attr_name)
+        if value is None:
+            return
+        array = np.atleast_2d(np.asarray(value, dtype=float))
+        if array.ndim != 2 or array.shape[0] != n:
+            raise ValueError(
+                f"{attr_name} must have shape ({n}, n_muscles), got {array.shape}"
+            )
+        setattr(self, attr_name, array)
 
     @property
     def num_steps(self) -> int:
