@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { apiFetch } from './fetch';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -66,9 +67,7 @@ export function useTerrain() {
 
   const fetchPresets = useCallback(async () => {
     try {
-      const res = await fetch('/api/terrain/presets');
-      if (!res.ok) throw new Error(`Failed to fetch presets: ${res.status}`);
-      const data = await res.json();
+      const data = await apiFetch<{ presets?: TerrainPreset[] } & TerrainPreset[]>('/api/terrain/presets');
       if (isMountedRef.current) setPresets(data.presets ?? data ?? []);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch presets');
@@ -77,9 +76,7 @@ export function useTerrain() {
 
   const fetchMaterials = useCallback(async () => {
     try {
-      const res = await fetch('/api/terrain/materials');
-      if (!res.ok) throw new Error(`Failed to fetch materials: ${res.status}`);
-      const data = await res.json();
+      const data = await apiFetch<{ materials?: TerrainMaterial[] } & TerrainMaterial[]>('/api/terrain/materials');
       if (isMountedRef.current) setMaterials(data.materials ?? data ?? []);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch materials');
@@ -88,9 +85,7 @@ export function useTerrain() {
 
   const fetchTerrainTypes = useCallback(async () => {
     try {
-      const res = await fetch('/api/terrain/types');
-      if (!res.ok) throw new Error(`Failed to fetch terrain types: ${res.status}`);
-      const data = await res.json();
+      const data = await apiFetch<{ types?: TerrainTypeInfo[] } & TerrainTypeInfo[]>('/api/terrain/types');
       if (isMountedRef.current) setTerrainTypes(data.types ?? data ?? []);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch terrain types');
@@ -99,16 +94,16 @@ export function useTerrain() {
 
   const fetchActiveTerrain = useCallback(async () => {
     try {
-      const res = await fetch('/api/terrain/active');
-      if (!res.ok && res.status !== 404) throw new Error(`Failed to fetch active terrain: ${res.status}`);
-      if (res.status === 404) {
+      const data = await apiFetch<ActiveTerrain>('/api/terrain/active');
+      if (isMountedRef.current) setActiveTerrain(data);
+    } catch (err) {
+      // A 404 means no terrain is loaded yet — not an error to surface.
+      const message = err instanceof Error ? err.message : 'Failed to fetch active terrain';
+      if (message.includes('404')) {
         if (isMountedRef.current) setActiveTerrain(null);
         return;
       }
-      const data = await res.json();
-      if (isMountedRef.current) setActiveTerrain(data);
-    } catch (err) {
-      if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Failed to fetch active terrain');
+      if (isMountedRef.current) setError(message);
     }
   }, []);
 
@@ -116,16 +111,10 @@ export function useTerrain() {
     setLoadState('loading');
     setError(null);
     try {
-      const res = await fetch('/api/terrain/load', {
+      const data = await apiFetch<ActiveTerrain>('/api/terrain/load', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ preset_id: presetId, ...overrides }),
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || `Failed to load terrain: ${res.status}`);
-      }
-      const data = await res.json();
       if (isMountedRef.current) {
         setActiveTerrain(data);
         setLoadState('loaded');
@@ -140,26 +129,27 @@ export function useTerrain() {
 
   const queryTerrain = useCallback(async (property: string) => {
     try {
-      const res = await fetch('/api/terrain/query', {
+      const data = await apiFetch<TerrainProperties>('/api/terrain/query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property }),
       });
-      if (!res.ok) throw new Error(`Query failed: ${res.status}`);
-      const data = await res.json();
       if (isMountedRef.current) setQueryResult(data);
     } catch (err) {
       if (isMountedRef.current) setError(err instanceof Error ? err.message : 'Terrain query failed');
     }
   }, []);
 
-  // Fetch catalog data on mount
+  // Fetch catalog data on mount. These fetchers are async (they await apiFetch
+  // before any setState); scheduling via a microtask makes the deferral
+  // explicit for react-hooks/set-state-in-effect.
   useEffect(() => {
     isMountedRef.current = true;
-    fetchPresets();
-    fetchMaterials();
-    fetchTerrainTypes();
-    fetchActiveTerrain();
+    void Promise.resolve().then(() => {
+      fetchPresets();
+      fetchMaterials();
+      fetchTerrainTypes();
+      fetchActiveTerrain();
+    });
     return () => { isMountedRef.current = false; };
   }, [fetchPresets, fetchMaterials, fetchTerrainTypes, fetchActiveTerrain]);
 

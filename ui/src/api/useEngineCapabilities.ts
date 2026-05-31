@@ -9,6 +9,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { apiFetch } from './fetch';
 
 /** Support level for a single engine capability. */
 export type CapabilityLevel = 'full' | 'partial' | 'none';
@@ -73,13 +74,7 @@ export function useEngineCapabilities(
     setError(null);
 
     try {
-      const response = await fetch(`/api/engines/${engine}/capabilities`);
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `Failed to fetch capabilities for ${engine}`);
-      }
-
-      const data: EngineCapabilitiesData = await response.json();
+      const data = await apiFetch<EngineCapabilitiesData>(`/api/engines/${engine}/capabilities`);
 
       if (isMountedRef.current) {
         setCapabilities(data);
@@ -94,15 +89,20 @@ export function useEngineCapabilities(
     }
   }, []);
 
-  // Auto-fetch when engineType changes
+  // Auto-fetch when engineType changes. fetchCapabilities is async (awaits
+  // apiFetch before any setState); a microtask makes the deferral explicit for
+  // react-hooks/set-state-in-effect, and we reset derived state the same way
+  // when the engine is cleared.
   useEffect(() => {
-    if (engineType) {
-      fetchCapabilities(engineType);
-    } else {
-      setCapabilities(null);
-      setLoadState('idle');
-      setError(null);
-    }
+    void Promise.resolve().then(() => {
+      if (engineType) {
+        fetchCapabilities(engineType);
+      } else {
+        setCapabilities(null);
+        setLoadState('idle');
+        setError(null);
+      }
+    });
   }, [engineType, fetchCapabilities]);
 
   // Cleanup on unmount

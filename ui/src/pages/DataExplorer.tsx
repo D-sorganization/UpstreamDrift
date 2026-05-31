@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, memo } from 'react';
+import { apiFetch, apiFetchForm } from '@/api/fetch';
 
 /** Dataset info from the API. See issue #1206 */
 export interface DatasetInfo {
@@ -210,19 +211,16 @@ export function DataExplorerPage() {
   useEffect(() => {
     async function fetchDatasets() {
       try {
-        const response = await fetch('/api/tools/data-explorer/datasets');
-        if (!response.ok) {
-          // F3: non-2xx means backend is up but returned an error — still show it
-          setServiceUnreachable(true);
-          setError(`Data service returned HTTP ${response.status}`);
-          return;
-        }
-        const data = (await response.json()) as Record<string, unknown>;
+        const data = await apiFetch<Record<string, unknown>>(
+          '/api/tools/data-explorer/datasets',
+        );
         // F4: guard against malformed response shapes
         const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
         setDatasets(list);
       } catch (err) {
-        // F3: network failure — backend is down; show distinct actionable error
+        // F3: backend is down or returned an error — show actionable message.
+        // apiFetch throws `HTTP <status> …` for non-2xx and a network message
+        // otherwise, so both surface a distinct, useful error here.
         setServiceUnreachable(true);
         setError(
           err instanceof Error
@@ -244,14 +242,9 @@ export function DataExplorerPage() {
     setFilterValue('');
 
     try {
-      const response = await fetch(
+      const data = await apiFetch<DatasetPreview>(
         `/api/tools/data-explorer/datasets/${encodeURIComponent(name)}/preview?limit=100`,
       );
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-      const data: DatasetPreview = await response.json();
       setPreview(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dataset');
@@ -268,14 +261,9 @@ export function DataExplorerPage() {
     setError(null);
 
     try {
-      const response = await fetch(
+      const data = await apiFetch<DatasetStats>(
         `/api/tools/data-explorer/datasets/${encodeURIComponent(selectedDataset)}/stats`,
       );
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-      const data: DatasetStats = await response.json();
       setStats(data);
       setViewMode('stats');
     } catch (err) {
@@ -292,11 +280,10 @@ export function DataExplorerPage() {
     setError(null);
 
     try {
-      const response = await fetch(
+      const data = await apiFetch<DatasetPreview>(
         `/api/tools/data-explorer/datasets/${encodeURIComponent(selectedDataset)}/filter`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             column: filterColumn,
             operator: filterOperator,
@@ -305,13 +292,6 @@ export function DataExplorerPage() {
           }),
         },
       );
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data: DatasetPreview = await response.json();
       setPreview(data);
       setViewMode('table');
     } catch (err) {
@@ -333,17 +313,11 @@ export function DataExplorerPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/tools/data-explorer/import', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiFetchForm<{
+        name: string;
+        format: string;
+        columns: string[];
+      }>('/api/tools/data-explorer/import', formData);
 
       // Add to dataset list and select it
       setDatasets((prev) => [
@@ -526,9 +500,8 @@ export function DataExplorerPage() {
                 setError(null);
                 // Re-trigger the effect by temporarily clearing + re-fetching
                 // (simple approach: reload datasets inline)
-                fetch('/api/tools/data-explorer/datasets')
-                  .then((r) => r.json())
-                  .then((data: Record<string, unknown>) => {
+                apiFetch<Record<string, unknown>>('/api/tools/data-explorer/datasets')
+                  .then((data) => {
                     const list = Array.isArray(data.datasets) ? (data.datasets as DatasetInfo[]) : [];
                     setDatasets(list);
                   })

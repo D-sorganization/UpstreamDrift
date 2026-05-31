@@ -425,19 +425,26 @@ describe('Simulation Workflow Integration', () => {
       });
     });
 
-    it('shows unavailable engines as disabled', async () => {
+    it('shows unavailable engines as disabled before any load attempt', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await expectEngineOption(/pinocchio/i);
 
-      // Click Load for Pinocchio
-      const loadBtn = screen.getByRole('button', { name: /load pinocchio/i });
-      fireEvent.click(loadBtn);
-
-      // Should show error state (Retry button)
+      // #6900: the page probes availability on mount. Pinocchio's probe reports
+      // it as not installed, so it must render as a disabled "Unavailable"
+      // control — never offering a Load action the user can't fulfil.
       await waitFor(() => {
-        expect(screen.getByText('Retry')).toBeInTheDocument();
+        const unavailableBtn = screen.getByRole('button', {
+          name: /pinocchio engine not installed/i,
+        });
+        expect(unavailableBtn).toBeDisabled();
+        expect(unavailableBtn).toHaveTextContent('Unavailable');
       });
+
+      // MuJoCo's probe says available, so it remains loadable.
+      expect(
+        screen.getByRole('button', { name: /load mujoco/i }),
+      ).toBeEnabled();
     });
   });
 

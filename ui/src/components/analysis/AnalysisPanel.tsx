@@ -19,6 +19,8 @@ import {
   Legend,
 } from 'recharts';
 import { Download, BarChart2, Activity, TrendingUp } from 'lucide-react';
+import { apiFetch } from '@/api/fetch';
+import { getApiBase } from '@/api/backend';
 
 /** Analysis metric from the backend. */
 interface AnalysisMetric {
@@ -87,15 +89,10 @@ export function AnalysisPanel({
   const fetchStatistics = useCallback(async () => {
     try {
       // First collect a new metric snapshot
-      await fetch('/api/analysis/metrics');
+      await apiFetch<unknown>('/api/analysis/metrics');
 
       // Then get statistics
-      const response = await fetch('/api/analysis/statistics');
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `HTTP ${response.status}`);
-      }
-      const data: AnalysisStatistics = await response.json();
+      const data = await apiFetch<AnalysisStatistics>('/api/analysis/statistics');
       setStatistics(data);
       setError(null);
 
@@ -145,7 +142,10 @@ export function AnalysisPanel({
   // Export handler
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
     try {
-      const response = await fetch('/api/analysis/export', {
+      // Export returns a binary blob (not JSON), so apiFetch — which parses
+      // JSON — is not suitable here. Build the URL via getApiBase() to stay
+      // Tauri-safe (#6897).
+      const response = await fetch(`${getApiBase()}/api/analysis/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ format, include_metrics: true, include_time_series: true }),

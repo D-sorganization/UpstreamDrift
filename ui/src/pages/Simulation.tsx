@@ -28,6 +28,7 @@ export function SimulationPage() {
   const selectEngine = useEngineStore((s) => s.selectEngine);
   const requestLoad = useEngineStore((s) => s.requestLoad);
   const unloadEngine = useEngineStore((s) => s.unloadEngine);
+  const probeAvailability = useEngineStore((s) => s.probeAvailability);
   // Uses the canonical selector from the store (F8: removes duplicated derivation)
   const effectiveEngine = useEngineStore(selectEffectiveEngine);
 
@@ -149,14 +150,21 @@ export function SimulationPage() {
     prevConnectionStatusRef.current = connectionStatus;
     if (connectionStatus === 'connected') {
       showSuccess('Connected to simulation server');
-    } else if (connectionStatus === 'reconnecting') {
-      // F5: a transient drop re-runs connect() which restarts the sim from
-      // t=0; warn the user so a silent restart is not mistaken for a freeze.
-      showInfo('Connection lost — reconnecting (simulation will restart)');
+    } else if (connectionStatus === 'lost') {
+      // #6896: the server has no resume protocol, so we never silently restart
+      // from t=0. Tell the user a manual restart is required.
+      showError('Connection lost — restart required to run again');
     } else if (connectionStatus === 'failed') {
       showError('Connection failed. Please check the server.');
     }
   }, [connectionStatus, showSuccess, showError, showInfo]);
+
+  // #6900: probe which engines are actually installed once on mount. The
+  // registry seeds every engine as available so the UI renders instantly, but
+  // an uninstalled engine must not appear loadable before the user tries.
+  useEffect(() => {
+    void probeAvailability();
+  }, [probeAvailability]);
 
   // Surface WebSocket errors via toast (F2)
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { getApiBase } from '@/api/backend';
 
 interface SegmentBreakdown {
   name: string;
@@ -142,7 +143,9 @@ export function CharacterBuilderPage() {
     setGenerating(true);
     setError(null);
     try {
-      const response = await fetch('/api/character-builder/generate', {
+      // Response is URDF XML text (not JSON), so apiFetch is not suitable.
+      // Build the URL via getApiBase() to stay Tauri-safe (#6897).
+      const response = await fetch(`${getApiBase()}/api/character-builder/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

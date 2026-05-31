@@ -1,3 +1,5 @@
+import { apiFetch } from './fetch';
+
 export interface ThemeColors {
   bg: string;
   group_bg: string;
@@ -96,11 +98,7 @@ export const SIDEKICK_STATIC_TOKENS = {
 } as const satisfies SidekickTokenMap;
 
 export async function fetchActiveTheme(): Promise<ActiveThemeResponse> {
-  const response = await fetch('/api/v1/themes/active');
-  if (!response.ok) {
-    throw new Error('Failed to fetch active theme');
-  }
-  return response.json();
+  return apiFetch<ActiveThemeResponse>('/api/v1/themes/active');
 }
 
 export function sidekickTokenToCSSVariable(tokenName: string): string {

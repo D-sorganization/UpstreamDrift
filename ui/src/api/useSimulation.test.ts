@@ -524,9 +524,11 @@ describe('useSimulation hook', () => {
     });
   });
 
-  describe('reconnection', () => {
-    it('attempts reconnection on unexpected close', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+  describe('reconnection (#6896 — safe, no silent restart)', () => {
+    it('does NOT silently reconnect-and-restart on an unclean close', () => {
+      // Regression guard for #6896: a transient blip previously reopened the
+      // socket and sent {action:'start'}, restarting the run from t=0.
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -544,117 +546,105 @@ describe('useSimulation hook', () => {
         ws.simulateUncleanClose(1006); // Abnormal closure
       });
 
-      expect(result.current.connectionStatus).toBe('reconnecting');
+      // Status reflects an unrecoverable drop, not an implied continuity.
+      expect(result.current.connectionStatus).toBe('lost');
 
-      // Advance timer for reconnection delay
+      // No timer-driven reconnect: advancing time creates no new socket.
       act(() => {
-        vi.advanceTimersByTime(2000);
+        vi.advanceTimersByTime(60000);
       });
-
-      // New WebSocket should be created
-      expect(MockWebSocket.instances.length).toBeGreaterThan(instanceCountBefore);
-      consoleSpy.mockRestore();
+      expect(MockWebSocket.instances.length).toBe(instanceCountBefore);
+      warnSpy.mockRestore();
     });
 
-    it('uses exponential backoff for reconnection', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    it('does not reset frames or current frame on an unclean close', () => {
+      // The core assertion #6896 asks for: reconnect/disconnect must not wipe
+      // the captured timeline without explicit user action.
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
         result.current.start();
       });
 
-      let ws = MockWebSocket.getLastInstance()!;
+      const ws = MockWebSocket.getLastInstance()!;
       act(() => {
         ws.simulateOpen();
       });
 
-      // First disconnect
+      // Capture a few frames.
+      act(() => {
+        ws.simulateMessage({ frame: 0, time: 0.0, state: {} });
+        ws.simulateMessage({ frame: 1, time: 0.5, state: {} });
+        ws.simulateMessage({ frame: 2, time: 1.0, state: {} });
+      });
+
+      expect(result.current.frames).toHaveLength(3);
+      const framesBefore = result.current.frames;
+      const currentBefore = result.current.currentFrame;
+
       act(() => {
         ws.simulateUncleanClose(1006);
       });
 
-      // First reconnect delay: ~1000ms + jitter
-      act(() => {
-        vi.advanceTimersByTime(1100);
-      });
-
-      ws = MockWebSocket.getLastInstance()!;
-      act(() => {
-        ws.simulateOpen();
-        ws.simulateUncleanClose(1006);
-      });
-
-      // Second reconnect delay: ~2000ms + jitter
-      act(() => {
-        vi.advanceTimersByTime(2200);
-      });
-
-      ws = MockWebSocket.getLastInstance()!;
-      act(() => {
-        ws.simulateOpen();
-        ws.simulateUncleanClose(1006);
-      });
-
-      // Third reconnect delay: ~4000ms + jitter
-      act(() => {
-        vi.advanceTimersByTime(4400);
-      });
-
-      expect(MockWebSocket.instances.length).toBeGreaterThanOrEqual(4);
-      consoleSpy.mockRestore();
+      // Frames and the last frame/time are preserved untouched.
+      expect(result.current.frames).toBe(framesBefore);
+      expect(result.current.frames).toHaveLength(3);
+      expect(result.current.currentFrame).toBe(currentBefore);
+      expect(result.current.currentFrame?.time).toBe(1.0);
+      expect(result.current.connectionStatus).toBe('lost');
+      warnSpy.mockRestore();
     });
 
-    // This test has timing complexity with fake timers - the reconnection logic
-    // involves async callbacks that are difficult to coordinate with vi.advanceTimersByTime
-    // The core reconnection functionality is tested by other tests in this suite
-    it.skip('sets status to failed after max attempts', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
-      const consoleErrSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+    it('surfaces a restart-required error after an unclean close', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
         result.current.start();
       });
+      const ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws.simulateOpen();
+        ws.simulateUncleanClose(1006);
+      });
 
-      // We need to go through MAX_RECONNECT_ATTEMPTS (5) reconnection attempts
-      // The counter starts at 0 and increments in the setTimeout callback
-      // When counter reaches 5, the next close will trigger 'failed'
+      expect(result.current.wsError).toMatch(/restart/i);
+      expect(result.current.isRunning).toBe(false);
+      warnSpy.mockRestore();
+    });
 
-      // Initial connection
+    it('clears the timeline only on an explicit user restart', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
       let ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws.simulateOpen();
+        ws.simulateMessage({ frame: 0, time: 0.0, state: {} });
+        ws.simulateMessage({ frame: 1, time: 0.5, state: {} });
+        ws.simulateUncleanClose(1006);
+      });
+
+      expect(result.current.frames).toHaveLength(2);
+      expect(result.current.connectionStatus).toBe('lost');
+
+      // The user explicitly restarts — only now is the timeline reset.
+      act(() => {
+        result.current.start();
+      });
+      ws = MockWebSocket.getLastInstance()!;
       act(() => {
         ws.simulateOpen();
       });
 
-      // First 5 unclean closes should trigger reconnection attempts
-      for (let i = 0; i < 5; i++) {
-        act(() => {
-          ws.simulateUncleanClose(1006);
-        });
-
-        // Advance time to trigger the reconnection callback
-        act(() => {
-          vi.advanceTimersByTime(35000);
-        });
-
-        // Get the newly created WebSocket
-        ws = MockWebSocket.getLastInstance()!;
-        act(() => {
-          ws.simulateOpen();
-        });
-      }
-
-      // At this point, reconnectAttemptsRef.current = 5
-      // The 6th unclean close should set status to 'failed'
-      act(() => {
-        ws.simulateUncleanClose(1006);
-      });
-
-      // The status should now be 'failed'
-      expect(result.current.connectionStatus).toBe('failed');
-      consoleSpy.mockRestore();
-      consoleErrSpy.mockRestore();
+      expect(result.current.connectionStatus).toBe('connected');
+      expect(result.current.frames).toEqual([]);
+      expect(result.current.wsError).toBeNull();
+      warnSpy.mockRestore();
     });
 
     it('does not reconnect on clean close', () => {
@@ -729,8 +719,8 @@ describe('useSimulation hook', () => {
       expect(ws.readyState).toBe(3); // CLOSED
     });
 
-    it('clears reconnection timeout on unmount', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    it('creates no new socket after an unclean close, even across unmount', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
       const { result, unmount } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -743,7 +733,8 @@ describe('useSimulation hook', () => {
         ws.simulateUncleanClose(1006);
       });
 
-      expect(result.current.connectionStatus).toBe('reconnecting');
+      // #6896: an unclean close no longer schedules a reconnect.
+      expect(result.current.connectionStatus).toBe('lost');
 
       unmount();
 
@@ -755,7 +746,7 @@ describe('useSimulation hook', () => {
 
       // No new WebSocket should be created after unmount
       expect(MockWebSocket.instances.length).toBe(instanceCountBefore);
-      consoleSpy.mockRestore();
+      warnSpy.mockRestore();
     });
 
     it('does not update state after unmount', () => {
