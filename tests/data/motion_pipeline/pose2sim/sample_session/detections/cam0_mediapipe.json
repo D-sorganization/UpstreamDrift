@@ -1,0 +1,48 @@
+{
+  "schema": "MediaPipe_33",
+  "fps": 30.0,
+  "frames": [
+    {
+      "frame_index": 0,
+      "timestamp": 0.0,
+      "landmarks": [
+        { "name": "nose", "x": 0.5, "y": 0.4, "z": 0.0, "visibility": 0.95 },
+        {
+          "name": "left_shoulder",
+          "x": 0.42,
+          "y": 0.55,
+          "z": 0.0,
+          "visibility": 0.9
+        },
+        {
+          "name": "right_shoulder",
+          "x": 0.58,
+          "y": 0.55,
+          "z": 0.0,
+          "visibility": 0.88
+        }
+      ]
+    },
+    {
+      "frame_index": 1,
+      "timestamp": 0.0333333333,
+      "landmarks": [
+        { "name": "nose", "x": 0.51, "y": 0.4, "z": 0.0, "visibility": 0.94 },
+        {
+          "name": "left_shoulder",
+          "x": 0.43,
+          "y": 0.55,
+          "z": 0.0,
+          "visibility": 0.89
+        },
+        {
+          "name": "right_shoulder",
+          "x": 0.59,
+          "y": 0.55,
+          "z": 0.0,
+          "visibility": 0.87
+        }
+      ]
+    }
+  ]
+}

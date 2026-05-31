@@ -41,6 +41,13 @@ from src.shared.python.motion_pipeline.sources.hrnet_json_adapter import (
 from src.shared.python.motion_pipeline.sources.openpose_json_adapter import (
     OpenPoseJSONAdapter,
 )
+from src.shared.python.motion_pipeline.sources.pose2sim_adapter import (
+    Pose2SimAdapter,
+    Pose2SimDetector,
+    Pose2SimObservations,
+    load_pose2sim_calibration,
+    load_pose2sim_observations,
+)
 from src.shared.python.motion_pipeline.sources.csv_adapter import CSVAdapter
 from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
 
@@ -57,11 +64,16 @@ __all__ = [
     "OpenPoseJSONAdapter",
     "OpenCapSessionAdapter",
     "OpenSimSTOMOTAdapter",
+    "Pose2SimAdapter",
+    "Pose2SimDetector",
+    "Pose2SimObservations",
     "SourceMetadata",
     "TRCAdapter",
     "UnsupportedFormatError",
     "detect_format",
     "list_formats",
+    "load_pose2sim_calibration",
+    "load_pose2sim_observations",
     "load_any",
     "register_adapter",
     "registered_adapters",
