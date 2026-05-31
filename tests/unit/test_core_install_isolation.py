@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
 import types
@@ -9,11 +10,21 @@ from importlib.machinery import ModuleSpec
 from pathlib import Path
 
 import pytest
-from scripts.check_core_install_isolation import (
-    CORE_IMPORT_MODULES,
-    FORBIDDEN_OPTIONAL_MODULES,
-    find_import_isolation_violations,
+
+ROOT = Path(__file__).resolve().parents[2]
+_GUARD_SCRIPT = ROOT / "scripts" / "check_core_install_isolation.py"
+_spec = importlib.util.spec_from_file_location(
+    "check_core_install_isolation", _GUARD_SCRIPT
 )
+assert _spec is not None
+assert _spec.loader is not None
+_guard_module = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = _guard_module
+_spec.loader.exec_module(_guard_module)
+
+CORE_IMPORT_MODULES = _guard_module.CORE_IMPORT_MODULES
+FORBIDDEN_OPTIONAL_MODULES = _guard_module.FORBIDDEN_OPTIONAL_MODULES
+find_import_isolation_violations = _guard_module.find_import_isolation_violations
 
 pytestmark = pytest.mark.core_only
 
