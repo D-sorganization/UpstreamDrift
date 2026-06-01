@@ -96,6 +96,18 @@ def validate_energy_balance(
     m_club = pre_state.clubhead_mass
     I_ball = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
 
+    # ΔKE_expected = ½·μ·v_rel_n²·(1−e²) in the relative (COM) frame.
+    _n_raw = np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+    _n_norm = math.sqrt(float(np.dot(_n_raw, _n_raw))) if _n_raw.size > 0 else 0.0
+    _n_unit = _n_raw / _n_norm if _n_norm > 1e-12 else np.array([1.0, 0.0, 0.0])
+    _v_rel = np.asarray(pre_state.clubhead_velocity, dtype=float) - np.asarray(
+        pre_state.ball_velocity, dtype=float
+    )
+    _mu = (float(m_ball) * float(m_club)) / (float(m_ball) + float(m_club))
+    expected_loss_j = (
+        0.5 * _mu * float(np.dot(_v_rel, _n_unit)) ** 2 * (1.0 - params.cor**2)
+    )
+
     # Pre-impact kinetic energy
     ke_ball_pre = (
         0.5 * m_ball * np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
@@ -138,6 +150,7 @@ def validate_energy_balance(
             float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
         ),
         "expected_loss_factor": expected_loss_factor,
+        "expected_loss_j": float(expected_loss_j),
         "ball_ke_post": float(ke_ball_post),
         "ball_launch_speed": float(math.sqrt(np.dot(post_state.ball_velocity, post_state.ball_velocity))),  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
     }
