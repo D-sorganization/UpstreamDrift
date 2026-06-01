@@ -31,12 +31,14 @@ what ``club_target_adapter.load_robneal_target`` produces.
 from __future__ import annotations
 
 import logging
-from types import ModuleType
 from typing import TYPE_CHECKING, Final
 
+from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     MultiSourceTarget,
+    publish_leaderboard_row,
     register_provider,
+    resolve_club_target,
 )
 
 from .fit_swing import FitOptions, FitResult, fit_swing_pinocchio
@@ -95,18 +97,10 @@ class PinocchioFitSwingProvider:
             ValueError: If ``target`` shapes are inconsistent.
             ImportError: If the ``pinocchio`` bindings are unavailable.
         """
-        if isinstance(target, MultiSourceTarget):
-            if target.club is None:
-                raise ValueError(
-                    "PinocchioFitSwingProvider requires target.club to be set"
-                )
-            target = target.club
-
-        result = fit_swing_pinocchio(target, opts)
-        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
-        from src.shared.python.motion_matching.leaderboard import maybe_append_row
-
-        maybe_append_row(
+        club = resolve_club_target(target)
+        result = fit_swing_pinocchio(club, opts)
+        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
+        publish_leaderboard_row(
             ENGINE_NAME,
             result,
             self.engine_version(),
@@ -134,23 +128,7 @@ class PinocchioFitSwingProvider:
             import pinocchio  # type: ignore[import-not-found]
         except ImportError:
             return "unknown"
-        if not isinstance(pinocchio, ModuleType):
-            return "unknown"
-        version = getattr(pinocchio, "__version__", None)
-        if isinstance(version, str) and version:
-            return version
-        try:
-            from importlib.metadata import PackageNotFoundError
-            from importlib.metadata import version as _v
-        except ImportError:  # pragma: no cover -- stdlib >=3.8
-            return "unknown"
-        try:
-            return _v("pin")
-        except PackageNotFoundError:
-            try:
-                return _v("pinocchio")
-            except PackageNotFoundError:
-                return "unknown"
+        return engine_package_version(pinocchio, "pin", "pinocchio")
 
 
 register_provider(PinocchioFitSwingProvider())  # type: ignore[arg-type]

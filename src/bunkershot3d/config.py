@@ -2,9 +2,24 @@
 Configuration and parameter models for BunkerShot3D using Pydantic for DbC.
 """
 
+from typing import NamedTuple
+
 import yaml
 from pathlib import Path
 from pydantic import BaseModel, Field
+
+
+class ContactParams(NamedTuple):
+    """Flat contact-material parameters (issue #6937).
+
+    Decouples backend drivers from the nested ``config.contact_model.*``
+    shape so a schema restructure does not ripple into every driver.
+    """
+
+    friction: float
+    restitution: float
+    youngs_modulus: float
+    poisson_ratio: float
 
 
 class DomainConfig(BaseModel):
@@ -81,3 +96,80 @@ class BunkerShotConfig(BaseModel):
         with open(path) as f:
             data = yaml.safe_load(f)
         return cls(**data)
+
+    # --- Flat delegating accessors (Law of Demeter, issue #6937) ---------
+    #
+    # Backend drivers previously reached two levels into the nested config
+    # (``config.contact_model.friction_coefficient`` etc.) ~20 times. These
+    # flat accessors are the single boundary so a schema restructure (CC-4)
+    # touches only this file, not every driver.
+
+    def contact_params(self) -> ContactParams:
+        """Return the contact-material parameters as a flat tuple."""
+        cm = self.contact_model
+        return ContactParams(
+            friction=cm.friction_coefficient,
+            restitution=cm.restitution_coefficient,
+            youngs_modulus=cm.youngs_modulus,
+            poisson_ratio=cm.poisson_ratio,
+        )
+
+    def domain_extents(self) -> tuple[float, float, float]:
+        """Return the bunker-bed domain extents ``(lx, ly, lz)`` in metres."""
+        d = self.bunker_bed.domain
+        return (d.length_x, d.width_y, d.depth_z)
+
+    @property
+    def grain_count(self) -> int:
+        """Configured grain population count."""
+        return self.grain_population.count
+
+    @property
+    def grain_diameter_mean(self) -> float:
+        """Mean grain diameter (m)."""
+        return self.grain_population.diameter_mean
+
+    @property
+    def grain_diameter_sigma_log(self) -> float:
+        """Log-normal sigma of the grain-diameter distribution."""
+        return self.grain_population.diameter_sigma_log
+
+    @property
+    def grain_density(self) -> float:
+        """Grain material density (kg/m^3)."""
+        return self.grain_population.density
+
+    @property
+    def grain_coarse_graining_factor(self) -> float:
+        """Coarse-graining factor applied to the grain population."""
+        return self.grain_population.coarse_graining_factor
+
+    @property
+    def clubhead_width(self) -> float:
+        """Clubhead width (m)."""
+        return self.clubhead.width
+
+    @property
+    def clubhead_height(self) -> float:
+        """Clubhead height (m)."""
+        return self.clubhead.height
+
+    @property
+    def clubhead_mass(self) -> float:
+        """Clubhead mass (kg)."""
+        return self.clubhead.mass
+
+    @property
+    def output_rate_hz(self) -> float:
+        """Output sampling rate (Hz)."""
+        return self.output.rate_hz
+
+    @property
+    def trajectory_duration(self) -> float:
+        """Configured simulation duration (s)."""
+        return self.trajectory.duration
+
+    @property
+    def trajectory_file(self) -> str:
+        """Configured swing-trajectory source file path."""
+        return self.trajectory.file

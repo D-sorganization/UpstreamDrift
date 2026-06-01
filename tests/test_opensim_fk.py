@@ -76,7 +76,9 @@ class TestRotationToQuat:
             assert q[0] >= 0.0  # w sign-canonicalised
 
     def test_bad_shape_raises(self) -> None:
-        with pytest.raises(ValueError, match="rot must be"):
+        # #6938: now delegates to the canonical opensim_golf.fk helper,
+        # whose message names the parameter ``rot_matrix``.
+        with pytest.raises(ValueError, match="rot_matrix must be"):
             _rotation_matrix_to_quat_wxyz(np.eye(4))
 
 
@@ -124,8 +126,8 @@ class TestExtractWithMockModel:
     ) -> None:
         # Bypass the opensim import probe.
         monkeypatch.setattr(
-            "src.engines.physics_engines.opensim.python.motion_matching."
-            "forward_kinematics._require_opensim",
+            "src.engines.physics_engines.opensim.python.opensim_golf."
+            "fk._require_opensim",
             lambda: None,
         )
         translations = {
@@ -149,8 +151,8 @@ class TestExtractWithMockModel:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.setattr(
-            "src.engines.physics_engines.opensim.python.motion_matching."
-            "forward_kinematics._require_opensim",
+            "src.engines.physics_engines.opensim.python.opensim_golf."
+            "fk._require_opensim",
             lambda: None,
         )
         translations = {
@@ -168,8 +170,8 @@ class TestExtractWithMockModel:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.setattr(
-            "src.engines.physics_engines.opensim.python.motion_matching."
-            "forward_kinematics._require_opensim",
+            "src.engines.physics_engines.opensim.python.opensim_golf."
+            "fk._require_opensim",
             lambda: None,
         )
         translations = {

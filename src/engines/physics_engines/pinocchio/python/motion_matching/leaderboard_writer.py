@@ -27,7 +27,6 @@ from __future__ import annotations
 import json
 import logging
 import math
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -61,22 +60,17 @@ SCHEMA_KEYS: tuple[str, ...] = (
 
 
 def _resolve_commit(commit: str | None) -> str:
-    """Return ``commit`` if non-empty, else best-effort `git rev-parse HEAD`.
+    """Return ``commit`` if non-empty, else best-effort short ``HEAD`` SHA.
 
-    Falls back to ``"unknown"`` if git is unavailable or the working tree
-    is not a repository — never raises.
+    Delegates the git lookup to the shared :func:`git_commit_short` probe
+    (issue #6939); falls back to ``"unknown"`` if git is unavailable —
+    never raises.
     """
     if commit:
         return commit
-    try:
-        out = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            stderr=subprocess.DEVNULL,
-            timeout=2.0,
-        )
-        return out.decode("ascii", errors="replace").strip() or "unknown"
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return "unknown"
+    from src.shared.python.motion_matching.provenance import git_commit_short
+
+    return git_commit_short()
 
 
 def _coerce_float(value: float, *, name: str) -> float:

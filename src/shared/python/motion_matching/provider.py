@@ -28,6 +28,7 @@ import threading
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
+from .club_ball_target import ClubBallTarget
 from .club_target import ClubTarget
 from .fit_result import CanonicalFitResult
 
@@ -37,7 +38,9 @@ __all__ = [
     "MultiSourceTarget",
     "available_engines",
     "get_provider",
+    "publish_leaderboard_row",
     "register_provider",
+    "resolve_club_target",
 ]
 
 
@@ -221,3 +224,94 @@ def available_engines() -> list[str]:
     """Return the sorted list of currently-registered engine names."""
     with _REGISTRY_LOCK:
         return sorted(_REGISTRY)
+
+
+# --- Shared provider helpers (issue #6935) ----------------------------------
+#
+# Every engine provider previously re-implemented two identical steps in its
+# ``fit_swing``: (1) unwrap the canonical target into a bare ``ClubTarget``,
+# and (2) append a leaderboard row. Those copies had FORKED -- e.g. a
+# ``ClubBallTarget`` unwrapped on Drake/OpenSim but raised ``TypeError`` on
+# MuJoCo/Pendulum, and only Pinocchio forwarded ``target_id``. These two
+# helpers are the single source of truth so a new wrapper type or leaderboard
+# column is a one-line change in one place.
+
+
+def resolve_club_target(target: Any) -> ClubTarget:
+    """Unwrap an arbitrary motion-matching target into a :class:`ClubTarget`.
+
+    This is the canonical, engine-agnostic unwrap every provider delegates
+    to (issue #6935). It accepts, **uniformly across all engines**:
+
+    * a bare :class:`ClubTarget` (returned as-is);
+    * a :class:`ClubBallTarget` (its ``.club`` payload is returned; the
+      ball-impact boundary is intentionally discarded -- no engine consumes
+      it yet);
+    * a :class:`MultiSourceTarget` (its ``.club`` slot is returned).
+
+    Behaviour is UNIFIED: prior to #6935 a ``ClubBallTarget`` unwrapped on
+    Drake/OpenSim/MyoSuite but raised ``TypeError`` on MuJoCo/Pendulum/
+    Pinocchio. All engines now accept it identically.
+
+    Args:
+        target: One of the three supported target shapes above.
+
+    Returns:
+        The resolved :class:`ClubTarget`.
+
+    Raises:
+        ValueError: If a :class:`MultiSourceTarget` has ``club=None`` or a
+            non-:class:`ClubTarget` payload.
+        TypeError: If ``target`` is none of the supported types.
+    """
+    if isinstance(target, ClubTarget):
+        return target
+    if isinstance(target, ClubBallTarget):
+        return target.club
+    if isinstance(target, MultiSourceTarget):
+        if target.club is None:
+            raise ValueError(
+                "resolve_club_target requires target.club to be set; "
+                "got MultiSourceTarget with club=None"
+            )
+        if not isinstance(target.club, ClubTarget):
+            raise ValueError(
+                f"target.club must be a ClubTarget, got {type(target.club).__name__}"
+            )
+        return target.club
+    raise TypeError(
+        "target must be a ClubTarget, ClubBallTarget, or MultiSourceTarget; "
+        f"got {type(target).__name__}"
+    )
+
+
+def publish_leaderboard_row(
+    engine_name: str,
+    result: Any,
+    version: str,
+    *,
+    target_id: str | None = None,
+) -> None:
+    """Append ``result`` to the cross-engine leaderboard (issue #6935).
+
+    Thin, canonical wrapper over
+    :func:`src.shared.python.motion_matching.leaderboard.maybe_append_row`
+    so every provider publishes identically -- including forwarding
+    ``target_id`` (previously only Pinocchio did). Publication is opt-in
+    (gated by ``UD_LEADERBOARD_PUBLISH=1`` inside ``maybe_append_row``) and
+    never raises, so wiring this into a ``fit_swing`` path is free for the
+    common case.
+
+    Args:
+        engine_name: Lowercase engine identifier used as the row key.
+        result: The :class:`CanonicalFitResult` (or engine ``FitResult``)
+            just produced.
+        version: Engine version string to stamp on the row.
+        target_id: Optional explicit target identifier. When ``None`` the
+            leaderboard derives one from the result's provenance fields.
+    """
+    # Imported lazily to avoid importing the (heavier) leaderboard module at
+    # provider-registry import time.
+    from .leaderboard import maybe_append_row
+
+    maybe_append_row(engine_name, result, version, target_id=target_id)
