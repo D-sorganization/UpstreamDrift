@@ -454,7 +454,9 @@ async def execute_feature(
     registry = ControlFeaturesRegistry(engine)
     # Not a DB cursor: ControlFeaturesRegistry.execute() dispatches a named,
     # registry-validated control/analysis feature; no SQL is constructed here.
-    result = registry.execute(request.feature_name, **request.args)  # nosemgrep
+    result = registry.execute(
+        request.feature_name, **request.args
+    )  # nosemgrep: python.django.security.injection.sql.sql-injection-using-db-cursor-execute  # not SQL: in-process tool/feature registry dispatch, no DB cursor
     return {"feature": request.feature_name, "result": result}
 
 
