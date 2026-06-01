@@ -32,6 +32,7 @@ def mock_suite_root(tmp_path) -> Path:
     (physics / "mujoco").mkdir()
     (physics / "drake").mkdir()
     (physics / "pinocchio").mkdir()
+    (physics / "jaxsim").mkdir()
     (physics / "opensim").mkdir()
     (physics / "myosuite").mkdir()
     # Add missing engine dirs that EngineManager.engine_paths requires
@@ -61,6 +62,7 @@ def engine_manager(
         patch(
             "src.shared.python.engine_core.engine_probes.PinocchioProbe"
         ) as MockPinocchio,
+        patch("src.shared.python.engine_core.engine_probes.JaxSimProbe") as MockJaxSim,
         patch(
             "src.shared.python.engine_core.engine_probes.OpenSimProbe"
         ) as MockOpenSim,
@@ -77,6 +79,7 @@ def engine_manager(
             EngineType.MUJOCO: MockMuJoCo,
             EngineType.DRAKE: MockDrake,
             EngineType.PINOCCHIO: MockPinocchio,
+            EngineType.JAXSIM: MockJaxSim,
             EngineType.OPENSIM: MockOpenSim,
             EngineType.MYOSIM: MockMyoSim,
             EngineType.MATLAB_2D: MockMatlab,
@@ -131,8 +134,8 @@ def test_discover_engines(mock_suite_root) -> None:
     for engine_type in present_engines:
         assert manager.engine_status[engine_type] == EngineStatus.AVAILABLE
 
-    # JaxSim has no directory in the fixture, so it stays unavailable.
-    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.UNAVAILABLE
+    # JaxSim has both an adapter directory and a patched-available runtime.
+    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.AVAILABLE
 
 
 def test_discover_engines_missing(mock_suite_root) -> None:
@@ -144,6 +147,7 @@ def test_discover_engines_missing(mock_suite_root) -> None:
         patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe"),
         patch("src.shared.python.engine_core.engine_probes.DrakeProbe"),
         patch("src.shared.python.engine_core.engine_probes.PinocchioProbe"),
+        patch("src.shared.python.engine_core.engine_probes.JaxSimProbe"),
         patch("src.shared.python.engine_core.engine_probes.OpenSimProbe"),
         patch("src.shared.python.engine_core.engine_probes.MyoSimProbe"),
         patch("src.shared.python.engine_core.engine_probes.MatlabProbe"),
