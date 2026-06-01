@@ -22,42 +22,20 @@ this initial pass (see #4520). The provider advertises that via
 from __future__ import annotations
 
 import logging
-from types import ModuleType
 from typing import Any
 
-from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.motion_matching.provenance import engine_package_version
+from src.shared.python.motion_matching.provider import (
+    publish_leaderboard_row,
+    resolve_club_target,
+)
 
 from .fit_swing import FitOptions, fit_swing_drake
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["DrakeFitSwingProvider"]
-
-
-def _extract_club_target(target: Any) -> ClubTarget:
-    """Pull a :class:`ClubTarget` out of an arbitrary motion-matching target.
-
-    Accepts:
-
-    * A :class:`ClubTarget` directly.
-    * A ``ClubBallTarget`` whose ``.club`` attribute is the underlying
-      :class:`ClubTarget` (per issue #4488's design).
-    * A ``MultiSourceTarget`` (issue #4509) whose ``.club`` attribute is
-      the :class:`ClubTarget` slice.
-
-    Raises:
-        TypeError: If no club-target can be resolved.
-    """
-    if isinstance(target, ClubTarget):
-        return target
-    club = getattr(target, "club", None)
-    if isinstance(club, ClubTarget):
-        return club
-    raise TypeError(
-        "DrakeFitSwingProvider.fit_swing: target must be a ClubTarget, or expose "
-        f"a `.club` attribute holding one; got {type(target).__name__}"
-    )
 
 
 class DrakeFitSwingProvider:
@@ -94,12 +72,10 @@ class DrakeFitSwingProvider:
             TypeError: If ``target`` lacks a usable ``.club`` /
                 :class:`ClubTarget` shape.
         """
-        club_target = _extract_club_target(target)
+        club_target = resolve_club_target(target)
         result = fit_swing_drake(club_target, opts)
-        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
-        from src.shared.python.motion_matching.leaderboard import maybe_append_row
-
-        maybe_append_row(self.engine_name, result, self.engine_version())
+        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
+        publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
 
     def supports_body_target(self) -> bool:
@@ -114,29 +90,13 @@ class DrakeFitSwingProvider:
         """Return the installed ``pydrake`` version, or ``"unknown"``.
 
         Stamps the resolved value into leaderboard rows so two runs
-        against different Drake wheels are distinguishable (issue
-        #4705). Falls back to :func:`importlib.metadata.version` when
-        the bindings expose no ``__version__`` attribute, and to
-        ``"unknown"`` when the wheel is not installed.
+        against different Drake wheels are distinguishable (issue #4705).
+        Delegates to the shared :func:`engine_package_version` cascade
+        (issue #6939): ``pydrake.__version__`` first, then the ``drake`` /
+        ``pydrake`` distributions, then ``"unknown"``.
         """
         try:
             import pydrake  # type: ignore[import-not-found]
         except ImportError:
             return "unknown"
-        if not isinstance(pydrake, ModuleType):
-            return "unknown"
-        version = getattr(pydrake, "__version__", None)
-        if isinstance(version, str) and version:
-            return version
-        try:
-            from importlib.metadata import PackageNotFoundError
-            from importlib.metadata import version as _v
-        except ImportError:  # pragma: no cover -- importlib.metadata is stdlib >=3.8
-            return "unknown"
-        try:
-            return _v("drake")
-        except PackageNotFoundError:
-            try:
-                return _v("pydrake")
-            except PackageNotFoundError:
-                return "unknown"
+        return engine_package_version(pydrake, "drake", "pydrake")

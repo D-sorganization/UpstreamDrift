@@ -31,16 +31,15 @@ class MPMDriver:
 
     def _generate_xml(self) -> str:
         """Generate the MJCF XML string for the bunker and clubhead."""
-        domain = self.config.bunker_bed.domain
-        lx, ly, lz = domain.length_x, domain.width_y, domain.depth_z
+        lx, ly, lz = self.config.domain_extents()
 
         # We will use a smaller number of spheres for draft simulation performance
-        num_grains = min(1000, self.config.grain_population.count)
-        r = self.config.grain_population.diameter_mean / 2.0
+        num_grains = min(1000, self.config.grain_count)
+        r = self.config.grain_diameter_mean / 2.0
 
         # Simple clubhead block
-        ch_w = self.config.clubhead.width
-        ch_h = self.config.clubhead.height
+        ch_w = self.config.clubhead_width
+        ch_h = self.config.clubhead_height
 
         xml = f"""
         <mujoco model="bunkershot">
@@ -88,7 +87,7 @@ class MPMDriver:
 
     def _load_trajectory(self) -> SwingTrajectory | None:
         """Load the swing trajectory from the configured file, or return None if unavailable."""
-        traj_file = Path(self.config.trajectory.file)
+        traj_file = Path(self.config.trajectory_file)
         if traj_file.is_absolute() and traj_file.exists():
             return SwingTrajectory.from_csv(traj_file)
         # Try relative to config directory
@@ -160,7 +159,7 @@ class MPMDriver:
 
         dt = self.model.opt.timestep
         # Derive step count from configured trajectory duration
-        n_steps = int(round(self.config.trajectory.duration / dt))
+        n_steps = int(round(self.config.trajectory_duration / dt))
 
         # Load swing trajectory if available
         trajectory = self._load_trajectory()

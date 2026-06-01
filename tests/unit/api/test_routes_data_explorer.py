@@ -125,3 +125,61 @@ def test_list_datasets_no_absolute_paths(client: TestClient, temp_dataset_dir) -
         ds = next(d for d in data["datasets"] if d["name"] == "dummy_dataset.csv")
         assert not Path(ds["path"]).is_absolute()
         assert ds["path"] == "dummy_dataset.csv"
+
+
+def test_preview_streams_only_limit_rows_for_large_csv(
+    client: TestClient, temp_dataset_dir
+) -> None:
+    """Issue #6923: preview must not read an entire large CSV into memory.
+
+    It streams only the header plus ``limit`` rows from a file handle while
+    still reporting the true total row count.
+    """
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    big_csv = output_dir / "big.csv"
+    total = 5000
+    lines = ["a,b"]
+    lines.extend(f"{i},{i * 2}" for i in range(total))
+    big_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    with (
+        patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir),
+        patch.object(
+            Path, "read_text", side_effect=AssertionError("must not read whole file")
+        ),
+    ):
+        response = client.get("/tools/data-explorer/datasets/big.csv/preview?limit=10")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["columns"] == ["a", "b"]
+    assert len(data["rows"]) == 10
+    assert data["total_rows"] == total
+    assert data["rows"][0] == {"a": "0", "b": "0"}
+
+
+def test_preview_streams_only_limit_rows_for_large_json(
+    client: TestClient, temp_dataset_dir
+) -> None:
+    """Issue #6923: JSON preview returns at most ``limit`` rows."""
+    import json
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    big_json = output_dir / "big.json"
+    total = 2000
+    records = [{"x": i, "y": i * 2} for i in range(total)]
+    big_json.write_text(json.dumps(records), encoding="utf-8")
+
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        response = client.get("/tools/data-explorer/datasets/big.json/preview?limit=5")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["columns"] == ["x", "y"]
+    assert len(data["rows"]) == 5
+    assert data["total_rows"] == total

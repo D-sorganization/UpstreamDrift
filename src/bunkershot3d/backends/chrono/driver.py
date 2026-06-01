@@ -32,21 +32,31 @@ class ChronoDriver:
         self._system: Any = None
         self._clubhead_body: Any = None
 
+    def _make_contact_material(self) -> Any:
+        """Build a ``ChContactMaterialSMC`` from the flat contact params.
+
+        Single source of truth for SMC material configuration (issue #6936):
+        walls, grains, and the clubhead all call this so a new contact
+        property is wired once rather than in three drifting copies. Reads
+        the flat ``config.contact_params()`` accessor (issue #6937) rather
+        than reaching into ``config.contact_model.*``.
+        """
+        params = self.config.contact_params()
+        material = chrono.ChContactMaterialSMC()
+        material.SetFriction(params.friction)
+        material.SetRestitution(params.restitution)
+        material.SetYoungModulus(params.youngs_modulus)
+        material.SetPoissonRatio(params.poisson_ratio)
+        return material
+
     def _build_system(self) -> Any:
         """Construct and return a populated ChSystemSMC."""
         system = chrono.ChSystemSMC()
         system.SetGravitationalAcceleration(chrono.ChVector3d(0, 0, -9.81))
 
-        domain = self.config.bunker_bed.domain
-        lx = domain.length_x
-        ly = domain.width_y
-        lz = domain.depth_z
+        lx, ly, lz = self.config.domain_extents()
 
-        wall_material = chrono.ChContactMaterialSMC()
-        wall_material.SetFriction(self.config.contact_model.friction_coefficient)
-        wall_material.SetRestitution(self.config.contact_model.restitution_coefficient)
-        wall_material.SetYoungModulus(self.config.contact_model.youngs_modulus)
-        wall_material.SetPoissonRatio(self.config.contact_model.poisson_ratio)
+        wall_material = self._make_contact_material()
 
         def _add_fixed_box(
             sys: Any,
@@ -80,18 +90,14 @@ class ChronoDriver:
         )
 
         # Grain contact material
-        grain_mat = chrono.ChContactMaterialSMC()
-        grain_mat.SetFriction(self.config.contact_model.friction_coefficient)
-        grain_mat.SetRestitution(self.config.contact_model.restitution_coefficient)
-        grain_mat.SetYoungModulus(self.config.contact_model.youngs_modulus)
-        grain_mat.SetPoissonRatio(self.config.contact_model.poisson_ratio)
+        grain_mat = self._make_contact_material()
 
         rng = np.random.default_rng(seed=42)
-        count = self.config.grain_population.count
-        r_mean = self.config.grain_population.diameter_mean / 2.0
-        r_sigma = self.config.grain_population.diameter_sigma_log
-        density = self.config.grain_population.density
-        cgf = self.config.grain_population.coarse_graining_factor
+        count = self.config.grain_count
+        r_mean = self.config.grain_diameter_mean / 2.0
+        r_sigma = self.config.grain_diameter_sigma_log
+        density = self.config.grain_density
+        cgf = self.config.grain_coarse_graining_factor
 
         # Effective particle count after coarse-graining
         effective_count = max(1, int(count / cgf))
@@ -115,15 +121,11 @@ class ChronoDriver:
             system.Add(grain)
 
         # Clubhead body
-        ch_w = self.config.clubhead.width
-        ch_h = self.config.clubhead.height
-        ch_mass = self.config.clubhead.mass
+        ch_w = self.config.clubhead_width
+        ch_h = self.config.clubhead_height
+        ch_mass = self.config.clubhead_mass
 
-        clubhead_mat = chrono.ChContactMaterialSMC()
-        clubhead_mat.SetFriction(self.config.contact_model.friction_coefficient)
-        clubhead_mat.SetRestitution(self.config.contact_model.restitution_coefficient)
-        clubhead_mat.SetYoungModulus(self.config.contact_model.youngs_modulus)
-        clubhead_mat.SetPoissonRatio(self.config.contact_model.poisson_ratio)
+        clubhead_mat = self._make_contact_material()
 
         self._clubhead_body = chrono.ChBody()
         self._clubhead_body.SetMass(ch_mass)
@@ -171,7 +173,7 @@ class ChronoDriver:
         system = self._system
         writer = BunkerShotResultWriter(output_path)
 
-        dt = 1.0 / self.config.output.rate_hz
+        dt = 1.0 / self.config.output_rate_hz
 
         # Settle phase: let grains come to rest before the clubhead swing
         for _ in range(500):

@@ -27,7 +27,6 @@ from __future__ import annotations
 import hashlib
 import importlib
 import logging
-import subprocess
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -369,18 +368,9 @@ def _git_commit() -> str:
 
     Currently unused by the dataclass (``SourceProvenance`` does not carry
     ``git_commit``) but kept available for future schema expansion that
-    matches the MATLAB struct exactly.
+    matches the MATLAB struct exactly. Delegates to the shared probe so the
+    git lookup is not reimplemented per engine (issue #6939).
     """
-    try:
-        out = subprocess.run(  # noqa: S603,S607 - safe, fixed args
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-        if out.returncode == 0:
-            return out.stdout.strip()
-    except (OSError, subprocess.SubprocessError):  # pragma: no cover - defensive
-        pass
-    return "unknown"
+    from src.shared.python.motion_matching.provenance import git_commit_short
+
+    return git_commit_short()
