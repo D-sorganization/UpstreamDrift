@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.230                                            |
+| **Spec Version**        | 1.0.231                                            |
 | **Last Spec Update**    | 2026-06-01                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-01** - Replaced smoke-only tests with value-asserting coverage for three calc modules (#6998, #6999, #7003): pressure-drop flow calculations (Darcy-Weisbach, Re=2300/4000 regime boundaries, hydrostatic-head sign convention, API RP 14E erosional velocity, expansion-factor bounds, negatives→ValueError); data-fitting solvers (2-link analytical IK round-trip vs synthetic ground truth, numerical IK convergence, forward-kinematics geometry, anthropometric parameter estimation vs Dempster fractions, residual contracts); and thermo property backends (CoolProp input validation, phase/quality determination, simplified ideal-gas/liquid correlations, Antoine saturation pressure/temperature round-trip, optional CoolProp/Cantera skips). Fixed a real robustness bug in `determine_phase_and_quality` (`sidekick/calculators/thermo/_property_backends.py`): a non-Cantera `water` object raised an uncaught `AttributeError` on `.TQ`; now caught so the function correctly returns `("unknown", 0.0)` per its contract.
 - **2026-05-31** - Hardened JaxSim readiness and parity gates (#6880, #6881, #6882, #6884): `EngineManager` now registers JaxSim as a runtime-backed engine, only marks runtime-backed engines available when both adapter/provider paths and importable runtime dependencies are present, preserves DbC path-policy failures as provider-discovery misses instead of constructor crashes, and uses a required-JUnit testcase assertion in the cross-engine workflow so skipped/missing JaxSim/Pinocchio parity cases fail CI.
 - **2026-05-31** - Fixed two HIGH-severity physics-audit defects (#6890, #6891): `JaxSimBackend.compute_jacobian` now restacks the native JaxSim free-floating Jacobian to the canonical `[angular; linear; joints]` convention — permuting the six base columns and the six spatial output rows — so `J·v` and `Jᵀ·force` agree with `M`/`h`/`v`/inverse-dynamics; and the cross-engine conformance harness no longer counts a missing required method on an advertised capability (now `passed=False`) or a throwing `supports()` query (now a failure, not a swallowed free pass) as a passing skip, closing a CC-8 gate-integrity hole. Genuine missing capabilities remain legitimate skips.
 - **2026-05-31** - Recovered closed review-feedback fixes for the metadata-driven UX wrappers: the shared `simulation.engine` metadata now includes `jaxsim` for generated TypeScript/PyQt engine selectors, and PyQt `HelpfulField` free-form fields with `valid_range: null` now render an editable `QLineEdit` instead of an empty combo box.
