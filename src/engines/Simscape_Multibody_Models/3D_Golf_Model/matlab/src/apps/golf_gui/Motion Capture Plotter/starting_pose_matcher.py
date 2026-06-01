@@ -35,6 +35,7 @@ Run:
 from __future__ import annotations
 
 import json
+import math
 import logging
 import sys
 from pathlib import Path
@@ -1731,8 +1732,10 @@ class StartingPoseMatcher(QMainWindow):
         if self.cb_fit_scale.isChecked():
             shaft_t = ch_target - mp_target
             shaft_m = ch_skel - mp_skel
-            len_t = float(np.linalg.norm(shaft_t))
-            len_m = float(np.linalg.norm(shaft_m))
+            # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+            len_t = float(math.sqrt(np.dot(shaft_t, shaft_t)))
+            # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+            len_m = float(math.sqrt(np.dot(shaft_m, shaft_m)))
             if len_m > 1e-6 and len_t > 1e-6:
                 new_scale = float(
                     np.clip(
@@ -1744,8 +1747,12 @@ class StartingPoseMatcher(QMainWindow):
         scale = max(1e-3, self.s_scale.value())
 
         # Solve Rz from XY-plane shaft directions (delegated to core).
-        nt = float(np.linalg.norm((ch_target - mp_target)[:2]))
-        nm = float(np.linalg.norm((ch_skel - mp_skel)[:2]))
+        diff_t = (ch_target - mp_target)[:2]
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        nt = float(math.hypot(diff_t[0], diff_t[1]))
+        diff_m = (ch_skel - mp_skel)[:2]
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        nm = float(math.hypot(diff_m[0], diff_m[1]))
         if nt < 1e-6 or nm < 1e-6:
             self._notify(
                 "Shaft projection onto XY plane is degenerate (vertical "
@@ -2223,14 +2230,15 @@ class StartingPoseMatcher(QMainWindow):
                 "dx_mm": float(d_mid[0]),
                 "dy_mm": float(d_mid[1]),
                 "dz_mm": float(d_mid[2]),
-                "norm_mm": float(np.linalg.norm(d_mid)),
+                # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+                "norm_mm": float(math.sqrt(np.dot(d_mid, d_mid))),
             }
             ch_target = self._mocap_pos_for(slot, "club")
             if ch_target is not None and "ch" in slot.skeleton.joints:
                 moved_ch = self.transform.apply(slot.skeleton.joints["ch"][None, :])[0]
-                entry["clubhead_norm_mm"] = float(
-                    np.linalg.norm((moved_ch - ch_target) * 1000.0)
-                )
+                d_ch = (moved_ch - ch_target) * 1000.0
+                # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+                entry["clubhead_norm_mm"] = float(math.sqrt(np.dot(d_ch, d_ch)))
             out[key] = entry
         return out
 
@@ -2576,7 +2584,8 @@ class StartingPoseMatcher(QMainWindow):
             n = hub - torso
         else:
             n = np.array([0.0, 0.0, 1.0])
-        nn = float(np.linalg.norm(n))
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        nn = float(math.sqrt(np.dot(n, n)))
         if nn < 1e-6:
             n = np.array([0.0, 0.0, 1.0])
         else:
@@ -2585,16 +2594,19 @@ class StartingPoseMatcher(QMainWindow):
         # In-plane axis: project (rs - ls) onto the plane orthogonal to n.
         rs_dir = rs - ls
         rs_dir = rs_dir - np.dot(rs_dir, n) * n
-        rd = float(np.linalg.norm(rs_dir))
+        # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+        rd = float(math.sqrt(np.dot(rs_dir, rs_dir)))
         if rd < 1e-6:
             # Pick any perpendicular if shoulders are degenerate.
             rs_dir = np.array([1.0, 0.0, 0.0])
             rs_dir = rs_dir - np.dot(rs_dir, n) * n
-            rd = float(np.linalg.norm(rs_dir))
+            # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+            rd = float(math.sqrt(np.dot(rs_dir, rs_dir)))
             if rd < 1e-6:
                 rs_dir = np.array([0.0, 1.0, 0.0])
                 rs_dir = rs_dir - np.dot(rs_dir, n) * n
-                rd = float(np.linalg.norm(rs_dir))
+                # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
+                rd = float(math.sqrt(np.dot(rs_dir, rs_dir)))
                 if rd < 1e-6:
                     return
         rs_dir = rs_dir / rd
