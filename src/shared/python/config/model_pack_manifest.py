@@ -69,6 +69,13 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
             exercises,
         )
         prefix = package or repo or str(provider)
+        # ``models_root`` (when declared) is the provider-relative directory that
+        # contains every exercise path. Resolution later sets
+        # ``source_root=provider_root``, so the exercise ``path`` must be made
+        # relative to ``provider_root`` by prepending ``models_root`` here;
+        # otherwise ``provider_root/<path>`` misses the ``models_root`` segment
+        # and the model file cannot be found (#6886).
+        models_root = str(data.get("models_root", "")).strip()
         models = []
         for exercise in exercises:
             require(
@@ -83,6 +90,11 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
                     "model_pack/v1 exercise entries require non-empty 'id' "
                     f"and 'path'; got {exercise!r}"
                 )
+            if models_root:
+                models_root_norm = models_root.replace("\\", "/").rstrip("/")
+                path_norm = path.replace("\\", "/").lstrip("/")
+                if models_root_norm and not path_norm.startswith(models_root_norm):
+                    path = f"{models_root_norm}/{path_norm}"
             models.append(
                 {
                     "id": f"{prefix}-{exercise_id}",

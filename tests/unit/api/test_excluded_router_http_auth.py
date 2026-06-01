@@ -174,6 +174,57 @@ def test_realtime_subscribe_ws_connects_with_valid_user(
         ws.close()
 
 
+# ── (e) WSPubSub autostart path: bare include_router still enforces auth ──
+
+
+@pytest.fixture
+def autostart_app() -> FastAPI:
+    """App that mounts the realtime router exactly as ``WSPubSub._spawn_server``.
+
+    The autostart server does a bare ``app.include_router(realtime_router)``
+    with *no* mount-level auth dependency. Issue #6911: the route itself must
+    carry ``ws_compatible_auth_dependency`` so this path is protected too —
+    otherwise #6888 (unauthenticated broadcast injection) is still reachable on
+    the autostarted server.
+    """
+    test_app = FastAPI()
+    test_app.include_router(realtime_module.router)
+    from src.api.rate_limit import limiter
+
+    test_app.state.limiter = limiter
+    return test_app
+
+
+@pytest.fixture
+def autostart_client(autostart_app: FastAPI) -> TestClient:
+    return TestClient(autostart_app, raise_server_exceptions=False)
+
+
+def test_autostart_realtime_publish_unauthenticated_rejected(
+    autostart_client: TestClient,
+) -> None:
+    """WSPubSub-style app (bare include_router) must still reject unauth publish."""
+    with patch.dict(os.environ, _REMOTE_ENV, clear=False):
+        response = autostart_client.post(
+            "/realtime/publish",
+            json={"channel": "pose/canonical", "payload": {"spoofed": True}},
+        )
+    assert response.status_code in (401, 403), response.text
+
+
+def test_autostart_realtime_publish_allowed_in_local_mode(
+    autostart_client: TestClient,
+) -> None:
+    """Local/auth-disabled mode still allows the autostart publish."""
+    with patch.dict(os.environ, _LOCAL_ENV, clear=False):
+        response = autostart_client.post(
+            "/realtime/publish",
+            json={"channel": "pose/canonical", "payload": {"ok": True}},
+        )
+    assert response.status_code == 200, response.text
+    assert response.json()["delivered"] == 0
+
+
 def test_chat_stream_ws_connects_with_valid_user(client: TestClient) -> None:
     """The chat WebSocket must still connect through the HTTP auth dependency."""
     fake_user = object()
