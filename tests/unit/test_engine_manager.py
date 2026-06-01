@@ -11,6 +11,7 @@ from src.shared.python.engine_core.engine_manager import (
     EngineStatus,
     EngineType,
 )
+from src.shared.python.core.contracts import PreconditionError
 
 
 class TestEngineManager:
@@ -42,6 +43,18 @@ class TestEngineManager:
 
             assert manager.suite_root == temp_path
             assert manager.engines_root == engines_dir
+
+    def test_provider_path_contract_violation_does_not_abort_init(self) -> None:
+        """Provider registry path policy failures only disable provider paths."""
+        with patch(
+            "src.shared.python.engine_core.engine_manager.ModelRegistry"
+            ".get_engine_provider_paths",
+            side_effect=PreconditionError("provider path escaped approved roots"),
+        ):
+            manager = EngineManager()
+
+        assert manager.provider_engine_paths == {}
+        assert isinstance(manager.engine_status, dict)
 
     def test_engine_discovery_with_existing_engines(self) -> None:
         """Test engine discovery when engines exist and runtime deps import.

@@ -26,6 +26,8 @@ from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
+    publish_leaderboard_row,
+    resolve_club_target,
 )
 
 from .fit_swing import FitOptions as OpenSimFitOptions
@@ -91,18 +93,16 @@ class OpenSimFitSwingProvider:
                 or when ``opts.engine_options`` is supplied but is not an
                 :class:`OpenSimFitOptions`.
         """
-        club = self._extract_club(target)
+        club = resolve_club_target(target)
         native = self._build_native_options(opts)
         result = fit_swing_opensim(club, native)
-        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
-        from src.shared.python.motion_matching.leaderboard import maybe_append_row
-
+        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
         version = (
             self.engine_version()
             if hasattr(self, "engine_version")
             else getattr(result, "engine_version", "unknown")
         )
-        maybe_append_row(self.engine_name, result, version)
+        publish_leaderboard_row(self.engine_name, result, version)
         return result
 
     def supports_body_target(self) -> bool:
@@ -121,32 +121,12 @@ class OpenSimFitSwingProvider:
     ) -> ClubTarget:
         """Return the :class:`ClubTarget` payload from ``target``.
 
-        Accepts bare :class:`ClubTarget`, :class:`ClubBallTarget` (whose
-        ``.club`` is unwrapped), and :class:`MultiSourceTarget` (whose
-        ``.club`` slot is unwrapped). The ball-impact boundary on a
-        :class:`ClubBallTarget` is intentionally discarded -- the OpenSim
-        fitter does not consume it.
+        Thin delegate to the shared :func:`resolve_club_target` (issue
+        #6935) so the unwrap behaviour is identical across every engine.
+        Retained as a public static method for back-compat with callers
+        and tests that reference it directly.
         """
-        if isinstance(target, ClubTarget):
-            return target
-        if isinstance(target, ClubBallTarget):
-            return target.club
-        if isinstance(target, MultiSourceTarget):
-            if target.club is None:
-                raise ValueError(
-                    "OpenSimFitSwingProvider requires target.club to be set; "
-                    "got MultiSourceTarget with club=None"
-                )
-            if not isinstance(target.club, ClubTarget):
-                raise ValueError(
-                    f"target.club must be a ClubTarget, "
-                    f"got {type(target.club).__name__}"
-                )
-            return target.club
-        raise TypeError(
-            f"target must be MultiSourceTarget, ClubTarget, or ClubBallTarget, "
-            f"got {type(target).__name__}"
-        )
+        return resolve_club_target(target)
 
     @staticmethod
     def _build_native_options(opts: FitOptions) -> OpenSimFitOptions:

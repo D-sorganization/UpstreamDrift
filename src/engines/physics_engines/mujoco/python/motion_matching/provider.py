@@ -20,10 +20,13 @@ import logging
 from typing import TYPE_CHECKING
 
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
+    publish_leaderboard_row,
     register_provider,
+    resolve_club_target,
 )
 
 from .fit_swing import FitOptions as MujocoFitOptions
@@ -84,10 +87,8 @@ class MujocoFitSwingProvider:
         club = self._extract_club(target)
         native = self._build_native_options(opts)
         result = fit_swing_mujoco(club, native)
-        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
-        from src.shared.python.motion_matching.leaderboard import maybe_append_row
-
-        maybe_append_row(self.engine_name, result, self.engine_version())
+        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
+        publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
 
     def supports_body_target(self) -> bool:
@@ -110,18 +111,7 @@ class MujocoFitSwingProvider:
             import mujoco  # type: ignore[import-not-found]
         except ImportError:
             return "unknown"
-        version = getattr(mujoco, "__version__", None)
-        if isinstance(version, str) and version:
-            return version
-        try:
-            from importlib.metadata import PackageNotFoundError
-            from importlib.metadata import version as _v
-        except ImportError:  # pragma: no cover -- stdlib >=3.8
-            return "unknown"
-        try:
-            return _v("mujoco")
-        except PackageNotFoundError:
-            return "unknown"
+        return engine_package_version(mujoco, "mujoco")
 
     # --- Internal helpers ----------------------------------------------
 
@@ -129,27 +119,12 @@ class MujocoFitSwingProvider:
     def _extract_club(target: MultiSourceTarget | ClubTarget) -> ClubTarget:
         """Return the :class:`ClubTarget` payload from ``target``.
 
-        Accepts both wrapped and unwrapped inputs to keep call sites
-        portable across the canonical-API rollout.
+        Thin delegate to the shared :func:`resolve_club_target` (issue
+        #6935) so unwrap behaviour is identical across every engine -- a
+        :class:`ClubBallTarget` is now accepted here too. Retained as a
+        public static method for back-compat with direct callers/tests.
         """
-        if isinstance(target, ClubTarget):
-            return target
-        if isinstance(target, MultiSourceTarget):
-            if target.club is None:
-                raise ValueError(
-                    "MujocoFitSwingProvider requires target.club to be set; "
-                    "got MultiSourceTarget with club=None"
-                )
-            if not isinstance(target.club, ClubTarget):
-                raise ValueError(
-                    f"target.club must be a ClubTarget, "
-                    f"got {type(target.club).__name__}"
-                )
-            return target.club
-        raise TypeError(
-            f"target must be MultiSourceTarget or ClubTarget, "
-            f"got {type(target).__name__}"
-        )
+        return resolve_club_target(target)
 
     @staticmethod
     def _build_native_options(opts: FitOptions) -> MujocoFitOptions:

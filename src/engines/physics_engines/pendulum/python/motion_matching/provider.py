@@ -10,10 +10,13 @@ import datetime
 
 import numpy as np
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.provenance import git_commit_short
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
+    publish_leaderboard_row,
     register_provider,
+    resolve_club_target,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 
@@ -32,7 +35,7 @@ class PendulumFitSwingProvider:
         target: MultiSourceTarget | ClubTarget,
         opts: FitOptions,
     ) -> CanonicalFitResult:
-        club = self._extract_club(target)
+        club = resolve_club_target(target)
 
         # Map the 3D target to a 2D swing plane
         from src.shared.python.motion_matching.projection_2d import project_to_2d
@@ -119,8 +122,10 @@ class PendulumFitSwingProvider:
         t0 = time.perf_counter()
         theta0 = np.zeros(14)  # 14 polynomial coefficients
 
-        # Scipy minimize loop
-        res = minimize(
+        # Scipy minimize loop. scipy-stubs' ``minimize`` overloads do not
+        # cover this (callable, ndarray, method=str, options=dict) form, so
+        # the call is type-ignored rather than restructured.
+        res = minimize(  # type: ignore[call-overload]
             cost_func,
             theta0,
             method="SLSQP",
@@ -128,7 +133,7 @@ class PendulumFitSwingProvider:
         )
         elapsed = time.perf_counter() - t0
 
-        return CanonicalFitResult(
+        result = CanonicalFitResult(
             theta_optimal=np.asarray(res.x, dtype=np.float64),
             final_cost=float(res.fun),
             final_rmse_m=float(np.sqrt(res.fun)),
@@ -139,11 +144,14 @@ class PendulumFitSwingProvider:
             message=str(res.message),
             history=tuple(history),
             method="scipy SLSQP",
-            git_commit="unknown",
+            git_commit=git_commit_short(),
             engine_version=self.engine_version(),
             target_hash="dummy",
             timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         )
+        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
+        publish_leaderboard_row(self.engine_name, result, self.engine_version())
+        return result
 
     def supports_body_target(self) -> bool:
         return False
@@ -156,15 +164,12 @@ class PendulumFitSwingProvider:
 
     @staticmethod
     def _extract_club(target: MultiSourceTarget | ClubTarget) -> ClubTarget:
-        if isinstance(target, ClubTarget):
-            return target
-        if isinstance(target, MultiSourceTarget):
-            if target.club is None:
-                raise ValueError("target.club must be set")
-            if not isinstance(target.club, ClubTarget):
-                raise ValueError("target.club must be a ClubTarget")
-            return target.club
-        raise TypeError("target must be MultiSourceTarget or ClubTarget")
+        """Delegate to the shared :func:`resolve_club_target` (issue #6935).
+
+        Retained for back-compat with direct callers/tests; unwrap behaviour
+        is now identical across every engine.
+        """
+        return resolve_club_target(target)
 
 
 register_provider(PendulumFitSwingProvider())

@@ -398,6 +398,71 @@ def test_launch_module_keep_terminal(mock_popen, manager) -> None:
         assert "& pause" in mock_popen.call_args[0][0]
 
 
+@patch(_VALIDATE_SCRIPT)
+@patch("subprocess.Popen")
+@patch(_SECURE_POPEN)
+def test_launch_script_separate_term_quotes_spaces_for_cmd(
+    mock_secure_popen, mock_popen, mock_validate, manager
+) -> None:
+    """Windows console launch must use cmd-compatible double-quote quoting.
+
+    Regression for #6921: shlex.quote uses POSIX single quotes, which
+    cmd.exe does not honor, breaking paths that contain spaces.
+    """
+    manager.use_separate_terminals = True
+    script_path = Path("/fake/dir with spaces/script.py")
+    cwd_path = Path("/fake/cwd")
+    fake_exe = r"C:\Program Files\Python\python.exe"
+
+    with (
+        patch("src.launchers.launcher_process_manager.os.name", "nt"),
+        patch("src.launchers.launcher_process_manager.sys.executable", fake_exe),
+    ):
+        manager.launch_script("Test", script_path, cwd_path)
+        cmd_str = mock_popen.call_args[0][0]
+
+    # cmd.exe quoting uses double quotes around the spaced executable path.
+    assert '"C:\\Program Files\\Python\\python.exe"' in cmd_str
+    # POSIX single-quote quoting must never appear.
+    assert "'" not in cmd_str
+    assert "cmd /c" in cmd_str
+
+
+@patch("subprocess.Popen")
+def test_launch_module_separate_term_quotes_spaces_for_cmd(mock_popen, manager) -> None:
+    """Windows module launch must double-quote the spaced interpreter path."""
+    manager.use_separate_terminals = True
+    fake_exe = r"C:\Program Files\Python\python.exe"
+
+    with (
+        patch("src.launchers.launcher_process_manager.os.name", "nt"),
+        patch("src.launchers.launcher_process_manager.sys.executable", fake_exe),
+        patch.dict("os.environ", {}),
+    ):
+        manager.launch_module("Test", "my_module", PureWindowsPath("."))
+        cmd_str = mock_popen.call_args[0][0]
+
+    assert '"C:\\Program Files\\Python\\python.exe"' in cmd_str
+    assert "'" not in cmd_str
+    assert "-m my_module" in cmd_str
+
+
+def test_build_windows_console_cmd_helper() -> None:
+    """The shared cmd-builder helper quotes args and toggles pause (DRY #6922)."""
+    from src.launchers.launcher_process_manager import _build_windows_console_cmd
+
+    args = [r"C:\Program Files\Python\python.exe", r"C:\my scripts\a.py"]
+    plain = _build_windows_console_cmd(args, keep_terminal_open=False)
+    paused = _build_windows_console_cmd(args, keep_terminal_open=True)
+
+    assert plain.startswith('cmd /c "')
+    assert '"C:\\Program Files\\Python\\python.exe"' in plain
+    assert "& pause" not in plain
+
+    assert paused.startswith('cmd /k "')
+    assert "& pause" in paused
+
+
 @patch("subprocess.Popen")
 def test_launch_in_wsl_posix(mock_popen, manager) -> None:
     with patch("os.name", "posix"):

@@ -32,6 +32,7 @@ on:
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
+      - "scripts/ci/check_pinocchio_dynamics_api.py"
       - ".jules/templates/**"
       - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
@@ -49,6 +50,7 @@ on:
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
       - "scripts/jaxsim/check_jaxsim_pin.py"
+      - "scripts/ci/check_pinocchio_dynamics_api.py"
       - ".jules/templates/**"
       - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
@@ -135,7 +137,12 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
           python -m ensurepip --upgrade || true
-          pip install "pin>=2.6.0" || echo "::warning::pinocchio install failed"
+          # PyPI also has an unrelated `pinocchio` distribution (version 0.1)
+          # that imports successfully but exposes none of the robotics
+          # dynamics APIs. Remove it before installing the correct `pin`
+          # distribution, whose import package is also named `pinocchio`.
+          pip uninstall -y pinocchio || true
+          pip install --force-reinstall --no-cache-dir "pin>=2.6.0,<5.0.0" || echo "::warning::pinocchio install failed"
           python -m ensurepip --upgrade || true
           pip install -e ".[jaxsim]" || echo "::warning::jaxsim install failed"
           python -m ensurepip --upgrade || true
@@ -170,7 +177,9 @@ jobs:
         # missing; this check makes that fail loudly instead of greening on
         # skipped assertions.
         shell: bash
-        run: python -c "import jax, jaxlib, jaxsim, pinocchio"
+        run: |
+          python -c "import jax, jaxlib, jaxsim"
+          python3 scripts/ci/check_pinocchio_dynamics_api.py
 
       - name: Run cross-engine forward-sim equivalence test
         env:
@@ -197,9 +206,9 @@ jobs:
         # fails unless at least one JaxSim/Pinocchio parity case passed.
         shell: bash
         run: |
-          python3 scripts/ci/assert_required_parity_ran.py \
-            --junit test-results/cross-engine-equivalence-junit.xml \
-            --require-name test_jaxsim_pinocchio_free_body_dynamics_terms_match
+          python3 scripts/ci/require_junit_test_passed.py \
+            test-results/cross-engine-equivalence-junit.xml \
+            test_jaxsim_pinocchio_free_body_dynamics_terms_match
 
       - name: Upload equivalence report
         if: always()

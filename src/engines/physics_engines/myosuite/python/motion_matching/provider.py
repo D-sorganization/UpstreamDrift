@@ -99,10 +99,13 @@ class MyoSuiteFitSwingProvider:
     def engine_version(self) -> str:
         try:
             import myosuite
-
-            return str(getattr(myosuite, "__version__", "unknown"))
         except ImportError:
             return "unknown"
+        from src.shared.python.motion_matching.provenance import (
+            engine_package_version,
+        )
+
+        return engine_package_version(myosuite, "myosuite")
 
 
 register_provider(MyoSuiteFitSwingProvider())

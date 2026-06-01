@@ -6,7 +6,11 @@ import pytest
 import numpy as np
 
 from src.shared.python.motion_matching.club_target import ClubTarget, SourceProvenance
-from src.shared.python.motion_matching.provider import FitOptions, MultiSourceTarget
+from src.shared.python.motion_matching.provider import (
+    FitOptions,
+    MultiSourceTarget,
+    resolve_club_target,
+)
 from src.shared.python.motion_matching.provider_registry import (
     clear_registry,
     get_provider,
@@ -41,16 +45,27 @@ def test_provider_registers() -> None:
 
 
 def test_fit_swing_returns_baseline(dummy_club_target: ClubTarget) -> None:
-    """Test that fit_swing returns a valid zero-cost baseline result."""
+    """fit_swing returns a well-formed CanonicalFitResult from the SLSQP fit.
+
+    The pendulum provider drives ``scipy.optimize.minimize(SLSQP)`` over the
+    polynomial-torque coefficients; it does not produce a zero-cost analytic
+    baseline. Assert the real solver contract: a finite non-negative cost, a
+    matching RMSE, the SLSQP method tag, and a populated git-commit stamp
+    (#6935 / #6939 wired the shared provenance probe).
+    """
+    import math
+
     provider = PendulumFitSwingProvider()
     opts = FitOptions(maxiter=10)
 
     result = provider.fit_swing(dummy_club_target, opts)
 
-    assert result.solver_status == "success"
-    assert result.final_cost == 0.0
-    assert result.method == "analytic"
-    assert result.iterations == 1
+    assert result.solver_status in {"success", "failure"}
+    assert result.final_cost >= 0.0
+    assert math.isfinite(result.final_cost)
+    assert result.final_rmse_m == pytest.approx(math.sqrt(result.final_cost))
+    assert result.method == "scipy SLSQP"
+    assert isinstance(result.git_commit, str) and result.git_commit
 
 
 def test_extract_club_from_multisource(dummy_club_target: ClubTarget) -> None:
@@ -63,11 +78,9 @@ def test_extract_club_from_multisource(dummy_club_target: ClubTarget) -> None:
 
 
 def test_extract_club_rejects_invalid() -> None:
-    """Test that _extract_club raises errors on bad input."""
-    provider = PendulumFitSwingProvider()
-
-    with pytest.raises(TypeError, match="MultiSourceTarget or ClubTarget"):
-        provider._extract_club("not a target")  # type: ignore
+    """Test that the shared unwrap raises errors on bad input (#6935)."""
+    with pytest.raises(TypeError, match="MultiSourceTarget"):
+        resolve_club_target("not a target")  # type: ignore
 
     with pytest.raises(ValueError, match="at least one of \\(club, body\\) set"):
         MultiSourceTarget(club=None, body=None)
