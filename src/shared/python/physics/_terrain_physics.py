@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -7,6 +8,16 @@ import numpy as np
 
 from src.shared.python.core.constants import GRAVITY
 from src.shared.python.physics.terrain import Terrain
+
+
+def _magnitude(vec: np.ndarray) -> float:
+    """Euclidean norm via ``math.sqrt(dot)`` (≈3x faster than ``np.linalg.norm``).
+
+    The vector is cast to ``float`` first so an integer-dtype input cannot
+    overflow inside ``np.dot`` before the square root (#7022).
+    """
+    arr = np.asarray(vec, dtype=float)
+    return math.sqrt(float(np.dot(arr, arr)))
 
 
 @dataclass
@@ -161,7 +172,7 @@ class TerrainContactModel:
         if normal_force is None:
             normal_force = self.compute_contact_force(x, y, z, radius, velocity)
 
-        normal_force_magnitude = np.linalg.norm(normal_force)
+        normal_force_magnitude = _magnitude(normal_force)
         if normal_force_magnitude < 1e-6:
             return np.zeros(3)
 
@@ -172,7 +183,7 @@ class TerrainContactModel:
         v_normal_component = np.dot(velocity, normal) * normal
         v_tangent = velocity - v_normal_component
 
-        v_tangent_magnitude = np.linalg.norm(v_tangent)
+        v_tangent_magnitude = _magnitude(v_tangent)
         if v_tangent_magnitude < 1e-6:
             return np.zeros(3)
 
@@ -426,7 +437,7 @@ class CompressibleTurfModel:
         normal = self.terrain.get_normal(x, y)
 
         # Kinetic energy
-        speed = np.linalg.norm(impact_velocity)
+        speed = _magnitude(impact_velocity)
         kinetic_energy = 0.5 * mass * speed**2
 
         # Normal velocity component

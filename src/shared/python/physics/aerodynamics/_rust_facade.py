@@ -28,6 +28,17 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
+def _magnitude(vec: np.ndarray) -> float:
+    """Euclidean norm via ``math.sqrt(dot)`` (≈3x faster than ``np.linalg.norm``).
+
+    The vector is cast to ``float`` first so an integer-dtype input cannot
+    overflow inside ``np.dot`` before the square root (#7022).
+    """
+    arr = np.asarray(vec, dtype=float)
+    return math.sqrt(float(np.dot(arr, arr)))
+
+
 # ── Lazy Rust import ─────────────────────────────────────────────────────────
 
 _RUST_AVAILABLE = False
@@ -159,10 +170,10 @@ def _python_fallback_total(
 
     area = math.pi * spec.radius**2
     rel_velocity = velocity - np.asarray(spec.wind, dtype=float)
-    speed = float(np.linalg.norm(rel_velocity))
-    spin_mag = float(np.linalg.norm(spin))
+    speed = _magnitude(rel_velocity)
+    spin_mag = _magnitude(spin)
 
-    total = np.zeros(3)
+    total: np.ndarray = np.zeros(3)
     if speed < 1e-6:
         return total
 
@@ -182,7 +193,7 @@ def _python_fallback_total(
         cl = 0.4 * (1.0 - math.exp(-spin_ratio / 0.1))
         spin_axis = spin / (spin_mag + 1e-10)
         lift_dir = np.cross(spin_axis, rel_velocity)
-        lift_norm = float(np.linalg.norm(lift_dir))
+        lift_norm = _magnitude(lift_dir)
         if lift_norm > 1e-6:
             f_mag = 0.5 * spec.air_density * cl * area * speed * speed
             total = total + f_mag * lift_dir / lift_norm
@@ -190,7 +201,7 @@ def _python_fallback_total(
     # ── Magnus ──────────────────────────────────────────────────────────
     if spec.magnus_enabled and spin_mag > 1e-6:
         magnus_dir = np.cross(spin, rel_velocity)
-        magnus_norm = float(np.linalg.norm(magnus_dir))
+        magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
             spin_param = spec.radius * spin_mag / speed
             # Rust: 0.4 * min(spin_param, 0.5)

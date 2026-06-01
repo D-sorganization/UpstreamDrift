@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from src.shared.python.physics._contact_types import (
@@ -9,6 +11,17 @@ from src.shared.python.physics._contact_types import (
 )
 
 
+def _magnitude(vec: np.ndarray) -> float:
+    """Euclidean norm via ``math.sqrt(dot)`` (≈3x faster than ``np.linalg.norm``).
+
+    The vector is cast to ``float`` first so that an integer-dtype input cannot
+    overflow inside ``np.dot`` before the square root (#7022); ``np.linalg.norm``
+    performed this promotion implicitly.
+    """
+    arr = np.asarray(vec, dtype=float)
+    return math.sqrt(float(np.dot(arr, arr)))
+
+
 def check_friction_cone(
     normal_force: float,
     tangent_force: np.ndarray,
@@ -16,7 +29,7 @@ def check_friction_cone(
 ) -> bool:
     if normal_force is None:
         raise ValueError("normal_force must be provided")
-    tangent_magnitude = np.linalg.norm(tangent_force)
+    tangent_magnitude = _magnitude(tangent_force)
     max_tangent = friction_coefficient * abs(normal_force)
     return bool(tangent_magnitude <= max_tangent)
 
@@ -24,7 +37,7 @@ def check_friction_cone(
 def compute_slip_direction(
     tangent_force: np.ndarray,
 ) -> np.ndarray:
-    magnitude = np.linalg.norm(tangent_force)
+    magnitude = _magnitude(tangent_force)
     if magnitude < 1e-10:
         return np.zeros(3)
     return np.asarray(tangent_force / magnitude)
@@ -52,7 +65,7 @@ def classify_contact_state(
     if normal_force <= 0:
         return ContactState.NO_CONTACT
 
-    slip_speed = np.linalg.norm(slip_velocity)
+    slip_speed = _magnitude(slip_velocity)
     if slip_speed > SLIP_VELOCITY_THRESHOLD:
         return ContactState.SLIPPING
 
