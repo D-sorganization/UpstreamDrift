@@ -86,7 +86,7 @@ def test_rejects_empty_shape_id() -> None:
 
 @pytest.mark.unit
 def test_rejects_non_marker_binding() -> None:
-    with pytest.raises(TypeError, match="binding must be MarkerBinding"):
+    with pytest.raises(TypeError, match="binding must be a MarkerBinding"):
         FittedShape(
             shape_id="x",
             binding="not a binding",  # type: ignore[arg-type]
@@ -104,7 +104,7 @@ def test_rejects_non_marker_binding() -> None:
 
 @pytest.mark.unit
 def test_rejects_non_numpy_arrays() -> None:
-    with pytest.raises(TypeError, match="centroid must be numpy.ndarray"):
+    with pytest.raises(TypeError, match="centroid must be a numpy.ndarray"):
         FittedShape(
             shape_id="x",
             binding=_example_binding(),
@@ -174,7 +174,7 @@ def test_rejects_mismatched_valid_mask() -> None:
 
 @pytest.mark.unit
 def test_valid_mask_must_be_bool_dtype() -> None:
-    with pytest.raises(TypeError, match="valid_mask must have dtype bool"):
+    with pytest.raises(TypeError, match="valid_mask must have dtype=bool"):
         FittedShape(
             shape_id="x",
             binding=_example_binding(),
@@ -194,7 +194,9 @@ def test_valid_mask_must_be_bool_dtype() -> None:
 def test_scale_must_be_positive_on_valid_frames() -> None:
     scale = np.ones((3, 3))
     scale[1, 0] = -0.1  # invalid: negative
-    with pytest.raises(ValueError, match="scale must be strictly positive"):
+    with pytest.raises(
+        ValueError, match="scale entries on valid frames must be strictly positive"
+    ):
         FittedShape(
             shape_id="x",
             binding=_example_binding(),
@@ -209,7 +211,9 @@ def test_scale_must_be_positive_on_valid_frames() -> None:
 def test_scale_must_be_finite_on_valid_frames() -> None:
     scale = np.ones((3, 3))
     scale[1, 0] = np.nan
-    with pytest.raises(ValueError, match="scale must contain only finite"):
+    with pytest.raises(
+        ValueError, match="scale entries on valid frames must be finite"
+    ):
         FittedShape(
             shape_id="x",
             binding=_example_binding(),

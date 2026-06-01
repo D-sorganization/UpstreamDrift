@@ -112,3 +112,8 @@ class FittedShape:
                 raise ValueError(
                     "scale entries on valid frames must be strictly positive"
                 )
+
+    @property
+    def n_frames(self) -> int:
+        """Return the number of frames (T) in the trajectory."""
+        return self.centroid.shape[0]

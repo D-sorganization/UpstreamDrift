@@ -169,7 +169,7 @@ def test_demonstration_recording() -> None:
     assert len(demo.timestamps) == 2
     assert len(demo.actions) == 2
     assert demo.source == "teleoperation"
-    assert demo.solver_status == "success"
+    assert demo.success is True
 
 
 class TestIssue2476TeleoperationPolling:

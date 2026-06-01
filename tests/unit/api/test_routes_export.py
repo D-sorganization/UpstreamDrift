@@ -9,10 +9,10 @@ from src.api.dependencies import get_task_manager
 
 
 class MockTaskManager:
-    async def exists(self, task_id):
+    def exists(self, task_id):
         return task_id == "valid_task"
 
-    async def get(self, task_id):
+    def get(self, task_id):
         if task_id == "valid_task":
             return {"status": "completed", "result": {"data": "test_data"}}
         return None

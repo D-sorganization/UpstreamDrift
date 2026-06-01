@@ -1483,7 +1483,7 @@ class ChatDockWidget(QDockWidget):
         screen = cast("QApplication", app).primaryScreen()
         if not screen:
             return
-        pixmap = parent.grab() if parent else screen.grabWindow(0)
+        pixmap = parent.grab() if parent else screen.grabWindow(0)  # type: ignore[arg-type]
         from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
 
         ba = QByteArray()

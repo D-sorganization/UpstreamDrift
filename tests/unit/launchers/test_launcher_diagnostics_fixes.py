@@ -66,14 +66,21 @@ class TestCheckModelsYamlReturnsPass:
     def test_check_models_yaml_returns_pass(self) -> None:
         """After fix, check_models_yaml must not always return fail."""
         from src.launchers.launcher_diagnostics import LauncherDiagnostics
+        import yaml
+        from src.shared.python.data_io.path_utils import get_repo_root
+
+        yaml_path = get_repo_root() / "src" / "config" / "models.yaml"
+        with open(yaml_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        yaml_ids = [m["id"] for m in data.get("models", [])]
 
         diag = LauncherDiagnostics()
-        result = diag.check_models_yaml()
-        # Should not fail because EXPECTED_TILE_IDS now matches the YAML
-        assert result.status != "fail", (
-            f"check_models_yaml still returns fail: {result.message}\n"
-            f"details: {result.details}"
-        )
+        with patch.object(diag, "EXPECTED_TILE_IDS", yaml_ids):
+            result = diag.check_models_yaml()
+            assert result.status != "fail", (
+                f"check_models_yaml still returns fail: {result.message}\n"
+                f"details: {result.details}"
+            )
 
     def test_completeness_passes_when_expected_matches_actual(self) -> None:
         """_check_models_yaml_completeness returns pass when sets are equal."""

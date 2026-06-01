@@ -37,14 +37,14 @@ def studio(qapp):  # noqa: ANN001, ANN201
     from src.tools.pose_studio.gui import PoseStudioWindow
 
     win = PoseStudioWindow()
-    yield win
+    yield win.main_widget
     win.close()
 
 
 def test_window_constructs_without_exception(studio) -> None:  # noqa: ANN001
     """The window must instantiate without raising."""
     assert studio is not None
-    assert studio.windowTitle() == "Pose Studio"
+    assert studio.window().windowTitle() == "Pose Studio"
 
 
 def test_engine_picker_swap_succeeds(studio) -> None:  # noqa: ANN001

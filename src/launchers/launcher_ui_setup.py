@@ -1972,14 +1972,24 @@ class UISetupManager:
 
     def _is_console_open(self) -> bool:
         """Check if the console widget is currently in the tab bar or detached."""
-        if not hasattr(self, "_console_widget"):
+        if not hasattr(self, "_console_widget") or self._console_widget is None:
             return False
-        if self.workspace_tabs.indexOf(self._console_widget) != -1:
-            return True
-        # Check detached tabs
-        for widget, _, _ in self.workspace_tabs.detached_tabs.values():
-            if widget is self._console_widget:
+        try:
+            if self.workspace_tabs.indexOf(self._console_widget) != -1:
                 return True
+        except (TypeError, AttributeError):
+            pass
+        # Check detached tabs
+        if (
+            hasattr(self.workspace_tabs, "detached_tabs")
+            and self.workspace_tabs.detached_tabs
+        ):
+            try:
+                for widget, _, _ in self.workspace_tabs.detached_tabs.values():
+                    if widget is self._console_widget:
+                        return True
+            except (TypeError, AttributeError):
+                pass
         return False
 
     def _sync_console_button_states(self) -> None:

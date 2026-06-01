@@ -204,7 +204,7 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
+                chat, message = self._build_chat_session(context, message)
                 response = chat.send_message(message)
             return AgentResponse(content=response.text, usage=canonical_usage)
         except (RuntimeError, ValueError, OSError) as e:
@@ -230,7 +230,7 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
+                chat, message = self._build_chat_session(context, message)
                 response: Iterator[GenerateContentResponse] = chat.send_message(
                     message, stream=True
                 )
@@ -326,13 +326,26 @@ class GeminiAdapter(BaseAgentAdapter):
             logger.error(f"Gemini validation error: {e}")
             return False, f"Connection failed: {e}"
 
-    def _build_chat_session(self, context: ConversationContext) -> Any:
+    def _build_chat_session(
+        self, context: ConversationContext, current_message: str = ""
+    ) -> tuple[Any, str]:
         """Build a chat session with history."""
         if context is None:
             raise ValueError("context must be provided")
+
+        history_messages = list(context.messages)
+
+        if (
+            not current_message
+            and history_messages
+            and history_messages[-1].role == "user"
+        ):
+            current_message = history_messages.pop().content
+
         history = []
-        for msg in context.messages:
+        for msg in history_messages:
             role = "user" if msg.role == "user" else "model"
             history.append({"role": role, "parts": [msg.content]})
 
-        return self._model.start_chat(history=history)  # type: ignore[arg-type]
+        chat = self._model.start_chat(history=history)  # type: ignore[arg-type]
+        return chat, current_message

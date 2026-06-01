@@ -7,8 +7,13 @@ from importlib.metadata import PackageNotFoundError
 from src.api import versioning
 
 
-def test_get_app_version_matches_pyproject() -> None:
+def test_get_app_version_matches_pyproject(monkeypatch) -> None:
     """Fallback version source should match pyproject version."""
+
+    def fake_version(name: str) -> str:
+        raise PackageNotFoundError(name)
+
+    monkeypatch.setattr(versioning, "version", fake_version)
     versioning.get_app_version.cache_clear()
     assert versioning.get_app_version() == "2.1.1"
 

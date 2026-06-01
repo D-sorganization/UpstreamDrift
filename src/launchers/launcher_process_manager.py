@@ -61,6 +61,14 @@ else:
     CREATE_NEW_CONSOLE = 0
 
 
+def _quote_cmd_arg(arg: str) -> str:
+    """Quote a command line argument. Use Windows-specific rules on NT."""
+    if os.name == "nt":
+        escaped = arg.replace('"', '\\"')
+        return f'"{escaped}"'
+    return shlex.quote(arg)
+
+
 def _assign_to_job(proc: subprocess.Popen[bytes]) -> None:
     """Attach a child process to the platform cascade-termination guard."""
 

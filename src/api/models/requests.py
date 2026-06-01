@@ -19,6 +19,7 @@ VALID_ENGINE_TYPES = {
     "pendulum",
     "golf_swing_pendulum",
     "putting_green",
+    "jaxsim",
 }
 
 VALID_ANALYSIS_TYPES = {

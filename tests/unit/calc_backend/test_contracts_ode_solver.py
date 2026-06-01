@@ -121,7 +121,7 @@ class TestODESolverResponse:
 
     def test_default_success_true(self) -> None:
         resp = self._make_response()
-        assert resp.solver_status == "success"
+        assert resp.success is True
 
     def test_default_message(self) -> None:
         resp = self._make_response()

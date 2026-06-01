@@ -101,14 +101,14 @@ def test_color_rejects_non_string() -> None:
     ],
 )
 def test_color_rejects_invalid_hex(bad_hex: str) -> None:
-    with pytest.raises(ValueError, match="not a valid hex color"):
+    with pytest.raises(ValueError, match="is not a recognised matplotlib colour"):
         ShapeTheme(color=bad_hex)
 
 
 @pytest.mark.unit
 def test_color_rejects_starts_with_digit() -> None:
     """Named colors must start with an alpha character."""
-    with pytest.raises(ValueError, match="not a valid color"):
+    with pytest.raises(ValueError, match="is not a recognised matplotlib colour"):
         ShapeTheme(color="123red")
 
 
@@ -125,31 +125,31 @@ def test_edge_color_rejects_invalid_hex() -> None:
 
 @pytest.mark.unit
 def test_opacity_rejects_above_one() -> None:
-    with pytest.raises(ValueError, match=r"opacity must be in \[0.0, 1.0\]"):
+    with pytest.raises(ValueError, match=r"opacity must be a finite value in \[0, 1\]"):
         ShapeTheme(opacity=1.1)
 
 
 @pytest.mark.unit
 def test_opacity_rejects_below_zero() -> None:
-    with pytest.raises(ValueError, match=r"opacity must be in \[0.0, 1.0\]"):
+    with pytest.raises(ValueError, match=r"opacity must be a finite value in \[0, 1\]"):
         ShapeTheme(opacity=-0.1)
 
 
 @pytest.mark.unit
 def test_opacity_rejects_inf() -> None:
-    with pytest.raises(ValueError, match="opacity must be finite"):
+    with pytest.raises(ValueError, match="opacity must be a finite value in"):
         ShapeTheme(opacity=float("inf"))
 
 
 @pytest.mark.unit
 def test_opacity_rejects_nan() -> None:
-    with pytest.raises(ValueError, match="opacity must be finite"):
+    with pytest.raises(ValueError, match="opacity must be a finite value in"):
         ShapeTheme(opacity=float("nan"))
 
 
 @pytest.mark.unit
 def test_opacity_rejects_string() -> None:
-    with pytest.raises(TypeError, match="opacity must be float"):
+    with pytest.raises(TypeError, match="opacity must be numeric"):
         ShapeTheme(opacity="0.5")  # type: ignore[arg-type]
 
 
@@ -160,19 +160,23 @@ def test_opacity_rejects_string() -> None:
 
 @pytest.mark.unit
 def test_edge_width_rejects_negative() -> None:
-    with pytest.raises(ValueError, match="edge_width must be >= 0"):
+    with pytest.raises(
+        ValueError, match="edge_width must be a finite, non-negative number"
+    ):
         ShapeTheme(edge_width=-0.5)
 
 
 @pytest.mark.unit
 def test_edge_width_rejects_inf() -> None:
-    with pytest.raises(ValueError, match="edge_width must be finite"):
+    with pytest.raises(
+        ValueError, match="edge_width must be a finite, non-negative number"
+    ):
         ShapeTheme(edge_width=float("inf"))
 
 
 @pytest.mark.unit
 def test_edge_width_rejects_string() -> None:
-    with pytest.raises(TypeError, match="edge_width must be float"):
+    with pytest.raises(TypeError, match="edge_width must be numeric"):
         ShapeTheme(edge_width="0.5")  # type: ignore[arg-type]
 
 

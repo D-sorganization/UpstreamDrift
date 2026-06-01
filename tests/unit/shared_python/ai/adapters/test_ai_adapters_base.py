@@ -1,6 +1,7 @@
 """Tests for the base AI adapter module."""
 
 from collections.abc import Iterator
+from typing import Any
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
@@ -36,6 +37,16 @@ class DummyAdapter(BaseAgentAdapter):
 
     def validate_connection(self) -> tuple[bool, str]:
         return True, "OK"
+
+    def list_models(self) -> list[Any]:
+        from src.shared.python.chat.models import ChatModelInfo
+
+        return [ChatModelInfo(name="dummy-model", provider="dummy")]
+
+    def thinking_capabilities(self) -> Any:
+        from src.shared.python.chat.models import make_none_only_capabilities
+
+        return make_none_only_capabilities("dummy")
 
 
 def test_tool_declaration_init() -> None:

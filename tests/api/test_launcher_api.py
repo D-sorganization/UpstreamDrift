@@ -211,6 +211,7 @@ class TestLauncherParityRequirements:
                 "ready",
                 "experimental",
                 "provider_unavailable",
+                "beta",
             }, f"special_app tile '{tile['id']}' has status '{tile['status']}'"
 
     def test_motion_capture_has_all_capabilities(self, client: TestClient) -> None:

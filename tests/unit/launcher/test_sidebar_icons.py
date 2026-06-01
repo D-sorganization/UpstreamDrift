@@ -30,11 +30,12 @@ _REQUIRED_BUTTON_LABELS = (
     "Engines",
     "Biomechanics",
     "Simulation",
-    "Motion Match",
-    "MoCap",
     "Tools",
-    "Library",
+    "Documentation",
+    "Favorites",
+    "History",
     "Settings",
+    "Console",
 )
 
 

@@ -20,13 +20,13 @@ class MockTaskManager:
     def __init__(self):
         self.tasks = {"existing_sim": {"status": "completed"}}
 
-    async def exists(self, task_id):
+    def exists(self, task_id):
         return task_id in self.tasks
 
-    async def get(self, task_id):
+    def get(self, task_id):
         return self.tasks.get(task_id)
 
-    async def set(self, task_id, value):
+    def set(self, task_id, value):
         self.tasks[task_id] = value
 
 

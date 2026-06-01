@@ -129,6 +129,11 @@ class FitResult:
     iterations: int = 0
     message: str = ""
 
+    @property
+    def solver_status(self) -> str:
+        """Get the solver status string based on success."""
+        return "success" if self.success else "failed"
+
 
 @dataclass
 class SensitivityResult:

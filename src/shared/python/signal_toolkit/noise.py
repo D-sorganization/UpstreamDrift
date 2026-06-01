@@ -67,6 +67,8 @@ class NoiseGenerator:
             Signal containing the noise.
         """
         assert t is not None, "t must be provided"
+        if amplitude < 0:
+            raise ValueError(f"amplitude must be non-negative, got {amplitude}")
         n = len(t)
 
         if noise_type == NoiseType.WHITE:

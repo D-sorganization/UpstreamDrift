@@ -22,7 +22,11 @@ def reset_mocks() -> None:
 
 @pytest.fixture(autouse=True)
 def patch_has_gemini() -> Generator[None, None, None]:
-    with patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True):
+    with (
+        patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True),
+        patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI_CLIENT", False),
+        patch("src.shared.python.ai.adapters.gemini_adapter._GenaiClient", None),
+    ):
         yield
 
 
@@ -209,9 +213,13 @@ def test_gemini_adapter_stream_response() -> None:
 
     chunks = list(adapter.stream_response("test", ConversationContext(), []))
 
-    assert len(chunks) == 2
+    assert len(chunks) == 3
     assert chunks[0].content == "Hel"
+    assert chunks[0].is_final is False
     assert chunks[1].content == "lo"
+    assert chunks[1].is_final is False
+    assert chunks[2].content == ""
+    assert chunks[2].is_final is True
 
 
 def test_stream_error() -> None:

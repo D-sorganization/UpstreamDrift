@@ -136,11 +136,6 @@ class AIAssistantPanel(QWidget):
         self._refresh_prompt_memory()
         self._mcp_pool: Any = None  # McpClientPool — wired in after setup
 
-        # --- Session manager + history ----------------------------------
-        self._session_manager = ChatSessionManager()
-        self._session_manager.session_loaded.connect(self._on_session_loaded)
-        self._load_history()
-
         self._init_tools()
 
         # --- Controllers -------------------------------------------------
@@ -149,6 +144,11 @@ class AIAssistantPanel(QWidget):
         self._adapter_mgr = AdapterLifecycleManager(self)
         self._indexer = IndexingController(self._rag_store, self)
         self._input_container = InputArea()
+
+        # --- Session manager + history ----------------------------------
+        self._session_manager = ChatSessionManager()
+        self._session_manager.session_loaded.connect(self._on_session_loaded)
+        self._load_history()
 
         self._wire_controllers()
         self._setup_ui()

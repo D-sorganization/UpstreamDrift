@@ -97,6 +97,11 @@ from .setup_wizard import (
     validate_canonical_setup_config,
 )
 from .standard_models import StandardModelManager
+from .settings import (
+    get_setting,
+    load_settings,
+    save_settings,
+)
 
 __all__: list[str] = [
     # config_utils
@@ -195,4 +200,8 @@ __all__: list[str] = [
     "validate_canonical_setup_config",
     # standard_models
     "StandardModelManager",
+    # settings
+    "get_setting",
+    "load_settings",
+    "save_settings",
 ]

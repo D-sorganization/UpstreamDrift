@@ -293,7 +293,7 @@ class Integrator:
 
         # Find indices for bounds
         lower_idx = np.searchsorted(t, lower_bound)
-        upper_idx = np.searchsorted(t, upper_bound)
+        upper_idx = np.searchsorted(t, upper_bound, side="right")
 
         lower_idx = np.clip(lower_idx, 0, len(t) - 1)
         upper_idx = np.clip(upper_idx, 0, len(t))

@@ -246,7 +246,7 @@ def test_extract_metrics_values_are_finite(
 def test_extract_metrics_rejects_invalid_input(
     analyzer_with_profile: PendulumPerturbationAnalyzer,
 ) -> None:
-    with pytest.raises((AssertionError, AttributeError, TypeError)):
+    with pytest.raises((AssertionError, AttributeError, TypeError, ValueError)):
         analyzer_with_profile.extract_metrics("not a sim result")  # type: ignore[arg-type]
 
 
@@ -361,7 +361,7 @@ def test_run_batch_metric_statistics_type(
 def test_run_batch_requires_profile_set(
     analyzer: PendulumPerturbationAnalyzer,
 ) -> None:
-    with pytest.raises((AssertionError, AttributeError, TypeError)):
+    with pytest.raises((AssertionError, AttributeError, TypeError, ValueError)):
         analyzer.run_batch(_SMALL_CONFIG)
 
 

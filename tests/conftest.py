@@ -6,7 +6,36 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# Prioritize local packages over installed site-packages to prevent package shadowing (e.g. tools)
+root_path = str(Path(__file__).resolve().parent.parent)
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
+
+# Resolve tools package shadowing by explicitly adding root tools directory to its __path__
+# Resolve tools package shadowing by explicitly adding all local tools directories to its __path__
+try:
+    import tools
+
+    root_path = Path(__file__).resolve().parent.parent
+    local_dirs = [
+        str(root_path / "tools"),
+        str(root_path / "src" / "tools"),
+        str(root_path / "src" / "shared" / "python" / "tools"),
+        str(root_path / "tests" / "ui" / "tools"),
+    ]
+
+    if hasattr(tools, "__path__"):
+        for d in local_dirs:
+            if d not in tools.__path__:
+                tools.__path__.insert(0, d)
+except ImportError:
+    pass
+
 import os
+
 
 # ---------------------------------------------------------------------------
 # Fleet Testing Standards §5: thread-safety + headless env vars.
@@ -19,29 +48,6 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
-# ---------------------------------------------------------------------------
-# Patch broken transitive imports before any test module is collected.
-# Other agents are refactoring src.shared.python.data_io and
-# src.shared.python.config, which temporarily removes symbols that
-# __init__.py still re-exports.  Inject stub packages so deeper imports
-# (LauncherManifest, ModelHandlerRegistry, etc.) can succeed.
-# ---------------------------------------------------------------------------
-import sys as _sys
-import types as _types
-
-_data_io_name = "src.shared.python.data_io"
-if _data_io_name not in _sys.modules:
-    _data_io_mod = _types.ModuleType(_data_io_name)
-    _data_io_mod.__path__ = ["src/shared/python/data_io"]
-    _data_io_mod.__package__ = _data_io_name
-    _sys.modules[_data_io_name] = _data_io_mod
-
-_config_name = "src.shared.python.config"
-if _config_name not in _sys.modules:
-    _config_mod = _types.ModuleType(_config_name)
-    _config_mod.__path__ = ["src/shared/python/config"]
-    _config_mod.__package__ = _config_name
-    _sys.modules[_config_name] = _config_mod
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 

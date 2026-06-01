@@ -62,7 +62,7 @@ class BiomechanicalModel:
 
         key = get_anthropometry_key(name)
         require(
-            key in self.segment_masses,
+            name in self.segment_masses,
             f"Unknown segment name: {name} (mapped to {key})",
         )
 

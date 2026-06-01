@@ -94,7 +94,15 @@ def get_server_host() -> str:
     Returns:
         Server host address.
     """
-    return get_settings().server_host
+    try:
+        return get_settings().server_host
+    except ValidationError as e:
+        import os
+
+        port_str = os.environ.get("API_PORT", str(DEFAULT_SERVER_PORT))
+        if "API_PORT" in str(e) or "server_port" in str(e):
+            raise ValueError(f"Invalid API_PORT value: {port_str!r}") from e
+        raise
 
 
 def get_server_port() -> int:

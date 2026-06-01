@@ -432,12 +432,13 @@ class AnthropicAdapter(BaseAgentAdapter):
             )
 
         # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         # Ensure alternating roles (Anthropic requirement)
         messages = self._ensure_alternating_roles(messages)

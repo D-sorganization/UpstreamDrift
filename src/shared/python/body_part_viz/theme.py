@@ -54,17 +54,21 @@ class ShapeTheme:
     group: str = "default"
 
     def __post_init__(self) -> None:
-        if not isinstance(self.color, str) or not self.color:
-            raise ValueError(f"color must be a non-empty string; got {self.color!r}")
+        if not isinstance(self.color, str):
+            raise TypeError(f"color must be str; got {type(self.color).__name__}")
+        if not self.color:
+            raise ValueError("color must be non-empty")
         if not is_color_like(self.color):
             raise ValueError(
                 f"color {self.color!r} is not a recognised matplotlib colour"
             )
 
-        if not isinstance(self.edge_color, str) or not self.edge_color:
-            raise ValueError(
-                f"edge_color must be a non-empty string; got {self.edge_color!r}"
+        if not isinstance(self.edge_color, str):
+            raise TypeError(
+                f"edge_color must be str; got {type(self.edge_color).__name__}"
             )
+        if not self.edge_color:
+            raise ValueError("edge_color must be non-empty")
         if not is_color_like(self.edge_color):
             raise ValueError(
                 f"edge_color {self.edge_color!r} is not a recognised matplotlib colour"
@@ -98,5 +102,7 @@ class ShapeTheme:
                 f"flat_shaded must be bool; got {type(self.flat_shaded).__name__}"
             )
 
-        if not isinstance(self.group, str) or not self.group:
-            raise ValueError(f"group must be a non-empty string; got {self.group!r}")
+        if not isinstance(self.group, str):
+            raise TypeError(f"group must be str; got {type(self.group).__name__}")
+        if not self.group:
+            raise ValueError("group must be non-empty")

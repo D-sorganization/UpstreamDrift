@@ -515,12 +515,13 @@ class OllamaAdapter(BaseAgentAdapter):
         )
 
         # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         return messages
 
@@ -637,6 +638,18 @@ class OllamaAdapter(BaseAgentAdapter):
 
     def _handle_error(self, error: Exception) -> NoReturn:
         """Handle Ollama-specific errors; always raises (NoReturn)."""
+        try:
+            import httpx
+
+            if isinstance(error, httpx.ConnectError):
+                raise AIConnectionError(
+                    f"Cannot connect to Ollama at {self._host}. "
+                    "Is Ollama running? Start with: ollama serve",
+                    provider="ollama",
+                ) from error
+        except ImportError:
+            pass
+
         err_str = str(error).lower()
         if "connection" in err_str or "unreachable" in err_str:
             raise AIConnectionError(

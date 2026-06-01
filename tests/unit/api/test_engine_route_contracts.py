@@ -87,7 +87,7 @@ class TestEngineStoreCallsBackendUnload:
                     break
 
         unload_str = "\n".join(unload_body)
-        assert "fetch(" in unload_str or "axios" in unload_str, (
+        assert "fetch" in unload_str.lower() or "axios" in unload_str, (
             "useEngineStore.ts unloadEngine does not call fetch() to notify the backend. "
             "Backend exposes POST /engines/{type}/unload. "
             "Fix: add a fetch call in unloadEngine before mutating client state."

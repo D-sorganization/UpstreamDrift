@@ -428,12 +428,13 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
+        tau_arr = self._require_vector("tau", tau, self.model.nv)
         q_arr = self._require_vector("q", self.q, self.model.nq)
         v_arr = self._require_vector("v", self.v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
         a_drift = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
-        a_full = pin.aba(self.model, self.data, q_arr, v_arr, tau)
+        a_full = pin.aba(self.model, self.data, q_arr, v_arr, tau_arr)
 
         return cast(np.ndarray, a_full - a_drift)
 

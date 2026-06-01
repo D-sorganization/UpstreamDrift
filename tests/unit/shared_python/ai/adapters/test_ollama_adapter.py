@@ -224,8 +224,8 @@ def test_ollama_adapter_send_message_success(mock_get_client, adapter) -> None:
     resp = adapter.send_message("hi", ConversationContext(), [])
 
     assert resp.content == "Hello!"
-    assert resp.usage["prompt_tokens"] == 50
-    assert resp.usage["completion_tokens"] == 20
+    assert resp.usage["input_tokens"] == 50
+    assert resp.usage["output_tokens"] == 20
     assert resp.finish_reason == "stop"
 
 
