@@ -123,6 +123,31 @@ VCXSRV_PATHS = [
 _MODULE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
 
 
+def _build_windows_console_cmd(args: list[str], *, keep_terminal_open: bool) -> str:
+    """Build a cmd.exe command string for a new-console subprocess launch.
+
+    ``subprocess.list2cmdline`` applies Windows (cmd.exe) quoting rules,
+    wrapping arguments that contain spaces in double quotes. POSIX
+    ``shlex.quote`` uses single quotes, which cmd.exe does not recognize,
+    so interpreter or script paths containing spaces fail to launch
+    (issue #6921).
+
+    Args:
+        args: The program and its arguments, e.g. ``[exe, script]`` or
+            ``[exe, "-m", module]``. All entries must already be validated.
+        keep_terminal_open: When ``True`` use ``cmd /k ... & pause`` so the
+            console stays open after the process exits; otherwise ``cmd /c``.
+
+    Returns:
+        A command string suitable for ``subprocess.Popen`` with
+        ``creationflags=CREATE_NEW_CONSOLE``.
+    """
+    inner = subprocess.list2cmdline(args)
+    if keep_terminal_open:
+        return f'cmd /k "{inner} & pause"'
+    return f'cmd /c "{inner}"'
+
+
 class ProcessManager:
     """Manages subprocess lifecycle for the Golf Launcher.
 
@@ -476,31 +501,16 @@ class ProcessManager:
                 process_env.get("PYTHONPATH", "<unset>")[:300],
             )
 
-            # Validate script path to prevent path-traversal / injection.
-            validate_script_path(script_path, self.repo_root)
-
-            # Diagnostic: log full launch details for debugging silent failures
-            logger.info(
-                "Launching script %s: cmd=[%s, %s], cwd=%s, PYTHONPATH=%s",
-                name,
-                sys.executable,
-                script_path,
-                cwd,
-                process_env.get("PYTHONPATH", "<unset>")[:300],
-            )
-
             if self.use_separate_terminals:
                 # Legacy: each engine gets its own console window.
                 # On Windows we must pass a string to open a new console but
                 # quote both the interpreter and script paths so that spaces
                 # and other shell-significant characters cannot inject commands.
                 if os.name == "nt":
-                    exe_q = shlex.quote(sys.executable)
-                    script_q = shlex.quote(str(script_path))
-                    if keep_terminal_open:
-                        cmd_str = f'cmd /k "{exe_q} {script_q} & pause"'
-                    else:
-                        cmd_str = f'cmd /c "{exe_q} {script_q}"'
+                    cmd_str = _build_windows_console_cmd(
+                        [sys.executable, str(script_path)],
+                        keep_terminal_open=keep_terminal_open,
+                    )
                     process = subprocess.Popen(
                         cmd_str,
                         cwd=str(cwd),
@@ -588,12 +598,6 @@ class ProcessManager:
                     f"Invalid module name (potential injection): {module_name!r}"
                 )
 
-            # Validate module name: must be a dotted Python identifier.
-            if not _MODULE_NAME_RE.match(module_name):
-                raise SecureSubprocessError(
-                    f"Invalid module name (potential injection): {module_name!r}"
-                )
-
             if os.name == "nt":
                 current_pythonpath = process_env.get("PYTHONPATH", "")
                 repo_root_str = str(self.repo_root)
@@ -630,13 +634,12 @@ class ProcessManager:
                 # On Windows we must pass a string to open a new console but
                 # quote the interpreter path so spaces cannot inject commands.
                 # module_name has already been validated against the allowlist
-                # regex so it is safe to interpolate directly.
+                # regex so it is safe to pass through.
                 if os.name == "nt":
-                    exe_q = shlex.quote(sys.executable)
-                    if keep_terminal_open:
-                        cmd_str = f'cmd /k "{exe_q} -m {module_name} & pause"'
-                    else:
-                        cmd_str = f'cmd /c "{exe_q} -m {module_name}"'
+                    cmd_str = _build_windows_console_cmd(
+                        [sys.executable, "-m", module_name],
+                        keep_terminal_open=keep_terminal_open,
+                    )
                     process = subprocess.Popen(
                         cmd_str,
                         cwd=str(cwd),
