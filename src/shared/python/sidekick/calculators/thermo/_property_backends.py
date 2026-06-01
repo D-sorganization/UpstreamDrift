@@ -188,10 +188,16 @@ def determine_phase_and_quality(
                 return "two-phase", 0.5
             return "vapor", 1.0
 
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+        except (
+            ValueError,
+            ZeroDivisionError,
+            OverflowError,
+            TypeError,
+            AttributeError,
+        ):
             return "unknown", 0.0
 
-    except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError, AttributeError):
         return "unknown", 0.0
 
 
