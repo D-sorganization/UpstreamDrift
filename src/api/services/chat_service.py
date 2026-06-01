@@ -346,9 +346,16 @@ class ChatService:
 
         chunk_queue: queue.Queue[Any] = queue.Queue()
 
+        # Cancellation token (#6981): set by the async consumer's ``finally``
+        # on client disconnect / generator close. The worker checks it in its
+        # loops and exits promptly instead of pulling from the adapter and
+        # persisting messages for an abandoned session, which previously left
+        # the daemon thread orphaned and contending for ``self._lock``.
+        stop_event = threading.Event()
+
         def _stream_to_queue() -> None:  # noqa: C901
             try:
-                while True:
+                while not stop_event.is_set():
                     current_response = []
                     tool_calls_accumulator = {}
 
@@ -359,6 +366,10 @@ class ChatService:
                         temp_ctx,
                         tool_declarations,
                     ):
+                        if stop_event.is_set():
+                            # Consumer disconnected: stop pulling and let the
+                            # adapter generator close via its own ``finally``.
+                            break
                         if chunk.content:
                             chunk_queue.put(chunk.content)
                             current_response.append(chunk.content)
@@ -379,6 +390,11 @@ class ChatService:
                                         tool_calls_accumulator[idx]["arguments"] += tc[
                                             "function"
                                         ]["arguments"]
+
+                    if stop_event.is_set():
+                        # Abandoned mid-stream: do not take the lock to persist
+                        # messages for a session whose client has gone away.
+                        break
 
                     complete_response = "".join(current_response)
 
@@ -420,6 +436,8 @@ class ChatService:
                     from src.shared.python.ai.config import get_tool_timeout
 
                     for tc in tool_calls:
+                        if stop_event.is_set():
+                            break
                         chunk_queue.put({"type": "tool_call_started", "tool": tc.name})
 
                         try:
@@ -474,22 +492,30 @@ class ChatService:
         thread = threading.Thread(target=_stream_to_queue, daemon=True)
         thread.start()
 
-        while True:
-            try:
-                item = await asyncio.to_thread(chunk_queue.get, timeout=60.0)
-            except queue.Empty:
-                yield {
-                    "type": "error",
-                    "detail": "AI provider connection timed out. Please check that your AI backend (e.g. Ollama or API key configuration) is running and reachable.",
-                }
-                break
-            except (FileNotFoundError, OSError):
-                break
-            if item is None:
-                break
-            yield item
-
-        thread.join(timeout=5.0)
+        # The ``finally`` below runs on normal completion, on consumer error,
+        # and crucially when the client disconnects -- closing this async
+        # generator (``aclose``) raises ``GeneratorExit`` at the ``yield``.
+        # In every case we set the stop flag so the worker exits and then
+        # join it (bounded), so no orphaned daemon thread is left behind
+        # (#6981).
+        try:
+            while True:
+                try:
+                    item = await asyncio.to_thread(chunk_queue.get, timeout=60.0)
+                except queue.Empty:
+                    yield {
+                        "type": "error",
+                        "detail": "AI provider connection timed out. Please check that your AI backend (e.g. Ollama or API key configuration) is running and reachable.",
+                    }
+                    break
+                except (FileNotFoundError, OSError):
+                    break
+                if item is None:
+                    break
+                yield item
+        finally:
+            stop_event.set()
+            thread.join(timeout=5.0)
 
     def refresh_models(self) -> dict[str, Any]:
         """Poll the configured provider for available chat models.
