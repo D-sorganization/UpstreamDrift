@@ -16,6 +16,11 @@ class ProviderRepoDefinition:
     provider_kind: str
     engine_type: str | None = None
     manifest_relative_paths: tuple[Path, ...] = ()
+    repo_name_aliases: tuple[str, ...] = ()
+
+    def iter_repo_names(self) -> tuple[str, ...]:
+        """Return the canonical repo name followed by any checkout aliases."""
+        return (self.repo_name, *self.repo_name_aliases)
 
 
 KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
@@ -55,11 +60,7 @@ KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
         provider_id="movement_optimizer",
         repo_name="Movement_Optimizer",
         provider_kind="utility",
-    ),
-    ProviderRepoDefinition(
-        provider_id="movement_optimizer",
-        repo_name="Movement-Optimizer",
-        provider_kind="utility",
+        repo_name_aliases=("Movement-Optimizer",),
     ),
 )
 
@@ -79,7 +80,7 @@ def _iter_manifest_paths_for_provider(
     extra_paths = tuple(
         provider.manifest_relative_paths
         for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
-        if provider.repo_name == provider_name
+        if provider_name in provider.iter_repo_names()
     )
     provider_relative_paths = _DEFAULT_MANIFEST_RELATIVE_PATHS + tuple(
         path for paths in extra_paths for path in paths
@@ -126,7 +127,8 @@ def iter_configured_provider_roots(
             _add_root(candidate)
 
     for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS:
-        _add_root(workspace_root / provider.repo_name)
+        for repo_name in provider.iter_repo_names():
+            _add_root(workspace_root / repo_name)
 
     return tuple(discovered)
 
