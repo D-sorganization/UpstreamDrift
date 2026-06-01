@@ -126,9 +126,25 @@ def validate_energy_balance(
     )
     total_ke_post = ke_ball_post + ke_ball_rot_post + ke_club_post
 
-    # Energy loss
+    # Energy loss (lab frame)
     energy_lost = total_ke_pre - total_ke_post
     expected_loss_factor = 1 - params.cor**2  # COR relates velocities, not energy
+
+    # Relative / COM-frame translational KE loss (issue #6984). COR removes a
+    # fraction (1 - e^2) of the kinetic energy of *relative* motion, not of the
+    # total lab-frame KE (which is dominated by the still-moving clubhead). The
+    # comparable quantity is 1/2 * mu * v_rel^2 * (1 - e^2) with reduced mass
+    # mu = m_ball*m_club / (m_ball + m_club), evaluated along the contact
+    # normal.
+    reduced_mass = (m_ball * m_club) / (m_ball + m_club)
+    v_rel_pre = pre_state.clubhead_velocity - pre_state.ball_velocity
+    v_rel_pre_sq = float(np.dot(v_rel_pre, v_rel_pre))
+    v_rel_post = post_state.clubhead_velocity - post_state.ball_velocity
+    v_rel_post_sq = float(np.dot(v_rel_post, v_rel_post))
+    expected_relative_ke_loss = (
+        0.5 * reduced_mass * v_rel_pre_sq * (1.0 - params.cor**2)
+    )
+    relative_ke_loss = 0.5 * reduced_mass * (v_rel_pre_sq - v_rel_post_sq)
 
     return {
         "total_ke_pre": float(total_ke_pre),
@@ -138,6 +154,8 @@ def validate_energy_balance(
             float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
         ),
         "expected_loss_factor": expected_loss_factor,
+        "expected_relative_ke_loss": float(expected_relative_ke_loss),
+        "relative_ke_loss": float(relative_ke_loss),
         "ball_ke_post": float(ke_ball_post),
         "ball_launch_speed": float(math.sqrt(np.dot(post_state.ball_velocity, post_state.ball_velocity))),  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
     }
