@@ -6,9 +6,9 @@
     "issue": "#3510"
   },
   "measurements": {
-    "drag_force_calculation": 4.0e-6,
-    "aerodynamics_engine_compute_forces": 1.3e-4,
-    "ball_flight_force_step": 2.7e-5,
-    "simulation_request_model_validate": 1.6e-6
+    "drag_force_calculation": 6e-06,
+    "aerodynamics_engine_compute_forces": 0.00013,
+    "ball_flight_force_step": 2.7e-05,
+    "simulation_request_model_validate": 1.6e-06
   }
 }

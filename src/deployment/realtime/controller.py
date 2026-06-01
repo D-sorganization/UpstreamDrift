@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -147,8 +146,8 @@ class RealTimeController:
         # Control loop thread
         self._control_thread: threading.Thread | None = None
 
-        # Timing statistics — bounded deque avoids unbounded memory growth (#6976)
-        self._cycle_times: deque[float] = deque(maxlen=10000)
+        # Timing statistics
+        self._cycle_times: list[float] = []
         self._start_time: float = 0.0
         self._overruns = 0
 
@@ -159,13 +158,12 @@ class RealTimeController:
         # Loopback physics state
         self._sim_state: tuple[NDArray[np.floating], NDArray[np.floating]] | None = None
 
-        # Condition that notifies waiters whenever a new state is stored (#6975)
-        self._state_cond = threading.Condition()
+        # Locks
+        self._state_lock = threading.Lock()
         self._command_lock = threading.Lock()
-        # Separate lock for timing counters so stats reads don't block the control loop
-        self._stats_lock = threading.Lock()
-        # Lock for _sim_state to prevent racy read-modify-write (#6977)
-        self._sim_state_lock = threading.Lock()
+
+        # Event signalled whenever a new state reading is stored
+        self._state_event = threading.Event()
 
     @property
     def is_connected(self) -> bool:
@@ -193,10 +191,6 @@ class RealTimeController:
         """
         if not (robot_config is not None):
             raise ValueError("robot_config must be provided")
-        if self._is_running:
-            raise RuntimeError(
-                "Cannot call connect() while the control loop is running"
-            )
         self._config = robot_config
 
         try:
@@ -207,8 +201,7 @@ class RealTimeController:
                 # Simulated connection always succeeds
                 self._is_connected = True
                 # Reset simulation state on connect to ensure correct sizing
-                with self._sim_state_lock:
-                    self._sim_state = None
+                self._sim_state = None
             elif self.comm_type == CommunicationType.ROS2:
                 self._connect_ros2()
             elif self.comm_type == CommunicationType.UDP:
@@ -299,9 +292,8 @@ class RealTimeController:
         self._aborted_on_failure = False
         self._is_running = True
         self._start_time = time.perf_counter()
-        with self._stats_lock:
-            self._cycle_times.clear()
-            self._overruns = 0
+        self._cycle_times = []
+        self._overruns = 0
 
         self._control_thread = threading.Thread(
             target=self._control_loop,
@@ -356,9 +348,10 @@ class RealTimeController:
                 # Read state
                 state = self._read_state()
 
-                with self._state_cond:
+                with self._state_lock:
                     self._last_state = state
-                    self._state_cond.notify_all()
+                self._state_event.set()
+                self._state_event.clear()
 
                 # Compute control
                 if self._control_callback is not None:
@@ -397,10 +390,11 @@ class RealTimeController:
             # Record timing
             cycle_end = time.perf_counter()
             cycle_time = cycle_end - cycle_start
-            with self._stats_lock:
-                self._cycle_times.append(cycle_time)
-                if cycle_time > self.dt:
-                    self._overruns += 1
+            self._cycle_times.append(cycle_time)
+
+            # Check for overrun
+            if cycle_time > self.dt:
+                self._overruns += 1
 
             # Sleep until next cycle
             next_cycle_time += self.dt
@@ -449,10 +443,11 @@ class RealTimeController:
 
         if self.comm_type == CommunicationType.LOOPBACK:
             n_joints = self._config.n_joints if self._config else 7
-            with self._sim_state_lock:
-                if self._sim_state is None:
-                    self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
-                current_sim_state = self._sim_state
+            if self._sim_state is None:
+                self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
+
+            # Atomic read of state tuple
+            current_sim_state = self._sim_state
             return RobotState(
                 timestamp=timestamp,
                 joint_positions=current_sim_state[0],
@@ -479,45 +474,52 @@ class RealTimeController:
             return
 
         if self.comm_type == CommunicationType.LOOPBACK:
-            with self._sim_state_lock:
-                if self._sim_state is None:
-                    n_joints = self._config.n_joints if self._config else 7
-                    self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
+            if self._sim_state is None:
+                # Initialize state if not present (should be handled in _read_state, but safety check)
+                n_joints = self._config.n_joints if self._config else 7
+                self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
 
-                q, qd = self._sim_state
+            q, qd = self._sim_state
 
-                if command.mode == ControlMode.TORQUE:
-                    if command.torque_commands is not None:
-                        damping = 0.1
-                        qdd = command.torque_commands - damping * qd
-                        qd = qd + qdd * self.dt
-                        q = q + qd * self.dt
-
-                elif command.mode == ControlMode.POSITION:
-                    if command.position_targets is not None:
-                        q = command.position_targets
-                        qd = np.zeros_like(q)
-
-                elif command.mode == ControlMode.VELOCITY:
-                    if command.velocity_targets is not None:
-                        qd = command.velocity_targets
-                        q = q + qd * self.dt
-
-                elif (
-                    command.mode == ControlMode.IMPEDANCE
-                    and command.position_targets is not None
-                    and command.stiffness is not None
-                    and command.damping is not None
-                ):
-                    q_err = command.position_targets - q
-                    tau = command.stiffness * q_err - command.damping * qd
-                    if command.feedforward_torque is not None:
-                        tau += command.feedforward_torque
-                    qdd = tau
+            if command.mode == ControlMode.TORQUE:
+                if command.torque_commands is not None:
+                    # Simple double integrator: acc = torque (assuming unit mass)
+                    # Add damping to prevent instability
+                    damping = 0.1
+                    qdd = command.torque_commands - damping * qd
                     qd = qd + qdd * self.dt
                     q = q + qd * self.dt
 
-                self._sim_state = (q, qd)
+            elif command.mode == ControlMode.POSITION:
+                if command.position_targets is not None:
+                    # Instantaneous position control (infinite gain)
+                    q = command.position_targets
+                    # Reset velocity or leave it? Let's zero it to be safe as position jump implies infinite velocity
+                    qd = np.zeros_like(q)
+
+            elif command.mode == ControlMode.VELOCITY:
+                if command.velocity_targets is not None:
+                    qd = command.velocity_targets
+                    q = q + qd * self.dt
+
+            elif (
+                command.mode == ControlMode.IMPEDANCE
+                and command.position_targets is not None
+                and command.stiffness is not None
+                and command.damping is not None
+            ):
+                # Impedance control: tau = K(q_d - q) + D(0 - qd)
+                # acc = tau (unit mass)
+                q_err = command.position_targets - q
+                tau = command.stiffness * q_err - command.damping * qd
+                if command.feedforward_torque is not None:
+                    tau += command.feedforward_torque
+
+                qdd = tau
+                qd = qd + qdd * self.dt
+                q = q + qd * self.dt
+
+            self._sim_state = (q, qd)
             return
 
         # Hardware-specific protocols (ETHERCAT, ROS2, UDP) are not yet implemented.
@@ -532,22 +534,20 @@ class RealTimeController:
         Returns:
             Timing statistics.
         """
-        with self._stats_lock:
-            if not self._cycle_times:
-                return TimingStatistics()
-            cycle_times = np.array(self._cycle_times)
-            overruns = self._overruns
-            total_cycles = len(self._cycle_times)
+        if not self._cycle_times:
+            return TimingStatistics()
 
+        cycle_times = np.array(self._cycle_times)
         target_period = self.dt
+
         return TimingStatistics(
             mean_cycle_time=float(np.mean(cycle_times)),
             max_cycle_time=float(np.max(cycle_times)),
             min_cycle_time=float(np.min(cycle_times)),
             std_cycle_time=float(np.std(cycle_times)),
             jitter=float(np.max(np.abs(cycle_times - target_period))),
-            overruns=overruns,
-            total_cycles=total_cycles,
+            overruns=self._overruns,
+            total_cycles=len(self._cycle_times),
             uptime=time.perf_counter() - self._start_time if self._start_time else 0,
         )
 
@@ -557,7 +557,7 @@ class RealTimeController:
         Returns:
             Last received state or None.
         """
-        with self._state_cond:
+        with self._state_lock:
             return self._last_state
 
     def get_last_command(self) -> ControlCommand | None:
@@ -580,12 +580,16 @@ class RealTimeController:
         """
         if not (timeout is not None):
             raise ValueError("timeout must be provided")
-        with self._state_cond:
+        start = time.perf_counter()
+        with self._state_lock:
             initial_state = self._last_state
-            deadline = time.perf_counter() + timeout
-            while self._last_state is initial_state:
-                remaining = deadline - time.perf_counter()
-                if remaining <= 0:
-                    return None
-                self._state_cond.wait(timeout=remaining)
-            return self._last_state
+
+        remaining = timeout
+        while remaining > 0:
+            self._state_event.wait(timeout=remaining)
+            with self._state_lock:
+                if self._last_state is not initial_state:
+                    return self._last_state
+            remaining = timeout - (time.perf_counter() - start)
+
+        return None
