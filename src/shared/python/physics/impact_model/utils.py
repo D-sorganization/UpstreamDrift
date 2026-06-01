@@ -126,9 +126,32 @@ def validate_energy_balance(
     )
     total_ke_post = ke_ball_post + ke_ball_rot_post + ke_club_post
 
-    # Energy loss
+    # Energy loss.
+    #
+    # The fractional factor (1 - e²) is the loss measured in the centre-of-mass
+    # (relative-motion) frame, NOT a fraction of the total lab-frame KE. The
+    # moving club retains most of its lab-frame KE, so comparing (1 - e²)
+    # against energy_lost / total_ke_pre mis-flags correct impacts (#6984).
+    # ``expected_loss_factor`` is retained for backward compatibility but is the
+    # relative-frame *fraction*; consumers should compare the absolute
+    # ``energy_lost`` against ``expected_energy_loss`` instead.
+    #
+    # The physically correct expected loss is computed in the relative frame:
+    #     ΔKE = ½ · μ · v_rel² · (1 - e²)
+    # where μ = (m_ball·m_club)/(m_ball+m_club) is the reduced mass and v_rel
+    # is the closing speed along the contact normal.
     energy_lost = total_ke_pre - total_ke_post
-    expected_loss_factor = 1 - params.cor**2  # COR relates velocities, not energy
+    expected_loss_factor = 1 - params.cor**2  # relative-frame fraction
+
+    reduced_mass = (m_ball * m_club) / (m_ball + m_club)
+    v_rel_vec = pre_state.clubhead_velocity - pre_state.ball_velocity
+    normal = pre_state.clubhead_orientation
+    normal_norm = float(np.linalg.norm(normal))
+    if normal_norm > 1e-12:
+        v_rel_normal = float(np.dot(v_rel_vec, normal / normal_norm))
+    else:
+        v_rel_normal = float(np.linalg.norm(v_rel_vec))
+    expected_energy_loss = 0.5 * reduced_mass * v_rel_normal**2 * (1.0 - params.cor**2)
 
     return {
         "total_ke_pre": float(total_ke_pre),
@@ -137,7 +160,8 @@ def validate_energy_balance(
         "energy_loss_ratio": (
             float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
         ),
-        "expected_loss_factor": expected_loss_factor,
+        "expected_loss_factor": float(expected_loss_factor),
+        "expected_energy_loss": float(expected_energy_loss),
         "ball_ke_post": float(ke_ball_post),
         "ball_launch_speed": float(math.sqrt(np.dot(post_state.ball_velocity, post_state.ball_velocity))),  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
     }

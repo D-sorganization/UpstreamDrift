@@ -199,9 +199,14 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
+        # Rolling cap on slip velocity at the contact point (-R·n), not bulk
+        # tangential velocity, so pre-spin can't exceed the rolling limit (#6986).
+        omega = pre_state.ball_angular_velocity
+        surface_vel = np.cross(omega, -GOLF_BALL_RADIUS_M * n)
+        slip_speed = max(0.0, tangent_mag - float(np.dot(surface_vel, tangent_dir)))
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
+            float(GOLF_BALL_MASS_KG * slip_speed * 0.4),
         )
         spin_axis = np.cross(n, tangent_dir)
         spin_magnitude = j_friction / (
@@ -342,6 +347,10 @@ class SpringDamperImpactModel(ImpactModel):
             raise ValueError("dt must be provided")
         self.dt = dt
 
+    def _initial_gap(self) -> float:
+        """Small positive separation [m] seeding event-detected contact (#6982)."""
+        return 1e-6
+
     @precondition(
         lambda self, pre_state, params: pre_state.clubhead_mass > 0,
         "Clubhead mass must be positive",
@@ -381,8 +390,10 @@ class SpringDamperImpactModel(ImpactModel):
             )
         )
 
-        # Initial state - place ball at contact
-        x_ball = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
+        # Start with a small positive gap so contact onset is event-detected
+        # rather than dependent on dt-step overshoot/rounding (#6982).
+        initial_gap = self._initial_gap()
+        x_ball = (GOLF_BALL_RADIUS_M + initial_gap) * n
         v_ball = pre_state.ball_velocity.copy()
         x_club = np.zeros(3)
         v_club = pre_state.clubhead_velocity.copy()
@@ -395,11 +406,13 @@ class SpringDamperImpactModel(ImpactModel):
         # Limit max force to prevent numerical blow-up
         max_force = 1e5  # [N] max contact force
 
+        in_contact = False
         for _ in range(max_steps):
             # Penetration depth (along normal)
             gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M
 
             if gap < 0:  # In contact (penetration)
+                in_contact = True
                 penetration = -gap
 
                 # Contact force (spring-damper)
@@ -408,35 +421,26 @@ class SpringDamperImpactModel(ImpactModel):
                 f_damper = -params.contact_damping * v_rel_normal
                 f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
 
+                # Equal-and-opposite force ⇒ momentum conserved each step:
+                # m_b·Δv_b = -m_c·Δv_c (#6982).
                 f_contact = f_magnitude * n
 
-                # Semi-implicit Euler: update velocities first
-                # Force on ball is in direction of normal (away from club)
+                # Semi-implicit Euler: velocities first, then positions.
                 a_ball = f_contact / m_ball
-                # Force on club is opposite to normal (reaction force)
                 a_club = -f_contact / m_club
 
                 v_ball = v_ball + a_ball * self.dt
                 v_club = v_club + a_club * self.dt
-
-                # Then positions
                 x_ball = x_ball + v_ball * self.dt
                 x_club = x_club + v_club * self.dt
-
                 contact_time += self.dt
 
-            elif contact_time > 0:
-                # Was in contact but now separated
-                break
+            elif in_contact:
+                break  # was in contact, now separated
             else:
-                # Pre-contact: advance positions
+                # Pre-contact free-flight until contact onset (gap < 0).
                 x_ball = x_ball + v_ball * self.dt  # type: ignore[assignment]
                 x_club = x_club + v_club * self.dt  # type: ignore[assignment]
-                # Don't increment contact_time here, it's only for contact duration
-
-                # Check if we've reached the ball
-                if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M < 0:
-                    continue
 
         # Energy calculation
         ke_ball_pre = (
@@ -627,9 +631,21 @@ def validate_energy_balance(
     )
     total_ke_post = ke_ball_post + ke_ball_rot_post + ke_club_post
 
-    # Energy loss
+    # (1 - e²) is the relative-frame loss fraction, not a lab-frame KE
+    # fraction (the moving club keeps most KE): incomparable (#6984). Correct
+    # expected loss: ΔKE = ½·μ·v_rel²·(1 - e²), μ = reduced mass.
     energy_lost = total_ke_pre - total_ke_post
-    expected_loss_factor = 1 - params.cor**2  # COR relates velocities, not energy
+    expected_loss_factor = 1 - params.cor**2  # relative-frame fraction
+
+    reduced_mass = (m_ball * m_club) / (m_ball + m_club)
+    v_rel_vec = pre_state.clubhead_velocity - pre_state.ball_velocity
+    normal = pre_state.clubhead_orientation
+    normal_norm = float(np.linalg.norm(normal))
+    if normal_norm > 1e-12:
+        v_rel_normal = float(np.dot(v_rel_vec, normal / normal_norm))
+    else:
+        v_rel_normal = float(np.linalg.norm(v_rel_vec))
+    expected_energy_loss = 0.5 * reduced_mass * v_rel_normal**2 * (1.0 - params.cor**2)
 
     return {
         "total_ke_pre": float(total_ke_pre),
@@ -638,7 +654,8 @@ def validate_energy_balance(
         "energy_loss_ratio": (
             float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
         ),
-        "expected_loss_factor": expected_loss_factor,
+        "expected_loss_factor": float(expected_loss_factor),
+        "expected_energy_loss": float(expected_energy_loss),
         "ball_ke_post": float(ke_ball_post),
         "ball_launch_speed": float(
             0.0

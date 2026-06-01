@@ -102,9 +102,19 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
+        # Rolling-without-slip cap (#6986). The cap must be applied to the slip
+        # velocity at the contact point, not the bulk tangential velocity. The
+        # contact point sits at -R·n from the ball centre, so the ball-surface
+        # velocity there is ω × (-R·n); the slip along tangent_dir is therefore
+        # v_t - (ω × (-R·n))·t̂. Ignoring the incoming ball spin lets a
+        # pre-spinning ball exceed the rolling limit.
+        omega = pre_state.ball_angular_velocity
+        surface_vel = np.cross(omega, -GOLF_BALL_RADIUS_M * n)
+        slip_speed = tangent_mag - float(np.dot(surface_vel, tangent_dir))
+        slip_speed = max(0.0, slip_speed)
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
+            float(GOLF_BALL_MASS_KG * slip_speed * 0.4),
         )
         spin_axis = np.cross(n, tangent_dir)
         spin_magnitude = j_friction / (
@@ -240,6 +250,17 @@ class SpringDamperImpactModel(ImpactModel):
             raise ValueError("dt must be provided")
         self.dt = dt
 
+    def _initial_gap(self) -> float:
+        """Small positive separation [m] used to seed contact detection.
+
+        Starting at a small positive gap (rather than exactly touching) means
+        contact onset is event-detected when the gap crosses zero, rather than
+        depending on dt-step overshoot or initial-gap rounding (#6982). The
+        pre-contact phase is pure free-flight, so the post-impact result is
+        independent of the chosen gap.
+        """
+        return 1e-6
+
     @precondition(
         lambda self, pre_state, params: pre_state.clubhead_mass > 0,
         "Clubhead mass must be positive",
@@ -276,8 +297,11 @@ class SpringDamperImpactModel(ImpactModel):
             )
         )
 
-        # Initial state - place ball at contact
-        x_ball: np.ndarray = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
+        # Initial state. Start with a small positive gap so contact onset is
+        # event-detected (gap crosses zero) rather than dependent on dt-step
+        # overshoot or initial-gap rounding (#6982).
+        initial_gap = self._initial_gap()
+        x_ball: np.ndarray = (GOLF_BALL_RADIUS_M + initial_gap) * n
         v_ball: np.ndarray = pre_state.ball_velocity.copy()
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()
@@ -290,11 +314,13 @@ class SpringDamperImpactModel(ImpactModel):
         # Limit max force to prevent numerical blow-up
         max_force = 1e5  # [N] max contact force
 
+        in_contact = False
         for _ in range(max_steps):
             # Penetration depth (along normal)
             gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M
 
             if gap < 0:  # In contact (penetration)
+                in_contact = True
                 penetration = -gap
 
                 # Contact force (spring-damper)
@@ -303,6 +329,9 @@ class SpringDamperImpactModel(ImpactModel):
                 f_damper = -params.contact_damping * v_rel_normal
                 f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
 
+                # Equal-and-opposite contact force (Newton's third law) ⇒
+                # momentum is conserved exactly each step: the same f_contact
+                # acts on ball (+) and club (-), so m_b·Δv_b = -m_c·Δv_c.
                 f_contact = f_magnitude * n
 
                 # Semi-implicit Euler: update velocities first
@@ -320,18 +349,13 @@ class SpringDamperImpactModel(ImpactModel):
 
                 contact_time += self.dt
 
-            elif contact_time > 0:
+            elif in_contact:
                 # Was in contact but now separated
                 break
             else:
-                # Pre-contact: advance positions
+                # Pre-contact: free-flight advance until contact onset.
                 x_ball = x_ball + v_ball * self.dt  # type: ignore[assignment]
                 x_club = x_club + v_club * self.dt  # type: ignore[assignment]
-                # Don't increment contact_time here, it's only for contact duration
-
-                # Check if we've reached the ball
-                if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M < 0:
-                    continue
 
         # Energy calculation
         ke_ball_pre = (

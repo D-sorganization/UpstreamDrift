@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.229                                            |
+| **Spec Version**        | 1.0.230                                            |
 | **Last Spec Update**    | 2026-06-01                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-01** - Fixed three impact-physics defects and added value-asserting tests (#6982, #6984, #6986, #6993). `SpringDamperImpactModel` now starts at a small positive gap with event-detected contact onset (no longer dt-overshoot dependent) and conserves linear momentum to machine precision (m*b·Δv_b = -m_c·Δv_c). `validate_energy_balance` now reports `expected_energy_loss = ½·μ·v_rel²·(1-e²)` computed in the relative (centre-of-mass) frame instead of comparing the relative-frame fraction `(1-e²)` against the total lab-frame KE loss. The rigid-body friction rolling cap now applies to the contact-point slip velocity `(v_t − ω·R)` so a pre-spinning ball cannot exceed the rolling-without-slip limit. Added `tests/unit/physics/test_impact_physics_values.py` pinning post-impact speed/launch/spin, the `\_compute*\*` helpers, gear-effect sign behaviour, factory dispatch, and precondition failures against hand-computed closed-form values.
 - **2026-05-31** - Hardened JaxSim readiness and parity gates (#6880, #6881, #6882, #6884): `EngineManager` now registers JaxSim as a runtime-backed engine, only marks runtime-backed engines available when both adapter/provider paths and importable runtime dependencies are present, preserves DbC path-policy failures as provider-discovery misses instead of constructor crashes, and uses a required-JUnit testcase assertion in the cross-engine workflow so skipped/missing JaxSim/Pinocchio parity cases fail CI.
 - **2026-05-31** - Fixed two HIGH-severity physics-audit defects (#6890, #6891): `JaxSimBackend.compute_jacobian` now restacks the native JaxSim free-floating Jacobian to the canonical `[angular; linear; joints]` convention — permuting the six base columns and the six spatial output rows — so `J·v` and `Jᵀ·force` agree with `M`/`h`/`v`/inverse-dynamics; and the cross-engine conformance harness no longer counts a missing required method on an advertised capability (now `passed=False`) or a throwing `supports()` query (now a failure, not a swallowed free pass) as a passing skip, closing a CC-8 gate-integrity hole. Genuine missing capabilities remain legitimate skips.
 - **2026-05-31** - Recovered closed review-feedback fixes for the metadata-driven UX wrappers: the shared `simulation.engine` metadata now includes `jaxsim` for generated TypeScript/PyQt engine selectors, and PyQt `HelpfulField` free-form fields with `valid_range: null` now render an editable `QLineEdit` instead of an empty combo box.
