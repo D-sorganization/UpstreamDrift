@@ -864,3 +864,39 @@ class TestMarkerTrajectory:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+# ---------------------------------------------------------------------------
+# CameraExtrinsics rotation validation (#6933)
+# ---------------------------------------------------------------------------
+
+
+def test_camera_extrinsics_accepts_identity_rotation() -> None:
+    extr = CameraExtrinsics()
+    assert extr.rotation == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+
+def test_camera_extrinsics_accepts_proper_rotation() -> None:
+    # 90-degree rotation about z (orthonormal, det == +1).
+    rot = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+    extr = CameraExtrinsics(rotation=rot)
+    assert extr.rotation == rot
+
+
+def test_camera_extrinsics_rejects_non_finite_rotation() -> None:
+    rot = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, float("nan")]]
+    with pytest.raises(ValueError, match="finite"):
+        CameraExtrinsics(rotation=rot)
+
+
+def test_camera_extrinsics_rejects_non_orthonormal_rotation() -> None:
+    rot = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 2.0]]
+    with pytest.raises(ValueError, match="orthonormal|proper rotation"):
+        CameraExtrinsics(rotation=rot)
+
+
+def test_camera_extrinsics_rejects_improper_rotation_det_minus_one() -> None:
+    # Reflection: orthonormal but det == -1.
+    rot = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, -1.0]]
+    with pytest.raises(ValueError, match="proper rotation"):
+        CameraExtrinsics(rotation=rot)

@@ -172,3 +172,59 @@ def test_public_functions_document_units_and_representation(
     assert "[angular; linear]" in doc or "Gravity vector" in doc
     assert "m/s" in doc or "m/s^2" in doc
     assert "representation" in doc
+
+
+# ---------------------------------------------------------------------------
+# Finiteness guards (#6931)
+# ---------------------------------------------------------------------------
+
+
+def _identity_rotation() -> np.ndarray:
+    return np.eye(3)
+
+
+@pytest.mark.parametrize("bad", [np.nan, np.inf, -np.inf])
+def test_convert_velocity_rejects_non_finite_velocity(bad: float) -> None:
+    velocity = np.array([0.1, -0.2, 0.3, 1.0, 2.0, bad])
+    with pytest.raises(ValueError, match="finite"):
+        convert_floating_base_velocity(
+            velocity,
+            source=VelocityRepresentation.INERTIAL,
+            target=VelocityRepresentation.BODY_FIXED,
+            rotation_inertial_from_body=_identity_rotation(),
+        )
+
+
+@pytest.mark.parametrize("bad", [np.nan, np.inf])
+def test_convert_gravity_rejects_non_finite(bad: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        convert_gravity_vector(
+            np.array([0.0, 0.0, bad]),
+            target=VelocityRepresentation.BODY_FIXED,
+            rotation_inertial_from_body=_identity_rotation(),
+        )
+
+
+def test_single_floating_body_rejects_non_finite_inertia() -> None:
+    inertia = np.eye(3)
+    inertia[0, 0] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        single_floating_body_h_g(
+            mass_kg=1.0,
+            inertia_body_kg_m2=inertia,
+            angular_velocity=np.zeros(3),
+            representation=VelocityRepresentation.INERTIAL,
+            rotation_inertial_from_body=_identity_rotation(),
+        )
+
+
+@pytest.mark.parametrize("bad_mass", [np.nan, np.inf])
+def test_single_floating_body_rejects_non_finite_mass(bad_mass: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        single_floating_body_h_g(
+            mass_kg=bad_mass,
+            inertia_body_kg_m2=np.eye(3),
+            angular_velocity=np.zeros(3),
+            representation=VelocityRepresentation.INERTIAL,
+            rotation_inertial_from_body=_identity_rotation(),
+        )
