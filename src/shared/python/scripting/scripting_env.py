@@ -44,6 +44,7 @@ If you need to evaluate *user-supplied expressions from an untrusted source*
 performs AST-level validation before execution.
 """
 
+import ast
 import builtins
 import contextlib
 import ctypes
@@ -195,6 +196,80 @@ def _make_restricted_builtins() -> dict[str, Any]:
     return safe
 
 
+# Attribute names that enable the classic CPython sandbox-escape chain.
+# Removing dangerous builtins and blocking ``__import__`` is not sufficient on
+# its own: user code can still walk the object graph via introspection dunders
+# (e.g. ``().__class__.__bases__[0].__subclasses__()``) to reach an arbitrary
+# class whose ``__init__.__globals__['__builtins__']`` is the *real*,
+# unrestricted builtins dict — leaking ``open``/``eval``/``exec``/``__import__``
+# and thereby escaping the sandbox entirely.  We deny any source that references
+# these attribute names (by attribute access or by string in ``getattr``).
+_BLOCKED_ATTRIBUTES: frozenset[str] = frozenset(
+    {
+        "__class__",
+        "__bases__",
+        "__base__",
+        "__subclasses__",
+        "__subclasshook__",
+        "__mro__",
+        "__globals__",
+        "__code__",
+        "__closure__",
+        "__func__",
+        "__self__",
+        "__dict__",
+        "__builtins__",
+        "__getattribute__",
+        "__getattr__",
+        "__import__",
+        "__loader__",
+        "__spec__",
+        "__init_subclass__",
+        "__reduce__",
+        "__reduce_ex__",
+    }
+)
+
+
+def _screen_source_for_escapes(source: str) -> None:
+    """Reject source that references sandbox-escape introspection dunders.
+
+    This is a security boundary.  The restricted ``__builtins__`` removes
+    dangerous primitives, but Python's object-introspection dunders allow a
+    determined attacker to climb back to the real builtins.  We parse the
+    source to an AST and reject any reference to a blocked attribute name,
+    whether via attribute access (``obj.__class__``) or as a constant string
+    fed to ``getattr``/``__getattribute__`` (``getattr(obj, "__class__")``).
+
+    Args:
+        source: User-supplied source code.
+
+    Raises:
+        ValueError: If the source references a blocked introspection dunder.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        # Let the downstream compile() surface the SyntaxError normally.
+        return
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in _BLOCKED_ATTRIBUTES:
+            raise ValueError(
+                f"access to attribute '{node.attr}' is blocked in the scripting sandbox"
+            )
+        # Block getattr(obj, "__class__") and similar string-keyed escapes.
+        if (
+            isinstance(node, ast.Constant)
+            and isinstance(node.value, str)
+            and node.value in _BLOCKED_ATTRIBUTES
+        ):
+            raise ValueError(
+                f"reference to attribute '{node.value}' is blocked in the "
+                "scripting sandbox"
+            )
+
+
 # Default per-call execution timeout (seconds).
 _DEFAULT_MAX_EXECUTION_TIME = 30
 
@@ -225,7 +300,7 @@ try:
 
     HAS_SCIPY = True
 except ImportError:
-    scipy = None
+    scipy = None  # type: ignore[assignment]
     HAS_SCIPY = False
 
 
@@ -448,6 +523,13 @@ class ConsoleEnvironment:
 
         out_buf = io.StringIO()
         err_buf = io.StringIO()
+
+        # Security screen: reject introspection-dunder escapes before execution.
+        try:
+            _screen_source_for_escapes(source)
+        except ValueError as e:
+            err_buf.write(f"SecurityError: {e}\n")
+            return out_buf.getvalue(), err_buf.getvalue()
 
         try:
             with (
