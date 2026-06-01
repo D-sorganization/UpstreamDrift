@@ -378,4 +378,7 @@ if __name__ == "__main__":
     import uvicorn
 
     app = create_app()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # nosec B104 - dev-only convenience entrypoint (``python -m ...api``);
+    # binding all interfaces is intentional for local container/dev use and
+    # this block never runs under the production ASGI server.
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104
