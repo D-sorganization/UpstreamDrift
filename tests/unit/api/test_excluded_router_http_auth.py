@@ -69,6 +69,11 @@ def app() -> FastAPI:
     test_app.include_router(chat_ws_module.router, dependencies=deps)
     test_app.include_router(realtime_module.router, dependencies=deps)
     test_app.state.chat_service = _MockChatService()
+    # /realtime/publish now carries the shared slowapi limiter (#6928); the
+    # decorator requires ``app.state.limiter`` to be the same instance.
+    from src.api.rate_limit import limiter
+
+    test_app.state.limiter = limiter
     return test_app
 
 
