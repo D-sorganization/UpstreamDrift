@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from bunkershot3d.kinematics.coupling import CoupledDoublePendulum, CoSimulator
 
@@ -30,6 +32,42 @@ def test_cosimulator() -> None:
 
     assert force.shape == (3,)
     assert torque.shape == (3,)
+
+
+def test_pure_force_torque_mapping() -> None:
+    """Wrench->joint-torque mapping must equal the manipulator Jacobian transpose.
+
+    Regression for #6987. For a planar 2R chain whose joints both rotate about
+    the world y-axis, the manipulator Jacobian has angular row [1, 1]; therefore
+    an external moment Ty projects onto BOTH joint torques. The position rows
+    give the force contributions. This is the correct J^T wrench projection, NOT
+    a double-count, so we lock the convention in here.
+    """
+    pendulum = CoupledDoublePendulum()
+    # Use a non-trivial configuration so the Jacobian is fully populated.
+    pendulum.state.theta1 = 0.3
+    pendulum.state.theta2 = -0.4
+    t1 = pendulum.state.theta1
+    t2 = pendulum.state.theta2
+    l1 = pendulum.params.upper_segment.length_m
+    l2 = pendulum.params.lower_segment.length_m
+
+    dx_dt1 = l1 * math.cos(t1) + l2 * math.cos(t1 + t2)
+    dz_dt1 = l1 * math.sin(t1) + l2 * math.sin(t1 + t2)
+    dx_dt2 = l2 * math.cos(t1 + t2)
+    dz_dt2 = l2 * math.sin(t1 + t2)
+
+    # Pure force (no moment): tau = J_v^T @ F.
+    Fx, Fz = 7.0, -3.0
+    pendulum.step(0.0, (np.array([Fx, 0.0, Fz]), np.zeros(3)))
+    assert pendulum.external_tau1 == np.float64(Fx * dx_dt1 + Fz * dz_dt1)
+    assert pendulum.external_tau2 == np.float64(Fx * dx_dt2 + Fz * dz_dt2)
+
+    # Pure moment about y: angular Jacobian row is [1, 1] -> Ty hits both joints.
+    Ty = 2.5
+    pendulum.step(0.0, (np.zeros(3), np.array([0.0, Ty, 0.0])))
+    assert pendulum.external_tau1 == np.float64(Ty)
+    assert pendulum.external_tau2 == np.float64(Ty)
 
 
 def test_zero_stiffness_regression() -> None:

@@ -158,11 +158,14 @@ def create_standard_shaft(
     check_positive(tip_diameter, "tip_diameter")
     check_positive(butt_diameter, "butt_diameter")
     check_positive(wall_thickness, "wall_thickness")
-    # Linear station positions from tip to butt
+    # Station positions run from the clamped butt (x=0) to the free tip
+    # (x=length). The cantilever boundary condition (and the analytic
+    # compute_static_deflection) fix station 0, so station 0 MUST be the
+    # butt — the clamped end of a golf shaft. See issue #6983.
     stations = np.linspace(0, length, n_stations)
 
-    # Linear taper in diameter
-    diameters = np.linspace(tip_diameter, butt_diameter, n_stations)
+    # Linear taper in diameter: thick butt at station 0 -> thin tip at the end.
+    diameters = np.linspace(butt_diameter, tip_diameter, n_stations)
 
     # Constant wall thickness (could be varied)
     wall = np.full(n_stations, wall_thickness)
