@@ -166,7 +166,7 @@ def _python_fallback_total(
         math.sqrt(np.dot(spin, spin))
     )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
 
-    total = np.zeros(3)
+    total: np.ndarray = np.zeros(3)
     if speed < 1e-6:
         return total
 
