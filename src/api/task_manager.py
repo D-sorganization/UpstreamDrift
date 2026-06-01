@@ -64,6 +64,10 @@ class TaskManager:
     TTL_SECONDS: int = 3600  # 1 hour
     MAX_TASKS: int = 1000  # Maximum stored tasks
     MAX_CONCURRENT_ENGINES: int = 4  # Concurrency limit for engine instances
+    # Minimum seconds between full O(n) expiry sweeps. Read/membership ops
+    # are O(1000)-hammered by status polling, so the sweep is throttled
+    # rather than run on every access (issue #6992).
+    CLEANUP_INTERVAL_SECONDS: float = 5.0
 
     def __init__(
         self,
@@ -90,15 +94,21 @@ class TaskManager:
         self._lock = threading.RLock()
         self._engine_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_ENGINES)
         self._closed = False
+        # Monotonic timestamp of the last full expiry sweep (issue #6992).
+        self._last_cleanup: float = 0.0
 
     def _ensure_open(self) -> None:
         """Raise when callers try to use a shutdown manager."""
         if self._closed:
             raise RuntimeError("TaskManager is closed")
 
-    def _cleanup_expired_locked(self) -> None:
-        """Remove expired tasks. Caller must hold ``self._lock``."""
-        current_time = time.time()
+    def _purge_expired_locked(self, current_time: float) -> None:
+        """Run the full O(n) expiry sweep. Caller must hold ``self._lock``.
+
+        Records the sweep time so :meth:`_cleanup_expired_locked` can throttle
+        subsequent invocations (issue #6992).
+        """
+        self._last_cleanup = current_time
         expired_keys = [
             task_id
             for task_id, timestamp in self._timestamps.items()
@@ -109,6 +119,38 @@ class TaskManager:
             self._timestamps.pop(task_id, None)
         if expired_keys:
             logger.debug("Cleaned up %d expired tasks", len(expired_keys))
+
+    def _cleanup_expired_locked(self, *, force: bool = False) -> None:
+        """Throttled expiry sweep. Caller must hold ``self._lock``.
+
+        The underlying sweep is O(n) over every tracked task, yet it is
+        invoked on every read/membership/iteration op — and status polling
+        hammers those paths. To keep the hot read path effectively O(1),
+        the full sweep runs at most once per ``CLEANUP_INTERVAL_SECONDS``
+        unless ``force`` is set. Because tasks only *expire* (never become
+        unexpired), deferring the sweep is safe: callers that depend on an
+        item being absent after TTL (``get``/``exists``) re-check membership,
+        and an entry lingering a few extra seconds before physical removal is
+        within the TTL contract's tolerance (issue #6992).
+        """
+        current_time = time.time()
+        if (
+            not force
+            and current_time - self._last_cleanup < self.CLEANUP_INTERVAL_SECONDS
+        ):
+            return
+        self._purge_expired_locked(current_time)
+
+    def _is_expired_locked(self, task_id: str) -> bool:
+        """Return whether ``task_id`` is past its TTL. Caller holds the lock.
+
+        Used by the read path so throttled physical cleanup never returns a
+        logically-expired task (issue #6992).
+        """
+        ts = self._timestamps.get(task_id)
+        if ts is None:
+            return True
+        return time.time() - ts > self.TTL_SECONDS
 
     def _enforce_size_limit_locked(self) -> None:
         """Evict oldest tasks if over limit. Caller must hold ``self._lock``."""
@@ -132,7 +174,9 @@ class TaskManager:
         _validate_task_id(task_id)
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            # Force the sweep on writes so storage stays bounded even when
+            # reads have been throttling cleanup (issue #6992).
+            self._cleanup_expired_locked(force=True)
             self._tasks[task_id] = data
             self._timestamps[task_id] = time.time()
             self._enforce_size_limit_locked()
@@ -142,6 +186,8 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
+            if self._is_expired_locked(task_id):
+                return None
             task = self._tasks.get(task_id)
             if task is not None:
                 self._timestamps[task_id] = time.time()
@@ -152,7 +198,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            present = task_id in self._tasks
+            present = task_id in self._tasks and not self._is_expired_locked(task_id)
             if present:
                 self._timestamps[task_id] = time.time()
             return present
@@ -191,7 +237,9 @@ class TaskManager:
         """Return the number of active (non-expired) tasks."""
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            # Force an exact sweep so the reported count never includes
+            # logically-expired-but-not-yet-purged tasks (issue #6992).
+            self._cleanup_expired_locked(force=True)
             return len(self._tasks)
 
     # ── Dict-like compatibility surface (#4843) ──────────────────────
@@ -202,7 +250,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            if task_id in self._tasks:
+            if task_id in self._tasks and not self._is_expired_locked(task_id):
                 # Refresh the TTL on membership so dict-style polling
                 # (``id in tm``) keeps long-running tasks alive,
                 # consistent with ``exists()`` / ``get()``. See #4871.
@@ -214,7 +262,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            if task_id not in self._tasks:
+            if task_id not in self._tasks or self._is_expired_locked(task_id):
                 raise KeyError(task_id)
             self._timestamps[task_id] = time.time()
             return self._tasks[task_id]
@@ -233,34 +281,36 @@ class TaskManager:
     def __len__(self) -> int:
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            # Snapshot/aggregate ops force an exact sweep (not the hot poll
+            # path) so callers see only non-expired tasks (issue #6992).
+            self._cleanup_expired_locked(force=True)
             return len(self._tasks)
 
     def __iter__(self) -> Any:
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            self._cleanup_expired_locked(force=True)
             return iter(list(self._tasks.keys()))
 
     def keys(self) -> list[str]:
         """Snapshot list of active (non-expired) task IDs."""
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            self._cleanup_expired_locked(force=True)
             return list(self._tasks.keys())
 
     def values(self) -> list[dict[str, Any]]:
         """Snapshot list of active task data dicts."""
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            self._cleanup_expired_locked(force=True)
             return list(self._tasks.values())
 
     def items(self) -> list[tuple[str, dict[str, Any]]]:
         """Snapshot list of (task_id, data) pairs."""
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
+            self._cleanup_expired_locked(force=True)
             return list(self._tasks.items())
 
     async def shutdown(self) -> None:
