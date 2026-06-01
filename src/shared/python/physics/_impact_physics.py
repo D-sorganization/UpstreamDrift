@@ -199,11 +199,14 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
+        spin_axis = np.cross(n, tangent_dir)
+        # Rolling cap relative to contact-point speed (pre-existing spin reduces sliding).
+        omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
+        v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
+            float(GOLF_BALL_MASS_KG * v_t_eff * 0.4),
         )
-        spin_axis = np.cross(n, tangent_dir)
         spin_magnitude = j_friction / (
             GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M
         )
@@ -381,8 +384,9 @@ class SpringDamperImpactModel(ImpactModel):
             )
         )
 
-        # Initial state - place ball at contact
-        x_ball = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
+        # Tiny clearance avoids dt-dependent overshoot at contact onset.
+        _initial_gap = float(GOLF_BALL_RADIUS_M) * 1e-4
+        x_ball = (float(GOLF_BALL_RADIUS_M) + _initial_gap) * n
         v_ball = pre_state.ball_velocity.copy()
         x_club = np.zeros(3)
         v_club = pre_state.clubhead_velocity.copy()
@@ -597,6 +601,16 @@ def validate_energy_balance(
     m_club = pre_state.clubhead_mass
     I_ball = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
 
+    # ΔKE_expected = ½·μ·v_rel_n²·(1−e²) in the relative (COM) frame.
+    _n_raw = np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+    _n_norm = math.hypot(*_n_raw) if _n_raw.size > 0 else 0.0
+    _n_unit = _n_raw / _n_norm if _n_norm > 1e-12 else np.array([1.0, 0.0, 0.0])
+    _v_rel = np.asarray(pre_state.clubhead_velocity, dtype=float) - np.asarray(
+        pre_state.ball_velocity, dtype=float
+    )
+    _mu = (float(m_ball) * float(m_club)) / (float(m_ball) + float(m_club))
+    expected_loss_j = 0.5 * _mu * float(np.dot(_v_rel, _n_unit)) ** 2 * (1.0 - params.cor**2)
+
     # Pre-impact kinetic energy
     ke_ball_pre = (
         0.5 * m_ball * np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
@@ -639,6 +653,7 @@ def validate_energy_balance(
             float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
         ),
         "expected_loss_factor": expected_loss_factor,
+        "expected_loss_j": float(expected_loss_j),
         "ball_ke_post": float(ke_ball_post),
         "ball_launch_speed": float(
             0.0
