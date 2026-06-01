@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import tempfile
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -470,7 +471,7 @@ class ModelGenerationAPI:
 
         try:
             urdf_string = converter.mjcf_to_urdf(content)
-        except (ValueError, KeyError, OSError) as e:
+        except (ValueError, KeyError, OSError, ET.ParseError) as e:
             return APIResponse.error(f"Conversion failed: {e}", 422)
 
         robot_name = body.get("robot_name", "converted")
@@ -499,7 +500,7 @@ class ModelGenerationAPI:
 
         try:
             mjcf_string = converter.urdf_to_mjcf(content)
-        except (ValueError, KeyError, OSError) as e:
+        except (ValueError, KeyError, OSError, ET.ParseError) as e:
             return APIResponse.error(f"Conversion failed: {e}", 422)
 
         robot_name = body.get("robot_name", "converted")

@@ -35,7 +35,7 @@ class FastAPIAdapter:
 
         for route in self.api.get_routes():
 
-            async def make_handler(r: Route) -> Callable[..., Any]:
+            def make_handler(r: Route) -> Callable[..., Any]:
                 async def handler(request: Request, **kwargs: Any) -> Any:
                     body = None
                     try:
