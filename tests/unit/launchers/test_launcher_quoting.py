@@ -39,6 +39,7 @@ def test_launch_script_separate_terminals_quoting(tmp_path: Path) -> None:
         patch("os.name", "nt"),
         patch("src.launchers.launcher_process_manager.CREATE_NEW_CONSOLE", 0x10),
         patch("src.launchers.launcher_process_manager.validate_script_path"),
+        patch("src.launchers.launcher_process_manager._assign_to_job"),
         patch("subprocess.Popen") as mock_popen,
     ):
         mock_popen.return_value = MagicMock()
@@ -54,8 +55,9 @@ def test_launch_script_separate_terminals_quoting(tmp_path: Path) -> None:
         cmd_str = args[0]
         # Verify the command is constructed using double quotes suitable for Windows cmd.exe
         assert cmd_str.startswith('cmd /c "')
-        # Check that sys.executable and script_path are nested inside double quotes
-        assert f'"{sys.executable}"' in cmd_str
+        # The interpreter is present and the space-containing script path is
+        # wrapped in double quotes (cmd.exe quoting via subprocess.list2cmdline).
+        assert sys.executable in cmd_str
         assert f'"{script}"' in cmd_str
 
 
@@ -67,6 +69,7 @@ def test_launch_module_separate_terminals_quoting(tmp_path: Path) -> None:
     with (
         patch("os.name", "nt"),
         patch("src.launchers.launcher_process_manager.CREATE_NEW_CONSOLE", 0x10),
+        patch("src.launchers.launcher_process_manager._assign_to_job"),
         patch("subprocess.Popen") as mock_popen,
     ):
         mock_popen.return_value = MagicMock()
@@ -81,5 +84,5 @@ def test_launch_module_separate_terminals_quoting(tmp_path: Path) -> None:
         args, kwargs = mock_popen.call_args
         cmd_str = args[0]
         assert cmd_str.startswith('cmd /c "')
-        assert f'"{sys.executable}"' in cmd_str
+        assert sys.executable in cmd_str
         assert " -m my_pkg.my_module" in cmd_str

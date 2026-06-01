@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.data_explorer import (
     router,
-    _load_dataset_from_path,
+    _preview_dataset_from_path,
 )
 
 
@@ -38,8 +38,8 @@ def temp_json(tmp_path: Path) -> Path:
 
 
 def test_load_csv_incremental(temp_csv: Path) -> None:
-    """_load_dataset_from_path must read only the limit rows for CSV but return correct total."""
-    columns, rows, total = _load_dataset_from_path(temp_csv, limit=15)
+    """Streaming preview must read only the limit rows for CSV but return correct total."""
+    columns, rows, total = _preview_dataset_from_path(temp_csv, 15)
 
     assert columns == ["id", "name", "value"]
     assert len(rows) == 15
@@ -49,8 +49,8 @@ def test_load_csv_incremental(temp_csv: Path) -> None:
 
 
 def test_load_json_limit(temp_json: Path) -> None:
-    """_load_dataset_from_path must limit loaded rows for JSON and return correct total."""
-    columns, rows, total = _load_dataset_from_path(temp_json, limit=15)
+    """Streaming preview must limit loaded rows for JSON and return correct total."""
+    columns, rows, total = _preview_dataset_from_path(temp_json, 15)
 
     assert columns == ["id", "name", "value"]
     assert len(rows) == 15
