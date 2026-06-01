@@ -242,7 +242,7 @@ async def test_registry_remove_multiple_subscribers() -> None:
     # The channel should still exist because mock_ws2 is still subscribed
     snapshot = await _registry.snapshot("pose/canonical")
     assert len(snapshot) == 1
-    assert snapshot[0] == mock_ws2
+    assert snapshot[0][0] == mock_ws2
     assert "pose/canonical" in _registry._subs
 
 
