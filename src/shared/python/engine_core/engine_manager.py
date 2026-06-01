@@ -44,7 +44,7 @@ _RUNTIME_DEPENDENCY_NAMES: dict[EngineType, str] = {
     EngineType.MUJOCO: "mujoco",
     EngineType.DRAKE: "drake",
     EngineType.PINOCCHIO: "pinocchio",
-    EngineType.JAXSIM: "jaxsim",
+    EngineType.JAXSIM: "jaxsim.api",
     EngineType.OPENSIM: "opensim",
     EngineType.MYOSIM: "myosuite",
 }

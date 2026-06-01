@@ -31,6 +31,7 @@ from typing import Any, Protocol, runtime_checkable
 from .club_ball_target import ClubBallTarget
 from .club_target import ClubTarget
 from .fit_result import CanonicalFitResult
+from .multi_source_target import MultiSourceTarget as _PublicMultiSourceTarget
 
 __all__ = [
     "FitOptions",
@@ -268,7 +269,7 @@ def resolve_club_target(target: Any) -> ClubTarget:
         return target
     if isinstance(target, ClubBallTarget):
         return target.club
-    if isinstance(target, MultiSourceTarget):
+    if isinstance(target, (MultiSourceTarget, _PublicMultiSourceTarget)):
         if target.club is None:
             raise ValueError(
                 "resolve_club_target requires target.club to be set; "
