@@ -21,8 +21,15 @@ ingestion.
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
+# Building XML is not an attack vector, so stdlib ElementTree is used to
+# *construct* documents (Element/SubElement/ElementTree.write). Untrusted
+# *parsing* goes through defusedxml, which refuses XXE / entity expansion
+# (issue #6927). defusedxml deliberately does not expose Element/SubElement,
+# so the two roles must use separate imports.
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from pathlib import Path
+
+import defusedxml.ElementTree as DefusedET
 
 import numpy as np
 
@@ -102,7 +109,7 @@ class OpenSimAdapter:
     def import_back(self, input_path: Path) -> SubjectAnthropometrics:
         """Reverse of :meth:`export`."""
         input_path = Path(input_path)
-        tree = ET.parse(str(input_path))
+        tree = DefusedET.parse(str(input_path))
         document = tree.getroot()
         if document.tag != "OpenSimDocument":
             raise ValueError(

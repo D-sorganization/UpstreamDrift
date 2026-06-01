@@ -13,24 +13,39 @@ Subscriber bookkeeping is in-memory and protected by an :class:`asyncio.Lock`.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from src.api.auth.ws_auth import resolve_ws_user
+from src.api.rate_limit import get_limit, limiter
 from src.shared.python.realtime.protocol import validate_channel
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["realtime"])
 
+# Upper bound on a channel name. Channel names are short ``scope/topic``
+# identifiers; this cap rejects pathological inputs before validation.
+_MAX_CHANNEL_LENGTH = 256
+
+# Upper bound on the JSON-serialized publish payload. A single publish is
+# fanned out to every subscriber, so an unbounded payload is an amplification
+# vector (issue #6928). 256 KiB is generous for realtime control messages.
+_MAX_PAYLOAD_BYTES = 256 * 1024
+
 
 class PublishRequest(BaseModel):
     """Request body for ``POST /realtime/publish``."""
 
-    channel: str = Field(..., description="Channel name (scope/topic pattern)")
+    channel: str = Field(
+        ...,
+        max_length=_MAX_CHANNEL_LENGTH,
+        description="Channel name (scope/topic pattern)",
+    )
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -65,12 +80,28 @@ _registry = _SubscriberRegistry()
 
 
 @router.post("/realtime/publish")
-async def publish(req: PublishRequest) -> dict[str, Any]:
-    """Broadcast ``req.payload`` to all subscribers of ``req.channel``."""
+@limiter.limit(get_limit("API_LIMIT_REALTIME_PUBLISH", "60/minute"))
+async def publish(request: Request, req: PublishRequest) -> dict[str, Any]:
+    """Broadcast ``req.payload`` to all subscribers of ``req.channel``.
+
+    Args:
+        request: FastAPI request object (used by the rate limiter).
+        req: Publish body with the target ``channel`` and ``payload``.
+    """
     try:
         validate_channel(req.channel)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Amplification guard (issue #6928): a single publish fans out to every
+    # subscriber, so cap the serialized payload size. ``default=str`` mirrors
+    # the lenient encoding used when broadcasting non-JSON-native values.
+    serialized = json.dumps(req.payload, default=str)
+    if len(serialized.encode("utf-8")) > _MAX_PAYLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=(f"payload exceeds maximum size of {_MAX_PAYLOAD_BYTES} bytes"),
+        )
 
     targets = await _registry.snapshot(req.channel)
     delivered = 0

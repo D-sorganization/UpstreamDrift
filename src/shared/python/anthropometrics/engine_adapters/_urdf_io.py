@@ -37,8 +37,14 @@ without information loss.
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as ET  # noqa: S314
+# stdlib ElementTree builds the URDF document (Element/SubElement/write/
+# register_namespace); defusedxml parses untrusted input and refuses XXE /
+# entity expansion (issue #6927). defusedxml does not expose the builder API,
+# so building and parsing use separate imports.
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from pathlib import Path
+
+import defusedxml.ElementTree as DefusedET
 
 from .._subject_anthropometrics import SubjectAnthropometrics
 from ..readers.urdf_inertial import read_urdf_inertial
@@ -111,7 +117,7 @@ def write_urdf_subject(anthro: SubjectAnthropometrics, output_path: Path) -> Non
 def read_urdf_subject(input_path: Path) -> SubjectAnthropometrics:
     """Reverse of :func:`write_urdf_subject`."""
     input_path = Path(input_path)
-    tree = ET.parse(str(input_path))
+    tree = DefusedET.parse(str(input_path))
     robot = tree.getroot()
     if robot.tag != "robot":
         raise ValueError(
