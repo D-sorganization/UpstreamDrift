@@ -275,7 +275,7 @@ class TestCIEnvironmentCompatibility:
         # Prerequisite import gate before the parity test runs.
         assert "import jax, jaxlib, jaxsim, pinocchio" in workflow
         # Post-pytest assertion that a required parity case passed (not skipped).
-        assert "scripts/ci/assert_required_parity_ran.py" in workflow
+        assert "scripts/ci/require_junit_test_passed.py" in workflow
         assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
 
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(

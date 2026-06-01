@@ -5,8 +5,9 @@ from __future__ import annotations
 
 import argparse
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+import defusedxml.ElementTree as ET
 
 
 def require_test_passed(junit_xml: Path, testcase_name: str) -> int:

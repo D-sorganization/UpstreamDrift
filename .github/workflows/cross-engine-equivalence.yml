@@ -197,9 +197,9 @@ jobs:
         # fails unless at least one JaxSim/Pinocchio parity case passed.
         shell: bash
         run: |
-          python3 scripts/ci/assert_required_parity_ran.py \
-            --junit test-results/cross-engine-equivalence-junit.xml \
-            --require-name test_jaxsim_pinocchio_free_body_dynamics_terms_match
+          python3 scripts/ci/require_junit_test_passed.py \
+            test-results/cross-engine-equivalence-junit.xml \
+            test_jaxsim_pinocchio_free_body_dynamics_terms_match
 
       - name: Upload equivalence report
         if: always()
