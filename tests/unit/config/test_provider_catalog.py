@@ -32,6 +32,7 @@ def test_iter_known_provider_metadata_covers_engine_and_utility_repos() -> None:
         "OpenSim_Models",
         "Tools",
         "Movement_Optimizer",
+        "Movement-Optimizer",
     )
     assert iter_known_engine_provider_ids() == (
         "mujoco_models",
@@ -76,6 +77,7 @@ def test_iter_configured_provider_roots_merges_env_and_sibling_defaults(
     assert workspace_root / "OpenSim_Models" in roots
     assert workspace_root / "Tools" in roots
     assert workspace_root / "Movement_Optimizer" in roots
+    assert workspace_root / "Movement-Optimizer" in roots
 
 
 def test_iter_provider_manifest_specs_supports_hidden_manifest_location(

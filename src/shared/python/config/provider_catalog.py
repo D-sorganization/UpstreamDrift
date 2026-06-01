@@ -151,7 +151,11 @@ def iter_provider_manifest_specs(
 
 def iter_known_provider_ids() -> tuple[str, ...]:
     """Return the canonical provider IDs for the onboarded external repos."""
-    return tuple(provider.provider_id for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS)
+    return tuple(
+        dict.fromkeys(
+            provider.provider_id for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+        )
+    )
 
 
 def iter_known_provider_repo_names() -> tuple[str, ...]:
@@ -162,16 +166,20 @@ def iter_known_provider_repo_names() -> tuple[str, ...]:
 def iter_known_engine_provider_ids() -> tuple[str, ...]:
     """Return provider IDs for engine-backed external repos."""
     return tuple(
-        provider.provider_id
-        for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
-        if provider.provider_kind == "engine"
+        dict.fromkeys(
+            provider.provider_id
+            for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+            if provider.provider_kind == "engine"
+        )
     )
 
 
 def iter_known_utility_provider_ids() -> tuple[str, ...]:
     """Return provider IDs for utility-backed external repos."""
     return tuple(
-        provider.provider_id
-        for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
-        if provider.provider_kind == "utility"
+        dict.fromkeys(
+            provider.provider_id
+            for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+            if provider.provider_kind == "utility"
+        )
     )

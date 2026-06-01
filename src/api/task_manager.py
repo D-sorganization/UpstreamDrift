@@ -208,7 +208,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            if task_id in self._tasks:
+            if task_id in self._tasks and not self._is_expired_locked(task_id):
                 self._tasks[task_id]["progress"] = min(max(progress, 0.0), 100.0)
                 self._timestamps[task_id] = time.time()
 
@@ -217,7 +217,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            if task_id in self._tasks:
+            if task_id in self._tasks and not self._is_expired_locked(task_id):
                 self._tasks[task_id]["status"] = TaskStatus.COMPLETED.value
                 self._tasks[task_id]["result"] = result
                 self._tasks[task_id]["progress"] = 100.0
@@ -228,7 +228,7 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            if task_id in self._tasks:
+            if task_id in self._tasks and not self._is_expired_locked(task_id):
                 self._tasks[task_id]["status"] = TaskStatus.FAILED.value
                 self._tasks[task_id]["error"] = error
                 self._timestamps[task_id] = time.time()

@@ -281,6 +281,34 @@ class TestDatasetStatsResponseContract:
         assert resp.stats["time"]["mean"] == 5.0
 
 
+@pytest.mark.asyncio
+async def test_dataset_stats_streams_all_rows_without_preview_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.api.routes import data_explorer
+
+    rows = (
+        {"speed": str(index)} for index in range(data_explorer.MAX_DATASET_ROWS + 2)
+    )
+
+    async def fake_source(
+        name: str,
+        unsupported_detail: str,
+    ) -> data_explorer._OperationSource:
+        return data_explorer._OperationSource(
+            columns=["speed"],
+            rows=rows,
+            fmt="csv",
+        )
+
+    monkeypatch.setattr(data_explorer, "_resolve_operation_source", fake_source)
+
+    result = await data_explorer.dataset_stats("large.csv")
+
+    assert result.row_count == data_explorer.MAX_DATASET_ROWS + 2
+    assert result.stats["speed"]["max"] == float(data_explorer.MAX_DATASET_ROWS + 1)
+
+
 class TestImportResponseContract:
     """Validate ImportResponse."""
 

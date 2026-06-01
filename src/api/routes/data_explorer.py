@@ -804,16 +804,14 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
     )
 
     # Single streaming pass over rows accumulating per-column aggregates so
-    # the full dataset is never materialized (issue #6991). A row cap bounds
-    # worst-case work for unbounded on-disk files.
+    # the full dataset is never materialized (issue #6991). Stats must cover
+    # every row; preview/page APIs are the capped endpoints.
     agg: dict[str, dict[str, float]] = {
         col: {"min": float("inf"), "max": float("-inf"), "sum": 0.0, "count": 0.0}
         for col in source.columns
     }
     row_count = 0
     for row in source.rows:
-        if row_count >= MAX_DATASET_ROWS:
-            break
         row_count += 1
         for col in source.columns:
             val = row.get(col)

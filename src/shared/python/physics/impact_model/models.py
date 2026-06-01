@@ -102,11 +102,13 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
+        spin_axis = np.cross(n, tangent_dir)
+        omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
+        v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
+            float(GOLF_BALL_MASS_KG * v_t_eff * 0.4),
         )
-        spin_axis = np.cross(n, tangent_dir)
         spin_magnitude = j_friction / (
             GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M
         )
@@ -276,8 +278,9 @@ class SpringDamperImpactModel(ImpactModel):
             )
         )
 
-        # Initial state - place ball at contact
-        x_ball: np.ndarray = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
+        # Tiny clearance avoids dt-dependent overshoot at contact onset.
+        initial_gap = float(GOLF_BALL_RADIUS_M) * 1e-4
+        x_ball: np.ndarray = (float(GOLF_BALL_RADIUS_M) + initial_gap) * n
         v_ball: np.ndarray = pre_state.ball_velocity.copy()
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()

@@ -20,6 +20,8 @@ These tests guard the four invariants that broke the chat in PR #6239:
 
 from __future__ import annotations
 
+import threading
+import time
 from collections.abc import Iterator
 from typing import Any
 
@@ -261,3 +263,55 @@ def test_get_or_create_session_postcondition_registered_in_sessions() -> None:
     assert ctx is not None
     assert ctx.session_id
     assert ctx.session_id in svc._sessions
+
+
+@pytest.mark.asyncio
+async def test_stream_cancellation_pairs_unexecuted_tool_calls() -> None:
+    from src.api.services.chat_service import ChatService
+    from src.shared.python.ai.types import AgentChunk, ToolResult
+
+    release_first_tool = threading.Event()
+
+    class TwoToolAdapter:
+        def stream_response(self, *_a: Any, **_kw: Any) -> Iterator[AgentChunk]:
+            yield AgentChunk(
+                tool_call_delta={
+                    "tool_calls": [
+                        {
+                            "index": 0,
+                            "id": "tool-1",
+                            "function": {"name": "one", "arguments": "{}"},
+                        },
+                        {
+                            "index": 1,
+                            "id": "tool-2",
+                            "function": {"name": "two", "arguments": "{}"},
+                        },
+                    ]
+                }
+            )
+
+    class BlockingRegistry:
+        def execute(self, name: str, arguments: dict[str, Any]) -> ToolResult:
+            assert name == "one"
+            release_first_tool.wait(timeout=1.0)
+            time.sleep(0.05)
+            return ToolResult(tool_call_id="tool-1", success=True, result="done")
+
+    svc = ChatService()
+    svc._adapter = TwoToolAdapter()  # type: ignore[assignment]
+    svc._tool_registry = BlockingRegistry()  # type: ignore[assignment]
+    svc._persist_session = lambda session_id: None  # type: ignore[method-assign]
+    ctx = svc.get_or_create_session(None)
+    ctx.add_user_message("run tools")
+
+    stream = svc.stream_response(ctx.session_id)
+    first = await stream.__anext__()
+    assert first == {"type": "tool_call_started", "tool": "one"}
+
+    release_first_tool.set()
+    await stream.aclose()
+
+    tool_results = [msg for msg in ctx.messages if msg.role == "tool"]
+    assert [msg.tool_call_id for msg in tool_results] == ["tool-1", "tool-2"]
+    assert "disconnected" in tool_results[1].content
