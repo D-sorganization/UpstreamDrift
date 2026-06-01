@@ -460,8 +460,8 @@ class EngineManager(ContractChecker):
         try:
             repo_root = get_repo_root()
             approved_roots.extend([repo_root, repo_root.parent])
-        except Exception:  # noqa: BLE001
-            pass
+        except (OSError, IndexError) as exc:
+            logger.debug("Could not resolve repo root for provider paths: %s", exc)
 
         try:
             grouped_paths = registry.get_engine_provider_paths(
