@@ -24,6 +24,7 @@ from __future__ import annotations
 import mimetypes
 import os
 import secrets
+import threading
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -899,11 +900,32 @@ def print_server_info(host: str, port: int) -> None:
         logger.info("    Press Ctrl+C to stop.\n")
 
 
+def _schedule_browser_open(host: str, port: int, delay: float = 1.5) -> threading.Timer:
+    """Schedule a one-shot browser open as a daemon timer.
+
+    Using a daemon thread ensures that if the server fails to bind (e.g. the
+    port is already in use), the process exits immediately instead of blocking
+    until the timer fires (issue #6924).
+
+    Returns:
+        The started, already-running daemon :class:`threading.Timer`.
+    """
+    import webbrowser
+
+    def open_browser() -> None:
+        from src.shared.python.config.environment import is_browser_suppressed
+
+        if not is_browser_suppressed():
+            webbrowser.open(f"http://{host}:{port}")
+
+    timer = threading.Timer(delay, open_browser)
+    timer.daemon = True
+    timer.start()
+    return timer
+
+
 def main() -> None:
     """Launch local server with auto-open browser."""
-    import webbrowser
-    from threading import Timer
-
     import uvicorn
 
     DIM = "\033[2m"
@@ -925,15 +947,8 @@ def main() -> None:
     print_matrix_status(f"Server ready on port {port}")
     logger.info("")
 
-    # Open browser after server starts
-    def open_browser() -> None:
-        """Open the default web browser to the local server URL."""
-        from src.shared.python.config.environment import is_browser_suppressed
-
-        if not is_browser_suppressed():
-            webbrowser.open(f"http://{host}:{port}")
-
-    Timer(1.5, open_browser).start()
+    # Open browser after server starts (daemon timer; see #6924)
+    _schedule_browser_open(host, port)
 
     # Print server info
     print_server_info(host, port)
