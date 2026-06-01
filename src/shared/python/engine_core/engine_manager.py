@@ -19,7 +19,7 @@ from ..data_io.common_utils import (
     get_logger,
     setup_structured_logging,
 )
-from ..data_io.path_utils import get_src_root
+from ..data_io.path_utils import get_repo_root, get_src_root
 from .engine_availability import EngineStatus as RuntimeEngineStatus
 from .engine_availability import get_engine_status as get_runtime_engine_status
 from .engine_registry import (
@@ -455,10 +455,18 @@ class EngineManager(ContractChecker):
             return {}
 
         registry = ModelRegistry(config_path)
+        # Safely resolve repository root to include workspace parent for sibling provider paths
+        approved_roots = [self.suite_root, self.suite_root.parent]
+        try:
+            repo_root = get_repo_root()
+            approved_roots.extend([repo_root, repo_root.parent])
+        except Exception:  # noqa: BLE001
+            pass
+
         try:
             grouped_paths = registry.get_engine_provider_paths(
                 self.suite_root,
-                approved_roots=(self.suite_root, self.suite_root.parent),
+                approved_roots=tuple(approved_roots),
             )
         except PreconditionError as exc:
             logger.warning(

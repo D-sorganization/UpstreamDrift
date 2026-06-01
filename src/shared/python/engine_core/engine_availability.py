@@ -150,7 +150,7 @@ def _probe_engine(  # noqa: C901
 _MODULE_MAPPING = {
     "mujoco": "mujoco",
     "pinocchio": "pinocchio",
-    "jaxsim": "jaxsim",
+    "jaxsim": "jaxsim.api",
     "drake": "drake",
     "opensim": "opensim",
     "myosuite": "myosuite",

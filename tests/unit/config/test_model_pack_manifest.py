@@ -497,6 +497,32 @@ class TestModelPackV1RuntimeAdapter:
         assert squat.path == "src/mujoco_models/exercises/squat"
         assert squat.type == "urdf"
 
+    def test_load_normalizes_relative_paths_with_models_root(
+        self, tmp_path: Path
+    ) -> None:
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Mujoco_Models",
+                "package": "mujoco_models",
+                "engine": "mujoco",
+                "models_root": "models",
+                "exercises": [
+                    {"id": "squat", "path": "squat/squat.urdf"},
+                    {"id": "gait", "path": "models/gait/gait.urdf"},
+                ],
+            },
+        )
+
+        manifest = ModelPackManifest.load(manifest_path)
+        squat = next(m for m in manifest.models if m.id.endswith("squat"))
+        gait = next(m for m in manifest.models if m.id.endswith("gait"))
+
+        assert squat.path == "models/squat/squat.urdf"
+        assert gait.path == "models/gait/gait.urdf"
+
     @pytest.mark.parametrize(
         ("engine", "package"),
         [

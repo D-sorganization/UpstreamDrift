@@ -262,6 +262,23 @@ def test_project_pinhole_zero_distortion_is_pinhole() -> None:
     np.testing.assert_allclose(plain, with_zero)
 
 
+def test_project_pinhole_accepts_five_term_distortion() -> None:
+    """A 5-term distortion array is accepted and correctly computed."""
+    points = np.array([[1.0, 1.0, 2.0]])
+    camera = np.eye(3)
+    distortion_4 = (0.1, 0.05, 0.01, 0.02)
+    distortion_5 = (0.1, 0.05, 0.01, 0.02, 0.03)
+
+    proj_4 = project_pinhole(points, camera, distortion=distortion_4)
+    proj_5 = project_pinhole(points, camera, distortion=distortion_5)
+
+    assert not np.allclose(proj_4, proj_5)
+
+    # Let's verify that a bad shape still raises a ValueError
+    with pytest.raises(ValueError, match="distortion must have shape"):
+        project_pinhole(points, camera, distortion=(0.1, 0.2, 0.3))
+
+
 def test_reprojection_residual_threads_distortion() -> None:
     """A fit with nonzero distortion recovers truth when residual threads
     the distortion coefficients (issue #6892)."""

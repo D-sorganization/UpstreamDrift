@@ -59,6 +59,8 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
             "'provider', or 'repo'."
         )
 
+    models_root = str(data.get("models_root", "")).strip()
+
     if "models" in data:
         models = data["models"]
     elif "exercises" in data:
@@ -83,6 +85,11 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
                     "model_pack/v1 exercise entries require non-empty 'id' "
                     f"and 'path'; got {exercise!r}"
                 )
+            if models_root:
+                models_root_norm = models_root.replace("\\", "/").rstrip("/")
+                path_norm = path.replace("\\", "/").lstrip("/")
+                if models_root_norm and not path_norm.startswith(models_root_norm):
+                    path = f"{models_root_norm}/{path_norm}"
             models.append(
                 {
                     "id": f"{prefix}-{exercise_id}",
@@ -549,9 +556,9 @@ class ModelPackEntry:
             hidden_owner=(
                 hidden_owner.strip() if isinstance(hidden_owner, str) else None
             ),
-            embed_adapter=embed_adapter.strip()
-            if isinstance(embed_adapter, str)
-            else None,
+            embed_adapter=(
+                embed_adapter.strip() if isinstance(embed_adapter, str) else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
