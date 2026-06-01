@@ -193,6 +193,8 @@ def stack_shared_parameter_jacobians(
     if not rows_by_observation:
         raise ValueError("at least one Jacobian block is required")
     rows = [np.asarray(row, dtype=float) for row in rows_by_observation]
+    if rows[0].ndim != 2:
+        raise ValueError("Jacobian blocks must be 2D with matching widths")
     width = rows[0].shape[1]
     for row in rows:
         if row.ndim != 2 or row.shape[1] != width:

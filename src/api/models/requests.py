@@ -40,6 +40,11 @@ MAX_SIMULATION_DURATION = 300.0  # 5 minutes max
 MIN_TIMESTEP = 1e-6
 MAX_TIMESTEP = 0.1
 
+# Input-size bounds (issue #6948): cap unbounded collections to avoid
+# memory/CPU DoS on a rate-limited-but-not-size-limited endpoint.
+MAX_CONTROL_INPUTS = 100_000
+MAX_STATE_VECTOR_LEN = 10_000
+
 
 def _normalize_initial_state_component(name: str, value: object) -> list[float]:
     """Return a finite float list for an initial-state component."""
@@ -52,6 +57,12 @@ def _normalize_initial_state_component(name: str, value: object) -> list[float]:
         raw_values = list(value)
     else:
         raise ValueError(f"initial_state.{name} must be a sequence of finite numbers")
+
+    if len(raw_values) > MAX_STATE_VECTOR_LEN:
+        raise ValueError(
+            f"initial_state.{name} exceeds maximum length "
+            f"{MAX_STATE_VECTOR_LEN} (got {len(raw_values)})"
+        )
 
     normalized: list[float] = []
     for item in raw_values:
@@ -102,7 +113,9 @@ class SimulationRequest(BaseModel):
         None, description="Initial joint positions/velocities"
     )
     control_inputs: list[dict[str, Any]] | None = Field(
-        None, description="Control sequence"
+        None,
+        description="Control sequence",
+        max_length=MAX_CONTROL_INPUTS,
     )
     analysis_config: dict[str, Any] | None = Field(
         None, description="Analysis configuration"

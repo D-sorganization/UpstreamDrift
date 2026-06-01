@@ -107,28 +107,41 @@ class RealTimeController:
         is_running: Whether control loop is active.
     """
 
+    #: Consecutive control-loop failures tolerated before the loop aborts and
+    #: commands zero torque as a safety fallback.
+    DEFAULT_MAX_CONSECUTIVE_FAILURES = 10
+
     def __init__(
         self,
         control_frequency: float = 1000.0,
         communication_type: str = "simulation",
+        max_consecutive_failures: int = DEFAULT_MAX_CONSECUTIVE_FAILURES,
     ) -> None:
         """Initialize real-time controller.
 
         Args:
             control_frequency: Control loop frequency in Hz.
             communication_type: Communication protocol.
+            max_consecutive_failures: Number of back-to-back control-loop
+                errors tolerated before the loop stops and sends zero torque.
+                Must be positive.
         """
         if not (control_frequency is not None):
             raise ValueError("control_frequency must be provided")
+        if max_consecutive_failures <= 0:
+            raise ValueError("max_consecutive_failures must be positive")
         self.control_frequency = control_frequency
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
+        self._max_consecutive_failures = max_consecutive_failures
 
         self._config: RobotConfig | None = None
         self._control_callback: Callable[[RobotState], ControlCommand] | None = None
         self._is_connected = False
         self._is_running = False
         self._should_stop = False
+        # Set when the loop aborts after exceeding the failure threshold.
+        self._aborted_on_failure = False
 
         # Control loop thread
         self._control_thread: threading.Thread | None = None
@@ -161,6 +174,11 @@ class RealTimeController:
     def is_running(self) -> bool:
         """Check if control loop is running."""
         return self._is_running
+
+    @property
+    def aborted_on_failure(self) -> bool:
+        """Whether the loop self-aborted after too many consecutive errors."""
+        return self._aborted_on_failure
 
     def connect(self, robot_config: RobotConfig) -> bool:
         """Connect to real robot.
@@ -271,6 +289,7 @@ class RealTimeController:
             return
 
         self._should_stop = False
+        self._aborted_on_failure = False
         self._is_running = True
         self._start_time = time.perf_counter()
         self._cycle_times = []
@@ -283,27 +302,44 @@ class RealTimeController:
         self._control_thread.start()
 
     def stop(self) -> None:
-        """Stop control loop safely."""
+        """Stop control loop safely.
+
+        Joins the control thread and only commands zero torque once the loop
+        has confirmably stopped. If the thread does not terminate within the
+        join timeout it is still running and sharing the command channel, so
+        sending a competing zero command would race the live loop.
+
+        Raises:
+            RuntimeError: If the control thread fails to stop within the
+                join timeout (safety-critical: the loop is still commanding
+                hardware on the same channel).
+        """
         self._should_stop = True
 
-        if self._control_thread is not None:
-            self._control_thread.join(timeout=2.0)
+        thread = self._control_thread
+        if thread is not None:
+            thread.join(timeout=2.0)
+            if thread.is_alive():
+                logger.error(
+                    "Control thread failed to stop within 2.0s; loop still "
+                    "alive — skipping zero-command to avoid racing the live "
+                    "loop on the command channel."
+                )
+                raise RuntimeError(
+                    "RealTimeController control thread did not stop within "
+                    "the 2.0s join timeout"
+                )
             self._control_thread = None
 
         self._is_running = False
 
-        # Send zero command
-        if self._config is not None:
-            zero_command = ControlCommand(
-                timestamp=time.perf_counter(),
-                mode=ControlMode.TORQUE,
-                torque_commands=np.zeros(self._config.n_joints),
-            )
-            self._send_command(zero_command)
+        # Send zero command only after the loop is confirmed stopped.
+        self._command_zero_torque()
 
     def _control_loop(self) -> None:
         """Main real-time control loop."""
         next_cycle_time = time.perf_counter()
+        consecutive_failures = 0
 
         while not self._should_stop:
             cycle_start = time.perf_counter()
@@ -331,8 +367,25 @@ class RealTimeController:
                     with self._command_lock:
                         self._last_command = command
 
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.error("Control loop error: %s", e)
+                consecutive_failures = 0
+
+            except (RuntimeError, ValueError, OSError):
+                consecutive_failures += 1
+                logger.exception(
+                    "Control loop error (consecutive failure %d/%d)",
+                    consecutive_failures,
+                    self._max_consecutive_failures,
+                )
+                if consecutive_failures >= self._max_consecutive_failures:
+                    logger.error(
+                        "Control loop exceeded %d consecutive failures; "
+                        "aborting loop and commanding zero torque.",
+                        self._max_consecutive_failures,
+                    )
+                    self._aborted_on_failure = True
+                    self._should_stop = True
+                    self._command_zero_torque()
+                    break
 
             # Record timing
             cycle_end = time.perf_counter()
@@ -354,6 +407,21 @@ class RealTimeController:
                 next_cycle_time = time.perf_counter()
 
         self._is_running = False
+
+    def _command_zero_torque(self) -> None:
+        """Send a zero-torque command as a safety fallback.
+
+        No-op when no robot configuration is set (nothing to size the
+        torque vector against).
+        """
+        if self._config is None:
+            return
+        zero_command = ControlCommand(
+            timestamp=time.perf_counter(),
+            mode=ControlMode.TORQUE,
+            torque_commands=np.zeros(self._config.n_joints),
+        )
+        self._send_command(zero_command)
 
     def _read_state(self) -> RobotState:
         """Read current robot state.

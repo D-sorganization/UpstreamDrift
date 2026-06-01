@@ -165,9 +165,13 @@ class SQLiteBackend:
                      or /tmp/upstream_drift_tasks.db as fallback.
         """
         if db_path is None:
+            # Default fallback only; operators override via the ARTIFACT_DIR
+            # env var. The path is created per-process with os.makedirs and
+            # stores app-private SQLite task state, not attacker-controlled or
+            # predictable secrets.
             artifact_dir = os.environ.get(
                 "ARTIFACT_DIR",
-                os.path.join("/tmp", "upstream_drift_artifacts"),
+                os.path.join("/tmp", "upstream_drift_artifacts"),  # nosec B108  # noqa: S108
             )
             os.makedirs(artifact_dir, exist_ok=True)
             db_path = os.path.join(artifact_dir, "tasks.db")
@@ -283,7 +287,7 @@ class SQLiteBackend:
             priority=row["priority"],
         )
 
-    def _record_to_values(self, record: TaskRecord) -> tuple:
+    def _record_to_values(self, record: TaskRecord) -> tuple[Any, ...]:
         """Convert TaskRecord to database values tuple."""
         return (
             record.task_id,
@@ -547,7 +551,7 @@ class DurableTaskManager:
         self.backend = backend or SQLiteBackend()
         self.heartbeat_timeout = heartbeat_timeout
         self._closed = False
-        self._cleanup_task: asyncio.Task | None = None
+        self._cleanup_task: asyncio.Task[None] | None = None
 
         if auto_cleanup:
             self._cleanup_interval = cleanup_interval
@@ -567,8 +571,8 @@ class DurableTaskManager:
                 count = self.backend.cleanup()
                 if count > 0:
                     logger.info("Cleaned up %d expired tasks", count)
-            except Exception as e:  # noqa: BLE001
-                logger.error("Cleanup error: %s", e)
+            except Exception:  # noqa: BLE001
+                logger.exception("Cleanup error")
 
     def create_task(
         self,

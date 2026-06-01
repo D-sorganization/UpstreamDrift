@@ -1,16 +1,9 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
-from typing import cast
-from datetime import timezone
+from typing import TypeVar
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from src.api.utils.datetime_compat import UTC
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -40,16 +33,20 @@ def _unauthorized(detail: str) -> HTTPException:
     )
 
 
-def _assert_type(obj: object, cls: type, name: str = "object") -> None:
-    """Raise ValueError if obj is not an instance of cls.
+_AssertT = TypeVar("_AssertT")
 
-    Provides runtime type safety where SQLAlchemy query results are typed
-    ambiguously. Use cast() after this check for mypy compliance.
+
+def _assert_type(obj: object, cls: type[_AssertT], name: str = "object") -> _AssertT:
+    """Return obj narrowed to cls, raising ValueError if it is not an instance.
+
+    Provides runtime type safety AND mypy narrowing where SQLAlchemy query
+    results are typed ambiguously, so callers need no cast().
     """
     if not isinstance(obj, cls):
         raise ValueError(
             f"Expected {cls.__name__}, got {type(obj).__name__} for {name}"
         )
+    return obj
 
 
 async def get_current_user(
@@ -73,8 +70,7 @@ async def get_current_user(
     if not user.is_active:
         raise _unauthorized("Inactive user")
 
-    _assert_type(user, User, "current_user")
-    return cast(User, user)
+    return _assert_type(user, User, "current_user")
 
 
 def _validate_api_key_format(api_key: str) -> None:
@@ -92,8 +88,7 @@ def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
     if not record or not record.is_active:
         return None
 
-    _assert_type(record, APIKey, "cached_api_key")
-    return cast(APIKey, record)
+    return _assert_type(record, APIKey, "cached_api_key")
 
 
 def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
@@ -126,8 +121,7 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
 
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
-            _assert_type(key_candidate, APIKey, "api_key_candidate")
-            return cast(APIKey, key_candidate)
+            return _assert_type(key_candidate, APIKey, "api_key_candidate")
 
     raise _unauthorized("Invalid API key")
 
@@ -136,8 +130,7 @@ def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
     user = db.query(User).filter(User.id == api_key_record.user_id).first()
     if not user or not user.is_active:
         raise _unauthorized("User not found or inactive")
-    _assert_type(user, User, "api_key_user")
-    return cast(User, user)
+    return _assert_type(user, User, "api_key_user")
 
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
