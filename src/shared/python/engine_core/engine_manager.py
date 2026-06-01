@@ -12,7 +12,7 @@ from typing import Any
 
 from src.shared.python.config.model_registry import ModelRegistry
 
-from ..core.contracts import ContractChecker, precondition
+from ..core.contracts import ContractChecker, PreconditionError, precondition
 from ..core.error_utils import EngineLaunchError
 from ..data_io.common_utils import (
     GolfModelingError,
@@ -455,10 +455,18 @@ class EngineManager(ContractChecker):
             return {}
 
         registry = ModelRegistry(config_path)
-        grouped_paths = registry.get_engine_provider_paths(
-            self.suite_root,
-            approved_roots=(self.suite_root, self.suite_root.parent),
-        )
+        try:
+            grouped_paths = registry.get_engine_provider_paths(
+                self.suite_root,
+                approved_roots=(self.suite_root, self.suite_root.parent),
+            )
+        except PreconditionError as exc:
+            logger.warning(
+                "Skipping provider-backed engine path discovery after model "
+                "registry path contract violation: %s",
+                exc,
+            )
+            return {}
         provider_paths: dict[EngineType, tuple[Path, ...]] = {}
         for engine_name, paths in grouped_paths.items():
             try:

@@ -134,8 +134,8 @@ def test_discover_engines(mock_suite_root) -> None:
     for engine_type in present_engines:
         assert manager.engine_status[engine_type] == EngineStatus.AVAILABLE
 
-    # JaxSim has no directory in the fixture, so it stays unavailable.
-    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.UNAVAILABLE
+    # JaxSim has both an adapter directory and a patched-available runtime.
+    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.AVAILABLE
 
 
 def test_discover_engines_missing(mock_suite_root) -> None:
