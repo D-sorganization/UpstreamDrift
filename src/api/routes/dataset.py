@@ -26,6 +26,10 @@ from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_engine_manager, get_logger
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.utils.path_validation import (
+    resolve_contained_path,
+    resolve_output_path,
+)
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import (
     get_logger as _get_module_logger,
@@ -38,6 +42,54 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
+
+# Allow-listed roots for swing-capture import (read) and RL export (write).
+# Capture files may only be read from, and trajectories may only be written to,
+# directories under the project root. This prevents the /import-swing endpoint
+# from being used for arbitrary local-file read (LFI) or arbitrary file write
+# by an authenticated tenant (issue #6926).
+_INPUT_DIR_NAMES = ("data", "tests/fixtures", "src/shared/urdf")
+_OUTPUT_DIR_NAMES = ("output", "data")
+
+
+def _project_root() -> Path:
+    """Locate the project root via the shared route helper."""
+    from ._route_utils import find_project_root
+
+    return find_project_root()
+
+
+def _dataset_input_roots() -> list[Path]:
+    """Existing directories from which swing captures may be read."""
+    root = _project_root()
+    return [root / name for name in _INPUT_DIR_NAMES if (root / name).exists()]
+
+
+def _dataset_output_roots() -> list[Path]:
+    """Directories under which RL exports may be written (created if absent)."""
+    root = _project_root()
+    roots: list[Path] = []
+    for name in _OUTPUT_DIR_NAMES:
+        candidate = root / name
+        candidate.mkdir(parents=True, exist_ok=True)
+        roots.append(candidate)
+    return roots
+
+
+def _validate_capture_input(file_path: str) -> Path:
+    """Resolve ``file_path`` inside an allow-listed input root or raise 400.
+
+    Maps any containment failure (absolute path, ``..`` traversal, or
+    not-found-in-roots) to HTTP 400 so a probe cannot distinguish "outside
+    the sandbox" from "missing file" (issue #6926).
+    """
+    try:
+        return resolve_contained_path(Path(file_path), _dataset_input_roots())
+    except HTTPException as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file_path: must reside under an allowed input root",
+        ) from exc
 
 
 # ---- Helpers ----
@@ -247,8 +299,12 @@ async def import_swing_capture(
         raise ValueError("request must be provided")
     from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
 
+    # Containment check (issue #6926): the capture file must resolve inside an
+    # allow-listed input root; raise 400 on traversal/absolute-path escape.
+    safe_input = _validate_capture_input(request.file_path)
+
     importer = SwingCaptureImporter(target_frame_rate=request.target_frame_rate)
-    trajectory = importer.import_file(request.file_path)
+    trajectory = importer.import_file(safe_input)
 
     phases = None
     try:
@@ -266,11 +322,16 @@ async def import_swing_capture(
 
     rl_export_path = None
     if request.export_for_rl:
-        output = (
-            request.output_path
-            or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
-        )
-        rl_export_path = str(importer.export_for_rl(trajectory, output))
+        output_roots = _dataset_output_roots()
+        if request.output_path is not None:
+            candidate = Path(request.output_path)
+        else:
+            # Default lands under the first output root (project ``output/``).
+            candidate = output_roots[0] / "rl_trajectories" / f"{safe_input.stem}.json"
+        # Containment check (issue #6926): the RL export target must resolve
+        # inside an allow-listed output root; raise 400 on escape.
+        safe_output = resolve_output_path(candidate, output_roots)
+        rl_export_path = str(importer.export_for_rl(trajectory, safe_output))
 
     return SwingImportResponse(
         status="success",
@@ -391,7 +452,9 @@ async def execute_feature(
     from src.shared.python.control_features_registry import ControlFeaturesRegistry
 
     registry = ControlFeaturesRegistry(engine)
-    result = registry.execute(request.feature_name, **request.args)
+    # Not a DB cursor: ControlFeaturesRegistry.execute() dispatches a named,
+    # registry-validated control/analysis feature; no SQL is constructed here.
+    result = registry.execute(request.feature_name, **request.args)  # nosemgrep
     return {"feature": request.feature_name, "result": result}
 
 
