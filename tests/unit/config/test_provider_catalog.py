@@ -42,6 +42,30 @@ def test_iter_known_provider_metadata_covers_engine_and_utility_repos() -> None:
     assert iter_known_utility_provider_ids() == ("tools", "movement_optimizer")
 
 
+def test_canonical_provider_ids_are_unique() -> None:
+    """Repo-name aliases must not duplicate the canonical provider_id (#6954)."""
+    provider_ids = iter_known_provider_ids()
+    assert len(provider_ids) == len(set(provider_ids))
+    utility_ids = iter_known_utility_provider_ids()
+    assert len(utility_ids) == len(set(utility_ids))
+
+
+def test_hyphenated_movement_optimizer_alias_is_discovered_as_sibling_root(
+    tmp_path: Path,
+) -> None:
+    """The hyphenated checkout name resolves as a sibling root via the alias."""
+    workspace_root = tmp_path
+    repo_root = workspace_root / "UpstreamDrift"
+    config_path = repo_root / "src" / "config" / "models.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("models: []\n", encoding="utf-8")
+
+    roots = iter_configured_provider_roots(config_path, None)
+
+    assert workspace_root / "Movement_Optimizer" in roots
+    assert workspace_root / "Movement-Optimizer" in roots
+
+
 def test_infer_repo_root_from_standard_models_config(tmp_path: Path) -> None:
     config_path = tmp_path / "UpstreamDrift" / "src" / "config" / "models.yaml"
     config_path.parent.mkdir(parents=True)

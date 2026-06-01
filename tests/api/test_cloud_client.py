@@ -173,6 +173,13 @@ def test_save_token_calls_chmod_cross_platform(temp_cache_dir: Path) -> None:
     ]
     assert token_modes == [0o600], f"token chmod calls {token_modes} != [0o600]"
 
+    dir_modes = [
+        call.args[1]
+        for call in mock_chmod.call_args_list
+        if call.args and call.args[0] == token_file.parent
+    ]
+    assert dir_modes == [0o700], f"config dir chmod calls {dir_modes} != [0o700]"
+
 
 @pytest.mark.asyncio
 async def test_login_failure(temp_cache_dir: Path) -> None:

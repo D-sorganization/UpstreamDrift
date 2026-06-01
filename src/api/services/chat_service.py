@@ -437,7 +437,15 @@ class ChatService:
 
                     for tc in tool_calls:
                         if stop_event.is_set():
-                            break
+                            result_str = (
+                                "Tool execution canceled because the stream client "
+                                "disconnected."
+                            )
+                            with self._lock:
+                                ctx.add_tool_result(tc.id, result_str)
+                                temp_ctx.add_tool_result(tc.id, result_str)
+                                self._persist_session(session_id)
+                            continue
                         chunk_queue.put({"type": "tool_call_started", "tool": tc.name})
 
                         try:

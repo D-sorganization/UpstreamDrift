@@ -262,6 +262,29 @@ class TestTaskManager:
         assert result is not None
         assert result["progress"] == 42.5
 
+    def test_mutations_do_not_resurrect_expired_tasks(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Mutation paths honor logical TTL even when full sweeps are throttled."""
+        import src.api.task_manager as task_manager_module
+        from src.api.task_manager import TaskManager
+
+        now = 1_000.0
+        monkeypatch.setattr(task_manager_module.time, "time", lambda: now)
+        tm = TaskManager(ttl_seconds=10)
+        tm.set("task-1", {"status": "running"})
+
+        now = 1_011.0
+        tm.get("missing")  # records a throttled cleanup sweep without purging task-1
+
+        now = 1_012.0
+        tm.update_progress("task-1", 55.0)
+        tm.mark_completed("task-1", {"ok": True})
+        tm.mark_failed("task-1", "late failure")
+
+        assert tm.get("task-1") is None
+
     def test_update_progress_clamped(self) -> None:
         """update_progress clamps to 0-100 range."""
         from src.api.task_manager import TaskManager
