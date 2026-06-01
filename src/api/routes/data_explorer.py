@@ -457,12 +457,71 @@ def _find_dataset_path(name: str) -> Path:
 
 
 def _load_dataset_from_path(filepath: Path) -> tuple[list[str], list[dict[str, Any]]]:
-    """Load previewable dataset rows from a resolved path."""
+    """Load previewable dataset rows from a resolved path.
+
+    Reads the entire file; only use for operations (stats, filtering) that
+    genuinely need every row. For previews use
+    :func:`_preview_dataset_from_path`, which streams a bounded window.
+    """
     content = filepath.read_text(encoding="utf-8")
     if filepath.suffix.lower() == ".csv":
         return _parse_csv_content(content)
     if filepath.suffix.lower() == ".json":
         return _parse_json_content(content)
+    raise HTTPException(
+        status_code=400,
+        detail=f"Preview not supported for {filepath.suffix} format",
+    )
+
+
+def _preview_csv_streaming(
+    filepath: Path, limit: int
+) -> tuple[list[str], list[dict[str, Any]], int]:
+    """Stream a CSV preview: header, first ``limit`` rows, and total count.
+
+    Reads the file incrementally via a single ``csv.reader`` pass so that
+    arbitrarily large files never materialize fully in memory (issue #6923).
+    """
+    rows: list[dict[str, Any]] = []
+    columns: list[str] = []
+    total = 0
+    with filepath.open(encoding="utf-8", newline="") as handle:
+        reader = csv.reader(handle)
+        try:
+            columns = next(reader)
+        except StopIteration:
+            return [], [], 0
+        for record in reader:
+            total += 1
+            if len(rows) < limit:
+                rows.append(dict(zip(columns, record, strict=False)))
+    return columns, rows, total
+
+
+def _preview_json_streaming(
+    filepath: Path, limit: int
+) -> tuple[list[str], list[dict[str, Any]], int]:
+    """Build a JSON preview, returning header, first ``limit`` rows, and total.
+
+    JSON has no line-oriented streaming guarantee, so the document is parsed
+    once and only the bounded preview window is retained for the response.
+    """
+    columns, all_rows = _parse_json_content(filepath.read_text(encoding="utf-8"))
+    return columns, all_rows[:limit], len(all_rows)
+
+
+def _preview_dataset_from_path(
+    filepath: Path, limit: int
+) -> tuple[list[str], list[dict[str, Any]], int]:
+    """Return (columns, preview_rows, total_rows) without holding large files.
+
+    Precondition: ``limit`` must be positive.
+    """
+    suffix = filepath.suffix.lower()
+    if suffix == ".csv":
+        return _preview_csv_streaming(filepath, limit)
+    if suffix == ".json":
+        return _preview_json_streaming(filepath, limit)
     raise HTTPException(
         status_code=400,
         detail=f"Preview not supported for {filepath.suffix} format",
@@ -611,13 +670,13 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
         )
 
     filepath = _find_dataset_path(name)
-    columns, rows = _load_dataset_from_path(filepath)
+    columns, rows, total_rows = _preview_dataset_from_path(filepath, limit)
 
     return DatasetPreviewResponse(
         name=name,
         columns=columns,
-        rows=rows[:limit],
-        total_rows=len(rows),
+        rows=rows,
+        total_rows=total_rows,
         format=filepath.suffix.lstrip("."),
     )
 
