@@ -21,7 +21,7 @@ import threading
 import time
 import uuid
 from collections import OrderedDict
-from collections.abc import Generator
+from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -89,6 +89,17 @@ class DatasetFilterRequest(BaseModel):
     )
     value: str = Field(..., description="Filter value (string-encoded)")
     limit: int = Field(100, ge=1, le=10000)
+
+
+class DatasetRowsResponse(BaseModel):
+    """Paginated rows from durable dataset storage (issue #6991)."""
+
+    dataset_id: str
+    columns: list[str]
+    rows: list[dict[str, Any]]
+    offset: int
+    limit: int
+    total_rows: int
 
 
 class ImportResponse(BaseModel):
@@ -249,6 +260,11 @@ class DatasetStorage:
                 f" ({size_bytes} > {MAX_DATASET_SIZE_BYTES})"
             )
 
+        # Enforce TTL retention before writing so datasets.db cannot grow
+        # without bound (issue #6989): expired datasets are purged on every
+        # store, giving lazy retention without a background loop.
+        self.cleanup_expired()
+
         dataset_id = str(uuid.uuid4())
         content_hash = hashlib.sha256(
             json.dumps({"columns": columns, "rows": rows}, sort_keys=True).encode()
@@ -275,12 +291,12 @@ class DatasetStorage:
                     now + MAX_CACHE_AGE_SECONDS,
                 ),
             )
-            for i, row in enumerate(rows):
-                conn.execute(
-                    "INSERT INTO dataset_rows"
-                    " (dataset_id, row_data, row_index) VALUES (?, ?, ?)",
-                    (dataset_id, json.dumps(row), i),
-                )
+            # Bulk insert rows (issue #6989) — one round-trip instead of N.
+            conn.executemany(
+                "INSERT INTO dataset_rows"
+                " (dataset_id, row_data, row_index) VALUES (?, ?, ?)",
+                [(dataset_id, json.dumps(row), i) for i, row in enumerate(rows)],
+            )
 
         logger.info(
             "Stored dataset %s (%s): %d rows, %d columns",
@@ -328,6 +344,32 @@ class DatasetStorage:
                 (dataset_id, limit, offset),
             )
             return [json.loads(row[0]) for row in cursor.fetchall()]
+
+    def iter_dataset_rows(
+        self,
+        dataset_id: str,
+        *,
+        batch_size: int = 1000,
+    ) -> Generator[dict[str, Any], None, None]:
+        """Yield a dataset's rows in bounded batches without full materialization.
+
+        Streams rows page-by-page via the ``row_index`` index so callers
+        (stats, filtering) never hold the entire dataset in memory at once
+        (issue #6991).
+
+        Precondition: ``batch_size`` must be positive.
+        """
+        if batch_size <= 0:
+            raise ValueError("batch_size must be positive")
+        offset = 0
+        while True:
+            batch = self.get_dataset_rows(dataset_id, offset=offset, limit=batch_size)
+            if not batch:
+                return
+            yield from batch
+            if len(batch) < batch_size:
+                return
+            offset += batch_size
 
     def cleanup_expired(self) -> int:
         """Remove expired datasets."""
@@ -402,6 +444,56 @@ def _parse_json_content(content: str) -> tuple[list[str], list[dict[str, Any]]]:
     return [], []
 
 
+# Maximum bytes scanned when sniffing JSON columns without a full parse
+# (issue #6990). Comfortably covers a header object / first array element
+# even with hundreds of wide columns, while never materializing a 100s-of-MB
+# document just to list columns.
+_JSON_COLUMN_SNIFF_BYTES = 256 * 1024
+
+
+def _stream_json_columns(filepath: Path) -> list[str]:
+    """Extract a JSON dataset's column names without a full ``json.load``.
+
+    Reads only a bounded prefix and decodes just enough structure to recover
+    top-level keys: for an array-of-objects, the first object's keys; for a
+    top-level object, its own keys. Returns ``[]`` when columns cannot be
+    determined from the bounded prefix (issue #6990).
+
+    Postcondition: the file is never fully parsed; at most
+    ``_JSON_COLUMN_SNIFF_BYTES`` are read.
+    """
+    with filepath.open(encoding="utf-8") as handle:
+        prefix = handle.read(_JSON_COLUMN_SNIFF_BYTES)
+
+    stripped = prefix.lstrip()
+    if not stripped:
+        return []
+
+    decoder = json.JSONDecoder()
+    # Locate the first object to decode: the document itself, or the first
+    # element of a top-level array.
+    start = 0
+    if stripped[0] == "[":
+        brace = stripped.find("{")
+        if brace == -1:
+            return []
+        start = brace
+    elif stripped[0] != "{":
+        return []
+
+    try:
+        obj, _ = decoder.raw_decode(stripped, start)
+    except ValueError as exc:
+        # Truncated prefix or non-object head: fall back to no columns
+        # rather than reading the whole file (issue #6990).
+        logger.debug("Could not sniff JSON columns from %s: %s", filepath.name, exc)
+        return []
+
+    if isinstance(obj, dict):
+        return list(obj.keys())
+    return []
+
+
 def _enforce_loaded_dataset_limit_locked() -> None:
     """Evict least-recently-used imported datasets beyond the cache ceiling."""
     while len(_loaded_datasets) > MAX_LOADED_DATASETS:
@@ -454,24 +546,6 @@ def _find_dataset_path(name: str) -> Path:
             detail=f"Dataset name '{name}' is ambiguous; {len(matches)} matches found",
         )
     return matches[0]
-
-
-def _load_dataset_from_path(filepath: Path) -> tuple[list[str], list[dict[str, Any]]]:
-    """Load previewable dataset rows from a resolved path.
-
-    Reads the entire file; only use for operations (stats, filtering) that
-    genuinely need every row. For previews use
-    :func:`_preview_dataset_from_path`, which streams a bounded window.
-    """
-    content = filepath.read_text(encoding="utf-8")
-    if filepath.suffix.lower() == ".csv":
-        return _parse_csv_content(content)
-    if filepath.suffix.lower() == ".json":
-        return _parse_json_content(content)
-    raise HTTPException(
-        status_code=400,
-        detail=f"Preview not supported for {filepath.suffix} format",
-    )
 
 
 def _preview_csv_streaming(
@@ -530,22 +604,54 @@ def _preview_dataset_from_path(
     )
 
 
-async def _load_dataset_for_operation(
+@dataclass
+class _OperationSource:
+    """Column header plus a (possibly streaming) row iterable (issue #6991)."""
+
+    columns: list[str]
+    rows: Iterator[dict[str, Any]]
+    fmt: str
+
+
+async def _resolve_operation_source(
     name: str, unsupported_detail: str
-) -> tuple[list[str], list[dict[str, Any]], str]:
-    """Load an imported or disk dataset for endpoint-specific operations."""
+) -> _OperationSource:
+    """Resolve a streaming row source for stats/filter (issue #6991).
+
+    For on-disk CSV datasets, only the header is read up front and rows are
+    streamed lazily; cached/JSON datasets reuse the already-materialized rows.
+    """
     cached_dataset = await _get_cached_dataset(name)
     if cached_dataset is not None:
-        return cached_dataset
+        columns, rows, fmt = cached_dataset
+        return _OperationSource(columns=columns, rows=iter(rows), fmt=fmt)
 
     filepath = _find_dataset_path(name)
-    try:
-        columns, rows = _load_dataset_from_path(filepath)
-    except HTTPException as exc:
-        if exc.status_code == 400:
-            raise HTTPException(status_code=400, detail=unsupported_detail) from exc
-        raise
-    return columns, rows, filepath.suffix.lstrip(".")
+    suffix = filepath.suffix.lower()
+    if suffix == ".csv":
+        columns, _, _ = _preview_csv_streaming(filepath, limit=0)
+        return _OperationSource(
+            columns=columns,
+            rows=_iter_csv_rows(filepath),
+            fmt="csv",
+        )
+    if suffix == ".json":
+        columns, all_rows = _parse_json_content(filepath.read_text(encoding="utf-8"))
+        return _OperationSource(columns=columns, rows=iter(all_rows), fmt="json")
+    raise HTTPException(status_code=400, detail=unsupported_detail)
+
+
+def _iter_csv_rows(filepath: Path) -> Generator[dict[str, Any], None, None]:
+    """Yield CSV rows one at a time without materializing the whole file."""
+    with filepath.open(encoding="utf-8", newline="") as handle:
+        reader = csv.reader(handle)
+        try:
+            columns = next(reader)
+        except StopIteration:
+            return
+        for record in reader:
+            if record:
+                yield dict(zip(columns, record, strict=False))
 
 
 def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> bool:
@@ -599,10 +705,9 @@ async def list_datasets() -> DatasetListResponse:
                             header = f.readline().strip()
                         columns = [c.strip().strip('"') for c in header.split(",")]
                     elif filepath.suffix.lower() == ".json":
-                        with open(filepath, encoding="utf-8") as f:
-                            data = json.load(f)
-                        if isinstance(data, dict):
-                            columns = list(data.keys())
+                        # Stream only the header/first object instead of
+                        # json.load()-ing a possibly-huge file (issue #6990).
+                        columns = _stream_json_columns(filepath)
                 except (FileNotFoundError, PermissionError, OSError) as exc:
                     logger.debug(
                         "Could not read columns from %s: %s", filepath.name, exc
@@ -694,35 +799,93 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
 
     See issue #1206
     """
-    columns, rows, _ = await _load_dataset_for_operation(
+    source = await _resolve_operation_source(
         name, "Stats not supported for this format"
     )
 
-    # Compute statistics per column
-    stats: dict[str, dict[str, float | None]] = {}
-    for col in columns:
-        values: list[float] = []
-        for row in rows:
+    # Single streaming pass over rows accumulating per-column aggregates so
+    # the full dataset is never materialized (issue #6991). A row cap bounds
+    # worst-case work for unbounded on-disk files.
+    agg: dict[str, dict[str, float]] = {
+        col: {"min": float("inf"), "max": float("-inf"), "sum": 0.0, "count": 0.0}
+        for col in source.columns
+    }
+    row_count = 0
+    for row in source.rows:
+        if row_count >= MAX_DATASET_ROWS:
+            break
+        row_count += 1
+        for col in source.columns:
             val = row.get(col)
-            if val is not None:
-                with contextlib.suppress(ValueError, TypeError):
-                    values.append(float(val))
+            if val is None:
+                continue
+            try:
+                num = float(val)
+            except (ValueError, TypeError):
+                continue
+            entry = agg[col]
+            entry["min"] = min(entry["min"], num)
+            entry["max"] = max(entry["max"], num)
+            entry["sum"] += num
+            entry["count"] += 1
 
-        if values:
+    stats: dict[str, dict[str, float | None]] = {}
+    for col, entry in agg.items():
+        if entry["count"]:
             stats[col] = {
-                "min": min(values),
-                "max": max(values),
-                "mean": sum(values) / len(values),
-                "count": float(len(values)),
+                "min": entry["min"],
+                "max": entry["max"],
+                "mean": entry["sum"] / entry["count"],
+                "count": entry["count"],
             }
         else:
             stats[col] = {"min": None, "max": None, "mean": None, "count": 0.0}
 
     return DatasetStatsResponse(
         name=name,
-        columns=columns,
-        row_count=len(rows),
+        columns=source.columns,
+        row_count=row_count,
         stats=stats,
+    )
+
+
+@router.get("/datasets/{dataset_id}/rows", response_model=DatasetRowsResponse)
+@precondition(
+    lambda dataset_id, offset=0, limit=100: (
+        dataset_id is not None and len(dataset_id.strip()) > 0 and limit > 0
+    ),
+    "dataset_id must be non-empty and limit must be positive",
+)
+@handle_api_errors
+async def get_dataset_rows_paginated(
+    dataset_id: str, offset: int = 0, limit: int = 100
+) -> DatasetRowsResponse:
+    """Read a slice of a stored dataset's rows by ID (issue #6991).
+
+    Delegates to :meth:`DatasetStorage.get_dataset_rows` so only the requested
+    window is read from SQLite — the full dataset is never materialized.
+    """
+    if offset < 0:
+        raise HTTPException(status_code=400, detail="offset must be non-negative")
+    if limit < 1 or limit > MAX_DATASET_ROWS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"limit must be between 1 and {MAX_DATASET_ROWS}",
+        )
+
+    storage = get_dataset_storage()
+    metadata = storage.get_dataset_metadata(dataset_id)
+    if metadata is None:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    rows = storage.get_dataset_rows(dataset_id, offset=offset, limit=limit)
+    return DatasetRowsResponse(
+        dataset_id=dataset_id,
+        columns=metadata.columns,
+        rows=rows,
+        offset=offset,
+        limit=limit,
+        total_rows=metadata.row_count,
     )
 
 
@@ -815,18 +978,20 @@ async def filter_dataset(
 
     See issue #1206
     """
-    columns, rows, fmt = await _load_dataset_for_operation(
+    source = await _resolve_operation_source(
         name, "Filter not supported for this format"
     )
 
-    if request.column not in columns:
+    if request.column not in source.columns:
         raise HTTPException(
             status_code=400,
-            detail=f"Column '{request.column}' not found. Available: {columns}",
+            detail=f"Column '{request.column}' not found. Available: {source.columns}",
         )
 
+    # Stream rows and stop as soon as the requested page is filled so the
+    # full dataset is never materialized (issue #6991).
     filtered: list[dict[str, Any]] = []
-    for row in rows:
+    for row in source.rows:
         if _row_matches_filter(row, request):
             filtered.append(row)
             if len(filtered) >= request.limit:
@@ -834,10 +999,10 @@ async def filter_dataset(
 
     return DatasetPreviewResponse(
         name=name,
-        columns=columns,
+        columns=source.columns,
         rows=filtered,
         total_rows=len(filtered),
-        format=fmt,
+        format=source.fmt,
     )
 
 

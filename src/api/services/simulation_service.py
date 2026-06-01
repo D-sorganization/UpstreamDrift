@@ -4,6 +4,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+import anyio.to_thread
+
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import (
     EngineLaunchError,
@@ -156,8 +158,53 @@ class SimulationService:
             recorder.record_step()
             self._stats.frame_count += 1
 
+    def _run_simulation_sync(self, request: SimulationRequest) -> SimulationResponse:
+        """Run the full CPU-bound simulation pipeline synchronously.
+
+        This performs engine preparation, the stepping loop, data extraction,
+        and analysis. It is intentionally blocking and must be invoked off the
+        event loop (see :meth:`run_simulation`) so the FastAPI worker is not
+        frozen for the duration of the simulation (issue #6988).
+        """
+        self._stats.start_time = time.time()
+        self._stats.frame_count = 0
+        engine = self._prepare_engine(request)
+        recorder = GenericPhysicsRecorder(engine)
+
+        if request.analysis_config:
+            recorder.set_analysis_config(request.analysis_config)
+
+        timestep = request.timestep or 0.001
+        if timestep <= 0:
+            raise ValueError(f"Timestep must be positive, got {timestep}")
+        if timestep > request.duration:
+            raise ValueError(
+                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
+            )
+        steps = int(request.duration / timestep)
+
+        self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+
+        simulation_data = self._extract_simulation_data(recorder)
+        analysis_results = None
+        if request.analysis_config:
+            analysis_results = self._perform_analysis(recorder, request.analysis_config)
+
+        return SimulationResponse(
+            success=True,
+            duration=request.duration,
+            frames=steps,
+            data=simulation_data,
+            analysis_results=analysis_results,
+            export_paths=[],
+        )
+
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
         """Run a physics simulation based on request parameters.
+
+        The CPU-bound stepping loop is offloaded to a worker thread via
+        ``anyio.to_thread.run_sync`` so the event loop stays responsive and
+        concurrent requests are not starved (issue #6988).
 
         Args:
             request: Simulation request parameters
@@ -166,41 +213,12 @@ class SimulationService:
             Simulation results and data
         """
         try:
-            self._stats.start_time = time.time()
-            self._stats.frame_count = 0
-            engine = self._prepare_engine(request)
-            recorder = GenericPhysicsRecorder(engine)
-
-            if request.analysis_config:
-                recorder.set_analysis_config(request.analysis_config)
-
-            timestep = request.timestep or 0.001
-            if timestep <= 0:
-                raise ValueError(f"Timestep must be positive, got {timestep}")
-            if timestep > request.duration:
-                raise ValueError(
-                    f"Timestep ({timestep}) must not exceed duration ({request.duration})"
-                )
-            steps = int(request.duration / timestep)
-
-            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
-
-            simulation_data = self._extract_simulation_data(recorder)
-            analysis_results = None
-            if request.analysis_config:
-                analysis_results = self._perform_analysis(
-                    recorder, request.analysis_config
-                )
-
-            return SimulationResponse(
-                success=True,
-                duration=request.duration,
-                frames=steps,
-                data=simulation_data,
-                analysis_results=analysis_results,
-                export_paths=[],
+            # run_sync is typed to return Any; bind to the declared type so
+            # mypy-strict's no-any-return is satisfied.
+            response: SimulationResponse = await anyio.to_thread.run_sync(
+                self._run_simulation_sync, request
             )
-
+            return response
         except (GolfSuiteError, ValueError, RuntimeError) as e:
             logger.error("Simulation failed: %s", e, exc_info=True)
             return SimulationResponse(
