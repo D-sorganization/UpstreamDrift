@@ -272,8 +272,11 @@ class TestCIEnvironmentCompatibility:
             REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
         ).read_text(encoding="utf-8")
 
-        # Prerequisite import gate before the parity test runs.
-        assert "import jax, jaxlib, jaxsim, pinocchio" in workflow
+        # Prerequisite gates before the parity test runs.
+        assert "import jax, jaxlib, jaxsim" in workflow
+        assert "pip uninstall -y pinocchio" in workflow
+        assert "pin>=2.6.0,<5.0.0" in workflow
+        assert "scripts/ci/check_pinocchio_dynamics_api.py" in workflow
         # Post-pytest assertion that a required parity case passed (not skipped).
         assert "scripts/ci/require_junit_test_passed.py" in workflow
         assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
