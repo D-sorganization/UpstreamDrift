@@ -261,7 +261,13 @@ class CrossEngineValidator(ContractChecker):
         """
         try:
             advertised = _supports_capability(adapter, capability)
-        except Exception as exc:  # noqa: BLE001 - any supports() failure is fatal
+        except (
+            AttributeError,
+            TypeError,
+            NotImplementedError,
+            ValueError,
+            RuntimeError,
+        ) as exc:
             logger.warning(
                 "capability query for %r raised on %s: %s",
                 capability,
