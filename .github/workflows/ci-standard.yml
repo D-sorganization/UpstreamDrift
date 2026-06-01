@@ -750,7 +750,8 @@ jobs:
               'tests/**/*.py' \
               'pyproject.toml' \
               'requirements*.txt' \
-              'environment.yml'
+              'environment.yml' \
+              ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
           )
           if [ "${#core_test_targets[@]}" -eq 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"

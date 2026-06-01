@@ -22,6 +22,7 @@ on:
     branches: [main]
     paths:
       - "src/engines/**"
+      - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
@@ -40,6 +41,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "src/engines/**"
+      - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
@@ -125,6 +127,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
+          python -m pip install --ignore-installed hatchling
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
@@ -277,6 +280,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
+          python -m pip install --ignore-installed hatchling
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python -m ensurepip --upgrade || true
           python - <<'PY'
