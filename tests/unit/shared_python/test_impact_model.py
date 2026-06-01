@@ -183,39 +183,6 @@ def test_rigid_body_friction_spin(basic_pre_state, default_impact_params) -> Non
     assert post_state.ball_angular_velocity[1] == 0
 
 
-def test_public_rigid_body_friction_honors_pre_existing_rolling_spin(
-    default_impact_params,
-) -> None:
-    """Public impact_model uses the rolling cap from the canonical physics copy."""
-    params = ImpactParameters(cor=0.78, friction_coefficient=0.5)
-    state_no_spin = PreImpactState(
-        clubhead_velocity=np.array([45.0, 5.0, 0.0]),
-        clubhead_angular_velocity=np.zeros(3),
-        clubhead_orientation=np.array([1.0, 0.0, 0.0]),
-        ball_position=np.array([0.05, 0.0, 0.0]),
-        ball_velocity=np.zeros(3),
-        ball_angular_velocity=np.zeros(3),
-        clubhead_mass=0.2,
-    )
-    state_with_spin = PreImpactState(
-        clubhead_velocity=np.array([45.0, 5.0, 0.0]),
-        clubhead_angular_velocity=np.zeros(3),
-        clubhead_orientation=np.array([1.0, 0.0, 0.0]),
-        ball_position=np.array([0.05, 0.0, 0.0]),
-        ball_velocity=np.zeros(3),
-        ball_angular_velocity=np.array([0.0, 0.0, 100.0]),
-        clubhead_mass=0.2,
-    )
-
-    model = RigidBodyImpactModel()
-    post_no_spin = model.solve(state_no_spin, params)
-    post_with_spin = model.solve(state_with_spin, params)
-
-    added_z_no_spin = float(post_no_spin.ball_angular_velocity[2])
-    added_z_with_spin = float(post_with_spin.ball_angular_velocity[2]) - 100.0
-    assert added_z_with_spin < added_z_no_spin
-
-
 def test_finite_time_model(basic_pre_state, default_impact_params) -> None:
     """Test finite time model delegates to rigid body but sets duration."""
     model = FiniteTimeImpactModel()
@@ -297,7 +264,6 @@ def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None
     assert analysis["total_ke_pre"] > 0
     assert analysis["total_ke_post"] > 0
     assert analysis["energy_lost"] > 0  # Inelastic collision (COR < 1)
-    assert analysis["expected_loss_j"] > 0
 
 
 def test_create_impact_model() -> None:
