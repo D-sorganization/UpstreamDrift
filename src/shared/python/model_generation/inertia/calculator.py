@@ -171,9 +171,18 @@ class InertiaResult:
         return abs(self.ixx - self.izz) <= self.iyy <= self.ixx + self.izz
 
     def validate_positive_definite(self) -> bool:
-        """Check if inertia matrix is positive definite."""
+        """Check if inertia matrix is positive definite.
+
+        A matrix containing NaN/inf is never positive definite. Some BLAS
+        backends do not raise ``LinAlgError`` for a NaN-laden matrix in the
+        Cholesky factorization, so non-finite entries are rejected explicitly
+        before the decomposition is attempted.
+        """
+        matrix = self.as_matrix()
+        if not np.all(np.isfinite(matrix)):
+            return False
         try:
-            np.linalg.cholesky(self.as_matrix())
+            np.linalg.cholesky(matrix)
             return True
         except np.linalg.LinAlgError:
             return False
@@ -310,7 +319,14 @@ class InertiaCalculator:
 
         Returns:
             InertiaResult
+
+        Raises:
+            ValueError: If mass is not strictly positive. A non-positive mass
+                would yield a physically meaningless (zero or negative) inertia
+                tensor, so it is rejected rather than silently propagated.
         """
+        if mass <= 0:
+            raise ValueError(f"mass must be positive, got {mass}")
         return self.compute(geometry, mass=mass, mode=InertiaMode.PRIMITIVE)
 
     def compute_from_mesh(
