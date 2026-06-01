@@ -294,7 +294,8 @@ class JaxSimBackend:
             apis.model.generalized_free_floating_jacobian,
             output_vel_repr=self._jaxsim_vel_repr(),
         )
-        spatial = np.asarray(jacobians[frame_index], dtype=np.float64)
+        native = np.asarray(jacobians[frame_index], dtype=np.float64)
+        spatial = _jaxsim_jacobian_to_canonical(native, expected_cols=6 + self._dofs())
         return {
             "spatial": spatial,
             "angular": spatial[:3, :],
@@ -571,6 +572,32 @@ def _jaxsim_free_floating_matrix_to_canonical(value: np.ndarray) -> np.ndarray:
         raise ValueError(f"free-floating matrix must be square, got {matrix.shape}")
     permutation = _free_floating_permutation(matrix.shape[0])
     return matrix[np.ix_(permutation, permutation)]
+
+
+def _jaxsim_jacobian_to_canonical(
+    value: np.ndarray, *, expected_cols: int
+) -> np.ndarray:
+    """Restack a JaxSim free-floating Jacobian to the canonical convention.
+
+    JaxSim emits a ``(6, 6 + dofs)`` matrix whose six output rows are spatial
+    velocity ``[linear; angular]`` and whose first six base columns are
+    generalized-velocity ``[linear; angular]``. The canonical state vector used
+    by every other dynamics output (M, h, v, inverse_dynamics) is
+    ``[angular; linear; joints]``. This mirrors :func:`_jaxsim_base_to_canonical`
+    on the row axis and applies :func:`_free_floating_permutation` to the
+    columns so that ``J @ v`` and ``Jᵀ @ force`` agree with that state vector.
+    """
+
+    matrix = np.asarray(value, dtype=np.float64)
+    if matrix.ndim != 2 or matrix.shape[0] != 6:
+        raise ValueError(f"spatial Jacobian must have six rows, got {matrix.shape}")
+    if matrix.shape[1] != expected_cols:
+        raise ValueError(
+            f"spatial Jacobian must have {expected_cols} columns, got {matrix.shape}"
+        )
+    row_permutation = np.array([3, 4, 5, 0, 1, 2], dtype=int)
+    col_permutation = _free_floating_permutation(matrix.shape[1])
+    return matrix[np.ix_(row_permutation, col_permutation)]
 
 
 def _assert_spd(matrix: np.ndarray, name: str) -> None:

@@ -245,6 +245,40 @@ class CrossEngineValidator(ContractChecker):
     ERROR_THRESHOLD = 10.0  # 10× tolerance → error (investigation required)
     BLOCKER_THRESHOLD = 100.0  # 100× tolerance → blocker (fundamental model error)
 
+    def _require_capability(
+        self,
+        adapter: object,
+        check_name: str,
+        capability: str,
+    ) -> ConformanceCheckResult | None:
+        """Gate a check on an advertised capability.
+
+        Returns ``None`` when the adapter advertises ``capability`` (the caller
+        should proceed). Returns a *passing* skip when the adapter genuinely
+        does not advertise it, and a *failing* result when the ``supports()``
+        query raises — so a capability-silent or throwing adapter can no longer
+        clear the gate with zero validation (issue #6891).
+        """
+        try:
+            advertised = _supports_capability(adapter, capability)
+        except (
+            AttributeError,
+            TypeError,
+            NotImplementedError,
+            ValueError,
+            RuntimeError,
+        ) as exc:
+            logger.warning(
+                "capability query for %r raised on %s: %s",
+                capability,
+                _adapter_name(adapter),
+                exc,
+            )
+            return _capability_error(adapter, check_name, capability, exc)
+        if not advertised:
+            return _capability_skip(adapter, check_name, capability)
+        return None
+
     def validate_round_trip_state_remap(
         self,
         adapter: object,
@@ -278,8 +312,9 @@ class CrossEngineValidator(ContractChecker):
     ) -> ConformanceCheckResult:
         """Validate FK against known reference poses."""
         check_name = "forward_kinematics_reference_pose"
-        if not _supports_capability(adapter, "forward_sim"):
-            return _capability_skip(adapter, check_name, "forward_sim")
+        gate = self._require_capability(adapter, check_name, "forward_sim")
+        if gate is not None:
+            return gate
         missing = _missing_methods(adapter, ("forward_kinematics",))
         if missing:
             return _skipped_result(adapter, check_name, missing)
@@ -304,10 +339,12 @@ class CrossEngineValidator(ContractChecker):
     ) -> ConformanceCheckResult:
         """Validate inverse-dynamics torques reproduce acceleration via FD."""
         check_name = "inverse_forward_dynamics_consistency"
-        if not _supports_capability(adapter, "inverse_dynamics"):
-            return _capability_skip(adapter, check_name, "inverse_dynamics")
-        if not _supports_capability(adapter, "forward_sim"):
-            return _capability_skip(adapter, check_name, "forward_sim")
+        gate = self._require_capability(adapter, check_name, "inverse_dynamics")
+        if gate is not None:
+            return gate
+        gate = self._require_capability(adapter, check_name, "forward_sim")
+        if gate is not None:
+            return gate
         missing = _missing_methods(adapter, ("inverse_dynamics", "forward_dynamics"))
         if missing:
             return _skipped_result(adapter, check_name, missing)
@@ -339,8 +376,9 @@ class CrossEngineValidator(ContractChecker):
     ) -> list[ConformanceCheckResult]:
         """Validate exported mass, CoM, and inertia against canonical CC-3."""
         check_name = "post_export_mass_properties"
-        if not _supports_capability(adapter, "mass_matrix"):
-            return [_capability_skip(adapter, check_name, "mass_matrix")]
+        gate = self._require_capability(adapter, check_name, "mass_matrix")
+        if gate is not None:
+            return [gate]
         missing = _missing_methods(adapter, ("exported_mass_properties",))
         if missing:
             return [_skipped_result(adapter, check_name, missing)]
@@ -369,8 +407,9 @@ class CrossEngineValidator(ContractChecker):
     ) -> ConformanceCheckResult:
         """Validate differential behavior against a reference engine."""
         check_name = "differential_cross_engine_reference"
-        if not _supports_capability(adapter, "forward_sim"):
-            return _capability_skip(adapter, check_name, "forward_sim")
+        gate = self._require_capability(adapter, check_name, "forward_sim")
+        if gate is not None:
+            return gate
         missing = _missing_methods(adapter, ("differential_state",))
         if missing:
             return _skipped_result(adapter, check_name, missing)
@@ -744,14 +783,20 @@ def _skipped_result(
     check_name: str,
     missing_methods: Sequence[str],
 ) -> ConformanceCheckResult:
-    """Build a skip result for incomplete adapters."""
+    """Build a failure result for an adapter missing a required method.
+
+    Reaching this point means the adapter advertises (or unconditionally owns,
+    for capability-free checks) the capability under test yet does not implement
+    the required method(s). That is a real conformance failure, not a free skip:
+    a half-implemented adapter must NOT clear the CC-8 gate. See issue #6891.
+    """
     missing = ", ".join(missing_methods)
     return ConformanceCheckResult(
         check_name=check_name,
         engine_name=_adapter_name(adapter),
-        passed=True,
-        skipped=True,
-        message=f"missing adapter method(s): {missing}",
+        passed=False,
+        skipped=False,
+        message=(f"missing adapter method(s) for advertised capability: {missing}"),
     )
 
 
@@ -760,13 +805,44 @@ def _capability_skip(
     check_name: str,
     capability: str,
 ) -> ConformanceCheckResult:
-    """Build a capability-aware skip result."""
+    """Build a capability-aware skip for an engine that lacks a capability.
+
+    A genuine missing capability is a legitimate skip (``passed=True,
+    skipped=True``): the engine truthfully reports it does not support the
+    feature, so there is nothing to validate. This is distinct from an adapter
+    that *advertises* a capability but cannot back it up (see ``_skipped_result``
+    and ``_capability_error``).
+    """
     return ConformanceCheckResult(
         check_name=check_name,
         engine_name=_adapter_name(adapter),
         passed=True,
         skipped=True,
         message=f"capability not supported: {capability}",
+    )
+
+
+def _capability_error(
+    adapter: object,
+    check_name: str,
+    capability: str,
+    exc: Exception,
+) -> ConformanceCheckResult:
+    """Build a failure result when a ``supports()`` query raises.
+
+    A capability descriptor whose ``supports()`` raises cannot be trusted to
+    truthfully report a missing capability, so it must not be routed to a
+    passing skip (which previously let a capability-silent adapter clear the
+    gate with zero validation). See issue #6891.
+    """
+    return ConformanceCheckResult(
+        check_name=check_name,
+        engine_name=_adapter_name(adapter),
+        passed=False,
+        skipped=False,
+        message=(
+            f"capability query for {capability!r} raised {type(exc).__name__}: {exc}"
+        ),
     )
 
 
@@ -790,6 +866,13 @@ def _supports_capability(adapter: object, capability: str) -> bool:
 
     This supports both the current ``EngineCapabilities`` fields and the
     canonical ``supports()`` query contract from PR #6824.
+
+    Raises:
+        A ``supports()`` query that itself raises is propagated to the caller
+        rather than swallowed into a ``False`` (which previously routed a
+        capability-silent adapter to a passing skip — issue #6891). Callers use
+        :meth:`CrossEngineValidator._require_capability` to convert the raised
+        error into a failing conformance result.
     """
     descriptor = _capability_descriptor(adapter)
     if descriptor is None:
@@ -797,10 +880,7 @@ def _supports_capability(adapter: object, capability: str) -> bool:
 
     supports = getattr(descriptor, "supports", None)
     if callable(supports):
-        try:
-            return bool(supports(capability))
-        except (AttributeError, TypeError, ValueError):
-            logger.debug("capability supports() query failed for %s", capability)
+        return bool(supports(capability))
 
     raw = getattr(descriptor, capability, None)
     if raw is None:

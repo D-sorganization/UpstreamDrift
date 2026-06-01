@@ -305,6 +305,47 @@ def test_jaxsim_backend_inverse_dynamics_and_acceleration_decomposition() -> Non
     assert control.shape == (7,)
 
 
+def test_jaxsim_jacobian_to_canonical_restacks_rows_and_base_columns() -> None:
+    """The permutation helper is the pure, jax-free core of the convention fix.
+
+    Feed a KNOWN JaxSim-convention matrix: rows are ``[linear; angular]`` and the
+    first six columns are base ``[linear; angular]``; joint columns trail. Assert
+    the helper restacks both axes to canonical ``[angular; linear; joints]``.
+    """
+
+    from src.engines.physics_engines.jaxsim.jaxsim_backend import (
+        _jaxsim_jacobian_to_canonical,
+    )
+
+    native = np.arange(6 * 7, dtype=np.float64).reshape(6, 7)
+    canonical = _jaxsim_jacobian_to_canonical(native, expected_cols=7)
+
+    row_perm = [3, 4, 5, 0, 1, 2]
+    col_perm = [3, 4, 5, 0, 1, 2, 6]
+    expected = native[np.ix_(row_perm, col_perm)]
+    np.testing.assert_array_equal(canonical, expected)
+
+    # Rows restacked: canonical angular rows == native linear rows (3:6).
+    np.testing.assert_array_equal(canonical[:3], native[3:6][:, col_perm])
+    np.testing.assert_array_equal(canonical[3:], native[0:3][:, col_perm])
+    # Base columns restacked: canonical angular base cols == native linear cols.
+    np.testing.assert_array_equal(canonical[:, :3], native[row_perm][:, 3:6])
+    np.testing.assert_array_equal(canonical[:, 3:6], native[row_perm][:, 0:3])
+    # Joint column is untouched (apart from the row restack).
+    np.testing.assert_array_equal(canonical[:, 6], native[row_perm][:, 6])
+
+
+def test_jaxsim_jacobian_to_canonical_rejects_wrong_shape() -> None:
+    from src.engines.physics_engines.jaxsim.jaxsim_backend import (
+        _jaxsim_jacobian_to_canonical,
+    )
+
+    with pytest.raises(ValueError, match="six rows"):
+        _jaxsim_jacobian_to_canonical(np.zeros((5, 7)), expected_cols=7)
+    with pytest.raises(ValueError, match="columns"):
+        _jaxsim_jacobian_to_canonical(np.zeros((6, 8)), expected_cols=7)
+
+
 def test_jaxsim_backend_jacobian_uses_spatial_order() -> None:
     backend = _backend()
 
@@ -312,8 +353,18 @@ def test_jaxsim_backend_jacobian_uses_spatial_order() -> None:
 
     assert jacobian is not None
     assert jacobian["spatial"].shape == (6, 7)
-    np.testing.assert_allclose(jacobian["angular"], jacobian["spatial"][:3])
-    np.testing.assert_allclose(jacobian["linear"], jacobian["spatial"][3:])
+    # The mock emits ``arange(42).reshape(6, 7) + 100`` for frame index 1 in the
+    # JaxSim convention; the adapter must return it restacked to canonical so
+    # ``J @ v`` agrees with the canonical state vector.
+    native = np.arange(42, dtype=np.float64).reshape(6, 7) + 100.0
+    row_perm = [3, 4, 5, 0, 1, 2]
+    col_perm = [3, 4, 5, 0, 1, 2, 6]
+    expected = native[np.ix_(row_perm, col_perm)]
+    np.testing.assert_allclose(jacobian["spatial"], expected)
+    np.testing.assert_allclose(jacobian["angular"], expected[:3])
+    np.testing.assert_allclose(jacobian["linear"], expected[3:])
+    # Canonical angular rows come from the native linear (lower) rows.
+    np.testing.assert_allclose(jacobian["angular"], native[3:6][:, col_perm])
     assert backend.compute_jacobian("missing") is None
 
 
