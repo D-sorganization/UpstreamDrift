@@ -434,7 +434,7 @@ class JaxSimProbe(EngineProbe):
                     "before selecting the JaxSim engine."
                 ),
             )
-        except Exception as exc:  # noqa: BLE001 - import-time runtime failures
+        except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:
             return EngineProbeResult(
                 engine_name=self.engine_name,
                 status=ProbeStatus.MISSING_BINARY,

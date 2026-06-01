@@ -30,7 +30,7 @@ def check_pinocchio_dynamics_api(module_name: str = "pinocchio") -> int:
     """Return 0 only when the imported module exposes required dynamics APIs."""
     try:
         pinocchio = importlib.import_module(module_name)
-    except Exception as exc:  # noqa: BLE001 - diagnostic command
+    except ImportError as exc:
         print(f"Pinocchio import failed: {exc}", file=sys.stderr)
         return 1
 
