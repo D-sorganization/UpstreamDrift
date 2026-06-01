@@ -21,9 +21,16 @@ metadata losslessly.
 from __future__ import annotations
 
 import json
-import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
+
+# stdlib ElementTree builds the MJCF document (Element/SubElement/write);
+# defusedxml parses untrusted input and refuses XXE / entity expansion
+# (issue #6927). defusedxml does not expose Element/SubElement, so building
+# and parsing use separate imports.
+import xml.etree.ElementTree as ET  # noqa: S405  # build-only; parse via DefusedET
 from pathlib import Path
 from typing import Any
+
+import defusedxml.ElementTree as DefusedET
 
 import numpy as np
 
@@ -129,7 +136,7 @@ def read_mjcf_subject(input_path: Path) -> SubjectAnthropometrics:
         )
     sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
 
-    tree = ET.parse(str(input_path))
+    tree = DefusedET.parse(str(input_path))
     root = tree.getroot()
     if root.tag != "mujoco":
         raise ValueError(

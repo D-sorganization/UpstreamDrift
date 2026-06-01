@@ -85,6 +85,54 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
     )
 
 
+def resolve_output_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
+    """Resolve an *output* path and ensure it stays under an allowed root.
+
+    Unlike :func:`resolve_contained_path`, the target file is not required to
+    exist yet (it is about to be written). Containment is checked against the
+    resolved candidate, and symlink traversal of any existing parent component
+    is rejected as defense-in-depth (issue #6926).
+
+    Raises:
+        HTTPException: 400 if the path is malformed or escapes every allowed
+            root.
+    """
+    try:
+        resolved_candidate = candidate.resolve()
+    except (ValueError, OSError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path format",
+        ) from exc
+
+    for allowed_dir in allowed_dirs:
+        try:
+            resolved_allowed_dir = allowed_dir.resolve()
+        except (ValueError, OSError) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid path format",
+            ) from exc
+
+        try:
+            resolved_candidate.relative_to(resolved_allowed_dir)
+        except ValueError:
+            continue
+
+        if _candidate_traverses_symlink(resolved_candidate, resolved_allowed_dir):
+            raise HTTPException(
+                status_code=400,
+                detail="Symbolic links are not permitted in output paths",
+            )
+
+        return resolved_candidate
+
+    raise HTTPException(
+        status_code=400,
+        detail="Invalid path: escapes allowed output directories",
+    )
+
+
 def validate_model_path(model_path: str) -> str:
     """Validate model path to prevent path traversal attacks."""
     try:

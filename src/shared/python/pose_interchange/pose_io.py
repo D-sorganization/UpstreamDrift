@@ -150,8 +150,27 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
 
 
 def _load_drake(path: Path) -> CanonicalPose:
+    """Load a Drake initial-state ``.drake`` file.
+
+    Trust boundary (issue #6929)
+    ----------------------------
+    The ``.drake`` interchange format is a Python ``pickle`` (see
+    :func:`_save_drake`). ``pickle.load`` executes arbitrary code embedded in
+    the stream, so a malicious ``.drake`` file is an arbitrary-code-execution
+    vector. This is **deliberately accepted** because the format is a
+    *local-only, desktop/CLI* artifact: it is **never** loaded from
+    network/API input (the FastAPI surface uses the JSON/``.npz`` engine
+    formats), and the file is produced by :func:`_save_drake` on the same
+    machine. Callers must therefore treat ``.drake`` files exactly like any
+    other executable they run: only load files you produced or fully trust.
+    Do **not** expose this loader on an untrusted ingest path; if that ever
+    becomes necessary, migrate ``.drake`` to ``np.savez``/JSON like the
+    MuJoCo and Pinocchio adapters, which avoid pickle entirely.
+    """
     with path.open("rb") as fh:
-        payload = pickle.load(fh)  # noqa: S301 - file produced by save_drake
+        # noqa: S301 — trusted, locally-produced file only; see trust-boundary
+        # note above. Not reachable from any API/network input.
+        payload = pickle.load(fh)  # noqa: S301
     if not isinstance(payload, dict) or "q" not in payload:
         raise ValueError(f"{path}: drake pickle missing required 'q' field")
     adapter = ADAPTER_REGISTRY["drake"]()
