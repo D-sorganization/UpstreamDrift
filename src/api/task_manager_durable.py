@@ -283,7 +283,7 @@ class SQLiteBackend:
             priority=row["priority"],
         )
 
-    def _record_to_values(self, record: TaskRecord) -> tuple:
+    def _record_to_values(self, record: TaskRecord) -> tuple[Any, ...]:
         """Convert TaskRecord to database values tuple."""
         return (
             record.task_id,
@@ -547,7 +547,7 @@ class DurableTaskManager:
         self.backend = backend or SQLiteBackend()
         self.heartbeat_timeout = heartbeat_timeout
         self._closed = False
-        self._cleanup_task: asyncio.Task | None = None
+        self._cleanup_task: asyncio.Task[None] | None = None
 
         if auto_cleanup:
             self._cleanup_interval = cleanup_interval
