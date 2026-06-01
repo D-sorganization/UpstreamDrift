@@ -492,6 +492,8 @@ def _preview_csv_streaming(
         except StopIteration:
             return [], [], 0
         for record in reader:
+            if not record:
+                continue
             total += 1
             if len(rows) < limit:
                 rows.append(dict(zip(columns, record, strict=False)))

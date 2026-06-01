@@ -161,6 +161,37 @@ def test_preview_streams_only_limit_rows_for_large_csv(
     assert data["rows"][0] == {"a": "0", "b": "0"}
 
 
+def test_preview_csv_skips_blank_lines(client: TestClient, temp_dataset_dir) -> None:
+    """Issue #6956: blank lines in a CSV must not inflate total_rows or add empty rows.
+
+    csv.reader yields an empty list for blank lines; the streaming path must
+    skip them so the row count and preview match what csv.DictReader (used for
+    stats/filtering) reports for the same file.
+    """
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    csv_file = output_dir / "blanks.csv"
+    # 3 real data rows, 2 blank lines interspersed
+    csv_file.write_text("a,b\n1,2\n\n3,4\n\n5,6\n", encoding="utf-8")
+
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        response = client.get(
+            "/tools/data-explorer/datasets/blanks.csv/preview?limit=10"
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["columns"] == ["a", "b"]
+    assert data["total_rows"] == 3
+    assert len(data["rows"]) == 3
+    assert {"a": "1", "b": "2"} in data["rows"]
+    assert {"a": "3", "b": "4"} in data["rows"]
+    assert {"a": "5", "b": "6"} in data["rows"]
+    assert {} not in data["rows"]
+
+
 def test_preview_streams_only_limit_rows_for_large_json(
     client: TestClient, temp_dataset_dir
 ) -> None:

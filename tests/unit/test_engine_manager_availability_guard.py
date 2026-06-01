@@ -74,7 +74,7 @@ def test_jaxsim_not_available_when_package_absent(
     """#6880: JaxSim adapter dir present but jaxsim package absent => not available."""
 
     def _status(name: str) -> AvailabilityStatus:
-        if name == "jaxsim":
+        if name == "jaxsim.api":
             return AvailabilityStatus.NOT_INSTALLED
         return AvailabilityStatus.AVAILABLE
 
@@ -130,7 +130,31 @@ def test_runtime_status_helper_maps_engine_types() -> None:
     # Pure-rigid engines without a dedicated importable package map to None and
     # are treated as path-gated (no runtime requirement).
     assert engine_manager.runtime_dependency_name(EngineType.MUJOCO) == "mujoco"
-    assert engine_manager.runtime_dependency_name(EngineType.JAXSIM) == "jaxsim"
+    assert engine_manager.runtime_dependency_name(EngineType.JAXSIM) == "jaxsim.api"
     assert engine_manager.runtime_dependency_name(EngineType.PENDULUM) is None
     # Sanity: the resolved names are accepted by the availability layer.
     assert engine_availability.get_engine_status("mujoco") in AvailabilityStatus
+
+
+def test_jaxsim_not_available_when_api_submodule_absent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """#6887: partial jaxsim install (jaxsim ok, jaxsim.api missing) => not available.
+
+    Discovery must probe the same surface the loader requires (jaxsim.api),
+    so an incomplete install is caught before switch_engine, not during.
+    """
+
+    def _status(name: str) -> AvailabilityStatus:
+        # jaxsim top-level importable; jaxsim.api is not
+        if name == "jaxsim.api":
+            return AvailabilityStatus.NOT_INSTALLED
+        return AvailabilityStatus.AVAILABLE
+
+    monkeypatch.setattr(engine_manager, "get_runtime_engine_status", _status)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _make_engine_dirs(root, "jaxsim")
+        manager = EngineManager(suite_root=root)
+        assert EngineType.JAXSIM not in manager.get_available_engines()
+        assert manager.get_engine_status(EngineType.JAXSIM) == EngineStatus.UNAVAILABLE
