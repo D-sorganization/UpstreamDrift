@@ -236,6 +236,164 @@ class TestRealTimeController:
         assert qd_pos[0] == 0.0
 
 
+class TestControlLoopFailureEscalation:
+    """Tests for consecutive-failure escalation (issue #6943)."""
+
+    def test_loop_aborts_and_zeroes_torque_after_n_failures(self) -> None:
+        """A persistently failing callback aborts the loop and zeroes torque."""
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=3,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        def failing_callback(_state: RobotState) -> object:
+            raise RuntimeError("simulated hardware fault")
+
+        controller.set_control_callback(failing_callback)
+        controller.start()
+
+        # Wait for the loop to self-abort.
+        deadline = time.perf_counter() + 2.0
+        while controller.is_running and time.perf_counter() < deadline:
+            time.sleep(0.005)
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        # A zero-torque command was issued as the safety fallback.
+        assert sent, "expected a zero-torque safety command"
+        last = sent[-1]
+        np.testing.assert_array_equal(
+            last.torque_commands,  # type: ignore[attr-defined]
+            np.zeros(2),
+        )
+
+    def test_transient_failures_do_not_abort(self) -> None:
+        """An occasional failure that recovers must not abort the loop."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=5,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=1))
+
+        state = {"calls": 0}
+
+        def flaky_callback(s: RobotState) -> ControlCommand:
+            state["calls"] += 1
+            if state["calls"] % 4 == 0:
+                raise RuntimeError("transient")
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(1),
+            )
+
+        controller.set_control_callback(flaky_callback)
+        controller.start()
+        time.sleep(0.1)
+
+        assert controller.is_running
+        assert not controller.aborted_on_failure
+        controller.stop()
+        controller.disconnect()
+
+    def test_invalid_max_consecutive_failures_rejected(self) -> None:
+        """Precondition: max_consecutive_failures must be positive."""
+        from src.deployment.realtime import RealTimeController
+
+        with pytest.raises(ValueError):
+            RealTimeController(max_consecutive_failures=0)
+
+
+class TestControllerStopTimeout:
+    """Tests for stop() join-timeout handling (issue #6944)."""
+
+    def test_stop_raises_and_skips_zero_command_on_join_timeout(self) -> None:
+        """If the thread won't stop, stop() raises and skips the zero command."""
+        from src.deployment.realtime import RealTimeController, RobotConfig
+
+        controller = RealTimeController(communication_type="simulation")
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        class _StuckThread:
+            def join(self, timeout: float | None = None) -> None:
+                return None
+
+            def is_alive(self) -> bool:
+                return True
+
+        controller._control_thread = _StuckThread()  # type: ignore[assignment]
+
+        with pytest.raises(RuntimeError, match="did not stop"):
+            controller.stop()
+
+        # No zero command was sent because the loop is still alive.
+        assert sent == []
+        # The (still-alive) thread handle is retained, not cleared.
+        assert controller._control_thread is not None
+
+    def test_stop_sends_zero_command_when_thread_confirmed_stopped(self) -> None:
+        """Normal stop confirms the join and commands zero torque once."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=3))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        def cb(s: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+        time.sleep(0.03)
+        controller.stop()
+
+        assert not controller.is_running
+        assert controller._control_thread is None
+        assert sent, "expected a zero-torque command on clean stop"
+        np.testing.assert_array_equal(
+            sent[-1].torque_commands,  # type: ignore[attr-defined]
+            np.zeros(3),
+        )
+
+
 class TestRobotConfig:
     """Tests for RobotConfig."""
 

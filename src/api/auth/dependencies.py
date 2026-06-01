@@ -2,15 +2,8 @@
 
 from collections.abc import Callable
 from typing import cast
-from datetime import timezone
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from src.api.utils.datetime_compat import UTC
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

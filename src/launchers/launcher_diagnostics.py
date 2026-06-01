@@ -1159,8 +1159,8 @@ def reset_layout_config() -> bool:
 
         logger.info("Layout config reset - launcher will use defaults (17 tiles)")
         return True
-    except (RuntimeError, ValueError, OSError) as e:
-        logger.error("Failed to reset layout config: %s", e)
+    except (RuntimeError, ValueError, OSError):
+        logger.exception("Failed to reset layout config")
         return False
 
 

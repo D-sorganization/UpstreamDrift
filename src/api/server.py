@@ -172,17 +172,17 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
 
         logger.info("Golf Modeling Suite API %s started successfully", API_PREFIX)
 
-    except OSError as e:
-        logger.error("Database or file system error during initialization: %s", e)
+    except OSError:
+        logger.exception("Database or file system error during initialization")
         raise
-    except ImportError as e:
-        logger.error("Missing required dependency: %s", e)
+    except ImportError:
+        logger.exception("Missing required dependency")
         raise
-    except RuntimeError as e:
-        logger.error("Engine initialization failed: %s", e)
+    except RuntimeError:
+        logger.exception("Engine initialization failed")
         raise
-    except (TypeError, AttributeError) as e:
-        logger.exception("Unexpected error during API initialization: %s", e)
+    except (TypeError, AttributeError):
+        logger.exception("Unexpected error during API initialization")
         raise
 
     try:

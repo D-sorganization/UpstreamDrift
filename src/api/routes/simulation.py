@@ -64,17 +64,17 @@ async def run_simulation(
         if logger:
             logger.warning("Invalid simulation parameters: %s", exc)
         raise HTTPException(
-            status_code=400, detail=f"Invalid parameters: {str(exc)}"
+            status_code=400, detail="Invalid simulation parameters"
         ) from exc
     except RuntimeError as exc:
         if logger:
             logger.exception("Simulation runtime error")
         raise HTTPException(
-            status_code=500, detail=f"Simulation failed: {str(exc)}"
+            status_code=500, detail="Internal simulation error"
         ) from exc
     except ImportError as exc:
         if logger:
-            logger.exception("Unexpected simulation error: %s", exc)
+            logger.exception("Unexpected simulation error")
         raise HTTPException(
             status_code=500, detail="Internal simulation error"
         ) from exc

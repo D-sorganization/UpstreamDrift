@@ -1,6 +1,7 @@
 """Tests for the optional cloud client."""
 
 import os
+import stat
 import sys
 from collections.abc import Generator
 from pathlib import Path
@@ -135,6 +136,42 @@ async def test_login_success(temp_cache_dir: Path) -> None:
     token_file = temp_cache_dir / ".golf-suite" / "cloud_token"
     assert token_file.exists()
     assert token_file.read_text() == "new-token-456"
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="POSIX file-mode bits not enforced on Windows"
+)
+def test_save_token_uses_owner_only_perms(temp_cache_dir: Path) -> None:
+    """Token file and dir get 0o600/0o700 on POSIX (issue #6946)."""
+    client = CloudClient()
+    client.token = "secret-token"
+    client._save_token()
+
+    config_dir = temp_cache_dir / ".golf-suite"
+    token_file = config_dir / "cloud_token"
+    assert token_file.exists()
+
+    file_mode = stat.S_IMODE(token_file.stat().st_mode)
+    assert file_mode == 0o600, f"token perms {oct(file_mode)} != 0o600"
+    # No group/other access bits set.
+    assert not file_mode & (stat.S_IRWXG | stat.S_IRWXO)
+
+
+def test_save_token_calls_chmod_cross_platform(temp_cache_dir: Path) -> None:
+    """_save_token always restricts the token to 0o600 (no-op on Windows)."""
+    client = CloudClient()
+    client.token = "secret-token"
+    token_file = temp_cache_dir / ".golf-suite" / "cloud_token"
+    with patch("src.api.cloud_client.Path.chmod", autospec=True) as mock_chmod:
+        client._save_token()
+    # _save_token tightens the config dir (0o700) and the token file (0o600);
+    # assert the bearer token specifically gets owner-only read/write.
+    token_modes = [
+        call.args[1]
+        for call in mock_chmod.call_args_list
+        if call.args and call.args[0] == token_file
+    ]
+    assert token_modes == [0o600], f"token chmod calls {token_modes} != [0o600]"
 
 
 @pytest.mark.asyncio

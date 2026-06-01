@@ -65,6 +65,36 @@ def test_simulation_request_initial_state_qv_rejects_bad_values() -> None:
         )
 
 
+def test_simulation_request_control_inputs_length_capped() -> None:
+    """control_inputs over MAX_CONTROL_INPUTS is rejected (issue #6948)."""
+    over = [{"t": i} for i in range(r.MAX_CONTROL_INPUTS + 1)]
+    with pytest.raises(ValidationError):
+        r.SimulationRequest(engine_type="mujoco", control_inputs=over)
+
+
+def test_simulation_request_control_inputs_at_limit_ok() -> None:
+    """A small control sequence within bounds is accepted."""
+    sim = r.SimulationRequest(
+        engine_type="mujoco", control_inputs=[{"t": 0.0}, {"t": 0.1}]
+    )
+    assert sim.control_inputs is not None
+    assert len(sim.control_inputs) == 2
+
+
+def test_simulation_request_initial_state_length_capped() -> None:
+    """initial_state q/v vectors over MAX_STATE_VECTOR_LEN are rejected (#6948)."""
+    over = [0.0] * (r.MAX_STATE_VECTOR_LEN + 1)
+    with pytest.raises(ValidationError):
+        r.SimulationRequest(engine_type="mujoco", initial_state={"q": over})
+
+
+def test_normalize_initial_state_component_length_check() -> None:
+    """The helper raises ValueError on an over-long component (#6948)."""
+    over = [0.0] * (r.MAX_STATE_VECTOR_LEN + 1)
+    with pytest.raises(ValueError, match="exceeds maximum length"):
+        r._normalize_initial_state_component("q", over)
+
+
 # ----- AnalysisRequest -----
 
 

@@ -178,6 +178,32 @@ class TestAdapterLoading:
         history = chat_service.get_session_history(ctx.session_id)
         assert len(history) == 1
 
+    def test_fallback_failure_surfaces_backend_error(self, chat_service) -> None:
+        """When the fallback adapter import fails, a clear state is set (#6945)."""
+        chat_service._adapter = MagicMock()  # pre-existing, should be cleared
+        chat_service._backend_error = None
+        with patch(
+            "src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter",
+            side_effect=ImportError("ollama missing"),
+        ):
+            chat_service._fallback_to_ollama()
+        assert chat_service._adapter is None
+        assert not chat_service.adapter_available
+        assert chat_service.backend_error is not None
+        assert "no chat backend available" in chat_service.backend_error.lower()
+
+    def test_successful_fallback_clears_backend_error(self, chat_service) -> None:
+        """A successful fallback clears any prior backend error (#6945)."""
+        chat_service._adapter = None
+        chat_service._backend_error = "stale error"
+        with patch(
+            "src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter",
+            return_value=MagicMock(),
+        ):
+            chat_service._fallback_to_ollama()
+        assert chat_service.adapter_available
+        assert chat_service.backend_error is None
+
 
 class TestRefreshModels:
     """Tests for refresh_models (Tools issue #2547 / PR #2566)."""

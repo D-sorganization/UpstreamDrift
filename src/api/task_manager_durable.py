@@ -567,8 +567,8 @@ class DurableTaskManager:
                 count = self.backend.cleanup()
                 if count > 0:
                     logger.info("Cleaned up %d expired tasks", count)
-            except Exception as e:  # noqa: BLE001
-                logger.error("Cleanup error: %s", e)
+            except Exception:  # noqa: BLE001
+                logger.exception("Cleanup error")
 
     def create_task(
         self,

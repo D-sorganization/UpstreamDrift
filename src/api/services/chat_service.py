@@ -56,6 +56,8 @@ class ChatService:
         self._sessions: OrderedDict[str, ConversationContext] = OrderedDict()
         self._timestamps: dict[str, float] = {}
         self._adapter: BaseAgentAdapter | None = None
+        # Human-readable reason when no chat backend could be loaded.
+        self._backend_error: str | None = None
         self._lock = threading.Lock()
 
         from src.shared.python.ai.sample_tools import register_golf_suite_tools
@@ -160,14 +162,35 @@ class ChatService:
             self._fallback_to_ollama()
 
     def _fallback_to_ollama(self) -> None:
-        """Fall back to default Ollama adapter."""
+        """Fall back to default Ollama adapter.
+
+        On failure the service has no usable chat backend; this surfaces a
+        clear ``_backend_error`` state (see :attr:`adapter_available` and
+        :attr:`backend_error`) rather than degrading silently.
+        """
         try:
             from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
             self._adapter = OllamaAdapter()
+            self._backend_error = None
             logger.info("ChatService using default OllamaAdapter")
-        except ImportError as e:
-            logger.error("ChatService: could not create fallback adapter: %s", e)
+        except ImportError:
+            self._adapter = None
+            self._backend_error = (
+                "No chat backend available: failed to import the fallback "
+                "Ollama adapter. Configure an AI provider in Settings > AI."
+            )
+            logger.exception("ChatService: could not create fallback adapter")
+
+    @property
+    def adapter_available(self) -> bool:
+        """Whether a usable chat backend adapter is loaded."""
+        return self._adapter is not None
+
+    @property
+    def backend_error(self) -> str | None:
+        """Reason no chat backend is available, or ``None`` when one is."""
+        return self._backend_error
 
     def _build_app_state_message(self) -> Any | None:
         """Build a system :class:`Message` containing the current app state.
@@ -275,7 +298,13 @@ class ChatService:
         Runs the synchronous adapter in a thread pool executor.
         """
         if not self._adapter:
-            yield "I'm not connected to an AI provider. Please configure one in the launcher Settings > AI."
+            if self._backend_error:
+                yield self._backend_error
+            else:
+                yield (
+                    "I'm not connected to an AI provider. Please configure "
+                    "one in the launcher Settings > AI."
+                )
             return
 
         with self._lock:

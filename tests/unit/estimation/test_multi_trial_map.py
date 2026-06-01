@@ -3,7 +3,14 @@ from __future__ import annotations
 import json
 
 import numpy as np
+import pytest
 
+from src.shared.python.contracts import (
+    ContractLevel,
+    ContractViolationError,
+    get_contract_level,
+    set_contract_level,
+)
 from src.shared.python.estimation import (
     CubicHermiteSplineTrajectory,
     MapEstimatorOptions,
@@ -16,6 +23,26 @@ from src.shared.python.estimation import (
     solve_multi_trial_map,
     stack_shared_parameter_jacobians,
 )
+from src.shared.python.estimation.multi_trial import (
+    _validate_observation,
+    _validate_problem,
+)
+
+
+@pytest.fixture
+def contracts_enforced():
+    """Force DbC enforcement so ``require(...)`` raises (issue #6941).
+
+    ``require`` is a no-op at ``ContractLevel.OFF``; the validation guards in
+    ``multi_trial`` rely on it, so the negative-path tests must run with
+    enforcement on regardless of the ambient ``DBC_LEVEL``.
+    """
+    previous = get_contract_level()
+    set_contract_level(ContractLevel.ENFORCE)
+    try:
+        yield
+    finally:
+        set_contract_level(previous)
 
 
 def test_shared_parameter_block_indexes_locks_and_serializes() -> None:
@@ -189,3 +216,142 @@ def _observation(index: int, scale: float) -> MultiTrialObservation:
         residual=residual,
         jacobian=jacobian,
     )
+
+
+# --------------------------------------------------------------------------
+# Negative-path / guard tests (issue #6941)
+# --------------------------------------------------------------------------
+
+
+def _single_problem() -> MultiTrialMapProblem:
+    return _problem_with_trials(
+        trial_scales=(1.0,), parameter_initial=1.0, locked_mass=False
+    )
+
+
+class TestValidateProblemGuards:
+    """Negative-path coverage for ``_validate_problem`` (issue #6941)."""
+
+    def test_empty_observations_rejected(self, contracts_enforced) -> None:
+        problem = _single_problem()
+        empty = MultiTrialMapProblem(
+            observations=(),
+            shared_parameters=problem.shared_parameters,
+            options=problem.options,
+        )
+        with pytest.raises(ContractViolationError, match="at least one observation"):
+            _validate_problem(empty)
+
+    def test_duplicate_trial_keys_rejected(self, contracts_enforced) -> None:
+        obs = _observation(0, 1.0)
+        problem = _single_problem()
+        dup = MultiTrialMapProblem(
+            observations=(obs, obs),  # identical keys
+            shared_parameters=problem.shared_parameters,
+            options=problem.options,
+        )
+        with pytest.raises(ContractViolationError, match="keys must be unique"):
+            _validate_problem(dup)
+
+    def test_non_positive_max_iterations_rejected(self, contracts_enforced) -> None:
+        problem = _single_problem()
+        bad = MultiTrialMapProblem(
+            observations=problem.observations,
+            shared_parameters=problem.shared_parameters,
+            options=MapEstimatorOptions(max_iterations=0),
+        )
+        with pytest.raises(ContractViolationError, match="max_iterations"):
+            _validate_problem(bad)
+
+    def test_negative_covariance_regularization_rejected(
+        self, contracts_enforced
+    ) -> None:
+        problem = _single_problem()
+        bad = MultiTrialMapProblem(
+            observations=problem.observations,
+            shared_parameters=problem.shared_parameters,
+            options=problem.options,
+            covariance_regularization=-1.0,
+        )
+        with pytest.raises(ContractViolationError, match="covariance_regularization"):
+            _validate_problem(bad)
+
+
+def _observation_with(**overrides) -> MultiTrialObservation:
+    base = _observation(0, 1.0)
+    fields = {
+        "trial_id": base.trial_id,
+        "trajectory": base.trajectory,
+        "evaluation_times": base.evaluation_times,
+        "initial_coefficients": base.initial_coefficients,
+        "residual": base.residual,
+        "jacobian": base.jacobian,
+        "view_id": base.view_id,
+    }
+    fields.update(overrides)
+    return MultiTrialObservation(**fields)
+
+
+class TestValidateObservationGuards:
+    """Negative-path coverage for ``_validate_observation`` (issue #6941)."""
+
+    def test_empty_trial_id_rejected(self, contracts_enforced) -> None:
+        obs = _observation_with(trial_id="   ")
+        with pytest.raises(ContractViolationError, match="trial_id"):
+            _validate_observation(obs)
+
+    def test_non_1d_evaluation_times_rejected(self, contracts_enforced) -> None:
+        obs = _observation_with(evaluation_times=np.zeros((2, 2)))
+        with pytest.raises(ContractViolationError, match="1D array"):
+            _validate_observation(obs)
+
+    def test_non_finite_evaluation_times_rejected(self, contracts_enforced) -> None:
+        times = np.array([0.0, np.inf, 1.0])
+        obs = _observation_with(evaluation_times=times)
+        with pytest.raises(ContractViolationError, match="must be finite"):
+            _validate_observation(obs)
+
+    def test_coefficient_shape_mismatch_rejected(self, contracts_enforced) -> None:
+        obs = _observation_with(initial_coefficients=np.zeros(3))
+        with pytest.raises(ContractViolationError, match="shape must match"):
+            _validate_observation(obs)
+
+    def test_non_finite_coefficients_rejected(self, contracts_enforced) -> None:
+        base = _observation(0, 1.0)
+        bad_coeffs = np.array(base.initial_coefficients, dtype=float)
+        bad_coeffs[0] = np.nan
+        obs = _observation_with(initial_coefficients=bad_coeffs)
+        with pytest.raises(ContractViolationError, match="must be finite"):
+            _validate_observation(obs)
+
+
+class TestPosteriorVarianceAccessor:
+    """``posterior_variance`` must raise ``KeyError`` for unknown names (#6941)."""
+
+    def test_unknown_parameter_raises_key_error(self) -> None:
+        result = _solve_problem(trial_scales=(1.0,))
+        with pytest.raises(KeyError):
+            result.posterior_variance("nonexistent")
+
+
+class TestStackSharedParameterJacobians:
+    """Negative-path coverage for ``stack_shared_parameter_jacobians`` (#6941)."""
+
+    def test_empty_sequence_rejected(self) -> None:
+        with pytest.raises(ValueError, match="at least one Jacobian block"):
+            stack_shared_parameter_jacobians([])
+
+    def test_mismatched_widths_rejected(self) -> None:
+        first = np.array([[1.0, 2.0]])
+        second = np.array([[3.0]])
+        with pytest.raises(ValueError, match="matching widths"):
+            stack_shared_parameter_jacobians([first, second])
+
+    def test_non_2d_block_rejected(self) -> None:
+        with pytest.raises(ValueError, match="2D"):
+            stack_shared_parameter_jacobians([np.array([1.0, 2.0, 3.0])])
+
+    def test_non_finite_block_rejected(self) -> None:
+        block = np.array([[1.0, np.nan]])
+        with pytest.raises(ValueError, match="must be finite"):
+            stack_shared_parameter_jacobians([block])

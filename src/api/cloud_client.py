@@ -70,11 +70,13 @@ class CloudClient:
             return
 
         config_dir = Path.home() / ".golf-suite"
+        # Owner-only directory perms; mode is a no-op on Windows.
         config_dir.mkdir(mode=0o700, exist_ok=True)
         config_dir.chmod(0o700)  # tighten pre-existing dirs (#6971)
 
         token_file = config_dir / "cloud_token"
         token_file.write_text(self.token)
+        # Restrict the bearer token to owner read/write (no-op on Windows).
         token_file.chmod(0o600)
 
     def logout(self) -> None:
