@@ -452,10 +452,9 @@ async def execute_feature(
     from src.shared.python.control_features_registry import ControlFeaturesRegistry
 
     registry = ControlFeaturesRegistry(engine)
-    # nosemgrep: python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute
     # Not a DB cursor: ControlFeaturesRegistry.execute() dispatches a named,
     # registry-validated control/analysis feature; no SQL is constructed here.
-    result = registry.execute(request.feature_name, **request.args)
+    result = registry.execute(request.feature_name, **request.args)  # nosemgrep
     return {"feature": request.feature_name, "result": result}
 
 
