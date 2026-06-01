@@ -86,6 +86,20 @@ def test_resolve_club_target_unwraps_uniformly(
     assert resolved is club
 
 
+def test_resolve_club_target_accepts_public_multi_source_target(
+    club: ClubTarget,
+) -> None:
+    """#6961: resolve_club_target must accept the public MultiSourceTarget from
+    multi_source_target.py (the package-level export used by the data-sources
+    panel), not only the provider-local class."""
+    from src.shared.python.motion_matching.multi_source_target import (
+        MultiSourceTarget as PublicMultiSourceTarget,
+    )
+
+    target = PublicMultiSourceTarget(club=club, body=None)
+    assert resolve_club_target(target) is club
+
+
 def test_resolve_club_target_rejects_empty_multi_source() -> None:
     bad = MultiSourceTarget(body={"present": True})  # club is None
     with pytest.raises(ValueError, match="club"):

@@ -1,5 +1,7 @@
 """Tests for the optional cloud client."""
 
+import os
+import sys
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -49,6 +51,63 @@ def test_logout(temp_cache_dir: Path) -> None:
     assert not client.is_logged_in
     assert client.token is None
     assert not token_file.exists()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permissions only")
+def test_save_token_sets_private_file_permissions(temp_cache_dir: Path) -> None:
+    """#6971: token file and its parent dir must be owner-only (0600 / 0700)."""
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"access_token": "secret-token"}
+
+    import asyncio
+
+    mock_client_instance = AsyncMock()
+    mock_client_instance.post.return_value = mock_response
+    mock_client_class = MagicMock()
+    mock_client_class.return_value.__aenter__.return_value = mock_client_instance
+
+    with patch("src.api.cloud_client.httpx.AsyncClient", mock_client_class):
+        client = CloudClient()
+        asyncio.run(client.login("test@example.com", "password"))
+
+    config_dir = temp_cache_dir / ".golf-suite"
+    token_file = config_dir / "cloud_token"
+
+    assert token_file.exists()
+    dir_mode = oct(os.stat(config_dir).st_mode)[-3:]
+    file_mode = oct(os.stat(token_file).st_mode)[-3:]
+    assert dir_mode == "700", f"config dir mode should be 700, got {dir_mode}"
+    assert file_mode == "600", f"token file mode should be 600, got {file_mode}"
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permissions only")
+def test_save_token_fixes_permissions_on_existing_dir(temp_cache_dir: Path) -> None:
+    """#6971: pre-existing config dir with loose permissions must be tightened."""
+    # Simulate an old install that left the dir world-readable (0755)
+    config_dir = temp_cache_dir / ".golf-suite"
+    config_dir.mkdir(parents=True)
+    config_dir.chmod(0o755)
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"access_token": "secret-token"}
+
+    import asyncio
+
+    mock_client_instance = AsyncMock()
+    mock_client_instance.post.return_value = mock_response
+    mock_client_class = MagicMock()
+    mock_client_class.return_value.__aenter__.return_value = mock_client_instance
+
+    with patch("src.api.cloud_client.httpx.AsyncClient", mock_client_class):
+        client = CloudClient()
+        asyncio.run(client.login("test@example.com", "password"))
+
+    dir_mode = oct(os.stat(config_dir).st_mode)[-3:]
+    assert dir_mode == "700", (
+        f"pre-existing dir should be tightened to 700, got {dir_mode}"
+    )
 
 
 @pytest.mark.asyncio
