@@ -127,7 +127,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
-          python -m pip install --ignore-installed hatchling
+          python -m pip install --ignore-installed hatchling editables
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
@@ -280,7 +280,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
-          python -m pip install --ignore-installed hatchling
+          python -m pip install --ignore-installed hatchling editables
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python -m ensurepip --upgrade || true
           python - <<'PY'
