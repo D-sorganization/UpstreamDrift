@@ -298,7 +298,9 @@ class WaterlooPennerModel(BallFlightModel):
                 raise ValueError("t must be provided")
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
-            speed = math.hypot(v_rel[0], v_rel[1], v_rel[2])  # ⚡ Bolt: math.hypot is faster
+            speed = math.hypot(
+                v_rel[0], v_rel[1], v_rel[2]
+            )  # ⚡ Bolt: math.hypot is faster
             if speed < MIN_SPEED_THRESHOLD:
                 return np.array(
                     [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
@@ -376,7 +378,9 @@ class MacDonaldHanzelyModel(BallFlightModel):
                 raise ValueError("t must be provided")
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
-            speed = math.hypot(v_rel[0], v_rel[1], v_rel[2])  # ⚡ Bolt: math.hypot is faster
+            speed = math.hypot(
+                v_rel[0], v_rel[1], v_rel[2]
+            )  # ⚡ Bolt: math.hypot is faster
             if speed < MIN_SPEED_THRESHOLD:
                 return np.array(
                     [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
@@ -468,7 +472,9 @@ class ConstantCoefficientModel(BallFlightModel):
                 raise ValueError("t must be provided")
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
-            speed = math.hypot(v_rel[0], v_rel[1], v_rel[2])  # ⚡ Bolt: math.hypot is faster
+            speed = math.hypot(
+                v_rel[0], v_rel[1], v_rel[2]
+            )  # ⚡ Bolt: math.hypot is faster
             if speed < MIN_SPEED_THRESHOLD:
                 return np.array(
                     [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
