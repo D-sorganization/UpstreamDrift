@@ -95,3 +95,51 @@ def test_openapi_schema_lists_run_endpoint(client: TestClient) -> None:
     assert r.status_code == 200
     paths = r.json()["paths"]
     assert "/api/v1/motion-pipeline/run" in paths
+
+
+# ---------------------------------------------------------------------------
+# source_format validation + error-code mapping (#6930 / #6932)
+# ---------------------------------------------------------------------------
+
+
+def test_run_pipeline_unknown_source_format_returns_400(client: TestClient) -> None:
+    """An unknown source_format is rejected with 400, not silently auto-detected."""
+    r = client.post(
+        "/api/v1/motion-pipeline/run",
+        files={"file": ("x.dat", b"\x00" * 8, "application/octet-stream")},
+        data={"source_format": "totally_not_a_format"},
+    )
+    assert r.status_code == 400
+    assert "totally_not_a_format" in r.json()["detail"]
+
+
+def test_run_pipeline_auto_source_format_is_accepted_past_validation(
+    client: TestClient,
+) -> None:
+    """``auto`` bypasses the registry check; failure (if any) is not the 400 guard."""
+    r = client.post(
+        "/api/v1/motion-pipeline/run",
+        files={"file": ("x.dat", b"\x00" * 8, "application/octet-stream")},
+        data={"source_format": "auto"},
+    )
+    if r.status_code == 400:
+        assert "Unknown source_format" not in r.json().get("detail", "")
+
+
+def test_run_config_unknown_source_format_returns_400(client: TestClient) -> None:
+    cfg = '{"source_format": "totally_not_a_format"}'
+    r = client.post(
+        "/api/v1/motion-pipeline/run-config",
+        files={"file": ("x.dat", b"\x00" * 8, "application/octet-stream")},
+        data={"config": cfg},
+    )
+    assert r.status_code == 400
+
+
+def test_run_config_malformed_json_returns_422(client: TestClient) -> None:
+    r = client.post(
+        "/api/v1/motion-pipeline/run-config",
+        files={"file": ("x.dat", b"\x00" * 8, "application/octet-stream")},
+        data={"config": "{not valid json"},
+    )
+    assert r.status_code == 422

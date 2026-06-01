@@ -213,6 +213,8 @@ def single_floating_body_h_g(
         representation.
     """
 
+    if not np.isfinite(mass_kg):
+        raise ValueError("mass_kg must be finite")
     if mass_kg <= 0.0:
         raise ValueError("mass_kg must be positive")
     inertia_body = _as_matrix3(inertia_body_kg_m2, "inertia_body_kg_m2")
@@ -286,25 +288,31 @@ def _stack_spatial(angular: ArrayLike, linear: ArrayLike) -> NDArray[np.float64]
     )
 
 
+def _require_finite(array: NDArray[np.float64], name: str) -> NDArray[np.float64]:
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must be finite (no NaN/Inf)")
+    return array
+
+
 def _as_spatial_vector(value: ArrayLike, name: str) -> NDArray[np.float64]:
     array = np.asarray(value, dtype=np.float64)
     if array.shape != (SPATIAL_VECTOR_SIZE,):
         raise ValueError(f"{name} must have shape ({SPATIAL_VECTOR_SIZE},)")
-    return array
+    return _require_finite(array, name)
 
 
 def _as_vector3(value: ArrayLike, name: str) -> NDArray[np.float64]:
     array = np.asarray(value, dtype=np.float64)
     if array.shape != (3,):
         raise ValueError(f"{name} must have shape (3,)")
-    return array
+    return _require_finite(array, name)
 
 
 def _as_matrix3(value: ArrayLike, name: str) -> NDArray[np.float64]:
     array = np.asarray(value, dtype=np.float64)
     if array.shape != (3, 3):
         raise ValueError(f"{name} must have shape (3, 3)")
-    return array
+    return _require_finite(array, name)
 
 
 def _as_rotation(value: ArrayLike) -> NDArray[np.float64]:

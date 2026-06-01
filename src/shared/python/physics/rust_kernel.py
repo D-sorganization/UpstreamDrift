@@ -140,6 +140,12 @@ def create_air_properties(
     """
     if density is None:
         raise ValueError("density must be provided")
+    if density <= 0:
+        raise ValueError("density must be positive")
+    if viscosity <= 0:
+        raise ValueError("viscosity must be positive")
+    if temperature <= 0:
+        raise ValueError("temperature must be positive (Kelvin)")
     if _RUST_AVAILABLE:
         return _rust.AirProperties(
             density=density,
@@ -179,6 +185,10 @@ def create_ball_properties(
     """
     if mass is None:
         raise ValueError("mass must be provided")
+    if mass <= 0:
+        raise ValueError("mass must be positive")
+    if radius <= 0:
+        raise ValueError("radius must be positive")
     import math
 
     if _RUST_AVAILABLE:

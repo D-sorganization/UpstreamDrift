@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from .contracts import MotionMatchingResult
 from .orchestrator import (
@@ -145,6 +145,28 @@ class PipelineResponse(BaseModel):
 # =============================================================================
 
 
+def _validate_source_format(source_format: str) -> None:
+    """Reject a source_format that matches no registered adapter.
+
+    ``auto``/``passthrough`` route to content auto-detection and are always
+    accepted. Any other value must name a registered adapter, otherwise a
+    400 is raised rather than silently auto-detecting (issue #6930).
+    """
+    from .sources.registry import registered_adapters
+
+    if source_format.lower() in ("auto", "passthrough"):
+        return
+    known = {cls.format_name.lower() for cls in registered_adapters()}
+    if source_format.lower() not in known:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Unknown source_format {source_format!r}. "
+                f"Known formats: {sorted(known)}"
+            ),
+        )
+
+
 def create_app() -> FastAPI:
     """
     Create FastAPI application with motion pipeline endpoints.
@@ -211,6 +233,11 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
                 status_code=status.HTTP_400_BAD_REQUEST, detail="No filename provided"
             )
 
+        # Validate source_format against the adapter registry up front so a
+        # typo-d/unknown format is rejected with 400 rather than silently
+        # auto-detected (issue #6930).
+        _validate_source_format(source_format)
+
         # Save uploaded file temporarily
         try:
             with tempfile.NamedTemporaryFile(
@@ -254,12 +281,18 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
 
             return PipelineResponse.from_result(result, audit_log)
 
+        except ValueError as e:
+            # Caller contract violation (InvalidInputError is a ValueError):
+            # map to 400 so clients can distinguish bad input from a bug.
+            logger.info(f"Request {request_id}: invalid input: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            ) from e
         except RuntimeError as e:
-            logger.error(f"Request {request_id}: Pipeline error: {e}")
-            return PipelineResponse.from_error(request_id, str(e))
-        except Exception as e:
-            logger.exception(f"Request {request_id}: Unexpected error: {e}")
-            return PipelineResponse.from_error(request_id, f"Internal error: {e}")
+            logger.exception(f"Request {request_id}: internal pipeline error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
 
     @app.post(
         "/api/v1/motion-pipeline/run-config",
@@ -290,10 +323,18 @@ Accepts JSON config body plus file upload.
         request_id = f"req-{uuid.uuid4().hex[:12]}"
         logger.info(f"Received pipeline request {request_id} with config")
 
+        # Parse config from JSON string (malformed config -> 422).
         try:
-            # Parse config from JSON string
             parsed_config = PipelineRequest.model_validate_json(config)
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            ) from e
 
+        # Reject an unknown source_format up front (issue #6930).
+        _validate_source_format(parsed_config.source_format)
+
+        try:
             # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -314,10 +355,16 @@ Accepts JSON config body plus file upload.
 
             return PipelineResponse.from_result(result, audit_log)
 
+        except ValueError as e:
+            logger.info(f"Request {request_id}: invalid input: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            ) from e
         except RuntimeError as e:
-            return PipelineResponse.from_error(request_id, str(e))
-        except Exception as e:  # noqa: BLE001
-            return PipelineResponse.from_error(request_id, f"Internal error: {e}")
+            logger.exception(f"Request {request_id}: internal pipeline error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
 
     return app
 
@@ -331,4 +378,7 @@ if __name__ == "__main__":
     import uvicorn
 
     app = create_app()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # nosec B104 - dev-only convenience entrypoint (``python -m ...api``);
+    # binding all interfaces is intentional for local container/dev use and
+    # this block never runs under the production ASGI server.
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104
