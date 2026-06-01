@@ -92,6 +92,13 @@ class CameraExtrinsics(BaseModel):
     def check_rotation_shape(cls, v: list[list[float]]) -> list[list[float]]:
         if len(v) != 3 or any(len(row) != 3 for row in v):
             raise ValueError("Rotation must be 3x3 matrix")
+        matrix = np.asarray(v, dtype=np.float64)
+        if not np.all(np.isfinite(matrix)):
+            raise ValueError("Rotation must be finite (no NaN/Inf)")
+        if not np.allclose(matrix.T @ matrix, np.eye(3), atol=1e-6):
+            raise ValueError("Rotation must be orthonormal (R.T @ R == I)")
+        if not np.isclose(np.linalg.det(matrix), 1.0, atol=1e-6):
+            raise ValueError("Rotation must be a proper rotation (det == +1)")
         return v
 
     @field_validator("translation")

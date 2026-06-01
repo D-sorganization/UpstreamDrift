@@ -87,9 +87,51 @@ def test_motion_pipeline_default_skeleton_raises() -> None:
 
 
 def test_motion_pipeline_run_missing_source_path_raises() -> None:
-    """Running on a non-existent file path bubbles up a RuntimeError."""
+    """A non-existent file path is a caller contract violation (#6932).
+
+    Missing input is now classified as invalid input (InvalidInputError,
+    a ValueError) rather than an internal RuntimeError, so the API maps it
+    to 400.
+    """
     from pathlib import Path
 
+    from src.shared.python.motion_pipeline.orchestrator import InvalidInputError
+
     p = MotionPipeline(make_minimal_config())
-    with pytest.raises((RuntimeError, OSError, FileNotFoundError)):
+    with pytest.raises((InvalidInputError, OSError, FileNotFoundError)):
         p.run(Path("/does/not/exist.c3d"))
+
+
+# ---------------------------------------------------------------------------
+# Error classification: invalid-input vs internal (#6932)
+# ---------------------------------------------------------------------------
+
+
+def test_unknown_source_type_is_invalid_input() -> None:
+    from src.shared.python.motion_pipeline.orchestrator import InvalidInputError
+
+    p = MotionPipeline(make_minimal_config())
+    with pytest.raises(InvalidInputError):
+        p.run(object())  # type: ignore[arg-type]
+
+
+def test_invalid_input_error_is_value_error() -> None:
+    from src.shared.python.motion_pipeline.orchestrator import InvalidInputError
+
+    assert issubclass(InvalidInputError, ValueError)
+
+
+def test_raise_stage_failure_maps_kind() -> None:
+    from src.shared.python.motion_pipeline.orchestrator import InvalidInputError
+
+    p = MotionPipeline(make_minimal_config())
+    bad_input = StageResult(
+        success=False, data=None, metadata={}, error="x", error_kind="invalid_input"
+    )
+    internal = StageResult(
+        success=False, data=None, metadata={}, error="y", error_kind="internal"
+    )
+    with pytest.raises(InvalidInputError):
+        p._raise_stage_failure("Stage", bad_input)
+    with pytest.raises(RuntimeError):
+        p._raise_stage_failure("Stage", internal)

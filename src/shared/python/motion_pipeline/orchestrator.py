@@ -78,14 +78,29 @@ class HookPayload(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class InvalidInputError(ValueError):
+    """Raised when a contract precondition on caller-supplied input fails.
+
+    Distinguishes client-side contract violations (bad source format,
+    unknown backend, unsupported source type) from internal pipeline
+    faults so the API layer can map them to 4xx vs 5xx (issue #6932).
+    """
+
+
 @dataclass
 class StageResult:
-    """Result of a pipeline stage."""
+    """Result of a pipeline stage.
+
+    ``error_kind`` classifies a failure as ``"invalid_input"`` (a caller
+    contract violation -> HTTP 4xx) or ``"internal"`` (a server-side fault
+    -> HTTP 5xx); see issue #6932.
+    """
 
     success: bool
     data: Any
     metadata: dict[str, Any]
     error: str | None = None
+    error_kind: str = "internal"
 
 
 # =============================================================================
@@ -250,41 +265,51 @@ class MotionPipeline:
 
         Adapters convert raw formats (C3D, TRC, BVH, JSON) to CIR.
         """
+        from .sources.base import UnsupportedFormatError
         from .sources.loader import load_source
 
-        try:
-            if isinstance(source, (KeypointSequence, MarkerTrajectory)):
-                # Already in canonical format
-                return StageResult(
-                    success=True,
-                    data=source,
-                    metadata={
-                        "source_type": type(source).__name__,
-                        "adapter": "passthrough",
-                    },
-                )
+        if isinstance(source, (KeypointSequence, MarkerTrajectory)):
+            # Already in canonical format
+            return StageResult(
+                success=True,
+                data=source,
+                metadata={
+                    "source_type": type(source).__name__,
+                    "adapter": "passthrough",
+                },
+            )
 
-            if isinstance(source, Path):
-                # Load from file
-                data = load_source(source, format_hint=self.config.adapter.format)
-                self._source_hash = self._compute_hash(source.read_bytes())
-                return StageResult(
-                    success=True,
-                    data=data,
-                    metadata={
-                        "source_type": type(data).__name__,
-                        "adapter": self.config.adapter.format,
-                        "source_path": str(source),
-                    },
-                )
-
+        if not isinstance(source, Path):
             return StageResult(
                 success=False,
                 data=None,
                 metadata={},
                 error=f"Unknown source type: {type(source)}",
+                error_kind="invalid_input",
             )
 
+        try:
+            data = load_source(source, format_hint=self.config.adapter.format)
+            self._source_hash = self._compute_hash(source.read_bytes())
+            return StageResult(
+                success=True,
+                data=data,
+                metadata={
+                    "source_type": type(data).__name__,
+                    "adapter": self.config.adapter.format,
+                    "source_path": str(source),
+                },
+            )
+        except (ValueError, FileNotFoundError, UnsupportedFormatError) as e:
+            # Caller-supplied contract violations: bad format hint,
+            # missing/undetectable source file (issue #6932).
+            return StageResult(
+                success=False,
+                data=None,
+                metadata={},
+                error=f"Adapter failed: {e}",
+                error_kind="invalid_input",
+            )
         except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False, data=None, metadata={}, error=f"Adapter failed: {e}"
@@ -360,6 +385,7 @@ class MotionPipeline:
                 data=None,
                 metadata={},
                 error=f"Unknown IK backend: {backend}",
+                error_kind="invalid_input",
             )
 
         try:
@@ -419,6 +445,7 @@ class MotionPipeline:
                     data=None,
                     metadata={},
                     error=f"Unknown matching backend: {backend}",
+                    error_kind="invalid_input",
                 )
 
             # Build request
@@ -488,7 +515,7 @@ class MotionPipeline:
         # Stage 1: Adapter
         adapter_result = self._run_adapter(source)
         if not adapter_result.success:
-            raise RuntimeError(f"Adapter stage failed: {adapter_result.error}")
+            self._raise_stage_failure("Adapter stage", adapter_result)
 
         self._fire_hooks(Stage.ADAPTER, adapter_result.data, adapter_result.metadata)
         self._log_audit(Stage.ADAPTER, adapter_result, self._source_hash or "")
@@ -498,7 +525,7 @@ class MotionPipeline:
         # Stage 2: Preprocessing
         preprocess_result = self._run_preprocessing(data)
         if not preprocess_result.success:
-            raise RuntimeError(f"Preprocessing failed: {preprocess_result.error}")
+            self._raise_stage_failure("Preprocessing", preprocess_result)
 
         self._fire_hooks(
             Stage.PREPROCESSING, preprocess_result.data, preprocess_result.metadata
@@ -513,7 +540,7 @@ class MotionPipeline:
 
         scaling_result = self._run_scaling(data, skeleton)
         if not scaling_result.success:
-            raise RuntimeError(f"Scaling failed: {scaling_result.error}")
+            self._raise_stage_failure("Scaling", scaling_result)
 
         self._fire_hooks(Stage.SCALING, scaling_result.data, scaling_result.metadata)
         self._log_audit(Stage.SCALING, scaling_result, self._source_hash or "")
@@ -523,7 +550,7 @@ class MotionPipeline:
         # Stage 4: Inverse Kinematics
         ik_result = self._run_inverse_kinematics(data, scaled_skeleton)
         if not ik_result.success:
-            raise RuntimeError(f"IK failed: {ik_result.error}")
+            self._raise_stage_failure("IK", ik_result)
 
         self._fire_hooks(Stage.INVERSE_KINEMATICS, ik_result.data, ik_result.metadata)
         self._log_audit(Stage.INVERSE_KINEMATICS, ik_result, self._source_hash or "")
@@ -543,7 +570,7 @@ class MotionPipeline:
         # Stage 5: Motion Matching
         matching_result = self._run_motion_matching(trajectory, scaled_skeleton)
         if not matching_result.success:
-            raise RuntimeError(f"Motion matching failed: {matching_result.error}")
+            self._raise_stage_failure("Motion matching", matching_result)
 
         self._fire_hooks(
             Stage.MOTION_MATCHING, matching_result.data, matching_result.metadata
@@ -560,6 +587,18 @@ class MotionPipeline:
         logger.info(f"Pipeline run completed: success={result.success}")
 
         return result
+
+    @staticmethod
+    def _raise_stage_failure(stage_label: str, result: StageResult) -> None:
+        """Raise the failure for a stage, preserving its 4xx/5xx kind.
+
+        ``InvalidInputError`` for caller contract violations, ``RuntimeError``
+        for internal faults (issue #6932). Always raises.
+        """
+        message = f"{stage_label} failed: {result.error}"
+        if result.error_kind == "invalid_input":
+            raise InvalidInputError(message)
+        raise RuntimeError(message)
 
     def _get_default_skeleton(self) -> SkeletonRig:
         """Get default skeleton for pipeline."""
