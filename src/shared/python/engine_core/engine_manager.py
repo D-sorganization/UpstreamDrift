@@ -27,6 +27,7 @@ from .engine_registry import (
     get_registry,
 )
 from .interfaces import PhysicsEngine
+from .jaxsim_probe import JaxSimProbe
 
 # Configure structured logging
 setup_structured_logging()
@@ -126,7 +127,6 @@ class EngineManager(ContractChecker):
         # Initialize probes
         from .engine_probes import (
             DrakeProbe,
-            JaxSimProbe,
             MatlabProbe,
             MuJoCoProbe,
             MyoSimProbe,
