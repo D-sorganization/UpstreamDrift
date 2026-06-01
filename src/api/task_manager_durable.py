@@ -552,16 +552,26 @@ class DurableTaskManager:
         self.heartbeat_timeout = heartbeat_timeout
         self._closed = False
         self._cleanup_task: asyncio.Task[None] | None = None
+        self._cleanup_thread: threading.Thread | None = None
+        self._cleanup_stop = threading.Event()
+        self._cleanup_interval = cleanup_interval
 
         if auto_cleanup:
-            self._cleanup_interval = cleanup_interval
-            # Start background cleanup in asyncio context
             try:
                 loop = asyncio.get_running_loop()
                 self._cleanup_task = loop.create_task(self._cleanup_loop())
             except RuntimeError:
-                # No running loop, cleanup will be manual
-                pass
+                logger.warning(
+                    "DurableTaskManager: no running event loop at construction time; "
+                    "auto-cleanup falling back to a daemon thread. "
+                    "Call shutdown() to stop it cleanly."
+                )
+                self._cleanup_thread = threading.Thread(
+                    target=self._cleanup_loop_sync,
+                    daemon=True,
+                    name="durable-task-cleanup",
+                )
+                self._cleanup_thread.start()
 
     async def _cleanup_loop(self) -> None:
         """Background task to periodically clean up expired tasks."""
@@ -573,6 +583,18 @@ class DurableTaskManager:
                     logger.info("Cleaned up %d expired tasks", count)
             except Exception:  # noqa: BLE001
                 logger.exception("Cleanup error")
+
+    def _cleanup_loop_sync(self) -> None:
+        """Daemon-thread fallback for periodic cleanup when no event loop is present."""
+        while not self._cleanup_stop.wait(timeout=self._cleanup_interval):
+            if self._closed:
+                return
+            try:
+                count = self.backend.cleanup()
+                if count > 0:
+                    logger.info("Cleaned up %d expired tasks", count)
+            except Exception as e:  # noqa: BLE001
+                logger.error("Cleanup error: %s", e)
 
     def create_task(
         self,
@@ -792,4 +814,7 @@ class DurableTaskManager:
             self._cleanup_task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._cleanup_task
+        if self._cleanup_thread is not None:
+            self._cleanup_stop.set()
+            self._cleanup_thread.join(timeout=5.0)
         logger.info("DurableTaskManager shutdown complete")

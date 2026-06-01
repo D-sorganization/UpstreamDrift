@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 
 import numpy as np
@@ -234,6 +235,160 @@ class TestRealTimeController:
         q_pos, qd_pos = controller._sim_state  # type: ignore
         assert q_pos[0] == 10.0
         assert qd_pos[0] == 0.0
+
+    def test_wait_for_state_wakes_within_one_cycle(self) -> None:
+        """#6975: wait_for_state must return within one cycle, not block to full timeout."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        try:
+            t0 = time.perf_counter()
+            state = controller.wait_for_state(timeout=1.0)
+            elapsed = time.perf_counter() - t0
+            assert state is not None, "wait_for_state returned None (timed out)"
+            # At 100 Hz a cycle is 10 ms; allow 10× margin → 100 ms
+            assert elapsed < 0.1, (
+                f"wait_for_state blocked {elapsed:.3f}s, expected <0.1s"
+            )
+        finally:
+            controller.stop()
+            controller.disconnect()
+
+    def test_get_timing_stats_thread_safe(self) -> None:
+        """#6976: get_timing_stats must not raise when called concurrently."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        errors: list[Exception] = []
+
+        def reader() -> None:
+            for _ in range(50):
+                try:
+                    controller.get_timing_stats()
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(exc)
+
+        threads = [threading.Thread(target=reader) for _ in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        controller.stop()
+        controller.disconnect()
+
+        assert not errors, f"Thread-safety errors in get_timing_stats: {errors}"
+
+    def test_cycle_times_bounded(self) -> None:
+        """#6976: cycle_times must not grow without bound."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=500.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=1)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(1),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+        time.sleep(0.05)
+        controller.stop()
+
+        stats = controller.get_timing_stats()
+        assert stats.total_cycles <= 10000
+        controller.disconnect()
+
+    def test_connect_while_running_raises(self) -> None:
+        """#6977: connect() must raise RuntimeError while control loop is active."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        try:
+            with pytest.raises(RuntimeError, match="running"):
+                controller.connect(config)
+        finally:
+            controller.stop()
+            controller.disconnect()
 
 
 class TestControlLoopFailureEscalation:
