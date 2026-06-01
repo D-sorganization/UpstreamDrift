@@ -17,11 +17,19 @@ import json
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from pydantic import BaseModel, Field
 
 from src.api.auth.ws_auth import resolve_ws_user
 from src.api.rate_limit import get_limit, limiter
+from src.api.route_registry import ws_compatible_auth_dependency
 from src.shared.python.realtime.protocol import validate_channel
 
 logger = logging.getLogger(__name__)
@@ -96,7 +104,10 @@ class _SubscriberRegistry:
 _registry = _SubscriberRegistry()
 
 
-@router.post("/realtime/publish")
+@router.post(
+    "/realtime/publish",
+    dependencies=[Depends(ws_compatible_auth_dependency)],
+)
 @limiter.limit(get_limit("API_LIMIT_REALTIME_PUBLISH", "6000/minute"))
 async def publish(request: Request, req: PublishRequest) -> dict[str, Any]:
     """Broadcast ``req.payload`` to all subscribers of ``req.channel``.

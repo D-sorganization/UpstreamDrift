@@ -282,6 +282,55 @@ def test_reprojection_residual_threads_distortion() -> None:
     np.testing.assert_allclose(residual, np.zeros(2), atol=1e-9)
 
 
+def test_project_pinhole_accepts_five_term_distortion() -> None:
+    """The canonical 5-term ``(k1, k2, p1, p2, k3)`` distortion is accepted
+    and ``k3`` extends the radial polynomial to ``r**6`` (issue #6907)."""
+    points = np.array([[0.3, -0.2, 0.05]])
+    camera = np.eye(3)
+
+    # With k3 == 0 the 5-term result must equal the 4-term result exactly.
+    four_term = project_pinhole(points, camera, distortion=(-0.15, 0.05, 0.0, 0.0))
+    five_term_k3_zero = project_pinhole(
+        points, camera, distortion=(-0.15, 0.05, 0.0, 0.0, 0.0)
+    )
+    np.testing.assert_allclose(four_term, five_term_k3_zero)
+
+    # A nonzero k3 must change the projection (the radial term now includes
+    # the r**6 contribution).
+    five_term_k3 = project_pinhole(
+        points, camera, distortion=(-0.15, 0.05, 0.0, 0.0, 0.25)
+    )
+    assert not np.allclose(four_term, five_term_k3)
+
+
+def test_distortion_invalid_length_rejected() -> None:
+    """Distortion vectors that are neither 4- nor 5-term are rejected."""
+    points = np.array([[0.3, -0.2, 0.05]])
+    camera = np.eye(3)
+    with pytest.raises(ValueError, match=r"shape \(4,\) or \(5,\)"):
+        project_pinhole(points, camera, distortion=(0.1, 0.2, 0.3))
+
+
+def test_reprojection_residual_threads_five_term_distortion() -> None:
+    """A fit with a 5-term distortion (including k3) recovers truth when the
+    residual threads the same coefficients (issue #6907)."""
+    points = np.array([[0.2, -0.1, 0.05]])
+    camera_matrix = np.array(
+        [[500.0, 0.0, 320.0], [0.0, 500.0, 240.0], [0.0, 0.0, 1.0]]
+    )
+    distortion = (-0.15, 0.05, 0.0, 0.0, 0.2)
+    observed = project_pinhole(points, camera_matrix, distortion=distortion)
+
+    residual = reprojection_residual_from_points(
+        points,
+        observed,
+        camera_matrix,
+        np.array([1.0]),
+        distortion=distortion,
+    )
+    np.testing.assert_allclose(residual, np.zeros(2), atol=1e-9)
+
+
 def test_invalid_confidence_rejected() -> None:
     with pytest.raises(ValueError, match="confidence values"):
         reprojection_residual(

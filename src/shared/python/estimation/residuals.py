@@ -109,16 +109,25 @@ def _apply_brown_conrady(
 ) -> tuple[Array, Array]:
     """Apply the Brown-Conrady radial/tangential distortion model.
 
-    ``distortion`` is ordered ``(k1, k2, p1, p2)`` and operates on normalized
-    image coordinates (camera-frame coordinates divided by depth), matching the
-    synthetic rig in ``synthetic_ground_truth.project_world_point``.
+    ``distortion`` is ordered ``(k1, k2, p1, p2)`` or the canonical 5-term
+    ``(k1, k2, p1, p2, k3)`` and operates on normalized image coordinates
+    (camera-frame coordinates divided by depth), matching the synthetic rig in
+    ``synthetic_ground_truth.project_world_point``. The optional third radial
+    term ``k3`` extends the radial polynomial to ``r**6`` (#6907).
     """
 
-    _validate_numeric_array(distortion, "distortion", shape=(4,))
+    if _is_jax_value(distortion):
+        arr_shape = getattr(distortion, "shape", None)
+    else:
+        arr_shape = np.asarray(distortion).shape
+    if arr_shape is None or len(arr_shape) != 1 or arr_shape[0] not in (4, 5):
+        raise ValueError(f"distortion must have shape (4,) or (5,), got {arr_shape}")
+    _validate_numeric_array(distortion, "distortion", ndim=1)
     coeffs = _as_array(distortion, xp)
     k1, k2, p1, p2 = coeffs[0], coeffs[1], coeffs[2], coeffs[3]
+    k3 = coeffs[4] if arr_shape[0] == 5 else 0.0
     radius_2 = x_norm * x_norm + y_norm * y_norm
-    radial = 1.0 + k1 * radius_2 + k2 * radius_2 * radius_2
+    radial = 1.0 + k1 * radius_2 + k2 * radius_2**2 + k3 * radius_2**3
     x_dist = x_norm * radial + 2.0 * p1 * x_norm * y_norm
     x_dist = x_dist + p2 * (radius_2 + 2.0 * x_norm * x_norm)
     y_dist = y_norm * radial + p1 * (radius_2 + 2.0 * y_norm * y_norm)

@@ -517,6 +517,58 @@ class TestModelPackV1RuntimeAdapter:
         assert manifest.provider == engine
         assert all(m.engine_type == engine for m in manifest.models)
 
+    def test_models_root_is_prepended_to_relative_exercise_paths(
+        self, tmp_path: Path
+    ) -> None:
+        """`models_root` must be prepended to exercise paths so later
+        `source_root=provider_root` resolution finds
+        `provider_root/<models_root>/<path>` (issue #6886)."""
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Mujoco_Models",
+                "package": "mujoco_models",
+                "engine": "mujoco",
+                "format": "urdf",
+                "models_root": "models",
+                "exercises": [
+                    {"id": "squat", "path": "squat/squat.urdf"},
+                    {"id": "gait", "path": "gait/gait.urdf"},
+                ],
+            },
+        )
+
+        manifest = ModelPackManifest.load(manifest_path)
+
+        paths = {m.id: m.path for m in manifest.models}
+        assert paths["mujoco_models-squat"] == "models/squat/squat.urdf"
+        assert paths["mujoco_models-gait"] == "models/gait/gait.urdf"
+
+    def test_models_root_not_double_prefixed(self, tmp_path: Path) -> None:
+        """Exercise paths already rooted under `models_root` are left as-is."""
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Mujoco_Models",
+                "package": "mujoco_models",
+                "engine": "mujoco",
+                "format": "urdf",
+                "models_root": "models",
+                "exercises": [
+                    {"id": "squat", "path": "models/squat/squat.urdf"},
+                ],
+            },
+        )
+
+        manifest = ModelPackManifest.load(manifest_path)
+
+        squat = next(m for m in manifest.models if m.id.endswith("squat"))
+        assert squat.path == "models/squat/squat.urdf"
+
     def test_load_rejects_malformed_v1_with_version_aware_error(
         self, tmp_path: Path
     ) -> None:
