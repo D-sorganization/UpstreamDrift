@@ -41,7 +41,7 @@ from __future__ import annotations
 # register_namespace); defusedxml parses untrusted input and refuses XXE /
 # entity expansion (issue #6927). defusedxml does not expose the builder API,
 # so building and parsing use separate imports.
-import xml.etree.ElementTree as ET  # noqa: S405  # build-only; parse via DefusedET
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from pathlib import Path
 
 import defusedxml.ElementTree as DefusedET

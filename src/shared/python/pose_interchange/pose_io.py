@@ -146,6 +146,7 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
         },
     }
     with path.open("wb") as fh:
+        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
         pickle.dump(payload, fh)
 
 
@@ -170,6 +171,7 @@ def _load_drake(path: Path) -> CanonicalPose:
     with path.open("rb") as fh:
         # noqa: S301 — trusted, locally-produced file only; see trust-boundary
         # note above. Not reachable from any API/network input.
+        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
         payload = pickle.load(fh)  # noqa: S301
     if not isinstance(payload, dict) or "q" not in payload:
         raise ValueError(f"{path}: drake pickle missing required 'q' field")

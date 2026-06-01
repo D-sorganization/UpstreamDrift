@@ -26,7 +26,7 @@ import json
 # defusedxml parses untrusted input and refuses XXE / entity expansion
 # (issue #6927). defusedxml does not expose Element/SubElement, so building
 # and parsing use separate imports.
-import xml.etree.ElementTree as ET  # noqa: S405  # build-only; parse via DefusedET
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from pathlib import Path
 from typing import Any
 

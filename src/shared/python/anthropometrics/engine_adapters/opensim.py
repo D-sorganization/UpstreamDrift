@@ -26,7 +26,7 @@ from __future__ import annotations
 # *parsing* goes through defusedxml, which refuses XXE / entity expansion
 # (issue #6927). defusedxml deliberately does not expose Element/SubElement,
 # so the two roles must use separate imports.
-import xml.etree.ElementTree as ET  # noqa: S405  # build-only; parse via DefusedET
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 from pathlib import Path
 
 import defusedxml.ElementTree as DefusedET
