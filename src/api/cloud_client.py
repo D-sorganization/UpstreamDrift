@@ -70,10 +70,12 @@ class CloudClient:
             return
 
         config_dir = Path.home() / ".golf-suite"
-        config_dir.mkdir(exist_ok=True)
+        config_dir.mkdir(mode=0o700, exist_ok=True)
+        config_dir.chmod(0o700)  # tighten pre-existing dirs (#6971)
 
         token_file = config_dir / "cloud_token"
         token_file.write_text(self.token)
+        token_file.chmod(0o600)
 
     def logout(self) -> None:
         """Logout and clear local token."""
