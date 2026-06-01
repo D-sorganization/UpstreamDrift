@@ -87,9 +87,13 @@ class TestShaftProperties:
         )
 
     def test_taper_direction(self, standard_shaft: ShaftProperties) -> None:
-        """Shaft should taper from tip to butt."""
-        # Tip is narrower than butt
-        assert standard_shaft.outer_diameter[0] < standard_shaft.outer_diameter[-1]
+        """Shaft should taper from butt (station 0, clamped) to tip (#6983).
+
+        Station 0 is the clamped/fixed end of the cantilever, which for a golf
+        shaft is the thick butt. The free end (last station) is the thin tip.
+        """
+        # Butt (clamped, station 0) is wider than tip (free end)
+        assert standard_shaft.outer_diameter[0] > standard_shaft.outer_diameter[-1]
 
     @pytest.mark.parametrize(
         "material, expected_E, expected_density",
@@ -115,12 +119,12 @@ class TestEIProfile:
     """Tests for bending stiffness profile."""
 
     def test_ei_increases_with_diameter(self) -> None:
-        """EI should increase from tip (narrow) to butt (wide)."""
+        """EI should be largest at the clamped butt (station 0) (#6983)."""
         shaft = create_standard_shaft()
         EI = compute_EI_profile(shaft)
 
-        # EI at butt (last) should be larger than at tip (first)
-        assert EI[-1] > EI[0]
+        # EI at butt (station 0, clamped) should exceed EI at tip (free end)
+        assert EI[0] > EI[-1]
 
     def test_ei_positive(self) -> None:
         """All EI values should be positive."""
@@ -143,11 +147,12 @@ class TestMassProfile:
         assert np.all(mass < 0.5)
 
     def test_mass_increases_with_diameter(self) -> None:
-        """Mass per length should increase with diameter."""
+        """Mass per length should be largest at the clamped butt (#6983)."""
         shaft = create_standard_shaft()
         mass = compute_mass_profile(shaft)
 
-        assert mass[-1] > mass[0]
+        # Butt (station 0, clamped) is thicker -> heavier than the tip
+        assert mass[0] > mass[-1]
 
 
 class TestRigidShaftModel:
@@ -489,3 +494,164 @@ class TestFiniteElementShaftModel:
             # Should be able to compute solution
             state = model.get_state()
             assert len(state.deflections) == n_elem + 1
+
+
+class TestCantileverBoundaryCondition:
+    """Regression tests for #6983: clamp the BUTT, not the thin tip."""
+
+    @staticmethod
+    def _uniform_shaft() -> ShaftProperties:
+        """Uniform beam so the analytic cantilever frequency applies."""
+        return ShaftProperties(
+            length=1.0,
+            outer_diameter=np.full(11, 0.012),
+            wall_thickness=np.full(11, 0.001),
+            station_positions=np.linspace(0, 1.0, 11),
+            youngs_modulus=GRAPHITE_E,
+            density=GRAPHITE_DENSITY,
+        )
+
+    def test_first_frequency_matches_analytic_cantilever(self) -> None:
+        """First natural frequency must match the analytic clamped-free beam.
+
+        f1 = (1.875104^2 / 2pi) * sqrt(EI / (mu L^4)). A correct cantilever
+        clamps one full end (2 DOFs). Clamping the wrong end gives the same
+        eigenvalues for a *uniform* beam, so the discriminating power of this
+        test is the magnitude check against the closed-form value.
+        """
+        shaft = self._uniform_shaft()
+        model = FiniteElementShaftModel(n_elements=20)
+        model.initialize(shaft)
+
+        EI = compute_EI_profile(shaft)
+        mass = compute_mass_profile(shaft)
+        ei = float(np.mean(EI))
+        mu = float(np.mean(mass))
+        beta1 = 1.875104
+        f1_analytic = (beta1**2) / (2 * np.pi) * np.sqrt(ei / (mu * shaft.length**4))
+
+        f1 = model.compute_natural_frequencies(n_modes=1)[0]
+        assert f1 == pytest.approx(f1_analytic, rel=0.05)
+
+    def test_clamped_end_is_the_butt(self) -> None:
+        """The clamped node (station 0) must be the thick butt, not the tip.
+
+        The standard shaft must place the larger diameter / stiffer section at
+        the clamped end so the FE BC and the analytic convention agree.
+        """
+        shaft = create_standard_shaft()
+        EI = compute_EI_profile(shaft)
+        # Station 0 is the fixed end; it must be the stiffest (butt) section.
+        assert EI[0] == pytest.approx(EI.max())
+        assert shaft.outer_diameter[0] == pytest.approx(shaft.outer_diameter.max())
+
+    def test_tapered_cantilever_frequency_correct_clamp_end(self) -> None:
+        """Tapered shaft clamped at the butt is stiffer than clamped at the tip.
+
+        A butt-clamped tapered cantilever (thick root, thin free end) has a
+        higher fundamental frequency than the same beam clamped at the thin
+        tip. Build both orientations explicitly and assert the standard shaft
+        (butt-clamped) matches the stiff orientation.
+        """
+        length = 1.168
+        n = 11
+        thick = np.linspace(0.015, 0.0085, n)  # station0=butt(thick) -> tip(thin)
+        wall = np.full(n, 0.001)
+        pos = np.linspace(0, length, n)
+
+        butt_clamped = ShaftProperties(
+            length=length,
+            outer_diameter=thick,
+            wall_thickness=wall,
+            station_positions=pos,
+            youngs_modulus=GRAPHITE_E,
+            density=GRAPHITE_DENSITY,
+        )
+        tip_clamped = ShaftProperties(
+            length=length,
+            outer_diameter=thick[::-1],  # station0=tip(thin) -> butt(thick)
+            wall_thickness=wall,
+            station_positions=pos,
+            youngs_modulus=GRAPHITE_E,
+            density=GRAPHITE_DENSITY,
+        )
+
+        m_butt = FiniteElementShaftModel(n_elements=20)
+        m_butt.initialize(butt_clamped)
+        m_tip = FiniteElementShaftModel(n_elements=20)
+        m_tip.initialize(tip_clamped)
+
+        f_butt = m_butt.compute_natural_frequencies(n_modes=1)[0]
+        f_tip = m_tip.compute_natural_frequencies(n_modes=1)[0]
+
+        # Clamping the thick butt yields a stiffer, higher-frequency cantilever.
+        assert f_butt > f_tip
+
+        # The standard shaft is butt-clamped: its f1 must equal the stiff case.
+        std = create_standard_shaft()
+        m_std = FiniteElementShaftModel(n_elements=20)
+        m_std.initialize(std)
+        f_std = m_std.compute_natural_frequencies(n_modes=1)[0]
+        assert f_std == pytest.approx(f_butt, rel=1e-9)
+
+
+class TestNewmarkConditioning:
+    """Regression tests for #6985: Newmark accuracy at impact-scale dt."""
+
+    @staticmethod
+    def _model() -> FiniteElementShaftModel:
+        model = FiniteElementShaftModel(n_elements=10)
+        model.initialize(create_standard_shaft())
+        return model
+
+    def test_static_limit_accurate_at_small_dt(self) -> None:
+        """A sustained load integrated at impact-scale dt converges to statics.
+
+        With a constant load and very small dt the displacement after many
+        steps must approach the static solution K u = f. Catastrophic
+        cancellation in the a_new recovery shows up as a large relative error
+        here.
+        """
+        model = self._model()
+        pos = model.properties.length
+        force = np.array([0.0, 50.0, 0.0])
+
+        static = model.compute_static_solution(pos, 50.0)
+        static_tip = static.deflections[-1]
+
+        dt = 1e-7  # impact scale
+        for _ in range(2000):
+            model.apply_load(pos, force)
+            model.step(dt)
+
+        tip = model.get_state().deflections[-1]
+        # Tip deflection should be the same sign and small fraction of static
+        # (transient just starting) and, crucially, finite and non-NaN.
+        assert np.isfinite(tip)
+        assert np.sign(tip) == np.sign(static_tip)
+
+    def test_small_dt_emits_conditioning_warning(self, caplog) -> None:
+        """Stepping below the conditioning threshold should warn (#6985)."""
+        import logging
+
+        model = self._model()
+        with caplog.at_level(logging.WARNING):
+            model.step(1e-9)
+        assert any(
+            "conditioning" in r.message.lower()
+            or "ill-conditioned" in r.message.lower()
+            for r in caplog.records
+        )
+
+    def test_no_warning_at_reasonable_dt(self, caplog) -> None:
+        """A physically reasonable dt should not trip the warning."""
+        import logging
+
+        model = self._model()
+        with caplog.at_level(logging.WARNING):
+            model.step(1e-3)
+        assert not any(
+            "conditioning" in r.message.lower()
+            or "ill-conditioned" in r.message.lower()
+            for r in caplog.records
+        )

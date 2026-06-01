@@ -298,6 +298,63 @@ class FiniteElementShaftModel(ShaftModel):
         if moment is not None and free_dof_idx + 1 < self.n_free_dof:
             self.f_ext[free_dof_idx + 1] = moment[2] if len(moment) > 2 else moment[0]
 
+    def _warn_if_ill_conditioned(self, dt: float) -> None:
+        """Warn when dt is small enough to ill-condition the Newmark system.
+
+        The effective stiffness K_eff = K + (γ/βdt)C + (1/βdt²)M is dominated
+        by the inertial term once dt falls below the natural time scale
+        sqrt(min(diagM)/max(diagK)). Below that scale the solve loses
+        precision (issue #6985). The factor `c` gives a safety margin.
+
+        Args:
+            dt: Proposed time step [s]
+        """
+        if self.M.size == 0 or self.K.size == 0:
+            return
+        diag_m = np.diag(self.M)
+        diag_k = np.diag(self.K)
+        min_m = float(np.min(diag_m))
+        max_k = float(np.max(diag_k))
+        if min_m <= 0 or max_k <= 0:
+            return
+        c = 1e-2  # safety factor below the characteristic time scale
+        dt_threshold = c * np.sqrt(min_m / max_k)
+        if dt < dt_threshold:
+            logger.warning(
+                "Newmark step dt=%.3e is below the conditioning threshold "
+                "%.3e (c*sqrt(min(diagM)/max(diagK))); K_eff is "
+                "ill-conditioned and the solution may lose precision.",
+                dt,
+                dt_threshold,
+            )
+
+    def _solve_scaled(self, K_eff: np.ndarray, f_eff: np.ndarray) -> np.ndarray:
+        """Solve K_eff u = f_eff using symmetric Jacobi (diagonal) scaling.
+
+        Forms D = diag(K_eff)^(-1/2) and solves the better-conditioned system
+        (D K_eff D) y = D f_eff, then recovers u = D y. This non-dimensionalises
+        the effective stiffness so the inertial 1/(βdt²) scaling does not blow
+        up the condition number (issue #6985).
+
+        Args:
+            K_eff: Effective stiffness matrix
+            f_eff: Effective force vector
+
+        Returns:
+            Displacement increment solution
+        """
+        diag = np.abs(np.diag(K_eff))
+        # Guard against zero/negative diagonal entries.
+        scale = np.where(diag > 0, 1.0 / np.sqrt(diag), 1.0)
+        k_scaled = K_eff * scale[:, None] * scale[None, :]
+        f_scaled = f_eff * scale
+        try:
+            y = np.linalg.solve(k_scaled, f_scaled)
+        except np.linalg.LinAlgError:
+            logger.warning("FE solve failed, using pseudo-inverse")
+            y = np.linalg.lstsq(k_scaled, f_scaled, rcond=None)[0]
+        return y * scale
+
     def step(self, dt: float) -> ShaftState:
         """Advance simulation by dt using Newmark-beta integration.
 
@@ -311,11 +368,15 @@ class FiniteElementShaftModel(ShaftModel):
         """
         if dt is None:
             raise ValueError("dt must be provided")
+        if dt <= 0:
+            raise ValueError(f"dt must be positive, got {dt}")
         self.time += dt
 
         # Newmark-beta parameters
         beta = 0.25
         gamma = 0.5
+
+        self._warn_if_ill_conditioned(dt)
 
         # Effective stiffness matrix
         K_eff = self.K + gamma / (beta * dt) * self.C + 1 / (beta * dt**2) * self.M
@@ -337,12 +398,13 @@ class FiniteElementShaftModel(ShaftModel):
             )
         )
 
-        # Solve for new displacement
-        try:
-            u_new = np.linalg.solve(K_eff, f_eff)
-        except np.linalg.LinAlgError:
-            logger.warning("FE solve failed, using pseudo-inverse")
-            u_new = np.linalg.lstsq(K_eff, f_eff, rcond=None)[0]
+        # Solve for new displacement. At impact-scale dt the 1/(β dt²) M term
+        # dominates K by many orders of magnitude, so K_eff is severely
+        # ill-conditioned. Symmetric Jacobi (diagonal) scaling normalises the
+        # diagonal to O(1), which restores precision in the solve and prevents
+        # the catastrophic cancellation that otherwise corrupts the a_new
+        # recovery below (issue #6985).
+        u_new = self._solve_scaled(K_eff, f_eff)
 
         # Update velocity and acceleration
         a_new = (

@@ -51,12 +51,23 @@ class CoupledDoublePendulum:
         l1 = self.params.upper_segment.length_m
         l2 = self.params.lower_segment.length_m
 
-        # Jacobian for mapping Cartesian forces to joint torques
+        # Map the external clubhead wrench to joint torques via tau = J^T w,
+        # where J is the manipulator Jacobian of the planar 2R chain.
+        #
+        # The position rows of J (linear velocity of the endpoint) give the
+        # force contributions:
         dx_dt1 = l1 * math.cos(theta1) + l2 * math.cos(theta1 + theta2)
         dz_dt1 = l1 * math.sin(theta1) + l2 * math.sin(theta1 + theta2)
         dx_dt2 = l2 * math.cos(theta1 + theta2)
         dz_dt2 = l2 * math.sin(theta1 + theta2)
 
+        # Convention (verified, issue #6987): BOTH joints are revolute about the
+        # world y-axis, so the angular row of the manipulator Jacobian is
+        # [d(theta1+theta2)/dtheta1, d(theta1+theta2)/dtheta2] = [1, 1].
+        # Therefore an external moment Ty about y projects onto BOTH joint
+        # torques. This is the correct J^T wrench projection, NOT a double
+        # count: a y-moment at the clubhead is reacted at the shoulder and the
+        # wrist joint alike. (Adding Ty to only the distal joint would be wrong.)
         self.external_tau1 = Fx * dx_dt1 + Fz * dz_dt1 + Ty
         self.external_tau2 = Fx * dx_dt2 + Fz * dz_dt2 + Ty
 
