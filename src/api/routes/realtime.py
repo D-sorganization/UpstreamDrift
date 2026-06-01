@@ -50,15 +50,25 @@ class PublishRequest(BaseModel):
 
 
 class _SubscriberRegistry:
-    """In-memory mapping of channel name → set of WebSocket connections."""
+    """In-memory mapping of channel name → set of WebSocket connections.
+
+    Each WebSocket also gets a dedicated asyncio.Lock so that concurrent
+    publish() calls cannot interleave frames on the same socket (#6978).
+    """
 
     def __init__(self) -> None:
         self._lock = asyncio.Lock()
         self._subs: dict[str, set[WebSocket]] = {}
+        # Per-socket send lock: only one coroutine may call send_json on a
+        # given WebSocket at a time.  Keyed by the WebSocket object itself
+        # (uses default id-based hash/equality from object).
+        self._ws_locks: dict[WebSocket, asyncio.Lock] = {}
 
     async def add(self, channel: str, ws: WebSocket) -> None:
         async with self._lock:
             self._subs.setdefault(channel, set()).add(ws)
+            if ws not in self._ws_locks:
+                self._ws_locks[ws] = asyncio.Lock()
 
     async def remove(self, channel: str, ws: WebSocket) -> None:
         async with self._lock:
@@ -68,11 +78,18 @@ class _SubscriberRegistry:
             bucket.discard(ws)
             if not bucket:
                 self._subs.pop(channel, None)
+            # Clean up the per-socket lock only when the ws is gone from all channels.
+            ws_still_present = any(ws in b for b in self._subs.values())
+            if not ws_still_present:
+                self._ws_locks.pop(ws, None)
 
-    async def snapshot(self, channel: str) -> list[WebSocket]:
+    async def snapshot(self, channel: str) -> list[tuple[WebSocket, asyncio.Lock]]:
+        """Return (socket, send_lock) pairs for all subscribers on channel."""
         async with self._lock:
             bucket = self._subs.get(channel)
-            return list(bucket) if bucket else []
+            if not bucket:
+                return []
+            return [(ws, self._ws_locks[ws]) for ws in bucket]
 
 
 # Module-level registry: shared across all requests served by this app.
@@ -80,7 +97,7 @@ _registry = _SubscriberRegistry()
 
 
 @router.post("/realtime/publish")
-@limiter.limit(get_limit("API_LIMIT_REALTIME_PUBLISH", "60/minute"))
+@limiter.limit(get_limit("API_LIMIT_REALTIME_PUBLISH", "6000/minute"))
 async def publish(request: Request, req: PublishRequest) -> dict[str, Any]:
     """Broadcast ``req.payload`` to all subscribers of ``req.channel``.
 
@@ -105,14 +122,17 @@ async def publish(request: Request, req: PublishRequest) -> dict[str, Any]:
 
     targets = await _registry.snapshot(req.channel)
     delivered = 0
-    for ws in targets:
-        try:
-            await ws.send_json(req.payload)
-            delivered += 1
-        except Exception:  # noqa: BLE001
-            # Best-effort: drop dead sockets but do not fail the publish.
-            logger.debug("realtime: dropping dead subscriber on %s", req.channel)
-            await _registry.remove(req.channel, ws)
+    for ws, ws_lock in targets:
+        # Acquire the per-socket lock so concurrent publish() calls cannot
+        # interleave frames on the same WebSocket (#6978).
+        async with ws_lock:
+            try:
+                await ws.send_json(req.payload)
+                delivered += 1
+            except Exception:  # noqa: BLE001
+                # Best-effort: drop dead sockets but do not fail the publish.
+                logger.debug("realtime: dropping dead subscriber on %s", req.channel)
+                await _registry.remove(req.channel, ws)
 
     return {"channel": req.channel, "delivered": delivered}
 

@@ -156,7 +156,11 @@ class WSPubSub:
     # Shared HTTP client for the python-backend publish path.
     # Declared at class level so mypy knows the attribute exists.
     # httpx is a soft/optional dep; imported lazily at first publish call.
+    # _http_client_lock guards the check-then-create initialization so that
+    # concurrent publish() calls from different threads cannot both see None
+    # and construct two clients, leaking a connection pool (#6980).
     _http_client: Any = None
+    _http_client_lock: threading.Lock = threading.Lock()
 
     def __init__(
         self,
@@ -302,9 +306,13 @@ class WSPubSub:
         body = {"channel": channel, "payload": payload}
 
         # Reuse a class-level client to avoid per-publish connection overhead.
-        if WSPubSub._http_client is None:
-            WSPubSub._http_client = httpx.Client(timeout=2.0)
-        r = WSPubSub._http_client.post(self._publish_url(), json=body)
+        # Double-checked initialization under a lock prevents the race where two
+        # threads both see None and each construct an httpx.Client (#6980).
+        with WSPubSub._http_client_lock:
+            if WSPubSub._http_client is None:
+                WSPubSub._http_client = httpx.Client(timeout=2.0)
+            http_client = WSPubSub._http_client
+        r = http_client.post(self._publish_url(), json=body)
         r.raise_for_status()
 
     # -- subscribe -----------------------------------------------------------
