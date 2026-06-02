@@ -288,7 +288,9 @@ class WaterlooPennerModel(BallFlightModel):
             raise ValueError("launch must be provided")
         cd0, cd1, cd2, cl0, cl1, cl2, cl_max = self.params
         omega_v = launch.get_spin_vector()
-        omega_m = math.hypot(omega_v[0], omega_v[1], omega_v[2])  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
+        omega_m = math.hypot(
+            omega_v[0], omega_v[1], omega_v[2]
+        )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
         wind_v = launch.get_wind_vector()
         area = math.pi * launch.ball_radius**2
 
@@ -366,7 +368,9 @@ class MacDonaldHanzelyModel(BallFlightModel):
             raise ValueError("launch must be provided")
         omega_0 = launch.spin_rate * 2 * math.pi / 60
         spin_axis = launch.get_spin_vector()
-        spin_norm = math.hypot(spin_axis[0], spin_axis[1], spin_axis[2])  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
+        spin_norm = math.hypot(
+            spin_axis[0], spin_axis[1], spin_axis[2]
+        )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
         if spin_norm > 0:
             spin_axis /= spin_norm
         wind_v = launch.get_wind_vector()
@@ -461,7 +465,9 @@ class ConstantCoefficientModel(BallFlightModel):
             raise ValueError("launch must be provided")
         omega_0 = launch.spin_rate * 2 * math.pi / 60
         spin_axis = launch.get_spin_vector()
-        spin_norm = math.hypot(spin_axis[0], spin_axis[1], spin_axis[2])  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
+        spin_norm = math.hypot(
+            spin_axis[0], spin_axis[1], spin_axis[2]
+        )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D vectors
         if spin_norm > 0:
             spin_axis = spin_axis / spin_norm
         wind_v = launch.get_wind_vector()
