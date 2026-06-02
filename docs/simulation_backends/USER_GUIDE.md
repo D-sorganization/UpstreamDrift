@@ -286,7 +286,7 @@ and everything except batched GPU rollouts works on a plain CPU. If you only
 ever run single rollouts, skip `[warp]` entirely — the GPU would be pure
 overhead. Use `[mjx]` when you need rollout gradients. For Docker GPU
 invocation and CUDA environment variables, see
-[`docs/docker-gpu.md`](../docker-gpu.md).
+[`docs/operations/docker-gpu.md`](../operations/docker-gpu.md).
 
 ## Troubleshooting
 
