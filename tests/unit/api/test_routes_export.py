@@ -9,10 +9,13 @@ from src.api.dependencies import get_task_manager
 
 
 class MockTaskManager:
-    async def exists(self, task_id):
+    # ``TaskManager``'s query API is synchronous (#4843 compatibility
+    # contract); the export route calls ``exists``/``get`` without awaiting,
+    # so the mock mirrors that synchronous contract.
+    def exists(self, task_id):
         return task_id == "valid_task"
 
-    async def get(self, task_id):
+    def get(self, task_id):
         if task_id == "valid_task":
             return {"status": "completed", "result": {"data": "test_data"}}
         return None

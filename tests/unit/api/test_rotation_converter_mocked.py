@@ -120,24 +120,34 @@ def test_compute_rotation_unknown_type(mock_rotation_class) -> None:
 
 
 def test_reference_frame_conversion() -> None:
-    """Reference frame operation (Lie group) should route correctly."""
+    """Reference frame operation (Lie group) should route correctly.
+
+    The router mounts under ``/api/calc/rotation-converter`` and the request
+    contract restricts ``operation`` to the ``Literal`` set
+    ``{twist_frame_conversion, homogeneous_transform, so3_so3_maps}`` with a
+    ``model_validator`` enforcing per-operation payloads. Here we exercise the
+    so(3)->SO(3) exponential-map path via ``so3_so3_maps`` with a single
+    ``so3_vector`` source.
+    """
     with patch(
         "src.shared.python.calc_backend.routers.rotation_converter.compute_reference_frame_operation"
     ) as mock_op:
         mock_result = MagicMock()
-        mock_result.operation = "exp_map"
+        mock_result.operation = "so3_so3_maps"
         mock_result.results = {"matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]}
         mock_result.explanation_markdown = "## Test"
         mock_result.explanation_latex = "$$I$$"
         mock_op.return_value = mock_result
 
         payload = {
-            "operation": "exp_map",
+            "operation": "so3_so3_maps",
             "so3_vector": [0.0, 0.0, 0.0],
         }
-        response = client.post("/reference-frame", json=payload)
+        response = client.post(
+            "/api/calc/rotation-converter/reference-frame", json=payload
+        )
 
         assert response.status_code == 200
         data = response.json()
-        assert data["operation"] == "exp_map"
+        assert data["operation"] == "so3_so3_maps"
         mock_op.assert_called_once()

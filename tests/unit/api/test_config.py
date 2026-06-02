@@ -94,6 +94,12 @@ def test_get_cors_origins_wildcard_rejected() -> None:
     """Test that wildcard '*' in CORS_ORIGINS is rejected."""
     with (
         patch.dict(os.environ, {"CORS_ORIGINS": "https://a.com,*,https://b.com"}),
-        pytest.raises(ValueError, match="Cannot use wildcard '\\*' in CORS_ORIGINS"),
+        pytest.raises(
+            ValueError,
+            match=(
+                r"CORS_ORIGINS must not contain '\*' when credentials are "
+                r"enabled \(fail-closed\)"
+            ),
+        ),
     ):
         get_cors_origins()
