@@ -272,11 +272,16 @@ def _run_engine_checked(engine: str) -> tuple[np.ndarray, np.ndarray]:
 
     Raises:
         _EngineBindingsError: if the engine's Python bindings are incomplete
-            (ImportError / AttributeError), OR if the grip trajectory is
-            non-finite (e.g. the grip body is absent from the URDF and the
-            simulate module returns NaN fill, or the integration diverges).
-            Callers can filter this engine out without aborting the whole test
-            via pytest.fail/pytest.skip.
+            (ImportError / AttributeError), or if the grip trajectory is
+            entirely NaN — the pattern produced when the simulate module fills
+            NaN for a missing grip body (Drake's documented design: only q, qd,
+            tau are guaranteed finite; grip/clubhead columns may be NaN when
+            the body is absent from the URDF).
+        pytest.Failed: if the grip trajectory contains non-finite values that
+            are not all-NaN (i.e. partial NaN rows or Inf values), indicating
+            a genuine simulation divergence for an otherwise runnable backend.
+            This remains a hard test failure so a newly-broken engine does not
+            silently disappear from the equivalence gate.
     """
     try:
         time, grip = _ENGINE_RUNNERS[engine]()
@@ -293,15 +298,21 @@ def _run_engine_checked(engine: str) -> tuple[np.ndarray, np.ndarray]:
     if time.size == 0 or grip.size == 0:
         pytest.fail(f"{engine} produced an empty rollout")
     if not np.all(np.isfinite(grip)):
-        # Non-finite grip means either the grip body is absent in the URDF
-        # (simulate module fills NaN by design) or the integrator diverged.
-        # Both cases indicate an engine that cannot participate in the
-        # equivalence gate: raise _EngineBindingsError so aggregation callers
-        # (test_cross_engine_grip_agreement) can skip this engine rather than
-        # aborting the entire test (issue #7097).
-        raise _EngineBindingsError(
+        if np.all(np.isnan(grip)):
+            # Every grip value is NaN: the simulate module filled NaN because
+            # the grip body name is absent from the URDF (Drake's club_grip
+            # case). Raise _EngineBindingsError so the aggregation test can
+            # skip this engine without aborting (issue #7097).
+            raise _EngineBindingsError(
+                f"{engine} produced an all-NaN grip trajectory — "
+                f"grip body absent in URDF; engine treated as unavailable"
+            )
+        # Partial NaN or Inf: the simulation actually ran but diverged.
+        # Keep this as a hard failure so a broken engine does not silently
+        # disappear from the equivalence gate (reviewer feedback #7099).
+        pytest.fail(
             f"{engine} produced a non-finite grip trajectory — "
-            f"grip body absent in URDF or simulation diverged"
+            f"integration diverged or simulation error"
         )
     return time, grip
 
@@ -509,25 +520,51 @@ def test_engine_bindings_error_is_raised_not_pytest_skip() -> None:
         _ENGINE_RUNNERS["mujoco"] = original
 
 
-def test_non_finite_grip_raises_engine_bindings_error() -> None:
-    """_run_engine_checked raises _EngineBindingsError when grip is NaN.
+def test_all_nan_grip_raises_engine_bindings_error() -> None:
+    """_run_engine_checked raises _EngineBindingsError for all-NaN grip.
 
-    Verifies the fix for #7097: a simulate module that returns NaN grip
-    (e.g. because the grip body name is absent from the URDF — Drake's
-    club_grip body) must raise _EngineBindingsError so the aggregation loop
-    in test_cross_engine_grip_agreement can skip that engine rather than
-    aborting with pytest.fail.
+    Verifies the fix for #7097: a simulate module that returns all-NaN grip
+    (e.g. the grip body is absent from the URDF — Drake's club_grip case)
+    raises _EngineBindingsError so the aggregation loop can skip that engine
+    rather than aborting with pytest.fail.
     """
 
-    def _nan_grip_runner() -> tuple[np.ndarray, np.ndarray]:
+    def _all_nan_grip_runner() -> tuple[np.ndarray, np.ndarray]:
         time = np.linspace(0.0, 0.30, 301)
         grip = np.full((301, 3), np.nan, dtype=np.float64)
         return time, grip
 
     original = _ENGINE_RUNNERS["mujoco"]
     try:
-        _ENGINE_RUNNERS["mujoco"] = _nan_grip_runner
-        with pytest.raises(_EngineBindingsError, match="non-finite grip trajectory"):
+        _ENGINE_RUNNERS["mujoco"] = _all_nan_grip_runner
+        with pytest.raises(_EngineBindingsError, match="all-NaN grip trajectory"):
+            _run_engine_checked("mujoco")
+    finally:
+        _ENGINE_RUNNERS["mujoco"] = original
+
+
+def test_diverged_grip_fails_not_skips() -> None:
+    """_run_engine_checked calls pytest.fail (not _EngineBindingsError) for diverged grip.
+
+    Verifies the distinction added per reviewer feedback on #7099: an engine
+    that starts with a valid trajectory but diverges to NaN or Inf (partial
+    non-finite values) must NOT raise _EngineBindingsError — it must remain a
+    hard pytest.fail so a newly-broken backend does not silently vanish from
+    the equivalence gate.
+    """
+    import pytest as _pytest
+
+    def _diverged_grip_runner() -> tuple[np.ndarray, np.ndarray]:
+        time = np.linspace(0.0, 0.30, 301)
+        grip = np.zeros((301, 3), dtype=np.float64)
+        # First frame finite, then diverge to Inf from frame 1 onward.
+        grip[1:, :] = np.inf
+        return time, grip
+
+    original = _ENGINE_RUNNERS["mujoco"]
+    try:
+        _ENGINE_RUNNERS["mujoco"] = _diverged_grip_runner
+        with _pytest.raises(_pytest.fail.Exception, match="non-finite grip trajectory"):
             _run_engine_checked("mujoco")
     finally:
         _ENGINE_RUNNERS["mujoco"] = original
