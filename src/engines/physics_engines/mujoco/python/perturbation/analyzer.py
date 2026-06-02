@@ -257,6 +257,14 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
 
         mujoco.mj_resetData(model, data)
 
+        # Enable MuJoCo's energy accounting so mj_energyPos / mj_energyVel
+        # populate data.energy with real potential / kinetic energy (#7052).
+        # Without this flag the energy buffer stays zero.
+        try:
+            model.opt.enableflags |= int(mujoco.mjtEnableBit.mjENBL_ENERGY)
+        except AttributeError:
+            logger.debug("MuJoCo energy enable flag unavailable; energy may be 0.")
+
         for _ in range(n_steps):
             t = float(data.time)
             ctrl = np.array([float(np.polyval(joint_polys[j], t)) for j in range(nu)])
@@ -269,17 +277,19 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
             qvel_list.append(data.qvel.copy())
             ee_pos_list.append(data.xpos[self._ee_body_id].copy())
 
-            # Kinetic energy via MuJoCo
-            ke = float(mujoco.mj_getTotalmass(model) * 0.0)  # placeholder
+            # Kinetic / potential energy via MuJoCo's energy accounting.
+            # data.energy == [potential, kinetic] once the ENERGY enable flag
+            # is set (above) and mj_energyPos / mj_energyVel have run (#7052).
+            ke = 0.0
+            pe = 0.0
             try:
                 mujoco.mj_energyPos(model, data)
                 mujoco.mj_energyVel(model, data)
-                ke = float(data.energy[1])
                 pe = float(data.energy[0])
+                ke = float(data.energy[1])
             except AttributeError:
-                # Older MuJoCo API
-                ke = 0.0
-                pe = 0.0
+                # Older MuJoCo API without separate energy entry points.
+                logger.debug("MuJoCo energy API unavailable; reporting 0.")
             ke_list.append(ke)
             pe_list.append(pe)
 

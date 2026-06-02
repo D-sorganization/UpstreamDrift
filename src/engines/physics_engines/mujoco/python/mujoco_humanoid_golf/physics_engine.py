@@ -28,6 +28,10 @@ from src.shared.python.core.contracts import (
 from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -87,6 +91,33 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
     def engine_type(self) -> str:
         """Get engine type identifier (Checkpointable contract)."""
         return "mujoco"
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report MuJoCo's verified canonical-core capability surface (#7050).
+
+        MuJoCo provides analytic mass matrix (``mj_fullM``), recursive
+        Newton-Euler inverse dynamics (``mj_inverse``), analytic body
+        Jacobians (``mj_jac``), a velocity-stabilised soft-contact solver,
+        and drift / ZVCF counterfactuals. Trajectory optimization is not a
+        native MuJoCo primitive (handled by higher layers), so it is left at
+        ``NONE``.
+        """
+        return EngineCapabilities(
+            engine_name="MuJoCo",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.FULL,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            dataset_export=CapabilityLevel.PARTIAL,
+            extra={
+                "contact_model": "soft_constraint_pgs",
+                "spatial_jacobian_order": "angular_linear",
+                "zvcf": "supported",
+            },
+        )
 
     @property
     def model_name(self) -> str:
