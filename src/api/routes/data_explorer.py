@@ -124,6 +124,13 @@ MAX_DATASET_ROWS = 100000  # 100K rows max
 MAX_DATASET_COLUMNS = 500  # 500 columns max
 MAX_CACHE_AGE_SECONDS = 3600  # 1 hour cache TTL
 
+# On-disk JSON has no line-oriented streaming guarantee, so reading a preview /
+# stats / filter source must ``json.loads`` the whole document. To keep that
+# bounded (issue #7058) — matching the CSV path which streams row-by-row and the
+# upload path which caps at ``MAX_DATASET_SIZE_BYTES`` — we reject on-disk JSON
+# datasets larger than this ceiling instead of materializing them per request.
+MAX_JSON_DATASET_BYTES = MAX_DATASET_SIZE_BYTES
+
 
 @dataclass
 class DatasetRecord:
@@ -432,6 +439,39 @@ def _parse_csv_content(content: str) -> tuple[list[str], list[dict[str, Any]]]:
     return list(columns), rows
 
 
+def _read_json_dataset_text(filepath: Path) -> str:
+    """Read an on-disk JSON dataset, rejecting oversized files (issue #7058).
+
+    A full ``json.loads`` materializes the whole document in memory, so an
+    arbitrarily large on-disk JSON dataset would be a per-request memory DoS
+    (the CSV path streams instead). We cap the file at
+    ``MAX_JSON_DATASET_BYTES`` — checked against the on-disk size *before*
+    reading — and reject oversized datasets with HTTP 413.
+
+    Precondition: ``filepath`` refers to a ``.json`` dataset on disk.
+    Postcondition: at most ``MAX_JSON_DATASET_BYTES`` are read into memory;
+    larger files raise ``HTTPException(413)`` without being read.
+
+    Raises:
+        HTTPException: 413 when the file exceeds ``MAX_JSON_DATASET_BYTES``.
+    """
+    try:
+        size = filepath.stat().st_size
+    except OSError as exc:
+        raise HTTPException(
+            status_code=404, detail=f"Dataset '{filepath.name}' not found"
+        ) from exc
+    if size > MAX_JSON_DATASET_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=(
+                f"JSON dataset too large ({size} bytes,"
+                f" max {MAX_JSON_DATASET_BYTES}); use CSV for large datasets"
+            ),
+        )
+    return filepath.read_text(encoding="utf-8")
+
+
 def _parse_json_content(content: str) -> tuple[list[str], list[dict[str, Any]]]:
     """Parse JSON content into columns and rows."""
     data = json.loads(content)
@@ -580,9 +620,10 @@ def _preview_json_streaming(
     """Build a JSON preview, returning header, first ``limit`` rows, and total.
 
     JSON has no line-oriented streaming guarantee, so the document is parsed
-    once and only the bounded preview window is retained for the response.
+    once (bounded by ``MAX_JSON_DATASET_BYTES``, issue #7058) and only the
+    bounded preview window is retained for the response.
     """
-    columns, all_rows = _parse_json_content(filepath.read_text(encoding="utf-8"))
+    columns, all_rows = _parse_json_content(_read_json_dataset_text(filepath))
     return columns, all_rows[:limit], len(all_rows)
 
 
@@ -636,7 +677,7 @@ async def _resolve_operation_source(
             fmt="csv",
         )
     if suffix == ".json":
-        columns, all_rows = _parse_json_content(filepath.read_text(encoding="utf-8"))
+        columns, all_rows = _parse_json_content(_read_json_dataset_text(filepath))
         return _OperationSource(columns=columns, rows=iter(all_rows), fmt="json")
     raise HTTPException(status_code=400, detail=unsupported_detail)
 

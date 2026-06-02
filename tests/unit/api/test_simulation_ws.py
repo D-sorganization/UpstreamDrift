@@ -461,6 +461,49 @@ async def test_simulation_stream_rejects_malformed_initial_state(
     load_engine.assert_not_called()
 
 
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_oversized_initial_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An oversized initial_state q must be rejected with an error frame and
+    never reach the engine (#7056).
+
+    Defense-in-depth: the request model caps the vector length at the validation
+    boundary, and ``_apply_initial_state`` independently caps before ``np.array``
+    (see ``TestApplyInitialStateLengthCap``). Either way the oversized payload is
+    rejected before ``set_state`` and before a large allocation.
+    """
+    from src.api.models.requests import MAX_STATE_VECTOR_LEN
+
+    oversized = [0.0] * (MAX_STATE_VECTOR_LEN + 1)
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"initial_state": {"q": oversized}}}]
+    )
+
+    engine = MagicMock()
+    engine.set_state.return_value = None
+
+    async def fake_load_engine(*_args: Any, **_kwargs: Any) -> object:
+        return engine
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(
+        simulation_ws_module, "_load_simulation_engine", fake_load_engine
+    )
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    # An error frame is emitted and the oversized payload never reaches set_state.
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    engine.set_state.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
 # 5. _is_numeric_sequence — pure unit tests (issue #5918)
 # ---------------------------------------------------------------------------
@@ -563,6 +606,76 @@ class TestApplyInitialStateValidation:
         args = engine.set_state.call_args.args
         assert len(args[0]) == 0
         assert len(args[1]) == 0
+
+
+# ---------------------------------------------------------------------------
+# 7. _apply_initial_state length cap — issue #7056 (memory DoS)
+# ---------------------------------------------------------------------------
+
+
+class TestApplyInitialStateLengthCap:
+    """Oversized q/v must be rejected before np.array() allocates (issue #7056)."""
+
+    def _make_engine(self, nq: int | None = None) -> MagicMock:
+        engine = MagicMock()
+        engine.set_state.return_value = None
+        if nq is None:
+            del engine.nq
+        else:
+            engine.nq = nq
+        return engine
+
+    def test_valid_small_array_returns_none_and_applies(self) -> None:
+        """Within-bounds q/v return no error and invoke set_state."""
+        engine = self._make_engine()
+        err = _apply_initial_state(engine, {"q": [0.1, 0.2], "v": [0.3, 0.4]})
+        assert err is None
+        engine.set_state.assert_called_once()
+
+    def test_oversized_q_rejected_without_allocation(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A q longer than the hard ceiling is rejected before np.array runs."""
+        engine = self._make_engine()
+        # Guard: np.array must never be called on the oversized payload.
+        monkeypatch.setattr(
+            simulation_ws_module.np,
+            "array",
+            lambda *a, **k: (_ for _ in ()).throw(
+                AssertionError("np.array must not allocate oversized input")
+            ),
+        )
+        oversized = range(simulation_ws_module._MAX_INITIAL_STATE_LEN + 1)
+        # Use a list so _is_numeric_sequence passes; length is the only issue.
+        err = _apply_initial_state(engine, {"q": list(oversized), "v": []})
+        assert err is not None
+        assert "initial_state.q" in err
+        engine.set_state.assert_not_called()
+
+    def test_oversized_v_rejected(self) -> None:
+        """A v longer than the hard ceiling is rejected."""
+        engine = self._make_engine()
+        big = [0.0] * (simulation_ws_module._MAX_INITIAL_STATE_LEN + 1)
+        err = _apply_initial_state(engine, {"q": [], "v": big})
+        assert err is not None
+        assert "initial_state.v" in err
+        engine.set_state.assert_not_called()
+
+    def test_engine_dof_tightens_cap(self) -> None:
+        """When the engine exposes nq, q beyond a small DoF-derived cap is rejected."""
+        engine = self._make_engine(nq=4)
+        # 4 DoF -> cap is small; a 1000-element q is rejected even though it is
+        # well under the hard ceiling.
+        err = _apply_initial_state(engine, {"q": [0.0] * 1000, "v": [0.0] * 1000})
+        assert err is not None
+        engine.set_state.assert_not_called()
+
+    def test_engine_dof_allows_matching_length(self) -> None:
+        """A q/v sized to the engine DoF is accepted."""
+        engine = self._make_engine(nq=4)
+        err = _apply_initial_state(engine, {"q": [0.0] * 4, "v": [0.0] * 4})
+        assert err is None
+        engine.set_state.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
