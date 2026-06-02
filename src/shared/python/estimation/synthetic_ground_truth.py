@@ -310,7 +310,13 @@ def project_world_point(
     y_norm = float(xyz_camera[1] / z)
     intr = camera.intrinsics
     radius_2 = x_norm * x_norm + y_norm * y_norm
-    radial = 1.0 + intr.k1 * radius_2 + intr.k2 * radius_2 * radius_2
+    k3 = getattr(intr, "k3", 0.0)
+    radial = (
+        1.0
+        + intr.k1 * radius_2
+        + intr.k2 * radius_2 * radius_2
+        + k3 * radius_2 * radius_2 * radius_2
+    )
     x_dist = x_norm * radial + 2.0 * intr.p1 * x_norm * y_norm
     x_dist += intr.p2 * (radius_2 + 2.0 * x_norm * x_norm)
     y_dist = y_norm * radial + intr.p1 * (radius_2 + 2.0 * y_norm * y_norm)
