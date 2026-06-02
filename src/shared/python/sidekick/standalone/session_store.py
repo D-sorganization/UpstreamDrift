@@ -24,6 +24,14 @@ from sidekick.persistence.schema import ProfilePayload
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "FileSessionStore",
+    "InMemorySessionStore",
+    "SessionStore",
+    "StandaloneSessionStore",
+    "default_store_root",
+]
+
 _PROFILE_NAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 _LAST_PROFILE_KEY = "last_profile"
 

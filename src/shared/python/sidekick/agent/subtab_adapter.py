@@ -29,7 +29,6 @@ Design contracts:
 
 from __future__ import annotations
 
-import secrets
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
@@ -141,6 +140,11 @@ class SubtabActionPort(Protocol):
         """Load a state profile. Raises ``KeyError`` if absent."""
         ...
 
+    def state_profile_delete(self, name: str) -> None:
+        """Delete a state profile. Idempotent: deleting an absent profile
+        is a no-op (so it composes as the inverse of ``save``)."""
+        ...
+
 
 # ---------------------------------------------------------------------------
 # Adapter
@@ -209,6 +213,7 @@ class SubtabAdapter:
             "subtab.workspace.set_variable": self._workspace_set_variable,
             "subtab.state_profile.save": self._state_profile_save,
             "subtab.state_profile.load": self._state_profile_load,
+            "subtab.state_profile.delete": self._state_profile_delete,
         }
 
     # ---- SidekickActionHandler ------------------------------------------
@@ -238,11 +243,10 @@ class SubtabAdapter:
             self._port.focus(tab_id)
         except KeyError as exc:
             return ActionResult(ok=False, error=f"unknown tab: {exc}")
-        return ActionResult(
-            ok=True,
-            value=None,
-            undo_token=_pack_undo("focus", {"tab_id": prior}) if prior else None,
-        )
+        # The inverse is re-focusing the previously active tab. If nothing
+        # was focused before, there is no state to restore — no undo.
+        metadata = _undo_meta("subtab.focus", {"tab_id": prior}) if prior else {}
+        return ActionResult(ok=True, value=None, metadata=metadata)
 
     def _show(self, params: Mapping[str, Any]) -> ActionResult:
         return self._set_visible(params["tab_id"], True)
@@ -255,12 +259,12 @@ class SubtabAdapter:
             self._port.set_visible(tab_id, visible)
         except KeyError as exc:
             return ActionResult(ok=False, error=f"unknown tab: {exc}")
+        # Inverse: the complementary show/hide for the same tab.
+        inverse_id = "subtab.hide" if visible else "subtab.show"
         return ActionResult(
             ok=True,
             value=None,
-            undo_token=_pack_undo(
-                "set_visible", {"tab_id": tab_id, "visible": not visible}
-            ),
+            metadata=_undo_meta(inverse_id, {"tab_id": tab_id}),
         )
 
     def _calculator_run(self, params: Mapping[str, Any]) -> ActionResult:
@@ -282,21 +286,32 @@ class SubtabAdapter:
             return ActionResult(ok=False, error="missing required property: 'value'")
         value = params["value"]
         prior = self._port.workspace_set_variable(name, value)
+        # Inverse: re-set the variable to its prior value (None if absent).
         return ActionResult(
             ok=True,
             value=None,
-            undo_token=_pack_undo("set_variable", {"name": name, "value": prior}),
+            metadata=_undo_meta(
+                "subtab.workspace.set_variable", {"name": name, "value": prior}
+            ),
         )
 
     def _state_profile_save(self, params: Mapping[str, Any]) -> ActionResult:
         name = params["name"]
         payload = params["payload"]
+        # Capture the prior payload (if any) BEFORE overwriting, so the
+        # inverse can restore it. A fresh profile is reversed by deleting.
+        try:
+            prior = dict(self._port.state_profile_load(name).payload)
+        except KeyError:
+            prior = None
         self._port.state_profile_save(name, payload)
-        return ActionResult(
-            ok=True,
-            value=None,
-            undo_token=_pack_undo("delete_profile", {"name": name}),
-        )
+        if prior is None:
+            undo = _undo_meta("subtab.state_profile.delete", {"name": name})
+        else:
+            undo = _undo_meta(
+                "subtab.state_profile.save", {"name": name, "payload": prior}
+            )
+        return ActionResult(ok=True, value=None, metadata=undo)
 
     def _state_profile_load(self, params: Mapping[str, Any]) -> ActionResult:
         name = params["name"]
@@ -305,6 +320,13 @@ class SubtabAdapter:
         except KeyError as exc:
             return ActionResult(ok=False, error=f"unknown profile: {exc}")
         return ActionResult(ok=True, value=dict(profile.payload))
+
+    def _state_profile_delete(self, params: Mapping[str, Any]) -> ActionResult:
+        # Idempotent delete — the inverse of save for a freshly-created
+        # profile. No undo: re-creating a deleted profile would require the
+        # payload, which the caller no longer holds.
+        self._port.state_profile_delete(params["name"])
+        return ActionResult(ok=True, value=None)
 
 
 # ---------------------------------------------------------------------------
@@ -377,22 +399,29 @@ def _build_descriptors() -> tuple[ActionDescriptor, ...]:
             side_effects="write",
             reversible=True,
         ),
+        ActionDescriptor(
+            action_id="subtab.state_profile.delete",
+            summary="Delete a named state profile (inverse of save).",
+            params_schema=_S_PROFILE_LOAD,
+            side_effects="destructive",
+            reversible=False,
+        ),
     )
 
 
 # ---------------------------------------------------------------------------
-# Undo token encoding (opaque to callers)
+# Undo metadata (consumed by SidekickActionService._maybe_register_undo)
 # ---------------------------------------------------------------------------
 
 
-def _pack_undo(kind: str, args: Mapping[str, Any]) -> str:
-    """Encode a small undo record into an opaque token string.
+def _undo_meta(inverse_action_id: str, params: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the ``_undo`` metadata the service turns into an undo token.
 
-    The token is intentionally not parseable by callers — only the
-    audit/undo subsystem (S6) decodes it. The format is "kind|nonce" so
-    that two tokens for the same action are always distinct.
+    The service (``SidekickActionService._maybe_register_undo``) reads
+    ``metadata["_undo"] == {"action_id": <id>, "params": {...}}``, stashes
+    the inverse action under a fresh service-owned token, strips this
+    private key, and stitches the token into the result. The adapter never
+    invents its own token — that keeps the undo table centralised (LOD) and
+    mirrors the contract pinned by ``_ToggleHandler`` in ``test_undo``.
     """
-    nonce = secrets.token_hex(4)
-    # The args mapping is carried in a side-table the audit/undo
-    # subsystem owns; we only return an opaque handle here.
-    return f"subtab:{kind}:{nonce}"
+    return {"_undo": {"action_id": inverse_action_id, "params": dict(params)}}
