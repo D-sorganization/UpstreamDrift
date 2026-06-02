@@ -1,64 +1,52 @@
-"""Cross-backend parity test for IK (#4566 headline spec).
+"""Parity / determinism test for the real IK backend (#4566, #7046).
 
-Compares joint-angle output of all four IK backends on a 3-DOF phantom.
-Each backend is currently a placeholder returning the neutral pose, so
-parity is trivially satisfied; once any backend lands a real
-implementation, this test will catch divergence.
+The engine-specific backends (mujoco/drake/opensim/pinocchio) are
+unimplemented stubs that raise ``NotImplementedError`` (issue #7046), so a
+cross-backend numerical comparison is no longer meaningful. Instead we pin
+the determinism of the one real backend - geometric - which is the
+reference all future backends must agree with.
 """
 
 from __future__ import annotations
 
-import math
-
 import numpy as np
-import pytest
 
-from src.shared.python.motion_pipeline.ik.drake_backend import DrakeIKSolver
-from src.shared.python.motion_pipeline.ik.mujoco_backend import MuJoCoIKSolver
-from src.shared.python.motion_pipeline.ik.opensim_backend import OpenSimIKSolver
-from src.shared.python.motion_pipeline.ik.pinocchio_backend import PinocchioIKSolver
+from src.shared.python.motion_pipeline.contracts import (
+    Marker,
+    MarkerFrame,
+    MarkerTrajectory,
+)
+from src.shared.python.motion_pipeline.ik.geometric_backend import (
+    GeometricIKSolver,
+    forward_kinematics,
+)
 
-from ._local_fixtures import make_3dof_phantom_rig, make_phantom_marker_trajectory
-
-_TOL_RAD = math.radians(5.0)  # 5° tolerance per spec
-
-
-def _available_backends() -> list[tuple[str, object]]:
-    """Return placeholders + pytest.importorskip-aware list."""
-    backends: list[tuple[str, object]] = [
-        ("mujoco", MuJoCoIKSolver()),
-        ("drake", DrakeIKSolver()),
-        ("pinocchio", PinocchioIKSolver()),
-    ]
-    # OpenSim's solve() raises ImportError without the package; only include
-    # it when import succeeds.
-    try:
-        import opensim  # noqa: F401
-
-        backends.append(("opensim", OpenSimIKSolver()))
-    except ImportError:
-        pass
-    return backends
+from ._local_fixtures import make_3dof_phantom_rig
 
 
-def test_cross_backend_parity_on_3dof_phantom() -> None:
+def _markers_traj_from_rig(rig, num_frames: int = 5) -> MarkerTrajectory:
+    """Build a marker trajectory whose markers sit on the rig's joints."""
+    frames = []
+    for i in range(num_frames):
+        t = i / 100.0
+        # Small per-frame perturbation on the first DOF.
+        q = [0.1 * i] + [0.0] * (rig.num_dofs - 1)
+        pos = forward_kinematics(rig, q)
+        markers = {
+            name: Marker(name=name, x=p[0], y=p[1], z=p[2]) for name, p in pos.items()
+        }
+        frames.append(MarkerFrame(timestamp=t, markers=markers, frame_index=i))
+    return MarkerTrajectory(id="det_traj", frames=frames)
+
+
+def test_geometric_backend_is_deterministic() -> None:
     rig = make_3dof_phantom_rig()
-    traj = make_phantom_marker_trajectory(num_frames=5)
+    traj = _markers_traj_from_rig(rig, num_frames=5)
 
-    available = _available_backends()
-    if len(available) < 2:
-        pytest.xfail("Cross-backend parity needs >= 2 backends available")
+    out_a = GeometricIKSolver().solve(traj, rig)
+    out_b = GeometricIKSolver().solve(traj, rig)
 
-    results: dict[str, np.ndarray] = {}
-    for name, solver in available:
-        out = solver.solve(traj, rig)
-        q_arr = np.array([f.q for f in out.frames])
-        results[name] = q_arr
-
-    backend_names = list(results.keys())
-    reference = results[backend_names[0]]
-    for name in backend_names[1:]:
-        diff = np.abs(results[name] - reference)
-        assert diff.max() <= _TOL_RAD, (
-            f"{name} differs from {backend_names[0]} by {diff.max()} rad > 5°"
-        )
+    q_a = np.array([f.q for f in out_a.frames])
+    q_b = np.array([f.q for f in out_b.frames])
+    assert np.allclose(q_a, q_b), "Geometric IK must be deterministic"
+    assert np.all(np.isfinite(q_a))

@@ -1,10 +1,13 @@
-"""Unit tests for motion_pipeline.ik.drake_backend."""
+"""Unit tests for motion_pipeline.ik.drake_backend.
+
+After issue #7046 the Drake IK backend is an unimplemented stub that must
+raise ``NotImplementedError`` rather than silently returning a neutral pose.
+"""
 
 from __future__ import annotations
 
 import pytest
 
-from src.shared.python.motion_pipeline.contracts import JointTrajectory
 from src.shared.python.motion_pipeline.ik.drake_backend import DrakeIKSolver
 
 from ._local_fixtures import make_3dof_phantom_rig, make_phantom_marker_trajectory
@@ -15,26 +18,16 @@ def test_drake_solver_constructs() -> None:
     assert solver is not None
 
 
-def test_drake_solver_solve_frame_returns_neutral_pose() -> None:
+def test_drake_solver_solve_frame_raises_not_implemented() -> None:
     rig = make_3dof_phantom_rig()
     solver = DrakeIKSolver()
-    q = solver.solve_frame({}, rig)
-    assert len(q) == rig.num_dofs
+    with pytest.raises(NotImplementedError):
+        solver.solve_frame({}, rig)
 
 
-def test_drake_solver_full_trajectory() -> None:
+def test_drake_solver_solve_raises_not_implemented() -> None:
     rig = make_3dof_phantom_rig()
     traj = make_phantom_marker_trajectory(num_frames=4)
     solver = DrakeIKSolver()
-    out = solver.solve(traj, rig)
-    assert isinstance(out, JointTrajectory)
-    assert out.num_frames == traj.num_frames
-
-
-def test_drake_solver_with_pydrake_present() -> None:
-    """Spec calls for pytest.importorskip("pydrake") when full impl arrives."""
-    pytest.importorskip("pydrake")
-    rig = make_3dof_phantom_rig()
-    traj = make_phantom_marker_trajectory(num_frames=3)
-    out = DrakeIKSolver().solve(traj, rig)
-    assert out.num_frames == traj.num_frames
+    with pytest.raises(NotImplementedError):
+        solver.solve(traj, rig)
