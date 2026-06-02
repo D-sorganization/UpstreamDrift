@@ -175,6 +175,16 @@ class FramelessResizeFilter(QObject):
 
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
+from src.shared.python.ui import (
+    apply_window_icon,
+    resolve_icon_path,
+    set_app_user_model_id,
+)
+
+# Windows taskbar identity. Declaring this (before any window is shown) is what
+# makes the taskbar use the app icon instead of the generic python.exe icon —
+# the piece earlier favicon fixes missed.
+_APP_USER_MODEL_ID = "D-sorganization.UpstreamDrift"
 
 # Backward-compatible re-exports
 __all__ = [
@@ -642,16 +652,18 @@ class UpstreamDriftLauncher(QMainWindow):
         self._embed_sidekick_sidebar_widget(widget)
 
     def _load_window_icon(self) -> None:
-        icon_candidates = [
-            ASSETS_DIR / "golf_logo.ico",
-            ASSETS_DIR / "golf_logo.png",
-        ]
-        for icon_path in icon_candidates:
-            if icon_path.exists():
-                self.setWindowIcon(QIcon(str(icon_path)))
-                logger.info("Loaded icon: %s", icon_path.name)
-                return
-        logger.warning("No icon files found")
+        # Sets the AppUserModelID (idempotent), the application icon, and this
+        # window's icon. The AppUserModelID is what fixes the Windows taskbar
+        # icon; setting only the window icon (as before) was not enough.
+        apply_window_icon(
+            app=QApplication.instance(),
+            window=self,
+            icon_candidates=[
+                ASSETS_DIR / "golf_logo.ico",
+                ASSETS_DIR / "golf_logo.png",
+            ],
+            app_id=_APP_USER_MODEL_ID,
+        )
 
     def _init_state(self, startup_results: StartupResults | None) -> None:
         self.docker_checker: DockerCheckThread | None = None
@@ -1508,12 +1520,15 @@ def main() -> None:
     app.setStyle("Fusion")
     _install_global_ui_zoom(app)
 
-    # Set global application icon
-    icon_path = ASSETS_DIR / "golf_logo.ico"
-    if not icon_path.exists():
-        icon_path = ASSETS_DIR / "golf_logo.png"
-    if icon_path.exists():
-        app.setWindowIcon(QIcon(str(icon_path)))
+    # Declare the Windows taskbar identity BEFORE the first window is shown,
+    # then set the global application icon. Without the AppUserModelID the
+    # taskbar shows the python.exe icon even though the icon file loads.
+    set_app_user_model_id(_APP_USER_MODEL_ID)
+    app_icon = resolve_icon_path(
+        [ASSETS_DIR / "golf_logo.ico", ASSETS_DIR / "golf_logo.png"]
+    )
+    if app_icon is not None:
+        app.setWindowIcon(QIcon(str(app_icon)))
 
     qss_path = ASSETS_DIR / "theme" / "dark_modern.qss"
     if qss_path.exists():

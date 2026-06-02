@@ -45,12 +45,21 @@ from .shortcuts_overlay import (
     ShortcutsOverlay,
 )
 from .toast import Toast, ToastManager, ToastType
+from .window_icon import (
+    apply_window_icon,
+    resolve_icon_path,
+    set_app_user_model_id,
+)
 
 __all__ = [
     # Auto Complete
     "AutoCompleteLineEdit",
     # Hover Copy Text Browser
     "HoverCopyTextBrowser",
+    # Window icon / taskbar identity (synced from Tools)
+    "apply_window_icon",
+    "resolve_icon_path",
+    "set_app_user_model_id",
     # Toast
     "Toast",
     "ToastManager",
