@@ -5,8 +5,8 @@ files_to_update = [
     "docs/troubleshooting/installation.md",
     "src/shared/python/config/standard_models.py",
     "src/shared/python/launcher_factory.py",
-    "docs/UPSTREAM_DRIFT_USER_MANUAL.md",
-    "docs/USER_MANUAL.md",
+    "docs/user_guide/upstream_drift_user_manual.md",
+    "docs/user_guide/user_manual.md",
     "docs/tutorials/content/01_getting_started.md",
     "output/README.md",
 ]
