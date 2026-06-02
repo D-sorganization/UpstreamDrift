@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.261                                            |
+| **Spec Version**        | 1.0.262                                            |
 | **Last Spec Update**    | 2026-06-02                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-02** - Removed obsolete archived launcher entries (#7108): the deprecated MuJoCo, MATLAB, and motion-capture archived launchers are no longer advertised through the launcher manifest or tool catalog, and launcher regression coverage now asserts the surviving catalog paths without maintaining tests for removed archived entry points.
 - **2026-06-02** - Hardened the core CI PR test lane for workflow-only pull requests (#7079): when the diff contains no core Python, test, or dependency targets, the core matrix exits after change detection instead of falling through to the full coverage lane. Source/dependency PRs with no changed tests still run the default core suite, preserving coverage while avoiding OOM-prone full-suite runs for GitHub Actions dependency bumps.
 - **2026-06-02** - Recorded the Bolt small-vector norm optimization (#7098): scalar ball-flight force calculation, Waterloo/Penner and spin-decay flight models, and swing-to-launch derivation now use fixed-arity `math.hypot` for known 2D/3D vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing one-dimensional vector contracts.
 - **2026-06-02** - Recorded the golf visualizer camera-basis norm optimization (#7101): `GolfVisualizerWidget` now uses fixed-arity `math.hypot` for the known 3D forward/right camera vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing fallback behavior for degenerate vectors.
