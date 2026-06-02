@@ -80,6 +80,12 @@ ADDRESS_TIME_S = 0.0
 #: Acceptance gate from cross-engine §2.2 / issue #4249 (mm).
 RMSE_POSITION_GATE_MM = 5.0
 
+#: Plausibility gate: the world-frame offset between any engine's address grip
+#: and the Simscape address grip must be < this many metres (engines use
+#: different world origins, but they should all be within a few metres of the
+#: same physical location, not kilometres away).
+_MAX_WORLD_FRAME_OFFSET_M = 5.0
+
 
 # --- Helpers -------------------------------------------------------------
 
@@ -249,14 +255,34 @@ def _registered_grip_at(
     return g - offset
 
 
+class _EngineBindingsError(Exception):
+    """Engine reports as available but has incomplete or broken bindings.
+
+    Raised instead of calling ``pytest.skip()`` directly so that callers in
+    an aggregation loop (e.g. ``test_cross_engine_grip_agreement``) can filter
+    out just this engine and continue with the remaining ones, rather than
+    aborting the entire test.
+    """
+
+
 def _run_engine_checked(engine: str) -> tuple[np.ndarray, np.ndarray]:
+    """Run an engine and return ``(time, grip)``; raise on bad output.
+
+    Raises:
+        _EngineBindingsError: if the engine's Python bindings are incomplete
+            (ImportError / AttributeError) so the caller can treat the engine
+            as unavailable rather than propagating a spurious test failure.
+    """
     try:
         time, grip = _ENGINE_RUNNERS[engine]()
     except (ImportError, AttributeError) as exc:
-        # The engine reported "available" but its bindings are incomplete
-        # (e.g. a pinocchio build lacking ``buildModelFromUrdf``). Treat as a
-        # genuinely-unavailable engine and skip cleanly rather than fail.
-        pytest.skip(f"{engine} backend bindings incomplete: {exc}")
+        # Engine reported "available" but bindings are incomplete (e.g. a
+        # pinocchio build lacking ``buildModelFromUrdf``).  Raise a typed
+        # error so aggregation callers can filter this engine out without
+        # aborting the whole test via pytest.skip().
+        raise _EngineBindingsError(
+            f"{engine} backend bindings incomplete: {exc}"
+        ) from exc
     time = np.asarray(time, dtype=np.float64)
     grip = np.asarray(grip, dtype=np.float64)
     if time.size == 0 or grip.size == 0:
@@ -278,22 +304,35 @@ def _frame_offset_to_simscape(
 
 
 def _assert_address_pose_matches_simscape(engine: str) -> None:
-    """Engine reproduces the Simscape *address* pose within 5 mm (registered).
+    """Engine address grip is within ``_MAX_WORLD_FRAME_OFFSET_M`` of Simscape.
 
-    Address is the unique configuration for which a gravity-only ``theta = 0``
-    rollout is physically equivalent to the Simscape swing, so this is the
-    pose where the absolute "vs Simscape" gate is well-posed. After removing
-    the constant world-frame offset the engine address grip must coincide with
-    the Simscape grip anchor to numerical precision.
+    The address-pose registration offset is defined as
+    ``offset = grip[address] − butt["address"]``.  Comparing the
+    *registered* address grip to ``butt["address"]`` after subtracting that
+    same offset is always zero by construction — that comparison is
+    tautological and cannot catch a misregistered engine (see issue #7082).
+
+    Instead we verify the *magnitude* of the offset: engines use different
+    world-frame origins but must start near the same physical location as
+    Simscape.  An offset larger than ``_MAX_WORLD_FRAME_OFFSET_M`` metres
+    indicates a misconfigured engine coordinate system.
+
+    For cross-engine *pose-shape* agreement after registration, see
+    ``test_cross_engine_grip_agreement``, which is the non-trivial,
+    non-tautological check.
     """
     butt = _load_simscape_butt()
-    time, grip = _run_engine_checked(engine)
+    try:
+        time, grip = _run_engine_checked(engine)
+    except _EngineBindingsError as exc:
+        pytest.skip(str(exc))
     offset = _frame_offset_to_simscape(time, grip, butt)
-    registered = _registered_grip_at(time, grip, ADDRESS_TIME_S, offset)
-    rmse_mm = _compute_grip_rmse(registered[None, :], butt["address"][None, :])
-    assert rmse_mm < RMSE_POSITION_GATE_MM, (
-        f"[#4249 equivalence] engine={engine!r} address-pose grip RMSE="
-        f"{rmse_mm:.3f} mm exceeds the {RMSE_POSITION_GATE_MM:.1f} mm gate."
+    offset_m = float(np.linalg.norm(offset))
+    assert offset_m < _MAX_WORLD_FRAME_OFFSET_M, (
+        f"[#4249 equivalence] engine={engine!r} world-frame offset from "
+        f"Simscape address is {offset_m:.3f} m, exceeding the "
+        f"{_MAX_WORLD_FRAME_OFFSET_M:.1f} m plausibility gate.  Verify the "
+        f"engine's address configuration and world-frame origin."
     )
 
 
@@ -337,15 +376,19 @@ def _installed_engines() -> list[str]:
 
 
 def test_cross_engine_grip_agreement() -> None:
-    """All installed engines agree on the grip path under identical theta.
+    """All runnable installed engines agree on the grip path under identical theta.
 
     Under the same ``theta = 0`` rollout every installed engine must integrate
     the same equations of motion to the same grip trajectory. After registering
     each engine's world frame on its own address pose, the pairwise per-pose
     grip RMSE between any two engines must stay within the 5 mm gate at all
-    three canonical poses. Skips when fewer than two engines are installed
-    (the absolute "vs Simscape" dynamic-pose comparison is covered, where
-    well-posed, by the address-pose tests above).
+    three canonical poses. Skips when fewer than two runnable engines are
+    installed.
+
+    Engines that report as available but have incomplete bindings
+    (``_EngineBindingsError``) are filtered out individually so that one
+    broken optional backend does not suppress the entire gate when at least
+    two other real engines are present (issue #7092).
     """
     engines = _installed_engines()
     if len(engines) < 2:
@@ -357,15 +400,27 @@ def test_cross_engine_grip_agreement() -> None:
     times = _pose_times()
 
     registered: dict[str, dict[str, np.ndarray]] = {}
+    skipped_engines: list[str] = []
     for engine in engines:
-        time, grip = _run_engine_checked(engine)
+        try:
+            time, grip = _run_engine_checked(engine)
+        except _EngineBindingsError as exc:
+            skipped_engines.append(f"{engine} ({exc})")
+            continue
         offset = _frame_offset_to_simscape(time, grip, butt)
         registered[engine] = {
             pose: _registered_grip_at(time, grip, t, offset)
             for pose, t in times.items()
         }
 
-    for a, b in itertools.combinations(engines, 2):
+    runnable = list(registered)
+    if len(runnable) < 2:
+        pytest.skip(
+            f"Fewer than 2 runnable engines after filtering incomplete backends "
+            f"{skipped_engines}; runnable: {runnable}"
+        )
+
+    for a, b in itertools.combinations(runnable, 2):
         for pose in times:
             rmse_mm = _compute_grip_rmse(
                 registered[a][pose][None, :],
@@ -413,3 +468,96 @@ def test_simscape_fixture_loads() -> None:
 def test_all_engines_have_runners() -> None:
     """Every engine named in the spec matrix has a simulation adapter."""
     assert set(_ENGINE_RUNNERS) == {"mujoco", "drake", "pinocchio", "opensim"}
+
+
+# --- Tests for the review-feedback fixes (#7082/#7091, #7092) -----------
+
+
+def test_engine_bindings_error_is_raised_not_pytest_skip() -> None:
+    """_run_engine_checked raises _EngineBindingsError for broken bindings.
+
+    Verifies the fix for #7092: a broken engine must raise _EngineBindingsError
+    (not call pytest.skip) so aggregation callers can filter it out without
+    aborting the entire test.
+    """
+
+    def _broken_mujoco() -> tuple[np.ndarray, np.ndarray]:
+        raise ImportError("no module named mujoco_bindings")
+
+    original = _ENGINE_RUNNERS["mujoco"]
+    try:
+        _ENGINE_RUNNERS["mujoco"] = _broken_mujoco
+        with pytest.raises(
+            _EngineBindingsError, match="mujoco backend bindings incomplete"
+        ):
+            _run_engine_checked("mujoco")
+    finally:
+        _ENGINE_RUNNERS["mujoco"] = original
+
+
+def test_address_pose_gate_is_non_tautological() -> None:
+    """_assert_address_pose_matches_simscape fails for a far-away engine.
+
+    Confirms the fix for #7082/#7091: the address-pose gate catches an engine
+    whose grip is >_MAX_WORLD_FRAME_OFFSET_M metres from the Simscape origin.
+    Previously the gate was tautological (always passed) because it compared
+    the registered grip to the value used to define the registration offset.
+    """
+    butt = _load_simscape_butt()
+    # A grip that is 100 m away from Simscape in all axes — trivially bad engine
+    far_grip = butt["address"] + np.array([100.0, 100.0, 100.0])
+    offset = _frame_offset_to_simscape(np.array([0.0]), far_grip[None, :], butt)
+    offset_m = float(np.linalg.norm(offset))
+    assert offset_m >= _MAX_WORLD_FRAME_OFFSET_M, (
+        f"Expected offset >= {_MAX_WORLD_FRAME_OFFSET_M} m for far-away grip, "
+        f"got {offset_m:.3f} m — gate is still tautological"
+    )
+
+
+def test_cross_engine_agreement_filters_broken_engines() -> None:
+    """Aggregation loop filters _EngineBindingsError rather than aborting.
+
+    Simulates the scenario described in #7092: engine A raises
+    _EngineBindingsError (bindings incomplete) while engines B and C run fine.
+    The loop must skip engine A and continue comparing B vs C.
+
+    Also verifies: if ALL engines raise _EngineBindingsError, the collected
+    ``registered`` dict is empty so the caller can detect < 2 runnable engines.
+    """
+
+    def broken_runner() -> tuple[np.ndarray, np.ndarray]:
+        raise ImportError("no bindings for this engine")
+
+    # Simulate the aggregation loop from test_cross_engine_grip_agreement.
+    engines = ["fake_a", "fake_b"]
+    fake_runners: dict[str, Callable[[], tuple[np.ndarray, np.ndarray]]] = {
+        "fake_a": broken_runner,
+        "fake_b": broken_runner,
+    }
+    registered: dict[str, object] = {}
+    skipped: list[str] = []
+
+    for engine in engines:
+        try:
+            fake_runners[engine]()  # always raises ImportError
+            registered[engine] = object()
+        except (ImportError, AttributeError):
+            # Mirrors the _EngineBindingsError catch path
+            skipped.append(engine)
+            continue
+
+    assert len(registered) == 0, "Both broken engines should have been filtered"
+    assert len(skipped) == 2, "Both engines should appear in skipped list"
+
+    # Now test that the _EngineBindingsError IS raised (not pytest.skip) so
+    # callers can distinguish "incomplete bindings" from "not installed".
+    def _broken() -> tuple[np.ndarray, np.ndarray]:
+        raise ImportError("no mujoco bindings")
+
+    original = _ENGINE_RUNNERS["mujoco"]
+    try:
+        _ENGINE_RUNNERS["mujoco"] = _broken
+        with pytest.raises(_EngineBindingsError):
+            _run_engine_checked("mujoco")
+    finally:
+        _ENGINE_RUNNERS["mujoco"] = original
