@@ -23,6 +23,18 @@ except ImportError as e:
 
 logger = setup_logging(__name__)
 
+#: Default revolute joint limit used by the standard joint-limit constraint
+#: when the trajectory carries joint angles (rad). Matches the canonical
+#: humanoid URDFs' ``[-pi, pi]`` revolute range (#7052).
+DEFAULT_JOINT_LIMIT_RAD: float = float(np.pi)
+
+#: Canonical fraction of the swing at which impact occurs (peak clubhead
+#: speed). Used by the impact-timing constraint (#7052).
+IMPACT_FRACTION: float = 0.9
+
+#: Standard gravity (m/s^2) for the ballistic carry-distance estimate (#7052).
+_GRAVITY_M_S2: float = 9.81
+
 
 @dataclass
 class OptimizationObjective:
@@ -127,9 +139,7 @@ class DrakeMotionOptimizer:
 
         # Ball speed objective
         def ball_speed_cost(trajectory: np.ndarray) -> float:
-            """Compute negative peak speed as a cost to maximize."""
-            # Placeholder: compute ball speed from trajectory
-            # In real implementation, this would extract ball velocity at impact
+            """Negative peak inter-sample speed (minimized → maximizes speed)."""
             # ⚡ Bolt: Computing max of np.einsum first, then sqrt,
             # is much faster than np.max(np.linalg.norm(..., axis=1))
             diff = np.diff(trajectory, axis=0)
@@ -144,8 +154,7 @@ class DrakeMotionOptimizer:
 
         # Accuracy objective (minimize lateral deviation)
         def accuracy_cost(trajectory: np.ndarray) -> float:
-            """Compute lateral deviation from the target line."""
-            # Placeholder: compute lateral deviation from target line
+            """Lateral (y-axis) deviation of the final position from the line."""
             final_position = trajectory[-1]
             return float(abs(final_position[1]))  # y-deviation from target line
 
@@ -175,12 +184,16 @@ class DrakeMotionOptimizer:
     def setup_standard_golf_constraints(self) -> None:
         """Set up standard golf swing optimization constraints."""
 
-        # Joint angle limits
+        # Joint angle limits (#7052). The trajectory is a (N, n_joints) array
+        # of joint angles (rad); the constraint returns the total magnitude by
+        # which any sample exceeds the default revolute limits [-pi, pi]. A
+        # value of 0 means every joint stays in range; the optimizer treats
+        # ``upper_bound=0`` as "no violation allowed".
         def joint_angle_constraint(trajectory: np.ndarray) -> float:
-            """Evaluate joint angle limit violations."""
-            # Placeholder: check joint angle limits
-            # In real implementation, extract joint angles and check limits
-            return 0.0  # No violation
+            """Return the summed joint-angle limit violation (rad)."""
+            traj = np.asarray(trajectory, dtype=float)
+            over = np.clip(np.abs(traj) - DEFAULT_JOINT_LIMIT_RAD, 0.0, None)
+            return float(np.sum(over))
 
         self.add_constraint(
             name="joint_limits",
@@ -189,17 +202,62 @@ class DrakeMotionOptimizer:
             upper_bound=0.0,
         )
 
-        # Impact timing constraint
+        # Impact-timing constraint (#7052). Impact is defined as the frame of
+        # peak inter-sample speed; this returns the (signed) fractional
+        # deviation of that frame from the canonical impact fraction so the
+        # equality solver can drive it to zero.
         def impact_timing_constraint(trajectory: np.ndarray) -> float:
-            """Evaluate deviation from required impact timing."""
-            # Placeholder: ensure impact occurs at specific time
-            return 0.0  # No violation
+            """Return peak-speed-frame deviation from the impact fraction."""
+            return self._impact_timing_deviation(trajectory, IMPACT_FRACTION)
 
         self.add_constraint(
             name="impact_timing",
             constraint_type="equality",
             constraint_function=impact_timing_constraint,
         )
+
+    @staticmethod
+    def _impact_timing_deviation(
+        trajectory: np.ndarray, impact_fraction: float
+    ) -> float:
+        """Signed deviation of the peak-speed frame from ``impact_fraction``.
+
+        Impact is the frame of maximum inter-sample speed. The returned value
+        is ``peak_fraction - impact_fraction`` in ``[-impact, 1-impact]``; an
+        equality solver drives it to zero. Degenerate trajectories (< 2
+        samples) report no deviation.
+        """
+        traj = np.asarray(trajectory, dtype=float)
+        n = traj.shape[0]
+        if n < 2:
+            return 0.0
+        diff = np.diff(traj, axis=0)
+        speeds = np.sqrt(np.einsum("ij,ij->i", diff, diff))
+        if not np.any(speeds > 0.0):
+            return 0.0
+        peak_idx = int(np.argmax(speeds))
+        # diff[k] spans samples k..k+1; place the event at the later sample.
+        peak_fraction = float(peak_idx + 1) / float(n - 1)
+        return peak_fraction - impact_fraction
+
+    @staticmethod
+    def _ballistic_carry_distance(trajectory: np.ndarray) -> float:
+        """Flat-ground projectile carry from the final launch velocity (m).
+
+        Uses the last inter-sample displacement of a ``(N, 3)`` world-position
+        trajectory as the (unit-time) launch velocity ``[vx, vy, vz]`` and
+        returns the range ``2*vx*vz/g`` for the vertical-plane components.
+        Returns 0 for fewer than two samples or a non-positive launch.
+        """
+        traj = np.asarray(trajectory, dtype=float)
+        if traj.shape[0] < 2 or traj.shape[1] < 3:
+            return 0.0
+        launch = traj[-1] - traj[-2]
+        v_x = float(launch[0])
+        v_z = float(launch[2])
+        if v_x <= 0.0 or v_z <= 0.0:
+            return 0.0
+        return 2.0 * v_x * v_z / _GRAVITY_M_S2
 
     def _build_total_cost_function(
         self, traj_shape: tuple
@@ -403,9 +461,15 @@ class DrakeMotionOptimizer:
         self.objectives.clear()
 
         def distance_cost(trajectory: np.ndarray) -> float:
-            """Compute negative carry distance to maximize via minimization."""
-            # Placeholder: compute carry distance
-            return -target_distance  # Negative because we minimize
+            """Negative ballistic carry distance (minimized → maximizes carry).
+
+            The launch velocity is the final inter-sample displacement of the
+            clubhead/ball trajectory (``(N, 3)`` world positions). Carry is the
+            flat-ground projectile range ``2*vx*vz/g`` using the launch's
+            horizontal (x) and vertical (z) components. Returned negative so
+            SLSQP *maximizes* carry; degenerate trajectories cost 0.
+            """
+            return -self._ballistic_carry_distance(trajectory)
 
         self.add_objective(
             name="carry_distance",
@@ -434,8 +498,7 @@ class DrakeMotionOptimizer:
         self.objectives.clear()
 
         def accuracy_cost(trajectory: np.ndarray) -> float:
-            """Compute Euclidean distance from final position to target."""
-            # Placeholder: compute distance to target
+            """Euclidean distance from the final position to the target point."""
             final_position = trajectory[-1]
             # ⚡ Bolt: np.dot is faster than np.linalg.norm for small 1D arrays
             diff = final_position - target_point

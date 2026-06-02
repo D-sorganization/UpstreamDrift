@@ -23,6 +23,10 @@ from src.shared.python.core.contracts import (
 )
 from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Configure logging
@@ -61,6 +65,34 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
     def engine_type(self) -> str:
         """Get engine type identifier (Checkpointable contract)."""
         return "opensim"
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report OpenSim's verified canonical-core capability surface (#7050).
+
+        OpenSim exposes Simbody's analytic mass matrix
+        (``SimbodyMatterSubsystem.calcM``), recursive Newton-Euler inverse
+        dynamics (``InverseDynamicsSolver``), the analytic station Jacobian
+        (``calcStationJacobian``, wired in #7051), muscle-driven forward
+        dynamics, and a drift counterfactual. OpenSim's strength is muscle
+        actuation, so ``muscles`` is ``FULL``. Joint-torque ZVCF and native
+        contact-force reporting are not first-class engine methods, so they
+        stay ``NONE``.
+        """
+        return EngineCapabilities(
+            engine_name="OpenSim",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.PARTIAL,
+            forward_sim=CapabilityLevel.FULL,
+            muscles=CapabilityLevel.FULL,
+            extra={
+                "jacobian_method": "simbody_calcStationJacobian",
+                "spatial_jacobian_order": "angular_linear",
+                "control_mode": "muscle_or_torque",
+            },
+        )
 
     @property
     def model_name(self) -> str:
@@ -360,9 +392,18 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-        """Compute spatial Jacobian for a body in OpenSim.
+        """Compute the spatial Jacobian for a body in OpenSim (#7051).
 
-        Uses SimTK SimbodyMatterSubsystem to compute body Jacobian matrices.
+        Uses Simbody's **analytic** ``SimbodyMatterSubsystem.calcStationJacobian``
+        about the body origin to obtain the exact ``3 × nv`` translational
+        Jacobian, and ``calcSystemJacobian`` for the ``6 × nbody`` system
+        Jacobian whose angular block gives the exact rotational Jacobian. This
+        replaces the previous O(nv) central-difference approximation, which was
+        both slow (2·nv position realizations per call) and only first-order
+        accurate.
+
+        If the analytic Simbody calls are unavailable (older bindings), the
+        method transparently falls back to the central-difference estimate.
 
         Args:
             body_name: Name of the body in the model.
@@ -378,46 +419,121 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if not self._model or not self._state or opensim is None:
             return None
 
+        body_set = self._model.getBodySet()
+        body = body_set.get(body_name)
+        self._model.realizePosition(self._state)
+
+        analytic = self._compute_jacobian_analytic(body)
+        if analytic is not None:
+            return analytic
+
+        logger.debug(
+            "Simbody analytic Jacobian unavailable for '%s'; "
+            "falling back to finite differences.",
+            body_name,
+        )
+        return self._compute_jacobian_finite_difference(body)
+
+    def _compute_jacobian_analytic(self, body: Any) -> dict[str, np.ndarray] | None:
+        """Exact Simbody station/system Jacobian for ``body`` (#7051).
+
+        Returns ``None`` (so the caller falls back to finite differences) when
+        the underlying Simbody analytic API is not exposed by the installed
+        OpenSim bindings.
+        """
+        if self._model is None or self._state is None or opensim is None:
+            return None
         try:
-            # Get the body
-            body_set = self._model.getBodySet()
-            body = body_set.get(body_name)
+            matter = self._model.getMatterSubsystem()
+            nv = self._state.getNU()
+            mobod = body.getMobilizedBodyIndex()
+            station = opensim.Vec3(0, 0, 0)
 
-            # Realize to position stage
+            # Translational Jacobian: 3 x nv, analytic.
+            js = opensim.Matrix()
+            matter.calcStationJacobian(self._state, mobod, station, js)
+            jacp = self._opensim_matrix_to_numpy(js, 3, nv)
+
+            # Angular Jacobian from the 6*nbody x nv system Jacobian. Rows for
+            # mobod are [3*mobod : 3*mobod+3] (angular) over the angular block.
+            jsys = opensim.Matrix()
+            matter.calcSystemJacobian(self._state, jsys)
+            nbody = matter.getNumBodies()
+            jacr = self._extract_angular_block(jsys, int(mobod), nbody, nv)
+
+            return {
+                "linear": jacp,
+                "angular": jacr,
+                "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear]
+            }
+        except (AttributeError, RuntimeError, TypeError) as exc:
+            logger.debug("Analytic Simbody Jacobian failed: %s", exc)
+            return None
+
+    @staticmethod
+    def _opensim_matrix_to_numpy(mat: Any, n_rows: int, n_cols: int) -> np.ndarray:
+        """Copy an ``opensim.Matrix`` into a dense ``(n_rows, n_cols)`` array."""
+        out = np.zeros((n_rows, n_cols))
+        for r in range(n_rows):
+            for c in range(n_cols):
+                out[r, c] = mat.get(r, c)
+        return out
+
+    @staticmethod
+    def _extract_angular_block(
+        jsys: Any, mobod: int, nbody: int, nv: int
+    ) -> np.ndarray:
+        """Extract a body's 3×nv angular Jacobian from the system Jacobian.
+
+        Simbody's ``calcSystemJacobian`` returns a ``6*nbody × nv`` matrix
+        stacked per mobilized body as ``[angular(3); linear(3)]``. The angular
+        rows for ``mobod`` start at ``6*mobod``.
+        """
+        if not 0 <= mobod < nbody:
+            raise RuntimeError(
+                f"mobilized body index {mobod} out of range [0, {nbody})"
+            )
+        base = 6 * mobod
+        out = np.zeros((3, nv))
+        for r in range(3):
+            for c in range(nv):
+                out[r, c] = jsys.get(base + r, c)
+        return out
+
+    def _compute_jacobian_finite_difference(
+        self, body: Any
+    ) -> dict[str, np.ndarray] | None:
+        """Central-difference Jacobian fallback (legacy path, #7051).
+
+        Retained only for OpenSim bindings that do not expose the analytic
+        Simbody station/system Jacobian. Second-order accurate but O(nv)
+        position realizations per call.
+        """
+        if self._model is None or self._state is None:
+            return None
+        try:
             self._model.realizePosition(self._state)
-
-            # Number of generalized coordinates (nq for positions, nv for velocities)
             nq = self._state.getNQ()
             nv = self._state.getNU()
 
-            # Build Jacobian using finite differences (OpenSim doesn't expose
-            # direct Jacobian computation as easily as MuJoCo)
-            # For each generalized coordinate, compute d(body_position)/dq
             jacp = np.zeros((3, nv))
             jacr = np.zeros((3, nv))
-
-            # Central differences with a macroscopic angular step are more stable
-            # for OpenSim coordinates than sqrt(eps) forward differences.
             eps = 1e-4
 
-            # Store original state
             q_orig = np.zeros(nq)
             for i in range(nq):
                 q_orig[i] = self._state.getQ()[i]
 
             for i in range(nv):
-                # Perturb coordinate i symmetrically.
                 local_eps = eps * max(1.0, abs(q_orig[i]))
                 q_plus = q_orig.copy()
                 q_minus = q_orig.copy()
                 q_plus[i] += local_eps
                 q_minus[i] -= local_eps
 
-                # Set positively perturbed state.
                 for j in range(nq):
                     self._state.updQ()[j] = q_plus[j]
                 self._model.realizePosition(self._state)
-
                 transform_plus = body.getTransformInGround(self._state)
                 pos_plus = np.array(
                     [
@@ -428,11 +544,9 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
                 )
                 rotation_plus = transform_plus.R()
 
-                # Set negatively perturbed state.
                 for j in range(nq):
                     self._state.updQ()[j] = q_minus[j]
                 self._model.realizePosition(self._state)
-
                 transform_minus = body.getTransformInGround(self._state)
                 pos_minus = np.array(
                     [
@@ -443,13 +557,11 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
                 )
                 rotation_minus = transform_minus.R()
 
-                # Position and angular Jacobian columns.
                 jacp[:, i] = (pos_plus - pos_minus) / (2.0 * local_eps)
                 jacr[:, i] = self._rotation_difference(
                     rotation_minus, rotation_plus
                 ) / (2.0 * local_eps)
 
-            # Restore original state
             for i in range(nq):
                 self._state.updQ()[i] = q_orig[i]
             self._model.realizePosition(self._state)
@@ -457,11 +569,10 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return {
                 "linear": jacp,
                 "angular": jacr,
-                "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear] convention
+                "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear]
             }
-
-        except ImportError as e:
-            logger.error(f"Failed to compute Jacobian for '{body_name}': {e}")
+        except (ImportError, RuntimeError, ValueError) as e:
+            logger.error("Finite-difference Jacobian failed: %s", e)
             return None
 
     def _rotation_difference(self, R0: Any, R1: Any) -> np.ndarray:
