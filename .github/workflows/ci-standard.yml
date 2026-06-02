@@ -164,7 +164,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -863,7 +863,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -933,7 +933,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
           cache: "pip"
@@ -1054,7 +1054,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
@@ -1153,10 +1153,22 @@ jobs:
               )
             fi
 
-            if [ "${#changed_tests[@]}" -eq 0 ]; then
-              echo "No Python test changes detected; skipping PR-scoped core tests."
-              echo "Falling through to default test lane to ensure coverage."
-              # Do not exit here - fall through to default test lane below
+            mapfile -t changed_core_targets < <(
+              git diff --name-only --diff-filter=ACMRT "${merge_base:-origin/${{ github.base_ref }}}" HEAD -- \
+                'src/**/*.py' \
+                'tests/**/*.py' \
+                'pyproject.toml' \
+                'requirements*.txt' \
+                'environment.yml' \
+                ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
+            )
+
+            if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
+              echo "No core Python/test/dependency changes detected; skipping core tests for this workflow-only PR."
+              exit 0
+            elif [ "${#changed_tests[@]}" -eq 0 ]; then
+              echo "No Python test changes detected for changed core targets."
+              echo "Falling through to default test lane to ensure source/dependency coverage."
             else
               echo "Running PR-scoped core tests:"
               printf '  %s\n' "${changed_tests[@]}"
@@ -1326,7 +1338,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1397,7 +1409,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1526,7 +1538,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1708,7 +1720,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1828,7 +1840,7 @@ jobs:
           fi
       - name: Set up Python (for PyO3 builds)
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
           cache: "pip"
@@ -2031,7 +2043,7 @@ jobs:
           fi
       - name: Setup Python
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
