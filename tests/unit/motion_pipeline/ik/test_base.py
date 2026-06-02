@@ -50,12 +50,11 @@ def test_make_ik_solver_unknown_backend_raises() -> None:
         make_ik_solver("not-a-backend")
 
 
-def test_make_ik_solver_geometric_raises_module_not_found() -> None:
-    """Geometric backend module is referenced but not present."""
-    # Either ImportError or ValueError is acceptable; the production code
-    # imports geometric_backend, which does not exist.
-    with pytest.raises((ImportError, ModuleNotFoundError)):
-        make_ik_solver(IKBackendType.GEOMETRIC)
+def test_make_ik_solver_geometric_returns_real_solver() -> None:
+    """The geometric backend is the one real, dependency-free solver (#7046)."""
+    solver = make_ik_solver(IKBackendType.GEOMETRIC)
+    assert hasattr(solver, "solve")
+    assert hasattr(solver, "solve_frame")
 
 
 def test_make_ik_solver_returns_protocol_compatible() -> None:

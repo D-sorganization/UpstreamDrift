@@ -106,22 +106,15 @@ class MuJoCoIKSolver(BaseIKSolver):
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
 
-        Returns:
-            List of joint angles (q) in radians
+        Raises:
+            NotImplementedError: The MuJoCo IK backend is not yet
+                implemented. Use the ``geometric`` backend for a real
+                dependency-free solver (issue #7046).
         """
-        # Placeholder implementation
-        # Full implementation would:
-        # 1. Build MuJoCo model from rig
-        # 2. Set marker targets
-        # 3. Run IK solver (e.g., damped least squares)
-        # 4. Extract joint angles
-
-        num_dofs = rig.num_dofs
-
-        # Return neutral pose as placeholder
-        q = [0.0] * num_dofs
-
-        # Apply joint limits
-        q = self._clamp_to_limits(q, rig)
-
-        return q
+        # A real implementation would build a MuJoCo model from the rig,
+        # set marker targets, run damped-least-squares IK, and extract
+        # joint angles. Until that lands we raise loudly rather than
+        # returning a silent neutral pose that masks the missing solver.
+        raise NotImplementedError(
+            "MuJoCo IK backend is not implemented; use the 'geometric' backend (#7046)."
+        )

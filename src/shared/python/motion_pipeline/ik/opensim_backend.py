@@ -111,22 +111,16 @@ class OpenSimIKSolver(BaseIKSolver):
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
 
-        Returns:
-            List of joint angles (q) in radians
+        Raises:
+            NotImplementedError: The OpenSim IK backend is not yet
+                implemented. Use the ``geometric`` backend for a real
+                dependency-free solver (issue #7046).
         """
-        # Placeholder implementation
-        # Full implementation would:
-        # 1. Write TRC file with marker positions
-        # 2. Write OpenSim setup XML
-        # 3. Run InverseKinematicsTool
-        # 4. Parse output .mot file
-
-        num_dofs = rig.num_dofs
-
-        # Return neutral pose as placeholder
-        q = [0.0] * num_dofs
-
-        # Apply joint limits
-        q = self._clamp_to_limits(q, rig)
-
-        return q
+        # A real implementation would write a TRC file + setup XML, run
+        # OpenSim's InverseKinematicsTool, and parse the output .mot file.
+        # Until that lands we raise loudly rather than returning a silent
+        # neutral pose.
+        raise NotImplementedError(
+            "OpenSim IK backend is not implemented; use the 'geometric' "
+            "backend (#7046)."
+        )
