@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect as StarletteWSDisconnect
 
 from src.api.routes.chat_ws import router
 
@@ -171,3 +172,76 @@ def test_chat_websocket_disconnect(client: TestClient) -> None:
     with client.websocket_connect("/ws/chat/session_1") as websocket:
         websocket.receive_json()
         websocket.close()
+
+
+class _DisconnectingChatService(MockChatService):
+    """ChatService whose stream raises WebSocketDisconnect mid-stream (#7057)."""
+
+    async def stream_response(self, session_id):  # type: ignore[override]
+        # Emit one valid chunk, then the client drops mid-stream.
+        yield {"type": "chunk", "content": "partial"}
+        raise StarletteWSDisconnect(code=1006)
+
+
+class _ChatRouteWebSocket:
+    """Minimal in-process WebSocket double for driving ``chat_stream`` directly.
+
+    Avoids TestClient deadlocks when the handler itself raises mid-stream.
+    """
+
+    def __init__(self, messages: list[dict[str, Any]], chat_service: Any) -> None:
+        self._messages = list(messages)
+        state = type("_S", (), {"chat_service": chat_service})()
+        self.app = type("_A", (), {"state": state})()
+        self.accepted = False
+        self.sent: list[dict[str, Any]] = []
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def receive_json(self) -> dict[str, Any]:
+        if not self._messages:
+            # No further client messages -> normal disconnect.
+            raise StarletteWSDisconnect(code=1000)
+        return self._messages.pop(0)
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+
+@pytest.mark.anyio
+async def test_chat_disconnect_midstream_is_not_internal_error(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A mid-stream WebSocketDisconnect must propagate to the outer disconnect
+    handler — not be logged as an internal error nor produce an error frame on
+    the dead socket (issue #7057)."""
+    import src.api.routes.chat_ws as chat_ws
+
+    async def _fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(chat_ws, "resolve_ws_user", _fake_resolve_ws_user)
+
+    websocket = _ChatRouteWebSocket(
+        [{"action": "send", "message": "hello"}],
+        _DisconnectingChatService(),
+    )
+
+    with caplog.at_level("DEBUG", logger="src.api.routes.chat_ws"):
+        # The handler must complete via the outer WebSocketDisconnect branch
+        # (it does not re-raise out of chat_stream).
+        await chat_ws.chat_stream(websocket, "session_1")
+
+    # The partial chunk was sent, but NO error frame ever reached the socket.
+    assert {"type": "chunk", "content": "partial"} in websocket.sent
+    assert not any(
+        frame.get("type") == "error" and frame.get("detail") == "Internal server error"
+        for frame in websocket.sent
+    )
+    # The streaming except-branch must NOT have logged an internal error.
+    assert not any(
+        "Error during streaming response" in r.message for r in caplog.records
+    )
+    # It is logged as a normal disconnect by the outer handler.
+    assert any("Chat WebSocket disconnected" in r.message for r in caplog.records)

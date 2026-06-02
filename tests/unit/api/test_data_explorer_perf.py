@@ -207,3 +207,72 @@ def test_cleanup_expired_counts_removed(tmp_path) -> None:
         )
     assert storage.cleanup_expired() == 1
     assert storage.cleanup_expired() == 0
+
+
+# ── #7058: bounded JSON read (size cap) + CSV/JSON parity ──
+
+
+def test_json_dataset_over_cap_rejected_without_reading(
+    client: TestClient, tmp_path, monkeypatch
+) -> None:
+    """An on-disk JSON dataset larger than the cap is rejected with 413 and
+    is never read into memory (issue #7058)."""
+    out_dir = tmp_path / "output"
+    out_dir.mkdir()
+    big = out_dir / "big.json"
+    big.write_text(json.dumps([{"a": 1}]), encoding="utf-8")
+    monkeypatch.setattr(de, "_get_output_dir", lambda: out_dir)
+
+    # Force the on-disk size over the cap without writing a huge file.
+    monkeypatch.setattr(de, "MAX_JSON_DATASET_BYTES", 4)
+
+    # Guard: a rejected dataset must never be read_text-ed.
+    real_read_text = Path.read_text
+
+    def _guard_read_text(self, *args, **kwargs):
+        if self == big:
+            raise AssertionError("oversized JSON must be rejected before read_text")
+        return real_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", _guard_read_text)
+
+    resp = client.get("/tools/data-explorer/datasets/big.json/preview?limit=5")
+    assert resp.status_code == 413
+
+
+def test_json_under_cap_still_previews(
+    client: TestClient, tmp_path, monkeypatch
+) -> None:
+    """A JSON dataset within the cap still previews normally (issue #7058)."""
+    out_dir = tmp_path / "output"
+    out_dir.mkdir()
+    payload = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+    (out_dir / "ok.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(de, "_get_output_dir", lambda: out_dir)
+
+    resp = client.get("/tools/data-explorer/datasets/ok.json/preview?limit=10")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["columns"] == ["a", "b"]
+    assert body["total_rows"] == 2
+
+
+def test_json_and_csv_preview_value_parity(
+    client: TestClient, tmp_path, monkeypatch
+) -> None:
+    """The same tabular data previews identically as CSV and JSON (#7058)."""
+    out_dir = tmp_path / "output"
+    out_dir.mkdir()
+    rows = [{"a": "1", "b": "2"}, {"a": "3", "b": "4"}]
+    (out_dir / "p.json").write_text(json.dumps(rows), encoding="utf-8")
+    (out_dir / "p.csv").write_text("a,b\n1,2\n3,4\n", encoding="utf-8")
+    monkeypatch.setattr(de, "_get_output_dir", lambda: out_dir)
+
+    json_resp = client.get("/tools/data-explorer/datasets/p.json/preview?limit=10")
+    csv_resp = client.get("/tools/data-explorer/datasets/p.csv/preview?limit=10")
+    assert json_resp.status_code == 200
+    assert csv_resp.status_code == 200
+    jb, cb = json_resp.json(), csv_resp.json()
+    assert jb["columns"] == cb["columns"] == ["a", "b"]
+    assert jb["total_rows"] == cb["total_rows"] == 2
+    assert jb["rows"] == cb["rows"]
