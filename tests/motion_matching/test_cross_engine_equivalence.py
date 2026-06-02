@@ -81,10 +81,14 @@ ADDRESS_TIME_S = 0.0
 RMSE_POSITION_GATE_MM = 5.0
 
 #: Plausibility gate: the world-frame offset between any engine's address grip
-#: and the Simscape address grip must be < this many metres (engines use
-#: different world origins, but they should all be within a few metres of the
-#: same physical location, not kilometres away).
-_MAX_WORLD_FRAME_OFFSET_M = 5.0
+#: and the Simscape address grip must be < this many metres.  Engines either
+#: share Simscape's world frame (offset ≈ 0 m) or use a body-at-origin
+#: convention (offset ≈ 0.98 m for trial_001).  2.0 m allows for both while
+#: catching a badly misconfigured engine.  A tighter 5 mm check is not
+#: achievable here without being tautological (the registration offset IS
+#: defined from the address pose); the 5 mm RMSE gate is enforced across
+#: all installed engines by ``test_cross_engine_grip_agreement``.
+_MAX_WORLD_FRAME_OFFSET_M = 2.0
 
 
 # --- Helpers -------------------------------------------------------------
@@ -304,7 +308,7 @@ def _frame_offset_to_simscape(
 
 
 def _assert_address_pose_matches_simscape(engine: str) -> None:
-    """Engine address grip is within ``_MAX_WORLD_FRAME_OFFSET_M`` of Simscape.
+    """Engine address grip world-frame origin is within plausibility bounds.
 
     The address-pose registration offset is defined as
     ``offset = grip[address] − butt["address"]``.  Comparing the
@@ -312,14 +316,16 @@ def _assert_address_pose_matches_simscape(engine: str) -> None:
     same offset is always zero by construction — that comparison is
     tautological and cannot catch a misregistered engine (see issue #7082).
 
-    Instead we verify the *magnitude* of the offset: engines use different
-    world-frame origins but must start near the same physical location as
-    Simscape.  An offset larger than ``_MAX_WORLD_FRAME_OFFSET_M`` metres
-    indicates a misconfigured engine coordinate system.
+    Instead we verify the *magnitude* of the offset stays within
+    ``_MAX_WORLD_FRAME_OFFSET_M`` (2 m).  Engines either share Simscape's
+    world frame (expected offset ≈ 0 m) or use a body-at-origin convention
+    (expected offset ≈ 0.98 m for trial_001).  An offset beyond 2 m
+    indicates a badly misconfigured coordinate system.
 
-    For cross-engine *pose-shape* agreement after registration, see
-    ``test_cross_engine_grip_agreement``, which is the non-trivial,
-    non-tautological check.
+    A sub-millimetre comparison is not achievable here without being
+    tautological because the registration IS computed from the address pose.
+    The 5 mm RMSE accuracy gate is enforced across all installed engines by
+    ``test_cross_engine_grip_agreement`` (the non-trivial, registered check).
     """
     butt = _load_simscape_butt()
     try:
@@ -339,14 +345,14 @@ def _assert_address_pose_matches_simscape(engine: str) -> None:
 @pytest.mark.requires_mujoco
 @pytest.mark.skipif(not is_engine_available("mujoco"), reason="mujoco not installed")
 def test_mujoco_matches_simscape_address() -> None:
-    """MuJoCo reproduces the Simscape address pose within 5 mm."""
+    """MuJoCo address grip world-frame origin is within 2 m of Simscape."""
     _assert_address_pose_matches_simscape("mujoco")
 
 
 @pytest.mark.requires_drake
 @pytest.mark.skipif(not is_engine_available("drake"), reason="pydrake not installed")
 def test_drake_matches_simscape_address() -> None:
-    """Drake reproduces the Simscape address pose within 5 mm."""
+    """Drake address grip world-frame origin is within 2 m of Simscape."""
     _assert_address_pose_matches_simscape("drake")
 
 
@@ -355,14 +361,14 @@ def test_drake_matches_simscape_address() -> None:
     not is_engine_available("pinocchio"), reason="pinocchio not installed"
 )
 def test_pinocchio_matches_simscape_address() -> None:
-    """Pinocchio reproduces the Simscape address pose within 5 mm."""
+    """Pinocchio address grip world-frame origin is within 2 m of Simscape."""
     _assert_address_pose_matches_simscape("pinocchio")
 
 
 @pytest.mark.requires_opensim
 @pytest.mark.skipif(not is_engine_available("opensim"), reason="opensim not installed")
 def test_opensim_matches_simscape_address() -> None:
-    """OpenSim reproduces the Simscape address pose within 5 mm."""
+    """OpenSim address grip world-frame origin is within 2 m of Simscape."""
     _assert_address_pose_matches_simscape("opensim")
 
 
@@ -496,21 +502,33 @@ def test_engine_bindings_error_is_raised_not_pytest_skip() -> None:
 
 
 def test_address_pose_gate_is_non_tautological() -> None:
-    """_assert_address_pose_matches_simscape fails for a far-away engine.
+    """_assert_address_pose_matches_simscape fails for a badly offset engine.
 
     Confirms the fix for #7082/#7091: the address-pose gate catches an engine
     whose grip is >_MAX_WORLD_FRAME_OFFSET_M metres from the Simscape origin.
     Previously the gate was tautological (always passed) because it compared
     the registered grip to the value used to define the registration offset.
+
+    Uses a 3 m shift — clearly outside the 2 m bound, yet a more realistic
+    example than 100 m to document what the gate is actually designed to catch.
+    Also verifies a near-origin engine (≈0 offset) passes the plausibility gate.
     """
     butt = _load_simscape_butt()
-    # A grip that is 100 m away from Simscape in all axes — trivially bad engine
-    far_grip = butt["address"] + np.array([100.0, 100.0, 100.0])
-    offset = _frame_offset_to_simscape(np.array([0.0]), far_grip[None, :], butt)
-    offset_m = float(np.linalg.norm(offset))
-    assert offset_m >= _MAX_WORLD_FRAME_OFFSET_M, (
-        f"Expected offset >= {_MAX_WORLD_FRAME_OFFSET_M} m for far-away grip, "
-        f"got {offset_m:.3f} m — gate is still tautological"
+
+    # A grip displaced 3 m from Simscape — should exceed the 2 m gate.
+    far_grip = butt["address"] + np.array([3.0, 0.0, 0.0])
+    offset_far = _frame_offset_to_simscape(np.array([0.0]), far_grip[None, :], butt)
+    assert float(np.linalg.norm(offset_far)) >= _MAX_WORLD_FRAME_OFFSET_M, (
+        f"Expected offset >= {_MAX_WORLD_FRAME_OFFSET_M} m for a 3 m shift, "
+        f"got {np.linalg.norm(offset_far):.3f} m — gate would not catch this"
+    )
+
+    # A grip at exactly the Simscape address position — offset = 0, should pass.
+    near_grip = butt["address"].copy()
+    offset_near = _frame_offset_to_simscape(np.array([0.0]), near_grip[None, :], butt)
+    assert float(np.linalg.norm(offset_near)) < _MAX_WORLD_FRAME_OFFSET_M, (
+        f"Expected offset < {_MAX_WORLD_FRAME_OFFSET_M} m for a co-located grip, "
+        f"got {np.linalg.norm(offset_near):.3f} m — gate is too tight"
     )
 
 
