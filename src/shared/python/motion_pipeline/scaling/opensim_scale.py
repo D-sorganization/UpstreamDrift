@@ -10,11 +10,10 @@ importable on systems without the package.
 from __future__ import annotations
 
 import logging
-import tempfile
-from pathlib import Path
-from collections.abc import Mapping
-
 import math
+import tempfile
+from collections.abc import Mapping
+from pathlib import Path
 
 import numpy as np
 
