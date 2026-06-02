@@ -3,8 +3,6 @@
 ## Canonical Current Quality Status
 
 - Canonical status file: `docs/assessments/CANONICAL_QUALITY_STATUS.md`
-- Archive index: `docs/assessments/archive/INDEX.md`
-- Legacy root-level assessment artifacts: `docs/assessments/archive/root-2026-04-26/`
 - Current migrated root assessment notes include
   `docs/assessments/may_10_12_audit_plan.md`, with fleet tracking and
   remediation summaries retained under `docs/operations/` as operational status

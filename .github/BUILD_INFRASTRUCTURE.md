@@ -180,13 +180,6 @@ Repair & Response:
   Jules-Hotfix-Creator           → Create emergency fix branches
 ```
 
-### Archived Workflows
-
-Disabled in `.github/workflows/archived/`:
-
-- `auto-remediate-issues.yml.disabled` — Superseded by Jules-Assessment-Remediator
-- `assessment-auto-fix.yml.disabled` — Superseded by Jules-Assessment-AutoFix
-
 ## Dependency Management
 
 ### Python Dependencies
