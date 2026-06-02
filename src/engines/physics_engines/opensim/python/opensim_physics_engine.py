@@ -441,6 +441,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         the underlying Simbody analytic API is not exposed by the installed
         OpenSim bindings.
         """
+        if self._model is None or self._state is None or opensim is None:
+            return None
         try:
             matter = self._model.getMatterSubsystem()
             nv = self._state.getNU()
@@ -507,6 +509,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         Simbody station/system Jacobian. Second-order accurate but O(nv)
         position realizations per call.
         """
+        if self._model is None or self._state is None:
+            return None
         try:
             self._model.realizePosition(self._state)
             nq = self._state.getNQ()
