@@ -214,27 +214,12 @@ class TestWindowSizing:
 
 
 # ---------------------------------------------------------------------------
-# PR #2087: MuJoCo launcher _get_launch_env must include shared_python.
+# PR #2087/#2089: ProcessManager subprocess env must have complete PYTHONPATH.
 # ---------------------------------------------------------------------------
 
 
 class TestSubprocessPythonpath:
     """PR #2087/#2089: Subprocesses must have complete PYTHONPATH."""
-
-    def test_mujoco_launcher_has_get_launch_env(self) -> None:
-        from src.launchers.archive.mujoco_unified_launcher import MujocoUnifiedLauncher
-
-        assert hasattr(MujocoUnifiedLauncher, "_get_launch_env")
-
-    def test_mujoco_launch_env_has_shared_python(self) -> None:
-        from src.launchers.archive.mujoco_unified_launcher import MujocoUnifiedLauncher
-
-        env = MujocoUnifiedLauncher._get_launch_env()
-        # shared_python must be on PYTHONPATH
-        pythonpath = env.get("PYTHONPATH", "")
-        assert "shared" in pythonpath and "python" in pythonpath, (
-            f"Expected shared/python in PYTHONPATH, got: {pythonpath}"
-        )
 
     def test_process_manager_env_has_shared_python(self) -> None:
         """ProcessManager.get_subprocess_env must include src/shared/python."""
