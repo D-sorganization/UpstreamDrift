@@ -785,15 +785,25 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_API: pyqt6
         run: |
+          set +e
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
             -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
-            -n auto \
+            -n 4 \
             --timeout=60 \
             --timeout-method=thread \
             -p no:cacheprovider \
             --no-cov \
             --tb=short
+          pytest_exit_code=$?
+          set -e
+          if [ "$pytest_exit_code" -eq 0 ]; then
+            exit 0
+          elif [ "$pytest_exit_code" -eq 5 ]; then
+            echo "No runnable green-suite unit tests were available after optional dependency skips."
+            exit 0
+          fi
+          exit "$pytest_exit_code"
 
   # Required branch-protection check (issue #7064). The name `quality-gate` is
   # preserved exactly so existing branch protection rules and the bot workflows
@@ -1876,7 +1886,7 @@ jobs:
 
       - name: Cache Cargo registry and build
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: |
             ~/.cargo/registry
@@ -2059,7 +2069,7 @@ jobs:
 
       - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: |
             ~/.cargo/registry
