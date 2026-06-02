@@ -60,10 +60,12 @@ class BiomechanicalModel:
         require(len(proximal_markers) > 0, "Must have at least one proximal marker")
         require(len(distal_markers) > 0, "Must have at least one distal marker")
 
-        key = get_anthropometry_key(name)
+        # ``segment_masses`` is keyed by the full segment name (e.g.
+        # ``right_thigh``), matching the lookup in ``compute_dynamic_com``.
+        # Validate against the same key used there, not the anthropometry key.
         require(
-            key in self.segment_masses,
-            f"Unknown segment name: {name} (mapped to {key})",
+            name in self.segment_masses,
+            f"Unknown segment name: {name} (mapped to {get_anthropometry_key(name)})",
         )
 
         self.segments.append(SegmentDefinition(name, proximal_markers, distal_markers))
