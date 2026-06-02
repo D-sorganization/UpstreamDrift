@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
+from src.shared.python.estimation.residuals import project_pinhole
 from src.shared.python.estimation.synthetic_fixtures import (
     make_fixture_cameras,
     make_two_link_trajectory,
@@ -14,6 +16,87 @@ from src.shared.python.estimation.synthetic_ground_truth import (
     SyntheticObservationRig,
     project_world_point,
 )
+from src.shared.python.motion_pipeline import (
+    CameraExtrinsics,
+    CameraIntrinsics,
+)
+
+
+def test_fixture_cameras_are_proper_rotations() -> None:
+    """Positive: every fixture extrinsic validates and is a proper rotation."""
+    for _camera_id, _intrinsics, extrinsics in make_fixture_cameras():
+        rotation = np.asarray(extrinsics.rotation, dtype=np.float64)
+        np.testing.assert_allclose(rotation.T @ rotation, np.eye(3), atol=1e-9)
+        assert np.isclose(np.linalg.det(rotation), 1.0, atol=1e-9)
+
+
+def test_camera_extrinsics_rejects_non_orthonormal_rotation() -> None:
+    """Negative: the legacy non-orthonormal fixture matrix is rejected."""
+    with pytest.raises(ValueError, match="orthonormal"):
+        CameraExtrinsics(
+            rotation=[
+                [0.9659, 0.0, -0.2588],
+                [0.0, 1.0, 0.0],
+                [0.2588, 0.0, 0.9659],
+            ],
+            translation=[0.2, 0.0, 0.0],
+        )
+
+
+def test_project_world_point_matches_pinhole_with_nonzero_k3() -> None:
+    """project_world_point must equal project_pinhole's 5-term radial model."""
+    intrinsics = CameraIntrinsics(
+        fx=800.0, fy=820.0, cx=640.0, cy=480.0, k1=0.12, k2=-0.05, k3=0.03
+    )
+    camera = SyntheticCamera("cam", intrinsics, CameraExtrinsics())
+    point = np.array([0.2, -0.1, 2.0])
+
+    x_px, y_px, _depth = project_world_point(camera, point)
+
+    camera_matrix = np.array(
+        [
+            [intrinsics.fx, 0.0, intrinsics.cx],
+            [0.0, intrinsics.fy, intrinsics.cy],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+    distortion = np.array(
+        [intrinsics.k1, intrinsics.k2, intrinsics.p1, intrinsics.p2, intrinsics.k3]
+    )
+    expected = project_pinhole(
+        point.reshape(1, 3),
+        camera_matrix,
+        distortion=distortion,
+    )[0]
+
+    np.testing.assert_allclose([x_px, y_px], expected, atol=1e-9)
+
+
+def test_project_world_point_unchanged_for_zero_k3() -> None:
+    """The 5-term model collapses to the 4-term model when k3 == 0."""
+    intrinsics = CameraIntrinsics(
+        fx=800.0, fy=820.0, cx=640.0, cy=480.0, k1=0.12, k2=-0.05
+    )
+    camera = SyntheticCamera("cam", intrinsics, CameraExtrinsics())
+    point = np.array([0.2, -0.1, 2.0])
+
+    x_px, y_px, _depth = project_world_point(camera, point)
+
+    camera_matrix = np.array(
+        [
+            [intrinsics.fx, 0.0, intrinsics.cx],
+            [0.0, intrinsics.fy, intrinsics.cy],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+    distortion = np.array([intrinsics.k1, intrinsics.k2, intrinsics.p1, intrinsics.p2])
+    expected = project_pinhole(
+        point.reshape(1, 3),
+        camera_matrix,
+        distortion=distortion,
+    )[0]
+
+    np.testing.assert_allclose([x_px, y_px], expected, atol=1e-9)
 
 
 def test_project_world_point_uses_intrinsics_and_depth() -> None:

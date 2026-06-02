@@ -70,19 +70,28 @@ def make_two_link_trajectory(n_frames: int = 8, fps: float = 60.0) -> JointTraje
 def make_fixture_cameras() -> tuple[
     tuple[str, CameraIntrinsics, CameraExtrinsics], ...
 ]:
-    """Return two calibrated pinhole cameras looking along positive depth."""
+    """Return two calibrated pinhole cameras looking along positive depth.
+
+    ``cam1`` is rotated by a proper 15-degree rotation about the Y axis, built
+    from ``cos``/``sin`` so the matrix is guaranteed orthonormal with
+    ``det == +1`` (the ``CameraExtrinsics`` validator rejects anything else).
+    """
     intrinsics = CameraIntrinsics(fx=800.0, fy=800.0, cx=640.0, cy=480.0)
+    theta = np.deg2rad(15.0)
+    cos_t = float(np.cos(theta))
+    sin_t = float(np.sin(theta))
+    rotation_about_y = [
+        [cos_t, 0.0, sin_t],
+        [0.0, 1.0, 0.0],
+        [-sin_t, 0.0, cos_t],
+    ]
     return (
         ("cam0", intrinsics, CameraExtrinsics()),
         (
             "cam1",
             intrinsics,
             CameraExtrinsics(
-                rotation=[
-                    [0.9659, 0.0, -0.2588],
-                    [0.0, 1.0, 0.0],
-                    [0.2588, 0.0, 0.9659],
-                ],
+                rotation=rotation_about_y,
                 translation=[0.2, 0.0, 0.0],
             ),
         ),
