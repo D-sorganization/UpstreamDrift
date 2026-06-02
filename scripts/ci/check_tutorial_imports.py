@@ -20,7 +20,7 @@ def _repo_root() -> Path:
 
 ROOT = _repo_root()
 DOC_TARGETS = (
-    ROOT / "docs" / "UPSTREAM_DRIFT_USER_MANUAL.md",
+    ROOT / "docs" / "user_guide" / "upstream_drift_user_manual.md",
     *sorted((ROOT / "docs" / "tutorials" / "content").glob("*.md")),
 )
 DEPRECATED_MODULE = "src.shared.python.engine_manager"

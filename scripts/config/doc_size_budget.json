@@ -2,7 +2,7 @@
   "max_bytes": 51200,
   "exceptions": [
     {
-      "path": "docs/UPSTREAM_DRIFT_USER_MANUAL.md",
+      "path": "docs/user_guide/upstream_drift_user_manual.md",
       "owner": "@docs-team",
       "reason": "Legacy monolithic user manual tracked by issue #3839; staged for Sphinx chapter decomposition.",
       "expires_on": "2026-08-01"

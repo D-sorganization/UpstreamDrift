@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 MAKEFILE = ROOT / "Makefile"
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
-MANUAL = ROOT / "docs" / "UPSTREAM_DRIFT_USER_MANUAL.md"
+MANUAL = ROOT / "docs" / "user_guide" / "upstream_drift_user_manual.md"
 CONTRIBUTING = ROOT / "docs" / "development" / "contributing.md"
 
 
