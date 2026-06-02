@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import math
 
 import numpy as np
 
@@ -254,7 +255,10 @@ class MotionCapturePlotterVisualizationMixin:
 
         # Calculate and draw club face normal vector
         shaft_direction = club_head_pos - grip_pos
-        shaft_length = np.linalg.norm(shaft_direction)
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        shaft_length = math.hypot(
+            shaft_direction[0], shaft_direction[1], shaft_direction[2]
+        )
 
         if shaft_length > 0:
             shaft_direction = shaft_direction / shaft_length
@@ -262,7 +266,10 @@ class MotionCapturePlotterVisualizationMixin:
             # Calculate face normal (perpendicular to shaft)
             up_vector = np.array([0, 0, 1])  # Vertical up
             face_normal = np.cross(shaft_direction, up_vector)
-            face_normal_length = np.linalg.norm(face_normal)
+            # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+            face_normal_length = math.hypot(
+                face_normal[0], face_normal[1], face_normal[2]
+            )
 
             if face_normal_length > 0:
                 face_normal = face_normal / face_normal_length
