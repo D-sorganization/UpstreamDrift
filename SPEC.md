@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.261                                            |
+| **Spec Version**        | 1.0.262                                            |
 | **Last Spec Update**    | 2026-06-02                                         |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-06-02** - Hardened the core CI PR test lane for workflow-only pull requests (#7079): when the diff contains no core Python, test, or dependency targets, the core matrix exits after change detection instead of falling through to the full coverage lane. Source/dependency PRs with no changed tests still run the default core suite, preserving coverage while avoiding OOM-prone full-suite runs for GitHub Actions dependency bumps.
+- **2026-06-02** - Re-homed archived launcher modules for #7104 so
+  `mujoco_unified_launcher.py`, `matlab_launcher_unified.py`, and
+  `motion_capture_launcher.py` live under `src/launchers/` again, matching the
+  launcher manifest and tool catalog paths. Regression coverage now verifies
+  the manifest paths exist/import and catalog commands resolve to importable
+  launcher modules.
 - **2026-06-02** - Recorded the Bolt small-vector norm optimization (#7098): scalar ball-flight force calculation, Waterloo/Penner and spin-decay flight models, and swing-to-launch derivation now use fixed-arity `math.hypot` for known 2D/3D vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing one-dimensional vector contracts.
 - **2026-06-02** - Recorded the golf visualizer camera-basis norm optimization (#7101): `GolfVisualizerWidget` now uses fixed-arity `math.hypot` for the known 3D forward/right camera vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing fallback behavior for degenerate vectors.
 - **2026-06-02** - Hardened cross-engine equivalence gate NaN handling and corrected JaxSim/Pinocchio parity test parameters (#7095, #7097): `_run_engine_checked` now distinguishes all-NaN grip (grip body absent from URDF — Drake's documented design for missing `club_grip`) from partial-NaN/Inf grip (simulation divergence). All-NaN raises `_EngineBindingsError` so the aggregation test skips the engine as unavailable; partial-NaN/Inf calls `pytest.fail` so a broken-but-runnable backend remains a hard gate failure (per reviewer feedback on #7099). The second JaxSim-vs-Pinocchio parametrized case was changed from a non-zero position to zero position: JaxSim uses INERTIAL velocity representation (angular momentum about world origin) while Pinocchio uses LOCAL (about CoM), and these two representations diverge in `M` and `h` at non-zero body positions via the parallel-axis theorem — the zero-position fix makes both representations equivalent while still exercising full mixed angular+linear Coriolis effects. Updated cross-engine gate docstrings to accurately describe that the 5 mm grip RMSE tolerance applies to cross-engine agreement only; the per-engine address-vs-Simscape check is a world-frame origin plausibility gate, not a post-registration RMSE gate (post-registration error is identically zero by construction).
