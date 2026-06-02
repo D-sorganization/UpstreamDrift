@@ -25,6 +25,7 @@ from typing import Any
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QCloseEvent, QShowEvent
 from PyQt6.QtWidgets import (
+    QInputDialog,
     QLabel,
     QMainWindow,
     QMessageBox,
@@ -32,9 +33,17 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from sidekick.persistence.schema import ProfilePayload
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["StandaloneSidekickConfig", "StandaloneSidekickWindow"]
+
+# Profile payload keys (DRY: declared once, used by save + load).
+_PROFILE_KEY = "profile"
+_THEME_KEY = "theme_name"
+# Default profile name used by the menu slots when prompting is unavailable.
+_DEFAULT_PROFILE_NAME = "default"
 
 _VALID_PROFILES = frozenset({"chat-first", "calc-first"})
 _PANEL_FALLBACK_ERRORS = (
@@ -132,6 +141,74 @@ class StandaloneSidekickWindow(QMainWindow):
     def sidebar(self) -> QWidget:
         """Return the sidebar (UnifiedToolsSidebar or placeholder) widget."""
         return self._sidebar_panel
+
+    def active_profile(self) -> str:
+        """Return the layout profile currently applied to the window."""
+        return self._config.profile
+
+    def active_theme(self) -> str | None:
+        """Return the theme name currently applied (``None`` if default)."""
+        return self._config.theme_name
+
+    def host_action_port(self) -> Any:
+        """Return the injected ``HostActionPort`` (or ``None``).
+
+        Exposes the configured port for embedded/standalone round-trip
+        callers (T5) so the value is consumed rather than dead state.
+        """
+        return self._config.host_action_port
+
+    # ---- Profile persistence (#7068) -------------------------------------
+
+    def save_profile_to_store(self, name: str = _DEFAULT_PROFILE_NAME) -> None:
+        """Persist the current layout + theme under profile *name*.
+
+        Precondition: the configured ``session_store`` exposes
+        ``save_profile(name, ProfilePayload)``.
+
+        Raises:
+            RuntimeError: if no capable session store is configured.
+        """
+        store = self._config.session_store
+        if store is None or not hasattr(store, "save_profile"):
+            raise RuntimeError("no session store configured for save_profile")
+        payload = ProfilePayload(
+            data={
+                _PROFILE_KEY: self._config.profile,
+                _THEME_KEY: self._config.theme_name,
+            }
+        )
+        store.save_profile(name, payload)
+        logger.info("Saved standalone profile %r", name)
+
+    def load_profile_from_store(self, name: str = _DEFAULT_PROFILE_NAME) -> None:
+        """Restore the layout + theme stored under profile *name*.
+
+        Raises:
+            KeyError: if *name* is not present in the store.
+            RuntimeError: if no capable session store is configured.
+        """
+        store = self._config.session_store
+        if store is None or not hasattr(store, "load_profile"):
+            raise RuntimeError("no session store configured for load_profile")
+        payload = store.load_profile(name)  # may raise KeyError
+        data = payload.data if isinstance(payload, ProfilePayload) else dict(payload)
+        theme_name = data.get(_THEME_KEY)
+        profile = data.get(_PROFILE_KEY, self._config.profile)
+        self._apply_theme(theme_name)
+        # Fold the restored theme into the config first; _switch_profile
+        # rebuilds the config carrying whatever theme_name is current, so
+        # this single update covers both the changed- and unchanged-profile
+        # cases (DRY — no duplicated config rebuild).
+        self._config = StandaloneSidekickConfig(
+            profile=self._config.profile,
+            theme_name=theme_name,
+            session_store=self._config.session_store,
+            host_action_port=self._config.host_action_port,
+        )
+        if profile in _VALID_PROFILES and profile != self._config.profile:
+            self._switch_profile(profile)
+        logger.info("Loaded standalone profile %r", name)
 
     # ---- Qt overrides ----------------------------------------------------
 
@@ -234,10 +311,38 @@ class StandaloneSidekickWindow(QMainWindow):
             logger.exception("Failed to flush session on close")
 
     def _on_save_profile(self) -> None:
-        logger.info("Save profile triggered (UI not yet implemented — T8)")
+        name = _prompt_profile_name(self, "Save profile", "Profile name:")
+        if not name:
+            return
+        try:
+            self.save_profile_to_store(name)
+        except (RuntimeError, OSError, ValueError, TypeError):
+            logger.exception("Save profile failed")
+            QMessageBox.warning(self, "Save profile", "Could not save the profile.")
 
     def _on_load_profile(self) -> None:
-        logger.info("Load profile triggered (UI not yet implemented — T8)")
+        name = _prompt_profile_name(self, "Load profile", "Profile name:")
+        if not name:
+            return
+        try:
+            self.load_profile_from_store(name)
+        except KeyError:
+            QMessageBox.warning(self, "Load profile", f"No profile named {name!r}.")
+        except (RuntimeError, OSError, ValueError, TypeError):
+            logger.exception("Load profile failed")
+            QMessageBox.warning(self, "Load profile", "Could not load the profile.")
+
+    def _apply_theme(self, theme_name: str | None) -> None:
+        """Apply *theme_name* to the running application, if a theme manager
+        is available. Headless-safe: a missing theme backend is a no-op."""
+        if not theme_name:
+            return
+        try:
+            from shared.python.theme.integration import get_theme_manager
+
+            get_theme_manager().set_theme(theme_name)
+        except (ImportError, AttributeError, RuntimeError, ValueError):
+            logger.debug("Theme backend unavailable; skipping apply of %r", theme_name)
 
     def _switch_profile(self, profile: str) -> None:
         if profile not in _VALID_PROFILES:
@@ -294,3 +399,13 @@ def _action(text: str, parent: QWidget, slot: Any) -> QAction:
     act = QAction(text, parent)
     act.triggered.connect(slot)
     return act
+
+
+def _prompt_profile_name(parent: QWidget, title: str, label: str) -> str | None:
+    """Prompt for a profile name. Returns the trimmed name or ``None`` if the
+    user cancelled or entered only whitespace. Patched in headless tests."""
+    text, ok = QInputDialog.getText(parent, title, label)
+    if not ok:
+        return None
+    name = text.strip()
+    return name or None

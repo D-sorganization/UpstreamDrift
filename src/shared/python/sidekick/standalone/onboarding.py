@@ -22,6 +22,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "SENTINEL_FILENAME",
+    "OnboardingState",
+    "StandaloneOnboarding",
+]
+
 SENTINEL_FILENAME = "onboarded"
 
 # Default config directory (overridden in tests via constructor arg)

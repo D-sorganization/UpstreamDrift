@@ -230,6 +230,130 @@ class TestNoLaunchersImport:
 # ---------------------------------------------------------------------------
 
 
+class TestProfilePersistence:
+    """Save/Load Profile must round-trip layout + theme (#7068)."""
+
+    def test_save_then_load_round_trips_layout_and_theme(
+        self, app: Any, session_store: Any
+    ) -> None:
+        from sidekick.standalone.window import (
+            StandaloneSidekickConfig,
+            StandaloneSidekickWindow,
+        )
+
+        cfg = StandaloneSidekickConfig(
+            profile="calc-first",
+            theme_name="Catppuccin Latte",
+            session_store=session_store,
+        )
+        win = StandaloneSidekickWindow(cfg)
+        # Persist current state under a named profile.
+        win.save_profile_to_store("snap")
+        assert "snap" in session_store.list_profiles()
+        win.close()
+
+        # A fresh window on a different profile/theme reloads the snapshot.
+        cfg2 = StandaloneSidekickConfig(
+            profile="chat-first",
+            theme_name="Catppuccin Mocha",
+            session_store=session_store,
+        )
+        win2 = StandaloneSidekickWindow(cfg2)
+        win2.load_profile_from_store("snap")
+        assert win2.active_profile() == "calc-first"
+        assert win2.active_theme() == "Catppuccin Latte"
+        win2.close()
+
+    def test_load_unknown_profile_raises_key_error(
+        self, app: Any, session_store: Any
+    ) -> None:
+        from sidekick.standalone.window import StandaloneSidekickWindow
+
+        win = StandaloneSidekickWindow(_make_config(session_store))
+        with pytest.raises(KeyError):
+            win.load_profile_from_store("does-not-exist")
+        win.close()
+
+    def test_save_load_menu_slots_do_not_raise_headless(
+        self, app: Any, session_store: Any, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # The interactive slots prompt for a name; stub the dialog so the
+        # headless slot exercises the real save/load path end-to-end.
+        from sidekick.standalone import window as window_mod
+        from sidekick.standalone.window import StandaloneSidekickWindow
+
+        monkeypatch.setattr(
+            window_mod, "_prompt_profile_name", lambda *a, **k: "from_menu"
+        )
+        win = StandaloneSidekickWindow(_make_config(session_store, "calc-first"))
+        win._on_save_profile()
+        assert "from_menu" in session_store.list_profiles()
+        win._on_load_profile()
+        assert win.active_profile() == "calc-first"
+        win.close()
+
+
+class TestHostActionPort:
+    """host_action_port is consumed, not dead state (#7068)."""
+
+    def test_host_action_port_accessor_returns_injected_port(
+        self, app: Any, session_store: Any
+    ) -> None:
+        from sidekick.standalone.window import (
+            StandaloneSidekickConfig,
+            StandaloneSidekickWindow,
+        )
+
+        sentinel = object()
+        cfg = StandaloneSidekickConfig(
+            profile="chat-first",
+            theme_name=None,
+            session_store=session_store,
+            host_action_port=sentinel,
+        )
+        win = StandaloneSidekickWindow(cfg)
+        assert win.host_action_port() is sentinel
+        win.close()
+
+    def test_host_action_port_defaults_to_none(
+        self, app: Any, session_store: Any
+    ) -> None:
+        from sidekick.standalone.window import StandaloneSidekickWindow
+
+        win = StandaloneSidekickWindow(_make_config(session_store))
+        assert win.host_action_port() is None
+        win.close()
+
+
+class TestStandaloneDunderAll:
+    """Every standalone module declares __all__ (#7068 hygiene)."""
+
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "sidekick.standalone.onboarding",
+            "sidekick.standalone.preferences",
+            "sidekick.standalone.runner",
+            "sidekick.standalone.session_store",
+            "sidekick.standalone.window",
+        ],
+    )
+    def test_module_declares_dunder_all(self, module_name: str) -> None:
+        import importlib
+
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            pytest.skip(f"{module_name} not importable in this environment")
+        assert hasattr(module, "__all__"), f"{module_name} is missing __all__"
+        assert isinstance(module.__all__, list)
+        assert module.__all__, f"{module_name}.__all__ is empty"
+        for name in module.__all__:
+            assert hasattr(module, name), (
+                f"{module_name}.__all__ lists {name!r} which is not defined"
+            )
+
+
 class TestProfileSwitch:
     def test_switch_profile_reorders_and_reflows(
         self, app: Any, session_store: Any

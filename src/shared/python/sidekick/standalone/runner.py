@@ -18,7 +18,6 @@ import difflib
 import io
 import json
 import logging
-import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -30,8 +29,15 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Maps CLI name → callable(inputs: dict) -> dict.
-# Add new calculators here; do NOT import GUI modules at module level.
+#
+# Entries are populated lazily by :func:`_ensure_registered` so that this
+# module imports with ZERO GUI / matplotlib / scipy dependencies (the
+# canonical ``process_calculators`` engines guard their PyQt6 imports but
+# still pull in heavy scientific stacks; deferring keeps ``sidekick run``
+# importable in headless CI and PyInstaller smoke tests — see
+# ``tests/.../test_run.py::test_runner_module_does_not_import_pyqt6``).
 _REGISTRY: dict[str, Any] = {}
+_REGISTERED = False
 
 
 def register(name: str):
@@ -45,105 +51,172 @@ def register(name: str):
 
 
 # ---------------------------------------------------------------------------
-# Built-in: wgs_reactor
+# Canonical-engine adapters (#7067)
 # ---------------------------------------------------------------------------
+#
+# Each adapter is a thin ``callable(inputs: dict) -> dict`` that delegates to
+# the single canonical engine in ``sidekick.process_calculators`` — the SAME
+# code path the GUI calculators use. No physics or constants are
+# re-implemented here (DRY): in particular WGS routes through
+# ``WGSReactorEngine`` so the equilibrium constant comes from the canonical
+# ``WGS_DELTA_H`` / ``WGS_DELTA_S`` and can never silently diverge.
 
 
-@register("wgs_reactor")
-def _wgs_reactor(inputs: dict) -> dict:
-    """Headless Water-Gas Shift reactor calculation.
-
-    Computes equilibrium composition and key performance metrics without
-    any GUI or matplotlib dependencies.
+def _adapt_wgs_reactor(inputs: dict) -> dict:
+    """Water-Gas Shift equilibrium via the canonical ``WGSReactorEngine``.
 
     Args:
-        inputs: dict with keys:
-            temperature_c  (float) reactor temperature in °C (default 350)
-            co_fraction    (float) inlet CO mole fraction (default 0.30)
-            h2o_fraction   (float) inlet H2O mole fraction (default 0.40)
-            co2_fraction   (float) inlet CO2 mole fraction (default 0.10)
-            h2_fraction    (float) inlet H2 mole fraction (default 0.20)
-            pressure_bar   (float) reactor pressure in bar (default 20.0)
+        inputs: dict with optional keys ``temperature_c`` (°C, default 350),
+            ``co_fraction``/``h2o_fraction``/``co2_fraction``/``h2_fraction``
+            (inlet mole fractions), ``pressure_bar`` (default 20.0).
 
     Returns:
-        dict with equilibrium mole fractions and CO conversion.
+        dict with ``co_conversion_fraction`` and an ``equilibrium_composition``
+        whose mole fractions sum to ≈ 1.
 
     Postcondition:
         All returned mole fractions are in [0, 1] and sum to ≈ 1.
     """
     assert isinstance(inputs, dict), "inputs must be a dict"
+    from sidekick.process_calculators.constants import CELSIUS_TO_KELVIN_OFFSET
+    from sidekick.process_calculators.wgs_reactor_calculator import WGSReactorEngine
 
-    R = 8.314  # J/(mol·K)
-    delta_h = -41000.0  # J/mol
-    delta_s = -42.0  # J/(mol·K)
+    t_c = float(inputs.get("temperature_c", 350.0))
+    assert -273.15 < t_c <= 2000.0, f"temperature_c {t_c} out of range"
+    inlet = {
+        "CO": float(inputs.get("co_fraction", 0.30)),
+        "H2O": float(inputs.get("h2o_fraction", 0.40)),
+        "CO2": float(inputs.get("co2_fraction", 0.10)),
+        "H2": float(inputs.get("h2_fraction", 0.20)),
+    }
+    for name, val in inlet.items():
+        assert 0.0 <= val <= 1.0, f"{name} fraction={val} must be in [0, 1]"
+    pressure_bar = float(inputs.get("pressure_bar", 20.0))
 
-    T_c = float(inputs.get("temperature_c", 350.0))
-    assert -273.15 < T_c <= 2000.0, f"temperature_c {T_c} out of range"
-    T_k = T_c + 273.15
-
-    y_co_in = float(inputs.get("co_fraction", 0.30))
-    y_h2o_in = float(inputs.get("h2o_fraction", 0.40))
-    y_co2_in = float(inputs.get("co2_fraction", 0.10))
-    y_h2_in = float(inputs.get("h2_fraction", 0.20))
-
-    for name, val in [
-        ("co_fraction", y_co_in),
-        ("h2o_fraction", y_h2o_in),
-        ("co2_fraction", y_co2_in),
-        ("h2_fraction", y_h2_in),
-    ]:
-        assert 0.0 <= val <= 1.0, f"{name}={val} must be in [0, 1]"
-
-    # Equilibrium constant K = exp(-ΔG / RT) where ΔG = ΔH - TΔS
-    delta_g = delta_h - T_k * delta_s
-    K_eq = math.exp(-delta_g / (R * T_k))
-
-    # Solve for extent of reaction ξ using the quadratic form of Kp:
-    # K = (y_co2 + ξ)(y_h2 + ξ) / ((y_co - ξ)(y_h2o - ξ))
-    # K(y_co - ξ)(y_h2o - ξ) = (y_co2 + ξ)(y_h2 + ξ)
-    # (K-1)ξ² - [K(y_co + y_h2o) + y_co2 + y_h2]ξ + K·y_co·y_h2o - y_co2·y_h2 = 0
-    a = K_eq - 1.0
-    b = -(K_eq * (y_co_in + y_h2o_in) + y_co2_in + y_h2_in)
-    c = K_eq * y_co_in * y_h2o_in - y_co2_in * y_h2_in
-
-    if abs(a) < 1e-12:
-        xi = -c / b if abs(b) > 1e-12 else 0.0
-    else:
-        disc = b * b - 4.0 * a * c
-        disc = max(disc, 0.0)
-        xi_pos = (-b + math.sqrt(disc)) / (2.0 * a)
-        xi_neg = (-b - math.sqrt(disc)) / (2.0 * a)
-        xi = xi_pos if 0.0 <= xi_pos <= min(y_co_in, y_h2o_in) else xi_neg
-
-    xi = max(0.0, min(xi, min(y_co_in, y_h2o_in)))
-
-    y_co_eq = y_co_in - xi
-    y_h2o_eq = y_h2o_in - xi
-    y_co2_eq = y_co2_in + xi
-    y_h2_eq = y_h2_in + xi
-
-    co_conversion = xi / y_co_in if y_co_in > 0 else 0.0
-
-    equilibrium_composition = {
-        "co": y_co_eq,
-        "h2o": y_h2o_eq,
-        "co2": y_co2_eq,
-        "h2": y_h2_eq,
+    engine = WGSReactorEngine()
+    eq = engine.calculate_equilibrium_composition(
+        inlet,
+        t_c + CELSIUS_TO_KELVIN_OFFSET,
+        pressure_bar,
+        steam_ratio=0.0,  # inlet already carries the H2O fraction
+    )
+    # The canonical engine reports composition in mol% and conversion in %.
+    composition = {k.lower(): v / 100.0 for k, v in eq["composition"].items()}
+    return {
+        "temperature_c": t_c,
+        "equilibrium_constant": eq["equilibrium_constant"],
+        "co_conversion_fraction": eq["conversion"] / 100.0,
+        "h2_co_ratio": eq["h2_co_ratio"],
+        "heat_released_kj": eq["heat_released"],
+        "equilibrium_composition": composition,
     }
 
-    result = {
-        "temperature_c": T_c,
-        "equilibrium_constant": K_eq,
-        "extent_of_reaction": xi,
-        "co_conversion_fraction": co_conversion,
-        "equilibrium_composition": equilibrium_composition,
+
+def _adapt_water_vapor_pressure(inputs: dict) -> dict:
+    """Saturated water-vapour pressure via ``SyngasWaterCalculator``."""
+    assert isinstance(inputs, dict), "inputs must be a dict"
+    from sidekick.process_calculators.syngas_water_calculator import (
+        SyngasWaterCalculator,
+    )
+
+    temperature_c = float(inputs.get("temperature_c", 25.0))
+    method = str(inputs.get("method", "auto"))
+    pressure_pa, method_used = SyngasWaterCalculator().calculate_vapor_pressure(
+        temperature_c, method
+    )
+    return {
+        "temperature_c": temperature_c,
+        "vapor_pressure_pa": pressure_pa,
+        "vapor_pressure_kpa": pressure_pa / 1000.0,
+        "method": method_used,
     }
 
-    total = sum(equilibrium_composition.values())
-    assert abs(total - 1.0) < 1e-6, f"mole fractions sum to {total}, expected 1.0"
-    assert 0.0 <= co_conversion <= 1.0, f"co_conversion={co_conversion} out of [0,1]"
 
-    return result
+def _adapt_flare(inputs: dict) -> dict:
+    """Flare sizing via the canonical ``FlareCalculator``."""
+    assert isinstance(inputs, dict), "inputs must be a dict"
+    from sidekick.process_calculators.flare_calculator import FlareCalculator
+
+    total_flow = float(inputs.get("total_flow_kg_hr", 1000.0))
+    composition = dict(inputs.get("gas_composition", {"CH4": 80.0, "CO2": 20.0}))
+    temperature_k = float(inputs.get("temperature_k", 298.15))
+    pressure_bar = float(inputs.get("pressure_bar", 1.5))
+    design = FlareCalculator().calculate_flare_size(
+        total_flow, composition, temperature_k, pressure_bar
+    )
+    return {
+        "height_m": design.height,
+        "diameter_m": design.diameter,
+        "exit_velocity_m_s": design.exit_velocity,
+        "heat_release_kw": design.heat_release,
+        "radiation_intensity_kw_m2": design.radiation_intensity,
+    }
+
+
+def _adapt_financial(inputs: dict) -> dict:
+    """Plant financial model via ``FinancialModelCalculator``."""
+    assert isinstance(inputs, dict), "inputs must be a dict"
+    from sidekick.process_calculators.financial_calculator import (
+        FinancialModelCalculator,
+        FinancialParameters,
+    )
+
+    # FinancialParameters is a dataclass with sane zero defaults; only pass
+    # through keys it actually declares so unknown inputs are ignored.
+    valid = set(FinancialParameters.__dataclass_fields__)  # type: ignore[attr-defined]
+    params = FinancialParameters(**{k: v for k, v in inputs.items() if k in valid})
+    results = FinancialModelCalculator().calculate_financial_model(params)
+    return {
+        "annual_product_tons": results.annual_product_tons,
+        "total_revenue": results.total_revenue,
+        "total_variable_costs": results.total_variable_costs,
+        "net_income": results.net_income,
+        "margin_per_ton": results.margin_per_ton,
+    }
+
+
+def _adapt_syngas_water(inputs: dict) -> dict:
+    """Water content of syngas via ``SyngasWaterCalculator``.
+
+    Distinct from ``water_vapor_pressure`` (which returns only the saturation
+    pressure): this also reports the method-selected saturation pressure at
+    the supplied dew-point/temperature for a saturated stream.
+    """
+    assert isinstance(inputs, dict), "inputs must be a dict"
+    from sidekick.process_calculators.syngas_water_calculator import (
+        SyngasWaterCalculator,
+    )
+
+    temperature_c = float(inputs.get("temperature_c", 40.0))
+    total_pressure_pa = float(inputs.get("total_pressure_pa", 101325.0))
+    method = str(inputs.get("method", "auto"))
+    calc = SyngasWaterCalculator()
+    p_sat, method_used = calc.calculate_vapor_pressure(temperature_c, method)
+    # Saturated mole fraction of water = P_sat / P_total (Raoult/Dalton).
+    mole_fraction = min(p_sat / total_pressure_pa, 1.0) if total_pressure_pa else 0.0
+    return {
+        "temperature_c": temperature_c,
+        "saturation_pressure_pa": p_sat,
+        "water_mole_fraction": mole_fraction,
+        "method": method_used,
+    }
+
+
+def _ensure_registered() -> None:
+    """Populate :data:`_REGISTRY` with the canonical-engine adapters once.
+
+    Idempotent. Called at the top of every public entry point so the heavy
+    ``process_calculators`` imports stay out of module import time.
+    """
+    global _REGISTERED
+    if _REGISTERED:
+        return
+    _REGISTRY.setdefault("wgs_reactor", _adapt_wgs_reactor)
+    _REGISTRY.setdefault("water_vapor_pressure", _adapt_water_vapor_pressure)
+    _REGISTRY.setdefault("flare", _adapt_flare)
+    _REGISTRY.setdefault("financial", _adapt_financial)
+    _REGISTRY.setdefault("syngas_water", _adapt_syngas_water)
+    _REGISTERED = True
 
 
 # ---------------------------------------------------------------------------
@@ -181,6 +254,7 @@ def run_calculator(
     )
     assert isinstance(inputs_path, str) and inputs_path, "inputs_path must be non-empty"
 
+    _ensure_registered()
     if calculator not in _REGISTRY:
         matches = difflib.get_close_matches(
             calculator, sorted(_REGISTRY), n=3, cutoff=0.4
@@ -277,4 +351,12 @@ def run_calculator(
 
 def list_calculators() -> list[str]:
     """Return sorted list of registered calculator names."""
+    _ensure_registered()
     return sorted(_REGISTRY.keys())
+
+
+__all__ = [
+    "list_calculators",
+    "register",
+    "run_calculator",
+]
