@@ -75,11 +75,14 @@ class TestLoadUnavailable:
     def test_load_from_string_creates_tempfile(
         self, engine: OpenSimPhysicsEngine
     ) -> None:
-        # Patch opensim and load_from_path to verify temp file plumbing.
+        # Patch opensim and the path-loading hook to verify temp file plumbing.
+        # ``load_from_string`` delegates to ``_load_from_path_impl`` (not the
+        # public ``load_from_path``), so the side-effect must be attached there
+        # for the temp file to be observed mid-load.
         fake_opensim = MagicMock()
         captured: dict = {}
 
-        def fake_load_from_path(path: str) -> None:
+        def fake_load_from_path_impl(path: str) -> None:
             captured["path"] = path
             assert os.path.exists(path)
 
@@ -89,10 +92,14 @@ class TestLoadUnavailable:
                 "opensim_physics_engine.opensim",
                 fake_opensim,
             ),
-            patch.object(engine, "load_from_path", side_effect=fake_load_from_path),
+            patch.object(
+                engine, "_load_from_path_impl", side_effect=fake_load_from_path_impl
+            ),
         ):
             engine.load_from_string("<xml/>", extension="osim")
-        # Temp file should be cleaned up.
+        # The temp file must have been created during the load...
+        assert "path" in captured, "_load_from_path_impl was not invoked with a path"
+        # ...and cleaned up afterwards.
         assert not os.path.exists(captured["path"])
 
 

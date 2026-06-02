@@ -111,6 +111,14 @@ def _probe_engine(  # noqa: C901
             importlib.import_module("PySide6.QtWidgets")
         elif import_name == "pinocchio":
             pin = importlib.import_module("pinocchio")
+            if type(pin).__module__ == "unittest.mock":
+                # A unit-test conftest may inject a MagicMock into
+                # sys.modules["pinocchio"] so that import-only tests collect
+                # without the heavy C-extension. MagicMock answers hasattr()
+                # truthy for everything, so without this guard the probe would
+                # cache the engine as AVAILABLE and poison every later test
+                # that genuinely requires the real bindings.
+                raise ImportError("mocked pinocchio module detected")
             if not hasattr(pin, "buildModelFromUrdf"):
                 raise ImportError(
                     "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
@@ -127,7 +135,11 @@ def _probe_engine(  # noqa: C901
                     "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
                 )
         else:
-            importlib.import_module(import_name)
+            module = importlib.import_module(import_name)
+            if type(module).__module__ == "unittest.mock":
+                # See the pinocchio branch above: a mocked module injected for
+                # collection must not be reported as a real, available engine.
+                raise ImportError(f"mocked {import_name} module detected")
 
         _engine_status_cache[name] = EngineStatus.AVAILABLE
     except ImportError as e:
@@ -265,6 +277,24 @@ def get_engine_error(engine_name: str) -> Exception | None:
 def is_engine_available(engine_name: str) -> bool:
     """Check if a physics engine or library is available."""
     return get_engine_status(engine_name) == EngineStatus.AVAILABLE
+
+
+def reset_engine_status_cache() -> None:
+    """Clear all memoised engine-availability state.
+
+    The probe results are cached in module-level dicts and an
+    ``lru_cache`` on :func:`is_engine_available`. That memoisation is correct
+    for production (engine availability does not change at runtime) but is a
+    hazard under test: a fixture that injects a ``MagicMock`` into
+    ``sys.modules`` for one test would otherwise leave a stale ``AVAILABLE``
+    entry that poisons every later test. Test fixtures call this to guarantee
+    a clean slate between tests.
+
+    Postcondition: subsequent availability queries re-probe ``sys.modules``.
+    """
+    _engine_status_cache.clear()
+    _engine_error_cache.clear()
+    is_engine_available.cache_clear()
 
 
 def get_available_engines() -> list[str]:
