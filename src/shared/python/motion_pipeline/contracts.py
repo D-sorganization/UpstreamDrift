@@ -60,6 +60,7 @@ class CameraIntrinsics(BaseModel):
     k2: float = Field(default=0.0, description="Radial distortion coefficient 2")
     p1: float = Field(default=0.0, description="Tangential distortion coefficient 1")
     p2: float = Field(default=0.0, description="Tangential distortion coefficient 2")
+    k3: float = Field(default=0.0, description="Radial distortion coefficient 3")
 
     @field_validator("fx", "fy", "cx", "cy", mode="before")
     @classmethod
