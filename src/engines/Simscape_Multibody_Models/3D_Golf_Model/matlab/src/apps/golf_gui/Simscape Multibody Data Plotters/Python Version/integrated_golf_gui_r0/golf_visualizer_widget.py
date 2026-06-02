@@ -10,6 +10,7 @@ import traceback
 from typing import Any
 
 import moderngl as mgl
+import math
 import numpy as np
 import pandas as pd
 from golf_data_core import FrameData, FrameProcessor, RenderConfig
@@ -122,7 +123,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
         # Look-at matrix
         forward = self.camera_target - camera_pos
-        forward_norm = np.linalg.norm(forward)
+        forward_norm = math.hypot(forward[0], forward[1], forward[2])  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
         if forward_norm > 1e-6:
             forward = forward / forward_norm
         else:
@@ -131,7 +132,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
             )  # Default forward direction  # noqa: E501
 
         right = np.cross(forward, np.array([0, 1, 0], dtype=np.float32))
-        right_norm = np.linalg.norm(right)
+        right_norm = math.hypot(right[0], right[1], right[2])  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
         if right_norm > 1e-6:
             right = right / right_norm
         else:
