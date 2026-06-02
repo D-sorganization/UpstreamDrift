@@ -655,3 +655,55 @@ class TestNewmarkConditioning:
             or "ill-conditioned" in r.message.lower()
             for r in caplog.records
         )
+
+    @staticmethod
+    def _sdof_model(m: float, k: float) -> FiniteElementShaftModel:
+        """Reduce the FE model to a single undamped DOF (mass m, stiffness k).
+
+        Overwrites the assembled matrices so the Newmark ``step`` integrates
+        the analytically solvable oscillator m*u'' + k*u = 0, isolating the
+        integrator's accuracy from the beam assembly.
+        """
+        model = FiniteElementShaftModel(n_elements=10)
+        model.initialize(create_standard_shaft())
+        model.n_free_dof = 1
+        model.M = np.array([[m]])
+        model.K = np.array([[k]])
+        model.C = np.zeros((1, 1))  # undamped
+        model.u = np.array([0.0])
+        model.v = np.array([0.0])
+        model.a = np.array([0.0])
+        model.f_ext = np.zeros(1)
+        model.time = 0.0
+        return model
+
+    @pytest.mark.parametrize("dt", [1e-3, 1e-4, 1e-5])
+    def test_newmark_accuracy_undamped_sdof(self, dt: float) -> None:
+        """Newmark error vs the analytic SDOF solution stays < 1% (#7054).
+
+        For m*u'' + k*u = 0 with u(0)=u0, u'(0)=0 the exact solution is
+        u(t) = u0*cos(w*t), w = sqrt(k/m). The average-acceleration Newmark
+        scheme (beta=1/4, gamma=1/2) is unconditionally stable and second-order
+        accurate, so at these dt the relative error over one period must be
+        well under 1%. This replaces the warn-only conditioning check with a
+        hard accuracy assertion.
+        """
+        m, k = 0.05, 200.0
+        w = np.sqrt(k / m)
+        period = 2.0 * np.pi / w
+        u0 = 0.01
+
+        model = self._sdof_model(m, k)
+        model.u = np.array([u0])  # initial displacement, zero velocity
+
+        t_end = period  # integrate exactly one period
+        n_steps = int(round(t_end / dt))
+        for _ in range(n_steps):
+            model.f_ext = np.zeros(1)
+            model.step(dt)
+
+        t = n_steps * dt
+        analytic = u0 * np.cos(w * t)
+        numeric = float(model.u[0])
+        # Period/amplitude error is O((w*dt)^2); assert tight 1% bound.
+        assert abs(numeric - analytic) <= 0.01 * u0
