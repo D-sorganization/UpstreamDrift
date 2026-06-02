@@ -1,7 +1,6 @@
 # Workflow Inventory
 
 This inventory is the ownership ledger for active GitHub Actions workflows.
-Archived workflows under `.github/workflows/archived/` are intentionally excluded.
 
 The current durable guardrail is a no-growth cap at 78 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
