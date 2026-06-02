@@ -72,12 +72,18 @@ def make_fixture_cameras() -> tuple[
 ]:
     """Return two calibrated pinhole cameras looking along positive depth.
 
-    ``cam1`` is rotated by a proper 15-degree rotation about the Y axis, built
-    from ``cos``/``sin`` so the matrix is guaranteed orthonormal with
-    ``det == +1`` (the ``CameraExtrinsics`` validator rejects anything else).
+    ``cam1`` is rotated by a proper −15-degree rotation about the Y axis
+    (R_y(−15°): ``[cos, 0, -sin] / [0,1,0] / [sin, 0, cos]``), built from
+    ``cos``/``sin`` so the matrix is guaranteed orthonormal with ``det == +1``
+    (the ``CameraExtrinsics`` validator rejects anything else).  The sign
+    matches the original fixture geometry: a negative yaw places the camera to
+    the right of centre so projected observations land left-of-centre on the
+    image plane, consistent with all multi-camera baselines that consume this
+    fixture.
     """
     intrinsics = CameraIntrinsics(fx=800.0, fy=800.0, cx=640.0, cy=480.0)
-    theta = np.deg2rad(15.0)
+    # Negative angle: R_y(-15°) matches the original fixture orientation.
+    theta = np.deg2rad(-15.0)
     cos_t = float(np.cos(theta))
     sin_t = float(np.sin(theta))
     rotation_about_y = [
