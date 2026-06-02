@@ -20,6 +20,36 @@ def _magnitude(vec: np.ndarray) -> float:
     return math.sqrt(float(np.dot(arr, arr)))
 
 
+# Energy-absorption blend weights (#7055).
+#
+# The fraction of normal-impact kinetic energy absorbed by turf is modelled as
+# a CONVEX COMBINATION of three independent, normalised (0-1) material
+# mechanisms:
+#   * compressibility       — plastic deformation of the surface
+#   * compression_damping   — viscous (rate-dependent) losses
+#   * 1 - restitution       — inelastic rebound losses
+# These weights are an engineering heuristic (not a measured physical
+# constant): they encode the relative importance attributed to each mechanism
+# and MUST sum to 1.0 so that the absorption factor stays bounded in [0, 1]
+# whenever each mechanism input is in [0, 1]. The 0.5 emphasis on
+# compressibility reflects that permanent deformation dominates soft-turf
+# energy loss (cf. soil-mechanics impact-absorption models); damping and
+# inelastic rebound split the remainder 0.3 / 0.2.
+ENERGY_ABSORPTION_COMPRESSIBILITY_WEIGHT = 0.5
+ENERGY_ABSORPTION_DAMPING_WEIGHT = 0.3
+ENERGY_ABSORPTION_RESTITUTION_WEIGHT = 0.2
+
+# Grass-blade resistance coefficient (#7055).
+#
+# Additional resistive force from grass blades is modelled as
+#   F_grass = k_grass * turf_density * grass_height * compression.
+# ``k_grass`` (units N per [density * m * m_compression]) is an empirical
+# tuning constant chosen so that typical fairway/rough turf adds a small
+# fraction of the spring force; it is a model heuristic, pinned by value tests
+# rather than a measured constant.
+GRASS_RESISTANCE_COEFFICIENT = 0.1
+
+
 @dataclass
 class TerrainContactModel:
     """Contact physics model for terrain interaction.
@@ -327,10 +357,14 @@ class CompressibleTurfModel:
         # Total force magnitude
         force_magnitude = spring_force + damping_force
 
-        # Grass resistance (additional resistance from grass blades)
+        # Grass resistance (additional resistance from grass blades).
+        # See GRASS_RESISTANCE_COEFFICIENT for provenance (#7055).
         if material.grass_height_m > 0 and material.turf_density > 0:
             grass_resistance = (
-                0.1 * material.turf_density * material.grass_height_m * compression
+                GRASS_RESISTANCE_COEFFICIENT
+                * material.turf_density
+                * material.grass_height_m
+                * compression
             )
             force_magnitude += grass_resistance
 
@@ -443,12 +477,14 @@ class CompressibleTurfModel:
         # Normal velocity component
         v_normal = abs(np.dot(impact_velocity, normal))
 
-        # Energy absorbed depends on compressibility and damping
-        # Higher compressibility = more energy absorption
+        # Energy absorbed depends on compressibility and damping.
+        # Higher compressibility = more energy absorption. The weights form a
+        # normalised convex combination (sum == 1); see the module-level
+        # ENERGY_ABSORPTION_*_WEIGHT constants for provenance (#7055).
         absorption_factor = (
-            material.compressibility * 0.5
-            + material.compression_damping * 0.3
-            + (1.0 - material.restitution) * 0.2
+            material.compressibility * ENERGY_ABSORPTION_COMPRESSIBILITY_WEIGHT
+            + material.compression_damping * ENERGY_ABSORPTION_DAMPING_WEIGHT
+            + (1.0 - material.restitution) * ENERGY_ABSORPTION_RESTITUTION_WEIGHT
         )
 
         # Normal component energy

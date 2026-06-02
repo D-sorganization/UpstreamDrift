@@ -13,6 +13,23 @@ from src.shared.python.core.physics_constants import (
 
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
 
+# Rolling-without-slip tangential-impulse factor for a uniform solid sphere.
+#
+# Derivation (#7054). A tangential friction impulse ``J_f`` applied at the
+# ball surface (lever arm = radius R) changes the contact-point tangential
+# velocity by both a linear and an angular contribution:
+#   * CoM tangential velocity change:        ΔV   = J_f / m
+#   * surface speed from spin-up:            R·ΔΩ = J_f·R² / I
+# Rolling without slip is reached when the contact point stops sliding, i.e.
+# when ΔV + R·ΔΩ equals the effective tangential approach speed v_t:
+#   J_f·(1/m + R²/I) = m·v_t   ⇒   J_f = v_t / (1/m + R²/I).
+# For a uniform solid sphere I = (2/5)·m·R², so R²/I = 5/(2m) and
+#   J_f = v_t / (1/m + 5/(2m)) = m·v_t · (2/7).
+# Hence the rolling cap factor is 2/7 ≈ 0.2857, NOT the prior 0.4.
+# Ref: classic rigid-body collision of a sphere, e.g. Cross, "Grip-slip
+# behavior of a bouncing ball", Am. J. Phys. 70, 1093 (2002).
+SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
+
 
 class ImpactModel(ABC):
     """Abstract base class for impact models."""
@@ -106,9 +123,12 @@ class RigidBodyImpactModel(ImpactModel):
         # Rolling cap relative to contact-point speed (pre-existing spin reduces sliding).
         omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
         v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))
+        # Coulomb friction impulse, capped at the rolling-without-slip impulse
+        # for a uniform solid sphere (J_f = m·v_t·2/7, see
+        # SPHERE_ROLLING_CAP_FACTOR derivation above).
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * v_t_eff * 0.4),
+            float(GOLF_BALL_MASS_KG * v_t_eff * SPHERE_ROLLING_CAP_FACTOR),
         )
         spin_magnitude = j_friction / (
             GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M

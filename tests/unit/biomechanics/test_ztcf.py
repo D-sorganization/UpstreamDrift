@@ -247,6 +247,51 @@ class TestComputeZTCFForces:
         assert np.all(np.isfinite(result.joint_forces))
         assert np.all(np.isfinite(result.joint_accelerations))
 
+    @pytest.mark.parametrize("theta_deg", [15.0, 30.0, 45.0, 60.0, 90.0])
+    def test_matches_analytic_single_pendulum(self, theta_deg: float) -> None:
+        """ZTCF tangential force equals the analytic pendulum m*g*sin(theta).
+
+        Validation for #7054. A single revolute pendulum (mass m, length L,
+        angle theta from vertical) under zero applied torque obeys
+        ``m*L^2 * qddot + m*g*L*sin(theta) = 0`` → ``qddot = -(g/L)*sin(theta)``.
+        The helper maps this to a tangential linear force
+        ``F_t = m * qddot * L = -m*g*sin(theta)``. This pins the magnitude
+        against the closed form, replacing the prior finiteness-only check.
+        """
+        m = 2.5  # [kg]
+        length = 0.9  # [m]
+        g = 9.81  # [m/s^2]
+        theta = np.radians(theta_deg)
+
+        # 1-DOF generalized dynamics for the pendulum about the pivot.
+        mass_matrix = np.array([[m * length**2]])
+        gravity_vector = np.array([m * g * length * np.sin(theta)])
+
+        result = compute_ztcf_forces(
+            mass_matrix=mass_matrix,
+            coriolis_vector=np.zeros(1),
+            gravity_vector=gravity_vector,
+            friction_vector=np.zeros(1),
+            joint_positions=np.array(
+                [[length * np.sin(theta), -length * np.cos(theta)]]
+            ),
+            segment_masses=np.array([m]),
+            segment_lengths=np.array([length]),
+            gravity_acceleration=g,
+        )
+
+        # qddot must equal -(g/L) sin(theta).
+        assert result.joint_accelerations[0] == pytest.approx(
+            -(g / length) * np.sin(theta), rel=1e-9
+        )
+
+        # Tangential (x) force component == -m*g*sin(theta).
+        f_tangential = result.joint_forces[0, 0]
+        assert f_tangential == pytest.approx(-m * g * np.sin(theta), rel=1e-9)
+
+        # Normal (y) component is the gravity reaction +m*g (g_vec = -g in y).
+        assert result.joint_forces[0, 1] == pytest.approx(m * g, rel=1e-9)
+
 
 # ============================================================================
 # compute_force_delta
