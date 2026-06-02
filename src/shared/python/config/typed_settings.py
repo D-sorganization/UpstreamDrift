@@ -39,6 +39,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_SERVER_PORT = 8000
 
+# Canonical API host/port defaults — mirror ``config.environment.get_api_host``
+# / ``get_api_port`` (env vars ``GOLF_API_HOST`` / ``GOLF_API_PORT``).  These
+# are distinct from the legacy ``API_HOST`` / ``API_PORT`` cluster above; the
+# divergence is intentional and documented in ``src/api/config.py`` (#2068).
+DEFAULT_API_HOST = "127.0.0.1"
+DEFAULT_API_PORT = 8000
+
 DEFAULT_ALLOWED_HOSTS: list[str] = [
     "localhost",
     "127.0.0.1",
@@ -92,6 +99,18 @@ class Settings(BaseSettings):
         default=DEFAULT_SERVER_PORT,
         validation_alias="API_PORT",
     )
+    # --- Canonical API host/port cluster ---------------------------------
+    # Reads ``GOLF_API_HOST`` / ``GOLF_API_PORT`` with defaults identical to
+    # ``config.environment.get_api_host`` / ``get_api_port``.  New code should
+    # prefer these over the scattered ``os.environ.get("GOLF_API_*")`` sites.
+    api_host: str = Field(
+        default=DEFAULT_API_HOST,
+        validation_alias="GOLF_API_HOST",
+    )
+    api_port: int = Field(
+        default=DEFAULT_API_PORT,
+        validation_alias="GOLF_API_PORT",
+    )
     allowed_hosts_raw: str | None = Field(
         default=None,
         validation_alias="ALLOWED_HOSTS",
@@ -101,12 +120,12 @@ class Settings(BaseSettings):
         validation_alias="CORS_ORIGINS",
     )
 
-    @field_validator("server_port")
+    @field_validator("server_port", "api_port")
     @classmethod
     def _validate_port(cls, value: int) -> int:
-        """Enforce the 1..65535 range the legacy accessor required."""
+        """Enforce the 1..65535 range the legacy accessors required."""
         if not (1 <= value <= 65535):
-            raise ValueError(f"Invalid API_PORT value: {value!r}")
+            raise ValueError(f"Invalid port value: {value!r}")
         return value
 
     # --- Derived list accessors (preserve legacy parsing semantics) ------
@@ -145,6 +164,8 @@ def get_settings() -> Settings:
 
 __all__ = [
     "DEFAULT_ALLOWED_HOSTS",
+    "DEFAULT_API_HOST",
+    "DEFAULT_API_PORT",
     "DEFAULT_CORS_ORIGINS",
     "DEFAULT_SERVER_HOST",
     "DEFAULT_SERVER_PORT",

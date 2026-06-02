@@ -35,15 +35,6 @@
       ]
     },
     {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
-      "max_lines": 220,
-      "required_modules": [
-        "motion_capture_plotter_ui",
-        "motion_capture_plotter_data",
-        "motion_capture_plotter_visualization"
-      ]
-    },
-    {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py",
       "max_lines": 160,
       "required_modules": [

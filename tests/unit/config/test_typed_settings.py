@@ -12,6 +12,8 @@ from pydantic import ValidationError
 
 from src.shared.python.config.typed_settings import (
     DEFAULT_ALLOWED_HOSTS,
+    DEFAULT_API_HOST,
+    DEFAULT_API_PORT,
     DEFAULT_CORS_ORIGINS,
     DEFAULT_SERVER_HOST,
     DEFAULT_SERVER_PORT,
@@ -28,6 +30,35 @@ def test_defaults_match_documented_values() -> None:
         assert settings.server_port == DEFAULT_SERVER_PORT == 8000
         assert settings.allowed_hosts == DEFAULT_ALLOWED_HOSTS
         assert settings.cors_origins == DEFAULT_CORS_ORIGINS
+        assert settings.api_host == DEFAULT_API_HOST == "127.0.0.1"
+        assert settings.api_port == DEFAULT_API_PORT == 8000
+
+
+def test_api_host_reads_golf_api_host_env() -> None:
+    """``api_host`` mirrors ``config.environment.get_api_host`` (GOLF_API_HOST)."""
+    with patch.dict(os.environ, {"GOLF_API_HOST": "0.0.0.0"}):
+        assert get_settings().api_host == "0.0.0.0"
+
+
+def test_api_port_reads_golf_api_port_env() -> None:
+    """``api_port`` mirrors ``config.environment.get_api_port`` (GOLF_API_PORT)."""
+    with patch.dict(os.environ, {"GOLF_API_PORT": "7654"}):
+        assert get_settings().api_port == 7654
+
+
+def test_api_port_out_of_range_raises() -> None:
+    with patch.dict(os.environ, {"GOLF_API_PORT": "0"}), pytest.raises(ValueError):
+        Settings()
+    with patch.dict(os.environ, {"GOLF_API_PORT": "70000"}), pytest.raises(ValueError):
+        Settings()
+
+
+def test_api_and_legacy_clusters_are_independent() -> None:
+    """``GOLF_API_*`` and the legacy ``API_*`` cluster do not cross-contaminate."""
+    with patch.dict(os.environ, {"GOLF_API_HOST": "10.0.0.1", "API_HOST": "1.2.3.4"}):
+        settings = get_settings()
+        assert settings.api_host == "10.0.0.1"
+        assert settings.server_host == "1.2.3.4"
 
 
 def test_server_host_reads_api_host_env() -> None:
