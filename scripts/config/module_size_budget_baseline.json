@@ -2,12 +2,6 @@
   "max_lines": 1200,
   "exceptions": [
     {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/starting_pose_matcher.py",
-      "owner": "@simscape-gui",
-      "reason": "Legacy starting pose matcher shim (2659 lines, pending #4376 decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy shared PyQt chat dock widget (1989 lines, pending decomposition under #5922)",
@@ -29,12 +23,6 @@
       "path": "src/launchers/upstream_drift_launcher.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy launcher entrypoint (1588 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "reason": "Legacy motion capture plotter (1402 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     },
     {
