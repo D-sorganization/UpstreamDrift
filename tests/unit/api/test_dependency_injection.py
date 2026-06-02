@@ -136,12 +136,15 @@ class TestDependencyOverride:
 
     @pytest.fixture
     def mock_task_manager(self) -> MagicMock:
-        """Create a mock task manager."""
-        from unittest.mock import AsyncMock
+        """Create a mock task manager.
 
+        ``TaskManager`` exposes a *synchronous* query/mutation API as of the
+        #4843 compatibility contract, so ``exists`` is a plain ``MagicMock``
+        (not ``AsyncMock``) to match the live contract.
+        """
         mgr = MagicMock(spec=["__contains__", "__getitem__", "get", "keys", "exists"])
         mgr.__contains__ = MagicMock(return_value=False)
-        mgr.exists = AsyncMock(return_value=False)
+        mgr.exists = MagicMock(return_value=False)
         return mgr
 
     @pytest.fixture

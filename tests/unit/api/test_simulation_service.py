@@ -316,10 +316,13 @@ class TestRunSimulation:
 
 
 class MockTaskManager:
+    # ``TaskManager.set`` is synchronous (#4843 compatibility contract);
+    # ``run_simulation_background`` calls it without awaiting, so the mock
+    # mirrors that synchronous contract.
     def __init__(self):
         self.tasks = {}
 
-    async def set(self, task_id: str, data: dict):
+    def set(self, task_id: str, data: dict):
         self.tasks[task_id] = data
 
 

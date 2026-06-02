@@ -1,5 +1,7 @@
 """Unit tests for the chat WebSocket API route."""
 
+from typing import Any
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -42,6 +44,23 @@ def app() -> FastAPI:
     test_app.include_router(router)
     test_app.state.chat_service = MockChatService()
     return test_app
+
+
+@pytest.fixture(autouse=True)
+def _bypass_ws_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Bypass WebSocket authentication (issue #5913) for these route tests.
+
+    The chat WS endpoint now calls :func:`resolve_ws_user` before
+    ``accept()`` and closes with code 1008 when unauthenticated. These tests
+    exercise the chat protocol, not the auth gate (covered by
+    ``test_ws_auth_hardening.py``), so we stub the resolver to return a
+    non-``None`` user — mirroring the pattern in ``test_simulation_ws.py``.
+    """
+
+    async def _fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr("src.api.routes.chat_ws.resolve_ws_user", _fake_resolve_ws_user)
 
 
 @pytest.fixture

@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.api.rate_limit import limiter
+from src.api.route_registry import ws_compatible_auth_dependency
 from src.api.routes import realtime as realtime_module
 from src.api.routes.realtime import _MAX_CHANNEL_LENGTH, _MAX_PAYLOAD_BYTES
 
@@ -21,6 +22,11 @@ def client() -> TestClient:
     app = FastAPI()
     app.include_router(realtime_module.router)
     app.state.limiter = limiter
+    # ``POST /realtime/publish`` is gated by ``ws_compatible_auth_dependency``
+    # (issues #6888/#6889). These tests exercise the amplification-bounds
+    # guards, not the auth gate (covered by ``test_excluded_router_http_auth``),
+    # so the auth dependency is overridden to an authenticated no-op.
+    app.dependency_overrides[ws_compatible_auth_dependency] = lambda: None
     return TestClient(app)
 
 
