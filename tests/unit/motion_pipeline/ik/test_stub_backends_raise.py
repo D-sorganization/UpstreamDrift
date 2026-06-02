@@ -38,7 +38,7 @@ def test_stub_solve_raises(name: str, cls: type) -> None:
 
     The OpenSim backend imports its hard dependency first, so when opensim
     is absent it raises ImportError before reaching the unimplemented
-    ``solve_frame``; otherwise all stubs raise NotImplementedError.
+    ``solve_frame``; otherwise all stubs raise NotImplementedError (#7046).
     """
     rig = make_3dof_phantom_rig()
     traj = make_phantom_marker_trajectory(num_frames=2)

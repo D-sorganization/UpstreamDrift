@@ -120,7 +120,7 @@ class OpenSimIKSolver(BaseIKSolver):
         # OpenSim's InverseKinematicsTool, and parse the output .mot file.
         # Until that lands we raise loudly rather than returning a silent
         # neutral pose.
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #7046
             "OpenSim IK backend is not implemented; use the 'geometric' "
             "backend (#7046)."
         )

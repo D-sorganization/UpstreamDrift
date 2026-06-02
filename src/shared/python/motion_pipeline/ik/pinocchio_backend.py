@@ -112,7 +112,7 @@ class PinocchioIKSolver(BaseIKSolver):
         # frame task per marker, and solve with Levenberg-Marquardt. Until
         # that lands we raise loudly rather than returning a silent
         # neutral pose.
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #7046
             "Pinocchio IK backend is not implemented; use the 'geometric' "
             "backend (#7046)."
         )

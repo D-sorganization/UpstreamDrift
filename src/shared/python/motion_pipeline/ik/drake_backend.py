@@ -112,6 +112,6 @@ class DrakeIKSolver(BaseIKSolver):
         # Drake InverseKinematics problem with per-marker position
         # constraints, and solve with SNOPT/IPOPT. Until that lands we
         # raise loudly rather than returning a silent neutral pose.
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #7046
             "Drake IK backend is not implemented; use the 'geometric' backend (#7046)."
         )

@@ -115,6 +115,6 @@ class MuJoCoIKSolver(BaseIKSolver):
         # set marker targets, run damped-least-squares IK, and extract
         # joint angles. Until that lands we raise loudly rather than
         # returning a silent neutral pose that masks the missing solver.
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #7046
             "MuJoCo IK backend is not implemented; use the 'geometric' backend (#7046)."
         )
