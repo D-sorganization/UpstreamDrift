@@ -21,12 +21,14 @@ from src.research.multi_robot.system import (
 
 class TestFormationConfig:
     def test_line_formation(self) -> None:
+        """Test."""
         c = FormationConfig.line_formation(3, spacing=2.0)
         assert c.name == "line"
         assert c.positions.shape == (3, 3)
         assert c.positions[2, 1] == 4.0
 
     def test_circle_formation(self) -> None:
+        """Test."""
         c = FormationConfig.circle_formation(4, radius=1.0)
         assert c.name == "circle"
         # each robot at distance ~1 from origin
@@ -34,6 +36,7 @@ class TestFormationConfig:
         np.testing.assert_allclose(dists, 1.0)
 
     def test_wedge_formation(self) -> None:
+        """Test."""
         c = FormationConfig.wedge_formation(5, spacing=1.0, angle=0.5)
         assert c.name == "wedge"
         np.testing.assert_allclose(c.positions[0], 0.0)
@@ -43,18 +46,21 @@ class TestFormationConfig:
 
 class TestFormationController:
     def test_construction(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(2)
         fc = FormationController(["a", "b"], f)
         assert fc.robots == ["a", "b"]
         assert fc.formation is f
 
     def test_set_gains(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(1)
         fc = FormationController(["a"], f)
         fc.set_gains(position=5.0, velocity=2.0, heading=3.0)
         assert fc._gains["position"] == 5.0
 
     def test_compute_formation_control(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(2, spacing=1.0)
         fc = FormationController(["a", "b"], f)
         leader_pose = np.array([0.0, 0, 0, 1, 0, 0, 0])
@@ -64,6 +70,7 @@ class TestFormationController:
         assert cmds["b"][1] > 0
 
     def test_compute_formation_with_velocities(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(1)
         fc = FormationController(["a"], f)
         cmds = fc.compute_formation_control(
@@ -75,18 +82,21 @@ class TestFormationController:
         assert cmds["a"][0] < 0
 
     def test_compute_formation_missing_robot(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(2)
         fc = FormationController(["a", "b"], f)
         cmds = fc.compute_formation_control(np.zeros(3), {"a": np.zeros(3)})
         assert "b" not in cmds
 
     def test_quat_to_rotation_identity(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(1)
         fc = FormationController(["a"], f)
         R = fc._quat_to_rotation(np.array([1.0, 0, 0, 0]))
         np.testing.assert_allclose(R, np.eye(3))
 
     def test_set_formation(self) -> None:
+        """Test."""
         f1 = FormationConfig.line_formation(2)
         f2 = FormationConfig.circle_formation(2)
         fc = FormationController(["a", "b"], f1)
@@ -94,6 +104,7 @@ class TestFormationController:
         assert fc.formation is f2
 
     def test_get_formation_error(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(2, spacing=1.0)
         fc = FormationController(["a", "b"], f)
         # perfect formation
@@ -106,18 +117,23 @@ class TestFormationController:
         assert err == pytest.approx(0.0, abs=1e-9)
 
     def test_get_formation_error_missing(self) -> None:
+        """Test."""
         f = FormationConfig.line_formation(2)
         fc = FormationController(["a", "b"], f)
-        err = fc.get_formation_error(np.zeros(7), {"a": np.zeros(3)})
+        err = fc.get_formation_error(
+            np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]), {"a": np.zeros(3)}
+        )
         assert err == 0.0
 
 
 class TestCooperativeManipulation:
     def test_construction(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         assert cm.n_robots == 2
 
     def test_set_grasp_points_default_normals(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
         assert len(cm._grasp_normals) == 2
@@ -126,18 +142,21 @@ class TestCooperativeManipulation:
         assert cm._grasp_normals[1][0] > 0
 
     def test_set_grasp_points_explicit_normals(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1"])
         normals = [np.array([0.0, 0, 1.0])]
         cm.set_grasp_points([np.zeros(3)], grasp_normals=normals)
         assert cm._grasp_normals[0][2] == 1.0
 
     def test_compute_grasp_matrix(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
         G = cm.compute_grasp_matrix(np.array([0.0, 0, 0, 1, 0, 0, 0]))
         assert G.shape == (6, 6)
 
     def test_compute_load_sharing(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
         forces = cm.compute_load_sharing(
@@ -150,6 +169,7 @@ class TestCooperativeManipulation:
         assert z_total == pytest.approx(10.0, rel=1e-3)
 
     def test_plan_cooperative_motion(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
         trajs = cm.plan_cooperative_motion(
@@ -163,12 +183,14 @@ class TestCooperativeManipulation:
         assert trajs[0].shape[0] >= 2
 
     def test_slerp_identical(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1"])
         q = np.array([1.0, 0, 0, 0])
         out = cm._slerp(q, q, 0.5)
         np.testing.assert_allclose(out, q, atol=1e-9)
 
     def test_slerp_negative_dot(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1"])
         q0 = np.array([1.0, 0, 0, 0])
         q1 = np.array([-1.0, 0, 0, 0])  # negative dot -> negate
@@ -176,6 +198,7 @@ class TestCooperativeManipulation:
         assert np.linalg.norm(out) == pytest.approx(1.0, rel=1e-6)
 
     def test_slerp_orthogonal(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1"])
         q0 = np.array([1.0, 0, 0, 0])
         q1 = np.array([0.0, 1, 0, 0])
@@ -184,6 +207,7 @@ class TestCooperativeManipulation:
         assert np.linalg.norm(out) == pytest.approx(1.0, rel=1e-6)
 
     def test_check_force_closure(self) -> None:
+        """Test."""
         cm = CooperativeManipulation(["r1", "r2"])
         cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
         has, qual = cm.check_force_closure(np.array([0.0, 0, 0, 1, 0, 0, 0]))
@@ -193,10 +217,12 @@ class TestCooperativeManipulation:
 
 class TestTask:
     def test_is_ready_no_deps(self) -> None:
+        """Test."""
         t = Task("t1", TaskType.MOVE_TO)
         assert t.is_ready(set())
 
     def test_is_ready_with_deps(self) -> None:
+        """Test."""
         t = Task("t2", TaskType.PICK, dependencies=["t1"])
         assert not t.is_ready(set())
         assert t.is_ready({"t1"})
@@ -204,12 +230,14 @@ class TestTask:
 
 class TestTaskCoordinator:
     def test_add_remove(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.MOVE_TO))
         assert c.remove_task("t1")
         assert not c.remove_task("missing")
 
     def test_get_ready_priority_sorted(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("a", TaskType.WAIT, priority=1))
         c.add_task(Task("b", TaskType.WAIT, priority=5))
@@ -217,6 +245,7 @@ class TestTaskCoordinator:
         assert ready[0].task_id == "b"
 
     def test_assign_start_complete(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.WAIT))
         assert c.assign_task("t1", "r1")
@@ -229,22 +258,26 @@ class TestTaskCoordinator:
         assert "r1" not in c._robot_tasks
 
     def test_assign_unknown(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         assert not c.assign_task("x", "r1")
 
     def test_assign_already_assigned_fails(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.WAIT))
         c.assign_task("t1", "r1")
         assert not c.assign_task("t1", "r2")
 
     def test_start_invalid(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         assert not c.start_task("missing")
         c.add_task(Task("t1", TaskType.WAIT))
         assert not c.start_task("t1")  # not assigned yet
 
     def test_fail_task(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.WAIT))
         c.assign_task("t1", "r1")
@@ -254,10 +287,12 @@ class TestTaskCoordinator:
         assert not c.fail_task("missing")
 
     def test_complete_missing(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         assert not c.complete_task("missing")
 
     def test_get_robot_task(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.WAIT))
         c.assign_task("t1", "r1")
@@ -266,6 +301,7 @@ class TestTaskCoordinator:
         assert c.get_robot_task("nobody") is None
 
     def test_available_robots(self) -> None:
+        """Test."""
         c = TaskCoordinator()
         c.add_task(Task("t1", TaskType.WAIT))
         c.assign_task("t1", "r1")
@@ -275,6 +311,7 @@ class TestTaskCoordinator:
 
 class TestMultiRobotSystem:
     def test_add_remove(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.array([1.0, 0, 0, 1, 0, 0, 0]))
         assert s.n_robots == 1
@@ -284,11 +321,13 @@ class TestMultiRobotSystem:
         assert not s.remove_robot("missing")
 
     def test_get_robot_missing(self) -> None:
+        """Test."""
         s = MultiRobotSystem()
         assert s.get_robot("x") is None
         assert s.get_robot_pose("x") is None
 
     def test_set_robot_pose(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.zeros(7))
         s.set_robot_pose("r1", np.array([5.0, 0, 0, 1, 0, 0, 0]))
@@ -297,11 +336,13 @@ class TestMultiRobotSystem:
         s.set_robot_pose("missing", np.zeros(7))
 
     def test_step_all(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.zeros(7))
         s.step_all(0.01)  # just verify no errors
 
     def test_check_inter_robot_collision(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.array([0.0, 0, 0, 1, 0, 0, 0]))
         s.add_robot("r2", fake_engine, np.array([0.1, 0, 0, 1, 0, 0, 0]))
@@ -311,6 +352,7 @@ class TestMultiRobotSystem:
         assert ("r1", "r3") not in col
 
     def test_allocate_tasks(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.array([0.0, 0, 0, 1, 0, 0, 0]))
         s.add_robot("r2", fake_engine, np.array([10.0, 0, 0, 1, 0, 0, 0]))
@@ -334,6 +376,7 @@ class TestMultiRobotSystem:
         assert "t1" in r1_ids
 
     def test_allocate_tasks_no_target(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.zeros(7))
         tasks = [Task("t1", TaskType.WAIT)]
@@ -341,6 +384,7 @@ class TestMultiRobotSystem:
         assert any(t.task_id == "t1" for t in alloc["r1"])
 
     def test_system_state(self, fake_engine) -> None:
+        """Test."""
         s = MultiRobotSystem()
         s.add_robot("r1", fake_engine, np.zeros(7))
         state = s.get_system_state()
