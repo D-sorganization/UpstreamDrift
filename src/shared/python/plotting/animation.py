@@ -207,7 +207,9 @@ class SwingAnimator:
             raise ValueError("ax must be provided")
         all_pts = np.vstack(list(body_data.values()))
         margin = 0.1
-        for setter, col in [(ax.set_xlim, 0), (ax.set_ylim, 1), (ax.set_zlim, 2)]:
+        # ax is a 3D Axes; set_zlim is provided by Axes3D, unseen by the 2D stub.
+        zlim = ax.set_zlim  # type: ignore[attr-defined]
+        for setter, col in [(ax.set_xlim, 0), (ax.set_ylim, 1), (zlim, 2)]:
             lo, hi = float(all_pts[:, col].min()), float(all_pts[:, col].max())
             span = max(hi - lo, 0.1)
             setter(lo - margin * span, hi + margin * span)
