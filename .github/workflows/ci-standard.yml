@@ -1226,7 +1226,17 @@ jobs:
           fi
 
           # Run the default, dependency-light CI lane:
-          # - Serial execution for self-hosted runner and coverage stability
+          # - Bounded parallelism (-n 2 --dist loadscope) so no single worker
+          #   process imports the entire 2k+ module test graph at once. A
+          #   monolithic serial (-n 0) run accumulated every test module's
+          #   top-level imports (mujoco/torch/etc.) plus coverage data for all
+          #   of src/ in one long-lived process, whose peak RSS exceeded the
+          #   self-hosted runner memory and was OOM-killed (exit 137). Two
+          #   workers each hold only their loadscope subset, halving per-process
+          #   peak memory, while pytest-cov combines the per-worker coverage
+          #   data so the measured percentage is unchanged. loadscope keeps each
+          #   test module (and its fixtures / serial-marked sys.modules edits)
+          #   on a single worker. See PR fixing the tests-matrix OOM.
           # - 60 second timeout per test
           # - Skip slow tests in CI for faster feedback
           # - Coverage measurement on src/ (pytest-cov)
@@ -1234,7 +1244,8 @@ jobs:
           # are intentionally not provisioned here.
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
-            -n 0 \
+            -n 2 \
+            --dist loadscope \
             --timeout=60 \
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
