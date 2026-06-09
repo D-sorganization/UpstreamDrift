@@ -60,6 +60,53 @@ def test_discover_routes_not_a_package(route_registry):
         route_registry.discover_routes("tests.api.test_route_registry")
 
 
+def test_discover_routes_fails_closed_on_mandatory_import_error(route_registry):
+    """Issue #7128: a broken *mandatory* route module fails discovery closed.
+
+    ``dummy_routes_broken.video`` raises ImportError at import time. When it is
+    treated as mandatory (empty optional allowlist), route discovery must
+    re-raise rather than silently dropping the endpoint and returning 404s.
+    """
+    with pytest.raises(ImportError):
+        route_registry.discover_routes(
+            "tests.api.dummy_routes_broken",
+            optional=frozenset(),
+        )
+
+
+def test_discover_routes_skips_optional_import_error(route_registry):
+    """Issue #7128: a broken *optional* route module is skipped, not fatal.
+
+    With ``video`` declared optional, its ImportError is tolerated while the
+    healthy ``auth`` and ``core`` routers are still discovered.
+    """
+    from fastapi import APIRouter
+
+    routes = route_registry.discover_routes(
+        "tests.api.dummy_routes_broken",
+        optional=frozenset({"video"}),
+    )
+
+    discovered = {name for name, _ in routes}
+    assert "auth" in discovered
+    assert "core" in discovered
+    assert "video" not in discovered  # skipped due to optional import failure
+    assert all(isinstance(router, APIRouter) for _, router in routes)
+
+
+def test_video_is_in_default_optional_modules(route_registry):
+    """The video router is the canonical optional, dependency-gated module."""
+    assert "video" in route_registry._OPTIONAL_MODULES
+
+
+def test_default_discovery_is_fail_closed(route_registry):
+    """By default (no ``optional`` override) only the allowlist may be skipped."""
+    # The default optional set is small and explicit; mandatory routers like
+    # physics/dataset/auth must never be in it.
+    for mandatory in ("auth", "core", "physics", "dataset", "simulation"):
+        assert mandatory not in route_registry._OPTIONAL_MODULES
+
+
 def test_register_routes(route_registry):
     """Test registering routes to a FastAPI app."""
     from fastapi import APIRouter, FastAPI

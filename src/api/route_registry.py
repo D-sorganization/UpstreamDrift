@@ -54,6 +54,22 @@ _EXCLUDED_MODULES: frozenset[str] = frozenset(
     }
 )
 
+# Route modules that are *allowed* to fail to import — typically because they
+# depend on optional feature extras (e.g. ``cv2``/``mediapipe`` for video pose
+# estimation) that the slim runtime image intentionally omits. Such a module
+# must still keep its top-level import dependency-free (so route discovery picks
+# up its ``router``) and surface a clear 503 from inside its handlers when the
+# feature dependency is missing (see ``tests/unit/api/test_video_route_lazy_import``).
+#
+# Every other route module is mandatory: a broken import is treated as a
+# deploy-time error and fails route discovery closed (issue #7128) rather than
+# silently dropping endpoints and returning 404s to clients.
+_OPTIONAL_MODULES: frozenset[str] = frozenset(
+    {
+        "video",
+    }
+)
+
 # Explicit registration order matching the original server.py.
 # This is critical because some modules define overlapping route paths
 # (e.g. /simulation/actuators in both physics.py and actuator_controls.py)
@@ -225,6 +241,7 @@ def discover_routes(
     package_path: str = "src.api.routes",
     *,
     exclude: frozenset[str] | None = None,
+    optional: frozenset[str] | None = None,
 ) -> list[tuple[str, APIRouter]]:
     """Discover all route modules with a ``router`` attribute.
 
@@ -237,18 +254,32 @@ def discover_routes(
     appended in alphabetical order.  This preserves FastAPI's
     first-match-wins semantics for overlapping route paths.
 
+    Route discovery **fails closed** (issue #7128): if a mandatory route
+    module cannot be imported, the ``ImportError`` propagates so a broken
+    deploy fails fast instead of silently dropping endpoints and returning
+    404s. Only modules listed in ``optional`` (feature-gated routers whose
+    extras may be absent in slim images) are allowed to be skipped on
+    ``ImportError`` — and those are expected to register their router with a
+    dependency-free top-level import and emit a 503 from their handlers when
+    the missing feature dependency is actually exercised.
+
     Args:
         package_path: Dotted import path to the routes package.
-        exclude: Module names to skip (without package prefix).
+        exclude: Module names to skip entirely (without package prefix).
+        optional: Module names allowed to fail import and be skipped.
+            Defaults to ``_OPTIONAL_MODULES``.
 
     Returns:
         List of (module_name, router) tuples in registration order.
 
     Raises:
-        ImportError: If the routes package itself cannot be imported.
+        ImportError: If the routes package itself cannot be imported, or if a
+            mandatory (non-optional) route module fails to import.
     """
     if exclude is None:
         exclude = _EXCLUDED_MODULES
+    if optional is None:
+        optional = _OPTIONAL_MODULES
 
     package = importlib.import_module(package_path)
     if not hasattr(package, "__path__"):
@@ -268,10 +299,21 @@ def discover_routes(
         try:
             module = importlib.import_module(full_module_path)
         except ImportError:
-            logger.warning(
-                "Failed to import route module %s — skipping", full_module_path
+            if module_name in optional:
+                logger.warning(
+                    "Optional route module %s failed to import — skipping. "
+                    "Its feature dependency is absent; handlers should 503.",
+                    full_module_path,
+                )
+                continue
+            # Fail closed: a mandatory route module that cannot import is a
+            # deploy-time error, not a silently-missing endpoint (issue #7128).
+            logger.exception(
+                "Mandatory route module %s failed to import; failing route "
+                "discovery closed",
+                full_module_path,
             )
-            continue
+            raise
 
         router = getattr(module, "router", None)
         if router is None:
@@ -299,6 +341,7 @@ def register_routes(
     *,
     prefix: str = "",
     exclude: frozenset[str] | None = None,
+    optional: frozenset[str] | None = None,
 ) -> int:
     """Discover and register all route modules on the given FastAPI app.
 
@@ -308,11 +351,13 @@ def register_routes(
         app: The FastAPI application instance.
         prefix: Optional URL prefix to prepend to all routes (e.g. "/api/v1").
         exclude: Module names to skip.
+        optional: Module names allowed to fail import and be skipped. Defaults
+            to ``_OPTIONAL_MODULES``. Mandatory modules fail closed (#7128).
 
     Returns:
         Number of routers registered.
     """
-    routes = discover_routes(exclude=exclude)
+    routes = discover_routes(exclude=exclude, optional=optional)
     for module_name, router in routes:
         deps = _dependencies_for_route(module_name)
         app.include_router(
