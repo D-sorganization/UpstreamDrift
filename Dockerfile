@@ -113,6 +113,8 @@ COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
 COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} scripts/ci/start_api_server.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} .env.example ./.env.example
+COPY --chown=${USER_NAME}:${USER_NAME} docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER ${USER_NAME}
 
@@ -135,13 +137,13 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 #   localhost only for security. Set FORWARDED_ALLOW_IPS env var in production
 #   to specify trusted proxy IPs (e.g., your load balancer's internal IP).
 # - --access-log: keep structured request logs on stdout for observability.
-CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8001", \
-     "--workers", "1", \
-     "--proxy-headers", \
-     "--forwarded-allow-ips", "${FORWARDED_ALLOW_IPS:-127.0.0.1}", \
-     "--access-log"]
+#
+# The flags above are passed by docker/entrypoint.sh. The entrypoint runs under
+# /bin/sh so FORWARDED_ALLOW_IPS is expanded at runtime (issue #7129) — an
+# exec-form CMD cannot perform shell parameter expansion, so the variable would
+# otherwise be passed to uvicorn as a literal string. The wrapper still exec's
+# uvicorn so it receives signals as PID 1.
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
 # Stage 3: Training — adds PyTorch + RL stack for GPU training workflows
@@ -162,4 +164,8 @@ RUN /opt/venv/bin/pip install --no-cache-dir \
 
 USER ${USER_NAME}
 
+# The training image is an interactive workbench, not the API server. Reset the
+# inherited API entrypoint (issue #7129) so `CMD ["/bin/bash"]` launches a shell
+# instead of being passed as arguments to the uvicorn entrypoint wrapper.
+ENTRYPOINT []
 CMD ["/bin/bash"]

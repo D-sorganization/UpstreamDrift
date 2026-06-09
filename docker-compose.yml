@@ -30,6 +30,9 @@ services:
       - API_PORT=8001
       - ENVIRONMENT=development
       - MUJOCO_GL=${MUJOCO_GL:-osmesa}
+    # Override the image ENTRYPOINT (the prod uvicorn wrapper, #7129) so this
+    # dev `command` with --reload is run directly rather than passed as args.
+    entrypoint: []
     command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload
     restart: unless-stopped
     working_dir: /workspace
