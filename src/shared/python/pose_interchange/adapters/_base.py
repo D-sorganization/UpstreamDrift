@@ -253,6 +253,8 @@ def _require_single_dof_slot(name: str, slot: JointSlot) -> None:
     """
 
     if slot.length != 1:
+        # tracked: #7145 — full multi-DOF slot support is future work; until
+        # then fail loudly rather than silently corrupting q.
         raise NotImplementedError(
             f"joint slot '{name}' has length={slot.length}; encode/decode only "
             "support 1-DOF slots. Multi-DOF slots (e.g. floating-base "
