@@ -8,7 +8,7 @@
 #   make test     - Run tests
 #   make clean    - Clean build artifacts
 
-.PHONY: help lint format test test-unit test-int smoke clean install check all docs sync-deps sbom codemap codemap-watch codemap-mcp
+.PHONY: help lint format test test-unit test-int test-in-tree smoke clean install check all docs sync-deps sbom codemap codemap-watch codemap-mcp
 
 # Default target
 help:
@@ -20,6 +20,7 @@ help:
 	@echo "  make test      - Run pytest"
 	@echo "  make test-unit - Run unit tests only"
 	@echo "  make test-int  - Run integration tests only"
+	@echo "  make test-in-tree - Validate in-tree src/**/tests pytest coverage"
 	@echo "  make smoke     - Run release smoke tests for available artifacts"
 	@echo "  make check     - Run all checks (lint + test)"
 	@echo "  make clean     - Remove build artifacts"
@@ -77,6 +78,11 @@ test-unit:
 test-int:
 	@echo "Running integration tests..."
 	pytest tests/integration/ -v --tb=short
+
+# Validate default pytest coverage for tracked in-tree src/**/tests files.
+test-in-tree:
+	@echo "Checking in-tree pytest testpaths coverage..."
+	python3 scripts/check_pytest_intree_testpaths.py
 
 # Run smoke tests against locally built release artifacts
 smoke:

@@ -21,7 +21,9 @@ dependencies = [
     # Core (always installed)
     "numpy>=2.0.0",
     "scipy>=1.13.1",
-    "fastapi>=0.126.0",
+    "fastapi>=0.136.0",
+    # Security floor for CVE-2026-48710; FastAPI 0.136+ supports Starlette 1.x.
+    "starlette>=1.0.1",
     "uvicorn[standard]>=0.30.0",
     "pydantic>=2.5.0",
     # Typed unified settings (issue #6565). Small dep; config is load-bearing.
@@ -56,6 +58,15 @@ dependencies = [
     # backs the default web-UI launch path — must be core, not dev-only (#6612).
     "slowapi>=0.1.9",
     "python-multipart>=0.0.27",
+    # API auth/database runtime imports (#7125): src.api.database imports
+    # SQLAlchemy/Alembic at module load and src.api.auth.security imports
+    # bcrypt/JWT/cryptography at module load.
+    "alembic>=1.13.0",
+    "sqlalchemy>=2.0.0",
+    "bcrypt>=4.1.0",
+    "PyJWT>=2.12.0",
+    "cryptography>=46.0.7",
+    "email-validator>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -142,18 +153,12 @@ dev = [
     "defusedxml>=0.7.0",
     # Required for plotting tests
     "matplotlib>=3.10.8",
-    # Required for auth/security tests
-    "sqlalchemy>=2.0.0",
-    "bcrypt>=4.1.0",
-    "PyJWT>=2.12.0",
-    "cryptography>=46.0.7",
+    # API auth/database packages live in core dependencies (#7125).
     # Required for async tests
     "anyio>=4.0.0",
     "pytest-anyio>=0.0.0; python_version>='3.10'",
     # Required for config tests
     "PyYAML>=6.0.3",
-    # Required for pydantic email validation in auth models
-    "email-validator>=2.0.0",
     # NOTE: slowapi and python-multipart moved to core [project] dependencies
     # (#6612) — they are runtime imports of the API server, not test-only.
     # Required for async streaming tests
@@ -166,8 +171,7 @@ dev = [
     "ezc3d>=1.5.0",
     # Required for property-based testing
     "hypothesis>=6.0.0",
-    # Required for database migration tooling (issue #2078)
-    "alembic>=1.13.0",
+    # Database migration tooling lives in core dependencies (#7125).
     # Type stubs for untyped third-party packages (GH2034)
     "types-PyYAML>=6.0",
     "scipy-stubs>=1.13.0",
@@ -461,7 +465,31 @@ follow_imports = "skip"
 
 [tool.pytest.ini_options]
 # Consolidated pytest configuration (replaces duplicate pytest.ini files)
-testpaths = ["tests"]
+# Default pytest must collect repository-level tests and intentional colocated
+# package tests under src/**/tests (#7126). Keep this explicit rather than
+# recursing all of src, which also contains engines, MATLAB bridges, and
+# generated assets.
+testpaths = [
+    "tests",
+    "src/engines/lower_body_model/tests",
+    "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/tests/unit",
+    "src/engines/physics_engines/tests",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests",
+    "src/shared/python/ai/tests",
+    "src/shared/python/calc_backend/tests",
+    "src/shared/python/chat/tests",
+    "src/shared/python/data_processing/tests",
+    "src/shared/python/humanoid_character_builder/tests",
+    "src/shared/python/model_generation/tests",
+    "src/shared/python/notes",
+    "src/shared/python/plot_engine/tests",
+    "src/shared/python/plot_theme/tests",
+    "src/shared/python/programmatic_pid/tests",
+    "src/shared/python/sidekick/process_calculators/scrubber/tests",
+    "src/shared/python/sidekick/tests",
+    "src/shared/python/signal_toolkit/tests",
+    "src/shared/python/tests",
+]
 pythonpath = [
     ".",
     "src",
@@ -482,7 +510,6 @@ timeout = 60
 timeout_method = "thread"
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
-    "src",
     "archive",
     "legacy",
     "node_modules",

@@ -30,7 +30,7 @@ permissions:
 
 # HARDENING: Prevent concurrent runs and limit frequency
 concurrency:
-  group: comment-to-issue-${{ github.repository }}
+  group: comment-to-issue-${{ github.repository }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 env:

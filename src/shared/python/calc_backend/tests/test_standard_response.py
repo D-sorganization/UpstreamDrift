@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from .standard_response import (
+from src.shared.python.calc_backend.api.standard_response import (
     ErrorCode,
     ErrorDetail,
     ResponseMetadata,

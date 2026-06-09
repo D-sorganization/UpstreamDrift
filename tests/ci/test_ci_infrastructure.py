@@ -394,9 +394,82 @@ class TestCIEnvironmentCompatibility:
 
         assert int(lod_job["timeout-minutes"]) >= 15
 
+    def test_quality_gate_workflow_emits_required_status_on_every_pr(self) -> None:
+        """The standalone required status must not be hidden behind path filters."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "quality-gate.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        job = workflow["jobs"]["quality-gate"]
+
+        assert job["name"] == "quality-gate"
+        assert job["runs-on"] == "d-sorg-fleet-docker"
+        assert "paths:" not in workflow_text
+
+    def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
+        """Helper checks must not cancel another PR's current check status."""
+        workflows = [
+            "Jules-Redundant-PR-Closer.yml",
+            "Comment-to-Issue-Converter.yml",
+        ]
+
+        for workflow_name in workflows:
+            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
+                encoding="utf-8"
+            )
+            assert (
+                "${{ github.event.pull_request.number || github.run_id }}" in workflow
+            )
+
+    def test_ci_standard_runner_guard_invokes_real_audit(self) -> None:
+        """The required local-only status must not be a no-op."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+
+        assert "python3 scripts/check_local_only_workflows.py" in workflow
+        assert 'echo "Bypass"' not in workflow
+
+    def test_ci_standard_defines_required_quality_gate_status(self) -> None:
+        """Branch protection requires the CI Standard / quality-gate status."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        job = workflow["jobs"]["quality-gate"]
+
+        assert job["name"] == "quality-gate"
+        assert set(job["needs"]) == {
+            "code-quality",
+            "security-scans",
+            "repo-structure-gates",
+            "unit-test-gate",
+        }
+        assert job["if"] == "always()"
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
+
+    @staticmethod
+    def _load_pyproject() -> dict[str, Any]:
+        try:
+            import tomllib  # Python 3.11+
+        except ImportError:
+            import tomli as tomllib  # type: ignore[import-not-found]
+
+        with open(REPO_ROOT / "pyproject.toml", "rb") as f:
+            return tomllib.load(f)
 
     def test_pyproject_exists(self) -> None:
         """Test that pyproject.toml exists at repo root."""
@@ -405,15 +478,7 @@ class TestPyprojectTomlConsistency:
 
     def test_pyproject_has_required_sections(self) -> None:
         """Test that pyproject.toml has required sections."""
-        try:
-            import tomllib  # Python 3.11+
-        except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
-
-        pyproject = REPO_ROOT / "pyproject.toml"
-
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
+        data = self._load_pyproject()
 
         assert "project" in data
         assert "dependencies" in data["project"]
@@ -421,18 +486,46 @@ class TestPyprojectTomlConsistency:
 
     def test_structlog_in_dependencies(self) -> None:
         """Test that structlog is declared in dependencies."""
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
-
-        pyproject = REPO_ROOT / "pyproject.toml"
-
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
+        data = self._load_pyproject()
 
         deps = data["project"]["dependencies"]
         # Check that structlog is in the dependencies
         assert any("structlog" in dep for dep in deps), (
             "structlog must be in core dependencies"
         )
+
+    def test_api_runtime_dependencies_are_core_and_locked(self) -> None:
+        """API auth/database imports must not require the dev extra."""
+        data = self._load_pyproject()
+        lock = (REPO_ROOT / "requirements.lock").read_text(encoding="utf-8").lower()
+
+        deps = {
+            requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            for requirement in data["project"]["dependencies"]
+        }
+        dev_deps = {
+            requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            for requirement in data["project"]["optional-dependencies"]["dev"]
+        }
+
+        for package in {
+            "alembic",
+            "sqlalchemy",
+            "bcrypt",
+            "pyjwt",
+            "cryptography",
+            "email-validator",
+            "starlette",
+        }:
+            assert package in deps
+            assert package not in dev_deps
+            assert f"{package}==" in lock
+
+    def test_pytest_collects_in_tree_tests_by_default(self) -> None:
+        """Default pytest config must include intentional colocated src tests."""
+        data = self._load_pyproject()
+        pytest_config = data["tool"]["pytest"]["ini_options"]
+
+        assert "src/shared/python/ai/tests" in pytest_config["testpaths"]
+        assert "src/shared/python/sidekick/tests" in pytest_config["testpaths"]
+        assert "src" not in pytest_config["norecursedirs"]

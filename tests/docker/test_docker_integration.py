@@ -78,26 +78,43 @@ class TestDockerRuntimeEntrypoint(unittest.TestCase):
 
     def setUp(self):
         self.content = (get_repo_root() / "Dockerfile").read_text()
+        # The uvicorn invocation moved out of the exec-form CMD into a /bin/sh
+        # entrypoint wrapper so FORWARDED_ALLOW_IPS expands at runtime (#7129).
+        self.entrypoint = (get_repo_root() / "docker" / "entrypoint.sh").read_text()
 
     def test_runtime_cmd_invokes_uvicorn_api_server(self):
-        """CMD must launch src.api.server:app via uvicorn."""
-        self.assertIn('"python3", "-m", "uvicorn"', self.content)
-        self.assertIn('"src.api.server:app"', self.content)
+        """Entrypoint must launch src.api.server:app via uvicorn."""
+        self.assertIn("python3 -m uvicorn", self.entrypoint)
+        self.assertIn("src.api.server:app", self.entrypoint)
+
+    def test_runtime_dockerfile_wires_entrypoint(self):
+        """Dockerfile must default to the entrypoint wrapper (not raw CMD)."""
+        self.assertIn('ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]', self.content)
 
     def test_runtime_cmd_binds_public_host_and_port(self):
-        """CMD must bind 0.0.0.0:8001 to match EXPOSE/HEALTHCHECK."""
-        self.assertIn('"--host", "0.0.0.0"', self.content)
-        self.assertIn('"--port", "8001"', self.content)
+        """Entrypoint must bind 0.0.0.0:8001 to match EXPOSE/HEALTHCHECK."""
+        self.assertIn("--host 0.0.0.0", self.entrypoint)
+        self.assertIn("--port 8001", self.entrypoint)
 
     def test_runtime_cmd_single_worker_for_healthcheck(self):
         """Single worker keeps in-process state + HEALTHCHECK aligned."""
-        self.assertIn('"--workers", "1"', self.content)
+        self.assertIn("--workers 1", self.entrypoint)
 
     def test_runtime_cmd_proxy_headers_hardening(self):
         """Proxy-aware flags must be present for reverse-proxy deployments."""
-        self.assertIn('"--proxy-headers"', self.content)
-        self.assertIn('"--forwarded-allow-ips"', self.content)
-        self.assertIn('"--access-log"', self.content)
+        self.assertIn("--proxy-headers", self.entrypoint)
+        self.assertIn("--forwarded-allow-ips", self.entrypoint)
+        self.assertIn("--access-log", self.entrypoint)
+
+    def test_runtime_forwarded_allow_ips_expands_at_runtime(self):
+        """FORWARDED_ALLOW_IPS must be shell-expanded, not passed literally."""
+        # The literal exec-array token must not survive in the Dockerfile, and
+        # the entrypoint must perform POSIX default-expansion (#7129).
+        self.assertNotIn("${FORWARDED_ALLOW_IPS:-127.0.0.1}", self.content)
+        self.assertIn(
+            'FORWARDED_ALLOW_IPS="${FORWARDED_ALLOW_IPS:-127.0.0.1}"',
+            self.entrypoint,
+        )
 
     def test_runtime_healthcheck_hits_health_endpoint(self):
         """HEALTHCHECK must probe /health on the same port as CMD."""
@@ -217,8 +234,8 @@ class TestContainerEnvironment(unittest.TestCase):
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
         self.assertIn("pip install --upgrade pip==26.1", content)
-        self.assertIn('"PyJWT==2.12.0"', content)
-        self.assertIn('"cryptography==46.0.7"', content)
+        self.assertIn("pyjwt==2.12.0", requirements_lock.lower())
+        self.assertIn("cryptography==46.0.7", requirements_lock.lower())
         self.assertIn("apt-get update && apt-get upgrade -y", content)
         self.assertIn("idna==3.15", requirements_lock)
 

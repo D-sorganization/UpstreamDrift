@@ -18,6 +18,10 @@ from enum import Enum
 import numpy as np
 
 from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
+from ._frame_arrays import (
+    keypoints_to_array as _keypoints_to_array,
+    markers_to_array as _markers_to_array,
+)
 
 try:  # pragma: no cover - import guard exercised in CI matrix
     import upstream_mocap_preproc as _rust_kernel  # type: ignore[import-not-found]
@@ -171,50 +175,6 @@ def _estimate_fps(frames: list) -> float:
         return 30.0
 
     return 1.0 / dt
-
-
-def _keypoints_to_array(frames: list[KeypointFrame]) -> np.ndarray:
-    """Convert keypoint frames to array."""
-    if not frames:
-        return np.array([])
-
-    num_frames = len(frames)
-    num_keypoints = len(frames[0].keypoints)
-
-    # Shape: (num_frames, num_keypoints, 3)
-    data = np.zeros((num_frames, num_keypoints, 3))
-
-    for i, frame in enumerate(frames):
-        for j, kp in enumerate(frame.keypoints):
-            data[i, j, 0] = kp.x
-            data[i, j, 1] = kp.y
-            if kp.z is not None:
-                data[i, j, 2] = kp.z
-
-    return data
-
-
-def _markers_to_array(frames: list[MarkerFrame]) -> np.ndarray:
-    """Convert marker frames to array."""
-    if not frames:
-        return np.array([])
-
-    num_frames = len(frames)
-    marker_names = list(frames[0].markers.keys())
-    num_markers = len(marker_names)
-
-    # Shape: (num_frames, num_markers, 3)
-    data = np.zeros((num_frames, num_markers, 3))
-
-    for i, frame in enumerate(frames):
-        for j, name in enumerate(marker_names):
-            if name in frame.markers:
-                m = frame.markers[name]
-                data[i, j, 0] = m.x
-                data[i, j, 1] = m.y
-                data[i, j, 2] = m.z
-
-    return data
 
 
 def _array_to_keypoint_frames(

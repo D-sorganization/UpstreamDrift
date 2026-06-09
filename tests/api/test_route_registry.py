@@ -20,12 +20,20 @@ def route_registry():
     of the worker, causing order-dependent failures in unrelated route tests.
     """
     db_mock = MagicMock()
+    auth_dependencies_mock = MagicMock()
+    auth_dependencies_mock.CheckSimulationQuota.dependency = object()
+    auth_dependencies_mock.CheckVideoQuota.dependency = object()
+    auth_dependencies_mock.check_usage_quota.return_value = lambda user, db: user
+    auth_models_mock = MagicMock()
+    auth_models_mock.User = object
     # Drop any cached import of route_registry so it re-imports against
     # the mocked database module each time.
     cached = sys.modules.pop("src.api.route_registry", None)
     with patch.dict(
         sys.modules,
         {
+            "src.api.auth.dependencies": auth_dependencies_mock,
+            "src.api.auth.models": auth_models_mock,
             "src.api.database": db_mock,
             "src.api.database.get_db": MagicMock(),
         },
@@ -58,6 +66,53 @@ def test_discover_routes_not_a_package(route_registry):
     """Test discover_routes raises an error if path is not a package."""
     with pytest.raises(ImportError, match="is not a package"):
         route_registry.discover_routes("tests.api.test_route_registry")
+
+
+def test_discover_routes_fails_closed_on_mandatory_import_error(route_registry):
+    """Issue #7128: a broken *mandatory* route module fails discovery closed.
+
+    ``dummy_routes_broken.video`` raises ImportError at import time. When it is
+    treated as mandatory (empty optional allowlist), route discovery must
+    re-raise rather than silently dropping the endpoint and returning 404s.
+    """
+    with pytest.raises(ImportError):
+        route_registry.discover_routes(
+            "tests.api.dummy_routes_broken",
+            optional=frozenset(),
+        )
+
+
+def test_discover_routes_skips_optional_import_error(route_registry):
+    """Issue #7128: a broken *optional* route module is skipped, not fatal.
+
+    With ``video`` declared optional, its ImportError is tolerated while the
+    healthy ``auth`` and ``core`` routers are still discovered.
+    """
+    from fastapi import APIRouter
+
+    routes = route_registry.discover_routes(
+        "tests.api.dummy_routes_broken",
+        optional=frozenset({"video"}),
+    )
+
+    discovered = {name for name, _ in routes}
+    assert "auth" in discovered
+    assert "core" in discovered
+    assert "video" not in discovered  # skipped due to optional import failure
+    assert all(isinstance(router, APIRouter) for _, router in routes)
+
+
+def test_video_is_in_default_optional_modules(route_registry):
+    """The video router is the canonical optional, dependency-gated module."""
+    assert "video" in route_registry._OPTIONAL_MODULES
+
+
+def test_default_discovery_is_fail_closed(route_registry):
+    """By default (no ``optional`` override) only the allowlist may be skipped."""
+    # The default optional set is small and explicit; mandatory routers like
+    # physics/dataset/auth must never be in it.
+    for mandatory in ("auth", "core", "physics", "dataset", "simulation"):
+        assert mandatory not in route_registry._OPTIONAL_MODULES
 
 
 def test_register_routes(route_registry):

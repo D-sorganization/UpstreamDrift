@@ -50,7 +50,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: jules-redundant-pr-closer-${{ github.repository }}
+  group: jules-redundant-pr-closer-${{ github.repository }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 jobs:

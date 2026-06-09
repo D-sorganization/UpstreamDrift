@@ -1,25 +1,34 @@
 #!/usr/bin/env python3
-"""Fail when GitHub Actions workflows can route to hosted runners."""
+"""Fail when GitHub Actions workflow jobs route to hosted runners."""
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
+from typing import Any
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover - exercised only in underprovisioned CI
+    yaml = None  # type: ignore[assignment]
 
 WORKFLOW_DIR = Path(".github") / "workflows"
-BANNED = (
-    "ubuntu-latest",
-    "windows-latest",
-    "macos-latest",
-    "force_cloud",
-    "mode=cloud",
-    "Routing to GitHub-hosted",
-    "using GitHub-hosted",
-    "runner=ubuntu-latest",
-    "runner=windows-latest",
-    "runner=macos-latest",
+HOSTED_RUNNER = re.compile(r"^(ubuntu|macos|windows)(-latest|-\d+)?$")
+ALLOWLIST_FILES = frozenset(
+    {
+        "local-only-runner-guard.yml",
+        "runner-health-alert.yml",
+    }
+)
+ALLOWLIST_JOB_NAMES = frozenset(
+    {
+        "Reject hosted runner routing",
+        "Local-Only Workflow Runner Guard",
+    }
 )
 
 
@@ -40,7 +49,7 @@ def _pull_request_base_ref() -> str | None:
     return payload.get("pull_request", {}).get("base", {}).get("ref")
 
 
-def _changed_workflows_for_pull_request() -> list[Path] | None:
+def _changed_workflows_for_pull_request(workflow_dir: Path) -> list[Path] | None:
     if os.environ.get("GITHUB_EVENT_NAME") != "pull_request":
         return None
 
@@ -62,7 +71,7 @@ def _changed_workflows_for_pull_request() -> list[Path] | None:
             f"origin/{base_ref}",
             "HEAD",
             "--",
-            str(WORKFLOW_DIR),
+            str(workflow_dir),
         ],
         check=False,
         text=True,
@@ -78,32 +87,98 @@ def _changed_workflows_for_pull_request() -> list[Path] | None:
     ]
 
 
-def _workflow_paths() -> list[Path]:
-    changed_paths = _changed_workflows_for_pull_request()
+def _workflow_paths(workflow_dir: Path) -> list[Path]:
+    changed_paths = _changed_workflows_for_pull_request(workflow_dir)
     if changed_paths is not None:
         return sorted(path for path in changed_paths if path.exists())
 
     return sorted(
-        path for path in WORKFLOW_DIR.rglob("*") if path.suffix in {".yml", ".yaml"}
+        path for path in workflow_dir.rglob("*") if path.suffix in {".yml", ".yaml"}
     )
 
 
-def main() -> int:
+def _runs_on_values(job: dict[str, Any]) -> list[str]:
+    runs_on = job.get("runs-on")
+    if isinstance(runs_on, str):
+        values = [runs_on]
+    elif isinstance(runs_on, list):
+        values = [value for value in runs_on if isinstance(value, str)]
+    else:
+        return []
+
+    if any("matrix.os" in value for value in values):
+        values = []
+        strategy = job.get("strategy") or {}
+        matrix = strategy.get("matrix") if isinstance(strategy, dict) else {}
+        if isinstance(matrix, dict):
+            os_axis = matrix.get("os")
+            if isinstance(os_axis, list):
+                values.extend(value for value in os_axis if isinstance(value, str))
+            include = matrix.get("include")
+            if isinstance(include, list):
+                values.extend(
+                    item["os"]
+                    for item in include
+                    if isinstance(item, dict) and isinstance(item.get("os"), str)
+                )
+    return values
+
+
+def _is_fleet_runner(value: str) -> bool:
+    return "pick-runner" in value or "d-sorg-fleet" in value or "self-hosted" in value
+
+
+def _workflow_failures(path: Path) -> list[str]:
+    if yaml is None:
+        return ["PyYAML is required to parse workflow routing."]
+    if path.name in ALLOWLIST_FILES:
+        return []
+
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [f"{path}: failed to parse YAML: {exc}"]
+
+    if not isinstance(data, dict):
+        return []
+    jobs = data.get("jobs") or {}
+    if not isinstance(jobs, dict):
+        return []
+
     failures: list[str] = []
-    if not WORKFLOW_DIR.exists():
+    for job_id, job in jobs.items():
+        if not isinstance(job, dict):
+            continue
+        if job.get("name") in ALLOWLIST_JOB_NAMES:
+            continue
+        if "uses" in job and "runs-on" not in job:
+            continue
+        for value in _runs_on_values(job):
+            runner = value.strip()
+            if _is_fleet_runner(runner):
+                continue
+            if HOSTED_RUNNER.match(runner):
+                failures.append(
+                    f"{path}:{job_id}: runs-on {runner!r} is a hosted runner"
+                )
+    return failures
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workflow-dir", type=Path, default=WORKFLOW_DIR)
+    args = parser.parse_args(argv)
+
+    workflow_dir = args.workflow_dir
+    if not workflow_dir.exists():
+        print("No .github/workflows directory; nothing to check.")
         return 0
 
-    for path in _workflow_paths():
-        try:
-            text = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            text = path.read_text(encoding="utf-8-sig")
-        for line_number, line in enumerate(text.splitlines(), start=1):
-            for token in BANNED:
-                if token in line:
-                    failures.append(
-                        f"{path}:{line_number}: banned hosted-runner token {token!r}"
-                    )
+    failures = [
+        failure
+        for path in _workflow_paths(workflow_dir)
+        for failure in _workflow_failures(path)
+    ]
 
     if failures:
         print(
