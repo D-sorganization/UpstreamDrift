@@ -52,6 +52,45 @@ class SecureSubprocessError(Exception):
     """Exception raised for subprocess security violations."""
 
 
+def _is_within(child: Path, parent: Path) -> bool:
+    """Return True iff ``child`` is inside ``parent``, failing closed.
+
+    ``Path.is_relative_to`` raises ``ValueError`` for some path combinations
+    (notably mixed drive / UNC forms on Windows). A security gate must never let
+    a parsing error escape the validation layer (issue #7152, DbC: fail closed),
+    so any comparison failure is treated as "not within".
+    """
+    try:
+        return child.is_relative_to(parent)
+    except (ValueError, OSError):
+        return False
+
+
+def _validate_cwd_within_roots(cwd: Path | str, suite_root: Path | None) -> None:
+    """Reject a working directory outside the allowed suite/tools roots.
+
+    Centralizes the cwd check used by both ``secure_popen`` and ``secure_run``
+    (DRY) and guarantees it raises ``SecureSubprocessError`` — never a bare
+    ``ValueError`` from path comparison (issue #7152).
+    """
+    try:
+        cwd_path = Path(cwd).resolve()
+    except (ValueError, OSError) as exc:
+        raise SecureSubprocessError(
+            f"Working directory could not be resolved: {cwd!r}"
+        ) from exc
+    if not suite_root:
+        return
+    suite_root_abs = suite_root.resolve()
+    tools_repo = _find_tools_repo_for_security(suite_root_abs)
+    in_suite = _is_within(cwd_path, suite_root_abs)
+    in_tools = tools_repo is not None and _is_within(cwd_path, tools_repo.resolve())
+    if not in_suite and not in_tools:
+        raise SecureSubprocessError(
+            f"Working directory outside allowed suite/tools directories: {cwd_path}"
+        )
+
+
 def _apply_hidden_window_default(kwargs: dict[str, Any]) -> None:
     """Hide background subprocess console windows on Windows by default."""
     if os.name != "nt" or "creationflags" in kwargs:
@@ -224,20 +263,9 @@ def secure_popen(  # noqa: C901
                 # If path parsing fails, continue (might be a module name)
                 pass
 
-    # Validate working directory
+    # Validate working directory (fails closed via SecureSubprocessError).
     if cwd:
-        cwd_path = Path(cwd).resolve()
-        if suite_root:
-            suite_root_abs = suite_root.resolve()
-            tools_repo = _find_tools_repo_for_security(suite_root_abs)
-            in_suite = cwd_path.is_relative_to(suite_root_abs)
-            in_tools = tools_repo is not None and cwd_path.is_relative_to(
-                tools_repo.resolve()
-            )
-            if not in_suite and not in_tools:
-                raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/tools directories: {cwd_path}"
-                )
+        _validate_cwd_within_roots(cwd, suite_root)
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
     _apply_hidden_window_default(kwargs)
@@ -302,20 +330,9 @@ def secure_run(  # noqa: C901
                 # If path parsing fails, continue (might be a module name)
                 pass
 
-    # Validate working directory
+    # Validate working directory (fails closed via SecureSubprocessError).
     if cwd:
-        cwd_path = Path(cwd).resolve()
-        if suite_root:
-            suite_root_abs = suite_root.resolve()
-            tools_repo = _find_tools_repo_for_security(suite_root_abs)
-            in_suite = cwd_path.is_relative_to(suite_root_abs)
-            in_tools = tools_repo is not None and cwd_path.is_relative_to(
-                tools_repo.resolve()
-            )
-            if not in_suite and not in_tools:
-                raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/tools directories: {cwd_path}"
-                )
+        _validate_cwd_within_roots(cwd, suite_root)
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")
     _apply_hidden_window_default(kwargs)
