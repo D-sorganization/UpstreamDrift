@@ -178,6 +178,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
 | 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
 | 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
+| 2026-06-09 | Comprehensive A-O Adversarial Review     | `docs/assessments/2026-06-09-comprehensive-ao-adversarial-review.md`          |
 
 ---
 
