@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-capability",
+  "description": "Pins the IPC permission surface of the main window (issue #7164). The four app-defined commands (start_backend, stop_backend, backend_status, get_diagnostics) are registered via generate_handler! in the application itself, so they are reachable by default from the app's own windows and are scoped here to the 'main' window. Plugin/core access is granted explicitly and minimally (no wildcards).",
+  "windows": ["main"],
+  "permissions": ["core:default", "log:default"]
+}
