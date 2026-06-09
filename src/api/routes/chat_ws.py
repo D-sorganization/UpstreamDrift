@@ -227,6 +227,12 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     await websocket.send_json(
                         {"type": "complete", "session_id": session_id}
                     )
+                except WebSocketDisconnect:
+                    # A mid-stream client disconnect is a normal event, not an
+                    # internal error. Re-raise so the outer handler logs it as a
+                    # disconnect and we never send a frame on a dead socket
+                    # (issue #7057).
+                    raise
                 except Exception:  # noqa: BLE001
                     logger.exception("Error during streaming response")
                     await websocket.send_json(

@@ -85,7 +85,6 @@ jobs:
           git checkout -B "$BRANCH_NAME" origin/main
           echo "ASSESSMENT_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -98,7 +97,7 @@ jobs:
             echo "Running directly on host. Sharing tool cache."
           fi
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -199,7 +198,7 @@ jobs:
           echo "critical_issues=$CRITICAL_ISSUES" >> $GITHUB_OUTPUT
 
       - name: Upload Assessment Reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: assessment-reports
           path: |
@@ -269,7 +268,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -282,7 +280,7 @@ jobs:
             echo "Running directly on host. Sharing tool cache."
           fi
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
@@ -463,7 +461,6 @@ jobs:
         with:
           name: assessment-reports
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -476,7 +473,7 @@ jobs:
             echo "Running directly on host. Sharing tool cache."
           fi
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"

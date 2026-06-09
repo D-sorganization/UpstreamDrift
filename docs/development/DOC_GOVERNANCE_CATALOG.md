@@ -33,5 +33,6 @@ expiration date.
 
 This PR intentionally avoids bulk document moves and manual decomposition of the
 633 KB user manual because other agents are working in nearby documentation
-areas. The budget exception for `docs/UPSTREAM_DRIFT_USER_MANUAL.md` expires on
-2026-08-01 and should be removed after the manual is split into Sphinx chapters.
+areas. The budget exception for
+`docs/user_guide/upstream_drift_user_manual.md` expires on 2026-08-01 and
+should be removed after the manual is split into Sphinx chapters.

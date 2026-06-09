@@ -250,7 +250,7 @@ def _build_catalog() -> list[UDToolEntry]:
             title="Motion Capture",
             category="Motion Capture",
             description="Launch markerless motion capture recording and processing.",
-            command="src.launchers.motion_capture_launcher",
+            command="src.tools.freemocap_sidecar.run_freemocap",
             icon="mocap",
         ),
         # ── Motion Matching ───────────────────────────────────────────
@@ -286,7 +286,7 @@ def _build_catalog() -> list[UDToolEntry]:
             title="MATLAB Suite",
             category="External Providers",
             description="Launch MATLAB golf modeling tools and simulations.",
-            command="src.launchers.matlab_launcher_unified",
+            command="src.launchers.matlab_suite_dialog",
             icon="matlab",
         ),
         # ── Developer Tools ───────────────────────────────────────────

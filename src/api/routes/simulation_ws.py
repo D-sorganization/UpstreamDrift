@@ -13,7 +13,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, ValidationError
 
 from src.api.auth.ws_auth import resolve_ws_user
-from src.api.models.requests import SimulationRequest
+from src.api.models.requests import MAX_STATE_VECTOR_LEN, SimulationRequest
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -130,7 +130,34 @@ def _is_numeric_sequence(value: object) -> bool:
     return all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in value)
 
 
-def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
+# Hard ceiling on initial_state q/v length, applied before ``np.array`` so an
+# authenticated client cannot trigger a multi-million-element allocation
+# (memory / event-loop DoS, issue #7056). This is a defense-in-depth bound that
+# mirrors the request-model cap (``MAX_STATE_VECTOR_LEN``, issue #6948): the WS
+# start path already validates through that model, but ``_apply_initial_state``
+# must not assume it was reached only via the validated path. Reusing the same
+# constant keeps the two layers consistent (DRY).
+_MAX_INITIAL_STATE_LEN = MAX_STATE_VECTOR_LEN
+
+
+def _max_initial_state_len(engine: object) -> int:
+    """Return the accepted q/v length ceiling for ``engine``.
+
+    Prefers the engine's declared DoF (``nq``) with a small slack factor so a
+    payload grossly larger than the model is rejected early; falls back to the
+    hard ceiling when the engine does not advertise its dimensionality. The
+    engine's own ``set_state`` still enforces the exact dimension match — this
+    bound only exists to cap allocation size before ``np.array`` (issue #7056).
+    """
+    nq = getattr(engine, "nq", None)
+    if isinstance(nq, int) and not isinstance(nq, bool) and nq > 0:
+        # Allow a little slack (e.g. quaternion-vs-tangent sizing) but stay far
+        # below the hard ceiling so a tiny model rejects huge payloads.
+        return min(_MAX_INITIAL_STATE_LEN, max(nq * 4, 16))
+    return _MAX_INITIAL_STATE_LEN
+
+
+def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> str | None:
     """Apply an initial state dict to the engine using the (q, v) contract.
 
     Engines expose ``set_state(q: np.ndarray, v: np.ndarray)``.  The WebSocket
@@ -145,24 +172,49 @@ def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
     Args:
         engine: The active physics engine instance.
         state_dict: Dict with optional 'q' and 'v' lists.
+
+    Returns:
+        ``None`` when the state was applied (or safely skipped); a human-readable
+        error string when the payload is rejected. Oversized q/v are rejected
+        *before* any ``np.array`` allocation to prevent a memory DoS (issue
+        #7056); the caller surfaces the string as a WebSocket error frame.
+
+    Postcondition: ``engine.set_state`` is never invoked, and no array is
+    allocated, when a non-``None`` error string is returned.
     """
     if not hasattr(engine, "set_state"):
-        return
+        return None
     q_raw = state_dict.get("q", [])
     v_raw = state_dict.get("v", [])
     if not _is_numeric_sequence(q_raw):
         logger.warning(
             "initial_state.q must be a list of numbers; ignoring initial state"
         )
-        return
+        return "initial_state.q must be a list of numbers"
     if not _is_numeric_sequence(v_raw):
         logger.warning(
             "initial_state.v must be a list of numbers; ignoring initial state"
         )
-        return
+        return "initial_state.v must be a list of numbers"
+    max_len = _max_initial_state_len(engine)
+    if len(q_raw) > max_len:
+        logger.warning(
+            "initial_state.q length %d exceeds cap %d; rejecting",
+            len(q_raw),
+            max_len,
+        )
+        return f"initial_state.q exceeds maximum length {max_len}"
+    if len(v_raw) > max_len:
+        logger.warning(
+            "initial_state.v length %d exceeds cap %d; rejecting",
+            len(v_raw),
+            max_len,
+        )
+        return f"initial_state.v exceeds maximum length {max_len}"
     q = np.array(q_raw, dtype=float)
     v = np.array(v_raw, dtype=float)
     engine.set_state(q, v)
+    return None
 
 
 def _engine_state_to_dict(engine: object) -> dict[str, Any]:
@@ -524,9 +576,13 @@ async def simulation_stream(
         if engine is None:
             return
 
-        # Set initial state if provided, using the (q, v) engine contract
+        # Set initial state if provided, using the (q, v) engine contract.
+        # Reject oversized q/v with an error frame before allocating (#7056).
         if "initial_state" in config:
-            _apply_initial_state(engine, config["initial_state"])
+            state_error = _apply_initial_state(engine, config["initial_state"])
+            if state_error is not None:
+                await websocket.send_json({"error": state_error})
+                return
 
         # Run simulation loop
         frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)

@@ -98,7 +98,7 @@ assert warp_device_available(), "no usable CUDA device visible to Warp"
 ```
 
 If you run inside Docker, the container images already wire up the NVIDIA
-Container Toolkit — see [`docs/docker-gpu.md`](../docker-gpu.md) for
+Container Toolkit — see [`docs/operations/docker-gpu.md`](../operations/docker-gpu.md) for
 `docker compose` GPU invocation, `NVIDIA_VISIBLE_DEVICES`, and `MUJOCO_GL`
 settings. Requesting `make_backend('mjwarp', ...)` on a CPU-only box raises a
 `BackendNotAvailableError` with an install hint rather than a bare `ImportError`.

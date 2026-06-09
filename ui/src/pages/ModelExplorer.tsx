@@ -52,7 +52,7 @@ export function ModelExplorerPage() {
   useEffect(() => {
     async function fetchModels() {
       try {
-        const data = await apiFetch<{ models?: string[] }>('/api/models');
+        const data = await apiFetch<{ models?: ModelEntry[] }>('/api/models');
         setModels(data.models || []);
       } catch {
         // Fallback or offline

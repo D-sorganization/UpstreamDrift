@@ -117,21 +117,3 @@ class MotionCaptureLoader:
             ),
             metadata=data.get("metadata", {}),
         )
-
-    @staticmethod
-    def load_bvh(filepath: str | Path) -> MotionCaptureSequence | None:
-        """Load motion capture data from BVH file.
-
-        BVH (Biovision Hierarchy) is a common format for motion capture.
-        This is a simplified parser - for production use, consider using
-        a dedicated BVH library.
-
-        Args:
-            filepath: Path to BVH file
-
-        Returns:
-            MotionCaptureSequence
-        """
-        # Placeholder for BVH parsing
-        # In production, use a library like 'bvh' or 'scikit-kinematics'
-        return None

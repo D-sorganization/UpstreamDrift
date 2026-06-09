@@ -12,8 +12,11 @@ import pytest
 import src.shared.python.data_io.export as export_module
 from src.shared.python.data_io.export import (
     CaptureExportData,
+    export_recording_all_formats,
     get_available_export_formats,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestGetAvailableExportFormats:
@@ -72,6 +75,114 @@ class TestGetAvailableExportFormats:
         formats = get_available_export_formats()
         for key, info in formats.items():
             assert "description" in info, f"Format '{key}' missing description"
+
+
+class TestJsonRoundTrip:
+    """Export -> reimport value round-trip for the always-available JSON format.
+
+    Asserts numeric arrays survive byte-for-value via ``assert_allclose`` and
+    that dictionary key order is preserved through the JSON document.
+    """
+
+    def test_json_preserves_numeric_arrays(self, tmp_path: Path) -> None:
+        times = np.linspace(0.0, 1.0, 25)
+        # 2-D array exercises column fidelity; non-trivial values exercise
+        # floating-point round-trip (JSON serializes via float repr).
+        angles = np.column_stack([np.sin(times), np.cos(times) * 3.5, times**2 - 0.123])
+        data_dict: dict[str, Any] = {"times": times, "angles": angles}
+
+        results = export_recording_all_formats(
+            str(tmp_path / "rec"), data_dict, formats=["json"]
+        )
+        assert results["json"] is True
+
+        reloaded = json.loads((tmp_path / "rec.json").read_text())
+        np.testing.assert_allclose(np.asarray(reloaded["times"]), times)
+        np.testing.assert_allclose(np.asarray(reloaded["angles"]), angles)
+
+    def test_json_preserves_key_order(self, tmp_path: Path) -> None:
+        n = 5
+        data_dict: dict[str, Any] = {
+            "times": np.arange(n, dtype=float),
+            "hip": np.arange(n, dtype=float) + 10.0,
+            "knee": np.arange(n, dtype=float) + 20.0,
+            "ankle": np.arange(n, dtype=float) + 30.0,
+        }
+        export_recording_all_formats(str(tmp_path / "rec"), data_dict, formats=["json"])
+        reloaded = json.loads((tmp_path / "rec.json").read_text())
+        assert list(reloaded.keys()) == ["times", "hip", "knee", "ankle"]
+
+    def test_json_preserves_unit_scaling(self, tmp_path: Path) -> None:
+        # Export positions scaled to millimetres; reimport and scale back to
+        # metres, asserting the unit-aware round-trip is exact (allclose).
+        times = np.linspace(0.0, 2.0, 30)
+        positions_m = np.column_stack([times * 0.5, np.sin(times)])
+        mm_per_m = 1000.0
+        data_dict: dict[str, Any] = {
+            "times": times,
+            "positions_mm": positions_m * mm_per_m,
+        }
+        export_recording_all_formats(str(tmp_path / "rec"), data_dict, formats=["json"])
+        reloaded = json.loads((tmp_path / "rec.json").read_text())
+        recovered_m = np.asarray(reloaded["positions_mm"]) / mm_per_m
+        np.testing.assert_allclose(recovered_m, positions_m)
+
+
+class TestCsvRoundTrip:
+    """Export -> reimport value round-trip for the always-available CSV format.
+
+    CSV flattens 2-D arrays into ``{key}_{i}`` columns with ``time`` first;
+    reimport via pandas asserts numeric equality, column order, and that
+    unit-scaled values survive the text serialization.
+    """
+
+    def test_csv_preserves_numeric_columns(self, tmp_path: Path) -> None:
+        import pandas as pd
+
+        times = np.linspace(0.0, 1.0, 20)
+        angles = np.column_stack([np.sin(times), np.cos(times) * 2.0])
+        data_dict: dict[str, Any] = {"times": times, "angles": angles}
+
+        results = export_recording_all_formats(
+            str(tmp_path / "rec"), data_dict, formats=["csv"]
+        )
+        assert results["csv"] is True
+
+        df = pd.read_csv(tmp_path / "rec.csv")
+        np.testing.assert_allclose(df["time"].to_numpy(), times)
+        np.testing.assert_allclose(df["angles_0"].to_numpy(), angles[:, 0])
+        np.testing.assert_allclose(df["angles_1"].to_numpy(), angles[:, 1])
+
+    def test_csv_preserves_column_order(self, tmp_path: Path) -> None:
+        import pandas as pd
+
+        n = 8
+        times = np.arange(n, dtype=float)
+        # Distinct 1-D series interleaved with a 2-D block; CSV must emit
+        # ``time`` first, then 1-D keys, then the expanded 2-D columns in order.
+        data_dict: dict[str, Any] = {
+            "times": times,
+            "hip": times + 1.0,
+            "torque": np.column_stack([times + 2.0, times + 3.0]),
+        }
+        export_recording_all_formats(str(tmp_path / "rec"), data_dict, formats=["csv"])
+        df = pd.read_csv(tmp_path / "rec.csv")
+        assert list(df.columns) == ["time", "hip", "torque_0", "torque_1"]
+
+    def test_csv_preserves_unit_scaling(self, tmp_path: Path) -> None:
+        import pandas as pd
+
+        times = np.linspace(0.0, 1.0, 15)
+        force_n = np.sin(times) * 42.0
+        kgf_per_n = 1.0 / 9.80665
+        data_dict: dict[str, Any] = {
+            "times": times,
+            "force_kgf": force_n * kgf_per_n,
+        }
+        export_recording_all_formats(str(tmp_path / "rec"), data_dict, formats=["csv"])
+        df = pd.read_csv(tmp_path / "rec.csv")
+        recovered_n = df["force_kgf"].to_numpy() / kgf_per_n
+        np.testing.assert_allclose(recovered_n, force_n)
 
 
 class TestCaptureExportData:

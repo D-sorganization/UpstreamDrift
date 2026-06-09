@@ -38,11 +38,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from .contracts import (
     KeypointSequence,
     MarkerTrajectory,
-    MotionMatchingRequest,
     MotionMatchingResult,
     MotionTrajectory,
     SkeletonRig,
 )
+from .matching.base import MatchingBackendType
 
 logger = logging.getLogger(__name__)
 
@@ -379,7 +379,7 @@ class MotionPipeline:
         orchestrator was not updated; tracked under #5911 follow-ups).
         """
         backend = self.config.ik_backend
-        if backend not in {"mujoco", "drake", "pinocchio", "opensim"}:
+        if backend not in {"mujoco", "drake", "pinocchio", "opensim", "geometric"}:
             return StageResult(
                 success=False,
                 data=None,
@@ -431,42 +431,44 @@ class MotionPipeline:
         """
         backend = self.config.matching_backend
 
-        try:
-            # Import backend dynamically
-            if backend == "mujoco":
-                from .matching.mujoco_backend import run_matching
-            elif backend == "drake":
-                from .matching.drake_backend import run_matching
-            elif backend == "pinocchio":
-                from .matching.pinocchio_backend import run_matching
-            else:
-                return StageResult(
-                    success=False,
-                    data=None,
-                    metadata={},
-                    error=f"Unknown matching backend: {backend}",
-                    error_kind="invalid_input",
-                )
-
-            # Build request
-            request = MotionMatchingRequest(
-                id=f"mm-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                target_trajectory=trajectory,
-                skeleton=skeleton,
-                constraints=self.config.scaling,
-                solver_config=self.config.cost_weights,
+        # Map the orchestrator's coarse engine name to the concrete matching
+        # solver backend. The real solver API is ``make_matching_solver`` +
+        # ``.match()`` (the per-backend ``run_matching`` functions never
+        # existed - #7047).
+        backend_map = {
+            "mujoco": MatchingBackendType.TORQUE_MUJOCO,
+            "drake": MatchingBackendType.TRAJOPT_DRAKE,
+            "pinocchio": MatchingBackendType.INVERSE_DYN_PINOCCHIO,
+        }
+        solver_backend = backend_map.get(backend)
+        if solver_backend is None:
+            return StageResult(
+                success=False,
+                data=None,
+                metadata={},
+                error=f"Unknown matching backend: {backend}",
+                error_kind="invalid_input",
             )
 
-            result = run_matching(request)
+        try:
+            from .matching.base import make_matching_solver
+
+            solver = make_matching_solver(solver_backend)
+            # The matching solvers track a kinematic JointTrajectory.
+            result = solver.match(trajectory.trajectory, skeleton)
+
+            # Convert the internal dataclass result to the canonical
+            # contract result the rest of the pipeline expects.
+            contract_result = result.to_contract()
 
             return StageResult(
-                success=result.success,
-                data=result,
+                success=contract_result.success,
+                data=contract_result,
                 metadata={
                     "backend": backend,
-                    "iterations": result.iterations,
-                    "solve_time": result.solve_time,
-                    "error_metrics": result.error_metrics,
+                    "solver_backend": solver_backend.value,
+                    "solve_time": contract_result.solve_time,
+                    "error_metrics": contract_result.error_metrics,
                 },
             )
 
@@ -477,7 +479,7 @@ class MotionPipeline:
                 metadata={},
                 error=f"Matching backend not available: {e}",
             )
-        except Exception as e:  # noqa: BLE001
+        except (RuntimeError, ValueError) as e:
             return StageResult(
                 success=False,
                 data=None,

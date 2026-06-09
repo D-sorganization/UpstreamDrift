@@ -122,10 +122,25 @@ class TestDrakeMotionOptimizerSetup:
         names = {con.name for con in optimizer.constraints}
         assert names == {"joint_limits", "impact_timing"}
 
-        traj = np.array([[0.0, 0.0, 0.0]])
-        for con in optimizer.constraints:
-            assert con.constraint_function is not None
-            assert con.constraint_function(traj) == 0.0
+        joint_con = next(c for c in optimizer.constraints if c.name == "joint_limits")
+        impact_con = next(c for c in optimizer.constraints if c.name == "impact_timing")
+        assert joint_con.constraint_function is not None
+        assert impact_con.constraint_function is not None
+
+        # Joint-limit constraint (#7052): in-range angles → 0 violation,
+        # out-of-range angles → positive summed overshoot.
+        in_range = np.zeros((3, 4))
+        assert joint_con.constraint_function(in_range) == 0.0
+        over = np.array([[np.pi + 0.5, 0.0, 0.0, 0.0]])
+        assert joint_con.constraint_function(over) == pytest.approx(0.5)
+
+        # Impact-timing constraint (#7052): a single-sample trajectory is
+        # degenerate → 0 deviation.
+        assert impact_con.constraint_function(np.zeros((1, 3))) == 0.0
+        # Peak speed in the final segment → late impact → positive deviation
+        # relative to the 0.9 canonical impact fraction (peak frac == 1.0).
+        late = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]])
+        assert impact_con.constraint_function(late) == pytest.approx(0.1)
 
 
 class TestDrakeMotionOptimizerOptimization:
@@ -248,7 +263,16 @@ class TestDrakeMotionOptimizerOptimization:
         assert optimizer.objectives[0].name == "carry_distance"
         assert optimizer.objectives[0].target_value == 300.0
         assert optimizer.objectives[0].cost_function is not None
-        assert optimizer.objectives[0].cost_function(initial_trajectory) == -300.0
+
+        # carry_distance cost (#7052) is the negative ballistic range computed
+        # from the final launch velocity. ``initial_trajectory`` is purely
+        # horizontal (vz == 0) so the carry is 0 → cost 0.
+        cost_fn = optimizer.objectives[0].cost_function
+        assert cost_fn(initial_trajectory) == 0.0
+        # A trajectory whose final segment launches up and forward yields a
+        # positive carry → negative cost. launch = [1, 0, 1] → 2*1*1/9.81.
+        ballistic = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 0.0, 1.0]])
+        assert cost_fn(ballistic) == pytest.approx(-2.0 / 9.81)
 
     @patch.object(DrakeMotionOptimizer, "optimize_trajectory")
     def test_optimize_for_accuracy(

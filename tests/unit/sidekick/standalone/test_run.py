@@ -303,6 +303,86 @@ def test_protocol_validate_inputs_assertion_error_exits_3(tmp_path: Path) -> Non
 
 
 # ---------------------------------------------------------------------------
+# Canonical-engine registry (#7067)
+# ---------------------------------------------------------------------------
+
+
+def test_registry_exposes_at_least_five_calculators() -> None:
+    from sidekick.standalone.runner import list_calculators
+
+    calcs = list_calculators()
+    assert len(calcs) >= 5, f"expected >=5 registered calculators, got {calcs}"
+    # WGS must remain available and routed through the canonical engine.
+    assert "wgs_reactor" in calcs
+
+
+@pytest.mark.parametrize(
+    "calc_id",
+    ["wgs_reactor", "water_vapor_pressure", "flare", "financial", "syngas_water"],
+)
+def test_registered_calculator_json_round_trip(calc_id: str, tmp_path: Path) -> None:
+    """Every registered calculator runs on a default JSON fixture and emits
+    a JSON object with at least one numeric field (exit 0)."""
+    code, out, err = _invoke(calc_id, {}, tmp_path)
+    assert code == 0, f"{calc_id} failed: {err}"
+    data = json.loads(out)
+    assert isinstance(data, dict) and data, f"{calc_id} produced empty output"
+    numeric = [v for v in data.values() if isinstance(v, (int, float))]
+    assert numeric, f"{calc_id} produced no numeric fields: {data}"
+
+
+def test_wgs_routes_through_canonical_engine(tmp_path: Path) -> None:
+    """The headless WGS calculator must delegate to the canonical
+    WGSReactorEngine rather than re-deriving equilibrium locally."""
+    from sidekick.process_calculators import wgs_reactor_calculator
+    from sidekick.standalone import runner
+
+    runner._ensure_registered()
+    calls = {"n": 0}
+    orig = wgs_reactor_calculator.WGSReactorEngine.calculate_equilibrium_composition
+
+    def _spy(self: Any, *a: Any, **k: Any) -> Any:
+        calls["n"] += 1
+        return orig(self, *a, **k)
+
+    with patch.object(
+        wgs_reactor_calculator.WGSReactorEngine,
+        "calculate_equilibrium_composition",
+        _spy,
+    ):
+        code, out, err = _invoke("wgs_reactor", {"temperature_c": 350.0}, tmp_path)
+    assert code == 0, err
+    assert calls["n"] == 1, "WGS did not route through the canonical engine"
+
+
+def test_no_duplicated_wgs_constants() -> None:
+    """The WGS equilibrium constants must live in exactly one module.
+
+    Regression for #7067: the headless runner previously re-declared
+    ``delta_h``/``delta_s`` (with values that diverged from the canonical
+    ``WGS_DELTA_H``/``WGS_DELTA_S``). They must now exist only in
+    ``process_calculators/constants.py``.
+    """
+    import re
+    from pathlib import Path as _Path
+
+    runner_src = _Path("src/shared/python/sidekick/standalone/runner.py").read_text(
+        encoding="utf-8"
+    )
+    # No hard-coded WGS enthalpy/entropy literals in the headless runner.
+    assert not re.search(r"-41\d{3}\.0", runner_src), (
+        "runner.py re-declares a WGS ΔH literal; import the canonical constant"
+    )
+    assert "WGS_DELTA_H" not in runner_src or "import" in runner_src
+    # Canonical home still declares them.
+    const_src = _Path(
+        "src/shared/python/sidekick/process_calculators/constants.py"
+    ).read_text(encoding="utf-8")
+    assert "WGS_DELTA_H" in const_src
+    assert "WGS_DELTA_S" in const_src
+
+
+# ---------------------------------------------------------------------------
 # No PyQt6 on headless path
 # ---------------------------------------------------------------------------
 

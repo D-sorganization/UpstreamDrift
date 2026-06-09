@@ -151,14 +151,18 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             request: Optional matching request with configuration
 
         Returns:
-            MotionMatchingResult with tracked trajectory and torque data
+            MotionMatchingResult with tracked trajectory and torque data.
+            ``success`` reflects whether MuJoCo actually ran: when the
+            wheel is absent no real inverse-dynamics is executed (torques
+            are all zero), so ``success`` is False.
+
+        Raises:
+            ValueError: If the reference trajectory is empty.
         """
-        # Placeholder implementation
-        # Full implementation would:
-        # 1. Build MuJoCo model from rig
-        # 2. Set up PD controller with reference trajectory
-        # 3. Run forward dynamics simulation
-        # 4. Extract joint angles and torques
+        if reference is None or rig is None:
+            raise ValueError("reference and rig must be provided")
+        if not reference.frames:
+            raise ValueError("reference must have at least one frame")
 
         request_id = request.id if request else f"mujoco-torque-{reference.id}"
         t_start = time.perf_counter()
@@ -169,14 +173,18 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         )
         n_frames, n_dof = q_all.shape
 
-        # Setup MuJoCo model and data
+        # Setup MuJoCo model and data. The empty-model fallback cannot run a
+        # real inverse-dynamics pass, so we track availability explicitly and
+        # never report a fake success when MuJoCo is missing (#7047).
         model = None
         data = None
+        mujoco_available = False
         try:
             import mujoco
 
             model = mujoco.MjModel.from_xml_string("<mujoco/>")
             data = mujoco.MjData(model)
+            mujoco_available = True
         except ImportError:
             pass
 
@@ -218,20 +226,45 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         )
 
         residual_report = self._compute_residual_report(reference, reference)
+        # Compute fit metrics from real residuals rather than hardcoding 0
+        # (#7047). The tracked trajectory is the reference itself, so the
+        # joint-tracking RMSE is genuinely near zero; the max torque
+        # magnitude is reported as a non-trivial finite diagnostic.
+        rmse = self._compute_rmse(reference, reference)
+        max_tau = float(np.max(np.abs(tau_all))) if tau_all.size else 0.0
         solve_time = time.perf_counter() - t_start
+
+        # Real execution only happened if MuJoCo produced non-trivial
+        # torques. The empty-model fallback yields all zeros -> not a real
+        # solve, so success is False (#7047).
+        success = mujoco_available and bool(np.any(tau_all != 0.0))
+
+        if success:
+            message = "MuJoCo torque tracking solve OK"
+        elif mujoco_available:
+            message = (
+                "MuJoCo present but produced zero torques from the placeholder "
+                "model (no real solve)"
+            )
+        else:
+            message = "MuJoCo unavailable; torques are zero (no real solve)"
 
         return MotionMatchingResult(
             request_id=request_id,
-            success=True,
+            success=success,
             tracked_trajectory=reference,
             torque_trajectory=torque_traj,
             residual_report=residual_report,
-            fit_metrics={"rmse": 0.0, "max_error": 0.0},
+            fit_metrics={
+                "rmse": float(rmse),
+                "max_error": float(residual_report["max_residual"]),
+                "max_torque": max_tau,
+            },
             solve_time=float(solve_time),
-            message="MuJoCo torque tracking solver - rust outer loop active",
+            message=message,
             metadata={
                 "backend": self.backend_type.value,
-                "status": "placeholder",
+                "mujoco_available": mujoco_available,
                 "n_frames": n_frames,
             },
         )

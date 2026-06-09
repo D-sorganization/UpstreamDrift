@@ -17,35 +17,6 @@ if TYPE_CHECKING:
     from src.launchers.launcher_process_manager import ProcessManager
 
 
-class TestMotionCaptureLauncherPythonpath:
-    """motion_capture_launcher._launch_script must inject PYTHONPATH."""
-
-    def test_popen_receives_env_with_pythonpath(self) -> None:
-        """_make_subprocess_env must return a dict with repo root in PYTHONPATH."""
-        from src.launchers.archive.motion_capture_launcher import (
-            REPO_ROOT,
-            _make_subprocess_env,
-        )
-
-        env = _make_subprocess_env(REPO_ROOT)
-        assert "PYTHONPATH" in env, "env dict must contain PYTHONPATH"
-        assert str(REPO_ROOT) in env["PYTHONPATH"], (
-            f"REPO_ROOT ({REPO_ROOT}) must appear in PYTHONPATH"
-        )
-
-    def test_popen_env_injects_pythonpath_in_subprocess_call(self) -> None:
-        """_launch_script must pass env= to subprocess.Popen."""
-        import inspect
-
-        import src.launchers.archive.motion_capture_launcher as mod
-
-        src_text = inspect.getsource(mod)
-        # The Popen call must pass env= keyword argument
-        assert "env=" in src_text, (
-            "subprocess.Popen(...) call must pass env= to inject PYTHONPATH"
-        )
-
-
 class TestGolfSuiteLauncherPythonpath:
     """golf_suite_launcher._launch_script must inject PYTHONPATH."""
 

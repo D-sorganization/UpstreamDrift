@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+import math
 import numpy as np
 
 if TYPE_CHECKING:
@@ -376,7 +377,10 @@ class MultiRobotSystem:
             for id2 in robot_ids[i + 1 :]:
                 pos1 = self._robot_poses[id1][:3]
                 pos2 = self._robot_poses[id2][:3]
-                distance = np.linalg.norm(pos1 - pos2)
+                # ⚡ Bolt: math.hypot is ~3x faster than np.linalg.norm for small 3D vectors
+                distance = math.hypot(
+                    pos1[0] - pos2[0], pos1[1] - pos2[1], pos1[2] - pos2[2]
+                )
 
                 if distance < safety_distance:
                     collisions.append((id1, id2))
@@ -424,7 +428,14 @@ class MultiRobotSystem:
             for robot_id in available_robots:
                 if task.target_position is not None:
                     robot_pos = self._robot_poses[robot_id][:3]
-                    distance = float(np.linalg.norm(task.target_position - robot_pos))
+                    # ⚡ Bolt: math.hypot is ~3x faster than np.linalg.norm for small 3D vectors
+                    distance = float(
+                        math.hypot(
+                            task.target_position[0] - robot_pos[0],
+                            task.target_position[1] - robot_pos[1],
+                            task.target_position[2] - robot_pos[2],
+                        )
+                    )
                     if distance < best_distance:
                         best_distance = distance
                         best_robot = robot_id

@@ -105,6 +105,10 @@ class _FakePort:
             raise KeyError(name)
         return StateProfile(name=name, payload=dict(payload))
 
+    def state_profile_delete(self, name: str) -> None:
+        self.calls.append(("state_profile_delete", (name,)))
+        self._profiles.pop(name, None)
+
 
 # ---------------------------------------------------------------------------
 # Construction + descriptor surface
@@ -134,6 +138,7 @@ def test_adapter_publishes_all_actions() -> None:
         "subtab.workspace.set_variable",
         "subtab.state_profile.save",
         "subtab.state_profile.load",
+        "subtab.state_profile.delete",
     }
 
 
@@ -271,6 +276,122 @@ def test_state_profile_load_unknown_returns_error() -> None:
     result = service.invoke("subtab.state_profile.load", {"name": "missing"})
     assert result.ok is False
     assert "missing" in (result.error or "")
+
+
+# ---------------------------------------------------------------------------
+# Undo round-trips (#7066): a real service.undo(token) must restore the
+# prior state for every reversible subtab action — not merely return a
+# non-None token.
+# ---------------------------------------------------------------------------
+
+
+def test_focus_undo_restores_prior_active_tab() -> None:
+    port = _FakePort(available_tabs=("a", "b"))
+    service, _ = _build_service(port)
+    # Start focused on "a"; focus "b".
+    assert port.active_tab() == "a"
+    result = service.invoke("subtab.focus", {"tab_id": "b"})
+    assert result.ok is True
+    assert port.active_tab() == "b"
+    assert result.undo_token
+    undo = service.undo(result.undo_token)
+    assert undo.ok is True, undo.error
+    assert port.active_tab() == "a"
+
+
+def test_hide_undo_restores_visibility() -> None:
+    port = _FakePort(available_tabs=("a", "b"))
+    service, _ = _build_service(port)
+    assert "a" in port._visible
+    result = service.invoke("subtab.hide", {"tab_id": "a"})
+    assert result.ok is True
+    assert "a" not in port._visible
+    assert result.undo_token
+    undo = service.undo(result.undo_token)
+    assert undo.ok is True, undo.error
+    assert "a" in port._visible
+
+
+def test_show_undo_restores_visibility() -> None:
+    port = _FakePort(available_tabs=("a", "b"))
+    service, _ = _build_service(port)
+    port._visible.discard("a")
+    result = service.invoke("subtab.show", {"tab_id": "a"})
+    assert result.ok is True
+    assert "a" in port._visible
+    assert result.undo_token
+    undo = service.undo(result.undo_token)
+    assert undo.ok is True, undo.error
+    assert "a" not in port._visible
+
+
+def test_set_variable_undo_restores_prior_value() -> None:
+    port = _FakePort()
+    service, _ = _build_service(port)
+    # _FakePort seeds {"y": 99}; overwrite it and undo back to 99.
+    result = service.invoke("subtab.workspace.set_variable", {"name": "y", "value": 7})
+    assert result.ok is True
+    assert port.workspace_snapshot().values["y"] == 7
+    assert result.undo_token
+    undo = service.undo(result.undo_token)
+    assert undo.ok is True, undo.error
+    assert port.workspace_snapshot().values["y"] == 99
+
+
+def test_set_variable_undo_restores_absent_value() -> None:
+    port = _FakePort()
+    service, _ = _build_service(port)
+    # A brand-new variable has no prior value; undo restores it to None.
+    result = service.invoke(
+        "subtab.workspace.set_variable", {"name": "fresh", "value": 5}
+    )
+    assert result.ok is True
+    undo = service.undo(result.undo_token)
+    assert undo.ok is True, undo.error
+    assert port.workspace_snapshot().values["fresh"] is None
+
+
+def test_state_profile_save_undo_deletes_new_profile() -> None:
+    port = _FakePort()
+    service, _ = _build_service(port)
+    save = service.invoke(
+        "subtab.state_profile.save",
+        {"name": "trial", "payload": {"x": 1}},
+    )
+    assert save.ok is True
+    assert "trial" in port._profiles
+    assert save.undo_token
+    undo = service.undo(save.undo_token)
+    assert undo.ok is True, undo.error
+    # The profile that did not exist before the save is removed on undo.
+    assert "trial" not in port._profiles
+
+
+def test_state_profile_save_undo_restores_prior_payload() -> None:
+    port = _FakePort()
+    service, _ = _build_service(port)
+    port._profiles["trial"] = {"x": 0}
+    save = service.invoke(
+        "subtab.state_profile.save",
+        {"name": "trial", "payload": {"x": 99}},
+    )
+    assert save.ok is True
+    assert port._profiles["trial"] == {"x": 99}
+    undo = service.undo(save.undo_token)
+    assert undo.ok is True, undo.error
+    # Undo restores the payload that was overwritten.
+    assert port._profiles["trial"] == {"x": 0}
+
+
+def test_calculator_run_has_no_undo_token() -> None:
+    port = _FakePort()
+    service, _ = _build_service(port)
+    result = service.invoke(
+        "subtab.calculator.run",
+        {"calculator_id": "doubler", "inputs": {"x": 1}},
+    )
+    assert result.ok is True
+    assert result.undo_token is None
 
 
 # ---------------------------------------------------------------------------

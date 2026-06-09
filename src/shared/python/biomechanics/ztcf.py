@@ -398,8 +398,22 @@ def _forces_from_accelerations(
 
         F_joint_i = m_i * a_linear_i − m_i * g_vector
 
-    This is a simplified Newton-Euler formulation that maps generalized
-    accelerations to Cartesian joint forces through the segment geometry.
+    where the tangential linear acceleration of segment ``i`` is mapped from
+    the generalized acceleration as ``a_t = qddot_i * L_i`` (segment length
+    as the moment arm) and gravity acts along −y.
+
+    Validation (#7054). For a single revolute pendulum (mass ``m``, length
+    ``L``, angle ``theta`` from vertical) the zero-torque dynamics give the
+    generalized acceleration ``qddot = -(g / L) * sin(theta)`` (from
+    ``m*L^2 * qddot + m*g*L*sin(theta) = 0``). The tangential force component
+    this helper returns is therefore
+
+        F_t = m * qddot * L = -m * g * sin(theta),
+
+    i.e. exactly the classical pendulum tangential gravity force
+    ``m*g*sin(theta)``. The analytic-pendulum regression test in
+    ``tests/unit/biomechanics/test_ztcf.py`` pins this identity, replacing the
+    previous finiteness-only check.
     """
     forces = np.zeros((n_joints, n_dims))
 

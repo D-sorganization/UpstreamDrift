@@ -39,6 +39,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_SERVER_PORT = 8000
 
+# Canonical API host/port defaults — mirror ``config.environment.get_api_host``
+# / ``get_api_port`` (env vars ``GOLF_API_HOST`` / ``GOLF_API_PORT``).  These
+# are distinct from the legacy ``API_HOST`` / ``API_PORT`` cluster above; the
+# divergence is intentional and documented in ``src/api/config.py`` (#2068).
+DEFAULT_API_HOST = "127.0.0.1"
+DEFAULT_API_PORT = 8000
+
 DEFAULT_ALLOWED_HOSTS: list[str] = [
     "localhost",
     "127.0.0.1",
@@ -104,9 +111,9 @@ class Settings(BaseSettings):
     @field_validator("server_port")
     @classmethod
     def _validate_port(cls, value: int) -> int:
-        """Enforce the 1..65535 range the legacy accessor required."""
+        """Enforce the 1..65535 range the legacy accessors required."""
         if not (1 <= value <= 65535):
-            raise ValueError(f"Invalid API_PORT value: {value!r}")
+            raise ValueError(f"Invalid port value: {value!r}")
         return value
 
     # --- Derived list accessors (preserve legacy parsing semantics) ------
@@ -123,6 +130,54 @@ class Settings(BaseSettings):
         if self.cors_origins_raw:
             return _split_csv(self.cors_origins_raw)
         return DEFAULT_CORS_ORIGINS.copy()
+
+
+class CanonicalApiSettings(BaseSettings):
+    """Isolated settings for the canonical GOLF_API_HOST / GOLF_API_PORT cluster.
+
+    Kept separate from :class:`Settings` so that a malformed ``GOLF_API_PORT``
+    in the environment does not cause callers of :func:`get_settings` (which
+    only need the legacy ``API_*`` / ``ALLOWED_HOSTS`` / ``CORS_ORIGINS``
+    cluster) to fail on construction.  Construct only when the canonical API
+    host/port values are actually needed.
+    """
+
+    model_config = SettingsConfigDict(
+        extra="ignore",
+        case_sensitive=True,
+    )
+
+    # Reads ``GOLF_API_HOST`` / ``GOLF_API_PORT`` — distinct from the legacy
+    # ``API_HOST`` / ``API_PORT`` cluster in ``Settings``.  Divergence is
+    # documented in ``src/api/config.py`` (issue #2068).
+    api_host: str = Field(
+        default=DEFAULT_API_HOST,
+        validation_alias="GOLF_API_HOST",
+    )
+    api_port: int = Field(
+        default=DEFAULT_API_PORT,
+        validation_alias="GOLF_API_PORT",
+    )
+
+    @field_validator("api_port")
+    @classmethod
+    def _validate_api_port(cls, value: int) -> int:
+        """Enforce the 1..65535 range."""
+        if not (1 <= value <= 65535):
+            raise ValueError(f"Invalid port value: {value!r}")
+        return value
+
+
+def get_canonical_api_settings() -> CanonicalApiSettings:
+    """Construct a fresh :class:`CanonicalApiSettings` from the environment.
+
+    Returns a new instance on every call (no caching) so that tests and
+    runtime code that mutate ``os.environ`` observe the change.
+
+    Returns:
+        A freshly constructed :class:`CanonicalApiSettings`.
+    """
+    return CanonicalApiSettings()
 
 
 def get_settings() -> Settings:
@@ -144,10 +199,14 @@ def get_settings() -> Settings:
 
 
 __all__ = [
+    "CanonicalApiSettings",
     "DEFAULT_ALLOWED_HOSTS",
+    "DEFAULT_API_HOST",
+    "DEFAULT_API_PORT",
     "DEFAULT_CORS_ORIGINS",
     "DEFAULT_SERVER_HOST",
     "DEFAULT_SERVER_PORT",
     "Settings",
+    "get_canonical_api_settings",
     "get_settings",
 ]

@@ -1,8 +1,7 @@
 """TDD Tests for Model Launch Handlers.
 
 Tests the SpecialAppHandler and PuttingGreenHandler to ensure
-motion_capture, model_explorer, matlab_unified, and putting_green
-tiles can be launched correctly.
+model_explorer and putting_green tiles can be launched correctly.
 """
 
 from __future__ import annotations  # noqa: E402
@@ -38,8 +37,6 @@ def repo_path(tmp_path: Path) -> Path:
     """Create a temporary repo root with mock scripts."""
     # Create mock script files
     scripts = [
-        "src/launchers/motion_capture_launcher.py",
-        "src/launchers/matlab_launcher_unified.py",
         "src/tools/urdf_generator/launch_urdf_generator.py",
         "src/tools/putting_green_gui/gui.py",
     ]
@@ -79,24 +76,6 @@ class TestSpecialAppHandler:
         assert not handler.can_handle("drake")
         assert not handler.can_handle("pinocchio")
 
-    def test_launch_motion_capture(
-        self, repo_path: Path, process_manager: MagicMock
-    ) -> None:
-        """Motion capture tile launches successfully."""
-        model = MockModel(
-            id="motion_capture",
-            name="Motion Capture",
-            path="src/launchers/motion_capture_launcher.py",
-            type="special_app",
-        )
-        handler = SpecialAppHandler()
-        result = handler.launch(model, repo_path, process_manager)
-
-        assert result is True
-        process_manager.launch_script.assert_called_once()
-        call_kwargs = process_manager.launch_script.call_args
-        assert call_kwargs.kwargs["name"] == "Motion Capture"
-
     def test_launch_model_explorer(
         self, repo_path: Path, process_manager: MagicMock
     ) -> None:
@@ -112,21 +91,6 @@ class TestSpecialAppHandler:
 
         assert result is True
         process_manager.launch_script.assert_called_once()
-
-    def test_launch_matlab_unified(
-        self, repo_path: Path, process_manager: MagicMock
-    ) -> None:
-        """Matlab unified tile launches successfully."""
-        model = MockModel(
-            id="matlab_unified",
-            name="Matlab Models",
-            path="src/launchers/matlab_launcher_unified.py",
-            type="special_app",
-        )
-        handler = SpecialAppHandler()
-        result = handler.launch(model, repo_path, process_manager)
-
-        assert result is True
 
     def test_launch_fails_for_missing_path(
         self, repo_path: Path, process_manager: MagicMock

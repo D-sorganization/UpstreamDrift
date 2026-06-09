@@ -71,6 +71,9 @@ class _FakeSubtabPort:
 
         return StateProfile(name=name, payload={})
 
+    def state_profile_delete(self, name: str) -> None:
+        pass
+
 
 def _build_service_with_subtab() -> SidekickActionService:
     service = SidekickActionService()

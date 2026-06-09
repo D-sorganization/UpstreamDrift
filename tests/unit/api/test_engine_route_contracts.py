@@ -87,10 +87,16 @@ class TestEngineStoreCallsBackendUnload:
                     break
 
         unload_str = "\n".join(unload_body)
-        assert "fetch(" in unload_str or "axios" in unload_str, (
-            "useEngineStore.ts unloadEngine does not call fetch() to notify the backend. "
-            "Backend exposes POST /engines/{type}/unload. "
-            "Fix: add a fetch call in unloadEngine before mutating client state."
+        # The store notifies the backend via a network call. Accept the shared
+        # ``apiFetch`` wrapper (the DRY HTTP helper), raw ``fetch(``, or
+        # ``axios`` so the contract tracks "notifies backend", not a specific
+        # transport literal.
+        assert (
+            "apiFetch" in unload_str or "fetch(" in unload_str or "axios" in unload_str
+        ), (
+            "useEngineStore.ts unloadEngine does not call the backend to notify "
+            "it. Backend exposes POST /engines/{type}/unload. "
+            "Fix: call apiFetch/fetch in unloadEngine before mutating client state."
         )
 
 

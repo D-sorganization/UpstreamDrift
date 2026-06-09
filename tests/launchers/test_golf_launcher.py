@@ -78,6 +78,24 @@ def test_load_window_icon(qapp) -> None:
         assert launcher.windowIcon() is not None
 
 
+def test_window_icon_declares_app_user_model_id(qapp) -> None:
+    """Regression: the launcher must declare the Windows AppUserModelID so the
+    taskbar shows the app icon instead of the python.exe icon. Earlier fixes
+    only set the window icon and asserted it was non-None, which stayed true
+    even while the taskbar icon was wrong — so this asserts the identity call
+    actually happens, with the correct id."""
+    from src.launchers.upstream_drift_launcher import _APP_USER_MODEL_ID
+
+    with (
+        patch_launcher_ui(),
+        patch("src.launchers.upstream_drift_launcher.apply_window_icon") as mock_apply,
+    ):
+        UpstreamDriftLauncher()
+
+    mock_apply.assert_called_once()
+    assert mock_apply.call_args.kwargs.get("app_id") == _APP_USER_MODEL_ID
+
+
 def test_init_registry_exception(qapp) -> None:
     with patch(
         "src.launchers.upstream_drift_launcher._lazy_load_model_registry",

@@ -147,11 +147,10 @@ class TestMotionCaptureLoader:
             if json_path.exists():
                 json_path.unlink()
 
-    def test_load_bvh(self) -> None:
-        """Test loading BVH file (placeholder)."""
-        # BVH loader returns None (placeholder)
-        result = MotionCaptureLoader.load_bvh("nonexistent.bvh")
-        assert result is None
+    # The dead ``MotionCaptureLoader.load_bvh`` placeholder was removed (#7052);
+    # the production BVH path lives in
+    # ``src.shared.python.motion_pipeline.sources.bvh_adapter.BVHAdapter`` and is
+    # covered by ``tests/unit/motion_pipeline/sources/test_bvh_adapter.py``.
 
 
 class TestMotionRetargeting:

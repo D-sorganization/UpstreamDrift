@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import math
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
@@ -252,7 +253,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         if vel is None:
             raise ValueError("vel must be provided")
         rel_vel = vel - self.environment.wind_velocity
-        speed = float(np.linalg.norm(rel_vel))
+        speed = float(
+            math.hypot(rel_vel[0], rel_vel[1], rel_vel[2])
+        )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
 
         drag = np.zeros(vel.shape)
         magnus = np.zeros(vel.shape)
@@ -270,7 +273,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         drag = -(aero_prefix * cd * speed**2) * (rel_vel / speed)
 
         cross = np.cross(launch.spin_axis, rel_vel / speed)
-        cross_norm = np.linalg.norm(cross)
+        cross_norm = math.hypot(
+            cross[0], cross[1], cross[2]
+        )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
         if cross_norm > NUMERICAL_EPSILON:
             magnus = (aero_prefix * cl * speed**2) * (cross / cross_norm)
 

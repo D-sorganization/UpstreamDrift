@@ -30,6 +30,15 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "DEFAULT_DATA_DIR",
+    "DEFAULT_LLM_PROVIDER",
+    "DEFAULT_PROFILE",
+    "DEFAULT_THEME",
+    "VALID_PROFILES",
+    "StandalonePreferences",
+]
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

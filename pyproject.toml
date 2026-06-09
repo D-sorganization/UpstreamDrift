@@ -328,6 +328,8 @@ max-complexity = 10
 "scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
+# Runnable docs examples are CLI-style scripts: stdout is how they report results.
+"docs/examples/**" = ["T201"]
 "tests/unit/test_calc_backend_protocols.py" = ["I"]
 # Codemap CLI / watcher / MCP server: stdout is the contract.
 "src/shared/python/codemap/cli.py" = ["T201"]

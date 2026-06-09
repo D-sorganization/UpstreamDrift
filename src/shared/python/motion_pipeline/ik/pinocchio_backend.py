@@ -103,21 +103,16 @@ class PinocchioIKSolver(BaseIKSolver):
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
 
-        Returns:
-            List of joint angles (q) in radians
+        Raises:
+            NotImplementedError: The Pinocchio IK backend is not yet
+                implemented. Use the ``geometric`` backend for a real
+                dependency-free solver (issue #7046).
         """
-        # Placeholder implementation
-        # Full implementation would:
-        # 1. Build Pinocchio model from rig
-        # 2. Create task for each marker
-        # 3. Solve with Levenberg-Marquardt or similar
-
-        num_dofs = rig.num_dofs
-
-        # Return neutral pose as placeholder
-        q = [0.0] * num_dofs
-
-        # Apply joint limits
-        q = self._clamp_to_limits(q, rig)
-
-        return q
+        # A real implementation would build a Pinocchio model, define a
+        # frame task per marker, and solve with Levenberg-Marquardt. Until
+        # that lands we raise loudly rather than returning a silent
+        # neutral pose.
+        raise NotImplementedError(  # tracked: #7046
+            "Pinocchio IK backend is not implemented; use the 'geometric' "
+            "backend (#7046)."
+        )

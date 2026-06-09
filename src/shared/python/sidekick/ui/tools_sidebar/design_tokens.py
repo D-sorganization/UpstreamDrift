@@ -377,6 +377,12 @@ QTabBar#{SIDEKICK_TAB_BAR_OBJECT_NAME}::tab {{
     padding: {value("space.2")} {value("space.3")};
 }}
 
+QTabBar#{SIDEKICK_TAB_BAR_OBJECT_NAME}::tab:!selected:hover {{
+    background: {value("color.accent.soft")};
+    border-color: {value("color.border.strong")};
+    color: {value("color.text")};
+}}
+
 QTabBar#{SIDEKICK_TAB_BAR_OBJECT_NAME}::tab:selected {{
     background: {value("color.surface")};
     border-color: {value("color.border.strong")};

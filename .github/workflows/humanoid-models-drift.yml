@@ -73,7 +73,6 @@ jobs:
           fetch-depth: 1
           submodules: false
 
-
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -86,7 +85,7 @@ jobs:
             echo "Running directly on host. Sharing tool cache."
           fi
       - name: Set up Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
           cache: "pip"
