@@ -10,6 +10,7 @@ Camera/mouse interaction lives in ``sim_camera_mixin.py``.
 
 from __future__ import annotations
 
+import math
 import os
 from pathlib import Path
 from typing import Any, Final
@@ -726,7 +727,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             parent_id = self.model.body_parentid[body_id]
             grip_pos = self.data.xpos[max(parent_id, 1)].copy()
 
-            if np.linalg.norm(clubhead_velocity) > 1e-3:
+            # ⚡ Bolt: math.hypot is faster than np.linalg.norm
+            if (
+                math.hypot(
+                    clubhead_velocity[0], clubhead_velocity[1], clubhead_velocity[2]
+                )
+                > 1e-3
+            ):
                 try:
                     spv = self.swing_plane_visualizer
                     plane_vis = spv.update_instantaneous_plane(

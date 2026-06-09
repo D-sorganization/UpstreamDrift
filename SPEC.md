@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-03
+  LAST UPDATED: 2026-06-09
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -979,3 +979,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-06-01 | 1.0.223 | DRY/LoD consolidation across the motion-matching engines and BunkerShot3D backends (#6935–#6939). Added `resolve_club_target()` + `publish_leaderboard_row()` to the shared `motion_matching.provider` module so all six engine providers delegate one canonical target-unwrap and leaderboard-append; this UNIFIES previously forked behavior — a `ClubBallTarget` now unwraps consistently on every engine (was a `TypeError` on mujoco/pendulum/pinocchio) and every engine forwards `target_id` (#6935). Extracted `ChronoDriver._make_contact_material()` so walls/grain/clubhead share one SMC material factory (#6936). Added flat delegating accessors on `BunkerShotConfig` (`contact_params()`, `domain_extents()`, `grain_count`, `clubhead_*`, `output_rate_hz`, `trajectory_*`) so chrono/mpm drivers stop reaching two levels into the nested config (#6937). Collapsed the drifted `opensim/motion_matching/forward_kinematics.py` FK copy (which read non-existent `/bodyset/Club/*` frames) into a thin re-export of the canonical `opensim_golf/fk.py` extractor (#6938). Added a shared `motion_matching.provenance` module (`engine_package_version()`, `git_commit_short()`) and routed the five `engine_version()` cascades and three git-commit probes through it (#6939). |
 | 2026-06-03 | 1.0.224 | Bolt: Optimized `np.linalg.norm(v[:2])` to `math.hypot(v[0], v[1])` in `ball_trajectory_analysis.py` to avoid temporary array allocation and speed up calculation. |
 ````
+
+
+- Optimized magnitude calculations using math.hypot instead of np.linalg.norm in MuJoCo humanoid golf engine

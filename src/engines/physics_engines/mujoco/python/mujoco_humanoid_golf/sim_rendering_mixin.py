@@ -11,6 +11,7 @@ frame/COM overlays from MuJoCoSimWidget.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from typing import Any
 
@@ -157,7 +158,9 @@ class SimRenderingMixin:
 
         self.label.setPixmap(pixmap)
 
-    def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_live_kinematics_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         if rgb is None:
             raise ValueError("rgb must be provided")
         if self.model is None or self.data is None:
@@ -286,7 +289,9 @@ class SimRenderingMixin:
             self._update_background_colors()
             self._render_once()
 
-    def _add_force_torque_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_force_torque_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         """Overlay torque/force/accel vectors using screen-space arrows."""
         if rgb is None:
             raise ValueError("rgb must be provided")
@@ -383,7 +388,10 @@ class SimRenderingMixin:
                 continue
 
             world_force = external_forces[body_id, 3:6]
-            magnitude = float(np.linalg.norm(world_force))
+            magnitude = float(
+                math.hypot(world_force[0], world_force[1], world_force[2])
+            )
+            # ⚡ Bolt: math.hypot is faster than np.linalg.norm
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
                 continue
             body_pos = self.data.xpos[body_id].copy()
@@ -396,14 +404,19 @@ class SimRenderingMixin:
                 continue
 
             joint_force = internal_forces[body_id, 3:6]
-            magnitude = float(np.linalg.norm(joint_force))
+            magnitude = float(
+                math.hypot(joint_force[0], joint_force[1], joint_force[2])
+            )
+            # ⚡ Bolt: math.hypot is faster than np.linalg.norm
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
                 continue
             body_pos = self.data.xpos[body_id].copy()
             arrow_end = body_pos + joint_force * self.force_scale
             draw_arrow_func(body_pos, arrow_end, (0, 255, 255))
 
-    def _draw_induced_vectors(self: Any, draw_arrow_func: Callable) -> None:  # noqa: C901
+    def _draw_induced_vectors(
+        self: Any, draw_arrow_func: Callable
+    ) -> None:  # noqa: C901
         """Draw Induced Acceleration vectors (Magenta)."""
         if draw_arrow_func is None:
             raise ValueError("draw_arrow_func must be provided")
@@ -582,7 +595,9 @@ class SimRenderingMixin:
 
         return None
 
-    def _add_swing_plane_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_swing_plane_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         """Overlay club trajectory and swing plane normal onto the pixel frame."""
         if rgb is None:
             raise ValueError("rgb must be provided")
@@ -635,7 +650,9 @@ class SimRenderingMixin:
 
         return img
 
-    def _add_frame_and_com_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_frame_and_com_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         if rgb is None:
             raise ValueError("rgb must be provided")
         cv2 = get_cv2()

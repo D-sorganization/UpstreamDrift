@@ -6,6 +6,7 @@ context menu, and frame/COM toggle logic from MuJoCoSimWidget.
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import mujoco
@@ -136,7 +137,8 @@ class SimCameraMixin:
                 )
                 up_world = np.array([0, 0, 1])
                 right = np.cross(up_world, forward)
-                right = right / (np.linalg.norm(right) + 1e-8)
+                right = right / (math.hypot(right[0], right[1], right[2]) + 1e-8)
+                # ⚡ Bolt: math.hypot is faster than np.linalg.norm
                 up = np.cross(forward, right)
 
                 self.camera.lookat[:] += (

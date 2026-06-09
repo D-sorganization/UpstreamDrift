@@ -12,6 +12,7 @@ derived biomechanical quantities.
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any, cast
 
 import mujoco
@@ -231,7 +232,8 @@ class BiomechanicalAnalyzer:
                 jacp = np.zeros((3, self.model.nv))
 
         vel = jacp @ self.data.qvel
-        speed = float(np.linalg.norm(vel))
+        speed = float(math.hypot(vel[0], vel[1], vel[2]))
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm
 
         return pos, vel, speed
 

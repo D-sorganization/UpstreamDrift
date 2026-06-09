@@ -70,14 +70,14 @@ def test_inline_hand_includes_tag_ordering(tmp_path):
     equality_start = result.find("<equality>")
 
     assert worldbody_end != -1
-    assert contact_start > worldbody_end, (
-        "<contact> should be placed after </worldbody>"
-    )
+    assert (
+        contact_start > worldbody_end
+    ), "<contact> should be placed after </worldbody>"
     assert tendon_start > worldbody_end, "<tendon> should be placed after </worldbody>"
-    assert actuator_start > worldbody_end, (
-        "<actuator> should be placed after </worldbody>"
-    )
-    assert equality_start > worldbody_end, (
-        "<equality> should be placed after </worldbody>"
-    )
+    assert (
+        actuator_start > worldbody_end
+    ), "<actuator> should be placed after </worldbody>"
+    assert (
+        equality_start > worldbody_end
+    ), "<equality> should be placed after </worldbody>"
     assert result.endswith("</mujoco>"), "The file should end with </mujoco>"
