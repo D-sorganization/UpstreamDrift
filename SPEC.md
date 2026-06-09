@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.264                                            |
-| **Last Spec Update**    | 2026-06-02                                         |
+| **Spec Version**        | 1.0.265                                            |
+| **Last Spec Update**    | 2026-06-09                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-09** - Added a changed-file architecture budget gate for #7131/#7133: `scripts/ci/check_architecture_budget.py` now scans changed production Python files for functions over 100 lines and callable signatures over 8 effective parameters (excluding `self`/`cls`), with owned/expiring exceptions configured in `scripts/config/architecture_budget.json`. The standard CI workflow runs the guard beside the file-size and module-size gates, and focused tests pin long-function, parameter-count, exception, and test-path skip behavior.
 - **2026-06-02** - Restored visible Sidekick sidebar tab hover affordance (#7109): the synced tools-sidebar design-token QSS now styles unselected `QTabBar` tabs on hover with the soft accent surface while keeping the selected-tab rule separate, and a headless unit regression pins the generated stylesheet contract.
 - **2026-06-02** - Fixed Windows taskbar identity for the UpstreamDrift launcher (#7107): `src.shared.python.ui.window_icon` now declares an AppUserModelID before showing the first window, applies the resolved icon to both the `QApplication` and top-level window, and covers the Windows API call plus icon application contract with focused unit tests.
 - **2026-06-02** - Removed obsolete archived launcher entries (#7108): the deprecated MuJoCo, MATLAB, and motion-capture archived launchers are no longer advertised through the launcher manifest or tool catalog, and launcher regression coverage now asserts the surviving catalog paths without maintaining tests for removed archived entry points.
@@ -205,6 +206,7 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 ### Module Map
 
 | 2026-06-03 | 1.0.224 | Bolt: Optimized `np.linalg.norm(v[:2])` to `math.hypot(v[0], v[1])` in `ball_trajectory_analysis.py` to avoid temporary array allocation and speed up calculation. |
+
 ````
 UpstreamDrift/
 ├── src/
@@ -569,6 +571,12 @@ Beyond standard tools, CI enforces custom checks:
   require owned, expiring exceptions in
   `scripts/config/module_size_budget_baseline.json`, currently capped at 10
   active exceptions.
+- **Architecture Budget**: Changed production Python files are capped at 100
+  lines per function and 8 effective parameters per callable by
+  `scripts/ci/check_architecture_budget.py`. The gate ignores test/vendor
+  paths, excludes receiver parameters (`self`/`cls`) from method counts, and
+  requires owned, linked exceptions in
+  `scripts/config/architecture_budget.json`.
 - **Agent Docs Consistency**: `scripts/check_agent_docs_consistency.py`
   validates literal repo-relative paths documented in agent guidance while
   treating glob/brace references such as `scripts/**` and
@@ -731,6 +739,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-09 | 1.0.265 | Architecture budget CI gate for #7131/#7133. Added `scripts/ci/check_architecture_budget.py` plus `scripts/config/architecture_budget.json` to ratchet changed production Python files against a 100-line function budget and 8-effective-parameter callable budget, excluding tests/vendor and requiring owned, linked exceptions for any temporary budget breach. Wired the gate into `.github/workflows/ci-standard.yml` and added focused TDD coverage for long-function detection, parameter counting, receiver-parameter exclusion, exception handling, and test-path skips. |
 | 2026-06-02 | 1.0.260 | Golf visualizer camera-basis norm optimization (#7101). `GolfVisualizerWidget` now uses fixed-arity `math.hypot` for the known 3D forward and right camera basis vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing fallback behavior for degenerate vectors. |
 | 2026-06-02 | 1.0.258 | Bolt small-vector norm optimization (#7098). `src/shared/python/physics/ball_simulator.py` now uses fixed-arity `math.hypot` for scalar relative-velocity and Magnus cross-product magnitudes in `_calculate_forces_single`; `src/shared/python/physics/flight_models.py` uses `math.hypot` for Waterloo/Penner spin-vector magnitude and for MacDonald-Hanzely/constant-coefficient spin-axis normalization, computing each spin norm once before normalization; and `src/shared/python/physics/swing_ball_flight_pipeline.py` uses `math.hypot` for launch speed, horizontal launch speed, and angular-velocity spin-rate derivation. This is a pure performance cleanup for known 2D/3D vectors, preserving behavior while avoiding NumPy reduction allocation overhead in scalar hot paths. |
 | 2026-06-02 | 1.0.259 | Cross-engine equivalence gate fixes (#7095, #7097). `_run_engine_checked` now treats all-NaN grip traces as missing-engine bindings (`_EngineBindingsError`) while keeping partial NaN/Inf traces as hard simulation-divergence failures. The JaxSim-vs-Pinocchio parity case now uses zero base position so INERTIAL and LOCAL velocity representations are comparable while still exercising mixed angular/linear Coriolis terms. Cross-engine docstrings now distinguish the 5 mm agreement tolerance from the looser per-engine world-frame origin plausibility check. |

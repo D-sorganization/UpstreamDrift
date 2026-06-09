@@ -1,0 +1,5 @@
+{
+  "max_function_lines": 100,
+  "max_parameters": 8,
+  "exceptions": []
+}
