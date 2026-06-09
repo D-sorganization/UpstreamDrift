@@ -211,14 +211,31 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn('"matplotlib==3.10.8"', content)
 
     def test_container_security_pins_clear_trivy_findings(self) -> None:
-        """Docker runtime pins must stay at or above the Trivy fixed versions."""
+        """Docker runtime pins must stay at or above the Trivy fixed versions.
+
+        PyJWT and cryptography moved from a Dockerfile-only compensating install
+        into core [project].dependencies / requirements.lock (issue #7125), so
+        the security floor is now enforced by the lockfile pin rather than a
+        literal Dockerfile string. Assert the locked versions are >= the fixed
+        versions so this never silently regresses below the Trivy floor.
+        """
+        import re
+
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
+        def _locked_version(dist: str) -> tuple[int, ...]:
+            match = re.search(
+                rf"(?mi)^{re.escape(dist)}==([0-9][0-9.]*)", requirements_lock
+            )
+            assert match, f"{dist} must be pinned in requirements.lock"
+            return tuple(int(part) for part in match.group(1).split("."))
+
         self.assertIn("pip install --upgrade pip==26.1", content)
-        self.assertIn('"PyJWT==2.12.0"', content)
-        self.assertIn('"cryptography==46.0.7"', content)
+        # Security floors (Trivy fixed versions) — enforced via the lockfile.
+        self.assertGreaterEqual(_locked_version("pyjwt"), (2, 12, 0))
+        self.assertGreaterEqual(_locked_version("cryptography"), (46, 0, 7))
         self.assertIn("apt-get update && apt-get upgrade -y", content)
         self.assertIn("idna==3.15", requirements_lock)
 

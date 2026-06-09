@@ -20,20 +20,14 @@ COPY requirements.lock /tmp/requirements.lock
 RUN pip install --upgrade pip==26.1 && \
     pip install -r /tmp/requirements.lock
 
-# Auth and server extensions - pinned versions (to be added to requirements.lock)
-# These should be consolidated into requirements.lock via pip-compile
+# API runtime extras now resolved from requirements.lock (#6612, #7125):
+# slowapi, python-multipart, sqlalchemy, alembic, bcrypt, PyJWT, cryptography,
+# email-validator (pydantic[email]), structlog, and colorama are core
+# dependencies and installed by the lockfile step above. Only the remaining
+# gaps that are not yet in core stay here.
 RUN pip install \
-    slowapi==0.1.9 \
-    "pydantic[email]==2.12.5" \
-    python-multipart==0.0.27 \
-    sqlalchemy==2.0.44 \
-    bcrypt==4.3.0 \
-    "PyJWT==2.12.0" \
-    "cryptography==46.0.7" \
     aiofiles==24.1.0 \
-    python-dateutil==2.9.0.post0 \
-    structlog==25.5.0 \
-    colorama==0.4.6
+    python-dateutil==2.9.0.post0
 
 # Shared-code runtime deps imported at module top-level by
 # src/shared/python (pandas, matplotlib, sympy) and API routes that parse
