@@ -394,6 +394,37 @@ class TestCIEnvironmentCompatibility:
 
         assert int(lod_job["timeout-minutes"]) >= 15
 
+    def test_quality_gate_workflow_emits_required_status_on_every_pr(self) -> None:
+        """The standalone required status must not be hidden behind path filters."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "quality-gate.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        job = workflow["jobs"]["quality-gate"]
+
+        assert job["name"] == "quality-gate"
+        assert job["runs-on"] == "d-sorg-fleet-docker"
+        assert "paths:" not in workflow_text
+
+    def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
+        """Helper checks must not cancel another PR's current check status."""
+        workflows = [
+            "Jules-Redundant-PR-Closer.yml",
+            "Comment-to-Issue-Converter.yml",
+        ]
+
+        for workflow_name in workflows:
+            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
+                encoding="utf-8"
+            )
+            assert (
+                "${{ github.event.pull_request.number || github.run_id }}" in workflow
+            )
+
     def test_ci_standard_runner_guard_invokes_real_audit(self) -> None:
         """The required local-only status must not be a no-op."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(

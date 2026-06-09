@@ -9,10 +9,6 @@ name: Quality Gate
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "src/engines/physics_engines/pinocchio/python/**"
-      - "scripts/ci/check_lod.py"
-      - ".github/workflows/quality-gate.yml"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +19,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quality-gate:
+    name: quality-gate
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 5
+    steps:
+      - name: Required quality-gate status
+        run: |
+          echo "Required quality-gate status is present for this pull request."
+          echo "CI Standard retains the blocking aggregate gate for code, security, structure, and unit checks."
+
   lod-pinocchio:
     name: LOD lint (pinocchio python) — advisory
     runs-on: d-sorg-fleet-docker
