@@ -27,7 +27,15 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-__all__ = ["FileTransport", "default_channel_path"]
+__all__ = ["FileTransport", "RealtimePublishError", "default_channel_path"]
+
+
+class RealtimePublishError(RuntimeError):
+    """Raised when a realtime publish cannot append/flush its message.
+
+    Surfacing a typed error (instead of swallowing the OSError) lets the api
+    layer latch publish health and report the cause (issue #7149 D2).
+    """
 
 
 _POLL_INTERVAL_S = 1.0 / 30.0  # 30 Hz tail polling
@@ -90,20 +98,29 @@ class FileTransport:
             {"ts": time.time(), "payload": payload}, separators=(",", ":")
         )
         with self._lock:
+            # Rotation decision is inside the lock so two writers cannot both
+            # decide to rotate and reset tail offsets inconsistently (#7149 D2).
             try:
-                # Truncate if the log has grown too large. Keeps tests
-                # deterministic and bounds disk usage.
                 if path.exists() and path.stat().st_size > _MAX_BYTES_PER_CHANNEL:
                     path.unlink(missing_ok=True)
                     tail = self._channels.get(channel)
                     if tail is not None:
                         tail.offset = 0
             except OSError:
-                pass
-            with path.open("a", encoding="utf-8") as fh:
-                fh.write(line)
-                fh.write("\n")
-                fh.flush()
+                # Rotation is best-effort; a failed stat/unlink must not lose
+                # the message below, which has its own error handling.
+                logger.debug("realtime rotation check failed for %s", channel)
+            # Re-raise write/flush failures as a typed error so the api layer
+            # can latch publish health instead of silently losing data.
+            try:
+                with path.open("a", encoding="utf-8") as fh:
+                    fh.write(line)
+                    fh.write("\n")
+                    fh.flush()
+            except OSError as exc:
+                raise RealtimePublishError(
+                    f"failed to append to channel {channel!r}: {exc}"
+                ) from exc
 
     # ---- subscribe ----------------------------------------------------
 

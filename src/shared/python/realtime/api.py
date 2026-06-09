@@ -9,7 +9,9 @@ what is wired up here.
 
 from __future__ import annotations
 
+import atexit
 import os
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -23,8 +25,10 @@ logger = get_logger(__name__)
 __all__ = [
     "CHANNEL_REGISTRY",
     "Subscription",
+    "is_healthy",
     "publish",
     "register_channel",
+    "shutdown_realtime",
     "subscribe",
 ]
 
@@ -135,13 +139,63 @@ class Subscription:
 # stateless across processes (the on-disk log is the source of truth)
 # and cheap to construct, so a single instance per process is fine.
 _TRANSPORT: FileTransport | None = None
+# Guards check-then-act on _TRANSPORT so concurrent first-callers cannot each
+# construct a transport and orphan the loser's polling thread (issue #7148 D1).
+_TRANSPORT_LOCK = threading.Lock()
+
+# First-failure latch for publish health (issue #7149 D1): a persistent failure
+# (e.g. unwritable channel root) is reported once via WARNING + is_healthy(),
+# instead of silently spamming the log on every publish.
+_HEALTH_LOCK = threading.Lock()
+_PUBLISH_FAILURE_REASON: str | None = None
 
 
 def _get_transport() -> FileTransport:
     global _TRANSPORT
+    # Double-checked locking: the fast path avoids the lock once initialised.
     if _TRANSPORT is None:
-        _TRANSPORT = FileTransport(default_channel_path)
+        with _TRANSPORT_LOCK:
+            if _TRANSPORT is None:
+                _TRANSPORT = FileTransport(default_channel_path)
     return _TRANSPORT
+
+
+def is_healthy() -> bool:
+    """Return ``True`` unless a prior publish failed persistently (#7149).
+
+    Realtime is a hint layer, so publish never raises; callers (e.g. UIs that
+    depend on a channel) can probe this to surface a degraded state once.
+    """
+    with _HEALTH_LOCK:
+        return _PUBLISH_FAILURE_REASON is None
+
+
+def validate_realtime() -> str | None:
+    """Return the latched publish-failure reason, or ``None`` if healthy."""
+    with _HEALTH_LOCK:
+        return _PUBLISH_FAILURE_REASON
+
+
+def shutdown_realtime() -> None:
+    """Stop the transport polling watcher and clear global state (idempotent).
+
+    Registered via :func:`atexit` and intended for test teardown so channels do
+    not leak between tests and buffered writes are flushed (issue #7148 D2).
+    """
+    global _TRANSPORT, _PUBLISH_FAILURE_REASON
+    with _TRANSPORT_LOCK:
+        transport = _TRANSPORT
+        _TRANSPORT = None
+    if transport is not None:
+        try:
+            transport.shutdown()
+        except Exception:  # pragma: no cover - defensive teardown
+            logger.exception("realtime.shutdown_realtime failed")
+    with _HEALTH_LOCK:
+        _PUBLISH_FAILURE_REASON = None
+
+
+atexit.register(shutdown_realtime)
 
 
 def publish(channel: str, payload: Any, transport: str | None = None) -> None:
@@ -170,10 +224,30 @@ def publish(channel: str, payload: Any, transport: str | None = None) -> None:
             "falling back to file",
             transport,
         )
+    global _PUBLISH_FAILURE_REASON
     try:
         _get_transport().publish(channel, payload)
-    except Exception:
-        logger.exception("realtime.publish failed on channel %s", channel)
+    except Exception as exc:  # noqa: BLE001 - hint layer: never propagate, latch health
+        # Latch the first persistent failure and warn once; subsequent failures
+        # update is_healthy() silently rather than spamming the log (#7149 D1).
+        with _HEALTH_LOCK:
+            first_failure = _PUBLISH_FAILURE_REASON is None
+            _PUBLISH_FAILURE_REASON = f"{type(exc).__name__}: {exc}"
+        if first_failure:
+            logger.warning(
+                "realtime.publish failed on channel %s; marking realtime "
+                "unhealthy (further failures suppressed): %s",
+                channel,
+                exc,
+            )
+        else:
+            logger.debug("realtime.publish failed again on channel %s", channel)
+        return
+    # A successful publish clears a previously latched failure.
+    with _HEALTH_LOCK:
+        if _PUBLISH_FAILURE_REASON is not None:
+            _PUBLISH_FAILURE_REASON = None
+            logger.info("realtime.publish recovered on channel %s", channel)
 
 
 def subscribe(channel: str, callback: Callable[[Any], None]) -> Subscription:
