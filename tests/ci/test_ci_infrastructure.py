@@ -394,9 +394,28 @@ class TestCIEnvironmentCompatibility:
 
         assert int(lod_job["timeout-minutes"]) >= 15
 
+    def test_ci_standard_runner_guard_invokes_real_audit(self) -> None:
+        """The required local-only status must not be a no-op."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+
+        assert "python3 scripts/check_local_only_workflows.py" in workflow
+        assert 'echo "Bypass"' not in workflow
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
+
+    @staticmethod
+    def _load_pyproject() -> dict[str, Any]:
+        try:
+            import tomllib  # Python 3.11+
+        except ImportError:
+            import tomli as tomllib  # type: ignore[import-not-found]
+
+        with open(REPO_ROOT / "pyproject.toml", "rb") as f:
+            return tomllib.load(f)
 
     def test_pyproject_exists(self) -> None:
         """Test that pyproject.toml exists at repo root."""
@@ -405,15 +424,7 @@ class TestPyprojectTomlConsistency:
 
     def test_pyproject_has_required_sections(self) -> None:
         """Test that pyproject.toml has required sections."""
-        try:
-            import tomllib  # Python 3.11+
-        except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
-
-        pyproject = REPO_ROOT / "pyproject.toml"
-
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
+        data = self._load_pyproject()
 
         assert "project" in data
         assert "dependencies" in data["project"]
@@ -421,18 +432,38 @@ class TestPyprojectTomlConsistency:
 
     def test_structlog_in_dependencies(self) -> None:
         """Test that structlog is declared in dependencies."""
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
-
-        pyproject = REPO_ROOT / "pyproject.toml"
-
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
+        data = self._load_pyproject()
 
         deps = data["project"]["dependencies"]
         # Check that structlog is in the dependencies
         assert any("structlog" in dep for dep in deps), (
             "structlog must be in core dependencies"
         )
+
+    def test_api_runtime_dependencies_are_core_and_locked(self) -> None:
+        """API auth/database imports must not require the dev extra."""
+        data = self._load_pyproject()
+        lock = (REPO_ROOT / "requirements.lock").read_text(encoding="utf-8").lower()
+
+        deps = {
+            requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            for requirement in data["project"]["dependencies"]
+        }
+        dev_deps = {
+            requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            for requirement in data["project"]["optional-dependencies"]["dev"]
+        }
+
+        for package in {"alembic", "sqlalchemy", "bcrypt", "pyjwt", "cryptography"}:
+            assert package in deps
+            assert package not in dev_deps
+            assert f"{package}==" in lock
+
+    def test_pytest_collects_in_tree_tests_by_default(self) -> None:
+        """Default pytest config must include intentional colocated src tests."""
+        data = self._load_pyproject()
+        pytest_config = data["tool"]["pytest"]["ini_options"]
+
+        assert "src/shared/python/ai/tests" in pytest_config["testpaths"]
+        assert "src/shared/python/sidekick/tests" in pytest_config["testpaths"]
+        assert "src" not in pytest_config["norecursedirs"]

@@ -26,10 +26,6 @@ RUN pip install \
     slowapi==0.1.9 \
     "pydantic[email]==2.12.5" \
     python-multipart==0.0.27 \
-    sqlalchemy==2.0.44 \
-    bcrypt==4.3.0 \
-    "PyJWT==2.12.0" \
-    "cryptography==46.0.7" \
     aiofiles==24.1.0 \
     python-dateutil==2.9.0.post0 \
     structlog==25.5.0 \

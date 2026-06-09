@@ -20,12 +20,20 @@ def route_registry():
     of the worker, causing order-dependent failures in unrelated route tests.
     """
     db_mock = MagicMock()
+    auth_dependencies_mock = MagicMock()
+    auth_dependencies_mock.CheckSimulationQuota.dependency = object()
+    auth_dependencies_mock.CheckVideoQuota.dependency = object()
+    auth_dependencies_mock.check_usage_quota.return_value = lambda user, db: user
+    auth_models_mock = MagicMock()
+    auth_models_mock.User = object
     # Drop any cached import of route_registry so it re-imports against
     # the mocked database module each time.
     cached = sys.modules.pop("src.api.route_registry", None)
     with patch.dict(
         sys.modules,
         {
+            "src.api.auth.dependencies": auth_dependencies_mock,
+            "src.api.auth.models": auth_models_mock,
             "src.api.database": db_mock,
             "src.api.database.get_db": MagicMock(),
         },

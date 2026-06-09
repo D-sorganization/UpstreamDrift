@@ -234,8 +234,8 @@ class TestContainerEnvironment(unittest.TestCase):
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
         self.assertIn("pip install --upgrade pip==26.1", content)
-        self.assertIn('"PyJWT==2.12.0"', content)
-        self.assertIn('"cryptography==46.0.7"', content)
+        self.assertIn("pyjwt==2.12.0", requirements_lock.lower())
+        self.assertIn("cryptography==46.0.7", requirements_lock.lower())
         self.assertIn("apt-get update && apt-get upgrade -y", content)
         self.assertIn("idna==3.15", requirements_lock)
 
