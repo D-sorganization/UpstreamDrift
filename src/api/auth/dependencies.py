@@ -1,7 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
-from collections.abc import Callable
-from typing import TypeVar
+from collections.abc import Callable, Iterator
+from typing import Any, TypeVar
 
 from src.api.utils.datetime_compat import UTC
 
@@ -78,12 +78,14 @@ def _validate_api_key_format(api_key: str) -> None:
         raise _unauthorized("Invalid API key format")
 
 
-def _api_key_not_expired():
+def _api_key_not_expired() -> Any:
     """SQLAlchemy predicate: key has no expiry, or expiry is still in the future.
 
     Single source of truth for the expiry rule so the prefix-indexed query and
     the fallback full-scan cannot drift (DRY). Mirrored by
-    :func:`_api_key_is_valid` for in-Python (cache-hit) re-validation.
+    :func:`_api_key_is_valid` for in-Python (cache-hit) re-validation. Returns a
+    SQLAlchemy ``BooleanClauseList`` (typed ``Any``; it is consumed only inside
+    ``.filter(...)``).
     """
     from datetime import datetime
 
@@ -93,7 +95,7 @@ def _api_key_not_expired():
 
 def _api_key_is_valid(record: APIKey) -> bool:
     """Postcondition predicate: an API key is usable iff active and unexpired."""
-    if not record.is_active:
+    if not bool(record.is_active):
         return False
     expires_at = record.expires_at
     if expires_at is None:
@@ -103,7 +105,7 @@ def _api_key_is_valid(record: APIKey) -> bool:
     # Treat naive timestamps as UTC for comparison robustness.
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=UTC)
-    return expires_at > datetime.now(UTC)
+    return bool(expires_at > datetime.now(UTC))
 
 
 def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
@@ -251,7 +253,7 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
 
 def check_usage_quota(
     resource_type: str,
-) -> Callable[[User, Session], object]:
+) -> Callable[[User, Session], Iterator[User]]:
     """Dependency factory for usage quota checking.
 
     The dependency is a generator (``yield``) dependency so that the quota
@@ -266,7 +268,7 @@ def check_usage_quota(
     def quota_dependency(
         current_user: User = Depends(get_current_user_flexible),
         db: Session = Depends(get_db),
-    ):
+    ) -> Iterator[User]:
         """Enforce usage quota for the given resource type."""
         if not usage_tracker.check_quota(current_user, resource_type):
             user_role = UserRole(current_user.role)
