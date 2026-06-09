@@ -102,6 +102,15 @@ Forbidden: `q_base_new = q_base + dq_ang` (naive addition leaves the manifold
 and is a sign/scale bug). Adapters that expose a native `integrate` (Pinocchio,
 MuJoCo) should delegate to it.
 
+**Finite-difference minimum-frame contract (CC-9, issue #7146):** estimating
+`qdot`/`qddot` from a sampled `q` trajectory requires at least **2 frames for
+`qdot`** and **3 frames for `qddot`**. Entry points must raise `ValueError`
+(rather than silently return all-zero derivatives, which degrades inverse
+dynamics to statics) unless the caller supplies explicit `qdot`/`qddot`
+overrides. This contract is enforced identically in Python
+(`engine_core.finite_difference.require_enough_frames_for_finite_diff`) and the
+Rust kernel (`rust_core/upstream-pinocchio-id`).
+
 ## 5. Provenance
 
 Every materialised state and result is stamped (CC-6 `ProvenanceStamp`) with the

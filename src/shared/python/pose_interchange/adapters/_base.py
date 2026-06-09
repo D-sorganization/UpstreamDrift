@@ -210,6 +210,7 @@ def encode_joint_angles(
             Modified in-place; the caller is responsible for its shape.
     """
     for name, slot in layout.items():
+        _require_single_dof_slot(name, slot)
         angle_deg = float(joint_angles_deg.get(name, 0.0))
         value = angle_deg if slot.units == "deg" else float(np.radians(angle_deg))
         engine_q[slot.start_index] = slot.sign * value
@@ -236,6 +237,24 @@ def decode_joint_angles(
     """
     out: dict[str, float] = {}
     for name, slot in layout.items():
+        _require_single_dof_slot(name, slot)
         value = float(engine_q[slot.start_index]) * slot.sign
         out[name] = value if slot.units == "deg" else float(np.degrees(value))
     return out
+
+
+def _require_single_dof_slot(name: str, slot: JointSlot) -> None:
+    """Reject multi-DOF slots that encode/decode cannot represent (DbC).
+
+    These helpers only read/write ``engine_q[slot.start_index]`` (a single
+    scalar). A slot with ``length != 1`` (e.g. a floating-base pseudo-joint)
+    would be silently partially written — corrupting ``q`` — so we fail loudly
+    instead. Implement full multi-DOF support before relaxing this guard.
+    """
+
+    if slot.length != 1:
+        raise NotImplementedError(
+            f"joint slot '{name}' has length={slot.length}; encode/decode only "
+            "support 1-DOF slots. Multi-DOF slots (e.g. floating-base "
+            "pseudo-joints) are not yet supported and would corrupt q."
+        )

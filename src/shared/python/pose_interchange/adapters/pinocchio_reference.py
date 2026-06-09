@@ -1,10 +1,14 @@
 """Pinocchio reference adapter for canonical-v2 engine boundaries.
 
 Canonical-v2 stores a floating base as ``[xyz, quat_wxyz]`` and six base
-velocity/acceleration entries as ``[angular; linear]``. Pinocchio stores the
-free-flyer quaternion as ``[xyz, quat_xyzw]`` and uses base motion vectors in
-``[linear; angular]`` order. This module keeps that remap explicit so the
-reference engine can be exercised without importing the heavy Pinocchio wheel.
+velocity/acceleration entries as ``[linear; angular]`` with angular velocity in
+the BODY (local) frame (``docs/conventions/canonical-v2.md`` §2). Pinocchio's
+free-flyer joint uses the **same** ``[linear; angular]`` motion layout in the
+LOCAL frame, so base motion vectors pass through unchanged — *only the
+quaternion order is reordered* (canonical ``w``-first vs Pinocchio ``w``-last),
+exactly as the per-engine table in the spec states. This module keeps that
+quaternion remap explicit so the reference engine can be exercised without
+importing the heavy Pinocchio wheel.
 """
 
 from __future__ import annotations
@@ -21,9 +25,16 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
+from src.shared.python.engine_core.finite_difference import (
+    require_enough_frames_for_finite_diff as _require_enough_frames_for_finite_diff,
+)
+from src.shared.python.pose_interchange.canonical_layout import (
+    ANGULAR,
+    LINEAR,
+    FREE_FLYER_Q as _FREE_FLYER_Q,
+    FREE_FLYER_V as _FREE_FLYER_V,
+)
 
-_FREE_FLYER_Q = 7
-_FREE_FLYER_V = 6
 _DEFAULT_EPS = 1.0e-6
 
 
@@ -40,7 +51,9 @@ class CanonicalV2State:
     """Canonical-v2 q/v/a state.
 
     ``q`` begins with ``[x, y, z, qw, qx, qy, qz]``. ``v`` and ``a`` begin with
-    ``[angular_x, angular_y, angular_z, linear_x, linear_y, linear_z]``.
+    ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]`` with the
+    angular block in the BODY (local) frame, per
+    ``docs/conventions/canonical-v2.md`` §2.
     """
 
     q: npt.NDArray[np.float64]
@@ -62,8 +75,10 @@ class CanonicalV2State:
 class PinocchioNativeState:
     """Pinocchio-native q/v/a state.
 
-    ``q`` begins with ``[x, y, z, qx, qy, qz, qw]``. ``v`` and ``a`` begin with
-    ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]``.
+    ``q`` begins with ``[x, y, z, qx, qy, qz, qw]`` (quaternion ``w``-last).
+    ``v`` and ``a`` begin with
+    ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]`` in the
+    LOCAL frame — identical to canonical-v2's motion layout.
     """
 
     q: npt.NDArray[np.float64]
@@ -201,7 +216,12 @@ class PinocchioReferenceAdapter:
     def jacobian(
         self, state: CanonicalV2State, frame_name: str
     ) -> Mapping[str, npt.NDArray[np.float64]]:
-        """Return Jacobian blocks in canonical ``[angular; linear]`` order."""
+        """Return Jacobian blocks in canonical-v2 ``[linear; angular]`` order.
+
+        Pinocchio emits spatial Jacobian rows as ``[linear; angular]``, which is
+        the canonical-v2 motion order, so the ``spatial`` block passes through
+        unchanged (``spatial @ v`` agrees with canonical ``v``).
+        """
 
         native = self.from_canonical_v2(state)
         pin_jacobian = np.asarray(
@@ -212,12 +232,12 @@ class PinocchioReferenceAdapter:
                 "jacobian must be a 6-row matrix in Pinocchio "
                 f"[linear; angular] order, got {pin_jacobian.shape}"
             )
-        linear = pin_jacobian[:3, :].copy()
-        angular = pin_jacobian[3:, :].copy()
+        linear = pin_jacobian[LINEAR, :].copy()
+        angular = pin_jacobian[ANGULAR, :].copy()
         return {
             "linear": linear,
             "angular": angular,
-            "spatial": np.vstack([angular, linear]),
+            "spatial": np.vstack([linear, angular]),
         }
 
     def inverse_dynamics(self, state: CanonicalV2State) -> npt.NDArray[np.float64]:
@@ -263,6 +283,14 @@ class PinocchioReferenceAdapter:
         time_array = _require_vector(np.asarray(times, dtype=np.float64), "times")
         if q_canonical.shape[0] != time_array.shape[0]:
             raise ValueError("q rows must match times length")
+        # Precondition (issue #7146): refuse to silently zero-fill derivatives
+        # for trajectories too short to differentiate. Callers wanting statics
+        # must pass explicit qdot/qddot overrides.
+        _require_enough_frames_for_finite_diff(
+            n_frames=q_canonical.shape[0],
+            need_qdot=qdot is None,
+            need_qddot=qddot is None,
+        )
         q_native = _map_rows(q_canonical, _canonical_q_to_pinocchio)
         qdot_native = _optional_motion_matrix(qdot, "qdot")
         qddot_native = _optional_motion_matrix(qddot, "qddot")
@@ -391,19 +419,26 @@ def _pinocchio_q_to_canonical(
 def _canonical_motion_to_pinocchio(
     value: npt.NDArray[np.float64],
 ) -> npt.NDArray[np.float64]:
-    array = _require_vector(value, "motion", min_size=_FREE_FLYER_V)
-    result = array.copy()
-    result[:6] = array[[3, 4, 5, 0, 1, 2]]
-    return result
+    """Map canonical-v2 base motion to Pinocchio native motion.
+
+    Per ``docs/conventions/canonical-v2.md`` §3, the Pinocchio free-flyer joint
+    uses the same ``[linear; angular]`` LOCAL-frame motion layout as
+    canonical-v2, so this is an identity copy (only the quaternion order, handled
+    separately, differs). ``_require_vector`` validation is retained.
+    """
+
+    return _require_vector(value, "motion", min_size=_FREE_FLYER_V).copy()
 
 
 def _pinocchio_motion_to_canonical(
     value: npt.NDArray[np.float64],
 ) -> npt.NDArray[np.float64]:
-    array = _require_vector(value, "motion", min_size=_FREE_FLYER_V)
-    result = array.copy()
-    result[:6] = array[[3, 4, 5, 0, 1, 2]]
-    return result
+    """Map Pinocchio native base motion to canonical-v2 (identity copy).
+
+    See :func:`_canonical_motion_to_pinocchio` — the two layouts coincide.
+    """
+
+    return _require_vector(value, "motion", min_size=_FREE_FLYER_V).copy()
 
 
 def _finite_difference(

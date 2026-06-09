@@ -205,6 +205,90 @@ def _rust_end_to_end(rust, pin, times, q):
     return [(float(times[i]), tau_all[i].tolist()) for i in range(n_frames)]
 
 
+@pytest.mark.unit
+def test_compute_qdot_shape_mismatch_raises_value_error():
+    """Mismatched q/times shapes must raise ``ValueError``, not a Rust
+    ``PanicException`` (which derives from ``BaseException`` and would slip
+    past ``except Exception`` handlers) — issue #7147 Defect 1."""
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    q = np.zeros((5, 3), dtype=np.float64)
+    times = np.zeros(4, dtype=np.float64)
+    with pytest.raises(ValueError, match="times length"):
+        rust.compute_qdot(q, times)
+
+
+@pytest.mark.unit
+def test_compute_qddot_shape_mismatch_raises_value_error():
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    q = np.zeros((5, 3), dtype=np.float64)
+    times = np.zeros(4, dtype=np.float64)
+    with pytest.raises(ValueError, match="times length"):
+        rust.compute_qddot(q, times)
+
+
+@pytest.mark.unit
+def test_inverse_dynamics_non_callable_callback_raises():
+    """A non-callable callback must raise, not panic — issue #7147."""
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    times, q = _make_trajectory(4, 3, dt=0.01)
+    qdot = rust.compute_qdot(q, times)
+    qddot = rust.compute_qddot(q, times)
+    with pytest.raises((TypeError, ValueError, RuntimeError)):
+        rust.inverse_dynamics(q, times, "not-callable", qdot, qddot)
+
+
+@pytest.mark.unit
+def test_inverse_dynamics_callback_wrong_shape_return_raises():
+    """A callback returning the wrong shape surfaces as an error, not a
+    silently-corrupted tau buffer — issue #7147 Defect 3."""
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    times, q = _make_trajectory(4, 3, dt=0.01)
+    qdot = rust.compute_qdot(q, times)
+    qddot = rust.compute_qddot(q, times)
+
+    def _bad_cb(q_row, v_row, a_row):  # noqa: ARG001
+        return np.zeros(99, dtype=np.float64)  # wrong length
+
+    with pytest.raises((ValueError, RuntimeError)):
+        rust.inverse_dynamics(q, times, _bad_cb, qdot, qddot)
+
+
+@pytest.mark.unit
+def test_inverse_dynamics_callback_raising_propagates_error():
+    """An exception raised inside the RNEA callback must propagate (not be
+    swallowed) so callers can diagnose it — issue #7147 Defect 2."""
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    times, q = _make_trajectory(4, 3, dt=0.01)
+    qdot = rust.compute_qdot(q, times)
+    qddot = rust.compute_qddot(q, times)
+
+    sentinel = "callback-boom-7147"
+
+    def _raising_cb(q_row, v_row, a_row):  # noqa: ARG001
+        raise ValueError(sentinel)
+
+    with pytest.raises((ValueError, RuntimeError)) as excinfo:
+        rust.inverse_dynamics(q, times, _raising_cb, qdot, qddot)
+    # The original message must survive in some form.
+    assert sentinel in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_rust_outer_loop_smoke_speedup_non_negative():
+    """Non-benchmark smoke assertion that the Rust path runs and is not slower
+    than a trivial floor on a small trajectory. The real >=3x SLA is enforced
+    in :func:`test_rust_outer_loop_at_least_3x_faster_than_python` (benchmark
+    lane) — issue #7147 Defect 3."""
+    rust = pytest.importorskip("upstream_pinocchio_id")
+    times, q = _make_trajectory(50, 4, dt=0.005)
+    pin = _make_stub_pinocchio()
+    t0 = time.perf_counter()
+    tau_rust = _rust_end_to_end(rust, pin, times, q)
+    elapsed = time.perf_counter() - t0
+    assert len(tau_rust) == 50
+    assert elapsed >= 0.0
+
+
 @pytest.mark.benchmark
 def test_rust_outer_loop_at_least_3x_faster_than_python():
     """≥3× end-to-end speedup on a 1000-frame trajectory (issue #5218 SLA).

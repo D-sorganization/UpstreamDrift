@@ -14,6 +14,24 @@ use pyo3::prelude::*;
 use crate::driver::run_inverse_dynamics;
 use crate::finite_diff::{finite_diff_qddot, finite_diff_qdot};
 
+/// Validate that `times.len()` matches `q`'s row count before the core kernels
+/// (which `assert!` on this invariant) run. Surfaces a `ValueError` to Python
+/// instead of a `PanicException` — the latter derives from `BaseException` and
+/// would slip past every `except Exception` handler in the caller (issue #7147).
+fn validate_q_times_shapes(
+    q: &PyReadonlyArray2<'_, f64>,
+    times: &PyReadonlyArray1<'_, f64>,
+) -> PyResult<()> {
+    let n_frames = q.as_array().nrows();
+    let n_times = times.as_array().len();
+    if n_times != n_frames {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "times length ({n_times}) must equal q rows / n_frames ({n_frames})"
+        )));
+    }
+    Ok(())
+}
+
 /// Compute centred finite-difference qdot from `(q, times)`.
 #[pyfunction]
 #[pyo3(signature = (q, times))]
@@ -22,6 +40,7 @@ fn compute_qdot<'py>(
     q: PyReadonlyArray2<'py, f64>,
     times: PyReadonlyArray1<'py, f64>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    validate_q_times_shapes(&q, &times)?;
     let qv = q.as_array();
     let tv = times.as_array();
     let out = finite_diff_qdot(qv, tv);
@@ -36,6 +55,7 @@ fn compute_qddot<'py>(
     q: PyReadonlyArray2<'py, f64>,
     times: PyReadonlyArray1<'py, f64>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    validate_q_times_shapes(&q, &times)?;
     let qv = q.as_array();
     let tv = times.as_array();
     let out = finite_diff_qddot(qv, tv);
@@ -73,7 +93,13 @@ fn inverse_dynamics<'py>(
         let arr: Bound<'py, PyArray1<f64>> = res
             .extract()
             .map_err(|e| format!("rnea must return 1-D float64 ndarray: {e}"))?;
-        // SAFETY: we copy out immediately and do not retain `arr`.
+        // SAFETY: `arr.as_array()` borrows the callback's returned numpy buffer.
+        // The borrow is sound because: (1) the GIL is held for the whole closure
+        // (`py` is in scope), so no other thread can mutate or free the array;
+        // (2) `to_owned()` copies the data out immediately into a fresh
+        // `Array2`, so the borrow ends before this statement returns; and
+        // (3) `arr` is a local that is never stored or returned, so the
+        // borrowed view cannot outlive the underlying Python object.
         let owned = unsafe { arr.as_array().to_owned() };
         Ok(owned)
     });
