@@ -377,15 +377,47 @@ def _validate_state_shapes(
         raise ValueError(
             f"nq must equal nv + 1: q={q.shape[0]}, v={v.shape[0]}, a={a.shape[0]}"
         )
-    quat = q[3:7] if _looks_canonical_q(q) else q[0:4]
+    quat = _select_base_quaternion(q)
     norm = float(np.linalg.norm(quat))
     if abs(norm - 1.0) > _QUAT_TOL:
         raise ValueError(f"base quaternion must have unit norm, got {norm:.6g}")
 
 
-def _looks_canonical_q(q: npt.NDArray[np.float64]) -> bool:
-    return q.shape[0] >= _CANONICAL_V2_BASE_NQ and abs(np.linalg.norm(q[3:7]) - 1) < (
-        abs(np.linalg.norm(q[0:4]) - 1) + _QUAT_TOL
+def _select_base_quaternion(
+    q: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """Return the base quaternion block, disambiguating layout symmetrically.
+
+    canonical-v2 places the quaternion at ``q[3:7]`` (after ``[x, y, z]``); a
+    legacy ``[quat_xyzw, xyz]`` layout would place it at ``q[0:4]``. Each
+    candidate must *independently* pass ``abs(norm - 1) < _QUAT_TOL`` to be
+    accepted (symmetric — the old asymmetric comparison could pick the wrong
+    block or reject a denormalized-but-correct quaternion). If both or neither
+    candidate looks like a unit quaternion the layout is ambiguous and we raise
+    rather than guess silently (DbC).
+    """
+
+    if q.shape[0] < _CANONICAL_V2_BASE_NQ:
+        # Only the leading four entries are available; no ambiguity.
+        return q[0:4]
+    canonical = q[3:7]
+    legacy = q[0:4]
+    canonical_ok = abs(float(np.linalg.norm(canonical)) - 1.0) < _QUAT_TOL
+    legacy_ok = abs(float(np.linalg.norm(legacy)) - 1.0) < _QUAT_TOL
+    if canonical_ok and not legacy_ok:
+        return canonical
+    if legacy_ok and not canonical_ok:
+        return legacy
+    if canonical_ok and legacy_ok:
+        raise ValueError(
+            "base quaternion layout is ambiguous: both q[3:7] and q[0:4] are "
+            "unit-norm; supply a canonical-v2 q ([x, y, z, qw, qx, qy, qz]) so "
+            "the layout is unambiguous"
+        )
+    raise ValueError(
+        "base quaternion layout could not be determined: neither q[3:7] nor "
+        f"q[0:4] is unit-norm within tol {_QUAT_TOL:g}; canonical-v2 requires a "
+        "unit quaternion at q[3:7] ([x, y, z, qw, qx, qy, qz])"
     )
 
 

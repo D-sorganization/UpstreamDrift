@@ -13,6 +13,16 @@
 //!
 //! Edge cases (zero `dt`, fewer than 2 frames) zero out the corresponding
 //! row, just like the Python reference.
+//!
+//! Contract for short trajectories (issue #7146): these kernels return
+//! all-zero derivatives for `n_frames < 2` (qdot) / `n_frames < 3` (qddot).
+//! That makes inverse dynamics degenerate to statics. Callers must enforce the
+//! minimum-frame precondition *before* reaching here — the Python entry points
+//! (`pose_interchange` reference adapter and `motion_pipeline` solver) do this
+//! via `engine_core.finite_difference.require_enough_frames_for_finite_diff`,
+//! raising `ValueError` unless explicit qdot/qddot overrides are supplied. The
+//! zero-fill is retained only as a defined-but-guarded fallback so the kernels
+//! never panic on a degenerate row.
 
 use ndarray::{Array2, ArrayView1, ArrayView2};
 

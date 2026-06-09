@@ -59,9 +59,11 @@ def test_canonical_v2_roundtrip_remaps_pinocchio_w_last_quaternion() -> None:
 
     native = adapter.from_canonical_v2(canonical)
 
+    # Only the quaternion is reordered (canonical w-first -> Pinocchio w-last).
     np.testing.assert_allclose(native.q[:7], [1.0, 2.0, 3.0, -0.5, 0.25, -0.25, 0.5])
-    np.testing.assert_allclose(native.v[:6], [1.0, 2.0, 3.0, 10.0, 20.0, 30.0])
-    np.testing.assert_allclose(native.a[:6], [4.0, 5.0, 6.0, 0.1, 0.2, 0.3])
+    # Base motion layout is identical [linear; angular] (issue #7144).
+    np.testing.assert_allclose(native.v[:6], [10.0, 20.0, 30.0, 1.0, 2.0, 3.0])
+    np.testing.assert_allclose(native.a[:6], [0.1, 0.2, 0.3, 4.0, 5.0, 6.0])
 
     recovered = adapter.to_canonical_v2(native)
     np.testing.assert_allclose(recovered.q, canonical.q, atol=1.0e-12)
@@ -96,8 +98,9 @@ def test_fk_jacobian_rnea_and_aba_use_canonical_boundary() -> None:
     native_jacobian = np.arange(36, dtype=np.float64).reshape(6, 6)
     np.testing.assert_allclose(jacobian["linear"], native_jacobian[:3])
     np.testing.assert_allclose(jacobian["angular"], native_jacobian[3:])
+    # Canonical-v2 spatial order is [linear; angular] (issue #7144).
     np.testing.assert_allclose(
-        jacobian["spatial"], np.vstack([native_jacobian[3:], native_jacobian[:3]])
+        jacobian["spatial"], np.vstack([native_jacobian[:3], native_jacobian[3:]])
     )
 
     tau = adapter.inverse_dynamics(state)
@@ -110,7 +113,8 @@ def test_fk_jacobian_rnea_and_aba_use_canonical_boundary() -> None:
 
     canonical_accel = adapter.forward_dynamics(state, tau)
     expected_native = tau - 0.2 * native.v - 0.01 * native.q[:7]
-    np.testing.assert_allclose(canonical_accel[:6], expected_native[[3, 4, 5, 0, 1, 2]])
+    # Pinocchio<->canonical motion layout is identity (issue #7144).
+    np.testing.assert_allclose(canonical_accel[:6], expected_native[:6])
 
 
 def test_inverse_dynamics_trajectory_uses_numpy_fallback(
@@ -155,13 +159,13 @@ def test_inverse_dynamics_trajectory_routes_through_rust_when_available(
     monkeypatch.setitem(sys.modules, "upstream_pinocchio_id", rust)
 
     adapter = PinocchioReferenceAdapter(_ReferenceBackend())
-    q = np.vstack([_state().q, _state().q + 0.01])
-    result = adapter.inverse_dynamics_trajectory(q, np.array([0.0, 0.1]))
+    q = np.vstack([_state().q, _state().q + 0.01, _state().q + 0.03])
+    result = adapter.inverse_dynamics_trajectory(q, np.array([0.0, 0.1, 0.2]))
 
     assert result.backend == "rust"
     np.testing.assert_allclose(calls["q"][0, 3:7], [-0.5, 0.25, -0.25, 0.5])
     np.testing.assert_allclose(result.qdot[0, :6], [1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-    assert result.tau.shape == (2, 7)
+    assert result.tau.shape == (3, 7)
 
 
 def test_gradient_fallback_covers_state_and_inertial_parameters() -> None:

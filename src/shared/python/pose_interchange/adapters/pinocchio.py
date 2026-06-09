@@ -62,7 +62,11 @@ def _layout_from_model(model: Any | None) -> Mapping[str, JointSlot]:
         return model["joint_layout"]
     raise TypeError(
         "PinocchioAdapter: 'model' must be None, a Mapping with 'joint_layout', "
-        "or an object exposing a 'joint_layout' Mapping attribute"
+        "or an object exposing a 'joint_layout' Mapping attribute. A real "
+        "Pinocchio 'Model' is not introspected here; supply the per-joint "
+        "layout explicitly, e.g. model={'joint_layout': "
+        "build_default_joint_layout(...)} or attach a 'joint_layout' Mapping "
+        f"attribute to your model object (got {type(model).__name__})."
     )
 
 
@@ -72,6 +76,20 @@ class PinocchioAdapter:
     engine_name: str = "pinocchio"
 
     def joint_layout(self, model: Any | None = None) -> Mapping[str, JointSlot]:
+        """Return the per-joint ``q``-vector layout for ``model``.
+
+        ``model`` must be one of:
+
+        * ``None`` — use the default golfer layout (mock mode);
+        * a ``Mapping`` containing a ``"joint_layout"`` key; or
+        * an object exposing a ``joint_layout`` ``Mapping`` attribute.
+
+        A **raw Pinocchio ``Model`` is not introspected** by this adapter: pass
+        the per-joint :class:`JointSlot` map alongside it (wrap it as
+        ``{"joint_layout": ...}`` or attach a ``joint_layout`` attribute).
+        Anything else raises :class:`TypeError` with the remediation.
+        """
+
         return _layout_from_model(model)
 
     def from_canonical(

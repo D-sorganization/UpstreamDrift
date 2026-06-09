@@ -16,6 +16,10 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_core.finite_difference import (
+    require_enough_frames_for_finite_diff as _require_enough_frames_for_finite_diff,
+)
+
 from ..contracts import (
     JointTrajectory,
     SkeletonRig,
@@ -102,6 +106,17 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
 
         have_qdot_override = all(f.qdot is not None for f in traj.frames)
         have_qddot_override = all(f.qddot is not None for f in traj.frames)
+
+        # Precondition (issue #7146): finite differencing without explicit
+        # qdot/qddot overrides needs enough samples, otherwise it silently
+        # returns all-zero velocities/accelerations and inverse dynamics
+        # degenerates to statics (plausible-looking but wrong physics). Fail
+        # loudly unless the caller supplied the derivatives.
+        _require_enough_frames_for_finite_diff(
+            n_frames=len(traj.frames),
+            need_qdot=not have_qdot_override,
+            need_qddot=not have_qddot_override,
+        )
 
         if _use_rust_outer_loop() and not (have_qdot_override and have_qddot_override):
             q_c = np.ascontiguousarray(q, dtype=np.float64)
