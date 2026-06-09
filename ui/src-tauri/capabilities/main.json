@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-capability",
+  "description": "Pins the IPC permission surface of the main window. The four app commands below can start/stop the local backend process and read diagnostics, so they are declared explicitly rather than left to framework defaults (issue #7164).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "log:default",
+    "allow-start-backend",
+    "allow-stop-backend",
+    "allow-backend-status",
+    "allow-get-diagnostics"
+  ]
+}

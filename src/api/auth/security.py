@@ -364,6 +364,11 @@ class UsageTracker:
         from .models import SUBSCRIPTION_QUOTAS
 
         user_role = UserRole(user.role)
+        # Admins are not metered and have no SUBSCRIPTION_QUOTAS entry; treat
+        # them as unlimited to avoid a KeyError for real admins and LocalUser
+        # (issue #7142). Other roles must have a quota row.
+        if user_role == UserRole.ADMIN:
+            return True
         quotas = SUBSCRIPTION_QUOTAS[user_role]
 
         if resource_type == "api_calls":
@@ -381,6 +386,11 @@ class UsageTracker:
         Args:
             user: User to increment usage for
             resource_type: Type of resource used
+
+        Raises:
+            ValueError: If ``resource_type`` is not a known metered resource.
+                Silently no-op'ing a typo'd resource type is a metering hole
+                no test can catch (issue #7143, DbC precondition).
         """
         if resource_type == "api_calls":
             user.api_calls_this_month = int(user.api_calls_this_month) + 1  # type: ignore[assignment]
@@ -388,6 +398,11 @@ class UsageTracker:
             user.video_analyses_this_month = int(user.video_analyses_this_month) + 1  # type: ignore[assignment]
         elif resource_type == "simulations":
             user.simulations_this_month = int(user.simulations_this_month) + 1  # type: ignore[assignment]
+        else:
+            raise ValueError(
+                "resource_type must be 'api_calls', 'video_analyses', or "
+                f"'simulations', got {resource_type!r}"
+            )
 
     def get_usage_summary(self, user: User) -> dict[str, Any]:
         """Get usage summary for a user.
@@ -403,12 +418,22 @@ class UsageTracker:
         from .models import SUBSCRIPTION_QUOTAS
 
         user_role = UserRole(user.role)
-        quotas = SUBSCRIPTION_QUOTAS[user_role]
-
         api_calls_used = int(user.api_calls_this_month)
         video_analyses_used = int(user.video_analyses_this_month)
         simulations_used = int(user.simulations_this_month)
 
+        # Admins are unlimited and have no quota row (issue #7142): report a
+        # -1 limit/remaining sentinel rather than raising KeyError.
+        if user_role == UserRole.ADMIN:
+            unlimited = {"used": 0, "limit": -1, "remaining": -1}
+            return {
+                "subscription_tier": user_role.value,
+                "api_calls": {**unlimited, "used": api_calls_used},
+                "video_analyses": {**unlimited, "used": video_analyses_used},
+                "simulations": {**unlimited, "used": simulations_used},
+            }
+
+        quotas = SUBSCRIPTION_QUOTAS[user_role]
         return {
             "subscription_tier": user_role.value,
             "api_calls": {

@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 from typing import cast
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from src.api.auth.dependencies import RequireAdmin, RequireAuth
@@ -269,20 +269,21 @@ async def delete_api_key(
 
 # Admin routes
 @router.get("/users", response_model=list[UserResponse])
-@precondition(
-    lambda skip=0, limit=100, current_user=None, db=None: skip >= 0 and limit > 0,
-    "skip must be non-negative and limit must be positive",
-)
 async def list_users(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
 ) -> list[UserResponse]:
-    """List all users (admin only)."""
+    """List all users (admin only).
 
-    if not (skip is not None):
-        raise ValueError("skip must be provided")
+    Pagination bounds are enforced at the HTTP boundary via FastAPI ``Query``
+    constraints (``ge``/``le``) — the idiomatic DbC mechanism here. The previous
+    ``@precondition`` lambda bound its own defaults rather than the real call
+    args, so it passed vacuously and never capped ``limit`` (issue #7140), which
+    let an unbounded ``limit`` load the whole table (memory-exhaustion DoS).
+    """
+
     users = db.query(User).offset(skip).limit(limit).all()
     return [UserResponse.from_orm(user) for user in users]
 
