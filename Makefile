@@ -20,6 +20,7 @@ help:
 	@echo "  make test      - Run pytest"
 	@echo "  make test-unit - Run unit tests only"
 	@echo "  make test-int  - Run integration tests only"
+	@echo "  make test-in-tree - Inspect legacy in-tree src/**/tests collection (#7126)"
 	@echo "  make smoke     - Run release smoke tests for available artifacts"
 	@echo "  make check     - Run all checks (lint + test)"
 	@echo "  make clean     - Remove build artifacts"
@@ -77,6 +78,14 @@ test-unit:
 test-int:
 	@echo "Running integration tests..."
 	pytest tests/integration/ -v --tb=short
+
+# Inspect legacy in-tree src/**/tests collection (issue #7126).
+# Diagnostic only: the default lane excludes src/ (norecursedirs); this reports
+# which grandfathered in-tree suites collect vs. carry migration debt.
+# See docs/development/in_tree_test_policy.md.
+test-in-tree:
+	@echo "Inspecting legacy in-tree src/**/tests collection..."
+	python3 scripts/collect_in_tree_tests.py
 
 # Run smoke tests against locally built release artifacts
 smoke:
