@@ -49,7 +49,7 @@ email-validator==2.3.0
     # via upstream-drift (pyproject.toml)
 etils[epath,epy]==1.13.0
     # via mujoco
-fastapi==0.128.0
+fastapi==0.136.3
     # via upstream-drift (pyproject.toml)
 flask==3.1.3
     # via upstream-drift (pyproject.toml)
@@ -157,8 +157,10 @@ sqlalchemy==2.0.44
     # via
     #   alembic
     #   upstream-drift (pyproject.toml)
-starlette==0.50.0
-    # via fastapi
+starlette==1.2.1
+    # via
+    #   fastapi
+    #   upstream-drift (pyproject.toml)
 structlog==25.5.0
     # via upstream-drift (pyproject.toml)
 tornado==6.5.5

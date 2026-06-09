@@ -515,6 +515,7 @@ class TestPyprojectTomlConsistency:
             "pyjwt",
             "cryptography",
             "email-validator",
+            "starlette",
         }:
             assert package in deps
             assert package not in dev_deps

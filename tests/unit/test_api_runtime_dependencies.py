@@ -19,6 +19,7 @@ _API_RUNTIME_DEPS = (
     "pyjwt",
     "cryptography",
     "email-validator",
+    "starlette",
 )
 
 
@@ -66,3 +67,14 @@ def test_api_runtime_dep_is_locked(dep: str) -> None:
         if "==" in line and not line.lstrip().startswith("#")
     }
     assert dep in locked
+
+
+def test_starlette_lock_satisfies_security_floor() -> None:
+    """CVE-2026-48710 is fixed in Starlette 1.0.1 and later."""
+    lock_lines = _LOCK.read_text(encoding="utf-8").splitlines()
+    locked = next(line for line in lock_lines if line.startswith("starlette=="))
+    major, minor, patch = (
+        int(part) for part in locked.removeprefix("starlette==").split(".")
+    )
+
+    assert (major, minor, patch) >= (1, 0, 1)

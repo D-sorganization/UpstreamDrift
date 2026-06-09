@@ -21,7 +21,9 @@ dependencies = [
     # Core (always installed)
     "numpy>=2.0.0",
     "scipy>=1.13.1",
-    "fastapi>=0.126.0",
+    "fastapi>=0.136.0",
+    # Security floor for CVE-2026-48710; FastAPI 0.136+ supports Starlette 1.x.
+    "starlette>=1.0.1",
     "uvicorn[standard]>=0.30.0",
     "pydantic>=2.5.0",
     # Typed unified settings (issue #6565). Small dep; config is load-bearing.
