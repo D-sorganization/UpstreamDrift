@@ -107,7 +107,11 @@ def create_chat_router(
 
         chat_service = websocket.app.state.chat_service
 
-        # Resolve or create session
+        # Resolve or create session. A connection that created a fresh ("new")
+        # session owns it and ends it on disconnect so per-connection state does
+        # not accumulate; a client that reconnected to an existing session id
+        # keeps it alive (issue #7150).
+        created_ephemeral_session = session_id == "new"
         if session_id == "new":
             session = chat_service.get_or_create_session(None)
             session_id = session.session_id
@@ -392,6 +396,12 @@ def create_chat_router(
                 await websocket.send_json(
                     {"type": "error", "detail": _CONNECTION_ERROR_DETAIL}
                 )
+        finally:
+            # All disconnect/error paths converge here: release the session this
+            # connection created so per-connection state cannot leak (#7150).
+            if created_ephemeral_session:
+                with contextlib.suppress(Exception):
+                    chat_service.end_session(session_id)
 
     # ── REST fallback endpoints ──────────────────────────────────────
 

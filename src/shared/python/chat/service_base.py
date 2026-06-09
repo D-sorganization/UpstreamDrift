@@ -154,6 +154,28 @@ class ChatServiceBase(abc.ABC):
             logger.info("Created chat session %s", session.session_id)
             return session
 
+    def end_session(self, session_id: str) -> bool:
+        """Evict *session_id* and release its resources (idempotent).
+
+        Returns ``True`` if a session was removed, ``False`` if it was already
+        absent. The single cleanup entry point used by the WebSocket router's
+        disconnect path so per-connection state cannot accumulate (issue #7150).
+        """
+        if not session_id:
+            return False
+        with self._lock:
+            existed = session_id in self._sessions
+            self._sessions.pop(session_id, None)
+            self._timestamps.pop(session_id, None)
+        if existed:
+            logger.debug("Ended chat session %s", session_id)
+        return existed
+
+    def session_count(self) -> int:
+        """Return the number of live sessions (observability for #7150)."""
+        with self._lock:
+            return len(self._sessions)
+
     def add_user_message(
         self,
         session_id: str,
