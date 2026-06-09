@@ -4,14 +4,94 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from src.shared.python.motion_pipeline.contracts import (
+    Keypoint,
+    KeypointFrame,
     KeypointSequence,
+    Marker,
+    MarkerFrame,
     MarkerTrajectory,
 )
 from src.shared.python.motion_pipeline.preprocessing.resample import resample
 
 from ._local_fixtures import make_keypoint_sequence, make_marker_trajectory
+
+
+_FINITE_COORD = st.floats(
+    min_value=-100.0,
+    max_value=100.0,
+    allow_nan=False,
+    allow_infinity=False,
+)
+
+
+def _affine_keypoint_sequence(
+    *,
+    num_frames: int,
+    num_keypoints: int,
+    fps: float,
+    base: float,
+    slope: float,
+    confidence: float,
+) -> KeypointSequence:
+    frames: list[KeypointFrame] = []
+    for frame_index in range(num_frames):
+        timestamp = frame_index / fps
+        keypoints = [
+            Keypoint(
+                x=base + keypoint_index + slope * timestamp,
+                y=base - keypoint_index + (slope * 0.5) * timestamp,
+                z=base + (keypoint_index * 0.25) - (slope * 0.25) * timestamp,
+                confidence=confidence,
+                name=f"kp_{keypoint_index}",
+            )
+            for keypoint_index in range(num_keypoints)
+        ]
+        frames.append(
+            KeypointFrame(
+                timestamp=timestamp,
+                keypoints=keypoints,
+                schema_name="custom",
+                frame_index=frame_index,
+            )
+        )
+    return KeypointSequence(id="affine_keypoints", frames=frames)
+
+
+def _affine_marker_trajectory(
+    *,
+    num_frames: int,
+    num_markers: int,
+    fps: float,
+    base: float,
+    slope: float,
+) -> MarkerTrajectory:
+    frames: list[MarkerFrame] = []
+    marker_names = [f"M{marker_index}" for marker_index in range(num_markers)]
+    for frame_index in range(num_frames):
+        timestamp = frame_index / fps
+        markers = {
+            name: Marker(
+                name=name,
+                x=base + marker_index + slope * timestamp,
+                y=base - marker_index + (slope * 0.25) * timestamp,
+                z=base + (marker_index * 0.5) - (slope * 0.5) * timestamp,
+                residual=float(marker_index),
+                occluded=False,
+            )
+            for marker_index, name in enumerate(marker_names)
+        }
+        frames.append(
+            MarkerFrame(
+                timestamp=timestamp,
+                markers=markers,
+                frame_index=frame_index,
+            )
+        )
+    return MarkerTrajectory(id="affine_markers", frames=frames, subject_id="subject")
 
 
 def test_resample_unsupported_type_raises() -> None:
@@ -84,6 +164,120 @@ def test_resample_marker_trajectory_id_preserved() -> None:
     traj = make_marker_trajectory(num_frames=10, fps=30.0)
     out = resample(traj, target_fps=60.0)
     assert out.id == traj.id
+
+
+@given(
+    num_frames=st.integers(min_value=2, max_value=8),
+    num_keypoints=st.integers(min_value=1, max_value=5),
+    fps=st.integers(min_value=15, max_value=120),
+    target_multiplier=st.integers(min_value=2, max_value=4),
+    base=_FINITE_COORD,
+    slope=_FINITE_COORD,
+    confidence=st.floats(
+        min_value=0.0,
+        max_value=1.0,
+        allow_nan=False,
+        allow_infinity=False,
+    ),
+)
+@settings(max_examples=40, deadline=None)
+def test_resample_keypoints_preserves_affine_paths_and_labels(
+    num_frames: int,
+    num_keypoints: int,
+    fps: int,
+    target_multiplier: int,
+    base: float,
+    slope: float,
+    confidence: float,
+) -> None:
+    source_fps = float(fps)
+    seq = _affine_keypoint_sequence(
+        num_frames=num_frames,
+        num_keypoints=num_keypoints,
+        fps=source_fps,
+        base=base,
+        slope=slope,
+        confidence=confidence,
+    )
+
+    out = resample(
+        seq,
+        target_fps=source_fps * target_multiplier,
+        source_fps=source_fps,
+    )
+
+    assert isinstance(out, KeypointSequence)
+    assert out.num_keypoints == num_keypoints
+    assert [kp.name for kp in out.frames[0].keypoints] == [
+        f"kp_{keypoint_index}" for keypoint_index in range(num_keypoints)
+    ]
+    for frame in out.frames:
+        for keypoint_index, keypoint in enumerate(frame.keypoints):
+            timestamp = frame.timestamp
+            assert keypoint.confidence == pytest.approx(confidence)
+            assert keypoint.x == pytest.approx(
+                base + keypoint_index + slope * timestamp
+            )
+            assert keypoint.y == pytest.approx(
+                base - keypoint_index + (slope * 0.5) * timestamp
+            )
+            assert keypoint.z == pytest.approx(
+                base + (keypoint_index * 0.25) - (slope * 0.25) * timestamp
+            )
+
+
+@given(
+    num_frames=st.integers(min_value=2, max_value=8),
+    num_markers=st.integers(min_value=1, max_value=5),
+    fps=st.integers(min_value=15, max_value=120),
+    target_multiplier=st.integers(min_value=2, max_value=4),
+    base=_FINITE_COORD,
+    slope=_FINITE_COORD,
+)
+@settings(max_examples=40, deadline=None)
+def test_resample_markers_preserves_affine_paths_and_marker_surface(
+    num_frames: int,
+    num_markers: int,
+    fps: int,
+    target_multiplier: int,
+    base: float,
+    slope: float,
+) -> None:
+    source_fps = float(fps)
+    traj = _affine_marker_trajectory(
+        num_frames=num_frames,
+        num_markers=num_markers,
+        fps=source_fps,
+        base=base,
+        slope=slope,
+    )
+
+    out = resample(
+        traj,
+        target_fps=source_fps * target_multiplier,
+        source_fps=source_fps,
+    )
+
+    assert isinstance(out, MarkerTrajectory)
+    assert out.subject_id == traj.subject_id
+    assert out.marker_names == [
+        f"M{marker_index}" for marker_index in range(num_markers)
+    ]
+    for frame in out.frames:
+        assert frame.marker_names == out.marker_names
+        for marker_index, marker_name in enumerate(out.marker_names):
+            marker = frame.markers[marker_name]
+            timestamp = frame.timestamp
+            assert marker.name == marker_name
+            assert marker.residual == pytest.approx(float(marker_index))
+            assert marker.occluded is False
+            assert marker.x == pytest.approx(base + marker_index + slope * timestamp)
+            assert marker.y == pytest.approx(
+                base - marker_index + (slope * 0.25) * timestamp
+            )
+            assert marker.z == pytest.approx(
+                base + (marker_index * 0.5) - (slope * 0.5) * timestamp
+            )
 
 
 def test_pure_python_resample_parity() -> None:
