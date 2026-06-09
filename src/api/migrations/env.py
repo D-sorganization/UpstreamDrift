@@ -9,6 +9,7 @@ Issue #2078: Add database migration tooling.
 
 import os
 from logging.config import fileConfig
+from typing import Any
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -29,7 +30,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 
-def _load_target_metadata():
+def _load_target_metadata() -> Any:
     """Import the auth models' metadata, with an actionable error on failure.
 
     Offline mode (``alembic upgrade --sql``) only emits SQL and does not need
