@@ -64,6 +64,7 @@ dependencies = [
     "bcrypt>=4.1.0",
     "PyJWT>=2.12.0",
     "cryptography>=46.0.7",
+    "email-validator>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -156,8 +157,6 @@ dev = [
     "pytest-anyio>=0.0.0; python_version>='3.10'",
     # Required for config tests
     "PyYAML>=6.0.3",
-    # Required for pydantic email validation in auth models
-    "email-validator>=2.0.0",
     # NOTE: slowapi and python-multipart moved to core [project] dependencies
     # (#6612) — they are runtime imports of the API server, not test-only.
     # Required for async streaming tests

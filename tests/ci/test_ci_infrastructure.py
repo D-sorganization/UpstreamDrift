@@ -508,7 +508,14 @@ class TestPyprojectTomlConsistency:
             for requirement in data["project"]["optional-dependencies"]["dev"]
         }
 
-        for package in {"alembic", "sqlalchemy", "bcrypt", "pyjwt", "cryptography"}:
+        for package in {
+            "alembic",
+            "sqlalchemy",
+            "bcrypt",
+            "pyjwt",
+            "cryptography",
+            "email-validator",
+        }:
             assert package in deps
             assert package not in dev_deps
             assert f"{package}==" in lock

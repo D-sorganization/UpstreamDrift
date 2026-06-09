@@ -43,6 +43,10 @@ cryptography==46.0.7
     # via upstream-drift (pyproject.toml)
 deprecated==1.3.1
     # via limits
+dnspython==2.8.0
+    # via email-validator
+email-validator==2.3.0
+    # via upstream-drift (pyproject.toml)
 etils[epath,epy]==1.13.0
     # via mujoco
 fastapi==0.128.0
@@ -70,6 +74,7 @@ httpx==0.28.1
 idna==3.15
     # via
     #   anyio
+    #   email-validator
     #   httpx
     #   requests
 importlib-resources==6.5.2
