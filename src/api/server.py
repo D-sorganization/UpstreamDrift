@@ -19,6 +19,7 @@ API Versioning (#1488):
     compatibility.
 """
 
+import os
 import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -295,6 +296,25 @@ logger.info("Registered %d route modules under /api", _legacy_api_count)
 # Register all routes under /api/v1/ prefix (versioned API)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
+
+# DbC (issue #7167 D1): all three passes must register the same number of route
+# modules. A partial failure otherwise yields an API where /api/v1/foo exists
+# but /foo 404s, with no signal. Fail-closed in strict mode.
+_strict_routes = os.getenv("API_STRICT_ROUTE_REGISTRATION", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+if not (_root_count == _legacy_api_count == _versioned_count):
+    _msg = (
+        "Route registration count mismatch across prefixes: "
+        f"root={_root_count}, /api={_legacy_api_count}, "
+        f"{API_PREFIX}={_versioned_count}. Some routes are reachable under one "
+        "prefix but 404 under another."
+    )
+    logger.error(_msg)
+    if _strict_routes:
+        raise RuntimeError(_msg)
 
 # Register explicitly excluded WebSocket routes.
 #
