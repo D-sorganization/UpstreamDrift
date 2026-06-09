@@ -38,6 +38,7 @@ navigation should start with the rendered documentation URL.
 | `engines/`              | @physics-team         | stable    | Physics engine support tiers, capabilities, and backend-specific documentation.                                                     |
 | `examples/`             | @developer-experience | stable    | Runnable examples and sample workflows that demonstrate supported integrations and usage patterns.                                  |
 | `estimation/`           | @engineering-team     | stable    | Estimation validation, synthetic fixtures, identifiability probes, and offline estimator readiness notes.                           |
+| `examples/`             | @developer-experience | stable    | Runnable examples and sample scripts that exercise documented workflows.                                                            |
 | `golf-model/`           | @physics-team         | draft     | Golf-model investigation notes and motion-matching diagnostics.                                                                     |
 | `governance/`           | @maintainers          | stable    | Repository governance policies, documentation rules, and maintenance process.                                                       |
 | `help/`                 | @support-team         | stable    | User support material and task-oriented help pages.                                                                                 |
