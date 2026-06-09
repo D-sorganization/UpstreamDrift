@@ -403,6 +403,29 @@ class TestCIEnvironmentCompatibility:
         assert "python3 scripts/check_local_only_workflows.py" in workflow
         assert 'echo "Bypass"' not in workflow
 
+    def test_ci_standard_defines_required_quality_gate_status(self) -> None:
+        """Branch protection requires the CI Standard / quality-gate status."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        job = workflow["jobs"]["quality-gate"]
+
+        assert job["name"] == "quality-gate"
+        assert set(job["needs"]) == {
+            "code-quality",
+            "security-scans",
+            "repo-structure-gates",
+            "unit-test-gate",
+        }
+        assert job["if"] == "always()"
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
