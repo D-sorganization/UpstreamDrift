@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.286                                            |
+| **Spec Version**        | 1.0.287                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -76,6 +76,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   Qt platform and selects `QT_QPA_PLATFORM=offscreen` on headless Linux, while
   the local API server tolerates unavailable optional engine-manager imports
   and reports an empty engine set instead of failing startup.
+- **2026-06-10** - Removed unsafe Drake pose pickle deserialization from
+  `src/shared/python/pose_interchange/pose_io.py`. Drake `.drake` initial-state
+  files now use JSON for `{q, v, model_metadata}`, and legacy binary/non-JSON
+  payloads are rejected before any deserialization path can execute.
 - **2026-06-10** - Preserved the legacy golf visualizer dataset contract after
   row extraction optimization: `extract_frame_data` still requires the BASEQ,
   ZTCFQ, and DELTAQ datasets and returns zero-vector frame data when the
@@ -864,7 +868,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-10 | 1.0.286 | Startup entry-point consolidation (#7215). `launch_golf_suite.py` now delegates to canonical `launch_upstream_drift.py` with a deprecation warning, classic PyQt launch preflights the Qt platform and selects offscreen mode on headless Linux, and `src/api/local_server.py` degrades to an unavailable engine-manager facade when optional engine imports fail during local API startup. |
+| 2026-06-10 | 1.0.287 | Startup entry-point consolidation (#7215). `launch_golf_suite.py` now delegates to canonical `launch_upstream_drift.py` with a deprecation warning, classic PyQt launch preflights the Qt platform and selects offscreen mode on headless Linux, and `src/api/local_server.py` degrades to an unavailable engine-manager facade when optional engine imports fail during local API startup. |
+| 2026-06-10 | 1.0.286 | Removed unsafe Drake pose pickle deserialization from `pose_interchange.pose_io`. Drake `.drake` initial-state files now serialize `{q, v, model_metadata}` as JSON, the loader rejects binary/non-JSON payloads before deserialization, and regression coverage asserts invalid JSON and missing-`q` contracts. |
 | 2026-06-10 | 1.0.285 | Legacy golf visualizer dataset contract preservation after row extraction optimization. `golf_visualizer_data.DataProcessor.extract_frame_data` still fails fast when BASEQ, ZTCFQ, or DELTAQ is absent and still returns zero-vector frame data when a requested frame row is missing, with regression coverage for both contracts. |
 | 2026-06-10 | 1.0.284 | Frankenstein composition validation framework (#7205). Added `src/tools/model_explorer/composition_validator.py` with structured error/warning findings for duplicate URDF names, orphaned joints, invalid root counts, disconnected links, kinematic cycles, and moving-link mass/inertia contracts. Frankenstein editor export now blocks validation errors by default while retaining an explicit `force=True` escape hatch for recovery exports. |
 | 2026-06-10 | 1.0.283 | LauncherContext shared event/value context for embedded tools (#7210). Added `src/shared/python/launcher_embed/context.py` with a headless `LauncherContext` protocol, in-memory snapshot-safe event dispatch, idempotent unsubscribe handles, keyed `value_changed:<key>` notifications, and a small `list/get/set` compatibility surface for Sidekick workspace reuse. `EmbeddedHostWidget` owns one context, injects it into opt-in tools through `set_launcher_context(ctx)`, and emits `tab.opened` / `tab.closed` events while legacy tools without the hook continue to open normally. |

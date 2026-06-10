@@ -253,10 +253,7 @@ class TestEngineManager:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             matlab_dir = (
-                temp_path
-                / "engines"
-                / "Simscape_Multibody_Models"
-                / "3D_Golf_Model"
+                temp_path / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model"
             )
             matlab_dir.mkdir(parents=True)
 
