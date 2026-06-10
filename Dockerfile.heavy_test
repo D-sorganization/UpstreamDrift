@@ -74,11 +74,25 @@ RUN pip install \
     pyyaml \
     c3d
 
-# ── Optional tooling (best-effort, non-fatal) ─────────────────────────────────
-RUN pip install PyQt6 || echo "PyQt6 not available on this platform — skipping"
-RUN pip install drake    || echo "Drake not available on this platform — skipping"
-RUN pip install opensim  || echo "OpenSim not available on this platform — skipping"
-RUN pip install myosuite || echo "MyoSuite not available on this platform — skipping"
+# ── Optional tooling (genuinely platform-optional) ───────────────────────────
+# Issue #7161 D2: a failed *optional* install must not silently produce a
+# "heavy test" image that is quietly missing deps. Each optional package that
+# fails to install emits a warning AND records its status in a marker file
+# (/app/.optional_deps_status) that the test entrypoint surfaces, so any
+# resulting skips are attributable rather than mysterious ModuleNotFoundErrors.
+# The hard-required engines above (pinocchio/mujoco/mediapipe/…) still fail the
+# build outright if they cannot install.
+RUN set -u; \
+    mkdir -p /app; \
+    : > /app/.optional_deps_status; \
+    for pkg in PyQt6 drake opensim myosuite; do \
+        if pip install "$pkg"; then \
+            echo "$pkg=installed" >> /app/.optional_deps_status; \
+        else \
+            echo "::warning::optional dependency $pkg failed to install — dependent heavy tests will skip"; \
+            echo "$pkg=missing" >> /app/.optional_deps_status; \
+        fi; \
+    done
 
 WORKDIR /app
 
@@ -92,8 +106,10 @@ RUN if [ -f "pyproject.toml" ]; then \
       pip install -r requirements.txt || true; \
     fi
 
-# ── Default: run heavy suite with Xvfb ───────────────────────────────────────
-CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1920x1080x24", \
-     "pytest", "-v", "-m", "live_simulation", \
-     "--timeout=300", "--timeout-method=thread", \
-     "--tb=short", "tests/heavy_integration/"]
+# ── Default: surface optional-dep status (issue #7161 D2) then run the heavy
+#    suite with Xvfb. The entrypoint prints the build-time optional-dependency
+#    marker so skips are attributable; pass args to `docker run` to override
+#    the default pytest invocation.
+COPY docker/heavy_test_entrypoint.sh /usr/local/bin/heavy_test_entrypoint.sh
+RUN chmod +x /usr/local/bin/heavy_test_entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/heavy_test_entrypoint.sh"]

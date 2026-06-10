@@ -47,6 +47,22 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /workspace
 
+# Validate PROFILE/FEATURES against docker/profiles.yaml *before* the expensive
+# install layers (issue #7161 D3): a typo'd profile now fails fast with a clear
+# message instead of after the multi-minute lockfile + feature installs. This
+# copies only the two cheap files the validator needs and runs it in --dry-run
+# mode (resolves features, raises on an unknown profile, installs nothing).
+COPY docker/profiles.yaml ./docker/profiles.yaml
+COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
+RUN set -eux; \
+    if [ -n "$PROFILE" ]; then \
+        python scripts/docker/install_features.py --profile "$PROFILE" --dry-run; \
+    elif [ -n "$FEATURES" ]; then \
+        python scripts/docker/install_features.py --features "$FEATURES" --dry-run; \
+    else \
+        python scripts/docker/install_features.py --profile "$DEFAULT_PROFILE" --dry-run; \
+    fi
+
 # Always install the lockfile baseline first so layer cache hits the
 # common case. Feature stages append additional packages on top.
 COPY requirements.lock /tmp/requirements.lock

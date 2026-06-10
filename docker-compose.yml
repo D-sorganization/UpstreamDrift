@@ -37,7 +37,13 @@ services:
     restart: unless-stopped
     working_dir: /workspace
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      # Python one-liner (issue #7161 D3) — no curl dependency; python is always
+      # present in the venv. Matches the image HEALTHCHECK in Dockerfile.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/health', timeout=5).status==200 else 1)"
       interval: 30s
       timeout: 10s
       retries: 3
@@ -74,7 +80,11 @@ services:
     environment:
       - VITE_API_URL=http://backend:8001
     depends_on:
-      - backend
+      # Wait for the backend to be HEALTHY, not merely started (issue #7161 D3),
+      # so `docker compose up` from cold start brings up a working frontend with
+      # no manual retry.
+      backend:
+        condition: service_healthy
     networks:
       - upstream-drift
 
