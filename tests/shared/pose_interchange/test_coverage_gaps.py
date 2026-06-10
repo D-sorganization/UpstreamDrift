@@ -354,6 +354,7 @@ class TestPoseIO:
 
     def test_load_drake_rejects_bad_file(self, tmp_path: Path) -> None:
         import json
+
         path = tmp_path / "bad.drake"
         path.write_text(json.dumps({"wrong": True}), encoding="utf-8")
         with pytest.raises(ValueError, match="missing required 'q'"):

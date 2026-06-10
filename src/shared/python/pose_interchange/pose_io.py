@@ -47,7 +47,6 @@ therefore emits a zero-velocity vector sized to match its ``q`` /
 from __future__ import annotations
 
 import json
-import pickle  # noqa: S403 - trusted pickle for engine-native MCAP fixtures
 from pathlib import Path
 from typing import Any, Final
 
@@ -160,6 +159,7 @@ def _load_drake(path: Path) -> CanonicalPose:
         # Fallback for legacy pickle files
         with path.open("rb") as fh:
             import pickle
+
             payload = pickle.load(fh)  # noqa: S301
 
     if not isinstance(payload, dict) or "q" not in payload:
