@@ -26,12 +26,12 @@ import hashlib
 import json
 import logging
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
-from collections.abc import Callable
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -85,6 +85,25 @@ class InvalidInputError(ValueError):
     unknown backend, unsupported source type) from internal pipeline
     faults so the API layer can map them to 4xx vs 5xx (issue #6932).
     """
+
+
+class HookExecutionError(RuntimeError):
+    """Raised when a per-stage hook fails in strict hook mode."""
+
+    def __init__(
+        self,
+        *,
+        stage: Stage,
+        hook_name: str,
+        original: BaseException,
+    ) -> None:
+        self.stage = stage
+        self.hook_name = hook_name
+        self.original = original
+        super().__init__(
+            f"Hook {hook_name!r} for stage {stage.value!r} failed: "
+            f"{type(original).__name__}: {original}"
+        )
 
 
 @dataclass
@@ -161,6 +180,15 @@ class PipelineConfig(BaseModel):
     # Output configuration
     output_format: str = Field(default="json", description="Output format")
 
+    # Hook execution policy
+    strict_hooks: bool = Field(
+        default=False,
+        description=(
+            "When true, per-stage hook failures raise HookExecutionError instead "
+            "of being logged and skipped."
+        ),
+    )
+
     class Config:
         """Pydantic config."""
 
@@ -194,7 +222,9 @@ class MotionPipeline:
             config: Pipeline configuration
         """
         self.config = config
-        self._hooks: dict[Stage, list[Callable]] = {stage: [] for stage in Stage}
+        self._hooks: dict[Stage, list[Callable[[HookPayload], None]]] = {
+            stage: [] for stage in Stage
+        }
         self._audit_log: list[dict[str, Any]] = []
         self._source_hash: str | None = None
         self._config_hash: str | None = None
@@ -250,8 +280,23 @@ class MotionPipeline:
         for hook in self._hooks[stage]:
             try:
                 hook(payload)
-            except Exception as e:  # noqa: BLE001
-                logger.warning(f"Hook for {stage.value} failed: {e}")
+            except (
+                AssertionError,
+                LookupError,
+                OSError,
+                RuntimeError,
+                TypeError,
+                ValueError,
+            ) as exc:
+                hook_name = getattr(hook, "__qualname__", repr(hook))
+                error = HookExecutionError(
+                    stage=stage,
+                    hook_name=hook_name,
+                    original=exc,
+                )
+                if self.config.strict_hooks:
+                    raise error from exc
+                logger.exception("%s", error)
 
     # -------------------------------------------------------------------------
     # Stage Implementations
