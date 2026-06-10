@@ -32,9 +32,9 @@ def test_gui_on_engine_selected(mock_qapp) -> None:
 
     win._on_engine_selected("mujoco")
 
-    win._engine_controller.switch_engine.assert_called_with("mujoco")
-    # Real methods run without crashing
-    assert True  # just checking no crash
+    # The selection is delegated to the controller exactly once with the
+    # selected engine name (issue #7157 — verify the argument, not just .called).
+    win._engine_controller.switch_engine.assert_called_once_with("mujoco")
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
@@ -46,7 +46,13 @@ def test_gui_on_angle_edited(mock_qapp) -> None:
     joint = REFERENCE_GOLFER_FIELDS[0]
     win._on_angle_edited(joint, 45.0)
 
-    assert win._history.push.called
+    # Issue #7157: verify the *pushed pose* carries the edited angle, not just
+    # that push() was called with some argument.
+    win._history.push.assert_called_once()
+    pushed_pose = win._history.push.call_args.args[0]
+    assert pushed_pose.joint_angles_deg[joint] == 45.0
+    # And the controller's live pose reflects the edit (observable state).
+    assert win._engine_controller.pose.joint_angles_deg[joint] == 45.0
 
     # Edit with an error
     win._history.push.reset_mock()
@@ -54,6 +60,8 @@ def test_gui_on_angle_edited(mock_qapp) -> None:
     # Triggering ValueError by injecting invalid joint name (though GUI doesn't do this, testing the try/except)
     win._on_angle_edited("unknown_joint", 45.0)
     assert not win._history.push.called
+    # The rejected edit left no "unknown_joint" key in the live pose.
+    assert "unknown_joint" not in win._engine_controller.pose.joint_angles_deg
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
@@ -65,19 +73,27 @@ def test_gui_undo_redo(mock_qapp) -> None:
     # mock history controller
     win._history.undo = MagicMock(return_value=pose1)
     win._history.redo = MagicMock(return_value=pose1)
+    win._apply_pose = MagicMock()
 
     win._on_undo()
     win._history.undo.assert_called_once()
+    # Issue #7157: assert the undone pose was actually applied (not just that
+    # undo() was called and its return value ignored), without re-recording it.
+    win._apply_pose.assert_called_once_with(pose1, record_history=False)
 
+    win._apply_pose.reset_mock()
     win._on_redo()
     win._history.redo.assert_called_once()
+    win._apply_pose.assert_called_once_with(pose1, record_history=False)
 
-    # Test none return from history
+    # When history returns None (nothing to undo/redo) the pose is NOT applied.
     win._history.undo = MagicMock(return_value=None)
     win._history.redo = MagicMock(return_value=None)
+    win._apply_pose.reset_mock()
 
     win._on_undo()
     win._on_redo()
+    win._apply_pose.assert_not_called()
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")

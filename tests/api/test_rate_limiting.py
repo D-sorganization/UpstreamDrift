@@ -12,14 +12,21 @@ import importlib
 
 import pytest
 
+from tests.support.optional_deps import skip_unless_optional
+
 try:
     # Importing the server module up front catches missing transitive deps
     # (e.g. uvicorn) so the whole module skips cleanly rather than producing
-    # a hard error inside an individual test.
+    # a hard error inside an individual test. Skip ONLY when an *optional*
+    # dependency is missing; a broken import inside api.server is a bug and
+    # must fail collection loudly instead of silently skipping (#7158).
     import src.api.server as _server  # noqa: F401
     from fastapi.testclient import TestClient
-except ImportError:
-    pytest.skip("FastAPI/server deps not available", allow_module_level=True)
+except ImportError as e:
+    skip_unless_optional(
+        e, allowed={"fastapi", "uvicorn", "slowapi", "httpx", "pydantic"}
+    )
+    raise
 
 
 def _build_app(monkeypatch: pytest.MonkeyPatch, simulate_limit: str = "2/minute"):
