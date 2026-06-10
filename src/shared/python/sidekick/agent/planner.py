@@ -304,9 +304,7 @@ _TYPE_MAP: Mapping[str, tuple[type, ...]] = {
 }
 
 
-def _validate_params(
-    params: Mapping[str, Any], schema: Mapping[str, Any]
-) -> str | None:
+def _validate_params(params: object, schema: Mapping[str, Any]) -> str | None:
     if not isinstance(params, Mapping):
         return f"params must be a Mapping, got {type(params).__name__}"
     if schema.get("type") != "object":

@@ -21,10 +21,8 @@ references for back-compatibility.
 from __future__ import annotations
 
 import contextlib
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from threading import Event
 from typing import TYPE_CHECKING, Any
 
 from PyQt6 import QtCore
@@ -47,6 +45,7 @@ from src.shared.python.ai.gui._message_display import MessageDisplayController
 from src.shared.python.ai.gui._panel_header import PanelHeaderController
 from src.shared.python.ai.gui._panel_tools import register_panel_tools
 from src.shared.python.ai.gui.assistant_widgets import (
+    MainThreadToolDispatcher,
     MessageWidget,
     StreamWorker,
 )
@@ -86,16 +85,6 @@ from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 logger = get_logger(__name__)
 
 
-@dataclass(slots=True)
-class _SidekickInvocation:
-    action_id: str
-    params: dict[str, Any]
-    dry_run: bool
-    done: Event
-    result: Any = None
-    error: BaseException | None = None
-
-
 def _discover_project_root(start: Path) -> Path:
     """Find a nearby project root for repository instruction loading."""
     current = start.resolve()
@@ -111,7 +100,6 @@ class AIAssistantPanel(QWidget):
     message_sent = pyqtSignal(str)
     settings_requested = pyqtSignal()
     close_requested = pyqtSignal()
-    _sidekick_invoke_requested = pyqtSignal(object)
 
     _CHAT_MODES = (
         ("Ask", "ask"),
@@ -147,11 +135,12 @@ class AIAssistantPanel(QWidget):
 
         # --- Tools / RAG / memory ----------------------------------------
         self._tools_registry = get_global_registry()
+        self._main_thread_dispatcher = MainThreadToolDispatcher(self)
+        self._tools_registry.set_main_thread_dispatcher(self._main_thread_dispatcher)
         self._rag_store = SimpleRAGStore()
         self._memory_manager = MemoryManager()
         self._sidekick_action_service: SidekickActionService | None = None
         self._sidekick_planner: SidekickAgentPlanner | None = None
-        self._sidekick_invoke_requested.connect(self._on_sidekick_invoke_requested)
         self._refresh_prompt_memory()
         self._mcp_pool: Any = None  # McpClientPool — wired in after setup
 
@@ -838,6 +827,8 @@ class AIAssistantPanel(QWidget):
         Passing ``None`` preserves the legacy plain-chat behavior.
         """
         if service is None:
+            if self._sidekick_action_service is not None:
+                self._sidekick_action_service.set_main_thread_dispatcher(None)
             self._sidekick_action_service = None
             self._sidekick_planner = None
             self._refresh_prompt_memory()
@@ -851,6 +842,7 @@ class AIAssistantPanel(QWidget):
                 f"got {type(service).__name__}"
             )
         self._sidekick_action_service = service
+        service.set_main_thread_dispatcher(self._main_thread_dispatcher)
         self._sidekick_planner = SidekickAgentPlanner(service=service)
         self._refresh_prompt_memory()
 
@@ -882,62 +874,16 @@ class AIAssistantPanel(QWidget):
         *,
         dry_run: bool = False,
     ) -> ActionResult:
-        """Invoke a Sidekick action, marshalling widget mutation to Qt's thread."""
-        if self._sidekick_planner is None:
+        """Invoke a Sidekick action through the canonical service dispatcher."""
+        service = self._sidekick_action_service
+        if service is None or self._sidekick_planner is None:
             raise RuntimeError("no Sidekick action service is attached")
         payload = dict(params or {})
-        if QtCore.QThread.currentThread() is self.thread():
-            return self._execute_sidekick_action_on_gui_thread(
-                action_id, payload, dry_run=dry_run
-            )
-
-        invocation = _SidekickInvocation(
-            action_id=action_id,
-            params=payload,
+        return service.invoke(
+            action_id,
+            payload,
             dry_run=dry_run,
-            done=Event(),
         )
-        self._sidekick_invoke_requested.emit(invocation)
-        if not invocation.done.wait(timeout=30):
-            raise RuntimeError("timed out waiting for Sidekick action on Qt thread")
-        if invocation.error is not None:
-            raise invocation.error
-        return invocation.result
-
-    def _on_sidekick_invoke_requested(self, invocation: object) -> None:
-        if not isinstance(invocation, _SidekickInvocation):
-            return
-        try:
-            invocation.result = self._execute_sidekick_action_on_gui_thread(
-                invocation.action_id,
-                invocation.params,
-                dry_run=invocation.dry_run,
-            )
-        except (RuntimeError, ValueError, TypeError) as exc:
-            invocation.error = exc
-        finally:
-            invocation.done.set()
-
-    def _execute_sidekick_action_on_gui_thread(
-        self,
-        action_id: str,
-        params: dict[str, Any],
-        *,
-        dry_run: bool = False,
-    ) -> ActionResult:
-        if self._sidekick_planner is None:
-            raise RuntimeError("no Sidekick action service is attached")
-        from sidekick.agent.planner import ToolCall
-
-        (step,) = self._sidekick_planner.plan_from_tool_calls(
-            [ToolCall(action_id=action_id, params=params)]
-        )
-        if step.is_error:
-            self.handle_sidekick_tool_calls(
-                [ToolCall(action_id=action_id, params=params)]
-            )
-            raise RuntimeError(step.error_message)
-        return self._sidekick_planner.execute(step, dry_run=dry_run)
 
     def _refresh_mcp_status(self) -> None:
         """Query the pool for connected-server count and update the indicator."""

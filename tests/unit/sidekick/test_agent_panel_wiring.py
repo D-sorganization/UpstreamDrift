@@ -91,6 +91,7 @@ def test_panel_set_action_service_adds_prompt_and_tool_catalog(
     panel.set_action_service(service)
     tools = panel._sidekick_tool_declarations()
 
+    assert service._dispatcher is panel._main_thread_dispatcher
     assert "subtab.list" in panel._context.metadata["sidekick_system_prompt"]
     assert any(
         tool.get("function", {}).get("name") == "sidekick.action.subtab.list"

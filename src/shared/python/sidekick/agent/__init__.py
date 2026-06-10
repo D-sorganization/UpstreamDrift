@@ -17,12 +17,12 @@ from __future__ import annotations
 
 from .access_policy import PolicyDecision, SidekickActionPolicy
 from .action_audit import JsonlActionAudit, MemoryActionAudit, redact_secrets
-from .chat_surface import (
-    ActionChipModel,
-    ActionChipState,
-    ChatActionEnvelope,
-    build_chip,
-    serialize_envelope,
+from .action_service import (
+    ActionDescriptor,
+    ActionDispatcher,
+    ActionResult,
+    SidekickActionHandler,
+    SidekickActionService,
 )
 from .canonical_tools import (
     CANONICAL_ACTION_IDS,
@@ -30,11 +30,12 @@ from .canonical_tools import (
     CanonicalOperationResult,
     CanonicalToolAdapter,
 )
-from .action_service import (
-    ActionDescriptor,
-    ActionResult,
-    SidekickActionHandler,
-    SidekickActionService,
+from .chat_surface import (
+    ActionChipModel,
+    ActionChipState,
+    ChatActionEnvelope,
+    build_chip,
+    serialize_envelope,
 )
 from .feature_catalog import (
     FeatureEntry,
@@ -78,6 +79,7 @@ __all__ = [
     "ActionChipModel",
     "ActionChipState",
     "ActionDescriptor",
+    "ActionDispatcher",
     "ActionResult",
     "CANONICAL_ACTION_IDS",
     "CalculatorRun",
