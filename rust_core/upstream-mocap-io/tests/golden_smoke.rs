@@ -30,7 +30,10 @@ fn parse_c3d_smoke() {
 
 fn repo_data(name: &str) -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest).join("../..").join("data").join(name)
+    PathBuf::from(manifest)
+        .join("../..")
+        .join("data")
+        .join(name)
 }
 
 /// The Tour-Average golf captures declare POINT:UNITS = "m" via a 1-D
@@ -93,6 +96,38 @@ fn parse_trc_smoke() {
     assert!(data.n_markers > 0);
     assert!(data.fps > 0.0);
     assert_eq!(data.positions.len(), data.n_frames * data.n_markers * 3);
+}
+
+fn trc_with_data_row(row: &str) -> String {
+    [
+        "PathFileType\t4\t(X/Y/Z)\tfile.trc",
+        "DataRate\tCameraRate\tNumFrames\tUnits",
+        "100.0\t100.0\t1\tmm",
+        "Frame#\tTime\tHEAD",
+        "\t\tX1\tY1\tZ1",
+        row,
+    ]
+    .join("\n")
+}
+
+#[test]
+fn parse_trc_rejects_invalid_frame_column() {
+    let text = trc_with_data_row("invalid_frame\t0.0\t1000\t2000\t3000");
+    let err = trc::parse_trc_text(&text).expect_err("invalid frame must fail");
+    assert!(
+        err.to_string().contains("invalid frame/time"),
+        "unexpected error: {err}"
+    );
+}
+
+#[test]
+fn parse_trc_rejects_invalid_time_column() {
+    let text = trc_with_data_row("1\tinvalid_time\t1000\t2000\t3000");
+    let err = trc::parse_trc_text(&text).expect_err("invalid time must fail");
+    assert!(
+        err.to_string().contains("invalid frame/time"),
+        "unexpected error: {err}"
+    );
 }
 
 #[test]

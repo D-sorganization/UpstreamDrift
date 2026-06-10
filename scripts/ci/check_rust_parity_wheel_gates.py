@@ -119,6 +119,11 @@ def audit(root: Path = REPO_ROOT) -> list[str]:
         )
     if "python scripts/ci/import_built_rust_wheels.py" not in workflow_text:
         failures.append("ci-standard.yml must run import_built_rust_wheels.py")
+    if "tests/unit/motion_pipeline/sources" not in workflow_text:
+        failures.append(
+            "ci-standard.yml must run motion-pipeline source adapter tests "
+            "after installing built Rust wheels"
+        )
 
     for gate in REQUIRED_GATES:
         if gate.wheel_module not in workflow_text:

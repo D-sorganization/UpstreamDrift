@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.278                                            |
+| **Spec Version**        | 1.0.279                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Repaired Rust TRC row-validation parity for #7213.
+  `rust_core/upstream-mocap-io` now rejects invalid frame/time columns before
+  accepting marker rows, preserving the Python adapter's malformed-line
+  contract when contributors install a fresh native wheel. The Rust wheel CI
+  lane now runs `tests/unit/motion_pipeline/sources` after installing built
+  wheels so OpenCap and TRC/C3D/BVH adapter behavior is verified against the
+  actual Maturin artifacts.
 - **2026-06-10** - Unified MATLAB engine loading through the registry for
   #7219. `EngineManager._load_engine()` now obtains MATLAB engines through
   `EngineRegistration.factory()` like every other engine instead of branching
@@ -815,6 +822,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.279 | Rust TRC parser row-validation parity for #7213. `rust_core/upstream-mocap-io` now rejects invalid frame/time columns before accepting marker coordinates, with Rust regression coverage for malformed frame and time fields. OpenCap source tests now tolerate native `float32` precision, and the Rust Maturin wheel lane installs freshly built wheels before running `tests/unit/motion_pipeline/sources`; `scripts/ci/check_rust_parity_wheel_gates.py` ratchets that coverage. |
 | 2026-06-10 | 1.0.278 | MATLAB engine loader unification (#7219). `EngineManager._load_engine()` now dispatches every engine, including `MATLAB_2D` and `MATLAB_3D`, through the registry's `EngineRegistration.factory()` path. MATLAB-family Simscape adapter creation lives in `src.engines.loaders` with loader shim exports preserved for legacy imports, and tests assert the manager has no private MATLAB loader branch. |
 | 2026-06-10 | 1.0.277 | OpenSim `.osim` loader for #7203. Added first-party `src/tools/model_explorer/osim_loader.py` to parse OpenSim 3.x and 4.x model XML into `ParsedModel`, convert to validated `CanonicalModel`, preserve masses and joint mappings, and surface muscles/constraints/markers as warnings. Sibling discovery, imported model discovery, file filters, and the model-opening path now accept `.osim` without editing vendored `src/shared/python/model_generation/**`. Regression coverage lives in `tests/tools/model_explorer/test_osim_loader.py` and `.osim` sibling-discovery assertions. |
 | 2026-06-10 | 1.0.276 | Drake SDF model loading (#7204). Added `src.tools.model_explorer.SdfLoader` for the model explorer to parse SDFormat links, inertials, primitive and mesh geometry, joint axes/limits/dynamics, SDFormat 1.8 `relative_to` poses, and ball/universal joints into the canonical model contract. Sibling model discovery now classifies `.sdf` files from `Drake_Models` alongside URDF and MJCF assets so Drake-native models can be browsed and composed. |

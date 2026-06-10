@@ -83,7 +83,7 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
     let mut n_frames_actual: usize = 0;
 
     // Data rows start at line index 5.
-    for line in lines.iter().skip(5) {
+    for (line_idx, line) in lines.iter().enumerate().skip(5) {
         let s = line.trim();
         if s.is_empty() {
             continue;
@@ -91,6 +91,16 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
         let tokens: Vec<&str> = s.split_whitespace().collect();
         if tokens.len() < 2 {
             continue;
+        }
+        let frame_value = tokens[0].parse::<f64>();
+        let time_value = tokens[1].parse::<f64>();
+        match (frame_value, time_value) {
+            (Ok(frame), Ok(time)) if frame.is_finite() && time.is_finite() => {}
+            _ => {
+                return Err(ParseError::Format(format!(
+                    "TRC line {line_idx} has invalid frame/time: {s:?}",
+                )));
+            }
         }
         // Skip frame_idx (tokens[0]) and time (tokens[1]); parse n_markers * 3 floats.
         let coords = &tokens[2..];
