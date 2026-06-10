@@ -35,14 +35,23 @@ from sidekick.agent.subtab_adapter import (
     SubtabAdapter,
     WorkspaceSnapshot,
 )
+from sidekick.agent.action_service import SidekickActionService
+from sidekick.agent.host_adapter import (
+    HostAdapter,
+    HostCapability,
+    HostInvocationResult,
+)
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 __all__ = [
+    "LauncherHostActionPort",
     "LauncherSubtabPort",
     "TabHost",
+    "create_launcher_action_service",
+    "create_launcher_host_adapter",
     "create_launcher_subtab_adapter",
 ]
 
@@ -248,6 +257,92 @@ class LauncherSubtabPort:
             )
 
 
+class LauncherHostActionPort:
+    """``HostActionPort`` for launcher-wide actions.
+
+    This port deliberately exposes only the launcher's public command
+    surface. It does not inspect widgets or tab internals; tab-scoped work
+    stays in :class:`LauncherSubtabPort`.
+    """
+
+    host_id = "launcher"
+
+    def __init__(self, launcher: Any) -> None:
+        if launcher is None:
+            raise ValueError("launcher must be provided")
+        self._launcher = launcher
+
+    def list_capabilities(self) -> Sequence[HostCapability]:
+        return (
+            HostCapability(
+                capability_id="host.launcher.list_tiles",
+                summary="List launcher tile ids available to open.",
+                params_schema={"type": "object", "properties": {}, "required": []},
+            ),
+            HostCapability(
+                capability_id="host.launcher.open_tile",
+                summary="Open or focus a launcher tile by id.",
+                params_schema={
+                    "type": "object",
+                    "properties": {
+                        "tool_id": {
+                            "type": "string",
+                            "description": "Launcher tile or Sidekick tab id to open.",
+                        }
+                    },
+                    "required": ["tool_id"],
+                },
+            ),
+        )
+
+    def invoke(
+        self, capability_id: str, params: Mapping[str, Any]
+    ) -> HostInvocationResult:
+        if capability_id == "host.launcher.list_tiles":
+            return HostInvocationResult(ok=True, value=self._list_tiles())
+        if capability_id == "host.launcher.open_tile":
+            tool_id = params.get("tool_id")
+            if not isinstance(tool_id, str) or not tool_id.strip():
+                return HostInvocationResult(
+                    ok=False, error="tool_id must be a non-empty string"
+                )
+            return self._open_tile(tool_id.strip())
+        return HostInvocationResult(
+            ok=False, error=f"unknown launcher capability: {capability_id!r}"
+        )
+
+    def _list_tiles(self) -> list[str]:
+        orchestrator = getattr(self._launcher, "orchestrator", None)
+        available = getattr(orchestrator, "available_models", None)
+        if isinstance(available, Mapping):
+            return sorted(str(key) for key in available)
+        if isinstance(available, Sequence) and not isinstance(available, str):
+            out: list[str] = []
+            for item in available:
+                tile_id = getattr(item, "id", item)
+                if isinstance(tile_id, str):
+                    out.append(tile_id)
+            return sorted(out)
+
+        host = getattr(self._launcher, "embedded_host", None)
+        open_tool_ids = getattr(host, "open_tool_ids", None)
+        if callable(open_tool_ids):
+            return sorted(str(tool_id) for tool_id in open_tool_ids())
+        return []
+
+    def _open_tile(self, tool_id: str) -> HostInvocationResult:
+        opener = getattr(self._launcher, "open_sidekick_tab", None)
+        if not callable(opener):
+            return HostInvocationResult(
+                ok=False, error="launcher does not expose open_sidekick_tab"
+            )
+        try:
+            opener(tool_id)
+        except (RuntimeError, ValueError, KeyError) as exc:
+            return HostInvocationResult(ok=False, error=str(exc))
+        return HostInvocationResult(ok=True, value={"opened": tool_id})
+
+
 def create_launcher_subtab_adapter(
     host: TabHost,
     *,
@@ -273,3 +368,37 @@ def create_launcher_subtab_adapter(
         profile_path=profile_path,
     )
     return SubtabAdapter(port=port)
+
+
+def create_launcher_host_adapter(launcher: Any) -> HostAdapter:
+    """Build the ready-to-register ``HostAdapter`` for launcher actions."""
+    return HostAdapter(port=LauncherHostActionPort(launcher))
+
+
+def create_launcher_action_service(
+    *,
+    launcher: Any,
+    embedded_host: TabHost | None = None,
+    workspace: Any | None = None,
+    calculators: Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]]
+    | None = None,
+    profile_path: str | Path | None = None,
+) -> SidekickActionService:
+    """Create the launcher window's Sidekick action service.
+
+    The subtab namespace is registered only when an embedded host is
+    available. Host actions remain available either way so older launcher
+    layouts that do not yet construct ``EmbeddedHostWidget`` keep working.
+    """
+    service = SidekickActionService()
+    if embedded_host is not None:
+        service.register(
+            create_launcher_subtab_adapter(
+                embedded_host,
+                workspace=workspace,
+                calculators=calculators,
+                profile_path=profile_path,
+            )
+        )
+    service.register(create_launcher_host_adapter(launcher))
+    return service
