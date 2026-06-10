@@ -95,45 +95,87 @@ def bootstrap_embeddable_tools() -> list[str]:
         "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
     ]
 
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
+
     registered = []
     for module_path in adapter_modules:
+        # Diff the registry around the import so we record the tool ids
+        # the adapter actually registered (an adapter may register zero,
+        # one, or several tools; ids need not match the module name).
+        before = set(EMBEDDABLE_TOOL_REGISTRY)
         try:
             # Import the module - it self-registers at module level
             __import__(module_path)
-            # Extract tool_id from module name for tracking
-            if module_path == "src.tools.canonical_core._embed_adapter":
-                registered.extend(
-                    ["canonical_core_estimation", "canonical_core_comparison"]
-                )
-                logger.debug("Bootstrapped canonical-core embeddable tools")
-                continue
-            if (
-                module_path
-                == "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
-            ):
-                tool_id = "c3d_viewer"
-            else:
-                tool_id = (
-                    module_path.split(".")[-2]
-                    if "_embed_adapter" in module_path
-                    else module_path.split(".")[-1]
-                )
-
-            registered.append(tool_id)
-            logger.debug(f"Bootstrapped embeddable tool: {tool_id}")
         except ImportError as e:
             # Tools may have optional dependencies (PyQt6, etc.)
             # Log but don't fail - the tool just won't be embeddable
             logger.warning(f"Failed to bootstrap {module_path}: {e}")
+            continue
         except Exception as e:  # noqa: BLE001
             # Catch any other unexpected errors during registration
             logger.warning(f"Error bootstrapping {module_path}: {e}")
+            continue
+        new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
+        if new_ids:
+            registered.extend(new_ids)
+            logger.debug(f"Bootstrapped embeddable tools: {new_ids}")
+        else:
+            logger.debug(
+                "Adapter module %s imported but registered no new tools "
+                "(already imported, or registration is conditional)",
+                module_path,
+            )
 
     _registered_tools = registered
     _bootstrap_complete = True
 
     logger.info(f"Bootstrapped {len(registered)} embeddable tools: {registered}")
+    _warn_on_manifest_gaps()
     return registered
+
+
+def missing_embeddable_manifest_tools(manifest: object | None = None) -> list[str]:
+    """Return tool-like manifest tile ids with no registered embeddable tool.
+
+    A tile in the launcher manifest whose category is tool-like is
+    expected to be openable inside the launcher; if no embeddable tool
+    is registered under its id, clicking the tile can only fall back to
+    a subprocess launch (or fail). Surfacing the delta makes "I added a
+    tile but forgot the adapter" loud instead of a silent dead tile.
+
+    Args:
+        manifest: Optional pre-loaded ``LauncherManifest`` (mainly for
+            tests). Loaded from disk when omitted.
+
+    Returns:
+        Sorted list of tile ids that are tool-like but unregistered.
+    """
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
+
+    if manifest is None:
+        from src.config.launcher_manifest_loader import LauncherManifest
+
+        manifest = LauncherManifest.load()
+    return sorted(
+        tile.id
+        for tile in manifest.tiles  # type: ignore[attr-defined]
+        if getattr(tile, "is_tool", False) and tile.id not in EMBEDDABLE_TOOL_REGISTRY
+    )
+
+
+def _warn_on_manifest_gaps() -> None:
+    """Log a warning for manifest tool tiles without embeddable adapters."""
+    try:
+        missing = missing_embeddable_manifest_tools()
+    except (FileNotFoundError, ValueError):
+        logger.exception("Could not validate launcher manifest coverage")
+        return
+    if missing:
+        logger.warning(
+            "Manifest tool tiles without embeddable adapters (these tiles "
+            "fall back to subprocess launch or fail): %s",
+            missing,
+        )
 
 
 def get_bootstrapped_tools() -> list[str]:
