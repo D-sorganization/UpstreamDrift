@@ -101,9 +101,9 @@ class DataProcessor:
         if frame_idx in self.cache:
             return self.cache[frame_idx]
 
-        baseq_row = self._safe_get_row(datasets.get("BASEQ"), frame_idx)
-        ztcfq_row = self._safe_get_row(datasets.get("ZTCFQ"), frame_idx)
-        deltaq_row = self._safe_get_row(datasets.get("DELTAQ"), frame_idx)
+        baseq_row = self._safe_get_row(datasets, "BASEQ", frame_idx)
+        ztcfq_row = self._safe_get_row(datasets, "ZTCFQ", frame_idx)
+        deltaq_row = self._safe_get_row(datasets, "DELTAQ", frame_idx)
 
         frame_data = FrameData(
             frame_idx=frame_idx,
@@ -140,11 +140,12 @@ class DataProcessor:
 
     @staticmethod
     def _safe_get_row(
-        dataframe: pd.DataFrame | None, frame_idx: int
+        datasets: dict[str, pd.DataFrame], dataset_name: str, frame_idx: int
     ) -> pd.Series | None:
         """Fetch one dataset row for all point/vector extraction in a frame."""
+        dataframe = datasets.get(dataset_name)
         if dataframe is None:
-            return None
+            raise ValueError(f"datasets must include {dataset_name}")
         try:
             return dataframe.iloc[frame_idx]
         except IndexError:
