@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.297                                            |
+| **Spec Version**        | 1.0.299                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added the #7214 C3D viewer renderer decision and backend
+  contract. ADR-0030 chooses `pyqtgraph.opengl`/PyQtGL as the first desktop
+  GPU playback backend while retaining matplotlib fallback, and
+  `viewer_3d_backend.py` pins the 60 fps target plus parity checklist for
+  scrubbing, speed control, loop playback, marker groups, view presets, and
+  skeleton overlay. The BunkerShot calibration optimizer now imports
+  `scipy.optimize` lazily so cross-engine equivalence imports can use
+  `WrenchTrace` without optional calibration optimizer dependencies.
 - **2026-06-10** - Added the #7207 model explorer composition-flow controller.
   `src/tools/model_explorer/composition_flow.py` now attaches a complete
   source URDF model to a working Frankenstein model through a declared
@@ -932,6 +940,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.299 | Cross-engine equivalence import-boundary fix for #7214. `CalibrationOptimizer.optimize()` now imports `scipy.optimize.differential_evolution` lazily so importing `src.bunkershot3d.postproc.wrench_trace` through shared simulation backends does not require optional calibration optimizer dependencies in the equivalence CI environment. |
+| 2026-06-10 | 1.0.298 | C3D viewer renderer backend decision for #7214. Added ADR-0030 choosing PyQtGL as the first desktop GPU playback path while keeping matplotlib fallback, plus a focused `viewer_3d_backend.py` decision contract that carries the 60 fps target and parity checklist for scrubbing, speed control, loop playback, marker groups, view presets, and skeleton overlay before replacement. |
 | 2026-06-10 | 1.0.297 | Model explorer composition-flow controller for #7207. Added `CompositionFlowController` to attach a complete source URDF model to a working Frankenstein model via selected or declared attachment points, copy links/joints/materials with deterministic name mapping, validate the composed result immediately, and export validation-gated URDF or MJCF preview content. `FrankensteinEditor` now exposes an Attach Source Model action plus public export helper, and `URDFModel.from_file()` carries attachment sidecar metadata into the editor. Focused headless tests cover human-plus-arm composition, MJCF export, validation refusal, and the offscreen editor attach/export path. |
 | 2026-06-10 | 1.0.296 | Model explorer attachment manifests for #7206. Added a first-party `attachment_manifest` parser for versioned `<model>.attachments.json` sidecars, checked in the JSON Schema and docs, exposed declared attachment points plus non-fatal warnings through `ModelLibrary` model info, and updated the attachment dialog to list declared mount points first, prefill their interface-frame origin, and report payload-limit warnings. Focused tests cover valid/missing/malformed manifests, imported-model exposure, dialog defaults, and payload warning contracts. |
 | 2026-06-10 | 1.0.295 | Split the launcher entrypoint below the file-size budget for #7217. Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved from `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the canonical frameless-window helper under `src/launchers/launcher_ui/frameless_window.py`. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |

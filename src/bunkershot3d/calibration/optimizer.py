@@ -3,7 +3,6 @@ Optimization loop for calibrating backend parameters to bulk properties.
 """
 
 import numpy as np
-from scipy.optimize import differential_evolution
 from typing import Any
 
 
@@ -44,6 +43,8 @@ class CalibrationOptimizer:
         raise ValueError("Experiment does not define known target properties.")
 
     def optimize(self) -> dict[str, float]:
+        from scipy.optimize import differential_evolution
+
         bounds = [(0.01, 1.0), (0.01, 1.0)]
 
         # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
