@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,6 +16,14 @@ from model_generation.library._model_types import (
     ModelFormat,
     RepositorySource,
 )
+
+
+class _BytesResponse(io.BytesIO):
+    def __enter__(self) -> _BytesResponse:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.close()
 
 
 class TestLoadModel:
