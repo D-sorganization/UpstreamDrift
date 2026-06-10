@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.276                                            |
+| **Spec Version**        | 1.0.277                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added the first-party OpenSim `.osim` loader for #7203.
+  `src/tools/model_explorer/osim_loader.py` parses OpenSim 3.x
+  `parent_body`/`body` joints and OpenSim 4.x socket-frame joints into the
+  existing `ParsedModel` contract, exposes validated `CanonicalModel`
+  conversion for composition, maps Pin/Slider/Ball/Weld/Free/Custom joints,
+  records unconverted ForceSet/ConstraintSet/MarkerSet elements as warnings,
+  and floors non-physical ground/zero inertia values only where needed for
+  contract validation. Model Explorer discovery/import paths now classify
+  `.osim` files from sibling repos and route opened `.osim` files through the
+  loader without editing vendored `model_generation` modules.
 - **2026-06-10** - Added Drake SDF model loading for #7204. The model
   explorer now provides a first-party `SdfLoader` under
   `src.tools.model_explorer`, parsing SDFormat links, inertials, primitive and
@@ -798,6 +808,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.277 | OpenSim `.osim` loader for #7203. Added first-party `src/tools/model_explorer/osim_loader.py` to parse OpenSim 3.x and 4.x model XML into `ParsedModel`, convert to validated `CanonicalModel`, preserve masses and joint mappings, and surface muscles/constraints/markers as warnings. Sibling discovery, imported model discovery, file filters, and the model-opening path now accept `.osim` without editing vendored `src/shared/python/model_generation/**`. Regression coverage lives in `tests/tools/model_explorer/test_osim_loader.py` and `.osim` sibling-discovery assertions. |
 | 2026-06-10 | 1.0.276 | Drake SDF model loading (#7204). Added `src.tools.model_explorer.SdfLoader` for the model explorer to parse SDFormat links, inertials, primitive and mesh geometry, joint axes/limits/dynamics, SDFormat 1.8 `relative_to` poses, and ball/universal joints into the canonical model contract. Sibling model discovery now classifies `.sdf` files from `Drake_Models` alongside URDF and MJCF assets so Drake-native models can be browsed and composed. |
 | 2026-06-10 | 1.0.275 | MJCF fixed-joint roundtrip topology preservation (#7208). URDF-to-MJCF conversion now keeps fixed children as welded nested MuJoCo bodies without joint elements while encoding the original fixed joint name, and MJCF-to-URDF decoding restores that fixed joint name only for welded nested bodies. Regression coverage asserts link sets, fixed and movable joint names/types, parent-child topology, and fixed-joint origin translation across URDF -> MJCF -> URDF. |
 | 2026-06-10 | 1.0.274 | Embeddable-tool adapter entry-point discovery (#7211). `src/launchers/embedded_tool_bootstrap.py` now imports `upstream_drift.embeddable_tools` entry-point adapters first, falls back to the in-tree adapter module list for editable checkouts, de-duplicates module paths across both sources, and keeps registry-diff tracking plus manifest-gap warnings intact. `pyproject.toml` declares the first-party adapter entry points so installed wheels and source checkouts use the same bootstrap contract. |

@@ -18,6 +18,7 @@ pytestmark = [pytest.mark.unit]
 
 _URDF = '<robot name="r"><link name="base"/></robot>'
 _MJCF = '<mujoco model="m"><worldbody/></mujoco>'
+_OSIM = '<OpenSimDocument Version="40500"><Model name="m"/></OpenSimDocument>'
 _SDF = '<sdf version="1.6"><model name="s"><link name="base"/></model></sdf>'
 
 
@@ -29,6 +30,7 @@ def _make_repo(parent: Path, name: str) -> Path:
     nested = repo / "models" / "hand"
     nested.mkdir(parents=True)
     (nested / "hand.xml").write_text(_MJCF, encoding="utf-8")
+    (nested / "arm.osim").write_text(_OSIM, encoding="utf-8")
     # Junk that must be ignored:
     (repo / "notes.txt").write_text("not a model", encoding="utf-8")
     (repo / "config.xml").write_text("<settings/>", encoding="utf-8")
@@ -79,16 +81,21 @@ class TestCandidateRoots:
 
 
 class TestDiscovery:
-    def test_discovers_urdf_mjcf_and_sdf_only(
+    def test_discovers_urdf_mjcf_sdf_and_osim_only(
         self, project_root: Path, tmp_path: Path, monkeypatch
     ) -> None:
         repo = _make_repo(tmp_path, "MuJoCo_Models")
         monkeypatch.setenv(SIBLING_REPOS_ENV_VAR, str(repo))
         models = discover_sibling_models(project_root)
         names = [m["name"] for m in models]
-        assert names == ["arm.urdf", "hand.xml", "plant.sdf"]
+        assert names == ["arm.osim", "arm.urdf", "hand.xml", "plant.sdf"]
         types = {m["name"]: m["type"] for m in models}
-        assert types == {"arm.urdf": "urdf", "hand.xml": "mjcf", "plant.sdf": "sdf"}
+        assert types == {
+            "arm.osim": "osim",
+            "arm.urdf": "urdf",
+            "hand.xml": "mjcf",
+            "plant.sdf": "sdf",
+        }
 
     def test_git_dir_and_plain_xml_are_skipped(
         self, project_root: Path, tmp_path: Path, monkeypatch
@@ -109,7 +116,7 @@ class TestDiscovery:
         second = discover_sibling_models(project_root)
         assert [m["config_key"] for m in first] == [m["config_key"] for m in second]
         assert all(m["repo"] == "Pinocchio_Models" for m in first)
-        assert first[0]["config_key"] == "sibling_Pinocchio_Models_arm.urdf"
+        assert "sibling_Pinocchio_Models_arm.urdf" in {m["config_key"] for m in first}
 
     def test_no_siblings_yields_empty_list(
         self, project_root: Path, monkeypatch
@@ -166,6 +173,7 @@ class TestModelLibraryIntegration:
         assert "sibling" in listing
         names = [m["name"] for m in listing["sibling"]]
         assert "arm.urdf" in names
+        assert "arm.osim" in names
 
     def test_get_model_info_resolves_sibling_key(
         self, project_root: Path, tmp_path: Path, monkeypatch
@@ -179,3 +187,9 @@ class TestModelLibraryIntegration:
         assert info is not None
         assert info["type"] == "urdf"
         assert info["path"].endswith("arm.urdf")
+
+        osim_info = library.get_model_info(
+            "sibling", "sibling_OpenSim_Models_models/hand/arm.osim"
+        )
+        assert osim_info is not None
+        assert osim_info["type"] == "osim"

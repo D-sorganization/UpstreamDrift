@@ -11,6 +11,8 @@ An interactive GUI tool for creating URDF (Unified Robot Description Format) fil
 - **Golf-Specific Templates**: Pre-configured templates for golf clubs, balls, and tees
 - **3D Visualization**: Real-time 3D preview of the URDF model (implementation in progress)
 - **Validation**: Built-in URDF validation and error checking
+- **OpenSim Import**: Load `.osim` biomechanics models into the shared parsed
+  model contract for preview and canonical-model composition
 
 ## Installation
 

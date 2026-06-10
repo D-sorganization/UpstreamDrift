@@ -723,7 +723,7 @@ class ModelLibrary:
             {
                 'name': filename,
                 'path': absolute path,
-                'type': 'urdf' | 'mjcf',
+                'type': 'urdf' | 'mjcf' | 'osim',
                 'config_key': unique key
             }
         """
@@ -753,6 +753,16 @@ class ModelLibrary:
                             "path": str(file_path),
                             "type": "urdf",
                             "config_key": f"urdf_{file}_{hash(str(file_path))}",
+                        }
+                    )
+                elif file.lower().endswith(".osim"):
+                    models.append(
+                        {
+                            "name": file,
+                            "description": f"OpenSim OSIM file at {file_path.relative_to(_project_root)}",
+                            "path": str(file_path),
+                            "type": "osim",
+                            "config_key": f"repo_{file}_{hash(str(file_path))}",
                         }
                     )
 
@@ -901,9 +911,10 @@ class ModelLibrary:
                     file.lower().endswith(".urdf")
                     or file.lower().endswith(".xml")
                     or file.lower().endswith(".mjcf")
+                    or file.lower().endswith(".osim")
                 ):
                     # Determine type
-                    m_type = "urdf"
+                    m_type = "osim" if file.lower().endswith(".osim") else "urdf"
                     if file.lower().endswith((".xml", ".mjcf")):
                         # quick check
                         try:
