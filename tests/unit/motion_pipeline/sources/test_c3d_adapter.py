@@ -43,6 +43,28 @@ def test_rust_load_surfaces_events_in_metadata(
                 {"label": "FootStrike", "context": "Left", "time_s": 0.5},
                 {"label": "ToeOff", "context": "Right", "time_s": 1.25},
             ],
+            "analog": {
+                "labels": ["Fx", "Fy"],
+                "units": ["N", "N"],
+                "values": np.array([[10.0, 20.0]], dtype=np.float32),
+                "n_frames": 1,
+                "samples_per_frame": 1,
+                "n_channels": 2,
+                "rate": 100.0,
+            },
+            "force_platforms": [
+                {
+                    "type": 2,
+                    "channels": [1, 2, 3, 4, 5, 6],
+                    "corners": [
+                        [0.0, 0.0, 0.0],
+                        [1.0, 0.0, 0.0],
+                        [1.0, 1.0, 0.0],
+                        [0.0, 1.0, 0.0],
+                    ],
+                    "origin": [0.0, 0.0, -0.05],
+                }
+            ],
         }
     )
 
@@ -54,4 +76,25 @@ def test_rust_load_surfaces_events_in_metadata(
     assert trajectory.metadata["events"] == [
         {"label": "FootStrike", "context": "Left", "time_s": 0.5},
         {"label": "ToeOff", "context": "Right", "time_s": 1.25},
+    ]
+    assert trajectory.metadata["analog"] == {
+        "labels": ["Fx", "Fy"],
+        "units": ["N", "N"],
+        "n_frames": 1,
+        "samples_per_frame": 1,
+        "n_channels": 2,
+        "rate": 100.0,
+    }
+    assert trajectory.metadata["force_platforms"] == [
+        {
+            "type": 2,
+            "channels": [1, 2, 3, 4, 5, 6],
+            "corners": [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
+            "origin": [0.0, 0.0, -0.05],
+        }
     ]

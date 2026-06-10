@@ -39,6 +39,46 @@ fn marker_data_to_pydict<'py>(py: Python<'py>, data: MarkerData) -> PyResult<Bou
         events.append(entry)?;
     }
     dict.set_item("events", events)?;
+    if let Some(analog) = data.analog {
+        let analog_arr = ndarray::Array2::from_shape_vec(
+            (
+                analog.n_frames * analog.samples_per_frame,
+                analog.n_channels,
+            ),
+            analog.values,
+        )
+        .map_err(|e| {
+            pyo3::exceptions::PyValueError::new_err(format!("AnalogData shape mismatch: {e}"))
+        })?;
+        let analog_dict = PyDict::new(py);
+        analog_dict.set_item("values", analog_arr.into_pyarray(py))?;
+        analog_dict.set_item("labels", PyList::new(py, &analog.labels)?)?;
+        analog_dict.set_item("units", PyList::new(py, &analog.units)?)?;
+        analog_dict.set_item("n_frames", analog.n_frames)?;
+        analog_dict.set_item("samples_per_frame", analog.samples_per_frame)?;
+        analog_dict.set_item("n_channels", analog.n_channels)?;
+        analog_dict.set_item("rate", analog.rate)?;
+        dict.set_item("analog", analog_dict)?;
+    } else {
+        dict.set_item("analog", py.None())?;
+    }
+    let force_platforms = PyList::empty(py);
+    for platform in &data.force_platforms {
+        let entry = PyDict::new(py);
+        entry.set_item("type", platform.platform_type)?;
+        entry.set_item("channels", PyList::new(py, &platform.channels)?)?;
+        let corners = PyList::empty(py);
+        for corner in &platform.corners {
+            corners.append((corner[0], corner[1], corner[2]))?;
+        }
+        entry.set_item("corners", corners)?;
+        entry.set_item(
+            "origin",
+            (platform.origin[0], platform.origin[1], platform.origin[2]),
+        )?;
+        force_platforms.append(entry)?;
+    }
+    dict.set_item("force_platforms", force_platforms)?;
     Ok(dict)
 }
 
