@@ -295,9 +295,10 @@ class ModelLibrary:
             ValueError: If ``entry.source_url`` is missing or its scheme
                 is not in the allowed set (``https`` only).
         """
-        import urllib.request
-
-        from src.shared.python.security.security_utils import validate_url_scheme
+        from src.shared.python.security.security_utils import (
+            download_to_file,
+            validate_url_scheme,
+        )
 
         if not entry.source_url:
             raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
@@ -310,5 +311,6 @@ class ModelLibrary:
         cache_dir.mkdir(parents=True, exist_ok=True)
         dest = cache_dir / Path(entry.source_url).name
 
-        urllib.request.urlretrieve(entry.source_url, dest)  # nosec B310 - scheme validated
+        # Bounded timeout (issue #7184): stream via urlopen(..., timeout=).
+        download_to_file(entry.source_url, dest)
         return dest

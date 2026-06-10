@@ -127,6 +127,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           COMMENT_BODY_JSON: ${{ toJson(github.event.comment.body) }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_COMMENT_ID: ${{ github.event.comment.id }}
+          EVENT_COMMENT_PATH: ${{ github.event.comment.path }}
+          EVENT_COMMENT_LINE: ${{ github.event.comment.line }}
+          EVENT_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          EVENT_REPOSITORY: ${{ github.repository }}
         run: |
           mkdir -p .jules/pending
           QUEUE_FILE=".jules/pending/pr_comments.json"
@@ -140,18 +146,18 @@ jobs:
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           PR_NUMBER="${{ steps.pr_state.outputs.pr_number }}"
 
-          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
-            COMMENT_ID="${{ github.event.comment.id }}"
-            COMMENT_PATH="${{ github.event.comment.path }}"
-            COMMENT_LINE="${{ github.event.comment.line }}"
+          if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+            COMMENT_ID="$EVENT_COMMENT_ID"
+            COMMENT_PATH="$EVENT_COMMENT_PATH"
+            COMMENT_LINE="$EVENT_COMMENT_LINE"
             COMMENT_TYPE="review"
-            COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
+            COMMENT_AUTHOR="$EVENT_COMMENT_AUTHOR"
           else
-            COMMENT_ID="${{ github.event.comment.id }}"
+            COMMENT_ID="$EVENT_COMMENT_ID"
             COMMENT_PATH=""
             COMMENT_LINE=""
             COMMENT_TYPE="pr"
-            COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
+            COMMENT_AUTHOR="$EVENT_COMMENT_AUTHOR"
           fi
 
           # Use Python for safe JSON manipulation
@@ -161,6 +167,11 @@ jobs:
 
           queue_file = "$QUEUE_FILE"
           comment_body = json.loads(os.environ["COMMENT_BODY_JSON"])
+          # Read attacker-influenced fields from the environment (never
+          # shell-splice them) to avoid template/shell injection (#7185).
+          comment_author = os.environ.get("EVENT_COMMENT_AUTHOR", "")
+          comment_path_env = os.environ.get("EVENT_COMMENT_PATH", "")
+          repository_env = os.environ.get("EVENT_REPOSITORY", "")
 
           # Load existing queue
           try:
@@ -181,12 +192,12 @@ jobs:
                   "comment_id": comment_id,
                   "pr_number": int("$PR_NUMBER"),
                   "type": "$COMMENT_TYPE",
-                  "author": "$COMMENT_AUTHOR",
+                  "author": comment_author,
                   "body": comment_body,
-                  "path": "$COMMENT_PATH" if "$COMMENT_PATH" else None,
+                  "path": comment_path_env if comment_path_env else None,
                   "line": int("$COMMENT_LINE") if "$COMMENT_LINE" else None,
                   "queued_at": "$TIMESTAMP",
-                  "repository": "${{ github.repository }}"
+                  "repository": repository_env
               }
 
               queue["comments"].append(new_comment)

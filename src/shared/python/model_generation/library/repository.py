@@ -12,6 +12,7 @@ fetching models from various sources.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -400,7 +401,9 @@ class GitHubRepository(Repository):
         local_path = destination / filename
 
         try:
-            urllib.request.urlretrieve(urdf_url, local_path)  # nosec B310 - URL from GitHub raw content base
+            from src.shared.python.security.security_utils import download_to_file
+
+            download_to_file(urdf_url, local_path)
             logger.info(f"Downloaded: {filename}")
 
             # Try to download meshes from same directory
@@ -435,7 +438,11 @@ class GitHubRepository(Repository):
                         or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     )
                     local_file = local_mesh_dir / item["name"]
-                    urllib.request.urlretrieve(raw_url, local_file)  # nosec B310 - URL from GitHub API download_url field
+                    from src.shared.python.security.security_utils import (
+                        download_to_file,
+                    )
+
+                    download_to_file(raw_url, local_file)
 
         except (PermissionError, OSError):
             pass  # Meshes not found or not accessible
@@ -448,18 +455,39 @@ class GitHubRepository(Repository):
             f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
         )
 
+        from src.shared.python.security.security_utils import (
+            download_to_file,
+            safe_extract_zip,
+        )
+
+        tmp_name: str | None = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-                urllib.request.urlretrieve(archive_url, tmp.name)  # nosec B310 - URL from trusted github.com base
+                tmp_name = tmp.name
+            # Bounded-timeout download (issue #7184) replaces unbounded urlretrieve.
+            download_to_file(archive_url, tmp_name)
 
-                with zipfile.ZipFile(tmp.name, "r") as zf:
-                    zf.extractall(destination)
+            with zipfile.ZipFile(tmp_name, "r") as zf:
+                # Validate member paths to prevent Zip Slip (issue #7183).
+                safe_extract_zip(zf, destination)
 
             return True
 
-        except (ConnectionError, TimeoutError, OSError) as e:
+        except (
+            ConnectionError,
+            TimeoutError,
+            OSError,
+            ValueError,
+            zipfile.BadZipFile,
+        ) as e:
             logger.error(f"Failed to download archive: {e}")
             return False
+        finally:
+            # The delete=False temp file must be unlinked on every path
+            # (issue #7183 temp-file leak).
+            if tmp_name is not None:
+                with contextlib.suppress(OSError):
+                    os.unlink(tmp_name)
 
 
 class CompositeRepository(Repository):

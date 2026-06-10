@@ -137,7 +137,7 @@ def _fetch_github_models(  # noqa: C901
     try:
         import urllib.request
 
-        with urllib.request.urlopen(api_url) as response:  # nosec B310
+        with urllib.request.urlopen(api_url, timeout=30) as response:  # nosec B310
             contents = json.loads(response.read().decode())
 
         model_extensions = {".urdf": ModelFormat.URDF, ".xml": ModelFormat.MJCF}
@@ -164,7 +164,7 @@ def _fetch_github_models(  # noqa: C901
             elif item["type"] == "dir":
                 subdir_url = item["url"]
                 try:
-                    with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310
+                    with urllib.request.urlopen(subdir_url, timeout=30) as sub_response:  # nosec B310
                         sub_contents = json.loads(sub_response.read().decode())
                     for sub_item in sub_contents:
                         if sub_item["type"] != "file":
