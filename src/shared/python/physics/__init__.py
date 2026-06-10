@@ -11,6 +11,14 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingBallFlightPipeline,
     SwingState,
 )
+from src.shared.python.physics.swing_optimizer import (
+    ClubPreset,
+    FlightTarget,
+    OptimizationControls,
+    SwingOptimizationDiagnostics,
+    SwingOptimizationResult,
+    SwingOptimizer,
+)
 from src.shared.python.physics.water_hazard import (
     WaterEntryResult,
     water_entry_kinematics,
@@ -28,4 +36,11 @@ __all__: list[str] = [
     "PipelineResult",
     "SwingBallFlightPipeline",
     "SwingState",
+    # Inverse swing optimization (Issue #7220)
+    "ClubPreset",
+    "FlightTarget",
+    "OptimizationControls",
+    "SwingOptimizationDiagnostics",
+    "SwingOptimizationResult",
+    "SwingOptimizer",
 ]
