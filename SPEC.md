@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.271                                            |
+| **Spec Version**        | 1.0.273                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added the headless ball-flight REST simulation route for
+  #7218. `POST /tools/ball-flight/simulate` now validates launch, spin, wind,
+  model, and integration-window inputs through Pydantic models, delegates to
+  the existing `FlightModelRegistry` / `UnifiedLaunchConditions` physics stack,
+  and registers the `ball_flight` tool alongside the existing API route map.
 - **2026-06-10** - Refreshed the Module Map against the actual source tree
   (the previous tree listed entry points and API files that no longer
   exist) and linked the operational project map. The full gap inventory
@@ -771,6 +776,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.273 | Ball-flight REST simulation route (#7218). `POST /tools/ball-flight/simulate` exposes headless/batch launch simulation through the existing `FlightModelRegistry` and `UnifiedLaunchConditions` stack, validates launch/spin/wind/model/integration-window inputs with Pydantic contracts, and registers the `ball_flight` API tool route alongside the route registry. |
 | 2026-06-10 | 1.0.272 | Model Explorer sibling model-repository discovery (#7201). `ModelLibrary.list_available_models()` now exposes a `sibling` category populated by `src/tools/model_explorer/sibling_repositories.py`, scanning `Drake_Models`, `MuJoCo_Models`, `Pinocchio_Models`, and `OpenSim_Models` siblings next to the checkout or explicit `UD_SIBLING_MODEL_REPOS` roots. Discovery accepts URDF plus MJCF XML by content, skips VCS/cache directories, emits stable `sibling_<repo>_<relative-path>` config keys, and surfaces truncation instead of silently hiding excess results. `get_model_info("sibling", key)` resolves the discovered local model metadata without network access. Regression coverage added in `tests/tools/model_explorer/test_sibling_repositories.py`; the human-model fallback download path now delegates to the shared bounded downloader instead of a local `urllib.urlopen` call. |
 | 2026-06-10 | 1.0.271 | Follow-up #7189 packaging gate repair after reconciling the parallel branch update. Tauri Linux dependency setup now waits on both apt and dpkg locks, matching the runner failure mode seen in `Check (Rust + TypeScript)`. The WGS process calculator lazy-loads GUI theme helpers from `create_plots_tab`, and the standalone Sidekick regression suite asserts the WGS engine import does not require `shared.python.theme.integration` or PyQt6, keeping the clean-wheel `sidekick run` smoke headless. `package-standalone-sidekick.yml` now smoke-tests Python 3.11/3.12 to match the package floor, with `scripts/ci/check_python_version_coherence.py` guarding that workflow. |
 | 2026-06-10 | 1.0.270 | Docker dependency-audit hardening for #7160 follow-up CI. Pinned Docker builder/runtime pip installs to `26.1.2`, declared patched runtime floors for `Mako>=1.3.12` and `PyJWT>=2.13.0`, aligned `requirements.lock`, and updated the direct dependency license ledger so in-image `pip-audit` resolves patched packages. |
