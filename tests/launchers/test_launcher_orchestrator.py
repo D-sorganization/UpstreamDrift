@@ -27,7 +27,7 @@ def test_initialize_from_results():
     assert orchestrator.engine_manager == results.engine_manager
 
 
-@patch("src.launchers.upstream_drift_launcher._lazy_load_model_registry")
+@patch("src.launchers.launcher_orchestrator._lazy_load_model_registry")
 def test_init_registry_fallback(mock_lazy_load):
     mock_mr_class = MagicMock()
     mock_lazy_load.return_value = mock_mr_class
@@ -40,7 +40,7 @@ def test_init_registry_fallback(mock_lazy_load):
     assert orchestrator.registry == mock_mr_class.return_value
 
 
-@patch("src.launchers.upstream_drift_launcher._lazy_load_engine_manager")
+@patch("src.launchers.launcher_orchestrator._lazy_load_engine_manager")
 def test_init_engine_manager_fallback(mock_lazy_load):
     mock_em_class = MagicMock()
     mock_lazy_load.return_value = (mock_em_class, MagicMock())
