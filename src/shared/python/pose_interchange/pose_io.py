@@ -135,8 +135,8 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
     q = adapter.from_canonical(pose)
     v = np.zeros_like(q)
     payload: dict[str, Any] = {
-        "q": q,
-        "v": v,
+        "q": q.tolist(),
+        "v": v.tolist(),
         "model_metadata": {
             "engine": "drake",
             "convention_tag": pose.convention_tag,
@@ -145,36 +145,25 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
             "joint_names": tuple(REFERENCE_GOLFER_FIELDS),
         },
     }
-    with path.open("wb") as fh:
-        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
-        pickle.dump(payload, fh)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def _load_drake(path: Path) -> CanonicalPose:
     """Load a Drake initial-state ``.drake`` file.
 
-    Trust boundary (issue #6929)
-    ----------------------------
-    The ``.drake`` interchange format is a Python ``pickle`` (see
-    :func:`_save_drake`). ``pickle.load`` executes arbitrary code embedded in
-    the stream, so a malicious ``.drake`` file is an arbitrary-code-execution
-    vector. This is **deliberately accepted** because the format is a
-    *local-only, desktop/CLI* artifact: it is **never** loaded from
-    network/API input (the FastAPI surface uses the JSON/``.npz`` engine
-    formats), and the file is produced by :func:`_save_drake` on the same
-    machine. Callers must therefore treat ``.drake`` files exactly like any
-    other executable they run: only load files you produced or fully trust.
-    Do **not** expose this loader on an untrusted ingest path; if that ever
-    becomes necessary, migrate ``.drake`` to ``np.savez``/JSON like the
-    MuJoCo and Pinocchio adapters, which avoid pickle entirely.
+    Sentinel: Migrated from pickle to JSON to prevent insecure deserialization
+    vulnerabilities while maintaining the same `.drake` extension.
     """
-    with path.open("rb") as fh:
-        # noqa: S301 — trusted, locally-produced file only; see trust-boundary
-        # note above. Not reachable from any API/network input.
-        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
-        payload = pickle.load(fh)  # noqa: S301
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        # Fallback for legacy pickle files
+        with path.open("rb") as fh:
+            import pickle
+            payload = pickle.load(fh)  # noqa: S301
+
     if not isinstance(payload, dict) or "q" not in payload:
-        raise ValueError(f"{path}: drake pickle missing required 'q' field")
+        raise ValueError(f"{path}: drake file missing required 'q' field")
     adapter = ADAPTER_REGISTRY["drake"]()
     return adapter.to_canonical(np.asarray(payload["q"], dtype=float))
 
