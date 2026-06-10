@@ -168,9 +168,14 @@ def route_launch(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Main entry point for unified launcher."""
+    from src.shared.python.launch_support import run_launch
+
     warn_if_unsupported_platform()
     args = parse_arguments()
-    route_launch(args)
+    run_launch(
+        lambda: route_launch(args),
+        hint="Run with --help for usage, or re-run with --verbose for details.",
+    )
 
 
 if __name__ == "__main__":
