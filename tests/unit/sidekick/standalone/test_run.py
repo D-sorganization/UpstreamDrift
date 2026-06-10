@@ -16,6 +16,8 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -111,6 +113,44 @@ def test_success_exits_zero(tmp_path: Path) -> None:
     assert code == 0
     data = json.loads(out)
     assert "co_conversion_fraction" in data
+
+
+def test_wgs_engine_import_does_not_require_gui_theme() -> None:
+    repo_root = Path(__file__).resolve().parents[4]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join(
+        [
+            str(repo_root),
+            str(repo_root / "src" / "shared" / "python"),
+            env.get("PYTHONPATH", ""),
+        ]
+    )
+    script = """
+import builtins
+
+real_import = builtins.__import__
+
+def block_gui_theme(name, *args, **kwargs):
+    if name == "shared.python.theme.integration" or name.startswith("PyQt6"):
+        raise ModuleNotFoundError(name)
+    return real_import(name, *args, **kwargs)
+
+builtins.__import__ = block_gui_theme
+
+from sidekick.process_calculators.wgs_reactor_calculator import WGSReactorEngine
+
+WGSReactorEngine()
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        check=False,
+        capture_output=True,
+        env=env,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_unknown_calculator_exits_4(tmp_path: Path) -> None:

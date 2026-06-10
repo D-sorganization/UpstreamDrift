@@ -360,7 +360,14 @@ fn parse_point_params(
                             }
                         }
                     "UNITS"
-                        if element_size == -1 && dims.len() == 2 => {
+                        // POINT:UNITS is most commonly a 1-D char array
+                        // (dims = [string_len]) holding a single unit
+                        // string such as "mm" or "m"; some writers emit a
+                        // 2-D char array (dims = [string_len, n_strings]).
+                        // Accept both — ignoring the 1-D form silently
+                        // defaulted meter-based files to mm and shrank
+                        // their coordinates 1000x.
+                        if element_size == -1 && (dims.len() == 1 || dims.len() == 2) => {
                             let slen = dims[0];
                             // First string is the unit.
                             if slen <= data.len() {
