@@ -83,7 +83,7 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
     let mut n_frames_actual: usize = 0;
 
     // Data rows start at line index 5.
-    for line in lines.iter().skip(5) {
+    for (line_idx, line) in lines.iter().enumerate().skip(5) {
         let s = line.trim();
         if s.is_empty() {
             continue;
@@ -92,18 +92,16 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
         if tokens.len() < 2 {
             continue;
         }
-        let _frame_idx = tokens[0].parse::<f32>().map_err(|e| {
-            ParseError::Format(format!(
-                "TRC data row has invalid frame index '{}': {e}",
-                tokens[0]
-            ))
-        })?;
-        let _time = tokens[1].parse::<f32>().map_err(|e| {
-            ParseError::Format(format!(
-                "TRC data row has invalid time '{}': {e}",
-                tokens[1]
-            ))
-        })?;
+        let frame_value = tokens[0].parse::<f64>();
+        let time_value = tokens[1].parse::<f64>();
+        match (frame_value, time_value) {
+            (Ok(frame), Ok(time)) if frame.is_finite() && time.is_finite() => {}
+            _ => {
+                return Err(ParseError::Format(format!(
+                    "TRC line {line_idx} has invalid frame/time: {s:?}",
+                )));
+            }
+        }
         // Skip frame_idx (tokens[0]) and time (tokens[1]); parse n_markers * 3 floats.
         let coords = &tokens[2..];
         for m_i in 0..n_markers {
@@ -167,10 +165,14 @@ mod tests {
     fn parse_trc_rejects_invalid_frame_or_time() {
         let bad_frame = trc_with_data_row("invalid\t0.0\t1000\t2000\t3000");
         let err = parse_trc_text(&bad_frame).expect_err("invalid frame must fail");
-        assert!(err.to_string().contains("invalid frame index"));
+        assert!(err.to_string().contains("invalid frame/time"));
 
         let bad_time = trc_with_data_row("1\tinvalid\t1000\t2000\t3000");
         let err = parse_trc_text(&bad_time).expect_err("invalid time must fail");
-        assert!(err.to_string().contains("invalid time"));
+        assert!(err.to_string().contains("invalid frame/time"));
+
+        let nonfinite_time = trc_with_data_row("1\tNaN\t1000\t2000\t3000");
+        let err = parse_trc_text(&nonfinite_time).expect_err("NaN time must fail");
+        assert!(err.to_string().contains("invalid frame/time"));
     }
 }

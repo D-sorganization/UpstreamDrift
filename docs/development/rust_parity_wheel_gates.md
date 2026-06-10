@@ -15,5 +15,8 @@ the CI ratchet in `scripts/ci/check_rust_parity_wheel_gates.py` green.
 
 The Rust quality gate builds the wheels for these crates with Maturin, installs
 all built artifacts into the smoke virtual environment, and imports every module
-listed above. That catches missing PyO3 module exports and packaging mistakes
+listed above. It also runs `tests/unit/motion_pipeline/sources` after installing
+the built wheels so TRC/C3D/BVH and OpenCap adapter behavior is checked against
+the same native extension artifacts a contributor gets from `maturin`. That
+catches missing PyO3 module exports, packaging mistakes, and Python facade drift
 before a PR can report a passing Rust backend.
