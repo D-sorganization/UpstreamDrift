@@ -9,13 +9,10 @@ Issue #2078: Add database migration tooling.
 
 import os
 from logging.config import fileConfig
+from typing import Any
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-
-# Import Base from auth models so Alembic can detect schema changes
-# when generating autogenerate migrations.
-from src.api.auth.models import Base
 
 # The Alembic Config object, which provides access to the values in alembic.ini.
 config = context.config
@@ -32,8 +29,32 @@ if database_url:
 if config.config_file_name is not None:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-# Metadata object for autogenerate support (detects new/removed tables and columns).
-target_metadata = Base.metadata
+
+def _load_target_metadata() -> Any:
+    """Import the auth models' metadata, with an actionable error on failure.
+
+    Offline mode (``alembic upgrade --sql``) only emits SQL and does not need
+    autogenerate metadata, so we skip the app import chain there — a broken
+    auth module no longer blocks offline SQL generation (issue #7168). A failure
+    in online mode is wrapped in a ``RuntimeError`` that names the dependency.
+    """
+    if context.is_offline_mode():
+        return None
+    try:
+        from src.api.auth.models import Base
+    except Exception as exc:  # noqa: BLE001 - surface an actionable message
+        raise RuntimeError(
+            "Alembic could not import src.api.auth.models.Base, which provides "
+            "the schema metadata for online migrations. Ensure the application "
+            "package is importable (PYTHONPATH/install), or run offline with "
+            "`alembic upgrade --sql` which does not require the app import. "
+            f"Original error: {type(exc).__name__}: {exc}"
+        ) from exc
+    return Base.metadata
+
+
+# Metadata object for autogenerate support (None in offline mode by design).
+target_metadata = _load_target_metadata()
 
 
 def run_migrations_offline() -> None:
