@@ -5,13 +5,12 @@ version = "2.1.1"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["golf", "biomechanics", "simulation", "physics", "mujoco", "urdf"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Physics",
@@ -144,7 +143,6 @@ dev = [
     "pytest-xdist>=3.0.0",
     "ruff>=0.15.10",
     "mypy>=1.20.1",
-    "tomli>=2.0.0; python_version<'3.11'",
     "build",
     # Required for tests that import common_utils and model_explorer
     "pandas>=2.0.0",
@@ -156,7 +154,7 @@ dev = [
     # API auth/database packages live in core dependencies (#7125).
     # Required for async tests
     "anyio>=4.0.0",
-    "pytest-anyio>=0.0.0; python_version>='3.10'",
+    "pytest-anyio>=0.0.0",
     # Required for config tests
     "PyYAML>=6.0.3",
     # NOTE: slowapi and python-multipart moved to core [project] dependencies
@@ -347,7 +345,7 @@ max-complexity = 10
 
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 mypy_path = "stubs"
 namespace_packages = true
 explicit_package_bases = true

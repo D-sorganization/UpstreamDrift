@@ -11,7 +11,7 @@
 
 ### Python Environment
 
-- **Python 3.10** or higher is required.
+- **Python 3.11** or higher is required.
 - We recommend using a virtual environment (venv, conda, etc.).
 
 ### MATLAB Environment (Optional)
