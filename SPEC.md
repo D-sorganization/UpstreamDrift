@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.271                                            |
+| **Spec Version**        | 1.0.272                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Preserved URDF fixed-joint topology through MJCF
+  roundtrips for #7208: URDF-to-MJCF conversion keeps MuJoCo weld semantics by
+  emitting fixed children as nested bodies without joint elements while encoding
+  the original fixed joint name, and MJCF-to-URDF decoding restores that name
+  only for welded nested bodies. Regression coverage now asserts link sets,
+  fixed and movable joint names/types, parent-child topology, and fixed-joint
+  origin translation through URDF -> MJCF -> URDF.
 - **2026-06-10** - Refreshed the Module Map against the actual source tree
   (the previous tree listed entry points and API files that no longer
   exist) and linked the operational project map. The full gap inventory
