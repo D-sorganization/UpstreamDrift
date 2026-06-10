@@ -19,6 +19,19 @@ from model_generation.library._model_types import (
 logger = logging.getLogger(__name__)
 
 
+def validate_model_source_url(entry: ModelEntry) -> str:
+    """Return a validated HTTPS source URL for remote model downloads."""
+    if not (entry is not None):
+        raise ValueError("entry must be provided")
+    if not entry.source_url:
+        raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
+
+    from src.shared.python.security.security_utils import validate_url_scheme
+
+    validate_url_scheme(entry.source_url, allowed_schemes=("https",))
+    return entry.source_url
+
+
 def load_model(
     entries: dict[str, ModelEntry],
     parser: URDFParser,
@@ -76,6 +89,7 @@ def download_model(
         raise ValueError("entry must be provided")
     if not entry.source_url:
         return False
+    source_url = validate_model_source_url(entry)
 
     try:
         import shutil
@@ -84,12 +98,12 @@ def download_model(
         cache_dir = config.cache_dir / entry.id.replace("/", "_")
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-        urdf_filename = entry.source_url.split("/")[-1]
+        urdf_filename = source_url.split("/")[-1]
         local_path = cache_dir / urdf_filename
 
         # Bounded timeout (issue #7184): urlretrieve has no timeout param, so
         # stream via urlopen(..., timeout=) instead to avoid indefinite hangs.
-        _req = urllib.request.Request(entry.source_url)
+        _req = urllib.request.Request(source_url)
         with (
             urllib.request.urlopen(_req, timeout=30) as _resp,  # nosec B310  # noqa: S310
             open(local_path, "wb") as _out,
