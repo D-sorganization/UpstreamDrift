@@ -30,6 +30,8 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.launcher_embed import (
     EmbeddableTool,
+    InMemoryLauncherContext,
+    LauncherContext,
     get_embeddable_tool,
     is_embeddable,
 )
@@ -230,6 +232,20 @@ def _safe_resume(tool: EmbeddableTool, widget: QWidget | None = None) -> None:
         logger.exception("resume raised for tool %s", tool.tool_id)
 
 
+def _safe_set_launcher_context(
+    tool: EmbeddableTool,
+    context: LauncherContext,
+) -> None:
+    """Inject the optional launcher context hook when a tool opts in."""
+    set_context = getattr(tool, "set_launcher_context", None)
+    if set_context is None:
+        return
+    try:
+        set_context(context)
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("set_launcher_context raised for tool %s", tool.tool_id)
+
+
 class EmbeddedHostWidget(QWidget):
     """Widget that hosts embeddable tools as tabs and dock panels.
 
@@ -247,6 +263,7 @@ class EmbeddedHostWidget(QWidget):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self._launcher_context = InMemoryLauncherContext()
         self._active_tabs: dict[str, _OpenTab] = {}
         self._active_docks: dict[str, _OpenDock] = {}
         # Tools the user closed with "keep running": paused + hidden but
@@ -293,6 +310,11 @@ class EmbeddedHostWidget(QWidget):
         """The central :class:`QTabWidget` (read-only attribute)."""
         return self._tab_widget
 
+    @property
+    def launcher_context(self) -> LauncherContext:
+        """Shared in-process context for opt-in embedded tools."""
+        return self._launcher_context
+
     # ------------------------------------------------------------------
     # Tab API
     # ------------------------------------------------------------------
@@ -330,6 +352,7 @@ class EmbeddedHostWidget(QWidget):
             return self._resurface_backgrounded(stashed)
 
         tool = _resolve_tool(tool_id)
+        _safe_set_launcher_context(tool, self._launcher_context)
         widget = tool.create_main_widget(self)
         if widget is None:
             raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
@@ -337,6 +360,9 @@ class EmbeddedHostWidget(QWidget):
         index = self._tab_widget.addTab(widget, tool.tool_id)
         self._tab_widget.setCurrentIndex(index)
         self._active_tabs[tool_id] = _OpenTab(tool=tool, widget=widget, index=index)
+        self._launcher_context.emit(
+            "tab.opened", {"tool_id": tool_id, "surface": "tab"}
+        )
         return index
 
     def _resurface_backgrounded(self, stashed: _Backgrounded) -> int:
@@ -350,6 +376,9 @@ class EmbeddedHostWidget(QWidget):
             tool=stashed.tool, widget=widget, index=index
         )
         _safe_resume(stashed.tool, stashed.widget)
+        self._launcher_context.emit(
+            "tab.opened", {"tool_id": stashed.tool.tool_id, "surface": "tab"}
+        )
         return index
 
     def close_tab(self, target: int | str, *, destroy: bool = True) -> bool:
@@ -393,6 +422,14 @@ class EmbeddedHostWidget(QWidget):
         else:
             _safe_cleanup(record.tool)
             self._remove_tab_widget(record)
+        self._launcher_context.emit(
+            "tab.closed",
+            {
+                "tool_id": record.tool.tool_id,
+                "surface": "tab",
+                "destroyed": not background,
+            },
+        )
         return True
 
     def _background_tab(self, record: _OpenTab) -> None:
@@ -711,6 +748,7 @@ class EmbeddedHostWidget(QWidget):
             return
 
         tool = _resolve_tool(tool_id)
+        _safe_set_launcher_context(tool, self._launcher_context)
         widget = tool.create_main_widget(self)
         if widget is None:
             raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
