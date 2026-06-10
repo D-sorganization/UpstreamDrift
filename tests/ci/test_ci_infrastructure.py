@@ -431,7 +431,7 @@ class TestCIEnvironmentCompatibility:
             encoding="utf-8"
         )
 
-        assert "python3 scripts/check_local_only_workflows.py" in workflow
+        assert "scripts/check_local_only_workflows.py" in workflow
         assert 'echo "Bypass"' not in workflow
 
     def test_ci_standard_defines_required_quality_gate_status(self) -> None:
@@ -456,6 +456,36 @@ class TestCIEnvironmentCompatibility:
             "unit-test-gate",
         }
         assert job["if"] == "always()"
+
+    def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
+        self,
+    ) -> None:
+        """PR-scoped no-cov tests must fall through to coverage for source changes."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+
+        assert "id: core-tests" in workflow
+        assert "mapfile -t changed_coverage_targets" in workflow
+        assert "src/**/*.py" in workflow
+        assert 'echo "coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
+        assert (
+            "No source/dependency coverage targets changed; skipping default coverage lane"
+            in workflow
+        )
+        assert (
+            "Source/dependency coverage targets changed; running default coverage lane"
+            in workflow
+        )
+        assert "steps.core-tests.outputs.coverage_generated == 'true'" in workflow
+        assert (
+            "github.event_name != 'pull_request'"
+            not in workflow[
+                workflow.index(
+                    "- name: Enforce Per-Package Coverage Thresholds"
+                ) : workflow.index("- name: Cross-Engine Validator Core Unit Tests")
+            ]
+        )
 
 
 class TestPyprojectTomlConsistency:

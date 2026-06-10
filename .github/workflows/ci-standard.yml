@@ -1162,6 +1162,7 @@ jobs:
           rm -f .coverage .coverage.* coverage.xml || true
 
       - name: Run Core Test Suite
+        id: core-tests
         if: steps.core-test-changes.outputs.skip != 'true'
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
@@ -1205,6 +1206,15 @@ jobs:
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
             )
 
+            mapfile -t changed_coverage_targets < <(
+              git diff --name-only --diff-filter=ACMRT "${merge_base:-origin/${{ github.base_ref }}}" HEAD -- \
+                'src/**/*.py' \
+                'pyproject.toml' \
+                'requirements*.txt' \
+                'environment.yml' \
+                ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
+            )
+
             if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
               echo "No core Python/test/dependency changes detected; skipping core tests for this workflow-only PR."
               exit 0
@@ -1233,7 +1243,6 @@ jobs:
               # - Other: Tests failed or error
               if [ $pytest_exit_code -eq 0 ]; then
                 echo "All PR-scoped tests passed."
-                exit 0
               elif [ $pytest_exit_code -eq 5 ]; then
                 # Exit code 5 means no tests were collected, not that tests were skipped
                 # This can happen if changed files don't contain any test functions
@@ -1251,8 +1260,12 @@ jobs:
                 exit $pytest_exit_code
               fi
 
-              # PR-scoped tests completed successfully, skip default lane
-              exit 0
+              if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                echo "No source/dependency coverage targets changed; skipping default coverage lane after PR-scoped tests."
+                exit 0
+              fi
+
+              echo "Source/dependency coverage targets changed; running default coverage lane after PR-scoped tests."
             fi
           fi
 
@@ -1273,6 +1286,7 @@ jobs:
           # - Coverage measurement on src/ (pytest-cov)
           # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
           # are intentionally not provisioned here.
+          echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
             -n 2 \
@@ -1293,8 +1307,8 @@ jobs:
             -v
 
       - name: Enforce Per-Package Coverage Thresholds
-        # Only run when coverage.xml is generated (not during PR-scoped --no-cov runs)
-        if: steps.core-test-changes.outputs.skip != 'true' && github.event_name != 'pull_request'
+        # Run only when the default coverage lane generated coverage.xml.
+        if: steps.core-test-changes.outputs.skip != 'true' && steps.core-tests.outputs.coverage_generated == 'true'
         run: python3 scripts/config/coverage_enforcer.py coverage.xml
       # Dependency-free validator coverage that supports future native-engine jobs.
       - name: Cross-Engine Validator Core Unit Tests
