@@ -14,6 +14,8 @@ Public surface:
   optional ``pause`` / ``resume`` / ``can_background`` / ``detach_to_window``
   lifecycle hooks (#6013). Hosts resolve these structurally so the hooks are
   fully optional.
+- :class:`LauncherContext` / :class:`InMemoryLauncherContext` — shared
+  in-process event bus and value registry for embedded tools (#7210).
 - :func:`register_embeddable_tool` / :func:`get_embeddable_tool` /
   :func:`is_embeddable` / :func:`unregister_embeddable_tool` — registry API.
 - :data:`EMBEDDABLE_TOOL_REGISTRY` — the underlying registry mapping
@@ -25,6 +27,7 @@ protocol so that consumers do not need to import a Qt binding to satisfy
 the contract.
 """
 
+from .context import InMemoryLauncherContext, LauncherContext
 from .contract import BackgroundableTool, EmbedCapabilities, EmbeddableTool
 from .registry import (
     EMBEDDABLE_TOOL_REGISTRY,
@@ -47,7 +50,9 @@ from .registry import (
 #
 # 1.1.0: added optional ``pause`` / ``resume`` / ``can_background`` /
 #   ``detach_to_window`` lifecycle hooks to ``EmbeddableTool`` (#6013).
-__version__ = "1.1.0"
+# 1.2.0: added optional ``LauncherContext`` injection for shared tool state
+#   and in-process events (#7210).
+__version__ = "1.2.0"
 
 # Contract version exposed to embedded tools. Hosts may refuse tools
 # declaring a higher major.
@@ -59,6 +64,8 @@ __all__ = [
     "BackgroundableTool",
     "EmbedCapabilities",
     "EmbeddableTool",
+    "InMemoryLauncherContext",
+    "LauncherContext",
     "__version__",
     "get_embeddable_tool",
     "is_embeddable",
