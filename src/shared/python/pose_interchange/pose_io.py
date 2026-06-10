@@ -17,7 +17,7 @@ Public API
   ===========  ====================================================
   engine       file format
   ===========  ====================================================
-  drake        pickle of ``{q, v, model_metadata}``
+  drake        JSON ``{q, v, model_metadata}``
   mujoco       JSON ``{qpos, qvel}``
   pinocchio    ``np.savez`` ``{q, v}``
   opensim      ``.sto`` row format (``initial_state``)
@@ -124,7 +124,7 @@ def _resolve_path(output_path: Path | str) -> Path:
 
 
 # ----------------------------------------------------------------------------
-# Drake: pickle of {q, v, model_metadata}
+# Drake: JSON {q, v, model_metadata}
 # ----------------------------------------------------------------------------
 
 
@@ -150,17 +150,13 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
 def _load_drake(path: Path) -> CanonicalPose:
     """Load a Drake initial-state ``.drake`` file.
 
-    Sentinel: Migrated from pickle to JSON to prevent insecure deserialization
-    vulnerabilities while maintaining the same `.drake` extension.
+    Drake pose interchange is JSON-only. Legacy pickle files are rejected at
+    the trust boundary instead of being deserialized.
     """
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        # Fallback for legacy pickle files
-        with path.open("rb") as fh:
-            import pickle
-
-            payload = pickle.load(fh)  # noqa: S301
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ValueError(f"{path}: drake file must be JSON") from exc
 
     if not isinstance(payload, dict) or "q" not in payload:
         raise ValueError(f"{path}: drake file missing required 'q' field")

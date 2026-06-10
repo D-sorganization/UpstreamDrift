@@ -360,6 +360,13 @@ class TestPoseIO:
         with pytest.raises(ValueError, match="missing required 'q'"):
             load_initial_state("drake", path)
 
+    def test_load_drake_rejects_non_json_file(self, tmp_path: Path) -> None:
+        path = tmp_path / "legacy.drake"
+        path.write_bytes(b"\x80\x04legacy-binary-payload")
+
+        with pytest.raises(ValueError, match="must be JSON"):
+            load_initial_state("drake", path)
+
     def test_load_mujoco_missing_qpos(self, tmp_path: Path) -> None:
         path = tmp_path / "bad.json"
         path.write_text('{"not_qpos": true}', encoding="utf-8")
