@@ -78,8 +78,12 @@ def download_model(
         return False
 
     try:
-        import shutil
-        import urllib.request
+        from src.shared.python.security.security_utils import (
+            download_to_file,
+            validate_url_scheme,
+        )
+
+        validate_url_scheme(entry.source_url, allowed_schemes=("https",))
 
         cache_dir = config.cache_dir / entry.id.replace("/", "_")
         cache_dir.mkdir(parents=True, exist_ok=True)
@@ -87,14 +91,7 @@ def download_model(
         urdf_filename = entry.source_url.split("/")[-1]
         local_path = cache_dir / urdf_filename
 
-        # Bounded timeout (issue #7184): urlretrieve has no timeout param, so
-        # stream via urlopen(..., timeout=) instead to avoid indefinite hangs.
-        _req = urllib.request.Request(entry.source_url)
-        with (
-            urllib.request.urlopen(_req, timeout=30) as _resp,  # nosec B310  # noqa: S310
-            open(local_path, "wb") as _out,
-        ):
-            shutil.copyfileobj(_resp, _out)
+        download_to_file(entry.source_url, local_path)
 
         entry.urdf_path = local_path
         entry.is_cached = True
@@ -106,6 +103,6 @@ def download_model(
         logger.info(f"Downloaded model: {entry.id}")
         return True
 
-    except (PermissionError, OSError) as e:
+    except (PermissionError, OSError, ValueError) as e:
         logger.error(f"Failed to download {entry.id}: {e}")
         return False
