@@ -71,20 +71,22 @@ For a focused reviewer walkthrough, start with the
 The recommended entry point is the **web UI**:
 
 ```bash
-python launch_golf_suite.py
+python launch_upstream_drift.py
 ```
 
 This starts the local API server (port 8000) and opens the React UI in your default browser.
+`launch_golf_suite.py` remains as a compatibility shim for existing scripts.
 
 ### Other entry points
 
-| Command                                       | What it launches                     |
-| --------------------------------------------- | ------------------------------------ |
-| `python launch_golf_suite.py`                 | Web UI (recommended)                 |
-| `python launch_golf_suite.py --classic`       | Classic PyQt6 desktop launcher       |
-| `python launch_golf_suite.py --api-only`      | API server without auto-opening a UI |
-| `python launch_golf_suite.py --engine <name>` | Legacy direct engine launch          |
-| Pose Studio standalone                        | `python -m src.tools.pose_studio`    |
+| Command                                           | What it launches                     |
+| ------------------------------------------------- | ------------------------------------ |
+| `python launch_upstream_drift.py`                 | Web UI (recommended)                 |
+| `python launch_upstream_drift.py --classic`       | Classic PyQt6 desktop launcher       |
+| `python launch_upstream_drift.py --api-only`      | API server without auto-opening a UI |
+| `python launch_upstream_drift.py --engine <name>` | Legacy direct engine launch          |
+| `python launch_golf_suite.py`                     | Deprecated compatibility shim        |
+| Pose Studio standalone                            | `python -m src.tools.pose_studio`    |
 
 The classic PyQt6 launcher remains supported as a fallback and for users who prefer a desktop window.
 

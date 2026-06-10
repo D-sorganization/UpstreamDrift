@@ -8,19 +8,23 @@ Design by Contract:
 - Postcondition: Returns AnalysisResponse with valid results or error
 """
 
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.core.error_utils import GolfSuiteError, ValidationError
-from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse
 
 logger = get_logger(__name__)
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 VALID_ANALYSIS_TYPES = frozenset(
     {"kinematics", "kinetics", "energetics", "swing_sequence"}

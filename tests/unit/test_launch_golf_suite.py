@@ -1,7 +1,9 @@
 import argparse
+from types import ModuleType
 from unittest.mock import patch
 
 import launch_golf_suite
+import launch_upstream_drift
 
 
 def test_parse_arguments() -> None:
@@ -62,3 +64,36 @@ def test_launch_golf_suite_main(mock_route, mock_parse) -> None:
     mock_parse.return_value = mock_args
     launch_golf_suite.main()
     mock_route.assert_called_once_with(mock_args)
+
+
+def test_launch_golf_suite_exports_canonical_router() -> None:
+    assert launch_golf_suite.parse_arguments is launch_upstream_drift.parse_arguments
+    assert launch_golf_suite.route_launch is launch_upstream_drift.route_launch
+
+
+def test_classic_qt_environment_uses_offscreen_when_headless_linux(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(launch_upstream_drift.sys, "platform", "linux")
+    monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    monkeypatch.delenv("QT_QPA_PLATFORM", raising=False)
+
+    class _QApplication:
+        @staticmethod
+        def instance() -> None:
+            return None
+
+        def __init__(self, _args: list[str]) -> None:
+            pass
+
+    pyqt_module = ModuleType("PyQt6")
+    widgets_module = ModuleType("PyQt6.QtWidgets")
+    widgets_module.QApplication = _QApplication
+
+    with patch.dict(
+        "sys.modules", {"PyQt6": pyqt_module, "PyQt6.QtWidgets": widgets_module}
+    ):
+        launch_upstream_drift._ensure_classic_qt_environment()
+
+    assert launch_upstream_drift.os.environ["QT_QPA_PLATFORM"] == "offscreen"

@@ -6,14 +6,13 @@ No module-level mutable state.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
-from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.engine_core.workflow_adapter import EngineWorkflowAdapter
 
@@ -26,6 +25,9 @@ from ..models.responses import (
 )
 from ..utils.path_validation import validate_model_path
 from .physics import clear_physics_caches
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 
 def _sanitize_for_json(obj: Any) -> Any:

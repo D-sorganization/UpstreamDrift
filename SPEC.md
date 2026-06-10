@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.282                                            |
+| **Spec Version**        | 1.0.283                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Consolidated launcher startup ownership for #7215.
+  `launch_golf_suite.py` is now a compatibility shim over the canonical
+  `launch_upstream_drift.py` entry point. Classic PyQt startup preflights the
+  Qt platform and selects `QT_QPA_PLATFORM=offscreen` on headless Linux, while
+  the local API server tolerates unavailable optional engine-manager imports
+  and reports an empty engine set instead of failing startup.
 - **2026-06-10** - Optimized legacy golf visualizer frame extraction by reading
   each Pandas dataset row once per frame before point/vector extraction, reducing
   repeated `.iloc` lookup overhead while preserving fallback behavior for missing
@@ -837,6 +843,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.283 | Startup entry-point consolidation (#7215). `launch_golf_suite.py` now delegates to canonical `launch_upstream_drift.py` with a deprecation warning, classic PyQt launch preflights the Qt platform and selects offscreen mode on headless Linux, and `src/api/local_server.py` degrades to an unavailable engine-manager facade when optional engine imports fail during local API startup. |
 | 2026-06-10 | 1.0.282 | Legacy golf visualizer Pandas row extraction optimization. `golf_visualizer_data.DataProcessor.extract_frame_data` now fetches each BASEQ/ZTCFQ/DELTAQ row once per frame and reuses the resulting row for all point/vector extraction, preserving the missing-row fallback contract while avoiding repeated `.iloc` lookups inside the render-frame path. |
 | 2026-06-10 | 1.0.281 | Configuration ownership consolidation (#7216). Removed root `config/` and `configs/` trees. Architecture debt policy moved to `scripts/config/architecture_debt_policy.json`; BunkerShot3D calibration YAML moved to `src/bunkershot3d/calibration/configs/`; UX field/error seed YAML moved to `src/shared/python/ux/config/`. Added `docs/development/configuration-systems.md`, canonical UX path constants, updated generators/tests/docs, and regression coverage preventing root config directories from returning. |
 | 2026-06-10 | 1.0.280 | Linux dependency-consistency lockfile repair after #7231. `requirements-dev.lock` now matches the Python 3.12 Linux `pip-compile --extra dev` output enforced by CI: Windows-only transitive `colorama` and `tzdata` entries are removed, and `uvloop` is restored for the Linux `uvicorn[standard]` dependency graph. |
