@@ -15,12 +15,6 @@
       "expires_on": "2026-08-31"
     },
     {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the launcher entrypoint is decomposed into smaller orchestration modules.",
-      "expires_on": "2026-09-30"
-    },
-    {
       "path": "scripts/_urdf_campaign_issues.py",
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",

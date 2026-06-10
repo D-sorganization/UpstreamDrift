@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.294                                            |
+| **Spec Version**        | 1.0.295                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Split the launcher entrypoint below the file-size budget
+  for #7217. Sidekick sidebar installation, process cleanup polling, launcher
+  domain orchestration, and GUI startup bootstrap now live in focused modules,
+  while the existing frameless-window helper remains under
+  `src/launchers/launcher_ui/frameless_window.py`; the
+  `src/launchers/upstream_drift_launcher.py` file-size exception is removed.
 - **2026-06-10** - Hardened Rust mocap Python binding errors for #7252.
   `upstream-mocap-io` validates `parse_c3d` / `parse_trc` / `parse_bvh`
   path preconditions before file access, maps missing files to
@@ -91,14 +97,6 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   shared `motion_pipeline.sources._marker_coordinates` helper, and the Python
   TRC fallback skips textual `nan` marker rows the same way the Rust-backed
   adapter paths skip occluded samples.
-- **2026-06-10** - Began the first mechanical launcher split for #7217.
-  Frameless window chrome and resize-filter behavior now live under
-  `src/launchers/launcher_ui/frameless_window.py`, while
-  `src/launchers/upstream_drift_launcher.py` continues to own main-window
-  orchestration and calls the extracted helper during startup. The changed-file
-  architecture budget keeps temporary #7217 exceptions for the legacy
-  `select_model` and `main` functions until later launcher slices split those
-  responsibilities.
 - **2026-06-10** - Added the first #7207 model explorer library-panel
   unification slice. `ModelLoaderDialog` now exposes a single searchable
   library tree covering every `ModelLibrary.list_available_models()` category,
@@ -917,6 +915,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.295 | Split the launcher entrypoint below the file-size budget for #7217. Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved from `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the canonical frameless-window helper under `src/launchers/launcher_ui/frameless_window.py`. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |
 | 2026-06-10 | 1.0.294 | Rust mocap FFI binding error-contract hardening for #7252. `upstream-mocap-io` now validates non-empty and NUL-free Python binding paths before parser entry, maps missing files from `parse_c3d` / `parse_trc` / `parse_bvh` to `FileNotFoundError`, maps other file-access errors to `OSError`, and keeps malformed present files as `ValueError` parse failures that include the format and path context. Rust binding tests and Python parity tests cover missing-file and malformed-present-file behavior across all three formats while preserving the marker/unit parser contracts. |
 | 2026-06-10 | 1.0.293 | First #7207 model explorer library-panel unification slice. `ModelLoaderDialog` now exposes one searchable Library tree built from every `ModelLibrary.list_available_models()` category, including sibling repositories, and model rows show first-party format badges inferred from explicit model metadata or category defaults. Headless panel-model tests cover flattening, sibling inclusion, search, category grouping, and badge logic. |
 | 2026-06-10 | 1.0.292 | Motion-pipeline hook exception handling for #7250. `PipelineConfig.strict_hooks` now controls per-stage hook failure policy: default lenient mode logs failures with `logger.exception` so tracebacks are observable while the pipeline continues, and strict mode raises `HookExecutionError` with the stage, hook name, and original exception chained as the cause. Focused orchestrator unit tests cover both modes. |
