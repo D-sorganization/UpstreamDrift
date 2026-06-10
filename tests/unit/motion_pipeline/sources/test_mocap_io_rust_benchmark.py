@@ -190,6 +190,9 @@ def _python_c3d_loop(points: np.ndarray, labels: list[str], scale: float) -> lis
         Marker,
         MarkerFrame,
     )
+    from src.shared.python.motion_pipeline.sources._marker_coordinates import (
+        has_nan_coordinate,
+    )
 
     n_frames = int(points.shape[2])
     fps = 100.0
@@ -202,7 +205,7 @@ def _python_c3d_loop(points: np.ndarray, labels: list[str], scale: float) -> lis
             x = float(points[0, mi, fi]) * scale
             y = float(points[1, mi, fi]) * scale
             z = float(points[2, mi, fi]) * scale
-            if any(val != val for val in (x, y, z)):
+            if has_nan_coordinate(x, y, z):
                 continue
             markers[name] = Marker(name=name, x=x, y=y, z=z)
         out.append(MarkerFrame(timestamp=fi / fps, markers=markers, frame_index=fi))

@@ -80,6 +80,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   `ClubPreset`, `SwingOptimizer`, and convergence diagnostics for solving
   speed/loft/attack/face-to-path parameters against the existing forward
   `SwingBallFlightPipeline`; GUI target mode remains follow-up scope.
+- **2026-06-10** - Consolidated mocap marker NaN occlusion handling for #7251.
+  C3D and TRC source adapters now delegate marker-triplet NaN detection to the
+  shared `motion_pipeline.sources._marker_coordinates` helper, and the Python
+  TRC fallback skips textual `nan` marker rows the same way the Rust-backed
+  adapter paths skip occluded samples.
 - **2026-06-10** - Began the first mechanical launcher split for #7217.
   Frameless window chrome and resize-filter behavior now live under
   `src/launchers/launcher_ui/frameless_window.py`, while
