@@ -17,7 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==26.1 && \
+RUN pip install --upgrade pip==26.1.2 && \
     pip install -r /tmp/requirements.lock
 
 # Auth and server extensions - pinned versions (to be added to requirements.lock)
@@ -86,7 +86,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Keep the base interpreter's bundled pip aligned with the venv so image
 # scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==26.1
+RUN python -m pip install --upgrade --no-cache-dir pip==26.1.2
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server

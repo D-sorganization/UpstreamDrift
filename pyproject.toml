@@ -61,9 +61,12 @@ dependencies = [
     # SQLAlchemy/Alembic at module load and src.api.auth.security imports
     # bcrypt/JWT/cryptography at module load.
     "alembic>=1.13.0",
+    # Alembic imports Mako for migration templates; keep a direct floor so
+    # container pip-audit cannot resolve vulnerable transitive releases.
+    "Mako>=1.3.12",
     "sqlalchemy>=2.0.0",
     "bcrypt>=4.1.0",
-    "PyJWT>=2.12.0",
+    "PyJWT>=2.13.0",
     "cryptography>=46.0.7",
     "email-validator>=2.0.0",
 ]
