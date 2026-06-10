@@ -689,3 +689,71 @@ def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, N
         },
     ):
         yield mock_mujoco, mock_interfaces
+
+
+# ---------------------------------------------------------------------------
+# Suite-marker enforcement (issue #7158, defect 2)
+# ---------------------------------------------------------------------------
+#
+# Goal: every test should declare which suite it belongs to via one of the
+# recognized "suite" markers below.  Unmarked tests run by default and nothing
+# requires a suite marker, which lets tests drift out of every CI lane's
+# selection expression.
+#
+# This hook runs in REPORT-ONLY mode first (the ratchet pattern used elsewhere
+# in this repo): it counts collected tests that carry none of the suite markers
+# and surfaces the count, but never fails collection.  Flip to enforcing later
+# (once the unmarked baseline is driven to zero) by setting the environment
+# variable ``UD_ENFORCE_SUITE_MARKERS=1`` — only then is missing-marker a
+# collection error.
+#
+# Acceptance-criteria mapping: "Add a pytest_collection_modifyitems hook ...
+# that fails collection when a test has none of {unit, integration, e2e,
+# slow, ...} — start in report-only mode with a baseline count, then flip to
+# enforcing."
+#
+# The classification logic lives in tests/support/suite_markers.py so it can be
+# unit-tested in isolation (see tests/unit/test_suite_marker_enforcement_7158).
+from tests.support.suite_markers import (  # noqa: E402
+    SUITE_MARKERS,
+    find_unmarked,
+    suite_markers_enforced,
+)
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    """Report (or, when enforced, fail on) tests lacking a suite marker.
+
+    Postcondition: stores the unmarked count on ``config`` as
+    ``_ud_unmarked_suite_count`` for the terminal summary; raises
+    ``pytest.UsageError`` only when enforcement is enabled.
+    """
+    unmarked = find_unmarked(items)
+    config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]
+    config._ud_unmarked_suite_nodeids = [  # type: ignore[attr-defined]
+        item.nodeid for item in unmarked
+    ]
+
+    if unmarked and suite_markers_enforced():
+        listing = "\n".join(f"  - {item.nodeid}" for item in unmarked)
+        raise pytest.UsageError(
+            f"{len(unmarked)} test(s) carry none of the required suite markers "
+            f"{sorted(SUITE_MARKERS)}:\n{listing}"
+        )
+
+
+def pytest_terminal_summary(
+    terminalreporter: Any, exitstatus: int, config: pytest.Config
+) -> None:
+    """Surface the unmarked-suite-marker count in the terminal summary."""
+    count = getattr(config, "_ud_unmarked_suite_count", None)
+    if not count:
+        return
+    mode = "ENFORCED" if suite_markers_enforced() else "report-only"
+    terminalreporter.write_line(
+        f"[suite-markers:{mode}] {count} collected test(s) carry no suite marker "
+        f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",
+        yellow=True,
+    )
