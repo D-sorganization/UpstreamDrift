@@ -7,6 +7,11 @@ from pathlib import Path
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
+from src.tools.model_explorer.composition_validator import (
+    CompositionValidationResult,
+    CompositionValidator,
+)
+
 
 @dataclass
 class URDFModel:
@@ -73,8 +78,18 @@ class URDFModel:
             other_elements=[],
         )
 
-    def to_xml(self) -> str:
+    def validate_composition(self) -> CompositionValidationResult:
+        """Validate this composed model before export."""
+        return CompositionValidator().validate_model(self)
+
+    def to_xml(self, *, force: bool = False) -> str:
         """Convert model to XML string."""
+        if force is None:
+            raise ValueError("force must be provided")
+        validation = self.validate_composition()
+        if not force:
+            validation.raise_for_errors()
+
         root = ET.Element("robot", name=self.robot_name)
 
         # Add materials first
