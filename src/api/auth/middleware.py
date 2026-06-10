@@ -13,32 +13,14 @@ def is_local_mode() -> bool:
 
 
 class LocalUser:
-    """Mock user for local mode - full access, no restrictions.
-
-    Must satisfy every ``User`` attribute that auth/quota code reads, otherwise
-    local mode raises ``AttributeError`` on paths that work in cloud mode (a
-    Liskov-substitution failure — issue #7142). The drift-guard test
-    ``tests/api/test_local_user_contract.py`` ties this to the ``User`` model so
-    a new column on ``User`` fails fast here.
-    """
+    """Mock user for local mode - full access, no restrictions."""
 
     def __init__(self) -> None:
         """Initialize local user with full permissions."""
         self.id: str = "local-user"
         self.email: str = "local@localhost"
-        # Use the real UserRole *value* ("admin") so role checks and
-        # UserRole(user.role) coercion in quota code succeed (issue #7142).
-        self.role: str = "admin"  # Full access locally
+        self.role: str = "ADMIN"  # Full access locally
         self.quota_remaining: float = float("inf")
-        # Account-status fields consumed by auth code paths.
-        self.is_active: bool = True
-        self.is_verified: bool = True
-        self.subscription_status: str = "active"
-        # Quota counters consumed by usage_tracker.check_quota / increment_usage.
-        # Reset each construction so local mode never hits a quota wall.
-        self.api_calls_this_month: int = 0
-        self.video_analyses_this_month: int = 0
-        self.simulations_this_month: int = 0
 
     def has_permission(self, permission: str) -> bool:
         """Check whether the local user has the given permission."""

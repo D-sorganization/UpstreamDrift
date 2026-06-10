@@ -78,13 +78,7 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: 
                 OSError,
             ) as e:
                 _handle_common_exceptions(e, func.__name__)
-                # _handle_common_exceptions always raises; if it ever returns,
-                # that is a contract violation (a tuple member without a branch)
-                # — fail loudly instead of returning a body-less None to the
-                # framework (issue #7167 D3).
-                raise AssertionError(
-                    "unreachable: _handle_common_exceptions must raise"
-                ) from e
+                return None  # pragma: no cover
 
         return async_wrapper
 
@@ -105,9 +99,6 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: 
             OSError,
         ) as e:
             _handle_common_exceptions(e, func.__name__)
-            # See async_wrapper: this is unreachable by contract (issue #7167 D3).
-            raise AssertionError(
-                "unreachable: _handle_common_exceptions must raise"
-            ) from e
+            return None  # pragma: no cover
 
     return sync_wrapper

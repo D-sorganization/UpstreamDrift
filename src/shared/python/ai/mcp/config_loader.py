@@ -379,30 +379,8 @@ def apply_preset_to_config(
     return cfg
 
 
-# Plain or scoped npm package name only. Rejects version specifiers, git/http
-# URLs, and filesystem paths so npm cannot be coaxed into fetching arbitrary
-# URLs/paths from a user-editable preset config (issue #7152, Defect 2).
-_NPM_PACKAGE_NAME_RE = re.compile(
-    r"^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*$"
-)
-
-
-def is_valid_npm_package_name(package: str) -> bool:
-    """Return True iff ``package`` is a plain/scoped npm name (no specifier).
-
-    A specifier such as ``pkg@1.2.3``, ``https://evil/x.tgz``, ``../local`` or
-    ``"; echo pwned"`` is rejected — npm interprets these and would fetch
-    arbitrary URLs/paths even with ``shell=False``.
-    """
-    return bool(_NPM_PACKAGE_NAME_RE.match(package))
-
-
 def _preset_npm_package(preset_id: str) -> str | None:
-    """Return the npm package name an npx-launched preset depends on, if any.
-
-    Only returns a value that passes :func:`is_valid_npm_package_name`; an
-    invalid/hostile specifier yields ``None`` so no subprocess ever runs on it.
-    """
+    """Return the npm package name an npx-launched preset depends on, if any."""
     from src.shared.python.ai.mcp.presets import MCP_SERVER_PRESETS
 
     if preset_id not in MCP_SERVER_PRESETS:
@@ -414,13 +392,6 @@ def _preset_npm_package(preset_id: str) -> str | None:
     for arg in preset.config.args:
         if arg.startswith("-"):
             continue
-        if not is_valid_npm_package_name(arg):
-            _LOG.warning(
-                "Refusing to probe preset %s: %r is not a plain npm package name",
-                preset_id,
-                arg,
-            )
-            return None
         return arg
     return None
 

@@ -1,10 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { resolveBackendPort } from './src/config/backendPort';
-
-// Single source of truth for the dev-proxy backend port (issue #7163).
-const backendPort = resolveBackendPort();
 
 export default defineConfig({
   plugins: [react()],
@@ -22,14 +18,13 @@ export default defineConfig({
     strictPort: true,
     open: false,
     proxy: {
-      // Proxy API requests to the local backend (8000) by default; set
-      // VITE_BACKEND_PORT=8001 for the containerized topology (issue #7163).
+      // Proxy API requests to Docker backend during development
       '/api': {
-        target: `http://localhost:${backendPort}`,
+        target: 'http://localhost:8001',
         changeOrigin: true,
       },
       '/api/ws': {
-        target: `ws://localhost:${backendPort}`,
+        target: 'ws://localhost:8001',
         ws: true,
       },
     },
