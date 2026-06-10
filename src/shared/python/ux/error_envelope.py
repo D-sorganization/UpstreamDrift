@@ -25,6 +25,7 @@ from src.shared.python.contracts import require
 
 _CODE_PATTERN: re.Pattern[str] = re.compile(r"^[a-z][a-z0-9_]*$")
 _FIELD_ID_PATTERN: re.Pattern[str] = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
+DEFAULT_ERROR_CATALOG_PATH = Path(__file__).with_name("config") / "error_messages.yaml"
 
 
 class UserFacingErrorError(ValueError):

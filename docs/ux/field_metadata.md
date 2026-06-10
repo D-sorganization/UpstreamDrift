@@ -17,7 +17,7 @@ Consumed by:
 
 Today, tooltip copy is scattered across ~376 `setToolTip(...)` call
 sites of inconsistent quality. The registry centralises help copy in
-one YAML file (`configs/ux/field_metadata.yaml`) that:
+one YAML file (`src/shared/python/ux/config/field_metadata.yaml`) that:
 
 1. Non-coders can review and edit.
 2. Has a single validation pass (DbC) — every entry has a label, a
@@ -46,7 +46,7 @@ fields:
     example: "0.002"
 ```
 
-See `configs/ux/field_metadata.yaml` for working examples.
+See `src/shared/python/ux/config/field_metadata.yaml` for working examples.
 
 ## Worked example — adding a new field
 
@@ -54,7 +54,7 @@ Say you add a "max wall-clock budget" input to the simulation page.
 
 1. **Pick a stable id**: `simulation.max_wallclock_s`. Dotted,
    lowercase, snake_case segments. Cannot change once shipped.
-2. **Add the YAML entry** to `configs/ux/field_metadata.yaml`:
+2. **Add the YAML entry** to `src/shared/python/ux/config/field_metadata.yaml`:
 
    ```yaml
    - id: simulation.max_wallclock_s
@@ -62,7 +62,7 @@ Say you add a "max wall-clock budget" input to the simulation page.
      short_help: Abort the run after this many real-time seconds.
      long_help: |
        The simulation aborts and surfaces `simulation_timeout` (see
-       `configs/ux/error_messages.yaml`) if it exceeds this budget.
+       `src/shared/python/ux/config/error_messages.yaml`) if it exceeds this budget.
        0 means no limit.
      units: s
      valid_range: [0.0, 3600.0]
@@ -104,7 +104,7 @@ of them, the seed-config test fails:
 
 - Epic: [#5968 — Idiot-Proof UX](https://github.com/D-sorganization/UpstreamDrift/issues/5968)
 - Code: `src/shared/python/ux/field_metadata.py`
-- YAML: `configs/ux/field_metadata.yaml`
+- YAML: `src/shared/python/ux/config/field_metadata.yaml`
 - Tests: `tests/unit/ux/test_field_metadata.py`, `tests/unit/ux/test_seed_configs.py`
 - Ratchet: `scripts/ci/check_ux_coverage_ratchet.py`
 - Baseline: `scripts/config/ux_field_coverage_baseline.json`

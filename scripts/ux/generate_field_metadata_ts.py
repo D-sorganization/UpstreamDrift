@@ -1,7 +1,7 @@
 """Generate ``ui/src/ux/fieldMetadata.ts`` from the YAML registry.
 
-The YAML at ``configs/ux/field_metadata.yaml`` is the single source of
-truth for UX field metadata (DRY).  The React side must not hand-copy
+The YAML at ``src/shared/python/ux/config/field_metadata.yaml`` is the
+single source of truth for UX field metadata (DRY). The React side must not hand-copy
 that content; instead this script derives a typed TypeScript module from
 the *validated* registry so Python and TS can never drift.
 
@@ -26,13 +26,15 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.shared.python.ux.field_metadata import load_registry  # noqa: E402
+from src.shared.python.ux.field_metadata import (  # noqa: E402
+    DEFAULT_FIELD_METADATA_PATH,
+    load_registry,
+)
 
-_YAML_PATH = _REPO_ROOT / "configs" / "ux" / "field_metadata.yaml"
 _TS_PATH = _REPO_ROOT / "ui" / "src" / "ux" / "fieldMetadata.ts"
 
 _HEADER = """\
-// AUTO-GENERATED from configs/ux/field_metadata.yaml — DO NOT EDIT BY HAND.
+// AUTO-GENERATED from src/shared/python/ux/config/field_metadata.yaml — DO NOT EDIT BY HAND.
 // Regenerate with: python3 scripts/ux/generate_field_metadata_ts.py
 // The YAML is the single source of truth (epic #5968, DRY).
 
@@ -71,7 +73,7 @@ def _to_camel(payload: dict) -> dict:
 
 def render() -> str:
     """Return the TypeScript source derived from the validated YAML."""
-    registry = load_registry(_YAML_PATH)
+    registry = load_registry(DEFAULT_FIELD_METADATA_PATH)
     records = [_to_camel(fm.to_dict()) for fm in registry.iter_fields()]
     body = json.dumps(records, indent=2, ensure_ascii=False)
     return (

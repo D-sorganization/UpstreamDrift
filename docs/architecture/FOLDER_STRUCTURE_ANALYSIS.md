@@ -62,7 +62,7 @@ src/
 │   ├── routes/          # API endpoints
 │   ├── services/        # Business logic
 │   └── utils/           # API utilities
-├── config/              # Configuration files
+├── scripts/config/      # CI policy, budget, waiver, and baseline files
 ├── launchers/           # Application entry points
 ├── shared/              # Shared libraries
 │   ├── python/          # Shared Python modules

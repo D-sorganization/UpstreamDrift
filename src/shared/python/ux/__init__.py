@@ -17,12 +17,14 @@ package.
 """
 
 from src.shared.python.ux.error_envelope import (
+    DEFAULT_ERROR_CATALOG_PATH,
     ErrorCatalog,
     UserFacingError,
     UserFacingErrorError,
     load_error_catalog,
 )
 from src.shared.python.ux.field_metadata import (
+    DEFAULT_FIELD_METADATA_PATH,
     FieldMetadata,
     FieldMetadataError,
     FieldRegistry,
@@ -43,6 +45,8 @@ from src.shared.python.ux.provenance import (
 
 __all__ = [
     "ErrorCatalog",
+    "DEFAULT_ERROR_CATALOG_PATH",
+    "DEFAULT_FIELD_METADATA_PATH",
     "FieldMetadata",
     "FieldMetadataError",
     "FieldRegistry",

@@ -34,6 +34,8 @@ The project uses several config formats; this table shows what belongs where:
 | Physical constants (SI)    | shared/python/core/physics_constants| Python   |
 | Simulation config defaults | shared/python/config/               |          |
 |                            |   configuration_manager.py          | Python   |
+| UX field/error copy        | shared/python/ux/config/            | YAML     |
+| BunkerShot calibration     | src/bunkershot3d/calibration/configs| YAML     |
 | File-size budgets          | scripts/config/file_size_budget.json| JSON     |
 | Module-size baselines      | scripts/config/                     |          |
 |                            |   module_size_budget_baseline.json  | JSON     |

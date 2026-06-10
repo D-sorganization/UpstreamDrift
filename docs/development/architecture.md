@@ -63,8 +63,8 @@ Golf_Modeling_Suite/
 │   ├── services/                 # Business logic
 │   └── server.py                 # Main API application
 │
-├── config/                       # Configuration files
-│   └── interim_config.yaml       # Server/auth/quota settings
+├── src/config/                   # Launcher manifests and YAML defaults
+│   └── interim_config.yaml       # Server/auth/quota defaults
 │
 ├── data/                         # Validation datasets
 │   └── golf_trajectory.csv       # Kaggle launch monitor data (832 shots)

@@ -21,16 +21,17 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 pytest.importorskip("PyQt6")
 
-from src.shared.python.ux.field_metadata import load_registry  # noqa: E402
+from src.shared.python.ux.field_metadata import (  # noqa: E402
+    DEFAULT_FIELD_METADATA_PATH,
+    load_registry,
+)
 
 pytestmark = pytest.mark.unit
-
-_YAML = "configs/ux/field_metadata.yaml"
 
 
 @pytest.fixture(scope="module")
 def registry():
-    return load_registry(_YAML)
+    return load_registry(DEFAULT_FIELD_METADATA_PATH)
 
 
 @pytest.fixture(scope="module")

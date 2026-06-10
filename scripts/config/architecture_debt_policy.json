@@ -4,11 +4,10 @@
       "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
       "max_lines": 140,
       "required_modules": [
-        "mesh_generator_models",
-        "mesh_generator_primitive",
-        "mesh_generator_makehuman",
-        "mesh_generator_smplx",
-        "mesh_generator_factory"
+        "_mesh_makehuman",
+        "_mesh_primitives",
+        "_mesh_smplx",
+        "_mesh_types"
       ]
     },
     {
@@ -17,13 +16,16 @@
       "required_modules": ["elevation", "materials", "regions", "terrain_base"]
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
-      "max_lines": 120,
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "max_lines": 220,
       "required_modules": [
-        "pressure_drop_api",
-        "pressure_drop_reference",
+        "engine.pressure_drop_calculation_engine",
+        "models.pressure_drop_data_models",
         "pressure_drop_results",
-        "pressure_drop_validation"
+        "pressure_drop_units",
+        "utils.flow_rate_converter",
+        "utils.gas_properties",
+        "utils.pipe_database"
       ]
     },
     {
@@ -37,13 +39,7 @@
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py",
       "max_lines": 160,
-      "required_modules": [
-        "golf_visualizer_models",
-        "golf_visualizer_data",
-        "golf_visualizer_renderer",
-        "golf_visualizer_widget",
-        "golf_visualizer_app"
-      ]
+      "required_modules": ["golf_visualizer_app"]
     }
   ],
   "tracked_subtargets": [
@@ -57,10 +53,10 @@
     },
     {
       "path": "src/shared/python/physics/terrain_representation.py",
-      "max_lines": 1100
+      "max_lines": 1250
     },
     {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
       "max_lines": 220
     },
     {

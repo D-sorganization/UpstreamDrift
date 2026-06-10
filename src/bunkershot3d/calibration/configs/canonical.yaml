@@ -30,7 +30,7 @@ clubhead:
   mass: 0.300 # kg
 
 trajectory:
-  file: "configs/bunkershot3d/reference_swing.csv"
+  file: "src/bunkershot3d/calibration/configs/reference_swing.csv"
 
 output:
   downsample_grains: 10 # Only save grains every N steps

@@ -5,7 +5,7 @@ loader/registry surface before implementation. They cover:
 
 * Construction invariants (DbC preconditions raise on bad input).
 * YAML round-trip — what the user writes in
-  ``configs/ux/field_metadata.yaml`` is exactly what code sees.
+  ``src/shared/python/ux/config/field_metadata.yaml`` is exactly what code sees.
 * Registry semantics — lookup, iteration, producer/consumer graph,
   cycle detection (LOD: graph queries return tuples; callers do not
   reach into private state).

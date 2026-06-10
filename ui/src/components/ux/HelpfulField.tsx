@@ -2,7 +2,7 @@
  * HelpfulField — metadata-driven input wrapper (epic #5968, Phase 2).
  *
  * Consumes the generated `FIELD_METADATA` registry (derived from
- * `configs/ux/field_metadata.yaml`, the single source of truth — DRY).
+ * `src/shared/python/ux/config/field_metadata.yaml`, the single source of truth — DRY).
  * It renders a labelled numeric/enum input wired up with
  * `aria-describedby` help text and surfaces an `onViolation` callback
  * when a numeric value breaches the field's declared range.

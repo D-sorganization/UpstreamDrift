@@ -2,21 +2,20 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
-from src.shared.python.ux import load_error_catalog, load_registry
+from src.shared.python.ux import (
+    DEFAULT_ERROR_CATALOG_PATH,
+    DEFAULT_FIELD_METADATA_PATH,
+    load_error_catalog,
+    load_registry,
+)
 
 pytestmark = pytest.mark.unit
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
-_FIELD_METADATA_YAML = _REPO_ROOT / "configs" / "ux" / "field_metadata.yaml"
-_ERROR_MESSAGES_YAML = _REPO_ROOT / "configs" / "ux" / "error_messages.yaml"
-
 
 def test_field_metadata_yaml_loads():
-    registry = load_registry(_FIELD_METADATA_YAML)
+    registry = load_registry(DEFAULT_FIELD_METADATA_PATH)
     # Seeded fields the Phase 0 PR documents in docs/ux/field_metadata.md.
     must_exist = {
         "simulation.duration",
@@ -33,7 +32,7 @@ def test_field_metadata_yaml_loads():
 
 
 def test_error_messages_yaml_loads():
-    catalog = load_error_catalog(_ERROR_MESSAGES_YAML)
+    catalog = load_error_catalog(DEFAULT_ERROR_CATALOG_PATH)
     must_exist = {
         "invalid_timestep",
         "invalid_duration",
@@ -52,8 +51,8 @@ def test_every_error_field_id_exists_in_registry():
     real field id (or be None).  Prevents copy from referencing dead
     fields after a refactor.
     """
-    catalog = load_error_catalog(_ERROR_MESSAGES_YAML)
-    registry = load_registry(_FIELD_METADATA_YAML)
+    catalog = load_error_catalog(DEFAULT_ERROR_CATALOG_PATH)
+    registry = load_registry(DEFAULT_FIELD_METADATA_PATH)
     for err in catalog:
         if err.field_id is None:
             continue

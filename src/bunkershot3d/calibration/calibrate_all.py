@@ -1,6 +1,7 @@
 """
 Calibration script for BunkerShot3D.
-Produces one calibrated parameter set per backend and writes to configs/bunkershot3d/sand_<backend>.yaml.
+Produces one calibrated parameter set per backend and writes to
+src/bunkershot3d/calibration/configs/sand_<backend>.yaml.
 """
 
 import sys
@@ -51,7 +52,7 @@ def calibrate_backend(backend: str, use_mock: bool = False) -> None:
         }
     }
 
-    config_dir = Path(__file__).parent.parent.parent.parent / "configs" / "bunkershot3d"
+    config_dir = Path(__file__).resolve().parent / "configs"
     config_dir.mkdir(parents=True, exist_ok=True)
 
     config_path = config_dir / f"sand_{backend}.yaml"

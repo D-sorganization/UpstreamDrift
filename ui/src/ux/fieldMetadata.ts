@@ -1,4 +1,4 @@
-// AUTO-GENERATED from configs/ux/field_metadata.yaml — DO NOT EDIT BY HAND.
+// AUTO-GENERATED from src/shared/python/ux/config/field_metadata.yaml — DO NOT EDIT BY HAND.
 // Regenerate with: python3 scripts/ux/generate_field_metadata_ts.py
 // The YAML is the single source of truth (epic #5968, DRY).
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import cast
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-POLICY_PATH = REPO_ROOT / "config" / "architecture_debt_policy.json"
+POLICY_PATH = REPO_ROOT / "scripts" / "config" / "architecture_debt_policy.json"
 
 
 def _load_policy() -> dict[str, list[dict[str, object]]]:

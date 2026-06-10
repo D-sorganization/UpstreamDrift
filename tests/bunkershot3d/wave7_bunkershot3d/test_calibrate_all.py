@@ -15,15 +15,12 @@ class TestCalibrateBackend:
     def test_calibrate_backend_writes_yaml(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """calibrate_backend writes a sand_<backend>.yaml file under configs/."""
-        # Patch the path resolution so we don't touch the real configs/ tree
+        """calibrate_backend writes a sand_<backend>.yaml under calibration/configs."""
+        # Patch the path resolution so we don't touch the real config tree.
         import bunkershot3d.calibration.calibrate_all as mod
 
         fake_root = tmp_path
-        # __file__ is .../calibration/calibrate_all.py; its parent.parent.parent.parent
-        # is the project root. Patch by inserting a sentinel.
-        target_dir = fake_root / "configs" / "bunkershot3d"
-        # Patch Path(__file__).parent.parent.parent.parent
+        target_dir = fake_root / "src" / "bunkershot3d" / "calibration" / "configs"
         monkeypatch.setattr(
             mod,
             "__file__",
@@ -59,7 +56,14 @@ class TestCalibrateBackend:
         )
         # mock backend triggers AngleOfReposeExperiment(use_mock=True) branch
         calibrate_backend("mock", use_mock=True)
-        out = tmp_path / "configs" / "bunkershot3d" / "sand_mock.yaml"
+        out = (
+            tmp_path
+            / "src"
+            / "bunkershot3d"
+            / "calibration"
+            / "configs"
+            / "sand_mock.yaml"
+        )
         assert out.exists()
 
 
@@ -90,7 +94,14 @@ class TestCalibrateAllOptimizerWiring:
             # optimize() invoked twice
             assert instance.optimize.call_count == 2
 
-        out = tmp_path / "configs" / "bunkershot3d" / "sand_mpm.yaml"
+        out = (
+            tmp_path
+            / "src"
+            / "bunkershot3d"
+            / "calibration"
+            / "configs"
+            / "sand_mpm.yaml"
+        )
         with open(out) as f:
             data = yaml.safe_load(f)
         # Averaged values from the deterministic stub

@@ -2,8 +2,8 @@
  * Py<->TS metadata round-trip (epic #5968, DRY guarantee).
  *
  * The generated `fieldMetadata.ts` must exactly reflect the YAML at
- * `configs/ux/field_metadata.yaml`, which is the single source of
- * truth.  This test re-parses the YAML independently and asserts the
+ * `src/shared/python/ux/config/field_metadata.yaml`, which is the single source
+ * of truth. This test re-parses the YAML independently and asserts the
  * generated TS registry matches, so editing the YAML without
  * regenerating fails CI.
  */
@@ -14,7 +14,10 @@ import { parse } from 'yaml';
 import { describe, it, expect } from 'vitest';
 import { FIELD_METADATA, getFieldMetadata } from './fieldMetadata';
 
-const YAML_PATH = resolve(__dirname, '../../../configs/ux/field_metadata.yaml');
+const YAML_PATH = resolve(
+  __dirname,
+  '../../../src/shared/python/ux/config/field_metadata.yaml',
+);
 
 interface RawField {
   id: string;

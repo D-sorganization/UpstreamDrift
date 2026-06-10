@@ -36,6 +36,7 @@ from src.shared.python.contracts import require
 
 _ID_PATTERN: re.Pattern[str] = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
 _SHORT_HELP_MAX_CHARS: int = 80
+DEFAULT_FIELD_METADATA_PATH = Path(__file__).with_name("config") / "field_metadata.yaml"
 
 
 class FieldMetadataError(ValueError):
