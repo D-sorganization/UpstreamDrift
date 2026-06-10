@@ -23,6 +23,12 @@ from src.tools.model_explorer.composition_flow import (
     ExportFormat,
     selection_from_attachment_point,
 )
+from src.tools.model_explorer.composition_ux import (
+    CompositionDragPayload,
+    CompositionDropPreview,
+    CompositionUxController,
+    ExportChoice,
+)
 
 from .model import URDFModel
 from .panel import ModelPanel
@@ -39,6 +45,7 @@ class FrankensteinEditor(QWidget):
         """Initialize the Frankenstein editor."""
         super().__init__(parent)
         self.composition_flow = CompositionFlowController()
+        self.composition_ux = CompositionUxController(self.composition_flow)
         self._setup_ui()
         self._connect_signals()
 
@@ -292,6 +299,7 @@ class FrankensteinEditor(QWidget):
     def attach_source_model_to_working(
         self,
         selection: AttachmentSelection | None = None,
+        payload: CompositionDragPayload | None = None,
     ) -> bool:
         """Attach the complete source model to the working model."""
         source_model = self.left_panel.get_model()
@@ -304,7 +312,9 @@ class FrankensteinEditor(QWidget):
             attach_selection = selection or self._default_attachment_selection(
                 source_model, target_model
             )
-            result = self.composition_flow.attach_source_model(
+            drag_payload = payload or self._default_drag_payload(source_model)
+            committed = self.composition_ux.commit_drop(
+                payload=drag_payload,
                 target_model=target_model,
                 source_model=source_model,
                 selection=attach_selection,
@@ -313,15 +323,52 @@ class FrankensteinEditor(QWidget):
             self.status_label.setText(f"Attach failed: {exc}")
             return False
 
+        result = committed.result
         self.right_panel._refresh_tree()
         self.right_panel.save_btn.setEnabled(True)
         self.status_label.setText(
             "Attached source root "
             f"'{result.source_root_link}' to '{attach_selection.target_link}' "
-            f"as '{result.mapped_root_link}'"
+            f"as '{result.mapped_root_link}' "
+            f"({self.composition_ux.validation_summary(result.validation)})"
         )
         self.model_updated.emit("working", target_model)
         return True
+
+    def preview_source_model_attachment(
+        self,
+        selection: AttachmentSelection | None = None,
+        payload: CompositionDragPayload | None = None,
+    ) -> CompositionDropPreview | None:
+        """Preview a source-model attachment without mutating the working model."""
+        source_model = self.left_panel.get_model()
+        target_model = self.right_panel.get_model()
+        if not source_model or not target_model:
+            self.status_label.setText("Both source and working models must be loaded")
+            return None
+        try:
+            attach_selection = selection or self._default_attachment_selection(
+                source_model, target_model
+            )
+            preview = self.composition_ux.preview_drop(
+                payload=payload or self._default_drag_payload(source_model),
+                target_model=target_model,
+                source_model=source_model,
+                selection=attach_selection,
+            )
+        except (CompositionFlowError, ValueError) as exc:
+            self.status_label.setText(f"Preview failed: {exc}")
+            return None
+        self.status_label.setText(preview.message)
+        return preview
+
+    def export_working_choices(self) -> tuple[ExportChoice, ...]:
+        """Return validation-aware export choices for the working model."""
+        model = self.right_panel.get_model()
+        if not model:
+            self.status_label.setText("No working model loaded")
+            return ()
+        return self.composition_ux.export_choices(model)
 
     def export_working_model(
         self,
@@ -370,6 +417,15 @@ class FrankensteinEditor(QWidget):
         if not target_link:
             raise CompositionFlowError("working model has no target links")
         return AttachmentSelection(target_link=target_link, source_prefix=source_prefix)
+
+    def _default_drag_payload(self, source_model: URDFModel) -> CompositionDragPayload:
+        return CompositionDragPayload(
+            category="source",
+            key=source_model.robot_name,
+            name=source_model.robot_name,
+            format_badge="URDF",
+            source_prefix=f"{source_model.robot_name}_",
+        )
 
     def _selected_working_link(self) -> str | None:
         item = self.right_panel.tree.currentItem()
