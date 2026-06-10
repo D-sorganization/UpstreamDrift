@@ -226,6 +226,26 @@ sidekick = "sidekick.__main__:main"
 # [project.entry-points."upstream_drift.engines"]
 # my_engine = "my_package:get_engine_plugin"
 
+[project.entry-points."upstream_drift.embeddable_tools"]
+model_explorer = "src.tools.model_explorer._embed_adapter"
+data_explorer = "data_explorer._embed_adapter"
+starting_pose_matcher = "src.tools.starting_pose_matcher._embed_adapter"
+training_controller = "src.tools.training_controller._embed_adapter"
+config_setup_wizard = "src.tools.config_setup_wizard._embed_adapter"
+pose_subscriber_demo = "src.tools.pose_subscriber_demo._embed_adapter"
+canonical_core = "src.tools.canonical_core._embed_adapter"
+sidekick = "src.tools.sidekick._embed_adapter"
+pose_studio = "src.tools.pose_studio.gui"
+video_analyzer = "src.tools.video_analyzer._embed_adapter"
+ball_flight_gui = "src.tools.ball_flight_gui._embed_adapter"
+bunker_shot_gui = "src.tools.bunker_shot_gui._embed_adapter"
+putting_green_gui = "src.tools.putting_green_gui._embed_adapter"
+golf_environment = "src.tools.golf_environment._embed_adapter"
+terrain_engine = "src.tools.terrain_engine._embed_adapter"
+golf_simulation_suite = "src.tools.golf_simulation_suite._embed_adapter"
+simulation_backends_launcher = "src.tools.simulation_backends_launcher._embed_adapter"
+simscape_3d_golf_model = "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
+
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"
 Documentation = "https://upstream-drift.readthedocs.io"

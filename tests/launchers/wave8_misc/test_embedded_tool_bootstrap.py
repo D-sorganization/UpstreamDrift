@@ -51,6 +51,11 @@ _ADAPTER_TOKEN = "_embed_adapter"
 _REAL_IMPORT = _builtins.__import__
 
 
+class _FakeEntryPoint:
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+
 def _make_filtered_import(decide):
     """Build an __import__ replacement that delegates to the real one
     for everything except adapter module names, which go through *decide*.
@@ -171,6 +176,117 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
         EMBEDDABLE_TOOL_REGISTRY.pop("model_explorer", None)
 
 
+def test_bootstrap_imports_entry_point_adapters(monkeypatch) -> None:
+    """Entry-point adapters are imported before the hard-coded fallback."""
+    imported: list[str] = []
+
+    def _entry_points(*, group: str):
+        assert group == bootstrap.EMBEDDABLE_TOOL_ENTRY_POINT_GROUP
+        return [_FakeEntryPoint("external_package._embed_adapter")]
+
+    def _selective(name):
+        imported.append(name)
+        raise ImportError(f"forced for {name}")
+
+    monkeypatch.setattr(bootstrap.importlib.metadata, "entry_points", _entry_points)
+    monkeypatch.setattr(bootstrap, "_warn_on_manifest_gaps", lambda: None)
+    with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
+        result = bootstrap.bootstrap_embeddable_tools()
+
+    assert result == []
+    assert imported[0] == "external_package._embed_adapter"
+
+
+def test_bootstrap_de_dupes_entry_points_and_fallback(monkeypatch) -> None:
+    """Adapters named by metadata and fallback are imported only once."""
+    fallback_module = "src.tools.model_explorer._embed_adapter"
+    imported: list[str] = []
+
+    def _entry_points(*, group: str):
+        assert group == bootstrap.EMBEDDABLE_TOOL_ENTRY_POINT_GROUP
+        return [
+            _FakeEntryPoint(fallback_module),
+            _FakeEntryPoint("external_package._embed_adapter"),
+            _FakeEntryPoint("external_package._embed_adapter"),
+        ]
+
+    def _selective(name):
+        imported.append(name)
+        raise ImportError(f"forced for {name}")
+
+    monkeypatch.setattr(bootstrap.importlib.metadata, "entry_points", _entry_points)
+    monkeypatch.setattr(bootstrap, "_warn_on_manifest_gaps", lambda: None)
+    with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
+        bootstrap.bootstrap_embeddable_tools()
+
+    assert imported.count(fallback_module) == 1
+    assert imported.count("external_package._embed_adapter") == 1
+
+
+def test_entry_point_bootstrap_records_registry_diff(monkeypatch) -> None:
+    """Entry-point adapters use the same registry-diff recording as fallback."""
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
+    from src.shared.python.launcher_embed.contract import EmbedCapabilities
+
+    class _FakeTool:
+        tool_id = "external_tool"
+
+        def embed_capabilities(self) -> EmbedCapabilities:
+            return EmbedCapabilities(supports_embedded=True)
+
+        def create_main_widget(self, parent: object) -> object:
+            return object()
+
+        def cleanup(self) -> None:
+            pass
+
+        def is_dirty(self) -> bool:
+            return False
+
+    def _entry_points(*, group: str):
+        assert group == bootstrap.EMBEDDABLE_TOOL_ENTRY_POINT_GROUP
+        return [_FakeEntryPoint("external_package._embed_adapter")]
+
+    def _selective(name):
+        if name == "external_package._embed_adapter":
+            EMBEDDABLE_TOOL_REGISTRY.setdefault("external_tool", _FakeTool())
+            return object()
+        raise ImportError(f"forced for {name}")
+
+    monkeypatch.setattr(bootstrap.importlib.metadata, "entry_points", _entry_points)
+    monkeypatch.setattr(bootstrap, "_warn_on_manifest_gaps", lambda: None)
+    try:
+        with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
+            result = bootstrap.bootstrap_embeddable_tools()
+        assert result == ["external_tool"]
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.pop("external_tool", None)
+
+
+def test_bootstrap_warns_on_manifest_gaps_after_entry_point_discovery(
+    monkeypatch,
+) -> None:
+    """Manifest coverage warnings still run after discovery-based bootstrap."""
+    warnings = {"count": 0}
+
+    def _entry_points(*, group: str):
+        assert group == bootstrap.EMBEDDABLE_TOOL_ENTRY_POINT_GROUP
+        return [_FakeEntryPoint("external_package._embed_adapter")]
+
+    def _selective(name):
+        raise ImportError(f"forced for {name}")
+
+    def _warn() -> None:
+        warnings["count"] += 1
+
+    monkeypatch.setattr(bootstrap.importlib.metadata, "entry_points", _entry_points)
+    monkeypatch.setattr(bootstrap, "_warn_on_manifest_gaps", _warn)
+    with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
+        bootstrap.bootstrap_embeddable_tools()
+
+    assert warnings["count"] == 1
+
+
 # Tools whose adapters live in this repo (not the vendored Tools submodule) and
 # have no heavy/optional runtime dependencies, so they must register on a bare
 # bootstrap run. Regression guard for #6560 (training_controller import bug) and
@@ -192,15 +308,15 @@ _FIRST_PARTY_TOOL_IDS = {
 
 def test_first_party_tools_are_listed_in_adapter_modules() -> None:
     """Static guard: every first-party tool has an adapter_modules entry."""
-    import inspect
-
-    source = inspect.getsource(bootstrap.bootstrap_embeddable_tools)
     for tool_id in _FIRST_PARTY_TOOL_IDS:
         if tool_id.startswith("canonical_core_"):
             expected = "src.tools.canonical_core._embed_adapter"
         else:
             expected = f"src.tools.{tool_id}."
-        assert expected in source, f"{tool_id} missing from adapter_modules"
+        assert any(
+            expected in module_path
+            for module_path in bootstrap.FALLBACK_ADAPTER_MODULES
+        ), f"{tool_id} missing from adapter_modules"
 
 
 def test_bootstrap_registers_all_first_party_tools(monkeypatch) -> None:
