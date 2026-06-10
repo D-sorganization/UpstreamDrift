@@ -14,6 +14,10 @@ from src.tools.model_explorer.composition_flow import (
     CompositionFlowController,
     CompositionFlowError,
 )
+from src.tools.model_explorer.composition_ux import (
+    CompositionDragPayload,
+    CompositionUxController,
+)
 from src.tools.model_explorer.frankenstein_editor.model import URDFModel
 
 pytestmark = [pytest.mark.unit]
@@ -127,6 +131,69 @@ def test_attach_fails_for_unknown_target_link() -> None:
         )
 
 
+def test_composition_ux_preview_is_non_mutating_and_highlights_ghost() -> None:
+    target = _model(_HUMAN)
+    source = _model(_ARM)
+    payload = CompositionDragPayload(
+        category="robotic",
+        key="simple_arm",
+        name="Simple Arm",
+        format_badge="URDF",
+        source_prefix="simple_arm_",
+    )
+
+    preview = CompositionUxController().preview_drop(
+        payload=payload,
+        target_model=target,
+        source_model=source,
+        selection=AttachmentSelection(
+            target_link="right_hand",
+            source_prefix=payload.source_prefix,
+        ),
+    )
+
+    assert preview.state == "ready"
+    assert preview.source_root_link == "base"
+    assert preview.mapped_root_link == "simple_arm_base"
+    assert preview.highlighted_links == ("right_hand", "simple_arm_base")
+    assert preview.validation is not None
+    assert preview.validation.ok
+    assert "simple_arm_base" not in target.links
+    assert "base" in source.links
+
+
+def test_composition_ux_commit_updates_target_and_exports_choices() -> None:
+    target = _model(_HUMAN)
+    source = _model(_ARM)
+    payload = CompositionDragPayload(
+        category="robotic",
+        key="simple_arm",
+        name="Simple Arm",
+        format_badge="URDF",
+        source_prefix="simple_arm_",
+    )
+    controller = CompositionUxController()
+
+    committed = controller.commit_drop(
+        payload=payload,
+        target_model=target,
+        source_model=source,
+        selection=AttachmentSelection(
+            target_link="right_hand",
+            source_prefix=payload.source_prefix,
+        ),
+    )
+
+    assert committed.result.validation.ok
+    assert "simple_arm_base" in target.links
+    choices = {choice.format: choice for choice in controller.export_choices(target)}
+    assert choices["urdf"].enabled is True
+    assert choices["mjcf"].enabled is True
+    assert choices["sdf"].enabled is False
+    assert choices["osim"].enabled is False
+    assert choices["sdf"].reason == "writer not available"
+
+
 @pytest.fixture
 def qapp() -> QApplication:
     app = QApplication.instance()
@@ -145,12 +212,22 @@ def test_frankenstein_editor_attach_action_exports_mjcf(qapp: QApplication) -> N
     editor.left_panel._refresh_tree()
     editor.right_panel._refresh_tree()
 
+    preview = editor.preview_source_model_attachment(
+        AttachmentSelection(target_link="right_hand", source_prefix="arm_")
+    )
+    assert preview is not None
+    assert preview.state == "ready"
+    assert "arm_base" not in editor.right_panel.model.links  # type: ignore[union-attr]
+
     attached = editor.attach_source_model_to_working(
         AttachmentSelection(target_link="right_hand", source_prefix="arm_")
     )
 
     assert attached is True
     assert "arm_base" in editor.right_panel.model.links  # type: ignore[union-attr]
+    choices = {choice.format: choice for choice in editor.export_working_choices()}
+    assert choices["urdf"].enabled is True
+    assert choices["mjcf"].enabled is True
     exported = editor.export_working_model("mjcf")
     assert exported is not None
     assert "<mujoco" in exported
