@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.289                                            |
+| **Spec Version**        | 1.0.290                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Began the first mechanical launcher split for #7217.
+  Frameless window chrome and resize-filter behavior now live under
+  `src/launchers/launcher_ui/frameless_window.py`, while
+  `src/launchers/upstream_drift_launcher.py` continues to own main-window
+  orchestration and calls the extracted helper during startup. The changed-file
+  architecture budget keeps temporary #7217 exceptions for the legacy
+  `select_model` and `main` functions until later launcher slices split those
+  responsibilities.
 - **2026-06-10** - Completed the #7205 Frankenstein composition validation
   surface. `CompositionValidator` now emits warning-level findings for heavy
   attached subtrees and direct attachment geometry AABB overlaps, while the
