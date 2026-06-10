@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from src.shared.python.motion_pipeline.contracts import CanonicalObservations
 from src.shared.python.motion_pipeline.sources import (
     OpenCapSessionAdapter,
@@ -50,7 +52,7 @@ def test_opencap_session_imports_to_canonical_observations(tmp_path: Path) -> No
     assert observations.num_frames == 2
     assert observations.marker_names == ["R.ASIS", "L.ASIS", "R.Acromium"]
     first_marker = observations.frames[0].markers["R.ASIS"]
-    assert first_marker.x == 0.1
+    assert first_marker.x == pytest.approx(0.1)
     assert observations.source_provenance["format"] == "opencap_session"
     assert observations.subject is not None
     assert observations.subject["massKg"] == 72.5
