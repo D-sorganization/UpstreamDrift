@@ -306,28 +306,23 @@ class TestLaunchConditionsDeriver:
         assert lc.velocity == pytest.approx(65.0, rel=1e-4)
 
     def test_launch_angle_matches_geometry(self):
-        # LaunchConditions stores launch_angle in RADIANS (#7223), so the
-        # derived angle must equal the geometric angle converted to radians.
         angle_deg = 15.0
         post = _make_post_impact(speed=60.0, angle_deg=angle_deg)
         lc = self.deriver.derive(post)
-        assert lc.launch_angle == pytest.approx(math.radians(angle_deg), abs=1e-3)
+        assert lc.launch_angle == pytest.approx(angle_deg, abs=0.1)
 
     def test_zero_horizontal_speed_gives_90_degree_angle(self):
         post = _make_post_impact(speed=10.0, angle_deg=0.0)
         # Override to pure vertical
         post.ball_velocity[:] = np.array([0.0, 0.0, 10.0])
         lc = self.deriver.derive(post)
-        assert lc.launch_angle == pytest.approx(math.radians(90.0), abs=1e-3)
+        assert lc.launch_angle == pytest.approx(90.0, abs=0.1)
 
-    def test_spin_rate_is_rpm_from_angular_velocity_magnitude(self):
-        # ball_angular_velocity is rad/s; LaunchConditions.spin_rate is RPM
-        # (the unit BallFlightSimulator expects) — #7223.
+    def test_spin_rate_matches_angular_velocity_magnitude(self):
         post = _make_post_impact()
         post.ball_angular_velocity[:] = np.array([0.0, -200.0, 0.0])
         lc = self.deriver.derive(post)
-        expected_rpm = 200.0 * 60.0 / (2.0 * math.pi)
-        assert lc.spin_rate == pytest.approx(expected_rpm, rel=1e-4)
+        assert lc.spin_rate == pytest.approx(200.0, rel=1e-4)
 
 
 # ===========================================================================

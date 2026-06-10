@@ -2,18 +2,12 @@ from __future__ import annotations
 
 import copy
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
-from src.tools.model_explorer.attachment_metadata import (
-    AttachmentManifest,
-    attachment_warnings_for_link,
-    load_attachment_manifest,
-)
 from src.tools.model_explorer.composition_validator import (
-    CompositionFinding,
     CompositionValidationResult,
     CompositionValidator,
 )
@@ -30,7 +24,6 @@ class URDFModel:
     materials: dict[str, ET.Element]
     other_elements: list[ET.Element]
     is_modified: bool = False
-    attachment_manifest: AttachmentManifest = field(default_factory=AttachmentManifest)
 
     @classmethod
     def from_file(cls, file_path: Path) -> URDFModel:
@@ -39,12 +32,7 @@ class URDFModel:
             raise ValueError("file_path must be provided")
         tree = DefusedET.parse(file_path)
         root = tree.getroot()
-        model = cls.from_element(root, file_path)
-        model.attachment_manifest = load_attachment_manifest(
-            file_path,
-            known_links=set(model.links),
-        )
-        return model
+        return cls.from_element(root, file_path)
 
     @classmethod
     def from_element(cls, root: ET.Element, file_path: Path | None = None) -> URDFModel:
@@ -194,61 +182,6 @@ class URDFModel:
         self.is_modified = True
         return name
 
-    def add_attachment_joint(
-        self,
-        *,
-        parent_link: str,
-        child_link: str,
-        joint_name: str = "attachment_joint",
-        payload_kg: float | None = None,
-    ) -> tuple[str, tuple[CompositionFinding, ...]]:
-        """Add a fixed attachment joint using declared interface-frame metadata."""
-        if parent_link is None:
-            raise ValueError("parent_link must be provided")
-        if child_link is None:
-            raise ValueError("child_link must be provided")
-
-        point = self.attachment_manifest.get(parent_link)
-        joint = ET.Element("joint", {"name": joint_name, "type": "fixed"})
-        ET.SubElement(joint, "parent", {"link": parent_link})
-        ET.SubElement(joint, "child", {"link": child_link})
-        if point is not None:
-            ET.SubElement(
-                joint,
-                "origin",
-                {
-                    "xyz": _format_vector(point.interface_frame.xyz),
-                    "rpy": _format_vector(point.interface_frame.rpy),
-                },
-            )
-
-        added_name = self.add_joint(joint)
-        warnings = self.attachment_warnings(parent_link, payload_kg=payload_kg)
-        return added_name, warnings
-
-    def attachment_warnings(
-        self,
-        link_name: str,
-        *,
-        payload_kg: float | None = None,
-    ) -> tuple[CompositionFinding, ...]:
-        """Return non-blocking editor warnings for an attachment target."""
-        messages = attachment_warnings_for_link(
-            self.attachment_manifest,
-            link_name,
-            payload_kg=payload_kg,
-        )
-        return tuple(
-            CompositionFinding(
-                code="attachment_metadata_warning",
-                severity="warning",
-                message=message,
-                elements=(link_name,),
-                category="attachment",
-            )
-            for message in messages
-        )
-
     def add_material(self, material: ET.Element) -> str:
         """Add a material to the model."""
         if material is None:
@@ -305,7 +238,3 @@ class URDFModel:
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""
         return list(self.joints.keys())
-
-
-def _format_vector(values: tuple[float, float, float]) -> str:
-    return " ".join(f"{value:g}" for value in values)

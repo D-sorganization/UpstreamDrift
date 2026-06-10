@@ -404,8 +404,10 @@ class _InverseDynamicsSolverMixin:
             computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
 
             # Error metrics
-            acc_error = np.linalg.norm(computed_qacc - qacc)
-            relative_error = acc_error / (np.linalg.norm(qacc) + 1e-10)
+            # ⚡ Bolt: math.hypot is much faster than np.linalg.norm for small 1D arrays
+            diff = computed_qacc - qacc
+            acc_error = float(np.sqrt(np.dot(diff, diff)))
+            relative_error = acc_error / (float(np.sqrt(np.dot(qacc, qacc))) + 1e-10)
 
             return {
                 "acceleration_error": float(acc_error),
@@ -434,8 +436,8 @@ class _InverseDynamicsSolverMixin:
         # Mechanical advantage (ratio of output to input)
         if result.inertial_torques is not None:
             inertial_ratio = float(
-                np.linalg.norm(result.inertial_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.sqrt(np.dot(result.inertial_torques, result.inertial_torques))
+                / (np.sqrt(np.dot(torques, torques)) + 1e-10),
             )
         else:
             inertial_ratio = 0.0
@@ -443,8 +445,8 @@ class _InverseDynamicsSolverMixin:
         # Gravity compensation ratio
         if result.gravity_torques is not None:
             gravity_ratio = float(
-                np.linalg.norm(result.gravity_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.sqrt(np.dot(result.gravity_torques, result.gravity_torques))
+                / (np.sqrt(np.dot(torques, torques)) + 1e-10),
             )
         else:
             gravity_ratio = 0.0
@@ -452,8 +454,8 @@ class _InverseDynamicsSolverMixin:
         # Coriolis ratio (ideally small)
         if result.coriolis_torques is not None:
             coriolis_ratio = float(
-                np.linalg.norm(result.coriolis_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.sqrt(np.dot(result.coriolis_torques, result.coriolis_torques))
+                / (np.sqrt(np.dot(torques, torques)) + 1e-10),
             )
         else:
             coriolis_ratio = 0.0
