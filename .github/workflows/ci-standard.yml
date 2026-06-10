@@ -1966,7 +1966,7 @@ jobs:
         run: cargo test --features python
 
       # ----------------------------------------------------------------------
-      # The remaining steps (Maturin wheel build, Python-binding smoke test,
+      # The remaining steps (Maturin wheel build, Python-binding/source tests,
       # WASM target build) are slow and largely platform-independent. We keep
       # them on Linux only so the cross-platform matrix stays focused on the
       # acceptance-criteria checks (fmt / clippy / test / test --features
@@ -1990,7 +1990,7 @@ jobs:
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install "numpy==2.2.6"
+          python -m pip install "numpy==2.2.6" pytest pydantic pytest-asyncio pytest-timeout
           python -m pip install --force-reinstall target/wheels/*.whl
           python scripts/ci/import_built_rust_wheels.py \
             upstream_physics \
@@ -1999,11 +1999,7 @@ jobs:
             upstream_muscle \
             upstream_motion_matching \
             ai_backend
-          python -m pytest \
-            tests/unit/motion_pipeline/sources/test_trc_adapter.py \
-            tests/unit/motion_pipeline/sources/test_opencap_adapter.py \
-            tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py \
-            -q -o addopts="" --tb=short
+          python -m pytest tests/unit/motion_pipeline/sources -q -o addopts="" --tb=short
           python -c "
           import upstream_physics
           # Verify key types are importable
@@ -2045,7 +2041,7 @@ jobs:
           echo "- cargo test --features python: all tests pass" >> $GITHUB_STEP_SUMMARY
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             echo "- maturin: wheel built" >> $GITHUB_STEP_SUMMARY
-            echo "- Python bindings: verified" >> $GITHUB_STEP_SUMMARY
+            echo "- Python bindings and source adapters: verified" >> $GITHUB_STEP_SUMMARY
             echo "- WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
           fi
 

@@ -11,11 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DOC_PATH = REPO_ROOT / "docs" / "development" / "rust_parity_wheel_gates.md"
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "ci-standard.yml"
 IMPORT_SCRIPT = REPO_ROOT / "scripts" / "ci" / "import_built_rust_wheels.py"
-UPSTREAM_MOCAP_IO_SOURCE_WHEEL_TESTS = (
-    "tests/unit/motion_pipeline/sources/test_trc_adapter.py",
-    "tests/unit/motion_pipeline/sources/test_opencap_adapter.py",
-    "tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py",
-)
+UPSTREAM_MOCAP_IO_SOURCE_WHEEL_TESTS = "tests/unit/motion_pipeline/sources"
 
 
 @dataclass(frozen=True)
@@ -131,12 +127,11 @@ def audit(root: Path = REPO_ROOT) -> list[str]:
                 f"ci-standard.yml import smoke missing module {gate.wheel_module}"
             )
 
-    for test_path in UPSTREAM_MOCAP_IO_SOURCE_WHEEL_TESTS:
-        if test_path not in workflow_text:
-            failures.append(
-                "ci-standard.yml must run upstream-mocap-io source adapter tests "
-                f"after installing built wheels: {test_path}"
-            )
+    if UPSTREAM_MOCAP_IO_SOURCE_WHEEL_TESTS not in workflow_text:
+        failures.append(
+            "ci-standard.yml must run motion-pipeline source adapter tests "
+            "after installing built Rust wheels"
+        )
 
     return failures
 
