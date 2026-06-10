@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://d-sorganization.github.io/upstreamdrift/model_explorer/attachment_manifest.schema.json",
+  "title": "Model Explorer Attachment Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "attachments"],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["link_name", "role", "interface_frame"],
+        "properties": {
+          "link_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "examples": ["hand", "tool-mount", "club-grip"]
+          },
+          "interface_frame": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["xyz", "rpy"],
+            "properties": {
+              "xyz": {
+                "$ref": "#/$defs/vector3"
+              },
+              "rpy": {
+                "$ref": "#/$defs/vector3"
+              }
+            }
+          },
+          "max_payload_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}
