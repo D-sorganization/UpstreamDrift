@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.279                                            |
+| **Spec Version**        | 1.0.280                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Repaired the Linux dependency-consistency lockfile drift
+  after #7231. `requirements-dev.lock` now matches the Python 3.12 Linux
+  `pip-compile --extra dev` output used by CI, removing Windows-only transitive
+  packages and restoring `uvloop` for the Linux `uvicorn[standard]` stack.
 - **2026-06-10** - Repaired Rust TRC row-validation parity for #7213.
   `rust_core/upstream-mocap-io` now rejects invalid or non-finite frame/time
   columns before accepting marker rows, preserving the Python adapter's
@@ -822,6 +826,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.280 | Linux dependency-consistency lockfile repair after #7231. `requirements-dev.lock` now matches the Python 3.12 Linux `pip-compile --extra dev` output enforced by CI: Windows-only transitive `colorama` and `tzdata` entries are removed, and `uvloop` is restored for the Linux `uvicorn[standard]` dependency graph. |
 | 2026-06-10 | 1.0.279 | Built-wheel mocap source parity fix (#7213). The Rust `upstream-mocap-io` TRC parser now validates invalid or non-finite data-row frame and time fields before marker coordinates, preserving the Python facade's invalid-row contract when the PyO3 wheel is installed. The OpenCap session adapter test now follows the existing Rust parity contract by comparing marker coordinates approximately instead of requiring impossible exact decimal equality from Rust `f32` output. CI now runs the full `tests/unit/motion_pipeline/sources` directory immediately after installing built Rust wheels, and the Rust parity wheel gate script ratchets that source-wheel coverage. |
 | 2026-06-10 | 1.0.278 | MATLAB engine loader unification (#7219). `EngineManager._load_engine()` now dispatches every engine, including `MATLAB_2D` and `MATLAB_3D`, through the registry's `EngineRegistration.factory()` path. MATLAB-family Simscape adapter creation lives in `src.engines.loaders` with loader shim exports preserved for legacy imports, and tests assert the manager has no private MATLAB loader branch. |
 | 2026-06-10 | 1.0.277 | OpenSim `.osim` loader for #7203. Added first-party `src/tools/model_explorer/osim_loader.py` to parse OpenSim 3.x and 4.x model XML into `ParsedModel`, convert to validated `CanonicalModel`, preserve masses and joint mappings, and surface muscles/constraints/markers as warnings. Sibling discovery, imported model discovery, file filters, and the model-opening path now accept `.osim` without editing vendored `src/shared/python/model_generation/**`. Regression coverage lives in `tests/tools/model_explorer/test_osim_loader.py` and `.osim` sibling-discovery assertions. |
