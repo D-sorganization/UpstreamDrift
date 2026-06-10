@@ -17,7 +17,7 @@ Public API
   ===========  ====================================================
   engine       file format
   ===========  ====================================================
-  drake        pickle of ``{q, v, model_metadata}``
+  drake        JSON ``{q, v, model_metadata}``
   mujoco       JSON ``{qpos, qvel}``
   pinocchio    ``np.savez`` ``{q, v}``
   opensim      ``.sto`` row format (``initial_state``)
@@ -47,7 +47,6 @@ therefore emits a zero-velocity vector sized to match its ``q`` /
 from __future__ import annotations
 
 import json
-import pickle  # noqa: S403 - trusted pickle for engine-native MCAP fixtures
 from pathlib import Path
 from typing import Any, Final
 
@@ -125,7 +124,7 @@ def _resolve_path(output_path: Path | str) -> Path:
 
 
 # ----------------------------------------------------------------------------
-# Drake: pickle of {q, v, model_metadata}
+# Drake: JSON {q, v, model_metadata}
 # ----------------------------------------------------------------------------
 
 
@@ -135,8 +134,8 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
     q = adapter.from_canonical(pose)
     v = np.zeros_like(q)
     payload: dict[str, Any] = {
-        "q": q,
-        "v": v,
+        "q": q.tolist(),
+        "v": v.tolist(),
         "model_metadata": {
             "engine": "drake",
             "convention_tag": pose.convention_tag,
@@ -145,36 +144,22 @@ def _save_drake(pose: CanonicalPose, path: Path) -> None:
             "joint_names": tuple(REFERENCE_GOLFER_FIELDS),
         },
     }
-    with path.open("wb") as fh:
-        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
-        pickle.dump(payload, fh)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def _load_drake(path: Path) -> CanonicalPose:
     """Load a Drake initial-state ``.drake`` file.
 
-    Trust boundary (issue #6929)
-    ----------------------------
-    The ``.drake`` interchange format is a Python ``pickle`` (see
-    :func:`_save_drake`). ``pickle.load`` executes arbitrary code embedded in
-    the stream, so a malicious ``.drake`` file is an arbitrary-code-execution
-    vector. This is **deliberately accepted** because the format is a
-    *local-only, desktop/CLI* artifact: it is **never** loaded from
-    network/API input (the FastAPI surface uses the JSON/``.npz`` engine
-    formats), and the file is produced by :func:`_save_drake` on the same
-    machine. Callers must therefore treat ``.drake`` files exactly like any
-    other executable they run: only load files you produced or fully trust.
-    Do **not** expose this loader on an untrusted ingest path; if that ever
-    becomes necessary, migrate ``.drake`` to ``np.savez``/JSON like the
-    MuJoCo and Pinocchio adapters, which avoid pickle entirely.
+    Drake pose interchange is JSON-only. Legacy pickle files are rejected at
+    the trust boundary instead of being deserialized.
     """
-    with path.open("rb") as fh:
-        # noqa: S301 — trusted, locally-produced file only; see trust-boundary
-        # note above. Not reachable from any API/network input.
-        # nosemgrep: python.lang.security.deserialization.pickle.avoid-pickle
-        payload = pickle.load(fh)  # noqa: S301
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ValueError(f"{path}: drake file must be JSON") from exc
+
     if not isinstance(payload, dict) or "q" not in payload:
-        raise ValueError(f"{path}: drake pickle missing required 'q' field")
+        raise ValueError(f"{path}: drake file missing required 'q' field")
     adapter = ADAPTER_REGISTRY["drake"]()
     return adapter.to_canonical(np.asarray(payload["q"], dtype=float))
 

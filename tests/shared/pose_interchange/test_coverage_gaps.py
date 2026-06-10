@@ -352,13 +352,19 @@ class TestPoseIO:
         with pytest.raises(FileNotFoundError, match="pinocchio archive"):
             load_initial_state("pinocchio", tmp_path / "missing")
 
-    def test_load_drake_rejects_bad_pickle(self, tmp_path: Path) -> None:
-        import pickle
+    def test_load_drake_rejects_bad_file(self, tmp_path: Path) -> None:
+        import json
 
-        path = tmp_path / "bad.pkl"
-        with path.open("wb") as fh:
-            pickle.dump({"wrong": True}, fh)
+        path = tmp_path / "bad.drake"
+        path.write_text(json.dumps({"wrong": True}), encoding="utf-8")
         with pytest.raises(ValueError, match="missing required 'q'"):
+            load_initial_state("drake", path)
+
+    def test_load_drake_rejects_non_json_file(self, tmp_path: Path) -> None:
+        path = tmp_path / "legacy.drake"
+        path.write_bytes(b"\x80\x04legacy-binary-payload")
+
+        with pytest.raises(ValueError, match="must be JSON"):
             load_initial_state("drake", path)
 
     def test_load_mujoco_missing_qpos(self, tmp_path: Path) -> None:
