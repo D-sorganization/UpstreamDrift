@@ -647,6 +647,7 @@ class ModelLibrary:
         embedded = self.get_embedded_mujoco_models()
         robot_descs = self.discover_robot_descriptions()
         imported = self.discover_imported_models()
+        sibling = self.discover_sibling_models()
 
         return {
             "human": list(self.HUMAN_MODELS.keys()),
@@ -658,6 +659,7 @@ class ModelLibrary:
             "embedded": embedded,
             "robot_descriptions": robot_descs,
             "imported": imported,
+            "sibling": sibling,
         }
 
     def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:  # noqa: C901
@@ -700,6 +702,12 @@ class ModelLibrary:
             return None
         if category == "imported":
             models = self.discover_imported_models()
+            for model in models:
+                if model["config_key"] == model_key:
+                    return model
+            return None
+        if category == "sibling":
+            models = self.discover_sibling_models()
             for model in models:
                 if model["config_key"] == model_key:
                     return model
@@ -769,6 +777,27 @@ class ModelLibrary:
                         pass  # reading error, skip
 
         return sorted(models, key=lambda x: x["name"])
+
+    def discover_sibling_models(self) -> list[dict[str, Any]]:
+        """Discover URDF/MJCF models in sibling model repositories.
+
+        Scans the repos named by ``UD_SIBLING_MODEL_REPOS`` (or the
+        default ``*_Models`` siblings next to this checkout). See
+        :mod:`src.tools.model_explorer.sibling_repositories`.
+
+        Returns:
+            List of model-info dictionaries (same shape as
+            :meth:`discover_repo_models`, plus a ``repo`` key).
+        """
+        from src.tools.model_explorer.sibling_repositories import (
+            discover_sibling_models,
+        )
+
+        try:
+            return discover_sibling_models(_project_root)
+        except ValueError:
+            logger.exception("Sibling model discovery failed")
+            return []
 
     def discover_robot_descriptions(self) -> list[dict[str, Any]]:
         """Discover models available in the robot_descriptions package.
