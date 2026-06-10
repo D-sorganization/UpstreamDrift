@@ -70,11 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-06-10** - Started the launcher entrypoint split for #7217.
-  Frameless-window resize handling now lives in
-  `src.launchers.launcher_frameless_window`, with tested edge detection,
-  cursor mapping, and minimum-size geometry helpers while preserving the
-  existing app-level event-filter behavior.
+- **2026-06-10** - Split the launcher entrypoint below the file-size budget
+  for #7217. Frameless resize handling, Sidekick sidebar installation,
+  process cleanup polling, launcher domain orchestration, and GUI startup
+  bootstrap now live in focused modules, and the
+  `src/launchers/upstream_drift_launcher.py` file-size exception is removed.
 - **2026-06-10** - Added model explorer attachment-point metadata for #7206.
   Bundled model definitions can now ship `<model>.attachments.json` sidecars
   validated by a JSON schema, the model library reports declared attachment
@@ -909,7 +909,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-10 | 1.0.294 | Started the launcher entrypoint split for #7217. Frameless-window resize handling moved from `src/launchers/upstream_drift_launcher.py` into `src.launchers.launcher_frameless_window`, adding focused tests for resize-edge detection, cursor mapping, and minimum-size geometry rejection while preserving the existing frameless app-level event-filter behavior. |
+| 2026-06-10 | 1.0.294 | Split the launcher entrypoint below the file-size budget for #7217. Frameless-window resize handling, Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved out of `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the existing app-level event-filter behavior. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |
 | 2026-06-10 | 1.0.293 | Added model explorer attachment-point metadata for #7206. Bundled model definitions can now ship schema-validated `<model>.attachments.json` sidecars that declare stable parent and child interface frames, the model library exposes declared attachment points with payload warnings for missing links or malformed manifests, and Frankenstein composition now places attachments from those declared interface-frame origins instead of relying on implicit link origins. |
 | 2026-06-10 | 1.0.292 | Hardened motion-pipeline keypoint gap filling for #7247. `_linear_interp_keypoints` now checks both `before.keypoints` and `after.keypoints` before indexing a low-confidence gap keypoint, leaving unfillable keypoints unchanged when neighboring frames have mismatched keypoint counts. The fix applies to both the primary preprocessing path and the pure-Python fallback, with regression coverage for the former `IndexError` crash case. |
 | 2026-06-10 | 1.0.291 | Corrected the ball-flight launch-condition unit contract for #7246. `LaunchConditions` continues to store launch/azimuth angles in radians and spin rate in RPM, and `LaunchConditions.from_user_units(...)` is now the canonical user-facing conversion boundary used by the ball-flight GUI and swing-to-flight pipeline. The pipeline converts impact rad/s spin back to RPM before simulation, and regression tests pin the tour-driver carry sanity gate so degree/rad-s misuse cannot silently collapse carry to zero again. |
