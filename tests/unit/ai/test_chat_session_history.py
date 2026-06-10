@@ -298,18 +298,27 @@ class TestChatSessionManagerSessionLifecycle:
         self, manager: object, storage_dir: Path
     ) -> None:
         """list_sessions returns sessions newest-first."""
-        import time
+        from datetime import UTC, datetime
 
+        # Control message timestamps explicitly (#7156): ordering is derived
+        # from the last message's timestamp, so set them deterministically
+        # instead of betting that a wall-clock sleep spaced two now() calls.
         ctx_old = _make_context()
+        ctx_old.add_user_message("older message")
+        ctx_old.messages[-1].timestamp = datetime(2020, 1, 1, tzinfo=UTC)
         manager.save_session(ctx_old)
-        time.sleep(0.01)  # ensure timestamp ordering
+
         ctx_new = _make_context()
         ctx_new.add_user_message("newer message")
+        ctx_new.messages[-1].timestamp = datetime(2024, 1, 1, tzinfo=UTC)
         manager.save_session(ctx_new)
 
         sessions = manager.list_sessions()
-        # Both sessions present; the test just checks it doesn't crash
         assert len(sessions) == 2
+        # Issue #7157: actually assert the documented newest-first order rather
+        # than merely that the call returns two items.
+        assert sessions[0]["id"] == ctx_new.session_id
+        assert sessions[1]["id"] == ctx_old.session_id
 
     def test_session_title_auto_generated(
         self, manager: object, storage_dir: Path

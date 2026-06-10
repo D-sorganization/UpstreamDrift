@@ -475,8 +475,8 @@ class TestPythonSubscribePath:
         ps = ws_mod.WSPubSub(port=12350, backend="python", autostart=False)
         monkeypatch.setitem(sys.modules, "websockets", None)
         sub = ps.subscribe("scope/topic", lambda p: None)
-        # Give the worker a moment to import-fail
-        time.sleep(0.05)
+        # No fixed sleep needed (#7156): unsubscribe() joins the worker thread,
+        # so it synchronises on the import-failed worker deterministically.
         sub.unsubscribe()
 
 
@@ -631,11 +631,17 @@ class TestPythonSubscribeLoop:
 
         ps = ws_mod.WSPubSub(port=12353, backend="python", autostart=False)
 
+        # Signal the first (raising) callback so we wait on an event instead of
+        # a fixed sleep (#7156): the callback sets the event *before* raising, so
+        # the test blocks exactly until isolation has been exercised once.
+        invoked = threading.Event()
+
         def cb(_payload) -> None:
+            invoked.set()
             raise RuntimeError("nope")
 
         sub = ps.subscribe("scope/topic", cb)
-        time.sleep(0.2)  # let it raise at least once
+        assert invoked.wait(3.0), "callback was never invoked"
         sub.unsubscribe()
 
 

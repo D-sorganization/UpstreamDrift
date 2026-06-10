@@ -54,6 +54,29 @@ RUN pip install \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
 
+# Audit the *resolved* environment inside the image (issue #7159 D2). The
+# Dockerfile pins ~36 lines that can drift from requirements.lock, so a manual
+# edit could otherwise bake a CVE into the runtime image without the CI lane
+# ever auditing it. We reuse the SAME waiver policy as CI
+# (scripts/config/pip_audit_waivers.json + scripts/ci/check_pip_audit_waivers.py)
+# so there is one source of truth (DRY). Runs in the builder stage only, so
+# pip-audit does not ship in the runtime image. Air-gapped builds may pass
+# --build-arg SKIP_AUDIT=true; the default is enforced.
+ARG SKIP_AUDIT=false
+COPY scripts/config/pip_audit_waivers.json /tmp/pip_audit_waivers.json
+COPY scripts/ci/check_pip_audit_waivers.py /tmp/check_pip_audit_waivers.py
+RUN set -eu; \
+    if [ "$SKIP_AUDIT" = "true" ]; then \
+        echo "SKIP_AUDIT=true — skipping in-image pip-audit (air-gapped build)"; \
+    else \
+        pip install --no-cache-dir pip-audit; \
+        waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
+            --waiver-file /tmp/pip_audit_waivers.json)"; \
+        # shellcheck disable=SC2086 - intentional word-splitting of flags
+        python -m pip_audit $waiver_flags; \
+        pip uninstall -y pip-audit; \
+    fi
+
 
 # Stage 2: Runtime — slim production image for the API server
 # Base image pinned by digest for reproducible builds
@@ -97,7 +120,11 @@ COPY --from=builder /opt/venv /opt/venv
 
 # /workspace is the project root; "from src.xxx" imports resolve here
 ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/workspace"
+    PYTHONPATH="/workspace" \
+    # Headless MuJoCo rendering default (issue #7161 D3): set in the image so a
+    # bare `docker run` matches the compose default (MUJOCO_GL=osmesa) instead
+    # of only being defined in docker-compose.yml (K — reproducibility).
+    MUJOCO_GL="osmesa"
 
 RUN mkdir -p /workspace && chown -R ${USER_NAME}:${USER_NAME} /workspace
 
@@ -116,9 +143,11 @@ USER ${USER_NAME}
 
 EXPOSE 8001
 
-# The core routes register /health on the FastAPI app (src/api/routes/core.py)
+# The core routes register /health on the FastAPI app (src/api/routes/core.py).
+# Use a Python one-liner (issue #7161 D3) so the healthcheck does not depend on
+# curl being present from an apt layer — python is always in the venv.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8001/health || exit 1
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/health', timeout=5).status==200 else 1)" || exit 1
 
 # Default command — starts the FastAPI server on port 8001.
 # Override with `docker run ... /bin/bash` for an interactive shell.

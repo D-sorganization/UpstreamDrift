@@ -8,6 +8,8 @@ import time
 import numpy as np
 import pytest
 
+from tests.support.waiting import wait_until
+
 
 class TestRobotState:
     """Tests for RobotState dataclass."""
@@ -169,8 +171,12 @@ class TestRealTimeController:
         controller.set_control_callback(simple_callback)
         controller.start()
 
-        # Run briefly
-        time.sleep(0.05)
+        # Wait until the control loop has actually run a cycle (event-based,
+        # not a fixed sleep — issue #7156).
+        wait_until(
+            lambda: controller.get_timing_stats().total_cycles > 0,
+            message="control loop did not complete a cycle",
+        )
 
         controller.stop()
 
@@ -349,7 +355,11 @@ class TestRealTimeController:
 
         controller.set_control_callback(cb)
         controller.start()
-        time.sleep(0.05)
+        # Wait for the loop to run rather than betting on a fixed sleep (#7156).
+        wait_until(
+            lambda: controller.get_timing_stats().total_cycles > 0,
+            message="control loop did not start cycling",
+        )
         controller.stop()
 
         stats = controller.get_timing_stats()
@@ -418,10 +428,12 @@ class TestControlLoopFailureEscalation:
         controller.set_control_callback(failing_callback)
         controller.start()
 
-        # Wait for the loop to self-abort.
-        deadline = time.perf_counter() + 2.0
-        while controller.is_running and time.perf_counter() < deadline:
-            time.sleep(0.005)
+        # Wait for the loop to self-abort (bounded, event-based — #7156).
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="control loop did not self-abort after persistent failures",
+        )
 
         assert not controller.is_running
         assert controller.aborted_on_failure
@@ -464,7 +476,12 @@ class TestControlLoopFailureEscalation:
 
         controller.set_control_callback(flaky_callback)
         controller.start()
-        time.sleep(0.1)
+        # Wait until several callbacks (including transient failures, every 4th)
+        # have run, then assert the loop survived them (#7156).
+        wait_until(
+            lambda: state["calls"] >= 8,
+            message="callback did not run enough cycles to exercise failures",
+        )
 
         assert controller.is_running
         assert not controller.aborted_on_failure
@@ -537,7 +554,8 @@ class TestControllerStopTimeout:
 
         controller.set_control_callback(cb)
         controller.start()
-        time.sleep(0.03)
+        # Wait for at least one command to be sent before stopping (#7156).
+        wait_until(lambda: bool(sent), message="no command sent before stop")
         controller.stop()
 
         assert not controller.is_running
