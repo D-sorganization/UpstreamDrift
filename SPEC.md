@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.275                                            |
+| **Spec Version**        | 1.0.276                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added Drake SDF model loading for #7204. The model
+  explorer now provides a first-party `SdfLoader` under
+  `src.tools.model_explorer`, parsing SDFormat links, inertials, primitive and
+  mesh geometry, joint axes/limits/dynamics, SDFormat 1.8 `relative_to` poses,
+  and ball/universal joints into the existing canonical model contract.
+  Sibling model discovery now classifies `.sdf` files from `Drake_Models`
+  alongside URDF and MJCF assets so Drake-native models can be browsed and
+  composed.
 - **2026-06-10** - Preserved URDF fixed-joint topology through MJCF
   roundtrips for #7208: URDF-to-MJCF conversion keeps MuJoCo weld semantics by
   emitting fixed children as nested bodies without joint elements while encoding
@@ -790,6 +798,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.276 | Drake SDF model loading (#7204). Added `src.tools.model_explorer.SdfLoader` for the model explorer to parse SDFormat links, inertials, primitive and mesh geometry, joint axes/limits/dynamics, SDFormat 1.8 `relative_to` poses, and ball/universal joints into the canonical model contract. Sibling model discovery now classifies `.sdf` files from `Drake_Models` alongside URDF and MJCF assets so Drake-native models can be browsed and composed. |
 | 2026-06-10 | 1.0.275 | MJCF fixed-joint roundtrip topology preservation (#7208). URDF-to-MJCF conversion now keeps fixed children as welded nested MuJoCo bodies without joint elements while encoding the original fixed joint name, and MJCF-to-URDF decoding restores that fixed joint name only for welded nested bodies. Regression coverage asserts link sets, fixed and movable joint names/types, parent-child topology, and fixed-joint origin translation across URDF -> MJCF -> URDF. |
 | 2026-06-10 | 1.0.274 | Embeddable-tool adapter entry-point discovery (#7211). `src/launchers/embedded_tool_bootstrap.py` now imports `upstream_drift.embeddable_tools` entry-point adapters first, falls back to the in-tree adapter module list for editable checkouts, de-duplicates module paths across both sources, and keeps registry-diff tracking plus manifest-gap warnings intact. `pyproject.toml` declares the first-party adapter entry points so installed wheels and source checkouts use the same bootstrap contract. |
 | 2026-06-10 | 1.0.273 | Ball-flight REST simulation route (#7218). `POST /tools/ball-flight/simulate` exposes headless/batch launch simulation through the existing `FlightModelRegistry` and `UnifiedLaunchConditions` stack, validates launch/spin/wind/model/integration-window inputs with Pydantic contracts, and registers the `ball_flight` API tool route alongside the route registry. |

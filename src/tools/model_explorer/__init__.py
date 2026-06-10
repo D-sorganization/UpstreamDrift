@@ -64,6 +64,8 @@ __all__ = [
     "JointManipulatorWidget",
     # Mesh browser
     "MeshBrowserWidget",
+    # Model loaders
+    "SdfLoader",
 ]
 
 
@@ -121,4 +123,8 @@ def __getattr__(name: str) -> type:  # noqa: C901
         from .mesh_browser import MeshBrowserWidget
 
         return MeshBrowserWidget
+    if name == "SdfLoader":
+        from .sdf_loader import SdfLoader
+
+        return SdfLoader
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

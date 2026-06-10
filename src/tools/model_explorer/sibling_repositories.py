@@ -7,7 +7,7 @@ bundled assets and files inside this repository, so those libraries
 were unreachable without manual file dialogs.
 
 This module scans sibling repositories for loadable model files (URDF
-and MJCF — the formats :class:`UnifiedModelLoader` understands today)
+MJCF, and Drake SDF)
 and reports them in the same dict shape that
 :meth:`ModelLibrary.discover_repo_models` uses, so the explorer UI can
 present them as one more category.
@@ -90,10 +90,12 @@ def candidate_sibling_roots(project_root: Path) -> list[Path]:
 
 
 def _classify(file_path: Path) -> str | None:
-    """Return ``'urdf'`` / ``'mjcf'`` for loadable model files, else None."""
+    """Return the loadable model format for known model files, else None."""
     suffix = file_path.suffix.lower()
     if suffix == ".urdf":
         return "urdf"
+    if suffix == ".sdf":
+        return "sdf"
     if suffix not in (".xml", ".mjcf"):
         return None
     try:
