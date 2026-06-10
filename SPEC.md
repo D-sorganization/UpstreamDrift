@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.293                                            |
+| **Spec Version**        | 1.0.294                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Optimized MuJoCo inverse-dynamics vector norms. The
+  MuJoCo humanoid golf ID solver now uses direct dot-product square roots for
+  one-dimensional residual/vector norm calculations in the hot validation and
+  batch solve paths, preserving numerical behavior while avoiding
+  `np.linalg.norm` overhead.
 - **2026-06-10** - Added model explorer attachment-point metadata for #7206.
   Bundled model definitions can now ship `<model>.attachments.json` sidecars
   validated by a JSON schema, the model library reports declared attachment
