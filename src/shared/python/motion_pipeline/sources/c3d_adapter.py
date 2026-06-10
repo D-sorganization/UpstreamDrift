@@ -25,6 +25,9 @@ from src.shared.python.motion_pipeline.sources.base import (
     MocapSourceAdapter,
     SourceMetadata,
 )
+from src.shared.python.motion_pipeline.sources._marker_coordinates import (
+    has_nan_coordinate,
+)
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
 
 try:  # pragma: no cover - native wheel may not be installed in dev clones
@@ -219,7 +222,7 @@ class C3DAdapter(MocapSourceAdapter):
                 x = float(row[base])
                 y = float(row[base + 1])
                 z = float(row[base + 2])
-                if x != x or y != y or z != z:  # NaN check (occluded)
+                if has_nan_coordinate(x, y, z):
                     continue
                 markers[name] = marker_ctor(
                     name=name, x=x, y=y, z=z, residual=None, occluded=False
@@ -272,7 +275,7 @@ class C3DAdapter(MocapSourceAdapter):
                 x = float(points[0, mi, fi]) * scale
                 y = float(points[1, mi, fi]) * scale
                 z = float(points[2, mi, fi]) * scale
-                if any(val != val for val in (x, y, z)):  # NaN check
+                if has_nan_coordinate(x, y, z):
                     continue
                 markers[name] = Marker(name=name, x=x, y=y, z=z)
             frames.append(

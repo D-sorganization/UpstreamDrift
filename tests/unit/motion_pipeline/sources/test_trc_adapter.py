@@ -52,6 +52,26 @@ def test_trc_load_converts_mm_to_meters(tmp_path: Path) -> None:
     assert head_first.z == pytest.approx(3.0)
 
 
+def test_trc_load_treats_nan_coordinates_as_occluded(tmp_path: Path) -> None:
+    content = "\n".join(
+        [
+            "PathFileType\t4\t(X/Y/Z)\tfile.trc",
+            "DataRate\tCameraRate\tNumFrames\tUnits",
+            "100.0\t100.0\t1\tmm",
+            "Frame#\tTime\tHEAD\tHIP",
+            "\t\tX1\tY1\tZ1\tX2\tY2\tZ2",
+            "1\t0.0\tnan\t2000\t3000\t100\t200\t300",
+        ]
+    )
+    p = tmp_path / "nan_marker.trc"
+    p.write_text(content)
+
+    traj = TRCAdapter().load(p)
+
+    assert "HEAD" not in traj.frames[0].markers
+    assert traj.frames[0].markers["HIP"].x == pytest.approx(0.1)
+
+
 def test_trc_truncated_raises(tmp_path: Path) -> None:
     p = tmp_path / "short.trc"
     p.write_text("PathFileType\t4\nfoo\n")

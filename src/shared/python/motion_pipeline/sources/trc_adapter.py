@@ -32,6 +32,9 @@ from src.shared.python.motion_pipeline.sources.base import (
     MocapSourceAdapter,
     SourceMetadata,
 )
+from src.shared.python.motion_pipeline.sources._marker_coordinates import (
+    has_nan_coordinate,
+)
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
 
 try:  # pragma: no cover - native wheel may not be installed
@@ -164,6 +167,8 @@ class TRCAdapter(MocapSourceAdapter):
                 except ValueError:
                     # Treat unparseable as occluded
                     continue
+                if has_nan_coordinate(x, y, z):
+                    continue
                 markers[name] = Marker(name=name, x=x, y=y, z=z)
             frames.append(
                 MarkerFrame(timestamp=t, markers=markers, frame_index=frame_idx)
@@ -224,7 +229,7 @@ class TRCAdapter(MocapSourceAdapter):
                 x = float(row[base])
                 y = float(row[base + 1])
                 z = float(row[base + 2])
-                if x != x or y != y or z != z:  # NaN occlusion
+                if has_nan_coordinate(x, y, z):
                     continue
                 markers[name] = marker_ctor(
                     name=name, x=x, y=y, z=z, residual=None, occluded=False
