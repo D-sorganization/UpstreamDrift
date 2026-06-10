@@ -1,5 +1,38 @@
 {
   "max_function_lines": 100,
   "max_parameters": 8,
-  "exceptions": []
+  "exceptions": [
+    {
+      "path": "src/launchers/launcher_process_manager.py",
+      "symbol": "ProcessManager.launch_script",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Pre-existing oversized launcher method, untouched by the #7151 pipe-reader fix; decomposition tracked in issue #7151 follow-up.",
+      "expires_on": "2026-08-15"
+    },
+    {
+      "path": "src/launchers/launcher_process_manager.py",
+      "symbol": "ProcessManager.launch_module",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Pre-existing oversized launcher method, untouched by the #7151 pipe-reader fix; decomposition tracked in issue #7151 follow-up.",
+      "expires_on": "2026-08-15"
+    },
+    {
+      "path": "src/shared/python/chat/router_factory.py",
+      "symbol": "create_chat_router",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Pre-existing oversized WS router factory; the #7150 disconnect-cleanup fix only adds a finally block. Decomposition tracked in issue #7150 follow-up.",
+      "expires_on": "2026-08-15"
+    },
+    {
+      "path": "src/shared/python/chat/router_factory.py",
+      "symbol": "create_chat_router.chat_stream",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Pre-existing oversized WS handler; the #7150 fix adds only disconnect/finally cleanup. Decomposition tracked in issue #7150 follow-up.",
+      "expires_on": "2026-08-15"
+    }
+  ]
 }
