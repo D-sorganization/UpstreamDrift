@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.293                                            |
+| **Spec Version**        | 1.0.294                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Started the launcher entrypoint split for #7217.
+  Frameless-window resize handling now lives in
+  `src.launchers.launcher_frameless_window`, with tested edge detection,
+  cursor mapping, and minimum-size geometry helpers while preserving the
+  existing app-level event-filter behavior.
 - **2026-06-10** - Added model explorer attachment-point metadata for #7206.
   Bundled model definitions can now ship `<model>.attachments.json` sidecars
   validated by a JSON schema, the model library reports declared attachment
@@ -904,6 +909,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.294 | Started the launcher entrypoint split for #7217. Frameless-window resize handling moved from `src/launchers/upstream_drift_launcher.py` into `src.launchers.launcher_frameless_window`, adding focused tests for resize-edge detection, cursor mapping, and minimum-size geometry rejection while preserving the existing frameless app-level event-filter behavior. |
 | 2026-06-10 | 1.0.293 | Added model explorer attachment-point metadata for #7206. Bundled model definitions can now ship schema-validated `<model>.attachments.json` sidecars that declare stable parent and child interface frames, the model library exposes declared attachment points with payload warnings for missing links or malformed manifests, and Frankenstein composition now places attachments from those declared interface-frame origins instead of relying on implicit link origins. |
 | 2026-06-10 | 1.0.292 | Hardened motion-pipeline keypoint gap filling for #7247. `_linear_interp_keypoints` now checks both `before.keypoints` and `after.keypoints` before indexing a low-confidence gap keypoint, leaving unfillable keypoints unchanged when neighboring frames have mismatched keypoint counts. The fix applies to both the primary preprocessing path and the pure-Python fallback, with regression coverage for the former `IndexError` crash case. |
 | 2026-06-10 | 1.0.291 | Corrected the ball-flight launch-condition unit contract for #7246. `LaunchConditions` continues to store launch/azimuth angles in radians and spin rate in RPM, and `LaunchConditions.from_user_units(...)` is now the canonical user-facing conversion boundary used by the ball-flight GUI and swing-to-flight pipeline. The pipeline converts impact rad/s spin back to RPM before simulation, and regression tests pin the tour-driver carry sanity gate so degree/rad-s misuse cannot silently collapse carry to zero again. |
