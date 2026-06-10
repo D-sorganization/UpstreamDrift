@@ -100,81 +100,80 @@ class DataProcessor:
             raise ValueError("frame_idx must be provided")
         if frame_idx in self.cache:
             return self.cache[frame_idx]
+
+        baseq_row = self._safe_get_row(datasets.get("BASEQ"), frame_idx)
+        ztcfq_row = self._safe_get_row(datasets.get("ZTCFQ"), frame_idx)
+        deltaq_row = self._safe_get_row(datasets.get("DELTAQ"), frame_idx)
+
         frame_data = FrameData(
             frame_idx=frame_idx,
             time=frame_idx * 0.001,
-            butt=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Butt"),
-            clubhead=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Clubhead"),
-            midpoint=self._safe_extract_point(datasets["BASEQ"], frame_idx, "MidPoint"),
-            left_wrist=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftWrist"
-            ),  # noqa: E501
-            left_elbow=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftElbow"
-            ),  # noqa: E501
-            left_shoulder=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftShoulder"
-            ),  # noqa: E501
-            right_wrist=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightWrist"
-            ),  # noqa: E501
-            right_elbow=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightElbow"
-            ),  # noqa: E501
-            right_shoulder=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightShoulder"
-            ),  # noqa: E501
-            hub=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Hub"),
+            butt=self._safe_extract_point(baseq_row, "Butt"),
+            clubhead=self._safe_extract_point(baseq_row, "Clubhead"),
+            midpoint=self._safe_extract_point(baseq_row, "MidPoint"),
+            left_wrist=self._safe_extract_point(baseq_row, "LeftWrist"),
+            left_elbow=self._safe_extract_point(baseq_row, "LeftElbow"),
+            left_shoulder=self._safe_extract_point(baseq_row, "LeftShoulder"),
+            right_wrist=self._safe_extract_point(baseq_row, "RightWrist"),
+            right_elbow=self._safe_extract_point(baseq_row, "RightElbow"),
+            right_shoulder=self._safe_extract_point(baseq_row, "RightShoulder"),
+            hub=self._safe_extract_point(baseq_row, "Hub"),
             forces={
-                "BASEQ": self._safe_extract_vector(
-                    datasets["BASEQ"], frame_idx, "TotalHandForceGlobal"
-                ),
-                "ZTCFQ": self._safe_extract_vector(
-                    datasets["ZTCFQ"], frame_idx, "TotalHandForceGlobal"
-                ),
-                "DELTAQ": self._safe_extract_vector(
-                    datasets["DELTAQ"], frame_idx, "TotalHandForceGlobal"
-                ),
+                "BASEQ": self._safe_extract_vector(baseq_row, "TotalHandForceGlobal"),
+                "ZTCFQ": self._safe_extract_vector(ztcfq_row, "TotalHandForceGlobal"),
+                "DELTAQ": self._safe_extract_vector(deltaq_row, "TotalHandForceGlobal"),
             },
             torques={
                 "BASEQ": self._safe_extract_vector(
-                    datasets["BASEQ"], frame_idx, "EquivalentMidpointCoupleGlobal"
+                    baseq_row, "EquivalentMidpointCoupleGlobal"
                 ),
                 "ZTCFQ": self._safe_extract_vector(
-                    datasets["ZTCFQ"], frame_idx, "EquivalentMidpointCoupleGlobal"
+                    ztcfq_row, "EquivalentMidpointCoupleGlobal"
                 ),
                 "DELTAQ": self._safe_extract_vector(
-                    datasets["DELTAQ"], frame_idx, "EquivalentMidpointCoupleGlobal"
+                    deltaq_row, "EquivalentMidpointCoupleGlobal"
                 ),
             },
         )
         self.cache[frame_idx] = frame_data
         return frame_data
 
-    def _safe_extract_point(
-        self, dataset: pd.DataFrame, frame_idx: int, column: str
-    ) -> np.ndarray:  # noqa: E501
-        """Safely extract 3D point with fallbacks"""
-        if dataset is None:
-            raise ValueError("dataset must be provided")
+    @staticmethod
+    def _safe_get_row(
+        dataframe: pd.DataFrame | None, frame_idx: int
+    ) -> pd.Series | None:
+        """Fetch one dataset row for all point/vector extraction in a frame."""
+        if dataframe is None:
+            return None
         try:
-            point = dataset[column].iloc[frame_idx]
+            return dataframe.iloc[frame_idx]
+        except IndexError:
+            return None
+
+    def _safe_extract_point(
+        self, row_series: pd.Series | None, column: str
+    ) -> np.ndarray:
+        """Safely extract 3D point with fallbacks"""
+        if row_series is None:
+            return np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        try:
+            point = row_series[column]
             if isinstance(point, list | np.ndarray) and len(point) == 3:
                 return np.array(point, dtype=np.float32)
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, KeyError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
     def _safe_extract_vector(
-        self, dataset: pd.DataFrame, frame_idx: int, column: str
-    ) -> np.ndarray:  # noqa: E501
+        self, row_series: pd.Series | None, column: str
+    ) -> np.ndarray:
         """Safely extract 3D vector with fallbacks"""
-        if dataset is None:
-            raise ValueError("dataset must be provided")
+        if row_series is None:
+            return np.array([0.0, 0.0, 0.0], dtype=np.float32)
         try:
-            vector = dataset[column].iloc[frame_idx]
+            vector = row_series[column]
             if isinstance(vector, list | np.ndarray) and len(vector) == 3:
                 return np.array(vector, dtype=np.float32)
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, KeyError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)

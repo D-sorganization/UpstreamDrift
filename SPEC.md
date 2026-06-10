@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-10
+  LAST UPDATED: 2026-06-11
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.281                                            |
+| **Spec Version**        | 1.0.282                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Optimized legacy golf visualizer frame extraction by reading
+  each Pandas dataset row once per frame before point/vector extraction, reducing
+  repeated `.iloc` lookup overhead while preserving fallback behavior for missing
+  rows and columns.
 - **2026-06-10** - Consolidated configuration ownership for #7216. Removed
   the root `config/` and `configs/` trees: CI/governance policy now lives in
   `scripts/config/`, BunkerShot3D calibration YAML lives under
@@ -833,6 +837,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.282 | Legacy golf visualizer Pandas row extraction optimization. `golf_visualizer_data.DataProcessor.extract_frame_data` now fetches each BASEQ/ZTCFQ/DELTAQ row once per frame and reuses the resulting row for all point/vector extraction, preserving the missing-row fallback contract while avoiding repeated `.iloc` lookups inside the render-frame path. |
 | 2026-06-10 | 1.0.281 | Configuration ownership consolidation (#7216). Removed root `config/` and `configs/` trees. Architecture debt policy moved to `scripts/config/architecture_debt_policy.json`; BunkerShot3D calibration YAML moved to `src/bunkershot3d/calibration/configs/`; UX field/error seed YAML moved to `src/shared/python/ux/config/`. Added `docs/development/configuration-systems.md`, canonical UX path constants, updated generators/tests/docs, and regression coverage preventing root config directories from returning. |
 | 2026-06-10 | 1.0.280 | Linux dependency-consistency lockfile repair after #7231. `requirements-dev.lock` now matches the Python 3.12 Linux `pip-compile --extra dev` output enforced by CI: Windows-only transitive `colorama` and `tzdata` entries are removed, and `uvloop` is restored for the Linux `uvicorn[standard]` dependency graph. |
 | 2026-06-10 | 1.0.279 | Built-wheel mocap source parity fix (#7213). The Rust `upstream-mocap-io` TRC parser now validates invalid or non-finite data-row frame and time fields before marker coordinates, preserving the Python facade's invalid-row contract when the PyO3 wheel is installed. The OpenCap session adapter test now follows the existing Rust parity contract by comparing marker coordinates approximately instead of requiring impossible exact decimal equality from Rust `f32` output. CI now runs the full `tests/unit/motion_pipeline/sources` directory immediately after installing built Rust wheels, and the Rust parity wheel gate script ratchets that source-wheel coverage. |
