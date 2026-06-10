@@ -18,12 +18,14 @@ pytestmark = [pytest.mark.unit]
 
 _URDF = '<robot name="r"><link name="base"/></robot>'
 _MJCF = '<mujoco model="m"><worldbody/></mujoco>'
+_SDF = '<sdf version="1.6"><model name="s"><link name="base"/></model></sdf>'
 
 
 def _make_repo(parent: Path, name: str) -> Path:
     repo = parent / name
     repo.mkdir(parents=True)
     (repo / "arm.urdf").write_text(_URDF, encoding="utf-8")
+    (repo / "plant.sdf").write_text(_SDF, encoding="utf-8")
     nested = repo / "models" / "hand"
     nested.mkdir(parents=True)
     (nested / "hand.xml").write_text(_MJCF, encoding="utf-8")
@@ -77,16 +79,16 @@ class TestCandidateRoots:
 
 
 class TestDiscovery:
-    def test_discovers_urdf_and_mjcf_only(
+    def test_discovers_urdf_mjcf_and_sdf_only(
         self, project_root: Path, tmp_path: Path, monkeypatch
     ) -> None:
         repo = _make_repo(tmp_path, "MuJoCo_Models")
         monkeypatch.setenv(SIBLING_REPOS_ENV_VAR, str(repo))
         models = discover_sibling_models(project_root)
         names = [m["name"] for m in models]
-        assert names == ["arm.urdf", "hand.xml"]
+        assert names == ["arm.urdf", "hand.xml", "plant.sdf"]
         types = {m["name"]: m["type"] for m in models}
-        assert types == {"arm.urdf": "urdf", "hand.xml": "mjcf"}
+        assert types == {"arm.urdf": "urdf", "hand.xml": "mjcf", "plant.sdf": "sdf"}
 
     def test_git_dir_and_plain_xml_are_skipped(
         self, project_root: Path, tmp_path: Path, monkeypatch
@@ -138,15 +140,15 @@ class TestModelLibraryIntegration:
         )
         monkeypatch.setattr("urllib.request.urlopen", fail_urlopen)
         library = ModelLibrary(base_path=tmp_path / "models")
-        result = library.download_human_model("human_gazebo", force=True)
+        result = library.download_human_model("human_with_meshes", force=True)
 
         assert (
             result
-            == tmp_path / "models" / "human_models" / "human_gazebo" / "model.urdf"
+            == tmp_path / "models" / "human_models" / "human_with_meshes" / "model.urdf"
         )
         assert calls == [
             (
-                ModelLibrary.HUMAN_MODELS["human_gazebo"]["urdf_url"],
+                ModelLibrary.HUMAN_MODELS["human_with_meshes"]["urdf_url"],
                 result,
                 30,
             )
