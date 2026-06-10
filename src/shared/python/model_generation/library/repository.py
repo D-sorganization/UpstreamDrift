@@ -26,6 +26,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ._download_utils import (
+    download_url_to_path,
+    safe_extract_zip,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -400,7 +405,7 @@ class GitHubRepository(Repository):
         local_path = destination / filename
 
         try:
-            urllib.request.urlretrieve(urdf_url, local_path)  # nosec B310 - URL from GitHub raw content base
+            download_url_to_path(urdf_url, local_path)
             logger.info(f"Downloaded: {filename}")
 
             # Try to download meshes from same directory
@@ -435,7 +440,7 @@ class GitHubRepository(Repository):
                         or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     )
                     local_file = local_mesh_dir / item["name"]
-                    urllib.request.urlretrieve(raw_url, local_file)  # nosec B310 - URL from GitHub API download_url field
+                    download_url_to_path(raw_url, local_file)
 
         except (PermissionError, OSError):
             pass  # Meshes not found or not accessible
@@ -448,18 +453,36 @@ class GitHubRepository(Repository):
             f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
         )
 
+        tmp_path: Path | None = None
+
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-                urllib.request.urlretrieve(archive_url, tmp.name)  # nosec B310 - URL from trusted github.com base
+                tmp_path = Path(tmp.name)
+                download_url_to_path(archive_url, tmp_path)
 
-                with zipfile.ZipFile(tmp.name, "r") as zf:
-                    zf.extractall(destination)
+            if tmp_path is not None:
+                with zipfile.ZipFile(tmp_path, "r") as zf:
+                    safe_extract_zip(zf, destination)
 
             return True
 
-        except (ConnectionError, TimeoutError, OSError) as e:
+        except (
+            ConnectionError,
+            TimeoutError,
+            OSError,
+            ValueError,
+            zipfile.BadZipFile,
+        ) as e:
             logger.error(f"Failed to download archive: {e}")
             return False
+        finally:
+            if tmp_path is not None:
+                try:
+                    tmp_path.unlink(missing_ok=True)
+                except OSError as e:
+                    logger.warning(
+                        f"Failed to remove temporary archive {tmp_path}: {e}"
+                    )
 
 
 class CompositeRepository(Repository):

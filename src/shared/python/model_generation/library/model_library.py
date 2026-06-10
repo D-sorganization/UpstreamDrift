@@ -37,6 +37,7 @@ from model_generation.library._model_repository import (
     add_repository,
     refresh_repository,
 )
+from ._download_utils import download_url_to_path
 from model_generation.library._model_search import (
     get_categories,
     get_model,
@@ -295,20 +296,18 @@ class ModelLibrary:
             ValueError: If ``entry.source_url`` is missing or its scheme
                 is not in the allowed set (``https`` only).
         """
-        import urllib.request
-
         from src.shared.python.security.security_utils import validate_url_scheme
 
         if not entry.source_url:
             raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
 
         # Allow only https. Tests in test_security_fixes.py assert that
-        # file://, http://, ftp:// etc. raise before urlretrieve is called.
+        # file://, http://, ftp:// etc. raise before any network call is made.
         validate_url_scheme(entry.source_url, allowed_schemes=("https",))
 
         cache_dir = self.config.cache_dir / entry.id
         cache_dir.mkdir(parents=True, exist_ok=True)
         dest = cache_dir / Path(entry.source_url).name
 
-        urllib.request.urlretrieve(entry.source_url, dest)  # nosec B310 - scheme validated
+        download_url_to_path(entry.source_url, dest)
         return dest

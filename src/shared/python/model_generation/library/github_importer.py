@@ -19,6 +19,7 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
+from ._download_utils import open_url
 from model_generation.library.model_library import ModelLibrary
 
 logger = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class GitHubImporter:
             if token:
                 req.add_header("Authorization", f"token {token}")
 
-            with urllib.request.urlopen(req) as response:  # nosec B310 - GitHub API endpoint, validated by Request object
+            with open_url(req) as response:
                 data = json.loads(response.read().decode())
 
             items = data.get("items", [])
@@ -292,7 +293,7 @@ class GitHubImporter:
             token = os.environ.get("GITHUB_TOKEN")
             if token:
                 req.add_header("Authorization", f"token {token}")
-            with urllib.request.urlopen(req) as response:  # nosec B310 - GitHub API endpoint, validated by Request object
+            with open_url(req) as response:
                 repo_data = json.loads(response.read().decode())
                 branch = repo_data.get("default_branch", "main")
                 description = repo_data.get("description", "")

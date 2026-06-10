@@ -25,7 +25,6 @@ import json
 import math
 import os
 import sys
-import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -369,7 +368,11 @@ class ModelLibrary:
             # Download URDF file
             logger.info(f"Downloading URDF: {model_info['urdf_url']}")
             validate_url_scheme(model_info["urdf_url"])
-            with urllib.request.urlopen(model_info["urdf_url"]) as response:  # nosec B310 - URL validated by validate_url_scheme() above
+            from src.shared.python.model_generation.library._download_utils import (
+                open_url,
+            )
+
+            with open_url(model_info["urdf_url"]) as response:
                 urdf_content = response.read().decode("utf-8")
                 urdf_path.write_text(urdf_content, encoding="utf-8")
 

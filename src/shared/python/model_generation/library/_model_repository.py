@@ -9,6 +9,7 @@ import json
 import logging
 from typing import Any
 
+from ._download_utils import open_url
 from model_generation.library._model_types import (
     LibraryConfig,
     ModelEntry,
@@ -135,9 +136,7 @@ def _fetch_github_models(  # noqa: C901
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{subpath}"
 
     try:
-        import urllib.request
-
-        with urllib.request.urlopen(api_url) as response:  # nosec B310
+        with open_url(api_url) as response:
             contents = json.loads(response.read().decode())
 
         model_extensions = {".urdf": ModelFormat.URDF, ".xml": ModelFormat.MJCF}
@@ -164,7 +163,7 @@ def _fetch_github_models(  # noqa: C901
             elif item["type"] == "dir":
                 subdir_url = item["url"]
                 try:
-                    with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310
+                    with open_url(subdir_url) as sub_response:
                         sub_contents = json.loads(sub_response.read().decode())
                     for sub_item in sub_contents:
                         if sub_item["type"] != "file":

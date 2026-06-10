@@ -4,7 +4,6 @@ This module provides standardized model loading across all physics engines,
 ensuring consistent biomechanical models for cross-engine validation.
 """
 
-import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -151,7 +150,11 @@ class StandardModelManager:
 
                 logger.info(f"Downloading {url} -> {local_path}")
                 validate_url_scheme(url)
-                urllib.request.urlretrieve(url, local_path)  # nosec B310 - URL validated by validate_url_scheme() above
+                from src.shared.python.model_generation.library._download_utils import (
+                    download_url_to_path,
+                )
+
+                download_url_to_path(url, local_path)
 
             # Download mesh files (this is a simplified approach - in practice you'd want
             # to download the actual mesh files from the repository)

@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
+from ._download_utils import download_url_to_path
 from model_generation.library._model_types import (
     LibraryConfig,
     ModelEntry,
@@ -78,15 +79,13 @@ def download_model(
         return False
 
     try:
-        import urllib.request
-
         cache_dir = config.cache_dir / entry.id.replace("/", "_")
         cache_dir.mkdir(parents=True, exist_ok=True)
 
         urdf_filename = entry.source_url.split("/")[-1]
         local_path = cache_dir / urdf_filename
 
-        urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310
+        download_url_to_path(entry.source_url, local_path)
 
         entry.urdf_path = local_path
         entry.is_cached = True

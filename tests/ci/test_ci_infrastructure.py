@@ -9,6 +9,7 @@ These tests verify that:
 This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -456,6 +457,31 @@ class TestCIEnvironmentCompatibility:
             "unit-test-gate",
         }
         assert job["if"] == "always()"
+
+    def test_workflow_run_blocks_do_not_interpolate_untrusted_issue_fields(
+        self,
+    ) -> None:
+        """Untrusted GitHub event strings must enter shell scripts through env."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        forbidden = re.compile(
+            r"\$\{\{\s*github\.event\.(?:issue|comment)\.(?:title|body|user\.login)\s*\}\}"
+        )
+
+        for workflow_path in (REPO_ROOT / ".github" / "workflows").glob("*.yml"):
+            workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+            for job_name, job in (workflow.get("jobs") or {}).items():
+                for index, step in enumerate(job.get("steps") or []):
+                    run_block = step.get("run")
+                    if not run_block:
+                        continue
+                    assert not forbidden.search(run_block), (
+                        f"{workflow_path.name} job {job_name} step {index} "
+                        "interpolates untrusted github.event data in run:"
+                    )
 
 
 class TestPyprojectTomlConsistency:

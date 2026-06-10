@@ -6,7 +6,9 @@ Covers GitHub issues #1695, #1691, #1700.
 
 from __future__ import annotations
 
+import io
 import os
+import zipfile
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -411,11 +413,106 @@ class TestRepositoryURLRestriction:
 
         with (
             patch("urllib.request.urlretrieve") as urlretrieve,
-            pytest.raises(ValueError, match="URL scheme 'file' is not allowed"),
+            pytest.raises(
+                ValueError,
+                match="URL scheme 'file' is not allowed|URL must be absolute HTTPS",
+            ),
         ):
             library._download_model(entry)
 
         urlretrieve.assert_not_called()
+
+
+class _ResponseBytes(io.BytesIO):
+    def __enter__(self) -> _ResponseBytes:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.close()
+
+
+class TestSecureDownloads:
+    """Network downloads must be bounded and archive extraction must fail closed."""
+
+    def test_download_url_to_path_passes_timeout_contract(self, tmp_path) -> None:
+        from src.shared.python.model_generation.library._download_utils import (
+            DOWNLOAD_TIMEOUT_SECONDS,
+            download_url_to_path,
+        )
+
+        with patch(
+            "src.shared.python.model_generation.library._download_utils.urllib.request.urlopen",
+            return_value=_ResponseBytes(b"model"),
+        ) as urlopen:
+            download_url_to_path("https://example.test/model.urdf", tmp_path / "m.urdf")
+
+        urlopen.assert_called_once()
+        assert urlopen.call_args.kwargs["timeout"] == DOWNLOAD_TIMEOUT_SECONDS
+        assert (tmp_path / "m.urdf").read_bytes() == b"model"
+
+    def test_safe_extract_zip_rejects_traversal_without_writing(self, tmp_path) -> None:
+        from src.shared.python.model_generation.library._download_utils import (
+            safe_extract_zip,
+        )
+
+        archive_path = tmp_path / "evil.zip"
+        destination = tmp_path / "dest"
+        destination.mkdir()
+        outside = tmp_path / "evil.txt"
+        with zipfile.ZipFile(archive_path, "w") as zf:
+            zf.writestr("repo/good.urdf", "<robot/>")
+            zf.writestr("../evil.txt", "owned")
+
+        with (
+            zipfile.ZipFile(archive_path, "r") as zf,
+            pytest.raises(ValueError, match="Unsafe path in archive"),
+        ):
+            safe_extract_zip(zf, destination)
+
+        assert not outside.exists()
+        assert not (destination / "repo" / "good.urdf").exists()
+
+    def test_github_archive_download_removes_temp_file_on_success(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        from src.shared.python.model_generation.library import (
+            repository as repository_module,
+        )
+        from src.shared.python.model_generation.library.repository import (
+            GitHubRepository,
+        )
+
+        archive_bytes = io.BytesIO()
+        with zipfile.ZipFile(archive_bytes, "w") as zf:
+            zf.writestr("repo-main/model.urdf", "<robot/>")
+
+        created_temp_paths: list[Path] = []
+
+        class TrackingTempFile:
+            def __init__(self, suffix: str, delete: bool) -> None:
+                self.name = str(tmp_path / f"download{suffix}")
+
+            def __enter__(self) -> TrackingTempFile:
+                created_temp_paths.append(Path(self.name))
+                return self
+
+            def __exit__(self, *args: object) -> None:
+                return None
+
+        monkeypatch.setattr(
+            repository_module.tempfile, "NamedTemporaryFile", TrackingTempFile
+        )
+        monkeypatch.setattr(
+            "src.shared.python.model_generation.library._download_utils.urllib.request.urlopen",
+            lambda *args, **kwargs: _ResponseBytes(archive_bytes.getvalue()),
+        )
+
+        repo = GitHubRepository(owner="owner", repo="repo", branch="main")
+        assert repo.download_archive(tmp_path / "extract") is True
+
+        assert created_temp_paths
+        assert all(not path.exists() for path in created_temp_paths)
+        assert (tmp_path / "extract" / "repo-main" / "model.urdf").exists()
 
 
 # ---------------------------------------------------------------------------

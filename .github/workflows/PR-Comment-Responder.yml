@@ -127,6 +127,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           COMMENT_BODY_JSON: ${{ toJson(github.event.comment.body) }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
         run: |
           mkdir -p .jules/pending
           QUEUE_FILE=".jules/pending/pr_comments.json"
@@ -145,13 +146,11 @@ jobs:
             COMMENT_PATH="${{ github.event.comment.path }}"
             COMMENT_LINE="${{ github.event.comment.line }}"
             COMMENT_TYPE="review"
-            COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
           else
             COMMENT_ID="${{ github.event.comment.id }}"
             COMMENT_PATH=""
             COMMENT_LINE=""
             COMMENT_TYPE="pr"
-            COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
           fi
 
           # Use Python for safe JSON manipulation
