@@ -215,7 +215,7 @@ class TestInverseDynamicsSolver:
 
         qpos = data.qpos.copy()
         qvel = data.qvel.copy()
-        qacc = np.zeros(model.nv)
+        qacc = np.array([0.01, -0.005])
 
         result = solver.compute_required_torques(qpos, qvel, qacc)
         metrics = solver.validate_solution(qpos, qvel, qacc, result.joint_torques)
@@ -225,6 +225,10 @@ class TestInverseDynamicsSolver:
         assert "max_torque" in metrics
         assert "mean_torque" in metrics
         assert all(isinstance(v, float) for v in metrics.values())
+        assert np.isclose(
+            metrics["relative_error"],
+            metrics["acceleration_error"] / (np.linalg.norm(qacc) + 1e-10),
+        )
 
     def test_compute_actuator_efficiency(self, model_and_data) -> None:
         """Test actuator efficiency computation."""
@@ -243,6 +247,41 @@ class TestInverseDynamicsSolver:
         assert "coriolis_ratio" in efficiency
         assert "efficiency_index" in efficiency
         assert all(isinstance(v, float) for v in efficiency.values())
+
+    def test_compute_actuator_efficiency_matches_norm_ratios(
+        self,
+        model_and_data,
+    ) -> None:
+        """Test optimized norm-ratio calculations against numpy norm semantics."""
+        model, data = model_and_data
+        solver = InverseDynamicsSolver(model, data)
+
+        torques = np.array([3.0, 4.0])
+        inertial = np.array([5.0, 12.0])
+        gravity = np.array([8.0, 15.0])
+        coriolis = np.array([7.0, 24.0])
+        result = InverseDynamicsResult(
+            joint_torques=torques,
+            inertial_torques=inertial,
+            gravity_torques=gravity,
+            coriolis_torques=coriolis,
+        )
+
+        efficiency = solver.compute_actuator_efficiency(result)
+        torque_norm = np.linalg.norm(torques) + 1e-10
+
+        assert np.isclose(
+            efficiency["inertial_ratio"],
+            np.linalg.norm(inertial) / torque_norm,
+        )
+        assert np.isclose(
+            efficiency["gravity_ratio"],
+            np.linalg.norm(gravity) / torque_norm,
+        )
+        assert np.isclose(
+            efficiency["coriolis_ratio"],
+            np.linalg.norm(coriolis) / torque_norm,
+        )
 
 
 class TestRecursiveNewtonEuler:

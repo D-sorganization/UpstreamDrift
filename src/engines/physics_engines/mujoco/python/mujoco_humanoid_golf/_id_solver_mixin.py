@@ -404,7 +404,7 @@ class _InverseDynamicsSolverMixin:
             computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
 
             # Error metrics
-            # ⚡ Bolt: math.hypot is much faster than np.linalg.norm for small 1D arrays
+            # Use dot products to avoid np.linalg.norm overhead on small 1D arrays.
             diff = computed_qacc - qacc
             acc_error = float(np.sqrt(np.dot(diff, diff)))
             relative_error = acc_error / (float(np.sqrt(np.dot(qacc, qacc))) + 1e-10)
