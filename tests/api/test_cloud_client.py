@@ -36,6 +36,21 @@ def test_client_init_with_token(temp_cache_dir: Path) -> None:
     assert client.token == "test-token-123"
 
 
+@pytest.mark.parametrize("cached_token", ["", " \n\t "])
+def test_client_init_ignores_blank_cached_token(
+    temp_cache_dir: Path, cached_token: str
+) -> None:
+    """Blank cached tokens must not mark the client as logged in."""
+    cache_dir = temp_cache_dir / ".golf-suite"
+    cache_dir.mkdir(parents=True)
+    (cache_dir / "cloud_token").write_text(cached_token)
+
+    client = CloudClient()
+
+    assert not client.is_logged_in
+    assert client.token is None
+
+
 def test_logout(temp_cache_dir: Path) -> None:
     """Test logout clears token and deletes file."""
     cache_dir = temp_cache_dir / ".golf-suite"
