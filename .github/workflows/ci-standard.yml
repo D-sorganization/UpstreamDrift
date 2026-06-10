@@ -175,7 +175,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Quality Virtual Environment
@@ -239,7 +239,8 @@ jobs:
         run: mkdir -p ui/dist
       - run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --no-cache-dir --ignore-installed -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
 
       - name: Pin Type Toolchain
         run: |
@@ -343,14 +344,11 @@ jobs:
           audit_python="$audit_venv/bin/python"
           python -m ensurepip --upgrade || true
           "$audit_python" -m pip install --upgrade pip
-          mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install --no-cache-dir -e ".[dev]"
-          python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install pip-audit
+          "$audit_python" -m pip install "pip-audit==2.10.0"
 
           set +e
-          "$audit_python" -m pip_audit --format json --output pip-audit-report.json
+          "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
           audit_status=$?
           set -e
 
@@ -364,7 +362,7 @@ jobs:
               --waiver-file scripts/config/pip_audit_waivers.json \
               --audit-report pip-audit-report.json
           )
-          "$audit_python" -m pip_audit "${pip_audit_waiver_flags[@]}"
+          "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
@@ -426,7 +424,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Security Virtual Environment
@@ -786,7 +784,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create stub ui/dist for editable install
@@ -804,7 +802,8 @@ jobs:
           python="$RUNNER_TEMP/unit-gate-venv/bin/python"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m pip install --no-cache-dir -e ".[dev,gui-test]"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
           python -m ensurepip --upgrade || true
@@ -911,7 +910,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create isolated core install
@@ -924,7 +923,8 @@ jobs:
           python3 -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python3 -m pip install --no-cache-dir -e .
+          python3 -m pip install --no-cache-dir --ignore-installed -r requirements.lock
+          python3 -m pip install --no-cache-dir --no-deps -e .
       - name: Verify optional engines are absent from core install
         shell: bash
         run: |
@@ -981,7 +981,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Dependency Virtual Environment
@@ -1004,12 +1004,9 @@ jobs:
           source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
-          mkdir -p ui/dist
-          python -m ensurepip --upgrade || true
-          python -m pip install --no-cache-dir .
           python -m ensurepip --upgrade || true
           python -m pip install "pip-audit==2.10.0"
-          pip-audit
+          python -m pip_audit -r requirements.lock
 
   tests:
     needs: pick-runner
@@ -1103,7 +1100,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
@@ -1127,7 +1124,8 @@ jobs:
           python="$RUNNER_TEMP/core-ci-venv/bin/python"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m pip install --no-cache-dir -e ".[dev,gui-test]"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
           python -m ensurepip --upgrade || true
@@ -1301,7 +1299,6 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
-
             --cov-fail-under=75 \
             --tb=short \
             -v
@@ -1411,7 +1408,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create stub ui/dist for editable install
@@ -1419,7 +1416,8 @@ jobs:
       - name: Install parity smoke dependencies
         run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --no-cache-dir --ignore-installed -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
       - name: Run scheduled parity smoke suite
         run: |
           python -m pytest \
@@ -1482,7 +1480,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Alembic Virtual Environment
@@ -1498,7 +1496,8 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          python -m pip install --no-cache-dir -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
           python -m ensurepip --upgrade || true
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
@@ -1611,7 +1610,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             pyproject.toml
-            requirements*.txt
+            requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create stub ui/dist for editable install
@@ -1632,7 +1631,8 @@ jobs:
           python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m pip install --no-cache-dir -e ".[dev,gui-test]"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
           python -m ensurepip --upgrade || true
