@@ -43,19 +43,39 @@ class BallFlightWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(self._build_controls_panel())
+        splitter.addWidget(self._build_results_panel())
+        splitter.setSizes([350, 650])
+        layout.addWidget(splitter)
 
-        # Left: controls
+    def _build_controls_panel(self) -> QWidget:
         left = QWidget()
         left_layout = QVBoxLayout(left)
+        self._add_title(left_layout)
+        left_layout.addWidget(self._build_launch_group())
+        left_layout.addWidget(self._build_environment_group())
+        left_layout.addWidget(self._build_aero_group())
+        left_layout.addWidget(self._build_preset_group())
 
+        self._run_btn = QPushButton("Simulate Flight")
+        self._run_btn.setStyleSheet(
+            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
+        )
+        self._run_btn.clicked.connect(self._run_simulation)
+        left_layout.addWidget(self._run_btn)
+        left_layout.addStretch()
+        return left
+
+    @staticmethod
+    def _add_title(layout: QVBoxLayout) -> None:
         title = QLabel("Aerodynamic Ball Flight Simulator")
         title_font = title.font()
         title_font.setPointSize(14)
         title_font.setBold(True)
         title.setFont(title_font)
-        left_layout.addWidget(title)
+        layout.addWidget(title)
 
-        # Launch conditions
+    def _build_launch_group(self) -> QGroupBox:
         launch_group = QGroupBox("Launch Conditions")
         launch_form = QFormLayout(launch_group)
 
@@ -82,10 +102,9 @@ class BallFlightWidget(QWidget):
         self._sidespin_spin.setValue(0.0)
         self._sidespin_spin.setSuffix(" rpm")
         launch_form.addRow("Sidespin:", self._sidespin_spin)
+        return launch_group
 
-        left_layout.addWidget(launch_group)
-
-        # Environment
+    def _build_environment_group(self) -> QGroupBox:
         env_group = QGroupBox("Environment")
         env_form = QFormLayout(env_group)
 
@@ -106,10 +125,9 @@ class BallFlightWidget(QWidget):
         self._altitude.setValue(0.0)
         self._altitude.setSuffix(" ft")
         env_form.addRow("Altitude:", self._altitude)
+        return env_group
 
-        left_layout.addWidget(env_group)
-
-        # Aerodynamic options
+    def _build_aero_group(self) -> QGroupBox:
         aero_group = QGroupBox("Aerodynamic Model")
         aero_layout = QVBoxLayout(aero_group)
         self._chk_dimples = QCheckBox("Dimple geometry effects")
@@ -120,9 +138,9 @@ class BallFlightWidget(QWidget):
         aero_layout.addWidget(self._chk_magnus)
         self._chk_seam = QCheckBox("Seam orientation effects")
         aero_layout.addWidget(self._chk_seam)
-        left_layout.addWidget(aero_group)
+        return aero_group
 
-        # Presets
+    def _build_preset_group(self) -> QGroupBox:
         preset_group = QGroupBox("Club Presets")
         preset_layout = QHBoxLayout(preset_group)
         for name, speed, angle, spin in [
@@ -135,20 +153,9 @@ class BallFlightWidget(QWidget):
                 lambda checked, s=speed, a=angle, sp=spin: self._apply_preset(s, a, sp)
             )
             preset_layout.addWidget(btn)
-        left_layout.addWidget(preset_group)
+        return preset_group
 
-        # Run
-        self._run_btn = QPushButton("Simulate Flight")
-        self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
-        )
-        self._run_btn.clicked.connect(self._run_simulation)
-        left_layout.addWidget(self._run_btn)
-
-        left_layout.addStretch()
-        splitter.addWidget(left)
-
-        # Right: results
+    def _build_results_panel(self) -> QWidget:
         right = QWidget()
         right_layout = QVBoxLayout(right)
         results_group = QGroupBox("Flight Results")
@@ -192,10 +199,7 @@ class BallFlightWidget(QWidget):
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
-        splitter.addWidget(right)
-
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        return right
 
     def _apply_preset(self, speed: float, angle: float, spin: float) -> None:
         self._speed_spin.setValue(speed)
