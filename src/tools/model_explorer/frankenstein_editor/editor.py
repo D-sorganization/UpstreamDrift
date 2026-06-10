@@ -269,11 +269,13 @@ class FrankensteinEditor(QWidget):
         """Get the working model."""
         return self.right_panel.get_model()
 
-    def get_working_xml(self) -> str | None:
+    def get_working_xml(self, *, force: bool = False) -> str | None:
         """Get the working model as XML string."""
+        if force is None:
+            raise ValueError("force must be provided")
         model = self.right_panel.get_model()
         if model:
-            return model.to_xml()
+            return model.to_xml(force=force)
         return None
 
     def _on_swap_models(self) -> None:

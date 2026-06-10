@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.283                                            |
+| **Spec Version**        | 1.0.284                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added a first-party Frankenstein composition validation
+  slice for #7205. `src/tools/model_explorer/composition_validator.py` now
+  emits structured error/warning findings for duplicate URDF names, orphaned
+  joints, invalid root counts, disconnected links, kinematic cycles, and
+  moving-link mass/inertia contracts. The active Frankenstein editor model
+  export path blocks validation errors by default while retaining an explicit
+  `force=True` escape hatch for recovery exports.
 - **2026-06-10** - Added the LauncherContext in-process event bus and shared
   value registry for embedded tools (#7210): `launcher_embed.context` now
   defines the `LauncherContext` protocol plus an in-memory implementation with
