@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.303                                            |
+| **Spec Version**        | 1.0.304                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Hardened model-library source URL validation for #7297.
+  `src/shared/python/model_generation/library/_model_loader.py` now rejects
+  non-HTTPS `ModelEntry.source_url` values before cache creation or network
+  access, delegates accepted downloads to the shared bounded downloader in
+  `src/shared/python/security/security_utils.py`, and treats URL contract
+  violations as load failures. Focused model-loader tests cover forced-download
+  rejection for `file:`, `http:`, and `ftp:` sources before `urlopen`.
 - **2026-06-10** - Closed the #7273 PR-scoped coverage bypass in standard CI.
   PRs that change source, test, or dependency targets now fall through to the
   coverage-producing core test lane instead of using the workflow-only
@@ -615,7 +622,9 @@ Engine tier metadata is declared in each in-scope engine package with
 
 **GUI Interface (PyQt6)**:
 
-- Model loader and parameter editor
+- Model loader and parameter editor; remote model-library downloads only accept
+  HTTPS `source_url` values and use the shared bounded downloader before
+  writing cached model files.
 - Real-time 3D simulation viewer with playback controls
 - Cross-engine comparison visualizer
 - IK/ID solver interface with result tables
@@ -968,6 +977,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.304 | Model-library source URL validation for #7297. `model_generation.library._model_loader.download_model` now validates remote `source_url` schemes before creating cache entries or opening the network, accepts only HTTPS, delegates accepted transfers to the shared bounded `download_to_file` helper, and reports `ValueError` URL-contract failures as failed loads. Focused tests cover forced-download rejection for `file:`, `http:`, and `ftp:` sources before `urllib.request.urlopen` plus the updated secure-download path. |
 | 2026-06-10 | 1.0.302 | Audit hygiene fixes for #7279 and #7282. `.github/workflows/docker-security-scan.yml` now blocks HIGH and CRITICAL Trivy container vulnerabilities in the table scan while retaining SARIF upload, and audited API/launcher production modules now use the canonical logging infrastructure instead of direct module-level `logging.getLogger` calls. Added security CI acceptance coverage for the Docker HIGH/CRITICAL gate and a repo-hygiene test for the remediated logger modules. |
 | 2026-06-10 | 1.0.301 | Audit regression fixes for #7269, #7270, and #7271. Model Explorer API path resolution now validates caller paths before filesystem reads and resolves only within approved model directories, closing the direct existing-path containment bypass. Motion-pipeline keypoint gap filling now guards both before/after neighbor keypoint indexes and pins mismatched-neighbor behavior in the main and pure-Python implementations. `SwingBallFlightPipeline` now emits `LaunchConditions` in the units consumed by `BallFlightSimulator`: launch and azimuth angles in radians, spin rate in RPM, with updated DbC validation and unit tests. |
 | 2026-06-10 | 1.0.300 | Completed the #7207 model explorer composition UX flow. Added `CompositionUxController` for library drag payloads, non-mutating drop/ghost previews, highlighted target/source links, validation summaries, committed drops, and a validation-aware export chooser that enables URDF/MJCF while explicitly marking SDF/OSIM unavailable until writers exist. `FrankensteinEditor` now exposes preview, commit, and export-choice hooks, with offscreen tests covering simple humanoid plus arm preview, commit, validation pass, and MJCF export. |
