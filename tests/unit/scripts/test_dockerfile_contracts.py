@@ -21,7 +21,11 @@ HEALTHCHECK CMD python3 -c "import urllib.request; urllib.request.urlopen('http:
         encoding="utf-8",
     )
     (root / "Dockerfile.modular").write_text(
-        f"RUN pip install --upgrade pip=={modular_pip}\n",
+        f"""
+COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
+RUN python scripts/docker/install_features.py --profile standard --dry-run
+RUN pip install --upgrade pip=={modular_pip}
+""",
         encoding="utf-8",
     )
     (root / "Dockerfile.heavy_test").write_text(
@@ -69,5 +73,24 @@ def test_docker_contracts_reject_masked_heavy_install(tmp_path: Path) -> None:
 
     assert any(
         "masks drake install failure" in failure
+        for failure in guard.docker_contract_failures(tmp_path)
+    )
+
+
+def test_docker_contracts_reject_modular_profile_dry_run_before_registry_copy(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "Dockerfile.modular").write_text(
+        """
+RUN python scripts/docker/install_features.py --profile standard --dry-run
+COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
+RUN pip install --upgrade pip==26.1
+""",
+        encoding="utf-8",
+    )
+
+    assert any(
+        "copy feature_registry before profile dry-run" in failure
         for failure in guard.docker_contract_failures(tmp_path)
     )

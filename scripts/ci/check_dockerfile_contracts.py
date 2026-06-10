@@ -51,6 +51,16 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     if "urllib.request.urlopen('http://localhost:8001/health'" not in dockerfile:
         failures.append("Dockerfile healthcheck must use Python urllib, not curl")
 
+    modular = _read(root / "Dockerfile.modular")
+    first_dry_run = modular.find("install_features.py --profile")
+    feature_registry_copy = modular.find("COPY src/shared/python/feature_registry/")
+    if feature_registry_copy == -1 or (
+        first_dry_run != -1 and feature_registry_copy > first_dry_run
+    ):
+        failures.append(
+            "Dockerfile.modular must copy feature_registry before profile dry-run"
+        )
+
     heavy = _read(root / "Dockerfile.heavy_test")
     for package in ("PyQt6", "drake", "opensim", "myosuite"):
         if re.search(rf"pip install {package}\s+\|\|", heavy):

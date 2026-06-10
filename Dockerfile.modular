@@ -54,6 +54,10 @@ WORKDIR /workspace
 # mode (resolves features, raises on an unknown profile, installs nothing).
 COPY docker/profiles.yaml ./docker/profiles.yaml
 COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
+COPY src/__init__.py ./src/__init__.py
+COPY src/shared/__init__.py ./src/shared/__init__.py
+COPY src/shared/python/__init__.py ./src/shared/python/__init__.py
+COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
 RUN set -eux; \
     if [ -n "$PROFILE" ]; then \
         python scripts/docker/install_features.py --profile "$PROFILE" --dry-run; \
