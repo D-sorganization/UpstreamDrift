@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.292                                            |
+| **Spec Version**        | 1.0.293                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added model explorer attachment-point metadata for #7206.
+  Bundled model definitions can now ship `<model>.attachments.json` sidecars
+  validated by a JSON schema, the model library reports declared attachment
+  frames and payload warnings, and Frankenstein composition uses the declared
+  parent/child interface-frame origins when assembling models.
 - **2026-06-10** - Hardened motion-pipeline keypoint gap filling for #7247.
   `_linear_interp_keypoints` now verifies both neighboring keypoint frames have
   a matching index before interpolation, preserving unfillable low-confidence
@@ -899,6 +904,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.293 | Added model explorer attachment-point metadata for #7206. Bundled model definitions can now ship schema-validated `<model>.attachments.json` sidecars that declare stable parent and child interface frames, the model library exposes declared attachment points with payload warnings for missing links or malformed manifests, and Frankenstein composition now places attachments from those declared interface-frame origins instead of relying on implicit link origins. |
 | 2026-06-10 | 1.0.292 | Hardened motion-pipeline keypoint gap filling for #7247. `_linear_interp_keypoints` now checks both `before.keypoints` and `after.keypoints` before indexing a low-confidence gap keypoint, leaving unfillable keypoints unchanged when neighboring frames have mismatched keypoint counts. The fix applies to both the primary preprocessing path and the pure-Python fallback, with regression coverage for the former `IndexError` crash case. |
 | 2026-06-10 | 1.0.291 | Corrected the ball-flight launch-condition unit contract for #7246. `LaunchConditions` continues to store launch/azimuth angles in radians and spin rate in RPM, and `LaunchConditions.from_user_units(...)` is now the canonical user-facing conversion boundary used by the ball-flight GUI and swing-to-flight pipeline. The pipeline converts impact rad/s spin back to RPM before simulation, and regression tests pin the tour-driver carry sanity gate so degree/rad-s misuse cannot silently collapse carry to zero again. |
 | 2026-06-10 | 1.0.290 | Rust C3D analog and force-platform metadata slice for #7212. `upstream-mocap-io` now decodes C3D analog channels in int16 mode with SCALE/OFFSET/GEN_SCALE and in float mode without int scaling, advances marker frame stride across analog-bearing records, parses FORCE_PLATFORM TYPE/CHANNEL/CORNERS/ORIGIN metadata, and exposes additive PyO3 `analog` / `force_platforms` keys while preserving existing marker/event keys and marker-only fixture behavior. |
