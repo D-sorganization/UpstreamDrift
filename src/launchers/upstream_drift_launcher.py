@@ -640,6 +640,10 @@ class UpstreamDriftLauncher(QMainWindow):
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
 
         self.sidekick_sidebar = sidebar_widget
+        service = self._ensure_sidekick_action_service()
+        setter = getattr(sidebar_widget, "set_action_service", None)
+        if callable(setter):
+            setter(service)
         self._apply_sidekick_splitter_sizes()
 
         logger.info("Sidekick sidebar embedded in main splitter")
@@ -650,6 +654,40 @@ class UpstreamDriftLauncher(QMainWindow):
         module = self._get_sidekick_module()
         widget = self._create_sidekick_sidebar_widget(module)
         self._embed_sidekick_sidebar_widget(widget)
+
+    @property
+    def sidekick_action_service(self) -> Any:
+        """Launcher-owned Sidekick action service for embedded chat panels."""
+        return self._ensure_sidekick_action_service()
+
+    def _ensure_sidekick_action_service(self) -> Any:
+        """Create or refresh the launcher Sidekick action service."""
+        embedded_host = getattr(self, "embedded_host", None)
+        if (
+            self._sidekick_action_service is not None
+            and self._sidekick_action_service_host is embedded_host
+        ):
+            return self._sidekick_action_service
+
+        from src.launchers.sidekick_host_port import create_launcher_action_service
+
+        workspace = None
+        if embedded_host is not None:
+            workspace = getattr(embedded_host, "launcher_context", None)
+        if workspace is None:
+            sidebar = getattr(self, "sidekick_sidebar", None)
+            workspace = getattr(sidebar, "registry", None)
+
+        service = create_launcher_action_service(
+            launcher=self,
+            embedded_host=embedded_host,
+            workspace=workspace,
+        )
+        self._sidekick_action_service = service
+        self._sidekick_action_service_host = embedded_host
+        if embedded_host is not None:
+            embedded_host.sidekick_action_service = service
+        return service
 
     def _load_window_icon(self) -> None:
         # Sets the AppUserModelID (idempotent), the application icon, and this
@@ -678,6 +716,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self.sidekick_sidebar = None
         self.sidekick_window = None
         self._sidekick_popped_out = False
+        self._sidekick_action_service: Any | None = None
+        self._sidekick_action_service_host: Any | None = None
         self._popped_out_windows: list[Any] = []
         self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self.orchestrator.initialize_from_results(startup_results)

@@ -21,8 +21,10 @@ references for back-compatibility.
 from __future__ import annotations
 
 import contextlib
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from threading import Event
 from typing import TYPE_CHECKING, Any
 
 from PyQt6 import QtCore
@@ -75,10 +77,23 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter
+    from sidekick.agent.action_service import ActionResult, SidekickActionService
+    from sidekick.agent.chat_surface import ChatActionEnvelope
+    from sidekick.agent.planner import SidekickAgentPlanner, ToolCall
 
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
 logger = get_logger(__name__)
+
+
+@dataclass(slots=True)
+class _SidekickInvocation:
+    action_id: str
+    params: dict[str, Any]
+    dry_run: bool
+    done: Event
+    result: Any = None
+    error: BaseException | None = None
 
 
 def _discover_project_root(start: Path) -> Path:
@@ -96,6 +111,7 @@ class AIAssistantPanel(QWidget):
     message_sent = pyqtSignal(str)
     settings_requested = pyqtSignal()
     close_requested = pyqtSignal()
+    _sidekick_invoke_requested = pyqtSignal(object)
 
     _CHAT_MODES = (
         ("Ask", "ask"),
@@ -133,6 +149,9 @@ class AIAssistantPanel(QWidget):
         self._tools_registry = get_global_registry()
         self._rag_store = SimpleRAGStore()
         self._memory_manager = MemoryManager()
+        self._sidekick_action_service: SidekickActionService | None = None
+        self._sidekick_planner: SidekickAgentPlanner | None = None
+        self._sidekick_invoke_requested.connect(self._on_sidekick_invoke_requested)
         self._refresh_prompt_memory()
         self._mcp_pool: Any = None  # McpClientPool — wired in after setup
 
@@ -579,6 +598,14 @@ class AIAssistantPanel(QWidget):
             self._memory_manager.build_prompt_memory()
         )
         self._context.metadata["project_root"] = str(self._project_root)
+        if self._sidekick_action_service is None:
+            self._context.metadata.pop("sidekick_system_prompt", None)
+        else:
+            from sidekick.agent.planner import build_sidekick_system_prompt
+
+            self._context.metadata["sidekick_system_prompt"] = (
+                build_sidekick_system_prompt(service=self._sidekick_action_service)
+            )
 
     def _on_memory_sync_requested(self) -> None:
         archived_contexts: list[ConversationContext] = []
@@ -741,13 +768,54 @@ class AIAssistantPanel(QWidget):
         return "openai"
 
     def _build_tool_declarations(self) -> list[dict[str, Any]]:
-        return tool_declarations_for_access_mode(
+        declarations = tool_declarations_for_access_mode(
             self._tools_registry,
             self._access_mode,
             provider_format=self._provider_tool_format(),
             rag_enabled=self._rag_enabled,
             max_expertise=self._context.user_expertise.value,
         )
+        declarations.extend(self._sidekick_tool_declarations())
+        return declarations
+
+    def _sidekick_tool_declarations(self) -> list[dict[str, Any]]:
+        if self._sidekick_planner is None:
+            return []
+
+        provider_format = self._provider_tool_format()
+        declarations: list[dict[str, Any]] = []
+        for exported in self._sidekick_planner.export_for_tool_registry():
+            name = str(exported["name"])
+            description = str(exported["description"])
+            parameters = dict(exported["parameters"])
+            if provider_format == "anthropic":
+                declarations.append(
+                    {
+                        "name": name,
+                        "description": description,
+                        "input_schema": parameters,
+                    }
+                )
+            elif provider_format == "openai":
+                declarations.append(
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "description": description,
+                            "parameters": parameters,
+                        },
+                    }
+                )
+            else:
+                declarations.append(
+                    {
+                        "name": name,
+                        "description": description,
+                        "parameters": parameters,
+                    }
+                )
+        return declarations
 
     # ------------------------------------------------------------------
     # Adapter / settings
@@ -763,6 +831,113 @@ class AIAssistantPanel(QWidget):
         """
         self._mcp_pool = pool
         self._refresh_mcp_status()
+
+    def set_action_service(self, service: SidekickActionService | None) -> None:
+        """Attach the launcher-owned Sidekick action service.
+
+        Passing ``None`` preserves the legacy plain-chat behavior.
+        """
+        if service is None:
+            self._sidekick_action_service = None
+            self._sidekick_planner = None
+            self._refresh_prompt_memory()
+            return
+        from sidekick.agent.action_service import SidekickActionService
+        from sidekick.agent.planner import SidekickAgentPlanner
+
+        if not isinstance(service, SidekickActionService):
+            raise TypeError(
+                "service must be a SidekickActionService or None, "
+                f"got {type(service).__name__}"
+            )
+        self._sidekick_action_service = service
+        self._sidekick_planner = SidekickAgentPlanner(service=service)
+        self._refresh_prompt_memory()
+
+    def handle_sidekick_tool_calls(self, calls: list[ToolCall]) -> ChatActionEnvelope:
+        """Plan tool calls and render their confirmation chips."""
+        if self._sidekick_action_service is None or self._sidekick_planner is None:
+            raise RuntimeError("no Sidekick action service is attached")
+        from sidekick.agent.chat_surface import (
+            ChatActionEnvelope,
+            build_chip,
+            serialize_envelope,
+        )
+
+        steps = self._sidekick_planner.plan_from_tool_calls(calls)
+        envelope = ChatActionEnvelope(
+            steps=steps,
+            chips=tuple(
+                build_chip(step=step, service=self._sidekick_action_service)
+                for step in steps
+            ),
+        )
+        self._add_system_message(f"Sidekick actions: {serialize_envelope(envelope)}")
+        return envelope
+
+    def invoke_sidekick_action(
+        self,
+        action_id: str,
+        params: dict[str, Any] | None = None,
+        *,
+        dry_run: bool = False,
+    ) -> ActionResult:
+        """Invoke a Sidekick action, marshalling widget mutation to Qt's thread."""
+        if self._sidekick_planner is None:
+            raise RuntimeError("no Sidekick action service is attached")
+        payload = dict(params or {})
+        if QtCore.QThread.currentThread() is self.thread():
+            return self._execute_sidekick_action_on_gui_thread(
+                action_id, payload, dry_run=dry_run
+            )
+
+        invocation = _SidekickInvocation(
+            action_id=action_id,
+            params=payload,
+            dry_run=dry_run,
+            done=Event(),
+        )
+        self._sidekick_invoke_requested.emit(invocation)
+        if not invocation.done.wait(timeout=30):
+            raise RuntimeError("timed out waiting for Sidekick action on Qt thread")
+        if invocation.error is not None:
+            raise invocation.error
+        return invocation.result
+
+    def _on_sidekick_invoke_requested(self, invocation: object) -> None:
+        if not isinstance(invocation, _SidekickInvocation):
+            return
+        try:
+            invocation.result = self._execute_sidekick_action_on_gui_thread(
+                invocation.action_id,
+                invocation.params,
+                dry_run=invocation.dry_run,
+            )
+        except (RuntimeError, ValueError, TypeError) as exc:
+            invocation.error = exc
+        finally:
+            invocation.done.set()
+
+    def _execute_sidekick_action_on_gui_thread(
+        self,
+        action_id: str,
+        params: dict[str, Any],
+        *,
+        dry_run: bool = False,
+    ) -> ActionResult:
+        if self._sidekick_planner is None:
+            raise RuntimeError("no Sidekick action service is attached")
+        from sidekick.agent.planner import ToolCall
+
+        (step,) = self._sidekick_planner.plan_from_tool_calls(
+            [ToolCall(action_id=action_id, params=params)]
+        )
+        if step.is_error:
+            self.handle_sidekick_tool_calls(
+                [ToolCall(action_id=action_id, params=params)]
+            )
+            raise RuntimeError(step.error_message)
+        return self._sidekick_planner.execute(step, dry_run=dry_run)
 
     def _refresh_mcp_status(self) -> None:
         """Query the pool for connected-server count and update the indicator."""
