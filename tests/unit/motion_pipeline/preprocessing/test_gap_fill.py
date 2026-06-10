@@ -82,6 +82,66 @@ def test_gap_fill_keypoints_skips_too_large_gap() -> None:
     assert out.num_frames == seq.num_frames
 
 
+def test_gap_fill_keypoints_mismatched_neighbour_counts_does_not_crash() -> None:
+    """Frames around a gap may have fewer keypoints than the gap frame.
+
+    Regression for the keypoint interpolation bounds bug: the guard only
+    checked the ``after`` frame's keypoint count, so indexing the ``before``
+    frame raised IndexError when it carried fewer keypoints.
+    """
+    from src.shared.python.motion_pipeline.contracts import (
+        Keypoint,
+        KeypointFrame,
+    )
+
+    def kp(x: float, conf: float, name: str) -> Keypoint:
+        return Keypoint(x=x, y=0.0, z=0.0, confidence=conf, name=name)
+
+    frames = [
+        # before: only 2 keypoints, all confident
+        KeypointFrame(
+            timestamp=0.0,
+            keypoints=[kp(0.0, 1.0, "a"), kp(0.0, 1.0, "b")],
+            schema_name="custom",
+            frame_index=0,
+        ),
+        # gap: 4 keypoints, the 4th is low-confidence (index 3 absent in before)
+        KeypointFrame(
+            timestamp=1 / 30,
+            keypoints=[
+                kp(1.0, 1.0, "a"),
+                kp(1.0, 1.0, "b"),
+                kp(1.0, 1.0, "c"),
+                kp(1.0, 0.1, "d"),
+            ],
+            schema_name="custom",
+            frame_index=1,
+        ),
+        # after: 4 keypoints, all confident
+        KeypointFrame(
+            timestamp=2 / 30,
+            keypoints=[
+                kp(2.0, 1.0, "a"),
+                kp(2.0, 1.0, "b"),
+                kp(2.0, 1.0, "c"),
+                kp(2.0, 1.0, "d"),
+            ],
+            schema_name="custom",
+            frame_index=2,
+        ),
+    ]
+    seq = KeypointSequence(id="seq_mismatch", frames=frames)
+
+    out = gap_fill(seq, strategy=GapFillStrategy.LINEAR, max_gap=10)
+
+    assert isinstance(out, KeypointSequence)
+    assert out.num_frames == 3
+    # The unfillable keypoint (no counterpart in ``before``) is left as-is.
+    gap_kps = out.frames[1].keypoints
+    assert len(gap_kps) == 4
+    assert gap_kps[3].confidence == pytest.approx(0.1)
+
+
 def test_gap_fill_markers_linear_interpolates_occluded_window() -> None:
     traj = make_marker_trajectory_with_occlusion(num_frames=20, occluded_range=(5, 8))
     out = gap_fill(traj, strategy=GapFillStrategy.LINEAR, max_gap=10)
