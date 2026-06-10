@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.295                                            |
+| **Spec Version**        | 1.0.296                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added model explorer attachment manifests for #7206.
+  `src/tools/model_explorer/attachment_manifest.py` now loads versioned
+  `<model>.attachments.json` sidecars with non-fatal warnings for malformed
+  manifests, `ModelLibrary` exposes declared attachment points on path-backed
+  repository/imported/sibling/static model info, and the attachment dialog
+  prioritizes declared mount points while applying their interface-frame
+  defaults and payload-limit warnings. The schema lives at
+  `src/tools/model_explorer/attachment_manifest.schema.json`, with user docs
+  under `docs/model_explorer/attachment-manifests.md`.
 - **2026-06-10** - Split the launcher entrypoint below the file-size budget
   for #7217. Sidekick sidebar installation, process cleanup polling, launcher
   domain orchestration, and GUI startup bootstrap now live in focused modules,
@@ -915,6 +924,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.296 | Model explorer attachment manifests for #7206. Added a first-party `attachment_manifest` parser for versioned `<model>.attachments.json` sidecars, checked in the JSON Schema and docs, exposed declared attachment points plus non-fatal warnings through `ModelLibrary` model info, and updated the attachment dialog to list declared mount points first, prefill their interface-frame origin, and report payload-limit warnings. Focused tests cover valid/missing/malformed manifests, imported-model exposure, dialog defaults, and payload warning contracts. |
 | 2026-06-10 | 1.0.295 | Split the launcher entrypoint below the file-size budget for #7217. Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved from `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the canonical frameless-window helper under `src/launchers/launcher_ui/frameless_window.py`. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |
 | 2026-06-10 | 1.0.294 | Rust mocap FFI binding error-contract hardening for #7252. `upstream-mocap-io` now validates non-empty and NUL-free Python binding paths before parser entry, maps missing files from `parse_c3d` / `parse_trc` / `parse_bvh` to `FileNotFoundError`, maps other file-access errors to `OSError`, and keeps malformed present files as `ValueError` parse failures that include the format and path context. Rust binding tests and Python parity tests cover missing-file and malformed-present-file behavior across all three formats while preserving the marker/unit parser contracts. |
 | 2026-06-10 | 1.0.293 | First #7207 model explorer library-panel unification slice. `ModelLoaderDialog` now exposes one searchable Library tree built from every `ModelLibrary.list_available_models()` category, including sibling repositories, and model rows show first-party format badges inferred from explicit model metadata or category defaults. Headless panel-model tests cover flattening, sibling inclusion, search, category grouping, and badge logic. |

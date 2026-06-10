@@ -260,7 +260,10 @@ def _pose_from_element(
     values = tuple(float(part) for part in pose_element.text.split())
     if len(values) != 6 or any(not math.isfinite(value) for value in values):
         raise ValueError("<pose> must contain 6 finite floats")
-    origin = Origin(xyz=values[:3], rpy=values[3:])
+    origin = Origin(
+        xyz=(values[0], values[1], values[2]),
+        rpy=(values[3], values[4], values[5]),
+    )
     relative_to = pose_element.get("relative_to", "").strip()
     if not relative_to:
         return origin
@@ -268,8 +271,16 @@ def _pose_from_element(
     if base is None:
         raise ValueError(f"<pose> references unknown relative_to frame '{relative_to}'")
     return Origin(
-        xyz=tuple(base.xyz[i] + origin.xyz[i] for i in range(3)),
-        rpy=tuple(base.rpy[i] + origin.rpy[i] for i in range(3)),
+        xyz=(
+            base.xyz[0] + origin.xyz[0],
+            base.xyz[1] + origin.xyz[1],
+            base.xyz[2] + origin.xyz[2],
+        ),
+        rpy=(
+            base.rpy[0] + origin.rpy[0],
+            base.rpy[1] + origin.rpy[1],
+            base.rpy[2] + origin.rpy[2],
+        ),
     )
 
 

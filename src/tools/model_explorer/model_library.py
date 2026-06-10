@@ -34,6 +34,7 @@ from src.shared.python.security.security_utils import (
     download_to_file,
     validate_url_scheme,
 )
+from src.tools.model_explorer.attachment_manifest import load_attachment_manifest
 
 # Resolve project root for model path resolution (no sys.path mutation)
 _project_root = next(
@@ -51,6 +52,28 @@ except ImportError:
     ROBOT_DESCRIPTIONS_AVAILABLE = False
 
 logger = get_logger(__name__)
+
+
+def _with_attachment_manifest(model_info: dict[str, Any]) -> dict[str, Any]:
+    """Return model info enriched with declared attachment points when present."""
+    model_path = model_info.get("path") or model_info.get("urdf_subpath")
+    if not model_path:
+        return dict(model_info)
+    path = Path(str(model_path))
+    if not path.is_absolute():
+        path = _project_root / path
+    result = load_attachment_manifest(path)
+    enriched = dict(model_info)
+    if result.attachment_points:
+        enriched["attachment_points"] = [
+            point.to_dict() for point in result.attachment_points
+        ]
+        enriched["attachment_manifest_path"] = str(result.path)
+    if result.warnings:
+        enriched["attachment_manifest_warnings"] = list(result.warnings)
+        enriched["attachment_manifest_path"] = str(result.path)
+    return enriched
+
 
 # Try to import bundled assets for local model access
 try:
@@ -676,15 +699,20 @@ class ModelLibrary:
         if category is None:
             raise ValueError("category must be provided")
         if category == "human":
-            return self.HUMAN_MODELS.get(model_key)
+            human_info = self.HUMAN_MODELS.get(model_key)
+            return _with_attachment_manifest(human_info) if human_info else None
         if category == "golf_clubs":
-            return self.GOLF_CLUBS.get(model_key)
+            club_info = self.GOLF_CLUBS.get(model_key)
+            return _with_attachment_manifest(club_info) if club_info else None
         if category == "pendulum":
-            return self.PENDULUM_MODELS.get(model_key)
+            pendulum_info = self.PENDULUM_MODELS.get(model_key)
+            return _with_attachment_manifest(pendulum_info) if pendulum_info else None
         if category == "robotic":
-            return self.ROBOTIC_MODELS.get(model_key)
+            robotic_info = self.ROBOTIC_MODELS.get(model_key)
+            return _with_attachment_manifest(robotic_info) if robotic_info else None
         if category == "component":
-            return self.COMPONENT_MODELS.get(model_key)
+            component_info = self.COMPONENT_MODELS.get(model_key)
+            return _with_attachment_manifest(component_info) if component_info else None
         if category == "discovered":
             discovered = self.discover_repo_models()
             for model in discovered:
@@ -786,7 +814,10 @@ class ModelLibrary:
                     except (FileNotFoundError, PermissionError, OSError):
                         pass  # reading error, skip
 
-        return sorted(models, key=lambda x: x["name"])
+        return sorted(
+            (_with_attachment_manifest(model) for model in models),
+            key=lambda x: x["name"],
+        )
 
     def discover_sibling_models(self) -> list[dict[str, Any]]:
         """Discover URDF/MJCF models in sibling model repositories.
@@ -804,7 +835,10 @@ class ModelLibrary:
         )
 
         try:
-            return discover_sibling_models(_project_root)
+            return [
+                _with_attachment_manifest(model)
+                for model in discover_sibling_models(_project_root)
+            ]
         except ValueError:
             logger.exception("Sibling model discovery failed")
             return []
@@ -848,7 +882,10 @@ class ModelLibrary:
                 except ImportError:
                     continue
 
-        return sorted(models, key=lambda x: x["name"])
+        return sorted(
+            (_with_attachment_manifest(model) for model in models),
+            key=lambda x: x["name"],
+        )
 
     def get_embedded_mujoco_models(self) -> dict[str, dict[str, Any]]:
         """Retrieve MuJoCo models embedded in python code.
@@ -936,7 +973,10 @@ class ModelLibrary:
                             "is_imported": True,
                         }
                     )
-        return sorted(models, key=lambda x: x["name"])
+        return sorted(
+            (_with_attachment_manifest(model) for model in models),
+            key=lambda x: x["name"],
+        )
 
     def import_model(self, source_path: str) -> Path | None:
         """Import a URDF/MJCF file or directory into the library.
