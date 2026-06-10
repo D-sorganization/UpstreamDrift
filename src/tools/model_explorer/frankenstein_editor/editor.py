@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import copy
-import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, pyqtSignal

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 import os
 import sys
 from pathlib import Path
 
+import defusedxml.ElementTree as ET
 import pytest
 from PyQt6.QtWidgets import QApplication
 
