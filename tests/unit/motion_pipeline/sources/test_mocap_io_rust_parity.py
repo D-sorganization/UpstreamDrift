@@ -19,6 +19,54 @@ GOLDEN = Path(__file__).resolve().parents[3] / "data" / "motion_pipeline" / "gol
 _rust = pytest.importorskip("upstream_mocap_io")
 
 
+@pytest.mark.parametrize(
+    ("parser_name", "suffix"),
+    [
+        ("parse_c3d", ".c3d"),
+        ("parse_trc", ".trc"),
+        ("parse_bvh", ".bvh"),
+    ],
+)
+def test_rust_bindings_missing_file_raises_file_error(
+    tmp_path: Path, parser_name: str, suffix: str
+) -> None:
+    """Missing files surface as file-access errors, not format errors."""
+    path = tmp_path / f"missing{suffix}"
+    parser = getattr(_rust, parser_name)
+
+    with pytest.raises(FileNotFoundError) as exc_info:
+        parser(str(path))
+
+    message = str(exc_info.value)
+    assert str(path) in message
+    assert suffix[1:].upper() in message
+
+
+@pytest.mark.parametrize(
+    ("parser_name", "suffix", "payload"),
+    [
+        ("parse_c3d", ".c3d", b"not a c3d"),
+        ("parse_trc", ".trc", b"PathFileType\t4\t(X/Y/Z)\tbad.trc\n"),
+        ("parse_bvh", ".bvh", b"HIERARCHY\nROOT Hips\n"),
+    ],
+)
+def test_rust_bindings_malformed_present_file_raises_format_value_error(
+    tmp_path: Path, parser_name: str, suffix: str, payload: bytes
+) -> None:
+    """Malformed present files surface as format errors with path context."""
+    path = tmp_path / f"malformed{suffix}"
+    path.write_bytes(payload)
+    parser = getattr(_rust, parser_name)
+
+    with pytest.raises(ValueError) as exc_info:
+        parser(str(path))
+
+    message = str(exc_info.value)
+    assert str(path) in message
+    assert "parse error" in message
+    assert suffix[1:].upper() in message
+
+
 def _marker_traj_to_array(traj) -> tuple[np.ndarray, list[str]]:
     """Flatten a MarkerTrajectory to (n_frames, n_markers*3); NaN for occlusion."""
     names = traj.frames[0].marker_names
