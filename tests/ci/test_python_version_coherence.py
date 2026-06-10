@@ -23,6 +23,7 @@ def _policy(**overrides: object) -> PythonVersionPolicy:
         "lock_version": PythonMinor(3, 12),
         "docker_versions": frozenset({PythonMinor(3, 12)}),
         "ci_standard_versions": frozenset({PythonMinor(3, 11), PythonMinor(3, 12)}),
+        "sidekick_wheel_versions": frozenset({PythonMinor(3, 11), PythonMinor(3, 12)}),
     }
     values.update(overrides)
     return PythonVersionPolicy(**values)  # type: ignore[arg-type]
@@ -50,6 +51,18 @@ def test_validate_policy_accepts_coherent_supported_versions() -> None:
                 )
             },
             "ci-standard.yml tests unsupported",
+        ),
+        (
+            {
+                "sidekick_wheel_versions": frozenset(
+                    {PythonMinor(3, 10), PythonMinor(3, 11)}
+                )
+            },
+            "package-standalone-sidekick.yml tests unsupported",
+        ),
+        (
+            {"sidekick_wheel_versions": frozenset({PythonMinor(3, 11)})},
+            "does not smoke-test Python 3.12",
         ),
     ],
 )

@@ -662,6 +662,9 @@ jobs:
       - name: Workflow Pytest Path Guard
         run: python3 scripts/ci/check_workflow_pytest_paths.py
 
+      - name: Rust Parity / Wheel Import Gate Ratchet
+        run: python3 scripts/ci/check_rust_parity_wheel_gates.py
+
       - name: Docker Build Contract Guard
         run: python3 scripts/ci/check_dockerfile_contracts.py
 
@@ -1987,7 +1990,15 @@ jobs:
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install target/wheels/upstream_physics-*.whl
+          python -m pip install "numpy==2.2.6"
+          python -m pip install --force-reinstall target/wheels/*.whl
+          python scripts/ci/import_built_rust_wheels.py \
+            upstream_physics \
+            upstream_mocap_preproc \
+            upstream_mocap_io \
+            upstream_muscle \
+            upstream_motion_matching \
+            ai_backend
           python -c "
           import upstream_physics
           # Verify key types are importable
@@ -2000,8 +2011,6 @@ jobs:
           "
           # ai_backend wheel: smoke-test that the #[pymodule] is importable
           # and exposes the four pyclasses + version. See issue #5220.
-          python -m ensurepip --upgrade || true
-          python -m pip install target/wheels/ai_backend-*.whl
           python -c "
           import ai_backend
           assert hasattr(ai_backend, 'AIConfig'), 'AIConfig missing'

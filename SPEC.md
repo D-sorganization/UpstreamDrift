@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.270                                            |
+| **Spec Version**        | 1.0.271                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Repaired remaining #7189 packaging gate regressions after
+  the branch merge: Tauri Linux dependency installs now wait on both apt and
+  dpkg locks, and the WGS calculator keeps GUI theme imports inside the plot-tab
+  path so the installed `sidekick run` wheel smoke can load the headless engine
+  without requiring PyQt6 or the top-level `shared` GUI theme package. The
+  standalone Sidekick wheel smoke matrix now matches the Python 3.11+ package
+  floor, and the Python-version coherence guard covers that workflow.
 - **2026-06-10** - Resolved Python-version provenance drift for #7160:
   `pyproject.toml`, `install.sh`, `CLAUDE.md`, user-facing installation docs,
   `SPEC.md`, the standard CI test matrix, Docker base images, and
@@ -765,6 +772,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.271 | Follow-up #7189 packaging gate repair after reconciling the parallel branch update. Tauri Linux dependency setup now waits on both apt and dpkg locks, matching the runner failure mode seen in `Check (Rust + TypeScript)`. The WGS process calculator lazy-loads GUI theme helpers from `create_plots_tab`, and the standalone Sidekick regression suite asserts the WGS engine import does not require `shared.python.theme.integration` or PyQt6, keeping the clean-wheel `sidekick run` smoke headless. `package-standalone-sidekick.yml` now smoke-tests Python 3.11/3.12 to match the package floor, with `scripts/ci/check_python_version_coherence.py` guarding that workflow. |
 | 2026-06-10 | 1.0.270 | Docker dependency-audit hardening for #7160 follow-up CI. Pinned Docker builder/runtime pip installs to `26.1.2`, declared patched runtime floors for `Mako>=1.3.12` and `PyJWT>=2.13.0`, aligned `requirements.lock`, and updated the direct dependency license ledger so in-image `pip-audit` resolves patched packages. |
 | 2026-06-10 | 1.0.269 | Python-version coherence hardening for #7160. Raised the live package/support floor to Python 3.11, removed the unsupported Python 3.10 classifier and standard CI matrix lane, kept Python 3.11/3.12 in the standard test matrix, and documented that the Docker image plus `requirements.lock` are generated on Python 3.12. Added `scripts/ci/check_python_version_coherence.py` and `tests/ci/test_python_version_coherence.py` to enforce agreement across `pyproject.toml`, `install.sh`, `requirements.lock`, `Dockerfile`, `.github/workflows/ci-standard.yml`, mypy target version, and public docs. |
 | 2026-06-10 | 1.0.268 | Finished a deferred sub-defect of the pytest-gating policy issue #7158 (D2 marker discipline). Added `tests/support/suite_markers.py` (`SUITE_MARKERS`, `suite_markers_enforced`, `find_unmarked`, `item_has_suite_marker`) and wired a `pytest_collection_modifyitems` + `pytest_terminal_summary` hook in `tests/conftest.py` that, in REPORT-ONLY mode (the repo's ratchet pattern), counts collected tests carrying none of the recognized suite markers and surfaces the baseline without failing collection. Enforcement (missing-marker = collection error) is opt-in via `UD_ENFORCE_SUITE_MARKERS=1` for a follow-up once the unmarked baseline is driven to zero. Unit coverage in `tests/unit/test_suite_marker_enforcement_7158.py`. The remaining #7158 sub-defects (D3 coverage-omit retune) and #7155 sub-defects (deleting the autouse `_protect_engine_modules` and function-scoping `mock_mujoco_dependencies`, both gated on the issue's 5/5 `-n auto` stability evidence) stay deferred for cause and are tracked on those issues. |
