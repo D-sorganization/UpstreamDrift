@@ -152,28 +152,25 @@ class FrankensteinEditor(QWidget):
 
     def _on_copy_selected(self) -> None:
         """Copy currently selected component."""
-        current = self.left_panel.tree.currentItem()
-        if not current:
+        selection = self.left_panel.selected_component()
+        if selection is None:
             self.status_label.setText("No component selected in source model")
             return
 
-        element = current.data(0, Qt.ItemDataRole.UserRole)
-        if element is None:
-            return
-
-        comp_type = current.data(1, Qt.ItemDataRole.UserRole) or ""
-        name = current.text(0)
-        self._on_copy_to_right(comp_type, name, element)
+        self._on_copy_to_right(
+            selection.comp_type,
+            selection.name,
+            selection.element,
+        )
 
     def _on_copy_chain(self) -> None:
         """Copy a link and all its connected joints/child links."""
-        current = self.left_panel.tree.currentItem()
-        if not current:
+        selection = self.left_panel.selected_component()
+        if selection is None:
             self.status_label.setText("Select a link in the source model")
             return
 
-        comp_type = current.data(1, Qt.ItemDataRole.UserRole)
-        if comp_type != "link":
+        if selection.comp_type != "link":
             self.status_label.setText("Please select a link (not a joint)")
             return
 
@@ -182,7 +179,7 @@ class FrankensteinEditor(QWidget):
             return
 
         # Get the selected link
-        link_name = current.text(0)
+        link_name = selection.name
         copied_count = self._copy_link_chain(source_model, link_name)
         self.status_label.setText(
             f"Copied chain starting from '{link_name}': {copied_count} components"
@@ -324,8 +321,8 @@ class FrankensteinEditor(QWidget):
             return False
 
         result = committed.result
-        self.right_panel._refresh_tree()
-        self.right_panel.save_btn.setEnabled(True)
+        self.right_panel.refresh()
+        self.right_panel.set_dirty(True)
         self.status_label.setText(
             "Attached source root "
             f"'{result.source_root_link}' to '{attach_selection.target_link}' "
@@ -428,12 +425,7 @@ class FrankensteinEditor(QWidget):
         )
 
     def _selected_working_link(self) -> str | None:
-        item = self.right_panel.tree.currentItem()
-        if not item:
-            return None
-        if item.data(1, Qt.ItemDataRole.UserRole) != "link":
-            return None
-        return item.text(0)
+        return self.right_panel.selected_link_name()
 
     def _on_swap_models(self) -> None:
         """Swap the left and right models."""
@@ -444,32 +436,8 @@ class FrankensteinEditor(QWidget):
             self.status_label.setText("No models to swap")
             return
 
-        # Swap models
-        self.left_panel.model = right_model
-        self.right_panel.model = left_model
-
-        # Update file labels
-        if right_model and right_model.file_path:
-            self.left_panel.file_label.setText(f"File: {right_model.file_path.name}")
-        else:
-            self.left_panel.file_label.setText(
-                "No file" if not right_model else "New model"
-            )
-
-        if left_model and left_model.file_path:
-            self.right_panel.file_label.setText(f"File: {left_model.file_path.name}")
-        else:
-            self.right_panel.file_label.setText(
-                "No file" if not left_model else "New model"
-            )
-
-        # Refresh trees
-        self.left_panel._refresh_tree()
-        self.right_panel._refresh_tree()
-
-        # Update button states
-        self.left_panel.save_btn.setEnabled(left_model is not None)
-        self.right_panel.save_btn.setEnabled(right_model is not None)
+        self.left_panel.set_model(right_model)
+        self.right_panel.set_model(left_model)
 
         self.status_label.setText("Models swapped")
         logger.info("Swapped left and right models")
@@ -492,10 +460,11 @@ class FrankensteinEditor(QWidget):
             other_elements=[copy.deepcopy(e) for e in right_model.other_elements],
         )
 
-        self.left_panel.model = left_model
-        self.left_panel.file_label.setText("Copied from working model")
-        self.left_panel.save_btn.setEnabled(True)
-        self.left_panel._refresh_tree()
+        self.left_panel.set_model(
+            left_model,
+            label="Copied from working model",
+            dirty=True,
+        )
 
         self.status_label.setText("Working model copied to source panel for comparison")
         logger.info("Copied working model to source panel")
@@ -510,32 +479,30 @@ class FrankensteinEditor(QWidget):
             return
 
         # Get selected link from source
-        source_item = self.left_panel.tree.currentItem()
-        if not source_item:
+        source_selection = self.left_panel.selected_component()
+        if source_selection is None:
             self.status_label.setText("Select a link in the source model")
             return
 
-        source_type = source_item.data(1, Qt.ItemDataRole.UserRole)
-        if source_type != "link":
+        if source_selection.comp_type != "link":
             self.status_label.setText("Please select a link (not a joint) from source")
             return
 
-        source_link_name = source_item.text(0)
+        source_link_name = source_selection.name
 
         # Get selected link from target to replace
-        target_item = self.right_panel.tree.currentItem()
-        if not target_item:
+        target_selection = self.right_panel.selected_component()
+        if target_selection is None:
             self.status_label.setText("Select a link in the working model to replace")
             return
 
-        target_type = target_item.data(1, Qt.ItemDataRole.UserRole)
-        if target_type != "link":
+        if target_selection.comp_type != "link":
             self.status_label.setText(
                 "Please select a link (not a joint) from working model"
             )
             return
 
-        target_link_name = target_item.text(0)
+        target_link_name = target_selection.name
 
         # Confirm replacement
         reply = QMessageBox.question(
@@ -555,7 +522,8 @@ class FrankensteinEditor(QWidget):
         # Copy source subtree
         count = self._copy_link_chain(source_model, source_link_name)
 
-        self.right_panel._refresh_tree()
+        self.right_panel.refresh()
+        self.right_panel.set_dirty(True)
         self.status_label.setText(
             f"Replaced '{target_link_name}' with '{source_link_name}' ({count} components)"
         )
