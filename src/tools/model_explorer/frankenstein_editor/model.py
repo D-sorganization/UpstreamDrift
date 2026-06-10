@@ -4,6 +4,7 @@ import copy
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
@@ -11,6 +12,7 @@ from src.tools.model_explorer.composition_validator import (
     CompositionValidationResult,
     CompositionValidator,
 )
+from src.tools.model_explorer.attachment_manifest import load_attachment_manifest
 
 
 @dataclass
@@ -23,6 +25,7 @@ class URDFModel:
     joints: dict[str, ET.Element]
     materials: dict[str, ET.Element]
     other_elements: list[ET.Element]
+    attachment_points: tuple[dict[str, Any], ...] = ()
     is_modified: bool = False
 
     @classmethod
@@ -32,7 +35,9 @@ class URDFModel:
             raise ValueError("file_path must be provided")
         tree = DefusedET.parse(file_path)
         root = tree.getroot()
-        return cls.from_element(root, file_path)
+        model = cls.from_element(root, file_path)
+        model.attachment_points = load_attachment_manifest(file_path).points_as_dicts()
+        return model
 
     @classmethod
     def from_element(cls, root: ET.Element, file_path: Path | None = None) -> URDFModel:
