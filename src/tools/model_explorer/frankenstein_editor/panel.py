@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +11,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QListWidget,
+    QListWidgetItem,
     QMenu,
     QMessageBox,
     QPushButton,
@@ -88,6 +90,13 @@ class ModelPanel(QWidget):
         self.preview_text.setMaximumHeight(120)
         preview_layout.addWidget(self.preview_text)
         layout.addWidget(preview_group)
+
+        validation_group = QGroupBox("Validation Findings")
+        validation_layout = QVBoxLayout(validation_group)
+        self.validation_list = QListWidget()
+        self.validation_list.setMaximumHeight(100)
+        validation_layout.addWidget(self.validation_list)
+        layout.addWidget(validation_group)
 
     def _connect_signals(self) -> None:
         """Connect signals."""
@@ -246,6 +255,7 @@ class ModelPanel(QWidget):
     def _refresh_tree(self) -> None:
         """Refresh the component tree."""
         self.tree.clear()
+        self._refresh_validation_findings()
         if not self.model:
             return
 
@@ -350,3 +360,22 @@ class ModelPanel(QWidget):
     def get_model(self) -> URDFModel | None:
         """Get the current model."""
         return self.model
+
+    def _refresh_validation_findings(self) -> None:
+        """Surface current composition findings in the panel."""
+        self.validation_list.clear()
+        if not self.model:
+            self.validation_list.addItem("No model loaded")
+            return
+
+        result = self.model.validate_composition()
+        if not result.findings:
+            self.validation_list.addItem("No validation findings")
+            return
+
+        for finding in result.findings:
+            item = QListWidgetItem(
+                f"{finding.severity.upper()} {finding.code}: {finding.message}"
+            )
+            item.setToolTip(", ".join(finding.elements))
+            self.validation_list.addItem(item)

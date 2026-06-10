@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import math
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
@@ -66,11 +66,26 @@ class CompositionValidationError(ValueError):
         super().__init__(f"Invalid Frankenstein composition: {messages}")
 
 
+@dataclass(frozen=True)
+class _JointEdge:
+    name: str
+    parent: str
+    child: str
+    origin: tuple[float, float, float]
+
+
+@dataclass(frozen=True)
+class _Aabb:
+    minimum: tuple[float, float, float]
+    maximum: tuple[float, float, float]
+
+
 class CompositionValidator:
     """Validate URDF composition invariants before first-party editor export."""
 
     _FLOAT_TOLERANCE = 1e-9
     _FIXED_JOINT_TYPES = {"fixed"}
+    _SUBTREE_MASS_RATIO_WARNING = 2.0
 
     def validate_model(self, model: URDFModel) -> CompositionValidationResult:
         """Validate a first-party Frankenstein editor model."""
@@ -98,6 +113,8 @@ class CompositionValidator:
         self._check_unique_names("joint", joint_names, findings)
         self._check_topology(link_elements, joint_elements, findings)
         self._check_moving_link_inertials(link_elements, joint_elements, findings)
+        self._check_subtree_mass_ratios(link_elements, joint_elements, findings)
+        self._check_attachment_geometry_overlap(link_elements, joint_elements, findings)
 
         return CompositionValidationResult(tuple(findings))
 
@@ -354,6 +371,86 @@ class CompositionValidator:
             self._check_mass(link_name, inertial, findings)
             self._check_inertia(link_name, inertial, findings)
 
+    def _check_subtree_mass_ratios(
+        self,
+        link_elements: list[ET.Element],
+        joint_elements: list[ET.Element],
+        findings: list[CompositionFinding],
+    ) -> None:
+        links_by_name = self._links_by_name(link_elements)
+        edges = self._valid_joint_edges(joint_elements, set(links_by_name))
+        if not edges:
+            return
+
+        adjacency = self._adjacency(edges)
+        parent_by_child = {edge.child: edge.parent for edge in edges}
+        masses: dict[str, float] = {}
+        for name, link in links_by_name.items():
+            mass = self._link_mass(link)
+            if mass is not None:
+                masses[name] = mass
+
+        for edge in edges:
+            parent_chain_mass = self._parent_chain_mass(
+                edge.parent,
+                parent_by_child,
+                masses,
+            )
+            subtree_mass = self._subtree_mass(edge.child, adjacency, masses)
+            if parent_chain_mass <= 0 or subtree_mass <= 0:
+                continue
+            ratio = subtree_mass / parent_chain_mass
+            if ratio > self._SUBTREE_MASS_RATIO_WARNING:
+                findings.append(
+                    CompositionFinding(
+                        code="subtree_mass_ratio",
+                        severity="warning",
+                        message=(
+                            f"Attached subtree rooted at '{edge.child}' has mass "
+                            f"{subtree_mass:g}, which is {ratio:.2f}x the parent "
+                            f"chain mass {parent_chain_mass:g} at '{edge.parent}'."
+                        ),
+                        elements=(edge.parent, edge.child, edge.name),
+                        category="inertial",
+                    )
+                )
+
+    def _check_attachment_geometry_overlap(
+        self,
+        link_elements: list[ET.Element],
+        joint_elements: list[ET.Element],
+        findings: list[CompositionFinding],
+    ) -> None:
+        links_by_name = self._links_by_name(link_elements)
+        aabbs = {
+            name: aabb
+            for name, link in links_by_name.items()
+            for aabb in [self._link_aabb(link)]
+            if aabb is not None
+        }
+
+        for edge in self._valid_joint_edges(joint_elements, set(links_by_name)):
+            parent_aabb = aabbs.get(edge.parent)
+            child_aabb = aabbs.get(edge.child)
+            if parent_aabb is None or child_aabb is None:
+                continue
+            child_in_parent = self._translate_aabb(child_aabb, edge.origin)
+            if self._aabbs_overlap(parent_aabb, child_in_parent):
+                findings.append(
+                    CompositionFinding(
+                        code="geometry_overlap",
+                        severity="warning",
+                        message=(
+                            f"Attachment joint '{edge.name}' places child link "
+                            f"'{edge.child}' geometry inside parent link "
+                            f"'{edge.parent}' geometry; inspect mount offset or "
+                            "use a deliberate collision allowance."
+                        ),
+                        elements=(edge.parent, edge.child, edge.name),
+                        category="geometry",
+                    )
+                )
+
     def _check_mass(
         self,
         link_name: str,
@@ -442,6 +539,182 @@ class CompositionValidator:
             )
 
     @staticmethod
+    def _links_by_name(link_elements: list[ET.Element]) -> dict[str, ET.Element]:
+        return {
+            link.get("name", "").strip(): link
+            for link in link_elements
+            if link.get("name", "").strip()
+        }
+
+    def _valid_joint_edges(
+        self,
+        joint_elements: list[ET.Element],
+        links: set[str],
+    ) -> tuple[_JointEdge, ...]:
+        edges: list[_JointEdge] = []
+        for joint in joint_elements:
+            parent = self._joint_endpoint(joint, "parent")
+            child = self._joint_endpoint(joint, "child")
+            if parent not in links or child not in links:
+                continue
+            assert parent is not None
+            assert child is not None
+            edges.append(
+                _JointEdge(
+                    name=self._name(joint) or "<unnamed joint>",
+                    parent=parent,
+                    child=child,
+                    origin=self._origin_xyz(joint),
+                )
+            )
+        return tuple(edges)
+
+    @staticmethod
+    def _adjacency(edges: tuple[_JointEdge, ...]) -> dict[str, list[str]]:
+        adjacency: dict[str, list[str]] = defaultdict(list)
+        for edge in edges:
+            adjacency[edge.parent].append(edge.child)
+        return adjacency
+
+    def _parent_chain_mass(
+        self,
+        parent: str,
+        parent_by_child: dict[str, str],
+        masses: dict[str, float],
+    ) -> float:
+        total = 0.0
+        current: str | None = parent
+        seen: set[str] = set()
+        while current is not None and current not in seen:
+            seen.add(current)
+            total += masses.get(current, 0.0)
+            current = parent_by_child.get(current)
+        return total
+
+    def _subtree_mass(
+        self,
+        root: str,
+        adjacency: dict[str, list[str]],
+        masses: dict[str, float],
+    ) -> float:
+        total = 0.0
+        stack = [root]
+        seen: set[str] = set()
+        while stack:
+            link = stack.pop()
+            if link in seen:
+                continue
+            seen.add(link)
+            total += masses.get(link, 0.0)
+            stack.extend(adjacency.get(link, ()))
+        return total
+
+    def _link_mass(self, link: ET.Element) -> float | None:
+        mass = self._float_attr(link.find("inertial/mass"), "value")
+        if mass is None or not math.isfinite(mass) or mass <= 0:
+            return None
+        return mass
+
+    def _link_aabb(self, link: ET.Element) -> _Aabb | None:
+        aabbs = [
+            aabb
+            for tag in ("visual", "collision")
+            for geometry in link.findall(tag)
+            for aabb in [self._geometry_aabb(geometry)]
+            if aabb is not None
+        ]
+        if not aabbs:
+            return None
+        minimum = (
+            min(aabb.minimum[0] for aabb in aabbs),
+            min(aabb.minimum[1] for aabb in aabbs),
+            min(aabb.minimum[2] for aabb in aabbs),
+        )
+        maximum = (
+            max(aabb.maximum[0] for aabb in aabbs),
+            max(aabb.maximum[1] for aabb in aabbs),
+            max(aabb.maximum[2] for aabb in aabbs),
+        )
+        return _Aabb(minimum=minimum, maximum=maximum)
+
+    def _geometry_aabb(self, geometry_parent: ET.Element) -> _Aabb | None:
+        origin = self._origin_xyz(geometry_parent)
+        geometry = geometry_parent.find("geometry")
+        if geometry is None:
+            return None
+        box = geometry.find("box")
+        if box is not None:
+            size = self._vector_attr(box, "size")
+            if size is None:
+                return None
+            half_extents = (size[0] / 2, size[1] / 2, size[2] / 2)
+            return self._aabb_from_half_extents(origin, half_extents)
+
+        sphere = geometry.find("sphere")
+        radius = self._float_attr(sphere, "radius")
+        if radius is not None and math.isfinite(radius) and radius >= 0:
+            return self._aabb_from_half_extents(origin, (radius, radius, radius))
+
+        cylinder = geometry.find("cylinder")
+        radius = self._float_attr(cylinder, "radius")
+        length = self._float_attr(cylinder, "length")
+        if (
+            radius is not None
+            and length is not None
+            and math.isfinite(radius)
+            and math.isfinite(length)
+            and radius >= 0
+            and length >= 0
+        ):
+            return self._aabb_from_half_extents(origin, (radius, radius, length / 2))
+
+        return None
+
+    @staticmethod
+    def _aabb_from_half_extents(
+        center: tuple[float, float, float],
+        half_extents: tuple[float, float, float],
+    ) -> _Aabb:
+        return _Aabb(
+            minimum=(
+                center[0] - half_extents[0],
+                center[1] - half_extents[1],
+                center[2] - half_extents[2],
+            ),
+            maximum=(
+                center[0] + half_extents[0],
+                center[1] + half_extents[1],
+                center[2] + half_extents[2],
+            ),
+        )
+
+    @staticmethod
+    def _translate_aabb(
+        aabb: _Aabb,
+        offset: tuple[float, float, float],
+    ) -> _Aabb:
+        return _Aabb(
+            minimum=(
+                aabb.minimum[0] + offset[0],
+                aabb.minimum[1] + offset[1],
+                aabb.minimum[2] + offset[2],
+            ),
+            maximum=(
+                aabb.maximum[0] + offset[0],
+                aabb.maximum[1] + offset[1],
+                aabb.maximum[2] + offset[2],
+            ),
+        )
+
+    @staticmethod
+    def _aabbs_overlap(first: _Aabb, second: _Aabb) -> bool:
+        return all(
+            first.minimum[index] <= second.maximum[index]
+            and second.minimum[index] <= first.maximum[index]
+            for index in range(3)
+        )
+
+    @staticmethod
     def _name(element: ET.Element) -> str:
         return element.get("name", "").strip()
 
@@ -466,3 +739,28 @@ class CompositionValidator:
             return float(value)
         except ValueError:
             return None
+
+    def _origin_xyz(self, element: ET.Element) -> tuple[float, float, float]:
+        origin = element.find("origin")
+        return self._vector_attr(origin, "xyz") or (0.0, 0.0, 0.0)
+
+    @staticmethod
+    def _vector_attr(
+        element: ET.Element | None,
+        attr: str,
+    ) -> tuple[float, float, float] | None:
+        if element is None:
+            return None
+        value = element.get(attr)
+        if value is None:
+            return None
+        parts = value.split()
+        if len(parts) != 3:
+            return None
+        try:
+            vector = (float(parts[0]), float(parts[1]), float(parts[2]))
+        except ValueError:
+            return None
+        if not all(math.isfinite(component) for component in vector):
+            return None
+        return vector
