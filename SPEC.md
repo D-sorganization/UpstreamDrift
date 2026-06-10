@@ -35,10 +35,10 @@
 | **Repository Name**     | `UpstreamDrift`                                    |
 | **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
 | **Owner**               | D-sorganization                                    |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
+| **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.268                                            |
+| **Spec Version**        | 1.0.269                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Resolved Python-version provenance drift for #7160:
+  `pyproject.toml`, `install.sh`, `CLAUDE.md`, user-facing installation docs,
+  `SPEC.md`, the standard CI test matrix, Docker base images, and
+  `requirements.lock` now describe one coherent policy. The supported floor is
+  Python 3.11, standard CI tests Python 3.11 and 3.12, and the production
+  Docker image plus lockfile remain generated on Python 3.12. Added
+  `scripts/ci/check_python_version_coherence.py` and focused tests so the
+  floor, classifiers, mypy target, installer floor, lock header, Docker base,
+  and CI versions cannot silently diverge again.
 - **2026-06-10** - Tightened test-isolation and optional-dependency contracts
   for #7155/#7158: the MuJoCo dependency mock is function-scoped, affected
   MuJoCo tests initialize their own required state, launcher tests route
@@ -673,7 +682,7 @@ Beyond standard tools, CI enforces custom checks:
 
 ```bash
 # Prerequisites
-- Python 3.10 or later
+- Python 3.11 or later
 - MuJoCo 3.3.0+ with license (community or pro)
 - Optional: Drake, Pinocchio, OpenSim binaries on PATH
 - For Tauri desktop app: Node.js 16+, Rust toolchain
@@ -751,6 +760,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.269 | Python-version coherence hardening for #7160. Raised the live package/support floor to Python 3.11, removed the unsupported Python 3.10 classifier and standard CI matrix lane, kept Python 3.11/3.12 in the standard test matrix, and documented that the Docker image plus `requirements.lock` are generated on Python 3.12. Added `scripts/ci/check_python_version_coherence.py` and `tests/ci/test_python_version_coherence.py` to enforce agreement across `pyproject.toml`, `install.sh`, `requirements.lock`, `Dockerfile`, `.github/workflows/ci-standard.yml`, mypy target version, and public docs. |
 | 2026-06-10 | 1.0.268 | Finished a deferred sub-defect of the pytest-gating policy issue #7158 (D2 marker discipline). Added `tests/support/suite_markers.py` (`SUITE_MARKERS`, `suite_markers_enforced`, `find_unmarked`, `item_has_suite_marker`) and wired a `pytest_collection_modifyitems` + `pytest_terminal_summary` hook in `tests/conftest.py` that, in REPORT-ONLY mode (the repo's ratchet pattern), counts collected tests carrying none of the recognized suite markers and surfaces the baseline without failing collection. Enforcement (missing-marker = collection error) is opt-in via `UD_ENFORCE_SUITE_MARKERS=1` for a follow-up once the unmarked baseline is driven to zero. Unit coverage in `tests/unit/test_suite_marker_enforcement_7158.py`. The remaining #7158 sub-defects (D3 coverage-omit retune) and #7155 sub-defects (deleting the autouse `_protect_engine_modules` and function-scoping `mock_mujoco_dependencies`, both gated on the issue's 5/5 `-n auto` stability evidence) stay deferred for cause and are tracked on those issues. |
 | 2026-06-10 | 1.0.267 | Security hardening of remote model downloads (#7183, #7184, #7185, #7186). Added shared helpers `download_to_file` (bounded-timeout streaming download; `DOWNLOAD_TIMEOUT_SECONDS=30`) and `safe_extract_zip` (Zip-Slip member-path validation) to `src/shared/python/security/security_utils.py`. `GitHubRepository.download_archive` now extracts via `safe_extract_zip`, downloads with a timeout, and unlinks its `delete=False` temp file on every path (#7183 Zip Slip + temp leak). All `urlretrieve`/`urlopen` call sites in `standard_models.py`, the `model_generation/library/` repository/loader modules, and `tools/model_explorer/model_library.py` now use a 30s timeout (#7184). `StandardModelManager.download_standard_humanoid` now parses the URDF for mesh-filename entries and downloads the real meshes, returning `False` (no silent empty-STL stubs) unless the dev-only `allow_stub_meshes=True` is passed (#7186). `Jules-Issue-Mention-Handler.yml` and `PR-Comment-Responder.yml` route attacker-controllable issue/comment title/body/login values through `env:` indirection instead of splicing into `run:` bodies (#7185 Actions expression injection). Regression tests added in `tests/unit/test_shared_security_utils.py` (zip-slip + timeout) and `tests/unit/config/test_standard_models.py` (real-mesh success vs loud failure). |
 | 2026-06-09 | 1.0.265 | Architecture budget CI gate for #7131/#7133. Added `scripts/ci/check_architecture_budget.py` plus `scripts/config/architecture_budget.json` to ratchet changed production Python files against a 100-line function budget and 8-effective-parameter callable budget, excluding tests/vendor and requiring owned, linked exceptions for any temporary budget breach. Wired the gate into `.github/workflows/ci-standard.yml` and added focused TDD coverage for long-function detection, parameter counting, receiver-parameter exclusion, exception handling, and test-path skips. |

@@ -87,8 +87,10 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 
 ## Python and Tooling
 
-- **Python 3.10+** is the supported minimum from `pyproject.toml`.
-- **Python 3.11** is the default CI interpreter in `.github/workflows/ci-standard.yml`.
+- **Python 3.11+** is the supported minimum from `pyproject.toml` and
+  `install.sh`.
+- **Python 3.11 and 3.12** are tested in the standard CI matrix; the
+  production Docker image and `requirements.lock` are generated on Python 3.12.
 - Always `python3`, never `python`.
 
 - **Formatter:** Ruff format. 88-char line limit.

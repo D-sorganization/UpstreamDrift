@@ -674,6 +674,9 @@ jobs:
       - name: VERSION / pyproject / SPEC.md Consistency Check
         run: python3 scripts/ci/check_version_consistency.py
 
+      - name: Python Version Coherence Check
+        run: python3 scripts/ci/check_python_version_coherence.py
+
       - name: Test Layout Guard
         run: python3 scripts/check_test_layout.py
 
@@ -1012,7 +1015,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.10", "3.11", "3.12"]
+        python: ["3.11", "3.12"]
     steps:
       - name: Clean corrupt git objects
         shell: bash
