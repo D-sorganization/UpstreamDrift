@@ -38,6 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 | **Spec Version** | 1.0.479 |
@@ -47,6 +48,10 @@
 | **Last Spec Update** | 2026-07-25 |
 
 > > > > > > > origin/codex/pyqt6-launcher-functional-qa
+=======
+| **Spec Version**        | 1.0.304                                            |
+| **Last Spec Update**    | 2026-06-11                                         |
+>>>>>>> 90c21162b (fix: ignore blank cached cloud tokens)
 
 ## 2. Purpose & Mission
 
@@ -77,6 +82,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+<<<<<<< HEAD
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
@@ -995,6 +1001,12 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   result. The standard CI acceptance tests also reject blank lines immediately
   after shell continuations so the core pytest coverage command cannot be split
   into a partial command again (#7303).
+=======
+- **2026-06-10** - Hardened the optional cloud client cache contract for
+  #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
+  treated as absent credentials, leaving `CloudClient.token` as `None` and
+  `is_logged_in` false while preserving valid cached-token behavior.
+>>>>>>> 90c21162b (fix: ignore blank cached cloud tokens)
 - **2026-06-10** - Closed the #7273 PR-scoped coverage bypass in standard CI.
   PRs that change source, test, or dependency targets now fall through to the
   coverage-producing core test lane instead of using the workflow-only
@@ -1925,6 +1937,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+<<<<<<< HEAD
 | 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
 | 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
 | 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
@@ -2055,6 +2068,9 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
 | 2026-06-10 | 1.0.308 | Docker build timeout and focused PR coverage enforcement for #7277. `DockerManager` now monitors build output through a background queue while enforcing a wall-clock build timeout, terminating the process tree when stdout remains open past the deadline. Standard CI now scopes PR coverage to changed `src/**/*.py` modules and runs per-package coverage enforcement only after full core coverage reports, so focused PRs are not blocked by unrelated packages. |
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
+=======
+| 2026-06-10 | 1.0.304 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
+>>>>>>> 90c21162b (fix: ignore blank cached cloud tokens)
 | 2026-06-10 | 1.0.302 | Audit hygiene fixes for #7279 and #7282. `.github/workflows/docker-security-scan.yml` now blocks HIGH and CRITICAL Trivy container vulnerabilities in the table scan while retaining SARIF upload, and audited API/launcher production modules now use the canonical logging infrastructure instead of direct module-level `logging.getLogger` calls. Added security CI acceptance coverage for the Docker HIGH/CRITICAL gate and a repo-hygiene test for the remediated logger modules. |
 | 2026-06-10 | 1.0.301 | Audit regression fixes for #7269, #7270, and #7271. Model Explorer API path resolution now validates caller paths before filesystem reads and resolves only within approved model directories, closing the direct existing-path containment bypass. Motion-pipeline keypoint gap filling now guards both before/after neighbor keypoint indexes and pins mismatched-neighbor behavior in the main and pure-Python implementations. `SwingBallFlightPipeline` now emits `LaunchConditions` in the units consumed by `BallFlightSimulator`: launch and azimuth angles in radians, spin rate in RPM, with updated DbC validation and unit tests. |
 | 2026-06-10 | 1.0.300 | Completed the #7207 model explorer composition UX flow. Added `CompositionUxController` for library drag payloads, non-mutating drop/ghost previews, highlighted target/source links, validation summaries, committed drops, and a validation-aware export chooser that enables URDF/MJCF while explicitly marking SDF/OSIM unavailable until writers exist. `FrankensteinEditor` now exposes preview, commit, and export-choice hooks, with offscreen tests covering simple humanoid plus arm preview, commit, validation pass, and MJCF export. |
