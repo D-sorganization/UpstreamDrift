@@ -21,6 +21,12 @@ from sqlalchemy.sql import func
 # Create the base class for SQLAlchemy models
 Base = declarative_base()
 
+# Single source of truth for the API-key `name` length bound (issue #7167 D4).
+# Used by the String() column, the DB CHECK constraint, the Pydantic
+# `APIKeyCreate.name` Field, and the route-level persistence assertion so a
+# bypass of any one layer cannot silently truncate.
+API_KEY_NAME_MAX_LENGTH = 255
+
 if TYPE_CHECKING:
     # For type checking, we need to tell MyPy that Base is a class
     from sqlalchemy.orm import DeclarativeMeta
@@ -111,9 +117,15 @@ class APIKey(Base):  # type: ignore[misc,valid-type]
 
     __tablename__ = "api_keys"
 
-    # DATA INTEGRITY: Add check constraint for non-negative usage count
+    # DATA INTEGRITY: non-negative usage count, and a defense-in-depth length
+    # bound on `name` so a bypassed/changed Pydantic layer cannot silently
+    # truncate at the String(255) column boundary (issue #7167 D4).
     __table_args__ = (
         CheckConstraint("usage_count >= 0", name="non_negative_usage_count"),
+        CheckConstraint(
+            f"length(name) >= 1 AND length(name) <= {API_KEY_NAME_MAX_LENGTH}",
+            name="api_key_name_length",
+        ),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -124,7 +136,7 @@ class APIKey(Base):  # type: ignore[misc,valid-type]
     key_hash = Column(String(255), unique=True, index=True, nullable=False)
     # Fast lookup prefix hash stored under the legacy key_prefix column name.
     key_prefix = Column(String(64), index=True, nullable=True)
-    name = Column(String(255), nullable=False)  # User-friendly name
+    name = Column(String(API_KEY_NAME_MAX_LENGTH), nullable=False)  # User-friendly name
     is_active = Column(Boolean, default=True, nullable=False)
 
     # Usage tracking (with non-negative constraint via __table_args__)
@@ -222,7 +234,10 @@ class APIKeyCreate(BaseModel):
     """API key creation model."""
 
     name: str = Field(
-        ..., min_length=1, max_length=255, description="Friendly name for the API key"
+        ...,
+        min_length=1,
+        max_length=API_KEY_NAME_MAX_LENGTH,
+        description="Friendly name for the API key",
     )
 
 

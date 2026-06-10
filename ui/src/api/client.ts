@@ -2,6 +2,17 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
 import { apiFetch } from './fetch';
 
+/**
+ * Result of a `setSpeed` call (issue #7166).
+ *
+ * `setSpeed` never rejects; it reports failure in-band so fire-and-forget
+ * callers cannot produce an unhandled rejection.
+ */
+export interface SetSpeedResult {
+  success: boolean;
+  error?: string;
+}
+
 export interface SimulationFrame {
   frame: number;
   time: number;
@@ -67,6 +78,11 @@ export function useSimulation(engineType: string) {
   const isMountedRef = useRef(true);
 
   const connect = useCallback((config: SimulationConfig = {}) => {
+    // Unmount guard at function entry (issue #7166): a connect() raced with
+    // unmount otherwise warns about state updates on an unmounted component
+    // when it reaches setConnectionStatus('connecting') below.
+    if (!isMountedRef.current) return;
+
     // Close any existing WebSocket connection before creating a new one
     if (wsRef.current) {
       wsRef.current.close();
@@ -220,14 +236,23 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
-  const setSpeed = useCallback(async (speed: number): Promise<void> => {
+  // Returns a structured result instead of throwing (issue #7166): callers
+  // that fire-and-forget (event handlers) previously turned the re-thrown error
+  // into an `unhandledrejection`. A result object makes the failure contract
+  // explicit (DbC) so callers can surface it via the existing error toast.
+  const setSpeed = useCallback(async (speed: number): Promise<SetSpeedResult> => {
     try {
       await apiFetch<unknown>('/api/simulation/speed', {
         method: 'POST',
         body: JSON.stringify({ speed_factor: speed }),
       });
-    } catch {
-      throw new Error(`Failed to set simulation speed to ${speed}x`);
+      return { success: true };
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      return {
+        success: false,
+        error: `Failed to set simulation speed to ${speed}x: ${detail}`,
+      };
     }
   }, []);
 

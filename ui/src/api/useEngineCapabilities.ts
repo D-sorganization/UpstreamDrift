@@ -9,7 +9,8 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { apiFetch } from './fetch';
+import { apiFetchParsed } from './fetch';
+import { parseEngineCapabilities } from './schemas';
 
 /** Support level for a single engine capability. */
 export type CapabilityLevel = 'full' | 'partial' | 'none';
@@ -74,7 +75,10 @@ export function useEngineCapabilities(
     setError(null);
 
     try {
-      const data = await apiFetch<EngineCapabilitiesData>(`/api/engines/${engine}/capabilities`);
+      const data = await apiFetchParsed(
+        `/api/engines/${engine}/capabilities`,
+        parseEngineCapabilities,
+      );
 
       if (isMountedRef.current) {
         setCapabilities(data);

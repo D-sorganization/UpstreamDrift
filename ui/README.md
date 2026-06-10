@@ -38,6 +38,31 @@ The UI consumes HTTP routes defined under `src/api/routes/` and relies on WebSoc
 
 Frontend call sites and hooks live under `ui/src/api/`. For transport details, start with `ui/src/api/client.ts`, which currently connects to `/api/ws/simulate/{engineType}`. The chat service protocol lives in `src/api/routes/chat_ws.py` under `/ws/chat/{session_id}`.
 
+### Runtime response validation (issue #7165)
+
+The backend and frontend ship separately (Docker vs Tauri vs dev), so response
+shape skew is a _when_, not an _if_. `apiFetch<T>` is a compile-time-only
+assertion, so a malformed payload would otherwise be stored as-is and crash deep
+inside a component render. Boundary hooks therefore validate at runtime via
+`apiFetchParsed(path, parseFn)` (`ui/src/api/fetch.ts`) with parser functions in
+`ui/src/api/schemas.ts`; an invalid payload becomes the hook's `error` state
+instead of a render-time `TypeError`.
+
+**Decision:** validation uses small hand-rolled type guards rather than a
+runtime-schema dependency (e.g. `zod`). The validated types are the existing
+TypeScript interfaces and each `parseX` returns that same interface, so the
+compile-time and runtime contracts share one source of truth without an added
+dependency. New validated boundaries should follow this pattern: add a
+`parseX` to `schemas.ts` and fetch through `apiFetchParsed`.
+
+### WebSocket URL resolution (issue #7166)
+
+There is one URL-resolution path for HTTP and WebSockets: components ask
+`getApiBase()` in `ui/src/api/backend.ts` and never compute origins themselves.
+`VITE_API_URL` is the single override. Chat (`resolveChatUrl` in
+`ChatPanel.tsx`) and the simulation socket both derive their `ws(s)://` URL from
+that base.
+
 ## Desktop build
 
 Install the Rust toolchain and the Tauri build prerequisites for your platform, then run:

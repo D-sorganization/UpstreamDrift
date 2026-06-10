@@ -218,6 +218,10 @@ class FilePubSub:
 
         try:
             qfsw = QFileSystemWatcher([str(path)])
+            # One-time re-arm failure latch (#7149 D3): a persistent OSError
+            # (e.g. permission loss) on re-arm should be logged once, not
+            # silently swallowed on every change event.
+            rearm_warned = {"done": False}
 
             def _on_file_changed(_p: str) -> None:
                 # QFileSystemWatcher stops tracking after file is replaced
@@ -229,10 +233,22 @@ class FilePubSub:
                     if not Path(_p).exists():
                         Path(_p).touch()
                     qfsw.addPath(_p)
-                except OSError:
-                    # File may have been deleted; watcher will stop tracking
-                    pass
-                # Deliver after re-arming to ensure subsequent changes are caught
+                except OSError as exc:
+                    # File may have been deleted (watcher stops tracking) or a
+                    # permission error occurred. Log once so a persistent
+                    # re-arm failure is observable instead of silent (#7149 D3).
+                    if not rearm_warned["done"]:
+                        rearm_warned["done"] = True
+                        logger.warning(
+                            "file pub-sub Qt watcher re-arm failed for %s "
+                            "(further failures suppressed): %s",
+                            _p,
+                            exc,
+                        )
+                # Deliver after re-arming to ensure subsequent changes are
+                # caught. deliver() already isolates subscriber-callback
+                # exceptions (#7149 D3), so a raising subscriber cannot
+                # propagate out of this Qt slot and kill the watcher.
                 deliver()
 
             qfsw.fileChanged.connect(_on_file_changed)

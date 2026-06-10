@@ -41,6 +41,7 @@ import {
 } from 'react';
 import { Send, MessageSquare, Paperclip, RefreshCw, X, RotateCcw } from 'lucide-react';
 import { ChatMarkdown } from './chatMarkdown';
+import { getApiBase } from '../../api/backend';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -118,13 +119,23 @@ export function resolveChatUrl(sessionId: string = 'new'): string {
   if (!sessionId || sessionId.trim().length === 0) {
     throw new Error('sessionId must be a non-empty string');
   }
-  const base =
-    (import.meta.env?.VITE_API_URL as string | undefined) ??
-    'ws://localhost:8000';
-  const wsBase = base
-    .replace(/^http:\/\//i, 'ws://')
-    .replace(/^https:\/\//i, 'wss://')
-    .replace(/\/+$/, '');
+  // Single URL-resolution path for the whole app (issue #7166 / DRY): the
+  // explicit `VITE_API_URL` override wins, otherwise defer to `getApiBase()`
+  // (the same source every other API consumer uses) and rewrite http→ws.
+  // `getApiBase()` returns '' in browser/Vite mode, where the dev server
+  // proxies the socket on the current origin.
+  const override = import.meta.env?.VITE_API_URL as string | undefined;
+  const base = override ?? getApiBase();
+  let wsBase: string;
+  if (base) {
+    wsBase = base
+      .replace(/^http:\/\//i, 'ws://')
+      .replace(/^https:\/\//i, 'wss://')
+      .replace(/\/+$/, '');
+  } else {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    wsBase = `${protocol}//${window.location.host}`;
+  }
   return `${wsBase}/ws/chat/${sessionId}`;
 }
 

@@ -11,7 +11,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { apiFetch } from './fetch';
+import { apiFetchParsed } from './fetch';
+import { parseLauncherManifest } from './schemas';
 
 export type LauncherCategory =
     | 'physics_engine'
@@ -75,11 +76,13 @@ export function useLauncherManifest(): UseLauncherManifestResult {
         setError(null);
 
         try {
-            const data = await apiFetch<LauncherManifest>('/api/launcher/manifest');
-
-            if (!Array.isArray(data.tiles)) {
-                throw new Error('Invalid manifest: tiles must be an array');
-            }
+            // Runtime-validate the payload (issue #7165): tiles must be an
+            // array and every tile must carry a finite-integer `order`, else
+            // the sort below produces NaN comparisons and silently-wrong order.
+            const data = await apiFetchParsed(
+                '/api/launcher/manifest',
+                parseLauncherManifest,
+            );
 
             // Filter hidden tiles (e.g. legacy aliases retained for saved
             // layout resolution) so the dashboard does not render duplicate
@@ -99,7 +102,12 @@ export function useLauncherManifest(): UseLauncherManifestResult {
     }, []);
 
     useEffect(() => {
-        fetchManifest();
+        // Defer to a microtask so the synchronous `setLoadState('loading')`
+        // inside fetchManifest does not run in the effect body (mirrors
+        // useEngineCapabilities; satisfies react-hooks/set-state-in-effect).
+        void Promise.resolve().then(() => {
+            fetchManifest();
+        });
     }, [fetchManifest]);
 
     const tiles = manifest?.tiles ?? [];

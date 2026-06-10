@@ -68,10 +68,10 @@ export function SimulationPage() {
 
   const handleSpeedChange = useCallback(async (value: number) => {
     setSpeedFactor(value);
-    try {
-      await setSpeed(value);
-    } catch (err) {
-      showError(err instanceof Error ? err.message : 'Failed to update speed');
+    // setSpeed reports failure in-band (issue #7166) — no rejection to catch.
+    const result = await setSpeed(value);
+    if (!result.success) {
+      showError(result.error ?? 'Failed to update speed');
     }
   }, [setSpeed, showError]);
 

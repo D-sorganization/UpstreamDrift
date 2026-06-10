@@ -18,7 +18,8 @@ const mockSimulation = {
   stop: vi.fn(),
   pause: vi.fn(),
   resume: vi.fn(),
-  setSpeed: vi.fn(),
+  // setSpeed resolves to a structured result (issue #7166), never rejects.
+  setSpeed: vi.fn().mockResolvedValue({ success: true }),
 };
 
 vi.mock('@/api/client', () => ({
@@ -95,7 +96,7 @@ describe('SimulationPage', () => {
       stop: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      setSpeed: vi.fn(),
+      setSpeed: vi.fn().mockResolvedValue({ success: true }),
     });
   });
 

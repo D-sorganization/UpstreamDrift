@@ -65,6 +65,32 @@ export async function apiFetch<T>(
 }
 
 /**
+ * apiFetchParsed — `apiFetch` plus runtime validation of the response body
+ * (issue #7165).
+ *
+ * `apiFetch<T>` only asserts the response type at compile time; a backend on a
+ * different version can return a malformed shape that is stored as-is and later
+ * crashes deep in a component render. This wrapper runs the body through a
+ * caller-supplied `parse` function so an invalid payload surfaces as a thrown
+ * error (which hooks turn into their `error` state) rather than a render-time
+ * `TypeError`.
+ *
+ * @param path - API path starting with `/`
+ * @param parse - Validator that returns the parsed value or throws on a bad shape
+ * @param init - Optional `RequestInit`
+ * @returns The validated value
+ * @throws Error on HTTP/network failure or when `parse` rejects the body
+ */
+export async function apiFetchParsed<T>(
+  path: string,
+  parse: (raw: unknown) => T,
+  init?: RequestInit,
+): Promise<T> {
+  const raw = await apiFetch<unknown>(path, init);
+  return parse(raw);
+}
+
+/**
  * apiFetchForm — same as apiFetch but for multipart/form-data uploads.
  *
  * Do NOT set Content-Type header; the browser sets it with the boundary.

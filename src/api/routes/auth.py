@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from src.api.auth.dependencies import RequireAdmin, RequireAuth
 from src.api.auth.models import (
+    API_KEY_NAME_MAX_LENGTH,
     APIKey,
     APIKeyCreate,
     APIKeyResponse,
@@ -205,6 +206,20 @@ async def create_api_key(
     # Generate API key
     if not (api_key_data is not None):
         raise ValueError("api_key_data must be provided")
+
+    # Defense-in-depth length precondition at the persistence boundary
+    # (issue #7167 D4): even if the Pydantic layer is bypassed or changed,
+    # never silently truncate the name at the String(API_KEY_NAME_MAX_LENGTH)
+    # column. Shares the single length bound with the model + DB CHECK.
+    if not (1 <= len(api_key_data.name) <= API_KEY_NAME_MAX_LENGTH):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "API key name must be between 1 and "
+                f"{API_KEY_NAME_MAX_LENGTH} characters"
+            ),
+        )
+
     api_key = security_manager.generate_api_key()
     api_key_hash = security_manager.hash_api_key(api_key)
 

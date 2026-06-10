@@ -103,6 +103,34 @@ def _init_video_pipeline() -> Any:
 active_tasks = TaskManager()
 
 
+def _validate_cors_at_startup() -> list[str]:
+    """Validate CORS origin configuration at startup (issue #7167 D2).
+
+    ``get_cors_origins`` already fails closed on a wildcard, but it is invoked
+    mid-middleware-setup, so a misconfigured deploy would otherwise fail wherever
+    the middleware first initializes rather than at a single, obvious startup
+    gate. Calling it explicitly here makes startup fail fast with a CRITICAL log
+    naming the offending value.
+
+    Returns:
+        The validated list of CORS origins.
+
+    Raises:
+        ValueError: if ``CORS_ORIGINS`` contains a wildcard with credentials.
+    """
+    try:
+        origins = get_cors_origins()
+    except ValueError:
+        logger.critical(
+            "Invalid CORS configuration: CORS_ORIGINS contains '*' while "
+            "credentials are enabled. Refusing to start. Set CORS_ORIGINS to an "
+            "explicit origin allowlist."
+        )
+        raise
+    logger.info("CORS origin allowlist validated (%d origin(s))", len(origins))
+    return origins
+
+
 def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Response:
     """Build a JSON response with Retry-After header when rate limit is exceeded."""
     detail = getattr(exc, "detail", "Too Many Requests")
@@ -125,6 +153,10 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     """
     task_manager: TaskManager | None = None
     try:
+        # Fail fast on a misconfigured CORS allowlist before any service
+        # initialisation (issue #7167 D2) — single, obvious startup gate.
+        _validate_cors_at_startup()
+
         # Validate environment variables before any service initialisation.
         # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
         # production checklist; it raises on critical failures so misconfigured

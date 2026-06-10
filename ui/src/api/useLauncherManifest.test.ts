@@ -102,8 +102,9 @@ describe('useLauncherManifest', () => {
 
         const { result } = renderHook(() => useLauncherManifest());
 
-        // Initially loading
-        expect(result.current.loadState).toBe('loading');
+        // The fetch is deferred to a microtask (react-hooks/set-state-in-effect),
+        // so the initial render is still 'idle'; it advances to 'loaded'.
+        expect(result.current.loadState).toBe('idle');
 
         await waitFor(() => {
             expect(result.current.loadState).toBe('loaded');
@@ -231,6 +232,43 @@ describe('useLauncherManifest', () => {
 
         expect(result.current.tiles).toHaveLength(0);
         expect(result.current.error).not.toBeNull();
+    });
+
+    // Per-tile field corruption (issue #7165): a tile missing `order` used to
+    // produce NaN sort comparisons -> unstable, silently-wrong ordering with no
+    // error. Now it must surface as the hook's error state.
+    it('transitions to error state when a tile is missing order', async () => {
+        const badTile = { ...MOCK_MANIFEST.tiles[0] } as Record<string, unknown>;
+        delete badTile.order;
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({ ...MOCK_MANIFEST, tiles: [badTile] }),
+        });
+
+        const { result } = renderHook(() => useLauncherManifest());
+
+        await waitFor(() => {
+            expect(result.current.loadState).toBe('error');
+        });
+
+        expect(result.current.tiles).toHaveLength(0);
+        expect(result.current.error).toMatch(/order/i);
+    });
+
+    it('transitions to error state when a tile order is NaN', async () => {
+        const badTile = { ...MOCK_MANIFEST.tiles[0], order: NaN };
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({ ...MOCK_MANIFEST, tiles: [badTile] }),
+        });
+
+        const { result } = renderHook(() => useLauncherManifest());
+
+        await waitFor(() => {
+            expect(result.current.loadState).toBe('error');
+        });
+
+        expect(result.current.error).toMatch(/order/i);
     });
 
     it('filters out hidden tiles', async () => {

@@ -90,8 +90,31 @@ async function waitForSocket(): Promise<TestWebSocket> {
 // ---------------------------------------------------------------------------
 
 describe('resolveChatUrl', () => {
-  it('falls back to ws://localhost:8000 when env is unset', () => {
-    expect(resolveChatUrl('new')).toMatch(/^ws:\/\/localhost:8000\/ws\/chat\/new$/);
+  // In browser/Vite mode getApiBase() returns '' and the socket is served on
+  // the current page origin (jsdom default: localhost:3000). Issue #7166: chat
+  // must resolve through the same path as the rest of the app, not a hardcoded
+  // ws://localhost:8000.
+  it('uses the page origin in browser mode when env is unset', () => {
+    expect(resolveChatUrl('new')).toMatch(
+      new RegExp(`^ws://${window.location.host}/ws/chat/new$`),
+    );
+  });
+
+  // Issue #7166 defect 2: in Tauri mode the chat URL must equal the ws form of
+  // getApiBase() (http://localhost:8000 -> ws://localhost:8000), NOT a value
+  // computed independently of backend.ts.
+  it('matches the ws form of getApiBase() in Tauri mode', () => {
+    const original = (globalThis as Record<string, unknown>).__TAURI_INTERNALS__;
+    (globalThis as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    try {
+      expect(resolveChatUrl('new')).toBe('ws://localhost:8000/ws/chat/new');
+    } finally {
+      if (original === undefined) {
+        delete (globalThis as Record<string, unknown>).__TAURI_INTERNALS__;
+      } else {
+        (globalThis as Record<string, unknown>).__TAURI_INTERNALS__ = original;
+      }
+    }
   });
 
   it('rejects empty session ids', () => {

@@ -73,6 +73,50 @@ describe('useEngineCapabilities', () => {
     expect(result.current.error).toBe('Engine not found');
   });
 
+  // Runtime validation (issue #7165): a backend on a different version may
+  // return a malformed shape. Without validation it was stored as-is and later
+  // crashed inside a component render (`capabilities.find is not a function`).
+  it('enters error state when capabilities is not an array', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        engine_name: 'MuJoCo',
+        engine_type: 'mujoco',
+        capabilities: 'not-array',
+        summary: { full: 0, partial: 0, none: 0 },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useEngineCapabilities('mujoco'));
+
+    await waitFor(() => {
+      expect(result.current.loadState).toBe('error');
+    });
+    expect(result.current.capabilities).toBeNull();
+    expect(result.current.error).toMatch(/invalid response format/i);
+  });
+
+  it('enters error state when a capability entry has a bad level', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        engine_name: 'MuJoCo',
+        engine_type: 'mujoco',
+        capabilities: [{ name: 'jacobian', level: 'maybe', supported: true }],
+        summary: { full: 0, partial: 0, none: 1 },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useEngineCapabilities('mujoco'));
+
+    await waitFor(() => {
+      expect(result.current.loadState).toBe('error');
+    });
+    expect(result.current.error).toMatch(/level/i);
+  });
+
   it('isSupported returns true for full and partial capabilities', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

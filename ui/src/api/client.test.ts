@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchEngines } from './client';
+import { renderHook } from '@testing-library/react';
+import { fetchEngines, useSimulation } from './client';
 
 /**
  * Tests for the API client module.
@@ -109,6 +110,51 @@ describe('API Client', () => {
 
       expect(closeSpy).toHaveBeenCalled();
     });
+  });
+});
+
+describe('useSimulation setSpeed (issue #7166)', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns a structured failure instead of rejecting on HTTP 500', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      json: () => Promise.resolve({ detail: 'speed control unavailable' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    // Capture unhandled rejections — a fire-and-forget caller must not produce one.
+    const rejections: unknown[] = [];
+    const onRejection = (e: PromiseRejectionEvent) => rejections.push(e.reason);
+    window.addEventListener('unhandledrejection', onRejection);
+
+    const { result } = renderHook(() => useSimulation('mujoco'));
+    const res = await result.current.setSpeed(2.0);
+
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('Failed to set simulation speed to 2x');
+    expect(res.error).toContain('speed control unavailable');
+
+    await Promise.resolve();
+    window.removeEventListener('unhandledrejection', onRejection);
+    expect(rejections).toHaveLength(0);
+  });
+
+  it('returns success on a 2xx response', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({}),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useSimulation('mujoco'));
+    const res = await result.current.setSpeed(1.5);
+
+    expect(res).toEqual({ success: true });
   });
 });
 
