@@ -69,7 +69,7 @@ RUN set -eu; \
     if [ "$SKIP_AUDIT" = "true" ]; then \
         echo "SKIP_AUDIT=true — skipping in-image pip-audit (air-gapped build)"; \
     else \
-        pip install --no-cache-dir pip-audit; \
+        pip install --no-cache-dir pip-audit==2.10.0; \
         waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
             --waiver-file /tmp/pip_audit_waivers.json)"; \
         # shellcheck disable=SC2086 - intentional word-splitting of flags
@@ -105,7 +105,6 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     patchelf \
     sed \
     ffmpeg \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 ARG USER_NAME=golfer

@@ -66,7 +66,7 @@ RUN set -eux; \
 # Always install the lockfile baseline first so layer cache hits the
 # common case. Feature stages append additional packages on top.
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==25.3 && \
+RUN pip install --upgrade pip==26.1 && \
     pip install -r /tmp/requirements.lock
 
 # Copy the *minimum* surface needed for `pip install .` to resolve.
@@ -103,7 +103,7 @@ ARG GROUP_ID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN python -m pip install --upgrade --no-cache-dir pip==25.3
+RUN python -m pip install --upgrade --no-cache-dir pip==26.1
 
 # Runtime apt deps — kept identical to legacy Dockerfile so the
 # rendering paths (osmesa, egl, ffmpeg) work for every profile.
