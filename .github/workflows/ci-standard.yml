@@ -323,10 +323,15 @@ jobs:
           fi
 
       # UI Security and Quality Checks (only when ui/ files change)
+      - name: UI Install (audit prerequisite)
+        if: steps.ui_changes.outputs.changed == 'true'
+        working-directory: ui
+        run: npm ci
+
       - name: UI Security Audit
         if: steps.ui_changes.outputs.changed == 'true'
         working-directory: ui
-        run: npm ci && npm audit --audit-level=high || echo "::warning::npm audit skipped - package-lock.json may not exist yet"
+        run: npm audit --audit-level=high
 
       # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
       - name: Security Audit
@@ -653,6 +658,15 @@ jobs:
 
       - name: Security Workflow Silent-Failure Guard
         run: python3 scripts/check_workflows_no_silent_failures.py
+
+      - name: Workflow Pytest Path Guard
+        run: python3 scripts/ci/check_workflow_pytest_paths.py
+
+      - name: Docker Build Contract Guard
+        run: python3 scripts/ci/check_dockerfile_contracts.py
+
+      - name: Tauri IPC Capabilities Guard
+        run: python3 scripts/ci/check_tauri_capabilities.py
 
       - name: Version Consistency Check
         run: python3 scripts/check_version_consistency.py

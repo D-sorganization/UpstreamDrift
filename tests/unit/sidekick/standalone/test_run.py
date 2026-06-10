@@ -414,3 +414,23 @@ def test_runner_module_does_not_import_pyqt6() -> None:
     finally:
         sys.meta_path.remove(blocker)
         sys.modules.update(saved)
+
+
+def test_process_calculator_constants_import_does_not_import_pandas() -> None:
+    """Wheel smoke must run WGS without importing pandas-only calculators first."""
+    import importlib
+
+    for module_name in (
+        "sidekick.process_calculators",
+        "sidekick.process_calculators.acid_gas_dewpoint_calculator",
+        "pandas",
+    ):
+        sys.modules.pop(module_name, None)
+
+    module = importlib.import_module("sidekick.process_calculators.constants")
+
+    assert pytest.approx(273.15) == module.CELSIUS_TO_KELVIN_OFFSET
+    assert "pandas" not in sys.modules
+    assert (
+        "sidekick.process_calculators.acid_gas_dewpoint_calculator" not in sys.modules
+    )

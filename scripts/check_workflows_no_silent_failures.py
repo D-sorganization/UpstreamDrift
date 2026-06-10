@@ -17,7 +17,8 @@ INLINE_PIP_AUDIT_WAIVER = "inline-pip-audit-waiver"
 MASKED_SCANNER_FAILURE = "masked-scanner-failure"
 PIP_AUDIT_WAIVER_HELPER = "scripts/ci/check_pip_audit_waivers.py"
 MASKED_SCANNER_RE = re.compile(
-    r"\b(?:pip-audit|bandit|semgrep)\b[^\n]*\|\|\s*(?:echo|true)\b"
+    r"\b(?:pip-audit|pip_audit|npm\s+audit|bandit|semgrep)\b"
+    r"[^\n]*\|\|\s*(?:echo|true)\b"
 )
 SECURITY_STEP_RE = re.compile(r"name:\s*.*(?:audit|scanner|security)", re.IGNORECASE)
 

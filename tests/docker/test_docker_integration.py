@@ -206,7 +206,7 @@ class TestContainerEnvironment(unittest.TestCase):
         )
         self.assertIn("python -m venv /opt/venv", content)
         self.assertIn(
-            "python -m pip install --upgrade --no-cache-dir pip==26.1", content
+            "python -m pip install --upgrade --no-cache-dir pip==26.1.2", content
         )
         self.assertIn("pip install -r /tmp/requirements.lock", content)
 
@@ -233,8 +233,8 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
-        self.assertIn("pip install --upgrade pip==26.1", content)
-        self.assertIn("pyjwt==2.12.0", requirements_lock.lower())
+        self.assertIn("pip install --upgrade pip==26.1.2", content)
+        self.assertIn("pyjwt==2.13.0", requirements_lock.lower())
         self.assertIn("cryptography==46.0.7", requirements_lock.lower())
         self.assertIn("apt-get update && apt-get upgrade -y", content)
         self.assertIn("idna==3.15", requirements_lock)

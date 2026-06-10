@@ -17,7 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==26.1 && \
+RUN pip install --upgrade pip==26.1.2 && \
     pip install -r /tmp/requirements.lock
 
 # Auth and server extensions - pinned versions (to be added to requirements.lock)
@@ -69,7 +69,7 @@ RUN set -eu; \
     if [ "$SKIP_AUDIT" = "true" ]; then \
         echo "SKIP_AUDIT=true — skipping in-image pip-audit (air-gapped build)"; \
     else \
-        pip install --no-cache-dir pip-audit; \
+        pip install --no-cache-dir pip-audit==2.10.0; \
         waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
             --waiver-file /tmp/pip_audit_waivers.json)"; \
         # shellcheck disable=SC2086 - intentional word-splitting of flags
@@ -86,7 +86,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Keep the base interpreter's bundled pip aligned with the venv so image
 # scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==26.1
+RUN python -m pip install --upgrade --no-cache-dir pip==26.1.2
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
@@ -105,7 +105,6 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     patchelf \
     sed \
     ffmpeg \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 ARG USER_NAME=golfer
