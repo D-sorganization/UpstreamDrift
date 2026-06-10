@@ -67,7 +67,56 @@ except ImportError:
     _has_pyqt6 = False
 
 if not _has_pyqt6 and "PyQt6" not in sys.modules:
+
+    class DummySignal:
+        def __init__(self, *args, **kwargs):
+            self._callbacks = []
+
+        def connect(self, callback):
+            self._callbacks.append(callback)
+
+        def emit(self, *args, **kwargs):
+            for callback in list(self._callbacks):
+                callback(*args, **kwargs)
+
+    class DummyQObject:
+        def __init__(self, *args, **kwargs):
+            super().__init__()
+
+    class DummyQSettings:
+        _values: dict[tuple[str, str, str], object] = {}
+
+        def __init__(self, organization: str = "", application: str = ""):
+            self._organization = organization
+            self._application = application
+
+        def value(self, key: str, defaultValue=None, type=None):
+            value = self._values.get(
+                (self._organization, self._application, key), defaultValue
+            )
+            if type is not None and value is not None:
+                try:
+                    return type(value)
+                except (TypeError, ValueError):
+                    return defaultValue
+            return value
+
+        def setValue(self, key: str, value):
+            self._values[(self._organization, self._application, key)] = value
+
+    class DummyQStandardPaths:
+        class StandardLocation:
+            AppConfigLocation = 0
+
+        @staticmethod
+        def writableLocation(_location):
+            return str(Path.cwd())
+
     mock_core = MagicMock()
+    mock_core.QObject = DummyQObject
+    mock_core.QSettings = DummyQSettings
+    mock_core.QStandardPaths = DummyQStandardPaths
+    mock_core.pyqtSignal = DummySignal
     mock_core.QLibraryInfo.version.return_value.toString.return_value = "6.6.0"
     mock_core.QLibraryInfo.version.return_value.segments.return_value = (6, 6, 0)
     mock_core.PYQT_VERSION_STR = "6.6.0"

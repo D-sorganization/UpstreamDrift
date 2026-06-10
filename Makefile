@@ -61,7 +61,7 @@ format:
 sync-deps:
 	python3 -m pip install "pip-tools>=7.4" "tomli>=2.0.0; python_version<'3.11'"
 	python3 -m piptools compile -o requirements.lock pyproject.toml
-	python3 -m piptools compile --extra dev -o requirements-dev.lock pyproject.toml
+	python3 -m piptools compile --extra dev --extra gui-test -o requirements-dev.lock pyproject.toml
 	python3 scripts/sync_environment_yml.py
 
 # Run all tests
