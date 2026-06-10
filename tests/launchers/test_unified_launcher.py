@@ -1,5 +1,6 @@
 """Tests for unified_launcher.py."""
 
+import importlib.util
 import sys  # noqa: E402
 from collections.abc import Generator  # noqa: E402
 from typing import Any, NoReturn
@@ -16,19 +17,18 @@ from src.launchers.unified_launcher import (  # noqa: E402
 
 
 @pytest.fixture
-def clean_sys_modules() -> Generator[None, None, None]:
+def clean_sys_modules() -> Generator[set[str], None, None]:
     """Remove specific modules from sys.modules."""
-    modules_to_remove = [
+    modules_to_remove = {
         "launchers.unified_launcher",
         "launchers.upstream_drift_launcher",
-    ]
+        "shared.python",
+    }
     for mod in modules_to_remove:
-        if mod in sys.modules:
-            del sys.modules[mod]
-    yield
+        sys.modules.pop(mod, None)
+    yield modules_to_remove
     for mod in modules_to_remove:
-        if mod in sys.modules:
-            del sys.modules[mod]
+        sys.modules.pop(mod, None)
 
 
 def test_is_pyqt6_available_legacy_override() -> None:
@@ -42,8 +42,8 @@ def test_is_pyqt6_available_legacy_override() -> None:
 
 def test_is_pyqt6_available_using_constant(clean_sys_modules) -> None:
     # Ensure no legacy module
-    if "launchers.unified_launcher" in sys.modules:
-        del sys.modules["launchers.unified_launcher"]
+    clean_sys_modules.add("launchers.unified_launcher")
+    sys.modules.pop("launchers.unified_launcher", None)
 
     with patch("src.launchers.unified_launcher.PYQT6_AVAILABLE", True):
         assert _is_pyqt6_available() is True
@@ -192,8 +192,12 @@ def test_pyqt6_unavailable_reload(clean_sys_modules) -> None:
     import src.launchers.unified_launcher
 
     path = src.launchers.unified_launcher.__file__
-    with open(path, encoding="utf-8") as f:
-        code = f.read()
+    spec = importlib.util.spec_from_file_location(
+        "src.launchers._test_unified_launcher_pyqt6_unavailable",
+        path,
+    )
+    assert spec is not None
+    assert spec.loader is not None
 
     import builtins
 
@@ -206,14 +210,14 @@ def test_pyqt6_unavailable_reload(clean_sys_modules) -> None:
 
     import contextlib
 
-    namespace = {"__name__": "src.launchers.unified_launcher", "__file__": path}
+    module = importlib.util.module_from_spec(spec)
     with (
         patch("builtins.__import__", side_effect=mock_import),
         contextlib.suppress(Exception),
     ):
-        exec(compile(code, path, "exec"), namespace)
+        spec.loader.exec_module(module)
 
-    assert namespace.get("QApplication") is None
+    assert getattr(module, "QApplication", None) is None
 
 
 def test_unified_launcher_mainloop() -> None:
@@ -392,7 +396,7 @@ def test_unified_launcher_get_version_shared_python() -> None:
                 assert launcher.get_version() == "1.2.5"
 
 
-def test_unified_launcher_get_version_pyproject_toml() -> None:
+def test_unified_launcher_get_version_pyproject_toml(clean_sys_modules) -> None:
     from importlib.metadata import PackageNotFoundError
 
     def mock_version(pkg) -> NoReturn:
@@ -403,8 +407,8 @@ def test_unified_launcher_get_version_pyproject_toml() -> None:
         patch("importlib.metadata.version", side_effect=mock_version),
     ):
         # Prevent finding shared.python
-        if "shared.python" in sys.modules:
-            del sys.modules["shared.python"]
+        clean_sys_modules.add("shared.python")
+        sys.modules.pop("shared.python", None)
 
         mock_tomllib = MagicMock()
         mock_tomllib.load.return_value = {"project": {"version": "1.2.6"}}
@@ -423,7 +427,7 @@ def test_unified_launcher_get_version_pyproject_toml() -> None:
             assert launcher.get_version() == "1.2.6"
 
 
-def test_unified_launcher_pyproject_toml_error() -> None:
+def test_unified_launcher_pyproject_toml_error(clean_sys_modules) -> None:
     from importlib.metadata import PackageNotFoundError
 
     def mock_version(pkg) -> NoReturn:
@@ -433,8 +437,8 @@ def test_unified_launcher_pyproject_toml_error() -> None:
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("importlib.metadata.version", side_effect=mock_version),
     ):
-        if "shared.python" in sys.modules:
-            del sys.modules["shared.python"]
+        clean_sys_modules.add("shared.python")
+        sys.modules.pop("shared.python", None)
 
         mock_tomllib = MagicMock()
         mock_tomllib.load.side_effect = OSError("Boom")
@@ -452,7 +456,7 @@ def test_unified_launcher_pyproject_toml_error() -> None:
             assert launcher.get_version() == "1.0.0-beta"
 
 
-def test_unified_launcher_get_version_hardcoded() -> None:
+def test_unified_launcher_get_version_hardcoded(clean_sys_modules) -> None:
     from importlib.metadata import PackageNotFoundError
 
     def mock_version(pkg) -> NoReturn:
@@ -462,8 +466,8 @@ def test_unified_launcher_get_version_hardcoded() -> None:
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("importlib.metadata.version", side_effect=mock_version),
     ):
-        if "shared.python" in sys.modules:
-            del sys.modules["shared.python"]
+        clean_sys_modules.add("shared.python")
+        sys.modules.pop("shared.python", None)
 
         with patch.dict(
             "sys.modules", {"tomllib": None, "tomli": None, "shared.python": None}

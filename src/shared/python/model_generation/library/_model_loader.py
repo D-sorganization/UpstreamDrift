@@ -78,6 +78,7 @@ def download_model(
         return False
 
     try:
+        import shutil
         import urllib.request
 
         cache_dir = config.cache_dir / entry.id.replace("/", "_")
@@ -86,7 +87,14 @@ def download_model(
         urdf_filename = entry.source_url.split("/")[-1]
         local_path = cache_dir / urdf_filename
 
-        urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310
+        # Bounded timeout (issue #7184): urlretrieve has no timeout param, so
+        # stream via urlopen(..., timeout=) instead to avoid indefinite hangs.
+        _req = urllib.request.Request(entry.source_url)
+        with (
+            urllib.request.urlopen(_req, timeout=30) as _resp,  # nosec B310  # noqa: S310
+            open(local_path, "wb") as _out,
+        ):
+            shutil.copyfileobj(_resp, _out)
 
         entry.urdf_path = local_path
         entry.is_cached = True

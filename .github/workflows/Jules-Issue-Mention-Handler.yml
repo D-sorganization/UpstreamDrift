@@ -62,14 +62,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.event.comment.user.login }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
           - **Jules here!** I've received your request and I'm analyzing this issue now.
 
           I'll create a PR with a fix shortly. Stay tuned! -
 
           ---
-          *Triggered by @${{ github.event.comment.user.login }}*
+          *Triggered by @${ACTOR}*
           EOF
           )"
 
@@ -247,13 +248,21 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ACTOR: ${{ github.event.comment.user.login }}
+          JULES_STATUS: ${{ steps.jules.outputs.status || 'N/A' }}
+          JULES_PR_URL: ${{ steps.jules.outputs.pr_url }}
         run: |
-          echo "## Jules Issue Fixer Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Issue:** #${{ github.event.issue.number }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Title:** ${{ github.event.issue.title }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Triggered by:** @${{ github.event.comment.user.login }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ${{ steps.jules.outputs.status || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ steps.jules.outputs.pr_url }}" ]; then
-            echo "- **PR:** ${{ steps.jules.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Jules Issue Fixer Summary"
+            echo ""
+            echo "- **Issue:** #${ISSUE_NUMBER}"
+            echo "- **Title:** ${ISSUE_TITLE}"
+            echo "- **Triggered by:** @${ACTOR}"
+            echo "- **Status:** ${JULES_STATUS}"
+            if [ -n "${JULES_PR_URL}" ]; then
+              echo "- **PR:** ${JULES_PR_URL}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -4,7 +4,6 @@ This module provides standardized model loading across all physics engines,
 ensuring consistent biomechanical models for cross-engine validation.
 """
 
-import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +13,10 @@ from src.shared.python.core import GolfModelingError
 from src.shared.python.core.constants import DEG_TO_RAD
 from src.shared.python.data_io.io_utils import ensure_directory
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.security_utils import validate_url_scheme
+from src.shared.python.security.security_utils import (
+    download_to_file,
+    validate_url_scheme,
+)
 
 logger = get_logger(__name__)
 
@@ -117,11 +119,29 @@ class StandardModelManager:
 
         return urdf_path
 
-    def download_standard_humanoid(self) -> bool:
+    #: human-gazebo subject directory for the standard humanoid.
+    _HUMANOID_BASE_URL = (
+        "https://raw.githubusercontent.com/robotology/human-gazebo/master"
+    )
+    _HUMANOID_MODEL_DIR = "models/humanSubject06_66dof"
+
+    def download_standard_humanoid(self, allow_stub_meshes: bool = False) -> bool:
         """Download standard humanoid model from human-gazebo repository.
 
+        Downloads the ``humanSubject06_66dof`` URDF/config and the real mesh
+        files it references.  If the meshes cannot be fetched the method fails
+        loudly (returns ``False``) rather than silently producing empty STL
+        stubs (issue #7186).
+
+        Args:
+            allow_stub_meshes: Dev-only escape hatch.  When ``True`` and a real
+                mesh download fails, empty placeholder STL files are written
+                instead of failing.  Never enable this in production — it
+                produces a model with no geometry.
+
         Returns:
-            True if download successful, False otherwise
+            ``True`` if the URDF/config and all referenced meshes were obtained;
+            ``False`` on any download/validation failure.
         """
         try:
             logger.info("Downloading standard humanoid model from human-gazebo...")
@@ -132,30 +152,49 @@ class StandardModelManager:
             human_models_dir.mkdir(parents=True, exist_ok=True)
             human_meshes_dir.mkdir(parents=True, exist_ok=True)
 
-            # Download specific files from human-gazebo repository
-            base_url = (
-                "https://raw.githubusercontent.com/robotology/human-gazebo/master"
-            )
+            base_url = self._HUMANOID_BASE_URL
 
             files_to_download = [
-                ("models/humanSubject06_66dof/model.urdf", "humanSubject06_66dof.urdf"),
+                (f"{self._HUMANOID_MODEL_DIR}/model.urdf", "humanSubject06_66dof.urdf"),
                 (
-                    "models/humanSubject06_66dof/conf/human_model.yaml",
+                    f"{self._HUMANOID_MODEL_DIR}/conf/human_model.yaml",
                     "human_model.yaml",
                 ),
             ]
 
+            urdf_local_path: Path | None = None
             for remote_path, local_filename in files_to_download:
                 url = f"{base_url}/{remote_path}"
                 local_path = human_models_dir / local_filename
 
                 logger.info(f"Downloading {url} -> {local_path}")
-                validate_url_scheme(url)
-                urllib.request.urlretrieve(url, local_path)  # nosec B310 - URL validated by validate_url_scheme() above
+                validate_url_scheme(url, allowed_schemes=("https",))
+                download_to_file(url, local_path)
+                if local_filename.endswith(".urdf"):
+                    urdf_local_path = local_path
 
-            # Download mesh files (this is a simplified approach - in practice you'd want
-            # to download the actual mesh files from the repository)
-            self._create_temporary_meshes(human_meshes_dir)
+            if urdf_local_path is None:
+                logger.error("Humanoid URDF was not downloaded; aborting")
+                return False
+
+            # Download the actual mesh files referenced by the URDF.  Do NOT
+            # fall back to empty stubs unless explicitly opted in (issue #7186).
+            meshes_ok = self._download_humanoid_meshes(
+                urdf_local_path, human_meshes_dir, base_url
+            )
+            if not meshes_ok:
+                if allow_stub_meshes:
+                    logger.warning(
+                        "Mesh download failed; writing stub meshes "
+                        "(allow_stub_meshes=True). The model has NO geometry."
+                    )
+                    self._create_temporary_meshes(human_meshes_dir)
+                else:
+                    logger.error(
+                        "Failed to download humanoid mesh geometry; "
+                        "refusing to report success with empty stubs."
+                    )
+                    return False
 
             logger.info("Standard humanoid model downloaded successfully")
             return True
@@ -164,10 +203,81 @@ class StandardModelManager:
             logger.error(f"Failed to download standard humanoid model: {e}")
             return False
 
-    def _create_temporary_meshes(self, mesh_dir: Path) -> None:
-        """Create temporary mesh files for development.
+    @staticmethod
+    def _parse_urdf_mesh_filenames(urdf_path: Path) -> list[str]:
+        """Return the mesh filenames referenced by ``<mesh filename=...>``.
 
-        In production, this would download actual STL files from human-gazebo.
+        Args:
+            urdf_path: Path to a URDF file on disk.
+
+        Returns:
+            A de-duplicated, order-preserving list of mesh filename strings
+            exactly as they appear in the URDF (``package://`` and relative
+            forms preserved).
+        """
+        if urdf_path is None:
+            raise ValueError("urdf_path must be provided")
+        import re
+
+        text = urdf_path.read_text(encoding="utf-8", errors="replace")
+        seen: dict[str, None] = {}
+        for match in re.finditer(r'<mesh[^>]*\bfilename\s*=\s*"([^"]+)"', text):
+            seen.setdefault(match.group(1), None)
+        return list(seen)
+
+    def _download_humanoid_meshes(
+        self, urdf_path: Path, mesh_dir: Path, base_url: str
+    ) -> bool:
+        """Download every mesh referenced by *urdf_path* into *mesh_dir*.
+
+        Args:
+            urdf_path: The downloaded humanoid URDF.
+            mesh_dir: Destination directory for mesh files.
+            base_url: Raw base URL of the human-gazebo subject directory.
+
+        Returns:
+            ``True`` if at least one mesh was referenced and every referenced
+            mesh downloaded to a non-empty file; ``False`` otherwise.
+        """
+        if urdf_path is None or mesh_dir is None:
+            raise ValueError("urdf_path and mesh_dir must be provided")
+
+        mesh_filenames = self._parse_urdf_mesh_filenames(urdf_path)
+        if not mesh_filenames:
+            logger.error("URDF references no meshes; cannot build geometry")
+            return False
+
+        mesh_dir.mkdir(parents=True, exist_ok=True)
+        for filename in mesh_filenames:
+            # Strip any package:// prefix and keep the path relative to the
+            # subject model directory in the upstream repo.
+            rel = filename
+            if rel.startswith("package://"):
+                rel = rel.split("/", 3)[-1]
+            rel = rel.lstrip("/")
+            local_name = Path(rel).name
+            local_path = mesh_dir / local_name
+            url = f"{base_url}/{self._HUMANOID_MODEL_DIR}/{rel}"
+            try:
+                validate_url_scheme(url, allowed_schemes=("https",))
+                logger.info(f"Downloading mesh {url} -> {local_path}")
+                download_to_file(url, local_path)
+            except (OSError, ValueError) as e:
+                logger.error(f"Failed to download mesh {filename!r}: {e}")
+                return False
+            if not local_path.exists() or local_path.stat().st_size == 0:
+                logger.error(f"Downloaded mesh {local_name!r} is empty")
+                return False
+        return True
+
+    def _create_temporary_meshes(self, mesh_dir: Path) -> None:
+        """Write empty placeholder STL files (dev-only stub geometry).
+
+        .. warning::
+            These files contain **no geometry**.  This method exists only for
+            the ``allow_stub_meshes=True`` dev escape hatch in
+            :meth:`download_standard_humanoid` and must never run on the
+            default success path (issue #7186).
         """
         # Create basic temporary STL files
         if mesh_dir is None:

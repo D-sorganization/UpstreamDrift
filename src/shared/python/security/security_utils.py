@@ -13,8 +13,19 @@ this.  The following schemes are always blocked unless explicitly allowed:
 * ``gopher`` -- classic SSRF vector
 """
 
+from __future__ import annotations
+
+import os
+import shutil
+import urllib.request
+import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
+
+#: Default bound (seconds) for all outbound network downloads.  ``urlretrieve``
+#: has no timeout parameter at all, so unbounded calls can hang a worker thread
+#: or the GUI indefinitely on a slow/half-open connection (issue #7184).
+DOWNLOAD_TIMEOUT_SECONDS = 30
 
 
 def validate_path(
@@ -105,3 +116,73 @@ def validate_url_https_only(url: str) -> str:
         ValueError: If the URL does not use the ``https`` scheme.
     """
     return validate_url_scheme(url, allowed_schemes=("https",))
+
+
+def download_to_file(
+    url: str,
+    dest: str | Path,
+    timeout: float = DOWNLOAD_TIMEOUT_SECONDS,
+) -> Path:
+    """Stream *url* to *dest* with a bounded socket timeout.
+
+    ``urllib.request.urlretrieve`` accepts no ``timeout`` argument, so it can
+    block forever on a hung server.  This helper streams the response via
+    :func:`urllib.request.urlopen`, which honours *timeout*, into *dest*.
+
+    The caller is responsible for validating the URL scheme
+    (:func:`validate_url_scheme`) before calling this helper.
+
+    Args:
+        url: The URL to download.  Must already be scheme-validated.
+        dest: Destination file path.
+        timeout: Per-operation socket timeout in seconds (must be > 0).
+
+    Returns:
+        The destination path as a :class:`~pathlib.Path`.
+
+    Raises:
+        ValueError: If *timeout* is not positive.
+        TimeoutError: If the connection or read exceeds *timeout*.
+        OSError: For other network/IO failures.
+    """
+    if timeout <= 0:
+        raise ValueError(f"timeout must be positive, got {timeout!r}")
+    dest_path = Path(dest)
+    req = urllib.request.Request(url)
+    # nosec B310 - scheme validation is the caller's responsibility (see docstring)
+    with (
+        urllib.request.urlopen(req, timeout=timeout) as response,  # noqa: S310
+        open(dest_path, "wb") as out,
+    ):
+        shutil.copyfileobj(response, out)
+    return dest_path
+
+
+def safe_extract_zip(zip_file: zipfile.ZipFile, dest: str | Path) -> None:
+    """Extract *zip_file* into *dest*, rejecting path-traversal members.
+
+    Guards against Zip Slip (issue #7183): a member named ``../evil`` or an
+    absolute path would otherwise let :meth:`zipfile.ZipFile.extractall` write
+    outside *dest*.  Every member's resolved target must stay within *dest*.
+
+    Args:
+        zip_file: An open :class:`zipfile.ZipFile`.
+        dest: Destination directory.  Created if missing.
+
+    Raises:
+        ValueError: If any member resolves outside *dest* (absolute path,
+            ``..`` traversal, or a symlink-style escape).
+    """
+    dest_path = Path(dest).resolve()
+    dest_path.mkdir(parents=True, exist_ok=True)
+    dest_str = str(dest_path)
+    for member in zip_file.namelist():
+        # Reject absolute paths and explicit parent traversal up front so the
+        # error message is precise even on exotic platforms.
+        member_path = Path(member)
+        if member_path.is_absolute() or ".." in member_path.parts:
+            raise ValueError(f"Unsafe path in archive: {member!r}")
+        target = (dest_path / member).resolve()
+        if target != dest_path and not str(target).startswith(dest_str + os.sep):
+            raise ValueError(f"Unsafe path in archive: {member!r}")
+    zip_file.extractall(dest_path)  # noqa: S202 - members validated above
