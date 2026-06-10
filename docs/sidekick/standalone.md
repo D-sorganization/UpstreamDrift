@@ -10,7 +10,7 @@ See [ADR-0018](../adr/0018-standalone-sidekick.md) for design rationale.
 
 ## Install in 3 minutes
 
-### Option A — pip (Python 3.10+)
+### Option A — pip (Python 3.11+)
 
 ```bash
 pip install upstream-drift          # or: pip install upstream-drift[gui-tools]

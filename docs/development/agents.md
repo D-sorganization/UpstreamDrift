@@ -14,8 +14,8 @@ used to be duplicated in `AGENTS.md`.
 
 - PRs target `main`, but contributors may use focused topic branches such as
   `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
-- Python support starts at 3.10 from `pyproject.toml`, and the standard CI lane
-  runs on Python 3.11 in `.github/workflows/ci-standard.yml`.
+- Python support starts at 3.11 from `pyproject.toml` and `install.sh`; the
+  standard CI matrix tests Python 3.11 and 3.12.
 - Run `python3 -m ruff check .`, `python3 -m ruff format --check .`,
   `python3 -m mypy .`, and `python3 -m pytest` before opening a PR when the
   affected surface makes those checks relevant.
