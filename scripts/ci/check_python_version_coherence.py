@@ -42,6 +42,7 @@ class PythonVersionPolicy:
     lock_version: PythonMinor
     docker_versions: frozenset[PythonMinor]
     ci_standard_versions: frozenset[PythonMinor]
+    sidekick_wheel_versions: frozenset[PythonMinor]
 
 
 def _load_pyproject(root: Path) -> dict[str, object]:
@@ -119,9 +120,15 @@ def _parse_docker_versions(root: Path) -> frozenset[PythonMinor]:
 
 
 def _parse_ci_standard_versions(root: Path) -> frozenset[PythonMinor]:
-    text = (root / ".github" / "workflows" / "ci-standard.yml").read_text(
-        encoding="utf-8"
-    )
+    return _parse_workflow_versions(root, "ci-standard.yml")
+
+
+def _parse_sidekick_wheel_versions(root: Path) -> frozenset[PythonMinor]:
+    return _parse_workflow_versions(root, "package-standalone-sidekick.yml")
+
+
+def _parse_workflow_versions(root: Path, workflow_name: str) -> frozenset[PythonMinor]:
+    text = (root / ".github" / "workflows" / workflow_name).read_text(encoding="utf-8")
     versions = {
         PythonMinor.parse(match.group("version"))
         for match in re.finditer(
@@ -134,7 +141,7 @@ def _parse_ci_standard_versions(root: Path) -> frozenset[PythonMinor]:
             for item in re.findall(r'["\'](\d+\.\d+)["\']', matrix.group("items"))
         )
     if not versions:
-        msg = "ci-standard.yml must declare tested Python versions"
+        msg = f"{workflow_name} must declare tested Python versions"
         raise ValueError(msg)
     return frozenset(versions)
 
@@ -150,6 +157,7 @@ def read_policy(root: Path) -> PythonVersionPolicy:
         lock_version=_parse_lock_version(root),
         docker_versions=_parse_docker_versions(root),
         ci_standard_versions=_parse_ci_standard_versions(root),
+        sidekick_wheel_versions=_parse_sidekick_wheel_versions(root),
     )
 
 
@@ -193,6 +201,21 @@ def validate_policy(policy: PythonVersionPolicy) -> list[str]:
             "ci-standard.yml tests unsupported Python minors: "
             + ", ".join(str(version) for version in unsupported_ci)
         )
+    unsupported_sidekick = sorted(
+        version
+        for version in policy.sidekick_wheel_versions
+        if version < policy.requires_floor
+    )
+    if unsupported_sidekick:
+        findings.append(
+            "package-standalone-sidekick.yml tests unsupported Python minors: "
+            + ", ".join(str(version) for version in unsupported_sidekick)
+        )
+    for version in (policy.requires_floor, policy.lock_version):
+        if version not in policy.sidekick_wheel_versions:
+            findings.append(
+                f"package-standalone-sidekick.yml does not smoke-test Python {version}"
+            )
     return findings
 
 
