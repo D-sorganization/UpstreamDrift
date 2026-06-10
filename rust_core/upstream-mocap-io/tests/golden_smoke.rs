@@ -30,7 +30,10 @@ fn parse_c3d_smoke() {
 
 fn repo_data(name: &str) -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest).join("../..").join("data").join(name)
+    PathBuf::from(manifest)
+        .join("../..")
+        .join("data")
+        .join(name)
 }
 
 /// The Tour-Average golf captures declare POINT:UNITS = "m" via a 1-D

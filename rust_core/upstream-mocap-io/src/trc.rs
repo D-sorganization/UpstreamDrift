@@ -92,6 +92,18 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
         if tokens.len() < 2 {
             continue;
         }
+        let _frame_idx = tokens[0].parse::<f32>().map_err(|e| {
+            ParseError::Format(format!(
+                "TRC data row has invalid frame index '{}': {e}",
+                tokens[0]
+            ))
+        })?;
+        let _time = tokens[1].parse::<f32>().map_err(|e| {
+            ParseError::Format(format!(
+                "TRC data row has invalid time '{}': {e}",
+                tokens[1]
+            ))
+        })?;
         // Skip frame_idx (tokens[0]) and time (tokens[1]); parse n_markers * 3 floats.
         let coords = &tokens[2..];
         for m_i in 0..n_markers {
@@ -133,4 +145,32 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
         fps,
         units: units_str,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_trc_text;
+
+    fn trc_with_data_row(row: &str) -> String {
+        [
+            "PathFileType\t4\t(X/Y/Z)\ttiny.trc",
+            "DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits",
+            "100.0\t100.0\t1\t1\tmm",
+            "Frame#\tTime\tHEAD\t\t\t",
+            "\t\tX1\tY1\tZ1",
+            row,
+        ]
+        .join("\n")
+    }
+
+    #[test]
+    fn parse_trc_rejects_invalid_frame_or_time() {
+        let bad_frame = trc_with_data_row("invalid\t0.0\t1000\t2000\t3000");
+        let err = parse_trc_text(&bad_frame).expect_err("invalid frame must fail");
+        assert!(err.to_string().contains("invalid frame index"));
+
+        let bad_time = trc_with_data_row("1\tinvalid\t1000\t2000\t3000");
+        let err = parse_trc_text(&bad_time).expect_err("invalid time must fail");
+        assert!(err.to_string().contains("invalid time"));
+    }
 }

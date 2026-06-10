@@ -1999,6 +1999,11 @@ jobs:
             upstream_muscle \
             upstream_motion_matching \
             ai_backend
+          python -m pytest \
+            tests/unit/motion_pipeline/sources/test_trc_adapter.py \
+            tests/unit/motion_pipeline/sources/test_opencap_adapter.py \
+            tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py \
+            -q -o addopts="" --tb=short
           python -c "
           import upstream_physics
           # Verify key types are importable
