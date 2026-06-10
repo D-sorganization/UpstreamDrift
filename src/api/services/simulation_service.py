@@ -1,8 +1,10 @@
 """Simulation service for Golf Modeling Suite API."""
 
+from __future__ import annotations
+
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import anyio.to_thread
 
@@ -13,7 +15,6 @@ from src.shared.python.core.error_utils import (
     ModelLoadError,
 )
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
-from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -21,6 +22,9 @@ from ..models.requests import SimulationRequest
 from ..models.responses import SimulationResponse
 
 logger = get_logger(__name__)
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 _DEFAULT_SPEED_FACTOR = 1.0
 

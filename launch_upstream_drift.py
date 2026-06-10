@@ -9,8 +9,8 @@ Usage:
     upstream-drift --engine X   # Launch specific engine directly
 """
 
-import sys
 import os
+import sys
 
 os.environ.setdefault("GOLF_SUITE_MODE", "local")
 
@@ -108,6 +108,38 @@ path.append(os.path.join(getcwd(), "src"))
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("upstream_drift_launcher")
+
+
+def _ensure_classic_qt_environment() -> None:
+    """Prepare and validate the Qt platform before classic launcher startup."""
+    if (
+        sys.platform.startswith("linux")
+        and not os.environ.get("DISPLAY")
+        and not os.environ.get("WAYLAND_DISPLAY")
+        and not os.environ.get("QT_QPA_PLATFORM")
+    ):
+        os.environ["QT_QPA_PLATFORM"] = "offscreen"
+        logger.info(
+            "No display server detected; using QT_QPA_PLATFORM=offscreen for "
+            "classic launcher startup."
+        )
+
+    try:
+        from PyQt6.QtWidgets import QApplication
+    except (ImportError, OSError) as exc:
+        raise RuntimeError(
+            "Classic PyQt6 launcher requires PyQt6 to be installed and loadable. "
+            "Use --api-only or the default web UI in headless environments."
+        ) from exc
+
+    try:
+        QApplication.instance() or QApplication([])
+    except (RuntimeError, OSError) as exc:
+        raise RuntimeError(
+            "Classic PyQt6 launcher could not initialize QApplication. "
+            "Set QT_QPA_PLATFORM=offscreen for headless Linux or install the "
+            "required Qt platform plugins."
+        ) from exc
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -211,6 +243,7 @@ def route_launch(args: argparse.Namespace) -> None:
     elif classic_arg:
         # Classic PyQt6 launcher
         try:
+            _ensure_classic_qt_environment()
             # Try new location first
             from src.launchers.upstream_drift_launcher import main as classic_main
 

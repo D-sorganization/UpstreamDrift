@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import logging
 from pathlib import Path
 
@@ -121,3 +122,57 @@ def test_local_app_description_mentions_versioning(monkeypatch, tmp_path) -> Non
     app = local_server.create_local_app()
     assert "v1" in app.description
     assert "/api/v1/" in app.description
+
+
+def test_local_app_boots_when_engine_manager_is_unavailable(
+    monkeypatch, tmp_path
+) -> None:
+    missing_ui_path = tmp_path / "ui" / "dist"
+    monkeypatch.setenv("GOLF_UI_DIST", str(missing_ui_path))
+
+    local_server._startup_metrics.update(
+        {
+            "startup_time": None,
+            "static_files_mounted": False,
+            "ui_path": None,
+            "engines_loaded": [],
+            "errors": [],
+        }
+    )
+
+    def _raise_import_error() -> object:
+        raise ImportError("mocked missing optional engine dependency")
+
+    monkeypatch.setattr(local_server, "_load_engine_manager_class", _raise_import_error)
+
+    app = local_server.create_local_app()
+
+    assert app.state.engine_manager.get_available_engines() == []
+    assert any(
+        "Engine manager unavailable" in message
+        for message in local_server._startup_metrics["errors"]
+    )
+
+
+def test_local_server_startup_modules_keep_engine_manager_import_lazy() -> None:
+    repo_root = Path(local_server.__file__).parents[2]
+    startup_modules = [
+        repo_root / "src" / "api" / "local_server.py",
+        repo_root / "src" / "api" / "routes" / "engines.py",
+        repo_root / "src" / "api" / "services" / "simulation_service.py",
+        repo_root / "src" / "api" / "services" / "analysis_service.py",
+        repo_root / "src" / "shared" / "python" / "engine_core" / "workflow_adapter.py",
+    ]
+
+    for module_path in startup_modules:
+        source = module_path.read_text(encoding="utf-8")
+        module = ast.parse(source, filename=str(module_path))
+        top_level_imports = [
+            node
+            for node in module.body
+            if isinstance(node, ast.ImportFrom)
+            and node.module == "src.shared.python.engine_core.engine_manager"
+        ]
+        assert top_level_imports == [], (
+            f"{module_path} imports EngineManager at module load time"
+        )

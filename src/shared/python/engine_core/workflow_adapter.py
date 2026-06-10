@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 logger = get_logger(__name__)
 

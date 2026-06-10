@@ -81,7 +81,6 @@ from src.api.services.chat_service import ChatService  # noqa: E402
 from src.api.task_manager import TaskManager  # noqa: E402
 from src.shared.python.app_state import agent_context, get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
-from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
@@ -124,13 +123,51 @@ class _LazyServiceProxy:
         return getattr(self._resolve(), name)
 
 
-def _create_simulation_service(engine_manager: EngineManager) -> Any:
+class _UnavailableEngineManager:
+    """Engine manager fallback used when optional engine imports are unavailable."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+    def get_available_engines(self) -> list[Any]:
+        return []
+
+    def get_current_engine(self) -> None:
+        return None
+
+    def get_engine_status(self, _engine_type: Any) -> Any:
+        from src.shared.python.engine_core.engine_registry import EngineStatus
+
+        return EngineStatus.UNAVAILABLE
+
+    def get_active_physics_engine(self) -> None:
+        return None
+
+
+def _load_engine_manager_class() -> Any:
+    from src.shared.python.engine_core.engine_manager import EngineManager
+
+    return EngineManager
+
+
+def _create_engine_manager() -> Any:
+    try:
+        manager_class = _load_engine_manager_class()
+        return manager_class()
+    except (ImportError, RuntimeError, OSError) as exc:
+        reason = f"Engine manager unavailable during local API startup: {exc}"
+        logger.warning(reason)
+        _startup_metrics["errors"].append(reason)
+        return _UnavailableEngineManager(reason)
+
+
+def _create_simulation_service(engine_manager: Any) -> Any:
     from src.api.services.simulation_service import SimulationService
 
     return SimulationService(engine_manager)
 
 
-def _create_analysis_service(engine_manager: EngineManager) -> Any:
+def _create_analysis_service(engine_manager: Any) -> Any:
     from src.api.services.analysis_service import AnalysisService
 
     return AnalysisService(engine_manager)
@@ -475,7 +512,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
 
 
 def _register_health_and_diagnostic_endpoints(
-    app: FastAPI, engine_manager: EngineManager
+    app: FastAPI, engine_manager: Any
 ) -> None:
     """Register health check and diagnostic endpoints."""
 
@@ -785,7 +822,7 @@ def create_local_app() -> FastAPI:
     _configure_cors(app)
 
     # Initialize services (lazy loading)
-    engine_manager = EngineManager()
+    engine_manager = _create_engine_manager()
 
     # Store in app state for dependency injection
     app.state.engine_manager = engine_manager
@@ -813,6 +850,11 @@ def create_local_app() -> FastAPI:
     _startup_metrics["engines_loaded"] = [
         e.value for e in engine_manager.get_available_engines()
     ]
+    logger.info(
+        "Engine availability at startup: available=%s unavailable_reason=%s",
+        _startup_metrics["engines_loaded"],
+        getattr(engine_manager, "reason", None),
+    )
 
     # Launcher endpoints (manifest, logos, launch, processes, stop)
     _register_launcher_endpoints(app)
