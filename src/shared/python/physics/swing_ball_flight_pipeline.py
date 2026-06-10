@@ -81,7 +81,6 @@ class FlightSimulatorProtocol(Protocol):
 # ---------------------------------------------------------------------------
 
 _MAX_LAUNCH_ANGLE_DEG: float = 90.0
-_MAX_LAUNCH_ANGLE_RAD: float = math.pi / 2.0  # launch_angle is stored in radians
 _MIN_LAUNCH_SPEED_MS: float = 0.0  # exclusive lower bound
 
 # ---------------------------------------------------------------------------
@@ -192,24 +191,20 @@ class _LaunchConditionsDeriver:
             azimuth_deg = float(np.degrees(np.arctan2(ball_vel[1], ball_vel[0])))
 
         spin_w = post.ball_angular_velocity
-        # Impact solver reports angular velocity in rad/s; LaunchConditions
-        # stores RPM (the unit BallFlightSimulator expects). Converting via
-        # from_user_units keeps the rad/s → RPM step in one place.
-        spin_rate_rad_s = float(
+        spin_rate = float(
             math.hypot(spin_w[0], spin_w[1], spin_w[2])
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
-        spin_rate_rpm = spin_rate_rad_s * 60.0 / (2.0 * math.pi)
         spin_axis = (
-            post.ball_angular_velocity / spin_rate_rad_s
-            if spin_rate_rad_s > 1e-12
+            post.ball_angular_velocity / spin_rate
+            if spin_rate > 1e-12
             else np.array([0.0, -1.0, 0.0])
         )
 
-        return LaunchConditions.from_user_units(
+        return LaunchConditions(
             velocity=speed,
-            launch_angle_deg=launch_angle_deg,
-            azimuth_deg=azimuth_deg,
-            spin_rate_rpm=spin_rate_rpm,
+            launch_angle=launch_angle_deg,
+            azimuth_angle=azimuth_deg,
+            spin_rate=spin_rate,
             spin_axis=np.asarray(spin_axis, dtype=float),
         )
 
@@ -494,8 +489,7 @@ class SwingBallFlightPipeline:
             launch.velocity,
         )
         require(
-            0.0 <= launch.launch_angle <= _MAX_LAUNCH_ANGLE_RAD,
-            f"launch_angle must be in [0, {_MAX_LAUNCH_ANGLE_RAD:.4f}] rad "
-            f"([0°, {_MAX_LAUNCH_ANGLE_DEG}°])",
+            0.0 <= launch.launch_angle <= _MAX_LAUNCH_ANGLE_DEG,
+            f"launch_angle must be in [0°, {_MAX_LAUNCH_ANGLE_DEG}°]",
             launch.launch_angle,
         )

@@ -7,7 +7,6 @@ sprint decomposition (issue #2486).
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -18,81 +17,13 @@ from src.shared.python.physics.atmosphere import air_density as _isa_air_density
 
 @dataclass(frozen=True)
 class LaunchConditions:
-    """Initial launch conditions for the ball-flight simulator.
-
-    Units (the contract every consumer relies on — see
-    ``BallFlightSimulator`` and ``flight_models``):
-
-    * ``velocity`` — ball speed in metres per second.
-    * ``launch_angle`` — vertical launch angle in **radians** above the
-      horizontal. Consumers feed it straight into ``cos``/``sin``.
-    * ``azimuth_angle`` — horizontal bearing in **radians** (0 = +x).
-    * ``spin_rate`` — backspin magnitude in **RPM** (revolutions per
-      minute). Consumers convert with ``* 2*pi/60`` to rad/s.
-    * ``spin_axis`` — unit vector of the spin axis.
-
-    Golf inputs are conventionally given in degrees and RPM; build from
-    those with :meth:`from_user_units` rather than constructing this
-    dataclass directly, so the degree→radian conversion happens in one
-    place (DRY) and cannot be forgotten.
-    """
+    """Initial launch conditions."""
 
     velocity: float
     launch_angle: float
     azimuth_angle: float = 0.0
     spin_rate: float = 0.0
     spin_axis: np.ndarray = field(default_factory=lambda: np.array([0.0, -1.0, 0.0]))
-
-    @classmethod
-    def from_user_units(
-        cls,
-        velocity: float,
-        launch_angle_deg: float,
-        azimuth_deg: float = 0.0,
-        spin_rate_rpm: float = 0.0,
-        spin_axis: np.ndarray | None = None,
-    ) -> LaunchConditions:
-        """Build ``LaunchConditions`` from golf-facing units.
-
-        Converts ``launch_angle_deg`` and ``azimuth_deg`` (degrees) into
-        the radians this dataclass stores; ``spin_rate_rpm`` is already
-        the stored unit (RPM) and is passed through. This is the single
-        conversion seam — callers that hand-built the dataclass with
-        degrees (and rad/s) silently produced garbage trajectories.
-
-        Args:
-            velocity: Ball speed [m/s], must be finite and >= 0.
-            launch_angle_deg: Vertical launch angle [degrees].
-            azimuth_deg: Horizontal bearing [degrees], 0 = +x.
-            spin_rate_rpm: Backspin magnitude [RPM], must be >= 0.
-            spin_axis: Optional spin-axis unit vector; defaults to the
-                pure-backspin axis.
-
-        Returns:
-            A ``LaunchConditions`` with angles in radians and spin in RPM.
-
-        Raises:
-            ValueError: If ``velocity`` or ``spin_rate_rpm`` is negative
-                or non-finite.
-        """
-        if not math.isfinite(velocity) or velocity < 0.0:
-            raise ValueError(f"velocity must be finite and >= 0, got {velocity!r}")
-        if not math.isfinite(spin_rate_rpm) or spin_rate_rpm < 0.0:
-            raise ValueError(
-                f"spin_rate_rpm must be finite and >= 0, got {spin_rate_rpm!r}"
-            )
-        axis = (
-            np.asarray(spin_axis, dtype=float)
-            if spin_axis is not None
-            else np.array([0.0, -1.0, 0.0])
-        )
-        return cls(
-            velocity=float(velocity),
-            launch_angle=math.radians(launch_angle_deg),
-            azimuth_angle=math.radians(azimuth_deg),
-            spin_rate=float(spin_rate_rpm),
-            spin_axis=axis,
-        )
 
 
 @dataclass(frozen=True)

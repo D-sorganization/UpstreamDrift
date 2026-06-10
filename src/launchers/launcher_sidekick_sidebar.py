@@ -17,7 +17,7 @@ class SidekickSidebarManager:
     def __init__(self, launcher: Any) -> None:
         self.launcher = launcher
 
-    def _apply_sidekick_splitter_sizes(self) -> None:
+    def _apply_sidekick_splitter_sizes(self: Any) -> None:
         """Set main_layout splitter sizes to give the sidekick 300px."""
         layout = self.main_layout
         sidebar = self.sidekick_sidebar
@@ -126,7 +126,7 @@ class SidekickSidebarManager:
             logger.warning("Sidekick factory call failed: %s", exc)
             return None
 
-    def _embed_sidekick_sidebar_widget(self, sidebar_widget: Any) -> None:
+    def _embed_sidekick_sidebar_widget(self: Any, sidebar_widget: Any) -> None:
         """Embed the created sidebar widget into the main layout."""
         if sidebar_widget is None:
             return

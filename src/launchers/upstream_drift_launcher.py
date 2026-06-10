@@ -55,8 +55,8 @@ from src.launchers.launcher_orchestrator import LauncherOrchestrator
 from src.launchers.launcher_process_cleanup_worker import ProcessCleanupWorker
 from src.launchers.launcher_process_manager import ProcessManager
 from src.launchers.launcher_simulation import SimulationManager
-from src.launchers.launcher_frameless_window import FramelessResizeFilter
 from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+from src.launchers.launcher_ui.frameless_window import configure_frameless_window
 from src.launchers.sidekick_readiness import (
     check_sidekick_api_readiness,
     readiness_detail_for_log,
@@ -120,6 +120,8 @@ class UpstreamDriftLauncher(QMainWindow):
     sidekick_window: Any | None
     _sidekick_popped_out: bool
     _sidekick_needs_initial_sizing: bool
+    _sidekick_action_service: Any | None
+    _sidekick_action_service_host: Any | None
 
     @property
     def docker_available(self) -> bool:
@@ -243,17 +245,8 @@ class UpstreamDriftLauncher(QMainWindow):
     def _configure_window_frame(self) -> None:
         """Configure frameless window chrome and initial geometry."""
         self.setWindowTitle("UpstreamDrift")
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowMinimizeButtonHint
-        )
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self._resize_filter = configure_frameless_window(self)
         self.setMinimumSize(800, 600)
-
-        # Enable app-level mouse tracking filter for frameless resizing
-        self._resize_filter = FramelessResizeFilter(self)
-        app = QApplication.instance()
-        if app is not None:
-            app.installEventFilter(self._resize_filter)
         self._resize_to_initial_screen()
 
     def _resize_to_initial_screen(self) -> None:
@@ -369,8 +362,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self.sidekick_sidebar = None
         self.sidekick_window = None
         self._sidekick_popped_out = False
-        self._sidekick_action_service: Any | None = None
-        self._sidekick_action_service_host: Any | None = None
+        self._sidekick_action_service = None
+        self._sidekick_action_service_host = None
         self._popped_out_windows: list[Any] = []
         self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self.orchestrator.initialize_from_results(startup_results)
