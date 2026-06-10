@@ -1,5 +1,22 @@
 {
   "max_function_lines": 100,
   "max_parameters": 8,
-  "exceptions": []
+  "exceptions": [
+    {
+      "path": "src/launchers/upstream_drift_launcher.py",
+      "symbol": "UpstreamDriftLauncher.select_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7217 legacy launcher decomposition: select_model remains over the function-lines budget until the launcher is split by responsibility.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/launchers/upstream_drift_launcher.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7217 legacy launcher decomposition: main remains over the function-lines budget until startup and window orchestration move into focused launcher modules.",
+      "expires_on": "2026-09-30"
+    }
+  ]
 }
