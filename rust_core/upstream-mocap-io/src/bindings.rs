@@ -30,6 +30,15 @@ fn marker_data_to_pydict<'py>(py: Python<'py>, data: MarkerData) -> PyResult<Bou
     dict.set_item("n_markers", n_markers)?;
     dict.set_item("fps", data.fps)?;
     dict.set_item("units", data.units)?;
+    let events = PyList::empty(py);
+    for event in &data.events {
+        let entry = PyDict::new(py);
+        entry.set_item("label", &event.label)?;
+        entry.set_item("context", &event.context)?;
+        entry.set_item("time_s", event.time_s)?;
+        events.append(entry)?;
+    }
+    dict.set_item("events", events)?;
     Ok(dict)
 }
 

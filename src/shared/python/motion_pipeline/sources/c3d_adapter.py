@@ -10,6 +10,8 @@ Issue #5213 — native C3D / BVH / TRC adapters via Rust.
 
 from __future__ import annotations
 
+import math
+from collections.abc import Mapping
 from pathlib import Path
 
 from src.shared.python.motion_pipeline.contracts import (
@@ -42,6 +44,30 @@ except ImportError:  # pragma: no cover
     _HAS_EZC3D = False
 
 _HAS_C3D_BACKEND = _HAS_RUST or _HAS_EZC3D
+
+
+def _normalize_rust_events(raw_events: object) -> list[dict[str, object]]:
+    """Return JSON-serializable C3D events from the Rust parser payload."""
+    if not raw_events:
+        return []
+    events: list[dict[str, object]] = []
+    for raw_event in raw_events:
+        if not isinstance(raw_event, Mapping):
+            continue
+        label = str(raw_event.get("label", "")).strip()
+        if not label:
+            continue
+        time_s = float(raw_event.get("time_s", 0.0))
+        if not math.isfinite(time_s):
+            continue
+        events.append(
+            {
+                "label": label,
+                "context": str(raw_event.get("context", "")).strip(),
+                "time_s": time_s,
+            }
+        )
+    return events
 
 
 class C3DAdapter(MocapSourceAdapter):
@@ -132,6 +158,7 @@ class C3DAdapter(MocapSourceAdapter):
         n_frames = int(r["n_frames"])
         fps = float(r["fps"]) or 30.0
         units = (str(r["units"]).strip().lower()) or "mm"
+        events = _normalize_rust_events(r.get("events", []))
         # Bypass pydantic validation on the inner Marker / MarkerFrame
         # objects via model_construct: the Rust pass already guaranteed
         # finiteness + occlusion handling. The outer MarkerTrajectory is
@@ -162,7 +189,7 @@ class C3DAdapter(MocapSourceAdapter):
             id=f"c3d-{p.stem}",
             frames=frames,
             calibration=calibration,
-            metadata={"source_file": str(p), "units": units},
+            metadata={"source_file": str(p), "units": units, "events": events},
         )
 
     def _load_via_ezc3d(  # pragma: no cover

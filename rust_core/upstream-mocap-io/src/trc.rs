@@ -142,6 +142,7 @@ pub fn parse_trc_text(text: &str) -> Result<MarkerData, ParseError> {
         n_markers,
         fps,
         units: units_str,
+        events: Vec::new(),
     })
 }
 
