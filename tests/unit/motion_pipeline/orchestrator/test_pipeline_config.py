@@ -20,6 +20,7 @@ def test_pipeline_config_minimal_valid() -> None:
     assert cfg.matching_backend == "mujoco"
     assert cfg.output_format == "json"
     assert cfg.preprocessing == []
+    assert cfg.strict_hooks is False
 
 
 def test_pipeline_config_missing_adapter_raises() -> None:
@@ -81,3 +82,4 @@ def test_pipeline_config_serializes_to_dict() -> None:
     d = cfg.model_dump()
     assert d["adapter"]["format"] == "c3d"
     assert d["ik_backend"] == "mujoco"
+    assert d["strict_hooks"] is False

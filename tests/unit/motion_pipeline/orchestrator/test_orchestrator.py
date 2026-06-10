@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from src.shared.python.motion_pipeline.orchestrator import (
+    HookExecutionError,
     MotionPipeline,
     Stage,
     StageResult,
@@ -77,6 +80,53 @@ def test_motion_pipeline_fire_hooks_emits_payload() -> None:
     p.add_hook(Stage.ADAPTER, cb)
     p._fire_hooks(Stage.ADAPTER, "data", {"meta": 1})
     assert received == [(Stage.ADAPTER, "data")]
+
+
+def test_motion_pipeline_fire_hooks_lenient_logs_traceback(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    p = MotionPipeline(make_minimal_config())
+
+    def broken_hook(payload):  # type: ignore[no-untyped-def]
+        raise RuntimeError(f"hook exploded for {payload.stage.value}")
+
+    p.add_hook(Stage.ADAPTER, broken_hook)
+
+    with caplog.at_level(
+        logging.ERROR,
+        logger="src.shared.python.motion_pipeline.orchestrator",
+    ):
+        p._fire_hooks(Stage.ADAPTER, "data", {"meta": 1})
+
+    records = [
+        record
+        for record in caplog.records
+        if record.name == "src.shared.python.motion_pipeline.orchestrator"
+    ]
+    assert records
+    assert records[-1].exc_info is not None
+    assert "Hook 'test_motion_pipeline_fire_hooks_lenient_logs_traceback" in caplog.text
+    assert "adapter" in caplog.text
+    assert "RuntimeError: hook exploded for adapter" in caplog.text
+
+
+def test_motion_pipeline_fire_hooks_strict_raises_diagnostic() -> None:
+    p = MotionPipeline(make_minimal_config(strict_hooks=True))
+
+    def broken_hook(payload):  # type: ignore[no-untyped-def]
+        raise ValueError(f"bad hook payload: {payload.stage.value}")
+
+    p.add_hook(Stage.PREPROCESSING, broken_hook)
+
+    with pytest.raises(HookExecutionError) as excinfo:
+        p._fire_hooks(Stage.PREPROCESSING, "data", {"meta": 1})
+
+    assert excinfo.value.stage is Stage.PREPROCESSING
+    assert excinfo.value.hook_name.endswith("broken_hook")
+    assert isinstance(excinfo.value.original, ValueError)
+    assert excinfo.value.__cause__ is excinfo.value.original
+    assert "preprocessing" in str(excinfo.value)
+    assert "ValueError: bad hook payload: preprocessing" in str(excinfo.value)
 
 
 def test_motion_pipeline_default_skeleton_raises() -> None:
