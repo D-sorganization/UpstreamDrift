@@ -11,7 +11,7 @@ Issue #5213 — native C3D / BVH / TRC adapters via Rust.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 from src.shared.python.motion_pipeline.contracts import (
@@ -48,7 +48,7 @@ _HAS_C3D_BACKEND = _HAS_RUST or _HAS_EZC3D
 
 def _normalize_rust_events(raw_events: object) -> list[dict[str, object]]:
     """Return JSON-serializable C3D events from the Rust parser payload."""
-    if not raw_events:
+    if not isinstance(raw_events, Iterable):
         return []
     events: list[dict[str, object]] = []
     for raw_event in raw_events:
@@ -68,6 +68,48 @@ def _normalize_rust_events(raw_events: object) -> list[dict[str, object]]:
             }
         )
     return events
+
+
+def _normalize_rust_analog(raw_analog: object) -> dict[str, object] | None:
+    """Return JSON-serializable analog metadata from the Rust parser payload."""
+    if not isinstance(raw_analog, Mapping):
+        return None
+    return {
+        "labels": [str(label).strip() for label in raw_analog.get("labels", [])],
+        "units": [str(unit).strip() for unit in raw_analog.get("units", [])],
+        "n_frames": int(raw_analog.get("n_frames", 0)),
+        "samples_per_frame": int(raw_analog.get("samples_per_frame", 0)),
+        "n_channels": int(raw_analog.get("n_channels", 0)),
+        "rate": float(raw_analog.get("rate", 0.0)),
+    }
+
+
+def _normalize_rust_force_platforms(
+    raw_platforms: object,
+) -> list[dict[str, object]]:
+    """Return JSON-serializable force-platform metadata from Rust payloads."""
+    if not isinstance(raw_platforms, Iterable):
+        return []
+    platforms: list[dict[str, object]] = []
+    for raw_platform in raw_platforms:
+        if not isinstance(raw_platform, Mapping):
+            continue
+        platforms.append(
+            {
+                "type": int(raw_platform.get("type", 0)),
+                "channels": [
+                    int(channel) for channel in raw_platform.get("channels", [])
+                ],
+                "corners": [
+                    [float(coord) for coord in corner]
+                    for corner in raw_platform.get("corners", [])
+                ],
+                "origin": [
+                    float(coord) for coord in raw_platform.get("origin", [0, 0, 0])
+                ],
+            }
+        )
+    return platforms
 
 
 class C3DAdapter(MocapSourceAdapter):
@@ -159,6 +201,8 @@ class C3DAdapter(MocapSourceAdapter):
         fps = float(r["fps"]) or 30.0
         units = (str(r["units"]).strip().lower()) or "mm"
         events = _normalize_rust_events(r.get("events", []))
+        analog = _normalize_rust_analog(r.get("analog"))
+        force_platforms = _normalize_rust_force_platforms(r.get("force_platforms", []))
         # Bypass pydantic validation on the inner Marker / MarkerFrame
         # objects via model_construct: the Rust pass already guaranteed
         # finiteness + occlusion handling. The outer MarkerTrajectory is
@@ -189,7 +233,13 @@ class C3DAdapter(MocapSourceAdapter):
             id=f"c3d-{p.stem}",
             frames=frames,
             calibration=calibration,
-            metadata={"source_file": str(p), "units": units, "events": events},
+            metadata={
+                "source_file": str(p),
+                "units": units,
+                "events": events,
+                "analog": analog,
+                "force_platforms": force_platforms,
+            },
         )
 
     def _load_via_ezc3d(  # pragma: no cover

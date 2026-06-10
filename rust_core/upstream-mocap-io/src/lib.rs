@@ -13,8 +13,8 @@
 //! files vs. the pure-Python reference implementation
 //! (issue #5213, opportunity 2 in `upstreamdrift_rust_opportunities.md`).
 //!
-//! C3D marker data is always parsed. Event metadata is parsed when present;
-//! analog and force-plate channels remain deferred follow-up work.
+//! C3D marker data is always parsed. Event, analog, and force-platform
+//! metadata are parsed when present.
 
 #![allow(clippy::needless_range_loop)]
 #![allow(clippy::too_many_arguments)]
@@ -46,6 +46,10 @@ pub struct MarkerData {
     pub units: String,
     /// Optional C3D EVENT group metadata, expressed in seconds.
     pub events: Vec<C3dEvent>,
+    /// Optional C3D analog channel samples, expressed in scaled source units.
+    pub analog: Option<C3dAnalogData>,
+    /// Optional C3D FORCE_PLATFORM group metadata.
+    pub force_platforms: Vec<C3dForcePlatform>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -53,6 +57,30 @@ pub struct C3dEvent {
     pub label: String,
     pub context: String,
     pub time_s: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct C3dAnalogData {
+    pub labels: Vec<String>,
+    pub units: Vec<String>,
+    /// `n_frames * samples_per_frame * n_channels`, row-major by 3D frame,
+    /// analog sub-sample, then channel.
+    pub values: Vec<f32>,
+    pub n_frames: usize,
+    pub samples_per_frame: usize,
+    pub n_channels: usize,
+    pub rate: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct C3dForcePlatform {
+    pub platform_type: i16,
+    /// One-based analog channel numbers as stored in FORCE_PLATFORM:CHANNEL.
+    pub channels: Vec<i16>,
+    /// Four xyz corner triplets, in source C3D units.
+    pub corners: Vec<[f32; 3]>,
+    /// xyz origin triplet, in source C3D units.
+    pub origin: [f32; 3],
 }
 
 /// Parsed joint trajectory (BVH). Per-frame channel values are returned in
