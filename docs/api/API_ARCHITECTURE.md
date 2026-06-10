@@ -159,6 +159,13 @@ def simulate(self) -> SimulationResult:
 | ------ | ------------------- | ----------------------------- |
 | GET    | `/export/{task_id}` | Export completed task results |
 
+### Tool Routes (`/tools`)
+
+| Method | Path                            | Description                         |
+| ------ | ------------------------------- | ----------------------------------- |
+| POST   | `/tools/ball-flight/simulate`   | Run headless ball-flight simulation |
+| POST   | `/tools/putting-green/simulate` | Simulate a putt on a putting green  |
+
 ## Error Handling
 
 All errors use structured error codes for traceability:

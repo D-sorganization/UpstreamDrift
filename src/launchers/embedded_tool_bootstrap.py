@@ -9,6 +9,7 @@ Part of EPIC #4993 (Subtask 5) - addresses review feedback from #5049.
 
 from __future__ import annotations
 
+import importlib.metadata
 from typing import TYPE_CHECKING
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -18,9 +19,60 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
+EMBEDDABLE_TOOL_ENTRY_POINT_GROUP = "upstream_drift.embeddable_tools"
+
+# Tool adapter modules that self-register on import. Kept as a fallback for
+# editable installs where package metadata can lag behind the source checkout.
+FALLBACK_ADAPTER_MODULES = (
+    "src.tools.model_explorer._embed_adapter",
+    "data_explorer._embed_adapter",  # Moved from src.tools in vendor
+    "src.tools.starting_pose_matcher._embed_adapter",
+    "src.tools.training_controller._embed_adapter",
+    "src.tools.config_setup_wizard._embed_adapter",
+    "src.tools.pose_subscriber_demo._embed_adapter",
+    "src.tools.canonical_core._embed_adapter",
+    "src.tools.sidekick._embed_adapter",
+    "src.tools.pose_studio.gui",
+    "src.tools.video_analyzer._embed_adapter",
+    "src.tools.ball_flight_gui._embed_adapter",
+    "src.tools.bunker_shot_gui._embed_adapter",
+    "src.tools.putting_green_gui._embed_adapter",
+    "src.tools.golf_environment._embed_adapter",
+    "src.tools.terrain_engine._embed_adapter",
+    "src.tools.golf_simulation_suite._embed_adapter",
+    "src.tools.simulation_backends_launcher._embed_adapter",
+    "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
+)
+
 # Registry state tracking
 _bootstrap_complete = False
 _registered_tools: list[str] = []
+
+
+def _iter_entry_point_adapter_modules() -> list[str]:
+    """Return adapter module paths declared by package entry points."""
+    return [
+        entry_point.value
+        for entry_point in importlib.metadata.entry_points(
+            group=EMBEDDABLE_TOOL_ENTRY_POINT_GROUP
+        )
+        if entry_point.value
+    ]
+
+
+def _adapter_modules_for_bootstrap() -> list[str]:
+    """Return entry-point adapters plus fallback adapters without duplicates."""
+    adapter_modules: list[str] = []
+    seen: set[str] = set()
+    for module_path in [
+        *_iter_entry_point_adapter_modules(),
+        *FALLBACK_ADAPTER_MODULES,
+    ]:
+        if module_path in seen:
+            continue
+        adapter_modules.append(module_path)
+        seen.add(module_path)
+    return adapter_modules
 
 
 def bootstrap_embeddable_tools() -> list[str]:
@@ -72,33 +124,10 @@ def bootstrap_embeddable_tools() -> list[str]:
         if p not in sys.path:
             sys.path.insert(0, p)
 
-    # List of tool adapter modules that self-register on import
-    # Each module's __init__.py calls register_embeddable_tool()
-    adapter_modules = [
-        "src.tools.model_explorer._embed_adapter",
-        "data_explorer._embed_adapter",  # Moved from src.tools in vendor
-        "src.tools.starting_pose_matcher._embed_adapter",
-        "src.tools.training_controller._embed_adapter",
-        "src.tools.config_setup_wizard._embed_adapter",
-        "src.tools.pose_subscriber_demo._embed_adapter",
-        "src.tools.canonical_core._embed_adapter",
-        "src.tools.sidekick._embed_adapter",
-        "src.tools.pose_studio.gui",
-        "src.tools.video_analyzer._embed_adapter",
-        "src.tools.ball_flight_gui._embed_adapter",
-        "src.tools.bunker_shot_gui._embed_adapter",
-        "src.tools.putting_green_gui._embed_adapter",
-        "src.tools.golf_environment._embed_adapter",
-        "src.tools.terrain_engine._embed_adapter",
-        "src.tools.golf_simulation_suite._embed_adapter",
-        "src.tools.simulation_backends_launcher._embed_adapter",
-        "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
-    ]
-
     from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
 
     registered = []
-    for module_path in adapter_modules:
+    for module_path in _adapter_modules_for_bootstrap():
         # Diff the registry around the import so we record the tool ids
         # the adapter actually registered (an adapter may register zero,
         # one, or several tools; ids need not match the module name).

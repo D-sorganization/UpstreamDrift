@@ -506,6 +506,19 @@ extra in `pyproject.toml` and reference the install command in the
 tile's `description`. Example: the `gui-tools` extra installs PyQt6 +
 matplotlib + pandas + openpyxl for the desktop tools.
 
+For a tool that should open inside the launcher tab/dock host, add all three
+registration surfaces together:
+
+1. Implement a lazy `_embed_adapter.py` (or equivalent module) that imports GUI
+   dependencies inside `create_main_widget()` and calls
+   `register_embeddable_tool()` at import time.
+2. Add a `[project.entry-points."upstream_drift.embeddable_tools"]` entry whose
+   value is the adapter module path. `src/launchers/embedded_tool_bootstrap.py`
+   imports entry-point adapters first and keeps its source list only as an
+   editable-install fallback.
+3. Add the matching `src/config/models.yaml` manifest tile with
+   `launcher.category: "tool"` so manifest coverage warnings stay clean.
+
 ---
 
 ## E. Tests

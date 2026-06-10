@@ -96,6 +96,7 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "model_explorer",
     "aip",
     "putting_green",
+    "ball_flight",
     "data_explorer",
     "motion_capture",
 )
