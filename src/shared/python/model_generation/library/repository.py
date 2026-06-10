@@ -451,6 +451,7 @@ class GitHubRepository(Repository):
         """Download entire repository as archive."""
         if not (destination is not None):
             raise ValueError("destination must be provided")
+        destination.mkdir(parents=True, exist_ok=True)
         archive_url = (
             f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
         )
@@ -473,13 +474,7 @@ class GitHubRepository(Repository):
 
             return True
 
-        except (
-            ConnectionError,
-            TimeoutError,
-            OSError,
-            ValueError,
-            zipfile.BadZipFile,
-        ) as e:
+        except (ConnectionError, TimeoutError, OSError, zipfile.BadZipFile) as e:
             logger.error(f"Failed to download archive: {e}")
             return False
         finally:

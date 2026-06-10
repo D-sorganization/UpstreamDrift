@@ -3,7 +3,11 @@ Tests for the model library module.
 """
 
 import tempfile
+import zipfile
 from pathlib import Path
+from typing import BinaryIO
+
+import pytest
 
 
 class TestModelLibrary:
@@ -182,3 +186,119 @@ class TestRepository:
             repo="test_repo",
         )
         assert repo.name == "test_repo"
+
+    def test_download_archive_rejects_zip_slip_and_removes_temp(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Repository archives must not write outside the destination."""
+        from model_generation.library import repository as repository_module
+        from model_generation.library.repository import GitHubRepository
+
+        archive_bytes = tmp_path / "malicious.zip"
+        with zipfile.ZipFile(archive_bytes, "w") as zf:
+            zf.writestr("../evil.txt", "owned")
+
+        temp_zip = tmp_path / "download.zip"
+        destination = tmp_path / "models"
+        outside_target = tmp_path / "evil.txt"
+
+        self._stub_archive_download(monkeypatch, repository_module, archive_bytes)
+        self._stub_named_temp_file(monkeypatch, repository_module, temp_zip)
+
+        repo = GitHubRepository("owner", "repo")
+        with pytest.raises(ValueError, match="Unsafe path"):
+            repo.download_archive(destination)
+
+        assert not outside_target.exists()
+        assert not temp_zip.exists()
+
+    @pytest.mark.parametrize("member_name", ["/tmp/evil.txt", "C:/evil.txt"])
+    def test_download_archive_rejects_absolute_members(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, member_name: str
+    ) -> None:
+        """Absolute archive members are rejected before extraction."""
+        from model_generation.library import repository as repository_module
+        from model_generation.library.repository import GitHubRepository
+
+        archive_bytes = tmp_path / "absolute.zip"
+        with zipfile.ZipFile(archive_bytes, "w") as zf:
+            zf.writestr(member_name, "owned")
+
+        self._stub_archive_download(monkeypatch, repository_module, archive_bytes)
+        self._stub_named_temp_file(
+            monkeypatch, repository_module, tmp_path / "absolute-download.zip"
+        )
+
+        repo = GitHubRepository("owner", "repo")
+        with pytest.raises(ValueError, match="Unsafe path"):
+            repo.download_archive(tmp_path / "models")
+
+    def test_download_archive_streams_with_timeout_and_cleans_temp(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Happy path streams with an explicit timeout and removes temp zip."""
+        from model_generation.library import repository as repository_module
+        from model_generation.library.repository import GitHubRepository
+
+        archive_bytes = tmp_path / "safe.zip"
+        with zipfile.ZipFile(archive_bytes, "w") as zf:
+            zf.writestr("repo-main/model.urdf", "<robot name='safe'/>")
+
+        observed_timeouts: list[float] = []
+        self._stub_archive_download(
+            monkeypatch, repository_module, archive_bytes, observed_timeouts
+        )
+        temp_zip = tmp_path / "safe-download.zip"
+        self._stub_named_temp_file(monkeypatch, repository_module, temp_zip)
+
+        repo = GitHubRepository("owner", "repo")
+        assert repo.download_archive(tmp_path / "models") is True
+
+        assert observed_timeouts == [30]
+        assert (tmp_path / "models" / "repo-main" / "model.urdf").exists()
+        assert not temp_zip.exists()
+
+    @staticmethod
+    def _stub_archive_download(
+        monkeypatch: pytest.MonkeyPatch,
+        repository_module: object,
+        archive_path: Path,
+        observed_timeouts: list[float] | None = None,
+    ) -> None:
+        class StubResponse:
+            def __enter__(self) -> BinaryIO:
+                self._file = archive_path.open("rb")
+                return self._file
+
+            def __exit__(self, *args: object) -> None:
+                self._file.close()
+
+        def fake_urlopen(request: object, timeout: float) -> StubResponse:
+            if observed_timeouts is not None:
+                observed_timeouts.append(timeout)
+            return StubResponse()
+
+        monkeypatch.setattr(repository_module.urllib.request, "urlopen", fake_urlopen)
+
+    @staticmethod
+    def _stub_named_temp_file(
+        monkeypatch: pytest.MonkeyPatch,
+        repository_module: object,
+        temp_zip: Path,
+    ) -> None:
+        class StubNamedTemporaryFile:
+            def __init__(self, suffix: str, delete: bool) -> None:
+                self.name = str(temp_zip)
+                self._file: BinaryIO | None = None
+
+            def __enter__(self) -> BinaryIO:
+                self._file = temp_zip.open("wb")
+                return self._file
+
+            def __exit__(self, *args: object) -> None:
+                if self._file is not None:
+                    self._file.close()
+
+        monkeypatch.setattr(
+            repository_module.tempfile, "NamedTemporaryFile", StubNamedTemporaryFile
+        )
