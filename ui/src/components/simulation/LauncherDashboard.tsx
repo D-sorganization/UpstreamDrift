@@ -19,6 +19,7 @@ import {
     AlertTriangle,
     ExternalLink,
     HelpCircle,
+    Monitor,
     Loader2,
     MessageSquare,
     RefreshCw,
@@ -28,14 +29,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
+import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';
 
 interface Props {
     tiles: LauncherTile[];
     loadState: ManifestLoadState;
     error: string | null;
     selectedTileId: string | null;
+    launchedWindows: LauncherWindowRecord[];
     onSelectTile: (tileId: string) => void;
     onLaunchTile: (tileId: string) => void;
+    onFocusLaunchedTile: (tileId: string) => void;
     onShowHelp: () => void;
     onRefetch: () => void;
 }
@@ -250,8 +254,10 @@ export function LauncherDashboard({
     loadState,
     error,
     selectedTileId,
+    launchedWindows,
     onSelectTile,
     onLaunchTile,
+    onFocusLaunchedTile,
     onShowHelp,
     onRefetch,
 }: Props) {
@@ -301,6 +307,51 @@ export function LauncherDashboard({
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <details className="relative">
+                        <summary
+                            role="button"
+                            aria-label="Window list"
+                            className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 bg-gray-700/40 hover:bg-gray-700/60 text-gray-200 rounded-lg border border-gray-600/60 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                            <Monitor className="w-5 h-5" aria-hidden="true" />
+                            <span className="text-sm font-medium hidden sm:inline">Windows</span>
+                            {launchedWindows.length > 0 && (
+                                <span className="rounded-full bg-blue-500/30 px-1.5 text-xs text-blue-100">
+                                    {launchedWindows.length}
+                                </span>
+                            )}
+                        </summary>
+                        <div
+                            className="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl shadow-black/40"
+                            role="menu"
+                            aria-label="Launched windows"
+                        >
+                            {launchedWindows.length === 0 ? (
+                                <p className="px-3 py-2 text-sm text-gray-500">No launched windows</p>
+                            ) : (
+                                launchedWindows.map((record) => (
+                                    <div
+                                        key={record.tileId}
+                                        className="flex items-center justify-between gap-3 rounded-md px-3 py-2 hover:bg-white/5"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium text-white">{record.name}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {record.launchCount} launch{record.launchCount === 1 ? '' : 'es'}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="shrink-0 rounded-md border border-blue-500/40 px-2 py-1 text-xs font-medium text-blue-200 hover:bg-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            onClick={() => onFocusLaunchedTile(record.tileId)}
+                                        >
+                                            Focus
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </details>
                     <NavButton to="/chat" label="Chat" icon={MessageSquare} />
                     <button
                         id="help-button"

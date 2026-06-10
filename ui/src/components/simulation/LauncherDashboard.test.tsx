@@ -107,8 +107,10 @@ describe('LauncherDashboard', () => {
         loadState: 'loaded' as const,
         error: null,
         selectedTileId: null,
+        launchedWindows: [],
         onSelectTile: vi.fn(),
         onLaunchTile: vi.fn(),
+        onFocusLaunchedTile: vi.fn(),
         onShowHelp: vi.fn(),
         onRefetch: vi.fn(),
     };
@@ -362,10 +364,48 @@ describe('LauncherDashboard', () => {
             expect(screen.getByText('Golf Modeling Suite')).toBeInTheDocument();
         });
 
-    it('shows tile counts', () => {
+        it('shows tile counts', () => {
         renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText(/6 tiles/)).toBeInTheDocument();
             expect(screen.getByText(/3 engines/)).toBeInTheDocument();
+        });
+    });
+
+    describe('launched window menu (#7221)', () => {
+        it('shows an empty window list state', () => {
+            renderWithRouter(<LauncherDashboard {...defaultProps} />);
+
+            fireEvent.click(screen.getByRole('button', { name: /window list/i }));
+
+            expect(screen.getByRole('menu', { name: /launched windows/i })).toBeInTheDocument();
+            expect(screen.getByText('No launched windows')).toBeInTheDocument();
+        });
+
+        it('renders launched windows and focuses by tile id', () => {
+            const onFocusLaunchedTile = vi.fn();
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    launchedWindows={[
+                        {
+                            tileId: 'model_explorer',
+                            name: 'Model Explorer',
+                            launchedAt: '2026-06-10T12:00:00.000Z',
+                            focusedAt: '2026-06-10T12:00:00.000Z',
+                            launchCount: 2,
+                        },
+                    ]}
+                    onFocusLaunchedTile={onFocusLaunchedTile}
+                />
+            );
+
+            fireEvent.click(screen.getByRole('button', { name: /window list/i }));
+            const menu = screen.getByRole('menu', { name: /launched windows/i });
+            fireEvent.click(within(menu).getByRole('button', { name: /focus/i }));
+
+            expect(within(menu).getByText('Model Explorer')).toBeInTheDocument();
+            expect(within(menu).getByText('2 launches')).toBeInTheDocument();
+            expect(onFocusLaunchedTile).toHaveBeenCalledWith('model_explorer');
         });
     });
 });
