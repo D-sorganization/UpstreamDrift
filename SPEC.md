@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.274                                            |
+| **Spec Version**        | 1.0.275                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Preserved URDF fixed-joint topology through MJCF
+  roundtrips for #7208: URDF-to-MJCF conversion keeps MuJoCo weld semantics by
+  emitting fixed children as nested bodies without joint elements while encoding
+  the original fixed joint name, and MJCF-to-URDF decoding restores that name
+  only for welded nested bodies. Regression coverage now asserts link sets,
+  fixed and movable joint names/types, parent-child topology, and fixed-joint
+  origin translation through URDF -> MJCF -> URDF.
 - **2026-06-10** - Added entry-point based embeddable-tool adapter discovery
   for #7211. The launcher bootstrap now imports
   `upstream_drift.embeddable_tools` package entry points before falling back to
@@ -783,6 +790,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.275 | MJCF fixed-joint roundtrip topology preservation (#7208). URDF-to-MJCF conversion now keeps fixed children as welded nested MuJoCo bodies without joint elements while encoding the original fixed joint name, and MJCF-to-URDF decoding restores that fixed joint name only for welded nested bodies. Regression coverage asserts link sets, fixed and movable joint names/types, parent-child topology, and fixed-joint origin translation across URDF -> MJCF -> URDF. |
 | 2026-06-10 | 1.0.274 | Embeddable-tool adapter entry-point discovery (#7211). `src/launchers/embedded_tool_bootstrap.py` now imports `upstream_drift.embeddable_tools` entry-point adapters first, falls back to the in-tree adapter module list for editable checkouts, de-duplicates module paths across both sources, and keeps registry-diff tracking plus manifest-gap warnings intact. `pyproject.toml` declares the first-party adapter entry points so installed wheels and source checkouts use the same bootstrap contract. |
 | 2026-06-10 | 1.0.273 | Ball-flight REST simulation route (#7218). `POST /tools/ball-flight/simulate` exposes headless/batch launch simulation through the existing `FlightModelRegistry` and `UnifiedLaunchConditions` stack, validates launch/spin/wind/model/integration-window inputs with Pydantic contracts, and registers the `ball_flight` API tool route alongside the route registry. |
 | 2026-06-10 | 1.0.272 | Model Explorer sibling model-repository discovery (#7201). `ModelLibrary.list_available_models()` now exposes a `sibling` category populated by `src/tools/model_explorer/sibling_repositories.py`, scanning `Drake_Models`, `MuJoCo_Models`, `Pinocchio_Models`, and `OpenSim_Models` siblings next to the checkout or explicit `UD_SIBLING_MODEL_REPOS` roots. Discovery accepts URDF plus MJCF XML by content, skips VCS/cache directories, emits stable `sibling_<repo>_<relative-path>` config keys, and surfaces truncation instead of silently hiding excess results. `get_model_info("sibling", key)` resolves the discovered local model metadata without network access. Regression coverage added in `tests/tools/model_explorer/test_sibling_repositories.py`; the human-model fallback download path now delegates to the shared bounded downloader instead of a local `urllib.urlopen` call. |

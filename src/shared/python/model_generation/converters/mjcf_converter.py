@@ -53,6 +53,8 @@ MJCF_TO_URDF_JOINT = {
     "ball": JointType.GIMBAL,  # Approximation
 }
 
+_FIXED_BODY_NAME_SEPARATOR = "__fixed__"
+
 
 @dataclass
 class MJCFConfig:
@@ -97,6 +99,27 @@ class MJCFConverter:
         """
         self.config = config or MJCFConfig()
         self._urdf_parser = URDFParser()
+
+    @staticmethod
+    def _encode_fixed_body_name(link_name: str, joint_name: str) -> str:
+        """Encode a welded URDF child body without adding a MuJoCo joint."""
+        if not link_name:
+            raise ValueError("link_name must be provided")
+        if not joint_name:
+            raise ValueError("joint_name must be provided")
+        return f"{link_name}{_FIXED_BODY_NAME_SEPARATOR}{joint_name}"
+
+    @staticmethod
+    def _decode_fixed_body_name(body_name: str) -> tuple[str, str | None]:
+        """Return the URDF link name and optional fixed-joint name."""
+        if not body_name:
+            raise ValueError("body_name must be provided")
+        if _FIXED_BODY_NAME_SEPARATOR not in body_name:
+            return body_name, None
+        link_name, joint_name = body_name.rsplit(_FIXED_BODY_NAME_SEPARATOR, 1)
+        if not link_name or not joint_name:
+            raise ValueError(f"Invalid fixed body name: {body_name!r}")
+        return link_name, joint_name
 
     def urdf_to_mjcf(
         self,
@@ -297,7 +320,11 @@ class MJCFConverter:
             xyz = connecting_joint.origin.xyz
             pos = f"{xyz[0]:.6g} {xyz[1]:.6g} {xyz[2]:.6g}"
 
-        lines.append(f'{indent}<body name="{link_name}" pos="{pos}">')
+        body_name = link_name
+        if connecting_joint and connecting_joint.joint_type == JointType.FIXED:
+            body_name = self._encode_fixed_body_name(link_name, connecting_joint.name)
+
+        lines.append(f'{indent}<body name="{body_name}" pos="{pos}">')
 
         # Inertial
         if link.inertia.mass > 0:
@@ -526,6 +553,7 @@ class MJCFConverter:
         parent_name: str,
         body_name: str,
         pos: tuple[float, ...],
+        fixed_joint_name: str | None = None,
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent."""
         if not (body_elem is not None):
@@ -535,7 +563,7 @@ class MJCFConverter:
         joint_elems = body_elem.findall("joint")
         if not joint_elems:
             return Joint(
-                name=f"{parent_name}_to_{body_name}",
+                name=fixed_joint_name or f"{parent_name}_to_{body_name}",
                 joint_type=JointType.FIXED,
                 parent=parent_name,
                 child=body_name,
@@ -585,7 +613,13 @@ class MJCFConverter:
     ) -> None:
         """Recursively parse body elements."""
         for body_elem in elem.findall("body"):
-            body_name = body_elem.get("name", f"body_{len(links)}")
+            raw_body_name = body_elem.get("name", f"body_{len(links)}")
+            body_name = raw_body_name
+            fixed_joint_name = None
+            if parent_name and not body_elem.findall("joint"):
+                body_name, fixed_joint_name = self._decode_fixed_body_name(
+                    raw_body_name
+                )
             pos_str = body_elem.get("pos", "0 0 0")
             pos = tuple(float(v) for v in pos_str.split())
 
@@ -607,7 +641,13 @@ class MJCFConverter:
 
             if parent_name:
                 joints.append(
-                    self._parse_body_joint(body_elem, parent_name, body_name, pos)
+                    self._parse_body_joint(
+                        body_elem,
+                        parent_name,
+                        body_name,
+                        pos,
+                        fixed_joint_name=fixed_joint_name,
+                    )
                 )
 
             self._parse_mjcf_body(body_elem, body_name, links, joints)
