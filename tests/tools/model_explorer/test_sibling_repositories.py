@@ -117,6 +117,41 @@ class TestDiscovery:
 
 
 class TestModelLibraryIntegration:
+    def test_download_human_model_uses_shared_bounded_downloader(
+        self, tmp_path: Path, monkeypatch
+    ) -> None:
+        from src.tools.model_explorer.model_library import ModelLibrary
+
+        calls: list[tuple[str, Path, float]] = []
+
+        def fake_download_to_file(url: str, dest: Path, timeout: float) -> Path:
+            calls.append((url, dest, timeout))
+            dest.write_text(_URDF, encoding="utf-8")
+            return dest
+
+        def fail_urlopen(*_args: object, **_kwargs: object) -> None:
+            raise AssertionError("model_library must not call urllib.urlopen directly")
+
+        monkeypatch.setattr(
+            "src.tools.model_explorer.model_library.download_to_file",
+            fake_download_to_file,
+        )
+        monkeypatch.setattr("urllib.request.urlopen", fail_urlopen)
+        library = ModelLibrary(base_path=tmp_path / "models")
+        result = library.download_human_model("human_gazebo", force=True)
+
+        assert (
+            result
+            == tmp_path / "models" / "human_models" / "human_gazebo" / "model.urdf"
+        )
+        assert calls == [
+            (
+                ModelLibrary.HUMAN_MODELS["human_gazebo"]["urdf_url"],
+                result,
+                30,
+            )
+        ]
+
     def test_list_available_models_has_sibling_category(
         self, project_root: Path, tmp_path: Path, monkeypatch
     ) -> None:

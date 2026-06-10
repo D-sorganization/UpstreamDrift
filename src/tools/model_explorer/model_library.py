@@ -25,13 +25,13 @@ import json
 import math
 import os
 import sys
-import urllib.request
 from pathlib import Path
 from typing import Any
 
 from src.shared.python.logging_pkg.logger_utils import get_logger
 from src.shared.python.security.security_utils import (
     DOWNLOAD_TIMEOUT_SECONDS,
+    download_to_file,
     validate_url_scheme,
 )
 
@@ -372,11 +372,11 @@ class ModelLibrary:
             # Download URDF file
             logger.info(f"Downloading URDF: {model_info['urdf_url']}")
             validate_url_scheme(model_info["urdf_url"])
-            with urllib.request.urlopen(  # nosec B310 - URL validated by validate_url_scheme() above
-                model_info["urdf_url"], timeout=DOWNLOAD_TIMEOUT_SECONDS
-            ) as response:
-                urdf_content = response.read().decode("utf-8")
-                urdf_path.write_text(urdf_content, encoding="utf-8")
+            download_to_file(
+                model_info["urdf_url"],
+                urdf_path,
+                timeout=DOWNLOAD_TIMEOUT_SECONDS,
+            )
 
             # IMPORTANT: Mesh downloads are NOT implemented.
             # Meshes must be bundled with the repository.
