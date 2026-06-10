@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import os
+import sys
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 
 import pytest
 
@@ -33,14 +35,31 @@ def _link(name: str, *, mass: float | None = None) -> ET.Element:
     return link
 
 
+def _box_link(
+    name: str,
+    *,
+    size: str,
+    origin_xyz: str = "0 0 0",
+    mass: float | None = None,
+) -> ET.Element:
+    link = _link(name, mass=mass)
+    visual = ET.SubElement(link, "visual")
+    ET.SubElement(visual, "origin", {"xyz": origin_xyz})
+    geometry = ET.SubElement(visual, "geometry")
+    ET.SubElement(geometry, "box", {"size": size})
+    return link
+
+
 def _joint(
     name: str,
     parent: str,
     child: str,
     *,
     joint_type: str = "fixed",
+    origin_xyz: str = "0 0 0",
 ) -> ET.Element:
     joint = ET.Element("joint", {"name": name, "type": joint_type})
+    ET.SubElement(joint, "origin", {"xyz": origin_xyz})
     ET.SubElement(joint, "parent", {"link": parent})
     ET.SubElement(joint, "child", {"link": child})
     return joint
@@ -54,6 +73,10 @@ def _robot(*children: ET.Element) -> ET.Element:
 
 def _codes(result: object) -> set[str]:
     return {finding.code for finding in result.errors}
+
+
+def _warning_codes(result: object) -> set[str]:
+    return {finding.code for finding in result.warnings}
 
 
 def test_valid_tree_has_no_errors() -> None:
@@ -138,6 +161,48 @@ def test_non_fixed_child_requires_positive_semidefinite_inertia() -> None:
     assert any("arm" in finding.message for finding in result.errors)
 
 
+def test_heavy_attached_subtree_reports_mass_ratio_warning() -> None:
+    root = _robot(
+        _link("base", mass=1.0),
+        _link("heavy_tool", mass=3.0),
+        _link("payload", mass=1.0),
+        _joint("base_to_tool", "base", "heavy_tool"),
+        _joint("tool_to_payload", "heavy_tool", "payload"),
+    )
+
+    result = CompositionValidator().validate_xml_root(root)
+
+    assert result.ok
+    assert "subtree_mass_ratio" in _warning_codes(result)
+    assert any("heavy_tool" in finding.message for finding in result.warnings)
+
+
+def test_overlapping_attachment_geometry_reports_warning() -> None:
+    root = _robot(
+        _box_link("base", size="2 2 2"),
+        _box_link("tool", size="1 1 1"),
+        _joint("base_to_tool", "base", "tool", origin_xyz="0.25 0 0"),
+    )
+
+    result = CompositionValidator().validate_xml_root(root)
+
+    assert result.ok
+    assert "geometry_overlap" in _warning_codes(result)
+    assert any("base_to_tool" in finding.message for finding in result.warnings)
+
+
+def test_separated_attachment_geometry_has_no_overlap_warning() -> None:
+    root = _robot(
+        _box_link("base", size="2 2 2"),
+        _box_link("tool", size="1 1 1"),
+        _joint("base_to_tool", "base", "tool", origin_xyz="3 0 0"),
+    )
+
+    result = CompositionValidator().validate_xml_root(root)
+
+    assert "geometry_overlap" not in _warning_codes(result)
+
+
 def test_model_export_blocks_invalid_cycle_and_force_allows_export() -> None:
     model = URDFModel.from_element(
         _robot(
@@ -155,3 +220,31 @@ def test_model_export_blocks_invalid_cycle_and_force_allows_export() -> None:
     assert "arm_to_base" in str(exc_info.value)
     forced_xml = model.to_xml(force=True)
     assert 'joint name="base_to_arm"' in forced_xml
+
+
+def test_model_panel_surfaces_validation_findings() -> None:
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    if "PyQt6.QtWidgets" in sys.modules:
+        qt_widgets = sys.modules["PyQt6.QtWidgets"]
+    else:
+        qt_widgets = pytest.importorskip("PyQt6.QtWidgets")
+    app = qt_widgets.QApplication.instance() or qt_widgets.QApplication([])
+    _ = app
+    from src.tools.model_explorer.frankenstein_editor.panel import ModelPanel
+
+    panel = ModelPanel("Working Model")
+    panel.model = URDFModel.from_element(
+        _robot(
+            _box_link("base", size="2 2 2"),
+            _box_link("tool", size="1 1 1"),
+            _joint("base_to_tool", "base", "tool", origin_xyz="0.25 0 0"),
+        )
+    )
+
+    panel._refresh_tree()
+
+    messages = [
+        panel.validation_list.item(index).text()
+        for index in range(panel.validation_list.count())
+    ]
+    assert any("geometry_overlap" in message for message in messages)
