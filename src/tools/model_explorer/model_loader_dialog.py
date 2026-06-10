@@ -156,6 +156,10 @@ class ModelLoaderDialog(QDialog):
         # Tabs
         self.tabs = QTabWidget()
 
+        library_tab = QWidget()
+        self._setup_library_tab(library_tab)
+        self.tabs.addTab(library_tab, "Library")
+
         self.tabs.addTab(self._setup_biomechanics_tab(), "Biomechanics")
         self.tabs.addTab(self._setup_equipment_tab(), "Equipment")
         self.tabs.addTab(self._setup_robotics_tab(), "Robotics")
@@ -180,6 +184,109 @@ class ModelLoaderDialog(QDialog):
 
         # Info display and dialog buttons
         self._setup_info_and_buttons(layout)
+
+    def _setup_library_tab(self, parent: QWidget) -> None:
+        """Create one searchable tree containing every library category."""
+        if parent is None:
+            raise ValueError("parent must be provided")
+        from PyQt6.QtWidgets import QHeaderView, QLineEdit, QTreeWidget
+
+        from .library_panel_model import LibraryPanelModel
+
+        self.library_panel_model = LibraryPanelModel.from_library(self.library)
+        layout = QVBoxLayout(parent)
+
+        search_layout = QHBoxLayout()
+        search_layout.addWidget(QLabel("Search:"))
+        self.library_search = QLineEdit()
+        self.library_search.setPlaceholderText(
+            "Filter by name, category, format, or path..."
+        )
+        self.library_search.textChanged.connect(self._filter_library_tree)
+        search_layout.addWidget(self.library_search)
+        layout.addLayout(search_layout)
+
+        self.library_tree = QTreeWidget()
+        self.library_tree.setHeaderLabels(["Model", "Format", "Source"])
+        header = self.library_tree.header()
+        if header:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.library_tree.itemSelectionChanged.connect(self._on_library_item_selected)
+        layout.addWidget(self.library_tree)
+
+        load_btn = QPushButton("Load Selected Model")
+        load_btn.clicked.connect(self._load_selected_library_model)
+        layout.addWidget(load_btn)
+
+        self._populate_library_tree()
+
+    def _populate_library_tree(self, query: str = "") -> None:
+        """Populate the unified library tree from the headless panel model."""
+        if query is None:
+            raise ValueError("query must be provided")
+        from PyQt6.QtWidgets import QTreeWidgetItem
+
+        self.library_tree.clear()
+        for group in self.library_panel_model.grouped_entries(query):
+            group_item = QTreeWidgetItem(
+                [f"{group.label} ({len(group.entries)})", "", ""]
+            )
+            group_item.setFlags(group_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            self.library_tree.addTopLevelItem(group_item)
+            for entry in group.entries:
+                item = QTreeWidgetItem(
+                    [entry.name, entry.format_badge, entry.source_label]
+                )
+                item.setData(0, Qt.ItemDataRole.UserRole, entry.category)
+                item.setData(0, Qt.ItemDataRole.UserRole + 1, entry.key)
+                if entry.description:
+                    item.setToolTip(0, entry.description)
+                group_item.addChild(item)
+            group_item.setExpanded(True)
+
+    def _filter_library_tree(self, text: str) -> None:
+        """Apply text search to the unified library tree."""
+        if text is None:
+            raise ValueError("text must be provided")
+        self._populate_library_tree(text)
+
+    def _current_library_entry(self) -> Any | None:
+        item = self.library_tree.currentItem()
+        if item is None:
+            return None
+        category = item.data(0, Qt.ItemDataRole.UserRole)
+        key = item.data(0, Qt.ItemDataRole.UserRole + 1)
+        if not category or not key:
+            return None
+        return next(
+            (
+                entry
+                for entry in self.library_panel_model.entries
+                if entry.category == category and entry.key == key
+            ),
+            None,
+        )
+
+    def _on_library_item_selected(self) -> None:
+        """Display details for the selected unified library row."""
+        entry = self._current_library_entry()
+        if entry is None:
+            return
+        self.selected_category = entry.category
+        self.selected_model = entry.key
+        self._display_model_info(entry.category, entry.key, dict(entry.info))
+
+    def _load_selected_library_model(self) -> None:
+        """Load the currently selected unified library row."""
+        entry = self._current_library_entry()
+        if entry is None:
+            return
+        self.selected_category = entry.category
+        self.selected_model = entry.key
+        self.model_selected.emit(entry.category, entry.key)
+        self.accept()
 
     def _setup_repo_tab(self, parent: QWidget) -> None:
         if parent is None:

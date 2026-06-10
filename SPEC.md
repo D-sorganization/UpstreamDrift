@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.293                                            |
+| **Spec Version**        | 1.0.294                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -94,6 +94,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   architecture budget keeps temporary #7217 exceptions for the legacy
   `select_model` and `main` functions until later launcher slices split those
   responsibilities.
+- **2026-06-10** - Added the first #7207 model explorer library-panel
+  unification slice. `ModelLoaderDialog` now exposes a single searchable
+  library tree covering every `ModelLibrary.list_available_models()` category,
+  including sibling repositories, with first-party format-badge inference
+  backed by headless controller/model tests.
 - **2026-06-10** - Completed the #7205 Frankenstein composition validation
   surface. `CompositionValidator` now emits warning-level findings for heavy
   attached subtrees and direct attachment geometry AABB overlaps, while the
@@ -907,7 +912,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.293 | Split the launcher entrypoint below the file-size budget for #7217. Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved from `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the canonical frameless-window helper under `src/launchers/launcher_ui/frameless_window.py`. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |
+| 2026-06-11 | 1.0.294 | Split the launcher entrypoint below the file-size budget for #7217. Sidekick sidebar installation, process cleanup polling, launcher domain orchestration, and GUI startup bootstrap moved from `src/launchers/upstream_drift_launcher.py` into focused modules, preserving compatibility imports and the canonical frameless-window helper under `src/launchers/launcher_ui/frameless_window.py`. The launcher entrypoint is now below 1200 lines, so its file-size budget exception was removed. |
+| 2026-06-10 | 1.0.293 | First #7207 model explorer library-panel unification slice. `ModelLoaderDialog` now exposes one searchable Library tree built from every `ModelLibrary.list_available_models()` category, including sibling repositories, and model rows show first-party format badges inferred from explicit model metadata or category defaults. Headless panel-model tests cover flattening, sibling inclusion, search, category grouping, and badge logic. |
 | 2026-06-10 | 1.0.292 | Motion-pipeline hook exception handling for #7250. `PipelineConfig.strict_hooks` now controls per-stage hook failure policy: default lenient mode logs failures with `logger.exception` so tracebacks are observable while the pipeline continues, and strict mode raises `HookExecutionError` with the stage, hook name, and original exception chained as the cause. Focused orchestrator unit tests cover both modes. |
 | 2026-06-10 | 1.0.291 | Added the bounded inverse swing optimization core for #7220. `src/shared/python/physics/swing_optimizer.py` adds `FlightTarget`, `ClubPreset`, `SwingOptimizer`, and diagnostics around SciPy SLSQP over speed/loft/attack/face-to-path while composing the existing `SwingBallFlightPipeline`; focused physics tests cover roundtrip, unreachable target, and timeout behavior. |
 | 2026-06-10 | 1.0.290 | Rust C3D analog and force-platform metadata slice for #7212. `upstream-mocap-io` now decodes C3D analog channels in int16 mode with SCALE/OFFSET/GEN_SCALE and in float mode without int scaling, advances marker frame stride across analog-bearing records, parses FORCE_PLATFORM TYPE/CHANNEL/CORNERS/ORIGIN metadata, and exposes additive PyO3 `analog` / `force_platforms` keys while preserving existing marker/event keys and marker-only fixture behavior. |
