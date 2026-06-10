@@ -35,6 +35,12 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+# A dispatcher runs a zero-arg thunk on the GUI thread and returns its
+# result. The concrete Qt implementation lives in the GUI layer
+# (``ai/gui``); this module only depends on the call signature, so it
+# stays importable in headless contexts.
+MainThreadDispatcher = Callable[[Callable[[], ToolResult]], ToolResult]
+
 
 class ToolCategory(Enum):
     """Categories for organizing tools in the UI.
@@ -112,6 +118,13 @@ class Tool:
     requires_confirmation: bool = False
     expertise_level: int = 1  # 1=beginner, 4=expert
     examples: list[dict[str, Any]] = field(default_factory=list)
+    # When True, the handler mutates Qt widgets (or otherwise requires the
+    # GUI thread). The chat runs tools on a background ``StreamWorker``
+    # thread, so such a handler must be marshalled onto the GUI thread via
+    # ``ToolRegistry``'s registered main-thread dispatcher. Plain compute /
+    # IO tools leave this False so they keep running off the UI thread and
+    # never block it.
+    requires_main_thread: bool = False
 
     def to_json_schema(self) -> dict[str, Any]:
         """Convert to JSON Schema for AI providers.
@@ -267,7 +280,33 @@ class ToolRegistry:
     def __init__(self) -> None:
         """Initialize empty tool registry."""
         self._tools: dict[str, Tool] = {}
+        # Optional callable that runs a thunk on the GUI thread and returns
+        # its result. Installed by the GUI layer (e.g. AIAssistantPanel)
+        # when a Qt event loop exists; left None in headless contexts.
+        self._main_thread_dispatcher: MainThreadDispatcher | None = None
         logger.info("Initialized ToolRegistry")
+
+    def set_main_thread_dispatcher(
+        self, dispatcher: MainThreadDispatcher | None
+    ) -> None:
+        """Register (or clear) the GUI-thread dispatcher for tool execution.
+
+        Tools flagged ``requires_main_thread`` are executed through this
+        dispatcher so their Qt-widget mutations happen on the GUI thread,
+        even though the chat invokes tools from a background worker thread.
+
+        Args:
+            dispatcher: A callable taking a zero-arg thunk and returning the
+                thunk's result after running it on the GUI thread, or
+                ``None`` to clear (tools then run inline on the caller's
+                thread — correct for headless use).
+
+        Raises:
+            TypeError: If ``dispatcher`` is neither callable nor ``None``.
+        """
+        if dispatcher is not None and not callable(dispatcher):
+            raise TypeError("dispatcher must be callable or None")
+        self._main_thread_dispatcher = dispatcher
 
     def register(
         self,
@@ -275,6 +314,7 @@ class ToolRegistry:
         description: str,
         category: ToolCategory = ToolCategory.ANALYSIS,
         requires_confirmation: bool = False,
+        requires_main_thread: bool = False,
         expertise_level: int = 1,
         examples: list[dict[str, Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
@@ -285,6 +325,8 @@ class ToolRegistry:
             description: What the tool does.
             category: Tool category.
             requires_confirmation: Whether to confirm before execution.
+            requires_main_thread: Whether to execute through the registered
+                main-thread dispatcher.
             expertise_level: Minimum expertise level (1-4).
             examples: Example invocations.
 
@@ -314,6 +356,7 @@ class ToolRegistry:
                 parameters=parameters,
                 category=category,
                 requires_confirmation=requires_confirmation,
+                requires_main_thread=requires_main_thread,
                 expertise_level=expertise_level,
                 examples=examples or [],
             )
@@ -522,7 +565,13 @@ class ToolRegistry:
                 parameters=arguments,
             )
 
-        result = tool.execute(arguments)
+        if tool.requires_main_thread and self._main_thread_dispatcher is not None:
+            # Marshal Qt-touching handlers onto the GUI thread. The
+            # dispatcher short-circuits to an inline call when already on
+            # the GUI thread, so this is safe regardless of caller thread.
+            result = self._main_thread_dispatcher(lambda: tool.execute(arguments))
+        else:
+            result = tool.execute(arguments)
         result.tool_call_id = tool_call_id
         return result
 

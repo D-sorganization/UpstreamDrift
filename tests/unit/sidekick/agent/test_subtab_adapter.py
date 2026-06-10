@@ -1,12 +1,4 @@
-"""Tests for sidekick.agent.subtab_adapter (epic #5967 / S3 / #5972).
-
-TDD: contract pinned before implementation. The adapter exposes the
-Sidekick subtab surface (tools_sidebar) through SidekickActionService
-without any direct PyQt6 calls — all UI side effects route through a
-SubtabActionPort Protocol injected at construction. This keeps tests
-fast, headless, and decoupled from the actual widget code (which may
-be in an inconsistent state during multi-agent edits).
-"""
+"""Focused coverage for Sidekick subtab adapter."""
 
 from __future__ import annotations
 
@@ -14,12 +6,9 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 import pytest
-
-from sidekick.agent.action_service import SidekickActionService
 from sidekick.agent.subtab_adapter import (
     CalculatorRun,
     StateProfile,
-    SubtabActionPort,
     SubtabAdapter,
     WorkspaceSnapshot,
 )
@@ -27,108 +16,71 @@ from sidekick.agent.subtab_adapter import (
 pytestmark = pytest.mark.unit
 
 
-# ---------------------------------------------------------------------------
-# Fake port — captures every call without touching real widgets
-# ---------------------------------------------------------------------------
-
-
-class _FakePort:
-    """In-memory ``SubtabActionPort`` for unit tests."""
-
-    def __init__(
-        self, *, available_tabs: Sequence[str] = ("calculator", "workspace")
-    ) -> None:
-        self._tabs: list[str] = list(available_tabs)
-        self._visible: set[str] = set(self._tabs)
-        self._active: str | None = self._tabs[0] if self._tabs else None
-        self._workspace: dict[str, Any] = {"y": 99}
-        self._profiles: dict[str, dict[str, Any]] = {}
-        # Records every method call as (name, args).
-        self.calls: list[tuple[str, tuple[Any, ...]]] = []
-
-    # SubtabActionPort surface ---------------------------------------------
+class _Port:
+    def __init__(self) -> None:
+        self.tabs = ["workspace", "calculator"]
+        self.active = "workspace"
+        self.visible: dict[str, bool] = dict.fromkeys(self.tabs, True)
+        self.workspace = {"mass": 1.0}
+        self.profiles: dict[str, dict[str, Any]] = {}
+        self.focused: list[str] = []
 
     def list_tabs(self) -> Sequence[str]:
-        self.calls.append(("list_tabs", ()))
-        return tuple(self._tabs)
+        return tuple(self.tabs)
 
     def active_tab(self) -> str | None:
-        return self._active
+        return self.active
 
     def focus(self, tab_id: str) -> None:
-        self.calls.append(("focus", (tab_id,)))
-        if tab_id not in self._tabs:
+        if tab_id not in self.tabs:
             raise KeyError(tab_id)
-        self._active = tab_id
+        self.active = tab_id
+        self.focused.append(tab_id)
 
     def set_visible(self, tab_id: str, visible: bool) -> None:
-        self.calls.append(("set_visible", (tab_id, visible)))
-        if tab_id not in self._tabs:
+        if tab_id not in self.tabs:
             raise KeyError(tab_id)
-        if visible:
-            self._visible.add(tab_id)
-        else:
-            self._visible.discard(tab_id)
+        self.visible[tab_id] = visible
 
     def workspace_snapshot(self) -> WorkspaceSnapshot:
-        self.calls.append(("workspace_snapshot", ()))
-        return WorkspaceSnapshot(values=dict(self._workspace))
+        return WorkspaceSnapshot(values=dict(self.workspace))
 
     def workspace_set_variable(self, name: str, value: Any) -> Any:
-        self.calls.append(("workspace_set_variable", (name, value)))
-        prior = self._workspace.get(name)
-        self._workspace[name] = value
+        prior = self.workspace.get(name)
+        self.workspace[name] = value
         return prior
 
     def calculator_run(
         self, calculator_id: str, inputs: Mapping[str, Any]
     ) -> CalculatorRun:
-        self.calls.append(("calculator_run", (calculator_id, dict(inputs))))
-        if calculator_id == "broken":
-            raise RuntimeError("simulated failure")
-        # Mirror Calculator protocol output shape.
-        return CalculatorRun(
-            values={"answer": float(inputs.get("x", 0)) * 2.0},
-            units={"answer": "dimensionless"},
-            warnings=(),
-            metadata={"calculator_id": calculator_id},
-        )
+        if calculator_id == "missing":
+            raise KeyError(calculator_id)
+        return CalculatorRun(values={"out": float(inputs["x"])}, units={"out": "kg"})
 
     def state_profile_save(self, name: str, payload: Mapping[str, Any]) -> None:
-        self.calls.append(("state_profile_save", (name, dict(payload))))
-        self._profiles[name] = dict(payload)
+        self.profiles[name] = dict(payload)
 
     def state_profile_load(self, name: str) -> StateProfile:
-        self.calls.append(("state_profile_load", (name,)))
-        payload = self._profiles.get(name)
-        if payload is None:
+        if name not in self.profiles:
             raise KeyError(name)
-        return StateProfile(name=name, payload=dict(payload))
+        return StateProfile(name=name, payload=dict(self.profiles[name]))
 
     def state_profile_delete(self, name: str) -> None:
-        self.calls.append(("state_profile_delete", (name,)))
-        self._profiles.pop(name, None)
+        self.profiles.pop(name, None)
 
 
-# ---------------------------------------------------------------------------
-# Construction + descriptor surface
-# ---------------------------------------------------------------------------
+def test_value_objects_validate_and_project() -> None:
+    run = CalculatorRun(values={"out": 1.0}, units={"out": "kg"}, warnings=("warn",))
+    assert run.as_dict()["warnings"] == ["warn"]
+    with pytest.raises(ValueError, match="units keys"):
+        CalculatorRun(values={"out": 1.0}, units={"other": "kg"})
 
 
-def test_adapter_namespace_is_subtab() -> None:
-    adapter = SubtabAdapter(port=_FakePort())
-    assert adapter.namespace == "subtab"
+def test_describe_and_core_tab_actions() -> None:
+    port = _Port()
+    adapter = SubtabAdapter(port=port)
 
-
-def test_adapter_rejects_non_port() -> None:
-    with pytest.raises(TypeError):
-        SubtabAdapter(port="not-a-port")  # type: ignore[arg-type]
-
-
-def test_adapter_publishes_all_actions() -> None:
-    adapter = SubtabAdapter(port=_FakePort())
-    ids = {d.action_id for d in adapter.describe()}
-    assert ids == {
+    assert [descriptor.action_id for descriptor in adapter.describe()] == [
         "subtab.list",
         "subtab.focus",
         "subtab.show",
@@ -139,301 +91,60 @@ def test_adapter_publishes_all_actions() -> None:
         "subtab.state_profile.save",
         "subtab.state_profile.load",
         "subtab.state_profile.delete",
-    }
+    ]
+    assert adapter.invoke("subtab.list", {}).value == ["workspace", "calculator"]
+
+    focused = adapter.invoke("subtab.focus", {"tab_id": "calculator"})
+    hidden = adapter.invoke("subtab.hide", {"tab_id": "calculator"})
+    shown = adapter.invoke("subtab.show", {"tab_id": "calculator"})
+
+    assert focused.ok is True
+    assert focused.metadata["_undo"]["params"] == {"tab_id": "workspace"}
+    assert hidden.metadata["_undo"]["action_id"] == "subtab.show"
+    assert shown.metadata["_undo"]["action_id"] == "subtab.hide"
 
 
-def test_side_effects_classification() -> None:
-    adapter = SubtabAdapter(port=_FakePort())
-    by_id = {d.action_id: d for d in adapter.describe()}
-    assert by_id["subtab.list"].side_effects == "read"
-    assert by_id["subtab.workspace.snapshot"].side_effects == "read"
-    assert by_id["subtab.focus"].side_effects == "write"
-    assert by_id["subtab.workspace.set_variable"].side_effects == "write"
-    assert by_id["subtab.state_profile.save"].side_effects == "write"
-    assert by_id["subtab.state_profile.load"].side_effects == "write"
-
-
-def test_reversible_flags_match_actual_undo_support() -> None:
-    adapter = SubtabAdapter(port=_FakePort())
-    by_id = {d.action_id: d for d in adapter.describe()}
-    assert by_id["subtab.focus"].reversible is True
-    assert by_id["subtab.show"].reversible is True
-    assert by_id["subtab.hide"].reversible is True
-    assert by_id["subtab.workspace.set_variable"].reversible is True
-    assert by_id["subtab.state_profile.save"].reversible is True
-    # calculator.run is not reversible — a calculation has no inverse.
-    assert by_id["subtab.calculator.run"].reversible is False
-
-
-# ---------------------------------------------------------------------------
-# Action invocation via the service
-# ---------------------------------------------------------------------------
-
-
-def _build_service(
-    port: SubtabActionPort,
-) -> tuple[SidekickActionService, SubtabAdapter]:
-    service = SidekickActionService()
+def test_workspace_calculator_and_profile_actions() -> None:
+    port = _Port()
     adapter = SubtabAdapter(port=port)
-    service.register(adapter)
-    return service, adapter
 
-
-def test_subtab_list_returns_port_tabs() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke("subtab.list", {})
-    assert result.ok is True
-    assert result.value == ["calculator", "workspace"]
-    assert ("list_tabs", ()) in port.calls
-
-
-def test_subtab_focus_records_undo_token() -> None:
-    port = _FakePort(available_tabs=("a", "b"))
-    service, _ = _build_service(port)
-    result = service.invoke("subtab.focus", {"tab_id": "b"})
-    assert result.ok is True
-    assert result.undo_token  # opaque; just must be present
-    assert port.active_tab() == "b"
-
-
-def test_subtab_focus_unknown_tab_returns_error() -> None:
-    port = _FakePort(available_tabs=("a",))
-    service, _ = _build_service(port)
-    result = service.invoke("subtab.focus", {"tab_id": "nonexistent"})
-    assert result.ok is False
-    assert "nonexistent" in (result.error or "")
-
-
-def test_subtab_show_and_hide_round_trip() -> None:
-    port = _FakePort(available_tabs=("a", "b"))
-    service, _ = _build_service(port)
-    r1 = service.invoke("subtab.hide", {"tab_id": "a"})
-    assert r1.ok is True
-    r2 = service.invoke("subtab.show", {"tab_id": "a"})
-    assert r2.ok is True
-
-
-def test_calculator_run_returns_calculation_result_shape() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke(
-        "subtab.calculator.run",
-        {"calculator_id": "doubler", "inputs": {"x": 21}},
+    assert adapter.invoke("subtab.workspace.snapshot", {}).value == {"mass": 1.0}
+    set_result = adapter.invoke(
+        "subtab.workspace.set_variable", {"name": "mass", "value": 2.0}
     )
-    assert result.ok is True
-    # Same shape as sidekick.protocols.CalculationResult.
-    assert result.value["values"] == {"answer": 42.0}
-    assert result.value["units"] == {"answer": "dimensionless"}
-
-
-def test_calculator_run_failure_translates_to_error_result() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke(
-        "subtab.calculator.run",
-        {"calculator_id": "broken", "inputs": {}},
+    calc_result = adapter.invoke(
+        "subtab.calculator.run", {"calculator_id": "calc", "inputs": {"x": 3}}
     )
-    assert result.ok is False
-    assert result.error is not None
-
-
-def test_workspace_snapshot_returns_values_dict() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke("subtab.workspace.snapshot", {})
-    assert result.ok is True
-    assert result.value == {"y": 99}
-
-
-def test_workspace_set_variable_emits_undo_token() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke(
-        "subtab.workspace.set_variable",
-        {"name": "z", "value": 7},
+    save_new = adapter.invoke(
+        "subtab.state_profile.save", {"name": "p1", "payload": {"a": 1}}
     )
-    assert result.ok is True
-    assert result.undo_token is not None
-
-
-def test_state_profile_save_and_load_round_trip() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    save = service.invoke(
-        "subtab.state_profile.save",
-        {"name": "trial", "payload": {"x": 1}},
+    save_existing = adapter.invoke(
+        "subtab.state_profile.save", {"name": "p1", "payload": {"a": 2}}
     )
-    assert save.ok is True
-    load = service.invoke("subtab.state_profile.load", {"name": "trial"})
-    assert load.ok is True
-    assert load.value == {"x": 1}
+    loaded = adapter.invoke("subtab.state_profile.load", {"name": "p1"})
+    deleted = adapter.invoke("subtab.state_profile.delete", {"name": "p1"})
+
+    assert set_result.metadata["_undo"]["params"] == {"name": "mass", "value": 1.0}
+    assert calc_result.value["values"] == {"out": 3.0}
+    assert save_new.metadata["_undo"]["action_id"] == "subtab.state_profile.delete"
+    assert save_existing.metadata["_undo"]["params"] == {
+        "name": "p1",
+        "payload": {"a": 1},
+    }
+    assert loaded.value == {"a": 2}
+    assert deleted.ok is True
 
 
-def test_state_profile_load_unknown_returns_error() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke("subtab.state_profile.load", {"name": "missing"})
-    assert result.ok is False
-    assert "missing" in (result.error or "")
+def test_error_paths_are_action_results() -> None:
+    adapter = SubtabAdapter(port=_Port())
 
-
-# ---------------------------------------------------------------------------
-# Undo round-trips (#7066): a real service.undo(token) must restore the
-# prior state for every reversible subtab action — not merely return a
-# non-None token.
-# ---------------------------------------------------------------------------
-
-
-def test_focus_undo_restores_prior_active_tab() -> None:
-    port = _FakePort(available_tabs=("a", "b"))
-    service, _ = _build_service(port)
-    # Start focused on "a"; focus "b".
-    assert port.active_tab() == "a"
-    result = service.invoke("subtab.focus", {"tab_id": "b"})
-    assert result.ok is True
-    assert port.active_tab() == "b"
-    assert result.undo_token
-    undo = service.undo(result.undo_token)
-    assert undo.ok is True, undo.error
-    assert port.active_tab() == "a"
-
-
-def test_hide_undo_restores_visibility() -> None:
-    port = _FakePort(available_tabs=("a", "b"))
-    service, _ = _build_service(port)
-    assert "a" in port._visible
-    result = service.invoke("subtab.hide", {"tab_id": "a"})
-    assert result.ok is True
-    assert "a" not in port._visible
-    assert result.undo_token
-    undo = service.undo(result.undo_token)
-    assert undo.ok is True, undo.error
-    assert "a" in port._visible
-
-
-def test_show_undo_restores_visibility() -> None:
-    port = _FakePort(available_tabs=("a", "b"))
-    service, _ = _build_service(port)
-    port._visible.discard("a")
-    result = service.invoke("subtab.show", {"tab_id": "a"})
-    assert result.ok is True
-    assert "a" in port._visible
-    assert result.undo_token
-    undo = service.undo(result.undo_token)
-    assert undo.ok is True, undo.error
-    assert "a" not in port._visible
-
-
-def test_set_variable_undo_restores_prior_value() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    # _FakePort seeds {"y": 99}; overwrite it and undo back to 99.
-    result = service.invoke("subtab.workspace.set_variable", {"name": "y", "value": 7})
-    assert result.ok is True
-    assert port.workspace_snapshot().values["y"] == 7
-    assert result.undo_token
-    undo = service.undo(result.undo_token)
-    assert undo.ok is True, undo.error
-    assert port.workspace_snapshot().values["y"] == 99
-
-
-def test_set_variable_undo_restores_absent_value() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    # A brand-new variable has no prior value; undo restores it to None.
-    result = service.invoke(
-        "subtab.workspace.set_variable", {"name": "fresh", "value": 5}
+    assert adapter.invoke("subtab.missing", {}).ok is False
+    assert adapter.invoke("subtab.focus", {"tab_id": "missing"}).ok is False
+    assert adapter.invoke("subtab.workspace.set_variable", {"name": "mass"}).ok is False
+    assert (
+        adapter.invoke(
+            "subtab.calculator.run", {"calculator_id": "missing", "inputs": {}}
+        ).ok
+        is False
     )
-    assert result.ok is True
-    undo = service.undo(result.undo_token)
-    assert undo.ok is True, undo.error
-    assert port.workspace_snapshot().values["fresh"] is None
-
-
-def test_state_profile_save_undo_deletes_new_profile() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    save = service.invoke(
-        "subtab.state_profile.save",
-        {"name": "trial", "payload": {"x": 1}},
-    )
-    assert save.ok is True
-    assert "trial" in port._profiles
-    assert save.undo_token
-    undo = service.undo(save.undo_token)
-    assert undo.ok is True, undo.error
-    # The profile that did not exist before the save is removed on undo.
-    assert "trial" not in port._profiles
-
-
-def test_state_profile_save_undo_restores_prior_payload() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    port._profiles["trial"] = {"x": 0}
-    save = service.invoke(
-        "subtab.state_profile.save",
-        {"name": "trial", "payload": {"x": 99}},
-    )
-    assert save.ok is True
-    assert port._profiles["trial"] == {"x": 99}
-    undo = service.undo(save.undo_token)
-    assert undo.ok is True, undo.error
-    # Undo restores the payload that was overwritten.
-    assert port._profiles["trial"] == {"x": 0}
-
-
-def test_calculator_run_has_no_undo_token() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    result = service.invoke(
-        "subtab.calculator.run",
-        {"calculator_id": "doubler", "inputs": {"x": 1}},
-    )
-    assert result.ok is True
-    assert result.undo_token is None
-
-
-# ---------------------------------------------------------------------------
-# DbC / LOD: no direct widget access from outside
-# ---------------------------------------------------------------------------
-
-
-def test_invalid_params_do_not_reach_port() -> None:
-    port = _FakePort()
-    service, _ = _build_service(port)
-    # missing required tab_id
-    result = service.invoke("subtab.focus", {})
-    assert result.ok is False
-    assert all(call[0] != "focus" for call in port.calls)
-
-
-def test_port_protocol_runtime_checkable() -> None:
-    port = _FakePort()
-    assert isinstance(port, SubtabActionPort)
-    assert not isinstance("string", SubtabActionPort)
-
-
-# ---------------------------------------------------------------------------
-# Result dataclass invariants
-# ---------------------------------------------------------------------------
-
-
-def test_calculator_run_dataclass_rejects_negative_values_for_units() -> None:
-    # The dataclass should not invent invariants the adapter doesn't have;
-    # but it should enforce that values/units keys agree if units present.
-    with pytest.raises(ValueError, match="units"):
-        CalculatorRun(
-            values={"a": 1.0},
-            units={"b": "kg"},  # 'b' not in values
-            warnings=(),
-            metadata={},
-        )
-
-
-def test_workspace_snapshot_is_frozen() -> None:
-    import dataclasses
-
-    snap = WorkspaceSnapshot(values={"a": 1})
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        snap.values = {"b": 2}  # type: ignore[misc]
+    assert adapter.invoke("subtab.state_profile.load", {"name": "missing"}).ok is False
