@@ -34,9 +34,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from sidekick.utils.state_manager import safe_read_json
 
-from shared.python.theme.integration import get_theme_manager
-from src.shared.python.plot_theme.integration import apply_plot_theme
-
 from .constants import (
     CELSIUS_TO_KELVIN_OFFSET,
     KJ_HR_TO_KW,
@@ -604,6 +601,9 @@ if BASE_CALCULATOR_AVAILABLE:
 
         def create_plots_tab(self) -> None:
             """Create plots tab"""
+            from shared.python.theme.integration import get_theme_manager
+            from src.shared.python.plot_theme.integration import apply_plot_theme
+
             self._plots_widget = QWidget()
             layout = QVBoxLayout()
 
