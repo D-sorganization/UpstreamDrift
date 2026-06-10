@@ -220,7 +220,7 @@ def _linear_interp_keypoints(
         for j, kp in enumerate(frame.keypoints):
             if kp.confidence < 0.5:
                 # Interpolate from before/after
-                if after and j < len(after.keypoints):
+                if after and j < len(before.keypoints) and j < len(after.keypoints):
                     t = (i - start + 1) / (end - start + 2)
                     kp_before = before.keypoints[j]
                     kp_after = after.keypoints[j]
@@ -426,122 +426,26 @@ def _pca_reconstruct_markers(
         return list(frames)
 
     marker_names = list(frames[0].markers.keys())
-    n_markers = len(marker_names)
-    n_dims = n_markers * 3
-
-    # Stack into (n_frames, n_markers*3)
-    M = np.zeros((n_frames, n_dims), dtype=float)
-    occ_mask = np.zeros((n_frames, n_dims), dtype=bool)  # True = occluded
-    for i, frame in enumerate(frames):
-        for j, name in enumerate(marker_names):
-            m = frame.markers.get(name)
-            if m is None:
-                occ_mask[i, 3 * j : 3 * j + 3] = True
-                continue
-            M[i, 3 * j] = m.x
-            M[i, 3 * j + 1] = m.y
-            M[i, 3 * j + 2] = m.z
-            if m.occluded:
-                occ_mask[i, 3 * j : 3 * j + 3] = True
-
-    # Identify rows with no occlusions -> basis rows
-    fully_visible_rows = ~occ_mask.any(axis=1)
-    n_visible = int(fully_visible_rows.sum())
-
-    # Need at least a couple visible rows to build a basis. Otherwise fall
-    # back entirely to linear interpolation.
-    if n_visible < 2:
+    matrix, occ_mask = _stack_marker_matrix(frames, marker_names)
+    basis = _build_marker_pca_basis(matrix, occ_mask, rank)
+    if basis is None:
         return _fill_gaps_markers(
             list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
         )
 
-    M_visible = M[fully_visible_rows]
+    mean, basis_vectors, basis_rank = basis
+    skip_frames = _large_gap_frames(gap_indices, max_gap)
+    filled_frames, pca_failed_frames = _apply_marker_pca_projection(
+        frames=frames,
+        marker_names=marker_names,
+        matrix=matrix,
+        occ_mask=occ_mask,
+        mean=mean,
+        basis_vectors=basis_vectors,
+        basis_rank=basis_rank,
+        skip_frames=skip_frames,
+    )
 
-    # Center on the visible-row mean (column-wise) for stable PCA
-    mean = M_visible.mean(axis=0)
-    Mc = M_visible - mean
-
-    # SVD: Mc = U S Vt; columns of V (rows of Vt) are the basis directions
-    try:
-        _, S, Vt = np.linalg.svd(Mc, full_matrices=False)
-    except np.linalg.LinAlgError:
-        return _fill_gaps_markers(
-            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
-        )
-
-    # Truncate to rank k. Default is min(6, effective rank).
-    eps = max(S.shape[0], 1) * np.finfo(float).eps * (S.max() if S.size else 1.0)
-    effective_rank = int((eps < S).sum())
-    if effective_rank == 0:
-        return _fill_gaps_markers(
-            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
-        )
-    k = min(6, effective_rank) if rank is None else min(rank, effective_rank)
-    V_k = Vt[:k].T  # (n_dims, k)
-
-    # Determine which gaps exceed max_gap and should be skipped (left for
-    # linear fallback later).
-    skip_frames: set[int] = set()
-    for start, end in gap_indices:
-        gap_size = end - start + 1
-        if gap_size > max_gap:
-            for i in range(start, end + 1):
-                skip_frames.add(i)
-
-    # Build new frames; for each occluded row, solve least-squares for
-    # basis coefficients using only visible coords.
-    filled_frames = list(frames)
-    pca_failed_frames: set[int] = set()
-
-    for i in range(n_frames):
-        if not occ_mask[i].any():
-            continue  # nothing occluded
-        if i in skip_frames:
-            pca_failed_frames.add(i)
-            continue
-
-        visible_idx = np.where(~occ_mask[i])[0]
-        if visible_idx.size < k:
-            # Under-determined: not enough visible coords to fit k coeffs
-            pca_failed_frames.add(i)
-            continue
-
-        # Solve V_k[visible] @ c = (M[i, visible] - mean[visible])
-        A = V_k[visible_idx]
-        b = M[i, visible_idx] - mean[visible_idx]
-        try:
-            coeffs, *_ = np.linalg.lstsq(A, b, rcond=None)
-        except np.linalg.LinAlgError:
-            pca_failed_frames.add(i)
-            continue
-
-        reconstructed = mean + V_k @ coeffs
-        if not np.all(np.isfinite(reconstructed)):
-            pca_failed_frames.add(i)
-            continue
-
-        # Back-fill occluded entries
-        frame = filled_frames[i]
-        new_markers = dict(frame.markers)
-        for j, name in enumerate(marker_names):
-            base = 3 * j
-            if occ_mask[i, base]:  # j-th marker is occluded
-                new_markers[name] = Marker(
-                    name=name,
-                    x=float(reconstructed[base]),
-                    y=float(reconstructed[base + 1]),
-                    z=float(reconstructed[base + 2]),
-                    residual=None,
-                    occluded=False,
-                )
-        filled_frames[i] = MarkerFrame(
-            timestamp=frame.timestamp,
-            markers=new_markers,
-            frame_index=frame.frame_index,
-        )
-
-    # Linear-interpolation fallback for frames PCA couldn't handle. Compute
-    # remaining gap intervals from the still-occluded frames.
     if pca_failed_frames:
         remaining_gaps = _find_gaps_markers(filled_frames)
         if remaining_gaps:
@@ -550,3 +454,139 @@ def _pca_reconstruct_markers(
             )
 
     return filled_frames
+
+
+def _stack_marker_matrix(
+    frames: list[MarkerFrame],
+    marker_names: list[str],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return marker coordinate matrix and matching occlusion mask."""
+    n_dims = len(marker_names) * 3
+    matrix = np.zeros((len(frames), n_dims), dtype=float)
+    occ_mask = np.zeros((len(frames), n_dims), dtype=bool)
+    for i, frame in enumerate(frames):
+        for j, name in enumerate(marker_names):
+            marker = frame.markers.get(name)
+            base = 3 * j
+            if marker is None:
+                occ_mask[i, base : base + 3] = True
+                continue
+            matrix[i, base] = marker.x
+            matrix[i, base + 1] = marker.y
+            matrix[i, base + 2] = marker.z
+            if marker.occluded:
+                occ_mask[i, base : base + 3] = True
+    return matrix, occ_mask
+
+
+def _build_marker_pca_basis(
+    matrix: np.ndarray,
+    occ_mask: np.ndarray,
+    rank: int | None,
+) -> tuple[np.ndarray, np.ndarray, int] | None:
+    """Build a PCA basis from fully visible marker rows."""
+    fully_visible_rows = ~occ_mask.any(axis=1)
+    n_visible = int(fully_visible_rows.sum())
+    if n_visible < 2:
+        return None
+
+    visible_matrix = matrix[fully_visible_rows]
+    mean = visible_matrix.mean(axis=0)
+    centered = visible_matrix - mean
+    try:
+        _, singular_values, basis_rows = np.linalg.svd(centered, full_matrices=False)
+    except np.linalg.LinAlgError:
+        return None
+
+    eps = max(singular_values.shape[0], 1) * np.finfo(float).eps
+    eps *= singular_values.max() if singular_values.size else 1.0
+    effective_rank = int((eps < singular_values).sum())
+    if effective_rank == 0:
+        return None
+    basis_rank = min(6, effective_rank) if rank is None else min(rank, effective_rank)
+    return mean, basis_rows[:basis_rank].T, basis_rank
+
+
+def _large_gap_frames(gap_indices: list[tuple[int, int]], max_gap: int) -> set[int]:
+    """Return frame indices whose gaps exceed the PCA fill limit."""
+    frames_to_skip: set[int] = set()
+    for start, end in gap_indices:
+        gap_size = end - start + 1
+        if gap_size > max_gap:
+            frames_to_skip.update(range(start, end + 1))
+    return frames_to_skip
+
+
+def _apply_marker_pca_projection(
+    *,
+    frames: list[MarkerFrame],
+    marker_names: list[str],
+    matrix: np.ndarray,
+    occ_mask: np.ndarray,
+    mean: np.ndarray,
+    basis_vectors: np.ndarray,
+    basis_rank: int,
+    skip_frames: set[int],
+) -> tuple[list[MarkerFrame], set[int]]:
+    """Project occluded marker rows onto the PCA basis."""
+    filled_frames = list(frames)
+    pca_failed_frames: set[int] = set()
+
+    for i in range(len(frames)):
+        if not occ_mask[i].any():
+            continue  # nothing occluded
+        if i in skip_frames:
+            pca_failed_frames.add(i)
+            continue
+
+        visible_idx = np.where(~occ_mask[i])[0]
+        if visible_idx.size < basis_rank:
+            # Under-determined: not enough visible coords to fit k coeffs
+            pca_failed_frames.add(i)
+            continue
+
+        # Solve V_k[visible] @ c = (M[i, visible] - mean[visible])
+        system_matrix = basis_vectors[visible_idx]
+        target = matrix[i, visible_idx] - mean[visible_idx]
+        try:
+            coeffs, *_ = np.linalg.lstsq(system_matrix, target, rcond=None)
+        except np.linalg.LinAlgError:
+            pca_failed_frames.add(i)
+            continue
+
+        reconstructed = mean + basis_vectors @ coeffs
+        if not np.all(np.isfinite(reconstructed)):
+            pca_failed_frames.add(i)
+            continue
+
+        filled_frames[i] = _replace_occluded_markers(
+            filled_frames[i], marker_names, occ_mask[i], reconstructed
+        )
+
+    return filled_frames, pca_failed_frames
+
+
+def _replace_occluded_markers(
+    frame: MarkerFrame,
+    marker_names: list[str],
+    row_mask: np.ndarray,
+    reconstructed: np.ndarray,
+) -> MarkerFrame:
+    """Return a frame with reconstructed coordinates for occluded markers."""
+    new_markers = dict(frame.markers)
+    for j, name in enumerate(marker_names):
+        base = 3 * j
+        if row_mask[base]:
+            new_markers[name] = Marker(
+                name=name,
+                x=float(reconstructed[base]),
+                y=float(reconstructed[base + 1]),
+                z=float(reconstructed[base + 2]),
+                residual=None,
+                occluded=False,
+            )
+    return MarkerFrame(
+        timestamp=frame.timestamp,
+        markers=new_markers,
+        frame_index=frame.frame_index,
+    )

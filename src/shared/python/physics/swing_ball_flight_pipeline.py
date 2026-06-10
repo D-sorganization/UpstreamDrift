@@ -10,7 +10,7 @@ Implements the foundational pipeline tile from Issue #5337:
 Design-by-Contract invariants
 ------------------------------
 - ``launch_speed`` of the derived ``LaunchConditions`` must be > 0.
-- ``launch_angle_deg`` must be in [0°, 90°].
+- ``launch_angle`` must be in [0, pi/2] radians.
 - ``PipelineResult`` is always fully populated (no None trajectory).
 
 Law of Demeter
@@ -80,7 +80,7 @@ class FlightSimulatorProtocol(Protocol):
 # Constants
 # ---------------------------------------------------------------------------
 
-_MAX_LAUNCH_ANGLE_DEG: float = 90.0
+_MAX_LAUNCH_ANGLE_RAD: float = math.pi / 2.0
 _MIN_LAUNCH_SPEED_MS: float = 0.0  # exclusive lower bound
 
 # ---------------------------------------------------------------------------
@@ -176,35 +176,36 @@ class _LaunchConditionsDeriver:
             math.hypot(ball_vel[0], ball_vel[1], ball_vel[2])
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
 
-        # Launch angle from horizontal plane
+        # Launch angle from horizontal plane. LaunchConditions uses radians.
         horiz_speed = float(
             math.hypot(ball_vel[0], ball_vel[1])
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
         if horiz_speed < 1e-12:
-            launch_angle_deg = 90.0
+            launch_angle_rad = math.pi / 2.0
         else:
-            launch_angle_deg = float(np.degrees(np.arctan2(ball_vel[2], horiz_speed)))
+            launch_angle_rad = float(math.atan2(ball_vel[2], horiz_speed))
 
-        # Azimuth angle (compass bearing, 0 = forward = +x)
-        azimuth_deg = 0.0
+        # Azimuth angle (compass bearing, 0 = forward = +x), in radians.
+        azimuth_rad = 0.0
         if horiz_speed > 1e-12:
-            azimuth_deg = float(np.degrees(np.arctan2(ball_vel[1], ball_vel[0])))
+            azimuth_rad = float(math.atan2(ball_vel[1], ball_vel[0]))
 
         spin_w = post.ball_angular_velocity
-        spin_rate = float(
+        spin_rate_rad_s = float(
             math.hypot(spin_w[0], spin_w[1], spin_w[2])
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
+        spin_rate_rpm = spin_rate_rad_s * 60.0 / (2.0 * math.pi)
         spin_axis = (
-            post.ball_angular_velocity / spin_rate
-            if spin_rate > 1e-12
+            post.ball_angular_velocity / spin_rate_rad_s
+            if spin_rate_rad_s > 1e-12
             else np.array([0.0, -1.0, 0.0])
         )
 
         return LaunchConditions(
             velocity=speed,
-            launch_angle=launch_angle_deg,
-            azimuth_angle=azimuth_deg,
-            spin_rate=spin_rate,
+            launch_angle=launch_angle_rad,
+            azimuth_angle=azimuth_rad,
+            spin_rate=spin_rate_rpm,
             spin_axis=np.asarray(spin_axis, dtype=float),
         )
 
@@ -489,7 +490,7 @@ class SwingBallFlightPipeline:
             launch.velocity,
         )
         require(
-            0.0 <= launch.launch_angle <= _MAX_LAUNCH_ANGLE_DEG,
-            f"launch_angle must be in [0°, {_MAX_LAUNCH_ANGLE_DEG}°]",
+            0.0 <= launch.launch_angle <= _MAX_LAUNCH_ANGLE_RAD,
+            f"launch_angle must be in [0, {_MAX_LAUNCH_ANGLE_RAD}] radians",
             launch.launch_angle,
         )

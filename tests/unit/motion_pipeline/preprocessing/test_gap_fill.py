@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_pipeline.contracts import (
+    Keypoint,
+    KeypointFrame,
     KeypointSequence,
     MarkerTrajectory,
 )
@@ -13,6 +15,8 @@ from src.shared.python.motion_pipeline.preprocessing.gap_fill import (
     GapFillStrategy,
     gap_fill,
 )
+
+pytestmark = pytest.mark.unit
 
 from ._local_fixtures import (
     make_keypoint_sequence,
@@ -63,6 +67,54 @@ def test_gap_fill_keypoints_linear_fills_low_confidence_window() -> None:
     assert xs[-1] > xs[0]
     assert out.metadata.get("gap_filled") is True
     assert out.metadata.get("strategy") == "linear"
+
+
+def test_gap_fill_keypoints_mismatched_neighbour_counts_does_not_crash() -> None:
+    """Linear interpolation leaves unmatched low-confidence keypoints unchanged."""
+    frames = [
+        KeypointFrame(
+            timestamp=0.0,
+            keypoints=[Keypoint(x=0.0, y=0.0, z=0.0, confidence=1.0, name="hip")],
+            schema_name="custom",
+            frame_index=0,
+        ),
+        KeypointFrame(
+            timestamp=1.0,
+            keypoints=[
+                Keypoint(x=1.0, y=0.0, z=0.0, confidence=0.1, name="hip"),
+                Keypoint(x=1.0, y=1.0, z=0.0, confidence=0.1, name="extra"),
+            ],
+            schema_name="custom",
+            frame_index=1,
+        ),
+        KeypointFrame(
+            timestamp=2.0,
+            keypoints=[
+                Keypoint(x=2.0, y=0.0, z=0.0, confidence=1.0, name="hip"),
+                Keypoint(x=2.0, y=1.0, z=0.0, confidence=1.0, name="extra"),
+            ],
+            schema_name="custom",
+            frame_index=2,
+        ),
+    ]
+    seq = KeypointSequence(id="mismatched", frames=frames)
+
+    out = gap_fill(seq, strategy=GapFillStrategy.LINEAR, max_gap=1)
+
+    assert isinstance(out, KeypointSequence)
+    assert out.frames[1].keypoints[0].confidence == pytest.approx(0.5)
+    assert out.frames[1].keypoints[1].confidence == pytest.approx(0.1)
+
+    from src.shared.python.motion_pipeline.preprocessing._gap_fill_pure_python import (
+        GapFillStrategy as PureGapFillStrategy,
+        gap_fill as pure_gap_fill,
+    )
+
+    pure_out = pure_gap_fill(seq, strategy=PureGapFillStrategy.LINEAR, max_gap=1)
+
+    assert isinstance(pure_out, KeypointSequence)
+    assert pure_out.frames[1].keypoints[0].confidence == pytest.approx(0.5)
+    assert pure_out.frames[1].keypoints[1].confidence == pytest.approx(0.1)
 
 
 def test_gap_fill_keypoints_nearest_uses_previous() -> None:

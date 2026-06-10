@@ -38,6 +38,8 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     _TrajectoryMetricsExtractor,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
 # ---------------------------------------------------------------------------
@@ -309,20 +311,26 @@ class TestLaunchConditionsDeriver:
         angle_deg = 15.0
         post = _make_post_impact(speed=60.0, angle_deg=angle_deg)
         lc = self.deriver.derive(post)
-        assert lc.launch_angle == pytest.approx(angle_deg, abs=0.1)
+        assert lc.launch_angle == pytest.approx(math.radians(angle_deg), abs=1e-6)
 
     def test_zero_horizontal_speed_gives_90_degree_angle(self):
         post = _make_post_impact(speed=10.0, angle_deg=0.0)
         # Override to pure vertical
         post.ball_velocity[:] = np.array([0.0, 0.0, 10.0])
         lc = self.deriver.derive(post)
-        assert lc.launch_angle == pytest.approx(90.0, abs=0.1)
+        assert lc.launch_angle == pytest.approx(math.pi / 2.0, abs=1e-6)
 
-    def test_spin_rate_matches_angular_velocity_magnitude(self):
+    def test_spin_rate_converts_angular_velocity_to_rpm(self):
         post = _make_post_impact()
         post.ball_angular_velocity[:] = np.array([0.0, -200.0, 0.0])
         lc = self.deriver.derive(post)
-        assert lc.spin_rate == pytest.approx(200.0, rel=1e-4)
+        assert lc.spin_rate == pytest.approx(200.0 * 60.0 / (2.0 * math.pi))
+
+    def test_azimuth_angle_matches_geometry_in_radians(self):
+        post = _make_post_impact()
+        post.ball_velocity[:] = np.array([30.0, 30.0, 10.0])
+        lc = self.deriver.derive(post)
+        assert lc.azimuth_angle == pytest.approx(math.pi / 4.0, abs=1e-6)
 
 
 # ===========================================================================

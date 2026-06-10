@@ -1,10 +1,15 @@
 """Unit tests for the model explorer API route."""
 
+from pathlib import Path
+
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
+from src.api.routes import model_explorer
 from src.api.routes.model_explorer import router
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -43,6 +48,45 @@ def test_inspect_model_not_found(client: TestClient) -> None:
     data = response.json()
     assert "detail" in data
     assert "not found" in data["detail"].lower()
+
+
+def test_resolve_model_path_rejects_existing_absolute_path_outside_allowed_dirs(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Existing files outside model roots must not bypass containment."""
+    repo_root = tmp_path / "repo"
+    allowed = repo_root / "src" / "shared" / "urdf"
+    allowed.mkdir(parents=True)
+    outside = tmp_path / "outside.urdf"
+    outside.write_text("<robot name='outside'><link name='base'/></robot>")
+
+    monkeypatch.setattr(model_explorer, "_find_project_root", lambda: repo_root)
+    monkeypatch.setattr(model_explorer, "_MODEL_DIRS", [Path("src/shared/urdf")])
+
+    with pytest.raises(HTTPException) as excinfo:
+        model_explorer._resolve_model_path(str(outside))
+
+    assert excinfo.value.status_code == 400
+
+
+def test_resolve_model_path_rejects_traversal_to_existing_file(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Parent traversal must be rejected before filesystem existence checks."""
+    repo_root = tmp_path / "repo"
+    allowed = repo_root / "src" / "shared" / "urdf"
+    allowed.mkdir(parents=True)
+    (tmp_path / "outside.urdf").write_text(
+        "<robot name='outside'><link name='base'/></robot>"
+    )
+
+    monkeypatch.setattr(model_explorer, "_find_project_root", lambda: repo_root)
+    monkeypatch.setattr(model_explorer, "_MODEL_DIRS", [Path("src/shared/urdf")])
+
+    with pytest.raises(HTTPException) as excinfo:
+        model_explorer._resolve_model_path("../outside.urdf")
+
+    assert excinfo.value.status_code == 400
 
 
 def test_compare_models_success(client: TestClient) -> None:

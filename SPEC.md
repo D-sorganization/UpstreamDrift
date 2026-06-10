@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.300                                            |
+| **Spec Version**        | 1.0.301                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Hardened the audit regressions tracked by #7269, #7270,
+  and #7271. Model Explorer inspect/compare path resolution now rejects
+  absolute paths and parent traversal before resolving candidates only under
+  approved model roots; motion-pipeline linear keypoint gap filling leaves
+  unmatched low-confidence keypoints unchanged when neighboring frames have
+  mismatched keypoint counts, including the pure-Python fallback; and
+  `SwingBallFlightPipeline` now derives `LaunchConditions` using the simulator
+  contract of radians for launch/azimuth angles and RPM for spin rate.
 - **2026-06-10** - Completed the #7207 model explorer composition UX flow.
   `src/tools/model_explorer/composition_ux.py` now provides a headless
   drag/drop orchestration layer with library payloads, non-mutating ghost
@@ -949,6 +957,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.301 | Audit regression fixes for #7269, #7270, and #7271. Model Explorer API path resolution now validates caller paths before filesystem reads and resolves only within approved model directories, closing the direct existing-path containment bypass. Motion-pipeline keypoint gap filling now guards both before/after neighbor keypoint indexes and pins mismatched-neighbor behavior in the main and pure-Python implementations. `SwingBallFlightPipeline` now emits `LaunchConditions` in the units consumed by `BallFlightSimulator`: launch and azimuth angles in radians, spin rate in RPM, with updated DbC validation and unit tests. |
 | 2026-06-10 | 1.0.300 | Completed the #7207 model explorer composition UX flow. Added `CompositionUxController` for library drag payloads, non-mutating drop/ghost previews, highlighted target/source links, validation summaries, committed drops, and a validation-aware export chooser that enables URDF/MJCF while explicitly marking SDF/OSIM unavailable until writers exist. `FrankensteinEditor` now exposes preview, commit, and export-choice hooks, with offscreen tests covering simple humanoid plus arm preview, commit, validation pass, and MJCF export. |
 | 2026-06-10 | 1.0.299 | Cross-engine equivalence import-boundary fix for #7214. `CalibrationOptimizer.optimize()` now imports `scipy.optimize.differential_evolution` lazily so importing `src.bunkershot3d.postproc.wrench_trace` through shared simulation backends does not require optional calibration optimizer dependencies in the equivalence CI environment. |
 | 2026-06-10 | 1.0.298 | C3D viewer renderer backend decision for #7214. Added ADR-0030 choosing PyQtGL as the first desktop GPU playback path while keeping matplotlib fallback, plus a focused `viewer_3d_backend.py` decision contract that carries the 60 fps target and parity checklist for scrubbing, speed control, loop playback, marker groups, view presets, and skeleton overlay before replacement. |

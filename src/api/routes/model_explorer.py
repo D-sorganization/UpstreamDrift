@@ -19,6 +19,7 @@ import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.utils.path_validation import resolve_contained_path
 from src.shared.python.core.contracts import postcondition, precondition
 
 from ..dependencies import get_logger
@@ -249,32 +250,49 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
     "Model path must be a non-empty string",
 )
 def _resolve_model_path(model_path: str) -> Path:
-    """Resolve a model path relative to the project root.
+    """Resolve a model path under one of the approved model directories.
 
     Args:
-        model_path: Relative or absolute model path.
+        model_path: Relative model path or model filename.
 
     Returns:
         Resolved absolute path.
 
     Raises:
-        HTTPException: If file not found.
+        HTTPException: If the path is unsafe or not found.
     """
     root = _find_project_root()
-    resolved = root / model_path
-    if resolved.exists():
-        return resolved
+    user_path = Path(model_path)
+    if (
+        user_path.is_absolute()
+        or (len(model_path) >= 2 and model_path[1] == ":")
+        or model_path.startswith(("/", "\\"))
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: absolute paths are not allowed",
+        )
+    if ".." in user_path.parts or ".." in model_path:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: parent directory references not allowed",
+        )
 
-    # Try direct path
-    direct = Path(model_path)
-    if direct.exists():
-        return direct
+    allowed_dirs = [(root / model_dir).resolve() for model_dir in _MODEL_DIRS]
+    candidate = root / user_path
+    try:
+        return resolve_contained_path(candidate, allowed_dirs)
+    except HTTPException as exc:
+        if exc.status_code != 404:
+            raise
 
-    # Search in model directories
     for model_dir in _MODEL_DIRS:
-        candidate = root / model_dir / Path(model_path).name
-        if candidate.exists():
-            return candidate
+        candidate = root / model_dir / user_path.name
+        try:
+            return resolve_contained_path(candidate, [root / model_dir])
+        except HTTPException as exc:
+            if exc.status_code != 404:
+                raise
 
     raise HTTPException(
         status_code=404,
