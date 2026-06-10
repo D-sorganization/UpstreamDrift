@@ -5,10 +5,10 @@ from pathlib import Path
 from scripts.ci import check_dockerfile_contracts as guard
 
 
-def _write_minimal_tree(root: Path, *, modular_pip: str = "26.1") -> None:
+def _write_minimal_tree(root: Path, *, modular_pip: str = "26.1.2") -> None:
     (root / "Dockerfile").write_text(
         """
-RUN pip install --upgrade pip==26.1
+RUN pip install --upgrade pip==26.1.2
 ARG SKIP_AUDIT=false
 RUN pip install pip-audit==2.10.0
 COPY scripts/ci/check_pip_audit_waivers.py /tmp/check_pip_audit_waivers.py
@@ -23,6 +23,7 @@ HEALTHCHECK CMD python3 -c "import urllib.request; urllib.request.urlopen('http:
     (root / "Dockerfile.modular").write_text(
         f"""
 COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
+COPY src/shared/python/engine_core/ ./src/shared/python/engine_core/
 RUN python scripts/docker/install_features.py --profile standard --dry-run
 RUN pip install --upgrade pip=={modular_pip}
 """,
@@ -85,12 +86,33 @@ def test_docker_contracts_reject_modular_profile_dry_run_before_registry_copy(
         """
 RUN python scripts/docker/install_features.py --profile standard --dry-run
 COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
-RUN pip install --upgrade pip==26.1
+COPY src/shared/python/engine_core/ ./src/shared/python/engine_core/
+RUN pip install --upgrade pip==26.1.2
 """,
         encoding="utf-8",
     )
 
     assert any(
         "copy feature_registry before profile dry-run" in failure
+        for failure in guard.docker_contract_failures(tmp_path)
+    )
+
+
+def test_docker_contracts_reject_modular_profile_dry_run_before_engine_core_copy(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "Dockerfile.modular").write_text(
+        """
+COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
+RUN python scripts/docker/install_features.py --profile standard --dry-run
+COPY src/shared/python/engine_core/ ./src/shared/python/engine_core/
+RUN pip install --upgrade pip==26.1.2
+""",
+        encoding="utf-8",
+    )
+
+    assert any(
+        "copy engine_core before profile dry-run" in failure
         for failure in guard.docker_contract_failures(tmp_path)
     )

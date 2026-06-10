@@ -54,11 +54,18 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     modular = _read(root / "Dockerfile.modular")
     first_dry_run = modular.find("install_features.py --profile")
     feature_registry_copy = modular.find("COPY src/shared/python/feature_registry/")
+    engine_core_copy = modular.find("COPY src/shared/python/engine_core/")
     if feature_registry_copy == -1 or (
         first_dry_run != -1 and feature_registry_copy > first_dry_run
     ):
         failures.append(
             "Dockerfile.modular must copy feature_registry before profile dry-run"
+        )
+    if engine_core_copy == -1 or (
+        first_dry_run != -1 and engine_core_copy > first_dry_run
+    ):
+        failures.append(
+            "Dockerfile.modular must copy engine_core before profile dry-run"
         )
 
     heavy = _read(root / "Dockerfile.heavy_test")
