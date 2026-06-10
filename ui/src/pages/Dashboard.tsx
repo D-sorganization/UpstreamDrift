@@ -5,11 +5,17 @@
  * and navigation logic.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
 import { useToast } from '@/components/ui/Toast';
 import { apiFetch } from '@/api/fetch';
+import {
+    loadLauncherWindowRecords,
+    persistLauncherWindowRecords,
+    reconcileLauncherWindowRecords,
+    recordLauncherWindowLaunch,
+} from '@/api/launcherWindowRegistry';
 
 export function DashboardPage() {
     const {
@@ -21,7 +27,16 @@ export function DashboardPage() {
         refetch,
     } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+    const [launchedWindows, setLaunchedWindows] = useState(() => loadLauncherWindowRecords());
+    const visibleLaunchedWindows = useMemo(
+        () => reconcileLauncherWindowRecords(launchedWindows, tiles),
+        [launchedWindows, tiles]
+    );
     const { showInfo, showError } = useToast();
+
+    useEffect(() => {
+        persistLauncherWindowRecords(visibleLaunchedWindows);
+    }, [visibleLaunchedWindows]);
 
     const handleLaunchTile = useCallback(
         (tileId: string) => {
@@ -38,6 +53,7 @@ export function DashboardPage() {
                 headers: launcherCsrfToken ? { [launcherCsrfHeader]: launcherCsrfToken } : {},
             })
                 .then((data) => {
+                    setLaunchedWindows(recordLauncherWindowLaunch(tile));
                     showInfo(`${data.name || tile.name} launched successfully`);
                 })
                 .catch((err) => {
@@ -45,6 +61,13 @@ export function DashboardPage() {
                 });
         },
         [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError]
+    );
+
+    const handleFocusLaunchedTile = useCallback(
+        (tileId: string) => {
+            handleLaunchTile(tileId);
+        },
+        [handleLaunchTile]
     );
 
     const handleShowHelp = useCallback(() => {
@@ -58,8 +81,10 @@ export function DashboardPage() {
             loadState={loadState}
             error={error}
             selectedTileId={selectedTileId}
+            launchedWindows={visibleLaunchedWindows}
             onSelectTile={setSelectedTileId}
             onLaunchTile={handleLaunchTile}
+            onFocusLaunchedTile={handleFocusLaunchedTile}
             onShowHelp={handleShowHelp}
             onRefetch={refetch}
         />

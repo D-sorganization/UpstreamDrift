@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.288                                            |
+| **Spec Version**        | 1.0.289                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -75,6 +75,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   attached subtrees and direct attachment geometry AABB overlaps, while the
   active Frankenstein model panel surfaces current validation findings in a
   dedicated list before save/export.
+- **2026-06-10** - Decided React/Tauri launcher parity for #7221.
+  ADR-0028 keeps React/Tauri on the manifest-driven multi-window model while
+  PyQt remains canonical for embedded tabs/docks. The React dashboard now
+  persists a manifest-keyed launcher window registry and exposes a window
+  list/focus menu backed by the existing launch API.
 - **2026-06-10** - Consolidated launcher startup ownership for #7215.
   `launch_golf_suite.py` is now a compatibility shim over the canonical
   `launch_upstream_drift.py` entry point. Classic PyQt startup preflights the
@@ -873,7 +878,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-10 | 1.0.288 | Completed the Frankenstein composition validation surface for #7205. `CompositionValidator` now emits warning-level `subtree_mass_ratio` findings when attached subtree mass exceeds roughly 2x the parent chain mass and `geometry_overlap` findings when directly attached link AABBs overlap. The active Frankenstein model panel now renders current validation findings in a dedicated list so warnings and blocking errors are visible before save/export. |
+| 2026-06-10 | 1.0.289 | Completed the Frankenstein composition validation surface for #7205. `CompositionValidator` now emits warning-level `subtree_mass_ratio` findings when attached subtree mass exceeds roughly 2x the parent chain mass and `geometry_overlap` findings when directly attached link AABBs overlap. The active Frankenstein model panel now renders current validation findings in a dedicated list so warnings and blocking errors are visible before save/export. |
+| 2026-06-10 | 1.0.288 | React/Tauri launcher parity decision (#7221). Added ADR-0028 choosing the manifest-driven multi-window Tauri model while keeping PyQt canonical for embedded tabs/docks. The React dashboard now persists a manifest-keyed launcher window registry, reconciles it with `useLauncherManifest.ts`, and exposes a window list/focus menu that reuses the local launcher API. |
 | 2026-06-10 | 1.0.287 | Startup entry-point consolidation (#7215). `launch_golf_suite.py` now delegates to canonical `launch_upstream_drift.py` with a deprecation warning, classic PyQt launch preflights the Qt platform and selects offscreen mode on headless Linux, and `src/api/local_server.py` degrades to an unavailable engine-manager facade when optional engine imports fail during local API startup. |
 | 2026-06-10 | 1.0.286 | Removed unsafe Drake pose pickle deserialization from `pose_interchange.pose_io`. Drake `.drake` initial-state files now serialize `{q, v, model_metadata}` as JSON, the loader rejects binary/non-JSON payloads before deserialization, and regression coverage asserts invalid JSON and missing-`q` contracts. |
 | 2026-06-10 | 1.0.285 | Legacy golf visualizer dataset contract preservation after row extraction optimization. `golf_visualizer_data.DataProcessor.extract_frame_data` still fails fast when BASEQ, ZTCFQ, or DELTAQ is absent and still returns zero-vector frame data when a requested frame row is missing, with regression coverage for both contracts. |

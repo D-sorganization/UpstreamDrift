@@ -8,9 +8,30 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '@/components/ui/Toast';
+import {
+    LAUNCHER_WINDOW_REGISTRY_KEY,
+    loadLauncherWindowRecords,
+} from '@/api/launcherWindowRegistry';
+
+function installMemoryStorage(): void {
+    const values = new Map<string, string>();
+    Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        value: {
+            getItem: (key: string) => values.get(key) ?? null,
+            setItem: (key: string, value: string) => {
+                values.set(key, value);
+            },
+            removeItem: (key: string) => {
+                values.delete(key);
+            },
+            clear: () => values.clear(),
+        },
+    });
+}
 
 // Mock the manifest hook
 const mockManifest = {
@@ -70,6 +91,8 @@ describe('DashboardPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        installMemoryStorage();
+        window.localStorage.removeItem(LAUNCHER_WINDOW_REGISTRY_KEY);
         global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
     });
 
@@ -93,5 +116,22 @@ describe('DashboardPage', () => {
     it('renders launch button', () => {
         renderWithRouter(<DashboardPage />);
         expect(screen.getByRole('button', { name: /launch simulation/i })).toBeInTheDocument();
+    });
+
+    it('persists launched windows after a successful launch', async () => {
+        renderWithRouter(<DashboardPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /model explorer/i }));
+        fireEvent.click(screen.getByRole('button', { name: /launch model explorer/i }));
+
+        await waitFor(() => {
+            expect(loadLauncherWindowRecords()).toEqual([
+                expect.objectContaining({
+                    tileId: 'model_explorer',
+                    name: 'Model Explorer',
+                    launchCount: 1,
+                }),
+            ]);
+        });
     });
 });
