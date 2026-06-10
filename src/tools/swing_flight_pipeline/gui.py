@@ -244,8 +244,8 @@ class SwingFlightWidget(QWidget):
         except ImportError as e:
             self._results_text.setPlainText(
                 f"Pipeline not available: {e}\n\n"
-                "The SwingBallFlightPipeline module may not be merged yet.\n"
-                "Check branch: feat/5337-swing-ball-flight-pipeline"
+                "A required dependency for the swing-to-flight pipeline "
+                "failed to import. Check the log for details."
             )
         except Exception as e:
             logger.exception("Pipeline execution failed")
