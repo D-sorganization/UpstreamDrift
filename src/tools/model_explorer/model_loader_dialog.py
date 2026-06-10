@@ -387,7 +387,7 @@ class ModelLoaderDialog(QDialog):
 
         btn_layout = QHBoxLayout()
 
-        import_btn = QPushButton("Import URDF/MJCF...")
+        import_btn = QPushButton("Import URDF/MJCF/OSIM...")
 
         import_btn.clicked.connect(self._on_import_button)
 
@@ -436,7 +436,7 @@ class ModelLoaderDialog(QDialog):
             self,
             "Import Model File",
             "",
-            "Model Files (*.urdf *.xml *.mjcf);;All Files (*)",
+            "Model Files (*.urdf *.xml *.mjcf *.osim);;All Files (*)",
         )
 
         if path:
@@ -852,6 +852,7 @@ class ModelLoaderDialog(QDialog):
             "embedded": self._format_embedded_info,
             "robot_descriptions": self._format_robot_descriptions_info,
             "imported": self._format_imported_info,
+            "sibling": self._format_discovered_info,
         }
 
         formatter = formatters.get(category)

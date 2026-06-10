@@ -6,8 +6,8 @@ The UpstreamDrift checkout commonly sits next to dedicated model repos
 bundled assets and files inside this repository, so those libraries
 were unreachable without manual file dialogs.
 
-This module scans sibling repositories for loadable model files (URDF
-MJCF, and Drake SDF)
+This module scans sibling repositories for loadable model files (URDF,
+MJCF, Drake SDF, and OpenSim ``.osim``)
 and reports them in the same dict shape that
 :meth:`ModelLibrary.discover_repo_models` uses, so the explorer UI can
 present them as one more category.
@@ -96,6 +96,8 @@ def _classify(file_path: Path) -> str | None:
         return "urdf"
     if suffix == ".sdf":
         return "sdf"
+    if suffix == ".osim":
+        return "osim"
     if suffix not in (".xml", ".mjcf"):
         return None
     try:
@@ -111,7 +113,7 @@ def _classify(file_path: Path) -> str | None:
 
 
 def _scan_repo(root: Path) -> list[dict[str, Any]]:
-    """Scan one repository root for URDF/MJCF model files."""
+    """Scan one repository root for known model files."""
     repo_label = root.name
     models: list[dict[str, Any]] = []
     truncated = False

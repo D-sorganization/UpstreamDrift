@@ -218,7 +218,7 @@ class MainWidget(QWidget):
             self,
             "Open URDF File",
             "",
-            "URDF Files (*.urdf);;XML Files (*.xml);;All Files (*)",
+            "Model Files (*.urdf *.xml *.mjcf *.osim);;All Files (*)",
         )
 
         if file_path:
@@ -269,7 +269,14 @@ class MainWidget(QWidget):
                             "This model is not bundled or downloaded.\n"
                             "Check bundled_assets/ for available models.",
                         )
-                elif category in ["pendulum", "robotic", "component", "discovered"]:
+                elif category in [
+                    "pendulum",
+                    "robotic",
+                    "component",
+                    "discovered",
+                    "sibling",
+                    "imported",
+                ]:
                     model_info = library.get_model_info(category, model_key)
                     if model_info and "path" in model_info:
                         raw_path = model_info["path"]
@@ -315,7 +322,12 @@ class MainWidget(QWidget):
     def _load_urdf_file(self, file_path: Path) -> None:
         """Load URDF file content and refresh the viewport."""
         try:
-            urdf_content = file_path.read_text(encoding="utf-8")
+            if file_path.suffix.lower() == ".osim":
+                from .osim_loader import OsimLoader
+
+                urdf_content = OsimLoader().to_urdf(file_path)
+            else:
+                urdf_content = file_path.read_text(encoding="utf-8")
             self.visualization_widget.update_visualization(urdf_content, str(file_path))
             self.current_file_path = file_path
             self._update_window_title()
