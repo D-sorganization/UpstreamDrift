@@ -54,12 +54,12 @@ from src.shared.python.plot_style import (
     PlotStyleSpec,
     PresetLibrary,
 )
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-logger = logging.getLogger(__name__)
-
+logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Engine stub (graceful degradation when physics package is not installed)
 # ---------------------------------------------------------------------------

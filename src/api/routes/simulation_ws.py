@@ -3,7 +3,6 @@
 import asyncio
 import contextlib
 import json
-import logging
 import math
 import time
 from typing import Any
@@ -18,7 +17,6 @@ from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
 router = APIRouter()
 _DEFAULT_SPEED_FACTOR = 1.0
 logger = get_logger(__name__)

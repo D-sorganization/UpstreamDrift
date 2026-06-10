@@ -9,7 +9,6 @@ multiple launcher implementations.
 
 from __future__ import annotations
 
-import logging
 import os
 import subprocess
 import sys
@@ -36,8 +35,9 @@ if TYPE_CHECKING:
 
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
+from src.shared.python.logging_pkg.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Repository root - single source of truth
 REPO_ROOT = Path(__file__).parent.parent.parent.resolve()

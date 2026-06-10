@@ -6,7 +6,11 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+
+pytestmark = pytest.mark.unit
 
 
 def _read(path: str) -> str:
@@ -35,6 +39,15 @@ def test_standard_ci_runs_blocking_semgrep_and_trivy() -> None:
     assert ('exit-code: "1"' in workflow) or ("exit-code: '1'" in workflow)
     assert "trivy" in trivy_test
     assert '"fs"' in trivy_test
+
+
+def test_docker_security_scan_blocks_high_and_critical() -> None:
+    workflow = _read(".github/workflows/docker-security-scan.yml")
+
+    assert 'severity: "CRITICAL,HIGH"' in workflow
+    assert 'exit-code: "1"' in workflow
+    assert "Fail the build on HIGH or CRITICAL vulnerabilities." in workflow
+    assert "ignore-unfixed: true" not in workflow
 
 
 def test_codeowners_has_two_owners_for_critical_paths() -> None:

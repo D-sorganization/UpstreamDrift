@@ -16,7 +16,6 @@ from __future__ import annotations
 import csv
 import io
 import json
-import logging
 import math
 from typing import TYPE_CHECKING, Any
 
@@ -24,6 +23,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger as get_module_logger
 
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
 router = APIRouter()
 
-logger = logging.getLogger(__name__)
+logger = get_module_logger(__name__)
 
 
 def _check_position_support(engine: Any) -> None:

@@ -47,7 +47,8 @@ jobs:
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "CRITICAL,HIGH"
-          # Don't fail the build initially - triage first
+          # SARIF upload remains nonblocking; the table scan below is the
+          # blocking HIGH/CRITICAL gate.
           exit-code: "0"
           timeout: "30m0s"
 
@@ -62,9 +63,8 @@ jobs:
         with:
           image-ref: "upstreamdrift:ci"
           format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          # Exit with error only on CRITICAL vulnerabilities
+          severity: "CRITICAL,HIGH"
+          # Fail the build on HIGH or CRITICAL vulnerabilities.
           exit-code: "1"
-          ignore-unfixed: true
           vuln-type: "os,library"
           timeout: "30m0s"
