@@ -70,6 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Refreshed the Module Map against the actual source tree
+  (the previous tree listed entry points and API files that no longer
+  exist) and linked the operational project map. The full gap inventory
+  from the 2026-06-10 operational deep dive lives in
+  `docs/architecture/PROJECT_MAP.md` §16, tracked by issues #7202-#7221
+  (model-composition epic, sidekick agent wiring, C3D/Rust analog support,
+  startup + config consolidation, and related work). Landed alongside:
+  sidekick subtab host port + pop-out lifecycle hooks (#7199), the Rust C3D
+  1-D `POINT:UNITS` fix with full `data/` coverage (#7200), and sibling
+  model-repository discovery in the model explorer (#7201).
 - **2026-06-10** - Repaired remaining #7189 packaging gate regressions after
   the branch merge: Tauri Linux dependency installs now wait on both apt and
   dpkg locks, and the WGS calculator keeps GUI theme imports inside the plot-tab
@@ -238,78 +248,67 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
-| 2026-06-03 | 1.0.224 | Bolt: Optimized `np.linalg.norm(v[:2])` to `math.hypot(v[0], v[1])` in `ball_trajectory_analysis.py` to avoid temporary array allocation and speed up calculation. |
+The operational companion to this map (startup phases, tab/sidekick wiring,
+and the tracked implementation-gap inventory) lives in
+[`docs/architecture/PROJECT_MAP.md`](docs/architecture/PROJECT_MAP.md) §16.
 
 ````
 UpstreamDrift/
+├── launch_upstream_drift.py        # Canonical entry point (web/classic/api-only/engine)
+├── launch_golf_suite.py            # Legacy alias entry point (console script target; #7215)
 ├── src/
 │   ├── engines/
-│   │   ├── physics_engines/        # Engine adapters and integrations (package directories)
-│   │   │   ├── mujoco/             # MuJoCo backend (supported)
+│   │   ├── physics_engines/        # Engine adapters (package directories)
+│   │   │   ├── mujoco/             # MuJoCo backend (core)
 │   │   │   ├── drake/              # Drake backend (extended)
 │   │   │   ├── pinocchio/          # Pinocchio backend (extended)
+│   │   │   ├── jaxsim/             # JaxSim backend (beta)
 │   │   │   ├── opensim/            # OpenSim backend (experimental)
 │   │   │   ├── myosuite/           # MyoSuite backend (experimental)
 │   │   │   ├── pendulum/           # Simplified educational models
 │   │   │   └── putting_green/      # Putting green simulation
-│   │   └── pendulum_models/        # Simplified educational models
-│   │       ├── twodof_pendulum.py
-│   │       └── biomechanical_pendulum.py
-│   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── upstream_drift_launcher.py        # PyQt6 professional GUI (main entrypoint)
-│   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
-│   │   ├── unified_launcher.py     # Unified launcher interface
-│   │   └── cli_launcher.py         # Command-line interface
-│   ├── api/                        # FastAPI REST backend
-│   │   ├── main.py                 # API entry point
-│   │   ├── endpoints/              # REST endpoint definitions
-│   │   └── models.py               # Pydantic request/response models
-│   ├── config/                     # Configuration management
-│   │   └── launcher_manifest_loader.py # Config loading and validation
-│   ├── shared/                     # Cross-engine utilities
-│   │   ├── validators.py           # Shared validation logic
-│   │   ├── utilities.py            # Helper functions
-│   │   └── exceptions.py           # Exception definitions
-
-│   └── tools/                      # Development and analysis tools
-│       ├── analysis_tools.py       # Biomechanical analysis utilities
-│       └── validation_tools.py     # Cross-engine validation
-├── rust_core/
-│   └── upstream-physics/           # Rust physics kernels
-│       ├── src/
-│       │   ├── lib.rs
-│       │   └── physics.rs
-│       └── Cargo.toml
-├── ui/
-│   ├── src/
-│   │   ├── main.ts                 # Tauri app entry point
-│   │   └── components/             # React/Vue components
-│   ├── tauri.conf.json
-│   └── package.json
-├── shared/
-│   └── models/                     # URDF/model definitions
-│       ├── golf_swing_models/
-│       ├── human_body_models/
-│       └── pendulum_models/
-├── tests/
-│   ├── unit/                       # Unit tests per module
-│   ├── integration/                # Cross-engine integration tests
-│   ├── acceptance/                 # End-to-end scenario tests
-│   ├── cross_engine/               # Cross-validation tests
-│   ├── physics_validation/         # Physics accuracy tests
-│   ├── benchmarks/                 # Performance benchmarks
-│   └── conftest.py                 # Pytest fixtures and configuration
-├── .github/
-│   └── workflows/
-
-│       ├── ci-standard.yml         # Standard CI checks
-│       ├── heavy-tests-opt-in.yml  # Heavy tests (custom runner)
-│       ├── nightly-cross-validation.yml
-│       ├── tauri-build.yml
-│       ├── vendor-freshness.yml
-│       └── docker-size-gates.yml
-├── pyproject.toml
-├── poetry.lock
+│   │   ├── pendulum_models/        # Educational pendulum models
+│   │   └── Simscape_Multibody_Models/  # MATLAB models + C3D viewer app
+│   ├── launchers/                  # PyQt6 launcher (50+ modules)
+│   │   ├── upstream_drift_launcher.py  # Main window (size split tracked: #7217)
+│   │   ├── embedded_host.py        # Tab/dock host: pop-out, backgrounding
+│   │   ├── embedded_tool_bootstrap.py  # Embeddable-adapter registration
+│   │   ├── sidekick_host_port.py   # Sidekick agent ↔ tabs bridge (subtab port)
+│   │   └── {mujoco,drake,pinocchio,jaxsim}_dashboard.py, dialogs, theme, …
+│   ├── api/                        # FastAPI backend
+│   │   ├── local_server.py         # Server entry (web UI host)
+│   │   ├── routes/                 # 30+ endpoint modules
+│   │   ├── services/               # Simulation/chat/analysis services
+│   │   └── auth/, middleware/, models/, utils/
+│   ├── config/                     # Launcher manifest + models.yaml loaders
+│   ├── tools/                      # Embeddable tool tabs (model_explorer,
+│   │                               # ball_flight_gui, putting_green_gui,
+│   │                               # swing_flight_pipeline, pose_studio,
+│   │                               # video_analyzer, sidekick, …)
+│   └── shared/python/              # Cross-cutting libraries; highlights:
+│       ├── engine_core/            # EngineManager/Registry/probes/capabilities
+│       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
+│       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
+│       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
+│       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
+│       ├── humanoid_character_builder/  # Parametric humanoid URDF generation
+│       └── pose_interchange/, realtime/, simulation_backends/, config/, …
+├── rust_core/                      # Maturin crates
+│   ├── upstream-physics/           # Ball flight, aero, contact, RK4 kernels
+│   ├── upstream-mocap-io/          # C3D/TRC/BVH parsers (PyO3)
+│   ├── upstream-mocap-preproc/, upstream-urdf/, upstream-mesh/,
+│   ├── upstream-muscle/, upstream-motion-matching/, upstream-pinocchio-id/,
+│   └── upstream-realtime/, upstream-codemap/, ai_backend/
+├── ui/                             # React + Tauri launcher (manifest-driven)
+├── vendor/ud-tools/                # Vendored Tools repo (canonical for sidekick
+│                                   # and model_generation packages)
+├── data/                           # Sample data incl. C3D captures (golf TA + CMU)
+├── tests/                          # unit/, integration/, launchers/, api/, tools/,
+│                                   # heavy_integration/, benchmarks/, …
+├── scripts/                        # CI gates + config baselines (scripts/config/)
+├── docs/                           # ADRs, architecture (PROJECT_MAP.md), guides
+├── pyproject.toml                  # Canonical dependency + console-script source
 ├── SPEC.md                         # This file
 └── README.md
 
