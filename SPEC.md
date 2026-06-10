@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.267                                            |
+| **Spec Version**        | 1.0.268                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Added the focused #7183 follow-up contract for
+  `GitHubRepository.download_archive`: the repository archive path continues to
+  use the shared `download_to_file` timeout and `safe_extract_zip` member
+  validation helpers, preserves unsafe-member `ValueError` propagation for
+  callers and tests, and guarantees the temporary network download file is
+  unlinked in success and failure paths. Regression tests now pin Zip Slip,
+  absolute-member rejection, timeout forwarding, and cleanup behavior in
+  `tests/unit/tools/model_generation/test_library.py`.
 - **2026-06-10** - Tightened test-isolation and optional-dependency contracts
   for #7155/#7158: the MuJoCo dependency mock is function-scoped, affected
   MuJoCo tests initialize their own required state, launcher tests route
@@ -751,6 +759,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.268 | Focused #7183 archive-download follow-up. `GitHubRepository.download_archive` preserves the shared `download_to_file` timeout and `safe_extract_zip` member-validation contract, allows unsafe archive `ValueError` failures to propagate, and guarantees `delete=False` network temp files are unlinked on success, download failure, and extraction failure. Targeted tests in `tests/unit/tools/model_generation/test_library.py` cover Zip Slip traversal, absolute archive members, timeout forwarding, and temp-file cleanup. |
 | 2026-06-10 | 1.0.267 | Security hardening of remote model downloads (#7183, #7184, #7185, #7186). Added shared helpers `download_to_file` (bounded-timeout streaming download; `DOWNLOAD_TIMEOUT_SECONDS=30`) and `safe_extract_zip` (Zip-Slip member-path validation) to `src/shared/python/security/security_utils.py`. `GitHubRepository.download_archive` now extracts via `safe_extract_zip`, downloads with a timeout, and unlinks its `delete=False` temp file on every path (#7183 Zip Slip + temp leak). All `urlretrieve`/`urlopen` call sites in `standard_models.py`, the `model_generation/library/` repository/loader modules, and `tools/model_explorer/model_library.py` now use a 30s timeout (#7184). `StandardModelManager.download_standard_humanoid` now parses the URDF for mesh-filename entries and downloads the real meshes, returning `False` (no silent empty-STL stubs) unless the dev-only `allow_stub_meshes=True` is passed (#7186). `Jules-Issue-Mention-Handler.yml` and `PR-Comment-Responder.yml` route attacker-controllable issue/comment title/body/login values through `env:` indirection instead of splicing into `run:` bodies (#7185 Actions expression injection). Regression tests added in `tests/unit/test_shared_security_utils.py` (zip-slip + timeout) and `tests/unit/config/test_standard_models.py` (real-mesh success vs loud failure). |
 | 2026-06-09 | 1.0.265 | Architecture budget CI gate for #7131/#7133. Added `scripts/ci/check_architecture_budget.py` plus `scripts/config/architecture_budget.json` to ratchet changed production Python files against a 100-line function budget and 8-effective-parameter callable budget, excluding tests/vendor and requiring owned, linked exceptions for any temporary budget breach. Wired the gate into `.github/workflows/ci-standard.yml` and added focused TDD coverage for long-function detection, parameter counting, receiver-parameter exclusion, exception handling, and test-path skips. |
 | 2026-06-02 | 1.0.260 | Golf visualizer camera-basis norm optimization (#7101). `GolfVisualizerWidget` now uses fixed-arity `math.hypot` for the known 3D forward and right camera basis vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing fallback behavior for degenerate vectors. |
