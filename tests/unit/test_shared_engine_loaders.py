@@ -14,6 +14,8 @@ from src.shared.python.data_io.common_utils import GolfModelingError
 from src.shared.python.engine_core.engine_loaders import (
     LOADER_MAP,
     load_drake_engine,
+    load_matlab_2d_engine,
+    load_matlab_3d_engine,
     load_mujoco_engine,
     load_pinocchio_engine,
 )
@@ -43,8 +45,10 @@ def mock_suite_root(tmp_path: Path) -> Path:
         EngineType.PINOCCHIO,
         EngineType.OPENSIM,
         EngineType.MYOSIM,
+        EngineType.MATLAB_2D,
+        EngineType.MATLAB_3D,
     ],
-    ids=["mujoco", "drake", "pinocchio", "opensim", "myosim"],
+    ids=["mujoco", "drake", "pinocchio", "opensim", "myosim", "matlab_2d", "matlab_3d"],
 )
 def test_loader_map(engine_type) -> None:
     """Verify that LOADER_MAP contains the engine type."""
@@ -57,6 +61,14 @@ def test_loader_map_from_canonical_location() -> None:
 
     assert EngineType.MUJOCO in canonical_map
     assert canonical_map is LOADER_MAP  # Same object, not a copy
+
+
+def test_matlab_loader_exports_are_shimmed() -> None:
+    """Legacy imports expose the canonical MATLAB loader functions."""
+    from src.engines import loaders as canonical_loaders
+
+    assert load_matlab_2d_engine is canonical_loaders.load_matlab_2d_engine
+    assert load_matlab_3d_engine is canonical_loaders.load_matlab_3d_engine
 
 
 def _make_probe_mock(*, available: bool = True) -> MagicMock:

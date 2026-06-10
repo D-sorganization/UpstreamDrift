@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import shutil
-import sys
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -279,19 +278,22 @@ def test_load_pinocchio_engine_success(engine_manager) -> None:
 
 
 def test_load_matlab_engine_success(engine_manager) -> None:
-    """Test successful MATLAB engine loading."""
-    mock_matlab = MagicMock()
-    mock_matlab_engine = MagicMock()
-    mock_matlab.engine = mock_matlab_engine
+    """Test MATLAB loading through the registry factory."""
+    engine_manager.engine_status[EngineType.MATLAB_2D] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-    with (
-        patch.dict(
-            sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
-        ),
-        patch("pathlib.Path.exists", return_value=True),
-    ):
-        engine_manager._load_matlab_engine(EngineType.MATLAB_2D)
-        assert engine_manager._matlab_engine is not None
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_registry:
+        mock_get_registry.return_value.get.return_value = mock_registration
+        result = engine_manager.switch_engine(EngineType.MATLAB_2D)
+
+    assert result is True
+    mock_get_registry.return_value.get.assert_called_once_with(EngineType.MATLAB_2D)
+    mock_registration.factory.assert_called_once_with()
+    assert engine_manager.active_physics_engine is mock_engine_instance
 
 
 def test_load_pendulum_engine(engine_manager) -> None:
@@ -311,9 +313,11 @@ def test_load_pendulum_engine(engine_manager) -> None:
 
 def test_cleanup(engine_manager) -> None:
     """Test engine manager cleanup resets state."""
-    engine_manager._matlab_engine = MagicMock()
+    mock_engine = MagicMock()
+    engine_manager.active_physics_engine = mock_engine
     engine_manager.cleanup()
-    assert engine_manager._matlab_engine is None
+    mock_engine.close.assert_called_once_with()
+    assert engine_manager.active_physics_engine is None
     assert engine_manager.current_engine is None
 
 

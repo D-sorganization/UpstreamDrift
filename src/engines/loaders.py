@@ -32,6 +32,8 @@ Supported engines
 - ``PENDULUM`` — :func:`load_pendulum_engine`
 - ``GOLF_SWING_PENDULUM`` — :func:`load_golf_swing_pendulum_engine`
 - ``PUTTING_GREEN`` — :func:`load_putting_green_engine`
+- ``MATLAB_2D`` — :func:`load_matlab_2d_engine` (legacy web-only Simscape
+  model shell)
 - ``MATLAB_3D`` — :func:`load_matlab_3d_engine` (Simscape Multibody bridge,
   see ``motion_matching/option4_python_bridge``)
 """
@@ -62,8 +64,10 @@ __all__ = [
     "load_pendulum_engine",
     "load_golf_swing_pendulum_engine",
     "load_putting_green_engine",
+    "load_matlab_2d_engine",
     "load_matlab_3d_engine",
     "LOADER_MAP",
+    "DEFAULT_MATLAB_2D_SLX_RELPATH",
     "DEFAULT_MATLAB_3D_SLX_RELPATH",
 ]
 
@@ -71,6 +75,13 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # MATLAB_3D constants
 # ---------------------------------------------------------------------------
+
+DEFAULT_MATLAB_2D_SLX_RELPATH: Path = Path(
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/GolfSwing.slx"
+)
+"""Default Simulink ``.slx`` model path for the MATLAB_2D engine, relative
+to the suite root.
+"""
 
 DEFAULT_MATLAB_3D_SLX_RELPATH: Path = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/"
@@ -436,29 +447,29 @@ def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG00
         raise GolfModelingError("Putting Green engine not found.") from e
 
 
-def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
-    """Load Simscape Multibody (MATLAB_3D) engine via the Python bridge.
-
-    Wires :class:`src.engines.simscape.SimscapeAdapter` into the registry
-    as ``EngineType.MATLAB_3D``. The default model path resolves to
-    :data:`DEFAULT_MATLAB_3D_SLX_RELPATH` under ``suite_root``.
+def _load_simscape_adapter(
+    *,
+    suite_root: Path,
+    engine_name: str,
+    default_model_relpath: Path,
+    load_default_model: bool,
+) -> PhysicsEngine:
+    """Load a registry-backed Simscape adapter for MATLAB-family engines.
 
     Preconditions (DbC):
         - ``suite_root`` is a :class:`Path`.
 
     Postcondition (DbC):
         - Returned engine is non-None.
-        - When the default ``.slx`` is on disk, the engine has it loaded
-          (skeleton metadata mode without MATLAB; live mode with MATLAB).
 
     Args:
-        suite_root: Repository root path. The default ``.slx`` is resolved
-            relative to this path.
+        suite_root: Repository root path.
+        engine_name: Human-readable engine name used in logs/errors.
+        default_model_relpath: Default ``.slx`` path relative to ``suite_root``.
+        load_default_model: Whether to load the default model immediately.
 
     Returns:
-        A :class:`SimscapeAdapter` instance. Even without ``matlab.engine``
-        installed, the adapter can perform metadata-only loads of the .slx
-        and serve as a registry citizen for downstream consumers.
+        A :class:`SimscapeAdapter` instance.
 
     Raises:
         GolfModelingError: If ``SimscapeAdapter`` cannot be imported, or
@@ -472,29 +483,67 @@ def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.simscape import SimscapeAdapter
     except ImportError as exc:
         raise GolfModelingError(
-            "MATLAB_3D engine not available: failed to import SimscapeAdapter. "
+            f"{engine_name} engine not available: failed to import SimscapeAdapter. "
             "See motion_matching/option4_python_bridge/INSTALLATION.md."
         ) from exc
 
     engine: PhysicsEngine = SimscapeAdapter()  # type: ignore[assignment]
 
-    model_path = suite_root / DEFAULT_MATLAB_3D_SLX_RELPATH
-    if model_path.exists():
-        logger.info("Loading default MATLAB_3D model: %s", model_path)
+    model_path = suite_root / default_model_relpath
+    if load_default_model and model_path.exists():
+        logger.info("Loading default %s model: %s", engine_name, model_path)
         try:
             engine.load_from_path(str(model_path))
         except (ValueError, RuntimeError, FileNotFoundError) as exc:
             raise GolfModelingError(
-                f"MATLAB_3D loader failed to load default model '{model_path}': {exc}"
+                f"{engine_name} loader failed to load default model "
+                f"'{model_path}': {exc}"
             ) from exc
+    elif load_default_model:
+        logger.warning(
+            "Default %s model not found at %s; returning unloaded adapter",
+            engine_name,
+            model_path,
+        )
     else:
         logger.warning(
-            "Default MATLAB_3D model not found at %s; returning unloaded adapter",
+            "%s default model loading skipped for registry startup; model path is %s",
+            engine_name,
             model_path,
         )
 
-    _ensure_engine_loaded(engine, "MATLAB_3D")
+    _ensure_engine_loaded(engine, engine_name)
     return engine
+
+
+def load_matlab_2d_engine(suite_root: Path) -> PhysicsEngine:
+    """Load the legacy MATLAB_2D registry adapter without starting MATLAB.
+
+    The 2D Simscape model remains web-only at the CLI layer. Registering a
+    lightweight adapter keeps EngineManager dispatch uniform while avoiding
+    the old manager-local ``matlab.engine.start_matlab`` path.
+    """
+    return _load_simscape_adapter(
+        suite_root=suite_root,
+        engine_name="MATLAB_2D",
+        default_model_relpath=DEFAULT_MATLAB_2D_SLX_RELPATH,
+        load_default_model=False,
+    )
+
+
+def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Simscape Multibody (MATLAB_3D) engine via the Python bridge.
+
+    Wires :class:`src.engines.simscape.SimscapeAdapter` into the registry
+    as ``EngineType.MATLAB_3D``. The default model path resolves to
+    :data:`DEFAULT_MATLAB_3D_SLX_RELPATH` under ``suite_root``.
+    """
+    return _load_simscape_adapter(
+        suite_root=suite_root,
+        engine_name="MATLAB_3D",
+        default_model_relpath=DEFAULT_MATLAB_3D_SLX_RELPATH,
+        load_default_model=True,
+    )
 
 
 def load_jaxsim_engine(suite_root: Path) -> PhysicsEngine:
@@ -547,5 +596,6 @@ LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
     EngineType.PENDULUM: load_pendulum_engine,
     EngineType.GOLF_SWING_PENDULUM: load_golf_swing_pendulum_engine,
     EngineType.PUTTING_GREEN: load_putting_green_engine,
+    EngineType.MATLAB_2D: load_matlab_2d_engine,
     EngineType.MATLAB_3D: load_matlab_3d_engine,
 }
