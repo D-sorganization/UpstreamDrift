@@ -16,6 +16,13 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.tools.model_explorer.composition_flow import (
+    AttachmentSelection,
+    CompositionFlowController,
+    CompositionFlowError,
+    ExportFormat,
+    selection_from_attachment_point,
+)
 
 from .model import URDFModel
 from .panel import ModelPanel
@@ -31,6 +38,7 @@ class FrankensteinEditor(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the Frankenstein editor."""
         super().__init__(parent)
+        self.composition_flow = CompositionFlowController()
         self._setup_ui()
         self._connect_signals()
 
@@ -64,10 +72,12 @@ class FrankensteinEditor(QWidget):
 
         self.copy_selected_btn = QPushButton("Copy Selected Component -->")
         self.copy_chain_btn = QPushButton("Copy Link Chain -->")
+        self.attach_source_btn = QPushButton("Attach Source Model -->")
         self.merge_all_btn = QPushButton("Merge All Components -->")
 
         transfer_layout.addWidget(self.copy_selected_btn)
         transfer_layout.addWidget(self.copy_chain_btn)
+        transfer_layout.addWidget(self.attach_source_btn)
         transfer_layout.addWidget(self.merge_all_btn)
         transfer_layout.addStretch()
 
@@ -114,6 +124,7 @@ class FrankensteinEditor(QWidget):
         # Transfer button signals
         self.copy_selected_btn.clicked.connect(self._on_copy_selected)
         self.copy_chain_btn.clicked.connect(self._on_copy_chain)
+        self.attach_source_btn.clicked.connect(self._on_attach_source_model)
         self.merge_all_btn.clicked.connect(self._on_merge_all)
 
         # Comparison/manipulation button signals
@@ -277,6 +288,96 @@ class FrankensteinEditor(QWidget):
         if model:
             return model.to_xml(force=force)
         return None
+
+    def attach_source_model_to_working(
+        self,
+        selection: AttachmentSelection | None = None,
+    ) -> bool:
+        """Attach the complete source model to the working model."""
+        source_model = self.left_panel.get_model()
+        target_model = self.right_panel.get_model()
+        if not source_model or not target_model:
+            self.status_label.setText("Both source and working models must be loaded")
+            return False
+
+        try:
+            attach_selection = selection or self._default_attachment_selection(
+                source_model, target_model
+            )
+            result = self.composition_flow.attach_source_model(
+                target_model=target_model,
+                source_model=source_model,
+                selection=attach_selection,
+            )
+        except (CompositionFlowError, ValueError) as exc:
+            self.status_label.setText(f"Attach failed: {exc}")
+            return False
+
+        self.right_panel._refresh_tree()
+        self.right_panel.save_btn.setEnabled(True)
+        self.status_label.setText(
+            "Attached source root "
+            f"'{result.source_root_link}' to '{attach_selection.target_link}' "
+            f"as '{result.mapped_root_link}'"
+        )
+        self.model_updated.emit("working", target_model)
+        return True
+
+    def export_working_model(
+        self,
+        export_format: ExportFormat = "urdf",
+        *,
+        force: bool = False,
+    ) -> str | None:
+        """Export the working model through validation-aware composition flow."""
+        model = self.right_panel.get_model()
+        if not model:
+            self.status_label.setText("No working model loaded")
+            return None
+        try:
+            exported = self.composition_flow.export_model(
+                model,
+                export_format=export_format,
+                force=force,
+            )
+        except (CompositionFlowError, ValueError) as exc:
+            self.status_label.setText(f"Export failed: {exc}")
+            return None
+        self.status_label.setText(
+            f"Exported working model as {exported.format.upper()}"
+        )
+        return exported.content
+
+    def _on_attach_source_model(self) -> None:
+        """Attach the full source model to the working model."""
+        self.attach_source_model_to_working()
+
+    def _default_attachment_selection(
+        self,
+        source_model: URDFModel,
+        target_model: URDFModel,
+    ) -> AttachmentSelection:
+        source_prefix = f"{source_model.robot_name}_"
+        if target_model.attachment_points:
+            return selection_from_attachment_point(
+                target_model.attachment_points[0],
+                source_prefix=source_prefix,
+            )
+        target_link = self._selected_working_link() or next(
+            iter(target_model.links),
+            "",
+        )
+        if not target_link:
+            raise CompositionFlowError("working model has no target links")
+        return AttachmentSelection(target_link=target_link, source_prefix=source_prefix)
+
+    def _selected_working_link(self) -> str | None:
+        item = self.right_panel.tree.currentItem()
+        if not item:
+            return None
+        if item.data(1, Qt.ItemDataRole.UserRole) != "link":
+            return None
+        return item.text(0)
 
     def _on_swap_models(self) -> None:
         """Swap the left and right models."""
