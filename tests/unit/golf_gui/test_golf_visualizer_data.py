@@ -91,3 +91,32 @@ def test_extract_frame_data_fetches_each_dataset_row_once() -> None:
     np.testing.assert_allclose(frame_data.clubhead, [4.0, 5.0, 6.0])
     np.testing.assert_allclose(frame_data.forces["BASEQ"], [1.0, 0.0, 0.0])
     np.testing.assert_allclose(frame_data.torques["DELTAQ"], [0.0, 0.0, 0.3])
+
+
+def test_extract_frame_data_requires_all_source_datasets() -> None:
+    processor = _load_data_processor()()
+
+    with pytest.raises(ValueError, match="datasets must include DELTAQ"):
+        processor.extract_frame_data(
+            0,
+            {
+                "BASEQ": _dataset([1.0, 0.0, 0.0], [0.1, 0.0, 0.0]),
+                "ZTCFQ": _dataset([0.0, 2.0, 0.0], [0.0, 0.2, 0.0]),
+            },
+        )
+
+
+def test_extract_frame_data_missing_row_uses_zero_vectors() -> None:
+    processor = _load_data_processor()()
+    datasets = {
+        "BASEQ": _dataset([1.0, 0.0, 0.0], [0.1, 0.0, 0.0]),
+        "ZTCFQ": _dataset([0.0, 2.0, 0.0], [0.0, 0.2, 0.0]),
+        "DELTAQ": _dataset([0.0, 0.0, 3.0], [0.0, 0.0, 0.3]),
+    }
+
+    frame_data = processor.extract_frame_data(5, datasets)
+
+    np.testing.assert_array_equal(frame_data.clubhead, np.zeros(3, dtype=np.float32))
+    np.testing.assert_array_equal(
+        frame_data.forces["BASEQ"], np.zeros(3, dtype=np.float32)
+    )
