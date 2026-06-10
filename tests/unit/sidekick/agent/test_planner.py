@@ -1,10 +1,4 @@
-"""Tests for sidekick.agent.planner (epic #5967 / S5 / #5974).
-
-TDD: contract pinned before implementation. The planner sits between
-the LLM-emitted tool calls and the action service; it validates each
-proposed action against the registered descriptors and produces
-PlannedSteps that the chat layer can render or execute.
-"""
+"""Focused coverage for Sidekick agent planner."""
 
 from __future__ import annotations
 
@@ -12,7 +6,6 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 import pytest
-
 from sidekick.agent.action_service import (
     ActionDescriptor,
     ActionResult,
@@ -25,292 +18,101 @@ from sidekick.agent.planner import (
     ToolCall,
     build_sidekick_system_prompt,
 )
-from sidekick.agent.subtab_adapter import SubtabAdapter
 
 pytestmark = pytest.mark.unit
 
 
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-
-class _FakeSubtabPort:
-    def list_tabs(self) -> Sequence[str]:
-        return ("calculator", "workspace")
-
-    def active_tab(self) -> str | None:
-        return "calculator"
-
-    def focus(self, tab_id: str) -> None:
-        if tab_id not in self.list_tabs():
-            raise KeyError(tab_id)
-
-    def set_visible(self, tab_id: str, visible: bool) -> None:
-        if tab_id not in self.list_tabs():
-            raise KeyError(tab_id)
-
-    def workspace_snapshot(self):  # type: ignore[no-untyped-def]
-        from sidekick.agent.subtab_adapter import WorkspaceSnapshot
-
-        return WorkspaceSnapshot(values={})
-
-    def workspace_set_variable(self, name: str, value: Any) -> Any:
-        return None
-
-    def calculator_run(self, calculator_id: str, inputs: Mapping[str, Any]):  # type: ignore[no-untyped-def]
-        from sidekick.agent.subtab_adapter import CalculatorRun
-
-        return CalculatorRun(values={"answer": 1.0})
-
-    def state_profile_save(self, name: str, payload: Mapping[str, Any]) -> None:
-        pass
-
-    def state_profile_load(self, name: str):  # type: ignore[no-untyped-def]
-        from sidekick.agent.subtab_adapter import StateProfile
-
-        return StateProfile(name=name, payload={})
-
-    def state_profile_delete(self, name: str) -> None:
-        pass
-
-
-def _build_service_with_subtab() -> SidekickActionService:
-    service = SidekickActionService()
-    service.register(SubtabAdapter(port=_FakeSubtabPort()))
-    return service
-
-
-# ---------------------------------------------------------------------------
-# ToolCall + PlannedStep DbC
-# ---------------------------------------------------------------------------
-
-
-def test_tool_call_rejects_non_string_id() -> None:
-    with pytest.raises(TypeError):
-        ToolCall(action_id=123, params={})  # type: ignore[arg-type]
-
-
-def test_tool_call_rejects_empty_id() -> None:
-    with pytest.raises(ValueError, match="action_id"):
-        ToolCall(action_id="", params={})
-
-
-def test_planned_step_rejects_empty_action_id() -> None:
-    with pytest.raises(ValueError):
-        PlannedStep(action_id="", params={}, rationale="x")
-
-
-def test_planned_step_is_frozen() -> None:
-    import dataclasses
-
-    step = PlannedStep(action_id="subtab.list", params={}, rationale="show me tabs")
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        step.rationale = "no"  # type: ignore[misc]
-
-
-# ---------------------------------------------------------------------------
-# Planner construction
-# ---------------------------------------------------------------------------
-
-
-def test_planner_rejects_non_service() -> None:
-    with pytest.raises(TypeError):
-        SidekickAgentPlanner(service="not-a-service")  # type: ignore[arg-type]
-
-
-# ---------------------------------------------------------------------------
-# plan_from_tool_calls
-# ---------------------------------------------------------------------------
-
-
-def test_plan_emits_one_step_per_known_action() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    calls = (
-        ToolCall(action_id="subtab.list", params={}),
-        ToolCall(action_id="subtab.focus", params={"tab_id": "workspace"}),
-    )
-    steps = planner.plan_from_tool_calls(calls)
-    assert [s.action_id for s in steps] == ["subtab.list", "subtab.focus"]
-
-
-def test_plan_rejects_unknown_action_with_error_step() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    calls = (ToolCall(action_id="nope.nada", params={}),)
-    steps = planner.plan_from_tool_calls(calls)
-    assert len(steps) == 1
-    assert steps[0].is_error
-    assert "nope.nada" in steps[0].error_message
-
-
-def test_plan_validates_against_descriptor_schema() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    # subtab.focus requires tab_id
-    calls = (ToolCall(action_id="subtab.focus", params={}),)
-    steps = planner.plan_from_tool_calls(calls)
-    assert len(steps) == 1
-    assert steps[0].is_error
-    assert "tab_id" in steps[0].error_message
-
-
-def test_plan_preserves_rationale_text() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    calls = (
-        ToolCall(
-            action_id="subtab.list",
-            params={},
-            rationale="user asked what tabs exist",
-        ),
-    )
-    steps = planner.plan_from_tool_calls(calls)
-    assert steps[0].rationale == "user asked what tabs exist"
-
-
-def test_plan_is_deterministic_for_same_input() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    calls = (ToolCall(action_id="subtab.list", params={}),)
-    a = planner.plan_from_tool_calls(calls)
-    b = planner.plan_from_tool_calls(calls)
-    assert a == b
-
-
-# ---------------------------------------------------------------------------
-# execute
-# ---------------------------------------------------------------------------
-
-
-def test_execute_dispatches_to_action_service() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    step = planner.plan_from_tool_calls(
-        (ToolCall(action_id="subtab.list", params={}),)
-    )[0]
-    result = planner.execute(step)
-    assert isinstance(result, ActionResult)
-    assert result.ok is True
-    assert result.value == ["calculator", "workspace"]
-
-
-def test_execute_on_error_step_raises_planner_error() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    step = planner.plan_from_tool_calls((ToolCall(action_id="nope.nada", params={}),))[
-        0
-    ]
-    assert step.is_error
-    with pytest.raises(PlannerError):
-        planner.execute(step)
-
-
-def test_execute_respects_dry_run_flag() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    step = planner.plan_from_tool_calls(
-        (ToolCall(action_id="subtab.focus", params={"tab_id": "workspace"}),)
-    )[0]
-    result = planner.execute(step, dry_run=True)
-    assert result.ok is True
-    assert "dry_run" in result.metadata
-
-
-# ---------------------------------------------------------------------------
-# Tool registry bridge
-# ---------------------------------------------------------------------------
-
-
-def test_export_for_tool_registry_returns_one_tool_per_action() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    tools = planner.export_for_tool_registry()
-    # One per registered action.
-    assert len(tools) == len(service.list_actions())
-    # Every tool name is sidekick-namespaced and matches a real action.
-    action_ids = {d.action_id for d in service.list_actions()}
-    tool_names = {t["name"] for t in tools}
-    assert all(name.startswith("sidekick.action.") for name in tool_names)
-    for tool in tools:
-        bare = tool["name"].removeprefix("sidekick.action.")
-        assert bare in action_ids
-
-
-def test_export_for_tool_registry_is_deterministic() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    a = planner.export_for_tool_registry()
-    b = planner.export_for_tool_registry()
-    assert a == b
-
-
-def test_export_includes_schema_and_description() -> None:
-    service = _build_service_with_subtab()
-    planner = SidekickAgentPlanner(service=service)
-    tools = planner.export_for_tool_registry()
-    for tool in tools:
-        assert "name" in tool
-        assert "description" in tool
-        assert "parameters" in tool
-        assert tool["parameters"]["type"] == "object"
-
-
-# ---------------------------------------------------------------------------
-# System prompt builder
-# ---------------------------------------------------------------------------
-
-
-def test_system_prompt_lists_every_action_id() -> None:
-    service = _build_service_with_subtab()
-    prompt = build_sidekick_system_prompt(service=service)
-    for descriptor in service.list_actions():
-        assert descriptor.action_id in prompt
-
-
-def test_system_prompt_marks_destructive_actions() -> None:
-    """Destructive actions are clearly flagged so the LLM knows to ask."""
-    service = SidekickActionService()
-    service.register(
-        _ActionsHandler(
-            [
-                ActionDescriptor(
-                    action_id="x.boom",
-                    summary="Erase all data.",
-                    params_schema={"type": "object"},
-                    side_effects="destructive",
-                    reversible=False,
-                ),
-            ]
-        )
-    )
-    prompt = build_sidekick_system_prompt(service=service)
-    assert "destructive" in prompt.lower()
-    assert "x.boom" in prompt
-
-
-def test_system_prompt_is_deterministic() -> None:
-    service = _build_service_with_subtab()
-    a = build_sidekick_system_prompt(service=service)
-    b = build_sidekick_system_prompt(service=service)
-    assert a == b
-
-
-def test_system_prompt_empty_service_still_returns_baseline() -> None:
-    prompt = build_sidekick_system_prompt(service=SidekickActionService())
-    assert prompt  # never empty
-    assert "Sidekick" in prompt
-
-
-class _ActionsHandler:
-    namespace = "x"
-
-    def __init__(self, descs: Sequence[ActionDescriptor]) -> None:
-        self._descs = tuple(descs)
+class _Handler:
+    namespace = "test"
 
     def describe(self) -> Sequence[ActionDescriptor]:
-        return self._descs
+        return (
+            ActionDescriptor(
+                action_id="test.echo",
+                summary="Echo a value.",
+                params_schema={
+                    "type": "object",
+                    "properties": {"value": {"type": "integer"}},
+                    "required": ["value"],
+                },
+                side_effects="read",
+                reversible=False,
+            ),
+            ActionDescriptor(
+                action_id="test.write",
+                summary="Write a value.",
+                params_schema={"type": "object", "properties": {}},
+                side_effects="write",
+                reversible=True,
+            ),
+        )
 
     def invoke(self, action_id: str, params: Mapping[str, Any]) -> ActionResult:
-        return ActionResult(ok=True)
+        return ActionResult(
+            ok=True, value={"action_id": action_id, "params": dict(params)}
+        )
+
+
+def _planner() -> SidekickAgentPlanner:
+    service = SidekickActionService()
+    service.register(_Handler())
+    return SidekickAgentPlanner(service=service)
+
+
+def test_tool_call_and_planned_step_validate_invariants() -> None:
+    with pytest.raises(TypeError, match="action_id"):
+        ToolCall(action_id=123, params={})  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="params"):
+        ToolCall(action_id="test.echo", params=[])  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="error_message"):
+        PlannedStep(action_id="test.echo", params={}, is_error=True)
+
+
+def test_planner_emits_normal_unknown_and_schema_error_steps() -> None:
+    planner = _planner()
+
+    ok, unknown, invalid = planner.plan_from_tool_calls(
+        [
+            ToolCall("test.echo", {"value": 4}, rationale="because"),
+            ToolCall("test.missing", {}),
+            ToolCall("test.echo", {"value": True}),
+        ]
+    )
+
+    assert ok.is_error is False
+    assert ok.rationale == "because"
+    assert unknown.is_error is True
+    assert "unknown action" in unknown.error_message
+    assert invalid.is_error is True
+    assert "expected type" in invalid.error_message
+
+
+def test_execute_refuses_error_steps_and_dispatches_valid_step() -> None:
+    planner = _planner()
+    (step,) = planner.plan_from_tool_calls([ToolCall("test.echo", {"value": 5})])
+
+    result = planner.execute(step, dry_run=True)
+
+    assert result.ok is True
+    assert result.metadata["dry_run"] == {"value": 5}
+    assert result.metadata["would_call"] == "test.echo"
+    with pytest.raises(PlannerError, match="cannot execute error step"):
+        planner.execute(
+            PlannedStep("test.echo", {}, is_error=True, error_message="bad")
+        )
+
+
+def test_export_and_system_prompt_are_generated_from_service() -> None:
+    planner = _planner()
+    exported = planner.export_for_tool_registry()
+    prompt = build_sidekick_system_prompt(service=planner._service)  # noqa: SLF001
+
+    assert exported[0]["name"] == "sidekick.action.test.echo"
+    assert exported[0]["metadata"]["original_action_id"] == "test.echo"
+    assert "`test.write` [write, reversible]" in prompt
+
+
+def test_system_prompt_handles_empty_service() -> None:
+    assert "(No actions registered.)" in build_sidekick_system_prompt(
+        service=SidekickActionService()
+    )

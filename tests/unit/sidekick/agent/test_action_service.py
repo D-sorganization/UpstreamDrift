@@ -7,11 +7,10 @@ subsequent adapter (subtab, host, feature-catalog) implements one Protocol.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
-from collections.abc import Mapping, Sequence
 
 import pytest
-
 from sidekick.agent.action_service import (
     ActionDescriptor,
     ActionResult,
@@ -185,7 +184,7 @@ def test_duplicate_action_id_raises_at_register() -> None:
 def test_handler_must_implement_protocol() -> None:
     service = SidekickActionService()
     with pytest.raises(TypeError):
-        service.register("not a handler")  # type: ignore[arg-type]
+        service.register("not a handler")
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +200,50 @@ def test_invoke_dispatches_to_handler_on_valid_params() -> None:
     assert result.ok is True
     assert result.value == 7
     assert handler.calls == [("test.echo", {"value": 7})]
+
+
+def test_invoke_routes_handler_call_through_dispatcher() -> None:
+    handler = _RecordingHandler()
+    dispatched: list[str] = []
+
+    def dispatcher(thunk: Callable[[], ActionResult]) -> ActionResult:
+        dispatched.append("called")
+        return thunk()
+
+    service = SidekickActionService(dispatcher=dispatcher)
+    service.register(handler)
+
+    result = service.invoke("test.echo", {"value": 7})
+
+    assert result.ok is True
+    assert result.value == 7
+    assert dispatched == ["called"]
+    assert handler.calls == [("test.echo", {"value": 7})]
+
+
+def test_set_main_thread_dispatcher_alias_routes_handler_call() -> None:
+    handler = _RecordingHandler()
+    dispatched: list[str] = []
+    service = SidekickActionService()
+
+    def dispatcher(thunk: Callable[[], ActionResult]) -> ActionResult:
+        dispatched.append("gui")
+        return thunk()
+
+    service.set_main_thread_dispatcher(dispatcher)
+    service.register(handler)
+
+    result = service.invoke("test.echo", {"value": 3})
+
+    assert result.ok is True
+    assert result.value == 3
+    assert dispatched == ["gui"]
+
+
+def test_set_dispatcher_rejects_non_callable() -> None:
+    service = SidekickActionService()
+    with pytest.raises(TypeError, match="callable"):
+        service.set_dispatcher(object())  # type: ignore[arg-type]
 
 
 def test_invoke_unknown_action_returns_error_result() -> None:

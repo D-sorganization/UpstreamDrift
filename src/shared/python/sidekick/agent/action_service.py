@@ -38,12 +38,33 @@ from __future__ import annotations
 
 import logging
 import uuid
-from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Mapping
 from datetime import datetime, timezone
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any
 
-from src.shared.python.core.contracts.exceptions import StateError
+from .action_contracts import (
+    ActionDescriptor,
+    ActionDispatcher,
+    ActionResult,
+    AuditSink,
+    RecordedCall,
+    SideEffect,
+    SidekickActionHandler,
+)
+
+if TYPE_CHECKING:
+
+    class StateError(RuntimeError):
+        """Fallback state error for repos that do not provide core contracts."""
+
+else:
+    try:
+        from src.shared.python.core.contracts.exceptions import StateError
+    except ImportError:  # pragma: no cover - Tools has no core contract package.
+
+        class StateError(RuntimeError):
+            """Fallback state error for repos without core contracts."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +72,7 @@ UTC = timezone.utc  # noqa: UP017
 
 __all__ = [
     "ActionDescriptor",
+    "ActionDispatcher",
     "ActionResult",
     "AuditSink",
     "RecordedCall",
@@ -58,132 +80,6 @@ __all__ = [
     "SidekickActionHandler",
     "SidekickActionService",
 ]
-
-
-SideEffect = Literal["read", "write", "destructive"]
-_VALID_SIDE_EFFECTS: frozenset[str] = frozenset({"read", "write", "destructive"})
-
-
-# ---------------------------------------------------------------------------
-# Public data types
-# ---------------------------------------------------------------------------
-
-
-@dataclass(frozen=True, slots=True)
-class ActionDescriptor:
-    """Self-describing record for one agentic action.
-
-    Attributes:
-        action_id: Fully qualified id of the form ``"<namespace>.<verb>"``.
-        summary: One-sentence human description.
-        params_schema: JSON Schema (subset) for the ``params`` mapping
-            passed to :meth:`SidekickActionService.invoke`.
-        side_effects: ``"read"``, ``"write"``, or ``"destructive"``.
-            Drives the chat-side confirmation UX (S8).
-        reversible: ``True`` if the adapter exposes an ``undo`` hook
-            for this action (consumed by the undo subsystem in S6).
-    """
-
-    action_id: str
-    summary: str
-    params_schema: Mapping[str, Any]
-    side_effects: SideEffect
-    reversible: bool = False
-
-    def __post_init__(self) -> None:
-        # DbC: pin every invariant the rest of the system relies on.
-        if not self.action_id or "." not in self.action_id:
-            raise ValueError(
-                f"action_id must be '<namespace>.<verb>'; got {self.action_id!r}"
-            )
-        if not self.summary:
-            raise ValueError("summary must be non-empty")
-        if not isinstance(self.params_schema, Mapping):
-            raise ValueError("params_schema must be a Mapping")
-        if "type" not in self.params_schema:
-            raise ValueError(
-                "params_schema must be JSON-Schema-shaped (missing 'type')"
-            )
-        if self.side_effects not in _VALID_SIDE_EFFECTS:
-            raise ValueError(
-                f"side_effects={self.side_effects!r} not in "
-                f"{sorted(_VALID_SIDE_EFFECTS)}"
-            )
-
-
-@dataclass(frozen=True, slots=True)
-class ActionResult:
-    """Outcome of one invocation. Either successful or carrying an error.
-
-    Attributes:
-        ok: ``True`` if the action completed successfully.
-        value: Action-specific payload. May be ``None``.
-        error: Human-readable error message. Must be present iff ``ok``
-            is ``False``.
-        undo_token: Opaque token an adapter can later use to reverse this
-            action. Optional; only set for reversible actions that have
-            something to undo.
-        metadata: Open-ended bag for diagnostics (timings, dry-run
-            previews, etc.). Must not be used to smuggle real return
-            values — those go in ``value``.
-    """
-
-    ok: bool
-    value: Any = None
-    error: str | None = None
-    undo_token: str | None = None
-    metadata: Mapping[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        if self.ok and self.error is not None:
-            raise ValueError("ok=True forbids setting error")
-        if not self.ok and not self.error:
-            raise ValueError("ok=False requires a non-empty error message")
-
-
-@dataclass(frozen=True, slots=True)
-class RecordedCall:
-    """One entry passed to an audit sink. Immutable.
-
-    The audit sink receives the descriptor and result but NOT the handler
-    instance — that's LOD by construction.
-    """
-
-    timestamp: datetime
-    action_id: str
-    params: Mapping[str, Any]
-    descriptor: ActionDescriptor | None
-    result: ActionResult
-    dry_run: bool
-
-
-# ---------------------------------------------------------------------------
-# Protocols
-# ---------------------------------------------------------------------------
-
-
-@runtime_checkable
-class SidekickActionHandler(Protocol):
-    """Contract implemented by every action adapter.
-
-    Implementations register a stable ``namespace`` (used only for
-    diagnostics; the per-action ``action_id`` is the actual key).
-    """
-
-    namespace: str
-
-    def describe(self) -> Sequence[ActionDescriptor]:
-        """Return the actions this handler publishes."""
-        ...
-
-    def invoke(self, action_id: str, params: Mapping[str, Any]) -> ActionResult:
-        """Run one action. Implementations should never raise on user
-        errors — translate to ``ActionResult(ok=False, error=...)``."""
-        ...
-
-
-AuditSink = Callable[[RecordedCall], None]
-"""Audit sink signature. Sinks must be cheap and non-raising."""
 
 
 def _noop_audit_sink(call: RecordedCall) -> None:  # pragma: no cover - trivial
@@ -214,6 +110,7 @@ class SidekickActionService:
         self,
         *,
         audit_sink: AuditSink | None = None,
+        dispatcher: ActionDispatcher | None = None,
         policy: object | None = None,
     ) -> None:
         # ``policy`` is typed as ``object`` to avoid a circular import with
@@ -223,6 +120,7 @@ class SidekickActionService:
         self._handlers: dict[str, SidekickActionHandler] = {}
         self._descriptors: dict[str, ActionDescriptor] = {}
         self._audit_sink: AuditSink = audit_sink or _noop_audit_sink
+        self.set_dispatcher(dispatcher)
         self._policy = policy
         # Token → (action_id, undo-action-id, undo-params) for undo dispatch.
         self._undo_table: dict[str, tuple[str, Mapping[str, Any]]] = {}
@@ -232,7 +130,7 @@ class SidekickActionService:
 
     # ---- Registration ----------------------------------------------------
 
-    def register(self, handler: SidekickActionHandler) -> None:
+    def register(self, handler: object) -> None:
         """Register every action published by ``handler``.
 
         Precondition: ``handler`` satisfies :class:`SidekickActionHandler`.
@@ -245,10 +143,13 @@ class SidekickActionService:
                 registered.
         """
         if not isinstance(handler, SidekickActionHandler):
-            raise TypeError(
-                f"handler must satisfy SidekickActionHandler, got {type(handler).__name__}"
+            message = (
+                "handler must satisfy SidekickActionHandler, got "
+                f"{type(handler).__name__}"
             )
-        new_descs = list(handler.describe())
+            raise TypeError(message)
+        typed_handler = handler
+        new_descs = list(typed_handler.describe())
         # Reject duplicates atomically — fail before mutating state.
         for desc in new_descs:
             if desc.action_id in self._descriptors:
@@ -257,13 +158,28 @@ class SidekickActionService:
                 )
         for desc in new_descs:
             self._descriptors[desc.action_id] = desc
-            self._handlers[desc.action_id] = handler
+            self._handlers[desc.action_id] = typed_handler
 
     # ---- Discovery -------------------------------------------------------
 
     def list_actions(self) -> tuple[ActionDescriptor, ...]:
         """Return every registered descriptor sorted by ``action_id``."""
         return tuple(self._descriptors[k] for k in sorted(self._descriptors))
+
+    def set_dispatcher(self, dispatcher: ActionDispatcher | None) -> None:
+        """Install or clear the action dispatch boundary.
+
+        GUI hosts pass the same zero-argument thunk shape used by the
+        shared AI tool registry. In Qt surfaces this is a main-thread
+        dispatcher; in tests it can be a fake that records invocation.
+        """
+        if dispatcher is not None and not callable(dispatcher):
+            raise TypeError("dispatcher must be callable or None")
+        self._dispatcher = dispatcher
+
+    def set_main_thread_dispatcher(self, dispatcher: ActionDispatcher | None) -> None:
+        """Compatibility alias for GUI hosts wiring main-thread marshalling."""
+        self.set_dispatcher(dispatcher)
 
     # ---- Dispatch --------------------------------------------------------
 
@@ -324,7 +240,7 @@ class SidekickActionService:
             self._record(action_id, params, descriptor, result, dry_run)
             return result
 
-        result = self._safe_invoke(action_id, params)
+        result = self._dispatch(action_id, params)
         # Promote any handler-issued undo request into a service-owned
         # token. The handler may suggest a token string for diagnostics
         # but the canonical one comes from us — that way the undo table
@@ -418,7 +334,7 @@ class SidekickActionService:
         """
         handler = self._handlers[action_id]
         try:
-            outcome = handler.invoke(action_id, params)
+            outcome: object = handler.invoke(action_id, params)
         except StateError as exc:
             logger.warning("action %s raised StateError: %s", action_id, exc)
             return ActionResult(ok=False, error=f"state error: {exc}")
@@ -439,6 +355,23 @@ class SidekickActionService:
                 ),
             )
         return outcome
+
+    def _dispatch(self, action_id: str, params: Mapping[str, Any]) -> ActionResult:
+        if self._dispatcher is None:
+            return self._safe_invoke(action_id, params)
+        try:
+            return self._dispatcher(lambda: self._safe_invoke(action_id, params))
+        except (RuntimeError, ValueError, OSError, LookupError) as exc:
+            logger.warning(
+                "action %s dispatcher raised %s: %s",
+                action_id,
+                type(exc).__name__,
+                exc,
+            )
+            return ActionResult(
+                ok=False,
+                error=f"dispatcher {type(exc).__name__}: {exc}",
+            )
 
     def _record(
         self,
@@ -479,9 +412,7 @@ class SidekickActionService:
 # ---------------------------------------------------------------------------
 
 
-def _validate_against_schema(
-    params: Mapping[str, Any], schema: Mapping[str, Any]
-) -> str | None:
+def _validate_against_schema(params: object, schema: Mapping[str, Any]) -> str | None:
     """Return ``None`` on success or a human-readable error string.
 
     A full draft-7 validator is out of scope; we cover the subset that
