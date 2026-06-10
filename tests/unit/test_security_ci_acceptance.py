@@ -30,7 +30,9 @@ def test_standard_ci_runs_blocking_semgrep_and_trivy() -> None:
     assert "--config p/owasp-top-ten --error" in workflow
     assert "aquasecurity/trivy-action@" in workflow
     assert "scan-type: fs" in workflow
-    assert "exit-code: '1'" in workflow
+    # Accept either YAML quote style — prettier normalises scalars and the
+    # behaviour of exit-code 1 (fail the build on findings) is identical.
+    assert ('exit-code: "1"' in workflow) or ("exit-code: '1'" in workflow)
     assert "trivy" in trivy_test
     assert '"fs"' in trivy_test
 
