@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.294                                            |
-| **Last Spec Update**    | 2026-06-10                                         |
+| **Spec Version**        | 1.0.289                                            |
+| **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,32 +70,6 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-06-10** - Optimized MuJoCo inverse-dynamics vector norms. The
-  MuJoCo humanoid golf ID solver now uses direct dot-product square roots for
-  one-dimensional residual/vector norm calculations in the hot validation and
-  batch solve paths, preserving numerical behavior while avoiding
-  `np.linalg.norm` overhead.
-- **2026-06-10** - Added model explorer attachment-point metadata for #7206.
-  Bundled model definitions can now ship `<model>.attachments.json` sidecars
-  validated by a JSON schema, the model library reports declared attachment
-  frames and payload warnings, and Frankenstein composition uses the declared
-  parent/child interface-frame origins when assembling models.
-- **2026-06-10** - Hardened motion-pipeline keypoint gap filling for #7247.
-  `_linear_interp_keypoints` now verifies both neighboring keypoint frames have
-  a matching index before interpolation, preserving unfillable low-confidence
-  keypoints instead of raising `IndexError` when streamed/partial detections
-  produce mismatched keypoint counts.
-- **2026-06-10** - Corrected the ball-flight launch-condition unit contract
-  for #7246. `LaunchConditions` remains radians for launch/azimuth angles and
-  RPM for spin rate, while `LaunchConditions.from_user_units(...)` is now the
-  canonical degree-to-radian conversion boundary for GUI and swing-pipeline
-  callers so user-facing degrees and impact rad/s spin do not collapse carry
-  distance to zero.
-- **2026-06-10** - Extended the Rust C3D parser for #7212. The
-  `upstream-mocap-io` C3D path now decodes int16 and float analog channel data,
-  surfaces additive PyO3 `analog` and `force_platforms` keys, parses
-  `FORCE_PLATFORM:{TYPE,CHANNEL,CORNERS,ORIGIN}`, and preserves existing
-  marker/event dictionary keys and marker-only fixture behavior.
 - **2026-06-10** - Completed the #7205 Frankenstein composition validation
   surface. `CompositionValidator` now emits warning-level findings for heavy
   attached subtrees and direct attachment geometry AABB overlaps, while the
@@ -909,9 +883,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-10 | 1.0.293 | Added model explorer attachment-point metadata for #7206. Bundled model definitions can now ship schema-validated `<model>.attachments.json` sidecars that declare stable parent and child interface frames, the model library exposes declared attachment points with payload warnings for missing links or malformed manifests, and Frankenstein composition now places attachments from those declared interface-frame origins instead of relying on implicit link origins. |
-| 2026-06-10 | 1.0.292 | Hardened motion-pipeline keypoint gap filling for #7247. `_linear_interp_keypoints` now checks both `before.keypoints` and `after.keypoints` before indexing a low-confidence gap keypoint, leaving unfillable keypoints unchanged when neighboring frames have mismatched keypoint counts. The fix applies to both the primary preprocessing path and the pure-Python fallback, with regression coverage for the former `IndexError` crash case. |
-| 2026-06-10 | 1.0.291 | Corrected the ball-flight launch-condition unit contract for #7246. `LaunchConditions` continues to store launch/azimuth angles in radians and spin rate in RPM, and `LaunchConditions.from_user_units(...)` is now the canonical user-facing conversion boundary used by the ball-flight GUI and swing-to-flight pipeline. The pipeline converts impact rad/s spin back to RPM before simulation, and regression tests pin the tour-driver carry sanity gate so degree/rad-s misuse cannot silently collapse carry to zero again. |
 | 2026-06-10 | 1.0.290 | Rust C3D analog and force-platform metadata slice for #7212. `upstream-mocap-io` now decodes C3D analog channels in int16 mode with SCALE/OFFSET/GEN_SCALE and in float mode without int scaling, advances marker frame stride across analog-bearing records, parses FORCE_PLATFORM TYPE/CHANNEL/CORNERS/ORIGIN metadata, and exposes additive PyO3 `analog` / `force_platforms` keys while preserving existing marker/event keys and marker-only fixture behavior. |
 | 2026-06-10 | 1.0.289 | Completed the Frankenstein composition validation surface for #7205. `CompositionValidator` now emits warning-level `subtree_mass_ratio` findings when attached subtree mass exceeds roughly 2x the parent chain mass and `geometry_overlap` findings when directly attached link AABBs overlap. The active Frankenstein model panel now renders current validation findings in a dedicated list so warnings and blocking errors are visible before save/export. |
 | 2026-06-10 | 1.0.288 | React/Tauri launcher parity decision (#7221). Added ADR-0028 choosing the manifest-driven multi-window Tauri model while keeping PyQt canonical for embedded tabs/docks. The React dashboard now persists a manifest-keyed launcher window registry, reconciles it with `useLauncherManifest.ts`, and exposes a window list/focus menu that reuses the local launcher API. |
