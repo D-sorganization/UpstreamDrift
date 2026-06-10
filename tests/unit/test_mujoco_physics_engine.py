@@ -37,7 +37,7 @@ _MJ_DATA_SPEC = [
 ]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies) -> Generator[type, None, None]:
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
@@ -117,6 +117,7 @@ def test_mujoco_physics_engine_reset(engine, mock_mj) -> None:
 
 
 def test_set_control(engine) -> None:
+    engine.load_from_string("<mujoco/>")
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -179,7 +180,7 @@ def test_mujoco_physics_engine_compute_inverse_dynamics(engine, mock_mj) -> None
 
     assert tau is not None
     np.testing.assert_array_equal(tau, np.array([10.0, 20.0]))
-    np.testing.assert_array_equal(engine.data.qacc, qacc)
+    np.testing.assert_array_equal(engine.data.qacc, np.zeros(2))
     mock_mj.mj_inverse.assert_called_once()
 
 

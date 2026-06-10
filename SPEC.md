@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.265                                            |
-| **Last Spec Update**    | 2026-06-09                                         |
+| **Spec Version**        | 1.0.266                                            |
+| **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,18 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Tightened test-isolation and optional-dependency contracts
+  for #7155/#7158: the MuJoCo dependency mock is function-scoped, affected
+  MuJoCo tests initialize their own required state, launcher tests route
+  `sys.modules` cleanup through the local cleanup fixture, and
+  `test_api_extended.py` uses the shared optional-dependency helper with
+  current path-validation imports instead of a blanket module-level skip. The
+  local-only workflow routing guard now installs its YAML parser in an isolated
+  workspace venv so self-hosted runners with PEP 668 system Python policy still
+  execute the guard instead of failing during dependency bootstrap. The
+  follow-up CI hardening keeps sidekick copied-test collection self-contained,
+  avoids dynamic source execution in launcher tests, and refreshes generated
+  dependency artifacts against the canonical project metadata.
 - **2026-06-09** - Added a changed-file architecture budget gate for #7131/#7133: `scripts/ci/check_architecture_budget.py` now scans changed production Python files for functions over 100 lines and callable signatures over 8 effective parameters (excluding `self`/`cls`), with owned/expiring exceptions configured in `scripts/config/architecture_budget.json`. The standard CI workflow runs the guard beside the file-size and module-size gates, and focused tests pin long-function, parameter-count, exception, and test-path skip behavior.
 - **2026-06-02** - Restored visible Sidekick sidebar tab hover affordance (#7109): the synced tools-sidebar design-token QSS now styles unselected `QTabBar` tabs on hover with the soft accent surface while keeping the selected-tab rule separate, and a headless unit regression pins the generated stylesheet contract.
 - **2026-06-02** - Fixed Windows taskbar identity for the UpstreamDrift launcher (#7107): `src.shared.python.ui.window_icon` now declares an AppUserModelID before showing the first window, applies the resolved icon to both the `QApplication` and top-level window, and covers the Windows API call plus icon application contract with focused unit tests.
@@ -979,6 +991,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-06-01 | 1.0.223 | DRY/LoD consolidation across the motion-matching engines and BunkerShot3D backends (#6935–#6939). Added `resolve_club_target()` + `publish_leaderboard_row()` to the shared `motion_matching.provider` module so all six engine providers delegate one canonical target-unwrap and leaderboard-append; this UNIFIES previously forked behavior — a `ClubBallTarget` now unwraps consistently on every engine (was a `TypeError` on mujoco/pendulum/pinocchio) and every engine forwards `target_id` (#6935). Extracted `ChronoDriver._make_contact_material()` so walls/grain/clubhead share one SMC material factory (#6936). Added flat delegating accessors on `BunkerShotConfig` (`contact_params()`, `domain_extents()`, `grain_count`, `clubhead_*`, `output_rate_hz`, `trajectory_*`) so chrono/mpm drivers stop reaching two levels into the nested config (#6937). Collapsed the drifted `opensim/motion_matching/forward_kinematics.py` FK copy (which read non-existent `/bodyset/Club/*` frames) into a thin re-export of the canonical `opensim_golf/fk.py` extractor (#6938). Added a shared `motion_matching.provenance` module (`engine_package_version()`, `git_commit_short()`) and routed the five `engine_version()` cascades and three git-commit probes through it (#6939). |
 | 2026-06-03 | 1.0.224 | Bolt: Optimized `np.linalg.norm(v[:2])` to `math.hypot(v[0], v[1])` in `ball_trajectory_analysis.py` to avoid temporary array allocation and speed up calculation. |
 ````
-
 
 - Optimized magnitude calculations using math.hypot instead of np.linalg.norm in MuJoCo humanoid golf engine

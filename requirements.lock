@@ -94,6 +94,7 @@ markupsafe==3.0.3
     # via
     #   flask
     #   jinja2
+    #   mako
     #   werkzeug
 mujoco==3.8.0
     # via upstream-drift (pyproject.toml)
@@ -117,6 +118,8 @@ pillow==12.2.0
     #   upstream-drift (pyproject.toml)
 platformdirs==4.3.8
     # via upstream-drift (pyproject.toml)
+pycparser==2.23
+    # via cffi
 pydantic==2.12.5
     # via
     #   fastapi
@@ -126,8 +129,6 @@ pydantic-core==2.41.5
     # via pydantic
 pydantic-settings==2.14.1
     # via upstream-drift (pyproject.toml)
-pycparser==2.23
-    # via cffi
 pyjwt==2.12.0
     # via upstream-drift (pyproject.toml)
 pyopengl==3.1.10
@@ -167,16 +168,19 @@ tornado==6.5.5
     # via bokeh
 typing-extensions==4.15.0
     # via
+    #   alembic
     #   anyio
     #   etils
     #   fastapi
     #   limits
     #   pydantic
     #   pydantic-core
+    #   sqlalchemy
     #   starlette
     #   typing-inspection
 typing-inspection==0.4.2
     # via
+    #   fastapi
     #   pydantic
     #   pydantic-settings
 urllib3==2.7.0

@@ -39,10 +39,12 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Install workflow parser dependency
         shell: bash
-        run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.2
+        run: |
+          python3 -m venv .ci-local-only-venv
+          .ci-local-only-venv/bin/python -m pip install --disable-pip-version-check pyyaml==6.0.2
       - name: Run local-only workflow guard
         shell: bash
-        run: python3 scripts/check_local_only_workflows.py
+        run: .ci-local-only-venv/bin/python scripts/check_local_only_workflows.py
 
   pinned-actions:
     name: Enforce action SHA pinning
