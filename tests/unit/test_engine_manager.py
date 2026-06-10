@@ -248,6 +248,39 @@ class TestEngineManager:
             assert manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.ERROR
             mock_logger.error.assert_called()
 
+    def test_matlab_3d_switch_uses_registry_factory(self) -> None:
+        """MATLAB engines must use the same registry path as other engines."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            matlab_dir = (
+                temp_path
+                / "engines"
+                / "Simscape_Multibody_Models"
+                / "3D_Golf_Model"
+            )
+            matlab_dir.mkdir(parents=True)
+
+            fake_engine = MagicMock()
+            fake_loader = MagicMock(return_value=fake_engine)
+
+            with patch.dict(
+                "src.engines.loaders.LOADER_MAP",
+                {EngineType.MATLAB_3D: fake_loader},
+                clear=True,
+            ):
+                manager = EngineManager(suite_root=temp_path)
+
+            assert manager.get_engine_status(EngineType.MATLAB_3D) == (
+                EngineStatus.AVAILABLE
+            )
+            assert manager.switch_engine(EngineType.MATLAB_3D) is True
+            fake_loader.assert_called_once_with(temp_path)
+            assert manager.active_physics_engine is fake_engine
+
+    def test_engine_manager_has_no_private_matlab_loader_branch(self) -> None:
+        """The loader registry owns MATLAB startup and adapter selection."""
+        assert not hasattr(EngineManager, "_load_matlab_engine")
+
 
 class TestEngineTypes:
     """Test cases for EngineType enum."""

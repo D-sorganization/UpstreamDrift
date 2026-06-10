@@ -83,14 +83,12 @@ def test_mujoco_loading_failure_no_registration(mock_engine_manager) -> None:
 
 def test_cleanup_releases_resources(mock_engine_manager) -> None:
     """Test that cleanup releases resources."""
-    # Mock some loaded resources
-    mock_matlab = MagicMock(spec=["quit", "exit"])
-    mock_engine_manager._matlab_engine = mock_matlab
+    mock_engine = MagicMock(spec=["close"])
+    mock_engine_manager.active_physics_engine = mock_engine
 
     mock_engine_manager.cleanup()
 
-    mock_matlab.quit.assert_called_once()
-    assert mock_engine_manager._matlab_engine is None
+    mock_engine.close.assert_called_once()
     # Verify cleanup completed successfully
     assert mock_engine_manager.active_physics_engine is None
     assert mock_engine_manager.current_engine is None
@@ -98,11 +96,11 @@ def test_cleanup_releases_resources(mock_engine_manager) -> None:
 
 def test_cleanup_handles_exceptions(mock_engine_manager) -> None:
     """Test that cleanup handles exceptions during shutdown."""
-    mock_matlab = MagicMock(spec=["quit", "exit"])
-    mock_matlab.quit.side_effect = RuntimeError("Shutdown error")
-    mock_engine_manager._matlab_engine = mock_matlab
+    mock_engine = MagicMock(spec=["close"])
+    mock_engine.close.side_effect = RuntimeError("Shutdown error")
+    mock_engine_manager.active_physics_engine = mock_engine
 
     # Should not raise
     mock_engine_manager.cleanup()
 
-    assert mock_engine_manager._matlab_engine is None
+    assert mock_engine_manager.active_physics_engine is None

@@ -202,9 +202,6 @@ class EngineManager(ContractChecker):
         self.provider_engine_paths = self._discover_provider_engine_paths()
         self._discover_engines()
 
-        # Engine storage (Legacy / Specifics)
-        self._matlab_engine: Any = None
-        self._matlab_model_dir: Path | None = None
         self._pendulum_model_dir: Path | None = None
 
     def get_active_physics_engine(self) -> PhysicsEngine | None:
@@ -313,20 +310,13 @@ class EngineManager(ContractChecker):
         self.active_physics_engine = None
 
         try:
-            # Handle special cases (MATLAB) that don't conform to standard PhysicsEngine yet
-            if engine_type in (EngineType.MATLAB_2D, EngineType.MATLAB_3D):
-                self._load_matlab_engine(engine_type)
-            else:
-                # Standard Registry Loading
-                registry = get_registry()
-                registration = registry.get(engine_type)
-                if not registration:
-                    # Fallback or error
-                    raise GolfModelingError(f"No registration found for {engine_type}")
+            registry = get_registry()
+            registration = registry.get(engine_type)
+            if not registration:
+                raise GolfModelingError(f"No registration found for {engine_type}")
 
-                # Instantiate
-                engine = registration.factory()
-                self.active_physics_engine = engine
+            engine = registration.factory()
+            self.active_physics_engine = engine
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(
@@ -347,54 +337,18 @@ class EngineManager(ContractChecker):
             )
             raise EngineLaunchError(engine_type.value, reason=str(e)) from e
 
-    def _load_matlab_engine(self, engine_type: EngineType) -> None:
-        """Load MATLAB engine type."""
-        if engine_type is None:
-            raise ValueError("engine_type must be provided")
-        self.active_physics_engine = None
-        try:
-            import matlab.engine
-
-            logger.info(
-                "matlab_engine_starting engine=%s timeout_seconds=60 (This may take 30-60 seconds)",
-                engine_type.value,
-            )
-            # REL-001: Add timeout to prevent infinite hangs
-            engine = matlab.engine.start_matlab(timeout=60.0)
-
-            model_dir = self.engine_paths[engine_type] / "matlab"
-            if not model_dir.exists():
-                raise GolfModelingError(
-                    f"MATLAB model directory not found: {model_dir}"
-                )
-
-            engine.addpath(str(model_dir), nargout=0)
-            self._matlab_engine = engine
-            self._matlab_model_dir = model_dir
-            logger.info(
-                "matlab_engine_loaded engine=%s model_dir=%s",
-                engine_type.value,
-                model_dir,
-            )
-
-        except ImportError as e:
-            logger.error(
-                "matlab_engine_import_failed: MATLAB Engine for Python not installed",
-                exc_info=True,
-            )
-            raise GolfModelingError("MATLAB Engine for Python not installed.") from e
-
     def cleanup(self) -> None:
         """Clean up loaded engines."""
-        if self._matlab_engine is not None:
+        active_engine = self.active_physics_engine
+        close = getattr(active_engine, "close", None)
+        if callable(close):
             try:
-                self._matlab_engine.quit()
-                logger.info("matlab_engine_shutdown status=success")
+                close()
+                logger.info("active_engine_shutdown status=success")
             except (RuntimeError, OSError) as e:
                 logger.warning(
-                    "matlab_engine_shutdown_failed error=%s", e, exc_info=True
+                    "active_engine_shutdown_failed error=%s", e, exc_info=True
                 )
-            self._matlab_engine = None
 
         self.active_physics_engine = None
         self.current_engine = None

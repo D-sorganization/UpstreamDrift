@@ -10,6 +10,8 @@ a live MATLAB Engine are marked ``requires_matlab`` (alias for
 
 from __future__ import annotations
 
+import importlib.util
+import os
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,19 @@ from src.engines.loaders import (
 )
 from src.engines.simscape import SimscapeAdapter
 from src.shared.python.engine_core.engine_registry import EngineType
+
+
+def _matlab_engine_available() -> bool:
+    """Return True when matlab.engine can be imported on this host."""
+    if os.environ.get("UD_SIMSCAPE_FORCE_NO_MATLAB") == "1":
+        return False
+    try:
+        return importlib.util.find_spec("matlab.engine") is not None
+    except ModuleNotFoundError:
+        return False
+
+
+_MATLAB_OK = _matlab_engine_available()
 
 
 def _suite_root() -> Path:
@@ -98,6 +113,10 @@ def test_invalid_model_path_raises_clear_error(tmp_path: Path) -> None:
 
 
 @pytest.mark.requires_matlab
+@pytest.mark.skipif(
+    not _MATLAB_OK,
+    reason="matlab.engine not importable in this environment",
+)
 def test_live_matlab_3d_simulate_smoke() -> None:  # pragma: no cover - requires MATLAB
     """Full simulate smoke test on a host with MATLAB."""
     import numpy as np
