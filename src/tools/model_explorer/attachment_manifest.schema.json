@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://d-sorganization.github.io/upstreamdrift/model-explorer/attachment_manifest.schema.json",
+  "title": "UpstreamDrift model attachment manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "attachment_points"],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "attachment_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "link_name", "role"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "link_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interface_frame": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "xyz": {
+                "$ref": "#/$defs/vector3"
+              },
+              "rpy": {
+                "$ref": "#/$defs/vector3"
+              }
+            }
+          },
+          "max_payload_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}
