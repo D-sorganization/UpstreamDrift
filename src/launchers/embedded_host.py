@@ -570,6 +570,11 @@ class EmbeddedHostWidget(QWidget):
             logger.info("pop_out_tab: %s is pin-only; ignoring", tool_id)
             return False
 
+        # Bracket the re-parent with pause/resume so tools holding
+        # re-parent-sensitive resources (GL contexts, timers, IPC) get a
+        # chance to quiesce before the widget changes top-level windows.
+        _safe_pause(record.tool, record.widget)
+
         index = self._tab_widget.indexOf(record.widget)
         if index != -1:
             self._tab_widget.removeTab(index)
@@ -585,6 +590,7 @@ class EmbeddedHostWidget(QWidget):
         )
         window.show()
         window.raise_()
+        _safe_resume(record.tool, record.widget)
         return True
 
     def dock_back(self, tool_id: str) -> int:
@@ -604,6 +610,10 @@ class EmbeddedHostWidget(QWidget):
         if record is None:
             return -1
 
+        # Same pause/resume bracket as pop_out_tab: the widget is about
+        # to migrate between top-level windows.
+        _safe_pause(record.tool, record.widget)
+
         widget = record.widget
         widget.setParent(self._tab_widget)
         widget.show()
@@ -617,6 +627,7 @@ class EmbeddedHostWidget(QWidget):
         record.window.setCentralWidget(None)
         record.window.close()
         record.window.deleteLater()
+        _safe_resume(record.tool, widget)
         return index
 
     def backgrounded_tools(self) -> set[str]:
@@ -626,6 +637,50 @@ class EmbeddedHostWidget(QWidget):
         need to know which tools are alive-but-hidden.
         """
         return set(self._backgrounded.keys())
+
+    def popped_out_tools(self) -> set[str]:
+        """Return the set of tool ids currently in their own windows."""
+        return set(self._popped_out.keys())
+
+    def open_tool_ids(self) -> list[str]:
+        """Return the tool ids of open tabs in current display order.
+
+        Display order reflects user drag-reordering of the movable tab
+        bar, so indices are computed live rather than from cached
+        bookkeeping.
+        """
+        by_index: list[tuple[int, str]] = []
+        for tool_id, record in self._active_tabs.items():
+            index = self._tab_widget.indexOf(record.widget)
+            if index != -1:
+                by_index.append((index, tool_id))
+        return [tool_id for _, tool_id in sorted(by_index)]
+
+    def active_tool_id(self) -> str | None:
+        """Return the tool id of the currently focused tab, or ``None``."""
+        current = self._tab_widget.currentIndex()
+        if current < 0:
+            return None
+        record = self._lookup_tab(current)
+        return record.tool.tool_id if record is not None else None
+
+    def focus_tab(self, tool_id: str) -> None:
+        """Bring ``tool_id``'s tab to the front.
+
+        Backgrounded and popped-out tools are re-surfaced via
+        :meth:`open_tab` (which re-docks / resumes them).
+
+        Raises:
+            KeyError: If ``tool_id`` is not an open, backgrounded, or
+                popped-out tool.
+        """
+        if (
+            tool_id not in self._active_tabs
+            and tool_id not in self._backgrounded
+            and tool_id not in self._popped_out
+        ):
+            raise KeyError(tool_id)
+        self.open_tab(tool_id)
 
     # ------------------------------------------------------------------
     # Dock API

@@ -1,11 +1,13 @@
 # UpstreamDrift - Complete Project Map
 
-> **Version 2.1** | Last updated: February 2026
+> **Version 2.1.1** | Last updated: 2026-06-10
 >
 > This document is the single comprehensive reference for every feature,
 > module, and tool in the UpstreamDrift Golf Modeling Suite. It is designed
 > to give users (and developers) full visibility into what the platform can
 > do, including features that are not yet exposed as launcher tiles.
+> Section 16 is the operational gap inventory — the started-but-unfinished
+> seams, each tracked by a GitHub issue.
 
 ---
 
@@ -26,6 +28,7 @@
 13. [Examples & Tutorials](#13-examples--tutorials)
 14. [Hidden / Unexposed Features](#14-hidden--unexposed-features-summary)
 15. [Deprecated / Archived Code](#15-deprecated--archived-code)
+16. [Operational Status & Gap Inventory](#16-operational-status--gap-inventory-2026-06-10)
 
 ---
 
@@ -654,3 +657,75 @@ python3 launch_golf_suite.py --engine pendulum
 # Custom port
 python3 launch_golf_suite.py --port 9000
 ```
+
+---
+
+## 16. Operational Status & Gap Inventory (2026-06-10)
+
+Findings from the 2026-06-10 operational deep dive across simulation
+processes, the launcher tab architecture, model composition, the C3D
+pipeline, and startup wiring. Working subsystems are noted for context;
+every gap is tracked by a dedicated issue with detailed instructions.
+
+### Verified working
+
+- **Putting simulation** — full pipeline (roll physics, green surface,
+  stroke params) with GUI tile and REST endpoints; integration tests pass.
+- **Ball flight** — seven literature flight models behind one registry,
+  Rust kernel preferred, GUI tile wired.
+- **Full swing forward dynamics** — engine (MuJoCo/Drake/Pinocchio) →
+  `SwingState` → impact solver → ball flight via
+  `swing_ball_flight_pipeline.py`; GUI tile wired.
+- **Engine loading** — all engines load through `LOADER_MAP` factories +
+  runtime probes in `engine_core`; missing wheels degrade to UNAVAILABLE
+  instead of crashing discovery.
+- **Tabs/pop-out** — `EmbeddedHostWidget` supports keep-running
+  backgrounding and pop-out windows that re-dock on close (state is never
+  destroyed by a pop-out close); pop-out transitions call the tools''
+  pause/resume hooks (PR #7199).
+- **C3D reading** — both capture families in `data/` (Tour-Average golf,
+  meters; CMU academic, millimeters) load correctly through the Rust
+  parser after the 1-D `POINT:UNITS` fix (PR #7200), with every file
+  covered by `tests/integration/test_c3d_data_folder_coverage.py`.
+- **Sibling model repos** — the model explorer discovers URDF/MJCF models
+  in `Drake_Models` / `MuJoCo_Models` / `Pinocchio_Models` /
+  `OpenSim_Models` next to the checkout (PR #7201;
+  `UD_SIBLING_MODEL_REPOS` overrides the roots).
+
+### Tracked gaps
+
+| Area                     | Gap                                                                                    | Issue |
+| ------------------------ | -------------------------------------------------------------------------------------- | ----- |
+| Model composition (epic) | Mix-and-match robots + biomechanics flagship                                           | #7202 |
+| Model composition        | OpenSim `.osim` loader missing                                                         | #7203 |
+| Model composition        | Drake `.sdf` loader missing                                                            | #7204 |
+| Model composition        | No validation of composed models (loops/mass/geometry)                                 | #7205 |
+| Model composition        | No attachment-point semantics                                                          | #7206 |
+| Model composition        | Drag-drop composition UX + 3D preview                                                  | #7207 |
+| Model conversion         | MJCF round-trip drops FIXED joints                                                     | #7208 |
+| Sidekick                 | Agent mode not registered in the chat panel (port exists, service unwired)             | #7209 |
+| Launcher                 | No shared event bus / context between tools                                            | #7210 |
+| Launcher                 | Hard-coded embeddable-adapter bootstrap list                                           | #7211 |
+| Mocap                    | Rust C3D parser lacks analog channels / force plates / events                          | #7212 |
+| Mocap                    | TRC + OpenCap tests fail against a fresh-built wheel                                   | #7213 |
+| Mocap                    | 3D viewer is matplotlib-bound; no GPU playback path                                    | #7214 |
+| Startup                  | Duplicate entry scripts; eager engine imports; no headless Qt fallback                 | #7215 |
+| Config                   | Three config dirs (`config/`, `configs/`, `src/shared/python/config/`) with no arbiter | #7216 |
+| Tech debt                | `upstream_drift_launcher.py` exceeds the 1200-line budget (2700+)                      | #7217 |
+| Simulation               | Ball flight has no REST endpoint (putting green does)                                  | #7218 |
+| Simulation               | Two divergent MATLAB engine launch paths                                               | #7219 |
+| Simulation               | No inverse swing optimization (target flight → swing)                                  | #7220 |
+| React UI                 | Tabs/pop-out/backgrounding parity vs multi-window undecided                            | #7221 |
+
+### Vendoring rule (recurring trap)
+
+`src/shared/python/model_generation/**` and `src/shared/python/sidekick/**`
+are vendored child copies of the Tools repository (header: "WARNING: DO NOT
+EDIT"). Canonical changes land in Tools and sync here; first-party additions
+belong under `src/tools/` or `src/launchers/` and must not shadow a Tools
+module (`tests/unit/repo_hygiene/` enforces this).
+
+### Maintenance
+
+Update §16 when a tracked gap closes (strike the row, link the PR) or a new
+gap is found — the same cadence as SPEC.md §4.

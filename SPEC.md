@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.270                                            |
+| **Spec Version**        | 1.0.271                                            |
 | **Last Spec Update**    | 2026-06-10                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,23 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-10** - Refreshed the Module Map against the actual source tree
+  (the previous tree listed entry points and API files that no longer
+  exist) and linked the operational project map. The full gap inventory
+  from the 2026-06-10 operational deep dive lives in
+  `docs/architecture/PROJECT_MAP.md` §16, tracked by issues #7202-#7221
+  (model-composition epic, sidekick agent wiring, C3D/Rust analog support,
+  startup + config consolidation, and related work). Landed alongside:
+  sidekick subtab host port + pop-out lifecycle hooks (#7199), the Rust C3D
+  1-D `POINT:UNITS` fix with full `data/` coverage (#7200), and sibling
+  model-repository discovery in the model explorer (#7201).
+- **2026-06-10** - Repaired remaining #7189 packaging gate regressions after
+  the branch merge: Tauri Linux dependency installs now wait on both apt and
+  dpkg locks, and the WGS calculator keeps GUI theme imports inside the plot-tab
+  path so the installed `sidekick run` wheel smoke can load the headless engine
+  without requiring PyQt6 or the top-level `shared` GUI theme package. The
+  standalone Sidekick wheel smoke matrix now matches the Python 3.11+ package
+  floor, and the Python-version coherence guard covers that workflow.
 - **2026-06-10** - Resolved Python-version provenance drift for #7160:
   `pyproject.toml`, `install.sh`, `CLAUDE.md`, user-facing installation docs,
   `SPEC.md`, the standard CI test matrix, Docker base images, and
@@ -231,78 +248,67 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
-| 2026-06-03 | 1.0.224 | Bolt: Optimized `np.linalg.norm(v[:2])` to `math.hypot(v[0], v[1])` in `ball_trajectory_analysis.py` to avoid temporary array allocation and speed up calculation. |
+The operational companion to this map (startup phases, tab/sidekick wiring,
+and the tracked implementation-gap inventory) lives in
+[`docs/architecture/PROJECT_MAP.md`](docs/architecture/PROJECT_MAP.md) §16.
 
 ````
 UpstreamDrift/
+├── launch_upstream_drift.py        # Canonical entry point (web/classic/api-only/engine)
+├── launch_golf_suite.py            # Legacy alias entry point (console script target; #7215)
 ├── src/
 │   ├── engines/
-│   │   ├── physics_engines/        # Engine adapters and integrations (package directories)
-│   │   │   ├── mujoco/             # MuJoCo backend (supported)
+│   │   ├── physics_engines/        # Engine adapters (package directories)
+│   │   │   ├── mujoco/             # MuJoCo backend (core)
 │   │   │   ├── drake/              # Drake backend (extended)
 │   │   │   ├── pinocchio/          # Pinocchio backend (extended)
+│   │   │   ├── jaxsim/             # JaxSim backend (beta)
 │   │   │   ├── opensim/            # OpenSim backend (experimental)
 │   │   │   ├── myosuite/           # MyoSuite backend (experimental)
 │   │   │   ├── pendulum/           # Simplified educational models
 │   │   │   └── putting_green/      # Putting green simulation
-│   │   └── pendulum_models/        # Simplified educational models
-│   │       ├── twodof_pendulum.py
-│   │       └── biomechanical_pendulum.py
-│   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── upstream_drift_launcher.py        # PyQt6 professional GUI (main entrypoint)
-│   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
-│   │   ├── unified_launcher.py     # Unified launcher interface
-│   │   └── cli_launcher.py         # Command-line interface
-│   ├── api/                        # FastAPI REST backend
-│   │   ├── main.py                 # API entry point
-│   │   ├── endpoints/              # REST endpoint definitions
-│   │   └── models.py               # Pydantic request/response models
-│   ├── config/                     # Configuration management
-│   │   └── launcher_manifest_loader.py # Config loading and validation
-│   ├── shared/                     # Cross-engine utilities
-│   │   ├── validators.py           # Shared validation logic
-│   │   ├── utilities.py            # Helper functions
-│   │   └── exceptions.py           # Exception definitions
-
-│   └── tools/                      # Development and analysis tools
-│       ├── analysis_tools.py       # Biomechanical analysis utilities
-│       └── validation_tools.py     # Cross-engine validation
-├── rust_core/
-│   └── upstream-physics/           # Rust physics kernels
-│       ├── src/
-│       │   ├── lib.rs
-│       │   └── physics.rs
-│       └── Cargo.toml
-├── ui/
-│   ├── src/
-│   │   ├── main.ts                 # Tauri app entry point
-│   │   └── components/             # React/Vue components
-│   ├── tauri.conf.json
-│   └── package.json
-├── shared/
-│   └── models/                     # URDF/model definitions
-│       ├── golf_swing_models/
-│       ├── human_body_models/
-│       └── pendulum_models/
-├── tests/
-│   ├── unit/                       # Unit tests per module
-│   ├── integration/                # Cross-engine integration tests
-│   ├── acceptance/                 # End-to-end scenario tests
-│   ├── cross_engine/               # Cross-validation tests
-│   ├── physics_validation/         # Physics accuracy tests
-│   ├── benchmarks/                 # Performance benchmarks
-│   └── conftest.py                 # Pytest fixtures and configuration
-├── .github/
-│   └── workflows/
-
-│       ├── ci-standard.yml         # Standard CI checks
-│       ├── heavy-tests-opt-in.yml  # Heavy tests (custom runner)
-│       ├── nightly-cross-validation.yml
-│       ├── tauri-build.yml
-│       ├── vendor-freshness.yml
-│       └── docker-size-gates.yml
-├── pyproject.toml
-├── poetry.lock
+│   │   ├── pendulum_models/        # Educational pendulum models
+│   │   └── Simscape_Multibody_Models/  # MATLAB models + C3D viewer app
+│   ├── launchers/                  # PyQt6 launcher (50+ modules)
+│   │   ├── upstream_drift_launcher.py  # Main window (size split tracked: #7217)
+│   │   ├── embedded_host.py        # Tab/dock host: pop-out, backgrounding
+│   │   ├── embedded_tool_bootstrap.py  # Embeddable-adapter registration
+│   │   ├── sidekick_host_port.py   # Sidekick agent ↔ tabs bridge (subtab port)
+│   │   └── {mujoco,drake,pinocchio,jaxsim}_dashboard.py, dialogs, theme, …
+│   ├── api/                        # FastAPI backend
+│   │   ├── local_server.py         # Server entry (web UI host)
+│   │   ├── routes/                 # 30+ endpoint modules
+│   │   ├── services/               # Simulation/chat/analysis services
+│   │   └── auth/, middleware/, models/, utils/
+│   ├── config/                     # Launcher manifest + models.yaml loaders
+│   ├── tools/                      # Embeddable tool tabs (model_explorer,
+│   │                               # ball_flight_gui, putting_green_gui,
+│   │                               # swing_flight_pipeline, pose_studio,
+│   │                               # video_analyzer, sidekick, …)
+│   └── shared/python/              # Cross-cutting libraries; highlights:
+│       ├── engine_core/            # EngineManager/Registry/probes/capabilities
+│       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
+│       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
+│       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
+│       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
+│       ├── humanoid_character_builder/  # Parametric humanoid URDF generation
+│       └── pose_interchange/, realtime/, simulation_backends/, config/, …
+├── rust_core/                      # Maturin crates
+│   ├── upstream-physics/           # Ball flight, aero, contact, RK4 kernels
+│   ├── upstream-mocap-io/          # C3D/TRC/BVH parsers (PyO3)
+│   ├── upstream-mocap-preproc/, upstream-urdf/, upstream-mesh/,
+│   ├── upstream-muscle/, upstream-motion-matching/, upstream-pinocchio-id/,
+│   └── upstream-realtime/, upstream-codemap/, ai_backend/
+├── ui/                             # React + Tauri launcher (manifest-driven)
+├── vendor/ud-tools/                # Vendored Tools repo (canonical for sidekick
+│                                   # and model_generation packages)
+├── data/                           # Sample data incl. C3D captures (golf TA + CMU)
+├── tests/                          # unit/, integration/, launchers/, api/, tools/,
+│                                   # heavy_integration/, benchmarks/, …
+├── scripts/                        # CI gates + config baselines (scripts/config/)
+├── docs/                           # ADRs, architecture (PROJECT_MAP.md), guides
+├── pyproject.toml                  # Canonical dependency + console-script source
 ├── SPEC.md                         # This file
 └── README.md
 
@@ -765,6 +771,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.271 | Follow-up #7189 packaging gate repair after reconciling the parallel branch update. Tauri Linux dependency setup now waits on both apt and dpkg locks, matching the runner failure mode seen in `Check (Rust + TypeScript)`. The WGS process calculator lazy-loads GUI theme helpers from `create_plots_tab`, and the standalone Sidekick regression suite asserts the WGS engine import does not require `shared.python.theme.integration` or PyQt6, keeping the clean-wheel `sidekick run` smoke headless. `package-standalone-sidekick.yml` now smoke-tests Python 3.11/3.12 to match the package floor, with `scripts/ci/check_python_version_coherence.py` guarding that workflow. |
 | 2026-06-10 | 1.0.270 | Docker dependency-audit hardening for #7160 follow-up CI. Pinned Docker builder/runtime pip installs to `26.1.2`, declared patched runtime floors for `Mako>=1.3.12` and `PyJWT>=2.13.0`, aligned `requirements.lock`, and updated the direct dependency license ledger so in-image `pip-audit` resolves patched packages. |
 | 2026-06-10 | 1.0.269 | Python-version coherence hardening for #7160. Raised the live package/support floor to Python 3.11, removed the unsupported Python 3.10 classifier and standard CI matrix lane, kept Python 3.11/3.12 in the standard test matrix, and documented that the Docker image plus `requirements.lock` are generated on Python 3.12. Added `scripts/ci/check_python_version_coherence.py` and `tests/ci/test_python_version_coherence.py` to enforce agreement across `pyproject.toml`, `install.sh`, `requirements.lock`, `Dockerfile`, `.github/workflows/ci-standard.yml`, mypy target version, and public docs. |
 | 2026-06-10 | 1.0.268 | Finished a deferred sub-defect of the pytest-gating policy issue #7158 (D2 marker discipline). Added `tests/support/suite_markers.py` (`SUITE_MARKERS`, `suite_markers_enforced`, `find_unmarked`, `item_has_suite_marker`) and wired a `pytest_collection_modifyitems` + `pytest_terminal_summary` hook in `tests/conftest.py` that, in REPORT-ONLY mode (the repo's ratchet pattern), counts collected tests carrying none of the recognized suite markers and surfaces the baseline without failing collection. Enforcement (missing-marker = collection error) is opt-in via `UD_ENFORCE_SUITE_MARKERS=1` for a follow-up once the unmarked baseline is driven to zero. Unit coverage in `tests/unit/test_suite_marker_enforcement_7158.py`. The remaining #7158 sub-defects (D3 coverage-omit retune) and #7155 sub-defects (deleting the autouse `_protect_engine_modules` and function-scoping `mock_mujoco_dependencies`, both gated on the issue's 5/5 `-n auto` stability evidence) stay deferred for cause and are tracked on those issues. |

@@ -132,16 +132,43 @@ def test_bootstrap_adds_vendor_path_to_sys_path() -> None:
 
 
 def test_bootstrap_records_successfully_imported_tools() -> None:
-    """Successful imports get their tool_id extracted and recorded."""
+    """Tool ids actually registered during an adapter import are recorded.
+
+    Recording diffs the registry around each import, so the recorded ids
+    are the ones the adapter registered — not ids guessed from the
+    module name.
+    """
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
+    from src.shared.python.launcher_embed.contract import EmbedCapabilities
+
+    class _FakeTool:
+        tool_id = "model_explorer"
+
+        def embed_capabilities(self) -> EmbedCapabilities:
+            return EmbedCapabilities(supports_embedded=True)
+
+        def create_main_widget(self, parent: object) -> object:
+            return object()
+
+        def cleanup(self) -> None:
+            pass
+
+        def is_dirty(self) -> bool:
+            return False
 
     def _selective(name):
         if name == "src.tools.model_explorer._embed_adapter":
-            return object()  # success
+            # Simulate the adapter's import-time self-registration.
+            EMBEDDABLE_TOOL_REGISTRY.setdefault("model_explorer", _FakeTool())
+            return object()
         raise ImportError(f"forced for {name}")
 
-    with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
-        result = bootstrap.bootstrap_embeddable_tools()
-    assert "model_explorer" in result
+    try:
+        with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
+            result = bootstrap.bootstrap_embeddable_tools()
+        assert "model_explorer" in result
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.pop("model_explorer", None)
 
 
 # Tools whose adapters live in this repo (not the vendored Tools submodule) and
