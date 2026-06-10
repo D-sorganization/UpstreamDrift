@@ -44,6 +44,41 @@ ROUNDTRIP_URDF = """<?xml version="1.0"?>
 </robot>
 """
 
+FIXED_JOINT_ROUNDTRIP_URDF = """<?xml version="1.0"?>
+<robot name="fixed_mount">
+  <link name="base">
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="sensor_mount">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.01" iyy="0.01" izz="0.01" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="sensor_head">
+    <inertial>
+      <mass value="0.25"/>
+      <inertia ixx="0.005" iyy="0.005" izz="0.005" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="weld_sensor_mount" type="fixed">
+    <parent link="base"/>
+    <child link="sensor_mount"/>
+    <origin xyz="0.1 0.2 0.3"/>
+  </joint>
+  <joint name="sensor_pan" type="revolute">
+    <parent link="sensor_mount"/>
+    <child link="sensor_head"/>
+    <origin xyz="0 0 0.4"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1" upper="1" effort="5" velocity="2"/>
+  </joint>
+</robot>
+"""
+
 
 def _element(xml_str: str) -> ET.Element:
     """Parse an MJCF snippet into an Element via defusedxml (matches module)."""
@@ -105,6 +140,58 @@ class TestRoundTrip:
         root = DefusedET.fromstring(urdf)
         link_names = {link.get("name") for link in root.findall("link")}
         assert {"base", "link1"} <= link_names
+
+    def test_fixed_joint_topology_survives_urdf_mjcf_urdf(
+        self, converter: MJCFConverter
+    ) -> None:
+        original = converter._urdf_parser.parse(FIXED_JOINT_ROUNDTRIP_URDF)
+
+        mjcf = converter.urdf_to_mjcf(FIXED_JOINT_ROUNDTRIP_URDF)
+        roundtripped_urdf = converter.mjcf_to_urdf(mjcf)
+        reparsed = converter._urdf_parser.parse(roundtripped_urdf)
+
+        assert {link.name for link in reparsed.links} == {
+            link.name for link in original.links
+        }
+        assert {joint.name for joint in reparsed.joints} == {
+            joint.name for joint in original.joints
+        }
+
+        original_joints = {joint.name: joint for joint in original.joints}
+        reparsed_joints = {joint.name: joint for joint in reparsed.joints}
+        fixed_joint = reparsed_joints["weld_sensor_mount"]
+        assert fixed_joint.joint_type == JointType.FIXED
+        assert fixed_joint.parent == original_joints["weld_sensor_mount"].parent
+        assert fixed_joint.child == original_joints["weld_sensor_mount"].child
+        assert fixed_joint.origin.xyz == pytest.approx((0.1, 0.2, 0.3), abs=1e-9)
+
+        movable_joint = reparsed_joints["sensor_pan"]
+        assert movable_joint.joint_type == JointType.REVOLUTE
+        assert movable_joint.parent == "sensor_mount"
+        assert movable_joint.child == "sensor_head"
+
+    def test_mjcf_jointed_body_name_with_fixed_marker_is_not_decoded(
+        self, converter: MJCFConverter
+    ) -> None:
+        mjcf = """<mujoco model="marker_name">
+  <worldbody>
+    <body name="base">
+      <body name="tool__fixed__literal" pos="0 0 1">
+        <joint name="tool_joint" type="hinge" axis="0 0 1"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>"""
+
+        reparsed = converter._parse_mjcf(_element(mjcf))
+
+        assert {link.name for link in reparsed.links} == {
+            "base",
+            "tool__fixed__literal",
+        }
+        joint = reparsed.joints[0]
+        assert joint.name == "tool_joint"
+        assert joint.child == "tool__fixed__literal"
 
 
 class TestParseBodyInertial:
