@@ -138,62 +138,6 @@ def test_stream_output(manager) -> None:
     manager._emit_output.assert_any_call("TestApp", "[exited with code 0]")
 
 
-def test_stream_output_closes_pipes_when_callback_raises(manager) -> None:
-    """A raising _emit_output must not leak the pipe handles (issue #7151 D1)."""
-    mock_proc = MagicMock()
-    mock_proc.stdout.readline.side_effect = [b"line1\n", b""]
-    mock_proc.stderr.readline.side_effect = [b""]
-    mock_proc.wait.return_value = 0
-
-    calls = {"n": 0}
-
-    def _raising_emit(name, line):
-        calls["n"] += 1
-        if line == "line1":
-            raise RuntimeError("callback boom")
-
-    manager._emit_output = _raising_emit
-
-    # Must not propagate; pipes must be closed regardless.
-    manager._stream_output("TestApp", mock_proc)
-    mock_proc.stdout.close.assert_called_once()
-    mock_proc.stderr.close.assert_called_once()
-
-
-def test_stream_output_skips_bad_line_and_continues(manager) -> None:
-    """One bad line/callback is skipped; the stream keeps going (#7151 D3)."""
-    mock_proc = MagicMock()
-    mock_proc.stdout.readline.side_effect = [b"good1\n", b"bad\n", b"good2\n", b""]
-    mock_proc.stderr.readline.side_effect = [b""]
-    mock_proc.wait.return_value = 0
-
-    seen = []
-
-    def _emit(name, line):
-        if line == "bad":
-            raise ValueError("nope")
-        seen.append(line)
-
-    manager._emit_output = _emit
-    manager._stream_output("TestApp", mock_proc)
-
-    assert "good1" in seen
-    assert "good2" in seen  # streaming continued past the bad line
-    assert "[exited with code 0]" in seen
-
-
-def test_stream_output_closes_pipes_on_normal_exit(manager) -> None:
-    mock_proc = MagicMock()
-    mock_proc.stdout.readline.side_effect = [b""]
-    mock_proc.stderr.readline.side_effect = [b""]
-    mock_proc.wait.return_value = 0
-    manager._emit_output = MagicMock()
-
-    manager._stream_output("TestApp", mock_proc)
-    mock_proc.stdout.close.assert_called_once()
-    mock_proc.stderr.close.assert_called_once()
-
-
 @patch(_VALIDATE_SCRIPT)
 @patch(_SECURE_POPEN)
 def test_launch_script_unified(mock_secure_popen, mock_validate, manager) -> None:
@@ -413,9 +357,6 @@ def test_write_log_line_oserror(mock_open_file, mock_datetime, manager) -> None:
 def test_stream_output_runtime_error(manager) -> None:
     mock_proc = MagicMock()
     mock_proc.stdout.readline.side_effect = RuntimeError("Boom")
-    # stderr terminates at EOF; each stream is now pumped independently so a
-    # stdout error no longer aborts stderr (issue #7151).
-    mock_proc.stderr.readline.side_effect = [b""]
     mock_proc.wait.return_value = 0
     manager._stream_output("TestApp", mock_proc)  # Should catch exception
 

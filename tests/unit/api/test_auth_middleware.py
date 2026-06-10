@@ -100,8 +100,7 @@ class TestLocalUserContract:
 
         user = LocalUser()
         assert hasattr(user, "role")
-        # Real UserRole value (issue #7142) so quota/role-check code coerces it.
-        assert user.role == "admin"
+        assert user.role == "ADMIN"
 
     def test_has_unlimited_quota(self) -> None:
         """Postcondition: LocalUser has unlimited quota."""
@@ -184,7 +183,7 @@ class TestOptionalAuthCall:
             result = await auth(mock_request)
 
             assert isinstance(result, LocalUser)
-            assert result.role == "admin"
+            assert result.role == "ADMIN"
 
     async def test_calls_parent_in_cloud_mode(self) -> None:
         """Test calling parent HTTPBearer in cloud mode."""

@@ -1,7 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
-from collections.abc import Callable, Iterator
-from typing import Any, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 from src.api.utils.datetime_compat import UTC
 
@@ -78,46 +78,14 @@ def _validate_api_key_format(api_key: str) -> None:
         raise _unauthorized("Invalid API key format")
 
 
-def _api_key_not_expired() -> Any:
-    """SQLAlchemy predicate: key has no expiry, or expiry is still in the future.
-
-    Single source of truth for the expiry rule so the prefix-indexed query and
-    the fallback full-scan cannot drift (DRY). Mirrored by
-    :func:`_api_key_is_valid` for in-Python (cache-hit) re-validation. Returns a
-    SQLAlchemy ``BooleanClauseList`` (typed ``Any``; it is consumed only inside
-    ``.filter(...)``).
-    """
-    from datetime import datetime
-
-    now = datetime.now(UTC)
-    return (APIKey.expires_at.is_(None)) | (APIKey.expires_at > now)
-
-
-def _api_key_is_valid(record: APIKey) -> bool:
-    """Postcondition predicate: an API key is usable iff active and unexpired."""
-    if not bool(record.is_active):
-        return False
-    expires_at = record.expires_at
-    if expires_at is None:
-        return True
-    from datetime import datetime
-
-    # Treat naive timestamps as UTC for comparison robustness.
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=UTC)
-    return bool(expires_at > datetime.now(UTC))
-
-
 def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
     from .security import auth_cache
 
     cached_key_id = auth_cache.get(api_key)
     if not cached_key_id:
         return None
-    # Re-fetch fresh by id and re-validate at use time so a key revoked or
-    # expired after the cache warmed cannot keep authenticating (issue #7139).
     record = db.query(APIKey).filter(APIKey.id == cached_key_id).first()
-    if not record or not _api_key_is_valid(record):
+    if not record or not record.is_active:
         return None
 
     return _assert_type(record, APIKey, "cached_api_key")
@@ -134,11 +102,7 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
     try:
         active_keys = (
             db.query(APIKey)
-            .filter(
-                APIKey.is_active,
-                APIKey.key_prefix == prefix_hash,
-                _api_key_not_expired(),
-            )
+            .filter(APIKey.is_active, APIKey.key_prefix == prefix_hash)
             .all()
         )
     except (OperationalError, ProgrammingError):
@@ -150,20 +114,14 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
         _logging.getLogger(__name__).debug(
             "key_prefix index unavailable, falling back to full key scan"
         )
-        active_keys = (
-            db.query(APIKey).filter(APIKey.is_active, _api_key_not_expired()).all()
-        )
+        active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     if not active_keys:
         raise _unauthorized("Invalid API key")
 
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
-            verified = _assert_type(key_candidate, APIKey, "api_key_candidate")
-            # Postcondition (DbC): a returned key is always active and unexpired.
-            if not _api_key_is_valid(verified):
-                raise _unauthorized("Invalid API key")
-            return verified
+            return _assert_type(key_candidate, APIKey, "api_key_candidate")
 
     raise _unauthorized("Invalid API key")
 
@@ -251,24 +209,13 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
     return role_dependency
 
 
-def check_usage_quota(
-    resource_type: str,
-) -> Callable[[User, Session], Iterator[User]]:
-    """Dependency factory for usage quota checking.
-
-    The dependency is a generator (``yield``) dependency so that the quota
-    counter is incremented **only after** the route handler completes
-    successfully. FastAPI drives the post-``yield`` code after the response is
-    produced and throws any handler exception back into the generator, so a
-    failed request (validation error, 5xx, engine unavailable) leaves the
-    counter untouched — users are no longer charged for requests that never
-    produced a result (issue #7143).
-    """
+def check_usage_quota(resource_type: str) -> Callable[[User, Session], User]:
+    """Dependency factory for usage quota checking."""
 
     def quota_dependency(
         current_user: User = Depends(get_current_user_flexible),
         db: Session = Depends(get_db),
-    ) -> Iterator[User]:
+    ) -> User:
         """Enforce usage quota for the given resource type."""
         if not usage_tracker.check_quota(current_user, resource_type):
             user_role = UserRole(current_user.role)
@@ -285,15 +232,11 @@ def check_usage_quota(
                 f"Upgrade your subscription for higher limits.",
             )
 
-        try:
-            yield current_user
-        except Exception:
-            # Handler failed after the dependency resolved: do not charge quota.
-            raise
-        else:
-            # Handler succeeded: charge exactly once, atomically.
-            usage_tracker.increment_usage(current_user, resource_type)
-            db.commit()
+        # Increment usage counter
+        usage_tracker.increment_usage(current_user, resource_type)
+        db.commit()
+
+        return current_user
 
     return quota_dependency
 

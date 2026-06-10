@@ -162,9 +162,7 @@ class CredentialManager:
         if env_var:
             key = os.environ.get(env_var)
             if key:
-                # Do not log the env-var name: debug bundles would reveal which
-                # API-key env vars exist on a host (issue #7152, Defect 3).
-                logger.debug("Using configured credential for provider %s", provider)
+                logger.debug("Using env var %s for provider %s", env_var, provider)
                 return key
 
         return None

@@ -28,7 +28,7 @@ import tempfile
 import threading
 from collections.abc import Callable
 from pathlib import Path
-from typing import IO, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -437,47 +437,27 @@ class ProcessManager:
         """Read stdout/stderr from *process* and emit lines until EOF.
 
         Runs in a daemon thread so the main GUI thread is never blocked.
-
-        Pipe handles are always closed in a ``finally`` block so a raising
-        ``_emit_output`` callback cannot leak them (issue #7151 D1). Closing the
-        read ends also unblocks a ``readline`` that is hung on a pipe inherited
-        by a grandchild after the child exits, so the reader thread is reclaimed
-        (#7151 D2). A single bad line is logged and skipped rather than killing
-        the stream (#7151 D3).
         """
         if name is None:
             raise ValueError("name must be provided")
         try:
-            self._pump_stream(name, process.stdout, prefix="")
-            self._pump_stream(name, process.stderr, prefix="STDERR: ")
-        finally:
-            for pipe in (process.stdout, process.stderr):
-                if pipe is not None:
-                    try:
-                        pipe.close()
-                    except OSError as exc:
-                        logger.debug("closing pipe for %s failed: %s", name, exc)
+            if process.stdout:
+                for raw_line in iter(process.stdout.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        self._emit_output(name, line)
+                process.stdout.close()
+            if process.stderr:
+                for raw_line in iter(process.stderr.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        self._emit_output(name, f"STDERR: {line}")
+                process.stderr.close()
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.debug("Output stream ended for %s: %s", name, e)
 
         return_code = process.wait()
         self._emit_output(name, f"[exited with code {return_code}]")
-
-    def _pump_stream(self, name: str, pipe: IO[bytes] | None, *, prefix: str) -> None:
-        """Read lines from *pipe* and emit them; isolate per-line failures."""
-        if pipe is None:
-            return
-        try:
-            for raw_line in iter(pipe.readline, b""):
-                try:
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        self._emit_output(name, f"{prefix}{line}")
-                except Exception as exc:  # noqa: BLE001 - one bad line/callback
-                    # A decode or subscriber failure on one line must not stop
-                    # streaming the rest (#7151 D3).
-                    logger.warning("dropping bad output line for %s: %s", name, exc)
-        except (RuntimeError, ValueError, OSError) as exc:
-            # ValueError: read on a closed pipe (the unblock-on-reap path).
-            logger.debug("output stream ended for %s: %s", name, exc)
 
     def launch_script(
         self,
