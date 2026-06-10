@@ -13,8 +13,8 @@
 //! files vs. the pure-Python reference implementation
 //! (issue #5213, opportunity 2 in `upstreamdrift_rust_opportunities.md`).
 //!
-//! Scope this PR: marker data only. C3D analog / event sections are not
-//! parsed (deferred — see issue #5213 follow-up).
+//! C3D marker data is always parsed. Event metadata is parsed when present;
+//! analog and force-plate channels remain deferred follow-up work.
 
 #![allow(clippy::needless_range_loop)]
 #![allow(clippy::too_many_arguments)]
@@ -44,6 +44,15 @@ pub struct MarkerData {
     /// Raw units string from the source (e.g. `"mm"`, `"m"`). The
     /// `positions` buffer is already converted to meters.
     pub units: String,
+    /// Optional C3D EVENT group metadata, expressed in seconds.
+    pub events: Vec<C3dEvent>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct C3dEvent {
+    pub label: String,
+    pub context: String,
+    pub time_s: f32,
 }
 
 /// Parsed joint trajectory (BVH). Per-frame channel values are returned in
