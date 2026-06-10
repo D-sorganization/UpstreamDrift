@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "attachments": [
+    {
+      "link_name": "torso",
+      "role": "tool-mount",
+      "interface_frame": {
+        "xyz": [0.0, 0.0, 0.12],
+        "rpy": [0.0, 0.0, 0.0]
+      },
+      "max_payload_kg": 3.0,
+      "tags": ["quadruped", "payload", "top-mount"]
+    }
+  ]
+}

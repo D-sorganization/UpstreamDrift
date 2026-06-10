@@ -34,6 +34,7 @@ from src.shared.python.security.security_utils import (
     download_to_file,
     validate_url_scheme,
 )
+from src.tools.model_explorer.attachment_metadata import load_attachment_manifest
 
 # Resolve project root for model path resolution (no sys.path mutation)
 _project_root = next(
@@ -747,23 +748,29 @@ class ModelLibrary:
                 # Check for URDF
                 if file.lower().endswith(".urdf"):
                     models.append(
-                        {
-                            "name": file,
-                            "description": f"URDF file at {file_path.relative_to(_project_root)}",
-                            "path": str(file_path),
-                            "type": "urdf",
-                            "config_key": f"urdf_{file}_{hash(str(file_path))}",
-                        }
+                        self._with_attachment_metadata(
+                            file_path,
+                            {
+                                "name": file,
+                                "description": f"URDF file at {file_path.relative_to(_project_root)}",
+                                "path": str(file_path),
+                                "type": "urdf",
+                                "config_key": f"urdf_{file}_{hash(str(file_path))}",
+                            },
+                        )
                     )
                 elif file.lower().endswith(".osim"):
                     models.append(
-                        {
-                            "name": file,
-                            "description": f"OpenSim OSIM file at {file_path.relative_to(_project_root)}",
-                            "path": str(file_path),
-                            "type": "osim",
-                            "config_key": f"repo_{file}_{hash(str(file_path))}",
-                        }
+                        self._with_attachment_metadata(
+                            file_path,
+                            {
+                                "name": file,
+                                "description": f"OpenSim OSIM file at {file_path.relative_to(_project_root)}",
+                                "path": str(file_path),
+                                "type": "osim",
+                                "config_key": f"repo_{file}_{hash(str(file_path))}",
+                            },
+                        )
                     )
 
                 # Check for MJCF (xml with <mujoco tag)
@@ -775,18 +782,33 @@ class ModelLibrary:
                             if "<mujoco" in start or "<robot" in start:
                                 model_type = "mjcf" if "<mujoco" in start else "urdf"
                                 models.append(
-                                    {
-                                        "name": file,
-                                        "description": f"{model_type.upper()} file at {file_path.relative_to(_project_root)}",
-                                        "path": str(file_path),
-                                        "type": model_type,
-                                        "config_key": f"repo_{file}_{hash(str(file_path))}",
-                                    }
+                                    self._with_attachment_metadata(
+                                        file_path,
+                                        {
+                                            "name": file,
+                                            "description": f"{model_type.upper()} file at {file_path.relative_to(_project_root)}",
+                                            "path": str(file_path),
+                                            "type": model_type,
+                                            "config_key": f"repo_{file}_{hash(str(file_path))}",
+                                        },
+                                    )
                                 )
                     except (FileNotFoundError, PermissionError, OSError):
                         pass  # reading error, skip
 
         return sorted(models, key=lambda x: x["name"])
+
+    def _with_attachment_metadata(
+        self,
+        model_path: Path,
+        model_info: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Attach parsed sidecar metadata to a discovered model-info dictionary."""
+        manifest = load_attachment_manifest(model_path)
+        model_info["attachments"] = manifest.to_model_info()
+        if manifest.warnings:
+            model_info["attachment_warnings"] = list(manifest.warnings)
+        return model_info
 
     def discover_sibling_models(self) -> list[dict[str, Any]]:
         """Discover URDF/MJCF models in sibling model repositories.
@@ -804,7 +826,12 @@ class ModelLibrary:
         )
 
         try:
-            return discover_sibling_models(_project_root)
+            return [
+                self._with_attachment_metadata(Path(model["path"]), model)
+                if "path" in model
+                else model
+                for model in discover_sibling_models(_project_root)
+            ]
         except ValueError:
             logger.exception("Sibling model discovery failed")
             return []
@@ -927,14 +954,17 @@ class ModelLibrary:
                             pass
 
                     models.append(
-                        {
-                            "name": file,
-                            "description": f"User imported model at {file_path.name}",
-                            "path": str(file_path),
-                            "type": m_type,
-                            "config_key": f"imported_{file}_{hash(str(file_path))}",
-                            "is_imported": True,
-                        }
+                        self._with_attachment_metadata(
+                            file_path,
+                            {
+                                "name": file,
+                                "description": f"User imported model at {file_path.name}",
+                                "path": str(file_path),
+                                "type": m_type,
+                                "config_key": f"imported_{file}_{hash(str(file_path))}",
+                                "is_imported": True,
+                            },
+                        )
                     )
         return sorted(models, key=lambda x: x["name"])
 
