@@ -265,6 +265,17 @@ jobs:
             exit 1
           fi
 
+      # Guard OUTSIDE continue-on-error so a future move/delete of these files
+      # turns the lane red immediately instead of being masked as a tolerated
+      # "file or directory not found" (issue #7162).
+      - name: Verify Pinocchio ecosystem test files exist
+        env:
+          PYTHONPATH: .:src
+        run: |
+          pytest --collect-only -q \
+            tests/engines/test_pinocchio_ecosystem.py \
+            tests/engines/test_pinocchio_recorder.py > /dev/null
+
       - name: Run Pinocchio Ecosystem Tests (Optional Stack)
         continue-on-error: true
         # Run pinocchio ecosystem tests.
@@ -277,8 +288,8 @@ jobs:
           echo "### Pinocchio Ecosystem Tests" >> "$GITHUB_STEP_SUMMARY"
           xvfb-run --auto-servernum pytest \
             -p no:xvfb \
-            tests/test_pinocchio_ecosystem.py \
-            tests/test_pinocchio_recorder.py \
+            tests/engines/test_pinocchio_ecosystem.py \
+            tests/engines/test_pinocchio_recorder.py \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short \
