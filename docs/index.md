@@ -45,6 +45,7 @@ navigation should start with the rendered documentation URL.
 | `installation/`         | @developer-experience | stable    | Installation instructions and environment setup guidance.                                                                           |
 | `issues/`               | @maintainers          | archived  | Issue-derived notes and local tracking artifacts retained under docs.                                                               |
 | `legal/`                | @maintainers          | stable    | License, compliance, and legal reference material.                                                                                  |
+| `model_explorer/`       | @ui-team              | draft     | Model Explorer attachment manifest documentation and related UI workflow notes.                                                     |
 | `motion_capture/`       | @research-team        | draft     | Motion capture intake notes and source-format reference material.                                                                   |
 | `motion_matching/`      | @research-team        | stable    | Motion-matching system documentation including surrogate training and cross-option leaderboards.                                    |
 | `motion_pipeline/`      | @research-team        | stable    | User-facing motion pipeline workflow guide, format matrix, troubleshooting, and backend compatibility tables.                       |
