@@ -7,11 +7,66 @@
 //! without paying the cost of pydantic construction.
 
 use numpy::{IntoPyArray, PyArray2};
+use pyo3::exceptions::{PyFileNotFoundError, PyOSError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use std::path::PathBuf;
+use std::io::ErrorKind;
+use std::path::{Path, PathBuf};
 
-use crate::{bvh, c3d, trc, JointData, MarkerData};
+use crate::{bvh, c3d, trc, JointData, MarkerData, ParseError};
+
+#[cfg(unix)]
+fn path_contains_nul(path: &Path) -> bool {
+    use std::os::unix::ffi::OsStrExt;
+
+    path.as_os_str().as_bytes().contains(&0)
+}
+
+#[cfg(windows)]
+fn path_contains_nul(path: &Path) -> bool {
+    use std::os::windows::ffi::OsStrExt;
+
+    path.as_os_str().encode_wide().any(|unit| unit == 0)
+}
+
+#[cfg(not(any(unix, windows)))]
+fn path_contains_nul(path: &Path) -> bool {
+    path.as_os_str().to_string_lossy().contains('\0')
+}
+
+fn validate_input_path(format: &str, path: &Path) -> PyResult<()> {
+    if path.as_os_str().is_empty() {
+        return Err(PyValueError::new_err(format!(
+            "{format} path must be non-empty"
+        )));
+    }
+    if path_contains_nul(path) {
+        return Err(PyValueError::new_err(format!(
+            "{format} path contains an interior NUL byte: {}",
+            path.display()
+        )));
+    }
+    Ok(())
+}
+
+fn parse_error_to_pyerr(format: &str, path: &Path, err: ParseError) -> PyErr {
+    match err {
+        ParseError::Io(io_err) if io_err.kind() == ErrorKind::NotFound => {
+            PyFileNotFoundError::new_err(format!(
+                "{format} file not found: {} ({io_err})",
+                path.display()
+            ))
+        }
+        ParseError::Io(io_err) => PyOSError::new_err(format!(
+            "{format} file access error for {}: {io_err}",
+            path.display()
+        )),
+        ParseError::Format(message) => PyValueError::new_err(format!(
+            "{format} parse error in {}: {message}",
+            path.display()
+        )),
+    }
+}
 
 fn marker_data_to_pydict<'py>(py: Python<'py>, data: MarkerData) -> PyResult<Bound<'py, PyDict>> {
     let n_frames = data.n_frames;
@@ -84,15 +139,15 @@ fn marker_data_to_pydict<'py>(py: Python<'py>, data: MarkerData) -> PyResult<Bou
 
 #[pyfunction]
 fn parse_c3d<'py>(py: Python<'py>, path: PathBuf) -> PyResult<Bound<'py, PyDict>> {
-    let data = c3d::parse_c3d_file(&path)
-        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("C3D parse error: {e}")))?;
+    validate_input_path("C3D", &path)?;
+    let data = c3d::parse_c3d_file(&path).map_err(|e| parse_error_to_pyerr("C3D", &path, e))?;
     marker_data_to_pydict(py, data)
 }
 
 #[pyfunction]
 fn parse_trc<'py>(py: Python<'py>, path: PathBuf) -> PyResult<Bound<'py, PyDict>> {
-    let data = trc::parse_trc_file(&path)
-        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("TRC parse error: {e}")))?;
+    validate_input_path("TRC", &path)?;
+    let data = trc::parse_trc_file(&path).map_err(|e| parse_error_to_pyerr("TRC", &path, e))?;
     marker_data_to_pydict(py, data)
 }
 
@@ -130,8 +185,8 @@ fn joint_data_to_pydict<'py>(py: Python<'py>, data: JointData) -> PyResult<Bound
 
 #[pyfunction]
 fn parse_bvh<'py>(py: Python<'py>, path: PathBuf) -> PyResult<Bound<'py, PyDict>> {
-    let data = bvh::parse_bvh_file(&path)
-        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("BVH parse error: {e}")))?;
+    validate_input_path("BVH", &path)?;
+    let data = bvh::parse_bvh_file(&path).map_err(|e| parse_error_to_pyerr("BVH", &path, e))?;
     joint_data_to_pydict(py, data)
 }
 
@@ -141,4 +196,109 @@ fn upstream_mocap_io(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse_trc, m)?)?;
     m.add_function(wrap_pyfunction!(parse_bvh, m)?)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn with_python(test: impl FnOnce(Python<'_>)) {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(test);
+    }
+
+    fn unique_temp_path(name: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock before unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "upstream_mocap_io_bindings_{name}_{}_{}",
+            std::process::id(),
+            nanos
+        ))
+    }
+
+    fn assert_missing_file_error(format: &str, err: PyErr, py: Python<'_>, path: &Path) {
+        assert!(
+            err.is_instance_of::<PyFileNotFoundError>(py),
+            "{format} missing file should raise FileNotFoundError, got {err:?}"
+        );
+        let message = err.to_string();
+        assert!(message.contains(format), "{message}");
+        assert!(
+            message.contains(&path.display().to_string()),
+            "missing path not named in error: {message}"
+        );
+    }
+
+    fn assert_malformed_file_error(format: &str, err: PyErr, py: Python<'_>, path: &Path) {
+        assert!(
+            err.is_instance_of::<PyValueError>(py),
+            "{format} malformed file should raise ValueError, got {err:?}"
+        );
+        let message = err.to_string();
+        assert!(message.contains(format), "{message}");
+        assert!(message.contains("parse error"), "{message}");
+        assert!(
+            message.contains(&path.display().to_string()),
+            "malformed path not named in error: {message}"
+        );
+    }
+
+    #[test]
+    fn parse_bindings_reject_empty_paths_before_file_access() {
+        with_python(|py| {
+            let err = parse_trc(py, PathBuf::new()).expect_err("empty path must fail");
+            assert!(err.is_instance_of::<PyValueError>(py));
+            assert!(err.to_string().contains("non-empty"));
+        });
+    }
+
+    #[test]
+    fn parse_bindings_map_missing_files_to_file_not_found() {
+        with_python(|py| {
+            let c3d_path = unique_temp_path("missing.c3d");
+            let trc_path = unique_temp_path("missing.trc");
+            let bvh_path = unique_temp_path("missing.bvh");
+
+            let err = parse_c3d(py, c3d_path.clone()).expect_err("missing c3d must fail");
+            assert_missing_file_error("C3D", err, py, &c3d_path);
+
+            let err = parse_trc(py, trc_path.clone()).expect_err("missing trc must fail");
+            assert_missing_file_error("TRC", err, py, &trc_path);
+
+            let err = parse_bvh(py, bvh_path.clone()).expect_err("missing bvh must fail");
+            assert_missing_file_error("BVH", err, py, &bvh_path);
+        });
+    }
+
+    #[test]
+    fn parse_bindings_map_malformed_present_files_to_value_error() {
+        with_python(|py| {
+            let c3d_path = unique_temp_path("malformed.c3d");
+            let trc_path = unique_temp_path("malformed.trc");
+            let bvh_path = unique_temp_path("malformed.bvh");
+
+            fs::write(&c3d_path, b"not a c3d").expect("write malformed c3d");
+            fs::write(&trc_path, "PathFileType\t4\t(X/Y/Z)\tbad.trc\n")
+                .expect("write malformed trc");
+            fs::write(&bvh_path, "HIERARCHY\nROOT Hips\n").expect("write malformed bvh");
+
+            let err = parse_c3d(py, c3d_path.clone()).expect_err("malformed c3d must fail");
+            assert_malformed_file_error("C3D", err, py, &c3d_path);
+
+            let err = parse_trc(py, trc_path.clone()).expect_err("malformed trc must fail");
+            assert_malformed_file_error("TRC", err, py, &trc_path);
+
+            let err = parse_bvh(py, bvh_path.clone()).expect_err("malformed bvh must fail");
+            assert_malformed_file_error("BVH", err, py, &bvh_path);
+
+            let _ = fs::remove_file(c3d_path);
+            let _ = fs::remove_file(trc_path);
+            let _ = fs::remove_file(bvh_path);
+        });
+    }
 }
