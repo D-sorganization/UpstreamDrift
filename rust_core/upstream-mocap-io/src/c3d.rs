@@ -1,4 +1,4 @@
-//! C3D binary parser (markers only).
+//! C3D binary parser (markers plus event metadata).
 //!
 //! C3D is a 512-byte-block binary format with three sections:
 //!   1. Header block (block 1, 512 bytes)
@@ -14,8 +14,8 @@
 //!
 //! Out of scope (deferred follow-up to issue #5213):
 //!   * Analog channels
-//!   * Event labels / event times
-//!   * Custom parameter groups beyond POINT:RATE/LABELS/UNITS/SCALE/FRAMES
+//!   * Force platform parameters
+//!   * Custom parameter groups beyond POINT and EVENT
 //!
 //! Reference: <https://www.c3d.org/docs/C3D_User_Guide.pdf>
 
@@ -25,7 +25,7 @@ use std::path::Path;
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
-use crate::{MarkerData, ParseError};
+use crate::{C3dEvent, MarkerData, ParseError};
 
 const BLOCK_SIZE: usize = 512;
 
@@ -132,21 +132,23 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
     };
 
     // ── Parameter section ──────────────────────────────────────────────
-    // Walk the parameters; we only need POINT:LABELS, POINT:UNITS,
-    // POINT:RATE, and optionally POINT:FRAMES (for long files where header
-    // n_frames overflows u16).
-    let (labels, units, fps_param, frames_param) = parse_point_params(buf, param_offset, endian)?;
+    // Walk the parameter section. Marker data depends on POINT metadata; event
+    // metadata is optional and never affects marker parsing.
+    let params = parse_c3d_params(buf, param_offset, endian)?;
+    let labels = params.labels;
+    let units = params.units;
+    let events = params.events;
 
-    let fps = if fps_param > 0.0 {
-        fps_param
+    let fps = if params.fps > 0.0 {
+        params.fps
     } else if fps_header > 0.0 {
         fps_header
     } else {
         30.0
     };
 
-    let n_frames = if frames_param > 0 {
-        frames_param
+    let n_frames = if params.frames > 0 {
+        params.frames
     } else {
         n_frames_header
     };
@@ -239,23 +241,75 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
         n_markers,
         fps,
         units,
+        events,
     })
 }
 
-/// Walk the C3D parameter section pulling out POINT:LABELS, POINT:UNITS,
-/// POINT:RATE, and optionally POINT:FRAMES.
-fn parse_point_params(
+#[derive(Debug, Default)]
+struct C3dParams {
+    labels: Vec<String>,
+    units: String,
+    fps: f32,
+    frames: usize,
+    events: Vec<C3dEvent>,
+}
+
+#[derive(Debug, Default)]
+struct EventParams {
+    labels: Vec<String>,
+    contexts: Vec<String>,
+    times: Vec<f32>,
+    used: Option<usize>,
+}
+
+impl EventParams {
+    fn into_events(self) -> Vec<C3dEvent> {
+        let count = self
+            .used
+            .unwrap_or_else(|| self.labels.len().min(self.times.len()));
+        if count == 0 {
+            return Vec::new();
+        }
+
+        let mut events = Vec::with_capacity(count);
+        for idx in 0..count {
+            let Some(label) = self
+                .labels
+                .get(idx)
+                .map(|s| s.trim())
+                .filter(|s| !s.is_empty())
+            else {
+                continue;
+            };
+            let Some(time_s) = self.times.get(idx).copied().filter(|v| v.is_finite()) else {
+                continue;
+            };
+            events.push(C3dEvent {
+                label: label.to_string(),
+                context: self
+                    .contexts
+                    .get(idx)
+                    .map(|s| s.trim().to_string())
+                    .unwrap_or_default(),
+                time_s,
+            });
+        }
+        events
+    }
+}
+
+/// Walk the C3D parameter section pulling out POINT marker metadata and
+/// optional EVENT labels/contexts/times.
+fn parse_c3d_params(
     buf: &[u8],
     param_section_offset: usize,
     endian: Endian,
-) -> Result<(Vec<String>, String, f32, usize), ParseError> {
+) -> Result<C3dParams, ParseError> {
     // After the 4-byte header (reserved, 0x50, n_param_blocks, processor),
     // parameter groups + items follow as a linked list with relative offsets.
     let mut pos = param_section_offset + 4;
-    let mut labels: Vec<String> = Vec::new();
-    let mut units = String::new();
-    let mut fps: f32 = 0.0;
-    let mut frames: usize = 0;
+    let mut params = C3dParams::default();
+    let mut event_params = EventParams::default();
 
     // Group ID → name map. Group definitions have id < 0; items have id > 0.
     let mut group_names: std::collections::HashMap<i8, String> = std::collections::HashMap::new();
@@ -356,7 +410,7 @@ fn parse_point_params(
                                 let s = String::from_utf8_lossy(&data[off..off + slen])
                                     .trim()
                                     .to_string();
-                                labels.push(s);
+                                params.labels.push(s);
                             }
                         }
                     "UNITS"
@@ -371,19 +425,36 @@ fn parse_point_params(
                             let slen = dims[0];
                             // First string is the unit.
                             if slen <= data.len() {
-                                units = String::from_utf8_lossy(&data[..slen]).trim().to_string();
+                                params.units =
+                                    String::from_utf8_lossy(&data[..slen]).trim().to_string();
                             }
                         }
                     "RATE"
                         if element_size == 4 && data.len() >= 4 => {
-                            fps = endian.read_f32(&data[..4]);
+                            params.fps = endian.read_f32(&data[..4]);
                         }
                     "FRAMES" => {
                         if element_size == 2 && data.len() >= 2 {
-                            frames = endian.read_u16(&data[..2]) as usize;
+                            params.frames = endian.read_u16(&data[..2]) as usize;
                         } else if element_size == 4 && data.len() >= 4 {
-                            frames = endian.read_f32(&data[..4]) as usize;
+                            params.frames = endian.read_f32(&data[..4]) as usize;
                         }
+                    }
+                    _ => {}
+                }
+            } else if group_name == "EVENT" {
+                match name.as_str() {
+                    "LABELS" if element_size == -1 && dims.len() == 2 => {
+                        event_params.labels = read_string_table(data, dims[0], dims[1]);
+                    }
+                    "CONTEXTS" if element_size == -1 && dims.len() == 2 => {
+                        event_params.contexts = read_string_table(data, dims[0], dims[1]);
+                    }
+                    "TIMES" if element_size == 4 => {
+                        event_params.times = read_event_times(data, &dims, endian);
+                    }
+                    "USED" => {
+                        event_params.used = read_usize_scalar(data, element_size, endian);
                     }
                     _ => {}
                 }
@@ -399,7 +470,56 @@ fn parse_point_params(
         pos = next_pos_in_record_start + next_offset as usize;
     }
 
-    Ok((labels, units, fps, frames))
+    params.events = event_params.into_events();
+    Ok(params)
+}
+
+fn read_string_table(data: &[u8], string_len: usize, count: usize) -> Vec<String> {
+    let mut values = Vec::with_capacity(count);
+    for idx in 0..count {
+        let off = idx * string_len;
+        if off + string_len > data.len() {
+            break;
+        }
+        values.push(
+            String::from_utf8_lossy(&data[off..off + string_len])
+                .trim()
+                .to_string(),
+        );
+    }
+    values
+}
+
+fn read_event_times(data: &[u8], dims: &[usize], endian: Endian) -> Vec<f32> {
+    let values = read_f32_values(data, endian);
+    if dims.len() == 2 && dims[0] == 2 {
+        let count = dims[1].min(values.len() / 2);
+        (0..count)
+            .map(|idx| values[idx * 2] * 60.0 + values[idx * 2 + 1])
+            .collect()
+    } else if dims.len() == 2 && dims[1] == 2 {
+        let count = dims[0].min(values.len() / 2);
+        (0..count)
+            .map(|idx| values[idx] * 60.0 + values[idx + count])
+            .collect()
+    } else {
+        values
+    }
+}
+
+fn read_f32_values(data: &[u8], endian: Endian) -> Vec<f32> {
+    data.chunks_exact(4)
+        .map(|chunk| endian.read_f32(chunk))
+        .collect()
+}
+
+fn read_usize_scalar(data: &[u8], element_size: i8, endian: Endian) -> Option<usize> {
+    match element_size {
+        1 if !data.is_empty() => Some(data[0] as usize),
+        2 if data.len() >= 2 => Some(endian.read_u16(&data[..2]) as usize),
+        4 if data.len() >= 4 => Some(endian.read_f32(&data[..4]) as usize),
+        _ => None,
+    }
 }
 
 #[allow(dead_code)]
@@ -408,4 +528,144 @@ fn read_block<R: Read + Seek>(r: &mut R, block_1based: usize) -> std::io::Result
     r.seek(SeekFrom::Start(((block_1based - 1) * BLOCK_SIZE) as u64))?;
     r.read_exact(&mut blk)?;
     Ok(blk)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use byteorder::{ByteOrder, LittleEndian};
+
+    fn write_record(buf: &mut [u8], pos: &mut usize, name: &str, group_id: i8, payload: &[u8]) {
+        let record_start = *pos;
+        buf[*pos] = name.len() as u8;
+        buf[*pos + 1] = group_id as u8;
+        *pos += 2;
+        buf[*pos..*pos + name.len()].copy_from_slice(name.as_bytes());
+        *pos += name.len();
+        let offset_pos = *pos;
+        *pos += 2;
+        buf[*pos..*pos + payload.len()].copy_from_slice(payload);
+        *pos += payload.len();
+        let next_offset = (*pos - offset_pos) as i16;
+        LittleEndian::write_i16(&mut buf[offset_pos..offset_pos + 2], next_offset);
+        assert!(*pos > record_start);
+    }
+
+    fn group_payload(description: &str) -> Vec<u8> {
+        let mut payload = vec![description.len() as u8];
+        payload.extend_from_slice(description.as_bytes());
+        payload
+    }
+
+    fn string_param_payload(string_len: usize, values: &[&str]) -> Vec<u8> {
+        let mut payload = vec![-1_i8 as u8, 2, string_len as u8, values.len() as u8];
+        for value in values {
+            let mut padded = vec![b' '; string_len];
+            let raw = value.as_bytes();
+            padded[..raw.len().min(string_len)].copy_from_slice(&raw[..raw.len().min(string_len)]);
+            payload.extend_from_slice(&padded);
+        }
+        payload.push(0);
+        payload
+    }
+
+    fn f32_param_payload(dims: &[u8], values: &[f32]) -> Vec<u8> {
+        let mut payload = vec![4, dims.len() as u8];
+        payload.extend_from_slice(dims);
+        for value in values {
+            let mut raw = [0; 4];
+            LittleEndian::write_f32(&mut raw, *value);
+            payload.extend_from_slice(&raw);
+        }
+        payload.push(0);
+        payload
+    }
+
+    fn minimal_c3d_with_event_params() -> Vec<u8> {
+        let mut buf = vec![0_u8; BLOCK_SIZE * 4];
+
+        buf[0] = 2;
+        buf[1] = 0x50;
+        LittleEndian::write_u16(&mut buf[2..4], 1);
+        LittleEndian::write_u16(&mut buf[6..8], 1);
+        LittleEndian::write_u16(&mut buf[8..10], 1);
+        LittleEndian::write_f32(&mut buf[12..16], -1.0);
+        LittleEndian::write_u16(&mut buf[16..18], 4);
+        LittleEndian::write_f32(&mut buf[20..24], 100.0);
+
+        let param_offset = BLOCK_SIZE;
+        buf[param_offset] = 0;
+        buf[param_offset + 1] = 0x50;
+        buf[param_offset + 2] = 2;
+        buf[param_offset + 3] = 0x54;
+        let mut pos = param_offset + 4;
+
+        write_record(&mut buf, &mut pos, "POINT", -1, &group_payload("point"));
+        write_record(&mut buf, &mut pos, "EVENT", -2, &group_payload("event"));
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            1,
+            &string_param_payload(3, &["M01"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "UNITS",
+            1,
+            &string_param_payload(2, &["m"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "RATE",
+            1,
+            &f32_param_payload(&[1], &[100.0]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            2,
+            &string_param_payload(10, &["FootStrike", "ToeOff"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "CONTEXTS",
+            2,
+            &string_param_payload(5, &["Left", "Right"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "TIMES",
+            2,
+            &f32_param_payload(&[2, 2], &[0.0, 0.5, 0.0, 1.25]),
+        );
+        buf[pos] = 0;
+        buf[pos + 1] = 0;
+
+        let data_offset = BLOCK_SIZE * 3;
+        LittleEndian::write_f32(&mut buf[data_offset..data_offset + 4], 1.0);
+        LittleEndian::write_f32(&mut buf[data_offset + 4..data_offset + 8], 2.0);
+        LittleEndian::write_f32(&mut buf[data_offset + 8..data_offset + 12], 3.0);
+        LittleEndian::write_f32(&mut buf[data_offset + 12..data_offset + 16], 0.0);
+        buf
+    }
+
+    #[test]
+    fn parse_c3d_extracts_event_labels_contexts_and_times() {
+        let data = parse_c3d_bytes(&minimal_c3d_with_event_params()).expect("parse c3d");
+
+        assert_eq!(data.names, vec!["M01"]);
+        assert_eq!(data.events.len(), 2);
+        assert_eq!(data.events[0].label, "FootStrike");
+        assert_eq!(data.events[0].context, "Left");
+        assert_eq!(data.events[0].time_s, 0.5);
+        assert_eq!(data.events[1].label, "ToeOff");
+        assert_eq!(data.events[1].context, "Right");
+        assert_eq!(data.events[1].time_s, 1.25);
+    }
 }
