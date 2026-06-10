@@ -115,6 +115,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   each Pandas dataset row once per frame before point/vector extraction, reducing
   repeated `.iloc` lookup overhead while preserving fallback behavior for missing
   rows and columns.
+- **2026-06-10** - Extended the Rust C3D parser for #7212. The
+  `upstream-mocap-io` C3D path now decodes int16 and float analog channel data,
+  surfaces additive PyO3 `analog` and `force_platforms` keys, parses
+  `FORCE_PLATFORM:{TYPE,CHANNEL,CORNERS,ORIGIN}`, and preserves existing
+  marker/event dictionary keys and marker-only fixture behavior.
 - **2026-06-10** - Consolidated configuration ownership for #7216. Removed
   the root `config/` and `configs/` trees: CI/governance policy now lives in
   `scripts/config/`, BunkerShot3D calibration YAML lives under
@@ -182,8 +187,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   exist) and linked the operational project map. The full gap inventory
   from the 2026-06-10 operational deep dive lives in
   `docs/architecture/PROJECT_MAP.md` §16, tracked by issues #7202-#7221
-  (model-composition epic, sidekick agent wiring, C3D/Rust analog support,
-  startup + config consolidation, and related work). Landed alongside:
+  (model-composition epic, sidekick agent wiring, startup + config
+  consolidation, and related work). Landed alongside:
   sidekick subtab host port + pop-out lifecycle hooks (#7199), the Rust C3D
   1-D `POINT:UNITS` fix with full `data/` coverage (#7200), and sibling
   model-repository discovery in the model explorer (#7201).
@@ -878,6 +883,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-10 | 1.0.290 | Rust C3D analog and force-platform metadata slice for #7212. `upstream-mocap-io` now decodes C3D analog channels in int16 mode with SCALE/OFFSET/GEN_SCALE and in float mode without int scaling, advances marker frame stride across analog-bearing records, parses FORCE_PLATFORM TYPE/CHANNEL/CORNERS/ORIGIN metadata, and exposes additive PyO3 `analog` / `force_platforms` keys while preserving existing marker/event keys and marker-only fixture behavior. |
 | 2026-06-10 | 1.0.289 | Completed the Frankenstein composition validation surface for #7205. `CompositionValidator` now emits warning-level `subtree_mass_ratio` findings when attached subtree mass exceeds roughly 2x the parent chain mass and `geometry_overlap` findings when directly attached link AABBs overlap. The active Frankenstein model panel now renders current validation findings in a dedicated list so warnings and blocking errors are visible before save/export. |
 | 2026-06-10 | 1.0.288 | React/Tauri launcher parity decision (#7221). Added ADR-0028 choosing the manifest-driven multi-window Tauri model while keeping PyQt canonical for embedded tabs/docks. The React dashboard now persists a manifest-keyed launcher window registry, reconciles it with `useLauncherManifest.ts`, and exposes a window list/focus menu that reuses the local launcher API. |
 | 2026-06-10 | 1.0.287 | Startup entry-point consolidation (#7215). `launch_golf_suite.py` now delegates to canonical `launch_upstream_drift.py` with a deprecation warning, classic PyQt launch preflights the Qt platform and selects offscreen mode on headless Linux, and `src/api/local_server.py` degrades to an unavailable engine-manager facade when optional engine imports fail during local API startup. |

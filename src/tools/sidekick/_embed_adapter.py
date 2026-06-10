@@ -63,6 +63,9 @@ class _SidekickEmbedAdapter:
         from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel
 
         widget = AIAssistantPanel(parent)
+        service = getattr(parent, "sidekick_action_service", None)
+        if service is not None:
+            widget.set_action_service(service)
         self._widgets.append(widget)
         return widget
 

@@ -1,4 +1,4 @@
-//! C3D binary parser (markers plus event metadata).
+//! C3D binary parser (markers, event metadata, analog channels, force plates).
 //!
 //! C3D is a 512-byte-block binary format with three sections:
 //!   1. Header block (block 1, 512 bytes)
@@ -13,9 +13,7 @@
 //!   * Float (scale < 0) and int16 (scale > 0) point storage
 //!
 //! Out of scope (deferred follow-up to issue #5213):
-//!   * Analog channels
-//!   * Force platform parameters
-//!   * Custom parameter groups beyond POINT and EVENT
+//!   * Custom parameter groups beyond POINT, EVENT, ANALOG, and FORCE_PLATFORM
 //!
 //! Reference: <https://www.c3d.org/docs/C3D_User_Guide.pdf>
 
@@ -25,7 +23,7 @@ use std::path::Path;
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
-use crate::{C3dEvent, MarkerData, ParseError};
+use crate::{C3dAnalogData, C3dEvent, C3dForcePlatform, MarkerData, ParseError};
 
 const BLOCK_SIZE: usize = 512;
 
@@ -114,10 +112,12 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
     //   word 10 (byte 18): analog samples per 3D frame
     //   word 11 (byte 20, two words): frame rate (32-bit float)
     let n_points = endian.read_u16(&buf[2..4]) as usize;
+    let analog_measurements_per_frame = endian.read_u16(&buf[4..6]) as usize;
     let first_frame = endian.read_u16(&buf[6..8]) as i32;
     let last_frame = endian.read_u16(&buf[8..10]) as i32;
     let scale = endian.read_f32(&buf[12..16]);
     let data_block_1based = endian.read_u16(&buf[16..18]) as usize;
+    let analog_samples_per_frame_header = endian.read_u16(&buf[18..20]) as usize;
     let fps_header = endian.read_f32(&buf[20..24]);
 
     if data_block_1based == 0 {
@@ -138,6 +138,7 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
     let labels = params.labels;
     let units = params.units;
     let events = params.events;
+    let force_platforms = params.force_platforms;
 
     let fps = if params.fps > 0.0 {
         params.fps
@@ -165,11 +166,31 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
     let data_offset = (data_block_1based - 1) * BLOCK_SIZE;
     let float_mode = scale < 0.0;
     let abs_scale = if scale == 0.0 { 1.0 } else { scale.abs() };
-    let bytes_per_value = 4; // both int16 + residual and float use 4 bytes * 4 values = 16 bytes/marker
-    let stride = n_points * bytes_per_value * 4 / bytes_per_value; // = n_points * 4 values
-    let bytes_per_frame = n_points * 4 * 4; // 4 values (x, y, z, residual) * 4 bytes each (float) or 2*2 (int16+residual)
-    let int_bytes_per_frame = n_points * 4 * 2; // 4 i16 per marker
-    let _ = stride;
+    let point_bytes_per_frame = if float_mode {
+        n_points * 4 * 4
+    } else {
+        n_points * 4 * 2
+    };
+    let analog_samples_per_frame = if analog_measurements_per_frame == 0 {
+        0
+    } else if analog_samples_per_frame_header > 0 {
+        analog_samples_per_frame_header
+    } else if params.analog.rate > 0.0 && fps > 0.0 {
+        (params.analog.rate / fps).round().max(1.0) as usize
+    } else if analog_measurements_per_frame > 0 {
+        1
+    } else {
+        0
+    };
+    let n_analog_channels = if analog_samples_per_frame > 0 {
+        let from_header = analog_measurements_per_frame / analog_samples_per_frame;
+        params.analog.channel_count().max(from_header)
+    } else {
+        0
+    };
+    let analog_values_per_frame = analog_samples_per_frame * n_analog_channels;
+    let analog_bytes_per_frame = analog_values_per_frame * if float_mode { 4 } else { 2 };
+    let bytes_per_frame = point_bytes_per_frame + analog_bytes_per_frame;
 
     let positions_capacity = n_frames * n_markers * 3;
     let mut positions = Vec::with_capacity(positions_capacity);
@@ -188,12 +209,7 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
     };
 
     for fi in 0..n_frames {
-        let frame_start = data_offset
-            + fi * if float_mode {
-                bytes_per_frame
-            } else {
-                int_bytes_per_frame
-            };
+        let frame_start = data_offset + fi * bytes_per_frame;
         for mi in 0..n_points {
             if mi >= n_markers {
                 // Skip extra unlabeled marker slots
@@ -234,6 +250,24 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
         }
     }
 
+    let analog = if n_analog_channels > 0 && analog_samples_per_frame > 0 {
+        Some(read_analog_data(
+            buf,
+            data_offset,
+            n_frames,
+            point_bytes_per_frame,
+            bytes_per_frame,
+            n_analog_channels,
+            analog_samples_per_frame,
+            float_mode,
+            endian,
+            &params.analog,
+            fps,
+        )?)
+    } else {
+        None
+    };
+
     Ok(MarkerData {
         names: labels.into_iter().take(n_markers).collect(),
         positions,
@@ -242,6 +276,8 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
         fps,
         units,
         events,
+        analog,
+        force_platforms,
     })
 }
 
@@ -252,6 +288,41 @@ struct C3dParams {
     fps: f32,
     frames: usize,
     events: Vec<C3dEvent>,
+    analog: AnalogParams,
+    force_platforms: Vec<C3dForcePlatform>,
+}
+
+#[derive(Debug)]
+struct AnalogParams {
+    labels: Vec<String>,
+    units: Vec<String>,
+    rate: f32,
+    scales: Vec<f32>,
+    offsets: Vec<i16>,
+    gen_scale: f32,
+}
+
+impl Default for AnalogParams {
+    fn default() -> Self {
+        Self {
+            labels: Vec::new(),
+            units: Vec::new(),
+            rate: 0.0,
+            scales: Vec::new(),
+            offsets: Vec::new(),
+            gen_scale: 1.0,
+        }
+    }
+}
+
+impl AnalogParams {
+    fn channel_count(&self) -> usize {
+        self.labels
+            .len()
+            .max(self.units.len())
+            .max(self.scales.len())
+            .max(self.offsets.len())
+    }
 }
 
 #[derive(Debug, Default)]
@@ -260,6 +331,37 @@ struct EventParams {
     contexts: Vec<String>,
     times: Vec<f32>,
     used: Option<usize>,
+}
+
+#[derive(Debug, Default)]
+struct ForcePlatformParams {
+    types: Vec<i16>,
+    channels: Vec<Vec<i16>>,
+    corners: Vec<Vec<[f32; 3]>>,
+    origins: Vec<[f32; 3]>,
+    used: Option<usize>,
+}
+
+impl ForcePlatformParams {
+    fn into_force_platforms(self) -> Vec<C3dForcePlatform> {
+        let inferred = self
+            .types
+            .len()
+            .max(self.channels.len())
+            .max(self.corners.len())
+            .max(self.origins.len());
+        let count = self.used.unwrap_or(inferred).min(inferred);
+        let mut platforms = Vec::with_capacity(count);
+        for idx in 0..count {
+            platforms.push(C3dForcePlatform {
+                platform_type: self.types.get(idx).copied().unwrap_or_default(),
+                channels: self.channels.get(idx).cloned().unwrap_or_default(),
+                corners: self.corners.get(idx).cloned().unwrap_or_default(),
+                origin: self.origins.get(idx).copied().unwrap_or([0.0; 3]),
+            });
+        }
+        platforms
+    }
 }
 
 impl EventParams {
@@ -298,8 +400,8 @@ impl EventParams {
     }
 }
 
-/// Walk the C3D parameter section pulling out POINT marker metadata and
-/// optional EVENT labels/contexts/times.
+/// Walk the C3D parameter section pulling out POINT marker metadata plus
+/// optional EVENT, ANALOG, and FORCE_PLATFORM metadata.
 fn parse_c3d_params(
     buf: &[u8],
     param_section_offset: usize,
@@ -310,6 +412,7 @@ fn parse_c3d_params(
     let mut pos = param_section_offset + 4;
     let mut params = C3dParams::default();
     let mut event_params = EventParams::default();
+    let mut force_platform_params = ForcePlatformParams::default();
 
     // Group ID → name map. Group definitions have id < 0; items have id > 0.
     let mut group_names: std::collections::HashMap<i8, String> = std::collections::HashMap::new();
@@ -458,6 +561,49 @@ fn parse_c3d_params(
                     }
                     _ => {}
                 }
+            } else if group_name == "ANALOG" {
+                match name.as_str() {
+                    "LABELS" if element_size == -1 && dims.len() == 2 => {
+                        params.analog.labels = read_string_table(data, dims[0], dims[1]);
+                    }
+                    "UNITS" if element_size == -1 && dims.len() == 2 => {
+                        params.analog.units = read_string_table(data, dims[0], dims[1]);
+                    }
+                    "RATE" if element_size == 4 && data.len() >= 4 => {
+                        params.analog.rate = endian.read_f32(&data[..4]);
+                    }
+                    "SCALE" if element_size == 4 => {
+                        params.analog.scales = read_f32_values(data, endian);
+                    }
+                    "OFFSET" if element_size == 2 => {
+                        params.analog.offsets = read_i16_values(data, endian);
+                    }
+                    "GEN_SCALE" if element_size == 4 && data.len() >= 4 => {
+                        params.analog.gen_scale = endian.read_f32(&data[..4]);
+                    }
+                    _ => {}
+                }
+            } else if group_name == "FORCE_PLATFORM" {
+                match name.as_str() {
+                    "USED" => {
+                        force_platform_params.used = read_usize_scalar(data, element_size, endian);
+                    }
+                    "TYPE" if element_size == 2 => {
+                        force_platform_params.types = read_i16_values(data, endian);
+                    }
+                    "CHANNEL" if element_size == 2 && dims.len() == 2 => {
+                        force_platform_params.channels =
+                            read_i16_matrix_columns(data, dims[0], dims[1], endian);
+                    }
+                    "CORNERS" if element_size == 4 && dims.len() == 3 && dims[0] == 3 => {
+                        force_platform_params.corners =
+                            read_force_platform_corners(data, dims[1], dims[2], endian);
+                    }
+                    "ORIGIN" if element_size == 4 && dims.len() == 2 && dims[0] == 3 => {
+                        force_platform_params.origins = read_xyz_columns(data, dims[1], endian);
+                    }
+                    _ => {}
+                }
             }
         }
 
@@ -471,6 +617,7 @@ fn parse_c3d_params(
     }
 
     params.events = event_params.into_events();
+    params.force_platforms = force_platform_params.into_force_platforms();
     Ok(params)
 }
 
@@ -511,6 +658,133 @@ fn read_f32_values(data: &[u8], endian: Endian) -> Vec<f32> {
     data.chunks_exact(4)
         .map(|chunk| endian.read_f32(chunk))
         .collect()
+}
+
+fn read_i16_values(data: &[u8], endian: Endian) -> Vec<i16> {
+    data.chunks_exact(2)
+        .map(|chunk| endian.read_i16(chunk))
+        .collect()
+}
+
+fn read_i16_matrix_columns(data: &[u8], rows: usize, cols: usize, endian: Endian) -> Vec<Vec<i16>> {
+    let values = read_i16_values(data, endian);
+    (0..cols)
+        .map(|col| {
+            (0..rows)
+                .filter_map(|row| values.get(col * rows + row).copied())
+                .collect()
+        })
+        .collect()
+}
+
+fn read_xyz_columns(data: &[u8], count: usize, endian: Endian) -> Vec<[f32; 3]> {
+    let values = read_f32_values(data, endian);
+    (0..count)
+        .filter_map(|idx| {
+            let base = idx * 3;
+            Some([
+                *values.get(base)?,
+                *values.get(base + 1)?,
+                *values.get(base + 2)?,
+            ])
+        })
+        .collect()
+}
+
+fn read_force_platform_corners(
+    data: &[u8],
+    corner_count: usize,
+    platform_count: usize,
+    endian: Endian,
+) -> Vec<Vec<[f32; 3]>> {
+    let values = read_f32_values(data, endian);
+    (0..platform_count)
+        .map(|platform| {
+            (0..corner_count)
+                .filter_map(|corner| {
+                    let base = platform * corner_count * 3 + corner * 3;
+                    Some([
+                        *values.get(base)?,
+                        *values.get(base + 1)?,
+                        *values.get(base + 2)?,
+                    ])
+                })
+                .collect()
+        })
+        .collect()
+}
+
+#[allow(clippy::too_many_arguments)]
+fn read_analog_data(
+    buf: &[u8],
+    data_offset: usize,
+    n_frames: usize,
+    point_bytes_per_frame: usize,
+    bytes_per_frame: usize,
+    n_channels: usize,
+    samples_per_frame: usize,
+    float_mode: bool,
+    endian: Endian,
+    params: &AnalogParams,
+    point_rate: f32,
+) -> Result<C3dAnalogData, ParseError> {
+    let mut values = Vec::with_capacity(n_frames * samples_per_frame * n_channels);
+    for frame_idx in 0..n_frames {
+        let analog_start = data_offset + frame_idx * bytes_per_frame + point_bytes_per_frame;
+        for sample_idx in 0..samples_per_frame {
+            for channel_idx in 0..n_channels {
+                let linear_idx = sample_idx * n_channels + channel_idx;
+                let raw_value = if float_mode {
+                    let off = analog_start + linear_idx * 4;
+                    if buf.len() < off + 4 {
+                        return Err(ParseError::Format(
+                            "C3D analog data truncated (float)".into(),
+                        ));
+                    }
+                    endian.read_f32(&buf[off..off + 4])
+                } else {
+                    let off = analog_start + linear_idx * 2;
+                    if buf.len() < off + 2 {
+                        return Err(ParseError::Format("C3D analog data truncated (int)".into()));
+                    }
+                    let raw = endian.read_i16(&buf[off..off + 2]);
+                    let offset = params.offsets.get(channel_idx).copied().unwrap_or(0);
+                    let scale = params.scales.get(channel_idx).copied().unwrap_or(1.0);
+                    (raw as f32 - offset as f32) * scale * params.gen_scale
+                };
+                values.push(raw_value);
+            }
+        }
+    }
+
+    let labels = (0..n_channels)
+        .map(|idx| {
+            params
+                .labels
+                .get(idx)
+                .filter(|label| !label.is_empty())
+                .cloned()
+                .unwrap_or_else(|| format!("ANALOG{}", idx + 1))
+        })
+        .collect();
+    let units = (0..n_channels)
+        .map(|idx| params.units.get(idx).cloned().unwrap_or_default())
+        .collect();
+    let rate = if params.rate > 0.0 {
+        params.rate
+    } else {
+        point_rate * samples_per_frame as f32
+    };
+
+    Ok(C3dAnalogData {
+        labels,
+        units,
+        values,
+        n_frames,
+        samples_per_frame,
+        n_channels,
+        rate,
+    })
 }
 
 fn read_usize_scalar(data: &[u8], element_size: i8, endian: Endian) -> Option<usize> {
@@ -575,6 +849,18 @@ mod tests {
         for value in values {
             let mut raw = [0; 4];
             LittleEndian::write_f32(&mut raw, *value);
+            payload.extend_from_slice(&raw);
+        }
+        payload.push(0);
+        payload
+    }
+
+    fn i16_param_payload(dims: &[u8], values: &[i16]) -> Vec<u8> {
+        let mut payload = vec![2, dims.len() as u8];
+        payload.extend_from_slice(dims);
+        for value in values {
+            let mut raw = [0; 2];
+            LittleEndian::write_i16(&mut raw, *value);
             payload.extend_from_slice(&raw);
         }
         payload.push(0);
@@ -655,6 +941,214 @@ mod tests {
         buf
     }
 
+    fn minimal_c3d_with_int_analog_and_force_platform() -> Vec<u8> {
+        let mut buf = vec![0_u8; BLOCK_SIZE * 4];
+
+        buf[0] = 2;
+        buf[1] = 0x50;
+        LittleEndian::write_u16(&mut buf[2..4], 1);
+        LittleEndian::write_u16(&mut buf[4..6], 4);
+        LittleEndian::write_u16(&mut buf[6..8], 1);
+        LittleEndian::write_u16(&mut buf[8..10], 1);
+        LittleEndian::write_f32(&mut buf[12..16], 1.0);
+        LittleEndian::write_u16(&mut buf[16..18], 4);
+        LittleEndian::write_u16(&mut buf[18..20], 2);
+        LittleEndian::write_f32(&mut buf[20..24], 100.0);
+
+        let param_offset = BLOCK_SIZE;
+        buf[param_offset] = 0;
+        buf[param_offset + 1] = 0x50;
+        buf[param_offset + 2] = 2;
+        buf[param_offset + 3] = 0x54;
+        let mut pos = param_offset + 4;
+
+        write_record(&mut buf, &mut pos, "POINT", -1, &group_payload("point"));
+        write_record(&mut buf, &mut pos, "ANALOG", -2, &group_payload("analog"));
+        write_record(
+            &mut buf,
+            &mut pos,
+            "FORCE_PLATFORM",
+            -3,
+            &group_payload("force"),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            1,
+            &string_param_payload(3, &["M01"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "UNITS",
+            1,
+            &string_param_payload(2, &["m"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "RATE",
+            1,
+            &f32_param_payload(&[1], &[100.0]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            2,
+            &string_param_payload(2, &["Fx", "Fy"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "UNITS",
+            2,
+            &string_param_payload(1, &["N", "N"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "RATE",
+            2,
+            &f32_param_payload(&[1], &[200.0]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "SCALE",
+            2,
+            &f32_param_payload(&[2], &[0.5, 2.0]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "OFFSET",
+            2,
+            &i16_param_payload(&[2], &[10, -5]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "GEN_SCALE",
+            2,
+            &f32_param_payload(&[1], &[2.0]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "USED",
+            3,
+            &i16_param_payload(&[1], &[1]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "TYPE",
+            3,
+            &i16_param_payload(&[1], &[2]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "CHANNEL",
+            3,
+            &i16_param_payload(&[6, 1], &[1, 2, 3, 4, 5, 6]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "CORNERS",
+            3,
+            &f32_param_payload(
+                &[3, 4, 1],
+                &[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+            ),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "ORIGIN",
+            3,
+            &f32_param_payload(&[3, 1], &[0.0, 0.0, -0.05]),
+        );
+        buf[pos] = 0;
+        buf[pos + 1] = 0;
+
+        let data_offset = BLOCK_SIZE * 3;
+        LittleEndian::write_i16(&mut buf[data_offset..data_offset + 2], 1);
+        LittleEndian::write_i16(&mut buf[data_offset + 2..data_offset + 4], 2);
+        LittleEndian::write_i16(&mut buf[data_offset + 4..data_offset + 6], 3);
+        LittleEndian::write_i16(&mut buf[data_offset + 6..data_offset + 8], 0);
+        for (idx, value) in [12_i16, 7, 14, 9].iter().enumerate() {
+            let off = data_offset + 8 + idx * 2;
+            LittleEndian::write_i16(&mut buf[off..off + 2], *value);
+        }
+        buf
+    }
+
+    fn minimal_c3d_with_float_analog() -> Vec<u8> {
+        let mut buf = vec![0_u8; BLOCK_SIZE * 4];
+
+        buf[0] = 2;
+        buf[1] = 0x50;
+        LittleEndian::write_u16(&mut buf[2..4], 1);
+        LittleEndian::write_u16(&mut buf[4..6], 2);
+        LittleEndian::write_u16(&mut buf[6..8], 1);
+        LittleEndian::write_u16(&mut buf[8..10], 1);
+        LittleEndian::write_f32(&mut buf[12..16], -1.0);
+        LittleEndian::write_u16(&mut buf[16..18], 4);
+        LittleEndian::write_u16(&mut buf[18..20], 1);
+        LittleEndian::write_f32(&mut buf[20..24], 100.0);
+
+        let param_offset = BLOCK_SIZE;
+        buf[param_offset] = 0;
+        buf[param_offset + 1] = 0x50;
+        buf[param_offset + 2] = 2;
+        buf[param_offset + 3] = 0x54;
+        let mut pos = param_offset + 4;
+
+        write_record(&mut buf, &mut pos, "POINT", -1, &group_payload("point"));
+        write_record(&mut buf, &mut pos, "ANALOG", -2, &group_payload("analog"));
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            1,
+            &string_param_payload(3, &["M01"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "UNITS",
+            1,
+            &string_param_payload(2, &["m"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "LABELS",
+            2,
+            &string_param_payload(2, &["Fx", "Fy"]),
+        );
+        write_record(
+            &mut buf,
+            &mut pos,
+            "RATE",
+            2,
+            &f32_param_payload(&[1], &[100.0]),
+        );
+        buf[pos] = 0;
+        buf[pos + 1] = 0;
+
+        let data_offset = BLOCK_SIZE * 3;
+        for (idx, value) in [1.0_f32, 2.0, 3.0, 0.0, 10.25, -2.5].iter().enumerate() {
+            let off = data_offset + idx * 4;
+            LittleEndian::write_f32(&mut buf[off..off + 4], *value);
+        }
+        buf
+    }
+
     #[test]
     fn parse_c3d_extracts_event_labels_contexts_and_times() {
         let data = parse_c3d_bytes(&minimal_c3d_with_event_params()).expect("parse c3d");
@@ -667,5 +1161,41 @@ mod tests {
         assert_eq!(data.events[1].label, "ToeOff");
         assert_eq!(data.events[1].context, "Right");
         assert_eq!(data.events[1].time_s, 1.25);
+    }
+
+    #[test]
+    fn parse_c3d_decodes_int16_analog_and_force_platform_params() {
+        let data =
+            parse_c3d_bytes(&minimal_c3d_with_int_analog_and_force_platform()).expect("parse c3d");
+
+        assert_eq!(data.names, vec!["M01"]);
+        assert_eq!(data.positions, vec![1.0, 2.0, 3.0]);
+        let analog = data.analog.expect("analog channels");
+        assert_eq!(analog.labels, vec!["Fx", "Fy"]);
+        assert_eq!(analog.units, vec!["N", "N"]);
+        assert_eq!(analog.n_frames, 1);
+        assert_eq!(analog.samples_per_frame, 2);
+        assert_eq!(analog.n_channels, 2);
+        assert_eq!(analog.rate, 200.0);
+        assert_eq!(analog.values, vec![2.0, 48.0, 4.0, 56.0]);
+
+        assert_eq!(data.force_platforms.len(), 1);
+        let platform = &data.force_platforms[0];
+        assert_eq!(platform.platform_type, 2);
+        assert_eq!(platform.channels, vec![1, 2, 3, 4, 5, 6]);
+        assert_eq!(platform.corners.len(), 4);
+        assert_eq!(platform.corners[2], [1.0, 1.0, 0.0]);
+        assert_eq!(platform.origin, [0.0, 0.0, -0.05]);
+    }
+
+    #[test]
+    fn parse_c3d_decodes_float_analog_without_int_scaling() {
+        let data = parse_c3d_bytes(&minimal_c3d_with_float_analog()).expect("parse c3d");
+
+        let analog = data.analog.expect("analog channels");
+        assert_eq!(analog.labels, vec!["Fx", "Fy"]);
+        assert_eq!(analog.samples_per_frame, 1);
+        assert_eq!(analog.n_channels, 2);
+        assert_eq!(analog.values, vec![10.25, -2.5]);
     }
 }
