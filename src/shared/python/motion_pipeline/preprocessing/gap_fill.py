@@ -233,8 +233,12 @@ def _linear_interp_keypoints(
 
         for j, kp in enumerate(frame.keypoints):
             if kp.confidence < 0.5:
-                # Interpolate from before/after
-                if after and j < len(after.keypoints):
+                # Interpolate from before/after. Both neighbour frames must
+                # actually have keypoint j — consecutive frames can carry
+                # different keypoint counts, and indexing ``before`` without
+                # checking its length raised IndexError (the guard checked
+                # only ``after``).
+                if after and j < len(after.keypoints) and j < len(before.keypoints):
                     t = (i - start + 1) / (end - start + 2)
                     kp_before = before.keypoints[j]
                     kp_after = after.keypoints[j]
