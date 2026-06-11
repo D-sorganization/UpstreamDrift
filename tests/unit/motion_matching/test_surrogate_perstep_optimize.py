@@ -17,6 +17,7 @@ from src.shared.python.motion_matching.surrogate.perstep.optimize import (
     _read_state_reference,
     build_argument_parser,
     find_quaternion_columns,
+    OptimizationOptions,
     quaternion_orientation_term,
     quaternion_orientation_term_numpy,
     resolve_cost_config,
@@ -41,10 +42,26 @@ def test_resolve_cost_config():
     assert c.regularizer_kind == "total_work"
 
     with pytest.raises(ValueError):
-        resolve_cost_config("invalid_mode")
+        resolve_cost_config("invalid_mode")  # type: ignore[arg-type]
 
     with pytest.raises(ValueError):
-        resolve_cost_config("position", regularizer_kind="invalid")
+        resolve_cost_config("position", regularizer_kind="invalid")  # type: ignore[arg-type]
+
+
+@pytest.mark.unit
+def test_optimization_options_accept_legacy_positional_values():
+    opts = OptimizationOptions.from_kwargs(
+        None,
+        (3, 0.01, 1e-6, 1e-4, "cpu"),
+        {"cost_mode": "full"},
+    )
+
+    assert opts.steps == 3
+    assert opts.learning_rate == 0.01
+    assert opts.device_name == "cpu"
+    assert opts.cost_mode == "full"
+    with pytest.raises(TypeError, match="multiple values"):
+        OptimizationOptions.from_kwargs(None, (3,), {"steps": 4})
 
 
 @pytest.mark.unit

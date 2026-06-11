@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.323                                            |
+| **Spec Version**        | 1.0.326                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -77,6 +77,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   target-module cache entries after each test, and repo-hygiene coverage
   rejects new module-scope `sys.modules` mocks for optional engine/media
   dependencies.
+- **2026-06-11** - Split the motion surrogate training architecture for
+  #7317. The compact-schema surrogate trainer now resolves legacy keyword
+  arguments through `SurrogateTrainingOptions`, builds an explicit training
+  context, and runs checkpoints/metrics through a focused loop state. The
+  per-step dynamics trainer now separates data preparation, runtime object
+  construction, epoch fitting, best-checkpoint evaluation, and JSON output
+  writing. The per-step optimizer now resolves legacy positional options
+  through `OptimizationOptions`, builds an optimization context, isolates
+  regularizer/orientation/tracking loss calculation, and writes torque plus
+  summary artifacts from a dedicated output helper while preserving existing
+  CLI and call-site compatibility.
 - **2026-06-11** - Hardened the #7314 PR-scoped unit gate in standard
   CI. Source and dependency PRs now fall through to the dependency-light unit
   lane instead of passing solely on touched test files, and targeted PR coverage
@@ -521,6 +532,7 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── motion_matching/        # Motion-matching pipelines, surrogate training, per-step optimization
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
 │       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
@@ -1009,6 +1021,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
 | 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
 | 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
 | 2026-06-11 | 1.0.318 | Data Explorer and model-library boundary contracts for #7297, #7298, and #7299. Import/list responses expose durable `dataset_id` values, Data Explorer filter requests reject unsupported operators at the request boundary, and forced model-library downloads validate HTTPS-only `source_url` values before any download I/O. |

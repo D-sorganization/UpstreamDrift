@@ -85,7 +85,7 @@ def _from_checkpoint(
     norm_meta = payload.get("normalizer", {})
     bounds = norm_meta.get("coeff_bounds", cfg.coeff_bounds)
     n_joints = norm_meta.get("n_joints", cfg.n_joints)
-    model.coeff_normalizer = CoeffNormalizer(  # type: ignore[attr-defined]
+    model.coeff_normalizer = CoeffNormalizer(  # type: ignore[attr-defined, assignment]
         n_joints=n_joints, coeff_bounds=tuple(bounds)
     )
     return model
@@ -151,7 +151,7 @@ def predict_trajectory(
             "model.coeff_normalizer is missing — load via "
             "SwingSurrogate.from_checkpoint() or assign a CoeffNormalizer"
         )
-    normalizer: CoeffNormalizer = model.coeff_normalizer  # type: ignore[attr-defined]
+    normalizer: CoeffNormalizer = model.coeff_normalizer  # type: ignore[attr-defined, assignment]
     target_device = (
         torch.device(device) if device is not None else next(model.parameters()).device
     )
