@@ -90,6 +90,7 @@ def test_save_body_target_video_requires_even_dimensions(tmp_path: Path) -> None
         save_body_target_video(_body_target(), tmp_path / "bad.mp4", width=321)
 
 
+@pytest.mark.unit
 def test_save_body_target_video_cancel_removes_partial_file(tmp_path: Path) -> None:
     out = tmp_path / "cancelled.mp4"
     progress_seen = []

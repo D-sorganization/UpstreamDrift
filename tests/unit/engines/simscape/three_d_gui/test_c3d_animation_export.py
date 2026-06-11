@@ -89,6 +89,7 @@ def test_viewer_menu_action_wired(qt_app):
     assert win.action_export_animation.isEnabled()
 
 
+@pytest.mark.unit
 def test_viewer_animation_export_runs_on_worker_thread(
     qt_app, qtbot, tmp_path, monkeypatch
 ):

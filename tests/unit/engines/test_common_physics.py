@@ -65,6 +65,7 @@ class TestBallProperties:
         assert ball.drag_coefficient == pytest.approx(float(GOLF_BALL_DRAG_COEFFICIENT))
         assert ball.spin_decay_rate == pytest.approx(float(SPIN_DECAY_RATE_S))
 
+    @pytest.mark.unit
     def test_ball_properties_source_shared_physical_constants(self) -> None:
         """Duplicated ball property classes must share canonical constants."""
         engine_ball = BallProperties()

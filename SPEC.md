@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.338                                            |
+| **Spec Version**        | 1.0.339                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-06-11** - Suite-marker ratchet follow-up for the #7382
+  import-boundary consolidation repair and the #7380 simulator-facade merge.
+  The regression tests surfaced by the changed-file ratchet now carry explicit
+  `unit` suite markers so CI can enforce no-growth test metadata without
+  weakening the marker baseline.
 
 - **2026-06-11** - Import-boundary facade consolidation for #7361, #7362,
   and #7363. The C3D viewer wrapper now imports the repo-qualified viewer
@@ -1142,6 +1148,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.339 | Suite-marker ratchet follow-up for the #7382 import-boundary consolidation repair and the #7380 simulator-facade merge. The launcher dependency-probe, settings Docker dependency worker, architecture-budget metadata, C3D viewer export worker, body-target-video cancellation, shared ball constants, MuJoCo torque dimension mismatch, Pinocchio inverse-dynamics readiness, and generated-rig orchestrator regression tests now carry explicit `unit` suite markers so CI can enforce no-growth test metadata without weakening the marker baseline. |
 | 2026-06-11 | 1.0.338 | Import-boundary facade consolidation for #7361, #7362, and #7363. The C3D viewer entrypoint now imports the repo-qualified viewer module directly, MCP config I/O moved into `src/shared/python/ai/mcp/config_io.py` with launcher compatibility facades, shared MCP chat integration reads shared config, and shared/engine datetime compatibility imports route through shared helpers. The changed-file architecture budget now records owned expiring exceptions for the five pre-existing oversized functions surfaced by the consolidation so decomposition debt remains visible without leaving `main` red. |
 | 2026-06-11 | 1.0.337 | MuJoCo motion-matching placeholder failure routing for #7333. The orchestrator now carries solver metadata through the motion-matching stage, maps unavailable or zero-torque MuJoCo matching results to `InvalidInputError` so REST callers receive 400-class configuration feedback instead of HTTP 500, and the motion-pipeline README recommends a non-placeholder matching backend until real MuJoCo rig-model integration lands. |
 | 2026-06-11 | 1.0.336 | Suite-marker ratchet enforcement for #7272. CI Standard now runs `scripts/ci/check_suite_marker_ratchet.py` against `scripts/config/suite_marker_baseline.json`, failing net-new tests that lack a recognized suite marker while allowing legacy unmarked-test debt to shrink. The shared `tests.support.suite_markers` helpers now normalize nodeids, load the baseline, and support report-only, strict, and baseline-ratchet collection behavior from `tests/conftest.py`; contributor guidance lives in `docs/development/test-marker-conventions.md` with focused unit coverage for the static scanner and runtime helpers. |

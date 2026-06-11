@@ -491,6 +491,7 @@ def test_check_wsl_deps_success(
 @patch("PyQt6.QtWidgets.QMessageBox.information")
 @patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
 @patch("subprocess.run")
+@pytest.mark.unit
 def test_check_docker_deps_returns_while_worker_runs(
     mock_run, mock_cmd, mock_info, parent_launcher, qapp, qtbot
 ) -> None:

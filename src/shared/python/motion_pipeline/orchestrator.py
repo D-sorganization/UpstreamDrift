@@ -524,11 +524,10 @@ class MotionPipeline:
 
             if not contract_result.success:
                 error_kind = "internal"
-                if (
-                    solver_metadata.get("production_ready") is False
-                    or self._is_unavailable_mujoco_matching_backend(
-                        solver_backend, solver_metadata, error_metrics
-                    )
+                if solver_metadata.get(
+                    "production_ready"
+                ) is False or self._is_unavailable_mujoco_matching_backend(
+                    solver_backend, solver_metadata, error_metrics
                 ):
                     error_kind = "invalid_input"
                 return StageResult(

@@ -188,6 +188,7 @@ def test_check_local_dependencies(mock_question, launcher) -> None:
         assert launcher._check_local_dependencies(model) is False
 
 
+@pytest.mark.unit
 def test_dependency_probe_runs_off_gui_thread_and_dedupes(launcher, qtbot) -> None:
     model = DummyModel("m1", "M1", "mjcf", path="test.xml")
     launcher._dependency_status_cache = {}

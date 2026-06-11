@@ -243,6 +243,7 @@ def test_mujoco_placeholder_matching_failure_is_invalid_input(
 
 
 @pytest.mark.skipif(not _HAVE_MUJOCO, reason="mujoco not installed")
+@pytest.mark.unit
 def test_orchestrator_mujoco_matching_uses_generated_rig_model() -> None:
     """The MuJoCo torque backend no longer runs on an empty placeholder model."""
     rig = _synthetic_rig()

@@ -134,6 +134,7 @@ def test_collect_violations_reports_invalid_exception_metadata(tmp_path: Path) -
     ]
 
 
+@pytest.mark.unit
 def test_checked_in_architecture_budget_exceptions_are_valid() -> None:
     repo_root = Path(__file__).resolve().parents[3]
     config = mod._load_config(

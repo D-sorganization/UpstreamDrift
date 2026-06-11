@@ -79,6 +79,7 @@ def _static_traj(rig: SkeletonRig, q_value: float = 0.0) -> JointTrajectory:
     return JointTrajectory(id="ref", skeleton=rig, frames=frames)
 
 
+@pytest.mark.unit
 def test_synthetic_rig_model_reports_honest_non_production_failure():
     rig = _pendulum_rig()
     traj = _static_traj(rig, q_value=0.0)
@@ -107,6 +108,7 @@ def test_match_postconditions():
     assert result.success is False
 
 
+@pytest.mark.unit
 def test_urdf_path_must_exist_for_production_solver(tmp_path):
     missing = tmp_path / "missing.urdf"
     with pytest.raises(ValueError, match="URDF path does not exist"):

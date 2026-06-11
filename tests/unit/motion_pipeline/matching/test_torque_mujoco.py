@@ -59,6 +59,7 @@ def test_mujoco_torque_success_reflects_real_execution() -> None:
         assert "unavailable" in (result.message or "").lower()
 
 
+@pytest.mark.unit
 def test_mujoco_torque_refuses_dimension_mismatch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
