@@ -330,13 +330,14 @@ jobs:
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
+          OPTIONAL_STACK_UNIT_WORKERS: "4"
         run: |
           echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
           set +e
           set -o pipefail
           xvfb-run --auto-servernum pytest tests/unit/ \
             -p no:xvfb \
-            -n auto \
+            -n "$OPTIONAL_STACK_UNIT_WORKERS" \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short \

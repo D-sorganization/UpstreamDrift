@@ -644,6 +644,9 @@ class TestCIEnvironmentCompatibility:
         assert "changed_tests" not in unit_step
         assert "No unit test changes detected" not in unit_step
         assert "pytest tests/unit/" in unit_step
+        assert 'OPTIONAL_STACK_UNIT_WORKERS: "4"' in unit_step
+        assert '-n "$OPTIONAL_STACK_UNIT_WORKERS"' in unit_step
+        assert "-n auto" not in unit_step
 
     def test_ci_optional_stack_pytest_exit_codes_are_gating(self) -> None:
         """The optional-stack lane must fail on pytest exit codes, not grep text."""
