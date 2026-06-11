@@ -18,6 +18,8 @@ from typing import Any
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
+from sqlalchemy import update
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 from .models import User, UserRole
 
@@ -65,6 +67,18 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 
 # Bcrypt cost factor (12 is the recommended minimum for security)
 BCRYPT_ROUNDS = 12
+
+_USAGE_COUNTER_COLUMNS = {
+    "api_calls": User.api_calls_this_month,
+    "video_analyses": User.video_analyses_this_month,
+    "simulations": User.simulations_this_month,
+}
+
+_USAGE_QUOTA_FIELDS = {
+    "api_calls": "api_calls_per_month",
+    "video_analyses": "video_analyses_per_month",
+    "simulations": "simulations_per_month",
+}
 
 
 @precondition(
@@ -361,19 +375,108 @@ class UsageTracker:
         """
         if user is None:
             raise ValueError("user must be provided")
+
+        if resource_type == "api_calls":
+            return int(user.api_calls_this_month) < self.quota_limit(
+                user, resource_type
+            )
+        if resource_type == "video_analyses":
+            return int(user.video_analyses_this_month) < self.quota_limit(
+                user, resource_type
+            )
+        if resource_type == "simulations":
+            return int(user.simulations_this_month) < self.quota_limit(
+                user, resource_type
+            )
+
+        return False
+
+    @precondition(
+        lambda self, user, resource_type: (
+            resource_type in ("api_calls", "video_analyses", "simulations")
+        ),
+        "resource_type must be 'api_calls', 'video_analyses', or 'simulations'",
+    )
+    def quota_limit(self, user: User, resource_type: str) -> int:
+        """Return the monthly limit for a user's resource type."""
+        if user is None:
+            raise ValueError("user must be provided")
         from .models import SUBSCRIPTION_QUOTAS
 
         user_role = UserRole(user.role)
         quotas = SUBSCRIPTION_QUOTAS[user_role]
+        return int(getattr(quotas, _USAGE_QUOTA_FIELDS[resource_type]))
 
-        if resource_type == "api_calls":
-            return int(user.api_calls_this_month) < quotas.api_calls_per_month
-        if resource_type == "video_analyses":
-            return int(user.video_analyses_this_month) < quotas.video_analyses_per_month
-        if resource_type == "simulations":
-            return int(user.simulations_this_month) < quotas.simulations_per_month
+    @precondition(
+        lambda self, db, user, resource_type: (
+            resource_type in ("api_calls", "video_analyses", "simulations")
+        ),
+        "resource_type must be 'api_calls', 'video_analyses', or 'simulations'",
+    )
+    def consume_quota(
+        self, db: SQLAlchemySession, user: User, resource_type: str
+    ) -> bool:
+        """Atomically consume one quota unit if the user is still below the limit.
 
-        return False
+        The bounded UPDATE is the authoritative quota transition. It runs in a
+        short independent transaction so metering does not commit unrelated
+        pending work from the request session.
+        """
+        if db is None:
+            raise ValueError("db must be provided")
+        if user is None:
+            raise ValueError("user must be provided")
+
+        return self._apply_quota_delta(db, user, resource_type, 1)
+
+    @precondition(
+        lambda self, db, user, resource_type: (
+            resource_type in ("api_calls", "video_analyses", "simulations")
+        ),
+        "resource_type must be 'api_calls', 'video_analyses', or 'simulations'",
+    )
+    def refund_quota(
+        self, db: SQLAlchemySession, user: User, resource_type: str
+    ) -> bool:
+        """Atomically refund one previously reserved quota unit."""
+        if db is None:
+            raise ValueError("db must be provided")
+        if user is None:
+            raise ValueError("user must be provided")
+
+        return self._apply_quota_delta(db, user, resource_type, -1)
+
+    def _apply_quota_delta(
+        self,
+        db: SQLAlchemySession,
+        user: User,
+        resource_type: str,
+        delta: int,
+    ) -> bool:
+        if delta not in (-1, 1):
+            raise ValueError("delta must be -1 or 1")
+
+        counter_column = _USAGE_COUNTER_COLUMNS[resource_type]
+        boundary = (
+            counter_column < self.quota_limit(user, resource_type)
+            if delta > 0
+            else counter_column > 0
+        )
+        statement = (
+            update(User)
+            .where(User.id == user.id, boundary)
+            .values({counter_column: counter_column + delta})
+        )
+
+        with SQLAlchemySession(bind=db.get_bind(), autoflush=False) as quota_db:
+            result = quota_db.execute(statement)
+            if result.rowcount != 1:
+                quota_db.rollback()
+                return False
+            quota_db.commit()
+
+        db.expire(user, [counter_column.key])
+        return True
 
     def increment_usage(self, user: User, resource_type: str) -> None:
         """Increment usage counter for a user.
