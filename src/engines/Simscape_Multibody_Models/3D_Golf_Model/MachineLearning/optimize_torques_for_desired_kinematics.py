@@ -18,6 +18,10 @@ import torch
 from torch import nn
 from train_dynamics_surrogate import DynamicsMLP
 
+from src.shared.python.motion_matching._checkpoint_artifacts import (
+    load_surrogate_checkpoint,
+)
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = SCRIPT_DIR / "runs" / "inverse_ready_10_cpu" / "best_model.pt"
 LOGGER = logging.getLogger(__name__)
@@ -64,8 +68,10 @@ def optimize_torques(
     effort_weight: float,
     device_name: str,
 ) -> None:
-    checkpoint = torch.load(
-        checkpoint_path, map_location=device_name, weights_only=False
+    checkpoint = load_surrogate_checkpoint(
+        checkpoint_path,
+        map_location=device_name,
+        artifact_name="Simscape dynamics surrogate checkpoint",
     )
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])

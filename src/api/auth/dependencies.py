@@ -1,6 +1,6 @@
 """Authentication dependencies for FastAPI endpoints."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from typing import TypeVar
 
 from src.api.utils.datetime_compat import UTC
@@ -209,34 +209,34 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
     return role_dependency
 
 
-def check_usage_quota(resource_type: str) -> Callable[[User, Session], User]:
+def _usage_quota_exceeded(current_user: User, resource_type: str) -> HTTPException:
+    quota_limit = usage_tracker.quota_limit(current_user, resource_type)
+    return HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail=f"Usage quota exceeded for {resource_type}. "
+        f"Limit: {quota_limit} per month. "
+        f"Upgrade your subscription for higher limits.",
+    )
+
+
+def check_usage_quota(
+    resource_type: str,
+) -> Callable[[User, Session], Generator[User, None, None]]:
     """Dependency factory for usage quota checking."""
 
     def quota_dependency(
         current_user: User = Depends(get_current_user_flexible),
         db: Session = Depends(get_db),
-    ) -> User:
+    ) -> Generator[User, None, None]:
         """Enforce usage quota for the given resource type."""
-        if not usage_tracker.check_quota(current_user, resource_type):
-            user_role = UserRole(current_user.role)
-            from .models import SUBSCRIPTION_QUOTAS
+        if not usage_tracker.consume_quota(db, current_user, resource_type):
+            raise _usage_quota_exceeded(current_user, resource_type)
 
-            quota_limit = getattr(
-                SUBSCRIPTION_QUOTAS[user_role], f"{resource_type}_per_month"
-            )
-
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Usage quota exceeded for {resource_type}. "
-                f"Limit: {quota_limit} per month. "
-                f"Upgrade your subscription for higher limits.",
-            )
-
-        # Increment usage counter
-        usage_tracker.increment_usage(current_user, resource_type)
-        db.commit()
-
-        return current_user
+        try:
+            yield current_user
+        except Exception:  # noqa: BLE001 - refund any protected-operation failure.
+            usage_tracker.refund_quota(db, current_user, resource_type)
+            raise
 
     return quota_dependency
 

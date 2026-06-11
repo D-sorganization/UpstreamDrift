@@ -17,6 +17,10 @@ import pandas as pd
 import torch
 from two_stage_optimizer import run_two_stage
 
+from src.shared.python.motion_matching._checkpoint_artifacts import (
+    load_surrogate_checkpoint,
+)
+
 LOGGER = logging.getLogger(__name__)
 SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -74,7 +78,11 @@ def _build_surrogate_callable(  # pragma: no cover - exercised in integration on
 ) -> tuple[torch.nn.Module, list[str], list[str]]:
     from train_dynamics_surrogate import DynamicsMLP
 
-    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    checkpoint = load_surrogate_checkpoint(
+        checkpoint_path,
+        map_location=device,
+        artifact_name="Simscape surrogate checkpoint",
+    )
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])
     model = DynamicsMLP(

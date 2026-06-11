@@ -9,6 +9,7 @@ import pytest
 
 from src.shared.python.motion_matching._checkpoint_artifacts import (
     load_checkpoint_dict,
+    load_surrogate_checkpoint,
     require_schema_version,
 )
 
@@ -116,6 +117,23 @@ def test_load_checkpoint_dict_rejects_missing_required_keys(
 
     with pytest.raises(ValueError, match="missing required key\\(s\\): config"):
         load_checkpoint_dict(ckpt, required_keys=("state_dict", "config"))
+
+
+@pytest.mark.unit
+def test_load_surrogate_checkpoint_enforces_required_artifact_keys(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    ckpt = tmp_path / "checkpoint.pt"
+    ckpt.write_bytes(b"placeholder")
+
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching._checkpoint_artifacts._load_weights_only_checkpoint",
+        lambda path, *, map_location=None: {"model_state_dict": {}},
+    )
+
+    with pytest.raises(ValueError, match="missing required key\\(s\\)"):
+        load_surrogate_checkpoint(ckpt, artifact_name="test surrogate checkpoint")
 
 
 @pytest.mark.unit
