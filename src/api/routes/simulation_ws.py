@@ -12,6 +12,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, ValidationError
 
 from src.api.auth.ws_auth import resolve_ws_user
+from src.api.dependencies import get_ws_engine_manager
 from src.api.models.requests import MAX_STATE_VECTOR_LEN, SimulationRequest
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -543,10 +544,17 @@ async def simulation_stream(
         return
     await websocket.accept()
 
-    # Access engine manager from app state
-    engine_manager = websocket.app.state.engine_manager
-
     try:
+        engine_manager = get_ws_engine_manager(websocket)
+        if engine_manager is None:
+            await websocket.send_json(
+                {
+                    "error": "service_unavailable",
+                    "message": "Engine manager not initialized",
+                }
+            )
+            return
+
         # Wait for start command
         start_msg = await websocket.receive_json()
 

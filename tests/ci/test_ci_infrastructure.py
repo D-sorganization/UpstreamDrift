@@ -222,6 +222,7 @@ class TestCIEnvironmentCompatibility:
 
         assert "pytest_exit_code=$?" in workflow
         assert "elif [ $pytest_exit_code -eq 5 ]; then" in workflow
+        assert '-o addopts=""' in workflow
         assert "WARNING: pytest exit code 5 (no tests collected) detected." in (
             workflow
         )
@@ -481,6 +482,17 @@ class TestCIEnvironmentCompatibility:
             in workflow
         )
         assert '"${coverage_args[@]}"' in workflow
+        selected_test_block_start = workflow.index(
+            "printf '  %s\\n' \"${changed_tests[@]}\""
+        )
+        selected_test_block_end = workflow.index(
+            "elif [ $pytest_exit_code -eq 5 ]",
+            selected_test_block_start,
+        )
+        assert (
+            '-o addopts=""'
+            in workflow[selected_test_block_start:selected_test_block_end]
+        )
         assert 'echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
         assert "steps.core-tests.outputs.full_coverage_generated == 'true'" in workflow
         assert (
@@ -500,6 +512,54 @@ class TestCIEnvironmentCompatibility:
             ]
         )
 
+    def test_ci_standard_source_prs_do_not_run_only_changed_tests(self) -> None:
+        """Source changes must not be validated solely by touched test files."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        pr_block = workflow[
+            workflow.index(
+                'if [ "${{ github.event_name }}" = "pull_request" ];'
+            ) : workflow.index("# Run the targeted, dependency-light CI lane:")
+        ]
+
+        source_branch = 'elif [ "${#changed_coverage_targets[@]}" -gt 0 ]; then'
+        changed_test_command = (
+            'xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}"'
+        )
+
+        assert source_branch in pr_block
+        assert pr_block.index(source_branch) < pr_block.index(changed_test_command)
+        assert (
+            "running the dependency-light unit lane instead of only changed tests"
+            in pr_block
+        )
+
+    def test_ci_standard_pr_targeted_coverage_runs_changed_file_ratchet(
+        self,
+    ) -> None:
+        """PR-targeted coverage must enforce changed policy files explicitly."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        enforcer_step = workflow[
+            workflow.index(
+                "- name: Enforce Per-Package Coverage Thresholds"
+            ) : workflow.index("- name: Cross-Engine Validator Core Unit Tests")
+        ]
+
+        assert 'echo "pr_targeted_coverage_generated=true" >> "$GITHUB_OUTPUT"' in (
+            workflow
+        )
+        assert "$RUNNER_TEMP/changed_coverage_targets.txt" in workflow
+        assert (
+            "steps.core-tests.outputs.pr_targeted_coverage_generated == 'true'"
+            in enforcer_step
+        )
+        assert '--changed-files "$RUNNER_TEMP/changed_coverage_targets.txt"' in (
+            enforcer_step
+        )
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
@@ -509,7 +569,7 @@ class TestPyprojectTomlConsistency:
         try:
             import tomllib  # Python 3.11+
         except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
+            import tomli as tomllib  # type: ignore[import-not-found, no-redef]
 
         with open(REPO_ROOT / "pyproject.toml", "rb") as f:
             return tomllib.load(f)

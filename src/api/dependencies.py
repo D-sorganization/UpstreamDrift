@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, WebSocket
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
@@ -37,6 +37,26 @@ def get_engine_manager(request: Request) -> EngineManager:
     manager = getattr(request.app.state, "engine_manager", None)
     if manager is None:
         raise HTTPException(status_code=503, detail="Engine manager not initialized")
+    return cast("EngineManager", manager)
+
+
+def get_ws_engine_manager(websocket: WebSocket) -> EngineManager | None:
+    """Retrieve the EngineManager from app state for WebSocket routes.
+
+    WebSocket handlers cannot surface FastAPI ``HTTPException`` responses after
+    the upgrade path starts, so this accessor returns ``None`` when app state is
+    missing and lets the route send an explicit WebSocket error frame.
+
+    Args:
+        websocket: FastAPI WebSocket object.
+
+    Returns:
+        EngineManager instance, or ``None`` when not initialized.
+    """
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    manager = getattr(app_state, "engine_manager", None)
+    if manager is None:
+        return None
     return cast("EngineManager", manager)
 
 
