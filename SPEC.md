@@ -97,6 +97,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   X-factor metrics only when joint trajectory data plus shoulder/hip indices
   are available.
 
+- **2026-06-11** - RL engine protocol and teleoperation hardware-connection
+  honesty for #7357/#7360. The RL humanoid environments now validate required
+  engine dimensions and observation/reward channels before constructing spaces
+  or stepping, `src.engines.protocols.PhysicsEngineProtocol` defines the typed
+  runtime-facing engine surface, and MuJoCo exposes the required accessors via
+  real model/data arrays. SpaceMouse, VR controller, and haptic input classes
+  now report unavailable until a real hardware backend is connected and raise a
+  state error on disconnected reads instead of returning frozen identity data.
+
 - **2026-06-11** - Hardened launcher Docker build cancellation and layout reset
   backup semantics for #7341/#7342. Docker build threads now own a managed
   subprocess handle, expose cooperative cancellation that stops the child
@@ -1206,6 +1215,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-11 | 1.0.345 | Restored main CI API, launcher, and Docker contracts: `jaxsim` is accepted by the public simulation request allowlist, Data Explorer import responses keep generated dataset IDs while allowing legacy direct model construction, canonical-core launcher tiles use a recognized status and served biomechanics logo, symlink model-path validation preserves explicit 400 security failures, and Docker feature dry-runs import shared engine probe configuration through the package-qualified path. |
 | 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
 | 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |
+| 2026-06-11 | 1.0.344 | RL engine protocol and teleoperation hardware-connection honesty for #7357/#7360. Added `src.engines.protocols.PhysicsEngineProtocol`, validated humanoid RL engine dimensions and runtime channels before use, removed zero-filled humanoid observation/reward fallbacks, exposed MuJoCo protocol accessors over real model/data arrays, and changed SpaceMouse/VR/Haptic device classes to report unavailable with `StateError` on disconnected reads/writes instead of fake successful hardware connections. |
 | 2026-06-11 | 1.0.342 | Launcher Docker build cancellation and layout reset backup hardening for #7341/#7342. Docker build threads now own a managed subprocess handle with cooperative cancellation instead of `QThread.terminate()`, the GUI prompts before closing an active build, and GUI/CLI layout reset paths share a helper that overwrites an existing `launcher_layout.json.bak` via `Path.replace` so repeated resets work on Windows. The changed-file architecture budget records expiring exceptions for the legacy launcher UI builders surfaced by this focused repair. |
 | 2026-06-11 | 1.0.341 | CI and validation test contract hardening for #7352, #7353, and #7354. The optional-stack lane now gates on pytest exit codes, physics validation scripts target real analytical/conservation suites, and PyQt fallback stubs no longer fabricate launcher expectations. |
 | 2026-06-11 | 1.0.340 | Motion-pipeline DRY follow-up for the #7380 simulator-facade merge. MuJoCo torque matching and Pinocchio inverse dynamics now share `BaseMotionMatchingSolver` helpers for per-DOF rig joint names and torque trajectory construction, removing duplicate post-merge torque payload assembly while preserving backend-specific success metadata. |

@@ -31,6 +31,35 @@ def mock_engine() -> MagicMock:
     return engine
 
 
+class IncompleteHumanoidEngine:
+    """Engine with dimensions but without required humanoid observation channels."""
+
+    n_q = 7
+    n_v = 7
+
+    def step(self) -> None:
+        """Advance simulation."""
+
+    def reset(self) -> None:
+        """Reset simulation."""
+
+    def set_joint_torques(self, action: np.ndarray) -> None:
+        """Apply torques."""
+
+
+def test_walk_env_rejects_engine_missing_runtime_channels() -> None:
+    """Humanoid walking cannot silently train on zero-filled engine channels."""
+    with pytest.raises(TypeError, match="engine lacks required methods"):
+        HumanoidWalkEnv(engine=IncompleteHumanoidEngine())
+
+
+def test_walk_env_rejects_engine_missing_dimensions(mock_engine: MagicMock) -> None:
+    """Joint and actuator dimensions must be real engine attributes."""
+    del mock_engine.n_v
+    with pytest.raises(TypeError, match="engine lacks required attributes: .*n_v"):
+        HumanoidWalkEnv(engine=mock_engine)
+
+
 class TestHumanoidWalkEnv:
     """Smoke tests for the walking environment."""
 

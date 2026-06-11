@@ -92,6 +92,20 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         """Get engine type identifier (Checkpointable contract)."""
         return "mujoco"
 
+    @property
+    def n_q(self) -> int:
+        """Return the loaded model's generalized position dimension."""
+        self.require_initialized("n_q")
+        assert self.model is not None
+        return int(self.model.nq)
+
+    @property
+    def n_v(self) -> int:
+        """Return the loaded model's generalized velocity dimension."""
+        self.require_initialized("n_v")
+        assert self.model is not None
+        return int(self.model.nv)
+
     def get_capabilities(self) -> EngineCapabilities:
         """Report MuJoCo's verified canonical-core capability surface (#7050).
 
@@ -270,6 +284,80 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
                 f"Control vector size mismatch: got {len(u)}, expected {self.model.nu}"
             )
         self.data.ctrl[:] = u
+
+    def get_joint_positions(self) -> np.ndarray:
+        """Return generalized positions for RL/deployment adapters."""
+        self.require_initialized("get_joint_positions")
+        assert self.data is not None
+        return self.data.qpos.copy()
+
+    def get_joint_velocities(self) -> np.ndarray:
+        """Return generalized velocities for RL/deployment adapters."""
+        self.require_initialized("get_joint_velocities")
+        assert self.data is not None
+        return self.data.qvel.copy()
+
+    def get_joint_torques(self) -> np.ndarray:
+        """Return the current MuJoCo control vector as applied joint torques."""
+        self.require_initialized("get_joint_torques")
+        assert self.data is not None
+        return self.data.ctrl.copy()
+
+    def set_joint_torques(self, torques: np.ndarray) -> None:
+        """Apply torque commands through the existing MuJoCo control path."""
+        self.set_control(torques)
+
+    def get_base_position(self) -> np.ndarray:
+        """Return the root body position from MuJoCo state."""
+        self.require_initialized("get_base_position")
+        assert self.data is not None
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 3:
+            return qpos[:3].copy()
+        xpos = self.data.xpos
+        body_id = 1 if xpos.shape[0] > 1 else 0
+        return xpos[body_id].copy()
+
+    def get_base_orientation(self) -> np.ndarray:
+        """Return the root body orientation quaternion."""
+        self.require_initialized("get_base_orientation")
+        assert self.data is not None
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 7:
+            return qpos[3:7].copy()
+        xquat = self.data.xquat
+        body_id = 1 if xquat.shape[0] > 1 else 0
+        return xquat[body_id].copy()
+
+    def get_base_velocity(self) -> np.ndarray:
+        """Return the root linear velocity from generalized velocity state."""
+        self.require_initialized("get_base_velocity")
+        assert self.data is not None
+        qvel = self.data.qvel
+        if qvel.shape[0] < 3:
+            raise ValueError("MuJoCo model does not expose a 3D base velocity")
+        return qvel[:3].copy()
+
+    def get_imu_data(self) -> np.ndarray:
+        """Return six IMU-like channels from sensors or root velocity state."""
+        self.require_initialized("get_imu_data")
+        assert self.data is not None
+        sensor_data = getattr(self.data, "sensordata", None)
+        if sensor_data is not None and len(sensor_data) >= 6:
+            return sensor_data[:6].copy()
+        qvel = self.data.qvel
+        if qvel.shape[0] < 6:
+            raise ValueError("MuJoCo model does not expose six IMU channels")
+        return qvel[:6].copy()
+
+    def get_contact_forces(self) -> np.ndarray:
+        """Return aggregate external contact wrench from MuJoCo contact forces."""
+        self.require_initialized("get_contact_forces")
+        assert self.data is not None
+        contact_forces = getattr(self.data, "cfrc_ext", None)
+        if contact_forces is None:
+            raise ValueError("MuJoCo data does not expose external contact forces")
+        return np.asarray(contact_forces).sum(axis=0).copy()
 
     def get_time(self) -> float:
         """Get the current simulation time."""
