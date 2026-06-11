@@ -619,9 +619,11 @@ class FrameProcessor:
             y_col = f"{prefix}y"
             z_col = f"{prefix}z"
 
-            x_val = df.iloc[row_idx][x_col] if x_col in df.columns else 0.0
-            y_val = df.iloc[row_idx][y_col] if y_col in df.columns else 0.0
-            z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
+            # ⚡ Bolt: Cache row to avoid repeated .iloc calls
+            row = df.iloc[row_idx]
+            x_val = row[x_col] if x_col in df.columns else 0.0
+            y_val = row[y_col] if y_col in df.columns else 0.0
+            z_val = row[z_col] if z_col in df.columns else 0.0
 
             return np.array([x_val, y_val, z_val], dtype=np.float32)
         except (ValueError, TypeError, RuntimeError) as e:
