@@ -455,40 +455,9 @@ def _rotmat_to_quat(rot_matrix: object) -> NDArray[np.float64]:
             dtype=np.float64,
         )
 
-    trace = np.trace(mat)
-    if trace > 0:
-        s = 0.5 / np.sqrt(trace + 1.0)
-        w = 0.25 / s
-        x = (mat[2, 1] - mat[1, 2]) * s
-        y = (mat[0, 2] - mat[2, 0]) * s
-        z = (mat[1, 0] - mat[0, 1]) * s
-    elif mat[0, 0] > mat[1, 1] and mat[0, 0] > mat[2, 2]:
-        s = 2.0 * np.sqrt(1.0 + mat[0, 0] - mat[1, 1] - mat[2, 2])
-        w = (mat[2, 1] - mat[1, 2]) / s
-        x = 0.25 * s
-        y = (mat[0, 1] + mat[1, 0]) / s
-        z = (mat[0, 2] + mat[2, 0]) / s
-    elif mat[1, 1] > mat[2, 2]:
-        s = 2.0 * np.sqrt(1.0 + mat[1, 1] - mat[0, 0] - mat[2, 2])
-        w = (mat[0, 2] - mat[2, 0]) / s
-        x = (mat[0, 1] + mat[1, 0]) / s
-        y = 0.25 * s
-        z = (mat[1, 2] + mat[2, 1]) / s
-    else:
-        s = 2.0 * np.sqrt(1.0 + mat[2, 2] - mat[0, 0] - mat[1, 1])
-        w = (mat[1, 0] - mat[0, 1]) / s
-        x = (mat[0, 2] + mat[2, 0]) / s
-        y = (mat[1, 2] + mat[2, 1]) / s
-        z = 0.25 * s
+    from src.shared.python.math_utils.quaternion import rotmat_to_quat
 
-    quat = np.array([w, x, y, z], dtype=np.float64)
-    if quat[0] < 0.0:
-        quat = -quat
-    # ⚡ Bolt: math.hypot is ~4.5x faster than np.linalg.norm for small 1D arrays
-    norm = math.hypot(quat[0], quat[1], quat[2], quat[3])
-    if norm == 0.0:
-        raise ValueError("Degenerate rotation produced zero-norm quaternion")
-    return quat / norm
+    return rotmat_to_quat(mat)
 
 
 def _average_quaternions(

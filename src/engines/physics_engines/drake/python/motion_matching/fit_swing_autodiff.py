@@ -81,6 +81,7 @@ __all__ = [
     "DEFAULT_COEFFICIENT_BOUNDS",
     "FitOptions",
     "FitResult",
+    "DrakeAutodiffFitResult",
     "build_polynomial_torque_system_autodiff",
     "compute_grip_rmse_and_work",
     "default_theta_bounds",
@@ -200,7 +201,7 @@ class FitOptions:
 
 
 @dataclass(frozen=True)
-class FitResult:
+class DrakeAutodiffFitResult:
     """Result of :func:`fit_swing_drake_autodiff`.
 
     Attributes:
@@ -248,6 +249,9 @@ class FitResult:
                 f"'failed'; got {self.solver_status!r}"
             )
             raise ValueError(msg)
+
+
+FitResult = DrakeAutodiffFitResult
 
 
 # ---------------------------------------------------------------------------

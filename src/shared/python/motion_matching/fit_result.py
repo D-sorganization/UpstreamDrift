@@ -40,6 +40,43 @@ class CanonicalFitResult:
     solver_options: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
+    @classmethod
+    def from_api_contract(
+        cls,
+        result: Any,
+        *,
+        git_commit: str,
+        engine_version: str,
+        target_hash: str,
+        timestamp_utc: str,
+        solver_status: str = "success",
+        iterations: int = 0,
+        n_evaluations: int = 0,
+        message: str = "",
+    ) -> CanonicalFitResult:
+        """Build the canonical result from the legacy API-contract payload."""
+        coefficients = np.asarray(result.coefficients, dtype=np.float64)
+        metadata = dict(result.metadata)
+        time_s = float(metadata.get("time_s", 0.0))
+        method = str(metadata.get("solver", metadata.get("method", "api_contract")))
+        return cls(
+            theta_optimal=coefficients,
+            final_cost=float(result.final_loss),
+            final_rmse_m=float(metadata.get("final_rmse_m", result.final_loss)),
+            solver_status=solver_status,
+            iterations=iterations,
+            n_evaluations=n_evaluations,
+            wall_clock_s=time_s,
+            message=message,
+            history=(),
+            method=method,
+            git_commit=git_commit,
+            engine_version=engine_version,
+            target_hash=target_hash,
+            timestamp_utc=timestamp_utc,
+            meta={"api_contract_metadata": metadata},
+        )
+
     @property
     def coefficients(self) -> NDArray[np.float64]:
         warnings.warn(

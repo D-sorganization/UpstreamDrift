@@ -1,4 +1,4 @@
-"""Engine-agnostic ``SimOut`` and ``FitResult`` dataclasses.
+"""Engine-agnostic ``SimOut`` and ``SimFitResult`` dataclasses.
 
 These mirror the MATLAB structures returned by ``simulate_with_coefficients.m``
 and the cost evaluator. Every engine (Simscape, Drake, Pinocchio, MuJoCo, ...)
@@ -11,8 +11,8 @@ preserving backwards compatibility with the existing Python tests.
 
 Public API:
     SimOut     -- engine-agnostic per-frame simulation output.
-    FitResult  -- the (theta, cost-breakdown, target, sim) tuple emitted by a
-                  fit run.
+    SimFitResult -- the (theta, cost-breakdown, target, sim) tuple emitted by a
+                    fit run.
 """
 
 from __future__ import annotations
@@ -28,11 +28,11 @@ from .target import ClubTarget
 # Aligning naming with MATLAB ``sim_out`` while keeping the existing class.
 SimOut = SimOutput
 
-__all__ = ["FitResult", "SimOut"]
+__all__ = ["FitResult", "SimFitResult", "SimOut"]
 
 
 @dataclass(frozen=True)
-class FitResult:
+class SimFitResult:
     """Result of a single fit / inverse run.
 
     Attributes:
@@ -59,9 +59,11 @@ class FitResult:
     def __post_init__(self) -> None:
         """Lightweight invariants -- cost finite, breakdown sums to cost."""
         if not np.isfinite(self.cost):
-            raise ValueError(f"FitResult.cost must be finite; got {self.cost!r}")
+            raise ValueError(f"SimFitResult.cost must be finite; got {self.cost!r}")
         if self.cost < 0.0:
-            raise ValueError(f"FitResult.cost must be non-negative; got {self.cost!r}")
+            raise ValueError(
+                f"SimFitResult.cost must be non-negative; got {self.cost!r}"
+            )
         # Allow a tiny float tolerance (the breakdown is computed in float64
         # by ``compute_cost`` so a few ulps of drift is normal).
         if abs(self.breakdown.total - self.cost) > 1e-9 * max(1.0, abs(self.cost)):
@@ -70,4 +72,7 @@ class FitResult:
                 f"(got {self.cost!r} vs {self.breakdown.total!r})"
             )
         if not isinstance(self.engine, str) or not self.engine:
-            raise ValueError("FitResult.engine must be a non-empty string")
+            raise ValueError("SimFitResult.engine must be a non-empty string")
+
+
+FitResult = SimFitResult

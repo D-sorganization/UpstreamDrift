@@ -265,45 +265,9 @@ def _rotmat_to_quat_local(rotmats: np.ndarray) -> np.ndarray:
     arr = np.asarray(rotmats, dtype=np.float64)
     if arr.ndim != 3 or arr.shape[1:] != (3, 3):
         raise ValueError(f"Expected (N, 3, 3); got {arr.shape}")
-    n = arr.shape[0]
-    out = np.empty((n, 4), dtype=np.float64)
-    for i in range(n):
-        r = arr[i]
-        m00, m01, m02 = r[0, 0], r[0, 1], r[0, 2]
-        m10, m11, m12 = r[1, 0], r[1, 1], r[1, 2]
-        m20, m21, m22 = r[2, 0], r[2, 1], r[2, 2]
-        trace = m00 + m11 + m22
-        if trace > 0.0:
-            s = 0.5 / np.sqrt(trace + 1.0)
-            w = 0.25 / s
-            x = (m21 - m12) * s
-            y = (m02 - m20) * s
-            z = (m10 - m01) * s
-        elif (m00 > m11) and (m00 > m22):
-            s = 2.0 * np.sqrt(1.0 + m00 - m11 - m22)
-            w = (m21 - m12) / s
-            x = 0.25 * s
-            y = (m01 + m10) / s
-            z = (m02 + m20) / s
-        elif m11 > m22:
-            s = 2.0 * np.sqrt(1.0 + m11 - m00 - m22)
-            w = (m02 - m20) / s
-            x = (m01 + m10) / s
-            y = 0.25 * s
-            z = (m12 + m21) / s
-        else:
-            s = 2.0 * np.sqrt(1.0 + m22 - m00 - m11)
-            w = (m10 - m01) / s
-            x = (m02 + m20) / s
-            y = (m12 + m21) / s
-            z = 0.25 * s
-        q = np.array([w, x, y, z], dtype=np.float64)
-        norm = np.linalg.norm(q)
-        out[i] = q / norm if norm > 0.0 else np.array([1.0, 0.0, 0.0, 0.0])
-    flips = out[:, 0] < 0.0
-    if np.any(flips):
-        out[flips] = -out[flips]
-    return out
+    from src.shared.python.math_utils.quaternion import rotmat_to_quat
+
+    return rotmat_to_quat(arr)
 
 
 # ---------------------------------------------------------------------------

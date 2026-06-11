@@ -168,6 +168,10 @@ class ControlSystem:
         if 0 <= actuator_index < self.num_actuators:
             self.actuator_controls[actuator_index].control_type = control_type
 
+    def get_control_type(self, actuator_index: int) -> ControlType:
+        """Return the control type for an actuator."""
+        return self.get_actuator_control(actuator_index).control_type
+
     def set_constant_value(self, actuator_index: int, value: float) -> None:
         """Set constant value for an actuator.
 
@@ -177,6 +181,10 @@ class ControlSystem:
         """
         if 0 <= actuator_index < self.num_actuators:
             self.actuator_controls[actuator_index].constant_value = value
+
+    def get_constant_value(self, actuator_index: int) -> float:
+        """Return the constant torque value for an actuator."""
+        return self.get_actuator_control(actuator_index).constant_value
 
     def set_polynomial_coeffs(self, actuator_index: int, coeffs: np.ndarray) -> None:
         """Set polynomial coefficients for an actuator.
@@ -199,6 +207,10 @@ class ControlSystem:
         if 0 <= actuator_index < self.num_actuators:
             self.actuator_controls[actuator_index].damping = damping
 
+    def get_damping(self, actuator_index: int) -> float:
+        """Return the damping coefficient for an actuator."""
+        return self.get_actuator_control(actuator_index).damping
+
     def set_sine_wave_params(
         self,
         actuator_index: int,
@@ -220,6 +232,15 @@ class ControlSystem:
             control.sine_frequency = frequency
             control.sine_phase = phase
 
+    def get_sine_params(self, actuator_index: int) -> dict[str, float]:
+        """Return sine-wave parameters for an actuator."""
+        control = self.get_actuator_control(actuator_index)
+        return {
+            "amplitude": control.sine_amplitude,
+            "frequency": control.sine_frequency,
+            "phase": control.sine_phase,
+        }
+
     def set_step_params(
         self,
         actuator_index: int,
@@ -237,6 +258,15 @@ class ControlSystem:
             control = self.actuator_controls[actuator_index]
             control.step_time = step_time
             control.step_value = step_value
+
+    def get_step_params(self, actuator_index: int) -> dict[str, float]:
+        """Return step-function parameters for an actuator."""
+        control = self.get_actuator_control(actuator_index)
+        return {
+            "toggle_time": control.step_time,
+            "on_value": control.step_value,
+            "off_value": 0.0,
+        }
 
     def compute_control_vector(
         self,

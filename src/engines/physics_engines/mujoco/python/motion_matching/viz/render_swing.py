@@ -56,6 +56,7 @@ from numpy.typing import NDArray  # noqa: E402
 
 __all__ = [
     "FitResult",
+    "MujocoVizFitResult",
     "VizOptions",
     "render_error_timecourse",
     "render_fit_quality_card",
@@ -96,7 +97,7 @@ class _SimOutLike(Protocol):
 
 
 @dataclass
-class FitResult:
+class MujocoVizFitResult:
     """Minimal viz contract for a motion-matching fit.
 
     Designed to be a strict subset of the canonical mujoco
@@ -142,6 +143,9 @@ class FitResult:
             duration_s=float(getattr(sim_out, "duration_s", 0.0)),
             metadata=dict(metadata),
         )
+
+
+FitResult = MujocoVizFitResult
 
 
 @dataclass(frozen=True)

@@ -15,6 +15,11 @@ from src.shared.python.motion_pipeline.contracts import (
     MarkerFrame,
 )
 from src.shared.python.motion_pipeline.preprocessing._frame_arrays import (
+    array_to_keypoint_frames,
+    array_to_keypoint_frames_at_timestamps,
+    array_to_marker_frames,
+    array_to_marker_frames_at_timestamps,
+    estimate_fps,
     keypoints_to_array,
     markers_to_array,
 )
@@ -118,3 +123,33 @@ def test_markers_to_array_uses_first_frame_order_and_zero_fills_missing_markers(
         ),
     )
     assert helper([]).size == 0
+
+
+def test_filter_and_resample_reconstruction_helpers_delegate_to_frame_arrays() -> None:
+    """Frame marshalling has one implementation with legacy private aliases."""
+    assert filter_module._estimate_fps is estimate_fps
+    assert pure_filter_module._estimate_fps is estimate_fps
+    assert resample_module._estimate_fps is estimate_fps
+    assert pure_resample_module._estimate_fps is estimate_fps
+
+    assert filter_module._array_to_keypoint_frames is array_to_keypoint_frames
+    assert pure_filter_module._array_to_keypoint_frames is array_to_keypoint_frames
+    assert filter_module._array_to_marker_frames is array_to_marker_frames
+    assert pure_filter_module._array_to_marker_frames is array_to_marker_frames
+
+    assert (
+        resample_module._array_to_keypoint_frames_at_timestamps
+        is array_to_keypoint_frames_at_timestamps
+    )
+    assert (
+        pure_resample_module._array_to_keypoint_frames_at_timestamps
+        is array_to_keypoint_frames_at_timestamps
+    )
+    assert (
+        resample_module._array_to_marker_frames_at_timestamps
+        is array_to_marker_frames_at_timestamps
+    )
+    assert (
+        pure_resample_module._array_to_marker_frames_at_timestamps
+        is array_to_marker_frames_at_timestamps
+    )

@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
+from ..contracts import KeypointSequence, MarkerTrajectory
 from ._frame_arrays import (
+    array_to_keypoint_frames_at_timestamps as _array_to_keypoint_frames_at_timestamps,
+    array_to_marker_frames_at_timestamps as _array_to_marker_frames_at_timestamps,
+    estimate_fps as _estimate_fps,
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
 )
@@ -141,91 +144,3 @@ def _resample_markers(
             "target_fps": target_fps,
         },
     )
-
-
-def _estimate_fps(frames: list) -> float:
-    """Estimate FPS from frame timestamps."""
-    if len(frames) < 2:
-        return 30.0
-
-    timestamps = [f.timestamp for f in frames]
-    dt = np.mean(np.diff(timestamps))
-
-    if dt <= 0:
-        return 30.0
-
-    return 1.0 / dt
-
-
-def _array_to_keypoint_frames_at_timestamps(
-    seq: KeypointSequence,
-    data: np.ndarray,
-    timestamps: np.ndarray,
-) -> list[KeypointFrame]:
-    """Convert array back to keypoint frames at specified timestamps."""
-    new_frames = []
-
-    for i, ts in enumerate(timestamps):
-        new_keypoints = []
-        for j in range(data.shape[1]):
-            kp = (
-                seq.frames[0].keypoints[j] if j < len(seq.frames[0].keypoints) else None
-            )
-            if kp:
-                new_kp = Keypoint(
-                    x=data[i, j, 0],
-                    y=data[i, j, 1],
-                    z=data[i, j, 2] if kp.z is not None else None,
-                    confidence=kp.confidence,
-                    name=kp.name,
-                )
-                new_keypoints.append(new_kp)
-
-        new_frames.append(
-            KeypointFrame(
-                timestamp=float(ts),
-                keypoints=new_keypoints,
-                schema_name=seq.frames[0].schema_name,
-                frame_index=i,
-            )
-        )
-
-    return new_frames
-
-
-def _array_to_marker_frames_at_timestamps(
-    traj: MarkerTrajectory,
-    data: np.ndarray,
-    timestamps: np.ndarray,
-) -> list[MarkerFrame]:
-    """Convert array back to marker frames at specified timestamps."""
-    new_frames = []
-    marker_names = list(traj.frames[0].markers.keys())
-
-    for i, ts in enumerate(timestamps):
-        new_markers = {}
-        for j, name in enumerate(marker_names):
-            if name in traj.frames[0].markers:
-                m = traj.frames[0].markers[name]
-                new_markers[name] = Marker(
-                    name=name,
-                    x=data[i, j, 0],
-                    y=data[i, j, 1],
-                    z=data[i, j, 2],
-                    residual=m.residual,
-                    occluded=m.occluded,
-                )
-
-        new_frames.append(
-            MarkerFrame(
-                timestamp=float(ts),
-                markers=new_markers,
-                frame_index=i,
-            )
-        )
-
-    return new_frames
-
-
-# Import for type hints
-from ..contracts import Keypoint, Marker

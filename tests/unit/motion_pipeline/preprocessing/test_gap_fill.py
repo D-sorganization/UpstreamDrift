@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from importlib import import_module
 
 from src.shared.python.motion_pipeline.contracts import (
     Keypoint,
@@ -14,6 +15,11 @@ from src.shared.python.motion_pipeline.contracts import (
 from src.shared.python.motion_pipeline.preprocessing.gap_fill import (
     GapFillStrategy,
     gap_fill,
+)
+from src.shared.python.motion_pipeline.preprocessing import _gap_fill_pure_python
+
+gap_fill_module = import_module(
+    "src.shared.python.motion_pipeline.preprocessing.gap_fill"
 )
 
 pytestmark = pytest.mark.unit
@@ -402,3 +408,9 @@ def test_pure_python_gap_fill() -> None:
             traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10
         )
         assert out_zero_s.metadata.get("strategy") == "pca"
+
+
+def test_pure_python_gap_fill_module_delegates_to_canonical_module() -> None:
+    """The pure fallback module is a compatibility facade, not a drifted copy."""
+    assert _gap_fill_pure_python.gap_fill is gap_fill_module.gap_fill
+    assert _gap_fill_pure_python.GapFillStrategy is gap_fill_module.GapFillStrategy

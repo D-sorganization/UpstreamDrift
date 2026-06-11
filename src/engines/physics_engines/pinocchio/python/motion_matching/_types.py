@@ -38,7 +38,7 @@ class ClubTargetLike(Protocol):
 
 
 @dataclass
-class FitResult:
+class PinocchioVizFitResult:
     """Pinocchio fit result, viz/leaderboard-facing subset.
 
     Attributes:
@@ -75,3 +75,6 @@ class FitResult:
     wall_clock_s: float = 0.0
     n_iterations: int = 0
     commit: str = "unknown"
+
+
+FitResult = PinocchioVizFitResult

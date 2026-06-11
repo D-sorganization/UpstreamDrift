@@ -4,11 +4,21 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+    _rotmat_to_quat as opensim_rotmat_to_quat,
+)
+from src.engines.physics_engines.pinocchio.python.motion_matching.fit_swing import (
+    rotmat_to_quat_wxyz as pinocchio_rotmat_to_quat,
+)
 from src.shared.python.motion_matching.loaders._quaternion import (
     _canonicalize_sign,
     quat_inverse_distance,
     rotmat_to_quat,
     slerp,
+)
+from src.shared.python.pose_interchange.se3 import matrix_to_quat as se3_matrix_to_quat
+from src.shared.python.spatial_algebra.pose6dof.rotations import (
+    rotation_matrix_to_quaternion as spatial_rotation_matrix_to_quaternion,
 )
 
 
@@ -55,3 +65,27 @@ def test_slerp_endpoints() -> None:
     q1 = np.array([0.0, 1.0, 0.0, 0.0])
     assert slerp(q0, q1, 0.0) == pytest.approx(q0)
     assert slerp(q0, q1, 1.0) == pytest.approx(q1)
+
+
+def test_rotation_matrix_quaternion_converters_share_canonical_contract() -> None:
+    """All public Shepperd wrappers agree with the canonical helper."""
+    rot = np.array(
+        [
+            [0.0, -1.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ],
+        dtype=np.float64,
+    )
+    expected = rotmat_to_quat(rot)
+
+    converters = (
+        se3_matrix_to_quat,
+        spatial_rotation_matrix_to_quaternion,
+        opensim_rotmat_to_quat,
+        pinocchio_rotmat_to_quat,
+    )
+    for converter in converters:
+        observed = converter(rot)
+        assert observed[0] >= 0.0
+        np.testing.assert_allclose(observed, expected, atol=1e-12)

@@ -54,7 +54,7 @@ if TYPE_CHECKING:
         plot_fit_quality_card,
     )
     from .plot_trajectory_overlay import plot_trajectory_overlay
-    from .sim_out import FitResult, SimOut
+    from .sim_out import FitResult, SimFitResult, SimOut
     from .synthesize_target_from_coefficients import (
         THETA_BOUNDS,
         EngineSimulator,
@@ -107,6 +107,7 @@ __all__ = [
     "MultiSourceTarget",
     "REGULARIZER_KINDS",
     "SimOut",
+    "SimFitResult",
     "SimOutput",
     "SourceProvenance",
     "SynthOptions",
@@ -167,6 +168,7 @@ _LAZY_EXPORTS = {
     "plot_fit_quality_card": ".plot_fit_quality_card",
     "plot_trajectory_overlay": ".plot_trajectory_overlay",
     "FitResult": ".sim_out",
+    "SimFitResult": ".sim_out",
     "SimOut": ".sim_out",
     "THETA_BOUNDS": ".synthesize_target_from_coefficients",
     "EngineSimulator": ".synthesize_target_from_coefficients",

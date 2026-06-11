@@ -32,7 +32,7 @@ columns above show up in the leaderboard.
 
 Public API
 ----------
-    FitResult           -- frozen dataclass; the leaderboard row schema.
+    LeaderboardRow      -- frozen dataclass; the leaderboard row schema.
     LeaderboardError    -- raised on schema violations or unreadable input.
     load_results        -- read every ``<trial>/<engine>.json`` under a dir.
     render_markdown     -- format a list of FitResults as a Markdown table.
@@ -52,6 +52,7 @@ from typing import Any
 
 __all__ = [
     "FitResult",
+    "LeaderboardRow",
     "LeaderboardError",
     "load_results",
     "render_markdown",
@@ -98,7 +99,7 @@ class LeaderboardError(ValueError):
     """
 
 
-def _validate_strings(record: FitResult) -> None:
+def _validate_strings(record: LeaderboardRow) -> None:
     """Trial / engine / solver string fields must be present and recognised."""
     if not isinstance(record.trial, str) or not record.trial:
         raise LeaderboardError(
@@ -114,7 +115,7 @@ def _validate_strings(record: FitResult) -> None:
         )
 
 
-def _validate_numbers(record: FitResult) -> None:
+def _validate_numbers(record: LeaderboardRow) -> None:
     """Numeric fields must be finite and non-negative."""
     for name in _NONNEG_FIELDS:
         value = getattr(record, name)
@@ -149,7 +150,7 @@ def _validate_timestamp(run_at: str) -> None:
 
 
 @dataclass(frozen=True)
-class FitResult:
+class LeaderboardRow:
     """Cross-engine leaderboard row.
 
     Mirrors the per-engine ``fit_swing_<engine>`` JSON contract from
@@ -175,8 +176,8 @@ class FitResult:
         _validate_timestamp(self.run_at)
 
     @classmethod
-    def from_dict(cls, data: dict, trial: str) -> FitResult:
-        """Build a FitResult from a parsed JSON dict.
+    def from_dict(cls, data: dict, trial: str) -> LeaderboardRow:
+        """Build a leaderboard row from a parsed JSON dict.
 
         ``trial`` is supplied separately because most fit drivers know
         which trial they ran without re-stating it; if the JSON does name
@@ -194,7 +195,7 @@ class FitResult:
         missing = [name for name, v in kwargs.items() if v is None]
         if missing:
             raise LeaderboardError(
-                f"missing required field(s) {sorted(missing)} in FitResult JSON"
+                f"missing required field(s) {sorted(missing)} in leaderboard JSON"
             )
         return cls(**kwargs)  # type: ignore[arg-type]
 
@@ -208,6 +209,9 @@ class FitResult:
             else:
                 out[name] = str(value)
         return out
+
+
+FitResult = LeaderboardRow
 
 
 # --- I/O ---------------------------------------------------------------------
