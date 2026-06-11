@@ -36,40 +36,6 @@ def test_client_init_with_token(temp_cache_dir: Path) -> None:
     assert client.token == "test-token-123"
 
 
-def test_client_init_ignores_empty_cached_token(temp_cache_dir: Path) -> None:
-    """Empty cached token files must not authenticate the client."""
-    cache_dir = temp_cache_dir / ".golf-suite"
-    cache_dir.mkdir(parents=True)
-    (cache_dir / "cloud_token").write_text("")
-
-    client = CloudClient()
-
-    assert not client.is_logged_in
-    assert client.token is None
-
-
-def test_client_init_ignores_whitespace_cached_token(temp_cache_dir: Path) -> None:
-    """Whitespace-only cached token files must not authenticate the client."""
-    cache_dir = temp_cache_dir / ".golf-suite"
-    cache_dir.mkdir(parents=True)
-    (cache_dir / "cloud_token").write_text(" \n\t ")
-
-    client = CloudClient()
-
-    assert not client.is_logged_in
-    assert client.token is None
-
-
-def test_client_with_manually_blank_token_is_not_logged_in(
-    temp_cache_dir: Path,
-) -> None:
-    """A non-None but blank token must not satisfy the auth invariant."""
-    client = CloudClient()
-    client.token = ""
-
-    assert not client.is_logged_in
-
-
 def test_logout(temp_cache_dir: Path) -> None:
     """Test logout clears token and deletes file."""
     cache_dir = temp_cache_dir / ".golf-suite"

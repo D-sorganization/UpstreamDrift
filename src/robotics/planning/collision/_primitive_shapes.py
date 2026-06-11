@@ -167,7 +167,11 @@ class Capsule(GeometricPrimitive):
     @property
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
-        return math.hypot((self.point_b - self.point_a)[0], (self.point_b - self.point_a)[1], (self.point_b - self.point_a)[2])
+        return math.hypot(
+            (self.point_b - self.point_a)[0],
+            (self.point_b - self.point_a)[1],
+            (self.point_b - self.point_a)[2],
+        )
 
     @property
     def axis(self) -> np.ndarray:

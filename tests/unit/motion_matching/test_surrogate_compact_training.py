@@ -15,7 +15,6 @@ from src.shared.python.motion_matching.surrogate.compact.training import (
     _build_targets_from_compact,
     _CompactSwingTorchDataset,
     _split_indices_by_trial,
-    SurrogateTrainingOptions,
     train_surrogate,
 )
 
@@ -176,23 +175,6 @@ def test_train_surrogate_happy_path(dummy_compact_dataset: Path, tmp_path: Path)
         )
     assert res2.best_epoch >= 2
     assert len(res2.history["train_loss"]) == 1  # ran epochs [2, 3) so 1 epoch
-
-
-@pytest.mark.unit
-def test_surrogate_training_options_preserve_legacy_kwargs(tmp_path: Path):
-    base = SurrogateTrainingOptions(epochs=5, output_dir=tmp_path / "base")
-
-    resolved = SurrogateTrainingOptions.from_kwargs(
-        base,
-        {"epochs": 7, "batch_size": 16, "output_dir": tmp_path / "override"},
-    )
-
-    assert resolved.epochs == 7
-    assert resolved.batch_size == 16
-    assert resolved.output_dir == tmp_path / "override"
-    assert base.epochs == 5
-    with pytest.raises(TypeError, match="unexpected train_surrogate option"):
-        SurrogateTrainingOptions.from_kwargs(base, {"unknown": True})
 
 
 @pytest.mark.unit

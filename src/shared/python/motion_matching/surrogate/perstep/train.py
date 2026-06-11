@@ -46,38 +46,6 @@ class TrainConfig:
     use_amp: bool
 
 
-@dataclass(frozen=True)
-class _PreparedTrainingData:
-    x_raw: np.ndarray
-    y_raw: np.ndarray
-    x_scaled: np.ndarray
-    y_scaled: np.ndarray
-    x_mean: np.ndarray
-    x_std: np.ndarray
-    y_mean: np.ndarray
-    y_std: np.ndarray
-    train_idx: np.ndarray
-    val_idx: np.ndarray
-    test_idx: np.ndarray
-    input_columns: list[str]
-    target_columns: list[str]
-
-
-@dataclass(frozen=True)
-class _RuntimeObjects:
-    model: DynamicsMLP
-    optimizer: torch.optim.Optimizer
-    loss_fn: nn.MSELoss
-    scaler: torch.amp.GradScaler
-    loader: DataLoader
-    val_x: torch.Tensor
-    val_y: torch.Tensor
-    test_x: torch.Tensor
-    device: torch.device
-    pin_memory: bool
-    best_path: Path
-
-
 class DynamicsMLP(nn.Module):
     def __init__(
         self, input_dim: int, output_dim: int, hidden_sizes: list[int]
@@ -216,24 +184,15 @@ def _normalized_rmse_by_column(
 
 
 def train(config: TrainConfig) -> None:
+    random.seed(config.seed)
+    np.random.seed(config.seed)
+    torch.manual_seed(config.seed)
+
+    dataset_path = Path(config.dataset)
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    _seed_training(config.seed)
-    data = _prepare_training_data(config)
-    runtime = _build_runtime(config, data, output_dir)
-    history, best_val = _fit_model(config, data, runtime)
-    metrics = _evaluate_best_model(config, data, runtime, best_val)
-    _write_training_outputs(output_dir, history, metrics)
 
-
-def _seed_training(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-
-def _prepare_training_data(config: TrainConfig) -> _PreparedTrainingData:
-    x_raw, y_raw, input_columns, target_columns = _load_arrays(Path(config.dataset))
+    x_raw, y_raw, input_columns, target_columns = _load_arrays(dataset_path)
     train_idx, val_idx, test_idx = _make_splits(
         len(x_raw),
         validation_fraction=config.validation_fraction,
@@ -245,32 +204,15 @@ def _prepare_training_data(config: TrainConfig) -> _PreparedTrainingData:
     y_train_raw = y_raw[train_idx]
     x_scaled, x_mean, x_std = _standardize(x_train_raw, x_raw)
     y_scaled, y_mean, y_std = _standardize(y_train_raw, y_raw)
-    return _PreparedTrainingData(
-        x_raw=x_raw,
-        y_raw=y_raw,
-        x_scaled=x_scaled,
-        y_scaled=y_scaled,
-        x_mean=x_mean,
-        x_std=x_std,
-        y_mean=y_mean,
-        y_std=y_std,
-        train_idx=train_idx,
-        val_idx=val_idx,
-        test_idx=test_idx,
-        input_columns=input_columns,
-        target_columns=target_columns,
-    )
 
-
-def _build_runtime(
-    config: TrainConfig,
-    data: _PreparedTrainingData,
-    output_dir: Path,
-) -> _RuntimeObjects:
     train_ds = TensorDataset(
-        torch.from_numpy(data.x_scaled[data.train_idx]),
-        torch.from_numpy(data.y_scaled[data.train_idx]),
+        torch.from_numpy(x_scaled[train_idx]),
+        torch.from_numpy(y_scaled[train_idx]),
     )
+    val_x = torch.from_numpy(x_scaled[val_idx])
+    val_y = torch.from_numpy(y_scaled[val_idx])
+    test_x = torch.from_numpy(x_scaled[test_idx])
+
     device = torch.device(config.device)
     pin_memory = device.type == "cuda"
     loader = DataLoader(
@@ -280,9 +222,10 @@ def _build_runtime(
         num_workers=0,
         pin_memory=pin_memory,
     )
+
     model = DynamicsMLP(
-        input_dim=data.x_scaled.shape[1],
-        output_dim=data.y_scaled.shape[1],
+        input_dim=x_scaled.shape[1],
+        output_dim=y_scaled.shape[1],
         hidden_sizes=config.hidden_sizes,
     ).to(device)
     optimizer = torch.optim.AdamW(
@@ -294,127 +237,85 @@ def _build_runtime(
     scaler = torch.amp.GradScaler(
         "cuda", enabled=config.use_amp and device.type == "cuda"
     )
-    return _RuntimeObjects(
-        model=model,
-        optimizer=optimizer,
-        loss_fn=loss_fn,
-        scaler=scaler,
-        loader=loader,
-        val_x=torch.from_numpy(data.x_scaled[data.val_idx]),
-        val_y=torch.from_numpy(data.y_scaled[data.val_idx]),
-        test_x=torch.from_numpy(data.x_scaled[data.test_idx]),
-        device=device,
-        pin_memory=pin_memory,
-        best_path=output_dir / "best_model.pt",
-    )
 
-
-def _fit_model(
-    config: TrainConfig,
-    data: _PreparedTrainingData,
-    runtime: _RuntimeObjects,
-) -> tuple[list[dict[str, float]], float]:
     history: list[dict[str, float]] = []
     best_val = math.inf
+    best_path = output_dir / "best_model.pt"
+
     for epoch in range(1, config.epochs + 1):
-        train_loss = _train_one_epoch(config, runtime)
-        val_loss = _validation_loss(runtime)
+        model.train()
+        train_loss = 0.0
+        train_count = 0
+        for batch_x, batch_y in loader:
+            batch_x = batch_x.to(device, non_blocking=pin_memory)
+            batch_y = batch_y.to(device, non_blocking=pin_memory)
+
+            optimizer.zero_grad(set_to_none=True)
+            with torch.amp.autocast(
+                "cuda", enabled=config.use_amp and device.type == "cuda"
+            ):
+                loss = loss_fn(model(batch_x), batch_y)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+
+            train_loss += float(loss.detach().cpu()) * len(batch_x)
+            train_count += len(batch_x)
+
+        model.eval()
+        with torch.no_grad():
+            val_pred = model(val_x.to(device)).cpu()
+            val_loss = float(loss_fn(val_pred, val_y).cpu())
+        train_loss /= train_count
         history.append({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
-        _log_training_epoch(epoch, train_loss, val_loss)
+        LOGGER.info(
+            "epoch=%03d train_loss=%.6f val_loss=%.6f",
+            epoch,
+            train_loss,
+            val_loss,
+        )
+
         if val_loss < best_val:
             best_val = val_loss
-            _save_best_checkpoint(config, data, runtime)
-    return history, best_val
+            torch.save(
+                {
+                    "model_state_dict": model.state_dict(),
+                    "input_columns": input_columns,
+                    "target_columns": target_columns,
+                    "x_mean": x_mean,
+                    "x_std": x_std,
+                    "y_mean": y_mean,
+                    "y_std": y_std,
+                    "config": asdict(config),
+                },
+                best_path,
+            )
 
-
-def _train_one_epoch(config: TrainConfig, runtime: _RuntimeObjects) -> float:
-    runtime.model.train()
-    train_loss = 0.0
-    train_count = 0
-    for batch_x, batch_y in runtime.loader:
-        batch_x = batch_x.to(runtime.device, non_blocking=runtime.pin_memory)
-        batch_y = batch_y.to(runtime.device, non_blocking=runtime.pin_memory)
-        runtime.optimizer.zero_grad(set_to_none=True)
-        with torch.amp.autocast(
-            "cuda", enabled=config.use_amp and runtime.device.type == "cuda"
-        ):
-            loss = runtime.loss_fn(runtime.model(batch_x), batch_y)
-        runtime.scaler.scale(loss).backward()
-        runtime.scaler.step(runtime.optimizer)
-        runtime.scaler.update()
-        train_loss += float(loss.detach().cpu()) * len(batch_x)
-        train_count += len(batch_x)
-    return train_loss / train_count
-
-
-def _validation_loss(runtime: _RuntimeObjects) -> float:
-    runtime.model.eval()
+    checkpoint = torch.load(best_path, map_location=device, weights_only=False)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
     with torch.no_grad():
-        val_pred = runtime.model(runtime.val_x.to(runtime.device)).cpu()
-        return float(runtime.loss_fn(val_pred, runtime.val_y).cpu())
+        pred_scaled = model(test_x.to(device)).cpu().numpy()
+    pred = pred_scaled * y_std + y_mean
+    target = y_raw[test_idx]
 
-
-def _save_best_checkpoint(
-    config: TrainConfig,
-    data: _PreparedTrainingData,
-    runtime: _RuntimeObjects,
-) -> None:
-    torch.save(
-        {
-            "model_state_dict": runtime.model.state_dict(),
-            "input_columns": data.input_columns,
-            "target_columns": data.target_columns,
-            "x_mean": data.x_mean,
-            "x_std": data.x_std,
-            "y_mean": data.y_mean,
-            "y_std": data.y_std,
-            "config": asdict(config),
-        },
-        runtime.best_path,
-    )
-
-
-def _evaluate_best_model(
-    config: TrainConfig,
-    data: _PreparedTrainingData,
-    runtime: _RuntimeObjects,
-    best_val: float,
-) -> dict[str, object]:
-    checkpoint = torch.load(
-        runtime.best_path, map_location=runtime.device, weights_only=False
-    )
-    runtime.model.load_state_dict(checkpoint["model_state_dict"])
-    runtime.model.eval()
-    with torch.no_grad():
-        pred_scaled = runtime.model(runtime.test_x.to(runtime.device)).cpu().numpy()
-    pred = pred_scaled * data.y_std + data.y_mean
-    target = data.y_raw[data.test_idx]
     diff = pred - target
-    return {
+    metrics = {
         "best_val_loss_scaled": best_val,
         "test_rmse_mean_unscaled": float(np.sqrt(np.vdot(diff, diff) / diff.size)),
-        "test_rmse_by_target_unscaled": _rmse_by_column(
-            pred, target, data.target_columns
-        ),
+        "test_rmse_by_target_unscaled": _rmse_by_column(pred, target, target_columns),
         "test_nrmse_by_target_std": _normalized_rmse_by_column(
-            pred, target, data.target_columns
+            pred, target, target_columns
         ),
-        "test_r2_by_target": _r2_by_column(pred, target, data.target_columns),
-        "n_rows": int(len(data.x_raw)),
-        "n_train": int(len(data.train_idx)),
-        "n_val": int(len(data.val_idx)),
-        "n_test": int(len(data.test_idx)),
-        "input_dim": len(data.input_columns),
-        "target_dim": len(data.target_columns),
-        "device": str(runtime.device),
+        "test_r2_by_target": _r2_by_column(pred, target, target_columns),
+        "n_rows": int(len(x_raw)),
+        "n_train": int(len(train_idx)),
+        "n_val": int(len(val_idx)),
+        "n_test": int(len(test_idx)),
+        "input_dim": len(input_columns),
+        "target_dim": len(target_columns),
+        "device": str(device),
     }
-
-
-def _write_training_outputs(
-    output_dir: Path,
-    history: list[dict[str, float]],
-    metrics: dict[str, object],
-) -> None:
     (output_dir / "history.json").write_text(
         json.dumps(history, indent=2), encoding="utf-8"
     )
@@ -422,15 +323,6 @@ def _write_training_outputs(
         json.dumps(metrics, indent=2), encoding="utf-8"
     )
     LOGGER.info("%s", json.dumps(metrics, indent=2))
-
-
-def _log_training_epoch(epoch: int, train_loss: float, val_loss: float) -> None:
-    LOGGER.info(
-        "epoch=%03d train_loss=%.6f val_loss=%.6f",
-        epoch,
-        train_loss,
-        val_loss,
-    )
 
 
 def parse_args() -> argparse.Namespace:

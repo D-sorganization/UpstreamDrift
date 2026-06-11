@@ -15,7 +15,6 @@ from src.shared.python.motion_matching.surrogate.perstep.train import (
     TrainConfig,
     _make_splits,
     _normalized_rmse_by_column,
-    _prepare_training_data,
     _r2_by_column,
     _rmse_by_column,
     _standardize,
@@ -83,42 +82,6 @@ def test_normalized_rmse_by_column():
     res = _normalized_rmse_by_column(pred, target, ["a", "b"])
     assert np.isclose(res["a"], 0.0)
     assert np.isclose(res["b"], 0.0)
-
-
-@pytest.mark.unit
-def test_prepare_training_data_preserves_columns_and_split_contract():
-    cfg = TrainConfig(
-        dataset="dummy.parquet",
-        output_dir="unused",
-        epochs=1,
-        batch_size=4,
-        learning_rate=1e-3,
-        weight_decay=0.0,
-        hidden_sizes=[8],
-        validation_fraction=0.2,
-        test_fraction=0.2,
-        seed=42,
-        device="cpu",
-        use_amp=False,
-    )
-    x_raw = np.arange(60, dtype=np.float32).reshape(12, 5)
-    y_raw = np.arange(36, dtype=np.float32).reshape(12, 3)
-    input_cols = [f"in_{idx}" for idx in range(5)]
-    target_cols = [f"out_{idx}" for idx in range(3)]
-
-    with patch(
-        "src.shared.python.motion_matching.surrogate.perstep.train._load_arrays",
-        return_value=(x_raw, y_raw, input_cols, target_cols),
-    ):
-        data = _prepare_training_data(cfg)
-
-    assert data.input_columns == input_cols
-    assert data.target_columns == target_cols
-    assert data.x_scaled.shape == x_raw.shape
-    assert data.y_scaled.shape == y_raw.shape
-    assert len(data.train_idx) + len(data.val_idx) + len(data.test_idx) == len(x_raw)
-    assert np.all(data.x_std > 0)
-    assert np.all(data.y_std > 0)
 
 
 @pytest.mark.unit

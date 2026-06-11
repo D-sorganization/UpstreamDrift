@@ -40,7 +40,7 @@ import logging
 import math
 import time
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import asdict, dataclass, field, replace as dataclass_replace
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -101,74 +101,6 @@ class TrainingResult:
     config: SurrogateConfig | None = None
     total_seconds: float = 0.0
     param_count: int = 0
-
-
-@dataclass(frozen=True)
-class SurrogateTrainingOptions:
-    """Runtime options for :func:`train_surrogate`."""
-
-    epochs: int = 50
-    batch_size: int = 64
-    lr: float = 1e-3
-    device: str | torch.device = "cpu"
-    seed: int = 0
-    config: SurrogateConfig | None = None
-    impact_weight: float = 1.0
-    val_fraction: float = 0.1
-    early_stopping_patience: int = 10
-    output_dir: str | Path | None = None
-    resume_from: str | Path | None = None
-    progress_cb: Callable[[int, dict[str, float]], None] | None = None
-
-    @classmethod
-    def from_kwargs(
-        cls,
-        options: SurrogateTrainingOptions | None,
-        kwargs: dict[str, Any],
-    ) -> SurrogateTrainingOptions:
-        if options is None:
-            options = cls()
-        if not kwargs:
-            return options
-        valid = set(cls.__dataclass_fields__)
-        unknown = sorted(set(kwargs) - valid)
-        if unknown:
-            joined = ", ".join(unknown)
-            raise TypeError(f"unexpected train_surrogate option(s): {joined}")
-        return dataclass_replace(options, **kwargs)
-
-
-@dataclass(frozen=True)
-class _TrainingContext:
-    model: SwingSurrogate
-    optimizer: torch.optim.Optimizer
-    train_loader: DataLoader
-    val_loader: DataLoader
-    cfg: SurrogateConfig
-    normalizer: CoeffNormalizer
-    target_normalizer: TargetNormalizer
-    device: torch.device
-    start_epoch: int
-    out_path: Path
-
-
-@dataclass(frozen=True)
-class _LoopOptions:
-    epochs: int
-    impact_weight: float
-    early_stopping_patience: int
-    progress_cb: Callable[[int, dict[str, float]], None] | None
-
-
-@dataclass
-class _LoopState:
-    history: dict[str, list[float]]
-    best_val_loss: float = float("inf")
-    best_val_grip_rmse: float = float("inf")
-    best_epoch: int = 0
-    last_ckpt: Path | None = None
-    best_ckpt: Path | None = None
-    no_improve: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -514,8 +446,19 @@ def _save_checkpoint(
 
 def train_surrogate(
     dataset_path: str | Path,
-    options: SurrogateTrainingOptions | None = None,
-    **kwargs: Any,
+    *,
+    epochs: int = 50,
+    batch_size: int = 64,
+    lr: float = 1e-3,
+    device: str | torch.device = "cpu",
+    seed: int = 0,
+    config: SurrogateConfig | None = None,
+    impact_weight: float = 1.0,
+    val_fraction: float = 0.1,
+    early_stopping_patience: int = 10,
+    output_dir: str | Path | None = None,
+    resume_from: str | Path | None = None,
+    progress_cb: Callable[[int, dict[str, float]], None] | None = None,
 ) -> TrainingResult:
     """Train :class:`SwingSurrogate` on a compact-schema parquet dataset.
 
@@ -551,37 +494,14 @@ def train_surrogate(
         ValueError: For invalid hyper-parameters or dataset shape.
         FileNotFoundError: If ``dataset_path`` does not exist.
     """
-    opts = SurrogateTrainingOptions.from_kwargs(options, kwargs)
-    context = _build_training_context(dataset_path, opts)
-    return _train_loop(
-        context=context,
-        options=_LoopOptions(
-            epochs=opts.epochs,
-            impact_weight=opts.impact_weight,
-            early_stopping_patience=opts.early_stopping_patience,
-            progress_cb=opts.progress_cb,
-        ),
-    )
-
-
-def _build_training_context(
-    dataset_path: str | Path,
-    options: SurrogateTrainingOptions,
-) -> _TrainingContext:
-    _check_train_args(
-        options.epochs,
-        options.batch_size,
-        options.lr,
-        options.val_fraction,
-        options.early_stopping_patience,
-    )
-    cfg = options.config if options.config is not None else SurrogateConfig()
+    _check_train_args(epochs, batch_size, lr, val_fraction, early_stopping_patience)
+    cfg = config if config is not None else SurrogateConfig()
     cfg.validate()
 
-    torch.manual_seed(options.seed)
-    np.random.seed(options.seed)
-    dev = torch.device(options.device)
-    out_path = _resolve_output_dir(options.output_dir)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    dev = torch.device(device)
+    out_path = _resolve_output_dir(output_dir)
     _LOGGER.info("training surrogate -> %s", out_path)
 
     coeffs_np, targets_np, trial_ids = _load_compact_dataset(
@@ -592,9 +512,7 @@ def _build_training_context(
             f"dataset coeff dim {coeffs_np.shape[1]} != cfg.coeff_dim "
             f"({cfg.coeff_dim}); check schema vs SurrogateConfig"
         )
-    train_idx, val_idx = _split_indices_by_trial(
-        trial_ids, options.val_fraction, seed=options.seed
-    )
+    train_idx, val_idx = _split_indices_by_trial(trial_ids, val_fraction, seed=seed)
     train_ds = _CompactSwingTorchDataset(
         coeffs_np[train_idx], targets_np[train_idx], trial_ids[train_idx]
     )
@@ -602,17 +520,18 @@ def _build_training_context(
         coeffs_np[val_idx], targets_np[val_idx], trial_ids[val_idx]
     )
     train_loader = DataLoader(
-        train_ds, batch_size=options.batch_size, shuffle=True, drop_last=False
+        train_ds, batch_size=batch_size, shuffle=True, drop_last=False
     )
     val_loader = DataLoader(
-        val_ds, batch_size=options.batch_size, shuffle=False, drop_last=False
+        val_ds, batch_size=batch_size, shuffle=False, drop_last=False
     )
 
     model = SwingSurrogate(cfg).to(dev)
-    optimizer: torch.optim.Optimizer = torch.optim.Adam(
-        model.parameters(), lr=options.lr
-    )
+    optimizer: torch.optim.Optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     normalizer = CoeffNormalizer(n_joints=cfg.n_joints, coeff_bounds=cfg.coeff_bounds)
+    # Per-channel target stats (mean / std over the train split). This is the
+    # core of the bug-1 fix: the loss is computed in standardised channel
+    # space so every output channel contributes comparable gradient signal.
     train_targets_t = torch.as_tensor(targets_np[train_idx], dtype=torch.float32)
     target_normalizer = TargetNormalizer.from_targets(train_targets_t)
     _LOGGER.info(
@@ -621,11 +540,16 @@ def _build_training_context(
         target_normalizer.std.tolist(),
     )
     start_epoch = 0
-    if options.resume_from is not None:
+    if resume_from is not None:
         start_epoch, restored_target_normalizer = _load_resume_state(
-            Path(options.resume_from), model=model, optimizer=optimizer
+            Path(resume_from), model=model, optimizer=optimizer
         )
         if restored_target_normalizer is not None:
+            # Reuse the original training run's target stats so the loss
+            # definition is preserved across the resume boundary. The
+            # optimizer moments carried in the checkpoint were computed
+            # against this normaliser; recomputing fresh stats from a
+            # different seed/split would silently change the loss.
             target_normalizer = restored_target_normalizer
             _LOGGER.info(
                 "restored target_normalizer from checkpoint: mean=%s std=%s",
@@ -637,11 +561,11 @@ def _build_training_context(
                 "checkpoint %s does not embed target_normalizer; "
                 "falling back to fresh stats from the current train split. "
                 "Resume metrics may be non-comparable to the original run.",
-                options.resume_from,
+                resume_from,
             )
-        _LOGGER.info("resumed from %s at epoch %d", options.resume_from, start_epoch)
+        _LOGGER.info("resumed from %s at epoch %d", resume_from, start_epoch)
 
-    return _TrainingContext(
+    return _train_loop(
         model=model,
         optimizer=optimizer,
         train_loader=train_loader,
@@ -650,167 +574,144 @@ def _build_training_context(
         normalizer=normalizer,
         target_normalizer=target_normalizer,
         device=dev,
+        epochs=epochs,
         start_epoch=start_epoch,
+        impact_weight=impact_weight,
+        early_stopping_patience=early_stopping_patience,
         out_path=out_path,
+        progress_cb=progress_cb,
     )
 
 
 def _train_loop(
     *,
-    context: _TrainingContext,
-    options: _LoopOptions,
+    model: SwingSurrogate,
+    optimizer: torch.optim.Optimizer,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
+    cfg: SurrogateConfig,
+    normalizer: CoeffNormalizer,
+    target_normalizer: TargetNormalizer,
+    device: torch.device,
+    epochs: int,
+    start_epoch: int,
+    impact_weight: float,
+    early_stopping_patience: int,
+    out_path: Path,
+    progress_cb: Callable[[int, dict[str, float]], None] | None,
 ) -> TrainingResult:
     """The actual epoch loop, factored out so it can be unit-tested narrowly."""
-    state = _LoopState(
-        history={
-            "epoch": [],
-            "train_loss": [],
-            "val_loss": [],
-            "val_grip_rmse_mm": [],
-            "val_clubhead_speed_mae_mph": [],
-        }
-    )
+    history: dict[str, list[float]] = {
+        "epoch": [],
+        "train_loss": [],
+        "val_loss": [],
+        "val_grip_rmse_mm": [],
+        "val_clubhead_speed_mae_mph": [],
+    }
+    # Early stopping watches the standardised multi-channel ``val_loss`` —
+    # the same quantity the optimiser minimises — so "best" reflects
+    # progress on every output channel rather than only the grip-position
+    # channel. ``best_val_grip_rmse`` is bookkept alongside for reporting.
+    best_val_loss = float("inf")
+    best_val_grip_rmse = float("inf")
+    best_epoch = 0
+    last_ckpt: Path | None = None
+    best_ckpt: Path | None = None
+    no_improve = 0
     t0 = time.perf_counter()
-    for epoch_idx in range(context.start_epoch, options.epochs):
-        if _run_training_epoch(context, options, state, epoch_idx):
-            break
-
-    elapsed = time.perf_counter() - t0
-    if state.last_ckpt is None:
-        raise RuntimeError("training produced no checkpoints (epochs == 0?)")
-    best_ckpt = state.best_ckpt or state.last_ckpt
-    return TrainingResult(
-        output_dir=context.out_path,
-        best_checkpoint=best_ckpt,
-        last_checkpoint=state.last_ckpt,
-        best_epoch=state.best_epoch,
-        best_val_loss=state.best_val_loss,
-        best_val_grip_rmse_mm=state.best_val_grip_rmse,
-        history=state.history,
-        config=context.cfg,
-        total_seconds=elapsed,
-        param_count=context.model.parameter_count(),
-    )
-
-
-def _run_training_epoch(
-    context: _TrainingContext,
-    options: _LoopOptions,
-    state: _LoopState,
-    epoch_idx: int,
-) -> bool:
-    epoch_human = epoch_idx + 1
-    train_metrics = _run_epoch(
-        context.model,
-        context.train_loader,
-        optimizer=context.optimizer,
-        device=context.device,
-        impact_weight=options.impact_weight,
-        normalizer=context.normalizer,
-        target_normalizer=context.target_normalizer,
-    )
-    val_metrics = _run_epoch(
-        context.model,
-        context.val_loader,
-        optimizer=None,
-        device=context.device,
-        impact_weight=options.impact_weight,
-        normalizer=context.normalizer,
-        target_normalizer=context.target_normalizer,
-    )
-    _record_epoch_metrics(state.history, epoch_human, train_metrics, val_metrics)
-    _save_epoch_checkpoint(context, epoch_human, train_metrics, val_metrics)
-    state.last_ckpt = context.out_path / f"checkpoint_epoch_{epoch_human:03d}.pt"
-    _write_metrics_json(context.out_path, state.history)  # type: ignore[arg-type]
-    _log_epoch(epoch_human, options.epochs, train_metrics, val_metrics)
-    if options.progress_cb is not None:
-        options.progress_cb(epoch_human, val_metrics)
-    return _update_best_checkpoint(
-        context, options, state, epoch_human, train_metrics, val_metrics
-    )
-
-
-def _record_epoch_metrics(
-    history: dict[str, list[float]],
-    epoch_human: int,
-    train_metrics: dict[str, float],
-    val_metrics: dict[str, float],
-) -> None:
-    history["epoch"].append(float(epoch_human))
-    history["train_loss"].append(train_metrics["loss"])
-    history["val_loss"].append(val_metrics["loss"])
-    history["val_grip_rmse_mm"].append(val_metrics["grip_rmse_mm"])
-    history["val_clubhead_speed_mae_mph"].append(val_metrics["clubhead_speed_mae_mph"])
-
-
-def _save_epoch_checkpoint(
-    context: _TrainingContext,
-    epoch_human: int,
-    train_metrics: dict[str, float],
-    val_metrics: dict[str, float],
-) -> None:
-    _save_checkpoint(
-        context.out_path / f"checkpoint_epoch_{epoch_human:03d}.pt",
-        model=context.model,
-        optimizer=context.optimizer,
-        epoch=epoch_human,
-        metrics={"train": train_metrics, "val": val_metrics},
-        config=context.cfg,
-        normalizer=context.normalizer,
-        target_normalizer=context.target_normalizer,
-    )
-
-
-def _log_epoch(
-    epoch_human: int,
-    epochs: int,
-    train_metrics: dict[str, float],
-    val_metrics: dict[str, float],
-) -> None:
-    _LOGGER.info(
-        "epoch %d/%d: train_loss=%.4g val_loss=%.4g grip_rmse=%.2f mm chs_mae=%.2f mph",
-        epoch_human,
-        epochs,
-        train_metrics["loss"],
-        val_metrics["loss"],
-        val_metrics["grip_rmse_mm"],
-        val_metrics["clubhead_speed_mae_mph"],
-    )
-
-
-def _update_best_checkpoint(
-    context: _TrainingContext,
-    options: _LoopOptions,
-    state: _LoopState,
-    epoch_human: int,
-    train_metrics: dict[str, float],
-    val_metrics: dict[str, float],
-) -> bool:
-    if val_metrics["loss"] < state.best_val_loss - 1e-6:
-        state.best_val_loss = val_metrics["loss"]
-        state.best_val_grip_rmse = val_metrics["grip_rmse_mm"]
-        state.best_epoch = epoch_human
-        state.best_ckpt = context.out_path / "checkpoint_best.pt"
+    for epoch_idx in range(start_epoch, epochs):
+        epoch_human = epoch_idx + 1
+        train_metrics = _run_epoch(
+            model,
+            train_loader,
+            optimizer=optimizer,
+            device=device,
+            impact_weight=impact_weight,
+            normalizer=normalizer,
+            target_normalizer=target_normalizer,
+        )
+        val_metrics = _run_epoch(
+            model,
+            val_loader,
+            optimizer=None,
+            device=device,
+            impact_weight=impact_weight,
+            normalizer=normalizer,
+            target_normalizer=target_normalizer,
+        )
+        history["epoch"].append(float(epoch_human))
+        history["train_loss"].append(train_metrics["loss"])
+        history["val_loss"].append(val_metrics["loss"])
+        history["val_grip_rmse_mm"].append(val_metrics["grip_rmse_mm"])
+        history["val_clubhead_speed_mae_mph"].append(
+            val_metrics["clubhead_speed_mae_mph"]
+        )
+        ckpt_path = out_path / f"checkpoint_epoch_{epoch_human:03d}.pt"
         _save_checkpoint(
-            state.best_ckpt,
-            model=context.model,
-            optimizer=context.optimizer,
+            ckpt_path,
+            model=model,
+            optimizer=optimizer,
             epoch=epoch_human,
             metrics={"train": train_metrics, "val": val_metrics},
-            config=context.cfg,
-            normalizer=context.normalizer,
-            target_normalizer=context.target_normalizer,
+            config=cfg,
+            normalizer=normalizer,
+            target_normalizer=target_normalizer,
         )
-        state.no_improve = 0
-        return False
-    state.no_improve += 1
-    if state.no_improve < options.early_stopping_patience:
-        return False
-    _LOGGER.info(
-        "early stopping after %d epochs without val_loss improvement",
-        options.early_stopping_patience,
+        last_ckpt = ckpt_path
+        _write_metrics_json(out_path, history)  # type: ignore[arg-type]
+        _LOGGER.info(
+            "epoch %d/%d: train_loss=%.4g val_loss=%.4g grip_rmse=%.2f mm chs_mae=%.2f mph",
+            epoch_human,
+            epochs,
+            train_metrics["loss"],
+            val_metrics["loss"],
+            val_metrics["grip_rmse_mm"],
+            val_metrics["clubhead_speed_mae_mph"],
+        )
+        if progress_cb is not None:
+            progress_cb(epoch_human, val_metrics)
+        if val_metrics["loss"] < best_val_loss - 1e-6:
+            best_val_loss = val_metrics["loss"]
+            best_val_grip_rmse = val_metrics["grip_rmse_mm"]
+            best_epoch = epoch_human
+            best_ckpt = out_path / "checkpoint_best.pt"
+            _save_checkpoint(
+                best_ckpt,
+                model=model,
+                optimizer=optimizer,
+                epoch=epoch_human,
+                metrics={"train": train_metrics, "val": val_metrics},
+                config=cfg,
+                normalizer=normalizer,
+                target_normalizer=target_normalizer,
+            )
+            no_improve = 0
+        else:
+            no_improve += 1
+            if no_improve >= early_stopping_patience:
+                _LOGGER.info(
+                    "early stopping after %d epochs without val_loss improvement",
+                    early_stopping_patience,
+                )
+                break
+
+    elapsed = time.perf_counter() - t0
+    if last_ckpt is None:
+        raise RuntimeError("training produced no checkpoints (epochs == 0?)")
+    if best_ckpt is None:
+        best_ckpt = last_ckpt
+    return TrainingResult(
+        output_dir=out_path,
+        best_checkpoint=best_ckpt,
+        last_checkpoint=last_ckpt,
+        best_epoch=best_epoch,
+        best_val_loss=best_val_loss,
+        best_val_grip_rmse_mm=best_val_grip_rmse,
+        history=history,
+        config=cfg,
+        total_seconds=elapsed,
+        param_count=model.parameter_count(),
     )
-    return True
 
 
 def _check_train_args(

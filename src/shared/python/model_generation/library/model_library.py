@@ -22,7 +22,7 @@ from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 from model_generation.core.contracts import postcondition, precondition
-from model_generation.library._model_loader import load_model, validate_model_source_url
+from model_generation.library._model_loader import load_model
 from model_generation.library._model_operations import (
     add_local_model,
     create_editable_copy,
@@ -297,14 +297,20 @@ class ModelLibrary:
         """
         from src.shared.python.security.security_utils import (
             download_to_file,
+            validate_url_scheme,
         )
 
-        source_url = validate_model_source_url(entry)
+        if not entry.source_url:
+            raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
+
+        # Allow only https. Tests in test_security_fixes.py assert that
+        # file://, http://, ftp:// etc. raise before urlretrieve is called.
+        validate_url_scheme(entry.source_url, allowed_schemes=("https",))
 
         cache_dir = self.config.cache_dir / entry.id
         cache_dir.mkdir(parents=True, exist_ok=True)
-        dest = cache_dir / Path(source_url).name
+        dest = cache_dir / Path(entry.source_url).name
 
         # Bounded timeout (issue #7184): stream via urlopen(..., timeout=).
-        download_to_file(source_url, dest)
+        download_to_file(entry.source_url, dest)
         return dest

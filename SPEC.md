@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.326                                            |
+| **Spec Version**        | 1.0.308                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,41 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-06-11** - Isolated optional dependency import mocks for #7307.
-  Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
-  imports now install fake optional packages only inside scoped import
-  fixtures. The shared optional-dependency helper restores dependency and
-  target-module cache entries after each test, and repo-hygiene coverage
-  rejects new module-scope `sys.modules` mocks for optional engine/media
-  dependencies.
-- **2026-06-11** - Split the motion surrogate training architecture for
-  #7317. The compact-schema surrogate trainer now resolves legacy keyword
-  arguments through `SurrogateTrainingOptions`, builds an explicit training
-  context, and runs checkpoints/metrics through a focused loop state. The
-  per-step dynamics trainer now separates data preparation, runtime object
-  construction, epoch fitting, best-checkpoint evaluation, and JSON output
-  writing. The per-step optimizer now resolves legacy positional options
-  through `OptimizationOptions`, builds an optimization context, isolates
-  regularizer/orientation/tracking loss calculation, and writes torque plus
-  summary artifacts from a dedicated output helper while preserving existing
-  CLI and call-site compatibility.
-- **2026-06-11** - Hardened the #7314 PR-scoped unit gate in standard
-  CI. Source and dependency PRs now fall through to the dependency-light unit
-  lane instead of passing solely on touched test files, and targeted PR coverage
-  invokes a changed-file coverage ratchet for production policy files.
-- **2026-06-10** - Hardened the optional cloud client cache contract for
-  #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
-  treated as absent credentials, leaving `CloudClient.token` as `None` and
-  `is_logged_in` false while preserving valid cached-token behavior. The
-  runtime login state now requires a truthy token even if a caller manually
-  mutates the token field.
-- **2026-06-10** - Tightened API and model-library boundary contracts for
-  #7297, #7298, and #7299. Data Explorer import/list responses now expose the
-  durable `dataset_id` required by row pagination, filter operators are
-  validated at the request boundary instead of silently returning empty
-  results for invalid operators, and `ModelLibrary.load_model(...,
-force_download=True)` enforces the HTTPS-only `source_url` policy before any
-  download I/O.
+- **2026-06-10** - Narrowed PR-scoped source coverage in standard CI to the
+  changed `src/**/*.py` targets after the coverage-bypass fix. Source and
+  dependency PRs still produce coverage and enforce the 75% floor, while the
+  full per-package coverage enforcer runs only after the default full-coverage
+  lane so focused PRs do not fail against unrelated modules.
+- **2026-06-10** - Enforced the #7277 Docker build timeout while process
+  stdout remains open. `src/launchers/docker_manager.py` now reads build output
+  through a background queue while the build thread owns a wall-clock timeout
+  and terminates the process tree on expiry, including the regression case
+  where stdout never reaches EOF.
 - **2026-06-10** - Locked the #7278 standard CI dependency and audit
   contract to committed artifacts. Python jobs that install project runtime or
   dev dependencies now seed environments from `requirements.lock` or
@@ -532,7 +507,6 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
-│       ├── motion_matching/        # Motion-matching pipelines, surrogate training, per-step optimization
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
 │       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
@@ -867,12 +841,6 @@ Beyond standard tools, CI enforces custom checks:
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
 - **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
-- **Workflow Run Trust Boundary**: `scripts/check_workflow_run_trust_boundary.py`
-  rejects privileged `workflow_run` jobs in `Jules-PR-AutoFix.yml` if they can
-  check out PR code, install dependencies, execute autofix tools, commit, or
-  push. The `workflow_run` path is restricted to trusted metadata analysis and
-  maintainer-facing dispatch instructions, while direct branch writeback remains
-  available only from explicit `workflow_dispatch`.
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Push-to-main full-src mypy runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics.
 - **Docker Size Gate**: Built images must not exceed 800 MB
@@ -1021,13 +989,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
-| 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
-| 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
-| 2026-06-11 | 1.0.318 | Data Explorer and model-library boundary contracts for #7297, #7298, and #7299. Import/list responses expose durable `dataset_id` values, Data Explorer filter requests reject unsupported operators at the request boundary, and forced model-library downloads validate HTTPS-only `source_url` values before any download I/O. |
-| 2026-06-11 | 1.0.312 | Blocking DRY duplication ratchet for #7315. Added `scripts/ci/check_dry_duplication_gate.py` with focused tests, explicit production-`src` include/exclude config, and an owned no-growth baseline for existing duplicated logic fingerprints; `ci-standard.yml` now runs the checker inside `repo-structure-gates` so duplicate growth feeds the required `quality-gate` aggregate while `Code-Metrics.yml` remains advisory/manual reporting. |
-| 2026-06-11 | 1.0.311 | PR-scoped unit gate hardening for #7314. Standard CI no longer lets source/dependency PRs pass solely by running changed test files; those PRs fall through to the dependency-light unit lane with targeted coverage. `coverage_enforcer.py` now supports a PR-mode changed-file ratchet so changed production policy files must appear in targeted coverage and meet their policy threshold. |
-| 2026-06-10 | 1.0.309 | Jules PR AutoFix workflow-run trust-boundary hardening for #7312. The privileged `workflow_run` path now performs read-only failed-CI metadata analysis and posts manual dispatch instructions instead of checking out or executing PR-controlled code. The write-capable iterative fixer is restricted to explicit `workflow_dispatch` with an input branch. Added `scripts/check_workflow_run_trust_boundary.py`, wired it into standard CI, documented it in `scripts/README.md`, and added focused regression tests for unsafe workflow-run checkout/install/writeback patterns and the current Jules workflow contract. |
 | 2026-06-10 | 1.0.308 | Docker build timeout and focused PR coverage enforcement for #7277. `DockerManager` now monitors build output through a background queue while enforcing a wall-clock build timeout, terminating the process tree when stdout remains open past the deadline. Standard CI now scopes PR coverage to changed `src/**/*.py` modules and runs per-package coverage enforcement only after full core coverage reports, so focused PRs are not blocked by unrelated packages. |
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
 | 2026-06-10 | 1.0.302 | Audit hygiene fixes for #7279 and #7282. `.github/workflows/docker-security-scan.yml` now blocks HIGH and CRITICAL Trivy container vulnerabilities in the table scan while retaining SARIF upload, and audited API/launcher production modules now use the canonical logging infrastructure instead of direct module-level `logging.getLogger` calls. Added security CI acceptance coverage for the Docker HIGH/CRITICAL gate and a repo-hygiene test for the remediated logger modules. |

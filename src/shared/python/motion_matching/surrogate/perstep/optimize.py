@@ -39,9 +39,9 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-from dataclasses import dataclass, replace as dataclass_replace
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -103,95 +103,6 @@ class CostConfig:
     smoothness_weight: float = 1e-4
     orientation_weight: float = DEFAULT_ORIENTATION_WEIGHT
     lambda_: float = DEFAULT_LAMBDA
-
-
-@dataclass(frozen=True)
-class OptimizationOptions:
-    steps: int
-    learning_rate: float
-    effort_weight: float
-    smoothness_weight: float
-    device_name: str
-    cost_mode: CostMode = "position"
-    regularizer_kind: RegularizerKind | None = None
-    orientation_weight: float = DEFAULT_ORIENTATION_WEIGHT
-    lambda_: float = DEFAULT_LAMBDA
-
-    @classmethod
-    def from_kwargs(
-        cls,
-        options: OptimizationOptions | None,
-        args: tuple[Any, ...],
-        kwargs: dict[str, Any],
-    ) -> OptimizationOptions:
-        positional = (
-            "steps",
-            "learning_rate",
-            "effort_weight",
-            "smoothness_weight",
-            "device_name",
-            "cost_mode",
-            "regularizer_kind",
-            "orientation_weight",
-            "lambda_",
-        )
-        if len(args) > len(positional):
-            raise TypeError("optimize_sequence received too many positional options")
-        for key, value in zip(positional, args, strict=False):
-            if key in kwargs:
-                raise TypeError(f"optimize_sequence got multiple values for {key}")
-            kwargs[key] = value
-        if options is not None and not kwargs:
-            return options
-        valid = set(cls.__dataclass_fields__)
-        unknown = sorted(set(kwargs) - valid)
-        if unknown:
-            joined = ", ".join(unknown)
-            raise TypeError(f"unexpected optimize_sequence option(s): {joined}")
-        if options is None:
-            required = {
-                "steps",
-                "learning_rate",
-                "effort_weight",
-                "smoothness_weight",
-                "device_name",
-            }
-            missing = sorted(required - set(kwargs))
-            if missing:
-                joined = ", ".join(missing)
-                raise TypeError(f"missing optimize_sequence option(s): {joined}")
-            return cls(**kwargs)
-        return dataclass_replace(options, **kwargs)
-
-
-@dataclass(frozen=True)
-class _OptimizationContext:
-    cost: CostConfig
-    model: nn.Module
-    input_columns: list[str]
-    target_columns: list[str]
-    control_columns: list[str]
-    control_indices: list[int]
-    desired_time: np.ndarray
-    x_base: torch.Tensor
-    target: torch.Tensor
-    selected: torch.Tensor
-    x_mean: torch.Tensor
-    x_std: torch.Tensor
-    y_mean: torch.Tensor
-    y_std: torch.Tensor
-    quat_target: torch.Tensor | None
-    time_t: torch.Tensor
-
-
-@dataclass(frozen=True)
-class _StepLosses:
-    loss: torch.Tensor
-    tracking_loss: torch.Tensor
-    effort_loss: torch.Tensor
-    smoothness_loss: torch.Tensor
-    orientation_loss: torch.Tensor
-    regulariser_loss: torch.Tensor
 
 
 def resolve_cost_config(
@@ -400,55 +311,36 @@ def _desired_quaternions(desired: pd.DataFrame) -> np.ndarray | None:
     return desired[list(cols)].to_numpy(dtype=np.float32)
 
 
-def optimize_sequence(
+def optimize_sequence(  # noqa: C901
     checkpoint_path: Path,
     desired_club_csv: Path,
     reference_body_csv: Path,
     output_csv: Path,
-    *legacy_args: Any,
-    options: OptimizationOptions | None = None,
-    **kwargs: Any,
+    steps: int,
+    learning_rate: float,
+    effort_weight: float,
+    smoothness_weight: float,
+    device_name: str,
+    cost_mode: CostMode = "position",
+    regularizer_kind: RegularizerKind | None = None,
+    orientation_weight: float = DEFAULT_ORIENTATION_WEIGHT,
+    lambda_: float = DEFAULT_LAMBDA,
 ) -> None:
-    opts = OptimizationOptions.from_kwargs(options, legacy_args, kwargs)
-    context = _build_optimization_context(
-        checkpoint_path,
-        desired_club_csv,
-        reference_body_csv,
-        opts,
-    )
-    controls, best_loss, history = _run_optimization(context, opts)
-    _write_optimization_outputs(
-        output_csv,
-        checkpoint_path,
-        desired_club_csv,
-        reference_body_csv,
-        context,
-        controls,
-        best_loss,
-        history,
-    )
-
-
-def _build_optimization_context(
-    checkpoint_path: Path,
-    desired_club_csv: Path,
-    reference_body_csv: Path,
-    options: OptimizationOptions,
-) -> _OptimizationContext:
     from train_dynamics_surrogate import (
         DynamicsMLP,  # lazy: avoid sibling-import on unit tests
     )
 
     cost = resolve_cost_config(
-        options.cost_mode,
-        regularizer_kind=options.regularizer_kind,
-        effort_weight=options.effort_weight,
-        smoothness_weight=options.smoothness_weight,
-        orientation_weight=options.orientation_weight,
-        lambda_=options.lambda_,
+        cost_mode,
+        regularizer_kind=regularizer_kind,
+        effort_weight=effort_weight,
+        smoothness_weight=smoothness_weight,
+        orientation_weight=orientation_weight,
+        lambda_=lambda_,
     )
+
     checkpoint = torch.load(
-        checkpoint_path, map_location=options.device_name, weights_only=False
+        checkpoint_path, map_location=device_name, weights_only=False
     )
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])
@@ -462,11 +354,12 @@ def _build_optimization_context(
         input_dim=len(input_columns),
         output_dim=len(target_columns),
         hidden_sizes=list(checkpoint["config"]["hidden_sizes"]),
-    ).to(options.device_name)
+    ).to(device_name)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     for parameter in model.parameters():
         parameter.requires_grad_(False)
+
     desired = pd.read_csv(desired_club_csv)
     if "time" not in desired.columns:
         raise ValueError("Desired club CSV must include a time column")
@@ -482,176 +375,115 @@ def _build_optimization_context(
     reference = _read_state_reference(reference_body_csv, input_columns)
     x_raw = _interpolate_reference(reference, desired_time, input_columns)
     target_raw, target_indices = _desired_club_targets(desired, target_columns)
+
     control_indices = [input_columns.index(column) for column in control_columns]
     x_mean = torch.as_tensor(
-        checkpoint["x_mean"], dtype=torch.float32, device=options.device_name
+        checkpoint["x_mean"], dtype=torch.float32, device=device_name
     )
     x_std = torch.as_tensor(
-        checkpoint["x_std"], dtype=torch.float32, device=options.device_name
+        checkpoint["x_std"], dtype=torch.float32, device=device_name
     )
     y_mean = torch.as_tensor(
-        checkpoint["y_mean"], dtype=torch.float32, device=options.device_name
+        checkpoint["y_mean"], dtype=torch.float32, device=device_name
     )
     y_std = torch.as_tensor(
-        checkpoint["y_std"], dtype=torch.float32, device=options.device_name
+        checkpoint["y_std"], dtype=torch.float32, device=device_name
     )
-    x_base = torch.as_tensor(x_raw, dtype=torch.float32, device=options.device_name)
-    target = torch.as_tensor(
-        target_raw, dtype=torch.float32, device=options.device_name
-    )
-    selected = torch.as_tensor(
-        target_indices, dtype=torch.long, device=options.device_name
-    )
-    time_t = torch.as_tensor(
-        desired_time, dtype=torch.float32, device=options.device_name
-    )
+
+    x_base = torch.as_tensor(x_raw, dtype=torch.float32, device=device_name)
+    target = torch.as_tensor(target_raw, dtype=torch.float32, device=device_name)
+    selected = torch.as_tensor(target_indices, dtype=torch.long, device=device_name)
+    time_t = torch.as_tensor(desired_time, dtype=torch.float32, device=device_name)
     quat_target_t = (
-        torch.as_tensor(desired_quat, dtype=torch.float32, device=options.device_name)
+        torch.as_tensor(desired_quat, dtype=torch.float32, device=device_name)
         if desired_quat is not None
         else None
     )
-    return _OptimizationContext(
-        cost=cost,
-        model=model,
-        input_columns=input_columns,
-        target_columns=target_columns,
-        control_columns=control_columns,
-        control_indices=control_indices,
-        desired_time=desired_time,
-        x_base=x_base,
-        target=target,
-        selected=selected,
-        x_mean=x_mean,
-        x_std=x_std,
-        y_mean=y_mean,
-        y_std=y_std,
-        quat_target=quat_target_t,
-        time_t=time_t,
-    )
+    initial_controls = x_base[:, control_indices].detach().clone()
+    controls = nn.Parameter(initial_controls.clone())
+    optimizer = torch.optim.Adam([controls], lr=learning_rate)
 
-
-def _run_optimization(
-    context: _OptimizationContext,
-    options: OptimizationOptions,
-) -> tuple[torch.Tensor, float, list[dict[str, float]]]:
-    controls, initial_controls = _initial_controls(context)
-    optimizer = torch.optim.Adam([controls], lr=options.learning_rate)
     best_loss = float("inf")
     best_controls = controls.detach().clone()
     history: list[dict[str, float]] = []
 
-    for step in range(1, options.steps + 1):
-        losses = _optimization_step_losses(context, controls, initial_controls)
+    for step in range(1, steps + 1):
+        candidate = x_base.clone()
+        candidate[:, control_indices] = controls
+        pred_scaled = model((candidate - x_mean) / x_std)
+        pred = pred_scaled * y_std + y_mean
+        matched = pred.index_select(1, selected)
+
+        tracking_loss = torch.mean((matched - target) ** 2)
+
+        # Orientation term (zero unless requested and quaternion data is present).
+        if cost.mode != "position" and quat_target_t is not None:
+            # No quaternion output from the surrogate today; treat the simulated
+            # orientation as the measured one only when the surrogate exposes
+            # quaternion columns. Until that lands, we emit zero contribution
+            # but expose the configured weight in the history for transparency.
+            orientation_loss = torch.zeros((), dtype=torch.float32, device=device_name)
+        else:
+            orientation_loss = torch.zeros((), dtype=torch.float32, device=device_name)
+
+        # Regularizer.
+        if cost.regularizer_kind == "total_work":
+            # omega := dcontrols/dt as a proxy for joint angular velocity in
+            # the absence of a physical-omega channel from the surrogate.
+            if len(controls) > 1:
+                dt = (time_t[1:] - time_t[:-1]).clamp(min=1e-9)
+                omega = (controls[1:] - controls[:-1]) / dt.unsqueeze(1)
+                tau_mid = 0.5 * (controls[1:] + controls[:-1])
+                t_mid = 0.5 * (time_t[1:] + time_t[:-1])
+                regulariser_loss = total_work_regularizer(tau_mid, omega, t_mid)
+            else:
+                regulariser_loss = torch.zeros(
+                    (), dtype=torch.float32, device=device_name
+                )
+            effort_loss = torch.zeros((), dtype=torch.float32, device=device_name)
+            smoothness_loss = torch.zeros((), dtype=torch.float32, device=device_name)
+        else:
+            effort_loss = torch.mean((controls - initial_controls) ** 2)
+            if len(controls) > 1:
+                smoothness_loss = torch.mean((controls[1:] - controls[:-1]) ** 2)
+            else:
+                smoothness_loss = torch.zeros(
+                    (), dtype=torch.float32, device=device_name
+                )
+            regulariser_loss = torch.zeros((), dtype=torch.float32, device=device_name)
+
+        loss = tracking_loss + cost.orientation_weight * orientation_loss
+        if cost.regularizer_kind == "total_work":
+            loss = loss + cost.lambda_ * regulariser_loss
+        else:
+            loss = (
+                loss
+                + cost.effort_weight * effort_loss
+                + cost.smoothness_weight * smoothness_loss
+            )
+
         optimizer.zero_grad(set_to_none=True)
-        losses.loss.backward()
+        loss.backward()
         optimizer.step()
-        loss_value = float(losses.loss.detach().cpu())
-        history.append(_step_history(step, loss_value, losses))
+
+        loss_value = float(loss.detach().cpu())
+        history.append(
+            {
+                "step": step,
+                "loss": loss_value,
+                "tracking_loss": float(tracking_loss.detach().cpu()),
+                "effort_loss": float(effort_loss.detach().cpu()),
+                "smoothness_loss": float(smoothness_loss.detach().cpu()),
+                "orientation_loss": float(orientation_loss.detach().cpu()),
+                "regulariser_loss": float(regulariser_loss.detach().cpu()),
+            }
+        )
         if loss_value < best_loss:
             best_loss = loss_value
             best_controls = controls.detach().clone()
-    return best_controls, best_loss, history
 
-
-def _initial_controls(
-    context: _OptimizationContext,
-) -> tuple[nn.Parameter, torch.Tensor]:
-    initial_controls = context.x_base[:, context.control_indices].detach().clone()
-    controls = nn.Parameter(initial_controls.clone())
-    return controls, initial_controls
-
-
-def _optimization_step_losses(
-    context: _OptimizationContext,
-    controls: torch.Tensor,
-    initial_controls: torch.Tensor,
-) -> _StepLosses:
-    candidate = context.x_base.clone()
-    candidate[:, context.control_indices] = controls
-    pred_scaled = context.model((candidate - context.x_mean) / context.x_std)
-    pred = pred_scaled * context.y_std + context.y_mean
-    matched = pred.index_select(1, context.selected)
-    tracking_loss = torch.mean((matched - context.target) ** 2)
-
-    orientation_loss = torch.zeros(
-        (), dtype=torch.float32, device=context.x_base.device
-    )
-    if context.cost.regularizer_kind == "total_work":
-        regulariser_loss = _total_work_loss(controls, context.time_t)
-        effort_loss = torch.zeros((), dtype=torch.float32, device=context.x_base.device)
-        smoothness_loss = torch.zeros(
-            (), dtype=torch.float32, device=context.x_base.device
-        )
-    else:
-        effort_loss = torch.mean((controls - initial_controls) ** 2)
-        smoothness_loss = _smoothness_loss(controls)
-        regulariser_loss = torch.zeros(
-            (), dtype=torch.float32, device=context.x_base.device
-        )
-
-    loss = tracking_loss + context.cost.orientation_weight * orientation_loss
-    if context.cost.regularizer_kind == "total_work":
-        loss = loss + context.cost.lambda_ * regulariser_loss
-    else:
-        loss = (
-            loss
-            + context.cost.effort_weight * effort_loss
-            + context.cost.smoothness_weight * smoothness_loss
-        )
-    return _StepLosses(
-        loss=loss,
-        tracking_loss=tracking_loss,
-        effort_loss=effort_loss,
-        smoothness_loss=smoothness_loss,
-        orientation_loss=orientation_loss,
-        regulariser_loss=regulariser_loss,
-    )
-
-
-def _total_work_loss(controls: torch.Tensor, time_t: torch.Tensor) -> torch.Tensor:
-    if len(controls) <= 1:
-        return torch.zeros((), dtype=torch.float32, device=controls.device)
-    dt = (time_t[1:] - time_t[:-1]).clamp(min=1e-9)
-    omega = (controls[1:] - controls[:-1]) / dt.unsqueeze(1)
-    tau_mid = 0.5 * (controls[1:] + controls[:-1])
-    t_mid = 0.5 * (time_t[1:] + time_t[:-1])
-    return total_work_regularizer(tau_mid, omega, t_mid)
-
-
-def _smoothness_loss(controls: torch.Tensor) -> torch.Tensor:
-    if len(controls) <= 1:
-        return torch.zeros((), dtype=torch.float32, device=controls.device)
-    return torch.mean((controls[1:] - controls[:-1]) ** 2)
-
-
-def _step_history(
-    step: int,
-    loss_value: float,
-    losses: _StepLosses,
-) -> dict[str, float]:
-    return {
-        "step": step,
-        "loss": loss_value,
-        "tracking_loss": float(losses.tracking_loss.detach().cpu()),
-        "effort_loss": float(losses.effort_loss.detach().cpu()),
-        "smoothness_loss": float(losses.smoothness_loss.detach().cpu()),
-        "orientation_loss": float(losses.orientation_loss.detach().cpu()),
-        "regulariser_loss": float(losses.regulariser_loss.detach().cpu()),
-    }
-
-
-def _write_optimization_outputs(
-    output_csv: Path,
-    checkpoint_path: Path,
-    desired_club_csv: Path,
-    reference_body_csv: Path,
-    context: _OptimizationContext,
-    best_controls: torch.Tensor,
-    best_loss: float,
-    history: list[dict[str, float]],
-) -> None:
-    output = pd.DataFrame({"time": context.desired_time})
-    for idx, column in enumerate(context.control_columns):
+    output = pd.DataFrame({"time": desired_time})
+    for idx, column in enumerate(control_columns):
         output[column] = best_controls[:, idx].detach().cpu().numpy()
 
     output_csv.parent.mkdir(parents=True, exist_ok=True)
@@ -664,12 +496,12 @@ def _write_optimization_outputs(
                 "reference_body_csv": str(reference_body_csv),
                 "output_csv": str(output_csv),
                 "rows": int(len(output)),
-                "control_columns": context.control_columns,
+                "control_columns": control_columns,
                 "best_loss": best_loss,
-                "cost_mode": context.cost.mode,
-                "regularizer_kind": context.cost.regularizer_kind,
-                "orientation_weight": context.cost.orientation_weight,
-                "lambda_": context.cost.lambda_,
+                "cost_mode": cost.mode,
+                "regularizer_kind": cost.regularizer_kind,
+                "orientation_weight": cost.orientation_weight,
+                "lambda_": cost.lambda_,
                 "history": history,
             },
             indent=2,

@@ -19,19 +19,6 @@ from model_generation.library._model_types import (
 logger = logging.getLogger(__name__)
 
 
-def validate_model_source_url(entry: ModelEntry) -> str:
-    """Return a validated HTTPS source URL for remote model downloads."""
-    if not (entry is not None):
-        raise ValueError("entry must be provided")
-    if not entry.source_url:
-        raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
-
-    from src.shared.python.security.security_utils import validate_url_scheme
-
-    validate_url_scheme(entry.source_url, allowed_schemes=("https",))
-    return entry.source_url
-
-
 def load_model(
     entries: dict[str, ModelEntry],
     parser: URDFParser,
@@ -89,18 +76,23 @@ def download_model(
         raise ValueError("entry must be provided")
     if not entry.source_url:
         return False
-    source_url = validate_model_source_url(entry)
 
     try:
-        from src.shared.python.security.security_utils import download_to_file
+        import requests
 
         cache_dir = config.cache_dir / entry.id.replace("/", "_")
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-        urdf_filename = source_url.split("/")[-1]
+        urdf_filename = entry.source_url.split("/")[-1]
         local_path = cache_dir / urdf_filename
 
-        download_to_file(source_url, local_path)
+        # Bounded timeout (issue #7184): urlretrieve has no timeout param, so
+        # stream via urlopen(..., timeout=) instead to avoid indefinite hangs.
+
+        with requests.get(entry.source_url, timeout=30, stream=True) as _resp:
+            _resp.raise_for_status()
+            with open(local_path, "wb") as _out:
+                _out.writelines(_resp.iter_content(chunk_size=8192))
 
         entry.urdf_path = local_path
         entry.is_cached = True

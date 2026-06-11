@@ -2,33 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from pathlib import Path
-from types import ModuleType
+import sys
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-from tests.support.optional_deps import scoped_import_with_optional_mocks
 
-_DRAKE_VISUALIZER_MODULE = (
-    "src.engines.physics_engines.drake.python.src.drake_visualizer"
-)
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_DRAKE_VISUALIZER_PATH = (
-    _REPO_ROOT
-    / "src"
-    / "engines"
-    / "physics_engines"
-    / "drake"
-    / "python"
-    / "src"
-    / "drake_visualizer.py"
-)
-
-
+# Per CLAUDE.md: never module-level sys.modules mocking.
+# Use patch.dict context managers instead.
+# Fix mocking for class methods and types
+# RotationMatrix needs to be a class with MakeYRotation classmethod
 class MockRotationMatrix:
     """Mock RotationMatrix for Drake testing."""
 
@@ -68,34 +53,15 @@ _MOCK_PYDRAKE.Cylinder = MagicMock()
 _MOCK_PYDRAKE.Sphere = MagicMock()
 _MOCK_PYDRAKE.Rgba = MagicMock()
 
+_PYDRAKE_MOCK = {
+    "pydrake": _MOCK_PYDRAKE,
+    "pydrake.all": _MOCK_PYDRAKE,
+}
 
-def _make_pydrake_all_stub() -> ModuleType:
-    stub = ModuleType("pydrake.all")
-    stub.Context = MagicMock()  # type: ignore[attr-defined]
-    stub.Cylinder = _MOCK_PYDRAKE.Cylinder  # type: ignore[attr-defined]
-    stub.Meshcat = MagicMock()  # type: ignore[attr-defined]
-    stub.MultibodyPlant = MagicMock()  # type: ignore[attr-defined]
-    stub.Rgba = _MOCK_PYDRAKE.Rgba  # type: ignore[attr-defined]
-    stub.RigidTransform = MockRigidTransform  # type: ignore[attr-defined]
-    stub.RotationMatrix = MockRotationMatrix  # type: ignore[attr-defined]
-    stub.Sphere = _MOCK_PYDRAKE.Sphere  # type: ignore[attr-defined]
-    return stub
-
-
-@pytest.fixture
-def drake_visualizer_module() -> Iterator[ModuleType]:
-    pydrake = ModuleType("pydrake")
-    pydrake_all = _make_pydrake_all_stub()
-    pydrake.all = pydrake_all  # type: ignore[attr-defined]
-    with scoped_import_with_optional_mocks(
-        _DRAKE_VISUALIZER_MODULE,
-        {
-            "pydrake": pydrake,
-            "pydrake.all": pydrake_all,
-        },
-        module_path=_DRAKE_VISUALIZER_PATH,
-    ) as module:
-        yield module
+with patch.dict(sys.modules, _PYDRAKE_MOCK):
+    from src.engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
+        DrakeVisualizer,
+    )
 
 
 class TestDrakeVisualizer:
@@ -112,14 +78,9 @@ class TestDrakeVisualizer:
         return MagicMock()
 
     @pytest.fixture
-    def visualizer(
-        self,
-        mock_meshcat: MagicMock,
-        mock_plant: MagicMock,
-        drake_visualizer_module: ModuleType,
-    ) -> Any:
+    def visualizer(self, mock_meshcat, mock_plant) -> DrakeVisualizer:
         """Create visualizer instance."""
-        return drake_visualizer_module.DrakeVisualizer(mock_meshcat, mock_plant)
+        return DrakeVisualizer(mock_meshcat, mock_plant)
 
     def test_drake_visualizer_initialization(
         self, visualizer, mock_meshcat, mock_plant
