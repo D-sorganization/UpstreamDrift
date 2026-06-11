@@ -65,7 +65,7 @@ def optimize_torques(
     device_name: str,
 ) -> None:
     checkpoint = torch.load(
-        checkpoint_path, map_location=device_name, weights_only=False
+        checkpoint_path, map_location=device_name, weights_only=True
     )
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])

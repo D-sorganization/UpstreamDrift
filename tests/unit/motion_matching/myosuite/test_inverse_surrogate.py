@@ -180,6 +180,6 @@ def test_train_surrogate_smoke(tmp_path: pytest.FixturePath) -> None:  # type: i
     )
     checkpoint = tmp_path / "surrogate_weights.pt"
     assert checkpoint.exists(), "Checkpoint file must be written after training"
-    state = torch.load(checkpoint, map_location="cpu")
+    state = torch.load(checkpoint, map_location="cpu", weights_only=True)
     assert isinstance(state, dict)
     assert len(state) > 0, "Checkpoint must contain model weights"

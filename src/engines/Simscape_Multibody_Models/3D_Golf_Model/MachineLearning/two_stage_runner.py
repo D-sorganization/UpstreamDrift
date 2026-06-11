@@ -74,7 +74,7 @@ def _build_surrogate_callable(  # pragma: no cover - exercised in integration on
 ) -> tuple[torch.nn.Module, list[str], list[str]]:
     from train_dynamics_surrogate import DynamicsMLP
 
-    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])
     model = DynamicsMLP(
