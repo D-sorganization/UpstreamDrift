@@ -107,7 +107,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   durable `dataset_id` required by row pagination, filter operators are
   validated at the request boundary instead of silently returning empty
   results for invalid operators, and `ModelLibrary.load_model(...,
-  force_download=True)` enforces the HTTPS-only `source_url` policy before any
+force_download=True)` enforces the HTTPS-only `source_url` policy before any
   download I/O.
 - **2026-06-10** - Closed the #7273 PR-scoped coverage bypass in standard CI.
   PRs that change source, test, or dependency targets now fall through to the

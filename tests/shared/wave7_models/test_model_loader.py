@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import io
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,14 +15,6 @@ from model_generation.library._model_types import (
     ModelFormat,
     RepositorySource,
 )
-
-
-class _BytesResponse(io.BytesIO):
-    def __enter__(self) -> _BytesResponse:
-        return self
-
-    def __exit__(self, *args: object) -> None:
-        self.close()
 
 
 class TestLoadModel:
@@ -129,12 +120,14 @@ class TestLoadModel:
         entries = {"m": entry}
 
         with (
-            patch("urllib.request.urlopen") as urlopen,
+            patch(
+                "src.shared.python.security.security_utils.download_to_file"
+            ) as download_to_file,
             pytest.raises(ValueError, match="URL scheme 'file' is not allowed"),
         ):
             load_model(entries, URDFParser(), lib_config, "m", force_download=True)
 
-        urlopen.assert_not_called()
+        download_to_file.assert_not_called()
         assert not (lib_config.cache_dir / "m").exists()
 
 
@@ -146,12 +139,15 @@ class TestDownloadModel:
     def test_success(
         self, tmp_path: Path, lib_config: LibraryConfig, monkeypatch
     ) -> None:
-        def fake_urlopen(request, timeout):
-            assert request.full_url == "https://example.com/file.urdf"
-            assert timeout == 30
-            return _BytesResponse(b"downloaded")
+        def fake_download_to_file(url, dest):
+            assert url == "https://example.com/file.urdf"
+            Path(dest).write_text("downloaded")
+            return Path(dest)
 
-        monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file",
+            fake_download_to_file,
+        )
         e = ModelEntry(
             id="m",
             name="M",
@@ -170,7 +166,9 @@ class TestDownloadModel:
         def boom(*a, **k):
             raise OSError("network down")
 
-        monkeypatch.setattr("urllib.request.urlopen", boom)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file", boom
+        )
         e = ModelEntry(
             id="m",
             name="M",
@@ -182,10 +180,14 @@ class TestDownloadModel:
     def test_id_with_slash_sanitized(
         self, lib_config: LibraryConfig, monkeypatch
     ) -> None:
-        def fake_urlopen(request, timeout):
-            return _BytesResponse(b"x")
+        def fake_download_to_file(url, dest):
+            Path(dest).write_text("x")
+            return Path(dest)
 
-        monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file",
+            fake_download_to_file,
+        )
         e = ModelEntry(
             id="org/name",
             name="N",
