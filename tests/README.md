@@ -21,7 +21,6 @@ directories below.
 - `integration/` - multi-module workflows run in the core CI lane.
 - `launchers/` - GUI and CLI launcher tests.
 - `parity/` - result parity and cross-implementation comparisons.
-- `physics_validation/` - scientific checks against known references.
 - `regression/` - issue-specific repro tests; file docstrings should reference the issue.
 - `rust_bindings/` - Python-facing Rust extension contracts.
 - `scripts/` - tests for repository maintenance scripts.
@@ -29,6 +28,9 @@ directories below.
 - `tools/` - tests for developer and model-generation tools.
 - `ui/` - UI rendering, layout, and interaction tests.
 - `unit/` - fast unit tests with the narrowest practical fixture scope.
+
+Scientific validation lives in `tests/analytical/` for closed-form baselines and
+`tests/integration/conservation_laws/` for conservation-law checks.
 
 ## Conftests
 

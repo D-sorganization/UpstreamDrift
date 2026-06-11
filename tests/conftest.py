@@ -125,6 +125,7 @@ if not _has_pyqt6 and "PyQt6" not in sys.modules:
     mock_core.qVersion.return_value = "6.6.0"
 
     pyqt_mock = MagicMock()
+    pyqt_mock.__ud_fake__ = True
     pyqt_mock.QtCore = mock_core
     pyqt_mock.QtGui = MagicMock()
 
@@ -134,34 +135,7 @@ if not _has_pyqt6 and "PyQt6" not in sys.modules:
 
         def __getattr__(self, name):
             if name not in self.__dict__["_mocks"]:
-                mock = MagicMock()
-                if name == "font":
-                    font_mock = MagicMock()
-                    font_mock.families.return_value = ["Outfit"]
-                    mock.return_value = font_mock
-                elif name == "actions":
-                    mock.return_value = [MagicMock()] * 4
-                elif name == "menuBar":
-                    mock.return_value = DummyWidget()
-                elif name == "findChildren":
-
-                    def mock_findChildren(*args, **kwargs):
-                        btns = []
-                        for n in [
-                            "Home",
-                            "Engines",
-                            "Biomechanics",
-                            "Settings",
-                            "Documentation",
-                        ]:
-                            b = MagicMock()
-                            b.accessibleName.return_value = n
-                            b.icon.return_value.isNull.return_value = False
-                            btns.append(b)
-                        return btns
-
-                    mock.side_effect = mock_findChildren
-                self.__dict__["_mocks"][name] = mock
+                self.__dict__["_mocks"][name] = MagicMock()
             return self.__dict__["_mocks"][name]
 
         @classmethod
@@ -327,6 +301,22 @@ _OPTIONAL_COLLECTION_RULES = (
     ),
 )
 _OPTIONAL_COLLECTION_WARNED_PATHS: set[str] = set()
+_FAKE_PYQT6_GUI_TESTS = (
+    "tests/launchers",
+    "tests/shared/wave7_python_core/test_theme_typography.py",
+    "tests/imports/test_gui_import_boundaries.py",
+    "tests/unit/launcher",
+    "tests/unit/launchers",
+    "tests/unit/shared_python/test_advanced_analysis_features.py",
+    "tests/unit/shared_python/test_dashboard_advanced_analysis.py",
+    "tests/unit/shared_python/test_launcher_integration.py",
+    "tests/unit/shared_python/test_openpose_gui_coverage.py",
+    "tests/unit/shared_python/test_simulation_gui_base.py",
+    "tests/unit/theme",
+    "tests/unit/tools/starting_pose_matcher",
+    "tests/unit/ui",
+    "tests/ui",
+)
 
 
 def _normalized_collection_path(path: object) -> str:
@@ -418,6 +408,32 @@ def _warn_optional_collection_skip(path: object) -> None:
         )
         _OPTIONAL_COLLECTION_WARNED_PATHS.add(path_text)
         return
+
+
+def _fake_pyqt6_active() -> bool:
+    pyqt6_module = sys.modules.get("PyQt6")
+    return not _has_pyqt6 and bool(getattr(pyqt6_module, "__ud_fake__", False))
+
+
+def _is_fake_pyqt6_gui_path(path: object) -> bool:
+    path_text = _normalized_collection_path(path)
+    return any(
+        _matches_collection_suffix(path_text, suffix)
+        for suffix in _FAKE_PYQT6_GUI_TESTS
+    )
+
+
+def _skip_fake_pyqt6_gui_items(items: list[pytest.Item]) -> None:
+    if not _fake_pyqt6_active():
+        return
+
+    skip_marker = pytest.mark.skip(
+        reason="real PyQt6 is unavailable; GUI tests must not pass against stubs"
+    )
+    for item in items:
+        item_path = getattr(item, "path", getattr(item, "fspath", ""))
+        if _is_fake_pyqt6_gui_path(item_path):
+            item.add_marker(skip_marker)
 
 
 def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
@@ -782,6 +798,8 @@ def pytest_collection_modifyitems(
     ``_ud_unmarked_suite_count`` for the terminal summary; raises
     ``pytest.UsageError`` only when enforcement is enabled.
     """
+    _skip_fake_pyqt6_gui_items(items)
+
     unmarked = find_unmarked(items)  # type: ignore[arg-type]
     config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]
     config._ud_unmarked_suite_nodeids = [  # type: ignore[attr-defined]

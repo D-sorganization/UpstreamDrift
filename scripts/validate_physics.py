@@ -3,7 +3,7 @@
 Physics Validation Runner
 -------------------------
 Automated script to run physics validation tests within the Golf Modeling Suite.
-Designed to be run from CI/CD or inside a Docker container.
+Designed for local preflight or containerized validation runs.
 
 Refactored to use shared script utilities (DRY principle).
 
@@ -17,6 +17,11 @@ import argparse
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
 from scripts.script_utils import get_repo_root, run_pytest, setup_script_logging
 
 logger = setup_script_logging("PhysicsValidator")
@@ -24,11 +29,12 @@ logger = setup_script_logging("PhysicsValidator")
 # Test file configuration - maps test types to relative paths
 TEST_FILES: dict[str, list[str]] = {
     "analytical": [
-        "tests/physics_validation/test_energy_conservation.py",
-        "tests/physics_validation/test_pendulum_accuracy.py",
+        "tests/analytical/test_engine_pendulum_dynamics.py",
+        "tests/analytical/test_engine_zvcf_jacobian_parity.py",
     ],
     "complex": [
-        "tests/physics_validation/test_complex_models.py",
+        "tests/integration/conservation_laws/test_energy_conservation.py",
+        "tests/integration/conservation_laws/test_work_energy_theorem.py",
     ],
 }
 

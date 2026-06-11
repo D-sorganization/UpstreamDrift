@@ -10,6 +10,7 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import sys
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -643,6 +644,151 @@ class TestCIEnvironmentCompatibility:
         assert "changed_tests" not in unit_step
         assert "No unit test changes detected" not in unit_step
         assert "pytest tests/unit/" in unit_step
+
+    def test_ci_optional_stack_pytest_exit_codes_are_gating(self) -> None:
+        """The optional-stack lane must fail on pytest exit codes, not grep text."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "ci-optional-stack.yml"
+        ).read_text(encoding="utf-8")
+        job = workflow[workflow.index("optional-stack-check:") :]
+
+        assert "Pre-existing optional-stack test failures tracked separately" not in job
+        install_step = job[
+            job.index("- name: Install System Dependencies") : job.index(
+                "- name: Isolate Python tool cache"
+            )
+        ]
+        assert "sudo -n true" in install_step
+        assert "sudo apt-get" not in install_step
+        assert "No root or non-interactive sudo available" in install_step
+
+        for step_name, log_file in [
+            ("Run API Tests (Optional Stack)", "/tmp/api-test-results.txt"),
+            (
+                "Run Pinocchio Ecosystem Tests (Optional Stack)",
+                "/tmp/pinocchio-test-results.txt",
+            ),
+            ("Run Unit Tests (Optional Stack)", "/tmp/unit-test-results.txt"),
+        ]:
+            step = job[job.index(f"- name: {step_name}") :]
+            next_step = step.find("\n      - name:", 1)
+            if next_step != -1:
+                step = step[:next_step]
+
+            assert "continue-on-error: true" not in step
+            assert f"tee {log_file} || true" not in step
+            assert "set -o pipefail" in step
+            assert "rc=$?" in step
+            assert 'grep -c "FAILED"' in step
+            assert '|| echo "0"' not in step
+
+        api_step = job[
+            job.index("- name: Run API Tests (Optional Stack)") : job.index(
+                "- name: Run Pinocchio Ecosystem Tests (Optional Stack)"
+            )
+        ]
+        unit_step = job[
+            job.index("- name: Run Unit Tests (Optional Stack)") : job.index(
+                "- name: Optional-Stack Skip Visibility Report"
+            )
+        ]
+        assert 'exit "$rc"' in api_step
+        assert 'exit "$rc"' in unit_step
+
+        pinocchio_step = job[
+            job.index(
+                "- name: Run Pinocchio Ecosystem Tests (Optional Stack)"
+            ) : job.index("- name: Run Unit Tests (Optional Stack)")
+        ]
+        assert '[[ "$rc" -eq 5 ]]' in pinocchio_step
+        assert 'exit "$rc"' in pinocchio_step
+
+    def test_physics_validation_script_targets_collect_tests(self) -> None:
+        """Every physics runner target must collect at least one real test."""
+        from scripts import validate_physics
+        from scripts import verify_physics
+
+        validate_source = (REPO_ROOT / "scripts" / "validate_physics.py").read_text(
+            encoding="utf-8"
+        )
+        verify_source = (REPO_ROOT / "scripts" / "verify_physics.py").read_text(
+            encoding="utf-8"
+        )
+        assert validate_source.index("sys.path.insert(0, str(_PROJECT_ROOT))") < (
+            validate_source.index("from scripts.script_utils")
+        )
+        assert verify_source.index("sys.path.insert(0, str(_PROJECT_ROOT))") < (
+            verify_source.index("from src.shared.python.engine_core.engine_manager")
+        )
+
+        paths = {
+            *(
+                REPO_ROOT / path
+                for group in validate_physics.TEST_FILES.values()
+                for path in group
+            ),
+            *(REPO_ROOT / path for path in verify_physics.VALIDATION_TEST_PATHS),
+        }
+        assert paths
+        legacy_dir = REPO_ROOT / "tests" / "physics_validation"
+        assert not list(legacy_dir.glob("test_*.py"))
+
+        for path in sorted(paths):
+            assert path.exists(), f"{path} must exist"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "--collect-only",
+                    "-q",
+                    "-o",
+                    "addopts=",
+                    str(path),
+                ],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert result.returncode == 0, result.stdout + result.stderr
+            nodeids = [
+                line
+                for line in result.stdout.splitlines()
+                if "::" in line and not line.startswith("<")
+            ]
+            assert nodeids, f"{path} collected no tests"
+
+    def test_pyqt6_fallback_is_not_expectation_shaped(self) -> None:
+        """The global PyQt fallback may prevent crashes, but not satisfy UI asserts."""
+        conftest = (REPO_ROOT / "tests" / "conftest.py").read_text(encoding="utf-8")
+        pyqt_fallback = conftest[
+            conftest.index(
+                'if not _has_pyqt6 and "PyQt6" not in sys.modules:'
+            ) : conftest.index("@pytest.fixture(autouse=True)")
+        ]
+
+        for forbidden in [
+            'font_mock.families.return_value = ["Outfit"]',
+            "mock.return_value = [MagicMock()] * 4",
+            '"Home"',
+            '"Engines"',
+            '"Documentation"',
+            "mock_findChildren",
+        ]:
+            assert forbidden not in pyqt_fallback
+
+        assert "__ud_fake__" in pyqt_fallback
+        assert "_skip_fake_pyqt6_gui_items" in conftest
+
+    def test_launcher_ui_setup_tests_assert_real_qt_results(self) -> None:
+        """Launcher UI tests must not guard away assertions for mock-shaped values."""
+        test_file = (
+            REPO_ROOT / "tests" / "launchers" / "test_launcher_ui_setup.py"
+        ).read_text(encoding="utf-8")
+
+        assert "if isinstance(actions, list)" not in test_file
+        assert "if isinstance(buttons, list)" not in test_file
 
     def test_ci_standard_rust_gate_runs_kernel_backed_python_suites(self) -> None:
         """Rust wheel CI must turn permanently skipped Python suites into failures."""

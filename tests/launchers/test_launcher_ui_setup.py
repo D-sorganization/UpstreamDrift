@@ -88,8 +88,7 @@ def test_setup_menu_bar(launcher) -> None:
     launcher._setup_menu_bar()
     menubar = launcher.menuBar()
     actions = menubar.actions()
-    if isinstance(actions, list):
-        assert len(actions) == 4
+    assert len(actions) == 4
 
 
 def test_setup_top_bar(launcher) -> None:
@@ -101,15 +100,13 @@ def test_setup_top_bar(launcher) -> None:
 def test_setup_global_sidebar_uses_icon_navigation(launcher) -> None:
     sidebar = launcher._setup_global_sidebar()
     buttons = sidebar.findChildren(QToolButton)
-    if isinstance(buttons, list) and len(buttons) > 0:
-        button_names = {button.accessibleName() for button in buttons}
-        assert "Home" in button_names
-        assert "Engines" in button_names
+    button_names = {button.accessibleName() for button in buttons}
+    assert "Home" in button_names
+    assert "Engines" in button_names
 
     for button in buttons:
         assert not button.icon().isNull()
-        if isinstance(buttons, list) and len(buttons) > 0:
-            assert button.accessibleName() in button_names
+        assert button.accessibleName() in button_names
 
 
 def test_library_is_sidebar_button_not_startup_tab(launcher) -> None:

@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.340                                            |
+| **Spec Version**        | 1.0.341                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-06-11** - CI and validation test contract hardening for #7352,
+  #7353, and #7354. The optional-stack lane now gates on pytest exit codes,
+  physics validation scripts target real analytical/conservation suites, and
+  PyQt fallback stubs no longer fabricate launcher expectations.
 
 - **2026-06-11** - Motion-pipeline DRY follow-up for the #7380
   simulator-facade merge. MuJoCo torque matching and Pinocchio inverse
@@ -886,7 +891,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | Integration                 | `tests/integration/`        | pytest              | `@pytest.mark.integration`          |
 | Acceptance                  | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`           |
 | Cross-Engine                | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`         |
-| Physics Validation          | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation`   |
+| Physics Validation          | `tests/analytical/`, `tests/integration/conservation_laws/` | pytest              | `@pytest.mark.unit` / `@pytest.mark.integration` |
 | Golf Source Contracts       | `tests/unit/shared_python/` | pytest              | source-map contract tests           |
 | Dependency Source Contracts | `tests/unit/scripts/`       | pytest              | generated dependency contract tests |
 | Benchmarks                  | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`            |
