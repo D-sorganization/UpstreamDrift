@@ -9,7 +9,7 @@ This module is the top-level facade that the chat panel (and tests) use
 to interact with MCP servers. It:
 
 1. Reads ``~/.upstreamdrift/mcp_servers.json`` via
-   :mod:`src.launchers.mcp_config_writer`.
+   :mod:`src.shared.python.ai.mcp.config_io`.
 2. Builds an :class:`~src.shared.python.ai.mcp.pool.McpClientPool` from
    the enabled server configs (via the module-level helper
    :func:`_build_pool`).
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Default config path — matches mcp_config_writer.DEFAULT_CONFIG_PATH
+# Default config path — matches config_io.DEFAULT_CONFIG_PATH
 # ---------------------------------------------------------------------------
 _DEFAULT_CONFIG_PATH = Path.home() / ".upstreamdrift" / "mcp_servers.json"
 
@@ -64,8 +64,8 @@ _DEFAULT_CONFIG_PATH = Path.home() / ".upstreamdrift" / "mcp_servers.json"
 def _load_server_configs(config_path: Path) -> list[McpServerConfig]:
     """Read enabled server configs from *config_path*.
 
-    Falls back to the launcher's :mod:`~src.launchers.mcp_config_writer`
-    for parsing. If the file is absent, returns ``[]`` silently.
+    Delegates to :mod:`src.shared.python.ai.mcp.config_io` for parsing.
+    If the file is absent, returns ``[]`` silently.
 
     Args:
         config_path: Path to ``mcp_servers.json``.
@@ -81,7 +81,7 @@ def _load_server_configs(config_path: Path) -> list[McpServerConfig]:
         return []
 
     try:
-        from src.launchers.mcp_config_writer import read as _read_file
+        from src.shared.python.ai.mcp.config_io import read as _read_file
 
         file_model = _read_file(path=config_path)
         configs: list[McpServerConfig] = []
