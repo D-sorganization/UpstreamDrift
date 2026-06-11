@@ -125,6 +125,8 @@ class UpstreamDriftLauncher(QMainWindow):
     sidekick_window: Any | None
     _sidekick_popped_out: bool
     _sidekick_needs_initial_sizing: bool
+    _sidekick_action_service: Any | None
+    _sidekick_action_service_host: Any | None
 
     @property
     def docker_available(self) -> bool:
@@ -299,15 +301,15 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _apply_sidekick_splitter_sizes(self) -> None:
         """Expose the Sidekick splitter sizing hook on the launcher class."""
-        return SidekickSidebarManager._apply_sidekick_splitter_sizes(self)
+        return self.sidekick_sidebar_manager._apply_sidekick_splitter_sizes()
 
     def _install_sidekick_sidebar(self) -> None:
         """Expose the Sidekick sidebar installer on the launcher class."""
-        return SidekickSidebarManager._install_sidekick_sidebar(self)
+        return self.sidekick_sidebar_manager._install_sidekick_sidebar()
 
     def _on_windows_mode_changed(self, state: int) -> None:
         """Expose the Windows-mode checkbox handler on the launcher class."""
-        return DialogsManager._on_windows_mode_changed(self, state)
+        return self.dialogs_manager._on_windows_mode_changed(state)
 
     def showEvent(self, event: Any) -> None:
         """Force sidekick splitter sizes on first display."""
@@ -377,8 +379,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self.sidekick_sidebar = None
         self.sidekick_window = None
         self._sidekick_popped_out = False
-        self._sidekick_action_service: Any | None = None
-        self._sidekick_action_service_host: Any | None = None
+        self._sidekick_action_service = None
+        self._sidekick_action_service_host = None
         self._popped_out_windows: list[Any] = []
         self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self._dependency_probe_workers: dict[str, Any] = {}

@@ -65,16 +65,20 @@ def ui_setup(qapp):
             self.layout_manager = _DummyLayoutManager()
             self.docker_available = False
             self.ui_setup_manager = UISetupManager(self)
+            from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+
+            self.sidekick_sidebar_manager = SidekickSidebarManager(self)
 
         def __getattr__(self, name):
-            # Avoid recursion if ui_setup_manager is not initialized
-            if name == "ui_setup_manager":
+            # Avoid recursion if managers are not initialized
+            if name in ("ui_setup_manager", "sidekick_sidebar_manager"):
                 raise AttributeError
-            # Only proxy attributes that actually exist on the manager (or its class)
-            if name in self.ui_setup_manager.__dict__ or hasattr(
-                type(self.ui_setup_manager), name
-            ):
-                return getattr(self.ui_setup_manager, name)
+            for manager_name in ("ui_setup_manager", "sidekick_sidebar_manager"):
+                manager = getattr(self, manager_name, None)
+                if manager is not None and (
+                    name in manager.__dict__ or hasattr(type(manager), name)
+                ):
+                    return getattr(manager, name)
             raise AttributeError(f"'_UIHarness' object has no attribute '{name}'")
 
         def init_ui(self):

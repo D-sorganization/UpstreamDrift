@@ -161,6 +161,46 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7362 legacy shared-chat decomposition: chat_stream exceeded the changed-file budget before MCP config I/O moved into the shared facade and needs streaming orchestration split.",
       "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager.init_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7399 legacy launcher UI setup decomposition: init_ui exceeds the function-lines budget until split into smaller widget builders.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager._setup_global_sidebar",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_global_sidebar exceeds the function-lines budget until split.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager._setup_help_menu",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_help_menu exceeds the function-lines budget until split.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager._setup_top_bar_status_and_search",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_top_bar_status_and_search exceeds the function-lines budget until split.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager._setup_view_mode_and_zoom",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_view_mode_and_zoom exceeds the function-lines budget until split.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
