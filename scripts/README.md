@@ -23,6 +23,7 @@ This directory contains utility and maintenance scripts for the UpstreamDrift pr
   - `pip_audit_waivers.json` — Time-bounded pip-audit CVE waivers consumed by `scripts/ci/check_pip_audit_waivers.py`
 
 - `check_workflows_no_silent_failures.py` — Reject silent security scanner failure patterns in core security workflows
+- `check_workflow_run_trust_boundary.py` — Reject privileged `workflow_run` paths that check out, install, or execute PR-controlled code
 
 - **`maintenance/`** — System and deployment utilities
 
