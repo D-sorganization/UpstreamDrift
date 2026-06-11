@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+import pytest
 from PyQt6.QtCore import Qt
 
 from src.launchers.library_widget import LibraryManager, LibraryWidget
@@ -62,6 +63,7 @@ def test_library_preview_escapes_document_metadata(qapp, tmp_path: Path) -> None
     assert "backend not configured" in widget.chat_input.placeholderText().lower()
 
 
+@pytest.mark.unit
 def test_document_chat_does_not_fabricate_backend_response(
     qapp, tmp_path: Path
 ) -> None:

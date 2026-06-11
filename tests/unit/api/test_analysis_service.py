@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 # Configure async tests to use asyncio backend only
-pytestmark = pytest.mark.anyio
+pytestmark = [pytest.mark.anyio, pytest.mark.unit]
 
 
 @pytest.fixture(scope="module")

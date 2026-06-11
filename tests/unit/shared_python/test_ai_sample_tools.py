@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -174,6 +176,7 @@ def test_check_energy_conservation() -> None:
     assert res.result["status"] == "not_implemented"
 
 
+@pytest.mark.unit
 def test_registered_chat_placeholders_do_not_claim_success_or_pending() -> None:
     """Production chat tools must not imply a nonexistent job was queued."""
     reg = ToolRegistry()
