@@ -1561,7 +1561,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Optimized magnitude calculations using math.hypot instead of np.linalg.norm in MuJoCo humanoid golf engine
 
-
-
-
 - Optimized 3D vector norm calculations in physics engines using math.hypot instead of np.linalg.norm.
