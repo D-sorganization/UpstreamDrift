@@ -37,12 +37,14 @@ def test_pipeline_request_to_pipeline_config_round_trip() -> None:
         adapter_options={"sync": True},
         ik_backend="drake",
         matching_backend="pinocchio",
+        matching_model_urdf="models/subject.urdf",
     )
     cfg = req.to_pipeline_config()
     assert cfg.adapter.format == "c3d"
     assert cfg.adapter.options == {"sync": True}
     assert cfg.ik_backend == "drake"
     assert cfg.matching_backend == "pinocchio"
+    assert cfg.matching_model_urdf == "models/subject.urdf"
 
 
 def test_pipeline_request_preserves_string_bool_for_pydantic_coercion() -> None:

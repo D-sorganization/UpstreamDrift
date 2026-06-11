@@ -21,6 +21,9 @@ from src.shared.python.motion_pipeline.matching.base import (
     MotionMatchingResult,
     make_matching_solver,
 )
+from src.shared.python.motion_pipeline.matching.inverse_dyn_pinocchio import (
+    PinocchioInverseDynMatchingSolver,
+)
 
 from ._local_fixtures import make_pendulum_reference_trajectory, make_simple_rig
 
@@ -130,6 +133,19 @@ def test_make_matching_solver_pinocchio_inverse_dyn_returns_solver() -> None:
     """
     solver = make_matching_solver(MatchingBackendType.INVERSE_DYN_PINOCCHIO)
     assert hasattr(solver, "match")
+
+
+def test_make_matching_solver_threads_pinocchio_urdf_path(tmp_path) -> None:
+    urdf_path = tmp_path / "subject.urdf"
+    urdf_path.write_text("<robot name='subject' />", encoding="utf-8")
+
+    solver = make_matching_solver(
+        MatchingBackendType.INVERSE_DYN_PINOCCHIO,
+        urdf_path=urdf_path,
+    )
+
+    assert isinstance(solver, PinocchioInverseDynMatchingSolver)
+    assert solver.urdf_path == urdf_path
 
 
 def test_motion_matching_request_post_init_sets_horizon() -> None:

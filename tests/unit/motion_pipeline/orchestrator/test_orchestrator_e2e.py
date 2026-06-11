@@ -122,7 +122,7 @@ class _PipelineWithDefaultRig(MotionPipeline):
 
 @pytest.mark.skipif(not _HAVE_PINOCCHIO, reason="pinocchio not installed")
 def test_orchestrator_full_run_finite_metrics_pinocchio() -> None:
-    """Full geometric-IK + Pinocchio-RNEA run completes with finite metrics."""
+    """Pinocchio matching requires a production URDF to claim readiness."""
     rig = _synthetic_rig()
     traj = _synthetic_markers(rig)
 
@@ -132,22 +132,8 @@ def test_orchestrator_full_run_finite_metrics_pinocchio() -> None:
         matching_backend="pinocchio",
     )
     pipeline = _PipelineWithDefaultRig(config, rig)
-    result = pipeline.run(traj)
-
-    assert isinstance(result, MotionMatchingResult)
-    assert result.success is True
-    # Finite metrics is the headline acceptance criterion (#7047).
-    assert result.error_metrics, "expected non-empty error metrics"
-    for metric, value in result.error_metrics.items():
-        assert np.isfinite(value), f"metric {metric!r} not finite: {value}"
-    assert result.matched_trajectory is not None
-    matched = result.matched_trajectory
-    expected_dofs = matched.skeleton.num_dofs
-    for frame in matched.trajectory.frames:
-        assert frame.num_dofs == expected_dofs
-    # Provenance wired through from the orchestrator.
-    assert "source_hash" in matched.source_provenance
-    assert "software_version" in matched.source_provenance
+    with pytest.raises(InvalidInputError, match="matching_model_urdf"):
+        pipeline.run(traj)
 
 
 def test_orchestrator_matching_routes_through_make_matching_solver(
@@ -182,8 +168,9 @@ def test_orchestrator_matching_routes_through_make_matching_solver(
             captured["rig_dofs"] = rig.num_dofs
             return _FakeResult()
 
-    def _fake_factory(backend, cost_weights=None):  # type: ignore[no-untyped-def]
+    def _fake_factory(backend, cost_weights=None, *, urdf_path=None):  # type: ignore[no-untyped-def]
         captured["backend"] = backend
+        captured["urdf_path"] = urdf_path
         return _FakeSolver()
 
     monkeypatch.setattr(matching_base, "make_matching_solver", _fake_factory)
@@ -205,6 +192,7 @@ def test_orchestrator_matching_routes_through_make_matching_solver(
     assert captured["rig_dofs"] == rig.num_dofs
     assert captured["reference_frames"] == traj.num_frames
     assert captured["backend"].value == "pinocchio_inverse_dyn"
+    assert captured["urdf_path"] is None
 
 
 @pytest.mark.unit
@@ -241,7 +229,7 @@ def test_mujoco_placeholder_matching_failure_is_invalid_input(
     monkeypatch.setattr(
         matching_base,
         "make_matching_solver",
-        lambda backend, cost_weights=None: _FakeSolver(),
+        lambda backend, cost_weights=None, *, urdf_path=None: _FakeSolver(),
     )
 
     config = PipelineConfig(
@@ -255,13 +243,8 @@ def test_mujoco_placeholder_matching_failure_is_invalid_input(
 
 
 @pytest.mark.skipif(not _HAVE_MUJOCO, reason="mujoco not installed")
-def test_orchestrator_mujoco_matching_fails_without_real_model() -> None:
-    """The MuJoCo torque backend yields no real solve from an empty model.
-
-    With only the placeholder ``<mujoco/>`` model, torques are all zero, so
-    ``success`` is False (#7047) and the orchestrator raises rather than
-    reporting a fake success.
-    """
+def test_orchestrator_mujoco_matching_uses_generated_rig_model() -> None:
+    """The MuJoCo torque backend no longer runs on an empty placeholder model."""
     rig = _synthetic_rig()
     traj = _synthetic_markers(rig)
 
@@ -271,5 +254,9 @@ def test_orchestrator_mujoco_matching_fails_without_real_model() -> None:
         matching_backend="mujoco",
     )
     pipeline = _PipelineWithDefaultRig(config, rig)
-    with pytest.raises(InvalidInputError, match="no real solve"):
-        pipeline.run(traj)
+    result = pipeline.run(traj)
+
+    assert result.success is True
+    assert result.metadata["model_source"] == "generated_mjcf"
+    assert result.metadata["placeholder_model"] is False
+    assert result.metadata["model_nq"] == rig.num_dofs
