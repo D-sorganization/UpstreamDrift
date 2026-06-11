@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Hardened the standard CI PR-scoped unit gate for #7314: source/dependency PRs
+  now use the dependency-light unit lane instead of passing solely on touched
+  test files, and targeted PR coverage runs a changed-file policy ratchet.
 - Re-baselined `scripts/config/module_size_budget_baseline.json` to drop 7 stale
   exceptions for files that have since been decomposed back under the 1,500-line
   cap, and updated the remaining 3 entries with current truthful line counts

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import logging
 import sys
 from dataclasses import dataclass
@@ -57,7 +58,7 @@ def parse_coverage_report(report_path: Path) -> dict[str, dict[int, int]]:
     report: dict[str, dict[int, int]] = {}
 
     for class_node in root.findall(".//class"):
-        filename = class_node.attrib.get("filename", "").replace("\\", "/")
+        filename = _normalize_path(class_node.attrib.get("filename", ""))
         if not filename:
             continue
         line_hits = report.setdefault(filename, {})
@@ -67,6 +68,62 @@ def parse_coverage_report(report_path: Path) -> dict[str, dict[int, int]]:
             line_hits[number] = max(line_hits.get(number, 0), hits)
 
     return report
+
+
+def load_changed_files(path: Path) -> list[str]:
+    """Return normalized changed-file paths from a newline-delimited file."""
+    if not path.is_file():
+        raise FileNotFoundError(f"changed-file list not found: {path}")
+
+    return [
+        normalized
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if (normalized := _normalize_path(line.strip()))
+    ]
+
+
+def find_changed_file_failures(
+    report: dict[str, dict[int, int]],
+    policies: tuple[CoveragePolicy, ...],
+    changed_files: list[str],
+) -> list[str]:
+    """Return policy failures for changed files covered by a policy.
+
+    This PR-mode ratchet is intentionally narrower than full-suite group
+    enforcement: it ignores changed files outside policy groups, but fails when
+    a changed policy file is missing from targeted coverage or falls below its
+    policy threshold.
+    """
+    normalized_report = {
+        _normalize_path(filename): hits for filename, hits in report.items()
+    }
+    failures: list[str] = []
+
+    for changed_file in sorted({_normalize_path(path) for path in changed_files}):
+        policy = _first_matching_policy(changed_file, policies)
+        if policy is None:
+            continue
+
+        line_hits = normalized_report.get(changed_file)
+        if line_hits is None:
+            failures.append(
+                f"{changed_file}: missing from coverage report (policy {policy.name})"
+            )
+            continue
+
+        total = len(line_hits)
+        if total == 0:
+            continue
+
+        covered = sum(1 for hits in line_hits.values() if hits > 0)
+        percent = (covered / total) * 100
+        if percent < policy.threshold:
+            failures.append(
+                f"{changed_file}: {percent:.1f}% covered ({covered}/{total} lines), "
+                f"threshold {policy.threshold:.1f}% for policy {policy.name}"
+            )
+
+    return failures
 
 
 def find_policy_failures(
@@ -118,21 +175,57 @@ def find_policy_failures(
     return failures
 
 
+def _first_matching_policy(
+    filename: str,
+    policies: tuple[CoveragePolicy, ...],
+) -> CoveragePolicy | None:
+    normalized = _normalize_path(filename)
+    for policy in policies:
+        if policy.matches(normalized):
+            return policy
+    return None
+
+
+def _normalize_path(path: str) -> str:
+    return path.replace("\\", "/").removeprefix("./")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
-    if len(args) != 1:
-        print("Usage: coverage_enforcer.py <coverage.xml>", file=sys.stderr)
-        return 2
+    parser = argparse.ArgumentParser(
+        description="Enforce repo-local coverage thresholds."
+    )
+    parser.add_argument("coverage_xml", help="Path to Cobertura coverage XML.")
+    parser.add_argument(
+        "--changed-files",
+        type=Path,
+        help=(
+            "Newline-delimited changed-file list for PR-targeted coverage. "
+            "Only changed files matching coverage policies are enforced."
+        ),
+    )
+    namespace = parser.parse_args(args)
 
-    report_path = Path(args[0])
+    report_path = Path(namespace.coverage_xml)
     if not report_path.is_file():
         print(f"Coverage report not found: {report_path}", file=sys.stderr)
         return 2
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    failures = find_policy_failures(
-        parse_coverage_report(report_path), DEFAULT_POLICIES
-    )
+    report = parse_coverage_report(report_path)
+    if namespace.changed_files is None:
+        failures = find_policy_failures(report, DEFAULT_POLICIES)
+    else:
+        try:
+            changed_files = load_changed_files(namespace.changed_files)
+        except FileNotFoundError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        failures = find_changed_file_failures(
+            report,
+            DEFAULT_POLICIES,
+            changed_files,
+        )
 
     if failures:
         logger.error("FAIL: coverage policy violations detected:\n")

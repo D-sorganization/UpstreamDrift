@@ -156,3 +156,67 @@ def test_find_policy_failures_flags_missing_policy_matches(tmp_path: Path) -> No
     assert any("api_routes_services" in failure for failure in failures)
     assert any("engine_core_control_interface" in failure for failure in failures)
     assert any("task_management" in failure for failure in failures)
+
+
+def test_changed_file_ratchet_flags_missing_changed_policy_file(
+    tmp_path: Path,
+) -> None:
+    mod = _load_module()
+    coverage_xml = tmp_path / "coverage.xml"
+    _write_coverage_xml(
+        coverage_xml,
+        """
+        <class filename="src/shared/python/logging_pkg/logging_config.py">
+          <lines>
+            <line number="1" hits="1" />
+          </lines>
+        </class>
+        """,
+    )
+
+    report = mod.parse_coverage_report(coverage_xml)
+    failures = mod.find_changed_file_failures(
+        report,
+        mod.DEFAULT_POLICIES,
+        ["src/api/routes/chat_ws.py"],
+    )
+
+    assert failures == [
+        "src/api/routes/chat_ws.py: missing from coverage report "
+        "(policy api_routes_services)"
+    ]
+
+
+def test_changed_file_ratchet_checks_changed_policy_files_only(
+    tmp_path: Path,
+) -> None:
+    mod = _load_module()
+    coverage_xml = tmp_path / "coverage.xml"
+    _write_coverage_xml(
+        coverage_xml,
+        """
+        <class filename="src/api/routes/chat_ws.py">
+          <lines>
+            <line number="1" hits="1" />
+            <line number="2" hits="0" />
+            <line number="3" hits="0" />
+            <line number="4" hits="0" />
+          </lines>
+        </class>
+        """,
+    )
+
+    report = mod.parse_coverage_report(coverage_xml)
+    failures = mod.find_changed_file_failures(
+        report,
+        mod.DEFAULT_POLICIES,
+        [
+            "src/api/routes/chat_ws.py",
+            "src/tools/uncovered_non_policy_file.py",
+        ],
+    )
+
+    assert failures == [
+        "src/api/routes/chat_ws.py: 25.0% covered (1/4 lines), "
+        "threshold 85.0% for policy api_routes_services"
+    ]
