@@ -43,11 +43,11 @@ if TYPE_CHECKING:
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
 
-# Allow-listed roots for swing-capture import (read) and RL export (write).
-# Capture files may only be read from, and trajectories may only be written to,
+# Allow-listed roots for swing-capture import (read) and dataset exports (write).
+# Capture files may only be read from, and generated datasets may only be written to,
 # directories under the project root. This prevents the /import-swing endpoint
 # from being used for arbitrary local-file read (LFI) or arbitrary file write
-# by an authenticated tenant (issue #6926).
+# by an authenticated tenant (issues #6926, #7329).
 _INPUT_DIR_NAMES = ("data", "tests/fixtures", "src/shared/urdf")
 _OUTPUT_DIR_NAMES = ("output", "data")
 
@@ -90,6 +90,14 @@ def _validate_capture_input(file_path: str) -> Path:
             status_code=400,
             detail="Invalid file_path: must reside under an allowed input root",
         ) from exc
+
+
+def _validate_dataset_output(
+    candidate: Path, output_roots: list[Path] | None = None
+) -> Path:
+    """Resolve a dataset output path inside an allow-listed output root."""
+    roots = _dataset_output_roots() if output_roots is None else output_roots
+    return resolve_output_path(candidate, roots)
 
 
 # ---- Helpers ----
@@ -268,8 +276,9 @@ async def generate_dataset(
         generator = DatasetGenerator(engine)
         dataset = generator.generate(config)
 
+        safe_output = _validate_dataset_output(Path(request.output_path))
         output_path = generator.export(
-            dataset, request.output_path, format=request.export_format
+            dataset, safe_output, format=request.export_format
         )
 
         return DatasetGenerationResponse(
@@ -328,9 +337,9 @@ async def import_swing_capture(
         else:
             # Default lands under the first output root (project ``output/``).
             candidate = output_roots[0] / "rl_trajectories" / f"{safe_input.stem}.json"
-        # Containment check (issue #6926): the RL export target must resolve
+        # Containment check (issues #6926, #7329): the export target must resolve
         # inside an allow-listed output root; raise 400 on escape.
-        safe_output = resolve_output_path(candidate, output_roots)
+        safe_output = _validate_dataset_output(candidate, output_roots)
         rl_export_path = str(importer.export_for_rl(trajectory, safe_output))
 
     return SwingImportResponse(
