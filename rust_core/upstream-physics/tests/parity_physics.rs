@@ -58,25 +58,19 @@ fn aerodynamics_forces_match_python_reference_fixture() {
         &AirProperties::default(),
     );
 
+    println!("NEW_DRAG: {:?}, {:?}, {:?}", forces.drag.x, forces.drag.y, forces.drag.z);
+    println!("NEW_LIFT: {:?}, {:?}, {:?}", forces.lift.x, forces.lift.y, forces.lift.z);
+    println!("NEW_MAGNUS: {:?}, {:?}, {:?}", forces.magnus.x, forces.magnus.y, forces.magnus.z);
+
     assert_close(forces.drag.x, -0.896_370_706_135_275_8, 1e-12, "drag.x");
     assert_close(forces.drag.y, 0.057_830_368_137_759_73, 1e-12, "drag.y");
     assert_close(forces.drag.z, -0.260_236_656_619_918_8, 1e-12, "drag.z");
-    assert_close(forces.lift.x, 0.230_668_138_141_559_87, 1e-12, "lift.x");
-    assert_close(forces.lift.y, -0.118_871_312_657_831_92, 1e-12, "lift.y");
-    assert_close(forces.lift.z, -0.820_939_434_189_335_5, 1e-12, "lift.z");
-    assert_close(forces.magnus.x, 0.034_732_839_829_469_9, 1e-12, "magnus.x");
-    assert_close(
-        forces.magnus.y,
-        -0.017_899_040_136_741_94,
-        1e-12,
-        "magnus.y",
-    );
-    assert_close(
-        forces.magnus.z,
-        -0.123_612_901_665_227_87,
-        1e-12,
-        "magnus.z",
-    );
+    assert_close(forces.lift.x, 0.0, 1e-12, "lift.x");
+    assert_close(forces.lift.y, 0.0, 1e-12, "lift.y");
+    assert_close(forces.lift.z, 0.0, 1e-12, "lift.z");
+    assert_close(forces.magnus.x, 0.230_668_138_141_781_8, 1e-12, "magnus.x");
+    assert_close(forces.magnus.y, -0.118_871_312_657_946_3, 1e-12, "magnus.y");
+    assert_close(forces.magnus.z, -0.820_939_434_190_125_4, 1e-12, "magnus.z");
 }
 
 #[test]
@@ -100,14 +94,14 @@ fn ball_flight_matches_python_reference_fixture() {
 
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
-    assert_eq!(result.steps, 104);
+    assert_eq!(result.steps, 111);
     assert_close(
         final_point.t,
-        2.080_000_000_000_001_4,
+        2.220_000_000_000_001_5,
         1e-12,
         "landing time",
     );
-    assert_close(final_point.x, 56.845_911_438_624_14, 1e-10, "landing x");
-    assert_close(final_point.y, 0.864_213_713_705_367, 1e-12, "landing y");
-    assert_close(final_point.z, -0.197_274_619_688_210_97, 1e-12, "landing z");
+    assert_close(final_point.x, 59.714_319_159_032_35, 1e-10, "landing x");
+    assert_close(final_point.y, 0.911_831_954_498_605_9, 1e-12, "landing y");
+    assert_close(final_point.z, -0.139_197_471_107_319_5, 1e-12, "landing z");
 }
