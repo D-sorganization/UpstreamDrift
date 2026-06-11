@@ -233,15 +233,15 @@ def test_model_panel_surfaces_validation_findings() -> None:
     from src.tools.model_explorer.frankenstein_editor.panel import ModelPanel
 
     panel = ModelPanel("Working Model")
-    panel.model = URDFModel.from_element(
-        _robot(
-            _box_link("base", size="2 2 2"),
-            _box_link("tool", size="1 1 1"),
-            _joint("base_to_tool", "base", "tool", origin_xyz="0.25 0 0"),
+    panel.set_model(
+        URDFModel.from_element(
+            _robot(
+                _box_link("base", size="2 2 2"),
+                _box_link("tool", size="1 1 1"),
+                _joint("base_to_tool", "base", "tool", origin_xyz="0.25 0 0"),
+            )
         )
     )
-
-    panel._refresh_tree()
 
     messages = [
         panel.validation_list.item(index).text()

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 import os
 import sys
+from pathlib import Path
 
+import defusedxml.ElementTree as ET
 import pytest
 from PyQt6.QtWidgets import QApplication
 
@@ -202,29 +203,86 @@ def qapp() -> QApplication:
     return app
 
 
+def test_model_panel_facade_manages_selection_and_dirty_state(
+    qapp: QApplication,
+) -> None:
+    del qapp
+    from src.tools.model_explorer.frankenstein_editor.panel import ModelPanel
+
+    panel = ModelPanel("Working Model")
+    panel.set_model(_model(_ARM), dirty=False)
+    model = panel.get_model()
+
+    assert model is not None
+    assert model.is_modified is False
+
+    links_item = panel.tree.topLevelItem(0)
+    assert links_item is not None
+    base_item = links_item.child(0)
+    panel.tree.setCurrentItem(base_item)
+
+    selection = panel.selected_component()
+
+    assert selection is not None
+    assert selection.comp_type == "link"
+    assert selection.name == "base"
+    assert selection.element.tag == "link"
+    assert panel.selected_link_name() == "base"
+
+    panel.set_dirty()
+    assert model.is_modified is True
+
+    panel.mark_clean()
+    assert model.is_modified is False
+
+    panel.set_model(None)
+    assert panel.get_model() is None
+    assert panel.selected_component() is None
+
+
+def test_frankenstein_editor_uses_model_panel_facade_for_panel_state() -> None:
+    editor_source = Path(
+        "src/tools/model_explorer/frankenstein_editor/editor.py"
+    ).read_text(encoding="utf-8")
+
+    forbidden_panel_internals = (
+        "left_panel.tree",
+        "right_panel.tree",
+        "._refresh_tree(",
+        ".save_btn",
+        ".file_label",
+        "left_panel.model =",
+        "right_panel.model =",
+    )
+
+    assert [
+        pattern for pattern in forbidden_panel_internals if pattern in editor_source
+    ] == []
+
+
 def test_frankenstein_editor_attach_action_exports_mjcf(qapp: QApplication) -> None:
     del qapp
     from src.tools.model_explorer.frankenstein_editor.editor import FrankensteinEditor
 
     editor = FrankensteinEditor()
-    editor.left_panel.model = _model(_ARM)
-    editor.right_panel.model = _model(_HUMAN)
-    editor.left_panel._refresh_tree()
-    editor.right_panel._refresh_tree()
+    editor.left_panel.set_model(_model(_ARM))
+    editor.right_panel.set_model(_model(_HUMAN))
 
     preview = editor.preview_source_model_attachment(
         AttachmentSelection(target_link="right_hand", source_prefix="arm_")
     )
     assert preview is not None
     assert preview.state == "ready"
-    assert "arm_base" not in editor.right_panel.model.links  # type: ignore[union-attr]
+    working_model = editor.right_panel.get_model()
+    assert working_model is not None
+    assert "arm_base" not in working_model.links
 
     attached = editor.attach_source_model_to_working(
         AttachmentSelection(target_link="right_hand", source_prefix="arm_")
     )
 
     assert attached is True
-    assert "arm_base" in editor.right_panel.model.links  # type: ignore[union-attr]
+    assert "arm_base" in working_model.links
     choices = {choice.format: choice for choice in editor.export_working_choices()}
     assert choices["urdf"].enabled is True
     assert choices["mjcf"].enabled is True
