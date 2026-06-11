@@ -5,9 +5,12 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+import pytest
 from PyQt6.QtCore import Qt
 
 from src.launchers.library_widget import LibraryManager, LibraryWidget
+
+pytestmark = pytest.mark.unit
 
 
 def _insert_document(db_path: Path, **overrides: str) -> None:
