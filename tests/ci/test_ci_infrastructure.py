@@ -460,24 +460,37 @@ class TestCIEnvironmentCompatibility:
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:
-        """PR-scoped no-cov tests must fall through to coverage for source changes."""
+        """PR-scoped tests must collect targeted coverage for source changes."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
 
         assert "id: core-tests" in workflow
         assert "mapfile -t changed_coverage_targets" in workflow
+        assert "coverage_args=(--cov=src)" in workflow
+        assert 'coverage_module="${target%.py}"' in workflow
+        assert 'coverage_args+=(--cov="${coverage_module//\\//.}")' in workflow
         assert "src/**/*.py" in workflow
         assert 'echo "coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
         assert (
-            "No source/dependency coverage targets changed; skipping default coverage lane"
+            "No source/dependency coverage targets changed; skipping targeted coverage lane"
             in workflow
         )
         assert (
-            "Source/dependency coverage targets changed; running default coverage lane"
+            "Source/dependency coverage targets changed; targeted coverage collected"
             in workflow
         )
-        assert "steps.core-tests.outputs.coverage_generated == 'true'" in workflow
+        assert '"${coverage_args[@]}"' in workflow
+        assert 'echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
+        assert "steps.core-tests.outputs.full_coverage_generated == 'true'" in workflow
+        assert (
+            "steps.core-tests.outputs.coverage_generated == 'true'"
+            not in workflow[
+                workflow.index(
+                    "- name: Enforce Per-Package Coverage Thresholds"
+                ) : workflow.index("- name: Cross-Engine Validator Core Unit Tests")
+            ]
+        )
         assert (
             "github.event_name != 'pull_request'"
             not in workflow[
