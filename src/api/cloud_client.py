@@ -24,12 +24,13 @@ class CloudClient:
         """Load token from local cache if user previously logged in."""
         token_file = Path.home() / ".golf-suite" / "cloud_token"
         if token_file.exists():
-            self.token = token_file.read_text().strip()
+            cached_token = token_file.read_text().strip()
+            self.token = cached_token or None
 
     @property
     def is_logged_in(self) -> bool:
         """Return whether the client has an active authentication token."""
-        return self.token is not None
+        return bool(self.token)
 
     @precondition(
         lambda self, email, password: isinstance(email, str) and "@" in email,
