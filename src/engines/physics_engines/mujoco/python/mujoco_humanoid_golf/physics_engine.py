@@ -311,27 +311,32 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         """Return the root body position from MuJoCo state."""
         self.require_initialized("get_base_position")
         assert self.data is not None
-        if self.data.qpos.shape[0] >= 3:
-            return self.data.qpos[:3].copy()
-        body_id = 1 if self.data.xpos.shape[0] > 1 else 0
-        return self.data.xpos[body_id].copy()
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 3:
+            return qpos[:3].copy()
+        xpos = self.data.xpos
+        body_id = 1 if xpos.shape[0] > 1 else 0
+        return xpos[body_id].copy()
 
     def get_base_orientation(self) -> np.ndarray:
         """Return the root body orientation quaternion."""
         self.require_initialized("get_base_orientation")
         assert self.data is not None
-        if self.data.qpos.shape[0] >= 7:
-            return self.data.qpos[3:7].copy()
-        body_id = 1 if self.data.xquat.shape[0] > 1 else 0
-        return self.data.xquat[body_id].copy()
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 7:
+            return qpos[3:7].copy()
+        xquat = self.data.xquat
+        body_id = 1 if xquat.shape[0] > 1 else 0
+        return xquat[body_id].copy()
 
     def get_base_velocity(self) -> np.ndarray:
         """Return the root linear velocity from generalized velocity state."""
         self.require_initialized("get_base_velocity")
         assert self.data is not None
-        if self.data.qvel.shape[0] < 3:
+        qvel = self.data.qvel
+        if qvel.shape[0] < 3:
             raise ValueError("MuJoCo model does not expose a 3D base velocity")
-        return self.data.qvel[:3].copy()
+        return qvel[:3].copy()
 
     def get_imu_data(self) -> np.ndarray:
         """Return six IMU-like channels from sensors or root velocity state."""
@@ -340,9 +345,10 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         sensor_data = getattr(self.data, "sensordata", None)
         if sensor_data is not None and len(sensor_data) >= 6:
             return sensor_data[:6].copy()
-        if self.data.qvel.shape[0] < 6:
+        qvel = self.data.qvel
+        if qvel.shape[0] < 6:
             raise ValueError("MuJoCo model does not expose six IMU channels")
-        return self.data.qvel[:6].copy()
+        return qvel[:6].copy()
 
     def get_contact_forces(self) -> np.ndarray:
         """Return aggregate external contact wrench from MuJoCo contact forces."""
