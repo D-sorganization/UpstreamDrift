@@ -7,10 +7,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import defusedxml.ElementTree as ET
 import pytest
 
 REPO = Path(__file__).parents[2]
 EDITOR_DIR = REPO / "src/tools/model_explorer"
+EDITOR_COORDINATOR = EDITOR_DIR / "frankenstein_editor" / "editor.py"
 LOC_BUDGET = 700
 
 
@@ -35,9 +37,9 @@ class TestFrankensteinEditorFileSizes:
 
     @pytest.mark.unit
     def test_frankenstein_editor_split_2456_coordinator_loc(self) -> None:
-        loc = _count_lines(EDITOR_DIR / "frankenstein_editor.py")
+        loc = _count_lines(EDITOR_COORDINATOR)
         assert loc <= LOC_BUDGET, (
-            f"frankenstein_editor.py has {loc} LOC; budget {LOC_BUDGET}"
+            f"{EDITOR_COORDINATOR.name} has {loc} LOC; budget {LOC_BUDGET}"
         )
 
     @pytest.mark.unit
@@ -81,3 +83,42 @@ class TestFrankensteinEditorPublicAPI:
         from src.tools.model_explorer.frankenstein_editor import StealComponentDialog
 
         assert StealComponentDialog is not None
+
+
+class TestFrankensteinLegacyCompatibility:
+    """Legacy split modules must forward to the canonical package."""
+
+    @pytest.mark.unit
+    def test_legacy_model_import_is_canonical_model(self) -> None:
+        from src.tools.model_explorer._frankenstein_model import (
+            URDFModel as LegacyURDFModel,
+        )
+        from src.tools.model_explorer.frankenstein_editor.model import URDFModel
+
+        assert LegacyURDFModel is URDFModel
+
+    @pytest.mark.unit
+    def test_legacy_panel_imports_are_canonical_panel_classes(self) -> None:
+        from src.tools.model_explorer._frankenstein_panels import (
+            ModelPanel as LegacyModelPanel,
+        )
+        from src.tools.model_explorer._frankenstein_panels import (
+            StealComponentDialog as LegacyStealComponentDialog,
+        )
+        from src.tools.model_explorer.frankenstein_editor.dialogs import (
+            StealComponentDialog,
+        )
+        from src.tools.model_explorer.frankenstein_editor.panel import ModelPanel
+
+        assert LegacyModelPanel is ModelPanel
+        assert LegacyStealComponentDialog is StealComponentDialog
+
+    @pytest.mark.unit
+    def test_legacy_model_uses_canonical_validation_contract(self) -> None:
+        from src.tools.model_explorer._frankenstein_model import URDFModel
+
+        root = ET.fromstring('<robot name="shim_contract" />')
+        model = URDFModel.from_element(root)
+
+        assert hasattr(model, "validate_composition")
+        assert model.to_xml(force=True).startswith("<?xml")

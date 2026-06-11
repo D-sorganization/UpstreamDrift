@@ -465,11 +465,54 @@ def setup_logging(
     return root_logger
 
 
-def get_logger(name: str | None = None) -> logging.Logger:
+_STDLIB_LOG_KWARGS = {"exc_info", "stack_info", "stacklevel", "extra"}
+
+
+class _StructuredLoggerAdapter:
+    """Small stdlib-backed logger facade that accepts structured fields."""
+
+    def __init__(self, logger: logging.Logger) -> None:
+        self._logger = logger
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._logger, name)
+
+    def _split_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        log_kwargs = {
+            key: kwargs.pop(key) for key in list(kwargs) if key in _STDLIB_LOG_KWARGS
+        }
+        if kwargs:
+            extra = dict(log_kwargs.get("extra") or {})
+            extra.update(kwargs)
+            log_kwargs["extra"] = extra
+        return log_kwargs
+
+    def debug(self, msg: object, *args: object, **kwargs: Any) -> None:
+        self._logger.debug(msg, *args, **self._split_kwargs(kwargs))
+
+    def info(self, msg: object, *args: object, **kwargs: Any) -> None:
+        self._logger.info(msg, *args, **self._split_kwargs(kwargs))
+
+    def warning(self, msg: object, *args: object, **kwargs: Any) -> None:
+        self._logger.warning(msg, *args, **self._split_kwargs(kwargs))
+
+    def error(self, msg: object, *args: object, **kwargs: Any) -> None:
+        self._logger.error(msg, *args, **self._split_kwargs(kwargs))
+
+    def critical(self, msg: object, *args: object, **kwargs: Any) -> None:
+        self._logger.critical(msg, *args, **self._split_kwargs(kwargs))
+
+    def exception(self, msg: object, *args: object, **kwargs: Any) -> None:
+        kwargs.setdefault("exc_info", True)
+        self._logger.error(msg, *args, **self._split_kwargs(kwargs))
+
+
+def get_logger(name: str | None = None) -> Any:
     """Get a logger instance with the given name.
 
-    This is a convenience wrapper around logging.getLogger that ensures
-    consistent logger naming across the suite.
+    This is a convenience wrapper that keeps stdlib logging as the transport
+    while accepting structured keyword fields such as
+    ``logger.info("event", key=value)``.
 
     Args:
         name: Logger name (typically __name__). If None, returns root logger.
@@ -481,7 +524,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
         logger = get_logger(__name__)
         logger.info("Starting process...")
     """
-    return logging.getLogger(name)
+    return _StructuredLoggerAdapter(logging.getLogger(name))
 
 
 def configure_test_logging(
