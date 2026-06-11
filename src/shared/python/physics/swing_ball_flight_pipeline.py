@@ -240,7 +240,8 @@ class _TrajectoryMetricsExtractor:
         if len(trajectory) < 2:
             return 0.0
         v = trajectory[-1].velocity
-        v_horiz = float(np.linalg.norm(v[:2]))
+        # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        v_horiz = float(math.hypot(v[0], v[1]))
         if v_horiz < 1e-12:
             return 90.0
         return float(np.degrees(np.arctan2(-v[2], v_horiz)))
