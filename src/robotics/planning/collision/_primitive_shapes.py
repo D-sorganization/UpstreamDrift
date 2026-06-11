@@ -41,14 +41,14 @@ class Sphere(GeometricPrimitive):
             raise ValueError("point must be provided")
         point = np.asarray(point)
         diff = np.ravel(point - self.center)
-        return math.hypot(*np.ravel(diff)) <= self.radius
+        return math.hypot(diff[0], diff[1], diff[2]) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*np.ravel(direction))
+        norm = math.hypot(direction[0], direction[1], direction[2])
         if norm < 1e-10:
             return self.center.copy()
         return self.center + self.radius * direction / norm
@@ -167,13 +167,13 @@ class Capsule(GeometricPrimitive):
     @property
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
-        return math.hypot(*np.ravel(self.point_b - self.point_a))
+        return math.hypot((self.point_b - self.point_a)[0], (self.point_b - self.point_a)[1], (self.point_b - self.point_a)[2])
 
     @property
     def axis(self) -> np.ndarray:
         """Get capsule axis direction (normalized)."""
         diff = self.point_b - self.point_a
-        length = math.hypot(*np.ravel(diff))
+        length = math.hypot(diff[0], diff[1], diff[2])
         if length < 1e-10:
             return np.array([0.0, 0.0, 1.0])
         return diff / length
@@ -206,14 +206,14 @@ class Capsule(GeometricPrimitive):
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
         diff = np.ravel(point - closest)
-        return math.hypot(*np.ravel(diff)) <= self.radius
+        return math.hypot(diff[0], diff[1], diff[2]) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*np.ravel(direction))
+        norm = math.hypot(direction[0], direction[1], direction[2])
         if norm < 1e-10:
             return self.point_a.copy()
         d = direction / norm
@@ -257,7 +257,7 @@ class Cylinder(GeometricPrimitive):
 
         # Normalize axis
         diff = np.ravel(self.axis)
-        norm = math.hypot(*np.ravel(diff))
+        norm = math.hypot(diff[0], diff[1], diff[2])
         if norm < 1e-10:
             raise ValueError("axis must be non-zero")
         self.axis = self.axis / norm
@@ -303,14 +303,14 @@ class Cylinder(GeometricPrimitive):
 
         # Check radius (perpendicular distance)
         perp = to_point - along_axis * self.axis
-        return math.hypot(*np.ravel(perp)) <= self.radius
+        return math.hypot(perp[0], perp[1], perp[2]) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*np.ravel(direction))
+        norm = math.hypot(direction[0], direction[1], direction[2])
         if norm < 1e-10:
             return self.center.copy()
 
@@ -328,7 +328,7 @@ class Cylinder(GeometricPrimitive):
             axis_support = self.center - self.half_height * self.axis
 
         # Support on radius (perpendicular)
-        perp_norm = math.hypot(*np.ravel(d_perp))
+        perp_norm = math.hypot(d_perp[0], d_perp[1], d_perp[2])
         if perp_norm > 1e-10:
             return axis_support + self.radius * d_perp / perp_norm
 
@@ -380,7 +380,7 @@ class ConvexHull(GeometricPrimitive):
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
         to_point = point - self.center
-        norm = math.hypot(*np.ravel(to_point))
+        norm = math.hypot(to_point[0], to_point[1], to_point[2])
         if norm < 1e-10:
             return True  # At center
 
