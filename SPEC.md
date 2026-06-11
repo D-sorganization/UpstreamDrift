@@ -85,6 +85,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   physics validation scripts target real analytical/conservation suites, and
   PyQt fallback stubs no longer fabricate launcher expectations.
 
+- **2026-06-11** - Shared Python motion-matching and signal-utility contract
+  cleanup for #7348, #7349, #7350, and #7351. Role-specific fit result
+  payloads now use explicit names with compatibility aliases, motion-pipeline
+  frame-array preprocessing helpers are canonicalized under one module,
+  rotation-matrix-to-quaternion conversion routes through a shared
+  sign-canonical helper, and the MuJoCo polynomial generator imports the
+  canonical signal-toolkit widget instead of carrying a fork.
+
 - **2026-06-11** - Motion-pipeline DRY follow-up for the #7380
   simulator-facade merge. MuJoCo torque matching and Pinocchio inverse
   dynamics now share base helpers for per-DOF rig joint names and torque

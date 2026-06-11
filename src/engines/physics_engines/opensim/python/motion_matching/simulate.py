@@ -378,6 +378,7 @@ def _make_controller_class() -> type:  # noqa: C901, PLR0915 -- factory holds cl
     return PolynomialTorqueController
 
 
+# --------------------------------------------------------------------------- #
 # Public entry point
 # --------------------------------------------------------------------------- #
 
