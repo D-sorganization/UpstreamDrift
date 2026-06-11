@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LOD (Law of Demeter) lint check for the pinocchio Python package.
+"""LOD (Law of Demeter) lint check for production Python code.
 
 Flags attribute-access chains deeper than 2 levels (i.e. `a.b.c.d` and longer)
 that are likely to be genuine LOD violations.
@@ -21,14 +21,20 @@ Allow-list rationale (these are library API patterns, not LOD violations):
   logger calls in the codebase are well-behaved.
 
 The script exits with code 0 if no violations are found, code 1 otherwise.
+When a baseline is supplied, checked-in violations are tolerated and only
+new path/chain occurrences fail the check.
 """
 
 from __future__ import annotations
 
 import argparse
 import ast
+from collections import Counter
 import sys
 from pathlib import Path
+
+DEFAULT_ROOT = "src"
+DEFAULT_BASELINE = "scripts/ci/lod_baseline.txt"
 
 # Final attribute / method names that indicate a library API chain rather
 # than navigation through application state.
@@ -133,10 +139,14 @@ def _is_library_chain(chain: list[str]) -> bool:
         "QtGui",
         "QtWidgets",
         "Qt",
+        "matplotlib",
         "pin",
         "pinocchio",
         "np",
         "numpy",
+        "pd",
+        "pandas",
+        "scipy",
     }
 
 
@@ -203,13 +213,105 @@ def iter_python_files(root: Path) -> list[Path]:
     ]
 
 
+Violation = tuple[str, int, str]
+BaselineKey = tuple[str, str]
+
+
+def _display_path(path: Path, root: Path) -> str:
+    try:
+        return path.relative_to(root.parent).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def collect_violations(root: Path) -> tuple[list[Path], list[Violation]]:
+    files = iter_python_files(root)
+    violations: list[Violation] = []
+    for path in sorted(files):
+        display_path = _display_path(path, root)
+        for lineno, chain in check_file(path):
+            violations.append((display_path, lineno, chain))
+    return files, violations
+
+
+def _violation_counts(violations: list[Violation]) -> Counter[BaselineKey]:
+    return Counter((path, chain) for path, _lineno, chain in violations)
+
+
+def load_baseline(path: Path) -> Counter[BaselineKey]:
+    counts: Counter[BaselineKey] = Counter()
+    for lineno, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) != 3:
+            raise ValueError(f"{path}:{lineno}: expected path<TAB>chain<TAB>count")
+        rel_path, chain, count_text = parts
+        try:
+            count = int(count_text)
+        except ValueError as exc:
+            raise ValueError(f"{path}:{lineno}: count must be an integer") from exc
+        if count <= 0:
+            raise ValueError(f"{path}:{lineno}: count must be positive")
+        counts[(rel_path, chain)] += count
+    return counts
+
+
+def write_baseline(path: Path, violations: list[Violation]) -> None:
+    counts = _violation_counts(violations)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# Law-of-Demeter baseline for issue #7308.",
+        "# Owner: @core",
+        "# Reduction plan: refactor existing entries opportunistically; this gate",
+        "# blocks any path/chain count growth across production src/ Python files.",
+        "# Format: <relative path><TAB><attribute chain><TAB><allowed count>",
+    ]
+    for (rel_path, chain), count in sorted(counts.items()):
+        lines.append(f"{rel_path}\t{chain}\t{count}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _baseline_excess(
+    violations: list[Violation],
+    baseline: Counter[BaselineKey],
+) -> list[Violation]:
+    current = _violation_counts(violations)
+    remaining = Counter(
+        {
+            key: count - baseline.get(key, 0)
+            for key, count in current.items()
+            if count > baseline.get(key, 0)
+        }
+    )
+    excess: list[Violation] = []
+    for violation in violations:
+        key = (violation[0], violation[2])
+        if remaining[key] <= 0:
+            continue
+        excess.append(violation)
+        remaining[key] -= 1
+    return excess
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "root",
         nargs="?",
-        default="src/engines/physics_engines/pinocchio/python",
+        default=DEFAULT_ROOT,
         help="Root directory to scan.",
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="Path to a checked-in path/chain count baseline for no-growth mode.",
+    )
+    parser.add_argument(
+        "--write-baseline",
+        type=Path,
+        help="Write the current findings as a path/chain count baseline and exit.",
     )
     parser.add_argument(
         "--advisory",
@@ -223,22 +325,48 @@ def main(argv: list[str] | None = None) -> int:
         print(f"check_lod: root path does not exist: {root}", file=sys.stderr)
         return 2
 
-    files = iter_python_files(root)
-    total = 0
-    for path in sorted(files):
-        violations = check_file(path)
-        if not violations:
-            continue
-        rel = path.relative_to(root.parent) if root.parent in path.parents else path
-        for lineno, chain in violations:
-            print(f"{rel}:{lineno}: LOD chain >2 deep: {chain}")
-            total += 1
+    files, violations = collect_violations(root)
 
-    if total == 0:
+    if args.write_baseline is not None:
+        write_baseline(args.write_baseline, violations)
+        print(
+            "check_lod: wrote baseline "
+            f"{args.write_baseline} ({len(_violation_counts(violations))} entries, "
+            f"{len(violations)} violation occurrences)"
+        )
+        return 0
+
+    if args.baseline is not None:
+        try:
+            baseline = load_baseline(args.baseline)
+        except (OSError, ValueError) as exc:
+            print(f"check_lod: invalid baseline: {exc}", file=sys.stderr)
+            return 2
+        excess = _baseline_excess(violations, baseline)
+        for rel_path, lineno, chain in excess:
+            print(f"{rel_path}:{lineno}: new LOD chain >2 deep: {chain}")
+        if not excess:
+            reductions = sum((baseline - _violation_counts(violations)).values())
+            print(
+                f"check_lod: clean no-growth scan ({len(files)} files scanned under "
+                f"{root}; {len(violations)} baseline violation occurrences; "
+                f"{reductions} reductions)"
+            )
+            return 0
+        print(
+            f"check_lod: found {len(excess)} new LOD violation occurrence(s)",
+            file=sys.stderr,
+        )
+        return 0 if args.advisory else 1
+
+    for rel_path, lineno, chain in violations:
+        print(f"{rel_path}:{lineno}: LOD chain >2 deep: {chain}")
+
+    if not violations:
         print(f"check_lod: clean ({len(files)} files scanned under {root})")
         return 0
 
-    print(f"check_lod: found {total} LOD violation(s)", file=sys.stderr)
+    print(f"check_lod: found {len(violations)} LOD violation(s)", file=sys.stderr)
     return 0 if args.advisory else 1
 
 

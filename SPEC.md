@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.326                                            |
+| **Spec Version**        | 1.0.329                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Promoted Law-of-Demeter enforcement from advisory
+  Pinocchio-only lint to a blocking repo-wide production `src/` ratchet.
+  `quality-gate.yml` now runs `scripts/ci/check_lod.py src --baseline
+  scripts/ci/lod_baseline.txt`; the checked-in baseline records existing
+  path/chain counts and the required `quality-gate` status fails on any new
+  non-allowlisted deep attribute chain.
 - **2026-06-11** - Isolated optional dependency import mocks for #7307.
   Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
   imports now install fake optional packages only inside scoped import
@@ -853,6 +859,11 @@ Beyond standard tools, CI enforces custom checks:
   paths, excludes receiver parameters (`self`/`cls`) from method counts, and
   requires owned, linked exceptions in
   `scripts/config/architecture_budget.json`.
+- **Law of Demeter Ratchet**: `scripts/ci/check_lod.py` scans production
+  `src/` Python files and blocks new deep application object chains beyond the
+  checked-in `scripts/ci/lod_baseline.txt` path/chain counts while preserving
+  documented library API allowances for Qt, numpy, pandas, matplotlib, scipy,
+  and engine namespace access.
 - **Agent Docs Consistency**: `scripts/check_agent_docs_consistency.py`
   validates literal repo-relative paths documented in agent guidance while
   treating glob/brace references such as `scripts/**` and
@@ -882,6 +893,7 @@ Beyond standard tools, CI enforces custom checks:
 | Workflow                       | Trigger                                | Purpose                                                                               | Blocking?          |
 | ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------ |
 | `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
+| `quality-gate.yml`             | PR/manual dispatch                     | Blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code           | Yes                |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                    | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                       | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                            | Yes (for releases) |
@@ -1021,6 +1033,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.329 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
 | 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
 | 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
 | 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |

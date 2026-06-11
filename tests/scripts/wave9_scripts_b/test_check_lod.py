@@ -31,6 +31,8 @@ def test_is_library_chain_intermediate() -> None:
 
 def test_is_library_chain_namespace_root() -> None:
     assert mod._is_library_chain(["np", "linalg", "norm", "x"])
+    assert mod._is_library_chain(["pd", "api", "types", "is_numeric_dtype"])
+    assert mod._is_library_chain(["matplotlib", "pyplot", "figure", "Figure"])
     assert mod._is_library_chain(["QtCore", "Qt", "Orientation", "Horizontal"])
 
 
@@ -87,6 +89,27 @@ def test_iter_python_files_skips_tests_and_examples(tmp_path: Path) -> None:
     assert "c.py" not in names
 
 
+def test_default_root_is_repo_wide_src() -> None:
+    assert mod.DEFAULT_ROOT == "src"
+
+
+def test_load_baseline_counts_path_chain_entries(tmp_path: Path) -> None:
+    p = tmp_path / "baseline.txt"
+    p.write_text(
+        "# comment\nsrc/app.py\tself.a.b.c.d\t1\nsrc/app.py\tself.a.b.c.d\t2\n",
+    )
+
+    assert mod.load_baseline(p)[("src/app.py", "self.a.b.c.d")] == 3
+
+
+def test_load_baseline_rejects_bad_format(tmp_path: Path) -> None:
+    p = tmp_path / "baseline.txt"
+    p.write_text("src/app.py self.a.b.c.d 1\n")
+
+    with pytest.raises(ValueError, match="expected path<TAB>chain<TAB>count"):
+        mod.load_baseline(p)
+
+
 def test_main_missing_root(capsys: pytest.CaptureFixture[str]) -> None:
     ret = mod.main(["/definitely/does/not/exist/xyz123"])
     assert ret == 2
@@ -111,3 +134,41 @@ def test_main_finds_violation(
 def test_main_advisory_returns_zero(tmp_path: Path) -> None:
     (tmp_path / "a.py").write_text("self.a.b.c.d\n")
     assert mod.main([str(tmp_path), "--advisory"]) == 0
+
+
+def test_main_baseline_allows_existing_path_chain_count(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+    (root / "app.py").write_text("self.a.b.c.d\n")
+    baseline = tmp_path / "lod_baseline.txt"
+    baseline.write_text("src/app.py\tself.a.b.c.d\t1\n")
+
+    assert mod.main([str(root), "--baseline", str(baseline)]) == 0
+    assert "clean no-growth scan" in capsys.readouterr().out
+
+
+def test_main_baseline_fails_when_path_chain_count_grows(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+    (root / "app.py").write_text("self.a.b.c.d\nself.a.b.c.d\n")
+    baseline = tmp_path / "lod_baseline.txt"
+    baseline.write_text("src/app.py\tself.a.b.c.d\t1\n")
+
+    assert mod.main([str(root), "--baseline", str(baseline)]) == 1
+    captured = capsys.readouterr()
+    assert "new LOD chain" in captured.out
+    assert "found 1 new LOD violation" in captured.err
+
+
+def test_write_baseline_records_counts(tmp_path: Path) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+    (root / "app.py").write_text("self.a.b.c.d\nself.a.b.c.d\n")
+    baseline = tmp_path / "lod_baseline.txt"
+
+    assert mod.main([str(root), "--write-baseline", str(baseline)]) == 0
+    assert "src/app.py\tself.a.b.c.d\t2" in baseline.read_text()
