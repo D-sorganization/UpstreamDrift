@@ -666,6 +666,9 @@ jobs:
       - name: Workflow Pytest Path Guard
         run: python3 scripts/ci/check_workflow_pytest_paths.py
 
+      - name: Suite Marker Ratchet
+        run: python3 scripts/ci/check_suite_marker_ratchet.py
+
       - name: Rust Parity / Wheel Import Gate Ratchet
         run: python3 scripts/ci/check_rust_parity_wheel_gates.py
 
@@ -850,7 +853,14 @@ jobs:
   # each underlying job report independently.
   quality-gate:
     name: quality-gate
-    needs: [code-quality, security-scans, repo-structure-gates, unit-test-gate]
+    needs:
+      [
+        code-quality,
+        security-scans,
+        repo-structure-gates,
+        tests,
+        unit-test-gate,
+      ]
     if: always()
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
@@ -861,6 +871,7 @@ jobs:
           echo "code-quality:        ${{ needs.code-quality.result }}"
           echo "security-scans:      ${{ needs.security-scans.result }}"
           echo "repo-structure-gates:${{ needs.repo-structure-gates.result }}"
+          echo "tests:              ${{ needs.tests.result }}"
           echo "unit-test-gate:      ${{ needs.unit-test-gate.result }}"
           {
             echo "## Quality Gate Summary"
@@ -869,11 +880,13 @@ jobs:
             echo "| code-quality | ${{ needs.code-quality.result }} |"
             echo "| security-scans | ${{ needs.security-scans.result }} |"
             echo "| repo-structure-gates | ${{ needs.repo-structure-gates.result }} |"
+            echo "| tests | ${{ needs.tests.result }} |"
             echo "| unit-test-gate | ${{ needs.unit-test-gate.result }} |"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ needs.code-quality.result }}" != "success" ] \
             || [ "${{ needs.security-scans.result }}" != "success" ] \
             || [ "${{ needs.repo-structure-gates.result }}" != "success" ] \
+            || [ "${{ needs.tests.result }}" != "success" ] \
             || [ "${{ needs.unit-test-gate.result }}" != "success" ]; then
             echo "::error::One or more quality-gate jobs failed."
             exit 1
@@ -1200,9 +1213,19 @@ jobs:
                 git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
               )
             fi
+            diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+
+            mapfile -t deleted_tests < <(
+              git diff --name-only --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
+            )
+            if [ "${#deleted_tests[@]}" -gt 0 ]; then
+              echo "::error::Deleted Python test files require review before CI can proceed."
+              printf '  %s\n' "${deleted_tests[@]}"
+              exit 1
+            fi
 
             mapfile -t changed_core_targets < <(
-              git diff --name-only --diff-filter=ACMRT "${merge_base:-origin/${{ github.base_ref }}}" HEAD -- \
+              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'tests/**/*.py' \
                 'pyproject.toml' \
@@ -1212,7 +1235,7 @@ jobs:
             )
 
             mapfile -t changed_coverage_targets < <(
-              git diff --name-only --diff-filter=ACMRT "${merge_base:-origin/${{ github.base_ref }}}" HEAD -- \
+              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'pyproject.toml' \
                 'requirements*.txt' \
@@ -1295,13 +1318,7 @@ jobs:
                 exit $pytest_exit_code
               fi
 
-              if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
-                echo "No source/dependency coverage targets changed; skipping targeted coverage lane after PR-scoped tests."
-                exit 0
-              fi
-
-              echo "Source/dependency coverage targets changed; targeted coverage collected during PR-scoped tests."
-              exit 0
+              echo "Full dependency-light lane will run after PR-scoped tests."
             fi
           fi
 
@@ -1859,7 +1876,8 @@ jobs:
   # =============================================================================
   # RUST QUALITY GATE
   # =============================================================================
-  # Only runs when Rust source files or Cargo manifests change.
+  # Runs when Rust source files, Cargo manifests, or Rust-backed Python physics
+  # facades/callers/tests change.
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
@@ -1896,37 +1914,50 @@ jobs:
       - name: Check for Rust changes
         id: rust-changes
         run: |
+          rust_gate_paths=(
+            '*.rs'
+            'Cargo.toml'
+            '*/Cargo.toml'
+            'rust-toolchain.toml'
+            'src/shared/python/physics/**'
+            'src/tools/ball_flight_gui/**'
+            'src/tools/golf_simulation_suite/**'
+            'tests/unit/test_ball_flight_physics.py'
+            'tests/unit/shared_python/test_ball_flight_physics.py'
+            'tests/rust_bindings/**'
+          )
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch origin "${{ github.base_ref }}"
             BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
             if [ -z "$BASE_SHA" ]; then
               BASE_SHA="${{ github.event.pull_request.base.sha }}"
             fi
-            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+            RUST_GATE_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- "${rust_gate_paths[@]}" || true)
           elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+            RUST_GATE_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- "${rust_gate_paths[@]}" || true)
           else
-            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
+            RUST_GATE_FILES=$(git diff --name-only HEAD~1 HEAD -- "${rust_gate_paths[@]}" || echo "")
           fi
 
-          if [ -n "$RUST_FILES" ]; then
+          if [ -n "$RUST_GATE_FILES" ]; then
             # Only enable the gate if a Cargo workspace actually exists
             if [ -f "Cargo.toml" ]; then
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
-              echo "Changed Rust files:"
-              echo "$RUST_FILES"
+              echo "Changed Rust/Python kernel gate files:"
+              echo "$RUST_GATE_FILES"
             else
               echo "has_changes=false" >> "$GITHUB_OUTPUT"
-              echo "Rust files changed but no Cargo.toml found  -  skipping quality gate."
+              echo "Rust/Python kernel gate files changed but no Cargo.toml found  -  skipping quality gate."
             fi
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No Rust changes detected  -  skipping Rust quality gate."
+            echo "No Rust/Python kernel gate changes detected  -  skipping Rust quality gate."
           fi
 
       - name: Rust Quality Gate Skipped
         if: steps.rust-changes.outputs.has_changes != 'true'
-        run: echo "No Rust changes detected; Rust quality gate is not required."
+        run: echo "No Rust/Python kernel gate changes detected; Rust quality gate is not required."
 
       # Enable Windows long-path support before cargo clones the `tools-core`
       # git dep. The Tools repo contains a >260-char PDF filename
@@ -2058,6 +2089,7 @@ jobs:
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install "numpy==2.2.6" pytest pydantic pytest-asyncio pytest-timeout
+          python -m pip install --no-cache-dir -e ".[dev]"
           python -m pip install --force-reinstall target/wheels/*.whl
           python scripts/ci/import_built_rust_wheels.py \
             upstream_physics \
@@ -2066,6 +2098,11 @@ jobs:
             upstream_muscle \
             upstream_motion_matching \
             ai_backend
+          CI_RUST_WHEELS_EXPECTED=1 python -m pytest \
+            tests/unit/test_ball_flight_physics.py \
+            tests/unit/shared_python/test_ball_flight_physics.py \
+            tests/rust_bindings \
+            -q -o addopts="" --tb=short
           python -m pytest tests/unit/motion_pipeline/sources -q -o addopts="" --tb=short
           python -c "
           import upstream_physics

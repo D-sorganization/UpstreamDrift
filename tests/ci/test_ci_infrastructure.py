@@ -15,6 +15,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -471,9 +473,18 @@ class TestCIEnvironmentCompatibility:
             "code-quality",
             "security-scans",
             "repo-structure-gates",
+            "tests",
             "unit-test-gate",
         }
         assert job["if"] == "always()"
+        aggregate = next(
+            step
+            for step in job["steps"]
+            if step.get("name") == "Aggregate quality gate results"
+        )["run"]
+
+        assert "tests:              ${{ needs.tests.result }}" in aggregate
+        assert '${{ needs.tests.result }}" != "success"' in aggregate
 
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
@@ -490,12 +501,9 @@ class TestCIEnvironmentCompatibility:
         assert 'coverage_args+=(--cov="${coverage_module//\\//.}")' in workflow
         assert "src/**/*.py" in workflow
         assert 'echo "coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
+        assert "Full dependency-light lane will run after PR-scoped tests" in workflow
         assert (
-            "No source/dependency coverage targets changed; skipping targeted coverage lane"
-            in workflow
-        )
-        assert (
-            "Source/dependency coverage targets changed; targeted coverage collected"
+            "Source/dependency targets changed; running the dependency-light unit lane"
             in workflow
         )
         assert '"${coverage_args[@]}"' in workflow
@@ -576,6 +584,100 @@ class TestCIEnvironmentCompatibility:
         assert '--changed-files "$RUNNER_TEMP/changed_coverage_targets.txt"' in (
             enforcer_step
         )
+
+    def test_ci_standard_pr_tests_fail_on_deleted_test_files(self) -> None:
+        """Deleted tests must not disappear from PR-scoped selection."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        pr_block = workflow[
+            workflow.index(
+                'if [ "${{ github.event_name }}" = "pull_request" ];'
+            ) : workflow.index("# Run the targeted, dependency-light CI lane:")
+        ]
+
+        assert "mapfile -t deleted_tests" in pr_block
+        assert "--diff-filter=D" in pr_block
+        assert "Deleted Python test files require review" in pr_block
+        assert (
+            "exit 1"
+            in pr_block[
+                pr_block.index("mapfile -t deleted_tests") : pr_block.index(
+                    "mapfile -t changed_core_targets"
+                )
+            ]
+        )
+
+    def test_ci_standard_test_only_prs_fall_through_to_full_lane(self) -> None:
+        """Changed tests may run first, but must not be the only PR coverage."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        selected_tests_block = workflow[
+            workflow.index('echo "Running PR-scoped core tests:"') : workflow.index(
+                "# Run the targeted, dependency-light CI lane:"
+            )
+        ]
+
+        assert "Full dependency-light lane will run after PR-scoped tests" in (
+            selected_tests_block
+        )
+        assert (
+            "No source/dependency coverage targets changed; skipping targeted coverage lane"
+            not in selected_tests_block
+        )
+        assert "exit 0" not in selected_tests_block
+
+    def test_ci_optional_stack_prs_run_unscoped_unit_lane(self) -> None:
+        """The optional-stack workflow must not skip PRs with no changed tests."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "ci-optional-stack.yml"
+        ).read_text(encoding="utf-8")
+        unit_step = workflow[
+            workflow.index("- name: Run Unit Tests (Optional Stack)") : workflow.index(
+                "- name: Optional-Stack Skip Visibility Report"
+            )
+        ]
+
+        assert 'github.event_name }}" = "pull_request"' not in unit_step
+        assert "changed_tests" not in unit_step
+        assert "No unit test changes detected" not in unit_step
+        assert "pytest tests/unit/" in unit_step
+
+    def test_ci_standard_rust_gate_runs_kernel_backed_python_suites(self) -> None:
+        """Rust wheel CI must turn permanently skipped Python suites into failures."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        rust_gate = workflow[
+            workflow.index("# RUST QUALITY GATE") : workflow.index("rust-quickstart:")
+        ]
+        binding_step = rust_gate[
+            rust_gate.index("- name: Verify Python Bindings") : rust_gate.index(
+                "- name: Build WASM Module"
+            )
+        ]
+
+        assert "RUST_GATE_FILES=$(git diff --name-only" in rust_gate
+        for path in [
+            "'src/shared/python/physics/**'",
+            "'src/tools/ball_flight_gui/**'",
+            "'tests/unit/test_ball_flight_physics.py'",
+            "'tests/unit/shared_python/test_ball_flight_physics.py'",
+            "'tests/rust_bindings/**'",
+        ]:
+            assert path in rust_gate
+
+        editable_install = 'python -m pip install --no-cache-dir -e ".[dev]"'
+        wheel_install = "python -m pip install --force-reinstall target/wheels/*.whl"
+        assert editable_install in binding_step
+        assert wheel_install in binding_step
+        assert binding_step.index(editable_install) < binding_step.index(wheel_install)
+        assert "CI_RUST_WHEELS_EXPECTED=1" in binding_step
+        assert "tests/rust_bindings" in binding_step
+        assert "tests/unit/test_ball_flight_physics.py" in binding_step
+        assert "tests/unit/shared_python/test_ball_flight_physics.py" in binding_step
+        assert '-o addopts=""' in binding_step
 
 
 class TestPyprojectTomlConsistency:

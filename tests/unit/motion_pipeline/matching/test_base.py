@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.motion_pipeline.contracts import (
     JointStateFrame,
     JointTrajectory,

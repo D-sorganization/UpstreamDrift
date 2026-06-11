@@ -25,6 +25,8 @@ from src.api.dependencies import get_engine_manager
 from src.api.routes import dataset as dataset_module
 from src.api.routes.dataset import router
 
+pytestmark = pytest.mark.unit
+
 
 class _MockEngine:
     engine_type = "mock"

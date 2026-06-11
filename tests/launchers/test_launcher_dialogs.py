@@ -8,6 +8,8 @@ import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMainWindow  # noqa: E402
 from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 
 from typing import Any
 

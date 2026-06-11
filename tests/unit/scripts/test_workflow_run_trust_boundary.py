@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.check_workflow_run_trust_boundary import find_violations
+
+pytestmark = pytest.mark.unit
 
 
 def test_rejects_workflow_run_checkout_and_install(tmp_path: Path) -> None:

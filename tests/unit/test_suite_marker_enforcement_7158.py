@@ -12,8 +12,11 @@ import pytest
 
 from tests.support.suite_markers import (
     SUITE_MARKERS,
+    find_unmarked_baseline_drift,
     find_unmarked,
     item_has_suite_marker,
+    normalize_nodeid,
+    suite_marker_ratchet_enabled,
     suite_markers_enforced,
 )
 
@@ -52,6 +55,15 @@ def test_enforced_flag_reads_env(monkeypatch: pytest.MonkeyPatch) -> None:
     assert suite_markers_enforced() is False
 
 
+def test_ratchet_flag_reads_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("UD_RATCHET_SUITE_MARKERS", raising=False)
+    assert suite_marker_ratchet_enabled() is False
+    monkeypatch.setenv("UD_RATCHET_SUITE_MARKERS", "yes")
+    assert suite_marker_ratchet_enabled() is True
+    monkeypatch.setenv("UD_RATCHET_SUITE_MARKERS", "0")
+    assert suite_marker_ratchet_enabled() is False
+
+
 def test_item_has_suite_marker() -> None:
     assert item_has_suite_marker(_FakeItem("x::test", ["unit"])) is True
     # requires_gl is a capability marker, not a suite marker.
@@ -79,3 +91,20 @@ def test_find_unmarked_empty_when_all_marked() -> None:
         _FakeItem("tests/test_b.py::test_slow", ["slow"]),
     ]
     assert find_unmarked(items) == []
+
+
+def test_normalize_nodeid_strips_param_suffix() -> None:
+    assert (
+        normalize_nodeid("tests/test_a.py::test_case[param]")
+        == "tests/test_a.py::test_case"
+    )
+
+
+def test_find_unmarked_baseline_drift_ignores_baselined_items() -> None:
+    items = [
+        _FakeItem("tests/test_a.py::test_marked", ["unit"]),
+        _FakeItem("tests/test_b.py::test_old[param]", []),
+        _FakeItem("tests/test_c.py::test_new", []),
+    ]
+    drift = find_unmarked_baseline_drift(items, {"tests/test_b.py::test_old"})
+    assert [item.nodeid for item in drift] == ["tests/test_c.py::test_new"]

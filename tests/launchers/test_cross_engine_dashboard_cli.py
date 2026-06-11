@@ -20,6 +20,8 @@ import pytest
 
 from typing import Any
 
+pytestmark = pytest.mark.unit
+
 from src.launchers import cross_engine_dashboard as ced
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
     CrossEngineRunResult,
