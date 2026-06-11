@@ -7,6 +7,18 @@ from pathlib import Path
 from typing import Any
 
 
+SURROGATE_CHECKPOINT_REQUIRED_KEYS = (
+    "model_state_dict",
+    "input_columns",
+    "target_columns",
+    "x_mean",
+    "x_std",
+    "y_mean",
+    "y_std",
+    "config",
+)
+
+
 def load_checkpoint_dict(
     path: str | Path,
     *,
@@ -37,6 +49,21 @@ def load_checkpoint_dict(
             f"{', '.join(missing)}"
         )
     return payload
+
+
+def load_surrogate_checkpoint(
+    path: str | Path,
+    *,
+    map_location: Any = None,
+    artifact_name: str = "surrogate checkpoint",
+) -> dict[str, Any]:
+    """Load the standard DynamicsMLP surrogate checkpoint artifact safely."""
+    return load_checkpoint_dict(
+        path,
+        map_location=map_location,
+        required_keys=SURROGATE_CHECKPOINT_REQUIRED_KEYS,
+        artifact_name=artifact_name,
+    )
 
 
 def _load_weights_only_checkpoint(
