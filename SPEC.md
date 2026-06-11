@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.354                                            |
+| **Spec Version**        | 1.0.356                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Consolidated launcher manager attribute forwarding through
+  `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
+  Sidekick, theme, and UI setup managers share one DbC boundary for local
+  manager state versus launcher-owned state. This keeps the process-console
+  guard fix DRY-compliant under the repository duplication ratchet.
+- **2026-06-11** - Hardened launcher process-console tab state detection so
+  `_is_console_open()` only passes real `QWidget` instances into Qt tab APIs.
+  Test sentinels and partially constructed launchers now safely report the
+  console as closed instead of raising C++ boundary `TypeError`s during layout
+  synchronization.
 - **2026-06-11** - Made the optional-stack unit lane boundary explicit:
   it exercises the non-engine unit suite with optional API/GUI/body-part
   dependencies installed, while native engine unit tests remain covered by the

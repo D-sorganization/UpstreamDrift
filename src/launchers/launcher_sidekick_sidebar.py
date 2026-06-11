@@ -11,6 +11,7 @@ import sys
 from typing import Any
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
+from src.launchers.launcher_manager_attrs import forward_manager_attribute
 
 
 class SidekickSidebarManager:
@@ -28,12 +29,7 @@ class SidekickSidebarManager:
             ) from err
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
-            super().__setattr__(name, value)
-        elif hasattr(self.launcher, name):
-            setattr(self.launcher, name, value)
-        else:
-            super().__setattr__(name, value)
+        forward_manager_attribute(self, name, value)
 
     def _apply_sidekick_splitter_sizes(self) -> None:
         """Set main_layout splitter sizes to give the sidekick 300px."""

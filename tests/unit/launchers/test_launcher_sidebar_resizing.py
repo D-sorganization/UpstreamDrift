@@ -134,3 +134,14 @@ def test_main_layout_is_splitter_with_handle(qapp, monkeypatch):
     # Verify stretch factors were set (0 for sidebar, 1 for content)
     assert (0, 0) in inst.called_setStretchFactor
     assert (1, 1) in inst.called_setStretchFactor
+
+
+@pytest.mark.unit
+def test_is_console_open_rejects_non_widget_console(qapp):
+    """Console tab state checks must not pass test doubles into Qt APIs."""
+    launcher = DummyLauncher()
+    launcher.workspace_tabs = MagicMock()
+    launcher._console_widget = MagicMock()
+
+    assert launcher._is_console_open() is False
+    launcher.workspace_tabs.indexOf.assert_not_called()

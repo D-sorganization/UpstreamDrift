@@ -25,6 +25,7 @@ from src.launchers.launcher_constants import (
     REPOS_ROOT,
     UI_COMPONENTS_AVAILABLE,
 )
+from src.launchers.launcher_manager_attrs import forward_manager_attribute
 from src.launchers.layout_config_backup import replace_existing_layout_backup
 from src.launchers.ui_components import (
     LayoutManagerDialog,
@@ -48,12 +49,7 @@ class DialogsManager:
         return getattr(self.launcher, name)
 
     def __setattr__(self, name, value):
-        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
-            super().__setattr__(name, value)
-        elif hasattr(self.launcher, name):
-            setattr(self.launcher, name, value)
-        else:
-            super().__setattr__(name, value)
+        forward_manager_attribute(self, name, value)
 
     """Mixin for UpstreamDriftLauncher dialog and settings management.
 
