@@ -38,20 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-<<<<<<< HEAD
-
-<<<<<<< HEAD
 | **Spec Version** | 1.0.479 |
 | **Last Spec Update** | 2026-07-27 |
-=======
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
-=======
-| **Spec Version**        | 1.0.304                                            |
-| **Last Spec Update**    | 2026-06-11                                         |
->>>>>>> 90c21162b (fix: ignore blank cached cloud tokens)
 
 ## 2. Purpose & Mission
 
@@ -1001,12 +989,21 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   result. The standard CI acceptance tests also reject blank lines immediately
   after shell continuations so the core pytest coverage command cannot be split
   into a partial command again (#7303).
+<<<<<<< HEAD
 =======
 - **2026-06-10** - Hardened the optional cloud client cache contract for
   #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
   treated as absent credentials, leaving `CloudClient.token` as `None` and
   `is_logged_in` false while preserving valid cached-token behavior.
 >>>>>>> 90c21162b (fix: ignore blank cached cloud tokens)
+=======
+- **2026-06-10** - Hardened the optional cloud client cache contract for
+  #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
+  treated as absent credentials, leaving `CloudClient.token` as `None` and
+  `is_logged_in` false while preserving valid cached-token behavior. The
+  runtime login state now requires a truthy token even if a caller manually
+  mutates the token field.
+>>>>>>> 734556d06 (test: pin truthy cloud login state)
 - **2026-06-10** - Closed the #7273 PR-scoped coverage bypass in standard CI.
   PRs that change source, test, or dependency targets now fall through to the
   coverage-producing core test lane instead of using the workflow-only
@@ -1938,6 +1935,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 <<<<<<< HEAD
+<<<<<<< HEAD
 | 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
 | 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
 | 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
@@ -2065,6 +2063,9 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-10 | 1.0.309 | Jules PR AutoFix workflow-run trust-boundary hardening for #7312. The privileged `workflow_run` path now performs read-only failed-CI metadata analysis and posts manual dispatch instructions instead of checking out or executing PR-controlled code. The write-capable iterative fixer is restricted to explicit `workflow_dispatch` with an input branch. Added `scripts/check_workflow_run_trust_boundary.py`, wired it into standard CI, documented it in `scripts/README.md`, and added focused regression tests for unsafe workflow-run checkout/install/writeback patterns and the current Jules workflow contract. |
 | 2026-06-10 | 1.0.308 | Docker build timeout and focused PR coverage enforcement for #7277. `DockerManager` now monitors build output through a background queue while enforcing a wall-clock build timeout, terminating the process tree when stdout remains open past the deadline. Standard CI now scopes PR coverage to changed `src/**/*.py` modules and runs per-package coverage enforcement only after full core coverage reports, so focused PRs are not blocked by unrelated packages. |
 | 2026-06-10 | 1.0.304 | Frankenstein editor legacy shim consolidation for #7280. `_frankenstein_model.py` now re-exports the canonical `frankenstein_editor.model.URDFModel`, and `_frankenstein_panels.py` re-exports the canonical panel/dialog classes, preserving older import paths without duplicating implementation. Focused split tests assert shim identity and exercise validation/export through the legacy model import. |
+=======
+| 2026-06-10 | 1.0.304 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
+>>>>>>> 734556d06 (test: pin truthy cloud login state)
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
 | 2026-06-10 | 1.0.308 | Docker build timeout and focused PR coverage enforcement for #7277. `DockerManager` now monitors build output through a background queue while enforcing a wall-clock build timeout, terminating the process tree when stdout remains open past the deadline. Standard CI now scopes PR coverage to changed `src/**/*.py` modules and runs per-package coverage enforcement only after full core coverage reports, so focused PRs are not blocked by unrelated packages. |
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
