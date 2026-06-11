@@ -52,6 +52,11 @@ import numpy as np
 import torch
 from torch import Tensor, nn
 
+from src.shared.python.motion_matching._checkpoint_artifacts import (
+    load_checkpoint_dict,
+    require_schema_version,
+)
+
 # ---------------------------------------------------------------------------
 # Constants from PROJECT_SPEC.md §4 / COMPACT_DATASET_SCHEMA.md
 # ---------------------------------------------------------------------------
@@ -368,7 +373,9 @@ class SwingInverseCVAE(nn.Module):
     def _decode(self, z: Tensor, context: Tensor) -> Tensor:
         raw = self.decoder(torch.cat([z, context], dim=-1))
         # Bound-aware activation: tanh -> scale by per-letter symmetric bound.
-        return torch.tanh(raw) * self.coefficient_bounds
+        bounds = self.coefficient_bounds
+        assert isinstance(bounds, Tensor)
+        return torch.tanh(raw) * bounds
 
     # ---------------- input validation ----------------
 
@@ -503,12 +510,17 @@ class SwingInverseCVAE(nn.Module):
         ckpt_path = Path(path)
         if not ckpt_path.exists():
             raise FileNotFoundError(f"checkpoint not found: {ckpt_path}")
-        # Trust-flag is required on torch>=2.6 default; checkpoints are local.
-        payload = torch.load(ckpt_path, map_location=map_location, weights_only=False)
-        if not isinstance(payload, dict) or "state_dict" not in payload:
-            raise ValueError(
-                f"checkpoint at {ckpt_path} is not a SwingInverseCVAE payload"
-            )
+        payload = load_checkpoint_dict(
+            ckpt_path,
+            map_location=map_location,
+            required_keys=("state_dict", "config", "schema_version"),
+            artifact_name="SwingInverseCVAE checkpoint",
+        )
+        require_schema_version(
+            payload,
+            cls.SCHEMA_VERSION,
+            artifact_name="SwingInverseCVAE checkpoint",
+        )
         cfg_dict = payload.get("config")
         if cfg_dict is None:
             raise ValueError("checkpoint missing 'config' entry")
