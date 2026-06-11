@@ -457,23 +457,29 @@ class TestResetLayoutConfig:
                 assert result is True, "Assertion failed: result is True"
 
     def test_reset_existing_config(self) -> None:
-        """Test resetting when config file exists."""
+        """Test resetting when config and a previous backup exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "layout.json"
-            config_file.write_text('{"model_order": ["test"]}')
+            backup_file = config_file.with_suffix(".json.bak")
+            backup_file.write_text("old backup", encoding="utf-8")
+            config_file.write_text('{"model_order": ["test"]}', encoding="utf-8")
 
             with patch(
                 "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file
             ):
                 result = reset_layout_config()
                 assert result is True, "Assertion failed: result is True"
+                config_file.write_text('{"model_order": ["second"]}', encoding="utf-8")
+                second_result = reset_layout_config()
+                assert second_result is True, "Assertion failed: second reset is True"
 
-                # Original file should be renamed to .bak
                 assert not config_file.exists(), (
                     "Assertion failed: not config_file.exists()"
                 )
-                backup_file = config_file.with_suffix(".json.bak")
                 assert backup_file.exists(), "Assertion failed: backup_file.exists()"
+                assert backup_file.read_text(encoding="utf-8") == (
+                    '{"model_order": ["second"]}'
+                )
 
 
 class TestCLIDiagnostics:

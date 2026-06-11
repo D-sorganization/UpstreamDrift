@@ -238,24 +238,28 @@ def test_open_environment_manager(launcher) -> None:
         mock_open.assert_called_with(tab=1)
 
 
-def test_reset_layout_to_defaults(launcher) -> None:
-    with (
-        patch("src.launchers.launcher_dialogs.Path.exists", return_value=True),
-        patch("src.launchers.launcher_dialogs.Path.with_suffix"),
-        patch("src.launchers.launcher_dialogs.Path.rename") as mock_rename,
-        patch(
-            "src.launchers.launcher_dialogs.Path.home",
-            return_value=Path("C:/Users/test"),
-        ),
-    ):
-        launcher._initialize_model_order = MagicMock()
-        launcher._sync_model_cards = MagicMock()
-        launcher._rebuild_grid = MagicMock()
+def test_reset_layout_to_defaults_overwrites_existing_backup(
+    launcher,
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / ".golf_modeling_suite"
+    config_dir.mkdir()
+    config_file = config_dir / "launcher_layout.json"
+    backup_file = config_file.with_suffix(".json.bak")
+    backup_file.write_text("old backup", encoding="utf-8")
+    config_file.write_text("first layout", encoding="utf-8")
+    launcher._initialize_model_order = MagicMock()
+    launcher._sync_model_cards = MagicMock()
+    launcher._rebuild_grid = MagicMock()
 
+    with patch("src.launchers.launcher_dialogs.Path.home", return_value=tmp_path):
+        launcher._reset_layout_to_defaults()
+        config_file.write_text("second layout", encoding="utf-8")
         launcher._reset_layout_to_defaults()
 
-        mock_rename.assert_called_once()
-        launcher._initialize_model_order.assert_called_once()
+    assert not config_file.exists()
+    assert backup_file.read_text(encoding="utf-8") == "second layout"
+    assert launcher._initialize_model_order.call_count == 2
 
 
 def test_reset_layout_to_defaults_not_exists(launcher) -> None:

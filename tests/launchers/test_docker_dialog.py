@@ -111,17 +111,18 @@ def test_cancel_build(dialog) -> None:
     with patch.object(dialog, "killTimer") as mock_kill:
         dialog._cancel_build()
 
-        mock_thread.terminate.assert_called_once()
+        mock_thread.cancel.assert_called_once()
         assert dialog.btn_build.isEnabled() is True
         assert dialog.btn_cancel.isEnabled() is False
-        mock_kill.assert_called_once_with(111)
-        assert dialog._elapsed_timer_id is None
-        assert dialog.build_status_label.text() == "Build cancelled."
+        mock_kill.assert_not_called()
+        assert dialog._elapsed_timer_id == 111
+        assert dialog.build_status_label.text() == "Cancelling build..."
 
     # Test canceling when _elapsed_timer_id is None
     mock_thread.reset_mock()
+    dialog._elapsed_timer_id = None
     dialog._cancel_build()
-    mock_thread.terminate.assert_called_once()
+    mock_thread.cancel.assert_called_once()
     assert dialog._elapsed_timer_id is None
 
 

@@ -1,6 +1,7 @@
 """Tests for launcher_diagnostics."""
 
 import json  # noqa: E402
+from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import yaml  # noqa: E402
@@ -331,12 +332,19 @@ def test_check_engine_availability_success(mock_manager_class) -> None:
     assert res.status == "pass"
 
 
-@patch("pathlib.Path.exists")
-@patch("pathlib.Path.rename")
-def test_reset_layout_config(mock_rename, mock_exists) -> None:
-    mock_exists.return_value = True
-    assert reset_layout_config() is True
-    mock_rename.assert_called_once()
+def test_reset_layout_config_overwrites_existing_backup(tmp_path: Path) -> None:
+    config_file = tmp_path / "launcher_layout.json"
+    backup_file = config_file.with_suffix(".json.bak")
+    backup_file.write_text("old backup", encoding="utf-8")
+    config_file.write_text("first layout", encoding="utf-8")
+
+    with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file):
+        assert reset_layout_config() is True
+        config_file.write_text("second layout", encoding="utf-8")
+        assert reset_layout_config() is True
+
+    assert not config_file.exists()
+    assert backup_file.read_text(encoding="utf-8") == "second layout"
 
 
 @patch.object(LauncherDiagnostics, "run_all_checks")
@@ -502,8 +510,8 @@ def test_generate_recommendations() -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-@patch("pathlib.Path.rename", side_effect=OSError("mock"))
-def test_reset_layout_config_error(mock_rename, mock_exists) -> None:
+@patch("pathlib.Path.replace", side_effect=OSError("mock"))
+def test_reset_layout_config_error(mock_replace, mock_exists) -> None:
     from src.launchers.launcher_diagnostics import reset_layout_config
 
     assert reset_layout_config() is False

@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from src.launchers.layout_config_backup import replace_existing_layout_backup
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -1151,10 +1152,8 @@ def reset_layout_config() -> bool:
         True if reset was successful, False otherwise
     """
     try:
-        if LAYOUT_CONFIG_FILE.exists():
-            # Backup existing config
-            backup_path = LAYOUT_CONFIG_FILE.with_suffix(".json.bak")
-            LAYOUT_CONFIG_FILE.rename(backup_path)
+        backup_path = replace_existing_layout_backup(LAYOUT_CONFIG_FILE)
+        if backup_path is not None:
             logger.info("Backed up existing config to %s", backup_path)
 
         logger.info("Layout config reset - launcher will use defaults (17 tiles)")

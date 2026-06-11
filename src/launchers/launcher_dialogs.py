@@ -25,6 +25,7 @@ from src.launchers.launcher_constants import (
     REPOS_ROOT,
     UI_COMPONENTS_AVAILABLE,
 )
+from src.launchers.layout_config_backup import replace_existing_layout_backup
 from src.launchers.ui_components import (
     LayoutManagerDialog,
 )
@@ -438,9 +439,8 @@ class DialogsManager:
         config_file = Path.home() / ".golf_modeling_suite" / "launcher_layout.json"
 
         try:
-            if config_file.exists():
-                backup_path = config_file.with_suffix(".json.bak")
-                config_file.rename(backup_path)
+            backup_path = replace_existing_layout_backup(config_file)
+            if backup_path is not None:
                 logger.info(f"Backed up existing config to {backup_path}")
 
             self._initialize_model_order()

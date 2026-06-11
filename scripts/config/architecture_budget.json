@@ -99,6 +99,54 @@
       "expires_on": "2026-08-31"
     },
     {
+      "path": "src/launchers/docker_dialog.py",
+      "symbol": "EnvironmentDialog.setup_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy launcher dialog decomposition: setup_ui exceeded the changed-file budget before Docker build cancellation was hardened and needs a focused widget-builder split.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/launcher_diagnostics.py",
+      "symbol": "LauncherDiagnostics.check_shared_tools_freshness",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy launcher diagnostics decomposition: check_shared_tools_freshness exceeded the changed-file budget before layout reset backups were centralized and needs responsibility splitting.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/launcher_dialogs.py",
+      "symbol": "DependencyErrorDialog.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy launcher dialog decomposition: DependencyErrorDialog.__init__ exceeded the changed-file budget before layout reset backups were centralized and needs widget assembly helpers.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/settings_dialog.py",
+      "symbol": "WslScriptDialog._setup_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy settings dialog decomposition: WslScriptDialog._setup_ui exceeded the changed-file budget before Docker build cancellation was hardened and needs focused widget builders.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/settings_dialog.py",
+      "symbol": "SettingsWidget._create_layout_tab",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy settings dialog decomposition: _create_layout_tab exceeded the changed-file budget before reset-layout backup behavior was fixed and needs tab assembly helpers.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/launchers/settings_dialog.py",
+      "symbol": "SettingsWidget._create_configuration_tab",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issues #7341/#7342 legacy settings dialog decomposition: _create_configuration_tab exceeded the changed-file budget before Docker build cancellation was hardened and needs configuration-section extraction.",
+      "expires_on": "2026-08-31"
+    },
+    {
       "path": "src/shared/python/chat/router_factory.py",
       "symbol": "create_chat_router",
       "rule": "function-lines",
