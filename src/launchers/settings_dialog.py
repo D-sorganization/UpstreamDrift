@@ -1527,13 +1527,32 @@ class SettingsWidget(QWidget):
             and self.build_thread
             and self.build_thread.isRunning()
         ):
-            self.build_thread.terminate()
-            self._build_status.setText("Build cancelled.")
-            self._btn_build.setEnabled(True)
-            self._btn_cancel_build.setEnabled(False)
-            if hasattr(self, "_build_timer_id") and self._build_timer_id is not None:
-                self.killTimer(self._build_timer_id)
-                self._build_timer_id = None
+            self._build_status.setText("Cancelling build...")
+            self.build_thread.cancel()
+
+    def closeEvent(self, event: Any) -> None:
+        """Cancel an active Docker build before closing settings."""
+        if (
+            hasattr(self, "build_thread")
+            and self.build_thread
+            and self.build_thread.isRunning()
+        ):
+            from PyQt6.QtWidgets import QMessageBox
+
+            reply = QMessageBox.question(
+                self,
+                "Build in progress",
+                "Cancel the build and close?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                event.ignore()
+                return
+            logger.info("Cancelling Docker build before closing settings")
+            self.build_thread.cancel()
+            self.build_thread.wait()
+        super().closeEvent(event)
 
     def timerEvent(self, event: Any) -> None:
         """Update the build elapsed-time label on each timer tick."""

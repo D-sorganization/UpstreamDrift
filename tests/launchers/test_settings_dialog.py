@@ -154,10 +154,10 @@ def test_cancel_build(parent_launcher, qapp) -> None:
 
     dialog._cancel_build()
 
-    dialog.build_thread.terminate.assert_called_once()
-    assert dialog._btn_build.isEnabled() is True
-    assert dialog._btn_cancel_build.isEnabled() is False
-    assert "cancelled" in dialog._build_status.text().lower()
+    dialog.build_thread.cancel.assert_called_once()
+    assert dialog._btn_build.isEnabled() is False
+    assert dialog._btn_cancel_build.isEnabled() is True
+    assert "cancelling" in dialog._build_status.text().lower()
 
 
 @patch("pathlib.Path.exists", return_value=True)
@@ -314,7 +314,8 @@ def test_cancel_build_no_timer(parent_launcher, qapp) -> None:
         del dialog._build_timer_id
 
     dialog._cancel_build()
-    assert "cancelled" in dialog._build_status.text().lower()
+    dialog.build_thread.cancel.assert_called_once()
+    assert "cancelling" in dialog._build_status.text().lower()
 
 
 def test_cancel_build_not_running(parent_launcher, qapp) -> None:
@@ -324,7 +325,7 @@ def test_cancel_build_not_running(parent_launcher, qapp) -> None:
 
     # Should not do anything
     dialog._cancel_build()
-    dialog.build_thread.terminate.assert_not_called()
+    dialog.build_thread.cancel.assert_not_called()
 
 
 def test_timer_event_no_start_time(parent_launcher, qapp) -> None:

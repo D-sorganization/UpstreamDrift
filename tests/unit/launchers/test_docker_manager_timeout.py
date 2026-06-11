@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 import threading
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -44,10 +45,15 @@ class TimeoutProcess:
         self.args = ["docker", "build"]
         self.wait_timeouts: list[float | None] = []
         self.killed = False
+        self.terminated = False
 
     def wait(self, timeout: float | None = None) -> int:
         self.wait_timeouts.append(timeout)
         raise subprocess.TimeoutExpired(cmd=["docker", "build"], timeout=timeout)
+
+    def terminate(self) -> None:
+        self.terminated = True
+        self.stdout.close()
 
     def kill(self) -> None:
         self.killed = True
@@ -79,13 +85,47 @@ class CompletedProcess:
         self.stdout = LineStdout(["step 1\n", "step 2\n"])
         self.wait_timeouts: list[float | None] = []
         self.killed = False
+        self.terminated = False
 
     def wait(self, timeout: float | None = None) -> int:
         self.wait_timeouts.append(timeout)
         return self.returncode
 
+    def terminate(self) -> None:
+        self.terminated = True
+
     def kill(self) -> None:
         self.killed = True
+
+
+class CancellableProcess:
+    """Popen fake that exits only after the build thread cancels it."""
+
+    pid = 6262
+    args = ["docker", "build"]
+
+    def __init__(self) -> None:
+        self.returncode = None
+        self.stdout = BlockingStdout()
+        self.terminated = False
+        self.killed = False
+        self.wait_timeouts: list[float | None] = []
+
+    def wait(self, timeout: float | None = None) -> int:
+        self.wait_timeouts.append(timeout)
+        if self.returncode is None:
+            raise subprocess.TimeoutExpired(cmd=self.args, timeout=timeout)
+        return self.returncode
+
+    def terminate(self) -> None:
+        self.terminated = True
+        self.returncode = -15
+        self.stdout.close()
+
+    def kill(self) -> None:
+        self.killed = True
+        self.returncode = -9
+        self.stdout.close()
 
 
 @patch("subprocess.Popen")
@@ -107,7 +147,13 @@ def test_docker_build_timeout_is_enforced_while_stdout_is_open(
     thread.finished_signal.connect(finished)
 
     with patch("src.launchers.docker_manager.kill_process_tree") as kill_tree:
-        kill_tree.side_effect = lambda pid: process.stdout.close() or True
+
+        def reap_process(_pid: int) -> bool:
+            process.returncode = -9
+            process.stdout.close()
+            return True
+
+        kill_tree.side_effect = reap_process
 
         thread.run()
 
@@ -115,6 +161,42 @@ def test_docker_build_timeout_is_enforced_while_stdout_is_open(
     kill_tree.assert_called_once_with(process.pid)
     assert process.killed is False
     finished.assert_called_once_with(False, "Build timed out (exceeded 1 hour limit)")
+
+
+@patch("subprocess.Popen")
+@patch.object(Path, "exists", return_value=True)
+def test_docker_build_cancel_terminates_child_and_emits_cancelled(
+    _mock_exists: MagicMock,
+    mock_popen: MagicMock,
+    qapp,
+) -> None:
+    process = CancellableProcess()
+    mock_popen.return_value = process
+    thread = DockerBuildThread(
+        target_stage="all",
+        image_name="test_image",
+        context_path=Path("/fake/context"),
+    )
+    finished = MagicMock()
+    thread.finished_signal.connect(finished)
+
+    worker = threading.Thread(target=thread.run)
+    worker.start()
+    while thread._process is None:  # noqa: SLF001 - regression probes thread state.
+        time.sleep(0.001)
+
+    thread.cancel()
+    worker.join(timeout=1.0)
+    for _ in range(10):
+        qapp.processEvents()
+        if finished.called:
+            break
+        time.sleep(0.001)
+
+    assert worker.is_alive() is False
+    assert process.terminated is True
+    assert process.killed is False
+    finished.assert_called_once_with(False, "Build cancelled by user")
 
 
 def test_get_docker_cmd_prefers_native_docker() -> None:

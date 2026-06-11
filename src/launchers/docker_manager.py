@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import queue
+import signal
 import shutil
 import subprocess
 import threading
@@ -52,6 +53,7 @@ from src.shared.python.docker_config import (  # noqa: E402
 from src.shared.python.docker_config import (  # noqa: E402
     LEGACY_DOCKER_ALIASES as LEGACY_DOCKER_IMAGE_ALIASES,
 )
+from src.shared.python.core.process_safety import managed_popen  # noqa: E402
 
 # Reuse existing subprocess utilities
 from src.shared.python.security.secure_subprocess import (  # noqa: E402
@@ -64,6 +66,9 @@ from src.shared.python.security.subprocess_utils import kill_process_tree  # noq
 DOCKER_BUILD_TIMEOUT_SECONDS = 3600.0
 DOCKER_BUILD_WAIT_POLL_SECONDS = 0.1
 DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS = 5.0
+DOCKER_BUILD_CANCEL_GRACE_SECONDS = 2.0
+WINDOWS_CREATE_NO_WINDOW = 0x08000000
+WINDOWS_CREATE_NEW_PROCESS_GROUP = 0x00000200
 
 
 class DockerCheckThread(QThread):
@@ -130,6 +135,59 @@ class DockerBuildThread(QThread):
         self.dockerfile_path = dockerfile_path
         self.build_args = build_args or {}
         self.build_timeout_seconds = build_timeout_seconds
+        self._cancelled = False
+        self._process: subprocess.Popen[str] | None = None
+        self._process_lock = threading.Lock()
+
+    def _process_has_exited(self, process: subprocess.Popen[str]) -> bool:
+        """Return whether the child process has already exited."""
+        if process.returncode is not None:
+            return True
+        poll = getattr(process, "poll", None)
+        if not callable(poll):
+            return False
+        return poll() is not None
+
+    def _wait_after_cancel(self, process: subprocess.Popen[str]) -> bool:
+        """Return True if ``process`` exits during the cancel grace window."""
+        try:
+            process.wait(timeout=DOCKER_BUILD_CANCEL_GRACE_SECONDS)
+            return True
+        except subprocess.TimeoutExpired:
+            return False
+
+    def _cancel_process(self, process: subprocess.Popen[str]) -> None:
+        """Ask Docker to stop, then escalate if the CLI keeps running."""
+        if self._process_has_exited(process):
+            return
+
+        if os.name == "nt" and hasattr(signal, "CTRL_BREAK_EVENT"):
+            try:
+                process.send_signal(signal.CTRL_BREAK_EVENT)
+                if self._wait_after_cancel(process):
+                    return
+            except (AttributeError, OSError, ProcessLookupError):
+                logger.debug("Unable to send CTRL_BREAK_EVENT to docker build")
+
+        try:
+            process.terminate()
+            if self._wait_after_cancel(process):
+                return
+        except (OSError, ProcessLookupError):
+            return
+
+        try:
+            process.kill()
+        except (OSError, ProcessLookupError):
+            return
+
+    def cancel(self) -> None:
+        """Cancel an in-progress Docker build and unblock the worker thread."""
+        self._cancelled = True
+        with self._process_lock:
+            process = self._process
+        if process is not None:
+            self._cancel_process(process)
 
     def _stream_process_output(
         self, process: subprocess.Popen[str]
@@ -235,9 +293,10 @@ class DockerBuildThread(QThread):
             # Windows-specific process flags
             creation_flags = 0
             if os.name == "nt":
-                creation_flags = 0x08000000  # CREATE_NO_WINDOW
+                creation_flags = WINDOWS_CREATE_NO_WINDOW
+                creation_flags |= WINDOWS_CREATE_NEW_PROCESS_GROUP
 
-            process = subprocess.Popen(
+            with managed_popen(
                 cmd,
                 cwd=str(self.context_path),
                 stdout=subprocess.PIPE,
@@ -248,35 +307,45 @@ class DockerBuildThread(QThread):
                 bufsize=1,
                 env=env,
                 creationflags=creation_flags,
-            )
-            stdout_stream = self._stream_process_output(process)
-            stdout_reader = stdout_stream[0] if stdout_stream is not None else None
-            output_queue = stdout_stream[1] if stdout_stream is not None else None
+                kill_timeout=DOCKER_BUILD_CANCEL_GRACE_SECONDS,
+            ) as process:
+                with self._process_lock:
+                    self._process = process
+                stdout_stream = self._stream_process_output(process)
+                stdout_reader = stdout_stream[0] if stdout_stream is not None else None
+                output_queue = stdout_stream[1] if stdout_stream is not None else None
 
-            # Add timeout to prevent indefinite hangs (issue #2715)
-            try:
-                self._wait_for_build_process(process, output_queue)
-            except subprocess.TimeoutExpired:
-                self._emit_queued_output(output_queue)
-                self.log_signal.emit(
-                    "Build timed out after 1 hour; terminating process"
-                )
-                self._terminate_timed_out_build(process)
-                self.finished_signal.emit(
-                    False, "Build timed out (exceeded 1 hour limit)"
-                )
-                return
-            finally:
-                if stdout_reader is not None:
-                    stdout_reader.join(DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS)
-                self._emit_queued_output(output_queue)
+                # Add timeout to prevent indefinite hangs (issue #2715)
+                try:
+                    self._wait_for_build_process(process, output_queue)
+                except subprocess.TimeoutExpired:
+                    self._emit_queued_output(output_queue)
+                    if self._cancelled:
+                        self.finished_signal.emit(False, "Build cancelled by user")
+                    else:
+                        self.log_signal.emit(
+                            "Build timed out after 1 hour; terminating process"
+                        )
+                        self._terminate_timed_out_build(process)
+                        self.finished_signal.emit(
+                            False, "Build timed out (exceeded 1 hour limit)"
+                        )
+                    return
+                finally:
+                    if stdout_reader is not None:
+                        stdout_reader.join(DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS)
+                    self._emit_queued_output(output_queue)
+                    with self._process_lock:
+                        self._process = None
 
-            if process.returncode == 0:
-                self.finished_signal.emit(True, "Build successful.")
-            else:
-                self.finished_signal.emit(
-                    False, f"Build failed with code {process.returncode}"
-                )
+                if self._cancelled:
+                    self.finished_signal.emit(False, "Build cancelled by user")
+                elif process.returncode == 0:
+                    self.finished_signal.emit(True, "Build successful.")
+                else:
+                    self.finished_signal.emit(
+                        False, f"Build failed with code {process.returncode}"
+                    )
 
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.finished_signal.emit(False, str(e))

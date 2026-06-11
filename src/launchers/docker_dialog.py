@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -281,24 +282,25 @@ class EnvironmentDialog(QDialog):
 
     def _cancel_build(self) -> None:
         if self.build_thread and self.build_thread.isRunning():
-            self.build_thread.terminate()
-            self.build_status_label.setText("Build cancelled.")
-            self.btn_build.setEnabled(True)
-            self.btn_cancel.setEnabled(False)
-            self._building = False
-            if self._elapsed_timer_id is not None:
-                self.killTimer(self._elapsed_timer_id)
-                self._elapsed_timer_id = None
+            self.build_status_label.setText("Cancelling build...")
+            self.build_thread.cancel()
 
     def closeEvent(self, event: Any) -> None:
-        """Handle dialog close event to clean up threads (issue #2715)."""
-        # Join the build thread with timeout to prevent orphans
+        """Cancel an active Docker build before closing."""
         if self.build_thread and self.build_thread.isRunning():
-            logger.info("Waiting for Docker build thread to finish...")
-            if not self.build_thread.wait(5000):  # 5 second timeout
-                logger.warning("Docker build thread did not exit; terminating")
-                self.build_thread.terminate()
-                self.build_thread.wait(1000)
+            reply = QMessageBox.question(
+                self,
+                "Build in progress",
+                "Cancel the build and close?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                event.ignore()
+                return
+            logger.info("Cancelling Docker build before closing dialog")
+            self.build_thread.cancel()
+            self.build_thread.wait()
         super().closeEvent(event)
 
     def timerEvent(self, event: Any) -> None:
