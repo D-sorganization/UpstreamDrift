@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.347                                            |
+| **Spec Version**        | 1.0.348                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Aligned pendulum perturbation analyzer guard failures with
+  the unit-level contract: invalid `extract_metrics()` inputs and missing
+  `set_base_torque_profile()` preconditions now surface as `TypeError`
+  precondition failures while preserving valid batch and metrics behavior.
 - **2026-06-11** - Restored legacy AI assistant widget import identity by
   routing `assistant_widgets` and `assistant_panel` compatibility exports to the
   canonical assistant submodules, and made the optional-stack unit chunk loop

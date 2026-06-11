@@ -274,7 +274,7 @@ class PendulumPerturbationAnalyzer:
         Post: all MANDATORY_METRICS present in output; all values are finite.
         """
         if not isinstance(sim_result, SimulationResult):
-            raise ValueError(
+            raise TypeError(
                 f"sim_result must be SimulationResult, got {type(sim_result)}"
             )
         if not (sim_result.n_steps >= 2):
@@ -381,7 +381,7 @@ class PendulumPerturbationAnalyzer:
         Post: summary.robustness_score in [0.0, 1.0].
         """
         if not (self._base_coeffs is not None):
-            raise ValueError("Call set_base_torque_profile() before run_batch()")
+            raise TypeError("Call set_base_torque_profile() before run_batch()")
         if not (config.n_trials > 0):
             raise ValueError("DbC Blocked: Precondition failed.")
 
