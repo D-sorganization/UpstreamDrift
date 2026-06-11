@@ -87,7 +87,7 @@ class SidekickSidebarManager:
         if module is not None:
             return module
 
-        self._install_sidekick_import_paths()
+        SidekickSidebarManager._install_sidekick_import_paths(self)
         for module_name in (
             "shared.python.sidekick.ui.tools_sidebar",
             "sidekick.ui.tools_sidebar",
@@ -172,13 +172,13 @@ class SidekickSidebarManager:
         setter = getattr(sidebar_widget, "set_action_service", None)
         if callable(setter) and service is not None:
             setter(service)
-        self._apply_sidekick_splitter_sizes()
+        SidekickSidebarManager._apply_sidekick_splitter_sizes(self)
 
         logger.info("Sidekick sidebar embedded in main splitter")
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane."""
         logger.info("Initializing _install_sidekick_sidebar")
-        module = self._get_sidekick_module()
-        widget = self._create_sidekick_sidebar_widget(module)
-        self._embed_sidekick_sidebar_widget(widget)
+        module = SidekickSidebarManager._get_sidekick_module(self)
+        widget = SidekickSidebarManager._create_sidekick_sidebar_widget(self, module)
+        SidekickSidebarManager._embed_sidekick_sidebar_widget(self, widget)
