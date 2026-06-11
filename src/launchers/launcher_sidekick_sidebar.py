@@ -1,3 +1,5 @@
+# mypy: disable-error-code="attr-defined,arg-type,assignment"
+
 """Sidekick sidebar installation helpers for the UpstreamDrift launcher."""
 
 from __future__ import annotations
@@ -16,6 +18,22 @@ class SidekickSidebarManager:
 
     def __init__(self, launcher: Any) -> None:
         self.launcher = launcher
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return getattr(self.launcher, name)
+        except AttributeError as err:
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{name}'"
+            ) from err
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
+            super().__setattr__(name, value)
+        elif hasattr(self.launcher, name):
+            setattr(self.launcher, name, value)
+        else:
+            super().__setattr__(name, value)
 
     def _apply_sidekick_splitter_sizes(self) -> None:
         """Set main_layout splitter sizes to give the sidekick 300px."""
@@ -42,7 +60,7 @@ class SidekickSidebarManager:
         try:
             from src.launchers.onboarding_dialog import show_onboarding_if_needed
 
-            show_onboarding_if_needed(self)
+            show_onboarding_if_needed(self.launcher)
         except ImportError as exc:
             logger.debug("Onboarding dialog not available: %s", exc)
 
@@ -69,7 +87,7 @@ class SidekickSidebarManager:
         if module is not None:
             return module
 
-        SidekickSidebarManager._install_sidekick_import_paths(self)
+        self._install_sidekick_import_paths()
         for module_name in (
             "shared.python.sidekick.ui.tools_sidebar",
             "sidekick.ui.tools_sidebar",
@@ -117,10 +135,10 @@ class SidekickSidebarManager:
             return None
 
         try:
-            return factory(parent=self, project_root=str(REPOS_ROOT))
+            return factory(parent=self.launcher, project_root=str(REPOS_ROOT))
         except TypeError:
             try:
-                return factory(parent=self)
+                return factory(parent=self.launcher)
             except (RuntimeError, ValueError) as exc:
                 logger.warning("Sidekick factory call failed: %s", exc)
                 return None
@@ -154,13 +172,13 @@ class SidekickSidebarManager:
         setter = getattr(sidebar_widget, "set_action_service", None)
         if callable(setter) and service is not None:
             setter(service)
-        SidekickSidebarManager._apply_sidekick_splitter_sizes(self)
+        self._apply_sidekick_splitter_sizes()
 
         logger.info("Sidekick sidebar embedded in main splitter")
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane."""
         logger.info("Initializing _install_sidekick_sidebar")
-        module = SidekickSidebarManager._get_sidekick_module(self)
-        widget = SidekickSidebarManager._create_sidekick_sidebar_widget(self, module)
-        SidekickSidebarManager._embed_sidekick_sidebar_widget(self, widget)
+        module = self._get_sidekick_module()
+        widget = self._create_sidekick_sidebar_widget(module)
+        self._embed_sidekick_sidebar_widget(widget)
