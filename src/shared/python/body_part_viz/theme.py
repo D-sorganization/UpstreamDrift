@@ -18,24 +18,27 @@ in ``theme/v1``; shape styling stays here.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 
 from matplotlib.colors import is_color_like
 
 __all__ = ["ShapeTheme"]
 
+_HEX_COLOR_RE = re.compile(
+    r"^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$"
+)
 
-def _validate_color(value: object, *, field_name: str) -> None:
+
+def _validate_color(value: object, field_name: str) -> None:
     if not isinstance(value, str):
-        raise TypeError(f"{field_name} must be str; got {type(value).__name__}")
+        raise TypeError(f"{field_name} must be str")
     if not value:
         raise ValueError(f"{field_name} must be non-empty")
-    if value.startswith("#") and not is_color_like(value):
-        raise ValueError(f"{field_name} is not a valid hex color: {value!r}")
+    if value.startswith("#") and not _HEX_COLOR_RE.fullmatch(value):
+        raise ValueError(f"{field_name} is not a valid hex color")
     if not is_color_like(value):
-        raise ValueError(
-            f"{field_name} is not a valid color / matplotlib colour: {value!r}"
-        )
+        raise ValueError(f"{field_name} is not a valid color or matplotlib colour")
 
 
 @dataclass(frozen=True)
@@ -67,28 +70,26 @@ class ShapeTheme:
     group: str = "default"
 
     def __post_init__(self) -> None:
-        _validate_color(self.color, field_name="color")
-        _validate_color(self.edge_color, field_name="edge_color")
+        _validate_color(self.color, "color")
+        _validate_color(self.edge_color, "edge_color")
 
         if not isinstance(self.opacity, (int, float)) or isinstance(self.opacity, bool):
-            raise TypeError(f"opacity must be float; got {type(self.opacity).__name__}")
+            raise TypeError("opacity must be float")
         opacity = float(self.opacity)
         if not math.isfinite(opacity):
-            raise ValueError(f"opacity must be finite; got {self.opacity!r}")
+            raise ValueError("opacity must be finite")
         if opacity < 0.0 or opacity > 1.0:
-            raise ValueError(f"opacity must be in [0.0, 1.0]; got {self.opacity!r}")
+            raise ValueError("opacity must be in [0.0, 1.0]")
 
         if not isinstance(self.edge_width, (int, float)) or isinstance(
             self.edge_width, bool
         ):
-            raise TypeError(
-                f"edge_width must be float; got {type(self.edge_width).__name__}"
-            )
+            raise TypeError("edge_width must be float")
         edge_width = float(self.edge_width)
         if not math.isfinite(edge_width):
-            raise ValueError(f"edge_width must be finite; got {self.edge_width!r}")
+            raise ValueError("edge_width must be finite")
         if edge_width < 0.0:
-            raise ValueError(f"edge_width must be >= 0; got {self.edge_width!r}")
+            raise ValueError("edge_width must be >= 0")
 
         if not isinstance(self.flat_shaded, bool):
             raise TypeError(
@@ -96,6 +97,6 @@ class ShapeTheme:
             )
 
         if not isinstance(self.group, str):
-            raise TypeError(f"group must be str; got {type(self.group).__name__}")
+            raise TypeError("group must be str")
         if not self.group:
             raise ValueError("group must be non-empty")

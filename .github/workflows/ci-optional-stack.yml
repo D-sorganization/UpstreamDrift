@@ -192,6 +192,7 @@ jobs:
           pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
           pip install -e ".[dev,gui-test]"
+          pip install "trimesh>=4.0.0"
 
       - name: Install API Extras
         # Install full FastAPI stack for API-path tests.
