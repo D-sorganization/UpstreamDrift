@@ -47,6 +47,9 @@ from src.shared.python.body_part_viz.shapes import (
     LineShape,
     MeshShape,
 )
+from src.shared.python.motion_matching.body_skeleton import (
+    default_body_segments,
+)
 from src.shared.python.plot_style import (
     ColormapId,
     DataChannel,
@@ -90,18 +93,6 @@ def _rgba_to_hex(rgba: tuple[float, float, float, float]) -> str:
     gh = int(round(g * 255))
     bh = int(round(b * 255))
     return f"#{rh:02x}{gh:02x}{bh:02x}"
-
-
-try:
-    from src.shared.python.motion_matching.body_skeleton import (
-        default_body_segments,
-    )
-except ImportError:  # pragma: no cover - exercised via fallback path only
-    # Fallback: when running inside the engine's pivoted sys.modules layout
-    # the canonical wrapper exposes the symbol via the bare-rooted path.
-    from shared.python.motion_matching.body_skeleton import (  # type: ignore
-        default_body_segments,
-    )
 
 
 # View-angle presets: (elev, azim) tuned to match issue spec.

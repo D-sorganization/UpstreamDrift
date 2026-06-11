@@ -17,11 +17,12 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from src.api.utils.datetime_compat import UTC
 from enum import Enum
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
+
+from compatibility import UTC
 
 logger = logging.getLogger(__name__)
 
