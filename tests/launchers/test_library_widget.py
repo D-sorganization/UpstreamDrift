@@ -58,7 +58,35 @@ def test_library_preview_escapes_document_metadata(qapp, tmp_path: Path) -> None
     html = widget.preview_browser.toHtml()
     assert "<script>alert(1)</script>" not in html
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
-    assert widget.chat_input.isEnabled()
+    assert not widget.chat_input.isEnabled()
+    assert "backend not configured" in widget.chat_input.placeholderText().lower()
+
+
+def test_document_chat_does_not_fabricate_backend_response(
+    qapp, tmp_path: Path
+) -> None:
+    manager = LibraryManager(tmp_path / "library_index.db")
+    doc_path = tmp_path / "doc.pdf"
+    doc_path.write_bytes(b"%PDF-1.4\n% unreadable test fixture\n")
+    _insert_document(
+        manager.db_path,
+        file_path=str(doc_path),
+        title="No Fake Chat",
+    )
+    widget = LibraryWidget(manager=manager)
+    widget.table.selectRow(0)
+    widget.table.setCurrentItem(widget.table.item(0, 0))
+    widget._on_document_selected()
+
+    widget.chat_input.setText("What does this say?")
+    widget._on_chat_return_pressed()
+
+    html = widget.preview_browser.toHtml()
+    assert "processed the document context" not in html
+    assert "Dispatching to Notebook LM backend" not in html
+    assert "Notebook LM:" not in html
+    assert "Document chat backend is not configured" in html
+    assert not widget.chat_input.isEnabled()
 
 
 def test_library_filter_searches_document_fields(qapp, tmp_path: Path) -> None:

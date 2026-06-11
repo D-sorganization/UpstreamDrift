@@ -1,7 +1,7 @@
 """Library Tab for UpstreamDrift Launcher.
 
 Provides a comprehensive document management interface with PDF/LaTeX viewing,
-metadata extraction, SQLite indexing, and NotebookLM-style AI integration.
+metadata extraction, SQLite indexing, and a placeholder for future document chat.
 """
 
 from __future__ import annotations
@@ -243,12 +243,11 @@ class LibraryWidget(QWidget):
 
         self.preview_browser = QTextBrowser()
         self.preview_browser.setObjectName("LibraryPreview")
-        self.preview_browser.setPlaceholderText(
-            "Select a document to view metadata and query via NotebookLM..."
-        )
+        self.preview_browser.setPlaceholderText("Select a document to view metadata.")
         preview_layout.addWidget(self.preview_browser, stretch=2)
 
-        # AI Chat placeholder
+        # Document chat placeholder. Phase 3 is tracked in
+        # docs/development/EPIC_Library_Tab.md; no backend is configured here.
         ai_panel = QWidget()
         ai_panel.setObjectName("LibraryChatPanel")
         ai_layout = QVBoxLayout(ai_panel)
@@ -264,7 +263,9 @@ class LibraryWidget(QWidget):
         ai_layout.addWidget(lbl_ai)
 
         self.chat_input = QLineEdit()
-        self.chat_input.setPlaceholderText("Ask a question about this document...")
+        self.chat_input.setPlaceholderText(
+            "Document chat backend not configured (EPIC_Library_Tab.md Phase 3)."
+        )
         self.chat_input.setEnabled(False)
         self.chat_input.returnPressed.connect(self._on_chat_return_pressed)
         ai_layout.addWidget(self.chat_input)
@@ -431,10 +432,13 @@ class LibraryWidget(QWidget):
         <p><i>Document preview will be rendered here. Full PDF viewing requires integration with a PDF renderer or WebView.</i></p>
         """
         self.preview_browser.setHtml(html)
-        self.chat_input.setEnabled(True)
+        self.chat_input.setEnabled(False)
+        self.chat_input.setPlaceholderText(
+            "Document chat backend not configured (EPIC_Library_Tab.md Phase 3)."
+        )
 
     def _on_chat_return_pressed(self) -> None:
-        """Handle chat queries for the Notebook LM integration."""
+        """Handle document chat attempts when no backend is configured."""
         query = self.chat_input.text().strip()
         if not query:
             return
@@ -451,8 +455,6 @@ class LibraryWidget(QWidget):
         if not doc:
             return
 
-        file_path = Path(doc["file_path"])
-
         # Clear input
         self.chat_input.clear()
 
@@ -460,37 +462,8 @@ class LibraryWidget(QWidget):
         self.preview_browser.append(
             f"<br><b style='color: #0A84FF;'>You:</b> {escape(query)}"
         )
-
-        # Determine if we can extract context
-        context_text = ""
-        if file_path.suffix.lower() == ".pdf":
-            try:
-                from pypdf import PdfReader
-
-                reader = PdfReader(str(file_path))
-                # Extract first 3 pages as context limit for safety
-                for i in range(min(3, len(reader.pages))):
-                    page_text = reader.pages[i].extract_text()
-                    if page_text:
-                        context_text += page_text + "\n"
-            except Exception as e:  # noqa: BLE001
-                logger.error(f"Failed to extract text for Notebook LM: {e}")
-
-        if not context_text:
-            self.preview_browser.append(
-                "<b style='color: #f85149;'>Notebook LM:</b> I'm sorry, I couldn't extract readable text from this document to answer your question."
-            )
-            return
-
-        # Here we would normally call the Sidekick LLM backend or an OpenAI endpoint
-        # For Phase 3, we format the prompt and simulate ingestion logic.
-        prompt = (
-            f"Context from document '{doc['title']}':\n"
-            f"{context_text[:2000]}...\n\nQuestion: {query}\n\nAnswer:"
-        )
-        logger.info(f"Dispatching to Notebook LM backend: {prompt[:100]}...")
-
-        # Simulate response
         self.preview_browser.append(
-            "<b style='color: #2da44e;'>Notebook LM:</b> I have received your question and processed the document context. [Backend RAG integration pending in Sidekick WebSocket channel]"
+            "<b style='color: #f85149;'>Document Chat:</b> "
+            "Document chat backend is not configured. "
+            "This integration is tracked in docs/development/EPIC_Library_Tab.md Phase 3."
         )

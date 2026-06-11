@@ -180,6 +180,10 @@ class AnalysisRequest(BaseModel):
     parameters: dict[str, Any] = Field(
         default_factory=dict, description="Analysis parameters"
     )
+    data: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Optional analysis input data such as trajectories or timebases",
+    )
     export_format: str = Field("json", description="Output format")
 
     @field_validator("analysis_type")

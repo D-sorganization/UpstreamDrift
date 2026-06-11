@@ -17,6 +17,8 @@ import numpy as np
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.core.error_utils import GolfSuiteError, ValidationError
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
+from src.shared.python.biomechanics.kinematic_sequence import SegmentTimingAnalyzer
 
 from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse
@@ -346,7 +348,6 @@ class AnalysisService:
             "phase_transitions": [],
             "sequence_timing": {},
             "kinematic_sequence": {},
-            "x_factor": None,
             "metadata": {},
         }
 
@@ -362,18 +363,17 @@ class AnalysisService:
                 if hasattr(engine, "get_segment_angular_velocities"):
                     seg_vel = engine.get_segment_angular_velocities()
                     if seg_vel is not None:
-                        result["kinematic_sequence"] = {
-                            "pelvis_peak": None,
-                            "torso_peak": None,
-                            "arm_peak": None,
-                            "club_peak": None,
-                        }
+                        self._populate_kinematic_sequence(result, request, seg_vel)
+
+                x_factor = self._compute_x_factor(request, engine)
+                if x_factor is not None:
+                    result["x_factor"] = x_factor
 
                 metadata = result["metadata"]
                 metadata["engine_type"] = type(engine).__name__
                 metadata["data_source"] = "engine"
 
-            except (GolfSuiteError, ImportError) as e:
+            except (GolfSuiteError, ImportError, TypeError, ValueError) as e:
                 logger.warning("Could not analyze swing sequence from engine: %s", e)
                 metadata = result["metadata"]
                 metadata["engine_error"] = str(e)
@@ -393,6 +393,148 @@ class AnalysisService:
                 result["sequence_timing"] = request_data["sequence_timing"]
 
         return result
+
+    def _populate_kinematic_sequence(
+        self,
+        result: dict[str, Any],
+        request: AnalysisRequest,
+        segment_velocities: Any,
+    ) -> None:
+        """Populate computed segment timing or an explicit no-trajectory marker."""
+        normalized = self._normalize_segment_velocity_trajectories(segment_velocities)
+        metadata = result["metadata"]
+        if not normalized:
+            metadata["kinematic_sequence"] = "requires_trajectory"
+            return
+
+        times = self._resolve_sequence_times(request, normalized)
+        if times is None:
+            metadata["kinematic_sequence"] = "requires_trajectory"
+            return
+
+        expected_order = ["pelvis", "torso", "arm", "club"]
+        analyzer = SegmentTimingAnalyzer(expected_order=expected_order)
+        timing = analyzer.analyze(normalized, times)
+
+        sequence: dict[str, Any] = {
+            "sequence_order": timing.sequence_order,
+            "expected_order": timing.expected_order,
+            "sequence_consistency": timing.sequence_consistency,
+            "is_valid_sequence": timing.is_valid_sequence,
+            "timing_gaps": timing.timing_gaps,
+        }
+        for peak in timing.peaks:
+            sequence[f"{peak.name}_peak"] = {
+                "velocity": peak.peak_velocity,
+                "time": peak.time,
+                "index": peak.index,
+                "normalized_velocity": peak.normalized_velocity,
+            }
+            if peak.speed_gain is not None:
+                sequence[f"{peak.name}_peak"]["speed_gain"] = peak.speed_gain
+            if peak.deceleration_rate is not None:
+                sequence[f"{peak.name}_peak"]["deceleration_rate"] = (
+                    peak.deceleration_rate
+                )
+
+        result["kinematic_sequence"] = sequence
+        metadata["kinematic_sequence"] = "computed"
+
+    def _normalize_segment_velocity_trajectories(
+        self,
+        segment_velocities: Any,
+    ) -> dict[str, np.ndarray] | None:
+        """Return per-segment 1-D trajectories; reject instantaneous samples."""
+        if not isinstance(segment_velocities, dict):
+            return None
+
+        normalized: dict[str, np.ndarray] = {}
+        trajectory_length: int | None = None
+        for name, values in segment_velocities.items():
+            arr = np.asarray(values, dtype=float).reshape(-1)
+            if arr.size < 2:
+                return None
+            if trajectory_length is None:
+                trajectory_length = arr.size
+            elif arr.size != trajectory_length:
+                return None
+            normalized[str(name)] = arr
+
+        return normalized or None
+
+    def _resolve_sequence_times(
+        self,
+        request: AnalysisRequest,
+        segment_velocities: dict[str, np.ndarray],
+    ) -> np.ndarray | None:
+        """Resolve a timebase for segment velocity trajectories."""
+        trajectory_length = len(next(iter(segment_velocities.values())))
+        request_data = getattr(request, "data", None) or {}
+        raw_times = request_data.get("times", request_data.get("time"))
+        if raw_times is None:
+            return np.arange(trajectory_length, dtype=float)
+
+        times = np.asarray(raw_times, dtype=float).reshape(-1)
+        if times.size != trajectory_length:
+            return None
+        return times
+
+    def _compute_x_factor(
+        self,
+        request: AnalysisRequest,
+        engine: Any,
+    ) -> dict[str, Any] | None:
+        """Compute X-factor only when joint trajectory data and indices are available."""
+        request_data = getattr(request, "data", None) or {}
+        joint_positions = request_data.get("joint_positions")
+        if joint_positions is None and hasattr(engine, "get_joint_positions"):
+            joint_positions = engine.get_joint_positions()
+        if joint_positions is None:
+            return None
+
+        shoulder_idx = request_data.get(
+            "shoulder_joint_idx",
+            request_data.get("torso_joint_idx"),
+        )
+        hip_idx = request_data.get(
+            "hip_joint_idx", request_data.get("pelvis_joint_idx")
+        )
+        if shoulder_idx is None or hip_idx is None:
+            return None
+
+        positions = np.asarray(joint_positions, dtype=float)
+        if positions.ndim != 2 or positions.shape[0] < 2:
+            return None
+
+        times = request_data.get("times", request_data.get("time"))
+        if times is not None:
+            time_array = np.asarray(times, dtype=float).reshape(-1)
+            dt = float(np.mean(np.diff(time_array))) if time_array.size > 1 else 1.0
+        else:
+            dt = 1.0
+
+        class _SwingMetricContext(SwingMetricsMixin):
+            pass
+
+        context = _SwingMetricContext()
+        context.joint_positions = positions
+        context.times = np.arange(positions.shape[0], dtype=float)
+        context.club_head_speed = None
+        context.dt = dt
+
+        x_factor = context.compute_x_factor(int(shoulder_idx), int(hip_idx))
+        if x_factor is None or x_factor.size == 0:
+            return None
+
+        stretch = context.compute_x_factor_stretch(int(shoulder_idx), int(hip_idx))
+        payload: dict[str, Any] = {
+            "values": x_factor.tolist(),
+            "peak": float(np.max(np.abs(x_factor))),
+        }
+        if stretch is not None:
+            payload["stretch_rate"] = stretch[0].tolist()
+            payload["peak_stretch_rate"] = stretch[1]
+        return payload
 
     def _detect_swing_phase(self, state: dict[str, Any]) -> str | None:
         """Detect current swing phase from engine state.
