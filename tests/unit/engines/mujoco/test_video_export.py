@@ -2,28 +2,30 @@
 
 from __future__ import annotations
 
-import sys
+from collections.abc import Iterator
+from pathlib import Path
+from types import ModuleType
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import mujoco
 import numpy as np
 import pytest
 
-# Mock dependencies before import
-sys.modules["cv2"] = MagicMock()
-sys.modules["imageio"] = MagicMock()
+from tests.support.optional_deps import scoped_import_with_optional_mocks
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402, E501
-    VideoExporter,
-    VideoFormat,
-    create_metrics_overlay,
-    export_simulation_video,
+_VIDEO_EXPORT_MODULE = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export"
 )
-
-# Path to the mujoco module reference inside video_export (imported as `mj`)
-_VID_EXPORT_MJ = (
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.mj"
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_VIDEO_EXPORT_PATH = (
+    _REPO_ROOT
+    / "src"
+    / "engines"
+    / "physics_engines"
+    / "mujoco"
+    / "python"
+    / "mujoco_humanoid_golf"
+    / "video_export.py"
 )
 
 # Mock constants for headless environment
@@ -31,13 +33,89 @@ WIDTH = 640
 HEIGHT = 480
 FPS = 30
 
+video_export: Any = None
+VideoExporter: Any = None
+VideoFormat: Any = None
+create_metrics_overlay: Any = None
+export_simulation_video: Any = None
+
+
+class _FakeMjModel:
+    pass
+
+
+class _FakeMjData:
+    pass
+
+
+class _FakeMjtObj:
+    mjOBJ_BODY = object()
+
+
+class _FakeMjtJoint:
+    pass
+
+
+class _FakeMjtGeom:
+    pass
+
+
+def _make_fake_mujoco_module() -> ModuleType:
+    module = ModuleType("mujoco")
+    module.MjModel = _FakeMjModel  # type: ignore[attr-defined]
+    module.MjData = _FakeMjData  # type: ignore[attr-defined]
+    module.mjtObj = _FakeMjtObj  # type: ignore[attr-defined]
+    module.mjtJoint = _FakeMjtJoint  # type: ignore[attr-defined]
+    module.mjtGeom = _FakeMjtGeom  # type: ignore[attr-defined]
+    module.Renderer = MagicMock()  # type: ignore[attr-defined]
+    module.mj_forward = MagicMock()  # type: ignore[attr-defined]
+    module.mj_step = MagicMock()  # type: ignore[attr-defined]
+    return module
+
+
+@pytest.fixture
+def fake_mujoco_module() -> ModuleType:
+    return _make_fake_mujoco_module()
+
+
+@pytest.fixture
+def video_export_module(fake_mujoco_module: ModuleType) -> Iterator[ModuleType]:
+    with scoped_import_with_optional_mocks(
+        _VIDEO_EXPORT_MODULE,
+        {
+            "mujoco": fake_mujoco_module,
+            "cv2": MagicMock(),
+            "imageio": MagicMock(),
+        },
+        module_path=_VIDEO_EXPORT_PATH,
+    ) as module:
+        yield module
+
+
+@pytest.fixture(autouse=True)
+def video_export_symbols(video_export_module: ModuleType) -> None:
+    globals()["video_export"] = video_export_module
+    globals()["VideoExporter"] = video_export_module.VideoExporter
+    globals()["VideoFormat"] = video_export_module.VideoFormat
+    globals()["create_metrics_overlay"] = video_export_module.create_metrics_overlay
+    globals()["export_simulation_video"] = video_export_module.export_simulation_video
+
+
+def _patch_video_export_mj(mock_mj: MagicMock):
+    return patch.object(video_export, "mj", mock_mj)
+
+
+def _patch_video_export_flag(name: str, value: bool = True):
+    return patch.object(video_export, name, value)
+
 
 def _make_mock_mj(**overrides: Any) -> MagicMock:
     """Create a mock mujoco module that preserves enum types but stubs C functions."""
     mock = MagicMock()
-    mock.mjtObj = mujoco.mjtObj
-    mock.mjtJoint = mujoco.mjtJoint
-    mock.mjtGeom = mujoco.mjtGeom
+    mock.mjtObj = _FakeMjtObj
+    mock.mjtJoint = _FakeMjtJoint
+    mock.mjtGeom = _FakeMjtGeom
+    mock.mj_name2id.return_value = -1
     # Return a dummy black frame from the Renderer mock
     renderer_inst = MagicMock()
     renderer_inst.render.return_value = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
@@ -48,14 +126,14 @@ def _make_mock_mj(**overrides: Any) -> MagicMock:
 
 
 @pytest.fixture
-def mock_mujoco() -> tuple[MagicMock, MagicMock]:
+def mock_mujoco(fake_mujoco_module: ModuleType) -> tuple[MagicMock, MagicMock]:
     """Create mock MuJoCo model and data."""
-    model = MagicMock(spec=mujoco.MjModel)
+    model = MagicMock(spec=fake_mujoco_module.MjModel)
     model.nq = 2
     model.nv = 2
     model.nu = 1
 
-    data = MagicMock(spec=mujoco.MjData)
+    data = MagicMock(spec=fake_mujoco_module.MjData)
     data.qpos = np.zeros(2)
     data.qvel = np.zeros(2)
     data.ctrl = np.zeros(1)
@@ -64,9 +142,9 @@ def mock_mujoco() -> tuple[MagicMock, MagicMock]:
 
 
 @pytest.fixture
-def mock_cv2() -> Any:
+def mock_cv2(video_export_module: ModuleType) -> Any:
     """Mock cv2 module."""
-    mock = sys.modules["cv2"]
+    mock = video_export_module.cv2
     mock.reset_mock()
 
     writer = MagicMock()
@@ -81,9 +159,9 @@ def mock_cv2() -> Any:
 
 
 @pytest.fixture
-def mock_imageio() -> Any:
+def mock_imageio(video_export_module: ModuleType) -> Any:
     """Mock imageio module."""
-    mock = sys.modules["imageio"]
+    mock = video_export_module.imageio
     mock.reset_mock()
     return mock
 
@@ -96,7 +174,7 @@ class TestVideoExporter:
         model, data = mock_mujoco
         mock_mj = _make_mock_mj()
 
-        with patch(_VID_EXPORT_MJ, mock_mj):
+        with _patch_video_export_mj(mock_mj):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS)
 
         assert exporter.width == WIDTH
@@ -115,11 +193,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("CV2_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             success = exporter.start_recording("test.mp4")
@@ -142,11 +217,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("IMAGEIO_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             success = exporter.start_recording("test.gif")
@@ -165,11 +237,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("CV2_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             exporter.start_recording("test.mp4")
@@ -192,11 +261,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("IMAGEIO_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             exporter.start_recording("test.gif")
@@ -215,11 +281,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("CV2_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             exporter.start_recording("test.mp4")
@@ -239,11 +302,8 @@ class TestVideoExporter:
         mock_mj = _make_mock_mj()
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("IMAGEIO_AVAILABLE"),
         ):
             exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             exporter.start_recording("test.gif")
@@ -272,11 +332,8 @@ class TestVideoExporter:
             """No-op progress callback."""
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("CV2_AVAILABLE"),
         ):
             success = exporter = VideoExporter(
                 model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4
@@ -304,10 +361,7 @@ class TestVideoExporter:
 
         metrics = {"Test Metric": lambda d: 42.0}
 
-        with patch(
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-            True,
-        ):
+        with _patch_video_export_flag("CV2_AVAILABLE"):
             out_frame = create_metrics_overlay(frame, 1.0, data, metrics)
 
         assert mock_cv2.putText.call_count >= 2
@@ -328,11 +382,8 @@ class TestVideoExporter:
         times = np.linspace(0, 1, N)
 
         with (
-            patch(_VID_EXPORT_MJ, mock_mj),
-            patch(
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-                True,
-            ),
+            _patch_video_export_mj(mock_mj),
+            _patch_video_export_flag("CV2_AVAILABLE"),
         ):
             success = export_simulation_video(
                 model,
