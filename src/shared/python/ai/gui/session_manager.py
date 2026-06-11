@@ -7,7 +7,7 @@
 
 import json
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -19,6 +19,19 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 ExportFormat = Literal["markdown", "json"]
+
+
+def _session_sort_timestamp(timestamp_str: str) -> datetime:
+    """Return a timezone-consistent timestamp for session ordering."""
+    if not timestamp_str:
+        return datetime.min.replace(tzinfo=UTC)
+    try:
+        parsed = datetime.fromisoformat(timestamp_str)
+    except ValueError:
+        return datetime.min.replace(tzinfo=UTC)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 
 def _session_to_markdown(context: ConversationContext) -> str:
@@ -126,14 +139,7 @@ class ChatSessionManager(QObject):
                 if messages:
                     timestamp_str = messages[-1].get("timestamp", "")
 
-                try:
-                    dt = (
-                        datetime.fromisoformat(timestamp_str)
-                        if timestamp_str
-                        else datetime.min
-                    )
-                except ValueError:
-                    dt = datetime.min
+                dt = _session_sort_timestamp(timestamp_str)
 
                 sessions.append(
                     {

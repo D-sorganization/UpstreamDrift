@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from src.launchers import sidekick_readiness as readiness
 
 
@@ -72,6 +74,14 @@ def test_check_sidekick_api_readiness_reports_invalid_port(monkeypatch) -> None:
 
     assert result.ready is False
     assert "Invalid API_PORT" in result.detail
+
+
+@pytest.mark.unit
+def test_launcher_exposes_sidekick_install_hooks() -> None:
+    from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
+
+    assert callable(UpstreamDriftLauncher._install_sidekick_sidebar)
+    assert callable(UpstreamDriftLauncher._apply_sidekick_splitter_sizes)
 
 
 def test_readiness_detail_for_log_truncates_body() -> None:

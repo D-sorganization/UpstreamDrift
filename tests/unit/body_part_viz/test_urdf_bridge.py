@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # noqa: S405 — generating, not parsing untrusted input
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; generated test XML
 from collections.abc import Callable
 from pathlib import Path
 
@@ -44,6 +44,7 @@ def _no_mesh_resolver(uri: str) -> Path:
 
 def _make_mesh_shape(tmp_path: Path) -> MeshShape:
     """Build a tiny on-disk STL (a non-degenerate tetrahedron) and load it."""
+    pytest.importorskip("trimesh")
     stl_path = tmp_path / "tiny.stl"
     # Tetrahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (0,0,1).
     stl_path.write_text(

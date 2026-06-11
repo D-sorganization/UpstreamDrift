@@ -33,10 +33,13 @@ def check_sidekick_api_readiness(timeout_seconds: float = 0.25) -> SidekickApiRe
     try:
         path, host, port = sidekick_api_ready_url()
     except ValueError as exc:
+        detail = str(exc)
+        if "API_PORT" in detail and "Invalid API_PORT" not in detail:
+            detail = f"Invalid API_PORT value: {detail}"
         return SidekickApiReadiness(
             ready=False,
             url=f"http://127.0.0.1:8000{READY_PATH}",
-            detail=str(exc),
+            detail=detail,
         )
 
     url = f"http://{host}:{port}{path}"

@@ -51,5 +51,6 @@ class ODESolverResponse(BaseModel):
         description="Variable name to list of values mapping"
     )
     variable_summaries: list[ODEVariableSummary]
+    solver_status: str = "success"
     success: bool = True
     message: str = "Solution computed successfully"

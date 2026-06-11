@@ -277,6 +277,14 @@ class UISetupManager:
         else:
             super().__setattr__(name, value)
 
+    def _on_windows_mode_changed(self, state: int) -> None:
+        """Delegate Windows-mode changes when the full launcher provides a handler."""
+        try:
+            handler = self.launcher._on_windows_mode_changed
+        except AttributeError:
+            return
+        handler(state)
+
     """Mixin for UpstreamDriftLauncher UI initialization.
 
     Provides methods for building the menu bar, top bar, grid area,
@@ -801,6 +809,22 @@ class UISetupManager:
             checkable=True,
         )
 
+        btn_motion_match = self._build_sidebar_button(
+            "Motion Match",
+            "directions_run",
+            checkable=True,
+        )
+        btn_motion_match.setAccessibleDescription(
+            "Filter tiles to show motion matching tools"
+        )
+
+        btn_mocap = self._build_sidebar_button(
+            "MoCap",
+            "videocam",
+            checkable=True,
+        )
+        btn_mocap.setAccessibleDescription("Filter tiles to show motion capture tools")
+
         btn_tools = self._build_sidebar_button(
             "Tools",
             "build",
@@ -857,13 +881,24 @@ class UISetupManager:
         self.sidebar_group.addButton(btn_engines, 1)
         self.sidebar_group.addButton(btn_biomechanics, 2)
         self.sidebar_group.addButton(btn_simulation, 3)
-        self.sidebar_group.addButton(btn_tools, 4)
-        self.sidebar_group.addButton(btn_documentation, 5)
-        self.sidebar_group.addButton(btn_favorites, 6)
-        self.sidebar_group.addButton(btn_history, 7)
+        self.sidebar_group.addButton(btn_motion_match, 4)
+        self.sidebar_group.addButton(btn_mocap, 5)
+        self.sidebar_group.addButton(btn_tools, 6)
+        self.sidebar_group.addButton(btn_documentation, 7)
+        self.sidebar_group.addButton(btn_favorites, 8)
+        self.sidebar_group.addButton(btn_history, 9)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
-        self.btn_library_sidebar = None
+        btn_library = self._build_sidebar_button(
+            "Library",
+            "book",
+            checkable=True,
+        )
+        btn_library.setAccessibleDescription(
+            "Filter tiles to show documentation and library tools"
+        )
+        self.sidebar_group.addButton(btn_library, 10)
+        self.btn_library_sidebar = btn_library
         self.btn_training_sidebar = None
 
         # Space navigation buttons evenly to fill available height
@@ -875,9 +910,15 @@ class UISetupManager:
         layout.addStretch(1)
         layout.addWidget(btn_simulation)
         layout.addStretch(1)
+        layout.addWidget(btn_motion_match)
+        layout.addStretch(1)
+        layout.addWidget(btn_mocap)
+        layout.addStretch(1)
         layout.addWidget(btn_tools)
         layout.addStretch(1)
         layout.addWidget(btn_documentation)
+        layout.addStretch(1)
+        layout.addWidget(btn_library)
         layout.addStretch(1)
         layout.addWidget(btn_favorites)
         layout.addStretch(1)
@@ -891,9 +932,12 @@ class UISetupManager:
         QWidget.setTabOrder(btn_home, btn_engines)
         QWidget.setTabOrder(btn_engines, btn_biomechanics)
         QWidget.setTabOrder(btn_biomechanics, btn_simulation)
-        QWidget.setTabOrder(btn_simulation, btn_tools)
+        QWidget.setTabOrder(btn_simulation, btn_motion_match)
+        QWidget.setTabOrder(btn_motion_match, btn_mocap)
+        QWidget.setTabOrder(btn_mocap, btn_tools)
         QWidget.setTabOrder(btn_tools, btn_documentation)
-        QWidget.setTabOrder(btn_documentation, btn_favorites)
+        QWidget.setTabOrder(btn_documentation, btn_library)
+        QWidget.setTabOrder(btn_library, btn_favorites)
         QWidget.setTabOrder(btn_favorites, btn_history)
         QWidget.setTabOrder(btn_history, btn_console)
         QWidget.setTabOrder(btn_console, btn_settings)
@@ -922,10 +966,13 @@ class UISetupManager:
         1  Engines
         2  Biomechanics
         3  Simulation
-        4  Tools
-        5  Documentation
-        6  Favorites
-        7  History
+        4  Motion Match
+        5  MoCap
+        6  Tools
+        7  Documentation
+        8  Favorites
+        9  History
+        10 Library
         """
         _CATEGORY_MAP: dict[int, str] = {
             0: "All",
@@ -933,9 +980,12 @@ class UISetupManager:
             2: "Biomechanics",
             3: "Simulation",
             4: "Tools",
-            5: "Documentation",
-            6: "Favorites",
-            7: "History",
+            5: "Tools",
+            6: "Tools",
+            7: "Documentation",
+            8: "Favorites",
+            9: "History",
+            10: "Documentation",
         }
         self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
             button_id, "All"

@@ -383,6 +383,7 @@ def test_load_unknown_container(
         MeshShape.load(p)
 
 
+@pytest.mark.slow
 def test_load_100k_vertex_mesh_decimated(tmp_path: Path) -> None:
     sphere = trimesh.creation.icosphere(subdivisions=7)
     assert len(sphere.vertices) >= 100_000 or len(sphere.vertices) > 5000

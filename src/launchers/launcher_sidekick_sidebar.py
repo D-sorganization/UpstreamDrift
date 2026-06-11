@@ -69,7 +69,7 @@ class SidekickSidebarManager:
         if module is not None:
             return module
 
-        self._install_sidekick_import_paths()
+        SidekickSidebarManager._install_sidekick_import_paths(self)
         for module_name in (
             "shared.python.sidekick.ui.tools_sidebar",
             "sidekick.ui.tools_sidebar",
@@ -84,13 +84,15 @@ class SidekickSidebarManager:
         """Prepend sibling or vendored Tools paths for Sidekick imports."""
         sibling_tools = REPOS_ROOT.parent / "Tools"
         if sibling_tools.is_dir():
-            self._prepend_sys_path(sibling_tools / "src")
-            self._prepend_sys_path(sibling_tools / "src" / "shared" / "python")
+            SidekickSidebarManager._prepend_sys_path(sibling_tools / "src")
+            SidekickSidebarManager._prepend_sys_path(
+                sibling_tools / "src" / "shared" / "python"
+            )
             return
 
         vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
-        self._prepend_sys_path(vendor_root)
-        self._prepend_sys_path(vendor_root / "shared" / "python")
+        SidekickSidebarManager._prepend_sys_path(vendor_root)
+        SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
 
     @staticmethod
     def _prepend_sys_path(path: Any) -> None:
@@ -145,17 +147,20 @@ class SidekickSidebarManager:
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
 
         self.sidekick_sidebar = sidebar_widget
-        service = self._ensure_sidekick_action_service()
+        service = None
+        ensure_service = getattr(self, "_ensure_sidekick_action_service", None)
+        if callable(ensure_service):
+            service = ensure_service()
         setter = getattr(sidebar_widget, "set_action_service", None)
-        if callable(setter):
+        if callable(setter) and service is not None:
             setter(service)
-        self._apply_sidekick_splitter_sizes()
+        SidekickSidebarManager._apply_sidekick_splitter_sizes(self)
 
         logger.info("Sidekick sidebar embedded in main splitter")
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane."""
         logger.info("Initializing _install_sidekick_sidebar")
-        module = self._get_sidekick_module()
-        widget = self._create_sidekick_sidebar_widget(module)
-        self._embed_sidekick_sidebar_widget(widget)
+        module = SidekickSidebarManager._get_sidekick_module(self)
+        widget = SidekickSidebarManager._create_sidekick_sidebar_widget(self, module)
+        SidekickSidebarManager._embed_sidekick_sidebar_widget(self, widget)

@@ -297,6 +297,18 @@ class UpstreamDriftLauncher(QMainWindow):
         self.cleanup_timer.timeout.connect(self._schedule_cleanup)
         self.cleanup_timer.start(10000)
 
+    def _apply_sidekick_splitter_sizes(self) -> None:
+        """Expose the Sidekick splitter sizing hook on the launcher class."""
+        return SidekickSidebarManager._apply_sidekick_splitter_sizes(self)
+
+    def _install_sidekick_sidebar(self) -> None:
+        """Expose the Sidekick sidebar installer on the launcher class."""
+        return SidekickSidebarManager._install_sidekick_sidebar(self)
+
+    def _on_windows_mode_changed(self, state: int) -> None:
+        """Expose the Windows-mode checkbox handler on the launcher class."""
+        return DialogsManager._on_windows_mode_changed(self, state)
+
     def showEvent(self, event: Any) -> None:
         """Force sidekick splitter sizes on first display."""
         super().showEvent(event)
