@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Hardened the standard CI PR-scoped unit gate for #7314: source/dependency PRs
+  now use the dependency-light unit lane instead of passing solely on touched
+  test files, and targeted PR coverage runs a changed-file policy ratchet.
+- Tightened internal motion matching runtime contracts (#7304, #7305, #7306,
+  #7309): invalid request/weight configuration fails at construction, metric
+  helpers reject mismatched trajectory frame/DOF shapes instead of truncating,
+  solver result validation checks reference-aligned time grids plus finite
+  torque/activation payloads, and successful internal results require a matched
+  payload before reaching orchestration.
 - Re-baselined `scripts/config/module_size_budget_baseline.json` to drop 7 stale
   exceptions for files that have since been decomposed back under the 1,500-line
   cap, and updated the remaining 3 entries with current truthful line counts

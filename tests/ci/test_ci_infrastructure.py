@@ -481,6 +481,17 @@ class TestCIEnvironmentCompatibility:
             in workflow
         )
         assert '"${coverage_args[@]}"' in workflow
+        selected_test_block_start = workflow.index(
+            "printf '  %s\\n' \"${changed_tests[@]}\""
+        )
+        selected_test_block_end = workflow.index(
+            "elif [ $pytest_exit_code -eq 5 ]",
+            selected_test_block_start,
+        )
+        assert (
+            '-o addopts=""'
+            in workflow[selected_test_block_start:selected_test_block_end]
+        )
         assert 'echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
         assert "steps.core-tests.outputs.full_coverage_generated == 'true'" in workflow
         assert (
@@ -509,7 +520,7 @@ class TestPyprojectTomlConsistency:
         try:
             import tomllib  # Python 3.11+
         except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
+            import tomli as tomllib  # type: ignore[import-not-found, no-redef]
 
         with open(REPO_ROOT / "pyproject.toml", "rb") as f:
             return tomllib.load(f)
