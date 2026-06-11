@@ -183,7 +183,7 @@ pub fn parse_c3d_bytes(buf: &[u8]) -> Result<MarkerData, ParseError> {
         0
     };
     let n_analog_channels = if analog_samples_per_frame > 0 {
-        let from_header = analog_measurements_per_frame / analog_samples_per_frame;
+        let from_header = analog_measurements_per_frame.checked_div(analog_samples_per_frame).unwrap_or(0);
         params.analog.channel_count().max(from_header)
     } else {
         0
