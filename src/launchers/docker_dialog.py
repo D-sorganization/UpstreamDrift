@@ -16,7 +16,6 @@ from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
-    QMessageBox,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -26,6 +25,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.build_close_guard import confirm_cancel_running_build_for_close
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_manager import DockerCheckThread as SharedDockerCheckThread
 from src.launchers.docker_profile_info import (
@@ -287,20 +287,13 @@ class EnvironmentDialog(QDialog):
 
     def closeEvent(self, event: Any) -> None:
         """Cancel an active Docker build before closing."""
-        if self.build_thread and self.build_thread.isRunning():
-            reply = QMessageBox.question(
-                self,
-                "Build in progress",
-                "Cancel the build and close?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if reply != QMessageBox.StandardButton.Yes:
-                event.ignore()
-                return
-            logger.info("Cancelling Docker build before closing dialog")
-            self.build_thread.cancel()
-            self.build_thread.wait()
+        if not confirm_cancel_running_build_for_close(
+            self,
+            event,
+            self.build_thread,
+            log_message="Cancelling Docker build before closing dialog",
+        ):
+            return
         super().closeEvent(event)
 
     def timerEvent(self, event: Any) -> None:

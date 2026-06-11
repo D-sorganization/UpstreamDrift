@@ -61,6 +61,44 @@ def estimate_fps(frames: list) -> float:
     return 1.0 / dt
 
 
+def _keypoint_from_array(
+    data: np.ndarray,
+    frame_index: int,
+    keypoint_index: int,
+    template: Keypoint,
+) -> Keypoint:
+    """Rebuild one keypoint from array coordinates and a metadata template."""
+    return Keypoint(
+        x=float(data[frame_index, keypoint_index, 0]),
+        y=float(data[frame_index, keypoint_index, 1]),
+        z=(
+            float(data[frame_index, keypoint_index, 2])
+            if template.z is not None
+            else None
+        ),
+        confidence=template.confidence,
+        name=template.name,
+    )
+
+
+def _marker_from_array(
+    data: np.ndarray,
+    frame_index: int,
+    marker_index: int,
+    name: str,
+    template: Marker,
+) -> Marker:
+    """Rebuild one marker from array coordinates and a metadata template."""
+    return Marker(
+        name=name,
+        x=float(data[frame_index, marker_index, 0]),
+        y=float(data[frame_index, marker_index, 1]),
+        z=float(data[frame_index, marker_index, 2]),
+        residual=template.residual,
+        occluded=template.occluded,
+    )
+
+
 def array_to_keypoint_frames(
     frames: list[KeypointFrame],
     data: np.ndarray,
@@ -71,15 +109,7 @@ def array_to_keypoint_frames(
     for i, frame in enumerate(frames):
         new_keypoints = []
         for j, kp in enumerate(frame.keypoints):
-            new_keypoints.append(
-                Keypoint(
-                    x=float(data[i, j, 0]),
-                    y=float(data[i, j, 1]),
-                    z=float(data[i, j, 2]) if kp.z is not None else None,
-                    confidence=kp.confidence,
-                    name=kp.name,
-                )
-            )
+            new_keypoints.append(_keypoint_from_array(data, i, j, kp))
 
         new_frames.append(
             KeypointFrame(
@@ -106,14 +136,7 @@ def array_to_marker_frames(
         for j, name in enumerate(marker_names):
             if name in frame.markers:
                 marker = frame.markers[name]
-                new_markers[name] = Marker(
-                    name=name,
-                    x=float(data[i, j, 0]),
-                    y=float(data[i, j, 1]),
-                    z=float(data[i, j, 2]),
-                    residual=marker.residual,
-                    occluded=marker.occluded,
-                )
+                new_markers[name] = _marker_from_array(data, i, j, name, marker)
 
         new_frames.append(
             MarkerFrame(
@@ -141,15 +164,7 @@ def array_to_keypoint_frames_at_timestamps(
                 seq.frames[0].keypoints[j] if j < len(seq.frames[0].keypoints) else None
             )
             if kp is not None:
-                new_keypoints.append(
-                    Keypoint(
-                        x=float(data[i, j, 0]),
-                        y=float(data[i, j, 1]),
-                        z=float(data[i, j, 2]) if kp.z is not None else None,
-                        confidence=kp.confidence,
-                        name=kp.name,
-                    )
-                )
+                new_keypoints.append(_keypoint_from_array(data, i, j, kp))
 
         new_frames.append(
             KeypointFrame(
@@ -177,14 +192,7 @@ def array_to_marker_frames_at_timestamps(
         for j, name in enumerate(marker_names):
             if name in traj.frames[0].markers:
                 marker = traj.frames[0].markers[name]
-                new_markers[name] = Marker(
-                    name=name,
-                    x=float(data[i, j, 0]),
-                    y=float(data[i, j, 1]),
-                    z=float(data[i, j, 2]),
-                    residual=marker.residual,
-                    occluded=marker.occluded,
-                )
+                new_markers[name] = _marker_from_array(data, i, j, name, marker)
 
         new_frames.append(
             MarkerFrame(

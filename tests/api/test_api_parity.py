@@ -22,6 +22,9 @@ from unittest.mock import patch
 
 import pytest
 
+os.environ.setdefault("DATABASE_URL", "sqlite://")
+os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
+
 try:
     from fastapi.testclient import TestClient
     from src.api.server import app

@@ -21,6 +21,8 @@ from src.shared.python.spatial_algebra.pose6dof.rotations import (
     rotation_matrix_to_quaternion as spatial_rotation_matrix_to_quaternion,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_quaternion_q0_nonnegative_after_canonicalize() -> None:
     q = np.array([-0.5, 0.5, 0.5, -0.5])

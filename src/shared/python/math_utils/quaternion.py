@@ -23,7 +23,7 @@ def rotmat_to_quat(rot: np.ndarray) -> np.ndarray:
         for i in range(arr.shape[0]):
             out[i] = _single_rotmat_to_quat(arr[i])
         return _canonicalize_sign(out)
-    raise ValueError(f"rot must have shape (..., 3, 3); got {arr.shape}")
+    raise ValueError(f"rot must have shape (3, 3) or (..., 3, 3); got {arr.shape}")
 
 
 def _single_rotmat_to_quat(r: np.ndarray) -> np.ndarray:
