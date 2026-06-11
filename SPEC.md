@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.348                                            |
+| **Spec Version**        | 1.0.349                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Decomposed pendulum perturbation metric extraction and
+  profile comparison into focused helpers so changed analyzer code stays within
+  the architecture function-size budget without changing public metric output.
 - **2026-06-11** - Aligned pendulum perturbation analyzer guard failures with
   the unit-level contract: invalid `extract_metrics()` inputs and missing
   `set_base_torque_profile()` preconditions now surface as `TypeError`
