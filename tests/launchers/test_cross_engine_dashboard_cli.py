@@ -18,7 +18,13 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from typing import Any
+
 from src.launchers import cross_engine_dashboard as ced
+from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
+    CrossEngineRunResult,
+    EngineTrialMetrics,
+)
 
 
 def test_stub_engine_reset_and_step() -> None:
@@ -48,7 +54,7 @@ def test_try_build_real_engine_returns_none_on_unknown() -> None:
 
 
 def test_build_engine_returns_stub_for_unknown() -> None:
-    eng = ced._build_engine("pendulum_stub")
+    eng: Any = ced._build_engine("pendulum_stub")
     # Whatever it is, calling step / reset / get_state must work.
     eng.reset()
     eng.set_control(np.zeros(2))
@@ -109,6 +115,55 @@ def test_run_headless_raises_for_empty_engine_list() -> None:
         ced._run_headless([], config)
 
 
+def test_cv_values_and_robustness_score_match_dashboard_order() -> None:
+    summary = {
+        "cv_total_energy_final": 0.1,
+        "cv_end_effector_speed_final": 0.2,
+        "cv_peak_end_effector_speed": 0.3,
+    }
+
+    values = ced._cv_values(summary)
+
+    assert values == [0.1, 0.2, 0.3]
+    assert ced._robustness_score(values) == pytest.approx(0.8)
+
+
+def test_cv_values_default_missing_metrics_to_zero() -> None:
+    assert ced._cv_values({"cv_total_energy_final": 0.25}) == [0.25, 0.0, 0.0]
+
+
+def test_trial_zero_trajectories_extracts_only_2d_capable_runs() -> None:
+    good_traj = np.ones((3, 2))
+    one_dimensional = np.ones((3,))
+    too_few_columns = np.ones((3, 1))
+    results = {
+        "good": CrossEngineRunResult(
+            "good",
+            metrics_per_trial=[
+                EngineTrialMetrics(1.0, 2.0, 3.0, good_traj, np.zeros((3, 2)))
+            ],
+        ),
+        "empty": CrossEngineRunResult("empty"),
+        "one_dimensional": CrossEngineRunResult(
+            "one_dimensional",
+            metrics_per_trial=[
+                EngineTrialMetrics(1.0, 2.0, 3.0, one_dimensional, np.zeros((3,)))
+            ],
+        ),
+        "too_few_columns": CrossEngineRunResult(
+            "too_few_columns",
+            metrics_per_trial=[
+                EngineTrialMetrics(1.0, 2.0, 3.0, too_few_columns, np.zeros((3, 1)))
+            ],
+        ),
+    }
+
+    trajectories = ced._trial_zero_trajectories(results)
+
+    assert list(trajectories) == ["good"]
+    np.testing.assert_array_equal(trajectories["good"], good_traj)
+
+
 def test_main_no_engine_names_exits() -> None:
     with pytest.raises(SystemExit):
         ced.main(["--no-gui", "--engines", " , ,"])
@@ -165,9 +220,27 @@ def test_create_dashboard_window_class_returns_window_object(qapp) -> None:
     obj.deleteLater()
 
 
-def test_cross_engine_dashboard_window_new_raises() -> None:
-    with pytest.raises(NotImplementedError):
-        ced.CrossEngineDashboardWindow()
+def test_cross_engine_dashboard_window_factory_returns_window(qapp) -> None:
+    win = ced.CrossEngineDashboardWindow()
+    assert win is not None
+    win.deleteLater()
+
+
+def test_load_dashboard_mpl_bindings_disables_broken_subplot(monkeypatch) -> None:
+    healthy_bindings = ced._load_dashboard_mpl_bindings()
+    figure_class = healthy_bindings.Figure
+    original_add_subplot = figure_class.add_subplot
+
+    def broken_add_subplot(self, *args, **kwargs):
+        raise TypeError("broken subplot")
+
+    monkeypatch.setattr(figure_class, "add_subplot", broken_add_subplot)
+    try:
+        bindings = ced._load_dashboard_mpl_bindings()
+    finally:
+        monkeypatch.setattr(figure_class, "add_subplot", original_add_subplot)
+
+    assert bindings.has_mpl is False
 
 
 def test_dashboard_window_on_run_with_no_engines(qapp) -> None:
