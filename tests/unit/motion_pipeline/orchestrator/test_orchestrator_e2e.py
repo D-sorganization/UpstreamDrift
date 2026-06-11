@@ -53,6 +53,7 @@ from src.shared.python.motion_pipeline.contracts import (
 from src.shared.python.motion_pipeline.ik.geometric_backend import forward_kinematics
 from src.shared.python.motion_pipeline.orchestrator import (
     AdapterOverride,
+    InvalidInputError,
     MotionPipeline,
     PipelineConfig,
 )
@@ -206,6 +207,53 @@ def test_orchestrator_matching_routes_through_make_matching_solver(
     assert captured["backend"].value == "pinocchio_inverse_dyn"
 
 
+@pytest.mark.unit
+def test_mujoco_placeholder_matching_failure_is_invalid_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The MuJoCo placeholder path must surface as a 4xx-class failure."""
+    import src.shared.python.motion_pipeline.matching.base as matching_base
+
+    rig = _synthetic_rig()
+    traj = _synthetic_markers(rig)
+
+    class _FakeResult:
+        def to_contract(self) -> MotionMatchingResult:
+            return MotionMatchingResult(
+                request_id="fake",
+                success=False,
+                error_metrics={"rmse": 0.0, "max_error": 0.0, "max_torque": 0.0},
+                message=(
+                    "MuJoCo present but produced zero torques from the placeholder "
+                    "model (no real solve)"
+                ),
+                metadata={
+                    "backend": "mujoco_torque",
+                    "mujoco_available": True,
+                    "n_frames": traj.num_frames,
+                },
+            )
+
+    class _FakeSolver:
+        def match(self, reference, rig, request=None):  # type: ignore[no-untyped-def]
+            return _FakeResult()
+
+    monkeypatch.setattr(
+        matching_base,
+        "make_matching_solver",
+        lambda backend, cost_weights=None: _FakeSolver(),
+    )
+
+    config = PipelineConfig(
+        adapter=AdapterOverride(format="passthrough"),
+        ik_backend="geometric",
+        matching_backend="mujoco",
+    )
+    pipeline = _PipelineWithDefaultRig(config, rig)
+    with pytest.raises(InvalidInputError, match="no real solve"):
+        pipeline.run(traj)
+
+
 @pytest.mark.skipif(not _HAVE_MUJOCO, reason="mujoco not installed")
 def test_orchestrator_mujoco_matching_fails_without_real_model() -> None:
     """The MuJoCo torque backend yields no real solve from an empty model.
@@ -223,5 +271,5 @@ def test_orchestrator_mujoco_matching_fails_without_real_model() -> None:
         matching_backend="mujoco",
     )
     pipeline = _PipelineWithDefaultRig(config, rig)
-    with pytest.raises(RuntimeError, match="Motion matching"):
+    with pytest.raises(InvalidInputError, match="no real solve"):
         pipeline.run(traj)

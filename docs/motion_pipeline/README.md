@@ -21,10 +21,15 @@ curl -X POST http://localhost:8000/api/v1/motion-pipeline/run \
   -F "file=@your_motion_data.c3d" \
   -F "source_format=c3d" \
   -F "ik_backend=mujoco" \
-  -F "matching_backend=mujoco"
+  -F "matching_backend=pinocchio"
 ```
 
 This will return a JSON response containing the solved kinematics and motion matching metrics.
+
+The MuJoCo motion-matching backend is reserved for real-model integration work.
+If selected without a real dynamics model, the API returns a 400-class
+configuration error instead of reporting placeholder zero torques as a
+successful solve.
 
 ---
 

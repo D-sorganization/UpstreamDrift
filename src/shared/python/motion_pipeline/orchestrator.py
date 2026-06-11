@@ -505,16 +505,35 @@ class MotionPipeline:
             # Convert the internal dataclass result to the canonical
             # contract result the rest of the pipeline expects.
             contract_result = result.to_contract()
+            solver_metadata = dict(contract_result.metadata or {})
+            error_metrics = dict(contract_result.error_metrics or {})
+            stage_metadata = {
+                "backend": backend,
+                "solver_backend": solver_backend.value,
+                "solve_time": contract_result.solve_time,
+                "error_metrics": error_metrics,
+                "solver_metadata": solver_metadata,
+            }
+
+            if not contract_result.success:
+                error_kind = "internal"
+                if self._is_unavailable_mujoco_matching_backend(
+                    solver_backend, solver_metadata, error_metrics
+                ):
+                    error_kind = "invalid_input"
+                return StageResult(
+                    success=False,
+                    data=None,
+                    metadata=stage_metadata,
+                    error=contract_result.message
+                    or f"{backend} motion matching did not produce a valid solve",
+                    error_kind=error_kind,
+                )
 
             return StageResult(
-                success=contract_result.success,
+                success=True,
                 data=contract_result,
-                metadata={
-                    "backend": backend,
-                    "solver_backend": solver_backend.value,
-                    "solve_time": contract_result.solve_time,
-                    "error_metrics": contract_result.error_metrics,
-                },
+                metadata=stage_metadata,
             )
 
         except ImportError as e:
@@ -531,6 +550,23 @@ class MotionPipeline:
                 metadata={},
                 error=f"Motion matching failed: {e}",
             )
+
+    @staticmethod
+    def _is_unavailable_mujoco_matching_backend(
+        solver_backend: MatchingBackendType,
+        solver_metadata: dict[str, Any],
+        error_metrics: dict[str, Any],
+    ) -> bool:
+        """Return True for known caller-actionable MuJoCo matching gaps."""
+        if solver_backend is not MatchingBackendType.TORQUE_MUJOCO:
+            return False
+        if solver_metadata.get("mujoco_available") is False:
+            return True
+        max_torque = error_metrics.get("max_torque")
+        try:
+            return max_torque is not None and float(max_torque) == 0.0
+        except (TypeError, ValueError):
+            return False
 
     # -------------------------------------------------------------------------
     # Main Entry Point
