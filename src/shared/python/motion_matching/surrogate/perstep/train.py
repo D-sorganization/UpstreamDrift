@@ -23,6 +23,7 @@ except OSError as exc:  # Broken local torch installs fail this way on import.
         "or create a CUDA venv as documented in README.md."
     ) from exc
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_DATASET = SCRIPT_DIR / "data" / "processed" / "golf_inverse_ready.parquet"
@@ -364,10 +365,10 @@ def _save_best_checkpoint(
             "model_state_dict": runtime.model.state_dict(),
             "input_columns": data.input_columns,
             "target_columns": data.target_columns,
-            "x_mean": data.x_mean,
-            "x_std": data.x_std,
-            "y_mean": data.y_mean,
-            "y_std": data.y_std,
+            "x_mean": data.x_mean.tolist(),
+            "x_std": data.x_std.tolist(),
+            "y_mean": data.y_mean.tolist(),
+            "y_std": data.y_std.tolist(),
             "config": asdict(config),
         },
         runtime.best_path,
@@ -380,8 +381,11 @@ def _evaluate_best_model(
     runtime: _RuntimeObjects,
     best_val: float,
 ) -> dict[str, object]:
-    checkpoint = torch.load(
-        runtime.best_path, map_location=runtime.device, weights_only=False
+    checkpoint = load_checkpoint_dict(
+        runtime.best_path,
+        map_location=runtime.device,
+        required_keys=("model_state_dict",),
+        artifact_name="per-step surrogate checkpoint",
     )
     runtime.model.load_state_dict(checkpoint["model_state_dict"])
     runtime.model.eval()

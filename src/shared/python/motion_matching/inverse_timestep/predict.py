@@ -14,6 +14,8 @@ import numpy as np
 import torch
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
+
 from .model import TimestepInverseDynamics
 
 logger = logging.getLogger(__name__)
@@ -150,9 +152,12 @@ def load_with_stats(
     suitable for :func:`predict_torques`.
     """
     ckpt_path = Path(checkpoint_path)
-    if not ckpt_path.exists():
-        raise FileNotFoundError(f"checkpoint not found: {ckpt_path}")
-    payload = torch.load(ckpt_path, map_location=map_location, weights_only=False)
+    payload = load_checkpoint_dict(
+        ckpt_path,
+        map_location=map_location,
+        required_keys=("state_dict", "config", "schema_version"),
+        artifact_name="TimestepInverseDynamics checkpoint",
+    )
     model = TimestepInverseDynamics.from_checkpoint(
         ckpt_path, map_location=map_location
     )

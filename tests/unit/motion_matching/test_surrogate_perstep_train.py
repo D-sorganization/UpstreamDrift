@@ -11,6 +11,7 @@ import pytest
 
 pytest.importorskip("torch")
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
 from src.shared.python.motion_matching.surrogate.perstep.train import (
     TrainConfig,
     _make_splits,
@@ -130,9 +131,8 @@ def test_compute_phase_stratified_metrics():
 
     assert compute_phase_stratified_metrics(pred, target, time) == {}
 
-    time = np.array([1.0, 1.0])
-    assert compute_phase_stratified_metrics(pred, target, time) == {}
-    assert compute_phase_stratified_metrics(pred, target, time) == {}
+    time_nonempty = np.array([1.0, 1.0])
+    assert compute_phase_stratified_metrics(pred, target, time_nonempty) == {}
 
 
 @pytest.mark.unit
@@ -176,3 +176,12 @@ def test_train_loop(tmp_path: Path):
     assert metrics["target_dim"] == 3
     assert "best_val_loss_scaled" in metrics
     assert "test_rmse_mean_unscaled" in metrics
+
+    checkpoint = load_checkpoint_dict(
+        out_dir / "best_model.pt",
+        required_keys=("x_mean", "x_std", "y_mean", "y_std"),
+    )
+    assert isinstance(checkpoint["x_mean"], list)
+    assert isinstance(checkpoint["x_std"], list)
+    assert isinstance(checkpoint["y_mean"], list)
+    assert isinstance(checkpoint["y_std"], list)

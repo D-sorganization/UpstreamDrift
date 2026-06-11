@@ -37,6 +37,11 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
+from src.shared.python.motion_matching._checkpoint_artifacts import (
+    load_checkpoint_dict,
+    require_schema_version,
+)
+
 from .cvae import (
     COEFFICIENT_LETTER_BOUNDS,
     COEFFICIENTS_PER_JOINT,
@@ -329,7 +334,9 @@ class InverseRegressor(nn.Module):
             h = block(h)
         h = self.head_norm(h)
         raw = self.head(h)
-        return torch.tanh(raw) * self.coefficient_scale
+        scale = self.coefficient_scale
+        assert isinstance(scale, Tensor)
+        return torch.tanh(raw) * scale
 
     # ----- (de)serialisation ----- #
 
@@ -357,11 +364,17 @@ class InverseRegressor(nn.Module):
         ckpt_path = Path(path)
         if not ckpt_path.exists():
             raise FileNotFoundError(f"checkpoint not found: {ckpt_path}")
-        payload = torch.load(ckpt_path, map_location=map_location, weights_only=False)
-        if not isinstance(payload, dict) or "state_dict" not in payload:
-            raise ValueError(
-                f"checkpoint at {ckpt_path} is not an InverseRegressor payload"
-            )
+        payload = load_checkpoint_dict(
+            ckpt_path,
+            map_location=map_location,
+            required_keys=("state_dict", "config", "schema_version"),
+            artifact_name="InverseRegressor checkpoint",
+        )
+        require_schema_version(
+            payload,
+            cls.SCHEMA_VERSION,
+            artifact_name="InverseRegressor checkpoint",
+        )
         cfg_dict = payload.get("config")
         if cfg_dict is None:
             raise ValueError("checkpoint missing 'config' entry")
