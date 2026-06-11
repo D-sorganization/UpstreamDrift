@@ -54,7 +54,11 @@ class FlightModelType(Enum):
 
 @dataclass
 class UnifiedLaunchConditions:
-    """Standardized launch conditions SI units."""
+    """Launch conditions with explicit units.
+
+    ``ball_speed`` is m/s; angular fields are radians; ``spin_rate`` is RPM;
+    ``wind_speed`` is m/s; mass, radius, density, and gravity are SI units.
+    """
 
     ball_speed: float
     launch_angle: float
@@ -67,6 +71,41 @@ class UnifiedLaunchConditions:
     gravity: float = STD_GRAVITY
     wind_speed: float = 0.0
     wind_direction: float = 0.0
+
+    def __post_init__(self) -> None:
+        fields = {
+            "ball_speed": self.ball_speed,
+            "launch_angle": self.launch_angle,
+            "azimuth_angle": self.azimuth_angle,
+            "spin_rate": self.spin_rate,
+            "spin_axis_angle": self.spin_axis_angle,
+            "ball_mass": self.ball_mass,
+            "ball_radius": self.ball_radius,
+            "air_density": self.air_density,
+            "gravity": self.gravity,
+            "wind_speed": self.wind_speed,
+            "wind_direction": self.wind_direction,
+        }
+        for name, value in fields.items():
+            if not math.isfinite(value):
+                raise ValueError(f"{name} must be finite; got {value!r}")
+        if self.ball_speed < 0.0:
+            raise ValueError(f"ball_speed must be >= 0; got {self.ball_speed!r}")
+        if self.spin_rate < 0.0:
+            raise ValueError(f"spin_rate must be RPM and >= 0; got {self.spin_rate!r}")
+        if self.ball_mass <= 0.0:
+            raise ValueError(f"ball_mass must be > 0; got {self.ball_mass!r}")
+        if self.ball_radius <= 0.0:
+            raise ValueError(f"ball_radius must be > 0; got {self.ball_radius!r}")
+        if self.air_density <= 0.0:
+            raise ValueError(f"air_density must be > 0; got {self.air_density!r}")
+        if self.gravity <= 0.0:
+            raise ValueError(f"gravity must be > 0; got {self.gravity!r}")
+        if not abs(self.launch_angle) <= math.pi / 2.0:
+            raise ValueError(
+                "launch_angle is radians and must be within [-pi/2, pi/2] — "
+                "did you pass degrees? Use from_imperial()."
+            )
 
     @classmethod
     def from_imperial(

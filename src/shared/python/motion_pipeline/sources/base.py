@@ -49,7 +49,13 @@ LoadedPayload = (
 
 #: Unit systems an adapter may report.
 UnitSystem = Literal[
-    "meters", "millimeters", "pixels", "degrees", "radians", "normalized"
+    "meters",
+    "centimeters",
+    "millimeters",
+    "pixels",
+    "degrees",
+    "radians",
+    "normalized",
 ]
 
 

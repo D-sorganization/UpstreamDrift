@@ -20,6 +20,7 @@ Layout::
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from src.shared.python.motion_pipeline.contracts import (
@@ -29,13 +30,21 @@ from src.shared.python.motion_pipeline.contracts import (
     MarkerTrajectory,
 )
 from src.shared.python.motion_pipeline.sources.base import (
+    AdapterContractError,
     MocapSourceAdapter,
     SourceMetadata,
 )
 from src.shared.python.motion_pipeline.sources._marker_coordinates import (
     has_nan_coordinate,
 )
+from src.shared.python.motion_pipeline.sources._unit_contracts import (
+    normalize_spatial_units,
+    require_rust_prescaled_units_are_trusted,
+    resolve_fps,
+)
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
+
+logger = logging.getLogger(__name__)
 
 try:  # pragma: no cover - native wheel may not be installed
     import upstream_mocap_io as _rust_io  # type: ignore[import-not-found]
@@ -85,31 +94,54 @@ class TRCAdapter(MocapSourceAdapter):
         marker_names = [t.strip() for t in marker_tokens[2:] if t.strip()]
         return {"header": header, "marker_names": marker_names}
 
+    def _resolve_header_fps(
+        self,
+        header: dict[object, object],
+        path: Path,
+        *,
+        allow_default: bool,
+    ) -> float:
+        try:
+            data_rate = float(header.get("DataRate", 0.0))
+        except (TypeError, ValueError):
+            data_rate = 0.0
+        if data_rate > 0:
+            return resolve_fps(
+                data_rate,
+                format_name="TRC",
+                path=path,
+                logger=logger,
+                allow_default=allow_default,
+            )
+        return resolve_fps(
+            header.get("CameraRate", 0.0),
+            format_name="TRC",
+            path=path,
+            logger=logger,
+            allow_default=allow_default,
+        )
+
     def metadata(self, path: Path) -> SourceMetadata:
         p = Path(path)
         lines = p.read_text(encoding="utf-8").splitlines()
         info = self._parse_header(lines)
         header: dict = info["header"]  # type: ignore[assignment]
-        try:
-            fps = float(header.get("DataRate", 0.0))
-        except (TypeError, ValueError):
-            fps = 0.0
-        if fps <= 0:
-            try:
-                fps = float(header.get("CameraRate", 30.0)) or 30.0
-            except (TypeError, ValueError):
-                fps = 30.0
+        fps = self._resolve_header_fps(header, p, allow_default=True)
         try:
             num_frames = int(header.get("NumFrames", 0))
         except (TypeError, ValueError):
             num_frames = 0
         units_str = str(header.get("Units", "mm")).strip().lower()
-        unit_system = "millimeters" if units_str.startswith("mm") else "meters"
+        unit_contract = normalize_spatial_units(
+            units_str,
+            format_name="TRC",
+            path=p,
+        )
         return SourceMetadata(
             format_name=self.format_name,
             fps=fps,
             frame_count=num_frames,
-            unit_system=unit_system,  # type: ignore[arg-type]
+            unit_system=unit_contract.metadata_unit_system,
             marker_set_name=None,
             notes=f"markers={len(info['marker_names'])}",  # type: ignore[arg-type]
         )
@@ -125,6 +157,8 @@ class TRCAdapter(MocapSourceAdapter):
         if _HAS_RUST:
             try:
                 return self._load_via_rust(p, calibration)
+            except AdapterContractError:
+                pass
             except (
                 Exception  # noqa: BLE001 - fall back to Python parser on any Rust failure
             ):  # pragma: no cover - Rust parser disagreement
@@ -136,7 +170,12 @@ class TRCAdapter(MocapSourceAdapter):
         marker_names: list[str] = info["marker_names"]  # type: ignore[assignment]
         header: dict = info["header"]  # type: ignore[assignment]
         units_str = str(header.get("Units", "mm")).strip().lower()
-        scale = _MM_TO_M if units_str.startswith("mm") else 1.0
+        self._resolve_header_fps(header, p, allow_default=False)
+        scale = normalize_spatial_units(
+            units_str,
+            format_name="TRC",
+            path=p,
+        ).scale_to_meters
 
         frames: list[MarkerFrame] = []
         # Data starts at line 5 (after 2 header lines, marker name line, axis line)
@@ -203,8 +242,19 @@ class TRCAdapter(MocapSourceAdapter):
         positions = r["positions"]  # (n_frames, n_markers * 3) float32, meters
         labels: list[str] = list(r["labels"])
         n_frames = int(r["n_frames"])
-        fps = float(r["fps"]) or 30.0
         units_str = str(r["units"]).strip().lower() or "mm"
+        require_rust_prescaled_units_are_trusted(
+            units_str,
+            format_name="TRC",
+            path=p,
+        )
+        fps = resolve_fps(
+            r["fps"],
+            format_name="TRC",
+            path=p,
+            logger=logger,
+            allow_default=False,
+        )
 
         # Re-read just the data lines to recover the per-row time + frame
         # index columns from the file (the Rust API does not surface them).

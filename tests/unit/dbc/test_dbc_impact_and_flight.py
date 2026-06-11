@@ -347,6 +347,34 @@ class TestSimulateTrajectoryPreconditions(unittest.TestCase):
         with self.assertRaises((ContractViolationError, ValueError)):
             sim.simulate_trajectory(launch, max_time=-1.0)
 
+    def test_degree_launch_angle_rejected(self) -> None:
+        from src.shared.python.core.contracts import ContractViolationError
+        from src.shared.python.physics.ball_flight_physics import (
+            BallFlightSimulator,
+            LaunchConditions,
+        )
+
+        sim = BallFlightSimulator()
+        launch = LaunchConditions(velocity=50.0, launch_angle=12.0)
+        with self.assertRaises((ContractViolationError, ValueError)):
+            sim.simulate_trajectory(launch)
+
+    def test_nan_spin_rate_rejected(self) -> None:
+        from src.shared.python.core.contracts import ContractViolationError
+        from src.shared.python.physics.ball_flight_physics import (
+            BallFlightSimulator,
+            LaunchConditions,
+        )
+
+        sim = BallFlightSimulator()
+        launch = LaunchConditions(
+            velocity=50.0,
+            launch_angle=0.2,
+            spin_rate=float("nan"),
+        )
+        with self.assertRaises((ContractViolationError, ValueError)):
+            sim.simulate_trajectory(launch)
+
 
 class TestBallPropertiesPostconditions(unittest.TestCase):
     """BallProperties derived values must be physically consistent."""

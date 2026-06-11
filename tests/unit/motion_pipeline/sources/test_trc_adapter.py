@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from src.shared.python.motion_pipeline.sources.base import AdapterContractError
 from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 
 _TRC = "\n".join(
@@ -50,6 +51,55 @@ def test_trc_load_converts_mm_to_meters(tmp_path: Path) -> None:
     assert head_first.x == pytest.approx(1.0)
     assert head_first.y == pytest.approx(2.0)
     assert head_first.z == pytest.approx(3.0)
+
+
+def test_trc_load_converts_cm_to_meters_python_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.sources.trc_adapter._HAS_RUST", False
+    )
+    p = _write_trc(tmp_path)
+    p.write_text(_TRC.replace("\tmm\t", "\tcm\t"), encoding="utf-8")
+
+    traj = TRCAdapter().load_checked(p)
+
+    head_first = traj.frames[0].markers["HEAD"]
+    assert head_first.x == pytest.approx(10.0)
+    assert head_first.y == pytest.approx(20.0)
+    assert head_first.z == pytest.approx(30.0)
+    assert traj.metadata["units"] == "cm"
+
+
+def test_trc_rejects_unknown_units(tmp_path: Path) -> None:
+    p = _write_trc(tmp_path)
+    p.write_text(_TRC.replace("\tmm\t", "\tinches\t"), encoding="utf-8")
+
+    with pytest.raises(AdapterContractError, match="Unsupported TRC units"):
+        TRCAdapter().metadata(p)
+
+
+def test_trc_metadata_warns_when_defaulting_fps(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    content = "\n".join(
+        [
+            "PathFileType\t4\t(X/Y/Z)\tfile.trc",
+            "DataRate\tCameraRate\tNumFrames\tUnits",
+            "0\t0\t1\tmm",
+            "Frame#\tTime\tHEAD",
+            "\t\tX1\tY1\tZ1",
+            "1\t0.0\t1.0\t2.0\t3.0",
+        ]
+    )
+    p = tmp_path / "fallback_fps.trc"
+    p.write_text(content, encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        md = TRCAdapter().metadata(p)
+
+    assert md.fps == pytest.approx(30.0)
+    assert "defaulting TRC fps to 30.0" in caplog.text
 
 
 def test_trc_load_treats_nan_coordinates_as_occluded(tmp_path: Path) -> None:

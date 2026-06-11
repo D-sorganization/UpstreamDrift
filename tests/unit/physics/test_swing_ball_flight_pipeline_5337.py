@@ -292,6 +292,58 @@ class TestPipelinePreconditions:
         with pytest.raises((ValueError, PreconditionError)):
             SwingBallFlightPipeline(flight_dt=-0.01)
 
+    def test_launch_validation_rejects_degree_angle_on_radian_field(self):
+        launch = LaunchConditions(
+            velocity=70.0,
+            launch_angle=12.0,
+            azimuth_angle=0.0,
+            spin_rate=2500.0,
+        )
+
+        with pytest.raises((ValueError, PreconditionError), match="radians"):
+            SwingBallFlightPipeline._validate_launch_conditions(launch)
+
+    def test_launch_validation_rejects_degree_azimuth_on_radian_field(self):
+        launch = LaunchConditions(
+            velocity=70.0,
+            launch_angle=math.radians(12.0),
+            azimuth_angle=180.0,
+            spin_rate=2500.0,
+        )
+
+        with pytest.raises((ValueError, PreconditionError), match="azimuth_angle"):
+            SwingBallFlightPipeline._validate_launch_conditions(launch)
+
+    def test_launch_validation_rejects_nan_spin_rate(self):
+        launch = LaunchConditions(
+            velocity=70.0,
+            launch_angle=math.radians(12.0),
+            azimuth_angle=0.0,
+            spin_rate=float("nan"),
+        )
+
+        with pytest.raises((ValueError, PreconditionError), match="spin_rate"):
+            SwingBallFlightPipeline._validate_launch_conditions(launch)
+
+    def test_result_sanity_rejects_unrealistic_carry_for_realistic_launch(self):
+        result = PipelineResult(
+            swing_state=_make_swing(),
+            impact_state=_make_post_impact(),
+            launch_conditions=LaunchConditions(
+                velocity=70.0,
+                launch_angle=math.radians(12.0),
+                spin_rate=2500.0,
+            ),
+            trajectory=_make_trajectory(n_points=2),
+            carry_m=5.0,
+            max_height_m=2.0,
+            flight_time_s=1.0,
+            landing_angle_deg=20.0,
+        )
+
+        with pytest.raises((ValueError, PreconditionError), match="carry_m"):
+            SwingBallFlightPipeline._validate_result_sanity(result)
+
 
 # ===========================================================================
 # _LaunchConditionsDeriver unit tests
