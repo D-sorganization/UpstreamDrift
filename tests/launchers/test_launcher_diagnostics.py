@@ -4,6 +4,7 @@ import json  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
+import pytest  # noqa: E402
 import yaml  # noqa: E402
 from src.launchers.launcher_diagnostics import (  # noqa: E402
     DiagnosticResult,
@@ -332,6 +333,7 @@ def test_check_engine_availability_success(mock_manager_class) -> None:
     assert res.status == "pass"
 
 
+@pytest.mark.unit
 def test_reset_layout_config_overwrites_existing_backup(tmp_path: Path) -> None:
     config_file = tmp_path / "launcher_layout.json"
     backup_file = config_file.with_suffix(".json.bak")
