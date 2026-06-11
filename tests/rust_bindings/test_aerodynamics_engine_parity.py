@@ -152,6 +152,18 @@ class TestAerodynamicsEngineParity:
         # Drag normally dominates → removing it changes total
         assert not np.allclose(f_all, f_no_drag)
 
+    def test_lift_toggle_does_not_double_count_spin_force(self) -> None:
+        """The combined kernel has one spin force even with legacy lift enabled."""
+        v = np.array([70.0, 0.0, 30.0])
+        s = np.array([0.0, 300.0, 0.0])
+
+        f_all = _python_fallback_total(_make_spec(), v, s)
+        f_lift_disabled = _python_fallback_total(_make_spec(lift_enabled=False), v, s)
+        f_spin_disabled = _python_fallback_total(_make_spec(magnus_enabled=False), v, s)
+
+        np.testing.assert_allclose(f_all, f_lift_disabled, rtol=1e-12, atol=1e-12)
+        assert not np.allclose(f_all, f_spin_disabled)
+
     def test_fallback_reference_identity(self) -> None:
         """Fallback and reference are the same function — sanity guard.
 

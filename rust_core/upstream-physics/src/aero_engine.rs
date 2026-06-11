@@ -6,8 +6,7 @@
 //!
 //! Composition (orthogonal, all toggleable):
 //!   F_total = (drag_enabled ? drag(v - wind)) +
-//!             (lift_enabled ? lift(v - wind, spin)) +
-//!             (magnus_enabled ? magnus(v - wind, spin))
+//!             (magnus_enabled ? single spin-induced magnus/lift(v - wind, spin))
 //!
 //! Wind is supplied by an optional `WindModel`. When `None` the relative
 //! velocity equals the ball velocity (no wind).
@@ -22,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use tools_core::Vector3;
 
 use crate::aerodynamics::{
-    compute_drag, compute_lift, compute_magnus, AeroBallProperties, AeroForces, AirProperties,
+    compute_drag, compute_magnus, AeroBallProperties, AeroForces, AirProperties,
 };
 use crate::wind::WindModel;
 
@@ -63,7 +62,7 @@ impl AeroEngineConfig {
     }
 }
 
-/// `AerodynamicsEngine` — combines drag/lift/magnus + optional wind.
+/// `AerodynamicsEngine` — combines drag and one spin-induced Magnus/lift force + optional wind.
 ///
 /// The engine owns its ball/air parameters by value; callers that want
 /// to change parameters mid-simulation should build a fresh engine.
@@ -94,7 +93,10 @@ impl AerodynamicsEngine {
         })
     }
 
-    /// Compute the full force breakdown (drag/lift/magnus).
+    /// Compute the full force breakdown.
+    ///
+    /// The `lift` field is retained for ABI compatibility, but the combined
+    /// kernel keeps it zero so spin lift is not counted twice alongside Magnus.
     ///
     /// `position` and `t` are used only when a `WindModel` is attached.
     #[must_use]
@@ -123,11 +125,7 @@ impl AerodynamicsEngine {
             Vector3::zero()
         };
 
-        let lift = if self.config.lift_active() {
-            compute_lift(&rel_velocity, spin, &self.ball, &self.air)
-        } else {
-            Vector3::zero()
-        };
+        let lift = Vector3::zero();
 
         let magnus = if self.config.magnus_active() {
             compute_magnus(&rel_velocity, spin, &self.ball, &self.air)
@@ -138,7 +136,7 @@ impl AerodynamicsEngine {
         AeroForces { drag, lift, magnus }
     }
 
-    /// Sum of drag + lift + magnus.
+    /// Sum of drag + magnus. The legacy lift slot is kept zero.
     #[must_use]
     pub fn compute_total_force(
         &self,

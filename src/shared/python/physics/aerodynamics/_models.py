@@ -21,7 +21,6 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_DRAG_COEFFICIENT,
     GOLF_BALL_LIFT_COEFFICIENT,
     GOLF_BALL_RADIUS_M,
-    MAGNUS_COEFFICIENT,
 )
 from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 
@@ -172,15 +171,15 @@ class LiftModel:
 
 
 class MagnusModel:
-    """Model for Magnus force from spin.
+    """Model for the single spin-induced Magnus/lift force.
 
-    The Magnus effect creates a force perpendicular to both velocity
-    and spin axis, causing hook/slice for sidespin.
+    The spin force is perpendicular to both velocity and spin axis, causing
+    lift for backspin and hook/slice curvature for sidespin.
     """
 
     def __init__(
         self,
-        coefficient: float = float(MAGNUS_COEFFICIENT),
+        coefficient: float = 0.4,
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
     ) -> None:
@@ -222,8 +221,8 @@ class MagnusModel:
         return force_magnitude * magnus_dir
 
     def _compute_magnus_coefficient(self, spin_param: float) -> float:
-        """Compute Magnus coefficient based on spin parameter."""
-        return self.coefficient * min(spin_param / 0.2, 1.0)
+        """Compute Magnus/lift coefficient based on spin parameter."""
+        return self.coefficient * (1 - math.exp(-spin_param / 0.1))
 
 
 __all__ = ["DragModel", "LiftModel", "MagnusModel"]

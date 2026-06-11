@@ -785,6 +785,29 @@ class TestEnvironmentRandomizer:
 class TestAerodynamicsEngine:
     """Tests for unified aerodynamics engine."""
 
+    def test_single_spin_force_no_lift_magnus_double_count(
+        self,
+        default_engine: AerodynamicsEngine,
+        typical_velocity: NDArray[np.floating],
+        typical_spin: NDArray[np.floating],
+    ) -> None:
+        """Combined kernel emits one spin-induced force, not lift plus Magnus."""
+        forces = default_engine.compute_forces(typical_velocity, typical_spin)
+        canonical_spin = LiftModel().calculate(
+            typical_velocity,
+            typical_spin,
+            air_density=1.225,
+        )
+
+        np.testing.assert_allclose(forces["lift"], np.zeros(3), atol=1e-12)
+        np.testing.assert_allclose(forces["magnus"], canonical_spin, rtol=1e-12)
+        np.testing.assert_allclose(
+            forces["total"],
+            forces["drag"] + forces["magnus"],
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
     def test_default_engine_creates_forces(
         self,
         default_engine: AerodynamicsEngine,

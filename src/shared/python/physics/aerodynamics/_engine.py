@@ -1,6 +1,6 @@
 """AerodynamicsEngine: unified force calculation orchestrator.
 
-Combines DragModel, LiftModel, MagnusModel with optional wind and
+Combines DragModel and one spin-induced Magnus/lift model with optional wind and
 environment randomization. All effects are independently togglable.
 """
 
@@ -22,7 +22,7 @@ from ._wind import WindModel
 class AerodynamicsEngine:
     """Unified aerodynamics calculation engine.
 
-    Combines all aerodynamic force models with optional wind and
+    Combines aerodynamic force models with optional wind and
     environment randomization. All effects can be toggled on/off.
 
     Example:
@@ -119,15 +119,10 @@ class AerodynamicsEngine:
         if self.config.is_drag_active():
             drag = self._drag.calculate(rel_velocity, self._current_air_density)
 
-        if self.config.is_lift_active():
-            lift = self._lift.calculate(rel_velocity, spin, self._current_air_density)
-
         if self.config.is_magnus_active():
-            magnus = self._magnus.calculate(
-                rel_velocity, spin, self._current_air_density
-            )
+            magnus = self._lift.calculate(rel_velocity, spin, self._current_air_density)
 
-        total = drag + lift + magnus
+        total = drag + magnus
 
         return {
             "drag": drag,
