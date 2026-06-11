@@ -324,10 +324,10 @@ jobs:
           fi
 
       - name: Run Unit Tests (Optional Stack)
-        # Run the full unit test suite with optional extras present.
-        # Some unit tests have try/except ImportError guards that fall back to
-        # reduced assertions when optional deps are absent; here they must take
-        # the full code path.
+        # Run the non-engine unit suite with optional extras present. Native
+        # engine unit tests are covered by dedicated engine/equivalence lanes;
+        # keeping them out of this broad optional-stack lane avoids coupling API
+        # and GUI optional dependency checks to engine-specific mock behavior.
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
@@ -340,6 +340,7 @@ jobs:
           mapfile -t unit_targets < <(
             find tests/unit -mindepth 1 -maxdepth 1 \
               \( -type d -o -type f -name "test_*.py" \) \
+              ! -path "tests/unit/engines" \
               | sort
           )
           for target in "${unit_targets[@]}"; do

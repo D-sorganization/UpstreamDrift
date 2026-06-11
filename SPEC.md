@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.352                                            |
+| **Spec Version**        | 1.0.353                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Made the optional-stack unit lane boundary explicit:
+  it exercises the non-engine unit suite with optional API/GUI/body-part
+  dependencies installed, while native engine unit tests remain covered by the
+  dedicated engine and cross-engine equivalence lanes. This keeps optional API
+  and GUI dependency validation from being blocked by engine-specific mock
+  behavior in full native dependency environments.
 - **2026-06-11** - Aligned deployment optional-stack device tests with the
   documented hardware-honesty contract: unavailable hardware devices remain
   disconnected and raise `StateError` for state operations, while
@@ -1237,6 +1243,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.353 | Made the optional-stack unit lane boundary explicit: the lane runs the non-engine unit suite with optional API, GUI, and body-part dependencies installed, while native engine unit tests remain covered by dedicated engine and cross-engine equivalence lanes to avoid coupling broad optional dependency validation to engine-specific mock behavior. |
 | 2026-06-11 | 1.0.352 | Aligned deployment optional-stack device tests with the hardware-honesty contract: unavailable hardware-backed input devices remain disconnected and raise `StateError` for state operations, `KeyboardMouseInput` remains the connected fallback, and `Demonstration` now carries default canonical `solver_status="success"` through recording, serialization, subsampling, and augmentation. |
 | 2026-06-11 | 1.0.351 | Restored the calc backend ODE solver response contract so `ODESolverResponse` again exposes the default `solver_status="success"` field consumed by optional-stack calc backend callers and tests. |
 | 2026-06-11 | 1.0.350 | Restored body-part visualization optional-stack contracts: `FittedShape.n_frames` again reports the validated frame count, theme and fitted-shape validation errors use the documented precise type/range messages, and CI Optional Stack installs `trimesh` before running unit chunks so mesh-backed body-part visualization tests exercise the intended full dependency path. |
