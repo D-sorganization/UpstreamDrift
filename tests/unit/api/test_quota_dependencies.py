@@ -12,6 +12,8 @@ from sqlalchemy.pool import StaticPool
 
 from src.api.auth.models import Base, SubscriptionStatus, User, UserRole
 
+pytestmark = pytest.mark.unit
+
 
 def _create_sqlite_session():
     engine = create_engine(
