@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.351                                            |
+| **Spec Version**        | 1.0.352                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Aligned deployment optional-stack device tests with the
+  documented hardware-honesty contract: unavailable hardware devices remain
+  disconnected and raise `StateError` for state operations, while
+  `KeyboardMouseInput` remains the connected fallback. `Demonstration` now
+  carries the default canonical `solver_status="success"` through recording,
+  serialization, subsampling, and augmentation.
 - **2026-06-11** - Restored the calc backend ODE solver response contract so
   `ODESolverResponse` again exposes the default `solver_status="success"`
   field consumed by optional-stack calc backend callers and tests.
@@ -1231,6 +1237,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.352 | Aligned deployment optional-stack device tests with the hardware-honesty contract: unavailable hardware-backed input devices remain disconnected and raise `StateError` for state operations, `KeyboardMouseInput` remains the connected fallback, and `Demonstration` now carries default canonical `solver_status="success"` through recording, serialization, subsampling, and augmentation. |
 | 2026-06-11 | 1.0.351 | Restored the calc backend ODE solver response contract so `ODESolverResponse` again exposes the default `solver_status="success"` field consumed by optional-stack calc backend callers and tests. |
 | 2026-06-11 | 1.0.350 | Restored body-part visualization optional-stack contracts: `FittedShape.n_frames` again reports the validated frame count, theme and fitted-shape validation errors use the documented precise type/range messages, and CI Optional Stack installs `trimesh` before running unit chunks so mesh-backed body-part visualization tests exercise the intended full dependency path. |
 | 2026-06-11 | 1.0.346 | Preserved symlink traversal security failures in model and output path validation. Candidates lexically under an allowed root now reject symlink components before resolved containment fallback can mask escaped targets as generic 404 misses, keeping Linux optional-stack path validation on the documented 400 contract. Added suite markers to newly merged unit-level regression tests so the suite-marker ratchet remains blocking without expanding the unmarked-test baseline. Runs optional-stack unit tests as serial top-level `tests/unit` chunks because full-suite optional dependency collection is xdist-unsafe and can exceed local runner memory before tests execute, and raises the bounded CI Standard tests matrix timeout so the core suite is not cancelled before its per-test timeout contract can report real failures. |
