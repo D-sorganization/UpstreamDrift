@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.334                                            |
+| **Spec Version**        | 1.0.335                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -74,6 +74,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   with explicit component access in primitive-shape distance helpers, keeping
   the robotics collision contracts unchanged while avoiding tuple unpacking
   overhead on hot paths.
+- **2026-06-11** - Restored the #7246/#7247 regression-guard cluster for
+  #7325, #7326, and #7327 after PR #7248 reverted part of the launch-condition
+  unit fix. `LaunchConditions.from_user_units(...)` is again the canonical
+  GUI/user-input boundary for degree-to-radian conversion and RPM spin, while
+  the current main gap-fill keypoint bounds guard remains in place.
 - **2026-06-11** - Promoted Law-of-Demeter enforcement from advisory
   Pinocchio-only lint to a blocking repo-wide production `src/` ratchet.
   `quality-gate.yml` now runs `scripts/ci/check_lod.py src --baseline
@@ -1102,6 +1107,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.335 | Restored the #7246/#7247 regression-guard cluster for #7325, #7326, and #7327 after PR #7248 reverted part of the launch-condition unit fix. `LaunchConditions.from_user_units(...)` is again the canonical GUI/user-input boundary for degree-to-radian conversion and RPM spin, the ball-flight GUI routes through that seam, and the current main gap-fill keypoint bounds guard remains covered by focused regression tests. |
 | 2026-06-11 | 1.0.334 | Collision distance helper optimization for #7324. Primitive-shape distance helpers now use explicit component access instead of `math.hypot(*tuple)` unpacking, preserving robotics collision behavior while avoiding tuple unpacking overhead on hot paths. |
 | 2026-06-11 | 1.0.333 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
 | 2026-06-11 | 1.0.332 | Safe motion checkpoint loading for #7276. Replaced pickle-enabled motion-matching checkpoint loads with safe artifact loading via `torch.load(..., weights_only=True)`. Validates mapping-shaped artifacts, keeping inverse, inverse-timestep, compact surrogate, and per-step surrogate loaders on the same safe contract. Exceeded surrogate train/optimize function budgets are tracked as exceptions in `architecture_budget.json`. |

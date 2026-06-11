@@ -211,13 +211,11 @@ class BallFlightWidget(QWidget):
             )
 
             speed_ms = self._speed_spin.value() * 0.44704  # mph to m/s
-            angle = self._angle_spin.value()
-            spin_rps = self._spin_spin.value() / 60.0 * 2 * np.pi  # rpm to rad/s
 
-            launch = LaunchConditions(
+            launch = LaunchConditions.from_user_units(
                 velocity=speed_ms,
-                launch_angle=angle,
-                spin_rate=spin_rps,
+                launch_angle_deg=self._angle_spin.value(),
+                spin_rate_rpm=self._spin_spin.value(),
             )
 
             sim = BallFlightSimulator()
@@ -232,7 +230,8 @@ class BallFlightWidget(QWidget):
                     f"Ball Flight Results\n"
                     f"{'=' * 40}\n"
                     f"Launch: {self._speed_spin.value():.0f} mph, "
-                    f"{angle:.1f}°, {self._spin_spin.value():.0f} rpm\n\n"
+                    f"{self._angle_spin.value():.1f}°, "
+                    f"{self._spin_spin.value():.0f} rpm\n\n"
                     f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
                     f"Max Height:  {max_h:.1f} m ({max_h * 3.28084:.1f} ft)\n"
                     f"Flight Time: {last.time:.2f} s\n"
