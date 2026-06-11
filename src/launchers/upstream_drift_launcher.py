@@ -54,6 +54,11 @@ from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_orchestrator import LauncherOrchestrator
 from src.launchers.launcher_process_cleanup_worker import ProcessCleanupWorker
 from src.launchers.launcher_process_manager import ProcessManager
+from src.launchers.launcher_simulation import (
+    DEPENDENCY_MAP,
+    dependency_cache_key,
+    dependency_probe_key,
+)
 from src.launchers.launcher_ui.frameless_window import configure_frameless_window
 from src.launchers.launcher_simulation import SimulationManager
 from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
@@ -364,6 +369,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self._sidekick_action_service_host: Any | None = None
         self._popped_out_windows: list[Any] = []
         self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
+        self._dependency_probe_workers: dict[str, Any] = {}
         self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
@@ -866,25 +872,19 @@ class UpstreamDriftLauncher(QMainWindow):
         if use_wsl or use_docker:
             return
 
-        from src.launchers.launcher_simulation import DEPENDENCY_MAP
-
-        key = model.id if model.id in DEPENDENCY_MAP else model.type
+        cache_key = dependency_cache_key(model)
+        key = dependency_probe_key(model)
         if key not in DEPENDENCY_MAP:
             return
 
-        if model_id not in self._dependency_status_cache:
+        if cache_key not in self._dependency_status_cache:
             self.lbl_status.setText(f"> Checking {model.name} dependencies...")
             self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
-            QApplication.processEvents(
-                QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
-            )
-
-            deps_ok, deps_error = self.simulation_manager._check_module_dependencies(
-                key
-            )
-            self._dependency_status_cache[model_id] = (deps_ok, deps_error)
-        else:
-            deps_ok, deps_error = self._dependency_status_cache[model_id]
+            if hasattr(self, "btn_launch"):
+                self.btn_launch.setEnabled(False)
+            self._start_dependency_probe(cache_key, model)
+            return
+        deps_ok, deps_error = self._dependency_status_cache[cache_key]
 
         if deps_ok:
             self._set_dependency_success_status()

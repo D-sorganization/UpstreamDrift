@@ -2,6 +2,8 @@
 
 import pytest
 from pathlib import Path
+import threading
+import time
 
 from src.apps.services.c3d_animation_export import export_animation
 from src.apps.core.models import C3DDataModel, MarkerData
@@ -85,3 +87,51 @@ def test_viewer_menu_action_wired(qt_app):
     win.model = model
     win._populate_ui_with_model()
     assert win.action_export_animation.isEnabled()
+
+
+def test_viewer_animation_export_runs_on_worker_thread(
+    qt_app, qtbot, tmp_path, monkeypatch
+):
+    pytest.importorskip("trimesh")
+    from src.apps.c3d_viewer import C3DViewerMainWindow
+
+    win = C3DViewerMainWindow()
+    qtbot.addWidget(win)
+    model = C3DDataModel(filepath="dummy.c3d")
+    model.markers = {"M1": MarkerData(name="M1", position=np.zeros((2, 3)))}
+    win._main_widget.model = model
+    win._populate_ui_with_model()
+
+    out_path = tmp_path / "async.mp4"
+    release_export = threading.Event()
+
+    class Result:
+        frame_count = 2
+        output_path = out_path
+
+    def slow_export(model, output_path, **kwargs):
+        kwargs["progress_callback"](1, 2)
+        release_export.wait(timeout=2)
+        return Result()
+
+    monkeypatch.setattr(
+        "src.apps.services.c3d_animation_export.export_animation", slow_export
+    )
+    monkeypatch.setattr(
+        "PyQt6.QtWidgets.QFileDialog.getSaveFileName",
+        lambda *args, **kwargs: (str(out_path), "MP4 files (*.mp4)"),
+    )
+    monkeypatch.setattr("PyQt6.QtWidgets.QMessageBox.information", lambda *args: None)
+
+    start = time.perf_counter()
+    win._export_animation_dialog()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 0.1
+    assert not win.action_export_animation.isEnabled()
+    assert not win.action_export_markers.isEnabled()
+
+    release_export.set()
+    qtbot.waitUntil(lambda: win._main_widget._export_thread is None, timeout=3000)
+    assert win.action_export_animation.isEnabled()
+    assert win.action_export_markers.isEnabled()
