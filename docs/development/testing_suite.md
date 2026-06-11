@@ -21,7 +21,6 @@ tests/
 ├── integration/         # Integration and E2E tests
 ├── learning/            # ML/RL learning pipeline tests
 ├── parity/              # Parity tests across implementations
-├── physics_validation/  # Physics model validation tests
 ├── security/            # Security-focused tests
 ├── unit/                # Unit tests (primary coverage focus)
 │   ├── ai/              # AI assistant and workflow tests
@@ -39,6 +38,10 @@ tests/
 │   └── spatial_algebra/ # Spatial algebra tests
 └── tools/               # Tool-specific tests
 ```
+
+Physics validation is split between `tests/analytical/` for closed-form
+baselines and `tests/integration/conservation_laws/` for conservation-law
+integration checks.
 
 ## Running Tests
 

@@ -7,6 +7,7 @@ runs validation tests, and generates a detailed compliance report.
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
 import logging
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,13 +18,17 @@ logger = logging.getLogger(__name__)
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
-
-from src.shared.python.data_io.path_utils import get_src_root  # noqa: E402
-
-# Add root to path
-ROOT_DIR = get_src_root()
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
+
+ROOT_DIR = _PROJECT_ROOT
+
+VALIDATION_TEST_PATHS: tuple[str, ...] = (
+    "tests/analytical",
+    "tests/integration/conservation_laws",
+)
 
 
 class _PytestPlugin:
@@ -87,8 +92,8 @@ def _run_tests_and_report(report_lines: list[str]) -> _PytestPlugin:
     logger.info("Running Pytest Suite...")
 
     plugin = _PytestPlugin()
-    test_dir = ROOT_DIR / "tests" / "physics_validation"
-    _ret_code = pytest.main(["-v", str(test_dir)], plugins=[plugin])
+    test_paths = [str(ROOT_DIR / path) for path in VALIDATION_TEST_PATHS]
+    _ret_code = pytest.main(["-v", *test_paths], plugins=[plugin])
 
     report_lines.append("| Test Case | Outcome | Duration (s) |")
     report_lines.append("|---|---|---|")

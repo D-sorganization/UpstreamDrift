@@ -64,7 +64,6 @@ jobs:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
-    continue-on-error: true # Pre-existing optional-stack test failures tracked separately
     strategy:
       fail-fast: false
       matrix:
@@ -94,15 +93,24 @@ jobs:
 
       - name: Install System Dependencies
         run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            APT_PREFIX=()
+          elif command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            APT_PREFIX=(sudo)
+          else
+            echo "::warning::No root or non-interactive sudo available; skipping system package installation."
+            exit 0
+          fi
+
           apt_retry() {
             for attempt in {1..12}; do
-              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+              if "${APT_PREFIX[@]}" apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
                 return 0
               fi
               echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
               sleep 10
             done
-            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+            "${APT_PREFIX[@]}" apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
           }
           apt_retry update
           apt_retry install -y \
@@ -237,7 +245,6 @@ jobs:
           fi
 
       - name: Run API Tests (Optional Stack)
-        continue-on-error: true
         # Run the API test suite against the full API extras installation.
         # These tests require fastapi, httpx, and related packages  -  they are
         # skipped in the core CI lane which does not install these extras.
@@ -246,27 +253,29 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           echo "### API Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
           xvfb-run --auto-servernum pytest tests/api/ \
             -p no:xvfb \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short \
             -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
-            2>&1 | tee /tmp/api-test-results.txt || true
+            2>&1 | tee /tmp/api-test-results.txt
+          rc=$?
+          set -e
 
-          passed=$(grep -c "PASSED" /tmp/api-test-results.txt || echo "0")
-          failed=$(grep -c "FAILED" /tmp/api-test-results.txt || echo "0")
-          skipped=$(grep -c "SKIPPED" /tmp/api-test-results.txt || echo "0")
+          passed=$(grep -c "PASSED" /tmp/api-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/api-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/api-test-results.txt || true)
           echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
 
-          # Fail this step if any tests explicitly failed (not skipped)
-          if [[ "$failed" -gt 0 ]]; then
-            echo "::error::$failed API test(s) failed in the optional-stack lane."
-            exit 1
+          if [[ "$rc" -ne 0 ]]; then
+            echo "::error::API tests failed in the optional-stack lane with pytest exit code $rc."
+            exit "$rc"
           fi
 
       - name: Run Pinocchio Ecosystem Tests (Optional Stack)
-        continue-on-error: true
         # Run pinocchio ecosystem tests.
         # If Pinocchio is not installed these tests self-skip via skipTest();
         # if Pinocchio IS installed they must pass without being skipped.
@@ -279,6 +288,8 @@ jobs:
             tests/engines/test_pinocchio_ecosystem.py \
             tests/engines/test_pinocchio_recorder.py \
             > /tmp/pinocchio-collect.txt
+          set +e
+          set -o pipefail
           xvfb-run --auto-servernum pytest \
             -p no:xvfb \
             tests/engines/test_pinocchio_ecosystem.py \
@@ -286,16 +297,20 @@ jobs:
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short \
-            2>&1 | tee /tmp/pinocchio-test-results.txt || true
+            2>&1 | tee /tmp/pinocchio-test-results.txt
+          rc=$?
+          set -e
 
-          passed=$(grep -c "PASSED" /tmp/pinocchio-test-results.txt || echo "0")
-          failed=$(grep -c "FAILED" /tmp/pinocchio-test-results.txt || echo "0")
-          skipped=$(grep -c "SKIPPED" /tmp/pinocchio-test-results.txt || echo "0")
+          passed=$(grep -c "PASSED" /tmp/pinocchio-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/pinocchio-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/pinocchio-test-results.txt || true)
           echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
 
-          if [[ "$failed" -gt 0 ]]; then
-            echo "::error::$failed Pinocchio ecosystem test(s) failed."
-            exit 1
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No Pinocchio ecosystem tests were collected in the optional-stack lane."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::Pinocchio ecosystem tests failed with pytest exit code $rc."
+            exit "$rc"
           fi
 
           # If Pinocchio IS installed but all tests were skipped, that is a
@@ -308,7 +323,6 @@ jobs:
           fi
 
       - name: Run Unit Tests (Optional Stack)
-        continue-on-error: true
         # Run the full unit test suite with optional extras present.
         # Some unit tests have try/except ImportError guards that fall back to
         # reduced assertions when optional deps are absent; here they must take
@@ -318,6 +332,8 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
           xvfb-run --auto-servernum pytest tests/unit/ \
             -p no:xvfb \
             -n auto \
@@ -325,16 +341,18 @@ jobs:
             --timeout-method=thread \
             -v --tb=short \
             -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
-            2>&1 | tee /tmp/unit-test-results.txt || true
+            2>&1 | tee /tmp/unit-test-results.txt
+          rc=$?
+          set -e
 
-          passed=$(grep -c "PASSED" /tmp/unit-test-results.txt || echo "0")
-          failed=$(grep -c "FAILED" /tmp/unit-test-results.txt || echo "0")
-          skipped=$(grep -c "SKIPPED" /tmp/unit-test-results.txt || echo "0")
+          passed=$(grep -c "PASSED" /tmp/unit-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/unit-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/unit-test-results.txt || true)
           echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
 
-          if [[ "$failed" -gt 0 ]]; then
-            echo "::error::$failed unit test(s) failed in the optional-stack lane."
-            exit 1
+          if [[ "$rc" -ne 0 ]]; then
+            echo "::error::Unit tests failed in the optional-stack lane with pytest exit code $rc."
+            exit "$rc"
           fi
 
       - name: Optional-Stack Skip Visibility Report
@@ -350,7 +368,7 @@ jobs:
           for f in /tmp/api-test-results.txt /tmp/pinocchio-test-results.txt /tmp/unit-test-results.txt; do
             if [[ -f "$f" ]]; then
               label=$(basename "$f" .txt)
-              count=$(grep -c "SKIPPED" "$f" || echo "0")
+              count=$(grep -c "SKIPPED" "$f" || true)
               echo "- $label: $count skipped" >> "$GITHUB_STEP_SUMMARY"
             fi
           done

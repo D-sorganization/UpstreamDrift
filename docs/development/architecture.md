@@ -102,7 +102,7 @@ Golf_Modeling_Suite/
 ├── tests/                        # Test suite
 │   ├── unit/                     # Unit tests (92+ files)
 │   ├── integration/              # Integration tests
-│   ├── physics_validation/       # Scientific validation
+│   ├── analytical/               # Closed-form scientific validation
 │   └── fixtures/                 # Test data
 │
 └── tools/                        # Development utilities
@@ -315,9 +315,9 @@ Video Upload
 2. **Integration Tests** (`tests/integration/`): 24 test files
    - Cross-component testing
    - Database integration
-3. **Physics Validation** (`tests/physics_validation/`): 6 test files
-   - Comparison against reference data
-   - Coefficient verification
+3. **Physics Validation** (`tests/analytical/`, `tests/integration/conservation_laws/`)
+   - Closed-form dynamics and Jacobian baselines
+   - Conservation-law and work-energy verification
 4. **API Tests** (`tests/unit/test_api_server.py`): 15 tests
    - Endpoint coverage
    - Security validation

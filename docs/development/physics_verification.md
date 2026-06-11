@@ -65,11 +65,12 @@ The generated `PHYSICS_VERIFICATION_REPORT.md` contains three sections:
 
 ## Adding New Tests
 
-Add new validation logic to `tests/physics_validation/`:
+Add new validation logic to the maintained suites:
 
-- `analytical.py`: Add exact math solutions here.
-- `test_*.py`: Add pytest files. Use `Analytical*` classes to verify simulation data.
+- `tests/analytical/`: closed-form pendulum, Jacobian, and engine parity baselines.
+- `tests/integration/conservation_laws/`: conservation-law and work-energy checks.
 
 ## Continuous Integration
 
-These tests are automatically run on PRs via GitHub Actions.
+Run `python scripts/validate_physics.py --type all` locally or in a container before
+changing physics-engine behavior. CI may invoke these suites through broader test lanes.
