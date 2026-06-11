@@ -96,6 +96,48 @@ class TestUnifiedLaunchConditions:
             "Assertion failed: abs(launch.launch_angle - math.radians(15.0)) < 0.001"
         )
 
+    def test_constructor_rejects_degree_launch_angle(self) -> None:
+        with pytest.raises(ValueError, match="launch_angle is radians"):
+            UnifiedLaunchConditions(
+                ball_speed=70.0,
+                launch_angle=12.0,
+                spin_rate=2500.0,
+            )
+
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("ball_speed", float("nan")),
+            ("launch_angle", float("nan")),
+            ("spin_rate", float("nan")),
+            ("spin_axis_angle", float("nan")),
+            ("azimuth_angle", float("nan")),
+            ("wind_direction", float("nan")),
+        ],
+    )
+    def test_constructor_rejects_non_finite_units(
+        self, field: str, value: float
+    ) -> None:
+        kwargs = {
+            "ball_speed": 70.0,
+            "launch_angle": math.radians(12.0),
+            "spin_rate": 2500.0,
+            field: value,
+        }
+        with pytest.raises(ValueError, match=field):
+            UnifiedLaunchConditions(**kwargs)
+
+    def test_spin_rate_contract_is_rpm(self) -> None:
+        launch = UnifiedLaunchConditions(
+            ball_speed=70.0,
+            launch_angle=math.radians(12.0),
+            spin_rate=3000.0,
+        )
+
+        assert np.linalg.norm(launch.get_spin_vector()) == pytest.approx(
+            3000.0 * 2.0 * math.pi / 60.0
+        )
+
     def test_initial_velocity_vector(
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:

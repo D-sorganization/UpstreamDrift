@@ -382,6 +382,7 @@ class SwingBallFlightPipeline:
 
         # Step 5: Extract metrics
         result = self._build_result(swing, post, launch, trajectory)
+        self._validate_result_sanity(result)
 
         ensure(
             len(result.trajectory) > 0,
@@ -485,12 +486,47 @@ class SwingBallFlightPipeline:
     def _validate_launch_conditions(launch: LaunchConditions) -> None:
         """Enforce DbC postconditions on derived launch conditions."""
         require(
+            math.isfinite(launch.velocity),
+            "launch velocity must be finite",
+            launch.velocity,
+        )
+        require(
             launch.velocity > _MIN_LAUNCH_SPEED_MS,
             "launch speed must be > 0 — check clubhead velocity",
             launch.velocity,
         )
         require(
+            math.isfinite(launch.launch_angle),
+            "launch_angle must be finite radians",
+            launch.launch_angle,
+        )
+        require(
             0.0 <= launch.launch_angle <= _MAX_LAUNCH_ANGLE_RAD,
             f"launch_angle must be in [0, {_MAX_LAUNCH_ANGLE_RAD}] radians",
             launch.launch_angle,
+        )
+        require(
+            math.isfinite(launch.azimuth_angle)
+            and abs(launch.azimuth_angle) <= math.pi,
+            "azimuth_angle must be finite and in [-pi, pi] radians",
+            launch.azimuth_angle,
+        )
+        require(
+            math.isfinite(launch.spin_rate) and launch.spin_rate >= 0.0,
+            "spin_rate must be finite RPM and >= 0",
+            launch.spin_rate,
+        )
+
+    @staticmethod
+    def _validate_result_sanity(result: PipelineResult) -> None:
+        """Catch unit regressions that still produce a trajectory object."""
+        launch = result.launch_conditions
+        realistic_speed = 40.0 <= launch.velocity <= 90.0
+        realistic_angle = math.radians(5.0) <= launch.launch_angle <= math.radians(20.0)
+        if not (realistic_speed and realistic_angle):
+            return
+        ensure(
+            result.carry_m > 20.0,
+            "pipeline result carry_m must exceed 20 m for realistic launch units",
+            result.carry_m,
         )

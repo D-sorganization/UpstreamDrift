@@ -11,6 +11,7 @@ Issue #5213 — native C3D / BVH / TRC adapters via Rust.
 from __future__ import annotations
 
 import math
+import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
@@ -28,7 +29,14 @@ from src.shared.python.motion_pipeline.sources.base import (
 from src.shared.python.motion_pipeline.sources._marker_coordinates import (
     has_nan_coordinate,
 )
+from src.shared.python.motion_pipeline.sources._unit_contracts import (
+    normalize_spatial_units,
+    require_rust_prescaled_units_are_trusted,
+    resolve_fps,
+)
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
+
+logger = logging.getLogger(__name__)
 
 try:  # pragma: no cover - native wheel may not be installed in dev clones
     import upstream_mocap_io as _rust_io  # type: ignore[import-not-found]
@@ -137,12 +145,22 @@ class C3DAdapter(MocapSourceAdapter):
                     f"Failed to read C3D metadata from {path}: {e}"
                 ) from e
             units = str(r["units"]).strip().lower() or "mm"
-            unit_system = "millimeters" if units.startswith("mm") else "meters"
+            unit_contract = normalize_spatial_units(
+                units,
+                format_name="C3D",
+                path=Path(path),
+            )
             return SourceMetadata(
                 format_name=self.format_name,
-                fps=float(r["fps"]),
+                fps=resolve_fps(
+                    r["fps"],
+                    format_name="C3D",
+                    path=Path(path),
+                    logger=logger,
+                    allow_default=True,
+                ),
                 frame_count=int(r["n_frames"]),
-                unit_system=unit_system,  # type: ignore[arg-type]
+                unit_system=unit_contract.metadata_unit_system,
                 marker_set_name=None,
             )
         if not _HAS_EZC3D:
@@ -157,19 +175,29 @@ class C3DAdapter(MocapSourceAdapter):
             ) from e
         params = c["parameters"]
         point = c["data"]["points"]
-        fps = float(params["POINT"]["RATE"]["value"][0])
+        fps = resolve_fps(
+            params["POINT"]["RATE"]["value"][0],
+            format_name="C3D",
+            path=Path(path),
+            logger=logger,
+            allow_default=True,
+        )
         frame_count = int(point.shape[2])
         units = (
             str(params["POINT"]["UNITS"]["value"][0]).strip().lower()
             if params["POINT"]["UNITS"]["value"]
             else "mm"
         )
-        unit_system = "millimeters" if units.startswith("mm") else "meters"
+        unit_contract = normalize_spatial_units(
+            units,
+            format_name="C3D",
+            path=Path(path),
+        )
         return SourceMetadata(
             format_name=self.format_name,
             fps=fps,
             frame_count=frame_count,
-            unit_system=unit_system,  # type: ignore[arg-type]
+            unit_system=unit_contract.metadata_unit_system,
             marker_set_name=None,
         )
 
@@ -186,7 +214,11 @@ class C3DAdapter(MocapSourceAdapter):
         if not p.exists():
             raise FileNotFoundError(f"C3D file not found: {p}")
         if _HAS_RUST:
-            return self._load_via_rust(p, calibration)
+            try:
+                return self._load_via_rust(p, calibration)
+            except AdapterContractError:
+                if not _HAS_EZC3D:
+                    raise
         return self._load_via_ezc3d(p, calibration)
 
     def _load_via_rust(  # pragma: no cover
@@ -201,8 +233,19 @@ class C3DAdapter(MocapSourceAdapter):
         labels: list[str] = list(r["labels"])
         positions = r["positions"]  # (n_frames, n_markers * 3) float32, meters
         n_frames = int(r["n_frames"])
-        fps = float(r["fps"]) or 30.0
         units = (str(r["units"]).strip().lower()) or "mm"
+        require_rust_prescaled_units_are_trusted(
+            units,
+            format_name="C3D",
+            path=p,
+        )
+        fps = resolve_fps(
+            r["fps"],
+            format_name="C3D",
+            path=p,
+            logger=logger,
+            allow_default=False,
+        )
         events = _normalize_rust_events(r.get("events", []))
         analog = _normalize_rust_analog(r.get("analog"))
         force_platforms = _normalize_rust_force_platforms(r.get("force_platforms", []))
@@ -258,13 +301,23 @@ class C3DAdapter(MocapSourceAdapter):
         points = c["data"]["points"]  # shape (4, N_markers, N_frames)
         labels_raw = params["POINT"]["LABELS"]["value"]
         labels = [str(label).strip() for label in labels_raw]
-        fps = float(params["POINT"]["RATE"]["value"][0]) or 30.0
+        fps = resolve_fps(
+            params["POINT"]["RATE"]["value"][0],
+            format_name="C3D",
+            path=p,
+            logger=logger,
+            allow_default=False,
+        )
         units = (
             str(params["POINT"]["UNITS"]["value"][0]).strip().lower()
             if params["POINT"]["UNITS"]["value"]
             else "mm"
         )
-        scale = 0.001 if units.startswith("mm") else 1.0
+        scale = normalize_spatial_units(
+            units,
+            format_name="C3D",
+            path=p,
+        ).scale_to_meters
         n_frames = int(points.shape[2])
         frames: list[MarkerFrame] = []
         for fi in range(n_frames):

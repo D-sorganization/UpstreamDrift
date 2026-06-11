@@ -66,7 +66,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
     def simulate_trajectory(
         self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> list[TrajectoryPoint]:
-        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+        """Simulate trajectory from m/s, radian angles, and RPM spin.
 
         When the upstream_physics Rust wheel is installed, the RK4 integration
         is delegated to the native Rust implementation for performance.
@@ -74,6 +74,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         """
         if launch is None:
             raise ValueError("launch must be provided")
+        self._validate_launch_contract(launch)
         from src.shared.python.physics.rust_kernel import is_rust_available
 
         if not is_rust_available():
@@ -137,6 +138,40 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             config,
         )
         return self._post_process_rust(rust_result, launch)
+
+    @staticmethod
+    def _validate_launch_contract(launch: LaunchConditions) -> None:
+        """Fail before the Rust boundary when launch units are inconsistent."""
+        if not math.isfinite(launch.velocity) or launch.velocity < 0.0:
+            raise ValueError(
+                f"launch.velocity must be finite and >= 0 m/s; got {launch.velocity!r}"
+            )
+        if not math.isfinite(launch.launch_angle) or not (
+            abs(launch.launch_angle) <= math.pi / 2.0
+        ):
+            raise ValueError(
+                "launch.launch_angle must be radians within [-pi/2, pi/2] — "
+                "did you pass degrees?"
+            )
+        if not math.isfinite(launch.azimuth_angle) or not (
+            abs(launch.azimuth_angle) <= math.pi
+        ):
+            raise ValueError(
+                "launch.azimuth_angle must be finite and in [-pi, pi] radians"
+            )
+        if not math.isfinite(launch.spin_rate) or launch.spin_rate < 0.0:
+            raise ValueError(
+                f"launch.spin_rate must be finite RPM and >= 0; got "
+                f"{launch.spin_rate!r}"
+            )
+        spin_axis = np.asarray(launch.spin_axis, dtype=float)
+        if spin_axis.shape != (3,) or not np.all(np.isfinite(spin_axis)):
+            raise ValueError("launch.spin_axis must be a finite 3-vector")
+        axis_norm = float(np.linalg.norm(spin_axis))
+        if abs(axis_norm - 1.0) >= 1e-6:
+            raise ValueError(
+                f"launch.spin_axis must be unit-norm; got norm {axis_norm!r}"
+            )
 
     def _post_process_rust(
         self, rust_result: Any, launch: LaunchConditions
