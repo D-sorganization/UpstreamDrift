@@ -19,6 +19,13 @@ from src.api.routes import chat_ws
 
 pytestmark = pytest.mark.anyio
 
+_LAUNCHER_TOKEN = "test-launcher-token"
+_WS_HEADERS = {"origin": "http://localhost"}
+
+
+def _chat_ws_url(session_id: str = "new") -> str:
+    return f"/api/ws/chat/{session_id}?launcher_token={_LAUNCHER_TOKEN}"
+
 
 @pytest.fixture(scope="module")
 def anyio_backend() -> str:
@@ -97,6 +104,7 @@ def app(mock_chat_service: MagicMock) -> FastAPI:
     """Create a FastAPI app with chat routes."""
     test_app = FastAPI()
     test_app.state.chat_service = mock_chat_service
+    test_app.state.launcher_csrf_token = _LAUNCHER_TOKEN
     test_app.include_router(chat_ws.router, prefix="/api")
     return test_app
 
@@ -112,7 +120,7 @@ class TestWebSocket:
 
     def test_connect_new_session(self, client, mock_chat_service) -> None:
         """Connecting with 'new' creates a new session."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             data = ws.receive_json()
             assert data["type"] == "session_info"
             assert data["session_id"] == "test-session-123"
@@ -121,7 +129,9 @@ class TestWebSocket:
 
     def test_connect_existing_session(self, client, mock_chat_service) -> None:
         """Connecting with an existing session ID retrieves it."""
-        with client.websocket_connect("/api/ws/chat/test-session-123") as ws:
+        with client.websocket_connect(
+            _chat_ws_url("test-session-123"), headers=_WS_HEADERS
+        ) as ws:
             data = ws.receive_json()
             assert data["type"] == "session_info"
             assert data["session_id"] == "test-session-123"
@@ -130,7 +140,7 @@ class TestWebSocket:
 
     def test_send_message_and_stream(self, client, mock_chat_service) -> None:
         """Sending a message streams response chunks then complete."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             # Consume session_info
             ws.receive_json()
 
@@ -158,7 +168,7 @@ class TestWebSocket:
 
     def test_send_empty_message(self, client) -> None:
         """Sending an empty message returns an error."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "send", "message": ""})
@@ -168,7 +178,7 @@ class TestWebSocket:
 
     def test_history_action(self, client, mock_chat_service) -> None:
         """Requesting history returns messages."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "history"})
@@ -179,7 +189,7 @@ class TestWebSocket:
 
     def test_new_session_action(self, client, mock_chat_service) -> None:
         """Requesting new_session creates a fresh session."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "new_session"})
@@ -189,7 +199,7 @@ class TestWebSocket:
 
     def test_refresh_models_action(self, client, mock_chat_service) -> None:
         """``refresh_models`` returns a ``model_list`` payload (Tools #2547)."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "refresh_models"})
@@ -205,7 +215,7 @@ class TestWebSocket:
 
     def test_index_codebase_action(self, client, mock_chat_service) -> None:
         """``index_codebase`` ships a 'running' then a 'complete' status (Tools #2549)."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "index_codebase"})
@@ -222,7 +232,7 @@ class TestWebSocket:
 
     def test_unknown_action(self, client) -> None:
         """Sending an unknown action returns an error."""
-        with client.websocket_connect("/api/ws/chat/new") as ws:
+        with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:
             ws.receive_json()  # session_info
 
             ws.send_json({"action": "invalid_action"})
@@ -243,7 +253,7 @@ class TestWebSocket:
 
         with (
             caplog.at_level("ERROR"),
-            client.websocket_connect("/api/ws/chat/new") as ws,
+            client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws,
         ):
             ws.receive_json()  # session_info
             ws.send_json({"action": "send", "message": "Hello AI"})
@@ -340,7 +350,13 @@ class TestWebSocket:
         websocket = FakeWebSocket(mock_chat_service)
         expected_token = chat_ws._session_log_token(sensitive_session_id)
 
-        with caplog.at_level("DEBUG"):
+        async def fake_resolve_ws_user(_websocket: FakeWebSocket) -> object:
+            return object()
+
+        with (
+            patch("src.api.routes.chat_ws.resolve_ws_user", fake_resolve_ws_user),
+            caplog.at_level("DEBUG"),
+        ):
             await chat_ws.chat_stream(websocket, sensitive_session_id)  # type: ignore[arg-type]
 
         assert websocket.sent[0] == {
