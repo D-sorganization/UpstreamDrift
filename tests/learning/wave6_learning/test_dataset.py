@@ -20,6 +20,7 @@ def _make_demo(
     with_contact: bool = False,
     task_id: str | None = "t",
     success: bool = True,
+    solver_status: str = "success",
 ) -> Demonstration:
     return Demonstration(
         timestamps=np.arange(n_frames, dtype=float) * 0.01,
@@ -34,6 +35,7 @@ def _make_demo(
         ),
         task_id=task_id,
         success=success,
+        solver_status=solver_status,
     )
 
 
@@ -73,12 +75,19 @@ class TestDemonstration:
         assert "ee_pose" in frame
 
     def test_subsample(self) -> None:
-        d = _make_demo(10, 2, with_ee=True, with_contact=True)
+        d = _make_demo(
+            10,
+            2,
+            with_ee=True,
+            with_contact=True,
+            solver_status="warning",
+        )
         sub = d.subsample(2)
         assert sub.n_frames == 5
         assert sub.end_effector_poses is not None
         assert sub.contact_states is not None
         assert len(sub.contact_states) == 5
+        assert sub.solver_status == "warning"
 
     def test_subsample_no_optional(self) -> None:
         d = _make_demo(10, 2, with_actions=False)
@@ -87,13 +96,20 @@ class TestDemonstration:
         assert sub.end_effector_poses is None
 
     def test_roundtrip_dict(self) -> None:
-        d = _make_demo(4, 2, with_ee=True, with_contact=True)
+        d = _make_demo(
+            4,
+            2,
+            with_ee=True,
+            with_contact=True,
+            solver_status="warning",
+        )
         data = d.to_dict()
         d2 = Demonstration.from_dict(data)
         np.testing.assert_array_equal(d.joint_positions, d2.joint_positions)
         assert d2.actions is not None
         assert d2.end_effector_poses is not None
         assert d2.contact_states == d.contact_states
+        assert d2.solver_status == "warning"
 
     def test_from_dict_minimal(self) -> None:
         data = {
@@ -104,6 +120,7 @@ class TestDemonstration:
         d = Demonstration.from_dict(data)
         assert d.actions is None
         assert d.success is True
+        assert d.solver_status == "success"
         assert d.source == "unknown"
 
 
@@ -155,7 +172,9 @@ class TestDataset:
         assert a.shape == (3, 2)
 
     def test_augment(self) -> None:
-        ds = DemonstrationDataset([_make_demo(3, 2, with_ee=True)])
+        ds = DemonstrationDataset(
+            [_make_demo(3, 2, with_ee=True, solver_status="warning")]
+        )
         aug = ds.augment(
             noise_std=0.01, num_augmentations=2, rng=np.random.default_rng(0)
         )
@@ -163,6 +182,7 @@ class TestDataset:
         assert len(aug) == 3
         assert aug[1].metadata.get("augmented") is True
         assert aug[1].source.endswith("_augmented")
+        assert aug[1].solver_status == "warning"
 
     def test_augment_default_rng(self) -> None:
         ds = DemonstrationDataset([_make_demo(3, 2)])

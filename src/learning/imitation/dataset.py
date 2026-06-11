@@ -26,6 +26,7 @@ class Demonstration:
         contact_states: Contact states per timestep.
         task_id: Identifier for the task being demonstrated.
         success: Whether demonstration completed successfully.
+        solver_status: Canonical status string ("success", "warning", or "failed").
         source: Source of demonstration (teleoperation, mocap, etc.).
         metadata: Additional metadata.
     """
@@ -38,6 +39,7 @@ class Demonstration:
     contact_states: list[list[dict[str, Any]]] | None = None
     task_id: str | None = None
     success: bool = True
+    solver_status: str = "success"
     source: str = "teleoperation"
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -120,6 +122,7 @@ class Demonstration:
             ),
             task_id=self.task_id,
             success=self.success,
+            solver_status=self.solver_status,
             source=self.source,
             metadata=self.metadata.copy(),
         )
@@ -132,6 +135,7 @@ class Demonstration:
             "joint_velocities": self.joint_velocities.tolist(),
             "task_id": self.task_id,
             "success": self.success,
+            "solver_status": self.solver_status,
             "source": self.source,
             "metadata": self.metadata,
         }
@@ -166,6 +170,7 @@ class Demonstration:
             contact_states=data.get("contact_states"),
             task_id=data.get("task_id"),
             success=data.get("success", True),
+            solver_status=data.get("solver_status", "success"),
             source=data.get("source", "unknown"),
             metadata=data.get("metadata", {}),
         )
@@ -354,6 +359,7 @@ class DemonstrationDataset:
                     contact_states=demo.contact_states,
                     task_id=demo.task_id,
                     success=demo.success,
+                    solver_status=demo.solver_status,
                     source=f"{demo.source}_augmented",
                     metadata={**demo.metadata, "augmented": True},
                 )

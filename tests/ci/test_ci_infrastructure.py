@@ -667,9 +667,13 @@ class TestCIEnvironmentCompatibility:
         assert "changed_tests" not in unit_step
         assert "No unit test changes detected" not in unit_step
         assert "find tests/unit -mindepth 1 -maxdepth 1" in unit_step
+        assert '! -path "tests/unit/engines"' in unit_step
+        assert "Native" in unit_step
+        assert "engine/equivalence lanes" in unit_step
         assert 'pytest "$target"' in unit_step
         assert "unit_targets" in unit_step
         assert "break" in unit_step
+        assert 'pip install "trimesh>=4.0.0"' in workflow
         assert "OPTIONAL_STACK_UNIT_WORKERS" not in unit_step
         assert "pytest-xdist" not in unit_step
         assert " -n " not in unit_step

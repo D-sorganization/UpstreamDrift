@@ -277,8 +277,11 @@ class AIAssistantPanel(QWidget):
     def _on_session_loaded(self, context: ConversationContext) -> None:
         self._context = context
         self._refresh_prompt_memory()
-        self._messages.clear_messages()
-        self._messages.restore_from_context(self._context)
+        messages = getattr(self, "_messages", None)
+        if messages is None:
+            return
+        messages.clear_messages()
+        messages.restore_from_context(self._context)
 
     # ------------------------------------------------------------------
     # Tools registration
@@ -287,6 +290,26 @@ class AIAssistantPanel(QWidget):
         register_file_tools(self._tools_registry)
         register_codemap_tools(self._tools_registry)
         register_panel_tools(self._tools_registry, self._rag_store)
+
+    def _populate_cli_provider_entries(self, combo: Any) -> None:
+        """Append discovered CLI providers to a provider combo."""
+        if combo is None:
+            raise ValueError("combo must be provided")
+
+        from src.shared.python.ai.cli_providers import registry as registry_mod
+
+        descriptors = registry_mod.discover_cli_providers()
+        if not descriptors:
+            return
+
+        combo.insertSeparator(combo.count())
+        combo.addItem("— CLI Agents —", None)
+
+        entries = {}
+        for descriptor in descriptors:
+            combo.addItem(descriptor.name, descriptor.id)
+            entries[descriptor.name] = descriptor
+        self._cli_provider_entries = entries
 
     # ------------------------------------------------------------------
     # UI assembly

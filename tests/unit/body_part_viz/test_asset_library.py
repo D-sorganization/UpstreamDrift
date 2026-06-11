@@ -15,6 +15,10 @@ from src.shared.python.body_part_viz.asset_library import ShapeLibrary
 from src.shared.python.body_part_viz.shapes import MeshShape
 
 
+def _require_trimesh() -> None:
+    pytest.importorskip("trimesh")
+
+
 def test_default_loads_without_raising() -> None:
     lib = ShapeLibrary.default()
     assert isinstance(lib, ShapeLibrary)
@@ -38,6 +42,7 @@ def test_default_names_match_expected_set() -> None:
 
 
 def test_get_returns_mesh_shape_for_every_name() -> None:
+    _require_trimesh()
     lib = ShapeLibrary.default()
     for name in lib.names():
         shape = lib.get(name)
@@ -47,6 +52,7 @@ def test_get_returns_mesh_shape_for_every_name() -> None:
 
 
 def test_get_caches_instances() -> None:
+    _require_trimesh()
     lib = ShapeLibrary.default()
     a = lib.get("head")
     b = lib.get("head")
@@ -54,6 +60,7 @@ def test_get_caches_instances() -> None:
 
 
 def test_rest_dimensions_match_manifest_within_tolerance() -> None:
+    _require_trimesh()
     lib = ShapeLibrary.default()
     manifest_path = (
         Path(__file__).resolve().parents[3]
@@ -119,6 +126,7 @@ def test_binding_template_on_marker_kind() -> None:
 
 
 def test_explicit_asset_root(tmp_path: Path) -> None:
+    _require_trimesh()
     # Build a tiny manifest pointing at an existing default mesh.
     src_root = (
         Path(__file__).resolve().parents[3] / "assets" / "body_part_shapes" / "default"
