@@ -287,11 +287,14 @@ class MotionMatchingRequest:
         _require_finite_positive(self.time_horizon, "time_horizon")
         _require_finite_positive(self.integrator_step, "integrator_step")
         _require_positive_int(self.max_iterations, "max_iterations")
-        if self.reference.skeleton.num_dofs != self.rig.num_dofs:
+        reference_skeleton = self.reference.skeleton
+        reference_num_dofs = reference_skeleton.num_dofs
+        rig_num_dofs = self.rig.num_dofs
+        if reference_num_dofs != rig_num_dofs:
             raise ValueError(
                 "rig must be compatible with reference: "
-                f"reference DOFs={self.reference.skeleton.num_dofs}, "
-                f"rig DOFs={self.rig.num_dofs}"
+                f"reference DOFs={reference_num_dofs}, "
+                f"rig DOFs={rig_num_dofs}"
             )
 
 

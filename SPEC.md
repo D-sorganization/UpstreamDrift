@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.332                                            |
+| **Spec Version**        | 1.0.333                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Promoted Law-of-Demeter enforcement from advisory
+  Pinocchio-only lint to a blocking repo-wide production `src/` ratchet.
+  `quality-gate.yml` now runs `scripts/ci/check_lod.py src --baseline
+scripts/ci/lod_baseline.txt`; the checked-in baseline records existing
+  path/chain counts and the required `quality-gate` status fails on any new
+  non-allowlisted deep attribute chain.
 - **2026-06-11** - Tightened motion matching runtime contracts for #7304,
   #7305, #7306, and #7309. Internal request construction now rejects invalid
   cost weights and solver configuration before backend dispatch, metric helpers
@@ -907,6 +913,11 @@ Beyond standard tools, CI enforces custom checks:
   paths, excludes receiver parameters (`self`/`cls`) from method counts, and
   requires owned, linked exceptions in
   `scripts/config/architecture_budget.json`.
+- **Law of Demeter Ratchet**: `scripts/ci/check_lod.py` scans production
+  `src/` Python files and blocks new deep application object chains beyond the
+  checked-in `scripts/ci/lod_baseline.txt` path/chain counts while preserving
+  documented library API allowances for Qt, numpy, pandas, matplotlib, scipy,
+  and engine namespace access.
 - **Agent Docs Consistency**: `scripts/check_agent_docs_consistency.py`
   validates literal repo-relative paths documented in agent guidance while
   treating glob/brace references such as `scripts/**` and
@@ -936,6 +947,7 @@ Beyond standard tools, CI enforces custom checks:
 | Workflow                       | Trigger                                | Purpose                                                                               | Blocking?          |
 | ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------ |
 | `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
+| `quality-gate.yml`             | PR/manual dispatch                     | Blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code           | Yes                |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                    | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                       | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                            | Yes (for releases) |
@@ -1075,6 +1087,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.333 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
 | 2026-06-11 | 1.0.332 | Safe motion checkpoint loading for #7276. Replaced pickle-enabled motion-matching checkpoint loads with safe artifact loading via `torch.load(..., weights_only=True)`. Validates mapping-shaped artifacts, keeping inverse, inverse-timestep, compact surrogate, and per-step surrogate loaders on the same safe contract. Exceeded surrogate train/optimize function budgets are tracked as exceptions in `architecture_budget.json`. |
 | 2026-06-11 | 1.0.331 | Resolve merge conflicts in SPEC.md for PR 7316 by merging origin/main, retaining all changelog entries, and bumping Spec Version. |
 | 2026-06-11 | 1.0.330 | Simulation WebSocket dependency-boundary conflict refresh for #7283. `simulation_stream` keeps resolving the engine manager through the WebSocket-safe dependency accessor after the #7304/#7305/#7306/#7309 runtime-contract `main` update, and missing app-state manager configuration still emits a structured `service_unavailable` frame before clean close. |
