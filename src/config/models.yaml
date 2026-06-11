@@ -539,7 +539,7 @@ models:
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
-      status: "beta"
+      status: "experimental"
       default_launch: "tab"
       web_route: "/tools/canonical-core/estimation"
 
@@ -556,7 +556,7 @@ models:
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
-      status: "beta"
+      status: "experimental"
       default_launch: "tab"
       web_route: "/tools/canonical-core/comparison"
 

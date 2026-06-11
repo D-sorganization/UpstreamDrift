@@ -17,7 +17,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from ..config.environment import get_env
+from src.shared.python.config.environment import get_env
 
 
 class ProbeStatus(Enum):

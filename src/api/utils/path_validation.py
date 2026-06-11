@@ -167,7 +167,9 @@ def validate_model_path(model_path: str) -> str:
         candidate = allowed_dir / user_path
         try:
             return str(resolve_contained_path(candidate, [allowed_dir]))
-        except HTTPException:
+        except HTTPException as exc:
+            if exc.status_code != 404:
+                raise
             continue
 
     raise HTTPException(
