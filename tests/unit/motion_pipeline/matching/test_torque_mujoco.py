@@ -49,10 +49,48 @@ def test_mujoco_torque_success_reflects_real_execution() -> None:
 
     # Importability is recorded honestly...
     assert result.metadata.get("mujoco_available") is have_mujoco
-    # ...but the empty placeholder model never yields a real solve, so
-    # success stays False regardless of whether the wheel is present.
+    assert result.metadata.get("model_source") == "generated_mjcf"
+    assert result.metadata.get("model_nq") == rig.num_dofs
+    assert result.metadata.get("placeholder_model") is False
+    if have_mujoco:
+        assert "placeholder" not in (result.message or "").lower()
+    else:
+        assert result.success is False
+        assert "unavailable" in (result.message or "").lower()
+
+
+def test_mujoco_torque_refuses_dimension_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    s = MuJoCoTorqueMatchingSolver()
+    ref = make_pendulum_reference_trajectory(num_frames=15)
+    rig = make_simple_rig(num_joints=1)
+
+    class FakeModel:
+        nq = 0
+        nv = 0
+
+    class FakeData:
+        def __init__(self, model: FakeModel) -> None:
+            self.model = model
+
+    class FakeMuJoCo:
+        class MjModel:
+            @staticmethod
+            def from_xml_string(xml: str) -> FakeModel:
+                assert "<mujoco" in xml
+                return FakeModel()
+
+        MjData = FakeData
+
+    monkeypatch.setitem(__import__("sys").modules, "mujoco", FakeMuJoCo)
+
+    result = s.match(ref, rig)
+
     assert result.success is False
-    assert "no real solve" in (result.message or "").lower()
+    assert result.metadata["model_nq"] == 0
+    assert result.metadata["n_dof"] == rig.num_dofs
+    assert "does not match trajectory DOFs" in (result.message or "")
 
 
 def test_mujoco_torque_metrics_are_finite_not_hardcoded() -> None:

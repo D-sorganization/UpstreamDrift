@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 
 import time
+from xml.sax.saxutils import escape
 
 import numpy as np
 
@@ -63,6 +64,92 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             cost_weights: Cost function weights
         """
         super().__init__(cost_weights)
+
+    @staticmethod
+    def _axis_vector(axis: str) -> str:
+        sign = -1.0 if axis.startswith("-") else 1.0
+        letter = axis[-1].upper()
+        vectors = {
+            "X": (sign, 0.0, 0.0),
+            "Y": (0.0, sign, 0.0),
+            "Z": (0.0, 0.0, sign),
+        }
+        return " ".join(f"{value:g}" for value in vectors.get(letter, vectors["Z"]))
+
+    @staticmethod
+    def _body_pos(offset: list[float]) -> str:
+        return " ".join(f"{float(value):.12g}" for value in offset)
+
+    @staticmethod
+    def _rig_joint_names(rig: SkeletonRig) -> list[str]:
+        names: list[str] = []
+        for jname, jdef in rig.joints.items():
+            for _ in jdef.axes:
+                names.append(jname)
+        return names
+
+    @classmethod
+    def _build_mjcf_from_rig(cls, rig: SkeletonRig) -> str:
+        children: dict[str | None, list[str]] = {None: []}
+        for jname, jdef in rig.joints.items():
+            children.setdefault(jdef.parent, []).append(jname)
+            children.setdefault(jname, [])
+        if rig.root_joint not in rig.joints:
+            raise ValueError(f"Root joint {rig.root_joint!r} not found in rig")
+
+        def emit_joint_chain(jname: str, depth: int) -> list[str]:
+            jdef = rig.joints[jname]
+            indent = "  " * depth
+            lines: list[str] = [
+                (
+                    f'{indent}<body name="{escape(jname)}" '
+                    f'pos="{cls._body_pos(jdef.tpose_offset)}">'
+                )
+            ]
+            current_depth = depth + 1
+            for axis_index, axis in enumerate(jdef.axes):
+                axis_name = f"{jname}_{axis_index}_{axis}"
+                axis_indent = "  " * current_depth
+                lines.extend(
+                    [
+                        (f'{axis_indent}<body name="{escape(axis_name)}" pos="0 0 0">'),
+                        (
+                            f'{axis_indent}  <joint name="{escape(axis_name)}" '
+                            f'type="hinge" axis="{cls._axis_vector(axis)}" />'
+                        ),
+                        (
+                            f'{axis_indent}  <inertial pos="0 0 0" '
+                            'mass="1" diaginertia="0.01 0.01 0.01" />'
+                        ),
+                    ]
+                )
+                current_depth += 1
+            for child_name in children.get(jname, []):
+                lines.extend(emit_joint_chain(child_name, current_depth))
+            for _axis in reversed(jdef.axes):
+                current_depth -= 1
+                lines.append(f"{'  ' * current_depth}</body>")
+            lines.append(f"{indent}</body>")
+            return lines
+
+        worldbody: list[str] = []
+        roots = [
+            rig.root_joint,
+            *[name for name in children[None] if name != rig.root_joint],
+        ]
+        for root in roots:
+            worldbody.extend(emit_joint_chain(root, 3))
+        return "\n".join(
+            [
+                '<mujoco model="motion_pipeline_generated">',
+                '  <compiler angle="radian" />',
+                '  <option gravity="0 0 -9.81" />',
+                "  <worldbody>",
+                *worldbody,
+                "  </worldbody>",
+                "</mujoco>",
+            ]
+        )
 
     @staticmethod
     def _per_frame_callback(model: object | None, data: object | None):
@@ -173,22 +260,41 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         )
         n_frames, n_dof = q_all.shape
 
-        # Setup MuJoCo model and data. The empty-model fallback cannot run a
-        # real inverse-dynamics pass, so we track availability explicitly and
-        # never report a fake success when MuJoCo is missing (#7047).
+        # Setup MuJoCo model and data from the rig. Production matching must
+        # never run on the historical empty ``<mujoco/>`` placeholder.
         model = None
         data = None
         mujoco_available = False
+        model_error: str | None = None
+        model_xml = self._build_mjcf_from_rig(rig)
         try:
             import mujoco
 
-            model = mujoco.MjModel.from_xml_string("<mujoco/>")
+            model = mujoco.MjModel.from_xml_string(model_xml)
             data = mujoco.MjData(model)
             mujoco_available = True
         except ImportError:
             pass
+        except (RuntimeError, TypeError, ValueError) as exc:
+            mujoco_available = True
+            model_error = f"MuJoCo model build failed: {exc}"
 
-        callback = self._per_frame_callback(model, data)
+        model_nq = getattr(model, "nq", None)
+        model_nv = getattr(model, "nv", None)
+        if (
+            model_error is None
+            and model is not None
+            and (model_nq != n_dof or model_nv != n_dof)
+        ):
+            model_error = (
+                f"MuJoCo model nq={model_nq}, nv={model_nv} does not match "
+                f"trajectory DOFs={n_dof}"
+            )
+
+        callback = self._per_frame_callback(
+            None if model_error else model,
+            None if model_error else data,
+        )
 
         if _use_rust_outer_loop():
             try:
@@ -214,10 +320,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             for i, t in enumerate(times)
         ]
 
-        rig_joint_names: list[str] = []
-        for jname, jdef in rig.joints.items():
-            for _ in jdef.axes:
-                rig_joint_names.append(jname)
+        rig_joint_names = self._rig_joint_names(rig)
 
         torque_traj = TorqueTrajectory(
             frames=torque_frames,
@@ -237,14 +340,18 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         # Real execution only happened if MuJoCo produced non-trivial
         # torques. The empty-model fallback yields all zeros -> not a real
         # solve, so success is False (#7047).
-        success = mujoco_available and bool(np.any(tau_all != 0.0))
+        success = (
+            mujoco_available and model_error is None and bool(np.any(tau_all != 0.0))
+        )
 
         if success:
             message = "MuJoCo torque tracking solve OK"
+        elif model_error is not None:
+            message = model_error
         elif mujoco_available:
             message = (
-                "MuJoCo present but produced zero torques from the placeholder "
-                "model (no real solve)"
+                "MuJoCo present but generated rig model produced zero torques "
+                "(no real inverse-dynamics signal)"
             )
         else:
             message = "MuJoCo unavailable; torques are zero (no real solve)"
@@ -266,5 +373,11 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
                 "backend": self.backend_type.value,
                 "mujoco_available": mujoco_available,
                 "n_frames": n_frames,
+                "n_dof": n_dof,
+                "model_source": "generated_mjcf",
+                "model_nq": model_nq,
+                "model_nv": model_nv,
+                "placeholder_model": False,
+                "production_ready": mujoco_available and model_error is None,
             },
         )

@@ -171,6 +171,10 @@ class PipelineConfig(BaseModel):
     matching_backend: str = Field(
         default="mujoco", description="Motion matching backend"
     )
+    matching_model_urdf: str | None = Field(
+        default=None,
+        description="Production URDF path for matching backends that require one",
+    )
 
     # Cost weights for IK/matching
     cost_weights: dict[str, float] = Field(
@@ -498,7 +502,10 @@ class MotionPipeline:
         try:
             from .matching.base import make_matching_solver
 
-            solver = make_matching_solver(solver_backend)
+            solver = make_matching_solver(
+                solver_backend,
+                urdf_path=self.config.matching_model_urdf,
+            )
             # The matching solvers track a kinematic JointTrajectory.
             result = solver.match(trajectory.trajectory, skeleton)
 
@@ -517,8 +524,11 @@ class MotionPipeline:
 
             if not contract_result.success:
                 error_kind = "internal"
-                if self._is_unavailable_mujoco_matching_backend(
-                    solver_backend, solver_metadata, error_metrics
+                if (
+                    solver_metadata.get("production_ready") is False
+                    or self._is_unavailable_mujoco_matching_backend(
+                        solver_backend, solver_metadata, error_metrics
+                    )
                 ):
                     error_kind = "invalid_input"
                 return StageResult(
@@ -549,6 +559,7 @@ class MotionPipeline:
                 data=None,
                 metadata={},
                 error=f"Motion matching failed: {e}",
+                error_kind="invalid_input",
             )
 
     @staticmethod

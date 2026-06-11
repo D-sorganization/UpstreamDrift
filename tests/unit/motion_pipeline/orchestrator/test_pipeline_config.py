@@ -61,9 +61,11 @@ def test_pipeline_config_custom_backends() -> None:
         adapter=AdapterOverride(format="c3d"),
         ik_backend="drake",
         matching_backend="pinocchio",
+        matching_model_urdf="models/subject.urdf",
     )
     assert cfg.ik_backend == "drake"
     assert cfg.matching_backend == "pinocchio"
+    assert cfg.matching_model_urdf == "models/subject.urdf"
 
 
 def test_stage_enum_has_five_stages() -> None:
@@ -83,3 +85,4 @@ def test_pipeline_config_serializes_to_dict() -> None:
     assert d["adapter"]["format"] == "c3d"
     assert d["ik_backend"] == "mujoco"
     assert d["strict_hooks"] is False
+    assert d["matching_model_urdf"] is None

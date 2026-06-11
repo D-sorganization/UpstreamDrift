@@ -536,6 +536,8 @@ class BaseMotionMatchingSolver(ABC):
 def make_matching_solver(
     backend: MatchingBackendType | str,
     cost_weights: CostWeights | None = None,
+    *,
+    urdf_path: str | None = None,
 ) -> MotionMatchingSolver:
     """
     Factory function to create a motion matching solver for the specified backend.
@@ -543,6 +545,7 @@ def make_matching_solver(
     Args:
         backend: Backend type (cmc, rra, drake_trajopt, mujoco_torque, pinocchio_inverse_dyn)
         cost_weights: Optional cost weights
+        urdf_path: Optional production URDF path for Pinocchio inverse dynamics
 
     Returns:
         MotionMatchingSolver instance
@@ -577,6 +580,6 @@ def make_matching_solver(
     if backend == MatchingBackendType.INVERSE_DYN_PINOCCHIO:
         from .inverse_dyn_pinocchio import PinocchioInverseDynMatchingSolver
 
-        return PinocchioInverseDynMatchingSolver(cost_weights)
+        return PinocchioInverseDynMatchingSolver(cost_weights, urdf_path=urdf_path)
 
     raise ValueError(f"Unknown motion matching backend: {backend}")
