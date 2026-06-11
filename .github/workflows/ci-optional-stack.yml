@@ -353,6 +353,7 @@ jobs:
             target_rc=$?
             if [[ "$target_rc" -ne 0 ]]; then
               rc="$target_rc"
+              break
             fi
           done
           set -e

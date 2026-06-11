@@ -44,6 +44,7 @@ from src.shared.python.ai.gui._input_area import InputArea
 from src.shared.python.ai.gui._message_display import MessageDisplayController
 from src.shared.python.ai.gui._panel_header import PanelHeaderController
 from src.shared.python.ai.gui._panel_tools import register_panel_tools
+from src.shared.python.ai.gui.assistant_widgets import ChatInput as ChatInput
 from src.shared.python.ai.gui.assistant_widgets import (
     MainThreadToolDispatcher,
     MessageWidget,

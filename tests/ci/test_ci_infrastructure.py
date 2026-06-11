@@ -669,6 +669,7 @@ class TestCIEnvironmentCompatibility:
         assert "find tests/unit -mindepth 1 -maxdepth 1" in unit_step
         assert 'pytest "$target"' in unit_step
         assert "unit_targets" in unit_step
+        assert "break" in unit_step
         assert "OPTIONAL_STACK_UNIT_WORKERS" not in unit_step
         assert "pytest-xdist" not in unit_step
         assert " -n " not in unit_step
