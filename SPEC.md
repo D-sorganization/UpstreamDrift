@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.319                                            |
+| **Spec Version**        | 1.0.320                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Isolated optional dependency import mocks for #7307.
+  Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
+  imports now install fake optional packages only inside scoped import
+  fixtures. The shared optional-dependency helper restores dependency and
+  target-module cache entries after each test, and repo-hygiene coverage
+  rejects new module-scope `sys.modules` mocks for optional engine/media
+  dependencies.
 - **2026-06-11** - Hardened the #7314 PR-scoped unit gate in standard
   CI. Source and dependency PRs now fall through to the dependency-light unit
   lane instead of passing solely on touched test files, and targeted PR coverage
@@ -1013,6 +1020,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
 | 2026-06-11 | 1.0.318 | Data Explorer and model-library boundary contracts for #7297, #7298, and #7299. Import/list responses expose durable `dataset_id` values, Data Explorer filter requests reject unsupported operators at the request boundary, and forced model-library downloads validate HTTPS-only `source_url` values before any download I/O. |
 | 2026-06-11 | 1.0.312 | Blocking DRY duplication ratchet for #7315. Added `scripts/ci/check_dry_duplication_gate.py` with focused tests, explicit production-`src` include/exclude config, and an owned no-growth baseline for existing duplicated logic fingerprints; `ci-standard.yml` now runs the checker inside `repo-structure-gates` so duplicate growth feeds the required `quality-gate` aggregate while `Code-Metrics.yml` remains advisory/manual reporting. |
 | 2026-06-11 | 1.0.311 | PR-scoped unit gate hardening for #7314. Standard CI no longer lets source/dependency PRs pass solely by running changed test files; those PRs fall through to the dependency-light unit lane with targeted coverage. `coverage_enforcer.py` now supports a PR-mode changed-file ratchet so changed production policy files must appear in targeted coverage and meet their policy threshold. |
