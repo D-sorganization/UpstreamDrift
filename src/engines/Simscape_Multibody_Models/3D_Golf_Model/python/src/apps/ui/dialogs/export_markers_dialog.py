@@ -130,14 +130,10 @@ class ExportMarkersDialog(QtWidgets.QDialog):
             self.list_markers.blockSignals(False)
 
     def _select_body(self) -> None:
-        try:
-            from src.shared.python.motion_matching.body_skeleton import (  # type: ignore
-                default_body_segments,
-            )
-        except ImportError:  # pragma: no cover
-            from shared.python.motion_matching.body_skeleton import (  # type: ignore
-                default_body_segments,
-            )
+        from src.shared.python.motion_matching.body_skeleton import (
+            default_body_segments,
+        )
+
         body = {
             n
             for s in default_body_segments(self.model.marker_names())
