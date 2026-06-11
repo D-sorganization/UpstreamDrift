@@ -80,6 +80,7 @@ def test_haptic_device_input() -> None:
         haptic.set_force_feedback(np.ones(6))
 
 
+@pytest.mark.unit
 def test_base_input_device_requires_connection_before_state_reads() -> None:
     """Input devices must not return frozen identity pose while disconnected."""
     kb = KeyboardMouseInput()

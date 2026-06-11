@@ -47,12 +47,14 @@ class IncompleteHumanoidEngine:
         """Apply torques."""
 
 
+@pytest.mark.unit
 def test_walk_env_rejects_engine_missing_runtime_channels() -> None:
     """Humanoid walking cannot silently train on zero-filled engine channels."""
     with pytest.raises(TypeError, match="engine lacks required methods"):
         HumanoidWalkEnv(engine=IncompleteHumanoidEngine())
 
 
+@pytest.mark.unit
 def test_walk_env_rejects_engine_missing_dimensions(mock_engine: MagicMock) -> None:
     """Joint and actuator dimensions must be real engine attributes."""
     del mock_engine.n_v
