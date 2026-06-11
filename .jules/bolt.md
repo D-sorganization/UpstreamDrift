@@ -1,6 +1,3 @@
 ## 2024-06-10 - [Optimize 1D Array Norm Calculation]
 **Learning:** `np.linalg.norm` has significant dispatch and object-creation overhead for very small 1D arrays (like quaternions). `math.hypot` (which supports N arguments in Python 3.8+) operates directly on the floats and is measurably faster (~4.5x) for tiny vectors.
 **Action:** Use `math.hypot(v[0], v[1], ...)` instead of `np.linalg.norm(v)` when calculating the magnitude of small fixed-size arrays where performance matters.
-## 2024-06-11 - [Micro-optimization Constraints]
-**Learning:** Replacing np.linalg.norm with math.hypot for 3D vector length calculations is generally rejected in code review if hardcoded indices (e.g., `vec[0]`, `vec[1]`, `vec[2]`) are used without absolute certainty of the vector's size. It can lead to `IndexError` or silently ignore additional dimensions (e.g., if a 2D or 4D vector is unexpectedly passed). This is considered an overly rigid micro-optimization that sacrifices safety and readability on "cold paths".
-**Action:** Do not blindly replace `np.linalg.norm` with `math.hypot` for arbitrary NumPy arrays unless the code is in an extreme hot loop and the array size is immutably guaranteed to be exactly 2 or 3. Prefer extracting single rows from Pandas DataFrames (`row = df.iloc[idx]`) before repeatedly accessing column values to avoid excessive Series allocations.
