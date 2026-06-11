@@ -88,7 +88,8 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
                 raise ValueError(f"URDF path does not exist: {self.urdf_path}")
             if not self.urdf_path.is_file():
                 raise ValueError(f"URDF path is not a file: {self.urdf_path}")
-            if self.urdf_path.suffix.lower() != ".urdf":
+            urdf_suffix = self.urdf_path.suffix
+            if urdf_suffix.lower() != ".urdf":
                 raise ValueError(f"URDF path must end with .urdf: {self.urdf_path}")
 
     # ------------------------------------------------------------------
