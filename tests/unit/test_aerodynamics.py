@@ -39,6 +39,8 @@ from src.shared.python.physics.aerodynamics import (
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+pytestmark = pytest.mark.unit
+
 
 # =============================================================================
 # Test Fixtures (DRY - shared setup)
