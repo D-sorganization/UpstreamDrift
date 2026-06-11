@@ -9,6 +9,17 @@ from PyQt6 import QtWidgets
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.polynomial_generator import (
     PolynomialGeneratorWidget,
 )
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.control_system import (
+    ControlSystem,
+    ControlType,
+)
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.actuator_detail_dialog import (
+    ActuatorDetailDialog,
+)
+from src.shared.python.signal_toolkit.polynomial_generator import (
+    PolynomialFitError,
+    PolynomialGeneratorWidget as CanonicalPolynomialGeneratorWidget,
+)
 
 
 @pytest.fixture
@@ -30,6 +41,12 @@ def test_widget_initialization(generator_widget):
     assert generator_widget.windowTitle() == "Polynomial Function Generator"
     assert generator_widget.mode == "add_points"
     assert generator_widget.order_spin.value() == 6
+
+
+def test_mujoco_polynomial_generator_is_canonical_widget():
+    """The MuJoCo import path is a compatibility shim over signal_toolkit."""
+    assert PolynomialGeneratorWidget is CanonicalPolynomialGeneratorWidget
+    assert PolynomialFitError.__name__ == "PolynomialFitError"
 
 
 def test_set_joints(generator_widget):
@@ -66,14 +83,17 @@ def test_calculate_poly_fit_insufficient_points(generator_widget):
     assert generator_widget.polynomial_coeffs is None
 
 
-@patch("PyQt6.QtWidgets.QMessageBox.warning")
-def test_fit_polynomial_with_ui(mock_warning, generator_widget):
+def test_fit_polynomial_with_ui(qapp):
     """Test fit polynomial via UI action."""
+    errors: list[tuple[str, str]] = []
+    generator_widget = PolynomialGeneratorWidget(
+        error_handler=lambda *args: errors.append(args)
+    )
     generator_widget.order_spin.setValue(2)
     generator_widget.current_points = [(0.0, 0.0), (1.0, 1.0)]
 
     generator_widget._fit_polynomial()
-    mock_warning.assert_called_once()
+    assert errors == [("Fit Error", "Need at least 3 points for a 2th order fit.")]
 
 
 def test_generate_from_equation(generator_widget):
@@ -114,3 +134,27 @@ def test_clear_data(generator_widget):
 
     assert len(generator_widget.current_points) == 0
     assert generator_widget.polynomial_coeffs is None
+
+
+def test_actuator_detail_dialog_embeds_canonical_polynomial_widget(qapp):
+    """Smoke-test the polynomial actuator path and signal wiring."""
+    control_system = ControlSystem(1)
+    control_system.set_control_type(0, ControlType.POLYNOMIAL)
+
+    dialog = ActuatorDetailDialog(
+        control_system=control_system,
+        actuator_index=0,
+        actuator_name="hip",
+        slider_sync=None,
+    )
+
+    assert isinstance(dialog.poly_widget, CanonicalPolynomialGeneratorWidget)
+
+    coeffs = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+    dialog.poly_widget.polynomial_generated.emit("hip", coeffs)
+
+    assert control_system.get_control_type(0) is ControlType.POLYNOMIAL
+    np.testing.assert_allclose(
+        control_system.get_actuator_control(0).polynomial_coeffs,
+        np.array(coeffs),
+    )

@@ -74,19 +74,19 @@ class MplCanvas(FigureCanvasQTAgg):
             raise ValueError("width must be provided")
         self.fig = Figure(figsize=(width, height), dpi=dpi)
 
-        from shared.python.theme.integration import get_theme_manager
-        from shared.python.theme.matplotlib_style import apply_plot_theme
+        try:
+            from shared.python.theme.integration import get_theme_manager
+            from shared.python.theme.matplotlib_style import apply_golf_suite_style
+        except ImportError:
+            from src.shared.python.theme.integration import get_theme_manager
+            from src.shared.python.theme.matplotlib_style import apply_golf_suite_style
 
         self.axes = self.fig.add_subplot(111)
         super().__init__(self.fig)
 
         _tm = get_theme_manager()
-        apply_plot_theme(self.fig, _tm.get_current_colors())
-        _tm.themeChanged.connect(
-            lambda name: apply_plot_theme(
-                self.fig, _tm.get_theme_colors(name) or _tm.get_current_colors()
-            )
-        )
+        apply_golf_suite_style(self.fig)
+        _tm.themeChanged.connect(lambda _name: apply_golf_suite_style(self.fig))
 
         self.setParent(parent)
         self.setSizePolicy(
@@ -368,11 +368,12 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         """Redraw the plot with current data."""
         self.canvas.axes.clear()
 
-        from shared.python.theme.integration import get_theme_manager
-        from shared.python.theme.matplotlib_style import apply_plot_theme
+        try:
+            from shared.python.theme.matplotlib_style import apply_golf_suite_style
+        except ImportError:
+            from src.shared.python.theme.matplotlib_style import apply_golf_suite_style
 
-        _tm = get_theme_manager()
-        apply_plot_theme(self.canvas.fig, _tm.get_current_colors())
+        apply_golf_suite_style(self.canvas.fig)
 
         self.canvas.axes.grid(True, alpha=0.5)
         self.canvas.axes.set_title("Joint Function Generator")

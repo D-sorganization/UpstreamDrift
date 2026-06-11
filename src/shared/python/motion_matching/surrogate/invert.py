@@ -7,7 +7,7 @@ so autograd flows from a weighted-MSE trajectory loss back to the coefficients.
 
 Public API:
     InvertOptions             -- frozen dataclass of optimizer hyperparameters.
-    FitResult                 -- per-fit bundle (coefficients, loss, history).
+    SurrogateInversionResult  -- per-fit bundle (coefficients, loss, history).
     fit_swing_via_surrogate   -- main entry point.
 """
 
@@ -28,7 +28,12 @@ from ._bounds import clamp_, default_bounds, validate_bounds
 from ._normalize import NormalizationStats, zscore_coeffs
 from .model import ClubTrajectory, SwingSurrogate
 
-__all__ = ["FitResult", "InvertOptions", "fit_swing_via_surrogate"]
+__all__ = [
+    "FitResult",
+    "InvertOptions",
+    "SurrogateInversionResult",
+    "fit_swing_via_surrogate",
+]
 
 logger = get_logger(__name__)
 
@@ -94,7 +99,7 @@ class InvertOptions:
 
 
 @dataclass
-class FitResult:
+class SurrogateInversionResult:
     """Return bundle for :func:`fit_swing_via_surrogate`.
 
     Attributes:
@@ -119,6 +124,9 @@ class FitResult:
     def theta_optimal(self) -> np.ndarray:
         """Alias for ``coefficients`` matching the canonical FitResult schema."""
         return self.coefficients
+
+
+FitResult = SurrogateInversionResult
 
 
 # ---------------------------------------------------------------------------

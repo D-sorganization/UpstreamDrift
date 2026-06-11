@@ -62,7 +62,7 @@ class FitOptions:
 
 
 @dataclass
-class FitResult:
+class SimscapeScipyFitResult:
     """Result of one ``fit_swing_scipy`` run."""
 
     theta: np.ndarray
@@ -74,6 +74,9 @@ class FitResult:
     elapsed_s: float
     history: list[float]
     method: str
+
+
+FitResult = SimscapeScipyFitResult
 
 
 # --------------------------------------------------------------------------- #

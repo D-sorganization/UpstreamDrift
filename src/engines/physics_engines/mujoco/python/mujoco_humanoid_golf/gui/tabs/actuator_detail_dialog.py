@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+import numpy as np
 from PyQt6 import QtWidgets
 
+from src.shared.python.signal_toolkit.polynomial_generator import (
+    PolynomialGeneratorWidget,
+)
+
 from ...control_system import ControlSystem, ControlType
-from ...polynomial_generator import PolynomialGeneratorWidget
 
 
 class ActuatorDetailDialog(QtWidgets.QDialog):
@@ -99,10 +103,8 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
 
     def _create_polynomial_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Embed the PolynomialGeneratorWidget for polynomial control."""
-        self.poly_widget = PolynomialGeneratorWidget(
-            actuator_index=self.actuator_index,
-            control_system=self.control_system,
-        )
+        self.poly_widget = PolynomialGeneratorWidget()
+        self.poly_widget.polynomial_generated.connect(self._on_polynomial_generated)
         layout.addWidget(self.poly_widget)
 
     def _create_sine_wave_section(self, layout: QtWidgets.QVBoxLayout) -> None:
@@ -203,12 +205,31 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
     def _on_damping_changed(self, value: float) -> None:
         self.control_system.set_damping(self.actuator_index, value)
 
+    def _on_polynomial_generated(self, _joint_name: str, coefficients: list) -> None:
+        self.control_system.set_polynomial_coeffs(
+            self.actuator_index,
+            np.asarray(coefficients, dtype=np.float64),
+        )
+        self.control_system.set_control_type(
+            self.actuator_index,
+            ControlType.POLYNOMIAL,
+        )
+
     def _update_sine_params(self, key: str, value: float) -> None:
         params = self.control_system.get_sine_params(self.actuator_index) or {}
         params[key] = value
-        self.control_system.set_sine_params(self.actuator_index, params)
+        self.control_system.set_sine_wave_params(
+            self.actuator_index,
+            params.get("amplitude", 0.0),
+            params.get("frequency", 1.0),
+            params.get("phase", 0.0),
+        )
 
     def _update_step_params(self, key: str, value: float) -> None:
         params = self.control_system.get_step_params(self.actuator_index) or {}
         params[key] = value
-        self.control_system.set_step_params(self.actuator_index, params)
+        self.control_system.set_step_params(
+            self.actuator_index,
+            params.get("toggle_time", 0.0),
+            params.get("on_value", 0.0),
+        )

@@ -11,8 +11,11 @@ from enum import Enum
 
 import numpy as np
 
-from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
+from ..contracts import KeypointSequence, MarkerTrajectory
 from ._frame_arrays import (
+    array_to_keypoint_frames as _array_to_keypoint_frames,
+    array_to_marker_frames as _array_to_marker_frames,
+    estimate_fps as _estimate_fps,
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
 )
@@ -161,84 +164,6 @@ def _filter_markers(
     )
 
 
-def _estimate_fps(frames: list) -> float:
-    """Estimate FPS from frame timestamps."""
-    if len(frames) < 2:
-        return 30.0
-
-    timestamps = [f.timestamp for f in frames]
-    dt = np.mean(np.diff(timestamps))
-
-    if dt <= 0:
-        return 30.0
-
-    return 1.0 / dt
-
-
-def _array_to_keypoint_frames(
-    frames: list[KeypointFrame],
-    data: np.ndarray,
-) -> list[KeypointFrame]:
-    """Convert array back to keypoint frames."""
-    new_frames = []
-
-    for i, frame in enumerate(frames):
-        new_keypoints = []
-        for j, kp in enumerate(frame.keypoints):
-            new_kp = Keypoint(
-                x=data[i, j, 0],
-                y=data[i, j, 1],
-                z=data[i, j, 2] if kp.z is not None else None,
-                confidence=kp.confidence,
-                name=kp.name,
-            )
-            new_keypoints.append(new_kp)
-
-        new_frames.append(
-            KeypointFrame(
-                timestamp=frame.timestamp,
-                keypoints=new_keypoints,
-                schema_name=frame.schema_name,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    return new_frames
-
-
-def _array_to_marker_frames(
-    frames: list[MarkerFrame],
-    data: np.ndarray,
-) -> list[MarkerFrame]:
-    """Convert array back to marker frames."""
-    new_frames = []
-    marker_names = list(frames[0].markers.keys())
-
-    for i, frame in enumerate(frames):
-        new_markers = {}
-        for j, name in enumerate(marker_names):
-            if name in frame.markers:
-                m = frame.markers[name]
-                new_markers[name] = Marker(
-                    name=name,
-                    x=data[i, j, 0],
-                    y=data[i, j, 1],
-                    z=data[i, j, 2],
-                    residual=m.residual,
-                    occluded=m.occluded,
-                )
-
-        new_frames.append(
-            MarkerFrame(
-                timestamp=frame.timestamp,
-                markers=new_markers,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    return new_frames
-
-
 def _butterworth_filter(
     data: np.ndarray,
     cutoff: float,
@@ -347,10 +272,6 @@ def _moving_average(
             )
 
     return filtered
-
-
-# Import Keypoint and Marker for type hints
-from ..contracts import Keypoint, Marker
 
 
 def _kalman_filter(

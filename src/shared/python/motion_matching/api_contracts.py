@@ -46,6 +46,7 @@ from src.shared.python.contracts import (
 )
 
 __all__ = [
+    "ApiFitResult",
     "FitResult",
     "InitialPose",
     "ThetaContractValidator",
@@ -89,7 +90,7 @@ class InitialPose(NamedTuple):
 
 
 @dataclass(frozen=True)
-class FitResult:
+class ApiFitResult:
     """Standardized return type for fit_swing_* optimizers across all engines.
 
     Serves as the canonical bundle for swing trajectory optimization results,
@@ -173,6 +174,9 @@ class FitResult:
             raise ValueError(
                 f"metadata['time_s'] must be >= 0, got {self.metadata['time_s']}"
             )
+
+
+FitResult = ApiFitResult
 
 
 class ThetaContractValidator:
