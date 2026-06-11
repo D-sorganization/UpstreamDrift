@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -90,6 +91,8 @@ class RoboticsGymEnv:
         self.action_config = action_config or ActionConfig()
         self.reward_config = reward_config or RewardConfig()
 
+        self._validate_engine_contract()
+
         # Get dimensions from engine
         self._n_joints = self._get_n_joints()
         self._n_actuators = self._get_n_actuators()
@@ -109,19 +112,58 @@ class RoboticsGymEnv:
 
     def _get_n_joints(self) -> int:
         """Get number of joints from engine."""
-        if hasattr(self.engine, "n_q"):
-            return int(self.engine.n_q)
-        return 7  # Default for 7-DOF arm
+        return int(self.engine.n_q)
 
     def _get_n_actuators(self) -> int:
         """Get number of actuators from engine."""
-        if hasattr(self.engine, "n_v"):
-            return int(self.engine.n_v)
-        return self._n_joints
+        return int(self.engine.n_v)
 
     def _get_n_end_effectors(self) -> int:
         """Get number of end-effectors."""
         return 1  # Override in subclasses
+
+    def _required_engine_attributes(self) -> Iterable[str]:
+        """Return required non-callable engine attributes."""
+        return ("n_q", "n_v")
+
+    def _required_engine_methods(self) -> Iterable[str]:
+        """Return methods required by the active environment configuration."""
+        methods = {"reset", "step"}
+        if self.obs_config.include_joint_pos:
+            methods.add("get_joint_positions")
+        if self.obs_config.include_joint_vel:
+            methods.add("get_joint_velocities")
+        if self.obs_config.include_joint_torque:
+            methods.add("get_joint_torques")
+        if self.obs_config.include_contact_forces:
+            methods.add("get_contact_forces")
+        if self.obs_config.include_imu:
+            methods.add("get_imu_data")
+        return tuple(sorted(methods))
+
+    def _validate_engine_contract(self) -> None:
+        """Validate required engine members before observations or rewards run."""
+        missing_attrs = [
+            name
+            for name in self._required_engine_attributes()
+            if not hasattr(self.engine, name)
+        ]
+        missing_methods = []
+        for name in self._required_engine_methods():
+            member = getattr(self.engine, name, None)
+            if not callable(member):
+                missing_methods.append(name)
+        if missing_attrs or missing_methods:
+            parts = []
+            if missing_attrs:
+                parts.append(
+                    f"engine lacks required attributes: {sorted(missing_attrs)}"
+                )
+            if missing_methods:
+                parts.append(
+                    f"engine lacks required methods: {sorted(missing_methods)}"
+                )
+            raise TypeError("; ".join(parts))
 
     def _build_observation_space(self) -> spaces.Box:
         """Build the observation space based on config.

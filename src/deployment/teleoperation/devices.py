@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from importlib.util import find_spec
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
+
+from src.shared.python.core.contracts.exceptions import StateError
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -82,30 +85,49 @@ class BaseInputDevice(ABC):
         Returns:
             True if connection successful.
         """
-        self._is_connected = True
-        return True
+        self._is_connected = False
+        return False
 
     def disconnect(self) -> None:
         """Disconnect from device."""
         self._is_connected = False
 
+    def _require_connected(self, operation: str) -> None:
+        """Raise when device state is queried without a hardware connection."""
+        if not self._is_connected:
+            raise StateError(
+                f"{self.__class__.__name__} is not connected",
+                current_state="disconnected",
+                required_state="connected",
+                operation=operation,
+            )
+
+    def _has_any_backend(self, module_names: tuple[str, ...]) -> bool:
+        """Return whether any optional hardware backend module is importable."""
+        return any(find_spec(module_name) is not None for module_name in module_names)
+
     def get_pose(self) -> NDArray[np.floating]:
         """Get current pose."""
+        self._require_connected("get_pose")
         return self._pose.copy()
 
     def get_twist(self) -> NDArray[np.floating]:
         """Get current twist."""
+        self._require_connected("get_twist")
         return self._twist.copy()
 
     def get_gripper_state(self) -> float:
         """Get gripper state."""
+        self._require_connected("get_gripper_state")
         return self._gripper
 
     def set_force_feedback(self, wrench: NDArray[np.floating]) -> None:  # noqa: B027
         """Set force feedback (no-op for devices without haptics)."""
+        self._require_connected("set_force_feedback")
 
     def get_buttons(self) -> dict[str, bool]:
         """Get button states."""
+        self._require_connected("get_buttons")
         return self._buttons.copy()
 
     @abstractmethod
@@ -137,17 +159,14 @@ class SpaceMouseInput(BaseInputDevice):
 
     def connect(self) -> bool:
         """Connect to SpaceMouse."""
-        # Actual connection would use hidapi or pyspacemouse
-        self._is_connected = True
-        return True
+        self._is_connected = False
+        if not self._has_any_backend(("pyspacemouse", "hid")):
+            return False
+        return False
 
     def update(self) -> None:
         """Update SpaceMouse state."""
-        if not self._is_connected:
-            return
-
-        # Actual implementation would read from device
-        # This is a placeholder for the interface
+        self._require_connected("update")
 
     def set_sensitivity(self, sensitivity: float) -> None:
         """Set input sensitivity.
@@ -192,19 +211,18 @@ class VRControllerInput(BaseInputDevice):
 
     def connect(self) -> bool:
         """Connect to VR system."""
-        # Actual connection would use OpenVR or similar
-        self._is_connected = True
-        return True
+        self._is_connected = False
+        if not self._has_any_backend(("openvr",)):
+            return False
+        return False
 
     def update(self) -> None:
         """Update VR controller state."""
-        if not self._is_connected:
-            return
-
-        # Actual implementation would poll VR API
+        self._require_connected("update")
 
     def get_gripper_state(self) -> float:
         """Get gripper from trigger value."""
+        self._require_connected("get_gripper_state")
         return 1.0 - self._trigger_value
 
     def get_trigger_value(self) -> float:
@@ -250,16 +268,14 @@ class HapticDeviceInput(BaseInputDevice):
 
     def connect(self) -> bool:
         """Connect to haptic device."""
-        # Actual connection would use device SDK
-        self._is_connected = True
-        return True
+        self._is_connected = False
+        if not self._has_any_backend(("forcedimension", "dhd")):
+            return False
+        return False
 
     def update(self) -> None:
         """Update haptic device state."""
-        if not self._is_connected:
-            return
-
-        # Actual implementation would use device API
+        self._require_connected("update")
 
     def set_force_feedback(self, wrench: NDArray[np.floating]) -> None:
         """Set haptic force feedback.
@@ -269,14 +285,11 @@ class HapticDeviceInput(BaseInputDevice):
         """
         if not (wrench is not None):
             raise ValueError("wrench must be provided")
-        if not self._is_connected:
-            return
+        self._require_connected("set_force_feedback")
 
         # Clip to device limits
         force = wrench[:3] * self._force_scale
         force = np.clip(force, -self._max_force, self._max_force)
-
-        # Actual implementation would send to device
 
     def set_workspace_scale(self, scale: float) -> None:
         """Set workspace scaling factor.
@@ -317,8 +330,7 @@ class KeyboardMouseInput(BaseInputDevice):
 
     def update(self) -> None:
         """Update from keyboard state."""
-        if not self._is_connected:
-            return
+        self._require_connected("update")
 
         # Compute velocity from key states
         vx = self._key_velocity * (
