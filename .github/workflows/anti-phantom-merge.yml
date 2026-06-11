@@ -68,8 +68,20 @@ jobs:
           SENDER: ${{ github.event.sender.login }}
         run: |
           set -euo pipefail
-          labels=$(jq -c '[.pull_request.labels[].name]' "$GITHUB_EVENT_PATH")
-          has_label=$(echo "$labels" | grep -c 'phantom-guard-override' || true)
+          has_label=$(python3 - <<'PY'
+          import json
+          import os
+
+          with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as handle:
+              event = json.load(handle)
+          labels = {
+              label.get("name")
+              for label in event.get("pull_request", {}).get("labels", [])
+              if isinstance(label, dict)
+          }
+          print(1 if "phantom-guard-override" in labels else 0)
+          PY
+          )
           if [ "$has_label" -eq 0 ]; then
             echo "override=false" >> "$GITHUB_OUTPUT"
             echo "Override label not present."

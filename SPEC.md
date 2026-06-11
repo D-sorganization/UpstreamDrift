@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.344                                            |
+| **Spec Version**        | 1.0.345                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -69,6 +69,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-06-11** - Restored API, launcher, and Docker contract parity after
+  the main CI regression sweep. The public simulation request engine allowlist
+  again includes `jaxsim`, Data Explorer import responses preserve generated
+  `dataset_id` values while tolerating legacy direct model construction,
+  launcher canonical-core tiles use a recognized `experimental` status with a
+  served `biomechanics.svg` logo, symlink model-path validation preserves
+  400-class security failures, and Docker feature dry-runs import engine probes
+  through the package-qualified shared config path.
 
 - **2026-06-11** - Capability truthfulness contracts for #7355 and #7356.
   Generated motion-pipeline compatibility docs now mark Drake trajectory
@@ -1203,6 +1212,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.345 | Restored main CI API, launcher, and Docker contracts: `jaxsim` is accepted by the public simulation request allowlist, Data Explorer import responses keep generated dataset IDs while allowing legacy direct model construction, canonical-core launcher tiles use a recognized status and served biomechanics logo, symlink model-path validation preserves explicit 400 security failures, and Docker feature dry-runs import shared engine probe configuration through the package-qualified path. |
 | 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
 | 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |
 | 2026-06-11 | 1.0.344 | RL engine protocol and teleoperation hardware-connection honesty for #7357/#7360. Added `src.engines.protocols.PhysicsEngineProtocol`, validated humanoid RL engine dimensions and runtime channels before use, removed zero-filled humanoid observation/reward fallbacks, exposed MuJoCo protocol accessors over real model/data arrays, and changed SpaceMouse/VR/Haptic device classes to report unavailable with `StateError` on disconnected reads/writes instead of fake successful hardware connections. |

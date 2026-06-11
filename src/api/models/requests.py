@@ -11,6 +11,7 @@ VALID_ENGINE_TYPES = {
     "mujoco",
     "drake",
     "pinocchio",
+    "jaxsim",
     "opensim",
     "myosim",
     "myosuite",

@@ -109,7 +109,7 @@ class DatasetRowsResponse(BaseModel):
 class ImportResponse(BaseModel):
     """Response after importing a dataset."""
 
-    dataset_id: str
+    dataset_id: str | None = None
     name: str
     format: str
     columns: list[str]

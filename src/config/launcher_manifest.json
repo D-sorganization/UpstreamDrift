@@ -589,7 +589,7 @@
       "path": "src/tools/canonical_core/estimation.py",
       "web_route": "/tools/canonical-core/estimation",
       "logo": "biomechanics.svg",
-      "status": "beta",
+      "status": "experimental",
       "default_launch": "tab",
       "shell_surfaces": ["pyqt6", "react"],
       "capabilities": [
@@ -609,7 +609,7 @@
       "path": "src/tools/canonical_core/comparison.py",
       "web_route": "/tools/canonical-core/comparison",
       "logo": "biomechanics.svg",
-      "status": "beta",
+      "status": "experimental",
       "default_launch": "tab",
       "shell_surfaces": ["pyqt6", "react"],
       "capabilities": [
