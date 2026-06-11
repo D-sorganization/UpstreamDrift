@@ -660,6 +660,9 @@ jobs:
       - name: Security Workflow Silent-Failure Guard
         run: python3 scripts/check_workflows_no_silent_failures.py
 
+      - name: Workflow Run Trust Boundary Guard
+        run: python3 scripts/check_workflow_run_trust_boundary.py
+
       - name: Workflow Pytest Path Guard
         run: python3 scripts/ci/check_workflow_pytest_paths.py
 
