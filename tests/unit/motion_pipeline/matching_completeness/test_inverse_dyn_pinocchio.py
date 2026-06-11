@@ -79,12 +79,16 @@ def _static_traj(rig: SkeletonRig, q_value: float = 0.0) -> JointTrajectory:
     return JointTrajectory(id="ref", skeleton=rig, frames=frames)
 
 
-def test_match_returns_finite_torques_for_static_pose():
+def test_synthetic_rig_model_reports_honest_non_production_failure():
     rig = _pendulum_rig()
     traj = _static_traj(rig, q_value=0.0)
     solver = PinocchioInverseDynMatchingSolver()
     result = solver.match(traj, rig)
-    assert result.success
+    assert result.success is False
+    assert result.metadata["model_fidelity"] == "synthetic_point_mass"
+    assert result.metadata["production_ready"] is False
+    assert result.metadata["model_source"] == "synthetic_rig"
+    assert "URDF" in (result.message or "")
     assert result.torque_trajectory is not None
     assert result.torque_trajectory.num_frames == traj.num_frames
     for f in result.torque_trajectory.frames:
@@ -100,6 +104,13 @@ def test_match_postconditions():
     assert result.tracked_trajectory is traj
     assert result.solve_time is not None and result.solve_time >= 0
     assert "rmse" in result.fit_metrics
+    assert result.success is False
+
+
+def test_urdf_path_must_exist_for_production_solver(tmp_path):
+    missing = tmp_path / "missing.urdf"
+    with pytest.raises(ValueError, match="URDF path does not exist"):
+        PinocchioInverseDynMatchingSolver(urdf_path=missing)
 
 
 def test_match_rejects_empty_reference():

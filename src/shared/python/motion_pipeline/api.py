@@ -68,6 +68,10 @@ class PipelineRequest(BaseModel):
     matching_backend: str = Field(
         default="mujoco", description="Motion matching backend"
     )
+    matching_model_urdf: str | None = Field(
+        default=None,
+        description="Production URDF path for matching backends that require one",
+    )
 
     # Cost weights
     cost_weights: dict[str, float] = Field(
@@ -96,6 +100,7 @@ class PipelineRequest(BaseModel):
             scaling=self.scaling,
             ik_backend=self.ik_backend,
             matching_backend=self.matching_backend,
+            matching_model_urdf=self.matching_model_urdf,
             cost_weights=self.cost_weights,
         )
 
@@ -209,6 +214,10 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
         source_format: str = Form(..., description="Source format"),
         ik_backend: str = Form(default="mujoco", description="IK backend"),
         matching_backend: str = Form(default="mujoco", description="Matching backend"),
+        matching_model_urdf: str | None = Form(
+            default=None,
+            description="Production URDF path for matching backends that require one",
+        ),
     ) -> PipelineResponse:
         """
         Run motion pipeline on uploaded file.
@@ -252,6 +261,7 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
                 adapter=AdapterOverride(format=source_format),
                 ik_backend=ik_backend,
                 matching_backend=matching_backend,
+                matching_model_urdf=matching_model_urdf,
             )
 
             # Create and run pipeline
