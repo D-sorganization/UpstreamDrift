@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -90,8 +91,20 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
     def _step_simulation(self) -> None:
         """Advance simulation by one timestep."""
-        if hasattr(self.engine, "step"):
-            self.engine.step()
+        self.engine.step()
+
+    def _required_engine_methods(self) -> Iterable[str]:
+        """Return engine methods required for humanoid walking."""
+        methods = set(super()._required_engine_methods())
+        methods.update({"get_base_velocity", "get_joint_torques", "set_joint_torques"})
+        if (
+            self.reward_config.use_potential_shaping
+            or self.task_config.early_termination
+        ):
+            methods.add("get_base_position")
+        if self.task_config.early_termination:
+            methods.add("get_base_orientation")
+        return tuple(sorted(methods))
 
     def _get_observation(self) -> NDArray[np.floating]:  # noqa: C901
         """Get observation for walking task."""
@@ -99,10 +112,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
         # Joint positions
         if self.obs_config.include_joint_pos:
-            if hasattr(self.engine, "get_joint_positions"):
-                q = self.engine.get_joint_positions()
-            else:
-                q = np.zeros(self._n_joints)
+            q = self.engine.get_joint_positions()
             # Add noise
             if self.obs_config.position_noise_std > 0:
                 q = q + self.np_random.normal(
@@ -112,10 +122,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
         # Joint velocities
         if self.obs_config.include_joint_vel:
-            if hasattr(self.engine, "get_joint_velocities"):
-                qd = self.engine.get_joint_velocities()
-            else:
-                qd = np.zeros(self._n_joints)
+            qd = self.engine.get_joint_velocities()
             # Add noise
             if self.obs_config.velocity_noise_std > 0:
                 qd = qd + self.np_random.normal(
@@ -125,26 +132,17 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
         # Joint torques
         if self.obs_config.include_joint_torque:
-            if hasattr(self.engine, "get_joint_torques"):
-                tau = self.engine.get_joint_torques()
-            else:
-                tau = np.zeros(self._n_joints)
+            tau = self.engine.get_joint_torques()
             obs_parts.append(tau)
 
         # IMU data (base orientation + angular velocity)
         if self.obs_config.include_imu:
-            if hasattr(self.engine, "get_imu_data"):
-                imu = self.engine.get_imu_data()
-            else:
-                imu = np.zeros(6)
+            imu = self.engine.get_imu_data()
             obs_parts.append(imu)
 
         # Contact forces
         if self.obs_config.include_contact_forces:
-            if hasattr(self.engine, "get_contact_forces"):
-                contacts = self.engine.get_contact_forces()
-            else:
-                contacts = np.zeros(6)  # Left and right foot
+            contacts = self.engine.get_contact_forces()
             obs_parts.append(contacts)
 
         obs = np.concatenate(obs_parts).astype(np.float32)
@@ -157,10 +155,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         reward = 0.0
 
         # Forward velocity reward
-        if hasattr(self.engine, "get_base_velocity"):
-            base_vel = self.engine.get_base_velocity()
-        else:
-            base_vel = np.zeros(3)
+        base_vel = self.engine.get_base_velocity()
 
         target_vel = self.task_config.target_velocity
         diff_vel = base_vel[:2] - target_vel[:2]
@@ -172,10 +167,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         reward += self.reward_config.alive_bonus
 
         # Energy penalty
-        if hasattr(self.engine, "get_joint_torques"):
-            torques = self.engine.get_joint_torques()
-        else:
-            torques = action
+        torques = self.engine.get_joint_torques()
         reward -= self.reward_config.compute_energy_penalty(torques)
 
         # Smoothness penalty
@@ -193,10 +185,8 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
     def _compute_potential(self) -> float:
         """Compute potential based on forward progress."""
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            return float(pos[0])  # Forward progress
-        return 0.0
+        pos = self.engine.get_base_position()
+        return float(pos[0])  # Forward progress
 
     def _check_termination(self) -> bool:
         """Check if humanoid has fallen."""
@@ -204,49 +194,40 @@ class HumanoidWalkEnv(RoboticsGymEnv):
             return False
 
         # Check base height
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            if pos[2] < self._base_height_threshold:
-                return True
+        pos = self.engine.get_base_position()
+        if pos[2] < self._base_height_threshold:
+            return True
 
         # Check base tilt
-        if hasattr(self.engine, "get_base_orientation"):
-            quat = self.engine.get_base_orientation()
-            # Check z-component of up vector after rotation
-            # Simplified: check quaternion indicates large tilt
-            up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
-            if up_z < self._base_tilt_threshold:
-                return True
-
-        return False
+        quat = self.engine.get_base_orientation()
+        # Check z-component of up vector after rotation
+        # Simplified: check quaternion indicates large tilt
+        up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
+        return bool(up_z < self._base_tilt_threshold)
 
     def _reset_simulation(self, options: dict[str, Any] | None) -> None:
         """Reset humanoid to standing position."""
-        if hasattr(self.engine, "reset"):
-            self.engine.reset()
+        self.engine.reset()
 
         # Apply small random perturbation to initial state
         if options and options.get("randomize_init", True):
             noise_scale = options.get("init_noise_scale", 0.01)
-            if hasattr(self.engine, "get_joint_positions"):
+            if hasattr(self.engine, "set_joint_positions"):
                 q = self.engine.get_joint_positions()
                 q_noise = self.np_random.normal(0, noise_scale, q.shape)
-                if hasattr(self.engine, "set_joint_positions"):
-                    self.engine.set_joint_positions(q + q_noise)
+                self.engine.set_joint_positions(q + q_noise)
 
     def _get_info(self) -> dict[str, Any]:
         """Get walking-specific info."""
         info = super()._get_info()
 
-        if hasattr(self.engine, "get_base_velocity"):
-            base_vel = self.engine.get_base_velocity()
-            info["forward_velocity"] = float(base_vel[0])
-            info["lateral_velocity"] = float(base_vel[1])
+        base_vel = self.engine.get_base_velocity()
+        info["forward_velocity"] = float(base_vel[0])
+        info["lateral_velocity"] = float(base_vel[1])
 
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            info["base_height"] = float(pos[2])
-            info["forward_distance"] = float(pos[0])
+        pos = self.engine.get_base_position()
+        info["base_height"] = float(pos[2])
+        info["forward_distance"] = float(pos[0])
 
         return info
 
@@ -323,32 +304,36 @@ class HumanoidStandEnv(RoboticsGymEnv):
             if hasattr(self.engine, "apply_external_force"):
                 self.engine.apply_external_force("torso", force)
 
-        if hasattr(self.engine, "step"):
-            self.engine.step()
+        self.engine.step()
+
+    def _required_engine_methods(self) -> Iterable[str]:
+        """Return engine methods required for humanoid standing."""
+        methods = set(super()._required_engine_methods())
+        methods.update(
+            {
+                "get_base_orientation",
+                "get_base_position",
+                "get_base_velocity",
+                "get_joint_torques",
+                "set_joint_torques",
+            }
+        )
+        return tuple(sorted(methods))
 
     def _get_observation(self) -> NDArray[np.floating]:
         """Get observation for standing task."""
         obs_parts = []
 
         if self.obs_config.include_joint_pos:
-            if hasattr(self.engine, "get_joint_positions"):
-                q = self.engine.get_joint_positions()
-            else:
-                q = np.zeros(self._n_joints)
+            q = self.engine.get_joint_positions()
             obs_parts.append(q)
 
         if self.obs_config.include_joint_vel:
-            if hasattr(self.engine, "get_joint_velocities"):
-                qd = self.engine.get_joint_velocities()
-            else:
-                qd = np.zeros(self._n_joints)
+            qd = self.engine.get_joint_velocities()
             obs_parts.append(qd)
 
         if self.obs_config.include_imu:
-            if hasattr(self.engine, "get_imu_data"):
-                imu = self.engine.get_imu_data()
-            else:
-                imu = np.zeros(6)
+            imu = self.engine.get_imu_data()
             obs_parts.append(imu)
 
         return np.concatenate(obs_parts).astype(np.float32)
@@ -360,33 +345,27 @@ class HumanoidStandEnv(RoboticsGymEnv):
         reward = 0.0
 
         # Height maintenance reward
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            height_error = abs(pos[2] - self._target_height)
-            height_reward = np.exp(-10 * height_error)
-            reward += height_reward * self.reward_config.task_reward_weight
+        pos = self.engine.get_base_position()
+        height_error = abs(pos[2] - self._target_height)
+        height_reward = np.exp(-10 * height_error)
+        reward += height_reward * self.reward_config.task_reward_weight
 
         # Upright orientation reward
-        if hasattr(self.engine, "get_base_orientation"):
-            quat = self.engine.get_base_orientation()
-            up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
-            upright_reward = (up_z + 1) / 2  # Normalize to [0, 1]
-            reward += upright_reward * 0.5
+        quat = self.engine.get_base_orientation()
+        up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
+        upright_reward = (up_z + 1) / 2  # Normalize to [0, 1]
+        reward += upright_reward * 0.5
 
         # Minimal movement reward (stay still)
-        if hasattr(self.engine, "get_base_velocity"):
-            vel = self.engine.get_base_velocity()
-            stillness_reward = np.exp(-np.sqrt(np.dot(vel, vel)))
-            reward += stillness_reward * 0.3
+        vel = self.engine.get_base_velocity()
+        stillness_reward = np.exp(-np.sqrt(np.dot(vel, vel)))
+        reward += stillness_reward * 0.3
 
         # Alive bonus
         reward += self.reward_config.alive_bonus
 
         # Energy penalty
-        if hasattr(self.engine, "get_joint_torques"):
-            torques = self.engine.get_joint_torques()
-        else:
-            torques = action
+        torques = self.engine.get_joint_torques()
         reward -= self.reward_config.compute_energy_penalty(torques)
 
         return float(reward)
@@ -396,29 +375,22 @@ class HumanoidStandEnv(RoboticsGymEnv):
         if not self.task_config.early_termination:
             return False
 
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            if pos[2] < self._base_height_threshold:
-                return True
-
-        return False
+        pos = self.engine.get_base_position()
+        return bool(pos[2] < self._base_height_threshold)
 
     def _reset_simulation(self, options: dict[str, Any] | None) -> None:
         """Reset humanoid to standing position."""
-        if hasattr(self.engine, "reset"):
-            self.engine.reset()
+        self.engine.reset()
 
     def _get_info(self) -> dict[str, Any]:
         """Get standing-specific info."""
         info = super()._get_info()
 
-        if hasattr(self.engine, "get_base_position"):
-            pos = self.engine.get_base_position()
-            info["base_height"] = float(pos[2])
+        pos = self.engine.get_base_position()
+        info["base_height"] = float(pos[2])
 
-        if hasattr(self.engine, "get_base_orientation"):
-            quat = self.engine.get_base_orientation()
-            up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
-            info["upright_score"] = float(up_z)
+        quat = self.engine.get_base_orientation()
+        up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
+        info["upright_score"] = float(up_z)
 
         return info

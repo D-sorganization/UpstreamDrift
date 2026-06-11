@@ -12051,22 +12051,23 @@ Gripper is controlled by `open_gripper` and `close_gripper` keys. Key states
 are set externally via `set_key_state(key, pressed)`.
 
 **SpaceMouseInput.** Interface for 3Dconnexion SpaceMouse 6-DOF controllers.
-Provides continuous position and rotation input with configurable sensitivity
-via `set_sensitivity(value)`. Buttons `button_1` and `button_2` are available
-for clutch and mode switching.
+The class exposes the intended contract and checks for optional SpaceMouse
+backend packages, but it does not claim a live connection until a hardware
+backend is implemented. Use `KeyboardMouseInput` as the software-only fallback
+for testing without specialized hardware. Tracked by GitHub issue #7360.
 
 **VRControllerInput.** Interface for VR controllers (Oculus Touch, Vive Wands,
 etc.). Supports left or right hand configuration and multiple tracking systems
-(SteamVR, Oculus). Provides analog trigger and grip values for proportional
-gripper control. The gripper state is derived from the trigger:
-`gripper = 1.0 - trigger_value`. Available buttons include `trigger`, `grip`,
-`thumbstick_click`, `a`, and `b`.
+(SteamVR, Oculus) at the API boundary. It reports unavailable until a real VR
+runtime backend is implemented; it does not synthesize live controller pose.
+Tracked by GitHub issue #7360.
 
 **HapticDeviceInput.** Interface for force-feedback devices (Phantom Omni,
-Force Dimension Sigma.7, etc.). Provides high-fidelity position input and
-bidirectional force feedback. The `set_force_feedback` method clips forces to
-the device's maximum (default 3.3 N for Phantom Omni). Workspace scaling is
-configurable via `set_workspace_scale(scale)`.
+Force Dimension Sigma.7, etc.). The class defines the desired API and force
+limits, but hardware polling and force output remain unavailable until a real
+device SDK backend is implemented. Disconnected reads and feedback writes raise
+a state error rather than returning frozen identity data. Tracked by GitHub
+issue #7360.
 
 ### 20.4.3 TeleoperationMode
 

@@ -15,6 +15,7 @@ from src.deployment.teleoperation.interface import (
     TeleoperationInterface,
     TeleoperationMode,
 )
+from src.shared.python.core.contracts.exceptions import StateError
 
 
 @pytest.fixture
@@ -43,9 +44,12 @@ def test_spacemouse_input() -> None:
     """Test SpaceMouseInput."""
     mouse = SpaceMouseInput(device_index=0)
     assert not mouse.is_connected
-    assert mouse.connect()
-    assert mouse.is_connected
-    mouse.update()
+    assert not mouse.connect()
+    assert not mouse.is_connected
+    with pytest.raises(StateError, match="not connected"):
+        mouse.update()
+    with pytest.raises(StateError, match="not connected"):
+        mouse.get_pose()
     mouse.set_sensitivity(2.0)
     assert mouse._sensitivity == 2.0
 
@@ -53,9 +57,12 @@ def test_spacemouse_input() -> None:
 def test_vr_controller_input() -> None:
     """Test VRControllerInput."""
     vr = VRControllerInput(hand="right")
-    assert vr.connect()
-    vr.update()
-    assert vr.get_gripper_state() == 1.0
+    assert not vr.connect()
+    assert not vr.is_connected
+    with pytest.raises(StateError, match="not connected"):
+        vr.update()
+    with pytest.raises(StateError, match="not connected"):
+        vr.get_gripper_state()
     assert vr.get_trigger_value() == 0.0
     assert vr.get_grip_value() == 0.0
 
@@ -63,15 +70,25 @@ def test_vr_controller_input() -> None:
 def test_haptic_device_input() -> None:
     """Test HapticDeviceInput."""
     haptic = HapticDeviceInput()
-    assert haptic.connect()
-    haptic.update()
+    assert not haptic.connect()
+    assert not haptic.is_connected
+    with pytest.raises(StateError, match="not connected"):
+        haptic.update()
     haptic.set_workspace_scale(0.01)
 
-    # Test setting feedback
-    haptic.set_force_feedback(np.ones(6))
+    with pytest.raises(StateError, match="not connected"):
+        haptic.set_force_feedback(np.ones(6))
 
-    haptic.disconnect()
-    haptic.set_force_feedback(np.zeros(6))  # No op when disconnected
+
+def test_base_input_device_requires_connection_before_state_reads() -> None:
+    """Input devices must not return frozen identity pose while disconnected."""
+    kb = KeyboardMouseInput()
+    with pytest.raises(StateError, match="not connected"):
+        kb.get_pose()
+    with pytest.raises(StateError, match="not connected"):
+        kb.get_twist()
+    with pytest.raises(StateError, match="not connected"):
+        kb.get_gripper_state()
 
 
 def test_keyboard_input() -> None:
@@ -169,7 +186,7 @@ def test_teleop_demonstration_recording(
     assert not interface.is_recording
 
     assert len(demo.joint_positions) == 2
-    assert demo.solver_status == "success"
+    assert demo.success is True
     assert demo.source == "teleoperation"
 
 
