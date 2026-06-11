@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,6 +16,14 @@ from model_generation.library._model_types import (
     ModelFormat,
     RepositorySource,
 )
+
+
+class _BytesResponse(io.BytesIO):
+    def __enter__(self) -> _BytesResponse:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.close()
 
 
 class TestLoadModel:
@@ -106,6 +115,30 @@ class TestLoadModel:
             load_model(entries, URDFParser(), lib_config, "m", force_download=True)
             mock_dl.assert_called_once()
 
+    def test_force_download_rejects_non_https_source_url_before_io(
+        self, simple_urdf: Path, lib_config: LibraryConfig
+    ) -> None:
+        entry = ModelEntry(
+            id="m",
+            name="M",
+            source=RepositorySource.URL,
+            source_url="file:///etc/passwd",
+            urdf_path=simple_urdf,
+            is_cached=True,
+        )
+        entries = {"m": entry}
+
+        with (
+            patch(
+                "src.shared.python.security.security_utils.download_to_file"
+            ) as download_to_file,
+            pytest.raises(ValueError, match="URL scheme 'file' is not allowed"),
+        ):
+            load_model(entries, URDFParser(), lib_config, "m", force_download=True)
+
+        download_to_file.assert_not_called()
+        assert not (lib_config.cache_dir / "m").exists()
+
 
 class TestDownloadModel:
     def test_no_url_returns_false(self, lib_config: LibraryConfig) -> None:
@@ -115,12 +148,15 @@ class TestDownloadModel:
     def test_success(
         self, tmp_path: Path, lib_config: LibraryConfig, monkeypatch
     ) -> None:
-        # Set up a fake urlretrieve that writes a file
-        def fake_urlretrieve(url, dest):
+        def fake_download_to_file(url, dest):
+            assert url == "https://example.com/file.urdf"
             Path(dest).write_text("downloaded")
-            return dest, None
+            return Path(dest)
 
-        monkeypatch.setattr("urllib.request.urlretrieve", fake_urlretrieve)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file",
+            fake_download_to_file,
+        )
         e = ModelEntry(
             id="m",
             name="M",
@@ -139,7 +175,9 @@ class TestDownloadModel:
         def boom(*a, **k):
             raise OSError("network down")
 
-        monkeypatch.setattr("urllib.request.urlretrieve", boom)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file", boom
+        )
         e = ModelEntry(
             id="m",
             name="M",
@@ -151,14 +189,14 @@ class TestDownloadModel:
     def test_id_with_slash_sanitized(
         self, lib_config: LibraryConfig, monkeypatch
     ) -> None:
-        captured = {}
-
-        def fake(url, dest):
-            captured["dest"] = Path(dest)
+        def fake_download_to_file(url, dest):
             Path(dest).write_text("x")
-            return dest, None
+            return Path(dest)
 
-        monkeypatch.setattr("urllib.request.urlretrieve", fake)
+        monkeypatch.setattr(
+            "src.shared.python.security.security_utils.download_to_file",
+            fake_download_to_file,
+        )
         e = ModelEntry(
             id="org/name",
             name="N",
@@ -168,4 +206,5 @@ class TestDownloadModel:
         assert download_model(e, lib_config, {"org/name": e}) is True
         # The cache directory part should not contain a literal slash from
         # the id (the sanitized form replaces '/' with '_')
-        assert "org_name" in str(captured["dest"])
+        assert e.urdf_path is not None
+        assert "org_name" in str(e.urdf_path)
