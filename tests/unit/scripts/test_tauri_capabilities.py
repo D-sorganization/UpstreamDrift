@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ci import check_tauri_capabilities as guard
+
+pytestmark = pytest.mark.unit
 
 
 def _write_tauri_tree(root: Path, permissions: list[str]) -> None:

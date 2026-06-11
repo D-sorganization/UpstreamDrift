@@ -1,6 +1,6 @@
 //! Aerodynamics calculations for golf ball flight.
 //!
-//! Computes drag, lift, and Magnus forces using empirical correlations
+//! Computes drag and a single spin-induced Magnus/lift force using empirical correlations
 //! from golf ball aerodynamics literature.
 //!
 //! # Design by Contract
@@ -154,9 +154,9 @@ impl AeroBallProperties {
 pub struct AeroForces {
     /// Drag force vector [N] (opposes velocity)
     pub drag: Vector3,
-    /// Lift force vector [N] (perpendicular to velocity, in spin plane)
+    /// Legacy lift slot [N]; combined kernels keep this zero to avoid double-counting spin lift.
     pub lift: Vector3,
-    /// Magnus force vector [N] (ω × v direction)
+    /// Magnus/lift force vector [N] (ω × v direction)
     pub magnus: Vector3,
 }
 
@@ -191,7 +191,7 @@ pub fn compute_aero_forces(
     air.validate().expect("invalid air properties");
 
     let drag = compute_drag(velocity, ball, air);
-    let lift = compute_lift(velocity, spin, ball, air);
+    let lift = Vector3::zero();
     let magnus = compute_magnus(velocity, spin, ball, air);
 
     AeroForces { drag, lift, magnus }
@@ -260,9 +260,9 @@ pub fn compute_lift(
     )
 }
 
-/// Compute Magnus force from spin-induced pressure differential.
+/// Compute the single spin-induced Magnus/lift force.
 ///
-/// F_magnus = 0.5 * ρ * Cm * A * |v|² * (ω × v) / |ω × v|
+/// F_magnus = 0.5 * ρ * Cl * A * |v|² * (ω × v) / |ω × v|
 #[must_use]
 pub fn compute_magnus(
     velocity: &Vector3,
@@ -285,8 +285,8 @@ pub fn compute_magnus(
     }
 
     let spin_param = ball.radius * spin_mag / speed;
-    let cm = compute_magnus_coefficient(spin_param);
-    let f_mag = 0.5 * air.density * cm * ball.area * speed * speed;
+    let cl = compute_magnus_coefficient(spin_param);
+    let f_mag = 0.5 * air.density * cl * ball.area * speed * speed;
     let inv_norm = 1.0 / magnus_norm;
 
     Vector3::new(
@@ -361,12 +361,12 @@ pub fn compute_lift_coefficient(spin_ratio: f64) -> f64 {
     cl_max * (1.0 - (-spin_ratio / 0.1).exp())
 }
 
-/// Compute Magnus coefficient from spin parameter ωR/v.
+/// Compute the spin-induced Magnus/lift coefficient from spin parameter ωR/v.
 ///
-/// Approximately linear for small spin_param, capped at 0.2.
+/// Uses the same Smits & Ogg saturation curve as the legacy lift coefficient.
 #[must_use]
 pub fn compute_magnus_coefficient(spin_param: f64) -> f64 {
-    0.4 * spin_param.min(0.5)
+    compute_lift_coefficient(spin_param)
 }
 
 /// Compute spin decay over a time step.
@@ -710,6 +710,28 @@ mod tests {
     }
 
     #[test]
+    fn test_compute_aero_forces_has_single_spin_force() {
+        let v = Vector3::new(70.0, 0.0, 30.0);
+        let spin = Vector3::new(0.0, 300.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let forces = compute_aero_forces(&v, &spin, &ball, &air);
+        let canonical_spin = compute_magnus(&v, &spin, &ball, &air);
+
+        assert!(
+            forces.lift.magnitude() < 1e-12,
+            "combined lift slot stays zero"
+        );
+        assert!(
+            (forces.magnus.x - canonical_spin.x).abs() < 1e-12
+                && (forces.magnus.y - canonical_spin.y).abs() < 1e-12
+                && (forces.magnus.z - canonical_spin.z).abs() < 1e-12,
+            "combined kernel should emit exactly one spin-induced force"
+        );
+    }
+
+    #[test]
     fn test_drag_always_opposes_velocity_diagonal() {
         let v = Vector3::new(30.0, 20.0, 10.0);
         let ball = default_ball();
@@ -799,8 +821,8 @@ mod tests {
     fn test_magnus_coefficient_capped() {
         let cm = compute_magnus_coefficient(1.0);
         assert!(
-            (cm - 0.2).abs() < 1e-10,
-            "Magnus coeff caps at 0.4*0.5=0.2, got {}",
+            (cm - 0.4).abs() < 1e-4,
+            "Magnus/lift coeff should saturate near 0.4, got {}",
             cm
         );
     }

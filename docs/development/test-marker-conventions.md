@@ -7,11 +7,37 @@ This document defines the conventions for `pytest.mark.skip`, `pytest.mark.skipi
 
 | Marker                                  | When to use                         | Who auto-applies it |
 | --------------------------------------- | ----------------------------------- | ------------------- |
+| `@pytest.mark.unit`                     | Dependency-light unit test          | — (you add it)      |
+| `@pytest.mark.integration`              | Cross-module or adapter integration | — (you add it)      |
+| `@pytest.mark.e2e`                      | Full-stack/end-to-end smoke test    | — (you add it)      |
+| `@pytest.mark.slow`                     | Long-running test lane              | — (you add it)      |
 | `@pytest.mark.requires_X`               | Test needs optional dep X           | — (you add it)      |
 | `@pytest.mark.skipif(cond, ...)`        | Conditionally skip (platform, env)  | — (you add it)      |
 | `@pytest.mark.skip(reason=...)`         | Unconditionally skip                | Avoid — see below   |
 | `@pytest.mark.xfail(strict=False, ...)` | Known failure tied to an open issue | — (you add it)      |
 | `@pytest.mark.xfail(strict=True, ...)`  | Must fail; XPASS is a CI error      | — (you add it)      |
+
+## Suite markers are required for new tests
+
+Every new test must carry at least one suite marker such as `unit`,
+`integration`, `e2e`, `slow`, `benchmark`, `smoke`, `gate`, `parity`,
+`scientific`, or `motion_pipeline`. Capability markers such as `requires_gl`
+and `requires_network` do not count as suite markers because they describe what
+the test needs, not which CI lane owns it.
+
+CI enforces this with `scripts/ci/check_suite_marker_ratchet.py` and the
+baseline at `scripts/config/suite_marker_baseline.json`. The baseline is a
+ratchet: existing unmarked tests may be paid down, but net-new unmarked tests
+fail the `Suite Marker Ratchet` step in CI Standard. When you add markers to
+legacy tests, run:
+
+```bash
+python scripts/ci/check_suite_marker_ratchet.py --update-baseline
+```
+
+Do not update the baseline to accept newly added unmarked tests. Add an
+appropriate suite marker instead, preferably as module-level `pytestmark` when
+every test in the file belongs to the same lane.
 
 ## `requires_*` markers — preferred over `skipif`
 

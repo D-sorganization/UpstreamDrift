@@ -17,6 +17,7 @@ will not meet the 10× target — that case is also skipped).
 
 from __future__ import annotations
 
+import math
 import time
 
 import numpy as np
@@ -151,6 +152,83 @@ class TestAerodynamicsEngineParity:
         f_no_drag = compute_total_force(_make_spec(drag_enabled=False), v, s)
         # Drag normally dominates → removing it changes total
         assert not np.allclose(f_all, f_no_drag)
+
+    def test_lift_toggle_does_not_double_count_spin_force(self) -> None:
+        """The combined kernel has one spin force even with legacy lift enabled."""
+        v = np.array([70.0, 0.0, 30.0])
+        s = np.array([0.0, 300.0, 0.0])
+
+        f_all = _python_fallback_total(_make_spec(), v, s)
+        f_lift_disabled = _python_fallback_total(_make_spec(lift_enabled=False), v, s)
+        f_spin_disabled = _python_fallback_total(_make_spec(magnus_enabled=False), v, s)
+
+        np.testing.assert_allclose(f_all, f_lift_disabled, rtol=1e-12, atol=1e-12)
+        assert not np.allclose(f_all, f_spin_disabled)
+
+    def test_driver_trajectory_matches_enhanced_python(self) -> None:
+        """Driver launch parity guards against doubled spin lift in trajectories."""
+        rust = pytest.importorskip("upstream_physics")
+        from src.shared.python.physics.aerodynamics import AerodynamicsConfig
+        from src.shared.python.physics.ball_flight_physics import (
+            BallProperties,
+            EnhancedBallFlightSimulator,
+            EnvironmentalConditions,
+            LaunchConditions,
+        )
+
+        speed = 70.0
+        launch_angle = math.radians(12.0)
+        spin_rpm = 2600.0
+        dt = 0.01
+        env = EnvironmentalConditions()
+        ball = BallProperties(spin_decay_rate=0.05)
+        launch = LaunchConditions(
+            velocity=speed,
+            launch_angle=launch_angle,
+            spin_rate=spin_rpm,
+        )
+        py_sim = EnhancedBallFlightSimulator(
+            ball=ball,
+            environment=env,
+            aero_config=AerodynamicsConfig(),
+        )
+        py_traj = py_sim.simulate_trajectory(launch, max_time=10.0, dt=dt)
+        py_carry = py_sim.calculate_carry_distance(py_traj)
+        py_apex = py_sim.calculate_max_height(py_traj)
+
+        rust_result = rust.simulate_ball_trajectory_py(
+            [0.0, 0.0, 0.0],
+            [
+                speed * math.cos(launch_angle),
+                0.0,
+                speed * math.sin(launch_angle),
+            ],
+            [0.0, -1.0, 0.0],
+            spin_rpm * 2.0 * math.pi / 60.0,
+            [0.0, 0.0, -env.gravity],
+            [0.0, 0.0, 0.0],
+            rust.AeroBallProperties(
+                mass=ball.mass,
+                radius=ball.radius,
+                drag_coefficient=0.25,
+                spin_decay_rate=ball.spin_decay_rate,
+            ),
+            rust.AirProperties(
+                density=env.air_density,
+                viscosity=1.81e-5,
+                temperature=288.15,
+                pressure=101_325.0,
+            ),
+            rust.IntegratorConfig(dt=dt, max_steps=1000),
+        )
+        rust_points = rust_result.to_flat_list()
+        rust_carry = rust_points[-1][1]
+        rust_apex = max(point[3] for point in rust_points)
+
+        assert 210.0 <= rust_carry <= 250.0
+        assert 30.0 <= rust_apex <= 50.0
+        assert rust_carry == pytest.approx(py_carry, rel=0.01)
+        assert rust_apex == pytest.approx(py_apex, rel=0.01)
 
     def test_fallback_reference_identity(self) -> None:
         """Fallback and reference are the same function — sanity guard.
