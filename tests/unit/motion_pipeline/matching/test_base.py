@@ -162,7 +162,7 @@ def test_motion_matching_request_rejects_invalid_solver_configuration(
     params = {"id": "r1", "reference": ref, "rig": rig}
     params.update(kwargs)
     with pytest.raises(ValueError, match=field_name):
-        MotionMatchingRequest(**params)
+        MotionMatchingRequest(**params)  # type: ignore[arg-type]
 
 
 def test_motion_matching_request_rejects_empty_reference_frames() -> None:

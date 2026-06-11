@@ -569,7 +569,7 @@ class TestPyprojectTomlConsistency:
         try:
             import tomllib  # Python 3.11+
         except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
+            import tomli as tomllib  # type: ignore[import-not-found, no-redef]
 
         with open(REPO_ROOT / "pyproject.toml", "rb") as f:
             return tomllib.load(f)
