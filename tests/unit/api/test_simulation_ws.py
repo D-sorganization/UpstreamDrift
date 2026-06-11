@@ -337,19 +337,25 @@ class TestSimulationStreamErrors:
 
 
 class _RouteAppState:
-    def __init__(self) -> None:
-        self.engine_manager = object()
+    def __init__(self, *, has_engine_manager: bool = True) -> None:
+        if has_engine_manager:
+            self.engine_manager = object()
 
 
 class _RouteApp:
-    def __init__(self) -> None:
-        self.state = _RouteAppState()
+    def __init__(self, *, has_engine_manager: bool = True) -> None:
+        self.state = _RouteAppState(has_engine_manager=has_engine_manager)
 
 
 class _RouteWebSocket:
-    def __init__(self, messages: list[dict[str, Any]]) -> None:
+    def __init__(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        has_engine_manager: bool = True,
+    ) -> None:
         self._messages = list(messages)
-        self.app = _RouteApp()
+        self.app = _RouteApp(has_engine_manager=has_engine_manager)
         self.accepted = False
         self.closed = False
         self.sent: list[dict[str, Any]] = []
@@ -374,7 +380,7 @@ async def test_simulation_stream_sanitizes_unexpected_errors(
 ) -> None:
     """Unexpected runtime failures must be logged with traceback and sanitized."""
 
-    websocket = _RouteWebSocket([{"action": "start", "config": {}}])
+    websocket: Any = _RouteWebSocket([{"action": "start", "config": {}}])
 
     async def fake_load_simulation_engine(*_args: Any, **_kwargs: Any) -> object:
         return object()
@@ -413,12 +419,44 @@ async def test_simulation_stream_sanitizes_unexpected_errors(
 
 
 @pytest.mark.anyio
+async def test_simulation_stream_reports_missing_engine_manager(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing engine manager state must return a structured service error."""
+
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {}}],
+        has_engine_manager=False,
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "resolve_ws_user",
+        AsyncMock(return_value=object()),
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [
+        {
+            "error": "service_unavailable",
+            "message": "Engine manager not initialized",
+        }
+    ]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
 async def test_simulation_stream_rejects_invalid_duration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Invalid duration must fail at the WS boundary before engine load."""
 
-    websocket = _RouteWebSocket([{"action": "start", "config": {"duration": 0}}])
+    websocket: Any = _RouteWebSocket([{"action": "start", "config": {"duration": 0}}])
     load_engine = AsyncMock()
 
     async def fake_resolve_ws_user(_websocket: Any) -> object:
@@ -442,7 +480,7 @@ async def test_simulation_stream_rejects_malformed_initial_state(
 ) -> None:
     """Malformed q/v vectors must be rejected before set_state runs."""
 
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"initial_state": {"q": "bad-state"}}}]
     )
     load_engine = AsyncMock()
@@ -476,7 +514,7 @@ async def test_simulation_stream_rejects_oversized_initial_state(
     from src.api.models.requests import MAX_STATE_VECTOR_LEN
 
     oversized = [0.0] * (MAX_STATE_VECTOR_LEN + 1)
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"initial_state": {"q": oversized}}}]
     )
 
@@ -814,7 +852,7 @@ async def test_simulation_stream_rejects_nan_speed_factor(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Non-finite speed_factor must send an error frame and not load an engine."""
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"speed_factor": float("nan")}}]
     )
     load_engine = AsyncMock()
@@ -838,7 +876,7 @@ async def test_simulation_stream_rejects_inf_speed_factor(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Infinite speed_factor must send an error frame and not load an engine."""
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"speed_factor": float("inf")}}]
     )
     load_engine = AsyncMock()
@@ -862,7 +900,9 @@ async def test_simulation_stream_rejects_duration_over_cap(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """duration >= 3600s must send a specific error frame and not load an engine."""
-    websocket = _RouteWebSocket([{"action": "start", "config": {"duration": 3600.0}}])
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 3600.0}}]
+    )
     load_engine = AsyncMock()
 
     monkeypatch.setattr(
@@ -884,7 +924,7 @@ async def test_simulation_stream_rejects_timestep_over_cap(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """timestep >= 1.0s must send a specific error frame and not load an engine."""
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"duration": 1.0, "timestep": 1.5}}]
     )
     load_engine = AsyncMock()
@@ -908,7 +948,7 @@ async def test_simulation_stream_rejects_timestep_too_small(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """timestep < 1e-6s must send a specific error frame and not load an engine."""
-    websocket = _RouteWebSocket(
+    websocket: Any = _RouteWebSocket(
         [{"action": "start", "config": {"duration": 1.0, "timestep": 1e-9}}]
     )
     load_engine = AsyncMock()
