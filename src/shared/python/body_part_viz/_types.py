@@ -47,6 +47,11 @@ class FittedShape:
     scale: np.ndarray
     valid_mask: np.ndarray
 
+    @property
+    def n_frames(self) -> int:
+        """Number of trajectory frames represented by this fit."""
+        return int(self.centroid.shape[0])
+
     def __post_init__(self) -> None:
         if not isinstance(self.shape_id, str) or not self.shape_id:
             raise ValueError(
@@ -54,14 +59,14 @@ class FittedShape:
             )
         if not isinstance(self.binding, MarkerBinding):
             raise TypeError(
-                f"binding must be a MarkerBinding; got {type(self.binding).__name__}"
+                f"binding must be MarkerBinding; got {type(self.binding).__name__}"
             )
 
         for name in ("centroid", "rotation_matrix", "scale", "valid_mask"):
             arr = getattr(self, name)
             if not isinstance(arr, np.ndarray):
                 raise TypeError(
-                    f"{name} must be a numpy.ndarray; got {type(arr).__name__}"
+                    f"{name} must be numpy.ndarray; got {type(arr).__name__}"
                 )
 
         # Floating-dtype enforcement for numeric fields. The contract and type
@@ -101,14 +106,14 @@ class FittedShape:
 
         if self.valid_mask.dtype != np.bool_:
             raise TypeError(
-                f"valid_mask must have dtype=bool; got {self.valid_mask.dtype}"
+                f"valid_mask must have dtype bool; got {self.valid_mask.dtype}"
             )
 
         if n_frames > 0 and bool(self.valid_mask.any()):
             valid_scale = self.scale[self.valid_mask]
             if not bool(np.all(np.isfinite(valid_scale))):
-                raise ValueError("scale entries on valid frames must be finite")
-            if not bool(np.all(valid_scale > 0.0)):
                 raise ValueError(
-                    "scale entries on valid frames must be strictly positive"
+                    "scale must contain only finite values on valid frames"
                 )
+            if not bool(np.all(valid_scale > 0.0)):
+                raise ValueError("scale must be strictly positive on valid frames")

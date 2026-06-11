@@ -44,6 +44,7 @@ def _no_mesh_resolver(uri: str) -> Path:
 
 def _make_mesh_shape(tmp_path: Path) -> MeshShape:
     """Build a tiny on-disk STL (a non-degenerate tetrahedron) and load it."""
+    pytest.importorskip("trimesh")
     stl_path = tmp_path / "tiny.stl"
     # Tetrahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (0,0,1).
     stl_path.write_text(

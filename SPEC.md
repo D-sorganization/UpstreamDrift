@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.349                                            |
+| **Spec Version**        | 1.0.350                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Restored `body_part_viz` unit contracts for
+  `FittedShape.n_frames`, validation exception messages, and optional
+  `trimesh`-dependent mesh tests so optional-stack runs skip unavailable mesh
+  IO dependencies instead of failing unrelated contract checks.
 - **2026-06-11** - Decomposed pendulum perturbation metric extraction and
   profile comparison into focused helpers so changed analyzer code stays within
   the architecture function-size budget without changing public metric output.
