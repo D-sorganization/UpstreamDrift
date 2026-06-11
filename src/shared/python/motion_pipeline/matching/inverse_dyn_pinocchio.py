@@ -24,7 +24,6 @@ from ..contracts import (
     JointTrajectory,
     SkeletonRig,
     TorqueFrame,
-    TorqueTrajectory,
 )
 from .base import (
     BaseMotionMatchingSolver,
@@ -214,14 +213,6 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
             joint_to_id[jname] = current_parent
         data = model.createData()
         return model, data
-
-    @staticmethod
-    def _rig_joint_names(rig: SkeletonRig) -> list[str]:
-        names: list[str] = []
-        for jname, jdef in rig.joints.items():
-            for _ in jdef.axes:
-                names.append(jname)
-        return names
 
     @staticmethod
     def _rig_dof_names(rig: SkeletonRig) -> list[str]:
@@ -506,15 +497,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         if self.urdf_path is not None:
             torque_frames = self._reorder_tau_to_rig_order(torque_frames, permutation)
 
-        # Build per-DOF joint-name list (one entry per axis) so the torque
-        # trajectory's invariant matches the per-frame tau length.
-        rig_joint_names = self._rig_joint_names(rig)
-
-        torque_traj = TorqueTrajectory(
-            frames=torque_frames,
-            rig_joint_names=rig_joint_names,
-            metadata={"semantics": "torques", "source_id": f"{reference.id}-torques"},
-        )
+        torque_traj = self._build_torque_trajectory(reference, rig, torque_frames)
 
         residual_report = self._compute_residual_report(reference, reference)
         rmse = self._compute_rmse(reference, reference)

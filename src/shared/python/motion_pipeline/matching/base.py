@@ -429,6 +429,26 @@ class BaseMotionMatchingSolver(ABC):
     ) -> MotionMatchingResult:
         """Solve motion matching for a reference trajectory."""
 
+    @staticmethod
+    def _rig_joint_names(rig: SkeletonRig) -> list[str]:
+        names: list[str] = []
+        for joint_name, joint_def in rig.joints.items():
+            for _ in joint_def.axes:
+                names.append(joint_name)
+        return names
+
+    def _build_torque_trajectory(
+        self,
+        reference: JointTrajectory,
+        rig: SkeletonRig,
+        frames: list[Any],
+    ) -> TorqueTrajectory:
+        return TorqueTrajectory(
+            frames=frames,
+            rig_joint_names=self._rig_joint_names(rig),
+            metadata={"semantics": "torques", "source_id": f"{reference.id}-torques"},
+        )
+
     def _compute_rmse(
         self,
         reference: JointTrajectory,

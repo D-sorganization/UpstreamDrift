@@ -17,7 +17,6 @@ from ..contracts import (
     JointTrajectory,
     SkeletonRig,
     TorqueFrame,
-    TorqueTrajectory,
 )
 from .base import (
     BaseMotionMatchingSolver,
@@ -79,14 +78,6 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
     @staticmethod
     def _body_pos(offset: list[float]) -> str:
         return " ".join(f"{float(value):.12g}" for value in offset)
-
-    @staticmethod
-    def _rig_joint_names(rig: SkeletonRig) -> list[str]:
-        names: list[str] = []
-        for jname, jdef in rig.joints.items():
-            for _ in jdef.axes:
-                names.append(jname)
-        return names
 
     @classmethod
     def _build_mjcf_from_rig(cls, rig: SkeletonRig) -> str:
@@ -320,13 +311,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             for i, t in enumerate(times)
         ]
 
-        rig_joint_names = self._rig_joint_names(rig)
-
-        torque_traj = TorqueTrajectory(
-            frames=torque_frames,
-            rig_joint_names=rig_joint_names,
-            metadata={"semantics": "torques", "source_id": f"{reference.id}-torques"},
-        )
+        torque_traj = self._build_torque_trajectory(reference, rig, torque_frames)
 
         residual_report = self._compute_residual_report(reference, reference)
         # Compute fit metrics from real residuals rather than hardcoding 0
