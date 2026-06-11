@@ -7,9 +7,10 @@ Part of issue #4568. Defines the unified motion matching interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, fields
 from enum import Enum
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 
@@ -21,6 +22,196 @@ from ..contracts import (
     SkeletonRig,
     TorqueTrajectory,
 )
+
+
+def _require_non_empty_string(value: str, field_name: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string")
+
+
+def _require_finite_nonnegative(value: float, field_name: str) -> None:
+    number = _coerce_float(value, field_name)
+    if number < 0.0:
+        raise ValueError(f"{field_name} must be finite and non-negative")
+
+
+def _require_finite_positive(value: float, field_name: str) -> None:
+    number = _coerce_float(value, field_name)
+    if number <= 0.0:
+        raise ValueError(f"{field_name} must be finite and positive")
+
+
+def _require_positive_int(value: int, field_name: str) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{field_name} must be a positive integer")
+
+
+def _coerce_float(value: float, field_name: str) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a finite number") from exc
+    if not np.isfinite(number):
+        raise ValueError(f"{field_name} must be finite")
+    return number
+
+
+def _require_mapping(value: object, field_name: str) -> None:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{field_name} must be mapping-like")
+
+
+def _trajectory_id(trajectory: JointTrajectory) -> str:
+    return str(getattr(trajectory, "id", "<unknown>"))
+
+
+def _require_non_empty_joint_trajectory(
+    trajectory: JointTrajectory, field_name: str
+) -> None:
+    frames = getattr(trajectory, "frames", None)
+    if not frames:
+        raise ValueError(f"{field_name} must contain at least one frame")
+
+
+def _validate_monotonic_finite_times(
+    frames: list[Any],
+    field_name: str,
+) -> None:
+    previous: float | None = None
+    for frame_index, frame in enumerate(frames):
+        timestamp = _coerce_float(
+            frame.timestamp, f"{field_name} frame {frame_index} timestamp"
+        )
+        if previous is not None and timestamp <= previous:
+            raise ValueError(
+                f"{field_name} timestamps must be strictly monotonic; "
+                f"frame {frame_index - 1}={previous}, frame {frame_index}={timestamp}"
+            )
+        previous = timestamp
+
+
+def _validate_trajectory_shape_and_values(
+    reference: JointTrajectory,
+    tracked: JointTrajectory,
+    *,
+    field_name: str,
+) -> None:
+    _require_non_empty_joint_trajectory(reference, "reference")
+    _require_non_empty_joint_trajectory(tracked, field_name)
+    _validate_monotonic_finite_times(reference.frames, "reference")
+
+    expected_frames = len(reference.frames)
+    actual_frames = len(tracked.frames)
+    if actual_frames != expected_frames:
+        raise ValueError(
+            f"{field_name} shape mismatch for reference '{_trajectory_id(reference)}' "
+            f"and tracked '{_trajectory_id(tracked)}': expected {expected_frames} "
+            f"frames, actual {actual_frames}"
+        )
+
+    _validate_monotonic_finite_times(tracked.frames, field_name)
+
+    for frame_index, (ref_frame, tracked_frame) in enumerate(
+        zip(reference.frames, tracked.frames, strict=True)
+    ):
+        expected_dofs = len(ref_frame.q)
+        actual_dofs = len(tracked_frame.q)
+        if expected_dofs <= 0:
+            raise ValueError(
+                f"reference frame {frame_index} must contain at least one q DOF"
+            )
+        if actual_dofs != expected_dofs:
+            raise ValueError(
+                f"{field_name} shape mismatch at frame {frame_index} for "
+                f"reference '{_trajectory_id(reference)}' and tracked "
+                f"'{_trajectory_id(tracked)}': expected {expected_dofs} DOFs, "
+                f"actual {actual_dofs}"
+            )
+        if not all(np.isfinite(value) for value in ref_frame.q):
+            raise ValueError(
+                f"reference frame {frame_index} q contains non-finite values"
+            )
+        if not all(np.isfinite(value) for value in tracked_frame.q):
+            raise ValueError(
+                f"{field_name} frame {frame_index} q contains non-finite values"
+            )
+
+
+def _validate_matching_time_grid(
+    reference: JointTrajectory,
+    trajectory: JointTrajectory,
+    *,
+    field_name: str,
+) -> None:
+    for frame_index, (ref_frame, candidate_frame) in enumerate(
+        zip(reference.frames, trajectory.frames, strict=True)
+    ):
+        reference_time = float(ref_frame.timestamp)
+        candidate_time = float(candidate_frame.timestamp)
+        if not np.isclose(reference_time, candidate_time, rtol=0.0, atol=1e-9):
+            raise ValueError(
+                f"{field_name} time grid mismatch at frame {frame_index}: "
+                f"expected {reference_time}, actual {candidate_time}"
+            )
+
+
+def _validate_aligned_signal_trajectory(
+    reference: JointTrajectory,
+    payload: TorqueTrajectory | MuscleActivationTrajectory,
+    *,
+    field_name: str,
+) -> None:
+    frames = list(getattr(payload, "frames", []))
+    if not frames:
+        raise ValueError(f"{field_name} must contain at least one frame")
+    _validate_monotonic_finite_times(frames, field_name)
+    expected_frames = len(reference.frames)
+    actual_frames = len(frames)
+    if actual_frames != expected_frames:
+        raise ValueError(
+            f"{field_name} frame count mismatch: expected {expected_frames} frames, "
+            f"actual {actual_frames}"
+        )
+
+    expected_width: int | None = None
+    values_name = "values"
+    if isinstance(payload, TorqueTrajectory):
+        expected_width = len(payload.rig_joint_names)
+        values_name = "tau"
+        if expected_width != reference.skeleton.num_dofs:
+            raise ValueError(
+                f"{field_name} rig_joint_names length {expected_width} does not match "
+                f"reference DOFs {reference.skeleton.num_dofs}"
+            )
+    elif isinstance(payload, MuscleActivationTrajectory):
+        expected_width = len(payload.muscle_names)
+        values_name = "activations"
+
+    for frame_index, (ref_frame, payload_frame) in enumerate(
+        zip(reference.frames, frames, strict=True)
+    ):
+        payload_time = float(payload_frame.timestamp)
+        reference_time = float(ref_frame.timestamp)
+        if not np.isclose(reference_time, payload_time, rtol=0.0, atol=1e-9):
+            raise ValueError(
+                f"{field_name} time grid mismatch at frame {frame_index}: "
+                f"expected {reference_time}, actual {payload_time}"
+            )
+        values = list(getattr(payload_frame, values_name))
+        if not values:
+            raise ValueError(
+                f"{field_name} frame {frame_index} {values_name} must not be empty"
+            )
+        if expected_width is not None and len(values) != expected_width:
+            raise ValueError(
+                f"{field_name} frame {frame_index} {values_name} length "
+                f"{len(values)} != expected {expected_width}"
+            )
+        if not all(np.isfinite(value) for value in values):
+            raise ValueError(
+                f"{field_name} frame {frame_index} {values_name} contains "
+                "non-finite values"
+            )
 
 
 class MatchingBackendType(str, Enum):
@@ -54,6 +245,12 @@ class CostWeights:
     contact: float = field(default=0.1)
     residual: float = field(default=10.0)
 
+    def __post_init__(self) -> None:
+        for weight_field in fields(self):
+            _require_finite_nonnegative(
+                getattr(self, weight_field.name), weight_field.name
+            )
+
 
 @dataclass
 class MotionMatchingRequest:
@@ -82,9 +279,20 @@ class MotionMatchingRequest:
     use_residuals: bool = field(default=True)
     use_contacts: bool = field(default=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        _require_non_empty_string(self.id, "id")
+        _require_non_empty_joint_trajectory(self.reference, "reference.frames")
         if self.time_horizon is None:
             self.time_horizon = self.reference.duration
+        _require_finite_positive(self.time_horizon, "time_horizon")
+        _require_finite_positive(self.integrator_step, "integrator_step")
+        _require_positive_int(self.max_iterations, "max_iterations")
+        if self.reference.skeleton.num_dofs != self.rig.num_dofs:
+            raise ValueError(
+                "rig must be compatible with reference: "
+                f"reference DOFs={self.reference.skeleton.num_dofs}, "
+                f"rig DOFs={self.rig.num_dofs}"
+            )
 
 
 @dataclass
@@ -114,6 +322,27 @@ class MotionMatchingResult:
     solve_time: float | None = None
     message: str | None = None
     metadata: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        _require_non_empty_string(self.request_id, "request_id")
+        if self.residual_report is not None:
+            _require_mapping(self.residual_report, "residual_report")
+        if self.fit_metrics is not None:
+            _require_mapping(self.fit_metrics, "fit_metrics")
+        _require_mapping(self.metadata, "metadata")
+
+        has_payload = (
+            self.tracked_trajectory is not None
+            or self.torque_trajectory is not None
+            or self.activation_trajectory is not None
+        )
+        if self.success and not has_payload:
+            raise ValueError(
+                "success=True requires at least one matched payload: "
+                "tracked_trajectory, torque_trajectory, or activation_trajectory"
+            )
+        if not self.success and not (self.message and self.message.strip()):
+            raise ValueError("message must explain failed motion matching results")
 
     def to_contract(self) -> ContractMotionMatchingResult:
         """Convert to contract MotionMatchingResult.
@@ -213,10 +442,13 @@ class BaseMotionMatchingSolver(ABC):
             RMSE in radians
         """
         errors = []
+        _validate_trajectory_shape_and_values(
+            reference, tracked, field_name="metric trajectory"
+        )
         for ref_frame, track_frame in zip(
-            reference.frames, tracked.frames, strict=False
+            reference.frames, tracked.frames, strict=True
         ):
-            for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
+            for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=True):
                 errors.append((ref_q - track_q) ** 2)
 
         return float(np.sqrt(np.mean(errors)))
@@ -238,10 +470,13 @@ class BaseMotionMatchingSolver(ABC):
         """
         # Compute residual as difference in joint angles
         residuals = []
+        _validate_trajectory_shape_and_values(
+            reference, tracked, field_name="metric trajectory"
+        )
         for ref_frame, track_frame in zip(
-            reference.frames, tracked.frames, strict=False
+            reference.frames, tracked.frames, strict=True
         ):
-            for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
+            for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=True):
                 residuals.append(abs(ref_q - track_q))
 
         return {
@@ -253,7 +488,8 @@ class BaseMotionMatchingSolver(ABC):
 
     def _validate_result(
         self,
-        trajectory: JointTrajectory,
+        reference: JointTrajectory,
+        result: MotionMatchingResult,
     ) -> bool:
         """
         Validate motion matching result satisfies DbC postconditions.
@@ -261,11 +497,35 @@ class BaseMotionMatchingSolver(ABC):
         Postconditions:
         - Torque/activation finite
         - Time grid matches reference
+
+        Raises:
+            ValueError: If the first broken invariant is found.
         """
-        # Check for NaN/Inf in joint angles
-        for frame in trajectory.frames:
-            if any(not np.isfinite(v) for v in frame.q):
-                return False
+        _require_non_empty_joint_trajectory(reference, "reference")
+        _validate_monotonic_finite_times(reference.frames, "reference")
+        if result.tracked_trajectory is not None:
+            _validate_trajectory_shape_and_values(
+                reference,
+                result.tracked_trajectory,
+                field_name="tracked_trajectory",
+            )
+            _validate_matching_time_grid(
+                reference,
+                result.tracked_trajectory,
+                field_name="tracked_trajectory",
+            )
+        if result.torque_trajectory is not None:
+            _validate_aligned_signal_trajectory(
+                reference,
+                result.torque_trajectory,
+                field_name="torque_trajectory",
+            )
+        if result.activation_trajectory is not None:
+            _validate_aligned_signal_trajectory(
+                reference,
+                result.activation_trajectory,
+                field_name="activation_trajectory",
+            )
 
         return True
 

@@ -428,10 +428,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         rmse = self._compute_rmse(reference, reference)
         solve_time = time.perf_counter() - t_start
 
-        if not self._validate_result(reference):
-            raise RuntimeError("Reference trajectory failed postcondition check")
-
-        return MotionMatchingResult(
+        result = MotionMatchingResult(
             request_id=request_id,
             success=True,
             tracked_trajectory=reference,
@@ -446,6 +443,8 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
                 "n_dof": n_dof_traj,
             },
         )
+        self._validate_result(reference, result)
+        return result
 
 
 __all__ = ["PinocchioInverseDynMatchingSolver"]
