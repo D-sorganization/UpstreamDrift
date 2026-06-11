@@ -487,6 +487,29 @@ class TestCIEnvironmentCompatibility:
         assert "tests:              ${{ needs.tests.result }}" in aggregate
         assert '${{ needs.tests.result }}" != "success"' in aggregate
 
+    def test_ci_standard_tests_matrix_timeout_covers_core_suite_runtime(self) -> None:
+        """The core tests matrix must not cancel before the bounded suite completes."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        tests_job = workflow["jobs"]["tests"]
+
+        assert int(tests_job["timeout-minutes"]) >= 35
+        core_step = next(
+            step
+            for step in tests_job["steps"]
+            if step.get("name") == "Run Core Test Suite"
+        )
+        assert "--timeout=60" in core_step["run"]
+        assert "-n 2" in core_step["run"]
+
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:
