@@ -134,6 +134,17 @@ def test_collect_violations_reports_invalid_exception_metadata(tmp_path: Path) -
     ]
 
 
+def test_checked_in_architecture_budget_exceptions_are_valid() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    config = mod._load_config(
+        repo_root, Path("scripts/config/architecture_budget.json")
+    )
+
+    _, invalid = mod._collect_active_exceptions(config)
+
+    assert invalid == []
+
+
 def test_main_fails_when_changed_production_file_exceeds_budget(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
