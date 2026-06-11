@@ -65,16 +65,17 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
                 detail="Invalid path format",
             ) from exc
 
+        # Check for symlinks first, even if the resolved target is outside.
+        if _candidate_traverses_symlink(candidate, allowed_dir):
+            raise HTTPException(
+                status_code=400,
+                detail="Symlinks are not permitted in model paths",
+            )
+
         try:
             resolved_candidate.relative_to(resolved_allowed_dir)
         except ValueError:
             continue
-
-        if _candidate_traverses_symlink(candidate, allowed_dir):
-            raise HTTPException(
-                status_code=400,
-                detail="Symbolic links are not permitted in model paths",
-            )
 
         if resolved_candidate.exists():
             return resolved_candidate
