@@ -8,8 +8,11 @@ from __future__ import annotations
 
 import logging
 import os
+import queue
 import shutil
 import subprocess
+import threading
+import time
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -55,6 +58,12 @@ from src.shared.python.security.secure_subprocess import (  # noqa: E402
     SecureSubprocessError,
     secure_run,
 )
+from src.shared.python.security.subprocess_utils import kill_process_tree  # noqa: E402
+
+
+DOCKER_BUILD_TIMEOUT_SECONDS = 3600.0
+DOCKER_BUILD_WAIT_POLL_SECONDS = 0.1
+DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS = 5.0
 
 
 class DockerCheckThread(QThread):
@@ -109,6 +118,7 @@ class DockerBuildThread(QThread):
         context_path: Path | None = None,
         dockerfile_path: Path | None = None,
         build_args: dict[str, str] | None = None,
+        build_timeout_seconds: float = DOCKER_BUILD_TIMEOUT_SECONDS,
     ) -> None:
         """Initialize the build thread."""
         if target_stage is None:
@@ -119,6 +129,69 @@ class DockerBuildThread(QThread):
         self.context_path = context_path
         self.dockerfile_path = dockerfile_path
         self.build_args = build_args or {}
+        self.build_timeout_seconds = build_timeout_seconds
+
+    def _stream_process_output(
+        self, process: subprocess.Popen[str]
+    ) -> tuple[threading.Thread, queue.Queue[str]] | None:
+        """Stream Docker stdout without blocking timeout enforcement."""
+        if process.stdout is None:
+            return None
+
+        output_queue: queue.Queue[str] = queue.Queue()
+
+        def read_stdout() -> None:
+            try:
+                for line in iter(process.stdout.readline, ""):
+                    stripped = line.strip()
+                    if stripped:
+                        output_queue.put(stripped)
+            finally:
+                process.stdout.close()
+
+        reader = threading.Thread(
+            target=read_stdout,
+            name="docker-build-stdout-reader",
+            daemon=True,
+        )
+        reader.start()
+        return reader, output_queue
+
+    def _emit_queued_output(self, output_queue: queue.Queue[str] | None) -> None:
+        """Emit all Docker output currently collected by the reader thread."""
+        if output_queue is None:
+            return
+        while True:
+            try:
+                line = output_queue.get_nowait()
+            except queue.Empty:
+                return
+            self.log_signal.emit(line)
+
+    def _wait_for_build_process(
+        self,
+        process: subprocess.Popen[str],
+        output_queue: queue.Queue[str] | None,
+    ) -> None:
+        """Wait for the Docker process while continuing to flush output."""
+        deadline = time.monotonic() + self.build_timeout_seconds
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(
+                    cmd=getattr(process, "args", ["docker", "build"]),
+                    timeout=self.build_timeout_seconds,
+                )
+            try:
+                process.wait(timeout=min(DOCKER_BUILD_WAIT_POLL_SECONDS, remaining))
+                return
+            except subprocess.TimeoutExpired:
+                self._emit_queued_output(output_queue)
+
+    def _terminate_timed_out_build(self, process: subprocess.Popen[str]) -> None:
+        """Terminate the Docker build process tree after a build timeout."""
+        if not kill_process_tree(process.pid):
+            process.kill()
 
     def run(self) -> None:
         """Run the docker build command."""
@@ -176,25 +249,27 @@ class DockerBuildThread(QThread):
                 env=env,
                 creationflags=creation_flags,
             )
-
-            if process.stdout:
-                for line in iter(process.stdout.readline, ""):
-                    if line.strip():
-                        self.log_signal.emit(line.strip())
-                process.stdout.close()
+            stdout_stream = self._stream_process_output(process)
+            stdout_reader = stdout_stream[0] if stdout_stream is not None else None
+            output_queue = stdout_stream[1] if stdout_stream is not None else None
 
             # Add timeout to prevent indefinite hangs (issue #2715)
             try:
-                process.wait(timeout=3600)  # 1-hour limit
+                self._wait_for_build_process(process, output_queue)
             except subprocess.TimeoutExpired:
+                self._emit_queued_output(output_queue)
                 self.log_signal.emit(
                     "Build timed out after 1 hour; terminating process"
                 )
-                process.kill()
+                self._terminate_timed_out_build(process)
                 self.finished_signal.emit(
                     False, "Build timed out (exceeded 1 hour limit)"
                 )
                 return
+            finally:
+                if stdout_reader is not None:
+                    stdout_reader.join(DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS)
+                self._emit_queued_output(output_queue)
 
             if process.returncode == 0:
                 self.finished_signal.emit(True, "Build successful.")

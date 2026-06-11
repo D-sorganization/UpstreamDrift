@@ -1168,6 +1168,7 @@ jobs:
           QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+          coverage_args=(--cov=src)
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # Fetch base branch with enough depth for merge-base resolution.
@@ -1213,14 +1214,40 @@ jobs:
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
             )
 
+            if [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
+              coverage_args=()
+              for target in "${changed_coverage_targets[@]}"; do
+                if [[ "$target" == src/*.py ]]; then
+                  coverage_module="${target%.py}"
+                  coverage_args+=(--cov="${coverage_module//\//.}")
+                fi
+              done
+              if [ "${#coverage_args[@]}" -eq 0 ]; then
+                coverage_args=(--cov=src)
+              fi
+            fi
+
             if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
               echo "No core Python/test/dependency changes detected; skipping core tests for this workflow-only PR."
               exit 0
             elif [ "${#changed_tests[@]}" -eq 0 ]; then
               echo "No Python test changes detected for changed core targets."
-              echo "Falling through to default test lane to ensure source/dependency coverage."
+              echo "Falling through to targeted coverage lane to ensure source/dependency coverage."
             else
-              echo "Running PR-scoped core tests:"
+              if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                echo "Running PR-scoped core tests:"
+                coverage_mode=(--no-cov)
+              else
+                echo "Running PR-scoped core tests with targeted coverage:"
+                coverage_mode=(
+                  "${coverage_args[@]}"
+                  --cov-report=term-missing
+                  --cov-report=xml:coverage.xml
+                  --cov-config=pyproject.toml
+                  --cov-fail-under=75
+                )
+                echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
+              fi
               printf '  %s\n' "${changed_tests[@]}"
               set +e
               xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}" \
@@ -1229,7 +1256,7 @@ jobs:
                 --timeout=60 \
                 --timeout-method=thread \
                 -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
-                --no-cov \
+                "${coverage_mode[@]}" \
                 --tb=short \
                 -v
               pytest_exit_code=$?
@@ -1259,15 +1286,16 @@ jobs:
               fi
 
               if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
-                echo "No source/dependency coverage targets changed; skipping default coverage lane after PR-scoped tests."
+                echo "No source/dependency coverage targets changed; skipping targeted coverage lane after PR-scoped tests."
                 exit 0
               fi
 
-              echo "Source/dependency coverage targets changed; running default coverage lane after PR-scoped tests."
+              echo "Source/dependency coverage targets changed; targeted coverage collected during PR-scoped tests."
+              exit 0
             fi
           fi
 
-          # Run the default, dependency-light CI lane:
+          # Run the targeted, dependency-light CI lane:
           # - Bounded parallelism (-n 2 --dist loadscope) so no single worker
           #   process imports the entire 2k+ module test graph at once. A
           #   monolithic serial (-n 0) run accumulated every test module's
@@ -1285,6 +1313,7 @@ jobs:
           # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
           # are intentionally not provisioned here.
           echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
+          echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
             -n 2 \
@@ -1295,7 +1324,7 @@ jobs:
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
-            --cov=src \
+            "${coverage_args[@]}" \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
@@ -1304,8 +1333,9 @@ jobs:
             -v
 
       - name: Enforce Per-Package Coverage Thresholds
-        # Run only when the default coverage lane generated coverage.xml.
-        if: steps.core-test-changes.outputs.skip != 'true' && steps.core-tests.outputs.coverage_generated == 'true'
+        # Run only when the default full coverage lane generated coverage.xml.
+        # PR-scoped targeted coverage intentionally omits unrelated packages.
+        if: steps.core-test-changes.outputs.skip != 'true' && steps.core-tests.outputs.full_coverage_generated == 'true'
         run: python3 scripts/config/coverage_enforcer.py coverage.xml
       # Dependency-free validator coverage that supports future native-engine jobs.
       - name: Cross-Engine Validator Core Unit Tests
