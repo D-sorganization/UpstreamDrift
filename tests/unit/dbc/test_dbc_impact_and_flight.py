@@ -17,10 +17,13 @@ import unittest
 from typing import Any
 
 import numpy as np
+import pytest
 
 os.environ["DBC_LEVEL"] = "enforce"
 
 from src.shared.python.physics.rust_kernel import is_rust_available  # noqa: E402
+
+pytestmark = pytest.mark.unit
 
 _RUST_SKIP = unittest.skipIf(
     not is_rust_available(),

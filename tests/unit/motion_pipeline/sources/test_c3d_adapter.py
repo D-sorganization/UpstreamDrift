@@ -14,6 +14,8 @@ from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
 
 _HAS_EZC3D = _mod._HAS_EZC3D
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.skipif(not _HAS_EZC3D, reason="ezc3d not installed")
 def test_c3d_supports_only_when_ezc3d(tmp_path: Path) -> None:

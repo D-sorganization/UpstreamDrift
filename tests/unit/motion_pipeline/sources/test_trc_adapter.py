@@ -9,6 +9,8 @@ import pytest
 from src.shared.python.motion_pipeline.sources.base import AdapterContractError
 from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 
+pytestmark = pytest.mark.unit
+
 _TRC = "\n".join(
     [
         "PathFileType\t4\t(X/Y/Z)\ttiny.trc",
