@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.333                                            |
+| **Spec Version**        | 1.0.334                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -74,6 +74,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   with explicit component access in primitive-shape distance helpers, keeping
   the robotics collision contracts unchanged while avoiding tuple unpacking
   overhead on hot paths.
+- **2026-06-11** - Promoted Law-of-Demeter enforcement from advisory
+  Pinocchio-only lint to a blocking repo-wide production `src/` ratchet.
+  `quality-gate.yml` now runs `scripts/ci/check_lod.py src --baseline
+scripts/ci/lod_baseline.txt`; the checked-in baseline records existing
+  path/chain counts and the required `quality-gate` status fails on any new
+  non-allowlisted deep attribute chain.
 - **2026-06-11** - Tightened motion matching runtime contracts for #7304,
   #7305, #7306, and #7309. Internal request construction now rejects invalid
   cost weights and solver configuration before backend dispatch, metric helpers
@@ -128,6 +134,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   capability now ships concrete v2 permission definitions so Rust/Tauri checks
   can resolve the four local backend commands, and the Tauri Linux dependency
   install now retries apt lock collisions on the self-hosted runner pool.
+- **2026-06-10** - Collapsed the legacy Frankenstein editor split modules into
+  import shims for #7280. `src/tools/model_explorer/_frankenstein_model.py`
+  now re-exports `frankenstein_editor.model.URDFModel`, and
+  `_frankenstein_panels.py` re-exports the canonical `ModelPanel` and
+  `StealComponentDialog`, preserving older import paths while keeping the
+  implementation in the `frankenstein_editor` package. The split contract tests
+  now assert shim identity and exercise the canonical URDF validation/export
+  path through the legacy import.
 - **2026-06-10** - Hardened the optional cloud client cache contract for
   #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
   treated as absent credentials, leaving `CloudClient.token` as `None` and
@@ -920,6 +934,11 @@ Beyond standard tools, CI enforces custom checks:
   paths, excludes receiver parameters (`self`/`cls`) from method counts, and
   requires owned, linked exceptions in
   `scripts/config/architecture_budget.json`.
+- **Law of Demeter Ratchet**: `scripts/ci/check_lod.py` scans production
+  `src/` Python files and blocks new deep application object chains beyond the
+  checked-in `scripts/ci/lod_baseline.txt` path/chain counts while preserving
+  documented library API allowances for Qt, numpy, pandas, matplotlib, scipy,
+  and engine namespace access.
 - **Agent Docs Consistency**: `scripts/check_agent_docs_consistency.py`
   validates literal repo-relative paths documented in agent guidance while
   treating glob/brace references such as `scripts/**` and
@@ -943,6 +962,7 @@ Beyond standard tools, CI enforces custom checks:
 | Workflow                       | Trigger                                | Purpose                                                                               | Blocking?          |
 | ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------ |
 | `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
+| `quality-gate.yml`             | PR/manual dispatch                     | Blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code           | Yes                |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                    | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                       | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                            | Yes (for releases) |
@@ -1082,7 +1102,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.333 | Collision distance helper optimization for #7324. Primitive-shape distance helpers now use explicit component access instead of `math.hypot(*tuple)` unpacking, preserving robotics collision behavior while avoiding tuple unpacking overhead on hot paths. |
+| 2026-06-11 | 1.0.334 | Collision distance helper optimization for #7324. Primitive-shape distance helpers now use explicit component access instead of `math.hypot(*tuple)` unpacking, preserving robotics collision behavior while avoiding tuple unpacking overhead on hot paths. |
+| 2026-06-11 | 1.0.333 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
 | 2026-06-11 | 1.0.332 | Safe motion checkpoint loading for #7276. Replaced pickle-enabled motion-matching checkpoint loads with safe artifact loading via `torch.load(..., weights_only=True)`. Validates mapping-shaped artifacts, keeping inverse, inverse-timestep, compact surrogate, and per-step surrogate loaders on the same safe contract. Exceeded surrogate train/optimize function budgets are tracked as exceptions in `architecture_budget.json`. |
 | 2026-06-11 | 1.0.331 | Resolve merge conflicts in SPEC.md for PR 7316 by merging origin/main, retaining all changelog entries, and bumping Spec Version. |
 | 2026-06-11 | 1.0.330 | Simulation WebSocket dependency-boundary conflict refresh for #7283. `simulation_stream` keeps resolving the engine manager through the WebSocket-safe dependency accessor after the #7304/#7305/#7306/#7309 runtime-contract `main` update, and missing app-state manager configuration still emits a structured `service_unavailable` frame before clean close. |
@@ -1099,6 +1120,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-11 | 1.0.311 | PR-scoped unit gate hardening for #7314. Standard CI no longer lets source/dependency PRs pass solely by running changed test files; those PRs fall through to the dependency-light unit lane with targeted coverage. `coverage_enforcer.py` now supports a PR-mode changed-file ratchet so changed production policy files must appear in targeted coverage and meet their policy threshold. |
 | 2026-06-10 | 1.0.309 | Jules PR AutoFix workflow-run trust-boundary hardening for #7312. The privileged `workflow_run` path now performs read-only failed-CI metadata analysis and posts manual dispatch instructions instead of checking out or executing PR-controlled code. The write-capable iterative fixer is restricted to explicit `workflow_dispatch` with an input branch. Added `scripts/check_workflow_run_trust_boundary.py`, wired it into standard CI, documented it in `scripts/README.md`, and added focused regression tests for unsafe workflow-run checkout/install/writeback patterns and the current Jules workflow contract. |
 | 2026-06-10 | 1.0.308 | Docker build timeout and focused PR coverage enforcement for #7277. `DockerManager` now monitors build output through a background queue while enforcing a wall-clock build timeout, terminating the process tree when stdout remains open past the deadline. Standard CI now scopes PR coverage to changed `src/**/*.py` modules and runs per-package coverage enforcement only after full core coverage reports, so focused PRs are not blocked by unrelated packages. |
+| 2026-06-10 | 1.0.304 | Frankenstein editor legacy shim consolidation for #7280. `_frankenstein_model.py` now re-exports the canonical `frankenstein_editor.model.URDFModel`, and `_frankenstein_panels.py` re-exports the canonical panel/dialog classes, preserving older import paths without duplicating implementation. Focused split tests assert shim identity and exercise validation/export through the legacy model import. |
 | 2026-06-10 | 1.0.303 | Lock-backed CI dependency install follow-up for #7278. Standard CI jobs now install committed `requirements-dev.lock` artifacts before editable package installs and use `--no-deps` for local editable extras so pip never treats extras-bearing lock entries as invalid constraints. The dev lock and `make sync-deps` target now cover the `gui-test` extra so unit gates retain real PyQt6/pytest-qt imports, and the static security CI acceptance test rejects `-c requirements-dev.lock` regressions while keeping the dev/runtime pip-audit lock checks. |
 | 2026-06-10 | 1.0.302 | Audit hygiene fixes for #7279 and #7282. `.github/workflows/docker-security-scan.yml` now blocks HIGH and CRITICAL Trivy container vulnerabilities in the table scan while retaining SARIF upload, and audited API/launcher production modules now use the canonical logging infrastructure instead of direct module-level `logging.getLogger` calls. Added security CI acceptance coverage for the Docker HIGH/CRITICAL gate and a repo-hygiene test for the remediated logger modules. |
 | 2026-06-10 | 1.0.301 | Audit regression fixes for #7269, #7270, and #7271. Model Explorer API path resolution now validates caller paths before filesystem reads and resolves only within approved model directories, closing the direct existing-path containment bypass. Motion-pipeline keypoint gap filling now guards both before/after neighbor keypoint indexes and pins mismatched-neighbor behavior in the main and pure-Python implementations. `SwingBallFlightPipeline` now emits `LaunchConditions` in the units consumed by `BallFlightSimulator`: launch and azimuth angles in radians, spin rate in RPM, with updated DbC validation and unit tests. |

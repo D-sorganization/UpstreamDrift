@@ -380,7 +380,7 @@ class TestCIEnvironmentCompatibility:
     def test_quality_gate_lod_timeout_budget_matches_self_hosted_setup_cost(
         self,
     ) -> None:
-        """The advisory LOD job must allow checkout/setup on busy self-hosted runners."""
+        """The LOD gate must allow checkout/setup on busy self-hosted runners."""
         try:
             import yaml
         except ImportError:
@@ -391,9 +391,26 @@ class TestCIEnvironmentCompatibility:
                 encoding="utf-8",
             ),
         )
-        lod_job = workflow["jobs"]["lod-pinocchio"]
+        lod_job = workflow["jobs"]["quality-gate"]
 
         assert int(lod_job["timeout-minutes"]) >= 15
+
+    def test_quality_gate_runs_repo_wide_blocking_lod_check(self) -> None:
+        """The required status must fail on new repo-wide LOD violations."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "quality-gate.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+
+        assert set(workflow["jobs"]) == {"quality-gate"}
+        assert "scripts/ci/check_lod.py" in workflow_text
+        assert "src \\" in workflow_text
+        assert "--baseline scripts/ci/lod_baseline.txt" in workflow_text
+        assert "--advisory" not in workflow_text
 
     def test_quality_gate_workflow_emits_required_status_on_every_pr(self) -> None:
         """The standalone required status must not be hidden behind path filters."""

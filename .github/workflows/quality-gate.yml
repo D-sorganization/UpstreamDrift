@@ -1,10 +1,8 @@
 name: Quality Gate
 
-# Advisory quality checks for engine-specific coding standards.
-# Currently runs the LOD (Law of Demeter) lint over the pinocchio Python
-# package; the check is **advisory** (it prints warnings and never fails the
-# build) until issue #4139 is fully landed and we want to start blocking
-# regressions.
+# Blocking repository-wide Law-of-Demeter quality gate. Existing findings are
+# ratcheted in scripts/ci/lod_baseline.txt; new production src/ occurrences
+# fail this required quality-gate status.
 
 on:
   pull_request:
@@ -21,16 +19,6 @@ concurrency:
 jobs:
   quality-gate:
     name: quality-gate
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 5
-    steps:
-      - name: Required quality-gate status
-        run: |
-          echo "Required quality-gate status is present for this pull request."
-          echo "CI Standard retains the blocking aggregate gate for code, security, structure, and unit checks."
-
-  lod-pinocchio:
-    name: LOD lint (pinocchio python) — advisory
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:
@@ -62,9 +50,9 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
-      - name: Run LOD lint (advisory)
+      - name: Run repo-wide LOD lint
         shell: bash
         run: |
           python3 scripts/ci/check_lod.py \
-            src/engines/physics_engines/pinocchio/python \
-            --advisory
+            src \
+            --baseline scripts/ci/lod_baseline.txt
