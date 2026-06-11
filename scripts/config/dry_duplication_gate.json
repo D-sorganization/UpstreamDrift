@@ -1,0 +1,17 @@
+{
+  "threshold_lines": 6,
+  "min_tokens_per_window": 12,
+  "include": ["src/*.py", "src/**/*.py"],
+  "exclude": [
+    "src/**/__pycache__/**",
+    "src/**/archive/**",
+    "src/**/data/**",
+    "src/**/fixtures/**",
+    "src/**/generated/**",
+    "src/**/legacy/**",
+    "src/**/migrations/**",
+    "src/**/tests/**",
+    "src/**/vendor/**"
+  ],
+  "baseline_path": "scripts/config/dry_duplication_baseline.json"
+}
