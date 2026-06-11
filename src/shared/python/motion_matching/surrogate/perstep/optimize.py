@@ -48,6 +48,7 @@ import pandas as pd
 import torch
 from torch import nn
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
 from src.shared.python.motion_matching._geodesic import quaternion_geodesic_angles
 from src.shared.python.motion_matching.cost import (
     compute_total_work as _shared_total_work,
@@ -447,8 +448,20 @@ def _build_optimization_context(
         orientation_weight=options.orientation_weight,
         lambda_=options.lambda_,
     )
-    checkpoint = torch.load(
-        checkpoint_path, map_location=options.device_name, weights_only=False
+    checkpoint = load_checkpoint_dict(
+        checkpoint_path,
+        map_location=options.device_name,
+        required_keys=(
+            "model_state_dict",
+            "input_columns",
+            "target_columns",
+            "x_mean",
+            "x_std",
+            "y_mean",
+            "y_std",
+            "config",
+        ),
+        artifact_name="per-step surrogate checkpoint",
     )
     input_columns = list(checkpoint["input_columns"])
     target_columns = list(checkpoint["target_columns"])

@@ -21,6 +21,11 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
+from src.shared.python.motion_matching._checkpoint_artifacts import (
+    load_checkpoint_dict,
+    require_schema_version,
+)
+
 DEFAULT_INPUT_DIM = 81  # 3 * 27 (q, qd, qdd)
 DEFAULT_OUTPUT_DIM = 27
 DEFAULT_HIDDEN = 256
@@ -172,11 +177,17 @@ class TimestepInverseDynamics(nn.Module):
         ckpt_path = Path(path)
         if not ckpt_path.exists():
             raise FileNotFoundError(f"checkpoint not found: {ckpt_path}")
-        payload = torch.load(ckpt_path, map_location=map_location, weights_only=False)
-        if not isinstance(payload, dict) or "state_dict" not in payload:
-            raise ValueError(
-                f"checkpoint at {ckpt_path} is not a TimestepInverseDynamics payload"
-            )
+        payload = load_checkpoint_dict(
+            ckpt_path,
+            map_location=map_location,
+            required_keys=("state_dict", "config", "schema_version"),
+            artifact_name="TimestepInverseDynamics checkpoint",
+        )
+        require_schema_version(
+            payload,
+            cls.SCHEMA_VERSION,
+            artifact_name="TimestepInverseDynamics checkpoint",
+        )
         cfg_dict = payload.get("config")
         if cfg_dict is None:
             raise ValueError("checkpoint missing 'config' entry")

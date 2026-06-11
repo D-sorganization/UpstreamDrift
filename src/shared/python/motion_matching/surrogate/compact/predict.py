@@ -17,6 +17,8 @@ from typing import Any
 import numpy as np
 import torch
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
+
 from .model import (
     CHANNEL_SLICES,
     CoeffNormalizer,
@@ -73,11 +75,12 @@ def _from_checkpoint(
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"checkpoint not found: {p}")
-    payload = torch.load(p, map_location=map_location, weights_only=False)
-    if "model_state_dict" not in payload:
-        raise ValueError(
-            f"checkpoint missing 'model_state_dict' key (got keys={list(payload)})"
-        )
+    payload = load_checkpoint_dict(
+        p,
+        map_location=map_location,
+        required_keys=("model_state_dict",),
+        artifact_name="SwingSurrogate checkpoint",
+    )
     cfg = _config_from_payload(payload)
     model = cls(cfg)
     model.load_state_dict(payload["model_state_dict"], strict=strict)

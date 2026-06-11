@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.332                                            |
+| **Spec Version**        | 1.0.333                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -82,6 +82,13 @@ scripts/ci/lod_baseline.txt`; the checked-in baseline records existing
   fail on mismatched frame/DOF shapes instead of truncating, solver result
   postconditions validate reference-aligned time grids plus torque/activation
   finiteness, and successful internal results must carry a matched payload.
+- **2026-06-11** - Replaced pickle-enabled motion-matching checkpoint loads
+  for #7276 with safe artifact loading. Motion checkpoint readers now route
+  through a shared helper that calls `torch.load(..., weights_only=True)`,
+  validates mapping-shaped artifacts, and keeps inverse, inverse-timestep,
+  compact surrogate, and per-step surrogate loaders on the same safe contract.
+  The changed-file architecture ratchet exposed pre-existing surrogate
+  train/optimize budget violations, now tracked for decomposition in #7294.
 - **2026-06-11** - Isolated optional dependency import mocks for #7307.
   Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
   imports now install fake optional packages only inside scoped import
@@ -1055,9 +1062,11 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.332 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
+| 2026-06-11 | 1.0.333 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
+| 2026-06-11 | 1.0.332 | Safe motion checkpoint loading for #7276. Replaced pickle-enabled motion-matching checkpoint loads with safe artifact loading via `torch.load(..., weights_only=True)`. Validates mapping-shaped artifacts, keeping inverse, inverse-timestep, compact surrogate, and per-step surrogate loaders on the same safe contract. Exceeded surrogate train/optimize function budgets are tracked as exceptions in `architecture_budget.json`. |
 | 2026-06-11 | 1.0.331 | Resolve merge conflicts in SPEC.md for PR 7316 by merging origin/main, retaining all changelog entries, and bumping Spec Version. |
 | 2026-06-11 | 1.0.330 | Simulation WebSocket dependency-boundary conflict refresh for #7283. `simulation_stream` keeps resolving the engine manager through the WebSocket-safe dependency accessor after the #7304/#7305/#7306/#7309 runtime-contract `main` update, and missing app-state manager configuration still emits a structured `service_unavailable` frame before clean close. |
+| 2026-06-11 | 1.0.329 | Safe motion checkpoint loading conflict refresh for #7276. The safe checkpoint artifact helper remains wired through inverse, inverse-timestep, compact surrogate, and per-step surrogate loading after the #7317 training/optimization architecture split and #7304/#7305/#7306/#7309 runtime-contract update, preserving mapping validation and `weights_only=True` reads while keeping the new helperized training and optimization contexts. |
 | 2026-06-11 | 1.0.328 | Motion matching runtime contract hardening for #7304, #7305, #7306, and #7309. `CostWeights` and internal `MotionMatchingRequest` now reject invalid numeric configuration at construction, shared metric validation fails on frame/DOF shape mismatches instead of silently truncating, the solver result postcondition gate validates reference-aligned time grids plus finite torque/activation payloads, and internal successful `MotionMatchingResult` objects must include a matched trajectory, torque trajectory, or activation trajectory payload. |
 | 2026-06-11 | 1.0.328 | Cross-engine dashboard window factory follow-up for #7316. `CrossEngineDashboardWindow()` now constructs the deferred PyQt window instead of raising a direct-instantiation placeholder, preserving the extracted fallback-engine stub and `_build_qt_window()` launcher path while keeping `src/launchers/cross_engine_dashboard.py` below the 1200-line file-size gate. |
 | 2026-06-11 | 1.0.325 | Cross-engine dashboard architecture split for #7288. `src/launchers/cross_engine_dashboard.py` now keeps the public `CrossEngineDashboardWindow` compatibility facade thin, constructs the concrete PyQt window class through a deferred factory, and imports the fallback engine stub from `src/launchers/cross_engine_dashboard_stubs.py`, removing the dashboard architecture-budget exception while preserving the existing CLI and window-construction contracts. |

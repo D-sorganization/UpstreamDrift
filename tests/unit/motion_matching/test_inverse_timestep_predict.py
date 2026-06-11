@@ -76,7 +76,7 @@ def test_predict_torques_attached_stats() -> None:
 def test_predict_torques_requires_model_type() -> None:
     """Pin: non-model arg rejected with TypeError."""
     with pytest.raises(TypeError, match="TimestepInverseDynamics"):
-        predict_torques("nope", np.zeros((1, 5)), np.zeros((1, 5)), np.zeros((1, 5)))
+        predict_torques("nope", np.zeros((1, 5)), np.zeros((1, 5)), np.zeros((1, 5)))  # type: ignore[arg-type]
 
 
 def test_predict_torques_requires_stats() -> None:
@@ -182,8 +182,14 @@ def test_load_with_stats_round_trip(tmp_path: Path) -> None:
     state, tau = _stats(n)
     ckpt_path = tmp_path / "ts.pt"
     payload = model.state_payload()
-    payload["state_stats"] = state
-    payload["tau_stats"] = tau
+    payload["state_stats"] = {
+        "mean": state["mean"].tolist(),
+        "std": state["std"].tolist(),
+    }
+    payload["tau_stats"] = {
+        "mean": tau["mean"].tolist(),
+        "std": tau["std"].tolist(),
+    }
     torch.save(payload, ckpt_path)
     loaded = load_with_stats(ckpt_path)
     assert hasattr(loaded, "_state_stats")

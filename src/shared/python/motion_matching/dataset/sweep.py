@@ -73,7 +73,7 @@ class SweepDataset:
         """
         ts = _as_pandas(self.timesteps)
         for row in ts.itertuples(index=False):
-            sample = row._asdict()
+            sample = row._asdict()  # type: ignore[operator]
             trial_id = int(sample.pop("trial_id"))
             yield trial_id, sample
 

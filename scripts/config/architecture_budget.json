@@ -17,6 +17,62 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7217 legacy launcher decomposition: main remains over the function-lines budget until startup and window orchestration move into focused launcher modules.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/compact/training.py",
+      "symbol": "train_surrogate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing surrogate training orchestration exceeds the changed-file architecture budget; split training context, checkpoint, and metrics responsibilities after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/compact/training.py",
+      "symbol": "train_surrogate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing surrogate training API exceeds the parameter budget; introduce a cohesive config/context object after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/compact/training.py",
+      "symbol": "_train_loop",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing compact surrogate loop exceeds the changed-file architecture budget; split epoch orchestration and checkpoint responsibilities after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/compact/training.py",
+      "symbol": "_train_loop",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing compact surrogate loop exceeds the parameter budget; introduce a training-loop context object after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/perstep/optimize.py",
+      "symbol": "optimize_sequence",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing per-step optimizer orchestration exceeds the changed-file architecture budget; split setup, objective, and result assembly after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/perstep/optimize.py",
+      "symbol": "optimize_sequence",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing per-step optimizer API exceeds the parameter budget; introduce a cohesive optimization config/context after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/surrogate/perstep/train.py",
+      "symbol": "train",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7294: pre-existing per-step training routine exceeds the changed-file architecture budget; split data preparation, loop, checkpoint, and metrics responsibilities after the #7276 checkpoint-safety fix lands.",
+      "expires_on": "2026-08-31"
     }
   ]
 }

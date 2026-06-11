@@ -242,7 +242,7 @@ def train_inverse_regressor(
     # the loss-standardisation divisor so val_loss is unitless and comparable
     # across runs even if the empirical coefficient range exceeds the nominal
     # per-letter bounds.
-    coeff_scale = model.coefficient_scale.to(selected_device)
+    coeff_scale: torch.Tensor = model.coefficient_scale.to(selected_device)  # type: ignore[assignment, attr-defined]
 
     train_loader = DataLoader(
         _TrialTensorDataset(train_samples),

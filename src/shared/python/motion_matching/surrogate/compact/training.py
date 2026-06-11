@@ -50,6 +50,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
+from src.shared.python.motion_matching._checkpoint_artifacts import load_checkpoint_dict
+
 from .model import (
     CHANNEL_SLICES,
     CoeffNormalizer,
@@ -865,7 +867,12 @@ def _load_resume_state(
     """
     if not path.exists():
         raise FileNotFoundError(f"resume_from checkpoint missing: {path}")
-    payload = torch.load(path, map_location="cpu", weights_only=False)
+    payload = load_checkpoint_dict(
+        path,
+        map_location="cpu",
+        required_keys=("model_state_dict", "optimizer_state_dict"),
+        artifact_name="SwingSurrogate resume checkpoint",
+    )
     model.load_state_dict(payload["model_state_dict"])
     optimizer.load_state_dict(payload["optimizer_state_dict"])
     target_normalizer: TargetNormalizer | None = None
