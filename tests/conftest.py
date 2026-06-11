@@ -168,10 +168,10 @@ if not _has_pyqt6 and "PyQt6" not in sys.modules:
         def instance(cls):
             return MagicMock()
 
-    DummyWidget.Shape = MagicMock()
-    DummyWidget.ToolButtonPopupMode = MagicMock()
-    DummyWidget.setTabOrder = MagicMock()
-    DummyWidget.DockWidgetFeature = MagicMock()
+    DummyWidget.Shape = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.ToolButtonPopupMode = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.setTabOrder = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.DockWidgetFeature = MagicMock()  # type: ignore[attr-defined]
 
     qt_widgets = MagicMock()
     qt_widgets.QWidget = DummyWidget
@@ -751,9 +751,9 @@ def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, N
 #
 # This hook runs in REPORT-ONLY mode first (the ratchet pattern used elsewhere
 # in this repo): it counts collected tests that carry none of the suite markers
-# and surfaces the count, but never fails collection.  Flip to enforcing later
-# (once the unmarked baseline is driven to zero) by setting the environment
-# variable ``UD_ENFORCE_SUITE_MARKERS=1`` — only then is missing-marker a
+# and surfaces the count. CI can reject net-new unmarked tests with
+# ``UD_RATCHET_SUITE_MARKERS=1`` and the committed baseline; once the baseline
+# reaches zero, ``UD_ENFORCE_SUITE_MARKERS=1`` makes any missing marker a
 # collection error.
 #
 # Acceptance-criteria mapping: "Add a pytest_collection_modifyitems hook ...
@@ -766,6 +766,9 @@ def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, N
 from tests.support.suite_markers import (  # noqa: E402
     SUITE_MARKERS,
     find_unmarked,
+    find_unmarked_baseline_drift,
+    load_baseline_nodeids,
+    suite_marker_ratchet_enabled,
     suite_markers_enforced,
 )
 
@@ -779,7 +782,7 @@ def pytest_collection_modifyitems(
     ``_ud_unmarked_suite_count`` for the terminal summary; raises
     ``pytest.UsageError`` only when enforcement is enabled.
     """
-    unmarked = find_unmarked(items)
+    unmarked = find_unmarked(items)  # type: ignore[arg-type]
     config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]
     config._ud_unmarked_suite_nodeids = [  # type: ignore[attr-defined]
         item.nodeid for item in unmarked
@@ -792,6 +795,19 @@ def pytest_collection_modifyitems(
             f"{sorted(SUITE_MARKERS)}:\n{listing}"
         )
 
+    if unmarked and suite_marker_ratchet_enabled():
+        baseline = load_baseline_nodeids()
+        drift = find_unmarked_baseline_drift(unmarked, baseline)
+        config._ud_unmarked_suite_drift_count = len(drift)  # type: ignore[attr-defined]
+        if drift:
+            listing = "\n".join(f"  - {item.nodeid}" for item in drift)
+            raise pytest.UsageError(
+                f"{len(drift)} net-new test(s) carry none of the required suite "
+                f"markers {sorted(SUITE_MARKERS)} and are absent from "
+                "scripts/config/suite_marker_baseline.json:\n"
+                f"{listing}"
+            )
+
 
 def pytest_terminal_summary(
     terminalreporter: Any, exitstatus: int, config: pytest.Config
@@ -800,7 +816,13 @@ def pytest_terminal_summary(
     count = getattr(config, "_ud_unmarked_suite_count", None)
     if not count:
         return
-    mode = "ENFORCED" if suite_markers_enforced() else "report-only"
+    if suite_markers_enforced():
+        mode = "ENFORCED"
+    elif suite_marker_ratchet_enabled():
+        drift_count = getattr(config, "_ud_unmarked_suite_drift_count", 0)
+        mode = f"ratchet, drift={drift_count}"
+    else:
+        mode = "report-only"
     terminalreporter.write_line(
         f"[suite-markers:{mode}] {count} collected test(s) carry no suite marker "
         f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",

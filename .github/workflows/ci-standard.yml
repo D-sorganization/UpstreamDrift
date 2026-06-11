@@ -666,6 +666,9 @@ jobs:
       - name: Workflow Pytest Path Guard
         run: python3 scripts/ci/check_workflow_pytest_paths.py
 
+      - name: Suite Marker Ratchet
+        run: python3 scripts/ci/check_suite_marker_ratchet.py
+
       - name: Rust Parity / Wheel Import Gate Ratchet
         run: python3 scripts/ci/check_rust_parity_wheel_gates.py
 

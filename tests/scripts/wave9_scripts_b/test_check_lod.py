@@ -9,6 +9,8 @@ import pytest
 
 from scripts.ci import check_lod as mod
 
+pytestmark = pytest.mark.unit
+
 
 def test_attr_chain_basic() -> None:
     tree = ast.parse("a.b.c.d", mode="eval")

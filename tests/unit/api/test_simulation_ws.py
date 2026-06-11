@@ -36,6 +36,8 @@ from src.api.routes.simulation_ws import (
 )
 from src.shared.python.engine_core.engine_registry import EngineType
 
+pytestmark = pytest.mark.unit
+
 try:
     _HAS_TESTCLIENT = True
 except RuntimeError:
