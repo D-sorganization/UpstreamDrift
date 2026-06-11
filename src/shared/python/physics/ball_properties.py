@@ -14,7 +14,7 @@ import numpy as np
 from src.shared.python.core.physics_constants import SPIN_DECAY_RATE_S
 
 MIN_SPEED_THRESHOLD: float = 0.1
-MAX_LIFT_COEFFICIENT: float = 0.25
+MAX_LIFT_COEFFICIENT: float = 0.35
 NUMERICAL_EPSILON: float = 1e-10
 
 
@@ -47,5 +47,5 @@ class BallProperties:
         return self.cd0 + s * (self.cd1 + s * self.cd2)
 
     def calculate_cl(self, s: float) -> float:
-        """Compute the lift coefficient from the spin parameter, clamped to max."""
-        return min(MAX_LIFT_COEFFICIENT, self.cl0 + s * (self.cl1 + s * self.cl2))
+        """Compute the shared spin-lift coefficient from the spin parameter."""
+        return MAX_LIFT_COEFFICIENT * (1 - np.exp(-s / 0.1))

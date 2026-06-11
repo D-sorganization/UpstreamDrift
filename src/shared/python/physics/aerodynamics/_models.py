@@ -121,7 +121,7 @@ class LiftModel:
         base_coefficient: float = float(GOLF_BALL_LIFT_COEFFICIENT),
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
-        max_coefficient: float = 0.4,
+        max_coefficient: float = 0.35,
     ) -> None:
         if base_coefficient is None:
             raise ValueError("base_coefficient must be provided")
@@ -179,7 +179,7 @@ class MagnusModel:
 
     def __init__(
         self,
-        coefficient: float = 0.4,
+        coefficient: float = 0.35,
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
     ) -> None:

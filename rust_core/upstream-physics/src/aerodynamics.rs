@@ -354,10 +354,11 @@ pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
 
 /// Compute lift coefficient from dimensionless spin ratio.
 ///
-/// Empirical relationship (Smits & Ogg): Cl saturates at ~0.4.
+/// Empirical relationship (Smits & Ogg form): Cl saturates below 0.4 for
+/// driver-scale trajectories.
 #[must_use]
 pub fn compute_lift_coefficient(spin_ratio: f64) -> f64 {
-    let cl_max = 0.4;
+    let cl_max = 0.35;
     cl_max * (1.0 - (-spin_ratio / 0.1).exp())
 }
 
@@ -811,8 +812,8 @@ mod tests {
     fn test_lift_coefficient_saturates() {
         let cl_very_high = compute_lift_coefficient(10.0);
         assert!(
-            (cl_very_high - 0.4).abs() < 0.01,
-            "Cl should saturate near 0.4, got {}",
+            (cl_very_high - 0.35).abs() < 0.01,
+            "Cl should saturate near 0.35, got {}",
             cl_very_high
         );
     }
@@ -821,8 +822,8 @@ mod tests {
     fn test_magnus_coefficient_capped() {
         let cm = compute_magnus_coefficient(1.0);
         assert!(
-            (cm - 0.4).abs() < 1e-4,
-            "Magnus/lift coeff should saturate near 0.4, got {}",
+            (cm - 0.35).abs() < 1e-4,
+            "Magnus/lift coeff should saturate near 0.35, got {}",
             cm
         );
     }

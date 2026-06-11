@@ -264,7 +264,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
 
         # Magnus
-        cl = self.ball.cl0 + s_ratio * (self.ball.cl1 + s_ratio * self.ball.cl2)
+        cl = self.ball.calculate_cl(s_ratio)
         magnus_force_mag = aero_prefix * cl * (valid_speed**2)
 
         axis = spin_axis.reshape(3, 1)

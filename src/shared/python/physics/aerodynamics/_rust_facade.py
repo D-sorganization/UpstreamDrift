@@ -190,8 +190,8 @@ def _python_fallback_total(
         magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
             spin_param = spec.radius * spin_mag / speed
-            # Rust: Smits/Ogg saturation, cl_max = 0.4.
-            cl = 0.4 * (1.0 - math.exp(-spin_param / 0.1))
+            # Rust: Smits/Ogg saturation, cl_max = 0.35.
+            cl = 0.35 * (1.0 - math.exp(-spin_param / 0.1))
             f_mag = 0.5 * spec.air_density * cl * area * speed * speed
             total = total + f_mag * magnus_dir / magnus_norm
 
