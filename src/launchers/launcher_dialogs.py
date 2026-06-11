@@ -613,17 +613,10 @@ class DialogsManager:
                         output = result.stdout.decode("utf-8", errors="ignore")
 
                     if result.returncode != 0 or "Ubuntu" not in output:
-                        raise RuntimeError("Ubuntu not found in WSL")
-                except (OSError, ValueError) as e:
-                    QMessageBox.warning(
-                        self.launcher,
-                        "WSL Not Available",
-                        f"WSL2 with Ubuntu is not available.\n\n"
-                        f"Error: {e}\n\n"
-                        "Please install WSL2 and Ubuntu:\n"
-                        "  wsl --install -d Ubuntu-22.04",
-                    )
-                    self.chk_wsl.setChecked(False)
+                        self._warn_wsl_unavailable("Ubuntu not found in WSL")
+                        return
+                except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+                    self._warn_wsl_unavailable(e)
                     return
 
             logger.info("WSL mode enabled")
@@ -650,6 +643,18 @@ class DialogsManager:
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
+
+    def _warn_wsl_unavailable(self, error: object) -> None:
+        """Warn the user that WSL mode cannot be enabled and revert the toggle."""
+        QMessageBox.warning(
+            self.launcher,
+            "WSL Not Available",
+            f"WSL2 with Ubuntu is not available.\n\n"
+            f"Error: {error}\n\n"
+            "Please install WSL2 and Ubuntu:\n"
+            "  wsl --install -d Ubuntu-22.04",
+        )
+        self.chk_wsl.setChecked(False)
 
     def update_execution_status(self) -> None:
         """Update the runtime indicator label based on current selection.

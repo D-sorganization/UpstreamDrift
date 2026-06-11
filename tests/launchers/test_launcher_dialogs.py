@@ -1,5 +1,6 @@
 """Tests for launcher_dialogs.py."""
 
+import subprocess
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
@@ -414,6 +415,35 @@ def test_on_wsl_mode_changed_error(mock_warning, mock_run, launcher) -> None:
     mock_run.side_effect = OSError("err")
     launcher._on_wsl_mode_changed(2)
     mock_warning.assert_called_once()
+
+
+@patch("src.launchers.launcher_dialogs.subprocess.run")
+@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
+def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
+    mock_warning, mock_run, launcher
+) -> None:
+    mock_result = MagicMock()
+    mock_result.stdout = "docker-desktop".encode("utf-16-le")
+    mock_result.returncode = 0
+    mock_run.return_value = mock_result
+
+    launcher._on_wsl_mode_changed(2)
+
+    mock_warning.assert_called_once()
+    launcher.chk_wsl.setChecked.assert_called_with(False)
+
+
+@patch("src.launchers.launcher_dialogs.subprocess.run")
+@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
+def test_on_wsl_mode_changed_timeout_warns_and_reverts(
+    mock_warning, mock_run, launcher
+) -> None:
+    mock_run.side_effect = subprocess.TimeoutExpired(["wsl", "--list", "--quiet"], 5)
+
+    launcher._on_wsl_mode_changed(2)
+
+    mock_warning.assert_called_once()
+    launcher.chk_wsl.setChecked.assert_called_with(False)
 
 
 def test_on_wsl_mode_changed_disable(launcher) -> None:
