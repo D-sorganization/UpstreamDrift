@@ -29,10 +29,18 @@ from two_stage_optimizer import (  # noqa: E402
     stage_a_optimize_kinematics,
     stage_b_optimize_torques,
 )
-from two_stage_runner import parse_args  # noqa: E402
+from optimize_body_kinematics_for_club import optimize_body_kinematics  # noqa: E402
+from optimize_torques_for_desired_kinematics import optimize_torques  # noqa: E402
+from train_dynamics_surrogate import DynamicsMLP  # noqa: E402
+from two_stage_runner import _build_surrogate_callable, parse_args  # noqa: E402
 
 N = 30
 J = 6
+
+
+class _UnsafePayload:
+    def __reduce__(self):
+        return (eval, ("'unsafe'",))
 
 
 def _linear_fk(weight: torch.Tensor):
@@ -42,6 +50,23 @@ def _linear_fk(weight: torch.Tensor):
         return q @ weight
 
     return fk
+
+
+def _write_surrogate_checkpoint(path: Path) -> None:
+    model = DynamicsMLP(input_dim=1, output_dim=1, hidden_sizes=[4])
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "input_columns": ["q0"],
+            "target_columns": ["club_x"],
+            "x_mean": [0.0],
+            "x_std": [1.0],
+            "y_mean": [0.0],
+            "y_std": [1.0],
+            "config": {"hidden_sizes": [4]},
+        },
+        path,
+    )
 
 
 def _linear_surrogate(a: torch.Tensor, b: torch.Tensor, c: torch.Tensor):
@@ -205,6 +230,69 @@ def test_runner_cli_args_parse() -> None:
     assert args.motion_weight == pytest.approx(0.001)
     assert args.smooth_weight == pytest.approx(0.0001)
     assert args.device == "cpu"
+
+
+@pytest.mark.unit
+def test_two_stage_runner_loads_safe_surrogate_checkpoint(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "safe.pt"
+    _write_surrogate_checkpoint(checkpoint)
+
+    model, input_columns, target_columns = _build_surrogate_callable(checkpoint, "cpu")
+
+    assert input_columns == ["q0"]
+    assert target_columns == ["club_x"]
+    with torch.no_grad():
+        prediction = model(torch.zeros(1, 1))
+    assert prediction.shape == (1, 1)
+
+
+@pytest.mark.unit
+def test_two_stage_runner_rejects_unsafe_checkpoint_payload(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "unsafe.pt"
+    torch.save({"payload": _UnsafePayload()}, checkpoint)
+
+    with pytest.raises(ValueError, match="cannot be loaded safely"):
+        _build_surrogate_callable(checkpoint, "cpu")
+
+
+@pytest.mark.unit
+def test_body_kinematics_optimizer_rejects_unsafe_checkpoint_payload(
+    tmp_path: Path,
+) -> None:
+    checkpoint = tmp_path / "unsafe.pt"
+    torch.save({"payload": _UnsafePayload()}, checkpoint)
+
+    with pytest.raises(ValueError, match="cannot be loaded safely"):
+        optimize_body_kinematics(
+            checkpoint_path=checkpoint,
+            reference_body_path=tmp_path / "reference.json",
+            desired_club_path=tmp_path / "desired.json",
+            output_path=tmp_path / "body_targets.json",
+            steps=1,
+            learning_rate=1e-2,
+            motion_weight=1e-5,
+            acceleration_weight=1e-8,
+            device_name="cpu",
+        )
+
+
+@pytest.mark.unit
+def test_torque_optimizer_rejects_unsafe_checkpoint_payload(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "unsafe.pt"
+    torch.save({"payload": _UnsafePayload()}, checkpoint)
+
+    with pytest.raises(ValueError, match="cannot be loaded safely"):
+        optimize_torques(
+            checkpoint_path=checkpoint,
+            current_state_path=tmp_path / "current.json",
+            desired_state_path=tmp_path / "desired.json",
+            output_path=tmp_path / "torques.json",
+            initial_controls_path=None,
+            steps=1,
+            learning_rate=1e-2,
+            effort_weight=1e-6,
+            device_name="cpu",
+        )
 
 
 def test_stage_a_rejects_negative_motion_weight() -> None:
