@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-11
+  LAST UPDATED: 2026-06-12
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.333                                            |
+| **Spec Version**        | 1.0.334                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Replaced collision distance `math.hypot(*tuple)` unpacking
+  with explicit component access in primitive-shape distance helpers, keeping
+  the robotics collision contracts unchanged while avoiding tuple unpacking
+  overhead on hot paths.
 - **2026-06-11** - Promoted Law-of-Demeter enforcement from advisory
   Pinocchio-only lint to a blocking repo-wide production `src/` ratchet.
   `quality-gate.yml` now runs `scripts/ci/check_lod.py src --baseline
@@ -173,6 +177,16 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   WebSocket-safe dependency accessor instead of reaching directly through
   `websocket.app.state`, and missing engine-manager state returns a structured
   `service_unavailable` frame before the connection closes cleanly.
+- **2026-06-10** - Narrowed PR-scoped source coverage in standard CI to the
+  changed `src/**/*.py` targets after the coverage-bypass fix. Source and
+  dependency PRs still produce coverage and enforce the 75% floor, while the
+  full per-package coverage enforcer runs only after the default full-coverage
+  lane so focused PRs do not fail against unrelated modules.
+- **2026-06-10** - Enforced the #7277 Docker build timeout while process
+  stdout remains open. `src/launchers/docker_manager.py` now reads build output
+  through a background queue while the build thread owns a wall-clock timeout
+  and terminates the process tree on expiry, including the regression case
+  where stdout never reaches EOF.
 - **2026-06-10** - Locked the #7278 standard CI dependency and audit
   contract to committed artifacts. Python jobs that install project runtime or
   dev dependencies now seed environments from `requirements.lock` or
@@ -600,7 +614,6 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
-│       ├── motion_matching/        # Motion-matching pipelines, surrogate training, per-step optimization
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
 │       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
@@ -940,12 +953,6 @@ Beyond standard tools, CI enforces custom checks:
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
 - **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
-- **Workflow Run Trust Boundary**: `scripts/check_workflow_run_trust_boundary.py`
-  rejects privileged `workflow_run` jobs in `Jules-PR-AutoFix.yml` if they can
-  check out PR code, install dependencies, execute autofix tools, commit, or
-  push. The `workflow_run` path is restricted to trusted metadata analysis and
-  maintainer-facing dispatch instructions, while direct branch writeback remains
-  available only from explicit `workflow_dispatch`.
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Push-to-main full-src mypy runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics.
 - **Docker Size Gate**: Built images must not exceed 800 MB
@@ -1095,6 +1102,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.334 | Collision distance helper optimization for #7324. Primitive-shape distance helpers now use explicit component access instead of `math.hypot(*tuple)` unpacking, preserving robotics collision behavior while avoiding tuple unpacking overhead on hot paths. |
 | 2026-06-11 | 1.0.333 | Law-of-Demeter enforcement for #7308. `scripts/ci/check_lod.py` now defaults to repo-wide production `src/` scanning, supports a checked-in no-growth baseline, and preserves documented library API allowances. `.github/workflows/quality-gate.yml` now runs the LOD scan as the blocking required `quality-gate` status with `scripts/ci/lod_baseline.txt` representing current grandfathered path/chain counts. |
 | 2026-06-11 | 1.0.332 | Safe motion checkpoint loading for #7276. Replaced pickle-enabled motion-matching checkpoint loads with safe artifact loading via `torch.load(..., weights_only=True)`. Validates mapping-shaped artifacts, keeping inverse, inverse-timestep, compact surrogate, and per-step surrogate loaders on the same safe contract. Exceeded surrogate train/optimize function budgets are tracked as exceptions in `architecture_budget.json`. |
 | 2026-06-11 | 1.0.331 | Resolve merge conflicts in SPEC.md for PR 7316 by merging origin/main, retaining all changelog entries, and bumping Spec Version. |
