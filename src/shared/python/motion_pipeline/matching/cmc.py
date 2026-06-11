@@ -265,7 +265,8 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
             message="CMC solver - placeholder torques (full CMC not yet implemented)",
             metadata={
                 "backend": self.backend_type.value,
-                "status": "placeholder",
+                "status": "not_implemented",
+                "production_ready": False,
                 "n_frames": int(n_frames),
                 "n_dof": int(n_dof),
                 "rust_outer_loop": bool(_HAVE_RUST),

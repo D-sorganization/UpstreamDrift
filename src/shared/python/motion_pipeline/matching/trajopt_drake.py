@@ -68,5 +68,9 @@ class DrakeTrajoptMatchingSolver(BaseMotionMatchingSolver):
             request_id=request_id,
             success=False,
             message="Drake trajectory optimization solver not yet implemented",
-            metadata={"backend": "drake_trajopt", "status": "placeholder"},
+            metadata={
+                "backend": "drake_trajopt",
+                "status": "not_implemented",
+                "production_ready": False,
+            },
         )

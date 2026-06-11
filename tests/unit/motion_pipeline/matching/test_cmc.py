@@ -25,6 +25,8 @@ def test_cmc_solver_match_returns_placeholder_failure() -> None:
     assert result.success is False
     assert "CMC" in (result.message or "")
     assert result.metadata.get("backend") == "cmc"
+    assert result.metadata.get("status") == "not_implemented"
+    assert result.metadata.get("production_ready") is False
 
 
 def test_cmc_solver_with_opensim() -> None:

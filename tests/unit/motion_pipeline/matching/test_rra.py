@@ -23,6 +23,8 @@ def test_rra_solver_match_returns_placeholder_failure() -> None:
     assert result.success is False
     assert "RRA" in (result.message or "")
     assert result.metadata.get("backend") == "rra"
+    assert result.metadata.get("status") == "not_implemented"
+    assert result.metadata.get("production_ready") is False
 
 
 def test_rra_solver_with_opensim() -> None:

@@ -66,5 +66,9 @@ class RRAMatchingSolver(BaseMotionMatchingSolver):
             request_id=request_id,
             success=False,
             message="RRA solver not yet implemented - OpenSim integration pending",
-            metadata={"backend": "rra", "status": "placeholder"},
+            metadata={
+                "backend": "rra",
+                "status": "not_implemented",
+                "production_ready": False,
+            },
         )

@@ -36,6 +36,23 @@ logger = get_logger(__name__)
 _education_holder: dict[str, EducationSystem | None] = {"instance": None}
 
 
+def _not_implemented_tool_result(
+    *,
+    capability: str,
+    message: str,
+    **metadata: Any,
+) -> dict[str, Any]:
+    """Return an honest result for registered-but-unimplemented chat tools."""
+    return {
+        "success": False,
+        "error": "not_implemented",
+        "status": "not_implemented",
+        "capability": capability,
+        "message": message,
+        **metadata,
+    }
+
+
 def _get_education_system() -> EducationSystem:
     """Get or create the education system singleton."""
     if _education_holder["instance"] is None:
@@ -286,23 +303,15 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
                 "error": f"Invalid engine. Choose from: {valid_engines}",
             }
 
-        # This implementation requires integration with the physics engines.
-        # 1. Load the C3D data
-        # 2. Create/load the model
-        # 3. Run inverse dynamics
-        # 4. Return results
-
-        return {
-            "success": True,
-            "status": "simulation_pending",
-            "engine": engine,
-            "file": file_path,
-            "message": (
-                f"Inverse dynamics simulation queued using {engine}. "
-                "This would normally take 30-60 seconds for a typical swing."
+        return _not_implemented_tool_result(
+            capability="inverse_dynamics",
+            message=(
+                "Inverse dynamics via chat is not implemented yet; use "
+                "POST /analyze/biomechanics or the motion pipeline API."
             ),
-            "note": ("Implementation requires physics engine integration."),
-        }
+            engine=engine,
+            file=file_path,
+        )
 
 
 def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
@@ -542,18 +551,16 @@ def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
         Returns:
             Validation results.
         """
-        # Placeholder for actual cross-engine validation
-        return {
-            "status": "validation_pending",
-            "file": file_path,
-            "engines": ["mujoco", "drake", "pinocchio"],
-            "tolerance": tolerance,
-            "message": (
-                "Cross-engine validation queued. This compares results from "
-                "multiple physics engines to ensure accuracy."
+        return _not_implemented_tool_result(
+            capability="cross_engine_validation",
+            message=(
+                "Cross-engine validation via chat is not implemented yet; use "
+                "the motion pipeline validation APIs when a real run is needed."
             ),
-            "note": "Placeholder - requires full physics engine integration.",
-        }
+            file=file_path,
+            engines=["mujoco", "drake", "pinocchio"],
+            tolerance=tolerance,
+        )
 
 
 def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
@@ -575,15 +582,14 @@ def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
         Returns:
             Energy conservation check results.
         """
-        return {
-            "status": "check_pending",
-            "tolerance": tolerance,
-            "message": (
-                "Energy conservation check queued. This verifies that total "
-                "mechanical energy is properly accounted for throughout the motion."
+        return _not_implemented_tool_result(
+            capability="energy_conservation",
+            message=(
+                "Energy conservation checks via chat are not implemented yet; "
+                "provide simulation results to a real analysis endpoint first."
             ),
-            "note": "Placeholder - requires simulation data.",
-        }
+            tolerance=tolerance,
+        )
 
 
 def _register_list_physics_engines_tool(registry: ToolRegistry) -> None:

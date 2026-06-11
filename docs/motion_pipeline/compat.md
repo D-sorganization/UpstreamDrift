@@ -9,67 +9,67 @@
 | IK Backend | Matching Backend | Status         | Notes                                        |
 | ---------- | ---------------- | -------------- | -------------------------------------------- |
 | mujoco     | mujoco           | ✅ Supported   |                                              |
-| mujoco     | drake            | ✅ Supported   |                                              |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568)               |
 | mujoco     | pinocchio        | ✅ Supported   |                                              |
 | drake      | mujoco           | ✅ Supported   |                                              |
-| drake      | drake            | ⚠️ Heavy       | Drake trajopt is computationally expensive   |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568)               |
 | drake      | pinocchio        | ✅ Supported   |                                              |
 | pinocchio  | mujoco           | ✅ Supported   |                                              |
-| pinocchio  | drake            | ✅ Supported   |                                              |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568)               |
 | pinocchio  | pinocchio        | ✅ Supported   |                                              |
 | opensim    | mujoco           | ❌ Unsupported | OpenSim IK backend under development (#4490) |
-| opensim    | drake            | ✅ Supported   |                                              |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568)               |
 | opensim    | pinocchio        | ✅ Supported   |                                              |
 
 ### TRC
 
-| IK Backend | Matching Backend | Status       | Notes                                      |
-| ---------- | ---------------- | ------------ | ------------------------------------------ |
-| mujoco     | mujoco           | ✅ Supported |                                            |
-| mujoco     | drake            | ✅ Supported |                                            |
-| mujoco     | pinocchio        | ✅ Supported |                                            |
-| drake      | mujoco           | ✅ Supported |                                            |
-| drake      | drake            | ⚠️ Heavy     | Drake trajopt is computationally expensive |
-| drake      | pinocchio        | ✅ Supported |                                            |
-| pinocchio  | mujoco           | ✅ Supported |                                            |
-| pinocchio  | drake            | ✅ Supported |                                            |
-| pinocchio  | pinocchio        | ✅ Supported |                                            |
-| opensim    | mujoco           | ✅ Supported |                                            |
-| opensim    | drake            | ✅ Supported |                                            |
-| opensim    | pinocchio        | ✅ Supported |                                            |
+| IK Backend | Matching Backend | Status         | Notes                          |
+| ---------- | ---------------- | -------------- | ------------------------------ |
+| mujoco     | mujoco           | ✅ Supported   |                                |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| mujoco     | pinocchio        | ✅ Supported   |                                |
+| drake      | mujoco           | ✅ Supported   |                                |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| drake      | pinocchio        | ✅ Supported   |                                |
+| pinocchio  | mujoco           | ✅ Supported   |                                |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| pinocchio  | pinocchio        | ✅ Supported   |                                |
+| opensim    | mujoco           | ✅ Supported   |                                |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| opensim    | pinocchio        | ✅ Supported   |                                |
 
 ### BVH
 
-| IK Backend | Matching Backend | Status       | Notes |
-| ---------- | ---------------- | ------------ | ----- |
-| mujoco     | mujoco           | ✅ Supported |       |
-| mujoco     | drake            | ✅ Supported |       |
-| mujoco     | pinocchio        | ✅ Supported |       |
-| drake      | mujoco           | ✅ Supported |       |
-| drake      | drake            | ✅ Supported |       |
-| drake      | pinocchio        | ✅ Supported |       |
-| pinocchio  | mujoco           | ✅ Supported |       |
-| pinocchio  | drake            | ✅ Supported |       |
-| pinocchio  | pinocchio        | ✅ Supported |       |
-| opensim    | mujoco           | ✅ Supported |       |
-| opensim    | drake            | ✅ Supported |       |
-| opensim    | pinocchio        | ✅ Supported |       |
+| IK Backend | Matching Backend | Status         | Notes                          |
+| ---------- | ---------------- | -------------- | ------------------------------ |
+| mujoco     | mujoco           | ✅ Supported   |                                |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| mujoco     | pinocchio        | ✅ Supported   |                                |
+| drake      | mujoco           | ✅ Supported   |                                |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| drake      | pinocchio        | ✅ Supported   |                                |
+| pinocchio  | mujoco           | ✅ Supported   |                                |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| pinocchio  | pinocchio        | ✅ Supported   |                                |
+| opensim    | mujoco           | ✅ Supported   |                                |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| opensim    | pinocchio        | ✅ Supported   |                                |
 
 ### OPENPOSE_JSON
 
 | IK Backend | Matching Backend | Status         | Notes                                   |
 | ---------- | ---------------- | -------------- | --------------------------------------- |
 | mujoco     | mujoco           | ✅ Supported   |                                         |
-| mujoco     | drake            | ✅ Supported   |                                         |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | mujoco     | pinocchio        | ✅ Supported   |                                         |
 | drake      | mujoco           | ❌ Unsupported | 2D lifting not implemented for Drake IK |
-| drake      | drake            | ✅ Supported   |                                         |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | drake      | pinocchio        | ✅ Supported   |                                         |
 | pinocchio  | mujoco           | ✅ Supported   |                                         |
-| pinocchio  | drake            | ✅ Supported   |                                         |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | pinocchio  | pinocchio        | ✅ Supported   |                                         |
 | opensim    | mujoco           | ✅ Supported   |                                         |
-| opensim    | drake            | ✅ Supported   |                                         |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | opensim    | pinocchio        | ✅ Supported   |                                         |
 
 ### MEDIAPIPE_JSON
@@ -77,34 +77,34 @@
 | IK Backend | Matching Backend | Status         | Notes                                   |
 | ---------- | ---------------- | -------------- | --------------------------------------- |
 | mujoco     | mujoco           | ✅ Supported   |                                         |
-| mujoco     | drake            | ✅ Supported   |                                         |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | mujoco     | pinocchio        | ✅ Supported   |                                         |
 | drake      | mujoco           | ❌ Unsupported | 2D lifting not implemented for Drake IK |
-| drake      | drake            | ✅ Supported   |                                         |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | drake      | pinocchio        | ✅ Supported   |                                         |
 | pinocchio  | mujoco           | ✅ Supported   |                                         |
-| pinocchio  | drake            | ✅ Supported   |                                         |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | pinocchio  | pinocchio        | ✅ Supported   |                                         |
 | opensim    | mujoco           | ✅ Supported   |                                         |
-| opensim    | drake            | ✅ Supported   |                                         |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568)          |
 | opensim    | pinocchio        | ✅ Supported   |                                         |
 
 ### FBX
 
-| IK Backend | Matching Backend | Status         | Notes                      |
-| ---------- | ---------------- | -------------- | -------------------------- |
-| mujoco     | mujoco           | ✅ Supported   |                            |
-| mujoco     | drake            | ✅ Supported   |                            |
-| mujoco     | pinocchio        | ✅ Supported   |                            |
-| drake      | mujoco           | ✅ Supported   |                            |
-| drake      | drake            | ✅ Supported   |                            |
-| drake      | pinocchio        | ✅ Supported   |                            |
-| pinocchio  | mujoco           | ✅ Supported   |                            |
-| pinocchio  | drake            | ✅ Supported   |                            |
-| pinocchio  | pinocchio        | ✅ Supported   |                            |
-| opensim    | mujoco           | ❌ Unsupported | FBX loader not implemented |
-| opensim    | drake            | ✅ Supported   |                            |
-| opensim    | pinocchio        | ✅ Supported   |                            |
+| IK Backend | Matching Backend | Status         | Notes                          |
+| ---------- | ---------------- | -------------- | ------------------------------ |
+| mujoco     | mujoco           | ✅ Supported   |                                |
+| mujoco     | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| mujoco     | pinocchio        | ✅ Supported   |                                |
+| drake      | mujoco           | ✅ Supported   |                                |
+| drake      | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| drake      | pinocchio        | ✅ Supported   |                                |
+| pinocchio  | mujoco           | ✅ Supported   |                                |
+| pinocchio  | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| pinocchio  | pinocchio        | ✅ Supported   |                                |
+| opensim    | mujoco           | ❌ Unsupported | FBX loader not implemented     |
+| opensim    | drake            | ❌ Unsupported | solver not implemented (#4568) |
+| opensim    | pinocchio        | ✅ Supported   |                                |
 
 ## Legend
 
