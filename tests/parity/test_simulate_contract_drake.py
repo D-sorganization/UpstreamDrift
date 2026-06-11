@@ -305,7 +305,15 @@ def test_q_width_matches_plant_dof(mocked_pydrake: dict[str, MagicMock]) -> None
 # --------------------------------------------------------------------------- #
 
 
-_PYDRAKE_AVAILABLE = importlib.util.find_spec("pydrake") is not None
+def _has_module_spec(name: str) -> bool:
+    """Return whether an optional module has a usable import spec."""
+    try:
+        return importlib.util.find_spec(name) is not None
+    except ValueError:
+        return False
+
+
+_PYDRAKE_AVAILABLE = _has_module_spec("pydrake")
 
 
 @pytest.mark.requires_drake

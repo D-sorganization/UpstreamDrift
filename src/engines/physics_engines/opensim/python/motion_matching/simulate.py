@@ -36,6 +36,11 @@ from typing import Any, Literal
 import numpy as np
 import numpy.typing as npt
 
+from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+    CLUBHEAD_FRAME_NAME,
+    GRIP_FRAME_NAME,
+    extract_full_pose,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
 # Canonical polynomial form: tau_j(t) = sum_{k=0}^{6} a_{j,k} * t^k.
@@ -45,12 +50,6 @@ COEFFS_PER_JOINT: int = POLY_DEGREE + 1
 # Default model path lives next to the engine; resolved lazily so tests
 # can override via SimOptions.osim_path.
 _DEFAULT_OSIM = Path(__file__).resolve().parents[2] / "models" / "golf_humanoid.osim"
-
-# Canonical frame / body names exposed in SimOut. Sourced from the
-# committed golf_humanoid.osim (issue #4110).
-GRIP_FRAME_NAME: str = "hand_r_grip_offset"
-CLUBHEAD_FRAME_NAME: str = "club_head_offset"
-
 
 # --------------------------------------------------------------------------- #
 # Public dataclasses
@@ -380,98 +379,6 @@ def _make_controller_class() -> type:  # noqa: C901, PLR0915 -- factory holds cl
 
 
 # --------------------------------------------------------------------------- #
-# Forward-kinematics helper -- minimal wrapper over osim API that works
-# with the shipped golf_humanoid.osim (uses hand_r_grip_offset and
-# club_head_offset PhysicalOffsetFrames).
-# --------------------------------------------------------------------------- #
-
-
-def extract_full_pose(state: Any, model: Any) -> dict[str, npt.NDArray[np.float64]]:
-    """Extract grip + clubhead world poses from a single SimTK state.
-
-    Mirrors the FK API in ``opensim_golf/fk.py`` but uses the canonical
-    ``hand_r_grip_offset`` / ``club_head_offset`` frames from the
-    committed golf_humanoid.osim.
-
-    Args:
-        state: SimTK::State (must already be realized to Position or higher).
-        model: Initialized ``osim.Model``.
-
-    Returns:
-        Dict with ``grip``, ``grip_quat``, ``clubhead``, ``club_quat`` keys
-        (each a numpy array; quats in canonical ``[w, x, y, z]`` order).
-    """
-    model.realizePosition(state)
-
-    grip_frame = model.getComponent(f"/jointset/hand_r_to_club/{GRIP_FRAME_NAME}")
-    clubhead_frame = model.getComponent(
-        f"/jointset/hand_r_to_club/{CLUBHEAD_FRAME_NAME}"
-    )
-
-    grip_t = grip_frame.getTransformInGround(state)
-    clubhead_t = clubhead_frame.getTransformInGround(state)
-
-    grip_pos = _vec3_to_array(grip_t.p())
-    clubhead_pos = _vec3_to_array(clubhead_t.p())
-
-    grip_quat = _rotation_to_quat(grip_t.R())
-    club_quat = _rotation_to_quat(clubhead_t.R())
-
-    return {
-        "grip": grip_pos,
-        "grip_quat": grip_quat,
-        "clubhead": clubhead_pos,
-        "club_quat": club_quat,
-    }
-
-
-def _vec3_to_array(v: Any) -> npt.NDArray[np.float64]:
-    """Convert a SimTK::Vec3 to a (3,) numpy array."""
-    return np.array([v.get(0), v.get(1), v.get(2)], dtype=np.float64)
-
-
-def _rotation_to_quat(rot: Any) -> npt.NDArray[np.float64]:
-    """Convert a SimTK::Rotation to a (4,) [w, x, y, z] quaternion.
-
-    Uses Shepperd's method for numerical stability across all rotations.
-    """
-    m = np.array(
-        [
-            [rot.get(0, 0), rot.get(0, 1), rot.get(0, 2)],
-            [rot.get(1, 0), rot.get(1, 1), rot.get(1, 2)],
-            [rot.get(2, 0), rot.get(2, 1), rot.get(2, 2)],
-        ],
-        dtype=np.float64,
-    )
-    trace = np.trace(m)
-    if trace > 0.0:
-        s = 0.5 / np.sqrt(trace + 1.0)
-        w = 0.25 / s
-        x = (m[2, 1] - m[1, 2]) * s
-        y = (m[0, 2] - m[2, 0]) * s
-        z = (m[1, 0] - m[0, 1]) * s
-    elif m[0, 0] > m[1, 1] and m[0, 0] > m[2, 2]:
-        s = 2.0 * np.sqrt(1.0 + m[0, 0] - m[1, 1] - m[2, 2])
-        w = (m[2, 1] - m[1, 2]) / s
-        x = 0.25 * s
-        y = (m[0, 1] + m[1, 0]) / s
-        z = (m[0, 2] + m[2, 0]) / s
-    elif m[1, 1] > m[2, 2]:
-        s = 2.0 * np.sqrt(1.0 + m[1, 1] - m[0, 0] - m[2, 2])
-        w = (m[0, 2] - m[2, 0]) / s
-        x = (m[0, 1] + m[1, 0]) / s
-        y = 0.25 * s
-        z = (m[1, 2] + m[2, 1]) / s
-    else:
-        s = 2.0 * np.sqrt(1.0 + m[2, 2] - m[0, 0] - m[1, 1])
-        w = (m[1, 0] - m[0, 1]) / s
-        x = (m[0, 2] + m[2, 0]) / s
-        y = (m[1, 2] + m[2, 1]) / s
-        z = 0.25 * s
-    return np.array([w, x, y, z], dtype=np.float64)
-
-
-# --------------------------------------------------------------------------- #
 # Public entry point
 # --------------------------------------------------------------------------- #
 
@@ -785,10 +692,10 @@ def _record_sample(  # noqa: PLR0913 -- buffers required for vectorised fill
     # Mirror the chronology metadata.
     time_grid[i]  # noqa: B018 -- index check
     pose = extract_full_pose(state, model)
-    grip_pos[i] = pose["grip"]
+    grip_pos[i] = pose["grip_pos"]
     grip_quat[i] = pose["grip_quat"]
-    club_pos[i] = pose["clubhead"]
-    club_quat[i] = pose["club_quat"]
+    club_pos[i] = pose["clubhead_pos"]
+    club_quat[i] = pose["clubhead_quat"]
 
 
 __all__ = [

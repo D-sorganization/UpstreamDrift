@@ -18,6 +18,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+    SPIN_DECAY_RATE_S,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -162,10 +168,10 @@ def create_air_properties(
 
 
 def create_ball_properties(
-    mass: float = 0.04593,
-    radius: float = 0.02135,
-    drag_coefficient: float = 0.25,
-    spin_decay_rate: float = 0.1,
+    mass: float = float(GOLF_BALL_MASS_KG),
+    radius: float = float(GOLF_BALL_RADIUS_M),
+    drag_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT),
+    spin_decay_rate: float = float(SPIN_DECAY_RATE_S),
 ) -> Any:
     """Create golf ball properties for aerodynamics calculations.
 

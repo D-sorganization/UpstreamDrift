@@ -29,6 +29,12 @@ import numpy as np
 
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+    SPIN_DECAY_RATE_S,
+)
 
 # ─── Physical Constants ────────────────────────────────────────────────
 # Single source of truth for gravity magnitude (#6638 F5): both the ISA model
@@ -112,12 +118,12 @@ class BallProperties:
         spin_decay_rate: Spin decay time constant [1/s]
     """
 
-    mass: float = 0.04593  # kg (1.62 oz)
-    radius: float = 0.02135  # m (1.68 in diameter)
+    mass: float = float(GOLF_BALL_MASS_KG)
+    radius: float = float(GOLF_BALL_RADIUS_M)
     area: float = field(init=False)
-    drag_coefficient: float = 0.25
+    drag_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT)
     lift_coefficient: float = 0.15
-    spin_decay_rate: float = 0.1  # 1/s
+    spin_decay_rate: float = float(SPIN_DECAY_RATE_S)
 
     def __post_init__(self) -> None:
         """Calculate derived properties."""

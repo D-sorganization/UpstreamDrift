@@ -11,7 +11,11 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.shared.python.core.physics_constants import SPIN_DECAY_RATE_S
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_DIAMETER_M,
+    GOLF_BALL_MASS_KG,
+    SPIN_DECAY_RATE_S,
+)
 
 MIN_SPEED_THRESHOLD: float = 0.1
 MAX_LIFT_COEFFICIENT: float = 0.35
@@ -22,8 +26,8 @@ NUMERICAL_EPSILON: float = 1e-10
 class BallProperties:
     """Physical properties of a golf ball (DRY-optimized)."""
 
-    mass: float = 0.0459
-    diameter: float = 0.04267
+    mass: float = float(GOLF_BALL_MASS_KG)
+    diameter: float = float(GOLF_BALL_DIAMETER_M)
     cd0: float = 0.21
     cd1: float = 0.05
     cd2: float = 0.02
