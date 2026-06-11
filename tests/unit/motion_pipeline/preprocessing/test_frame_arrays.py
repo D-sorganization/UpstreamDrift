@@ -35,6 +35,8 @@ pure_resample_module = import_module(
     "src.shared.python.motion_pipeline.preprocessing._resample_pure_python"
 )
 
+pytestmark = pytest.mark.unit
+
 
 KEYPOINT_HELPERS: tuple[Callable[[list[KeypointFrame]], np.ndarray], ...] = (
     keypoints_to_array,

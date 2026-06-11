@@ -63,7 +63,7 @@ jobs:
       - name: Find Related Jules PRs
         id: find
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
         run: |
           echo "Checking for superseded Jules PRs after push to main..."
 
@@ -131,7 +131,7 @@ jobs:
       - name: Close Superseded PRs
         if: steps.find.outputs.superseded_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
         run: |
           echo "Closing superseded Jules PRs..."
 

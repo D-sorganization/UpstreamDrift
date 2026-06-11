@@ -21,6 +21,8 @@ from src.shared.python.signal_toolkit.polynomial_generator import (
     PolynomialGeneratorWidget as CanonicalPolynomialGeneratorWidget,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def qapp():

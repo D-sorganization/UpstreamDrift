@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.343                                            |
+| **Spec Version**        | 1.0.344                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -73,11 +73,20 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-06-11** - Capability truthfulness contracts for #7355 and #7356.
   Generated motion-pipeline compatibility docs now mark Drake trajectory
   optimization matching as unsupported until the solver is implemented, and
-  Drake/RRA/CMC matching placeholder results advertise `status:
-not_implemented` plus `production_ready: false` so orchestrator failures
-  remain caller-actionable. Production chat tools that do not yet run real
-  work now return explicit `not_implemented` payloads instead of queued or
+  Drake/RRA/CMC matching placeholder results advertise
+  `status: not_implemented` plus `production_ready: false` so orchestrator
+  failures remain caller-actionable. Production chat tools that do not yet run
+  real work now return explicit `not_implemented` payloads instead of queued or
   successful placeholder results.
+
+- **2026-06-11** - Honest launcher Document Chat and swing-sequence analytics
+  contracts for #7358/#7359. The Library tab no longer enables Document Chat
+  without a configured backend and no longer fabricates Notebook LM responses.
+  `swing_sequence` analysis now computes segment peak timing from trajectory
+  angular velocities via the shared segment timing analyzer, marks
+  instantaneous-only segment velocities as `requires_trajectory`, and emits
+  X-factor metrics only when joint trajectory data plus shoulder/hip indices
+  are available.
 
 - **2026-06-11** - Hardened launcher Docker build cancellation and layout reset
   backup semantics for #7341/#7342. Docker build threads now own a managed
@@ -1185,7 +1194,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.343 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
+| 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
+| 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |
 | 2026-06-11 | 1.0.342 | Launcher Docker build cancellation and layout reset backup hardening for #7341/#7342. Docker build threads now own a managed subprocess handle with cooperative cancellation instead of `QThread.terminate()`, the GUI prompts before closing an active build, and GUI/CLI layout reset paths share a helper that overwrites an existing `launcher_layout.json.bak` via `Path.replace` so repeated resets work on Windows. The changed-file architecture budget records expiring exceptions for the legacy launcher UI builders surfaced by this focused repair. |
 | 2026-06-11 | 1.0.341 | CI and validation test contract hardening for #7352, #7353, and #7354. The optional-stack lane now gates on pytest exit codes, physics validation scripts target real analytical/conservation suites, and PyQt fallback stubs no longer fabricate launcher expectations. |
 | 2026-06-11 | 1.0.340 | Motion-pipeline DRY follow-up for the #7380 simulator-facade merge. MuJoCo torque matching and Pinocchio inverse dynamics now share `BaseMotionMatchingSolver` helpers for per-DOF rig joint names and torque trajectory construction, removing duplicate post-merge torque payload assembly while preserving backend-specific success metadata. |
