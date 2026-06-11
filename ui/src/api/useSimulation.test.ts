@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSimulation, fetchEngines, type SimulationFrame } from './client';
+import { setLauncherCapabilityToken } from './websocketToken';
 
 // Create a controllable mock WebSocket
 class MockWebSocket {
@@ -84,6 +85,7 @@ class MockWebSocket {
 // Install mock before tests
 beforeEach(() => {
   MockWebSocket.reset();
+  setLauncherCapabilityToken(null);
   vi.stubGlobal('WebSocket', MockWebSocket);
   vi.useFakeTimers();
 });
@@ -135,6 +137,20 @@ describe('useSimulation hook', () => {
       });
 
       expect(MockWebSocket.lastUrl).toContain('/api/ws/simulate/drake');
+    });
+
+    it('adds the launcher capability token to the WebSocket URL when available', () => {
+      setLauncherCapabilityToken('test-token');
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
+
+      expect(MockWebSocket.lastUrl).toContain('/api/ws/simulate/mujoco');
+      expect(new URL(MockWebSocket.lastUrl).searchParams.get('launcher_token')).toBe(
+        'test-token',
+      );
     });
 
     it('sets connection status to connecting', () => {

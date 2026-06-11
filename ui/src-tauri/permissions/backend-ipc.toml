@@ -1,0 +1,19 @@
+[[permission]]
+identifier = "allow-start-backend"
+description = "Allow the main window to start the local Python backend process."
+commands.allow = ["start_backend"]
+
+[[permission]]
+identifier = "allow-stop-backend"
+description = "Allow the main window to stop the managed local Python backend process."
+commands.allow = ["stop_backend"]
+
+[[permission]]
+identifier = "allow-backend-status"
+description = "Allow the main window to read local Python backend process status."
+commands.allow = ["backend_status"]
+
+[[permission]]
+identifier = "allow-get-diagnostics"
+description = "Allow the main window to read local launcher diagnostic details."
+commands.allow = ["get_diagnostics"]

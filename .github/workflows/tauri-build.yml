@@ -86,8 +86,19 @@ jobs:
 
       - name: Install Linux dependencies
         run: |
-          sudo apt-get -o APT::Get::Lock-Timeout=300 -o DPkg::Lock::Timeout=300 update
-          sudo apt-get -o APT::Get::Lock-Timeout=300 -o DPkg::Lock::Timeout=300 install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          apt_retry() {
+            local attempt
+            for attempt in 1 2 3; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep $((attempt * 20))
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
         working-directory: ui
@@ -156,8 +167,19 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.platform == 'd-sorg-fleet-docker'
         run: |
-          sudo apt-get -o APT::Get::Lock-Timeout=300 -o DPkg::Lock::Timeout=300 update
-          sudo apt-get -o APT::Get::Lock-Timeout=300 -o DPkg::Lock::Timeout=300 install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          apt_retry() {
+            local attempt
+            for attempt in 1 2 3; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep $((attempt * 20))
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
         working-directory: ui
