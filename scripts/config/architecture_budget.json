@@ -73,6 +73,46 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7294: pre-existing per-step training routine exceeds the changed-file architecture budget; split data preparation, loop, checkpoint, and metrics responsibilities after the #7276 checkpoint-safety fix lands.",
       "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
+      "symbol": "Viewer3DTab._init_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7361 legacy GUI facade decomposition: _init_ui exceeded the changed-file budget before the import-boundary consolidation and needs a focused widget-builder split.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
+      "symbol": "Viewer3DTab._rebuild_scene",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7361 legacy GUI facade decomposition: _rebuild_scene exceeded the changed-file budget before the import-boundary consolidation and needs scene assembly split into focused helpers.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_mujoco",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7363 legacy MuJoCo facade decomposition: fit_swing_mujoco exceeded the changed-file budget before the import-boundary consolidation and needs setup/solve/result assembly split.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/chat/router_factory.py",
+      "symbol": "create_chat_router",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7362 legacy shared-chat decomposition: create_chat_router exceeded the changed-file budget before MCP config I/O moved into the shared facade and needs route construction split.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/chat/router_factory.py",
+      "symbol": "create_chat_router.chat_stream",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7362 legacy shared-chat decomposition: chat_stream exceeded the changed-file budget before MCP config I/O moved into the shared facade and needs streaming orchestration split.",
+      "expires_on": "2026-08-31"
     }
   ]
 }
