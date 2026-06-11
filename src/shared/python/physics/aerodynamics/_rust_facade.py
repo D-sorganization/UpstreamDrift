@@ -5,9 +5,8 @@ routes through the ``upstream_physics`` Rust kernel when it is installed,
 and falls back to the canonical Python implementation otherwise.
 
 The pure-Python fallback intentionally re-uses the same
-:class:`DragModel`, :class:`LiftModel`, and :class:`MagnusModel` objects
-as the legacy :class:`AerodynamicsEngine` so behaviour is byte-identical
-between fallback and reference paths.
+:class:`DragModel` and the Smits/Ogg spin-lift law used by the Rust kernel
+so behaviour is byte-identical between fallback and reference paths.
 
 This is the per-step entry point used by hot integrator loops to avoid
 the Python/C boundary on every RK4 stage (issue #5265). The full
@@ -158,11 +157,10 @@ def _python_fallback_total(
     produces byte-identical results to the Rust kernel. This is the
     invariant the parity test asserts.
 
-    The legacy :class:`DragModel` / :class:`LiftModel` / :class:`MagnusModel`
-    in ``_models.py`` use slightly different coefficient formulas (in
-    particular ``MagnusModel`` scales by 1.25 in the small-spin regime
-    while the Rust kernel scales by 0.4). The Rust formulation is the
-    new canonical reference per issue #5265.
+    The combined kernel intentionally emits one spin-induced force in the
+    ``magnus`` slot. The legacy ``lift`` slot remains exposed by Rust/Python
+    APIs, but is not summed here because lift and Magnus point along the same
+    ``spin × velocity`` direction for a spinning golf ball.
     """
     # Local import avoids a circular import: this module is consumed by
     # _engine.py which itself imports from the aerodynamics package.
@@ -186,27 +184,15 @@ def _python_fallback_total(
         f_mag = 0.5 * spec.air_density * cd * area * speed * speed
         total = total - f_mag * rel_velocity / speed
 
-    # ── Lift ────────────────────────────────────────────────────────────
-    if spec.lift_enabled and spin_mag > 1e-6:
-        spin_ratio = spec.radius * spin_mag / (speed + 1e-10)
-        # Rust: cl_max = 0.4, cl = cl_max * (1 - exp(-spin_ratio / 0.1))
-        cl = 0.4 * (1.0 - math.exp(-spin_ratio / 0.1))
-        spin_axis = spin / (spin_mag + 1e-10)
-        lift_dir = np.cross(spin_axis, rel_velocity)
-        lift_norm = _magnitude(lift_dir)
-        if lift_norm > 1e-6:
-            f_mag = 0.5 * spec.air_density * cl * area * speed * speed
-            total = total + f_mag * lift_dir / lift_norm
-
-    # ── Magnus ──────────────────────────────────────────────────────────
+    # ── Single spin-induced Magnus/lift force ───────────────────────────
     if spec.magnus_enabled and spin_mag > 1e-6:
         magnus_dir = np.cross(spin, rel_velocity)
         magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
             spin_param = spec.radius * spin_mag / speed
-            # Rust: 0.4 * min(spin_param, 0.5)
-            cm = 0.4 * min(spin_param, 0.5)
-            f_mag = 0.5 * spec.air_density * cm * area * speed * speed
+            # Rust: Smits/Ogg saturation, cl_max = 0.4.
+            cl = 0.4 * (1.0 - math.exp(-spin_param / 0.1))
+            f_mag = 0.5 * spec.air_density * cl * area * speed * speed
             total = total + f_mag * magnus_dir / magnus_norm
 
     return total
