@@ -17,6 +17,8 @@ from src.deployment.teleoperation.interface import (
 )
 from src.shared.python.core.contracts.exceptions import StateError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_robot() -> MagicMock:

@@ -487,6 +487,29 @@ class TestCIEnvironmentCompatibility:
         assert "tests:              ${{ needs.tests.result }}" in aggregate
         assert '${{ needs.tests.result }}" != "success"' in aggregate
 
+    def test_ci_standard_tests_matrix_timeout_covers_core_suite_runtime(self) -> None:
+        """The core tests matrix must not cancel before the bounded suite completes."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        tests_job = workflow["jobs"]["tests"]
+
+        assert int(tests_job["timeout-minutes"]) >= 35
+        core_step = next(
+            step
+            for step in tests_job["steps"]
+            if step.get("name") == "Run Core Test Suite"
+        )
+        assert "--timeout=60" in core_step["run"]
+        assert "-n 2" in core_step["run"]
+
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:
@@ -643,7 +666,14 @@ class TestCIEnvironmentCompatibility:
         assert 'github.event_name }}" = "pull_request"' not in unit_step
         assert "changed_tests" not in unit_step
         assert "No unit test changes detected" not in unit_step
-        assert "pytest tests/unit/" in unit_step
+        assert "find tests/unit -mindepth 1 -maxdepth 1" in unit_step
+        assert 'pytest "$target"' in unit_step
+        assert "unit_targets" in unit_step
+        assert "break" in unit_step
+        assert "OPTIONAL_STACK_UNIT_WORKERS" not in unit_step
+        assert "pytest-xdist" not in unit_step
+        assert " -n " not in unit_step
+        assert "-n auto" not in unit_step
 
     def test_ci_optional_stack_pytest_exit_codes_are_gating(self) -> None:
         """The optional-stack lane must fail on pytest exit codes, not grep text."""

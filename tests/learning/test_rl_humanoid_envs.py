@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("gymnasium")
 
 from src.learning.rl.humanoid_envs import (  # noqa: E402

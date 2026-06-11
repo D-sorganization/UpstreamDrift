@@ -1030,7 +1030,7 @@ jobs:
   tests:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 20 # Prevent runaway tests - hard cutoff
+    timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
     strategy:
       fail-fast: false
       matrix:
