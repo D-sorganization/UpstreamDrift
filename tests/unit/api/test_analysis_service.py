@@ -236,6 +236,96 @@ class TestAnalyzeSwingSequenceInternal:
         ]
         assert result["phases"] == expected_phases
 
+    async def test_swing_sequence_computes_segment_velocity_peaks(
+        self, analysis_service
+    ) -> None:
+        """Regression: segment velocity trajectories must not become null peaks."""
+        from src.api.models.requests import AnalysisRequest
+
+        class Engine:
+            def get_segment_angular_velocities(self):
+                return {
+                    "pelvis": [0.0, 3.0, 1.0, 0.0],
+                    "torso": [0.0, 1.0, 5.0, 0.0],
+                    "arm": [0.0, 1.0, 2.0, 7.0],
+                    "club": [0.0, 2.0, 4.0, 9.0],
+                }
+
+        request = AnalysisRequest(
+            analysis_type="swing_sequence",
+            data_source="simulation",
+            parameters={},
+            data={"times": [0.0, 0.1, 0.2, 0.3]},
+        )
+
+        result = await analysis_service._analyze_swing_sequence(request, Engine())
+
+        sequence = result["kinematic_sequence"]
+        assert sequence["pelvis_peak"]["velocity"] == 3.0
+        assert sequence["pelvis_peak"]["time"] == 0.1
+        assert sequence["torso_peak"]["velocity"] == 5.0
+        assert sequence["arm_peak"]["velocity"] == 7.0
+        assert sequence["club_peak"]["velocity"] == 9.0
+        assert sequence["sequence_order"] == ["pelvis", "torso", "arm", "club"]
+        assert result["metadata"]["kinematic_sequence"] == "computed"
+
+    async def test_swing_sequence_marks_instantaneous_velocities_as_requires_trajectory(
+        self, analysis_service
+    ) -> None:
+        """Regression: single-sample segment velocities are not valid peak analytics."""
+        from src.api.models.requests import AnalysisRequest
+
+        class Engine:
+            def get_segment_angular_velocities(self):
+                return {
+                    "pelvis": 3.0,
+                    "torso": 5.0,
+                    "arm": 7.0,
+                    "club": 9.0,
+                }
+
+        request = AnalysisRequest(
+            analysis_type="swing_sequence",
+            data_source="simulation",
+            parameters={},
+        )
+
+        result = await analysis_service._analyze_swing_sequence(request, Engine())
+
+        assert result["kinematic_sequence"] == {}
+        assert result["metadata"]["kinematic_sequence"] == "requires_trajectory"
+        assert "x_factor" not in result
+
+    async def test_swing_sequence_computes_x_factor_when_joint_data_is_available(
+        self, analysis_service
+    ) -> None:
+        """Regression: x_factor is computed when shoulder and hip rotations exist."""
+        from src.api.models.requests import AnalysisRequest
+
+        class Engine:
+            pass
+
+        request = AnalysisRequest(
+            analysis_type="swing_sequence",
+            data_source="simulation",
+            parameters={},
+            data={
+                "joint_positions": [
+                    [0.0, 0.0],
+                    [np.pi / 2.0, np.pi / 6.0],
+                ],
+                "shoulder_joint_idx": 0,
+                "hip_joint_idx": 1,
+                "times": [0.0, 0.1],
+            },
+        )
+
+        result = await analysis_service._analyze_swing_sequence(request, Engine())
+
+        assert result["x_factor"]["values"] == pytest.approx([0.0, 60.0])
+        assert result["x_factor"]["peak"] == pytest.approx(60.0)
+        assert result["x_factor"]["peak_stretch_rate"] == pytest.approx(600.0)
+
 
 class TestToListHelper:
     """Tests for _to_list helper method."""
