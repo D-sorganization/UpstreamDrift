@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.326                                            |
+| **Spec Version**        | 1.0.328                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Tightened motion matching runtime contracts for #7304,
+  #7305, #7306, and #7309. Internal request construction now rejects invalid
+  cost weights and solver configuration before backend dispatch, metric helpers
+  fail on mismatched frame/DOF shapes instead of truncating, solver result
+  postconditions validate reference-aligned time grids plus torque/activation
+  finiteness, and successful internal results must carry a matched payload.
 - **2026-06-11** - Isolated optional dependency import mocks for #7307.
   Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
   imports now install fake optional packages only inside scoped import
@@ -1021,6 +1027,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.328 | Motion matching runtime contract hardening for #7304, #7305, #7306, and #7309. `CostWeights` and internal `MotionMatchingRequest` now reject invalid numeric configuration at construction, shared metric validation fails on frame/DOF shape mismatches instead of silently truncating, the solver result postcondition gate validates reference-aligned time grids plus finite torque/activation payloads, and internal successful `MotionMatchingResult` objects must include a matched trajectory, torque trajectory, or activation trajectory payload. |
 | 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
 | 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
 | 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
