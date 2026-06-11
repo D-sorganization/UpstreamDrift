@@ -2,24 +2,33 @@
 
 from __future__ import annotations
 
-import sys
-from unittest.mock import MagicMock, patch
+from collections.abc import Iterator
+from types import ModuleType
+from typing import Any
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-# Per CLAUDE.md: never module-level sys.modules mocking.
-# Use patch.dict context managers instead.
-_PYDRAKE_MOCK = {
-    "pydrake": MagicMock(),
-    "pydrake.all": MagicMock(),
-}
+from tests.support.optional_deps import scoped_import_with_optional_mocks
 
-# Import the module under test with patched sys.modules
-with patch.dict(sys.modules, _PYDRAKE_MOCK):
-    from src.engines.physics_engines.drake.python.src.induced_acceleration import (  # noqa: E402
-        DrakeInducedAccelerationAnalyzer,
-    )
+_INDUCED_ACCELERATION_MODULE = (
+    "src.engines.physics_engines.drake.python.src.induced_acceleration"
+)
+_DRAKE_ANALYSIS_MODULE = "src.engines.physics_engines.drake.python.src.drake_analysis"
+
+
+@pytest.fixture
+def induced_acceleration_module() -> Iterator[ModuleType]:
+    with scoped_import_with_optional_mocks(
+        _INDUCED_ACCELERATION_MODULE,
+        {
+            "pydrake": MagicMock(),
+            "pydrake.all": MagicMock(),
+        },
+        purge_modules=[_DRAKE_ANALYSIS_MODULE],
+    ) as module:
+        yield module
 
 
 class TestDrakeInducedAcceleration:
@@ -35,9 +44,9 @@ class TestDrakeInducedAcceleration:
         return plant
 
     @pytest.fixture
-    def analyzer(self, mock_plant) -> DrakeInducedAccelerationAnalyzer:
+    def analyzer(self, mock_plant, induced_acceleration_module: ModuleType) -> Any:
         """Create analyzer instance."""
-        return DrakeInducedAccelerationAnalyzer(mock_plant)
+        return induced_acceleration_module.DrakeInducedAccelerationAnalyzer(mock_plant)
 
     def test_induced_acceleration_initialization(self, analyzer, mock_plant) -> None:
         """Test initialization."""
