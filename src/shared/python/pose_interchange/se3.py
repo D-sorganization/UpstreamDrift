@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Final
 
+import math
 import numpy as np
 import numpy.typing as npt
 
@@ -204,7 +205,8 @@ def quat_exp(rotvec: npt.ArrayLike) -> npt.NDArray[np.float64]:
     v = np.asarray(rotvec, dtype=float)
     if v.shape != (3,):
         raise ValueError(f"rotvec must have shape (3,), got {v.shape}")
-    theta = float(np.linalg.norm(v))
+    # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+    theta = float(math.hypot(v[0], v[1], v[2]))
     half = 0.5 * theta
     w = float(np.cos(half))
     if theta < _EPS_SMALL_ANGLE:
@@ -227,7 +229,8 @@ def quat_log(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
         arr = -arr
     w = float(np.clip(arr[0], -1.0, 1.0))
     v = arr[1:4]
-    nv = float(np.linalg.norm(v))
+    # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+    nv = float(math.hypot(v[0], v[1], v[2]))
     if nv < _EPS_SMALL_ANGLE:
         # theta -> 0: rotvec = 2 v / w to leading order (w -> 1 here)
         return v * (2.0 / w)
