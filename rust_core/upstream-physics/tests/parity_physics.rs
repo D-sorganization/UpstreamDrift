@@ -102,7 +102,7 @@ fn ball_flight_matches_python_reference_fixture() {
         1e-12,
         "landing time",
     );
-    assert_close(final_point.x, 61.682_495_716_718_755, 1e-10, "landing x");
-    assert_close(final_point.y, 0.945_155_456_531_989, 1e-12, "landing y");
-    assert_close(final_point.z, -0.009_540_164_319_093_99, 1e-12, "landing z");
+    assert_close(final_point.x, 61.664_670_686_686_485, 1e-10, "landing x");
+    assert_close(final_point.y, 0.945_150_330_272_271, 1e-12, "landing y");
+    assert_close(final_point.z, -0.192_800_148_205_597, 1e-12, "landing z");
 }

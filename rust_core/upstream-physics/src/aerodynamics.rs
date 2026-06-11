@@ -106,7 +106,7 @@ impl Default for AeroBallProperties {
             radius,
             area: std::f64::consts::PI * radius * radius,
             drag_coefficient: 0.25,
-            spin_decay_rate: 0.1,
+            spin_decay_rate: 0.05,
         }
     }
 }
@@ -445,7 +445,7 @@ impl AirProperties {
 #[pyo3::prelude::pymethods]
 impl AeroBallProperties {
     #[new]
-    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.1))]
+    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.05))]
     fn py_new(
         mass: f64,
         radius: f64,

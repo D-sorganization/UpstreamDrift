@@ -12,6 +12,15 @@ from src.engines.common.physics import (
     BallPhysics,
     BallProperties,
 )
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+    SPIN_DECAY_RATE_S,
+)
+from src.shared.python.physics.ball_properties import (
+    BallProperties as SharedBallProperties,
+)
 
 
 class TestAirProperties:
@@ -51,8 +60,20 @@ class TestBallProperties:
     def test_default_golf_ball(self) -> None:
         """Test default golf ball properties."""
         ball = BallProperties()
-        assert ball.mass == pytest.approx(0.04593, rel=0.01)
-        assert ball.radius == pytest.approx(0.02135, rel=0.01)
+        assert ball.mass == pytest.approx(float(GOLF_BALL_MASS_KG))
+        assert ball.radius == pytest.approx(float(GOLF_BALL_RADIUS_M))
+        assert ball.drag_coefficient == pytest.approx(float(GOLF_BALL_DRAG_COEFFICIENT))
+        assert ball.spin_decay_rate == pytest.approx(float(SPIN_DECAY_RATE_S))
+
+    def test_ball_properties_source_shared_physical_constants(self) -> None:
+        """Duplicated ball property classes must share canonical constants."""
+        engine_ball = BallProperties()
+        shared_ball = SharedBallProperties()
+
+        assert engine_ball.mass == float(GOLF_BALL_MASS_KG)
+        assert shared_ball.mass == float(GOLF_BALL_MASS_KG)
+        assert engine_ball.spin_decay_rate == float(SPIN_DECAY_RATE_S)
+        assert shared_ball.spin_decay_rate == float(SPIN_DECAY_RATE_S)
 
     def test_area_calculated(self) -> None:
         """Test cross-sectional area is calculated correctly."""

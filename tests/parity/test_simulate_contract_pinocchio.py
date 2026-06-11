@@ -18,16 +18,29 @@ cleanly when the engine is unavailable.
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-# Skip the entire module cleanly when the optional engine isn't installed —
-# the ``requires_pinocchio`` marker is informational; the module-level
-# ``importorskip`` is what actually drops us off the CI graph.
-pytest.importorskip("pinocchio")
+pytestmark = [pytest.mark.requires_pinocchio, pytest.mark.unit]
+
+
+def _has_pinocchio_runtime() -> bool:
+    """Return whether a real Pinocchio runtime API is available."""
+    try:
+        pin = importlib.import_module("pinocchio")
+    except ImportError:
+        return False
+    return hasattr(pin, "buildModelFromUrdf")
+
+
+_PIN_AVAILABLE = _has_pinocchio_runtime()
+
+if not _PIN_AVAILABLE:
+    pytest.skip("pinocchio not installed", allow_module_level=True)
 
 from src.engines.physics_engines.pinocchio.python.motion_matching.simulate import (  # noqa: E402
     COEFFS_PER_JOINT,
@@ -36,9 +49,6 @@ from src.engines.physics_engines.pinocchio.python.motion_matching.simulate impor
     simulate_with_coefficients,
 )
 
-pytestmark = [pytest.mark.requires_pinocchio, pytest.mark.unit]
-
-_PIN_AVAILABLE = importlib.util.find_spec("pinocchio") is not None
 _GOLFER_URDF = (
     Path(__file__).resolve().parents[2]
     / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
@@ -209,6 +219,9 @@ def test_simulate_contract_pinocchio_time_monotonic_starts_at_zero() -> None:
 
 def test_q_width_matches_model_nq() -> None:
     """SimOut.q has model.nq columns at every timestep."""
+    if not _PIN_AVAILABLE:
+        pytest.skip("pinocchio not installed")
+
     import pinocchio as pin
 
     model = pin.buildModelFromUrdf(str(_GOLFER_URDF))
