@@ -254,6 +254,10 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   skeleton overlay. The BunkerShot calibration optimizer now imports
   `scipy.optimize` lazily so cross-engine equivalence imports can use
   `WrenchTrace` without optional calibration optimizer dependencies.
+- **2026-06-10** - Added the #7340/#7343/#7344 UI responsiveness contract:
+  launcher dependency probes, settings Docker/WSL checks, and C3D MP4 export
+  must run off the GUI thread; C3D video export exposes cooperative progress
+  and cancellation hooks that remove partial files on cancel.
 - **2026-06-10** - Added the #7207 model explorer composition-flow controller.
   `src/tools/model_explorer/composition_flow.py` now attaches a complete
   source URDF model to a working Frankenstein model through a declared

@@ -13,9 +13,10 @@ Features:
 
 import os
 import sys
+import threading
 from pathlib import Path
 
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
 try:
@@ -46,6 +47,45 @@ from .ui.tabs.viewer_3d_tab import Viewer3DTab
 # ---------------------------------------------------------------------------
 
 
+class AnimationExportThread(QtCore.QThread):
+    """Export C3D animation video away from the GUI thread."""
+
+    succeeded = QtCore.pyqtSignal(object)
+    failed = QtCore.pyqtSignal(str)
+    cancelled = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(int, int)
+
+    def __init__(self, model: C3DDataModel, output_path: str, parent=None) -> None:
+        super().__init__(parent)
+        self._model = model
+        self._output_path = output_path
+        self._cancel_event = threading.Event()
+
+    def cancel(self) -> None:
+        self._cancel_event.set()
+
+    def run(self) -> None:
+        from src.shared.python.motion_matching.diagnostics.body_target_video import (
+            BodyTargetVideoCancelled,
+        )
+
+        from .services.c3d_animation_export import export_animation
+
+        try:
+            result = export_animation(
+                self._model,
+                self._output_path,
+                progress_callback=self.progress.emit,
+                cancel_check=self._cancel_event.is_set,
+            )
+        except BodyTargetVideoCancelled:
+            self.cancelled.emit()
+        except (OSError, ValueError, ImportError) as exc:
+            self.failed.emit(str(exc))
+        else:
+            self.succeeded.emit(result)
+
+
 class MainWidget(QtWidgets.QWidget):
     """Embeddable C3D Motion Analysis viewer widget.
 
@@ -65,6 +105,8 @@ class MainWidget(QtWidgets.QWidget):
 
         self.model: C3DDataModel | None = None
         self._loader_thread: C3DLoaderThread | None = None
+        self._export_thread: AnimationExportThread | None = None
+        self._export_progress_dialog: QtWidgets.QProgressDialog | None = None
 
         self._create_actions()
         self._create_central_widget()
@@ -410,28 +452,88 @@ class MainWidget(QtWidgets.QWidget):
         if not path:
             return
 
-        from .services.c3d_animation_export import export_animation
+        if self._export_thread is not None:
+            return
 
-        QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        frame_count = self._animation_frame_count()
+        self._status_message(f"Exporting animation to {os.path.basename(path)}...")
+
+        self.action_export_animation.setEnabled(False)
+        self.action_export_markers.setEnabled(False)
+        progress_dialog = QtWidgets.QProgressDialog(
+            "Exporting animation...",
+            "Cancel",
+            0,
+            frame_count,
+            self,
+        )
+        progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        progress_dialog.setMinimumDuration(0)
+        progress_dialog.setValue(0)
+        self._export_progress_dialog = progress_dialog
+
+        self._export_thread = AnimationExportThread(self.model, path, self)
+        self._export_thread.progress.connect(self._on_animation_export_progress)
+        self._export_thread.succeeded.connect(self._on_animation_export_success)
+        self._export_thread.failed.connect(self._on_animation_export_failure)
+        self._export_thread.cancelled.connect(self._on_animation_export_cancelled)
+        self._export_thread.finished.connect(self._on_animation_export_finished)
+        progress_dialog.canceled.connect(self._cancel_animation_export)
+        progress_dialog.show()
+        self._export_thread.start()
+
+    def _animation_frame_count(self) -> int:
+        """Return the largest marker track length for progress reporting."""
+        if self.model is None:
+            return 0
+        model = self.model
+        markers = model.markers
+        frame_counts = [
+            int(getattr(marker.position, "shape", [len(marker.position)])[0])
+            for marker in markers.values()
+            if getattr(marker, "position", None) is not None
+        ]
+        return max(frame_counts, default=0)
+
+    def _cancel_animation_export(self) -> None:
+        if self._export_thread is not None:
+            self._status_message("Cancelling animation export...")
+            self._export_thread.cancel()
+
+    def _on_animation_export_progress(self, current: int, total: int) -> None:
+        if self._export_progress_dialog is None:
+            return
+        if total > self._export_progress_dialog.maximum():
+            self._export_progress_dialog.setMaximum(total)
+        self._export_progress_dialog.setValue(current)
+
+    def _on_animation_export_success(self, result: object) -> None:
+        frame_count = getattr(result, "frame_count", 0)
+        output_path = getattr(result, "output_path", "")
         self._status_message(
-            f"Exporting animation to {os.path.basename(path)}... (may take a moment)"
+            f"Exported {frame_count} frames to {os.path.basename(str(output_path))}"
+        )
+        QtWidgets.QMessageBox.information(
+            self, "Export success", f"Animation exported to:\n{output_path}"
         )
 
-        try:
-            result = export_animation(self.model, path)
-            self._status_message(
-                f"Exported {result.frame_count} frames to {os.path.basename(path)}"
-            )
-            QtWidgets.QMessageBox.information(
-                self, "Export success", f"Animation exported to:\n{path}"
-            )
-        except (OSError, ValueError, ImportError) as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Export failed", f"Could not export animation:\n{e}"
-            )
-            self._status_message("Animation export failed.")
-        finally:
-            QtWidgets.QApplication.restoreOverrideCursor()
+    def _on_animation_export_failure(self, error: str) -> None:
+        QtWidgets.QMessageBox.warning(
+            self, "Export failed", f"Could not export animation:\n{error}"
+        )
+        self._status_message("Animation export failed.")
+
+    def _on_animation_export_cancelled(self) -> None:
+        self._status_message("Animation export cancelled.")
+
+    def _on_animation_export_finished(self) -> None:
+        if self._export_progress_dialog is not None:
+            self._export_progress_dialog.close()
+            self._export_progress_dialog = None
+        self._export_thread = None
+        has_model = self.model is not None
+        self.action_export_animation.setEnabled(has_model)
+        self.action_export_markers.setEnabled(has_model)
 
 
 # ---------------------------------------------------------------------------
