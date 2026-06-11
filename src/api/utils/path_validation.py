@@ -68,7 +68,7 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
         if _candidate_traverses_symlink(candidate, allowed_dir):
             raise HTTPException(
                 status_code=400,
-                detail="Symbolic links are not permitted in model paths",
+                detail="Symlink traversal is not permitted in model paths",
             )
 
         try:
@@ -122,7 +122,7 @@ def resolve_output_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
         if _candidate_traverses_symlink(candidate, allowed_dir):
             raise HTTPException(
                 status_code=400,
-                detail="Symbolic links are not permitted in output paths",
+                detail="Symlink traversal is not permitted in output paths",
             )
 
         return resolved_candidate
