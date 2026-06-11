@@ -42,6 +42,7 @@ import {
 import { Send, MessageSquare, Paperclip, RefreshCw, X, RotateCcw } from 'lucide-react';
 import { ChatMarkdown } from './chatMarkdown';
 import { getApiBase } from '../../api/backend';
+import { withLauncherWebSocketToken } from '../../api/websocketToken';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -136,7 +137,7 @@ export function resolveChatUrl(sessionId: string = 'new'): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     wsBase = `${protocol}//${window.location.host}`;
   }
-  return `${wsBase}/ws/chat/${sessionId}`;
+  return withLauncherWebSocketToken(`${wsBase}/ws/chat/${sessionId}`);
 }
 
 function makeId(): string {
@@ -226,7 +227,10 @@ export function ChatPanel({
     attachments?: ChatAttachment[];
   } | null>(null);
 
-  const targetUrl = useMemo(() => url ?? resolveChatUrl('new'), [url]);
+  const targetUrl = useMemo(
+    () => (url ? withLauncherWebSocketToken(url) : resolveChatUrl('new')),
+    [url],
+  );
 
   // Append text to the in-flight assistant message (or start a new one).
   const appendAssistantChunk = useCallback((chunk: string) => {

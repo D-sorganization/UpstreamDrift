@@ -6,7 +6,9 @@ cannot access the physics simulator or chat service without credentials.
 Local-mode bypass
 -----------------
 When ``GOLF_SUITE_MODE=local`` or ``GOLF_AUTH_DISABLED=true`` the connection is
-admitted, but a WARNING is emitted so the bypass is visible in production logs.
+admitted only after an allowed loopback ``Origin`` and the launcher capability
+token are verified, with a WARNING emitted so local-mode use remains visible in
+production logs.
 
 Cloud mode
 ----------
@@ -18,6 +20,8 @@ absent or the token is invalid the socket is closed with code 1008
 from __future__ import annotations
 
 import logging
+from secrets import compare_digest
+from urllib.parse import urlparse
 
 from fastapi import WebSocket
 
@@ -29,6 +33,86 @@ from src.api.database import SessionLocal
 logger = logging.getLogger(__name__)
 
 _WS_CLOSE_POLICY_VIOLATION = 1008
+_WS_TOKEN_QUERY_KEYS = ("launcher_token", "launcher_csrf_token")
+_WS_TOKEN_PROTOCOL_PREFIX = "launcher-token."
+
+
+def _is_loopback_origin(value: str) -> bool:
+    """Return True when an Origin value points at the local launcher UI."""
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    return parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+
+
+def _iter_ws_protocol_values(websocket: WebSocket) -> tuple[str, ...]:
+    """Return requested Sec-WebSocket-Protocol values as normalized tokens."""
+    header_value = websocket.headers.get("sec-websocket-protocol", "")
+    if not header_value:
+        return ()
+    return tuple(part.strip() for part in header_value.split(",") if part.strip())
+
+
+def _launcher_token_from_websocket(websocket: WebSocket, expected_token: str) -> str:
+    """Extract a launcher capability token from query params or subprotocols."""
+    for key in _WS_TOKEN_QUERY_KEYS:
+        token = websocket.query_params.get(key)
+        if token:
+            return str(token)
+
+    exact_protocol_token = ""
+    for protocol in _iter_ws_protocol_values(websocket):
+        if protocol.startswith(_WS_TOKEN_PROTOCOL_PREFIX):
+            return protocol.removeprefix(_WS_TOKEN_PROTOCOL_PREFIX)
+        if compare_digest(protocol, expected_token):
+            exact_protocol_token = protocol
+    return exact_protocol_token
+
+
+async def enforce_local_websocket_guard(websocket: WebSocket) -> bool:
+    """Require loopback Origin and launcher token before accepting local WS.
+
+    Preconditions:
+        - ``websocket`` has not been accepted yet.
+        - ``websocket.app.state.launcher_csrf_token`` is the local launcher
+          capability token issued via ``/api/launcher/manifest``.
+
+    Postcondition:
+        Returns ``True`` only when the Origin is loopback and the provided
+        capability token matches. On failure, closes the socket with 1008.
+    """
+    assert websocket is not None, "websocket must be provided"
+
+    origin = websocket.headers.get("origin", "")
+    if not origin or not _is_loopback_origin(origin):
+        logger.warning(
+            "WebSocket local guard rejected non-loopback origin. path=%s origin=%r",
+            websocket.url.path,
+            origin,
+        )
+        await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
+        return False
+
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    expected_token = getattr(app_state, "launcher_csrf_token", "")
+    provided_token = (
+        _launcher_token_from_websocket(websocket, expected_token)
+        if isinstance(expected_token, str)
+        else ""
+    )
+    if (
+        not isinstance(expected_token, str)
+        or not expected_token
+        or not compare_digest(provided_token, expected_token)
+    ):
+        logger.warning(
+            "WebSocket local guard rejected missing or invalid launcher proof. path=%s",
+            websocket.url.path,
+        )
+        await websocket.close(code=_WS_CLOSE_POLICY_VIOLATION)
+        return False
+
+    return True
 
 
 async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
@@ -51,9 +135,11 @@ async def resolve_ws_user(websocket: WebSocket) -> User | LocalUser | None:
     assert websocket is not None, "websocket must be provided"
 
     if is_local_mode():
+        if not await enforce_local_websocket_guard(websocket):
+            return None
         logger.warning(
-            "WebSocket accepted without authentication (local/auth-disabled mode). "
-            "Do not set GOLF_AUTH_DISABLED or GOLF_SUITE_MODE=local in production. "
+            "WebSocket accepted with local launcher Origin/capability guard "
+            "(local/auth-disabled mode). "
             "path=%s",
             websocket.url.path,
         )

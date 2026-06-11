@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetchParsed } from './fetch';
 import { parseLauncherManifest } from './schemas';
+import { setLauncherCapabilityToken } from './websocketToken';
 
 export type LauncherCategory =
     | 'physics_engine'
@@ -93,8 +94,10 @@ export function useLauncherManifest(): UseLauncherManifestResult {
             data.tiles.sort((a, b) => a.order - b.order);
 
             setManifest(data);
+            setLauncherCapabilityToken(data.launcher_csrf_token ?? null);
             setLoadState('loaded');
         } catch (err) {
+            setLauncherCapabilityToken(null);
             const message = err instanceof Error ? err.message : 'Failed to load launcher manifest';
             setError(message);
             setLoadState('error');
