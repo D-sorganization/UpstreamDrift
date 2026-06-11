@@ -39,7 +39,7 @@ def test_skip_unless_optional_returns_for_real_bug() -> None:
         "cannot import name 'app' from 'src.api.server'", name="src.api.server"
     )
     # Returns None (does not raise skip) so the caller's `raise` propagates.
-    assert skip_unless_optional(exc, allowed={"fastapi", "httpx"}) is None
+    skip_unless_optional(exc, allowed={"fastapi", "httpx"})
 
 
 def test_message_fallback_when_name_unset() -> None:

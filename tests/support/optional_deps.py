@@ -112,9 +112,9 @@ def scoped_import_with_optional_mocks(
     finally:
         for name in target_modules:
             sys.modules.pop(name, None)
-        for name, module in previous.items():
-            if module is _MISSING:
+        for name, prev_val in previous.items():
+            if prev_val is _MISSING:
                 sys.modules.pop(name, None)
             else:
-                sys.modules[name] = module
+                sys.modules[name] = prev_val  # type: ignore[assignment]
         importlib.invalidate_caches()
