@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,6 +34,10 @@ class BodyTargetVideoResult:
     fps: float
     width: int
     height: int
+
+
+class BodyTargetVideoCancelled(RuntimeError):
+    """Raised when video export is cancelled cooperatively."""
 
 
 def _resolve_frame_indices(
@@ -120,6 +125,8 @@ def save_body_target_video(
     width: int = 960,
     height: int = 720,
     title: str | None = None,
+    progress_callback: Any | None = None,
+    cancel_check: Any | None = None,
 ) -> BodyTargetVideoResult:
     """Save a headless MP4 preview of a body target's skeleton.
 
@@ -152,17 +159,29 @@ def save_body_target_video(
     writer = cv2.VideoWriter(str(path), fourcc, fps, (width, height))
     if not writer.isOpened():
         raise OSError(f"Could not open video writer for {path}")
+    total_frames = len(frames)
     try:
-        for frame_idx in frames:
+        for current_frame, frame_idx in enumerate(frames, start=1):
+            if cancel_check is not None and cancel_check():
+                raise BodyTargetVideoCancelled("Video export cancelled")
             _draw_frame(ax, target, frame_idx, points_for_limits, title)
             rgb = _canvas_rgb(canvas, height, width)
             writer.write(cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
+            if progress_callback is not None:
+                progress_callback(current_frame, total_frames)
+            if cancel_check is not None and cancel_check():
+                raise BodyTargetVideoCancelled("Video export cancelled")
+    except BodyTargetVideoCancelled:
+        writer.release()
+        with contextlib.suppress(OSError):
+            path.unlink(missing_ok=True)
+        raise
     finally:
         writer.release()
 
     return BodyTargetVideoResult(
         output_path=path,
-        frame_count=len(frames),
+        frame_count=total_frames,
         fps=float(fps),
         width=width,
         height=height,
@@ -180,6 +199,8 @@ def save_c3d_body_video(
     width: int = 960,
     height: int = 720,
     title: str | None = None,
+    progress_callback: Any | None = None,
+    cancel_check: Any | None = None,
 ) -> BodyTargetVideoResult:
     """Load a C3D body target and save a skeleton preview video."""
     target = load_body_target_c3d(
@@ -195,11 +216,14 @@ def save_c3d_body_video(
         width=width,
         height=height,
         title=title,
+        progress_callback=progress_callback,
+        cancel_check=cancel_check,
     )
 
 
 __all__ = [
     "BodyTargetVideoResult",
+    "BodyTargetVideoCancelled",
     "save_body_target_video",
     "save_c3d_body_video",
 ]

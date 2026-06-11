@@ -8,11 +8,14 @@ Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 from __future__ import annotations
 
 import os
+import subprocess
 import time
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import QThread, Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -53,6 +56,268 @@ TAB_STARTUP = 5
 TAB_NOTIFICATIONS = 6
 TAB_PERFORMANCE = 7
 TAB_PROCESSES = 8
+
+_RUNTIME_DEPENDENCIES = {
+    "numpy": ">=1.26.4",
+    "scipy": ">=1.13.1",
+    "mujoco": ">=3.6.0",
+    "pydrake": ">=1.22.0",
+    "pinocchio": ">=2.6.0",
+    "opensim": ">=4.4.0",
+    "myosuite": ">=2.0.0",
+}
+_RUNTIME_DISPLAY_NAMES = {
+    "numpy": "NumPy",
+    "scipy": "SciPy",
+    "mujoco": "MuJoCo",
+    "pydrake": "Drake (PyDrake)",
+    "pinocchio": "Pinocchio",
+    "opensim": "OpenSim",
+    "myosuite": "MyoSuite",
+}
+_RUNTIME_OPTIONAL_DEPS = {"pydrake", "pinocchio", "opensim", "myosuite"}
+_DEPENDENCY_PROBE_SCRIPT = (
+    "import importlib.metadata\n"
+    "import sys\n"
+    "res = []\n"
+    f"for p in {list(_RUNTIME_DEPENDENCIES)!r}:\n"
+    "    try:\n"
+    "        __import__(p)\n"
+    "        try:\n"
+    "            v = importlib.metadata.version(p)\n"
+    "        except Exception:\n"
+    "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
+    "        res.append(f'{p}:{v}')\n"
+    "    except ImportError:\n"
+    "        res.append(f'{p}:Missing')\n"
+    "print(','.join(res))"
+)
+
+
+@dataclass(frozen=True)
+class RuntimeDependencyReport:
+    """Structured result from a background runtime dependency check."""
+
+    dialog_title: str
+    table_title: str
+    environment_name: str
+    check_results: list[dict[str, Any]]
+
+
+class RuntimeDependencyCheckFailure(RuntimeError):
+    """A dependency check completed with a user-facing warning or error."""
+
+    def __init__(self, severity: str, title: str, html: str) -> None:
+        super().__init__(html)
+        self.severity = severity
+        self.title = title
+        self.html = html
+
+
+class RuntimeDependencyCheckWorker(QThread):
+    """Run Docker or WSL dependency checks without blocking the GUI thread."""
+
+    succeeded = pyqtSignal(object)
+    failed = pyqtSignal(str, str, str)
+
+    def __init__(
+        self,
+        check_fn: Callable[[], RuntimeDependencyReport],
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self._check_fn = check_fn
+
+    def run(self) -> None:
+        try:
+            self.succeeded.emit(self._check_fn())
+        except RuntimeDependencyCheckFailure as exc:
+            self.failed.emit(exc.severity, exc.title, exc.html)
+        except (subprocess.SubprocessError, FileNotFoundError, OSError) as exc:
+            self.failed.emit(
+                "critical",
+                "Dependency Check",
+                f"<h3>Runtime Dependency Check Failed</h3><p>{exc}</p>",
+            )
+
+
+def _compare_version_strings(installed: str, required_spec: str) -> bool:
+    """Compare installed version string with required specification."""
+    if installed == "Unknown":
+        return True
+    if installed == "Missing":
+        return False
+
+    if required_spec.startswith(">="):
+        op = ">="
+        req_ver = required_spec[2:]
+    elif required_spec.startswith("=="):
+        op = "=="
+        req_ver = required_spec[2:]
+    else:
+        op = ">="
+        req_ver = required_spec
+
+    try:
+
+        def to_int_list(v_str: str) -> list[int]:
+            parts = []
+            for p in v_str.split("."):
+                digits = []
+                for c in p:
+                    if c.isdigit():
+                        digits.append(c)
+                    else:
+                        break
+                parts.append(int("".join(digits)) if digits else 0)
+            return parts
+
+        inst_parts = to_int_list(installed)
+        req_parts = to_int_list(req_ver)
+        length = max(len(inst_parts), len(req_parts))
+        inst_parts += [0] * (length - len(inst_parts))
+        req_parts += [0] * (length - len(req_parts))
+
+        if op == ">=":
+            return inst_parts >= req_parts
+        if op == "==":
+            return inst_parts == req_parts
+    except (ValueError, TypeError, IndexError):
+        pass
+    return True
+
+
+def _parse_dependency_output(output: str) -> dict[str, str]:
+    parsed_deps = {}
+    for item in output.split(","):
+        if ":" in item:
+            key, value = item.split(":", 1)
+            parsed_deps[key] = value
+    return parsed_deps
+
+
+def _build_dependency_check_results(
+    parsed_deps: dict[str, str],
+) -> list[dict[str, Any]]:
+    check_results = []
+    for package_name, requirement in _RUNTIME_DEPENDENCIES.items():
+        installed_version = parsed_deps.get(package_name, "Missing")
+        if installed_version == "Missing":
+            status = "warn" if package_name in _RUNTIME_OPTIONAL_DEPS else "error"
+        else:
+            status = (
+                "ok"
+                if _compare_version_strings(installed_version, requirement)
+                else "error"
+            )
+        check_results.append(
+            {
+                "name": _RUNTIME_DISPLAY_NAMES[package_name],
+                "required": requirement,
+                "installed": installed_version,
+                "status": status,
+            }
+        )
+    return check_results
+
+
+def _check_docker_dependencies_report() -> RuntimeDependencyReport:
+    from src.launchers.docker_manager import get_docker_cmd
+
+    cmd = get_docker_cmd()
+    inspect_cmd = cmd + ["image", "inspect", "upstream-drift:engine"]
+    try:
+        res = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10.0)
+    except subprocess.TimeoutExpired as exc:
+        msg = (
+            "<h3>Docker Connection Timeout</h3>"
+            "<p>Failed to communicate with the Docker daemon within the timeout limit (10.0s):</p>"
+            f"<pre style='color:#f87171;'>{exc}</pre>"
+            "<p>This typically occurs if the WSL2 subsystem or Docker Desktop is starting up, frozen, or not running.</p>"
+            "<p>Please verify that:</p>"
+            "<ol>"
+            "  <li><b>Docker Desktop</b> is running.</li>"
+            "  <li><b>WSL integration</b> is enabled for your distribution in Docker Desktop settings.</li>"
+            "  <li>You can run <code>wsl docker ps</code> in a terminal without hanging.</li>"
+            "</ol>"
+        )
+        raise RuntimeDependencyCheckFailure(
+            "critical", "Docker Dependency Check", msg
+        ) from exc
+
+    if res.returncode != 0:
+        msg = (
+            "<h3>Docker Environment Status: Missing Image</h3>"
+            "<p>The <b>upstream-drift:engine</b> image has not been built yet.</p>"
+            "<p>Please click the <b>Build Image</b> button below to build the container first.</p>"
+        )
+        raise RuntimeDependencyCheckFailure("warning", "Docker Dependency Check", msg)
+
+    run_cmd = cmd + [
+        "run",
+        "--rm",
+        "upstream-drift:engine",
+        "python3",
+        "-c",
+        _DEPENDENCY_PROBE_SCRIPT,
+    ]
+    try:
+        res_run = subprocess.run(run_cmd, capture_output=True, text=True, timeout=60.0)
+    except subprocess.TimeoutExpired as exc:
+        msg = (
+            "<h3>Docker Environment Status: Timeout</h3>"
+            "<p>Docker container dependency check timed out.</p>"
+            "<p>The Docker image exists, but a cold container start did not finish within 60 seconds.</p>"
+        )
+        raise RuntimeDependencyCheckFailure(
+            "warning", "Docker Dependency Check", msg
+        ) from exc
+
+    if res_run.returncode != 0:
+        msg = (
+            "<h3>Docker Environment Status: Degraded</h3>"
+            f"<p>The image is built, but running probe failed (Exit Code {res_run.returncode}).</p>"
+            f"<pre style='color:#f87171;'>{res_run.stderr.strip()}</pre>"
+            "<p>Verify Docker is running and has access to execute containers in WSL.</p>"
+        )
+        raise RuntimeDependencyCheckFailure("warning", "Docker Dependency Check", msg)
+
+    return RuntimeDependencyReport(
+        dialog_title="Docker Dependency Check",
+        table_title="Docker Container Environment",
+        environment_name="Docker Container",
+        check_results=_build_dependency_check_results(
+            _parse_dependency_output(res_run.stdout.strip())
+        ),
+    )
+
+
+def _check_wsl_dependencies_report() -> RuntimeDependencyReport:
+    from src.shared.python.data_io.path_utils import get_repo_root
+
+    repo_root = get_repo_root()
+    venv_path = repo_root / ".venv-wsl"
+    python_exec = "./.venv-wsl/bin/python" if venv_path.exists() else "python3"
+    cmd = ["wsl", python_exec, "-c", _DEPENDENCY_PROBE_SCRIPT]
+    res = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
+    if res.returncode != 0:
+        msg = (
+            "<h3>WSL Environment Status: Not Set Up</h3>"
+            "<p>WSL environment could not be checked or has not been initialized.</p>"
+            f"<p>Details: Exit Code {res.returncode}</p>"
+            f"<pre style='color:#f87171;'>{res.stderr.strip()}</pre>"
+            "<p>Please click the <b>WSL Setup</b> button to view the setup script and run it in WSL.</p>"
+        )
+        raise RuntimeDependencyCheckFailure("warning", "WSL Dependency Check", msg)
+
+    return RuntimeDependencyReport(
+        dialog_title="WSL Dependency Check",
+        table_title="WSL2 Environment Status",
+        environment_name=f"WSL ({python_exec})",
+        check_results=_build_dependency_check_results(
+            _parse_dependency_output(res.stdout.strip())
+        ),
+    )
 
 
 def validate_tab_index(tab_index: int) -> int:
@@ -310,6 +575,7 @@ class SettingsWidget(QWidget):
         self._launcher = launcher or parent
         self._diagnostics_loaded = False
         self._docker_profile_infos = load_docker_profiles()
+        self._dep_check_workers: dict[str, RuntimeDependencyCheckWorker] = {}
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
         # Connect tab change signal for lazy diagnostics loading
@@ -544,12 +810,14 @@ class SettingsWidget(QWidget):
             "Full Drake/Pinocchio support; requires Docker installed and the "
             "image built (see Docker Image section below)."
         )
-        btn_check_doc = QPushButton("Check Deps")
-        btn_check_doc.setToolTip("Check Docker container image dependencies")
-        btn_check_doc.setFixedWidth(100)
-        btn_check_doc.clicked.connect(self._check_docker_deps)
+        self.btn_check_docker_deps = QPushButton("Check Deps")
+        self.btn_check_docker_deps.setToolTip(
+            "Check Docker container image dependencies"
+        )
+        self.btn_check_docker_deps.setFixedWidth(100)
+        self.btn_check_docker_deps.clicked.connect(self._check_docker_deps)
         grid_runtime.addWidget(self.chk_docker, 1, 0)
-        grid_runtime.addWidget(btn_check_doc, 1, 1)
+        grid_runtime.addWidget(self.btn_check_docker_deps, 1, 1)
 
         # Row 2: WSL
         self.chk_wsl = QCheckBox("WSL")
@@ -558,12 +826,12 @@ class SettingsWidget(QWidget):
             "wheels as Docker mode but no container layer — faster file I/O "
             "and easier interactive debugging from a WSL shell."
         )
-        btn_check_wsl = QPushButton("Check Deps")
-        btn_check_wsl.setToolTip("Check WSL environment dependencies")
-        btn_check_wsl.setFixedWidth(100)
-        btn_check_wsl.clicked.connect(self._check_wsl_deps)
+        self.btn_check_wsl_deps = QPushButton("Check Deps")
+        self.btn_check_wsl_deps.setToolTip("Check WSL environment dependencies")
+        self.btn_check_wsl_deps.setFixedWidth(100)
+        self.btn_check_wsl_deps.clicked.connect(self._check_wsl_deps)
         grid_runtime.addWidget(self.chk_wsl, 2, 0)
-        grid_runtime.addWidget(btn_check_wsl, 2, 1)
+        grid_runtime.addWidget(self.btn_check_wsl_deps, 2, 1)
 
         # Row 3: WSL Setup Script (separate row)
         btn_script_wsl = QPushButton("WSL Setup Script")
@@ -1475,50 +1743,7 @@ class SettingsWidget(QWidget):
 
         Returns True if the requirement is satisfied.
         """
-        if installed == "Unknown":
-            return True
-        if installed == "Missing":
-            return False
-
-        if required_spec.startswith(">="):
-            op = ">="
-            req_ver = required_spec[2:]
-        elif required_spec.startswith("=="):
-            op = "=="
-            req_ver = required_spec[2:]
-        else:
-            op = ">="
-            req_ver = required_spec
-
-        try:
-
-            def to_int_list(v_str: str) -> list[int]:
-                parts = []
-                for p in v_str.split("."):
-                    digits = []
-                    for c in p:
-                        if c.isdigit():
-                            digits.append(c)
-                        else:
-                            break
-                    parts.append(int("".join(digits)) if digits else 0)
-                return parts
-
-            inst_parts = to_int_list(installed)
-            req_parts = to_int_list(req_ver)
-
-            # Pad
-            length = max(len(inst_parts), len(req_parts))
-            inst_parts += [0] * (length - len(inst_parts))
-            req_parts += [0] * (length - len(req_parts))
-
-            if op == ">=":
-                return inst_parts >= req_parts
-            if op == "==":
-                return inst_parts == req_parts
-        except (ValueError, TypeError, IndexError):
-            pass
-        return True
+        return _compare_version_strings(installed, required_spec)
 
     def _generate_dep_table_html(
         self, title: str, env_name: str, check_results: list[dict[str, Any]]
@@ -1642,248 +1867,98 @@ class SettingsWidget(QWidget):
 
     def _check_docker_deps(self) -> None:
         """Verify the built status of the Docker environment container and check package versions inside it."""
-        from PyQt6.QtWidgets import QMessageBox
-        import subprocess
-        from src.launchers.docker_manager import get_docker_cmd
-
-        try:
-            cmd = get_docker_cmd()
-            inspect_cmd = cmd + ["image", "inspect", "upstream-drift:engine"]
-            res = subprocess.run(
-                inspect_cmd, capture_output=True, text=True, timeout=10.0
-            )
-            if res.returncode != 0:
-                msg = (
-                    "<h3>Docker Environment Status: Missing Image</h3>"
-                    "<p>The <b>upstream-drift:engine</b> image has not been built yet.</p>"
-                    "<p>Please click the <b>Build Image</b> button below to build the container first.</p>"
-                )
-                QMessageBox.warning(self, "Docker Dependency Check", msg)
-                return
-        except subprocess.TimeoutExpired as e:
-            msg = (
-                "<h3>Docker Connection Timeout</h3>"
-                f"<p>Failed to communicate with the Docker daemon within the timeout limit (10.0s):</p>"
-                f"<pre style='color:#f87171;'>{e}</pre>"
-                "<p>This typically occurs if the WSL2 subsystem or Docker Desktop is starting up, frozen, or not running.</p>"
-                "<p>Please verify that:</p>"
-                "<ol>"
-                "  <li><b>Docker Desktop</b> is running.</li>"
-                "  <li><b>WSL integration</b> is enabled for your distribution in Docker Desktop settings.</li>"
-                "  <li>You can run <code>wsl docker ps</code> in a terminal without hanging.</li>"
-                "</ol>"
-            )
-            QMessageBox.critical(self, "Docker Dependency Check", msg)
-            return
-        except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
-            msg = (
-                "<h3>Docker Environment Status: Error</h3>"
-                f"<p>Failed to communicate with Docker daemon: {e}</p>"
-                "<p>Make sure Docker Desktop or the WSL2 Docker daemon is running.</p>"
-            )
-            QMessageBox.critical(self, "Docker Dependency Check", msg)
-            return
-
-        check_script = (
-            "import importlib.metadata\n"
-            "import sys\n"
-            "res = []\n"
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
-            "    try:\n"
-            "        __import__(p)\n"
-            "        try:\n"
-            "            v = importlib.metadata.version(p)\n"
-            "        except Exception:\n"
-            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
-            "        res.append(f'{p}:{v}')\n"
-            "    except ImportError:\n"
-            "        res.append(f'{p}:Missing')\n"
-            "print(','.join(res))"
+        self._start_runtime_dependency_check(
+            worker_key="docker",
+            button=self.btn_check_docker_deps,
+            check_fn=_check_docker_dependencies_report,
         )
-
-        run_cmd = cmd + [
-            "run",
-            "--rm",
-            "upstream-drift:engine",
-            "python3",
-            "-c",
-            check_script,
-        ]
-        try:
-            res_run = subprocess.run(
-                run_cmd, capture_output=True, text=True, timeout=10.0
-            )
-            if res_run.returncode == 0:
-                output = res_run.stdout.strip()
-                parsed_deps = {}
-                for item in output.split(","):
-                    if ":" in item:
-                        k, val = item.split(":", 1)
-                        parsed_deps[k] = val
-
-                reqs = {
-                    "numpy": ">=1.26.4",
-                    "scipy": ">=1.13.1",
-                    "mujoco": ">=3.6.0",
-                    "pydrake": ">=1.22.0",
-                    "pinocchio": ">=2.6.0",
-                    "opensim": ">=4.4.0",
-                    "myosuite": ">=2.0.0",
-                }
-
-                display_names = {
-                    "numpy": "NumPy",
-                    "scipy": "SciPy",
-                    "mujoco": "MuJoCo",
-                    "pydrake": "Drake (PyDrake)",
-                    "pinocchio": "Pinocchio",
-                    "opensim": "OpenSim",
-                    "myosuite": "MyoSuite",
-                }
-
-                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
-                check_results = []
-                for p_name, req in reqs.items():
-                    inst_v = parsed_deps.get(p_name, "Missing")
-                    if inst_v == "Missing":
-                        status = "warn" if p_name in optional_deps else "error"
-                    else:
-                        is_ok = self._compare_versions(inst_v, req)
-                        status = "ok" if is_ok else "error"
-                    check_results.append(
-                        {
-                            "name": display_names[p_name],
-                            "required": req,
-                            "installed": inst_v,
-                            "status": status,
-                        }
-                    )
-
-                html = self._generate_dep_table_html(
-                    "Docker Container Environment", "Docker Container", check_results
-                )
-                QMessageBox.information(self, "Docker Dependency Check", html)
-            else:
-                msg = (
-                    "<h3>Docker Environment Status: Degraded</h3>"
-                    f"<p>The image is built, but running probe failed (Exit Code {res_run.returncode}).</p>"
-                    f"<pre style='color:#f87171;'>{res_run.stderr.strip()}</pre>"
-                    "<p>Verify Docker is running and has access to execute containers in WSL.</p>"
-                )
-                QMessageBox.warning(self, "Docker Dependency Check", msg)
-        except subprocess.TimeoutExpired:
-            msg = (
-                "<h3>Docker Environment Status: Timeout</h3>"
-                "<p>Docker container dependency check timed out.</p>"
-                "<p>The Docker image exists, but the check could not be completed within 10 seconds.</p>"
-            )
-            QMessageBox.warning(self, "Docker Dependency Check", msg)
-        except Exception as e:  # noqa: BLE001
-            msg = (
-                "<h3>Docker Environment Status: Error</h3>"
-                f"<p>An unexpected error occurred during check: {e}</p>"
-            )
-            QMessageBox.critical(self, "Docker Dependency Check", msg)
 
     def _check_wsl_deps(self) -> None:
         """Verify python dependency statuses inside the WSL2 environment distro."""
-        from PyQt6.QtWidgets import QMessageBox
-        import subprocess
-        from src.shared.python.data_io.path_utils import get_repo_root
-
-        repo_root = get_repo_root()
-        venv_path = repo_root / ".venv-wsl"
-
-        python_exec = "python3"
-        if venv_path.exists():
-            python_exec = "./.venv-wsl/bin/python"
-
-        check_script = (
-            "import importlib.metadata\n"
-            "import sys\n"
-            "res = []\n"
-            "for p in ['numpy', 'scipy', 'mujoco', 'pydrake', 'pinocchio', 'opensim', 'myosuite']:\n"
-            "    try:\n"
-            "        __import__(p)\n"
-            "        try:\n"
-            "            v = importlib.metadata.version(p)\n"
-            "        except Exception:\n"
-            "            v = getattr(sys.modules[p], '__version__', 'Unknown')\n"
-            "        res.append(f'{p}:{v}')\n"
-            "    except ImportError:\n"
-            "        res.append(f'{p}:Missing')\n"
-            "print(','.join(res))"
+        self._start_runtime_dependency_check(
+            worker_key="wsl",
+            button=self.btn_check_wsl_deps,
+            check_fn=_check_wsl_dependencies_report,
         )
 
-        cmd = ["wsl", python_exec, "-c", check_script]
-        try:
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
-            if res.returncode == 0:
-                output = res.stdout.strip()
-                parsed_deps = {}
-                for item in output.split(","):
-                    if ":" in item:
-                        k, val = item.split(":", 1)
-                        parsed_deps[k] = val
+    def _start_runtime_dependency_check(
+        self,
+        *,
+        worker_key: str,
+        button: QPushButton,
+        check_fn: Callable[[], RuntimeDependencyReport],
+    ) -> None:
+        """Run a runtime dependency check on a worker thread."""
+        worker = self._dep_check_workers.get(worker_key)
+        if worker is not None and worker.isRunning():
+            return
 
-                reqs = {
-                    "numpy": ">=1.26.4",
-                    "scipy": ">=1.13.1",
-                    "mujoco": ">=3.6.0",
-                    "pydrake": ">=1.22.0",
-                    "pinocchio": ">=2.6.0",
-                    "opensim": ">=4.4.0",
-                    "myosuite": ">=2.0.0",
-                }
+        original_text = button.text()
+        button.setEnabled(False)
+        button.setText("Checking...")
 
-                display_names = {
-                    "numpy": "NumPy",
-                    "scipy": "SciPy",
-                    "mujoco": "MuJoCo",
-                    "pydrake": "Drake (PyDrake)",
-                    "pinocchio": "Pinocchio",
-                    "opensim": "OpenSim",
-                    "myosuite": "MyoSuite",
-                }
-
-                optional_deps = {"pydrake", "pinocchio", "opensim", "myosuite"}
-                check_results = []
-                for p_name, req in reqs.items():
-                    inst_v = parsed_deps.get(p_name, "Missing")
-                    if inst_v == "Missing":
-                        status = "warn" if p_name in optional_deps else "error"
-                    else:
-                        is_ok = self._compare_versions(inst_v, req)
-                        status = "ok" if is_ok else "error"
-                    check_results.append(
-                        {
-                            "name": display_names[p_name],
-                            "required": req,
-                            "installed": inst_v,
-                            "status": status,
-                        }
-                    )
-
-                html = self._generate_dep_table_html(
-                    "WSL2 Environment Status", f"WSL ({python_exec})", check_results
-                )
-                QMessageBox.information(self, "WSL Dependency Check", html)
-            else:
-                msg = (
-                    "<h3>WSL Environment Status: Not Set Up</h3>"
-                    "<p>WSL environment could not be checked or has not been initialized.</p>"
-                    f"<p>Details: Exit Code {res.returncode}</p>"
-                    f"<pre style='color:#f87171;'>{res.stderr.strip()}</pre>"
-                    "<p>Please click the <b>WSL Setup</b> button to view the setup script and run it in WSL.</p>"
-                )
-                QMessageBox.warning(self, "WSL Dependency Check", msg)
-        except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
-            msg = (
-                "<h3>WSL Environment Status: Error</h3>"
-                f"<p>Failed to execute WSL check command: {e}</p>"
-                "<p>Make sure WSL2 is enabled and default Ubuntu distribution is configured on your Windows system.</p>"
+        worker = RuntimeDependencyCheckWorker(check_fn, self)
+        self._dep_check_workers[worker_key] = worker
+        worker.succeeded.connect(
+            lambda report, key=worker_key, btn=button, text=original_text: (
+                self._on_runtime_dependency_check_succeeded(key, btn, text, report)
             )
-            QMessageBox.critical(self, "WSL Dependency Check", msg)
+        )
+        worker.failed.connect(
+            lambda severity,
+            title,
+            html,
+            key=worker_key,
+            btn=button,
+            text=original_text: (
+                self._on_runtime_dependency_check_failed(
+                    key, btn, text, severity, title, html
+                )
+            )
+        )
+        worker.finished.connect(
+            lambda key=worker_key: self._dep_check_workers.pop(key, None)
+        )
+        worker.start()
+
+    def _restore_dependency_check_button(
+        self, worker_key: str, button: QPushButton, original_text: str
+    ) -> None:
+        self._dep_check_workers.pop(worker_key, None)
+        button.setText(original_text)
+        button.setEnabled(True)
+
+    def _on_runtime_dependency_check_succeeded(
+        self,
+        worker_key: str,
+        button: QPushButton,
+        original_text: str,
+        report: RuntimeDependencyReport,
+    ) -> None:
+        from PyQt6.QtWidgets import QMessageBox
+
+        self._restore_dependency_check_button(worker_key, button, original_text)
+        html = self._generate_dep_table_html(
+            report.table_title, report.environment_name, report.check_results
+        )
+        QMessageBox.information(self, report.dialog_title, html)
+
+    def _on_runtime_dependency_check_failed(
+        self,
+        worker_key: str,
+        button: QPushButton,
+        original_text: str,
+        severity: str,
+        title: str,
+        html: str,
+    ) -> None:
+        from PyQt6.QtWidgets import QMessageBox
+
+        self._restore_dependency_check_button(worker_key, button, original_text)
+        if severity == "critical":
+            QMessageBox.critical(self, title, html)
+        else:
+            QMessageBox.warning(self, title, html)
 
     def _show_wsl_setup_dialog(self) -> None:
         """Show the WSL dependency setup script dialog."""

@@ -2,6 +2,8 @@
 
 import os  # noqa: E402
 import sys  # noqa: E402
+import threading  # noqa: E402
+import time  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
@@ -160,33 +162,59 @@ def test_try_launch_docker(launcher) -> None:
 
 @patch("src.launchers.launcher_simulation.QMessageBox.question")
 def test_check_local_dependencies(mock_question, launcher) -> None:
-    model = DummyModel("m1", "M1", "mujoco", path="test.xml")
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
 
     # WSL enabled
     launcher.chk_wsl.isChecked.return_value = True
     assert launcher._check_local_dependencies(model) is True
 
-    # WSL disabled, deps OK
+    # WSL disabled, cached deps OK
     launcher.chk_wsl.isChecked.return_value = False
-    with patch.object(launcher, "_check_module_dependencies", return_value=(True, "")):
-        assert launcher._check_local_dependencies(model) is True
+    launcher._dependency_status_cache = {"m1": (True, "")}
+    assert launcher._check_local_dependencies(model) is True
 
-    # Deps fail, docker available
+    # Cached deps fail, docker available
     launcher.docker_available = True
-    launcher._dependency_status_cache = {}
-    with patch.object(
-        launcher, "_check_module_dependencies", return_value=(False, "error")
-    ):
-        mock_question.return_value = QMessageBox.StandardButton.Yes
-        with patch.object(launcher, "launch_simulation") as mock_launch:
-            assert launcher._check_local_dependencies(model) is False
-            launcher.chk_docker.setChecked.assert_called_with(True)
-            mock_launch.assert_called_once()
+    launcher._dependency_status_cache = {"m1": (False, "error")}
+    mock_question.return_value = QMessageBox.StandardButton.Yes
+    with patch.object(launcher, "launch_simulation") as mock_launch:
+        assert launcher._check_local_dependencies(model) is False
+        launcher.chk_docker.setChecked.assert_called_with(True)
+        mock_launch.assert_called_once()
 
-        launcher._dependency_status_cache = {}
-        mock_question.return_value = QMessageBox.StandardButton.No
-        with patch.object(launcher, "_show_dependency_error"):
-            assert launcher._check_local_dependencies(model) is False
+    launcher._dependency_status_cache = {"m1": (False, "error")}
+    mock_question.return_value = QMessageBox.StandardButton.No
+    with patch.object(launcher, "_show_dependency_error"):
+        assert launcher._check_local_dependencies(model) is False
+
+
+def test_dependency_probe_runs_off_gui_thread_and_dedupes(launcher, qtbot) -> None:
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+    launcher._dependency_status_cache = {}
+    release_probe = threading.Event()
+    calls = []
+
+    def slow_check(key: str) -> tuple[bool, str]:
+        calls.append(key)
+        release_probe.wait(timeout=2)
+        return True, ""
+
+    with patch.object(launcher, "_check_module_dependencies", side_effect=slow_check):
+        start = time.perf_counter()
+        assert launcher._start_dependency_probe(model.id, model) is True
+        elapsed = time.perf_counter() - start
+        assert elapsed < 0.1
+
+        assert launcher._start_dependency_probe(model.id, model) is True
+        assert len(launcher._dependency_probe_workers) == 1
+
+        release_probe.set()
+        qtbot.waitUntil(
+            lambda: launcher._dependency_status_cache.get("m1") == (True, ""),
+            timeout=3000,
+        )
+
+    assert calls == ["mjcf"]
 
 
 def test_execute_local_launch(launcher) -> None:
@@ -583,23 +611,20 @@ def test_check_module_dependencies_with_map(mock_run, launcher) -> None:
 def test_check_local_dependencies_with_dialog(launcher) -> None:
     model = DummyModel("mujoco_unified", "MuJoCo", "custom_humanoid", path="test.xml")
 
-    launcher._dependency_status_cache = {}
+    launcher._dependency_status_cache = {
+        "mujoco_unified": (False, "Missing dependency info")
+    }
     launcher.show_dependency_error = MagicMock()
 
-    with patch.object(
-        launcher,
-        "_check_module_dependencies",
-        return_value=(False, "Missing dependency info"),
-    ):
-        res = launcher._check_local_dependencies(model)
-        assert res is False
-        launcher.show_dependency_error.assert_called_once_with(
-            "MuJoCo",
-            "MuJoCo",
-            "pip install mujoco",
-            "https://mujoco.org",
-            "Missing dependency info",
-        )
+    res = launcher._check_local_dependencies(model)
+    assert res is False
+    launcher.show_dependency_error.assert_called_once_with(
+        "MuJoCo",
+        "MuJoCo",
+        "pip install mujoco",
+        "https://mujoco.org",
+        "Missing dependency info",
+    )
 
 
 def test_execute_local_launch_with_unavailable_dockable_ui(launcher) -> None:

@@ -16,10 +16,11 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import QEventLoop
+from PyQt6.QtCore import QEventLoop, QThread, pyqtSignal
 from PyQt6.QtWidgets import QApplication, QMessageBox
 
 from src.launchers.launcher_constants import (
@@ -150,6 +151,49 @@ DEPENDENCY_MAP: dict[str, dict[str, str]] = {
 }
 
 
+def dependency_cache_key(model: Any) -> str:
+    """Return the stable cache key shared by selection and launch paths."""
+    model_id = getattr(model, "id", None)
+    if not model_id:
+        raise ValueError("model.id must be provided")
+    return str(model_id)
+
+
+def dependency_probe_key(model: Any) -> str:
+    """Return the dependency-map key for a model."""
+    model_id = dependency_cache_key(model)
+    if model_id in DEPENDENCY_MAP:
+        return model_id
+    model_type = getattr(model, "type", None)
+    return str(model_type) if model_type is not None else model_id
+
+
+class DependencyProbeThread(QThread):
+    """Run a dependency probe away from the GUI thread."""
+
+    probe_finished = pyqtSignal(str, bool, str)
+
+    def __init__(
+        self,
+        model_id: str,
+        probe_key: str,
+        checker: Callable[[str], tuple[bool, str]],
+        parent: Any | None = None,
+    ) -> None:
+        super().__init__(parent)
+        if not model_id:
+            raise ValueError("model_id must be provided")
+        if not probe_key:
+            raise ValueError("probe_key must be provided")
+        self._model_id = model_id
+        self._probe_key = probe_key
+        self._checker = checker
+
+    def run(self) -> None:
+        ok, error = self._checker(self._probe_key)
+        self.probe_finished.emit(self._model_id, ok, error)
+
+
 class SimulationManager:
     def __init__(self, launcher):
         self.launcher = launcher
@@ -171,6 +215,77 @@ class SimulationManager:
                 setattr(launcher, name, value)
             else:
                 super().__setattr__(name, value)
+
+    def _launcher_ref(self) -> Any:
+        """Return the concrete launcher for manager or delegated calls."""
+        return self.__dict__.get("launcher", self)
+
+    def _dependency_cache(self) -> dict[str, tuple[bool, str]]:
+        """Return the launcher's dependency cache, creating it if needed."""
+        launcher = self._launcher_ref()
+        if "_dependency_status_cache" not in launcher.__dict__:
+            launcher._dependency_status_cache = {}
+        return launcher._dependency_status_cache
+
+    def _dependency_probe_threads(self) -> dict[str, DependencyProbeThread]:
+        """Return active dependency probes, creating storage if needed."""
+        launcher = self._launcher_ref()
+        if "_dependency_probe_workers" not in launcher.__dict__:
+            launcher._dependency_probe_workers = {}
+        return launcher._dependency_probe_workers
+
+    def _start_dependency_probe(self, model_id: str, model: Any) -> bool:
+        """Start or reuse an async dependency probe for ``model``.
+
+        Returns True when a probe is in-flight after this call. The result is
+        recorded through ``_on_dependency_probe_finished`` on the GUI thread.
+        """
+        probe_key = dependency_probe_key(model)
+        if probe_key not in DEPENDENCY_MAP:
+            return False
+
+        threads = self._dependency_probe_threads()
+        if model_id in threads:
+            return True
+
+        launcher = self._launcher_ref()
+        thread = DependencyProbeThread(
+            model_id,
+            probe_key,
+            self._check_module_dependencies,
+            launcher if hasattr(launcher, "thread") else None,
+        )
+        threads[model_id] = thread
+        thread.probe_finished.connect(self._on_dependency_probe_finished)
+        thread.finished.connect(lambda: threads.pop(model_id, None))
+        thread.start()
+        return True
+
+    def _on_dependency_probe_finished(
+        self, model_id: str, deps_ok: bool, deps_error: str
+    ) -> None:
+        """Record an async dependency probe and refresh selected-model UI."""
+        launcher = self._launcher_ref()
+        self._dependency_cache()[model_id] = (deps_ok, deps_error)
+        if getattr(launcher, "selected_model", None) != model_id:
+            return
+
+        model = launcher._get_model(model_id)
+        if model is None:
+            return
+
+        if deps_ok:
+            if hasattr(launcher, "_set_dependency_success_status"):
+                launcher._set_dependency_success_status()
+            if hasattr(launcher, "update_launch_button"):
+                launcher.update_launch_button(getattr(model, "name", model_id))
+            return
+
+        if hasattr(launcher, "_set_dependency_error_status"):
+            probe_key = dependency_probe_key(model)
+            launcher._set_dependency_error_status(
+                model, probe_key, deps_error, DEPENDENCY_MAP
+            )
 
     """Mixin for UpstreamDriftLauncher simulation launching.
 
@@ -322,21 +437,21 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if use_wsl:
             return True
 
-        self.lbl_status.setText(f"> Checking {model.name} dependencies...")
-        self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
-        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+        model_id = dependency_cache_key(model)
+        key = dependency_probe_key(model)
+        if key not in DEPENDENCY_MAP:
+            return True
 
-        # Retrieve or check dependencies with caching
-        if not hasattr(self.launcher, "_dependency_status_cache"):
-            self.launcher._dependency_status_cache = {}
+        cache = self._dependency_cache()
+        if model_id not in cache:
+            self.lbl_status.setText(f"> Checking {model.name} dependencies...")
+            self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
+            if hasattr(self, "btn_launch"):
+                self.btn_launch.setEnabled(False)
+            self._start_dependency_probe(model_id, model)
+            return False
 
-        key = model.id if model.id in DEPENDENCY_MAP else model.type
-
-        if model.id not in self.launcher._dependency_status_cache:
-            deps_ok, deps_error = self._check_module_dependencies(key)
-            self.launcher._dependency_status_cache[model.id] = (deps_ok, deps_error)
-        else:
-            deps_ok, deps_error = self.launcher._dependency_status_cache[model.id]
+        deps_ok, deps_error = cache[model_id]
 
         if deps_ok:
             return True

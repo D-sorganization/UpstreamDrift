@@ -10,6 +10,7 @@ cv2 = pytest.importorskip("cv2")
 from src.shared.python.motion_matching.body_target import BodyTarget
 from src.shared.python.motion_matching.club_target import SourceProvenance
 from src.shared.python.motion_matching.diagnostics.body_target_video import (
+    BodyTargetVideoCancelled,
     save_body_target_video,
 )
 
@@ -87,3 +88,32 @@ def test_save_body_target_video_rejects_empty_frame_selection(tmp_path: Path) ->
 def test_save_body_target_video_requires_even_dimensions(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="even"):
         save_body_target_video(_body_target(), tmp_path / "bad.mp4", width=321)
+
+
+def test_save_body_target_video_cancel_removes_partial_file(tmp_path: Path) -> None:
+    out = tmp_path / "cancelled.mp4"
+    progress_seen = []
+    cancel_after_first_frame = False
+
+    def progress_callback(current: int, total: int) -> None:
+        nonlocal cancel_after_first_frame
+        progress_seen.append((current, total))
+        cancel_after_first_frame = True
+
+    def cancel_check() -> bool:
+        return cancel_after_first_frame
+
+    with pytest.raises(BodyTargetVideoCancelled):
+        save_body_target_video(
+            _body_target(),
+            out,
+            frame_indices=(0, 1, 2),
+            fps=12.0,
+            width=320,
+            height=240,
+            progress_callback=progress_callback,
+            cancel_check=cancel_check,
+        )
+
+    assert progress_seen == [(1, 3)]
+    assert not out.exists()

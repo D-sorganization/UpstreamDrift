@@ -3,6 +3,7 @@
 # mypy: disable-error-code="attr-defined,method-assign"
 
 import time  # noqa: E402
+import threading  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -422,7 +423,7 @@ def test_check_windows_deps(mock_gen_html, mock_info, parent_launcher, qapp) -> 
 @patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
 @patch("subprocess.run")
 def test_check_docker_deps_missing_image(
-    mock_run, mock_cmd, mock_warning, parent_launcher, qapp
+    mock_run, mock_cmd, mock_warning, parent_launcher, qapp, qtbot
 ) -> None:
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
@@ -432,6 +433,7 @@ def test_check_docker_deps_missing_image(
     mock_run.return_value = mock_res
 
     dialog._check_docker_deps()
+    qtbot.waitUntil(lambda: mock_warning.called, timeout=3000)
     mock_warning.assert_called_once()
     args, kwargs = mock_warning.call_args
     assert "Missing Image" in args[2]
@@ -441,7 +443,7 @@ def test_check_docker_deps_missing_image(
 @patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
 @patch("subprocess.run")
 def test_check_docker_deps_success(
-    mock_run, mock_cmd, mock_info, parent_launcher, qapp
+    mock_run, mock_cmd, mock_info, parent_launcher, qapp, qtbot
 ) -> None:
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
@@ -457,6 +459,7 @@ def test_check_docker_deps_success(
     mock_run.side_effect = [res_inspect, res_run]
 
     dialog._check_docker_deps()
+    qtbot.waitUntil(lambda: mock_info.called, timeout=3000)
     mock_info.assert_called_once()
     args, kwargs = mock_info.call_args
     assert "Docker Container" in args[2]
@@ -466,7 +469,7 @@ def test_check_docker_deps_success(
 @patch("subprocess.run")
 @patch("pathlib.Path.exists", autospec=True)
 def test_check_wsl_deps_success(
-    mock_exists, mock_run, mock_info, parent_launcher, qapp
+    mock_exists, mock_run, mock_info, parent_launcher, qapp, qtbot
 ) -> None:
     mock_exists.side_effect = lambda *args, **kwargs: any(
         ".venv-wsl" in str(arg) for arg in args
@@ -479,9 +482,49 @@ def test_check_wsl_deps_success(
     mock_run.return_value = res_run
 
     dialog._check_wsl_deps()
+    qtbot.waitUntil(lambda: mock_info.called, timeout=3000)
     mock_info.assert_called_once()
     args, kwargs = mock_info.call_args
     assert "WSL2 Environment Status" in args[2]
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+@patch("src.launchers.docker_manager.get_docker_cmd", return_value=["docker"])
+@patch("subprocess.run")
+def test_check_docker_deps_returns_while_worker_runs(
+    mock_run, mock_cmd, mock_info, parent_launcher, qapp, qtbot
+) -> None:
+    release_probe = threading.Event()
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    res_inspect = MagicMock()
+    res_inspect.returncode = 0
+    res_run = MagicMock()
+    res_run.returncode = 0
+    res_run.stdout = "numpy:1.26.4,scipy:1.13.1,mujoco:3.6.0\n"
+
+    call_count = 0
+
+    def delayed_run(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 2:
+            release_probe.wait(timeout=2)
+            return res_run
+        return res_inspect
+
+    mock_run.side_effect = delayed_run
+
+    start = time.perf_counter()
+    dialog._check_docker_deps()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 0.1
+    assert not dialog.btn_check_docker_deps.isEnabled()
+
+    release_probe.set()
+    qtbot.waitUntil(dialog.btn_check_docker_deps.isEnabled, timeout=3000)
+    assert mock_info.called
 
 
 @patch("PyQt6.QtWidgets.QDialog.exec")
