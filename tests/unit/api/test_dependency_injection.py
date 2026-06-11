@@ -278,6 +278,29 @@ class TestDependencyProviders:
         result = get_engine_manager(mock_request)
         assert result is mock_mgr
 
+    def test_get_ws_engine_manager_returns_none_when_missing(self) -> None:
+        """WebSocket dependency helper should tolerate missing app state."""
+        from src.api.dependencies import get_ws_engine_manager
+
+        mock_websocket = MagicMock()
+        mock_websocket.app.state = MagicMock(spec=[])
+
+        result = get_ws_engine_manager(mock_websocket)
+
+        assert result is None
+
+    def test_get_ws_engine_manager_returns_instance(self) -> None:
+        """WebSocket dependency helper should return the stored engine manager."""
+        from src.api.dependencies import get_ws_engine_manager
+
+        mock_websocket = MagicMock()
+        mock_mgr = MagicMock(spec=EngineManager)
+        mock_websocket.app.state.engine_manager = mock_mgr
+
+        result = get_ws_engine_manager(mock_websocket)
+
+        assert result is mock_mgr
+
     def test_get_logger_returns_none_gracefully(self) -> None:
         """get_logger should return None when logger not set, without error."""
         from src.api.dependencies import get_logger
