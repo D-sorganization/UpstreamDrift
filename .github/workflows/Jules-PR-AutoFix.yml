@@ -33,8 +33,8 @@ on:
         type: string
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
   actions: read
   checks: read
 
@@ -83,16 +83,93 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  workflow-run-analyze:
+    needs: [check-kill-switch, pick-runner]
+    name: Analyze failed CI run (trusted metadata only)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 5
+    if: |
+      needs.check-kill-switch.outputs.enabled == 'true' &&
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure'
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+    outputs:
+      branch: ${{ steps.pr.outputs.branch }}
+      pr_number: ${{ steps.pr.outputs.pr_number }}
+      skip: ${{ steps.pr.outputs.skip }}
+    steps:
+      - name: Resolve PR from workflow metadata
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "Failed CI branch from workflow_run metadata: $HEAD_BRANCH"
+
+          if [ -z "$HEAD_BRANCH" ]; then
+            echo "No head branch was present on the workflow_run event."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$HEAD_BRANCH" == "main" || "$HEAD_BRANCH" == "master" ]]; then
+            echo "Protected branch '$HEAD_BRANCH' is not eligible for PR AutoFix."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PR_INFO=$(gh pr list --repo "$REPOSITORY" --head "$HEAD_BRANCH" --state open --json number,headRefName --jq '.[0] // empty')
+          if [ -z "$PR_INFO" ]; then
+            echo "No open PR found for branch '$HEAD_BRANCH'."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PR_NUMBER=$(echo "$PR_INFO" | jq -r '.number')
+          echo "Found failed PR #$PR_NUMBER for branch $HEAD_BRANCH."
+          echo "branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+  workflow-run-writeback:
+    needs: workflow-run-analyze
+    name: Request trusted manual AutoFix dispatch
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 5
+    if: needs.workflow-run-analyze.outputs.skip == 'false'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Comment with manual AutoFix instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.workflow-run-analyze.outputs.pr_number }}
+          BRANCH: ${{ needs.workflow-run-analyze.outputs.branch }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "## AutoFix requires trusted dispatch
+
+          CI failed on branch \`$BRANCH\`, but this privileged \`workflow_run\` path does not check out, install, or execute PR-controlled code.
+
+          A maintainer can run **Jules PR AutoFix (Direct Push with CI Verification)** with \`workflow_dispatch\` for branch \`$BRANCH\` after reviewing the PR trust boundary."
+
   iterative-fix:
     needs: [check-kill-switch, pick-runner]
     name: Fix and Verify CI (Iterative)
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
-    # Only run on failures (not success) for workflow_run events
-    if: |
-      needs.check-kill-switch.outputs.enabled == 'true' &&
-      (github.event_name == 'workflow_dispatch' ||
-       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'))
+    if: needs.check-kill-switch.outputs.enabled == 'true' && github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+      checks: read
 
     outputs:
       final_status: ${{ steps.final-status.outputs.status }}
@@ -103,14 +180,17 @@ jobs:
         id: branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          if [ -n "${{ github.event.inputs.branch }}" ]; then
-            BRANCH="${{ github.event.inputs.branch }}"
-          else
-            BRANCH="${{ github.event.workflow_run.head_branch }}"
-          fi
+          BRANCH="$INPUT_BRANCH"
 
           echo "Target branch: $BRANCH"
+
+          if [ -z "$BRANCH" ]; then
+            echo "Manual AutoFix dispatch requires an explicit branch."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           # GUARD: Don't fix protected branches directly
           if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
