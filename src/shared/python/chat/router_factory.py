@@ -40,13 +40,10 @@ import importlib
 import importlib.util
 import logging
 import sys
-
-# ``datetime.UTC`` was added in 3.11; project still supports 3.10.
-# Use the compat shim that exposes the same symbol on 3.10.
-from src.api.utils.datetime_compat import UTC
 from pathlib import Path
 from typing import Any
 
+from compatibility import UTC
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 

@@ -26,9 +26,10 @@ import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from src.api.utils.datetime_compat import UTC
 from pathlib import Path
 from typing import Any
+
+from compatibility import UTC
 
 logger = logging.getLogger(__name__)
 

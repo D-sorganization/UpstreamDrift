@@ -28,6 +28,9 @@ from src.shared.python.body_part_viz import (
     ShapeTheme,
 )
 from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+from src.shared.python.motion_matching.body_skeleton import (
+    default_body_segments,
+)
 
 from ...core.models import C3DDataModel
 from ...services.segment_set_io import (
@@ -37,15 +40,6 @@ from ...services.segment_set_io import (
     spec_v1_to_v2,
     spec_v2_to_v1,
 )
-
-try:
-    from src.shared.python.motion_matching.body_skeleton import (
-        default_body_segments,
-    )
-except ImportError:  # pragma: no cover
-    from shared.python.motion_matching.body_skeleton import (  # type: ignore
-        default_body_segments,
-    )
 
 # Shape-picker labels exposed in the table combobox. The first four map
 # directly onto v2 shape kinds; the last two are sentinels that open a

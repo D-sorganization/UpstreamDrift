@@ -1,0 +1,184 @@
+"""Pure-data round-trip for ``~/.upstreamdrift/mcp_servers.json``."""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
+
+try:  # pragma: no cover - pydantic is a hard runtime dependency
+    from pydantic import BaseModel, Field, ValidationError, field_validator
+except ImportError as _exc:  # pragma: no cover - surfaced as ImportError
+    raise ImportError(
+        "pydantic is required for MCP config I/O; install pydantic>=2.5"
+    ) from _exc
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+__all__ = [
+    "DEFAULT_CONFIG_DIR",
+    "DEFAULT_CONFIG_PATH",
+    "ENV_VAR_PATTERN",
+    "McpServerConfig",
+    "McpServersFile",
+    "expand_env",
+    "load",
+    "read",
+    "validate_env_placeholders",
+    "write",
+]
+
+DEFAULT_CONFIG_DIR = Path.home() / ".upstreamdrift"
+DEFAULT_CONFIG_PATH = DEFAULT_CONFIG_DIR / "mcp_servers.json"
+
+ENV_VAR_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+_BAD_PLACEHOLDER = re.compile(r"\$\{[^}]*$|\$\{\}|\$\{[^A-Za-z_}][^}]*\}")
+
+
+def validate_env_placeholders(value: str) -> str:
+    """Return *value* unchanged after rejecting malformed ``${VAR}`` syntax."""
+    if value is None:
+        raise ValueError("value must be a string, not None")
+    if _BAD_PLACEHOLDER.search(value):
+        raise ValueError(
+            f"Malformed environment-variable placeholder in MCP server "
+            f"env value: {value!r}. Use the form ${{VAR_NAME}}."
+        )
+    return value
+
+
+class McpServerConfig(BaseModel):
+    """Local schema for a single MCP server entry."""
+
+    name: str = Field(..., min_length=1)
+    command: str = Field(..., min_length=1)
+    args: list[str] = Field(default_factory=list)
+    env: dict[str, str] = Field(default_factory=dict)
+    enabled: bool = True
+
+    @field_validator("env")
+    @classmethod
+    def _env_placeholders_ok(cls, value: dict[str, str]) -> dict[str, str]:
+        for key, raw in value.items():
+            if not isinstance(key, str) or not key:
+                raise ValueError(f"env keys must be non-empty strings, got {key!r}")
+            validate_env_placeholders(raw)
+        return value
+
+
+class McpServersFile(BaseModel):
+    """Top-level JSON structure for ``mcp_servers.json``."""
+
+    version: int = 1
+    servers: list[McpServerConfig] = Field(default_factory=list)
+
+    @field_validator("servers")
+    @classmethod
+    def _unique_names(cls, value: list[McpServerConfig]) -> list[McpServerConfig]:
+        seen: set[str] = set()
+        for server in value:
+            if server.name in seen:
+                raise ValueError(
+                    f"Duplicate MCP server name {server.name!r} - names must "
+                    "be unique within the file."
+                )
+            seen.add(server.name)
+        return value
+
+
+def _coerce_to_canonical_servers(
+    servers: Iterable[McpServerConfig | dict[str, Any]],
+) -> list[McpServerConfig]:
+    result: list[McpServerConfig] = []
+    for raw in servers:
+        if isinstance(raw, McpServerConfig):
+            result.append(raw)
+        elif isinstance(raw, dict):
+            result.append(McpServerConfig(**raw))
+        else:
+            raise TypeError(
+                f"servers entries must be McpServerConfig or dict, "
+                f"got {type(raw).__name__}"
+            )
+    return result
+
+
+def write(
+    servers: Iterable[McpServerConfig | dict[str, Any]],
+    *,
+    path: Path | None = None,
+) -> Path:
+    """Write *servers* to ``mcp_servers.json`` and return the destination."""
+    target = path if path is not None else DEFAULT_CONFIG_PATH
+
+    try:
+        validated = _coerce_to_canonical_servers(servers)
+        file_model = McpServersFile(servers=validated)
+    except ValidationError as exc:
+        raise ValueError(str(exc)) from exc
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = file_model.model_dump(mode="json")
+    target.write_text(
+        json.dumps(payload, indent=2, sort_keys=False) + "\n",
+        encoding="utf-8",
+    )
+    logger.info(
+        "Wrote %d MCP server entr(y/ies) to %s",
+        len(file_model.servers),
+        target,
+    )
+    return target
+
+
+def read(*, path: Path | None = None) -> McpServersFile:
+    """Read the MCP servers file. Returns an empty file model if missing."""
+    source = path if path is not None else DEFAULT_CONFIG_PATH
+    if not source.exists():
+        return McpServersFile()
+
+    try:
+        raw = json.loads(source.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Failed to read MCP servers file at {source}: {exc}") from exc
+
+    if isinstance(raw, dict) and isinstance(raw.get("servers"), list):
+        good: list[dict[str, Any]] = []
+        for idx, entry in enumerate(raw["servers"]):
+            try:
+                McpServerConfig(**entry)
+                good.append(entry)
+            except (ValidationError, TypeError) as exc:
+                logger.warning(
+                    "Skipping invalid MCP server entry #%d in %s: %s",
+                    idx,
+                    source,
+                    exc,
+                )
+        raw["servers"] = good
+
+    try:
+        return McpServersFile(**raw)
+    except ValidationError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+load = read
+
+
+def expand_env(value: str, *, environ: dict[str, str] | None = None) -> str:
+    """Expand ``${VAR}`` placeholders in *value* against *environ*."""
+    if value is None:
+        raise ValueError("value must be a string, not None")
+    env = environ if environ is not None else os.environ
+
+    def _sub(match: re.Match[str]) -> str:
+        name = match.group(1)
+        return env.get(name, match.group(0))
+
+    return ENV_VAR_PATTERN.sub(_sub, value)

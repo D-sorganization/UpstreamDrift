@@ -27,10 +27,10 @@ from __future__ import annotations
 import logging
 import os
 from datetime import datetime
-from src.api.utils.datetime_compat import UTC
 from pathlib import Path
 from typing import Any
 
+from compatibility import UTC
 from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
 
 logger = logging.getLogger(__name__)
