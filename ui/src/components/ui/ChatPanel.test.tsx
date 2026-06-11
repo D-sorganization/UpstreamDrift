@@ -11,6 +11,7 @@ import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { ChatPanel, resolveChatUrl, fileToBase64 } from './ChatPanel';
 import { ChatMarkdown } from './chatMarkdown';
+import { setLauncherCapabilityToken } from '../../api/websocketToken';
 
 // ---------------------------------------------------------------------------
 // Mock WebSocket — local override of the global mock from setup.ts so we
@@ -61,6 +62,7 @@ class TestWebSocket {
 
 beforeEach(() => {
   TestWebSocket.instances = [];
+  setLauncherCapabilityToken(null);
   // Provide static OPEN constant on the class so component checks pass.
   Object.assign(TestWebSocket, { OPEN: 1 });
   vi.stubGlobal('WebSocket', TestWebSocket);
@@ -119,6 +121,14 @@ describe('resolveChatUrl', () => {
 
   it('rejects empty session ids', () => {
     expect(() => resolveChatUrl('')).toThrow();
+  });
+
+  it('adds the launcher capability token when available', () => {
+    setLauncherCapabilityToken('chat-token');
+
+    const url = resolveChatUrl('new');
+
+    expect(new URL(url).searchParams.get('launcher_token')).toBe('chat-token');
   });
 });
 

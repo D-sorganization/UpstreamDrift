@@ -120,6 +120,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   CI. Source and dependency PRs now fall through to the dependency-light unit
   lane instead of passing solely on touched test files, and targeted PR coverage
   invokes a changed-file coverage ratchet for production policy files.
+- **2026-06-10** - Added the #7275 local WebSocket origin and launcher-token
+  guard. Browser WebSocket clients now request a short-lived launcher
+  capability token before opening simulation/chat sockets, and the backend
+  validates allowed local origins plus token claims so local sockets are not
+  ambiently reachable from arbitrary browser contexts. The Tauri backend IPC
+  capability now ships concrete v2 permission definitions so Rust/Tauri checks
+  can resolve the four local backend commands, and the Tauri Linux dependency
+  install now retries apt lock collisions on the self-hosted runner pool.
 - **2026-06-10** - Hardened the optional cloud client cache contract for
   #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
   treated as absent credentials, leaving `CloudClient.token` as `None` and
@@ -133,6 +141,23 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   results for invalid operators, and `ModelLibrary.load_model(...,
 force_download=True)` enforces the HTTPS-only `source_url` policy before any
   download I/O.
+- **2026-06-10** - Hardened the Jules PR AutoFix `workflow_run` trust boundary.
+  Failed-CI `workflow_run` events now use read-only metadata resolution and a
+  PR comment that asks maintainers to run the privileged fixer through explicit
+  `workflow_dispatch`; only the manual dispatch path can check out PR code,
+  install dependencies, run autofix tools, commit, or push. Standard CI now
+  enforces that boundary with `scripts/check_workflow_run_trust_boundary.py`
+  and focused regression coverage.
+- **2026-06-10** - Narrowed PR-scoped source coverage in standard CI to the
+  changed `src/**/*.py` targets after the coverage-bypass fix. Source and
+  dependency PRs still produce coverage and enforce the 75% floor, while the
+  full per-package coverage enforcer runs only after the default full-coverage
+  lane so focused PRs do not fail against unrelated modules.
+- **2026-06-10** - Enforced the #7277 Docker build timeout while process
+  stdout remains open. `src/launchers/docker_manager.py` now reads build output
+  through a background queue while the build thread owns a wall-clock timeout
+  and terminates the process tree on expiry, including the regression case
+  where stdout never reaches EOF.
 - **2026-06-10** - Closed the #7283 simulation WebSocket dependency-boundary
   gap. The simulation stream now resolves its engine manager through a
   WebSocket-safe dependency accessor instead of reaching directly through
@@ -1067,6 +1092,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-11 | 1.0.325 | Cross-engine dashboard architecture split for #7288. `src/launchers/cross_engine_dashboard.py` now keeps the public `CrossEngineDashboardWindow` compatibility facade thin, constructs the concrete PyQt window class through a deferred factory, and imports the fallback engine stub from `src/launchers/cross_engine_dashboard_stubs.py`, removing the dashboard architecture-budget exception while preserving the existing CLI and window-construction contracts. |
 | 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
 | 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
+| 2026-06-11 | 1.0.321 | Local WebSocket hardening, Tauri permission manifest repair, and Tauri build apt-lock hardening for #7275, plus coverage gate fix for #7273. API WebSocket auth now validates launcher capability tokens and allowed Origins, the React client propagates the launcher manifest token, the Tauri IPC capability defines concrete permissions, and `.github/workflows/tauri-build.yml` retries apt dependency installs. Standard CI now sends PRs that change source, tests, or dependency targets through the coverage-producing core test lane. |
 | 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
 | 2026-06-11 | 1.0.318 | Data Explorer and model-library boundary contracts for #7297, #7298, and #7299. Import/list responses expose durable `dataset_id` values, Data Explorer filter requests reject unsupported operators at the request boundary, and forced model-library downloads validate HTTPS-only `source_url` values before any download I/O. |
 | 2026-06-11 | 1.0.312 | Blocking DRY duplication ratchet for #7315. Added `scripts/ci/check_dry_duplication_gate.py` with focused tests, explicit production-`src` include/exclude config, and an owned no-growth baseline for existing duplicated logic fingerprints; `ci-standard.yml` now runs the checker inside `repo-structure-gates` so duplicate growth feeds the required `quality-gate` aggregate while `Code-Metrics.yml` remains advisory/manual reporting. |

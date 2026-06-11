@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
 import { apiFetch } from './fetch';
+import { withLauncherWebSocketToken } from './websocketToken';
 
 /**
  * Result of a `setSpeed` call (issue #7166).
@@ -104,7 +105,7 @@ export function useSimulation(engineType: string) {
       wsUrl = `${protocol}//${host}/api/ws/simulate/${engineType}`;
     }
 
-    const ws = new WebSocket(wsUrl);
+    const ws = new WebSocket(withLauncherWebSocketToken(wsUrl));
     wsRef.current = ws;
 
     ws.onopen = () => {

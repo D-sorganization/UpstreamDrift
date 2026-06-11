@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,15 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from .model import URDFModel
 
 logger = get_logger(__name__)
+
+
+@dataclass(frozen=True)
+class ModelPanelSelection:
+    """Public description of the currently selected model component."""
+
+    comp_type: str
+    name: str
+    element: ET.Element
 
 
 class ModelPanel(QWidget):
@@ -122,10 +132,11 @@ class ModelPanel(QWidget):
     def load_file(self, file_path: Path) -> bool:
         """Load a URDF file."""
         try:
-            self.model = URDFModel.from_file(file_path)
-            self.file_label.setText(f"File: {file_path.name}")
-            self.save_btn.setEnabled(True)
-            self._refresh_tree()
+            self.set_model(
+                URDFModel.from_file(file_path),
+                label=f"File: {file_path.name}",
+                dirty=False,
+            )
             logger.info(f"Loaded URDF: {file_path}")
             return True
         except (RuntimeError, ValueError, OSError) as e:
@@ -135,10 +146,11 @@ class ModelPanel(QWidget):
 
     def _on_new(self) -> None:
         """Handle new button click."""
-        self.model = URDFModel.create_empty()
-        self.file_label.setText("New model (unsaved)")
-        self.save_btn.setEnabled(True)
-        self._refresh_tree()
+        self.set_model(
+            URDFModel.create_empty(),
+            label="New model (unsaved)",
+            dirty=True,
+        )
 
     def _on_save(self) -> None:
         """Handle save button click."""
@@ -162,7 +174,7 @@ class ModelPanel(QWidget):
             content = self.model.to_xml()
             file_path.write_text(content, encoding="utf-8")
             self.model.file_path = file_path
-            self.model.is_modified = False
+            self.mark_clean()
             self.file_label.setText(f"File: {file_path.name}")
             logger.info(f"Saved URDF: {file_path}")
         except (RuntimeError, ValueError, OSError) as e:
@@ -251,6 +263,7 @@ class ModelPanel(QWidget):
                 self.model.remove_joint(name)
 
             self._refresh_tree()
+            self.set_dirty(True)
 
     def _refresh_tree(self) -> None:
         """Refresh the component tree."""
@@ -258,13 +271,14 @@ class ModelPanel(QWidget):
         self._refresh_validation_findings()
         if not self.model:
             return
+        model = self.model
 
         # Links
-        links_item = QTreeWidgetItem(["Links", "", f"({len(self.model.links)})"])
+        links_item = QTreeWidgetItem(["Links", "", f"({len(model.links)})"])
         links_item.setFlags(links_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
         self.tree.addTopLevelItem(links_item)
 
-        for name, link in self.model.links.items():
+        for name, link in model.links.items():
             # Get geometry info
             geom_info = "unknown"
             visual = link.find("visual/geometry")
@@ -281,11 +295,11 @@ class ModelPanel(QWidget):
         links_item.setExpanded(True)
 
         # Joints
-        joints_item = QTreeWidgetItem(["Joints", "", f"({len(self.model.joints)})"])
+        joints_item = QTreeWidgetItem(["Joints", "", f"({len(model.joints)})"])
         joints_item.setFlags(joints_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
         self.tree.addTopLevelItem(joints_item)
 
-        for name, joint in self.model.joints.items():
+        for name, joint in model.joints.items():
             joint_type = joint.get("type", "unknown")
             item = QTreeWidgetItem([name, "joint", joint_type])
             item.setData(0, Qt.ItemDataRole.UserRole, joint)
@@ -295,16 +309,16 @@ class ModelPanel(QWidget):
         joints_item.setExpanded(True)
 
         # Materials
-        if self.model.materials:
+        if model.materials:
             materials_item = QTreeWidgetItem(
-                ["Materials", "", f"({len(self.model.materials)})"]
+                ["Materials", "", f"({len(model.materials)})"]
             )
             materials_item.setFlags(
                 materials_item.flags() & ~Qt.ItemFlag.ItemIsSelectable
             )
             self.tree.addTopLevelItem(materials_item)
 
-            for name, material in self.model.materials.items():
+            for name, material in model.materials.items():
                 item = QTreeWidgetItem([name, "material", ""])
                 item.setData(0, Qt.ItemDataRole.UserRole, material)
                 item.setData(1, Qt.ItemDataRole.UserRole, "material")
@@ -350,16 +364,75 @@ class ModelPanel(QWidget):
                 return None
 
             self._refresh_tree()
-            self.save_btn.setEnabled(True)
+            self.set_dirty(True)
             return result
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to add component: {e}")
             return None
 
+    def selected_component(self) -> ModelPanelSelection | None:
+        """Return the selected component without exposing tree widget internals."""
+        current = self.tree.currentItem()
+        if not current:
+            return None
+
+        element = current.data(0, Qt.ItemDataRole.UserRole)
+        if element is None:
+            return None
+
+        return ModelPanelSelection(
+            comp_type=current.data(1, Qt.ItemDataRole.UserRole) or "",
+            name=current.text(0),
+            element=element,
+        )
+
+    def selected_link_name(self) -> str | None:
+        """Return the selected link name when the current selection is a link."""
+        selection = self.selected_component()
+        if selection is None or selection.comp_type != "link":
+            return None
+        return selection.name
+
+    def set_model(
+        self,
+        model: URDFModel | None,
+        *,
+        label: str | None = None,
+        dirty: bool | None = None,
+    ) -> None:
+        """Replace the panel model and refresh associated panel state."""
+        self.model = model
+        self.file_label.setText(label or self._model_label(model))
+        if dirty is not None and self.model is not None:
+            self.model.is_modified = dirty
+        self.save_btn.setEnabled(model is not None)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh public panel presentation after model mutation."""
+        self._refresh_tree()
+
+    def set_dirty(self, dirty: bool = True) -> None:
+        """Record whether the current model has unsaved changes."""
+        if self.model is not None:
+            self.model.is_modified = dirty
+        self.save_btn.setEnabled(self.model is not None)
+
+    def mark_clean(self) -> None:
+        """Mark the current model as saved without exposing the save button."""
+        self.set_dirty(False)
+
     def get_model(self) -> URDFModel | None:
         """Get the current model."""
         return self.model
+
+    def _model_label(self, model: URDFModel | None) -> str:
+        if model is None:
+            return "No file loaded"
+        if model.file_path:
+            return f"File: {model.file_path.name}"
+        return "New model"
 
     def _refresh_validation_findings(self) -> None:
         """Surface current composition findings in the panel."""

@@ -28,14 +28,28 @@ def anyio_backend() -> str:
 
 
 class _MockWebSocket:
-    def __init__(self, auth_header: str = "") -> None:
+    def __init__(
+        self,
+        auth_header: str = "",
+        *,
+        origin: str = "http://localhost:5173",
+        query_token: str | None = "test-launcher-token",
+        app_token: str = "test-launcher-token",
+    ) -> None:
         self.headers: dict[str, str] = {}
         if auth_header:
             self.headers["authorization"] = auth_header
+        if origin:
+            self.headers["origin"] = origin
+        self.query_params: dict[str, str] = {}
+        if query_token is not None:
+            self.query_params["launcher_token"] = query_token
         from unittest.mock import MagicMock
 
         self.url = MagicMock()
         self.url.path = "/ws/test"
+        self.app = MagicMock()
+        self.app.state.launcher_csrf_token = app_token
         self.close_called = False
         self.close_code: int | None = None
 
@@ -50,7 +64,7 @@ class _MockWebSocket:
 
 
 class TestResolveWsUserLocalMode:
-    """In local/auth-disabled mode, connections are admitted with a WARNING."""
+    """In local/auth-disabled mode, guarded launcher connections are admitted."""
 
     async def test_returns_local_user(self) -> None:
         from src.api.auth.middleware import LocalUser
