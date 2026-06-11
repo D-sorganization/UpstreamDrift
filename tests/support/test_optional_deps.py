@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import sys
+from types import ModuleType
+
 import pytest
 
-from tests.support.optional_deps import missing_is_optional, skip_unless_optional
+from tests.support.optional_deps import (
+    missing_is_optional,
+    scoped_import_with_optional_mocks,
+    skip_unless_optional,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -38,3 +45,25 @@ def test_skip_unless_optional_returns_for_real_bug() -> None:
 def test_message_fallback_when_name_unset() -> None:
     exc = ImportError("No module named mujoco")  # no .name attribute set
     assert missing_is_optional(exc, allowed={"mujoco"}) is True
+
+
+def test_scoped_import_with_optional_mocks_restores_modules() -> None:
+    dependency_name = "_ud_fake_optional_dependency"
+    target_name = "_ud_fake_optional_target"
+    fake_dependency = ModuleType(dependency_name)
+    fake_dependency.VALUE = 1  # type: ignore[attr-defined]
+
+    before_dependency = sys.modules.get(dependency_name)
+    before_target = sys.modules.get(target_name)
+
+    with scoped_import_with_optional_mocks(
+        "calendar",
+        {dependency_name: fake_dependency},
+        purge_modules=[target_name],
+    ) as imported:
+        sys.modules[target_name] = ModuleType(target_name)
+        assert imported.__name__ == "calendar"
+        assert sys.modules[dependency_name] is fake_dependency
+
+    assert sys.modules.get(dependency_name) is before_dependency
+    assert sys.modules.get(target_name) is before_target

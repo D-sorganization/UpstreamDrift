@@ -20,11 +20,23 @@ Usage::
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
+import sys
 from collections.abc import Iterable
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
 
 import pytest
 
-__all__ = ["skip_unless_optional", "missing_is_optional"]
+__all__ = [
+    "missing_is_optional",
+    "scoped_import_with_optional_mocks",
+    "skip_unless_optional",
+]
+
+_MISSING = object()
 
 
 def missing_is_optional(exc: ImportError, allowed: Iterable[str]) -> bool:
@@ -57,3 +69,52 @@ def skip_unless_optional(exc: ImportError, allowed: Iterable[str]) -> None:
             allow_module_level=True,
         )
     # Not optional → a real bug. Caller re-raises.
+
+
+@contextmanager
+def scoped_import_with_optional_mocks(
+    module_name: str,
+    module_mocks: dict[str, Any],
+    *,
+    module_path: Path | None = None,
+    purge_modules: Iterable[str] = (),
+):
+    """Import *module_name* under temporary optional-dependency mocks.
+
+    The helper removes the target module before import, installs the supplied
+    dependency mocks, yields the freshly imported module, then restores both the
+    dependency entries and any target modules imported under those mocks.
+    """
+    if not module_name:
+        raise ValueError("module_name must be provided")
+    if not module_mocks:
+        raise ValueError("module_mocks must be provided")
+
+    target_modules = tuple(dict.fromkeys((module_name, *purge_modules)))
+    tracked_modules = tuple(dict.fromkeys((*module_mocks.keys(), *target_modules)))
+    previous = {name: sys.modules.get(name, _MISSING) for name in tracked_modules}
+
+    try:
+        for name in target_modules:
+            sys.modules.pop(name, None)
+        sys.modules.update(module_mocks)
+        importlib.invalidate_caches()
+        if module_path is None:
+            yield importlib.import_module(module_name)
+        else:
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            if spec is None or spec.loader is None:
+                raise ImportError(f"cannot load module spec for {module_path}")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+            yield module
+    finally:
+        for name in target_modules:
+            sys.modules.pop(name, None)
+        for name, module in previous.items():
+            if module is _MISSING:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = module
+        importlib.invalidate_caches()
