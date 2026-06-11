@@ -24,6 +24,8 @@ def test_drake_trajopt_match_returns_placeholder_failure() -> None:
     assert isinstance(result, MotionMatchingResult)
     assert result.success is False
     assert result.metadata.get("backend") == "drake_trajopt"
+    assert result.metadata.get("status") == "not_implemented"
+    assert result.metadata.get("production_ready") is False
 
 
 def test_drake_trajopt_with_pydrake() -> None:

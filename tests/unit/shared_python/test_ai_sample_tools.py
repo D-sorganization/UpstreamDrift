@@ -97,7 +97,9 @@ def test_run_inverse_dynamics() -> None:
         "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "mujoco"}
     )
     assert res.solver_status == "success"
-    assert res.result["success"] is True
+    assert res.result["success"] is False
+    assert res.result["error"] == "not_implemented"
+    assert res.result["status"] == "not_implemented"
     assert res.result["engine"] == "mujoco"
 
     res_bad = reg.execute(
@@ -156,7 +158,9 @@ def test_validate_cross_engine() -> None:
 
     res = reg.execute("validate_cross_engine", {"file_path": "test.c3d"})
     assert res.solver_status == "success"
-    assert res.result["status"] == "validation_pending"
+    assert res.result["success"] is False
+    assert res.result["error"] == "not_implemented"
+    assert res.result["status"] == "not_implemented"
 
 
 def test_check_energy_conservation() -> None:
@@ -165,7 +169,28 @@ def test_check_energy_conservation() -> None:
 
     res = reg.execute("check_energy_conservation", {})
     assert res.solver_status == "success"
-    assert res.result["status"] == "check_pending"
+    assert res.result["success"] is False
+    assert res.result["error"] == "not_implemented"
+    assert res.result["status"] == "not_implemented"
+
+
+def test_registered_chat_placeholders_do_not_claim_success_or_pending() -> None:
+    """Production chat tools must not imply a nonexistent job was queued."""
+    reg = ToolRegistry()
+    register_golf_suite_tools(reg)
+
+    inv = reg.execute(
+        "run_inverse_dynamics",
+        {"file_path": "test.c3d", "engine": "mujoco"},
+    ).result
+    cross = reg.execute("validate_cross_engine", {"file_path": "test.c3d"}).result
+    energy = reg.execute("check_energy_conservation", {}).result
+
+    for result in (inv, cross, energy):
+        assert result["success"] is False
+        assert result["status"] == "not_implemented"
+        assert "pending" not in str(result).lower()
+        assert "placeholder" not in str(result).lower()
 
 
 def test_list_physics_engines() -> None:

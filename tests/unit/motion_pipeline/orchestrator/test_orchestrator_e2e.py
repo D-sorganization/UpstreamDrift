@@ -242,6 +242,49 @@ def test_mujoco_placeholder_matching_failure_is_invalid_input(
         pipeline.run(traj)
 
 
+@pytest.mark.unit
+def test_placeholder_matching_backend_failure_is_invalid_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Known unsupported solver placeholders must map to 4xx-class failures."""
+    import src.shared.python.motion_pipeline.matching.base as matching_base
+
+    rig = _synthetic_rig()
+    traj = _synthetic_markers(rig)
+
+    class _FakeResult:
+        def to_contract(self) -> MotionMatchingResult:
+            return MotionMatchingResult(
+                request_id="fake",
+                success=False,
+                message="Drake trajectory optimization solver not yet implemented",
+                metadata={
+                    "backend": "drake_trajopt",
+                    "status": "not_implemented",
+                    "production_ready": False,
+                },
+            )
+
+    class _FakeSolver:
+        def match(self, reference, rig, request=None):  # type: ignore[no-untyped-def]
+            return _FakeResult()
+
+    monkeypatch.setattr(
+        matching_base,
+        "make_matching_solver",
+        lambda backend, cost_weights=None, *, urdf_path=None: _FakeSolver(),
+    )
+
+    config = PipelineConfig(
+        adapter=AdapterOverride(format="passthrough"),
+        ik_backend="geometric",
+        matching_backend="drake",
+    )
+    pipeline = _PipelineWithDefaultRig(config, rig)
+    with pytest.raises(InvalidInputError, match="not yet implemented"):
+        pipeline.run(traj)
+
+
 @pytest.mark.skipif(not _HAVE_MUJOCO, reason="mujoco not installed")
 @pytest.mark.unit
 def test_orchestrator_mujoco_matching_uses_generated_rig_model() -> None:

@@ -53,6 +53,10 @@ MATCHING_BACKENDS = [
     "pinocchio",  # Pinocchio operational space control
 ]
 
+PLACEHOLDER_MATCHING_BACKENDS = {
+    "drake": "solver not implemented (#4568)",
+}
+
 # Known unsupported combinations with reasons
 KNOWN_UNSUPPORTED = {
     ("openpose_json", "drake", "mujoco"): "2D lifting not implemented for Drake IK",
@@ -101,6 +105,9 @@ def generate_compatibility_matrix() -> str:
                 if key in KNOWN_UNSUPPORTED:
                     status = "❌ Unsupported"
                     notes = KNOWN_UNSUPPORTED[key]
+                elif mm in PLACEHOLDER_MATCHING_BACKENDS:
+                    status = "❌ Unsupported"
+                    notes = PLACEHOLDER_MATCHING_BACKENDS[mm]
                 elif key in HEAVY_COMBINATIONS:
                     status = "⚠️ Heavy"
                     notes = HEAVY_COMBINATIONS[key]
@@ -138,7 +145,7 @@ def generate_compatibility_matrix() -> str:
         ]
     )
 
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def generate_matrix_file() -> None:
@@ -218,6 +225,17 @@ if "pytest" in sys.modules or (
 
         assert matrix_path.exists(), f"Matrix file not created: {matrix_path}"
         assert len(matrix_md) > 100, "Matrix file seems too short"
+
+    def test_placeholder_matching_backends_are_never_reported_supported() -> None:
+        """Known placeholder solvers must not be advertised as working."""
+        matrix_md = generate_compatibility_matrix()
+
+        for line in matrix_md.splitlines():
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 4 or cells[1] not in PLACEHOLDER_MATCHING_BACKENDS:
+                continue
+            assert cells[2] == "❌ Unsupported"
+            assert "not implemented" in cells[3]
 
 
 # ---------------------------------------------------------------------------

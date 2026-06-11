@@ -119,7 +119,7 @@ class TestAnalysisTools:
         assert "invalid" in result.result["error"].lower()
 
     def test_run_inverse_dynamics_valid_engine(self) -> None:
-        """Test inverse dynamics with valid engine."""
+        """Inverse dynamics chat tool is honest until backed by real work."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -128,7 +128,9 @@ class TestAnalysisTools:
             {"file_path": "test.c3d", "engine": "mujoco"},
         )
         assert result.solver_status == "success"
-        assert result.result["success"] is True
+        assert result.result["success"] is False
+        assert result.result["error"] == "not_implemented"
+        assert result.result["status"] == "not_implemented"
         assert result.result["engine"] == "mujoco"
 
     def test_interpret_torques(self) -> None:
