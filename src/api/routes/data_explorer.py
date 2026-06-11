@@ -24,7 +24,7 @@ from collections import OrderedDict
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
@@ -42,9 +42,13 @@ router = APIRouter(prefix="/tools/data-explorer", tags=["data-explorer"])
 # ── Request / Response Models ──
 
 
+FilterOperator = Literal["eq", "ne", "gt", "lt", "gte", "lte", "contains"]
+
+
 class DatasetInfo(BaseModel):
     """Information about a discovered dataset file."""
 
+    dataset_id: str | None = None
     name: str
     path: str
     format: str
@@ -83,7 +87,7 @@ class DatasetFilterRequest(BaseModel):
     """Request to filter dataset rows."""
 
     column: str = Field(..., description="Column name to filter on")
-    operator: str = Field(
+    operator: FilterOperator = Field(
         "eq",
         description="Filter operator: eq, ne, gt, lt, gte, lte, contains",
     )
@@ -105,6 +109,7 @@ class DatasetRowsResponse(BaseModel):
 class ImportResponse(BaseModel):
     """Response after importing a dataset."""
 
+    dataset_id: str
     name: str
     format: str
     columns: list[str]
@@ -778,6 +783,7 @@ async def list_datasets() -> DatasetListResponse:
             if not any(d.name == name for d in datasets):
                 datasets.append(
                     DatasetInfo(
+                        dataset_id=ds.get("dataset_id"),
                         name=name,
                         path="(imported)",
                         format=ds.get("format", "unknown"),
@@ -998,6 +1004,7 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
         _enforce_loaded_dataset_limit_locked()
 
     return ImportResponse(
+        dataset_id=dataset_id,
         name=file.filename,
         format=suffix.lstrip("."),
         columns=columns,

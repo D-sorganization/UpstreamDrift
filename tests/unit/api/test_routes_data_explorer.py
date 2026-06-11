@@ -87,8 +87,28 @@ def test_import_dataset_csv(client: TestClient, temp_dataset_dir) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "test.csv"
+    assert data["dataset_id"]
     assert data["row_count"] == 2
     assert "a" in data["columns"]
+
+
+def test_imported_dataset_list_exposes_dataset_id(
+    client: TestClient, temp_dataset_dir
+) -> None:
+    """Imported dataset list entries expose the durable storage identifier."""
+    csv_content = b"a,b\n1,2\n"
+    files = {"file": ("listed.csv", csv_content, "text/csv")}
+    import_response = client.post("/tools/data-explorer/import", files=files)
+    assert import_response.status_code == 200
+    dataset_id = import_response.json()["dataset_id"]
+
+    response = client.get("/tools/data-explorer/datasets")
+
+    assert response.status_code == 200
+    listed = next(
+        ds for ds in response.json()["datasets"] if ds["name"] == "listed.csv"
+    )
+    assert listed["dataset_id"] == dataset_id
 
 
 def test_import_dataset_json(client: TestClient, temp_dataset_dir) -> None:
@@ -99,8 +119,23 @@ def test_import_dataset_json(client: TestClient, temp_dataset_dir) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "test.json"
+    assert data["dataset_id"]
     assert data["row_count"] == 2
     assert "a" in data["columns"]
+
+
+def test_filter_rejects_invalid_operator(client: TestClient, temp_dataset_dir) -> None:
+    """Invalid filter operators fail request validation instead of matching no rows."""
+    csv_content = b"a,b\n1,2\n"
+    files = {"file": ("filter.csv", csv_content, "text/csv")}
+    assert client.post("/tools/data-explorer/import", files=files).status_code == 200
+
+    response = client.post(
+        "/tools/data-explorer/datasets/filter.csv/filter",
+        json={"column": "a", "operator": "starts_with", "value": "1"},
+    )
+
+    assert response.status_code == 422
 
 
 def test_list_datasets_no_absolute_paths(client: TestClient, temp_dataset_dir) -> None:
