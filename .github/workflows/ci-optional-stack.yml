@@ -334,15 +334,28 @@ jobs:
           echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
           set +e
           set -o pipefail
-          xvfb-run --auto-servernum pytest tests/unit/ \
-            -p no:xvfb \
-            -n auto \
-            --timeout=60 \
-            --timeout-method=thread \
-            -v --tb=short \
-            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
-            2>&1 | tee /tmp/unit-test-results.txt
-          rc=$?
+          : > /tmp/unit-test-results.txt
+          rc=0
+          mapfile -t unit_targets < <(
+            find tests/unit -mindepth 1 -maxdepth 1 \
+              \( -type d -o -type f -name "test_*.py" \) \
+              | sort
+          )
+          for target in "${unit_targets[@]}"; do
+            echo "## Optional-stack unit target: $target" | tee -a /tmp/unit-test-results.txt
+            xvfb-run --auto-servernum pytest "$target" \
+              -p no:xvfb \
+              --timeout=60 \
+              --timeout-method=thread \
+              -v --tb=short \
+              -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+              2>&1 | tee -a /tmp/unit-test-results.txt
+            target_rc=$?
+            if [[ "$target_rc" -ne 0 ]]; then
+              rc="$target_rc"
+              break
+            fi
+          done
           set -e
 
           passed=$(grep -c "PASSED" /tmp/unit-test-results.txt || true)

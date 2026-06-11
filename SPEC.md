@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-12
+  LAST UPDATED: 2026-06-13
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.345                                            |
+| **Spec Version**        | 1.0.349                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,18 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Decomposed pendulum perturbation metric extraction and
+  profile comparison into focused helpers so changed analyzer code stays within
+  the architecture function-size budget without changing public metric output.
+- **2026-06-11** - Aligned pendulum perturbation analyzer guard failures with
+  the unit-level contract: invalid `extract_metrics()` inputs and missing
+  `set_base_torque_profile()` preconditions now surface as `TypeError`
+  precondition failures while preserving valid batch and metrics behavior.
+- **2026-06-11** - Restored legacy AI assistant widget import identity by
+  routing `assistant_widgets` and `assistant_panel` compatibility exports to the
+  canonical assistant submodules, and made the optional-stack unit chunk loop
+  fail fast after the first failing chunk to reduce runner load and produce
+  focused CI diagnostics.
 - **2026-06-11** - Restored API, launcher, and Docker contract parity after
   the main CI regression sweep. The public simulation request engine allowlist
   again includes `jaxsim`, Data Explorer import responses preserve generated
@@ -1212,6 +1224,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-11 | 1.0.346 | Preserved symlink traversal security failures in model and output path validation. Candidates lexically under an allowed root now reject symlink components before resolved containment fallback can mask escaped targets as generic 404 misses, keeping Linux optional-stack path validation on the documented 400 contract. Added suite markers to newly merged unit-level regression tests so the suite-marker ratchet remains blocking without expanding the unmarked-test baseline. Runs optional-stack unit tests as serial top-level `tests/unit` chunks because full-suite optional dependency collection is xdist-unsafe and can exceed local runner memory before tests execute, and raises the bounded CI Standard tests matrix timeout so the core suite is not cancelled before its per-test timeout contract can report real failures. |
 | 2026-06-11 | 1.0.345 | Restored main CI API, launcher, and Docker contracts: `jaxsim` is accepted by the public simulation request allowlist, Data Explorer import responses keep generated dataset IDs while allowing legacy direct model construction, canonical-core launcher tiles use a recognized status and served biomechanics logo, symlink model-path validation preserves explicit 400 security failures, and Docker feature dry-runs import shared engine probe configuration through the package-qualified path. |
 | 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
 | 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |

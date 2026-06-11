@@ -74,6 +74,88 @@ MANDATORY_METRICS: tuple[str, ...] = (
     "motion_duration",
 )
 
+SCALAR_COMPARISON_METRICS: tuple[str, ...] = (
+    "end_effector_speed_final",
+    "peak_end_effector_speed",
+    "total_energy_final",
+    "trajectory_rmse",
+    "trajectory_max_deviation",
+)
+
+HIGHER_IS_BETTER_METRICS: frozenset[str] = frozenset(
+    ("end_effector_speed_final", "peak_end_effector_speed")
+)
+
+
+def _metric_winner(metric: str, mean_a: float, mean_b: float) -> str:
+    if metric in HIGHER_IS_BETTER_METRICS:
+        return "A" if mean_a > mean_b else "B"
+    return "A" if mean_a < mean_b else "B"
+
+
+def _overall_winner(a_wins: int, b_wins: int) -> tuple[str, float]:
+    total = a_wins + b_wins
+    if total == 0:
+        return "tie", 0.5
+    if a_wins > b_wins:
+        return "A", a_wins / total
+    if b_wins > a_wins:
+        return "B", b_wins / total
+    return "tie", 0.5
+
+
+def _mann_whitney_pvalue(
+    stats_module: Any,
+    vals_a: np.ndarray,
+    vals_b: np.ndarray,
+) -> float:
+    try:
+        _stat, pval = stats_module.mannwhitneyu(vals_a, vals_b, alternative="two-sided")
+    except ValueError:
+        return 1.0
+    return float(pval)
+
+
+def _final_joint_arrays(result: SimulationResult) -> tuple[np.ndarray, np.ndarray]:
+    last_idx = result.n_steps - 1
+    angles = np.array([result.theta1[last_idx], result.phi[last_idx]])
+    velocities = np.array([result.dtheta1[last_idx], result.dphi[last_idx]])
+    return angles, velocities
+
+
+def _tip_position(result: SimulationResult, index: int) -> np.ndarray:
+    position = forward_kinematics(
+        result.theta1[index], result.phi[index], result.params
+    )
+    return np.array(position["tip"], dtype=float)
+
+
+def _final_tip_kinematics(
+    result: SimulationResult,
+    last_idx: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    tip_pos_final = _tip_position(result, last_idx)
+    if result.n_steps < 3:
+        return tip_pos_final, np.zeros(2)
+
+    dt = result.t[last_idx] - result.t[last_idx - 1]
+    tip_prev = _tip_position(result, last_idx - 1)
+    return tip_pos_final, (tip_pos_final - tip_prev) / max(dt, 1e-12)
+
+
+def _peak_tip_speed(result: SimulationResult) -> float:
+    speeds = [0.0]
+    for index in range(1, result.n_steps):
+        dt = result.t[index] - result.t[index - 1]
+        tip_velocity = (
+            _tip_position(result, index) - _tip_position(result, index - 1)
+        ) / max(
+            dt,
+            1e-12,
+        )
+        speeds.append(float(np.linalg.norm(tip_velocity)))
+    return float(max(speeds))
+
 
 # ---------------------------------------------------------------------------
 # Comparison report
@@ -274,7 +356,7 @@ class PendulumPerturbationAnalyzer:
         Post: all MANDATORY_METRICS present in output; all values are finite.
         """
         if not isinstance(sim_result, SimulationResult):
-            raise ValueError(
+            raise TypeError(
                 f"sim_result must be SimulationResult, got {type(sim_result)}"
             )
         if not (sim_result.n_steps >= 2):
@@ -282,66 +364,12 @@ class PendulumPerturbationAnalyzer:
 
         result = sim_result
         last_idx = result.n_steps - 1
-
-        # Joint angles and velocities at final time step
-        joint_angles_final = np.array([result.theta1[last_idx], result.phi[last_idx]])
-        joint_velocities_final = np.array(
-            [result.dtheta1[last_idx], result.dphi[last_idx]]
-        )
-
-        # End-effector (tip) positions via FK at each time step
-        pos_final = forward_kinematics(
-            result.theta1[last_idx], result.phi[last_idx], result.params
-        )
-        tip_pos_final = np.array(pos_final["tip"], dtype=float)
-
-        # End-effector velocities at final step (finite-difference of tip pos)
-        if result.n_steps >= 3:
-            dt = result.t[last_idx] - result.t[last_idx - 1]
-            pos_prev = forward_kinematics(
-                result.theta1[last_idx - 1],
-                result.phi[last_idx - 1],
-                result.params,
-            )
-            tip_prev = np.array(pos_prev["tip"], dtype=float)
-            tip_vel_final = (tip_pos_final - tip_prev) / max(dt, 1e-12)
-        else:
-            tip_vel_final = np.zeros(2)
-
+        joint_angles_final, joint_velocities_final = _final_joint_arrays(result)
+        tip_pos_final, tip_vel_final = _final_tip_kinematics(result, last_idx)
         tip_speed_final = float(np.linalg.norm(tip_vel_final))
-
-        # Peak tip speed across all time steps
-        speeds = []
-        for i in range(result.n_steps):
-            if i == 0:
-                speeds.append(0.0)
-                continue
-            dt = result.t[i] - result.t[i - 1]
-            pos_i = forward_kinematics(result.theta1[i], result.phi[i], result.params)
-            pos_im1 = forward_kinematics(
-                result.theta1[i - 1], result.phi[i - 1], result.params
-            )
-            v = (
-                np.array(pos_i["tip"], dtype=float)
-                - np.array(pos_im1["tip"], dtype=float)
-            ) / max(dt, 1e-12)
-            speeds.append(float(np.linalg.norm(v)))
-        peak_speed = float(max(speeds))
-
-        # Total energy at final step
+        peak_speed = _peak_tip_speed(result)
         total_energy_final = float(total_energy(result.states[last_idx], result.params))
-
-        # Trajectory RMSE vs nominal (if nominal available)
-        trajectory_rmse = 0.0
-        trajectory_max_deviation = 0.0
-        if self._nominal_result is not None:
-            nom = self._nominal_result
-            n_compare = min(result.n_steps, nom.n_steps)
-            deviations = np.linalg.norm(
-                result.states[:n_compare, :2] - nom.states[:n_compare, :2], axis=1
-            )
-            trajectory_rmse = float(np.sqrt(np.mean(deviations**2)))
-            trajectory_max_deviation = float(np.max(deviations))
+        trajectory_rmse, trajectory_max_deviation = self._trajectory_deviation(result)
 
         metrics: dict[str, float | np.ndarray] = {
             "end_effector_position_final": tip_pos_final,
@@ -362,6 +390,19 @@ class PendulumPerturbationAnalyzer:
             )
         return metrics
 
+    def _trajectory_deviation(self, result: SimulationResult) -> tuple[float, float]:
+        if self._nominal_result is None:
+            return 0.0, 0.0
+
+        nominal = self._nominal_result
+        n_compare = min(result.n_steps, nominal.n_steps)
+        deviations = np.linalg.norm(
+            result.states[:n_compare, :2] - nominal.states[:n_compare, :2],
+            axis=1,
+        )
+        rmse = float(np.sqrt(np.mean(deviations**2)))
+        return rmse, float(np.max(deviations))
+
     def run_batch(self, config: PerturbationConfig) -> PerturbationSummary:
         """Run full Monte Carlo batch and return summary with all mandatory metrics.
 
@@ -381,7 +422,7 @@ class PendulumPerturbationAnalyzer:
         Post: summary.robustness_score in [0.0, 1.0].
         """
         if not (self._base_coeffs is not None):
-            raise ValueError("Call set_base_torque_profile() before run_batch()")
+            raise TypeError("Call set_base_torque_profile() before run_batch()")
         if not (config.n_trials > 0):
             raise ValueError("DbC Blocked: Precondition failed.")
 
@@ -462,7 +503,7 @@ class PendulumPerturbationAnalyzer:
     # Profile comparison
     # ------------------------------------------------------------------
 
-    def compare_profiles(  # noqa: C901
+    def compare_profiles(
         self,
         profile_a: object,
         profile_b: object,
@@ -489,88 +530,15 @@ class PendulumPerturbationAnalyzer:
         """
         from scipy import stats as _stats  # lazy import — optional dep
 
-        metric_comparisons: dict[str, Any] = {}
-        pvalues: dict[str, float] = {}
-        a_wins = 0
-        b_wins = 0
-
-        # Compare scalar metrics via Mann-Whitney U test
-        scalar_metrics = [
-            "end_effector_speed_final",
-            "peak_end_effector_speed",
-            "total_energy_final",
-            "trajectory_rmse",
-            "trajectory_max_deviation",
-        ]
-
-        base_seed = config.seed if config.seed is not None else 0
-
-        # Re-run raw trials for statistical testing
-        def _collect_scalar(profile: object, metric: str) -> np.ndarray:
-            self.set_base_torque_profile(profile)
-            values = []
-            for i in range(config.n_trials):
-                perturbed = _perturb_coeffs_by_mode(
-                    self._base_coeffs,  # type: ignore[arg-type]
-                    config,
-                    base_seed + i,
-                )
-                try:
-                    sim = self._simulate(perturbed)
-                    m = self.extract_metrics(sim)
-                    v = m[metric]
-                    if isinstance(v, np.ndarray):
-                        v = float(np.linalg.norm(v))
-                    values.append(float(v))
-                except (ValueError, RuntimeError, FloatingPointError, AssertionError):
-                    pass
-            return np.array(values) if values else np.array([0.0])
-
-        for metric in scalar_metrics:
-            vals_a = _collect_scalar(profile_a, metric)
-            vals_b = _collect_scalar(profile_b, metric)
-
-            try:
-                stat, pval = _stats.mannwhitneyu(
-                    vals_a, vals_b, alternative="two-sided"
-                )
-            except ValueError:
-                pval = 1.0
-
-            pvalues[metric] = float(pval)
-            mean_a = float(np.mean(vals_a))
-            mean_b = float(np.mean(vals_b))
-
-            # For most metrics lower is better (rmse, energy), for speed higher is better
-            if metric in ("end_effector_speed_final", "peak_end_effector_speed"):
-                winner_metric = "A" if mean_a > mean_b else "B"
-            else:
-                winner_metric = "A" if mean_a < mean_b else "B"
-
-            metric_comparisons[metric] = {
-                "mean_a": mean_a,
-                "mean_b": mean_b,
-                "winner": winner_metric,
-                "pvalue": float(pval),
-            }
-
-            if winner_metric == "A":
-                a_wins += 1
-            else:
-                b_wins += 1
-
-        total = a_wins + b_wins
-        if total == 0:
-            winner, confidence = "tie", 0.5
-        elif a_wins > b_wins:
-            winner = "A"
-            confidence = a_wins / total
-        elif b_wins > a_wins:
-            winner = "B"
-            confidence = b_wins / total
-        else:
-            winner = "tie"
-            confidence = 0.5
+        metric_comparisons, pvalues, a_wins, b_wins = (
+            self._build_scalar_metric_comparisons(
+                _stats,
+                profile_a,
+                profile_b,
+                config,
+            )
+        )
+        winner, confidence = _overall_winner(a_wins, b_wins)
 
         # Restore profile A
         self.set_base_torque_profile(profile_a)
@@ -583,6 +551,69 @@ class PendulumPerturbationAnalyzer:
             metric_comparisons=metric_comparisons,
             pvalues=pvalues,
         )
+
+    def _build_scalar_metric_comparisons(
+        self,
+        stats_module: Any,
+        profile_a: object,
+        profile_b: object,
+        config: PerturbationConfig,
+    ) -> tuple[dict[str, Any], dict[str, float], int, int]:
+        metric_comparisons: dict[str, Any] = {}
+        pvalues: dict[str, float] = {}
+        a_wins = 0
+        b_wins = 0
+
+        for metric in SCALAR_COMPARISON_METRICS:
+            vals_a = self._collect_scalar_metric_values(profile_a, metric, config)
+            vals_b = self._collect_scalar_metric_values(profile_b, metric, config)
+            pval = _mann_whitney_pvalue(stats_module, vals_a, vals_b)
+            mean_a = float(np.mean(vals_a))
+            mean_b = float(np.mean(vals_b))
+            winner_metric = _metric_winner(metric, mean_a, mean_b)
+
+            pvalues[metric] = pval
+            metric_comparisons[metric] = {
+                "mean_a": mean_a,
+                "mean_b": mean_b,
+                "winner": winner_metric,
+                "pvalue": pval,
+            }
+            a_wins += int(winner_metric == "A")
+            b_wins += int(winner_metric == "B")
+
+        return metric_comparisons, pvalues, a_wins, b_wins
+
+    def _collect_scalar_metric_values(
+        self,
+        profile: object,
+        metric: str,
+        config: PerturbationConfig,
+    ) -> np.ndarray:
+        base_seed = config.seed if config.seed is not None else 0
+        self.set_base_torque_profile(profile)
+        values: list[float] = []
+        for i in range(config.n_trials):
+            perturbed = _perturb_coeffs_by_mode(
+                self._base_coeffs,  # type: ignore[arg-type]
+                config,
+                base_seed + i,
+            )
+            try:
+                sim = self._simulate(perturbed)
+                value = self.extract_metrics(sim)[metric]
+                if isinstance(value, np.ndarray):
+                    value = float(np.linalg.norm(value))
+                values.append(float(value))
+            except (
+                AssertionError,
+                FloatingPointError,
+                RuntimeError,
+                TypeError,
+                ValueError,
+            ):
+                continue
+        return np.array(values) if values else np.array([0.0])
 
     # ------------------------------------------------------------------
     # Internal helpers
