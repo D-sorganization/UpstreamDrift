@@ -222,6 +222,7 @@ class TestCIEnvironmentCompatibility:
 
         assert "pytest_exit_code=$?" in workflow
         assert "elif [ $pytest_exit_code -eq 5 ]; then" in workflow
+        assert '-o addopts=""' in workflow
         assert "WARNING: pytest exit code 5 (no tests collected) detected." in (
             workflow
         )

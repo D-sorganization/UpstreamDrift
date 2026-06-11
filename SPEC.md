@@ -38,14 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-
-<<<<<<< ours
-| **Spec Version** | 1.0.319 |
-=======
-| **Spec Version** | 1.0.304 |
-
-> > > > > > > theirs
-> > > > > > > | **Last Spec Update** | 2026-06-11 |
+| **Spec Version**        | 1.0.328                                            |
+| **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
 
@@ -76,38 +70,34 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-11** - Isolated optional dependency import mocks for #7307.
+  Tests for OpenSim, MuJoCo video export, and Drake visualizer/analysis
+  imports now install fake optional packages only inside scoped import
+  fixtures. The shared optional-dependency helper restores dependency and
+  target-module cache entries after each test, and repo-hygiene coverage
+  rejects new module-scope `sys.modules` mocks for optional engine/media
+  dependencies.
+- **2026-06-11** - Split the motion surrogate training architecture for
+  #7317. The compact-schema surrogate trainer now resolves legacy keyword
+  arguments through `SurrogateTrainingOptions`, builds an explicit training
+  context, and runs checkpoints/metrics through a focused loop state. The
+  per-step dynamics trainer now separates data preparation, runtime object
+  construction, epoch fitting, best-checkpoint evaluation, and JSON output
+  writing. The per-step optimizer now resolves legacy positional options
+  through `OptimizationOptions`, builds an optimization context, isolates
+  regularizer/orientation/tracking loss calculation, and writes torque plus
+  summary artifacts from a dedicated output helper while preserving existing
+  CLI and call-site compatibility.
 - **2026-06-11** - Hardened the #7314 PR-scoped unit gate in standard
   CI. Source and dependency PRs now fall through to the dependency-light unit
   lane instead of passing solely on touched test files, and targeted PR coverage
   invokes a changed-file coverage ratchet for production policy files.
-- **2026-06-10** - Hardened the Jules PR AutoFix `workflow_run` trust boundary.
-  Failed-CI `workflow_run` events now use read-only metadata resolution and a
-  PR comment that asks maintainers to run the privileged fixer through explicit
-  `workflow_dispatch`; only the manual dispatch path can check out PR code,
-  install dependencies, run autofix tools, commit, or push. Standard CI now
-  enforces that boundary with `scripts/check_workflow_run_trust_boundary.py`
-  and focused regression coverage.
-- **2026-06-10** - Narrowed PR-scoped source coverage in standard CI to the
-  changed `src/**/*.py` targets after the coverage-bypass fix. Source and
-  dependency PRs still produce coverage and enforce the 75% floor, while the
-  full per-package coverage enforcer runs only after the default full-coverage
-  lane so focused PRs do not fail against unrelated modules.
-- **2026-06-10** - Enforced the #7277 Docker build timeout while process
-  stdout remains open. `src/launchers/docker_manager.py` now reads build output
-  through a background queue while the build thread owns a wall-clock timeout
-  and terminates the process tree on expiry, including the regression case
-  where stdout never reaches EOF.
-- **2026-06-10** - Locked the #7278 standard CI dependency and audit
-  contract to committed artifacts. Python jobs that install project runtime or
-  dev dependencies now seed environments from `requirements.lock` or
-  `requirements-dev.lock` before no-dependency editable installs, avoiding
-  pip constraints parsing for lock entries with extras. The dev lock now
-  includes the GUI-test extra so `--no-deps` editable installs still provide
-  real PyQt6/pytest-qt modules in the unit gates, and `pip-audit` runs directly
-  against the committed runtime/dev lock files instead of a live resolver
-  result. The standard CI acceptance tests also reject blank lines immediately
-  after shell continuations so the core pytest coverage command cannot be split
-  into a partial command again (#7303).
+- **2026-06-10** - Hardened the optional cloud client cache contract for
+  #7300. Empty or whitespace-only `~/.golf-suite/cloud_token` files are now
+  treated as absent credentials, leaving `CloudClient.token` as `None` and
+  `is_logged_in` false while preserving valid cached-token behavior. The
+  runtime login state now requires a truthy token even if a caller manually
+  mutates the token field.
 - **2026-06-10** - Tightened API and model-library boundary contracts for
   #7297, #7298, and #7299. Data Explorer import/list responses now expose the
   durable `dataset_id` required by row pagination, filter operators are
@@ -120,6 +110,17 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   WebSocket-safe dependency accessor instead of reaching directly through
   `websocket.app.state`, and missing engine-manager state returns a structured
   `service_unavailable` frame before the connection closes cleanly.
+- **2026-06-10** - Locked the #7278 standard CI dependency and audit
+  contract to committed artifacts. Python jobs that install project runtime or
+  dev dependencies now seed environments from `requirements.lock` or
+  `requirements-dev.lock` before no-dependency editable installs, avoiding
+  pip constraints parsing for lock entries with extras. The dev lock now
+  includes the GUI-test extra so `--no-deps` editable installs still provide
+  real PyQt6/pytest-qt modules in the unit gates, and `pip-audit` runs directly
+  against the committed runtime/dev lock files instead of a live resolver
+  result. The standard CI acceptance tests also reject blank lines immediately
+  after shell continuations so the core pytest coverage command cannot be split
+  into a partial command again (#7303).
 - **2026-06-10** - Closed the #7273 PR-scoped coverage bypass in standard CI.
   PRs that change source, test, or dependency targets now fall through to the
   coverage-producing core test lane instead of using the workflow-only
@@ -410,7 +411,7 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
 - **2026-05-31** - Added the CC-26 AffineDrift coupling surface (#6799): `src/shared/python/analysis/affine_drift_coupling.py` now samples double-pendulum traces into pointwise drift/control-affine acceleration terms, exposes HDF5 persistence for coupling results, and documents canonical-v2 trace extraction in `docs/conventions/canonical-v2.md` and `docs/simulation_backends/results_schema_v2.md`.
 - **2026-05-31** - Added the CC-16 output-only canonical C3D exporter (#6789): motion capture can now export marker trajectories from canonical state arrays to terminal C3D files with unit, label, sample-rate, and architecture guards that prevent C3D from becoming an internal intermediate.
 - **2026-05-31** - Added the CC-28 Drake canonical-core adapter slice for issue #6801: the existing Drake pose adapter now declares AutoDiffXd/contact/trajectory capabilities, remaps canonical-v2 dynamic state blocks into Drake `QuaternionFloatingJoint` ordering with angular-velocity frame conversion, and registers the hydroelastic-vs-Pinocchio contact divergence in `docs/conformance/canonical_core_divergences.yaml`.
-- **2026-05-31** - Added the CC-30 MyoSuite canonical-core adapter slice (#6803): activation-driven canonical-v2 state remapping for MyoSuite/MuJoCo MJCF layouts, explicit MUSCLES/FORWARD_DYN/CONTACT capability declaration with no joint-torque inverse-dynamics claim, upstream-muscle activation/force helper routing, and Trace v2.1 muscle-output fields.
+- **2026-05-31** - Added the CC-30 MyoSuite canonical-core adapter slice (#6803): activation-driven canonical-v2 state remapping for MyoSuite/MuJoCo MJCF layouts, explicit MUSCLES/FORWARD_DYN/CONTACT capability declaration with no joint-torque inverse-dynamics claim, upstream-muscle activation/force helper routing, and Trace v2.1 muscle-output persistence fields.
 - **2026-05-31** - Added the CC-33 canonical 3D viewport provider decision (#6806): MeshCat is the selected default over Rerun and VTK/PyVista, with lazy provider metadata/selection/degradation and a Trace v2 overlay payload for canonical-v2 trajectory, marker, contact, and GRF/wrench data.
 - **2026-05-31** - Tightened review-feedback guardrails for issues #6816 and #6827: the license ledger advisory now validates the OpenPose row cells directly, the cross-engine equivalence workflow runs when `pyproject.toml` changes so the JaxSim pin guard covers optional-extra drift, and the bot CI trigger validates `gh auth status` before attempting authenticated workflow dispatch.
 - **2026-05-31** - Added canonical-core estimation residuals for issue #6791:
@@ -536,6 +537,7 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── motion_matching/        # Motion-matching pipelines, surrogate training, per-step optimization
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
 │       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
@@ -736,7 +738,6 @@ engines:
 visualization:
   default_camera: third_person
   background_color: [0.1, 0.1, 0.1, 1.0]
-```
 
 ## 7. Testing Specification
 
@@ -977,7 +978,6 @@ cd ui && npm install && npm run tauri build
 pytest tests/unit/ -v
 pytest tests/integration/ -v
 pytest tests/ --cov=src --cov-fail-under=55
-```
 
 ### Build Artifacts
 
@@ -1026,7 +1026,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-11 | 1.0.322 | Simulation WebSocket dependency-boundary hardening for #7283. `simulation_stream` now resolves the engine manager through a WebSocket-safe dependency accessor instead of direct `websocket.app.state.engine_manager` traversal, and missing app-state manager configuration emits a structured `service_unavailable` frame before clean close. Focused dependency and WebSocket route tests pin the contract. |
+| 2026-06-11 | 1.0.328 | Simulation WebSocket dependency-boundary conflict refresh for #7283. `simulation_stream` keeps resolving the engine manager through the WebSocket-safe dependency accessor after the latest `main` SPEC updates, and missing app-state manager configuration still emits a structured `service_unavailable` frame before clean close. |
+| 2026-06-11 | 1.0.326 | Motion surrogate training architecture split for #7317. Compact surrogate training now uses `SurrogateTrainingOptions`, explicit training context construction, and loop-state helpers while preserving legacy keyword call compatibility. Per-step dynamics training separates data preparation, runtime setup, fitting, evaluation, and output writing. Per-step optimization now routes legacy positional options through `OptimizationOptions`, uses an optimization context, isolates tracking/regularizer loss helpers, and writes optimized torque outputs plus summaries through a dedicated artifact writer. |
+| 2026-06-11 | 1.0.323 | Cloud client cached-token hardening for #7300. `CloudClient._load_cached_token()` now ignores empty and whitespace-only cache files instead of treating `""` as an authenticated token, `CloudClient.is_logged_in` requires a truthy token, and focused tests pin both invalid-cache cases while preserving valid cached-token behavior. |
+| 2026-06-11 | 1.0.320 | Optional dependency mock isolation for #7307. Added `scoped_import_with_optional_mocks()` to shared test support, converted the called-out OpenSim, MuJoCo, and Drake tests from module-scope `sys.modules` mutation/import patching to per-test scoped import fixtures, removed the MuJoCo subtree-wide fake dependency conftest, and added a repo-hygiene guard that fails on new module-scope optional dependency mocks for `opensim`, `mujoco`, `cv2`, `imageio`, and `pydrake`. |
 | 2026-06-11 | 1.0.318 | Data Explorer and model-library boundary contracts for #7297, #7298, and #7299. Import/list responses expose durable `dataset_id` values, Data Explorer filter requests reject unsupported operators at the request boundary, and forced model-library downloads validate HTTPS-only `source_url` values before any download I/O. |
 | 2026-06-11 | 1.0.312 | Blocking DRY duplication ratchet for #7315. Added `scripts/ci/check_dry_duplication_gate.py` with focused tests, explicit production-`src` include/exclude config, and an owned no-growth baseline for existing duplicated logic fingerprints; `ci-standard.yml` now runs the checker inside `repo-structure-gates` so duplicate growth feeds the required `quality-gate` aggregate while `Code-Metrics.yml` remains advisory/manual reporting. |
 | 2026-06-11 | 1.0.311 | PR-scoped unit gate hardening for #7314. Standard CI no longer lets source/dependency PRs pass solely by running changed test files; those PRs fall through to the dependency-light unit lane with targeted coverage. `coverage_enforcer.py` now supports a PR-mode changed-file ratchet so changed production policy files must appear in targeted coverage and meet their policy threshold. |
