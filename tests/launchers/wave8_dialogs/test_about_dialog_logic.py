@@ -9,71 +9,45 @@ from unittest.mock import patch
 import pytest
 
 from src.launchers import about_dialog as ad
+from src.shared.python import version_info
+
+# The version-resolution chain is now single-sourced in
+# src.shared.python.version_info (issue #7459); the dialog delegates to it.
 
 
 class TestReadVersionFile:
     def test_returns_none_when_no_file(self, tmp_path: Path) -> None:
-        with patch.object(
-            ad, "__file__", str(tmp_path / "nonexistent" / "about_dialog.py")
-        ):
-            assert ad._read_version_file() is None
+        assert version_info.read_version_file(tmp_path) is None
 
-    def test_reads_first_line(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        # Layout: tmp/repo/src/launchers/about_dialog.py -> VERSION at parents[2]
-        repo = tmp_path / "repo"
-        (repo / "src" / "launchers").mkdir(parents=True)
-        fake_file = repo / "src" / "launchers" / "about_dialog.py"
-        fake_file.write_text("# stub")
-        (repo / "VERSION").write_text("9.9.9\nignored\n")
+    def test_reads_first_line(self, tmp_path: Path) -> None:
+        (tmp_path / "VERSION").write_text("9.9.9\nignored\n")
+        assert version_info.read_version_file(tmp_path) == "9.9.9"
 
-        monkeypatch.setattr(ad, "__file__", str(fake_file))
-        assert ad._read_version_file() == "9.9.9"
-
-    def test_skips_empty_file(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        repo = tmp_path / "repo"
-        (repo / "src" / "launchers").mkdir(parents=True)
-        fake_file = repo / "src" / "launchers" / "about_dialog.py"
-        fake_file.write_text("# stub")
-        (repo / "VERSION").write_text("   \n")
-
-        monkeypatch.setattr(ad, "__file__", str(fake_file))
-        assert ad._read_version_file() is None
+    def test_skips_empty_file(self, tmp_path: Path) -> None:
+        (tmp_path / "VERSION").write_text("   \n")
+        assert version_info.read_version_file(tmp_path) is None
 
     def test_oserror_handled(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        # Patch Path.exists to raise OSError on read_text path
-        repo = tmp_path / "repo"
-        (repo / "src" / "launchers").mkdir(parents=True)
-        fake_file = repo / "src" / "launchers" / "about_dialog.py"
-        fake_file.write_text("# stub")
-        monkeypatch.setattr(ad, "__file__", str(fake_file))
-
-        original_read = Path.read_text
+        (tmp_path / "VERSION").write_text("1.2.3")
 
         def boom(self: Path, *a: object, **kw: object) -> str:
             raise OSError("denied")
 
         monkeypatch.setattr(Path, "read_text", boom)
         # Should not raise; just return None
-        (repo / "VERSION").write_text("1.2.3")
-        assert ad._read_version_file() is None
-        monkeypatch.setattr(Path, "read_text", original_read)
+        assert version_info.read_version_file(tmp_path) is None
 
 
 class TestResolveAppVersion:
-    def test_uses_version_file_first(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(ad, "_read_version_file", lambda: "7.0.0")
-        assert ad._resolve_app_version() == "7.0.0"
+    def test_uses_version_file_first(self, tmp_path: Path) -> None:
+        (tmp_path / "VERSION").write_text("7.0.0\n")
+        assert version_info.resolve_app_version(tmp_path) == "7.0.0"
 
     def test_fallback_constant_when_no_metadata(
-        self, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        monkeypatch.setattr(ad, "_read_version_file", lambda: None)
         from importlib.metadata import PackageNotFoundError
 
         def fake_version(name: str) -> str:
@@ -82,12 +56,11 @@ class TestResolveAppVersion:
         import importlib.metadata as m
 
         monkeypatch.setattr(m, "version", fake_version)
-        assert ad._resolve_app_version() == "1.0.0-beta"
+        assert version_info.resolve_app_version(tmp_path) == "1.0.0-beta"
 
     def test_uses_importlib_metadata_when_available(
-        self, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        monkeypatch.setattr(ad, "_read_version_file", lambda: None)
         import importlib.metadata as m
 
         def fake_version(name: str) -> str:
@@ -98,7 +71,10 @@ class TestResolveAppVersion:
             raise PackageNotFoundError(name)
 
         monkeypatch.setattr(m, "version", fake_version)
-        assert ad._resolve_app_version() == "3.2.1"
+        assert version_info.resolve_app_version(tmp_path) == "3.2.1"
+
+    def test_dialog_delegates_to_shared_implementation(self) -> None:
+        assert ad._resolve_app_version is version_info.resolve_app_version
 
 
 class TestSafeVersion:

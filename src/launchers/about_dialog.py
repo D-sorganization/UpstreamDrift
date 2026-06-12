@@ -21,86 +21,21 @@ from PyQt6.QtCore import QT_VERSION_STR, QUrl
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import QMessageBox
 
+from src.shared.python.version_info import (
+    ISSUES_URL as ISSUES_URL,
+)
+from src.shared.python.version_info import (
+    REPO_URL as REPO_URL,
+)
+from src.shared.python.version_info import (
+    resolve_app_version as _resolve_app_version,
+)
+from src.shared.python.version_info import (
+    safe_module_version as _safe_version,
+)
+
 if TYPE_CHECKING:
     from PyQt6.QtWidgets import QWidget
-
-
-REPO_URL = "https://github.com/D-sorganization/UpstreamDrift"
-ISSUES_URL = f"{REPO_URL}/issues"
-
-
-def _read_version_file() -> str | None:
-    """Return the contents of the repo-root ``VERSION`` file, if present.
-
-    Returns:
-        The stripped first line of ``VERSION``, or ``None`` when the file
-        does not exist or cannot be read. Never raises.
-    """
-    candidates = [
-        Path(__file__).resolve().parents[2] / "VERSION",
-        Path(__file__).resolve().parents[3] / "VERSION",
-    ]
-    for path in candidates:
-        try:
-            if path.exists():
-                text = path.read_text(encoding="utf-8").strip()
-                if text:
-                    return text.splitlines()[0].strip()
-        except OSError:
-            continue
-    return None
-
-
-def _resolve_app_version() -> str:
-    """Resolve the application version string.
-
-    Resolution order:
-        1. ``VERSION`` file at repo root.
-        2. ``importlib.metadata`` for ``upstream-drift``.
-        3. Hardcoded fallback.
-
-    Returns:
-        Version string (never empty).
-    """
-    v = _read_version_file()
-    if v:
-        return v
-    try:
-        from importlib.metadata import PackageNotFoundError, version
-
-        try:
-            return version("upstream-drift")
-        except PackageNotFoundError:
-            pass
-        try:
-            return version("golf-modeling-suite")
-        except PackageNotFoundError:
-            pass
-    except ImportError:
-        pass
-    return "1.0.0-beta"
-
-
-def _safe_version(import_name: str) -> str:
-    """Import a module and return ``__version__`` if available.
-
-    Args:
-        import_name: Module to import (e.g. ``"numpy"``).
-
-    Returns:
-        The module's ``__version__`` string, or ``"not installed"`` if the
-        module cannot be imported, or ``"unknown"`` if the module is
-        importable but does not expose ``__version__``.
-    """
-    # Issue #5911: ``ImportError`` was previously a bare ``except Exception``.
-    # Narrowed to the real exception types that ``__import__`` raises.
-    # ``ModuleNotFoundError`` is a subclass of ``ImportError`` (caught).
-    # ``ValueError`` covers the ``__import__("")`` empty-name path.
-    try:
-        mod = __import__(import_name)
-    except (ImportError, ValueError):
-        return "not installed"
-    return str(getattr(mod, "__version__", "unknown"))
 
 
 def gather_version_info() -> dict[str, str]:

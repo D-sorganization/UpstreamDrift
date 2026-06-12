@@ -1,0 +1,27 @@
+{
+  "header": "Welcome to UpstreamDrift",
+  "subtitle": "Biomechanics and Robotics Platform",
+  "cards": [
+    {
+      "id": "quick_start",
+      "title": "Quick Start",
+      "body": "Launch your first physics model using the integrated grid layout.",
+      "link_text": "Read the Guide",
+      "link_url": "https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md"
+    },
+    {
+      "id": "configurations",
+      "title": "Configurations",
+      "body": "Adjust themes, install required dependencies, and set up your environment.",
+      "link_text": "Report an Issue",
+      "link_url": "https://github.com/D-sorganization/UpstreamDrift/issues"
+    },
+    {
+      "id": "documentation",
+      "title": "Documentation",
+      "body": "Browse the user guide for engine installation, model selection, and launching simulations.",
+      "link_text": "Open Documentation",
+      "link_url": "https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md"
+    }
+  ]
+}
