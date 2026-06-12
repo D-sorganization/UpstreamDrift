@@ -154,6 +154,15 @@ describe('DiagnosticsPanel (browser mode, issue #7458)', () => {
     }
   });
 
+  it('floats the panel above page sidebars (#7419: z-50)', async () => {
+    await openPanel();
+    // Walk up from a stable inner node to the absolutely-positioned panel.
+    const inner = screen.getByTestId('full-diagnostics');
+    const panel = inner.closest('div.absolute');
+    expect(panel).not.toBeNull();
+    expect(panel?.className).toContain('z-50');
+  });
+
   it.each([
     ['pass', 'engine_availability'],
     ['warning', 'asset_files'],

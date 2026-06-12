@@ -404,7 +404,7 @@ export function LauncherDashboard({
             </header>
 
             {/* Scrollable tile grid */}
-            <main className="flex-1 overflow-y-auto px-6 py-6" id="tile-grid-container">
+            <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-3 md:py-6" id="tile-grid-container">
                 {tileSections.map((section) => {
                     const Icon = section.icon;
                     return (
@@ -420,7 +420,7 @@ export function LauncherDashboard({
                                 />
                             </div>
                             <div
-                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4"
                                 role="group"
                                 aria-label={section.groupLabel}
                                 id={section.id}

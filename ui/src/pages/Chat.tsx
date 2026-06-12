@@ -9,10 +9,10 @@ import { ChatPanel } from '@/components/ui/ChatPanel';
 
 export function ChatPage() {
   return (
-    <div className="sidekick-shell flex justify-center items-stretch w-full h-screen p-4">
-      <div className="flex w-full max-w-3xl h-full">
-        <ChatPanel />
-      </div>
+    // #7419: single wrapper — ChatPanel owns its own `max-w-3xl`, so the
+    // previous nested flex wrappers were redundant.
+    <div className="sidekick-shell w-full h-screen flex justify-center p-2 sm:p-4">
+      <ChatPanel />
     </div>
   );
 }
