@@ -102,4 +102,57 @@ describe('useSimulationStore', () => {
       expect(state.hasRun).toBe(false);
     });
   });
+
+  // ── Trajectory recording lifecycle (#7452) ────────────────────────
+  describe('recording', () => {
+    it('starts idle with zero frames', () => {
+      const { recording } = useSimulationStore.getState();
+      expect(recording).toEqual({ status: 'idle', frameCount: 0 });
+    });
+
+    it('startRecording marks active and clears prior frame count', () => {
+      act(() => {
+        useSimulationStore.getState().finishRecording(99);
+        useSimulationStore.getState().startRecording();
+      });
+
+      expect(useSimulationStore.getState().recording).toEqual({
+        status: 'recording',
+        frameCount: 0,
+      });
+    });
+
+    it('finishRecording records the saved frame count', () => {
+      act(() => {
+        useSimulationStore.getState().startRecording();
+        useSimulationStore.getState().finishRecording(123);
+      });
+
+      expect(useSimulationStore.getState().recording).toEqual({
+        status: 'saved',
+        frameCount: 123,
+      });
+    });
+
+    it('resetRecording returns to idle', () => {
+      act(() => {
+        useSimulationStore.getState().finishRecording(5);
+        useSimulationStore.getState().resetRecording();
+      });
+
+      expect(useSimulationStore.getState().recording).toEqual({
+        status: 'idle',
+        frameCount: 0,
+      });
+    });
+
+    it('resetParameters also clears recording state', () => {
+      act(() => {
+        useSimulationStore.getState().startRecording();
+        useSimulationStore.getState().resetParameters();
+      });
+
+      expect(useSimulationStore.getState().recording.status).toBe('idle');
+    });
+  });
 });

@@ -301,6 +301,17 @@ class CameraPresetResponse(BaseModel):
     up: list[float] = Field(..., description="Camera up vector [x, y, z]")
 
 
+class CameraPresetListResponse(BaseModel):
+    """Response model for enumerating available camera presets.
+
+    See issue #7452
+    """
+
+    presets: list[CameraPresetResponse] = Field(
+        ..., description="Available camera presets with their view vectors"
+    )
+
+
 class TrajectoryRecordResponse(BaseModel):
     """Response model for trajectory recording state.
 
