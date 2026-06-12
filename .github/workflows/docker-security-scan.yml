@@ -47,6 +47,7 @@ jobs:
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
           # SARIF upload remains nonblocking; the table scan below is the
           # blocking HIGH/CRITICAL gate.
           exit-code: "0"
@@ -64,6 +65,7 @@ jobs:
           image-ref: "upstreamdrift:ci"
           format: "table"
           severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
           # Fail the build on HIGH or CRITICAL vulnerabilities.
           exit-code: "1"
           vuln-type: "os,library"

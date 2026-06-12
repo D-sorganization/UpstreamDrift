@@ -74,6 +74,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   standalone Sidekick console package by asserting the wheel target maps
   `src/shared/python/sidekick` to top-level `sidekick` through Hatch
   `force-include`.
+- **2026-06-12** - Refreshed the pinned `python:3.12-slim` Docker base digest
+  and configured the blocking Trivy table scan to ignore unfixed OS findings,
+  keeping the gate focused on actionable HIGH/CRITICAL vulnerabilities.
 - **2026-06-12** - Moved shared plot-series label generation into a Qt-free
   `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
   label contracts without importing the Matplotlib/PyQt plotting package.
