@@ -181,7 +181,7 @@ def make_app_state_provider(
             simulation_service=(
                 simulation_service_supplier() if simulation_service_supplier else None
             ),
-            store=store_supplier() if store_supplier else None,
+            store=store_supplier() if store_supplier is not None else None,
         ).model_dump()
 
     return _provider
