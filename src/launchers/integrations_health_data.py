@@ -251,12 +251,71 @@ def collect_all() -> list[IntegrationRecord]:
 # Pattern to strip Bearer tokens and any raw key-like values from detail strings.
 _SECRET_PATTERN = re.compile(r"Bearer\s+\S+", re.IGNORECASE)
 
+#: Minimum secret value length considered for literal-value redaction. Very
+#: short env values (e.g. ``"1"``) would otherwise cause pathological
+#: replacements across unrelated text.
+_MIN_SECRET_LENGTH = 4
+
+
+def redact_secrets(text: str | None) -> str:
+    """Redact Bearer tokens and known provider secret values from *text*.
+
+    Server-side guarantee for diagnostics surfaces (issue #7458): in addition
+    to the ``Bearer <token>`` pattern, any literal value of a configured
+    provider env var (e.g. ``ANTHROPIC_API_KEY``) found in *text* is replaced
+    with ``[REDACTED]``.
+
+    Args:
+        text: Arbitrary detail/error string, or ``None``.
+
+    Returns:
+        The scrubbed string; empty string for ``None``.
+    """
+    if text is None:
+        return ""
+    scrubbed = _SECRET_PATTERN.sub("[REDACTED]", text)
+    for _provider, env_var in _KNOWN_API_PROVIDERS:
+        value = os.environ.get(env_var, "")
+        if len(value) >= _MIN_SECRET_LENGTH and value in scrubbed:
+            scrubbed = scrubbed.replace(value, "[REDACTED]")
+    return scrubbed
+
 
 def _scrub(text: str | None) -> str:
     """Remove Bearer tokens from *text*; return empty string for ``None``."""
-    if text is None:
-        return ""
-    return _SECRET_PATTERN.sub("[REDACTED]", text)
+    return redact_secrets(text)
+
+
+def record_to_redacted_dict(record: IntegrationRecord) -> dict[str, str | None]:
+    """Serialize *record* to a JSON-safe dict with secrets redacted.
+
+    Used by ``GET /api/v1/integrations/health`` so redaction is enforced
+    server-side, never delegated to the client (issue #7458).
+
+    Args:
+        record: The integration record to serialize.
+
+    Returns:
+        Dict with ``kind``, ``name``, ``status``, ``last_checked`` (ISO 8601 or
+        ``None``), ``last_error``, and ``detail`` keys.
+
+    Raises:
+        TypeError: If *record* is not an :class:`IntegrationRecord`.
+    """
+    if not isinstance(record, IntegrationRecord):
+        raise TypeError(
+            f"record must be an IntegrationRecord, got {type(record).__name__}"
+        )
+    return {
+        "kind": record.kind,
+        "name": record.name,
+        "status": record.status,
+        "last_checked": (
+            record.last_checked.isoformat() if record.last_checked else None
+        ),
+        "last_error": redact_secrets(record.last_error) or None,
+        "detail": redact_secrets(record.detail) or None,
+    }
 
 
 def copy_diagnostics(records: list[IntegrationRecord]) -> str:
@@ -315,4 +374,6 @@ __all__ = [
     "aggregate_mcp_servers",
     "collect_all",
     "copy_diagnostics",
+    "record_to_redacted_dict",
+    "redact_secrets",
 ]
