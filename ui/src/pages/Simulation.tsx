@@ -5,7 +5,8 @@ import { useEngineStore, selectEffectiveEngine } from '@/stores/useEngineStore';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
-import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
+import { ParameterPanel } from '@/components/simulation/ParameterPanel';
+import type { SimulationParameters } from '@/stores/useSimulationStore';
 import { useDebouncedCommand } from '@/utils/useDebouncedCommand';
 import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
 import { RecordingsPanel } from '@/components/simulation/RecordingsPanel';
@@ -50,7 +51,8 @@ export function SimulationPage() {
   );
 
   const parameters = useSimulationStore((s) => s.parameters);
-  const replaceParameters = useSimulationStore((s) => s.replaceParameters);
+  const setParameters = useSimulationStore((s) => s.setParameters);
+  const resetToEngineDefaults = useSimulationStore((s) => s.resetToEngineDefaults);
   const markRun = useSimulationStore((s) => s.markRun);
   const recording = useSimulationStore((s) => s.recording);
   const markRecordingStarted = useSimulationStore((s) => s.startRecording);
@@ -219,11 +221,15 @@ export function SimulationPage() {
   );
 
   const handleParameterChange = useCallback(
-    (params: SimulationParameters) => {
-      replaceParameters(params);
+    (params: Partial<SimulationParameters>) => {
+      setParameters(params);
     },
-    [replaceParameters]
+    [setParameters]
   );
+
+  const handleResetDefaults = useCallback(() => {
+    resetToEngineDefaults(effectiveEngine || 'mujoco');
+  }, [resetToEngineDefaults, effectiveEngine]);
 
   const handleStart = useCallback(() => {
     if (!effectiveEngine) {
@@ -369,7 +375,9 @@ export function SimulationPage() {
           <ParameterPanel
             engine={effectiveEngine || 'mujoco'}
             disabled={isRunning || !effectiveEngine}
+            value={parameters}
             onChange={handleParameterChange}
+            onResetDefaults={handleResetDefaults}
           />
         </div>
 

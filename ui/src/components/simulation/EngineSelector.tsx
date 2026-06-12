@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Loader2, Check, AlertCircle, Power, PowerOff } from 'lucide-react';
 import type { ManagedEngine, EngineLoadState } from '@/stores/useEngineStore';
 
@@ -13,6 +14,7 @@ interface Props {
 function LoadStateIcon({ state }: { state: EngineLoadState }) {
   switch (state) {
     case 'loading':
+    case 'unloading':
       return <Loader2 className="w-4 h-4 animate-spin text-blue-400" aria-hidden="true" />;
     case 'loaded':
       return <Check className="w-4 h-4 text-emerald-400" aria-hidden="true" />;
@@ -27,6 +29,8 @@ function LoadStateLabel({ engine }: { engine: ManagedEngine }) {
   switch (engine.loadState) {
     case 'loading':
       return <span className="text-blue-400">Loading...</span>;
+    case 'unloading':
+      return <span className="text-blue-400">Unloading...</span>;
     case 'loaded':
       return (
         <span className="text-emerald-400">
@@ -48,6 +52,36 @@ export function EngineSelector({
   onUnload,
   disabled,
 }: Props) {
+  // Inline two-step unload confirm (#7427): name of the engine awaiting
+  // confirmation, auto-cancelled after 3s. Avoids a disruptive modal while
+  // still guarding against an accidental single-click unload.
+  const [confirmUnload, setConfirmUnload] = useState<string | null>(null);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearConfirm = () => {
+    if (confirmTimer.current) {
+      clearTimeout(confirmTimer.current);
+      confirmTimer.current = null;
+    }
+    setConfirmUnload(null);
+  };
+
+  const requestUnloadConfirm = (engineName: string) => {
+    if (confirmTimer.current) {
+      clearTimeout(confirmTimer.current);
+    }
+    setConfirmUnload(engineName);
+    confirmTimer.current = setTimeout(() => setConfirmUnload(null), 3000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (confirmTimer.current) {
+        clearTimeout(confirmTimer.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="mb-6">
       <label
@@ -68,7 +102,9 @@ export function EngineSelector({
           const isSelected = selectedEngine === engine.name;
           const isLoaded = engine.loadState === 'loaded';
           const isLoading = engine.loadState === 'loading';
+          const isUnloading = engine.loadState === 'unloading';
           const isError = engine.loadState === 'error';
+          const isConfirming = confirmUnload === engine.name;
           // #6900: an engine whose package is not installed must not be loadable.
           const isUnavailable = engine.available === false;
 
@@ -130,26 +166,59 @@ export function EngineSelector({
 
               {/* Load/Unload button — absolute positioned on right */}
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                {isLoaded ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUnload(engine.name);
-                    }}
-                    disabled={disabled || isSelected}
-                    aria-label={`Unload ${engine.displayName}`}
-                    title={isSelected ? 'Cannot unload active engine' : `Unload ${engine.displayName}`}
-                    className={`
-                      p-2 rounded-md text-xs transition-colors
-                      ${isSelected
-                        ? 'text-gray-600 cursor-not-allowed'
-                        : 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'
-                      }
-                      focus:outline-none focus:ring-2 focus:ring-red-400
-                    `}
-                  >
-                    <PowerOff className="w-4 h-4" />
-                  </button>
+                {isLoaded || isUnloading ? (
+                  isConfirming ? (
+                    <div className="flex items-center gap-1" role="group" aria-label="Confirm unload">
+                      <span className="text-[10px] text-gray-300 mr-1">Unload?</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearConfirm();
+                          onUnload(engine.name);
+                        }}
+                        aria-label={`Confirm unload ${engine.displayName}`}
+                        title="Confirm unload"
+                        className="p-1.5 rounded-md text-emerald-400 hover:bg-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearConfirm();
+                        }}
+                        aria-label="Cancel unload"
+                        title="Cancel"
+                        className="p-1.5 rounded-md text-gray-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        requestUnloadConfirm(engine.name);
+                      }}
+                      disabled={disabled || isSelected || isUnloading}
+                      aria-label={`Unload ${engine.displayName}`}
+                      title={isSelected ? 'Cannot unload active engine' : `Unload ${engine.displayName}`}
+                      className={`
+                        p-2 rounded-md text-xs transition-colors
+                        ${isSelected || isUnloading
+                          ? 'text-gray-600 cursor-not-allowed'
+                          : 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'
+                        }
+                        focus:outline-none focus:ring-2 focus:ring-red-400
+                      `}
+                    >
+                      {isUnloading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <PowerOff className="w-4 h-4" />
+                      )}
+                    </button>
+                  )
                 ) : (
                   <button
                     onClick={(e) => {

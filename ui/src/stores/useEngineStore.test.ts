@@ -116,6 +116,18 @@ describe('useEngineStore', () => {
 
       expect(useEngineStore.getState().selectedEngine).toBe('mujoco');
     });
+
+    it('is a no-op (no backend call) when the engine is not loaded (#7427)', async () => {
+      // 'drake' starts idle — unload must not POST to the backend.
+      const fetchSpy = vi.fn();
+      global.fetch = fetchSpy as unknown as typeof fetch;
+
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('drake');
+      });
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('requestLoad', () => {
@@ -200,6 +212,47 @@ describe('useEngineStore', () => {
       await useEngineStore.getState().requestLoad('drake');
 
       expect(useEngineStore.getState().selectedEngine).toBe('drake');
+    });
+
+    it('ignores a second concurrent load request (idempotence, #7427)', async () => {
+      // First call hangs in 'loading'; a rapid second call must be a no-op so
+      // the UI never fires duplicate load POSTs.
+      const fetchSpy = vi.fn(
+        () =>
+          new Promise<Response>(() => {
+            /* never resolves */
+          })
+      );
+      global.fetch = fetchSpy as typeof fetch;
+
+      const first = useEngineStore.getState().requestLoad('mujoco');
+      const loadingCalls = fetchSpy.mock.calls.length;
+      // Second click while still loading.
+      await useEngineStore.getState().requestLoad('mujoco');
+
+      // No additional fetch was issued by the second request.
+      expect(fetchSpy.mock.calls.length).toBe(loadingCalls);
+      const mujoco = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'mujoco');
+      expect(mujoco?.loadState).toBe('loading');
+      void first;
+    });
+
+    it('does not auto-select an engine that failed to load (#7427)', async () => {
+      // A failed load must never leave a selected engine the backend lacks.
+      global.fetch = vi.fn(() =>
+        Promise.reject(new Error('Network error'))
+      ) as typeof fetch;
+
+      expect(useEngineStore.getState().selectedEngine).toBeNull();
+      await useEngineStore.getState().requestLoad('drake');
+
+      const drake = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'drake');
+      expect(drake?.loadState).toBe('error');
+      expect(useEngineStore.getState().selectedEngine).toBeNull();
     });
 
     it('marks engine unavailable if probe returns not available', async () => {

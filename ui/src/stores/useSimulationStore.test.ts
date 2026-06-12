@@ -3,6 +3,7 @@ import { act } from '@testing-library/react';
 import {
   useSimulationStore,
   DEFAULT_PARAMETERS,
+  getEngineDefaults,
 } from './useSimulationStore';
 
 describe('useSimulationStore', () => {
@@ -100,6 +101,38 @@ describe('useSimulationStore', () => {
       const state = useSimulationStore.getState();
       expect(state.parameters).toEqual(DEFAULT_PARAMETERS);
       expect(state.hasRun).toBe(false);
+    });
+  });
+
+  describe('getEngineDefaults (#7424)', () => {
+    it('returns per-engine defaults (case-insensitive)', () => {
+      expect(getEngineDefaults('drake')).toEqual({ duration: 5.0, timestep: 0.001 });
+      expect(getEngineDefaults('DRAKE')).toEqual({ duration: 5.0, timestep: 0.001 });
+    });
+
+    it('falls back to global defaults for unknown engines', () => {
+      expect(getEngineDefaults('nonexistent')).toEqual({
+        duration: DEFAULT_PARAMETERS.duration,
+        timestep: DEFAULT_PARAMETERS.timestep,
+      });
+    });
+  });
+
+  describe('resetToEngineDefaults (#7424)', () => {
+    it('applies the engine defaults and preserves unrelated fields', () => {
+      act(() => {
+        useSimulationStore
+          .getState()
+          .setParameters({ duration: 42, liveAnalysis: false });
+      });
+      act(() => {
+        useSimulationStore.getState().resetToEngineDefaults('drake');
+      });
+      const { parameters } = useSimulationStore.getState();
+      expect(parameters.duration).toBe(5.0);
+      expect(parameters.timestep).toBe(0.001);
+      // Toggles are not part of engine defaults — left as the user set them.
+      expect(parameters.liveAnalysis).toBe(false);
     });
   });
 

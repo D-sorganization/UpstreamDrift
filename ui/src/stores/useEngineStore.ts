@@ -13,7 +13,12 @@ import type { EngineLoadResponse, EngineProbeResponse } from '@/api/generated/ty
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type EngineLoadState = 'idle' | 'loading' | 'loaded' | 'error';
+export type EngineLoadState =
+  | 'idle'
+  | 'loading'
+  | 'loaded'
+  | 'unloading'
+  | 'error';
 
 export interface ManagedEngine {
   name: string;
@@ -181,6 +186,12 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   },
 
   requestLoad: async (engineName) => {
+    // Idempotence guard (#7427): ignore a second request while one is already
+    // in flight, even if a rapid double-click slipped past the disabled button.
+    const current = get().engines.find((e) => e.name === engineName);
+    if (current?.loadState === 'loading' || current?.loadState === 'unloading') {
+      return;
+    }
     // Set to loading
     set((state) => ({
       engines: state.engines.map((e) =>
@@ -225,8 +236,13 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
         ),
       }));
 
-      // Auto-select if nothing is selected
-      if (!get().selectedEngine) {
+      // Auto-select if nothing is selected — but only if the engine is still
+      // loaded by the time the load resolves (#7427). A concurrent unload (this
+      // tab, another window, or a backend-side eviction) could have flipped it
+      // back, and selecting an engine the backend no longer has makes Start
+      // fail confusingly.
+      const justLoaded = get().engines.find((e) => e.name === engineName);
+      if (!get().selectedEngine && justLoaded?.loadState === 'loaded') {
         set({ selectedEngine: engineName });
       }
     } catch (err) {
@@ -244,6 +260,20 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
 
   unloadEngine: async (engineName) => {
     const { selectedEngine } = get();
+    // Idempotence guard (#7427): ignore an unload for an engine that is not
+    // loaded or already has an operation in flight.
+    const current = get().engines.find((e) => e.name === engineName);
+    if (current?.loadState !== 'loaded') {
+      return;
+    }
+    // Mark in flight so the UI can disable the button / show a spinner.
+    set((state) => ({
+      engines: state.engines.map((e) =>
+        e.name === engineName
+          ? { ...e, loadState: 'unloading' as EngineLoadState }
+          : e
+      ),
+    }));
     try {
       await apiFetch<unknown>(`/api/engines/${engineName}/unload`, { method: 'POST' });
     } catch {
