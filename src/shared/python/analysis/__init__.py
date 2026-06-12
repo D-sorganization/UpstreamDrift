@@ -55,6 +55,12 @@ from src.shared.python.analysis.dataclasses import (
     SwingProfileMetrics,
 )
 from src.shared.python.analysis.energy_metrics import EnergyMetricsMixin
+from src.shared.python.analysis.orchestrator import AnalysisOrchestrator
+from src.shared.python.analysis.plot_data import (
+    CounterfactualResult,
+    PlotData,
+    PlotSeries,
+)
 from src.shared.python.analysis.grf_metrics import GRFMetricsMixin
 from src.shared.python.analysis.nonlinear_dynamics import NonlinearDynamicsMixin
 from src.shared.python.analysis.pca_analysis import PCAAnalysisMixin
@@ -65,6 +71,11 @@ from src.shared.python.analysis.stability_metrics import StabilityMetricsMixin
 from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
 
 __all__ = [
+    # Headless analysis service layer (issue #7446)
+    "AnalysisOrchestrator",
+    "CounterfactualResult",
+    "PlotData",
+    "PlotSeries",
     # Dataclasses
     "AngularMomentumMetrics",
     "CoordinationMetrics",

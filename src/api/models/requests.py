@@ -212,6 +212,50 @@ class AnalysisRequest(BaseModel):
         return normalized
 
 
+class CounterfactualRequest(BaseModel):
+    """Request model for counterfactual / induced-acceleration analysis.
+
+    Preconditions:
+        - kind must be a known counterfactual kind (see
+          ``src.shared.python.analysis.orchestrator`` — single source).
+
+    See issue #7450.
+    """
+
+    kind: str = Field(
+        ...,
+        description=(
+            "Counterfactual kind: 'ztcf' / 'zvcf' (counterfactual "
+            "accelerations) or 'gravity' / 'drift' / 'control' / 'total' "
+            "(induced accelerations)"
+        ),
+    )
+    run_post_hoc: bool = Field(
+        True,
+        description=(
+            "When true and no counterfactual data is stored yet, replay the "
+            "recorded frames through the engine (expensive)"
+        ),
+    )
+
+    @field_validator("kind")
+    @classmethod
+    def validate_kind(cls, v: str) -> str:
+        """Precondition: kind must be a recognized counterfactual kind."""
+        from src.shared.python.analysis.orchestrator import (
+            COUNTERFACTUAL_KINDS,
+            INDUCED_ACCELERATION_KINDS,
+        )
+
+        normalized = v.lower().strip()
+        valid = COUNTERFACTUAL_KINDS | INDUCED_ACCELERATION_KINDS
+        if normalized not in valid:
+            raise ValueError(
+                f"Unknown counterfactual kind '{v}'. Valid kinds: {sorted(valid)}"
+            )
+        return normalized
+
+
 class VideoAnalysisRequest(BaseModel):
     """Request model for video-based pose estimation."""
 

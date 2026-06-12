@@ -201,6 +201,22 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_view_mode_and_zoom exceeds the function-lines budget until split.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/loaders/c3d.py",
+      "symbol": "load_club_target_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Relocation legacy code",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/loaders/c3d_body.py",
+      "symbol": "load_body_target_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Relocation legacy code",
+      "expires_on": "2026-12-31"
     }
   ]
 }

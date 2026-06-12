@@ -77,7 +77,6 @@ from src.launchers.ui_components import (
     StartupResults,
 )
 
-
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui import (
@@ -99,7 +98,6 @@ __all__ = [
     "STARTUP_TIMEOUT_SEC",
     "main",
 ]
-
 
 # Async startup is normally well under a second; 30s is a generous ceiling
 # that comfortably covers cold-disk Docker probes and slow first-run
@@ -1143,14 +1141,10 @@ class UpstreamDriftLauncher(QMainWindow):
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
-        if True:
-            settings.setValue("chk_live", self.chk_live.isChecked())
-        if True:
-            settings.setValue("chk_gpu", self.chk_gpu.isChecked())
-        if True:
-            settings.setValue("chk_docker", self.chk_docker.isChecked())
-        if True:
-            settings.setValue("chk_wsl", self.chk_wsl.isChecked())
+        settings.setValue("chk_live", self.chk_live.isChecked())
+        settings.setValue("chk_gpu", self.chk_gpu.isChecked())
+        settings.setValue("chk_docker", self.chk_docker.isChecked())
+        settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
     def _stop_background_threads(self) -> None:
         """Stop background timers and threads cleanly."""
@@ -1191,7 +1185,6 @@ class UpstreamDriftLauncher(QMainWindow):
 
 
 def main() -> None:
-    """Application entry point retained for backward-compatible imports."""
     from src.launchers.upstream_drift_launcher_main import main as launcher_main
 
     launcher_main()

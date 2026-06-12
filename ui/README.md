@@ -38,6 +38,29 @@ The UI consumes HTTP routes defined under `src/api/routes/` and relies on WebSoc
 
 Frontend call sites and hooks live under `ui/src/api/`. For transport details, start with `ui/src/api/client.ts`, which currently connects to `/api/ws/simulate/{engineType}`. The chat service protocol lives in `src/api/routes/chat_ws.py` under `/ws/chat/{session_id}`.
 
+### Generated API types (issue #7447)
+
+`ui/src/api/generated/types.ts` is **generated** from the backend OpenAPI
+contract (the Pydantic models in `src/api/models/` plus route response
+models) and checked in. **Never hand-write a TypeScript interface for a
+payload that exists in `src/api/models/`** — import it from
+`./generated/types` instead (see `EngineStatus` in `ui/src/api/client.ts` and
+the launcher-manifest types in `ui/src/api/useLauncherManifest.ts` for the
+pattern). If an endpoint you consume has no Pydantic response model yet, add
+one in `src/api/models/responses.py` and attach it to the route, then
+regenerate.
+
+Regenerate after any contract change:
+
+```bash
+python scripts/generate_ui_api_types.py
+```
+
+A pytest freshness gate (`tests/api/test_generated_ui_api_types.py`)
+regenerates the file in CI and fails if the committed copy is stale, so the
+generated contract can never drift silently. Do not edit the generated file
+by hand.
+
 ### Runtime response validation (issue #7165)
 
 The backend and frontend ship separately (Docker vs Tauri vs dev), so response
