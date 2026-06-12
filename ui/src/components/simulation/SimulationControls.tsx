@@ -10,8 +10,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Play, Pause, Square, SkipForward, Camera, Circle, Download, Gauge } from 'lucide-react';
 
-/** Camera preset identifiers matching the backend. */
-export type CameraPreset = 'side' | 'front' | 'top' | 'follow_ball' | 'follow_club';
+/**
+ * Camera preset identifiers matching the backend.
+ *
+ * The canonical list is served by GET /api/simulation/camera/presets (#7452);
+ * the `string & {}` arm keeps the type open for presets added server-side
+ * while preserving autocompletion for the known ones.
+ */
+export type CameraPreset =
+  | 'side'
+  | 'front'
+  | 'top'
+  | 'follow_ball'
+  | 'follow_club'
+  | (string & {});
 
 /** Simulation runtime statistics from the backend. */
 export interface SimulationStats {
@@ -35,8 +47,18 @@ interface Props {
   onSpeedChange?: (speed: number) => void;
   /** Callback when camera preset changes (optional). */
   onCameraChange?: (preset: CameraPreset) => void;
+  /**
+   * Camera presets to render, ideally fetched from the API (#7452).
+   * Falls back to the canonical built-in list when omitted.
+   */
+  cameraPresets?: CameraPreset[];
   /** Callback for recording toggle (optional). */
   onRecordingToggle?: (recording: boolean) => void;
+  /**
+   * Controlled recording state (#7452). When provided, the toggle reflects
+   * the server-confirmed state instead of optimistic local state.
+   */
+  recordingActive?: boolean;
   /** Callback for trajectory export (optional). */
   onExportTrajectory?: () => void;
   /** Current simulation stats (optional). */
@@ -58,13 +80,29 @@ const buttonStyles = {
   small: 'py-1 px-2 text-sm',
 };
 
-const CAMERA_PRESETS: { id: CameraPreset; label: string }[] = [
-  { id: 'side', label: 'Side' },
-  { id: 'front', label: 'Front' },
-  { id: 'top', label: 'Top' },
-  { id: 'follow_ball', label: 'Ball' },
-  { id: 'follow_club', label: 'Club' },
+const DEFAULT_CAMERA_PRESETS: CameraPreset[] = [
+  'side',
+  'front',
+  'top',
+  'follow_ball',
+  'follow_club',
 ];
+
+const CAMERA_PRESET_LABELS: Record<string, string> = {
+  side: 'Side',
+  front: 'Front',
+  top: 'Top',
+  follow_ball: 'Ball',
+  follow_club: 'Club',
+};
+
+/** Human-readable label for a preset id (e.g. 'follow_ball' → 'Ball'). */
+function cameraPresetLabel(id: CameraPreset): string {
+  const known = CAMERA_PRESET_LABELS[id];
+  if (known) return known;
+  const last = id.split('_').pop() ?? id;
+  return last.charAt(0).toUpperCase() + last.slice(1);
+}
 
 const SPEED_PRESETS = [0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0];
 
@@ -79,14 +117,23 @@ export function SimulationControls({
   onStep,
   onSpeedChange,
   onCameraChange,
+  cameraPresets,
   onRecordingToggle,
+  recordingActive,
   onExportTrajectory,
   stats,
   initialSpeed = 1.0,
 }: Props) {
   const [speedFactor, setSpeedFactor] = useState(initialSpeed);
-  const [isRecording, setIsRecording] = useState(false);
+  const [localRecording, setLocalRecording] = useState(false);
   const [activeCamera, setActiveCamera] = useState<CameraPreset>('side');
+
+  // Controlled when the parent owns server-confirmed recording state (#7452)
+  const isRecording = recordingActive ?? localRecording;
+  const presetIds =
+    cameraPresets && cameraPresets.length > 0
+      ? cameraPresets
+      : DEFAULT_CAMERA_PRESETS;
 
   // Handle speed change
   const handleSpeedChange = useCallback(
@@ -109,9 +156,11 @@ export function SimulationControls({
   // Handle recording toggle
   const handleRecordingToggle = useCallback(() => {
     const newState = !isRecording;
-    setIsRecording(newState);
+    if (recordingActive === undefined) {
+      setLocalRecording(newState);
+    }
     onRecordingToggle?.(newState);
-  }, [isRecording, onRecordingToggle]);
+  }, [isRecording, recordingActive, onRecordingToggle]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -281,17 +330,17 @@ export function SimulationControls({
             <span className="text-xs text-gray-400">Camera</span>
           </div>
           <div className="flex gap-1">
-            {CAMERA_PRESETS.map(({ id, label }) => (
+            {presetIds.map((id) => (
               <button
                 key={id}
                 onClick={() => handleCameraChange(id)}
-                aria-label={`${label} camera view`}
+                aria-label={`${cameraPresetLabel(id)} camera view`}
                 aria-pressed={activeCamera === id}
                 className={`${buttonStyles.base} ${buttonStyles.small} ${
                   activeCamera === id ? buttonStyles.accent : buttonStyles.secondary
                 }`}
               >
-                {label}
+                {cameraPresetLabel(id)}
               </button>
             ))}
           </div>

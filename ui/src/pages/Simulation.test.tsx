@@ -26,10 +26,68 @@ vi.mock('@/api/client', () => ({
   useSimulation: vi.fn(() => mockSimulation),
 }));
 
+// Controllable mocks for the controls wiring (#7452). vi.hoisted so the
+// vi.mock factories below can reference them.
+const h = vi.hoisted(() => ({
+  controls: {
+    fetchCameraPresets: vi.fn(async (): Promise<{ preset: string }[]> => []),
+    applyCameraPreset: vi.fn(async (preset: string) => ({
+      preset,
+      position: [0, 0, 0],
+      target: [0, 0, 0],
+      up: [0, 0, 1],
+    })),
+    controlRecording: vi.fn(async () => ({
+      recording: true,
+      frame_count: 0,
+      status: 'started',
+    })),
+    downloadTrajectory: vi.fn(),
+  },
+  capabilities: {
+    loadState: 'idle' as string,
+    isSupported: (() => true) as (name: string) => boolean,
+  },
+}));
+
+vi.mock('@/api/simulationControls', () => ({
+  FALLBACK_CAMERA_PRESETS: ['side', 'front', 'top', 'follow_ball', 'follow_club'],
+  fetchCameraPresets: h.controls.fetchCameraPresets,
+  applyCameraPreset: h.controls.applyCameraPreset,
+  controlRecording: h.controls.controlRecording,
+  downloadTrajectory: h.controls.downloadTrajectory,
+}));
+
+vi.mock('@/api/useEngineCapabilities', () => ({
+  useEngineCapabilities: () => ({
+    capabilities: null,
+    loadState: h.capabilities.loadState,
+    error: null,
+    fetchCapabilities: vi.fn(),
+    isSupported: (name: string) => h.capabilities.isSupported(name),
+    isFullySupported: () => true,
+    getLevel: () => 'full',
+  }),
+}));
+
 // Mock Scene3D
 vi.mock('@/components/visualization/Scene3D', () => ({
-  Scene3D: ({ engine, frame }: { engine: string; frame: unknown }) => (
-    <div data-testid="scene3d-mock" data-engine={engine} data-has-frame={!!frame}>
+  Scene3D: ({
+    engine,
+    frame,
+    cameraCommand,
+  }: {
+    engine: string;
+    frame: unknown;
+    cameraCommand?: { preset: string; seq: number } | null;
+  }) => (
+    <div
+      data-testid="scene3d-mock"
+      data-engine={engine}
+      data-has-frame={!!frame}
+      data-camera-preset={cameraCommand?.preset ?? ''}
+      data-camera-seq={cameraCommand?.seq ?? 0}
+    >
       Scene3D Mock
     </div>
   ),
@@ -98,6 +156,22 @@ describe('SimulationPage', () => {
       resume: vi.fn(),
       setSpeed: vi.fn().mockResolvedValue({ success: true }),
     });
+
+    // Reset controls-wiring mocks (#7452)
+    h.controls.fetchCameraPresets.mockResolvedValue([]);
+    h.controls.applyCameraPreset.mockImplementation(async (preset: string) => ({
+      preset,
+      position: [0, 0, 0],
+      target: [0, 0, 0],
+      up: [0, 0, 1],
+    }));
+    h.controls.controlRecording.mockResolvedValue({
+      recording: true,
+      frame_count: 0,
+      status: 'started',
+    });
+    h.capabilities.loadState = 'idle';
+    h.capabilities.isSupported = () => true;
   });
 
   describe('layout', () => {
@@ -374,6 +448,181 @@ describe('SimulationPage', () => {
       const slider = screen.getByLabelText(/speed factor/i);
       fireEvent.change(slider, { target: { value: '2.5' } });
       expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5);
+    });
+  });
+
+  // ── Controls wiring (#7452): camera, recording, export ────────────────
+  describe('controls wiring (#7452)', () => {
+    const loadMujoco = () =>
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco' ? { ...e, loadState: 'loaded' as const } : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
+
+    beforeEach(() => {
+      loadMujoco();
+    });
+
+    describe('camera presets', () => {
+      it('POSTs the preset to the backend and drives the local 3D camera', async () => {
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        fireEvent.click(screen.getByRole('button', { name: /top camera view/i }));
+
+        expect(h.controls.applyCameraPreset).toHaveBeenCalledWith('top');
+        await waitFor(() => {
+          expect(screen.getByTestId('scene3d-mock')).toHaveAttribute(
+            'data-camera-preset',
+            'top'
+          );
+        });
+      });
+
+      it('re-applies the same preset on repeat clicks (seq bumps)', async () => {
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        fireEvent.click(screen.getByRole('button', { name: /side camera view/i }));
+        fireEvent.click(screen.getByRole('button', { name: /side camera view/i }));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('scene3d-mock')).toHaveAttribute(
+            'data-camera-seq',
+            '2'
+          );
+        });
+      });
+
+      it('renders the preset list fetched from the API', async () => {
+        h.controls.fetchCameraPresets.mockResolvedValue([
+          { preset: 'side' },
+          { preset: 'follow_ball' },
+        ]);
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        await waitFor(() => {
+          expect(
+            screen.queryByRole('button', { name: /top camera view/i })
+          ).not.toBeInTheDocument();
+        });
+        expect(
+          screen.getByRole('button', { name: /side camera view/i })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: /ball camera view/i })
+        ).toBeInTheDocument();
+      });
+
+      it('keeps the fallback presets when the API enumeration fails', async () => {
+        h.controls.fetchCameraPresets.mockRejectedValue(new Error('offline'));
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        await waitFor(() => {
+          expect(h.controls.fetchCameraPresets).toHaveBeenCalled();
+        });
+        expect(
+          screen.getByRole('button', { name: /top camera view/i })
+        ).toBeInTheDocument();
+      });
+
+      it('surfaces backend preset errors as a toast', async () => {
+        h.controls.applyCameraPreset.mockRejectedValue(
+          new Error('Unknown camera preset: diagonal')
+        );
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+        fireEvent.click(screen.getByRole('button', { name: /front camera view/i }));
+
+        expect(
+          await screen.findByText(/unknown camera preset/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe('recording toggle', () => {
+      it('start → stop round-trips through the API into the store', async () => {
+        h.controls.controlRecording
+          .mockResolvedValueOnce({ recording: true, frame_count: 0, status: 'started' })
+          .mockResolvedValueOnce({ recording: false, frame_count: 7, status: 'stopped' });
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        fireEvent.click(screen.getByRole('button', { name: /start recording/i }));
+        await waitFor(() => {
+          expect(useSimulationStore.getState().recording.status).toBe('recording');
+        });
+        expect(h.controls.controlRecording).toHaveBeenCalledWith('start');
+
+        fireEvent.click(screen.getByRole('button', { name: /stop recording/i }));
+        await waitFor(() => {
+          expect(useSimulationStore.getState().recording).toEqual({
+            status: 'saved',
+            frameCount: 7,
+          });
+        });
+        expect(h.controls.controlRecording).toHaveBeenCalledWith('stop');
+        // Toast announces the saved recording with its frame count
+        expect(await screen.findByText(/recording saved — 7 frames/i)).toBeInTheDocument();
+      });
+
+      it('does not flip state when the backend call fails', async () => {
+        h.controls.controlRecording.mockRejectedValue(new Error('recorder offline'));
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+        fireEvent.click(screen.getByRole('button', { name: /start recording/i }));
+
+        expect(await screen.findByText(/recorder offline/i)).toBeInTheDocument();
+        expect(useSimulationStore.getState().recording.status).toBe('idle');
+        expect(
+          screen.getByRole('button', { name: /start recording/i })
+        ).toBeInTheDocument();
+      });
+
+      it('is hidden when the engine lacks forward_sim capability', () => {
+        h.capabilities.loadState = 'loaded';
+        h.capabilities.isSupported = (name: string) => name !== 'forward_sim';
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+
+        expect(
+          screen.queryByRole('button', { name: /recording/i })
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('button', { name: /export trajectory/i })
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe('trajectory export', () => {
+      it('downloads the accumulated frame buffer as CSV and JSON', async () => {
+        const frames: SimulationFrame[] = [
+          { frame: 0, time: 0, state: { qpos: [0] } },
+          { frame: 1, time: 0.1, state: { qpos: [0.1] } },
+        ];
+        Object.assign(mockSimulation, { frames });
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+        fireEvent.click(screen.getByRole('button', { name: /export trajectory/i }));
+
+        expect(h.controls.downloadTrajectory).toHaveBeenCalledWith(frames, 'csv');
+        expect(h.controls.downloadTrajectory).toHaveBeenCalledWith(frames, 'json');
+        expect(await screen.findByText(/exported 2 frames/i)).toBeInTheDocument();
+      });
+
+      it('shows an error when there is nothing to export', async () => {
+        Object.assign(mockSimulation, { frames: [] });
+
+        render(<SimulationPage />, { wrapper: createWrapper() });
+        fireEvent.click(screen.getByRole('button', { name: /export trajectory/i }));
+
+        expect(h.controls.downloadTrajectory).not.toHaveBeenCalled();
+        expect(
+          await screen.findByText(/no trajectory frames to export/i)
+        ).toBeInTheDocument();
+      });
     });
   });
 

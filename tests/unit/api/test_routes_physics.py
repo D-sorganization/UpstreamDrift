@@ -138,8 +138,40 @@ def test_set_camera_preset(client: TestClient) -> None:
     assert "position" in data
 
 
+def test_list_camera_presets(client: TestClient) -> None:
+    """The presets enumeration matches the canonical preset registry (#7452)."""
+    from src.api.models.requests import VALID_CAMERA_PRESETS
+    from src.api.routes.physics import CAMERA_PRESETS
+
+    response = client.get("/simulation/camera/presets")
+    assert response.status_code == 200
+    presets = response.json()["presets"]
+    names = {p["preset"] for p in presets}
+    assert names == set(CAMERA_PRESETS)
+    # The enumeration must stay in sync with request validation
+    assert names == VALID_CAMERA_PRESETS
+    for preset in presets:
+        assert len(preset["position"]) == 3
+        assert len(preset["target"]) == 3
+        assert len(preset["up"]) == 3
+
+
 def test_control_recording(client: TestClient) -> None:
     """Test controlling trajectory recording."""
     response = client.post("/simulation/recording", json={"action": "start"})
     assert response.status_code == 200
     assert response.json()["recording"] is True
+
+
+def test_stop_recording_reports_frame_count(
+    client: TestClient, mock_simulation_service: MockSimulationService
+) -> None:
+    """Stopping a recording reports the recorded frame count (#7452)."""
+    client.post("/simulation/recording", json={"action": "start"})
+    mock_simulation_service.stats.recorded_frames = [{"t": 0.0}, {"t": 0.1}]
+
+    response = client.post("/simulation/recording", json={"action": "stop"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["recording"] is False
+    assert data["frame_count"] == 2

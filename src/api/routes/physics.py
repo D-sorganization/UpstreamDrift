@@ -38,6 +38,7 @@ from ..models.requests import (
 from ..models.responses import (
     ActuatorStateResponse,
     BiomechanicsMetricsResponse,
+    CameraPresetListResponse,
     CameraPresetResponse,
     ControlFeaturesResponse,
     ForceVectorResponse,
@@ -518,6 +519,30 @@ async def set_simulation_speed(
     return SpeedControlResponse(
         speed_factor=request.speed_factor,
         status=f"Speed set to {request.speed_factor}x",
+    )
+
+
+@router.get("/simulation/camera/presets", response_model=CameraPresetListResponse)
+@handle_api_errors
+async def list_camera_presets() -> CameraPresetListResponse:
+    """Enumerate the canonical camera presets.
+
+    Lets clients (e.g. the web UI) build their preset controls from the
+    server's canonical list instead of hardcoding it. See issue #7452.
+
+    Returns:
+        All available presets with their position/target/up vectors.
+    """
+    return CameraPresetListResponse(
+        presets=[
+            CameraPresetResponse(
+                preset=name,
+                position=data["position"],
+                target=data["target"],
+                up=data["up"],
+            )
+            for name, data in CAMERA_PRESETS.items()
+        ]
     )
 
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/dom';
 
 // Mock react-three/fiber before importing Scene3D
 vi.mock('@react-three/fiber', () => ({
@@ -290,6 +290,93 @@ describe('Scene3D', () => {
     it('renders Environment for lighting', () => {
       render(<Scene3D engine="mujoco" frame={null} />);
       expect(screen.getByTestId('environment-mock')).toBeInTheDocument();
+    });
+  });
+
+  // ── External camera preset commands (#7452) ────────────────────────
+  // The command is applied a microtask after the effect runs, so these
+  // assertions await waitFor.
+  describe('camera commands', () => {
+    it('enables follow mode for follow_ball command', async () => {
+      render(
+        <Scene3D
+          engine="mujoco"
+          frame={null}
+          cameraCommand={{ preset: 'follow_ball', seq: 1 }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Follow').className).toContain('bg-blue-600');
+      });
+    });
+
+    it('enables follow mode for follow_club command', async () => {
+      render(
+        <Scene3D
+          engine="mujoco"
+          frame={null}
+          cameraCommand={{ preset: 'follow_club', seq: 1 }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Follow').className).toContain('bg-blue-600');
+      });
+    });
+
+    it('disables follow mode when a static preset command arrives', async () => {
+      const { rerender } = render(
+        <Scene3D
+          engine="mujoco"
+          frame={null}
+          cameraCommand={{ preset: 'follow_ball', seq: 1 }}
+        />
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Follow').className).toContain('bg-blue-600');
+      });
+
+      rerender(
+        <Scene3D
+          engine="mujoco"
+          frame={null}
+          cameraCommand={{ preset: 'side', seq: 2 }}
+        />
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Follow').className).not.toContain('bg-blue-600');
+      });
+    });
+
+    it('handles static preset commands without crashing', async () => {
+      for (const preset of ['front', 'side', 'top']) {
+        const { unmount } = render(
+          <Scene3D
+            engine="mujoco"
+            frame={null}
+            cameraCommand={{ preset, seq: 1 }}
+          />
+        );
+        await waitFor(() => {
+          expect(screen.getByRole('img')).toBeInTheDocument();
+        });
+        unmount();
+      }
+    });
+
+    it('ignores unknown presets', async () => {
+      render(
+        <Scene3D
+          engine="mujoco"
+          frame={null}
+          cameraCommand={{ preset: 'diagonal', seq: 1 }}
+        />
+      );
+      // Flush the microtask, then confirm follow mode stayed off
+      await waitFor(() => {
+        expect(screen.getByText('Follow').className).not.toContain('bg-blue-600');
+      });
     });
   });
 

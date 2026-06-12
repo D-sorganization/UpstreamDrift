@@ -286,6 +286,53 @@ describe('SimulationControls', () => {
       fireEvent.click(screen.getByRole('button', { name: /front camera view/i }));
       expect(onCameraChange).toHaveBeenCalledWith('front');
     });
+
+    // ── API-driven presets (#7452) ────────────────────────────────
+    it('renders the preset list provided by the API', () => {
+      const onCameraChange = vi.fn();
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onCameraChange={onCameraChange}
+          cameraPresets={['side', 'follow_ball']}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /side camera view/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /ball camera view/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /top camera view/i })).not.toBeInTheDocument();
+    });
+
+    it('passes follow presets through to onCameraChange', () => {
+      const onCameraChange = vi.fn();
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onCameraChange={onCameraChange}
+          cameraPresets={['follow_ball', 'follow_club']}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /club camera view/i }));
+      expect(onCameraChange).toHaveBeenCalledWith('follow_club');
+    });
+
+    it('falls back to the canonical preset list when given an empty list', () => {
+      const onCameraChange = vi.fn();
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onCameraChange={onCameraChange}
+          cameraPresets={[]}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /side camera view/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /ball camera view/i })).toBeInTheDocument();
+    });
   });
 
   // ──────────────────────────────────────────────────────────────
@@ -317,6 +364,79 @@ describe('SimulationControls', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /start recording/i }));
       expect(onRecordingToggle).toHaveBeenCalledWith(true);
+    });
+
+    // ── Controlled recording state (#7452) ────────────────────────
+    it('reflects server-confirmed recording state when controlled', () => {
+      const onRecordingToggle = vi.fn();
+      const { rerender } = render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onRecordingToggle={onRecordingToggle}
+          recordingActive={false}
+        />
+      );
+
+      // Clicking does NOT flip the visual state — the parent owns it
+      fireEvent.click(screen.getByRole('button', { name: /start recording/i }));
+      expect(onRecordingToggle).toHaveBeenCalledWith(true);
+      expect(screen.getByRole('button', { name: /start recording/i })).toBeInTheDocument();
+
+      // Once the server confirms, the parent re-renders with recordingActive
+      rerender(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onRecordingToggle={onRecordingToggle}
+          recordingActive={true}
+        />
+      );
+      expect(screen.getByRole('button', { name: /stop recording/i })).toBeInTheDocument();
+    });
+
+    it('requests stop when controlled and recording is active', () => {
+      const onRecordingToggle = vi.fn();
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onRecordingToggle={onRecordingToggle}
+          recordingActive={true}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /stop recording/i }));
+      expect(onRecordingToggle).toHaveBeenCalledWith(false);
+    });
+
+    it('calls onExportTrajectory when export is clicked', () => {
+      const onRecordingToggle = vi.fn();
+      const onExportTrajectory = vi.fn();
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+          onRecordingToggle={onRecordingToggle}
+          recordingActive={false}
+          onExportTrajectory={onExportTrajectory}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /export trajectory/i }));
+      expect(onExportTrajectory).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides recording controls entirely when onRecordingToggle is absent', () => {
+      render(
+        <SimulationControls
+          isRunning={false}
+          {...mockHandlers}
+        />
+      );
+
+      expect(screen.queryByRole('button', { name: /recording/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /export trajectory/i })).not.toBeInTheDocument();
     });
 
     it('renders export button when onExportTrajectory is provided', () => {
