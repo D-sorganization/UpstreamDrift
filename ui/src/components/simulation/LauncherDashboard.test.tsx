@@ -371,6 +371,136 @@ describe('LauncherDashboard', () => {
         });
     });
 
+    // ────────────────────────────────────────────────────────────
+    // Web reachability badges (#7461)
+    // ────────────────────────────────────────────────────────────
+    describe('web reachability badges (#7461)', () => {
+        const WEB_TILES: LauncherTile[] = [
+            {
+                ...MOCK_TILES[0],
+                id: 'route_tile',
+                name: 'Route Tile',
+                web: { mode: 'route', route: '/tools/terrain' },
+            },
+            {
+                ...MOCK_TILES[1],
+                id: 'native_tile',
+                name: 'Native Tile',
+                web: { mode: 'native-window' },
+            },
+            {
+                ...MOCK_TILES[4],
+                id: 'unavailable_tile',
+                name: 'Unavailable Tile',
+                web: { mode: 'unavailable', reason: 'REST API endpoint only' },
+            },
+        ];
+
+        it('route tiles show no reachability badge and stay launchable', () => {
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={false}
+                    selectedTileId="route_tile"
+                />
+            );
+            const tileEl = document.getElementById('tile-route_tile')!;
+            expect(within(tileEl).queryByText('Desktop app only')).toBeNull();
+            expect(within(tileEl).queryByText('Unavailable')).toBeNull();
+            expect(screen.getByRole('button', { name: /launch route tile/i })).not.toBeDisabled();
+        });
+
+        it('native-window tiles show Desktop app only badge when native launch is not allowed', () => {
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={false}
+                />
+            );
+            const tileEl = document.getElementById('tile-native_tile')!;
+            expect(within(tileEl).getByText('Desktop app only')).toBeInTheDocument();
+        });
+
+        it('native-window tiles show no badge when native launch is allowed (Tauri/localhost)', () => {
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={true}
+                />
+            );
+            const tileEl = document.getElementById('tile-native_tile')!;
+            expect(within(tileEl).queryByText('Desktop app only')).toBeNull();
+        });
+
+        it('unavailable tiles show badge with the reason as tooltip', () => {
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={true}
+                />
+            );
+            const tileEl = document.getElementById('tile-unavailable_tile')!;
+            const badge = within(tileEl).getByText('Unavailable');
+            expect(badge).toBeInTheDocument();
+            expect(badge.closest('[title]')).toHaveAttribute(
+                'title',
+                'REST API endpoint only'
+            );
+        });
+
+        it('launch button is disabled for blocked native-window tiles (no dead buttons)', () => {
+            const onLaunchTile = vi.fn();
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={false}
+                    selectedTileId="native_tile"
+                    onLaunchTile={onLaunchTile}
+                />
+            );
+            const launchBtn = screen.getByRole('button', { name: /launch native tile/i });
+            expect(launchBtn).toBeDisabled();
+            fireEvent.click(launchBtn);
+            expect(onLaunchTile).not.toHaveBeenCalled();
+        });
+
+        it('launch button is disabled for unavailable tiles and shows the reason', () => {
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={true}
+                    selectedTileId="unavailable_tile"
+                />
+            );
+            expect(
+                screen.getByRole('button', { name: /launch unavailable tile/i })
+            ).toBeDisabled();
+            const footer = document.getElementById('launch-footer');
+            expect(footer?.textContent).toContain('REST API endpoint only');
+        });
+
+        it('double-clicking a blocked tile does not trigger a launch', () => {
+            const onLaunchTile = vi.fn();
+            renderWithRouter(
+                <LauncherDashboard
+                    {...defaultProps}
+                    tiles={WEB_TILES}
+                    nativeWindowAllowed={false}
+                    onLaunchTile={onLaunchTile}
+                />
+            );
+            fireEvent.doubleClick(document.getElementById('tile-native_tile')!);
+            fireEvent.doubleClick(document.getElementById('tile-unavailable_tile')!);
+            expect(onLaunchTile).not.toHaveBeenCalled();
+        });
+    });
+
     describe('launched window menu (#7221)', () => {
         it('shows an empty window list state', () => {
             renderWithRouter(<LauncherDashboard {...defaultProps} />);

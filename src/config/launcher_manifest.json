@@ -12,7 +12,11 @@
       "logo": "urdf_icon.svg",
       "status": "utility",
       "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
-      "order": 1
+      "order": 1,
+      "web": {
+        "mode": "route",
+        "route": "/tools/model-explorer"
+      }
     },
     {
       "id": "mujoco_unified",
@@ -52,7 +56,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 2
+      "order": 2,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "drake_golf",
@@ -84,7 +91,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 3
+      "order": 3,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "pinocchio_golf",
@@ -112,7 +122,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 4
+      "order": 4,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "opensim_golf",
@@ -133,7 +146,10 @@
         "biomechanics",
         "actuator_controls"
       ],
-      "order": 5
+      "order": 5,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "myosim_suite",
@@ -152,7 +168,10 @@
         "mass_matrix",
         "jacobian"
       ],
-      "order": 6
+      "order": 6,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "putting_green",
@@ -166,7 +185,11 @@
       "status": "simulator",
       "web_route": "/tools/putting-green",
       "capabilities": ["surface_modeling", "ball_physics", "terrain"],
-      "order": 7
+      "order": 7,
+      "web": {
+        "mode": "route",
+        "route": "/tools/putting-green"
+      }
     },
     {
       "id": "matlab_unified",
@@ -178,7 +201,10 @@
       "logo": "matlab_logo.svg",
       "status": "external",
       "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
-      "order": 8
+      "order": 8,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "motion_target_preview",
@@ -191,12 +217,15 @@
       "status": "utility",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
       "tags": ["c3d", "mocap", "club", "body", "preview"],
-      "order": 9
+      "order": 9,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "motion_capture",
       "name": "Motion Capture",
-      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis \u2014 with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
+      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis — with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
       "category": "tool",
       "type": "special_app",
       "path": "src/tools/freemocap_sidecar/run_freemocap.py",
@@ -213,7 +242,11 @@
         "signal_processing",
         "scaling"
       ],
-      "order": 10
+      "order": 10,
+      "web": {
+        "mode": "route",
+        "route": "/tools/motion-capture"
+      }
     },
     {
       "id": "video_analyzer",
@@ -235,7 +268,11 @@
         "motion_tracking",
         "frame_analysis"
       ],
-      "order": 11
+      "order": 11,
+      "web": {
+        "mode": "route",
+        "route": "/tools/video-analyzer"
+      }
     },
     {
       "id": "video_processor",
@@ -257,7 +294,10 @@
         "frame_extraction",
         "media_analysis"
       ],
-      "order": 12
+      "order": 12,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "data_explorer",
@@ -274,7 +314,11 @@
       "status": "external",
       "web_route": "/tools/data-explorer",
       "capabilities": ["data_import", "filtering", "visualization", "export"],
-      "order": 13
+      "order": 13,
+      "web": {
+        "mode": "route",
+        "route": "/tools/data-explorer"
+      }
     },
     {
       "id": "data_processor",
@@ -303,7 +347,10 @@
         "export",
         "process_calculators"
       ],
-      "order": 14
+      "order": 14,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "project_map",
@@ -319,7 +366,11 @@
         "feature_discovery",
         "project_overview"
       ],
-      "order": 15
+      "order": 15,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Documentation file; no dedicated web page yet"
+      }
     },
     {
       "id": "cross_engine",
@@ -337,7 +388,10 @@
         "comparison",
         "cross_engine_robustness"
       ],
-      "order": 16
+      "order": 16,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "biomech_exercise",
@@ -354,7 +408,10 @@
         "swing_modification",
         "exercise_presets"
       ],
-      "order": 17
+      "order": 17,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "shot_tracer",
@@ -366,7 +423,10 @@
       "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": ["trajectory_visualization", "multi_model_comparison"],
-      "order": 18
+      "order": 18,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "pose_studio",
@@ -378,7 +438,10 @@
       "logo": "pose_studio.svg",
       "status": "gui_ready",
       "capabilities": ["pose_editing", "retargeting", "joint_manipulation"],
-      "order": 19
+      "order": 19,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "golf_simulation_suite",
@@ -390,7 +453,10 @@
       "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
-      "order": 20
+      "order": 20,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "swing_optimizer",
@@ -406,7 +472,10 @@
         "constraint_solving",
         "cost_functions"
       ],
-      "order": 21
+      "order": 21,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "injury_analysis",
@@ -423,7 +492,10 @@
         "spinal_load",
         "swing_modification"
       ],
-      "order": 22
+      "order": 22,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "terrain_engine",
@@ -441,7 +513,11 @@
         "topography",
         "terrain_query"
       ],
-      "order": 23
+      "order": 23,
+      "web": {
+        "mode": "route",
+        "route": "/tools/terrain"
+      }
     },
     {
       "id": "dataset_generator",
@@ -459,7 +535,11 @@
         "parameter_sweep",
         "export"
       ],
-      "order": 24
+      "order": 24,
+      "web": {
+        "mode": "route",
+        "route": "/tools/dataset"
+      }
     },
     {
       "id": "bunkershot3d",
@@ -471,7 +551,10 @@
       "logo": "bunkershot3d.svg",
       "status": "gui_ready",
       "capabilities": ["sand_simulation", "mpm", "liggghts", "calibration"],
-      "order": 25
+      "order": 25,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "pendulum_simulator",
@@ -483,7 +566,10 @@
       "logo": "pendulum.svg",
       "status": "gui_ready",
       "capabilities": ["educational", "2dof", "pendulum"],
-      "order": 26
+      "order": 26,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "chat_assistant",
@@ -501,7 +587,11 @@
         "workspace",
         "data_explorer"
       ],
-      "order": 27
+      "order": 27,
+      "web": {
+        "mode": "route",
+        "route": "/chat"
+      }
     },
     {
       "id": "character_builder",
@@ -518,7 +608,11 @@
         "mesh_generation",
         "collision_geometry"
       ],
-      "order": 28
+      "order": 28,
+      "web": {
+        "mode": "route",
+        "route": "/tools/character-builder"
+      }
     },
     {
       "id": "drake_dashboard",
@@ -538,7 +632,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 29
+      "order": 29,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "mujoco_dashboard",
@@ -558,7 +655,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 30
+      "order": 30,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "pinocchio_dashboard",
@@ -578,7 +678,10 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 31
+      "order": 31,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "canonical_core_estimation",
@@ -598,7 +701,11 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 36
+      "order": 36,
+      "web": {
+        "mode": "route",
+        "route": "/tools/canonical-core/estimation"
+      }
     },
     {
       "id": "canonical_core_comparison",
@@ -618,7 +725,11 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 37
+      "order": 37,
+      "web": {
+        "mode": "route",
+        "route": "/tools/canonical-core/comparison"
+      }
     },
     {
       "id": "analysis_tools_api",
@@ -631,7 +742,11 @@
       "logo": "data_explorer.svg",
       "status": "ready",
       "capabilities": ["swing_metrics", "biomechanics", "api"],
-      "order": 38
+      "order": 38,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
     },
     {
       "id": "motion_pipeline",
@@ -644,7 +759,11 @@
       "logo": "c3d_icon.svg",
       "status": "experimental",
       "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
-      "order": 33
+      "order": 33,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API service; no dedicated web page yet"
+      }
     },
     {
       "id": "perturbation_analysis",
@@ -657,7 +776,11 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["perturbation", "robustness", "cross_engine"],
-      "order": 34
+      "order": 34,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
     },
     {
       "id": "force_overlays",
@@ -670,7 +793,11 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
-      "order": 35
+      "order": 35,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
     },
     {
       "id": "realtime_ws",
@@ -683,7 +810,11 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["websocket", "realtime", "pubsub"],
-      "order": 36
+      "order": 36,
+      "web": {
+        "mode": "unavailable",
+        "reason": "WebSocket endpoint only; no dedicated web page yet"
+      }
     },
     {
       "id": "aip",
@@ -696,7 +827,11 @@
       "logo": "golf_logo.svg",
       "status": "experimental",
       "capabilities": ["ai_methods", "protocol", "dispatch"],
-      "order": 37
+      "order": 37,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
     },
     {
       "id": "actuator_controls",
@@ -709,7 +844,11 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
-      "order": 38
+      "order": 38,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
     },
     {
       "id": "unreal_integration",
@@ -722,7 +861,11 @@
       "logo": "golf_logo.svg",
       "status": "external",
       "capabilities": ["streaming", "vr", "visualization"],
-      "order": 39
+      "order": 39,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Python integration library; no dedicated web page yet"
+      }
     },
     {
       "id": "robotics_module",
@@ -735,7 +878,11 @@
       "logo": "drake.svg",
       "status": "experimental",
       "capabilities": ["locomotion", "contact", "planning"],
-      "order": 40
+      "order": 40,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Python module; no dedicated web page yet"
+      }
     },
     {
       "id": "tools_calculator_hub",
@@ -748,7 +895,10 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["process_calculators", "engineering", "analysis"],
-      "order": 41
+      "order": 41,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "pid_generator",
@@ -761,7 +911,10 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
-      "order": 42
+      "order": 42,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "starting_pose_matcher",
@@ -776,7 +929,10 @@
       "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
       "hidden_owner": "@launcher",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
-      "order": 99
+      "order": 99,
+      "web": {
+        "mode": "native-window"
+      }
     },
     {
       "id": "simulation_backends",
@@ -795,7 +951,10 @@
         "ztcf_zvcf",
         "hdf5_export"
       ],
-      "order": 43
+      "order": 43,
+      "web": {
+        "mode": "native-window"
+      }
     }
   ]
 }

@@ -6,7 +6,9 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
+import { resolveTileLaunchAction } from '@/api/webLaunch';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
 import { useToast } from '@/components/ui/Toast';
 import { apiFetch } from '@/api/fetch';
@@ -33,6 +35,7 @@ export function DashboardPage() {
         [launchedWindows, tiles]
     );
     const { showInfo, showError } = useToast();
+    const navigate = useNavigate();
 
     useEffect(() => {
         persistLauncherWindowRecords(visibleLaunchedWindows);
@@ -43,6 +46,19 @@ export function DashboardPage() {
             const tile = tiles.find((t) => t.id === tileId);
             if (!tile) {
                 showError('Tile not found');
+                return;
+            }
+
+            // Resolve the tile's web launch contract (issue #7461):
+            //   route → in-app navigation; native-window → backend POST
+            //   (Tauri/localhost only); blocked → honest error, no dead POST.
+            const action = resolveTileLaunchAction(tile);
+            if (action.kind === 'navigate') {
+                navigate(action.route);
+                return;
+            }
+            if (action.kind === 'blocked') {
+                showError(`${tile.name}: ${action.reason}`);
                 return;
             }
 
@@ -60,7 +76,7 @@ export function DashboardPage() {
                     showError(`Failed to launch ${tile.name}: ${err.message}`);
                 });
         },
-        [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError]
+        [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError, navigate]
     );
 
     const handleFocusLaunchedTile = useCallback(
