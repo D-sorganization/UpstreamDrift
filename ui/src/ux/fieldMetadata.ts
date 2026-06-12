@@ -97,6 +97,26 @@ export const FIELD_METADATA: FieldMetadata[] = [
     "example": "0.0"
   },
   {
+    "id": "counterfactual.kind",
+    "label": "Counterfactual kind",
+    "shortHelp": "Which counterfactual or induced-acceleration analysis to run.",
+    "longHelp": "- `ztcf`: zero-torque counterfactual — joint accelerations with applied\n  torques removed (velocity-dependent + gravity effects remain).\n- `zvcf`: zero-velocity counterfactual — accelerations with joint\n  velocities zeroed (gravity/configuration effects).\n- `gravity` / `drift`: passive drift component of the acceleration.\n- `control`: acceleration attributable to the applied torques.\n- `total`: drift + control superposition.\nResults are joint accelerations in rad/s^2, computed by the same\npost-hoc replay the desktop dashboard uses (issue #7450).\n",
+    "units": null,
+    "validRange": [
+      "ztcf",
+      "zvcf",
+      "gravity",
+      "drift",
+      "control",
+      "total"
+    ],
+    "default": "ztcf",
+    "defaultSource": "ZTCF is the first entry in the desktop dashboard analysis combo (src/shared/python/dashboard/window.py).",
+    "consumers": [],
+    "producers": [],
+    "example": "ztcf"
+  },
+  {
     "id": "pose_studio.show_radians",
     "label": "Show in radians",
     "shortHelp": "Display joint angles in radians instead of degrees.",
