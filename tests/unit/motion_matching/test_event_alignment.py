@@ -158,7 +158,7 @@ def fake_c3d_path(tmp_path: Path) -> Path:
 
 def _patch_load_c3d(monkeypatch: pytest.MonkeyPatch, payload: dict[str, Any]) -> None:
     """Replace the canonical ``load_c3d`` so the loader sees ``payload``."""
-    from sidekick.lab.bio import _c3d_io, c3d_reader
+    from src.shared.python.sidekick.lab.bio import _c3d_io, c3d_reader
 
     monkeypatch.setattr(_c3d_io, "load_c3d", lambda _p: payload)
     monkeypatch.setattr(c3d_reader, "load_c3d", lambda _p: payload)
