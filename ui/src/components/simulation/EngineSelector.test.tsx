@@ -143,7 +143,7 @@ describe('EngineSelector', () => {
       expect(screen.getByRole('button', { name: /unload mujoco/i })).toBeInTheDocument();
     });
 
-    it('calls onUnload when Unload button clicked', () => {
+    it('calls onUnload only after the inline confirm (#7427)', () => {
       const onUnload = vi.fn();
       const engines = [
         createEngine({ name: 'mujoco', displayName: 'MuJoCo', loadState: 'loaded' }),
@@ -157,8 +157,38 @@ describe('EngineSelector', () => {
         />
       );
 
-      fireEvent.click(screen.getByRole('button', { name: /unload mujoco/i }));
+      // First click only opens the confirm step — no unload yet.
+      fireEvent.click(screen.getByRole('button', { name: /^unload mujoco/i }));
+      expect(onUnload).not.toHaveBeenCalled();
+
+      // Confirming triggers the unload.
+      fireEvent.click(
+        screen.getByRole('button', { name: /confirm unload mujoco/i }),
+      );
       expect(onUnload).toHaveBeenCalledWith('mujoco');
+    });
+
+    it('cancels the unload confirm without calling onUnload (#7427)', () => {
+      const onUnload = vi.fn();
+      const engines = [
+        createEngine({ name: 'mujoco', displayName: 'MuJoCo', loadState: 'loaded' }),
+      ];
+      render(
+        <EngineSelector
+          {...defaultProps}
+          engines={engines}
+          selectedEngine={null}
+          onUnload={onUnload}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /^unload mujoco/i }));
+      fireEvent.click(screen.getByRole('button', { name: /cancel unload/i }));
+      expect(onUnload).not.toHaveBeenCalled();
+      // The original Unload button is back.
+      expect(
+        screen.getByRole('button', { name: /^unload mujoco/i }),
+      ).toBeInTheDocument();
     });
 
     it('disables Unload button on selected engine', () => {
