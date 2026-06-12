@@ -8,6 +8,8 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
+import { AboutModal } from '@/components/ui/AboutModal';
+import { OnboardingOverlay } from '@/components/ui/OnboardingOverlay';
 import { useToast } from '@/components/ui/Toast';
 import { apiFetch } from '@/api/fetch';
 import {
@@ -27,6 +29,7 @@ export function DashboardPage() {
         refetch,
     } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+    const [aboutOpen, setAboutOpen] = useState(false);
     const [launchedWindows, setLaunchedWindows] = useState(() => loadLauncherWindowRecords());
     const visibleLaunchedWindows = useMemo(
         () => reconcileLauncherWindowRecords(launchedWindows, tiles),
@@ -76,17 +79,22 @@ export function DashboardPage() {
     }, [showInfo]);
 
     return (
-        <LauncherDashboard
-            tiles={tiles}
-            loadState={loadState}
-            error={error}
-            selectedTileId={selectedTileId}
-            launchedWindows={visibleLaunchedWindows}
-            onSelectTile={setSelectedTileId}
-            onLaunchTile={handleLaunchTile}
-            onFocusLaunchedTile={handleFocusLaunchedTile}
-            onShowHelp={handleShowHelp}
-            onRefetch={refetch}
-        />
+        <>
+            <LauncherDashboard
+                tiles={tiles}
+                loadState={loadState}
+                error={error}
+                selectedTileId={selectedTileId}
+                launchedWindows={visibleLaunchedWindows}
+                onSelectTile={setSelectedTileId}
+                onLaunchTile={handleLaunchTile}
+                onFocusLaunchedTile={handleFocusLaunchedTile}
+                onShowHelp={handleShowHelp}
+                onShowAbout={() => setAboutOpen(true)}
+                onRefetch={refetch}
+            />
+            <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+            <OnboardingOverlay />
+        </>
     );
 }

@@ -41,6 +41,7 @@ interface Props {
     onLaunchTile: (tileId: string) => void;
     onFocusLaunchedTile: (tileId: string) => void;
     onShowHelp: () => void;
+    onShowAbout?: () => void;
     onRefetch: () => void;
 }
 
@@ -259,6 +260,7 @@ export function LauncherDashboard({
     onLaunchTile,
     onFocusLaunchedTile,
     onShowHelp,
+    onShowAbout,
     onRefetch,
 }: Props) {
     const engines = tiles.filter((t) => t.category === 'physics_engine');
@@ -407,7 +409,7 @@ export function LauncherDashboard({
                 className="flex items-center justify-between px-6 py-3 bg-gray-800/95 border-t border-gray-700 flex-shrink-0 backdrop-blur-sm"
                 id="launch-footer"
             >
-                <div className="text-sm text-gray-400">
+                <div className="flex items-center gap-3 text-sm text-gray-400">
                     {selectedTile ? (
                         <span>
                             Selected: <strong className="text-white">{selectedTile.name}</strong>
@@ -415,6 +417,16 @@ export function LauncherDashboard({
                         </span>
                     ) : (
                         <span className="text-gray-500">Select a tile to launch</span>
+                    )}
+                    {onShowAbout && (
+                        <button
+                            id="about-link"
+                            onClick={onShowAbout}
+                            aria-label="About UpstreamDrift"
+                            className="text-xs text-gray-500 underline-offset-2 hover:text-gray-300 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                        >
+                            About
+                        </button>
                     )}
                 </div>
                 <button

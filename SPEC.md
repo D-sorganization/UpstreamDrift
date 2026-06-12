@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.362                                            |
+| **Spec Version**        | 1.0.363                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -104,6 +104,14 @@ side="right")`, and Nm3/ppm conversions share the DIN 1343 normal state
   and `CapabilityLevelResponse.level`/`EngineCapabilitiesResponse.summary`
   are strictly typed. UI engine-list, engine load/probe, launcher-manifest,
   and engine-capabilities call sites consume the generated types.
+- **2026-06-12** - Added About/version + onboarding web parity (#7459):
+  `GET /api/v1/about` (and `/about/onboarding`) backed by the new shared
+  version-resolution helper `src/shared/python/version_info.py` (VERSION
+  file → importlib.metadata → fallback, plus safe git-commit reading) now
+  used by both the desktop About dialog and the API. Web About modal and
+  first-run onboarding overlay added to the React dashboard; onboarding
+  card copy single-sourced in `src/config/onboarding_cards.json` consumed
+  by the Qt dialog and the web overlay.
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
