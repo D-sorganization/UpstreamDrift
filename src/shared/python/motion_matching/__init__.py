@@ -8,7 +8,9 @@ surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
 from __future__ import annotations
 
 import importlib
+import sys
 from typing import TYPE_CHECKING, Any
+from types import ModuleType
 
 if TYPE_CHECKING:
     from .align_to_simulation_grid import (
@@ -191,11 +193,44 @@ _LAZY_EXPORTS = {
     "must_have_fields": ".validators",
 }
 
+_SUBMODULE_NAME_COLLISIONS = frozenset(
+    {
+        "compute_total_work",
+        "load_body_target",
+    }
+)
+
+
+def compute_total_work(*args: Any, **kwargs: Any) -> Any:
+    from .cost import compute_total_work as _compute_total_work
+
+    return _compute_total_work(*args, **kwargs)
+
+
+def load_body_target(*args: Any, **kwargs: Any) -> Any:
+    from .load_body_target import load_body_target as _load_body_target
+
+    return _load_body_target(*args, **kwargs)
+
+
+_COLLISION_EXPORTS = {
+    "compute_total_work": compute_total_work,
+    "load_body_target": load_body_target,
+}
+
+
+def _resolve_export(name: str) -> Any:
+    if name in _COLLISION_EXPORTS:
+        return _COLLISION_EXPORTS[name]
+    module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+    value = getattr(module, name)
+    globals()[name] = value
+    return value
+
 
 def __getattr__(name: str) -> Any:
     if name in _LAZY_EXPORTS:
-        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
-        return getattr(module, name)
+        return _resolve_export(name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -203,12 +238,12 @@ def __dir__() -> list[str]:
     return list(_LAZY_EXPORTS.keys())
 
 
-# These public names collide with same-named submodules. Bind the callable
-# exports eagerly so ``from motion_matching import name`` cannot resolve to the
-# module object after another import has populated the package attribute.
-compute_total_work = importlib.import_module(
-    ".compute_total_work", __package__
-).compute_total_work
-_load_body_target_module = importlib.import_module(".load_body_target", __package__)
-load_body_target = _load_body_target_module.load_body_target
-load_body_target_c3d = _load_body_target_module.load_body_target_c3d
+class _MotionMatchingModule(ModuleType):
+    def __getattribute__(self, name: str) -> Any:
+        value = super().__getattribute__(name)
+        if name in _SUBMODULE_NAME_COLLISIONS and isinstance(value, ModuleType):
+            return _COLLISION_EXPORTS[name]
+        return value
+
+
+sys.modules[__name__].__class__ = _MotionMatchingModule
