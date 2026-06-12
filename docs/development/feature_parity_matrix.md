@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 11 parity · 14 gap · 11 exempt (10 pending decision in #7460).
+**Summary:** 16 parity · 9 gap · 12 exempt (11 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -33,12 +33,13 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `onboarding.about_version`<br>About/version info + onboarding | 🔴 gap | `src/launchers/about_dialog.py` | — | — | #7459 |
 | `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Desktop optimization GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
-| `settings.preferences`<br>Settings/preferences surface + persistence | 🔴 gap | `src/launchers/settings_dialog.py` | — | — | #7457 |
+| `settings.desktop_only_tabs`<br>Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | ⚪ exempt | `src/launchers/settings_dialog.py` | — | — | Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460. — **pending decision (#7460)** |
+| `settings.preferences`<br>Settings/preferences surface + persistence | ✅ parity | `src/launchers/settings_dialog.py` | `src/api/routes/settings.py` | `ui/src/pages/Settings.tsx` | — |
 | `sidekick.terminal_repl_jupyter_skills`<br>Sidekick OS terminal / REPL / Jupyter / skills | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | — | — | Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460. — **pending decision (#7460)** |
 | `simulation.controls_wiring`<br>Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls) | 🔴 gap | `src/launchers/launcher_simulation.py` | — | `ui/src/components/simulation/SimulationControls.tsx` | #7452 |
 | `simulation.golf_suite_batch`<br>Golf Simulation Suite (parameter sweeps, batch runs) | ⚪ exempt | `src/tools/golf_simulation_suite/__main__.py` | — | — | Desktop batch-simulation GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `simulation.realtime_ws_stream`<br>Live simulation data over WebSocket pub-sub | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/simulation_ws.py` | `ui/src/pages/Simulation.tsx` | — |
-| `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | 🔴 gap | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | — | #7456 |
+| `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | ✅ parity | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | `ui/src/pages/BallFlight.tsx` | #7456 |
 | `tools.character_builder`<br>Character Builder (humanoid URDF generation) | 🔴 gap | `src/shared/python/model_generation/cli/main.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | #7448 |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | 🔴 gap | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | #7448 |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |

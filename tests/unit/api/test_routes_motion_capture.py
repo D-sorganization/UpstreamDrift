@@ -179,9 +179,7 @@ def test_c3d_upload_returns_metadata_and_playable_recording(
 
     # Frames are playable through the existing frame endpoint, with mm->m
     # unit scaling applied (mirrors the desktop viewer; #7200 lineage).
-    frame = client.get(
-        f"/tools/motion-capture/frame/{data['recording_name']}/0"
-    ).json()
+    frame = client.get(f"/tools/motion-capture/frame/{data['recording_name']}/0").json()
     assert frame["frame_index"] == 0
     joints = {j["name"]: j for j in frame["joints"]}
     assert set(joints) == {"HEAD", "BUTT"}

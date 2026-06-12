@@ -255,6 +255,26 @@ export interface AnalysisStatisticsResponse {
 }
 
 /**
+ * Appearance preferences for the web shell.
+ */
+export interface AppearanceSettings {
+  /** Preferred theme name (must match a theme from GET /themes). */
+  theme_id: string;
+  /** Root font scale multiplier (0.5–2.0). */
+  font_scale: number;
+}
+
+/**
+ * Trajectory and summary metrics for a single flight model.
+ */
+export interface BallFlightModelResult {
+  model_name: string;
+  model_key: FlightModelType;
+  trajectory: BallFlightTrajectorySample[];
+  summary: BallFlightSummary;
+}
+
+/**
  * Request to simulate a single ball-flight trajectory.
  */
 export interface BallFlightSimulationRequest {
@@ -274,6 +294,8 @@ export interface BallFlightSimulationRequest {
   wind_direction_deg: number;
   /** Ball-flight model identifier */
   model_name: FlightModelType;
+  /** Optional list of flight models for overlay comparison. When provided, the response carries one result per (deduplicated) model; the top-level trajectory/summary mirror the first entry for backwards compatibility. */
+  models?: FlightModelType[] | null;
   /** Maximum simulation time [s] */
   max_time_s: number;
   /** Returned trajectory sample interval [s] */
@@ -281,13 +303,14 @@ export interface BallFlightSimulationRequest {
 }
 
 /**
- * Response containing ball-flight trajectory and summary metrics.
+ * Response containing ball-flight trajectories and summary metrics. The top-level ``model_name``/``trajectory``/``summary`` fields describe the first requested model (backwards compatible with single-model clients); ``results`` carries one entry per requested model for overlay comparison (issue #7456).
  */
 export interface BallFlightSimulationResponse {
   model_name: string;
   model_key: FlightModelType;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
+  results: BallFlightModelResult[];
 }
 
 /**
@@ -394,6 +417,41 @@ export interface Body_import_dataset_tools_data_explorer_import_post {
   file: string;
 }
 
+export interface Body_upload_c3d_api_tools_motion_capture_upload_c3d_post {
+  file: string;
+}
+
+export interface Body_upload_c3d_api_v1_tools_motion_capture_upload_c3d_post {
+  file: string;
+}
+
+export interface Body_upload_c3d_tools_motion_capture_upload_c3d_post {
+  file: string;
+}
+
+/**
+ * Metadata extracted from an uploaded C3D file. Marker positions are converted to meters server-side (mirroring the desktop C3D viewer's ``target_units="m"`` handling) so the web visualizer never has to guess mm-vs-m scaling.
+ */
+export interface C3DUploadResponse {
+  recording_name: string;
+  marker_names: string[];
+  frame_rate: number;
+  total_frames: number;
+  duration_seconds: number;
+  /** POINT units declared in the file ('' when absent) */
+  native_units: string;
+  /** Units of the stored marker positions */
+  converted_units: string;
+}
+
+/**
+ * Response model for enumerating available camera presets. See issue #7452
+ */
+export interface CameraPresetListResponse {
+  /** Available camera presets with their view vectors */
+  presets: CameraPresetResponse[];
+}
+
 /**
  * Request model for camera preset selection. Preconditions: - preset must be a known camera preset See issue #1202
  */
@@ -469,6 +527,8 @@ export interface CaptureSource {
   /** c3d, openpose, or mediapipe */
   type: string;
   available: boolean;
+  /** Why the source is unavailable (None when available) */
+  reason?: string | null;
   description: string;
 }
 
@@ -525,6 +585,16 @@ export interface ControlStateRequest {
 }
 
 /**
+ * Request model for counterfactual / induced-acceleration analysis. Preconditions: - kind must be a known counterfactual kind (see ``src.shared.python.analysis.orchestrator`` — single source). See issue #7450.
+ */
+export interface CounterfactualRequest {
+  /** Counterfactual kind: 'ztcf' / 'zvcf' (counterfactual accelerations) or 'gravity' / 'drift' / 'control' / 'total' (induced accelerations) */
+  kind: string;
+  /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
+  run_post_hoc: boolean;
+}
+
+/**
  * Request to create a terrain environment.
  */
 export interface CreateEnvironmentRequest {
@@ -538,6 +608,31 @@ export interface CreateEnvironmentRequest {
   slope_angle_deg: number;
   /** Slope direction (degrees) */
   slope_direction_deg: number;
+}
+
+/**
+ * Perturbation study configuration. All fields match ``CrossEngineSimConfig`` from the service layer.
+ */
+export interface CrossEnginePerturbationConfig {
+  /** Simulation horizon (seconds) */
+  t_end: number;
+  /** Integration timestep (seconds) */
+  dt: number;
+  /** Perturbation amplitude */
+  noise_amplitude: number;
+  /** Number of perturbation trials */
+  n_trials: number;
+  /** Random seed for reproducibility */
+  seed: number;
+}
+
+/**
+ * Request body for POST /analysis/cross-engine.
+ */
+export interface CrossEngineStudyRequest {
+  /** Engine names to compare; each must be a recognised engine. */
+  engines?: string[];
+  config: CrossEnginePerturbationConfig;
 }
 
 /**
@@ -776,6 +871,23 @@ export interface FeatureReportModel {
   message: string;
   missing?: string[];
   depends_on?: string[];
+}
+
+/**
+ * Metadata describing one registered ball-flight model.
+ */
+export interface FlightModelInfo {
+  key: FlightModelType;
+  name: string;
+  description: string;
+  reference: string;
+}
+
+/**
+ * Enumeration of every flight model in :class:`FlightModelRegistry`.
+ */
+export interface FlightModelListResponse {
+  models: FlightModelInfo[];
 }
 
 /**
@@ -1031,6 +1143,8 @@ export interface LauncherTileResponse {
   python_paths?: string[] | null;
   /** URL path for web tools */
   web_route?: string | null;
+  /** Web reachability contract (issue #7461) */
+  web?: WebLaunchContractResponse | null;
   /** tab | dock | window | external */
   default_launch: string;
   /** Shell surfaces the tile supports (pyqt6, react) */
@@ -1162,6 +1276,16 @@ export interface ModelExplorerResponse {
 export interface ModelListResponse {
   /** List of available models with name and format */
   models: Record<string, string>[];
+}
+
+/**
+ * Toast notification preferences.
+ */
+export interface NotificationSettings {
+  /** Auto-dismiss delay for toasts in milliseconds (500–60000). */
+  toast_duration_ms: number;
+  /** 'all' shows every toast, 'errors' only errors/warnings, 'silent' suppresses all toasts. */
+  verbosity: "all" | "errors" | "silent";
 }
 
 /**
@@ -1330,6 +1454,18 @@ export interface ScatterAnalysisResponse {
 export interface SetActiveThemeRequest {
   /** Theme name to activate */
   name: string;
+}
+
+/**
+ * Default simulation parameters applied at app start. Mirrors the desktop Configuration tab (see issue #7457); the web simulation store hydrates from these once per app start so an in-session change is never clobbered (#7424).
+ */
+export interface SimulationDefaultsSettings {
+  /** Engine name preselected on the simulation page. */
+  default_engine: string;
+  /** Default simulation duration in seconds (0–300]. */
+  duration: number;
+  /** Default integration timestep in seconds (0–1]. */
+  timestep: number;
 }
 
 /**
@@ -1691,4 +1827,25 @@ export interface VideoAnalysisResponse {
   quality_metrics: Record<string, unknown>;
   /** Pose estimation results */
   pose_data: Record<string, unknown>[];
+}
+
+/**
+ * How a tile is reachable from the web app (issue #7461). Mirrors ``src.config.launcher_manifest_loader.WebLaunchContract``.
+ */
+export interface WebLaunchContractResponse {
+  /** route | native-window | unavailable */
+  mode: string;
+  /** In-app route for mode 'route' */
+  route?: string | null;
+  /** Why unavailable, for mode 'unavailable' */
+  reason?: string | null;
+}
+
+/**
+ * Full per-user web settings document (GET/PUT /settings).
+ */
+export interface WebSettings {
+  appearance?: AppearanceSettings;
+  notifications?: NotificationSettings;
+  simulation_defaults?: SimulationDefaultsSettings;
 }
