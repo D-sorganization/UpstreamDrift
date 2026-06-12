@@ -6,7 +6,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -20,6 +20,7 @@ from ..auth.middleware import OptionalAuth, is_local_mode
 from ..dependencies import get_engine_manager
 from ..models.responses import (
     CapabilityLevelResponse,
+    CapabilitySummaryResponse,
     EngineCapabilitiesResponse,
     EngineLoadResponse,
     EngineProbeResponse,
@@ -327,12 +328,14 @@ async def get_engine_capabilities(
         # EngineCapabilities.to_dict() without an explicit allow-list update.
         if not isinstance(level, str) or level not in _VALID_CAPABILITY_LEVELS:
             continue
-        supported = level != "none"
+        # The membership check above guarantees the literal set; mypy cannot
+        # narrow str via frozenset membership, so cast explicitly.
+        level_literal = cast(Literal["full", "partial", "none"], level)
         capability_list.append(
             CapabilityLevelResponse(
                 name=key,
-                level=level,
-                supported=supported,
+                level=level_literal,
+                supported=level_literal != "none",
             )
         )
         summary[level] = summary.get(level, 0) + 1
@@ -341,5 +344,9 @@ async def get_engine_capabilities(
         engine_name=caps_dict.get("engine_name", engine_type),
         engine_type=engine_type,
         capabilities=capability_list,
-        summary=summary,
+        summary=CapabilitySummaryResponse(
+            full=summary["full"],
+            partial=summary["partial"],
+            none=summary["none"],
+        ),
     )
