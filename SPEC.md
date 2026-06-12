@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.360                                            |
+| **Spec Version**        | 1.0.361                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Kept CI's Rust Python-binding verification lane on the
+  locked dependency policy by installing the editable dev package with
+  `--no-deps`, and removed a stale putting-green API mypy suppression so the
+  changed-file strict API gate stays clean.
 - **2026-06-12** - Consolidated the remaining UI dependency, motion-matching
   export, legacy golf-data indexing, and putting-green vector-norm updates into
   one CI lane. Motion-matching package exports now preserve callable symbols

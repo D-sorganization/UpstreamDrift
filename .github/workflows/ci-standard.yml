@@ -2089,7 +2089,7 @@ jobs:
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install "numpy==2.2.6" pytest pydantic pytest-asyncio pytest-timeout
-          python -m pip install --no-cache-dir -e ".[dev]"
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
           python -m pip install --force-reinstall target/wheels/*.whl
           python scripts/ci/import_built_rust_wheels.py \
             upstream_physics \
