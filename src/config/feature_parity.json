@@ -89,11 +89,12 @@
     "analysis.static_plots": {
       "title": "Static analysis plots (20+ plot types)",
       "pyqt": "src/shared/python/plot_engine/pyqt6_widget.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
+      "api": "src/api/routes/analysis_plots.py",
+      "web": "ui/src/components/analysis/PlotsSection.tsx",
+      "status": "parity",
       "issue": 7449,
-      "tiles": []
+      "tiles": [],
+      "notes": "GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
     },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
