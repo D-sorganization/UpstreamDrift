@@ -6,6 +6,7 @@ import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting.base import RecorderInterface
+from src.shared.python.plot_labels import aligned_joint_label, joint_name
 
 logger = get_logger(__name__)
 
@@ -104,31 +105,13 @@ class DataManager:
         """Get human-readable joint name."""
         if joint_idx is None:
             raise ValueError("joint_idx must be provided")
-        if 0 <= joint_idx < len(self.joint_names):
-            return self.joint_names[joint_idx]
-        return f"Joint {joint_idx}"
+        return joint_name(self.joint_names, joint_idx)
 
     def get_aligned_label(self, idx: int, data_dim: int) -> str:
         """Get label aligned with data dimension (handling nq != nv)."""
         if idx is None:
             raise ValueError("idx must be provided")
-        if len(self.joint_names) == 0:
-            return f"DoF {idx}"
-
-        # If perfect match
-        if data_dim == len(self.joint_names):
-            return (
-                self.joint_names[idx] if idx < len(self.joint_names) else f"DoF {idx}"
-            )
-
-        # If mismatch, align from the end (assuming base is at the start)
-        offset = max(0, data_dim - len(self.joint_names))
-        name_idx = idx - offset
-
-        if 0 <= name_idx < len(self.joint_names):
-            return self.joint_names[name_idx]
-
-        return f"DoF {idx}"
+        return aligned_joint_label(self.joint_names, idx, data_dim)
 
     def get_induced_acceleration_series(
         self, source_name: str | int
