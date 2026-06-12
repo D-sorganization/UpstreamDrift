@@ -9,6 +9,7 @@
 
 import { create } from 'zustand';
 import { apiFetch } from '@/api/fetch';
+import type { EngineLoadResponse, EngineProbeResponse } from '@/api/generated/types';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -108,23 +109,20 @@ const ENGINE_REGISTRY: Omit<ManagedEngine, 'loadState' | 'available' | 'error'>[
 
 // ── API helpers ───────────────────────────────────────────────────────────
 
-interface EngineStatus {
-  available: boolean;
-  version?: string;
-  capabilities?: string[];
-}
+// Payload shapes come from the generated API contract (issue #7447) — never
+// hand-write interfaces for payloads modeled in src/api/models/.
 
-async function probeEngine(engineName: string): Promise<EngineStatus> {
+async function probeEngine(engineName: string): Promise<EngineProbeResponse> {
   try {
-    return await apiFetch<EngineStatus>(`/api/engines/${engineName}/probe`);
+    return await apiFetch<EngineProbeResponse>(`/api/engines/${engineName}/probe`);
   } catch {
     throw new Error(`Failed to probe engine: ${engineName}`);
   }
 }
 
-async function loadEngineApi(engineName: string): Promise<EngineStatus> {
+async function loadEngineApi(engineName: string): Promise<EngineLoadResponse> {
   try {
-    return await apiFetch<EngineStatus>(`/api/engines/${engineName}/load`, {
+    return await apiFetch<EngineLoadResponse>(`/api/engines/${engineName}/load`, {
       method: 'POST',
     });
   } catch {
@@ -220,7 +218,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
                 ...e,
                 loadState: 'loaded' as EngineLoadState,
                 available: true,
-                version: loadResult.version,
+                version: loadResult.version ?? undefined,
                 capabilities: loadResult.capabilities || e.capabilities,
               }
             : e

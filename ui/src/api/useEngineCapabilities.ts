@@ -11,28 +11,25 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { apiFetchParsed } from './fetch';
 import { parseEngineCapabilities } from './schemas';
+import type {
+  CapabilityLevelResponse,
+  EngineCapabilitiesResponse,
+} from './generated/types';
+
+/**
+ * Engine-capabilities payloads — generated from the API contract (#7447).
+ *
+ * Do NOT hand-write these shapes: they mirror `EngineCapabilitiesResponse` /
+ * `CapabilityLevelResponse` in `src/api/models/responses.py` via
+ * `ui/src/api/generated/types.ts`.
+ */
+export type CapabilityEntry = CapabilityLevelResponse;
 
 /** Support level for a single engine capability. */
-export type CapabilityLevel = 'full' | 'partial' | 'none';
-
-/** A single capability entry from the backend. */
-export interface CapabilityEntry {
-  name: string;
-  level: CapabilityLevel;
-  supported: boolean;
-}
+export type CapabilityLevel = CapabilityEntry['level'];
 
 /** Full capabilities response from the backend. */
-export interface EngineCapabilitiesData {
-  engine_name: string;
-  engine_type: string;
-  capabilities: CapabilityEntry[];
-  summary: {
-    full: number;
-    partial: number;
-    none: number;
-  };
-}
+export type EngineCapabilitiesData = EngineCapabilitiesResponse;
 
 export type CapabilitiesLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
