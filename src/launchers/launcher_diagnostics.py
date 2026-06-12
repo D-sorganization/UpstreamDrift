@@ -87,6 +87,25 @@ def _read_manifest_schema(manifest_path: Path | None) -> str | None:
     return None
 
 
+#: Ordered probe categories shared by the desktop diagnostics dialog and the
+#: web API (``GET /api/v1/diagnostics/full``). Parity contract (issue #7458):
+#: both UIs derive their category set from this single enumeration. Each entry
+#: ``name`` maps to a ``LauncherDiagnostics.check_<name>`` method.
+DIAGNOSTIC_CHECKS: tuple[str, ...] = (
+    "python_environment",
+    "models_yaml",
+    "model_registry",
+    "launcher_provider_compatibility",
+    "layout_config",
+    "asset_files",
+    "pyqt6_availability",
+    "engine_availability",
+    "biomech_siblings",
+    "tools_sidebar",
+    "shared_tools_freshness",
+)
+
+
 @dataclass
 class DiagnosticResult:
     """Result of a diagnostic check."""
@@ -217,40 +236,15 @@ class LauncherDiagnostics:
         """
         self.results = []
 
-        # Core checks
-        self.check_python_environment()
-        self.check_models_yaml()
-        self.check_model_registry()
-        self.check_launcher_provider_compatibility()
-        self.check_layout_config()
-        self.check_asset_files()
-        self.check_pyqt6_availability()
-        self.check_engine_availability()
-        self.check_biomech_siblings()
-        self.check_tools_sidebar()
-        self.check_shared_tools_freshness()
+        # Core checks — driven by the shared DIAGNOSTIC_CHECKS enumeration so
+        # the desktop dialog and the web API stay in lockstep (issue #7458).
+        for check_name in DIAGNOSTIC_CHECKS:
+            getattr(self, f"check_{check_name}")()
 
         # Feed all results into the app-state ring buffer so the Sidekick
         # chat assistant can include them via get_chat_context() (issue #5474).
         self._push_to_ring_buffer(self.results)
-        # Calculate summary
-        passed = sum(1 for r in self.results if r.status == "pass")
-        failed = sum(1 for r in self.results if r.status == "fail")
-        warnings = sum(1 for r in self.results if r.status == "warning")
-
-        return {
-            "summary": {
-                "total_checks": len(self.results),
-                "passed": passed,
-                "failed": failed,
-                "warnings": warnings,
-                "status": "healthy" if failed == 0 else "degraded",
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "expected_tiles": len(self.EXPECTED_TILE_IDS),
-            },
-            "checks": [r.to_dict() for r in self.results],
-            "recommendations": self._generate_recommendations(),
-        }
+        return build_report(self.results, expected_tiles=len(self.EXPECTED_TILE_IDS))
 
     def check_python_environment(self) -> DiagnosticResult:
         """Check Python environment configuration."""
@@ -1082,67 +1076,118 @@ class LauncherDiagnostics:
         self._record_result(result)
         return result
 
-    def _generate_recommendations(self) -> list[str]:  # noqa: C901
+    def _generate_recommendations(self) -> list[str]:
         """Generate recommendations based on diagnostic results."""
-        recommendations = []
+        return generate_recommendations(self.results)
 
-        for result in self.results:
-            if result.status == "fail":
-                if result.name == "models_yaml":
+
+def build_report(
+    results: list[DiagnosticResult], *, expected_tiles: int
+) -> dict[str, Any]:
+    """Build the structured diagnostics report from check *results*.
+
+    Shared by :meth:`LauncherDiagnostics.run_all_checks` (desktop dialog) and
+    ``GET /api/v1/diagnostics/full`` (web UI) so both surfaces serve the same
+    report shape (issue #7458).
+
+    Args:
+        results: Diagnostic results, one per probe category.
+        expected_tiles: Number of launcher tiles expected from the registry.
+
+    Returns:
+        Dictionary with ``summary``, ``categories``, ``checks``, and
+        ``recommendations`` keys.
+
+    Raises:
+        TypeError: If *results* is not a list.
+    """
+    if not isinstance(results, list):
+        raise TypeError(
+            f"results must be a list of DiagnosticResult, got {type(results).__name__}"
+        )
+    passed = sum(1 for r in results if r.status == "pass")
+    failed = sum(1 for r in results if r.status == "fail")
+    warnings = sum(1 for r in results if r.status == "warning")
+
+    return {
+        "summary": {
+            "total_checks": len(results),
+            "passed": passed,
+            "failed": failed,
+            "warnings": warnings,
+            "status": "healthy" if failed == 0 else "degraded",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "expected_tiles": expected_tiles,
+        },
+        "categories": list(DIAGNOSTIC_CHECKS),
+        "checks": [r.to_dict() for r in results],
+        "recommendations": generate_recommendations(results),
+    }
+
+
+def generate_recommendations(  # noqa: C901
+    results: list[DiagnosticResult],
+) -> list[str]:
+    """Generate recommendations based on diagnostic *results*."""
+    recommendations = []
+
+    for result in results:
+        if result.status == "fail":
+            if result.name == "models_yaml":
+                recommendations.append(
+                    "CRITICAL: Ensure src/config/models.yaml exists and contains all 17 model definitions"
+                )
+            elif result.name == "model_registry":
+                recommendations.append(
+                    "Check ModelRegistry initialization - verify YAML parsing is working"
+                )
+            elif result.name == "pyqt6_availability":
+                recommendations.append("Install PyQt6 with: pip install PyQt6")
+            elif result.name == "asset_files":
+                recommendations.append(
+                    "Restore missing asset files in src/launchers/assets/"
+                )
+            elif result.name == "launcher_provider_compatibility":
+                recommendations.append(
+                    "Fix model provider metadata so launcher entries resolve valid source roots, artifacts, and working directories"
+                )
+
+        elif result.status == "warning":
+            if result.name == "layout_config":
+                details = result.details
+                if details.get("missing_from_saved"):
                     recommendations.append(
-                        "CRITICAL: Ensure src/config/models.yaml exists and contains all 17 model definitions"
+                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
                     )
-                elif result.name == "model_registry":
+            elif result.name == "asset_files":
+                recommendations.append("Some tile icons may not display correctly")
+            elif result.name == "launcher_provider_compatibility":
+                recommendations.append(
+                    "Review incompatible provider-backed models before enabling shared external packs in the launcher"
+                )
+            elif result.name == "shared_tools_freshness":
+                details = result.details
+                if details.get("submodule_status") == "not_initialized":
                     recommendations.append(
-                        "Check ModelRegistry initialization - verify YAML parsing is working"
+                        "Run 'git submodule update --init --recursive' to initialize shared submodule dependencies"
                     )
-                elif result.name == "pyqt6_availability":
-                    recommendations.append("Install PyQt6 with: pip install PyQt6")
-                elif result.name == "asset_files":
+                elif details.get("submodule_status") == "out_of_sync_with_pin":
                     recommendations.append(
-                        "Restore missing asset files in src/launchers/assets/"
+                        "Run 'git submodule update --init --recursive' to sync your submodule checkout to the pinned commit"
                     )
-                elif result.name == "launcher_provider_compatibility":
+                if details.get("sibling_status") == "out_of_sync_with_submodule":
                     recommendations.append(
-                        "Fix model provider metadata so launcher entries resolve valid source roots, artifacts, and working directories"
+                        "Your sibling Tools repository is out of sync with UpstreamDrift's pinned submodule version"
+                    )
+                if not details.get("is_current") and details.get("remote_sha"):
+                    recommendations.append(
+                        "A newer version of ud-tools is available. Run 'Sync Shared Tools' in Settings to update"
                     )
 
-            elif result.status == "warning":
-                if result.name == "layout_config":
-                    details = result.details
-                    if details.get("missing_from_saved"):
-                        recommendations.append(
-                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
-                        )
-                elif result.name == "asset_files":
-                    recommendations.append("Some tile icons may not display correctly")
-                elif result.name == "launcher_provider_compatibility":
-                    recommendations.append(
-                        "Review incompatible provider-backed models before enabling shared external packs in the launcher"
-                    )
-                elif result.name == "shared_tools_freshness":
-                    details = result.details
-                    if details.get("submodule_status") == "not_initialized":
-                        recommendations.append(
-                            "Run 'git submodule update --init --recursive' to initialize shared submodule dependencies"
-                        )
-                    elif details.get("submodule_status") == "out_of_sync_with_pin":
-                        recommendations.append(
-                            "Run 'git submodule update --init --recursive' to sync your submodule checkout to the pinned commit"
-                        )
-                    if details.get("sibling_status") == "out_of_sync_with_submodule":
-                        recommendations.append(
-                            "Your sibling Tools repository is out of sync with UpstreamDrift's pinned submodule version"
-                        )
-                    if not details.get("is_current") and details.get("remote_sha"):
-                        recommendations.append(
-                            "A newer version of ud-tools is available. Run 'Sync Shared Tools' in Settings to update"
-                        )
+    if not recommendations:
+        recommendations.append("All systems operational - no issues detected")
 
-        if not recommendations:
-            recommendations.append("All systems operational - no issues detected")
-
-        return recommendations
+    return recommendations
 
 
 def reset_layout_config() -> bool:
