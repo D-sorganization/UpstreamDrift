@@ -291,9 +291,12 @@ class Integrator:
         if upper_bound is None:
             upper_bound = t[-1]
 
-        # Find indices for bounds
+        # Find indices for bounds. The upper index uses side="right" so a
+        # sample lying exactly on the upper bound (including the default t[-1])
+        # is included by the half-open slice below; side="left" dropped it,
+        # biasing every definite integral low by one interval (#7412).
         lower_idx = np.searchsorted(t, lower_bound)
-        upper_idx = np.searchsorted(t, upper_bound)
+        upper_idx = np.searchsorted(t, upper_bound, side="right")
 
         lower_idx = np.clip(lower_idx, 0, len(t) - 1)
         upper_idx = np.clip(upper_idx, 0, len(t))
