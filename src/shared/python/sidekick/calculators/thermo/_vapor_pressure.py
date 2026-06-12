@@ -53,8 +53,12 @@ def _buck_equation(temperature_c: float) -> float:
     if temperature_c is None:
         raise ValueError("temperature_c must be provided")
     a_kpa = BUCK_A / MBAR_TO_KPA_FACTOR
+    # Buck (1996): P = 6.1121 * exp((18.678 - T/234.5) * (T/(257.14 + T)))
+    # BUCK_C (234.5) divides T in the exponent term; BUCK_D (257.14) is the
+    # denominator offset. They were previously swapped, biasing pressures high
+    # (+15% at 25°C, +43% at 100°C). See issue #7411 / Tools#3381.
     p_kpa = a_kpa * np.exp(
-        (BUCK_B - temperature_c / BUCK_D) * temperature_c / (temperature_c + BUCK_C)
+        (BUCK_B - temperature_c / BUCK_C) * temperature_c / (temperature_c + BUCK_D)
     )
     return float(p_kpa * KPA_TO_PA_FACTOR)
 
