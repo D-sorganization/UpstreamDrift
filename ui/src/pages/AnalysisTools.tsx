@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { useAnalysisTools } from '@/api/useAnalysisTools';
 import type { MetricInfo } from '@/api/useAnalysisTools';
+import { PlotsSection } from '@/components/analysis/PlotsSection';
 export type {
   AnalysisLoadState,
   ExportResult,
@@ -110,6 +111,9 @@ export function AnalysisToolsPage() {
         {/* Content Area */}
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-3xl mx-auto space-y-6">
+            {/* Static Plots (post-run analysis, issue #7449) */}
+            <PlotsSection />
+
             {/* Statistics Summary */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
               <div className="flex items-center justify-between mb-3">
