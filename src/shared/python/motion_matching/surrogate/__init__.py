@@ -17,11 +17,15 @@ Public API:
 
 from __future__ import annotations
 
-from ._normalize import NormalizationStats
-from .invert import FitResult, InvertOptions, fit_swing_via_surrogate
-from .model import ClubTrajectory, SurrogateConfig, SwingSurrogate
-from .train import TrainConfig, TrainedSurrogate, train_surrogate
-from .validate import ValidationReport, validate_against_simscape
+import importlib
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ._normalize import NormalizationStats
+    from .invert import FitResult, InvertOptions, fit_swing_via_surrogate
+    from .model import ClubTrajectory, SurrogateConfig, SwingSurrogate
+    from .train import TrainConfig, TrainedSurrogate, train_surrogate
+    from .validate import ValidationReport, validate_against_simscape
 
 __all__ = [
     "ClubTrajectory",
@@ -37,3 +41,29 @@ __all__ = [
     "train_surrogate",
     "validate_against_simscape",
 ]
+
+_LAZY_EXPORTS = {
+    "NormalizationStats": "._normalize",
+    "FitResult": ".invert",
+    "InvertOptions": ".invert",
+    "fit_swing_via_surrogate": ".invert",
+    "ClubTrajectory": ".model",
+    "SurrogateConfig": ".model",
+    "SwingSurrogate": ".model",
+    "TrainConfig": ".train",
+    "TrainedSurrogate": ".train",
+    "train_surrogate": ".train",
+    "ValidationReport": ".validate",
+    "validate_against_simscape": ".validate",
+}
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_EXPORTS:
+        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(__all__)
