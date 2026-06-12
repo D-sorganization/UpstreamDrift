@@ -12,6 +12,9 @@ import { DatasetGeneratorPage } from './pages/DatasetGenerator';
 import { AnalysisToolsPage } from './pages/AnalysisTools';
 import { CharacterBuilderPage } from './pages/CharacterBuilder';
 import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
+import { NotFoundPage } from './pages/NotFound';
+import { ScrollToTop } from './utils/ScrollToTop';
+import { RouteTitle } from './utils/RouteTitle';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
@@ -23,6 +26,8 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
+      <RouteTitle />
       <ToastProvider>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
@@ -47,6 +52,8 @@ function App() {
           />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
+          {/* Catch-all 404 (#7430) — must stay last. */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <DiagnosticsPanel />
         <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />

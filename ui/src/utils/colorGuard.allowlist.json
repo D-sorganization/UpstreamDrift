@@ -1,0 +1,8 @@
+{
+  "comment": "Intentional non-canonical color utility classes (UI/UX #7421). Canonical neutrals are gray-*, canonical primary is blue-*. Entries here are categorical/semantic colors that are NOT neutrals or primary accents, reviewed and kept on purpose. Format: 'relative/path/from/ui/src': ['reason'].",
+  "allow": {
+    "components/model-explorer/ModelTree.tsx": "purple/yellow distinguish source vs target model and swap-selection state in Frankenstein mode (categorical, not a primary accent)",
+    "components/model-explorer/TreeDiffModal.tsx": "purple marks the source model name in cross-model diffs (categorical)",
+    "components/simulation/LauncherDashboard.tsx": "purple is the 'Utility' tile-category badge color (categorical taxonomy, not a primary action)"
+  }
+}

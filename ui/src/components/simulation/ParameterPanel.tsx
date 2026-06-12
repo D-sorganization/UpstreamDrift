@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Input, Select } from '@/components/ui';
 
 export interface SimulationParameters {
   duration: number;
@@ -92,7 +93,7 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
         >
           Duration (seconds)
         </label>
-        <input
+        <Input
           id="duration-input"
           type="number"
           min="0.1"
@@ -101,9 +102,7 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
           value={duration}
           onChange={(e) => setDuration(parseFloat(e.target.value) || 3.0)}
           disabled={disabled}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
           aria-describedby="duration-help"
         />
         <p id="duration-help" className="mt-1 text-xs text-gray-500">
@@ -119,21 +118,19 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
         >
           Timestep (seconds)
         </label>
-        <select
+        <Select
           id="timestep-input"
           value={timestep}
           onChange={(e) => setTimestep(parseFloat(e.target.value))}
           disabled={disabled}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
           aria-describedby="timestep-help"
         >
           <option value="0.001">0.001s (High precision)</option>
           <option value="0.002">0.002s (Default)</option>
           <option value="0.005">0.005s (Fast)</option>
           <option value="0.01">0.01s (Very fast)</option>
-        </select>
+        </Select>
         <p id="timestep-help" className="mt-1 text-xs text-gray-500">
           Physics integration step size
         </p>

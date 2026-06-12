@@ -185,7 +185,7 @@ export function AnalysisToolsPage() {
                 <button
                   onClick={handleExport}
                   disabled={isLoading}
-                  className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                 >
                   Export
                 </button>
