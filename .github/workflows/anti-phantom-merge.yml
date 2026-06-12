@@ -169,10 +169,8 @@ jobs:
             git fetch origin "$BASE_SHA" || true
             git fetch origin "$HEAD_SHA" || true
             # Cross-check via the API as well.
-            API_STATS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json additions,deletions,changedFiles 2>/dev/null || echo '{}')
-            API_FILES=$(echo "$API_STATS" | jq -r '.changedFiles // 0')
-            API_ADDS=$(echo "$API_STATS" | jq -r '.additions // 0')
-            API_DELS=$(echo "$API_STATS" | jq -r '.deletions // 0')
+            API_STATS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json additions,deletions,changedFiles --jq '[.changedFiles, .additions, .deletions] | @tsv' 2>/dev/null || echo '0	0	0')
+            read -r API_FILES API_ADDS API_DELS <<< "$API_STATS"
             echo "api_changed_files=$API_FILES api_additions=$API_ADDS api_deletions=$API_DELS"
             MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo "$BASE_SHA")
             CHANGED_FILES=$(git diff --name-only "$MERGE_BASE...$HEAD_SHA" || true)

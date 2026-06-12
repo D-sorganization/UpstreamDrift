@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
 import { apiFetch } from './fetch';
 import { withLauncherWebSocketToken } from './websocketToken';
+import type { EngineListResponse, EngineStatusResponse } from './generated/types';
 
 /**
  * Result of a `setSpeed` call (issue #7166).
@@ -32,13 +33,13 @@ export interface SimulationConfig {
   initial_state?: Record<string, number[]>;
 }
 
-export interface EngineStatus {
-  name: string;
-  available: boolean;
-  loaded: boolean;
-  version?: string;
-  capabilities: string[];
-}
+/**
+ * Engine status payload — generated from the API contract (issue #7447).
+ *
+ * Do NOT hand-write this shape: it mirrors `EngineStatusResponse` in
+ * `src/api/models/responses.py` via `ui/src/api/generated/types.ts`.
+ */
+export type EngineStatus = EngineStatusResponse;
 
 // Maximum number of frames to keep in history to prevent memory leaks
 const MAX_FRAMES_HISTORY = 1000;
@@ -55,16 +56,18 @@ export type ConnectionStatus =
   | 'lost';
 
 export async function fetchEngines(): Promise<EngineStatus[]> {
-  let data: { engines?: unknown };
+  // Compile-time contract from the generated types; the runtime shape check
+  // below stays because the backend ships separately (see ui/README.md).
+  let data: Partial<EngineListResponse>;
   try {
-    data = await apiFetch<{ engines?: unknown }>('/api/engines');
+    data = await apiFetch<Partial<EngineListResponse>>('/api/engines');
   } catch {
     throw new Error('Failed to fetch engines');
   }
   if (!Array.isArray(data.engines)) {
     throw new Error('Unexpected engines response shape');
   }
-  return data.engines as EngineStatus[];
+  return data.engines;
 }
 
 export function useSimulation(engineType: string) {
