@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from src.api.routes.physics import router, clear_physics_caches
 from src.api.dependencies import get_engine_manager, get_simulation_service
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngine:
     def __init__(self):

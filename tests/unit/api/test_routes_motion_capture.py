@@ -11,6 +11,8 @@ from fastapi.testclient import TestClient
 from src.api.routes import motion_capture as mc
 from src.api.routes.motion_capture import router, _sessions, _recordings
 
+pytestmark = pytest.mark.unit
+
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _LAUNCHER_MANIFEST = _REPO_ROOT / "src" / "config" / "launcher_manifest.json"
 _HAS_EZC3D = importlib.util.find_spec("ezc3d") is not None

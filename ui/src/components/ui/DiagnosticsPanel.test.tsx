@@ -112,15 +112,15 @@ const integrationsReport: IntegrationsHealthReport = {
   markdown: '# Integration Health\n| cli | claude | healthy |',
 };
 
-const apiFetchMock = vi.fn((path: string) => {
+const apiFetchMock = vi.fn(async (...[path]: [string, RequestInit?]): Promise<unknown> => {
   if (path === '/api/v1/diagnostics/full') {
-    return Promise.resolve(fullReport);
+    return fullReport;
   }
   if (path === '/api/v1/integrations/health') {
-    return Promise.resolve(integrationsReport);
+    return integrationsReport;
   }
   // /api/engines backend-health probe
-  return Promise.resolve([]);
+  return [];
 });
 
 vi.mock('@/api/fetch', () => ({

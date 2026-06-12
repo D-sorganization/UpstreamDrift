@@ -24,8 +24,13 @@ import {
 import { apiFetch } from '@/api/fetch';
 import { HelpfulField } from '@/components/ux/HelpfulField';
 import { getFieldMetadata } from '@/ux/fieldMetadata';
-import { isInRange } from '@/ux/fieldHelpers';
 import { BallFlightScene3D } from '@/components/visualization/BallFlightScene3D';
+import {
+  LAUNCH_FIELD_IDS,
+  invalidLaunchFields,
+  modelColor,
+  type LaunchFieldId,
+} from './ballFlightModel';
 
 /** Flight-model metadata from GET /tools/ball-flight/models. See issue #7456 */
 export interface FlightModelInfo {
@@ -64,30 +69,6 @@ export interface BallFlightSimulationResponse extends BallFlightModelResult {
   results: BallFlightModelResult[];
 }
 
-/** Mirrors the desktop tracer's per-model color cycle. */
-export const MODEL_COLORS = [
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#22c55e', // green
-  '#e879f9', // magenta
-  '#eab308', // yellow
-  '#06b6d4', // cyan
-  '#f97316', // orange
-] as const;
-
-/** Launch-condition field ids (registry-backed; single source of units). */
-export const LAUNCH_FIELD_IDS = [
-  'ball_flight.ball_speed',
-  'ball_flight.launch_angle',
-  'ball_flight.azimuth_angle',
-  'ball_flight.spin_rate',
-  'ball_flight.spin_axis_tilt',
-  'ball_flight.wind_speed',
-  'ball_flight.wind_direction',
-] as const;
-
-type LaunchFieldId = (typeof LAUNCH_FIELD_IDS)[number];
-
 /** Map registry field ids to API request keys (units stay explicit). */
 const FIELD_TO_API_KEY: Record<LaunchFieldId, string> = {
   'ball_flight.ball_speed': 'ball_speed_mps',
@@ -99,23 +80,6 @@ const FIELD_TO_API_KEY: Record<LaunchFieldId, string> = {
   'ball_flight.wind_direction': 'wind_direction_deg',
 };
 
-/**
- * Validate the form values against the metadata registry.
- *
- * Returns the field ids whose values are missing, non-numeric, or outside
- * the declared valid range. Exported for direct unit testing.
- */
-export function invalidLaunchFields(
-  values: Record<LaunchFieldId, string>,
-): LaunchFieldId[] {
-  return LAUNCH_FIELD_IDS.filter((fieldId) => {
-    const raw = values[fieldId];
-    const parsed = Number(raw);
-    if (raw.trim() === '' || Number.isNaN(parsed)) return true;
-    return !isInRange(getFieldMetadata(fieldId), parsed);
-  });
-}
-
 function defaultLaunchValues(): Record<LaunchFieldId, string> {
   return Object.fromEntries(
     LAUNCH_FIELD_IDS.map((fieldId) => [
@@ -123,11 +87,6 @@ function defaultLaunchValues(): Record<LaunchFieldId, string> {
       String(getFieldMetadata(fieldId).default),
     ]),
   ) as Record<LaunchFieldId, string>;
-}
-
-/** Color for the i-th selected model (cycles like the desktop palette). */
-export function modelColor(index: number): string {
-  return MODEL_COLORS[index % MODEL_COLORS.length];
 }
 
 /** 2D profile chart shared by the side (height) and top (lateral) views. */

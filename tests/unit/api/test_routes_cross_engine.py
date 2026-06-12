@@ -18,6 +18,8 @@ from src.api.routes.cross_engine import router
 from src.api.dependencies import get_task_manager
 from src.api.task_manager import TaskManager
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # Fixtures

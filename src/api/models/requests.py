@@ -47,6 +47,17 @@ MAX_CONTROL_INPUTS = 100_000
 MAX_STATE_VECTOR_LEN = 10_000
 
 
+def _validate_export_format(value: str) -> str:
+    """Normalize and validate an analysis/trajectory export format."""
+    normalized = value.lower().strip()
+    if normalized not in VALID_EXPORT_FORMATS:
+        raise ValueError(
+            f"Unsupported export_format '{value}'. "
+            f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
+        )
+    return normalized
+
+
 def _normalize_initial_state_component(name: str, value: object) -> list[float]:
     """Return a finite float list for an initial-state component."""
     if hasattr(value, "tolist") and not isinstance(value, (str, bytes, bytearray)):
@@ -203,13 +214,7 @@ class AnalysisRequest(BaseModel):
     @classmethod
     def validate_export_format(cls, v: str) -> str:
         """Precondition: export_format must be supported."""
-        normalized = v.lower().strip()
-        if normalized not in VALID_EXPORT_FORMATS:
-            raise ValueError(
-                f"Unsupported export_format '{v}'. "
-                f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
-            )
-        return normalized
+        return _validate_export_format(v)
 
 
 class CounterfactualRequest(BaseModel):
@@ -413,13 +418,7 @@ class TrajectoryRecordRequest(BaseModel):
         the web API; the route returns an honest 501 for them (issue #7448,
         tracked by #7451).
         """
-        normalized = v.lower().strip()
-        if normalized not in VALID_EXPORT_FORMATS:
-            raise ValueError(
-                f"Unsupported export_format '{v}'. "
-                f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
-            )
-        return normalized
+        return _validate_export_format(v)
 
 
 # ──────────────────────────────────────────────────────────────

@@ -50,11 +50,13 @@ vi.mock('recharts', () => ({
 
 import {
   BallFlightPage,
+} from './BallFlight';
+import {
   invalidLaunchFields,
   modelColor,
   LAUNCH_FIELD_IDS,
   MODEL_COLORS,
-} from './BallFlight';
+} from './ballFlightModel';
 import type { BallFlightSimulationResponse, FlightModelInfo } from './BallFlight';
 
 const MODELS: FlightModelInfo[] = [

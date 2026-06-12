@@ -12,6 +12,8 @@ from pydantic import ValidationError
 from src.api.routes.ball_flight import BallFlightSimulationRequest, router
 from src.shared.python.physics.flight_models import FlightModelType
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def client() -> TestClient:
