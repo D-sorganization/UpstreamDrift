@@ -249,3 +249,52 @@ def test_pure_python_filter_fallbacks() -> None:
 
         res_gaussian = _gaussian_filter(data, sigma=1.0)
         assert res_gaussian.shape == data.shape
+
+
+def _kalman_steady_state_fixed_point(q: float, r: float, iters: int = 100_000) -> float:
+    """Iterate the random-walk DARE ``P = (P + q) * r / (P + q + r)`` to convergence."""
+    p = 1.0
+    for _ in range(iters):
+        p = (p + q) * r / (p + q + r)
+    return p
+
+
+def test_kalman_steady_state_matches_dare_fixed_point() -> None:
+    """The closed-form steady-state P must equal the DARE fixed point (#7410)."""
+    q, r = 0.01, 0.1
+    closed_form = 0.5 * (-q + np.sqrt(q**2 + 4.0 * q * r))
+    assert closed_form == pytest.approx(
+        _kalman_steady_state_fixed_point(q, r), abs=1e-12
+    )
+
+
+def test_kalman_pure_python_matches_canonical_implementation() -> None:
+    """Regression for #7410: the pure-Python copy must match ``filter.py`` exactly.
+
+    Before the fix the pure-Python module used a wrong-sign steady-state P
+    initialization, biasing the first smoothed frame by ~5e-3.
+    """
+    from src.shared.python.motion_pipeline.preprocessing import (
+        _filter_pure_python as pure,
+    )
+    from src.shared.python.motion_pipeline.preprocessing.filter import (
+        _kalman_filter_python,
+    )
+
+    rng = np.random.default_rng(0)
+    data = np.cumsum(rng.standard_normal((40, 2, 3)), axis=0)
+
+    canonical = _kalman_filter_python(data, process_noise=0.01, measurement_noise=0.1)
+    pure_result = pure._kalman_filter(data, process_noise=0.01, measurement_noise=0.1)
+    assert np.allclose(pure_result, canonical, atol=1e-9)
+
+
+def test_kalman_smoother_constant_signal_has_no_init_transient() -> None:
+    """A constant noise-free signal must smooth to that constant everywhere (#7410)."""
+    from src.shared.python.motion_pipeline.preprocessing.filter import (
+        _kalman_filter_python,
+    )
+
+    data = np.full((30, 1, 1), 5.0)
+    smoothed = _kalman_filter_python(data, process_noise=0.01, measurement_noise=0.1)
+    assert np.allclose(smoothed, 5.0, atol=1e-9)
