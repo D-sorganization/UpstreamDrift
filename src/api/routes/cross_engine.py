@@ -47,11 +47,19 @@ class CrossEnginePerturbationConfig(BaseModel):
     All fields match ``CrossEngineSimConfig`` from the service layer.
     """
 
-    t_end: float = Field(1.0, gt=0.0, description="Simulation horizon (seconds)")
-    dt: float = Field(0.01, gt=0.0, description="Integration timestep (seconds)")
-    noise_amplitude: float = Field(0.05, ge=0.0, description="Perturbation amplitude")
-    n_trials: int = Field(10, ge=1, le=200, description="Number of perturbation trials")
-    seed: int = Field(42, description="Random seed for reproducibility")
+    t_end: float = Field(
+        default=1.0, gt=0.0, description="Simulation horizon (seconds)"
+    )
+    dt: float = Field(
+        default=0.01, gt=0.0, description="Integration timestep (seconds)"
+    )
+    noise_amplitude: float = Field(
+        default=0.05, ge=0.0, description="Perturbation amplitude"
+    )
+    n_trials: int = Field(
+        default=10, ge=1, le=200, description="Number of perturbation trials"
+    )
+    seed: int = Field(default=42, description="Random seed for reproducibility")
 
 
 class CrossEngineStudyRequest(BaseModel):
@@ -62,7 +70,7 @@ class CrossEngineStudyRequest(BaseModel):
         min_length=1,
         description="Engine names to compare; each must be a recognised engine.",
     )
-    config: CrossEnginePerturbationConfig = CrossEnginePerturbationConfig()  # type: ignore[call-arg]
+    config: CrossEnginePerturbationConfig = CrossEnginePerturbationConfig()
 
     @field_validator("engines")
     @classmethod
