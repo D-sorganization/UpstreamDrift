@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reduced-motion safety net (#7441): users who request reduced motion get
+ * near-instant animations/transitions app-wide. Tailwind `motion-reduce:`
+ * variants can still refine individual cases; this is the global guard so
+ * ungated `animate-*`/`transition-*` utilities (toasts, modals, pulses) never
+ * animate against the OS preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Shared focus ring for one-off focusable elements that don't use the
  * Button/Input/Select primitives (UI/UX #7420). Plain CSS (not @apply) for
  * Tailwind v4 compatibility, matching the .sidekick-focus-ring convention. */

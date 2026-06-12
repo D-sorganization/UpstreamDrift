@@ -44,6 +44,27 @@ describe('ModelTree Component', () => {
     expect(handleSelect).toHaveBeenCalledWith(mockNodes[0]);
   });
 
+  it('gives each tree item an accessible name with node type (#7440)', () => {
+    render(
+      <ModelTree
+        modelName="Test Model"
+        treeNodes={mockNodes}
+        selectedNodeId={null}
+        onNodeSelect={() => {}}
+        side="single"
+      />,
+    );
+    const items = screen.getAllByRole('treeitem');
+    const labels = items.map((el) => el.getAttribute('aria-label'));
+    expect(labels).toContain('root_link, root');
+    expect(labels).toContain('arm_joint, joint');
+    // The expandable root exposes its expanded state to AT.
+    const root = items.find(
+      (el) => el.getAttribute('aria-label') === 'root_link, root',
+    );
+    expect(root).toHaveAttribute('aria-expanded');
+  });
+
   it('shows action buttons in Frankenstein mode for source side', () => {
     const handleCopyComponent = vi.fn();
     const handleCopyChain = vi.fn();

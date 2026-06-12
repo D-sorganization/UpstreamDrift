@@ -144,6 +144,14 @@ function App() {
 
   return (
     <BrowserRouter>
+      {/* #7441: first focusable element — lets keyboard users jump past the
+          per-page sidebars straight to the main content. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-3 focus:py-2 focus:rounded"
+      >
+        Skip to main content
+      </a>
       <ScrollToTop />
       <RouteTitle />
       <ToastProvider>

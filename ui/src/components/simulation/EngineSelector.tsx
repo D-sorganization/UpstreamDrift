@@ -213,9 +213,9 @@ export function EngineSelector({
                       `}
                     >
                       {isUnloading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                       ) : (
-                        <PowerOff className="w-4 h-4" />
+                        <PowerOff className="w-4 h-4" aria-hidden="true" />
                       )}
                     </button>
                   )
@@ -253,7 +253,7 @@ export function EngineSelector({
                     {isUnavailable ? (
                       'Unavailable'
                     ) : isLoading ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                     ) : isError ? (
                       'Retry'
                     ) : (
