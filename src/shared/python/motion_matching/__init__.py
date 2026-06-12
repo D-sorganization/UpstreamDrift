@@ -201,3 +201,14 @@ def __getattr__(name: str) -> Any:
 
 def __dir__() -> list[str]:
     return list(_LAZY_EXPORTS.keys())
+
+
+# These public names collide with same-named submodules. Bind the callable
+# exports eagerly so ``from motion_matching import name`` cannot resolve to the
+# module object after another import has populated the package attribute.
+compute_total_work = importlib.import_module(
+    ".compute_total_work", __package__
+).compute_total_work
+_load_body_target_module = importlib.import_module(".load_body_target", __package__)
+load_body_target = _load_body_target_module.load_body_target
+load_body_target_c3d = _load_body_target_module.load_body_target_c3d
