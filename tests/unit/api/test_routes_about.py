@@ -144,6 +144,17 @@ class TestAboutEndpoint:
             assert card["body"]
             assert card["link_url"].startswith("https://")
 
+    def test_about_routes_registered_on_local_app(self) -> None:
+        from src.api.local_server import create_local_app
+
+        local_client = TestClient(create_local_app())
+
+        versioned = local_client.get("/api/v1/about")
+        legacy = local_client.get("/api/about")
+
+        assert versioned.status_code == 200
+        assert legacy.status_code == 200
+
 
 class TestSharedResolutionWithDesktopDialog:
     def test_about_dialog_delegates_to_shared_helper(self) -> None:

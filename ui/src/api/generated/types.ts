@@ -525,6 +525,16 @@ export interface ControlStateRequest {
 }
 
 /**
+ * Request model for counterfactual / induced-acceleration analysis. Preconditions: - kind must be a known counterfactual kind (see ``src.shared.python.analysis.orchestrator`` — single source). See issue #7450.
+ */
+export interface CounterfactualRequest {
+  /** Counterfactual kind: 'ztcf' / 'zvcf' (counterfactual accelerations) or 'gravity' / 'drift' / 'control' / 'total' (induced accelerations) */
+  kind: string;
+  /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
+  run_post_hoc: boolean;
+}
+
+/**
  * Request to create a terrain environment.
  */
 export interface CreateEnvironmentRequest {
@@ -538,6 +548,31 @@ export interface CreateEnvironmentRequest {
   slope_angle_deg: number;
   /** Slope direction (degrees) */
   slope_direction_deg: number;
+}
+
+/**
+ * Perturbation study configuration. All fields match ``CrossEngineSimConfig`` from the service layer.
+ */
+export interface CrossEnginePerturbationConfig {
+  /** Simulation horizon (seconds) */
+  t_end: number;
+  /** Integration timestep (seconds) */
+  dt: number;
+  /** Perturbation amplitude */
+  noise_amplitude: number;
+  /** Number of perturbation trials */
+  n_trials: number;
+  /** Random seed for reproducibility */
+  seed: number;
+}
+
+/**
+ * Request body for POST /analysis/cross-engine.
+ */
+export interface CrossEngineStudyRequest {
+  /** Engine names to compare; each must be a recognised engine. */
+  engines?: string[];
+  config: CrossEnginePerturbationConfig;
 }
 
 /**
