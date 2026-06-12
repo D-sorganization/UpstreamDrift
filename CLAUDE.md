@@ -153,8 +153,10 @@ every user-facing feature (`parity`, `gap` + open issue number, or `exempt` +
 reason). **PRs adding user-facing PyQt6 features must add or update a registry
 entry.** CI enforces this via `tests/config/feature_parity/` (gap entries need
 an issue, referenced paths must exist, every launcher tile must be covered)
-and a freshness gate on the generated matrix doc. After editing the JSON,
-regenerate the human-readable matrix:
+and a freshness gate on the generated matrix doc. Desktop-only exemptions are
+decided in [ADR-0031](docs/adr/0031-web-parity-exemptions.md) — **changing an
+exempt entry requires updating that ADR in the same PR.** After editing the
+JSON, regenerate the human-readable matrix:
 
 ```bash
 python3 -m scripts.generate_feature_parity_matrix
