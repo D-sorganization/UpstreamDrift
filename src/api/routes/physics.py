@@ -21,6 +21,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
@@ -38,6 +39,7 @@ from ..models.requests import (
 from ..models.responses import (
     ActuatorStateResponse,
     BiomechanicsMetricsResponse,
+    CameraPresetListResponse,
     CameraPresetResponse,
     ControlFeaturesResponse,
     ForceVectorResponse,
@@ -45,6 +47,7 @@ from ..models.responses import (
     SpeedControlResponse,
     TrajectoryRecordResponse,
 )
+from ._route_utils import not_implemented_json
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
@@ -56,6 +59,15 @@ _logger = _get_module_logger(__name__)
 router = APIRouter()
 _CONTROL_INTERFACE_CACHE: dict[int, Any] = {}
 _FEATURES_REGISTRY_CACHE: dict[int, Any] = {}
+
+# Trajectory export honesty (issue #7448): only JSON export is actually
+# implemented for the web API today. The remaining desktop formats
+# (csv/mat/hdf5/c3d via src.shared.python.data_io.export) are tracked by the
+# parity issue below and return an honest 501 until wired up — previously the
+# endpoint wrote a JSON document into a file named with whatever extension the
+# client requested, fabricating csv/mat/hdf5 exports.
+SUPPORTED_RECORDING_EXPORT_FORMATS = frozenset({"json"})
+RECORDING_EXPORT_TRACKING_ISSUE = 7451
 
 
 def clear_physics_caches() -> None:
@@ -521,6 +533,30 @@ async def set_simulation_speed(
     )
 
 
+@router.get("/simulation/camera/presets", response_model=CameraPresetListResponse)
+@handle_api_errors
+async def list_camera_presets() -> CameraPresetListResponse:
+    """Enumerate the canonical camera presets.
+
+    Lets clients (e.g. the web UI) build their preset controls from the
+    server's canonical list instead of hardcoding it. See issue #7452.
+
+    Returns:
+        All available presets with their position/target/up vectors.
+    """
+    return CameraPresetListResponse(
+        presets=[
+            CameraPresetResponse(
+                preset=name,
+                position=data["position"],
+                target=data["target"],
+                up=data["up"],
+            )
+            for name, data in CAMERA_PRESETS.items()
+        ]
+    )
+
+
 @router.post("/simulation/camera", response_model=CameraPresetResponse)
 @handle_api_errors
 async def set_camera_preset(
@@ -558,7 +594,7 @@ async def control_recording(
     request: TrajectoryRecordRequest,
     simulation_service: SimulationService = Depends(get_simulation_service),
     logger: Any = Depends(get_logger),
-) -> TrajectoryRecordResponse:
+) -> TrajectoryRecordResponse | JSONResponse:
     """Control trajectory recording (start, stop, export).
 
     Args:
@@ -589,6 +625,20 @@ async def control_recording(
         )
 
     if action == "export":
+        # Honesty guard (issue #7448): never write a JSON document into a file
+        # whose extension claims another format. Non-JSON formats return 501
+        # with the parity tracking issue until they are wired to the shared
+        # exporters in src.shared.python.data_io.export (issue #7451).
+        if request.export_format not in SUPPORTED_RECORDING_EXPORT_FORMATS:
+            return not_implemented_json(
+                detail=(
+                    f"Trajectory export format '{request.export_format}' is not"
+                    " implemented in the web API yet; only 'json' is currently"
+                    " supported."
+                ),
+                tracking_issue=RECORDING_EXPORT_TRACKING_ISSUE,
+            )
+
         recorded = simulation_service.stats.recorded_frames
         frame_count = len(recorded)
         export_path = None
@@ -611,13 +661,13 @@ async def control_recording(
             # Create a uniquely named artifact file with atomic write
             # Using a temporary file in the managed directory ensures cleanup
             fd, tmp_path = tempfile.mkstemp(
-                suffix=f".{request.export_format}",
+                suffix=".json",
                 dir=artifact_dir,
             )
             try:
                 with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
                     json.dump(
-                        {"frames": recorded, "format": request.export_format},
+                        {"frames": recorded, "format": "json"},
                         tmp_file,
                         indent=2,
                     )

@@ -24,6 +24,28 @@ The Vite dev server listens on port `5180` by default. The browser UI expects th
 
 - `ui/src/pages/` - route-level screens such as the dashboard and simulation views.
 - `ui/src/components/` - reusable UI building blocks and domain components, including `visualization/Scene3D.tsx`.
+- `ui/src/components/ui/` - shared design primitives (`Button`, `Input`, `Select`, `Badge`, `Card`). See "Design system" below.
+
+## Design system
+
+All new buttons, inputs, and selects **must** use the shared primitives in
+`components/ui/` (`Button`, `Input`, `Select`, `Badge`, `Card`) instead of
+hand-rolled Tailwind strings, so paddings, radii, focus rings, and disabled
+states stay consistent (UI/UX #7420). For one-off focusable elements that can't
+use a primitive, apply the `.focus-ring` component class from `index.css`.
+
+Color rules (UI/UX #7421), enforced by `utils/colorGuard.test.ts`:
+
+- **Neutrals: `gray-*` only** (no `slate-`, `zinc-`, `neutral-`).
+- **Primary accent: `blue-*`** (`blue-600` / `blue-700` hover). Green is for
+  run/start/success, red for destructive actions.
+- **Status semantics:** success `green-*`, error `red-*`, warning `amber-*`
+  (not `yellow-*`), info `blue-*`. Semantic aliases (`primary`, `success`,
+  `warning`, `danger`) are defined in `tailwind.config.js`.
+
+Intentional exceptions to the color guard live in
+`utils/colorGuard.allowlist.json` with a documented reason.
+
 - `ui/src/api/` - client utilities and hooks that wrap REST and WebSocket flows.
 - `ui/src/stores/` - Zustand state for engines, simulation state, and UI session data.
 - `ui/src/integration/` - integration-focused UI tests.

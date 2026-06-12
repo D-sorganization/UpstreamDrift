@@ -43,6 +43,56 @@ logger = get_logger(__name__)
 # Config file path for storing onboarding dismissal state
 ONBOARDING_CONFIG_PATH = Path.home() / ".upstreamdrift" / "onboarding_config.json"
 
+# Single-sourced onboarding card copy, shared with the web onboarding overlay
+# via GET /api/v1/about/onboarding (issue #7459).
+ONBOARDING_CARDS_PATH = (
+    Path(__file__).resolve().parents[1] / "config" / "onboarding_cards.json"
+)
+
+_FALLBACK_COPY: dict = {
+    "header": "Welcome to UpstreamDrift",
+    "subtitle": "Biomechanics and Robotics Platform",
+    "cards": [
+        {
+            "title": "Quick Start",
+            "body": (
+                "Launch your first physics model using the integrated grid layout."
+            ),
+            "link_text": "Read the Guide",
+            "link_url": (
+                "https://github.com/D-sorganization/UpstreamDrift"
+                "/blob/main/docs/user_guide/getting_started.md"
+            ),
+        },
+        {
+            "title": "Configurations",
+            "body": (
+                "Adjust themes, install required dependencies,"
+                " and set up your environment."
+            ),
+            "link_text": "Report an Issue",
+            "link_url": "https://github.com/D-sorganization/UpstreamDrift/issues",
+        },
+    ],
+}
+
+
+def load_onboarding_copy() -> dict:
+    """Load the shared onboarding card copy from JSON.
+
+    Returns:
+        Mapping with ``header``, ``subtitle``, and ``cards`` keys. Falls
+        back to built-in copy when the JSON is missing or malformed.
+    """
+    try:
+        with open(ONBOARDING_CARDS_PATH, encoding="utf-8") as f:
+            copy = json.load(f)
+        if isinstance(copy, dict) and isinstance(copy.get("cards"), list):
+            return copy
+    except (OSError, json.JSONDecodeError):
+        logger.warning("Onboarding card copy unavailable; using fallback")
+    return _FALLBACK_COPY
+
 
 def is_first_run() -> bool:
     """Check if this is the first run (onboarding not dismissed).
@@ -138,14 +188,18 @@ class OnboardingDialog(QDialog):
         layout.setSpacing(16)
         layout.setContentsMargins(30, 30, 30, 30)
 
+        # Copy is single-sourced from src/config/onboarding_cards.json so the
+        # web onboarding overlay shows the same text (issue #7459).
+        copy = load_onboarding_copy()
+
         # Header
-        header_label = QLabel("Welcome to UpstreamDrift")
+        header_label = QLabel(str(copy.get("header", "Welcome to UpstreamDrift")))
         header_label.setFont(get_display_font(size=20, weight=Weights.BOLD))
         header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header_label)
 
         # Subtitle — uses placeholder-text palette role (theme-aware)
-        subtitle_label = QLabel("Biomechanics and Robotics Platform")
+        subtitle_label = QLabel(str(copy.get("subtitle", "")))
         subtitle_label.setFont(get_qfont(size=12, weight=Weights.NORMAL))
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         subtitle_label.setForegroundRole(QPalette.ColorRole.PlaceholderText)
@@ -156,31 +210,19 @@ class OnboardingDialog(QDialog):
         separator.setFrameShape(QFrame.Shape.HLine)
         layout.addWidget(separator)
 
-        # Card grid — two cards side-by-side
+        # Card grid — cards side-by-side
         cards_row = QHBoxLayout()
         cards_row.setSpacing(12)
 
-        quick_start_card = _make_info_card(
-            title="Quick Start",
-            body="Launch your first physics model using the integrated grid layout.",
-            link_text="Read the Guide",
-            link_url=(
-                "https://github.com/D-sorganization/UpstreamDrift"
-                "/blob/main/docs/user_guide/getting_started.md"
-            ),
-        )
-        cards_row.addWidget(quick_start_card)
-
-        config_card = _make_info_card(
-            title="Configurations",
-            body=(
-                "Adjust themes, install required dependencies,"
-                " and set up your environment."
-            ),
-            link_text="Report an Issue",
-            link_url="https://github.com/D-sorganization/UpstreamDrift/issues",
-        )
-        cards_row.addWidget(config_card)
+        for card in copy.get("cards", []):
+            cards_row.addWidget(
+                _make_info_card(
+                    title=str(card.get("title", "")),
+                    body=str(card.get("body", "")),
+                    link_text=str(card.get("link_text", "")),
+                    link_url=str(card.get("link_url", "")),
+                )
+            )
 
         layout.addLayout(cards_row)
 

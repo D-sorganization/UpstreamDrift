@@ -51,4 +51,12 @@ describe('App', () => {
     expect(App).toBeDefined();
     expect(typeof App).toBe('function');
   });
+
+  it('renders the branded 404 page for unknown routes (#7430)', () => {
+    window.history.pushState({}, '', '/tools/does-not-exist');
+    render(<App />, { wrapper: createWrapper() });
+    expect(screen.getByText('Page not found')).toBeInTheDocument();
+    expect(screen.getByText('/tools/does-not-exist')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /back to dashboard/i })).toBeInTheDocument();
+  });
 });

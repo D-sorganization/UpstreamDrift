@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared focus ring for one-off focusable elements that don't use the
+ * Button/Input/Select primitives (UI/UX #7420). Plain CSS (not @apply) for
+ * Tailwind v4 compatibility, matching the .sidekick-focus-ring convention. */
+.focus-ring:focus {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid #60a5fa; /* blue-400 */
+  outline-offset: 2px;
+}
+
 html,
 body,
 #root {

@@ -16,6 +16,7 @@ try:
 except ImportError as e:
     pytest.skip(f"Cannot import API services: {e}", allow_module_level=True)
 
+from src.api.task_manager import TaskManager
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
@@ -163,7 +164,7 @@ class TestSimulationService:
         self, service: SimulationService
     ) -> None:
         """Successful background run stores status=completed (issue #2467)."""
-        active_tasks: dict = {}
+        active_tasks = TaskManager()
         task_id = "test-task-1"
         request = SimulationRequest(
             engine_type="mujoco",
@@ -188,7 +189,7 @@ class TestSimulationService:
         self, service: SimulationService
     ) -> None:
         """Failed background run stores status=failed, not completed (issue #2467)."""
-        active_tasks: dict = {}
+        active_tasks = TaskManager()
         task_id = "test-task-2"
         request = SimulationRequest(
             engine_type="mujoco",

@@ -1,11 +1,19 @@
 /**
  * Tests for MotionCapture page.
  *
- * See issue #1206
+ * See issues #1206, #7454
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 
+vi.mock('@/api/fetch', () => ({
+  apiFetch: vi.fn(),
+  apiFetchForm: vi.fn(),
+}));
+
+import { apiFetch } from '@/api/fetch';
+import { MotionCapturePage } from './MotionCapture';
 import type {
   CaptureSource,
   JointData,
@@ -13,6 +21,96 @@ import type {
   CaptureSession,
   PlaybackState,
 } from './MotionCapture';
+
+const mockedApiFetch = vi.mocked(apiFetch);
+
+function mockApi(sources: CaptureSource[]) {
+  mockedApiFetch.mockImplementation(async (path: string) => {
+    if (path.endsWith('/sources')) return sources as unknown;
+    if (path.includes('/skeleton/')) return [] as unknown;
+    if (path.endsWith('/recordings')) return [] as unknown;
+    throw new Error(`unexpected path ${path}`);
+  });
+}
+
+const API_SOURCES: CaptureSource[] = [
+  {
+    id: 'mediapipe',
+    name: 'MediaPipe Pose',
+    type: 'mediapipe',
+    available: false,
+    reason: 'MediaPipe is not installed on the server (pip install mediapipe)',
+    description: 'Real-time pose estimation using Google MediaPipe',
+  },
+  {
+    id: 'openpose',
+    name: 'OpenPose',
+    type: 'openpose',
+    available: false,
+    reason: 'OpenPose Python bindings are not installed on the server',
+    description: 'Multi-person pose estimation using OpenPose',
+  },
+  {
+    id: 'c3d',
+    name: 'C3D File Import',
+    type: 'c3d',
+    available: true,
+    reason: null,
+    description: 'Import motion capture data from C3D files',
+  },
+];
+
+describe('MotionCapturePage source-driven UI (#7454)', () => {
+  beforeEach(() => {
+    mockedApiFetch.mockReset();
+  });
+
+  it('renders all sources from the API, disabling unavailable ones with reason', async () => {
+    mockApi(API_SOURCES);
+    render(<MotionCapturePage />);
+
+    const mediapipe = await screen.findByTestId('source-mediapipe');
+    expect(mediapipe).toBeDisabled();
+    expect(screen.getByTestId('source-reason-mediapipe')).toHaveTextContent(
+      'MediaPipe is not installed',
+    );
+
+    const openpose = screen.getByTestId('source-openpose');
+    expect(openpose).toBeDisabled();
+    expect(screen.getByTestId('source-reason-openpose')).toHaveTextContent(
+      'OpenPose Python bindings are not installed',
+    );
+
+    expect(screen.getByTestId('source-c3d')).toBeEnabled();
+    expect(screen.queryByTestId('source-reason-c3d')).toBeNull();
+  });
+
+  it('auto-selects the first available source and shows the C3D upload control', async () => {
+    mockApi(API_SOURCES);
+    render(<MotionCapturePage />);
+
+    // c3d is the only available source -> auto-selected -> upload input shown
+    expect(await screen.findByTestId('c3d-file-input')).toBeInTheDocument();
+  });
+
+  it('does not show the C3D upload control for non-c3d sources', async () => {
+    mockApi(
+      API_SOURCES.map((s) =>
+        s.id === 'mediapipe' ? { ...s, available: true, reason: null } : s,
+      ),
+    );
+    render(<MotionCapturePage />);
+
+    await screen.findByTestId('source-mediapipe');
+    expect(screen.queryByTestId('c3d-file-input')).toBeNull();
+  });
+
+  it('shows a loading placeholder when no sources have arrived', () => {
+    mockedApiFetch.mockImplementation(() => new Promise(() => {}));
+    render(<MotionCapturePage />);
+    expect(screen.getByText('Loading sources...')).toBeInTheDocument();
+  });
+});
 
 describe('MotionCapture data structures', () => {
   it('should parse capture sources', () => {

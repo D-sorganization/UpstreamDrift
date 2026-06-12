@@ -12,8 +12,11 @@ import { DatasetGeneratorPage } from './pages/DatasetGenerator';
 import { AnalysisToolsPage } from './pages/AnalysisTools';
 import { CharacterBuilderPage } from './pages/CharacterBuilder';
 import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
-import { SettingsPage } from './pages/Settings';
+import { NotFoundPage } from './pages/NotFound';
+import { ScrollToTop } from './utils/ScrollToTop';
+import { RouteTitle } from './utils/RouteTitle';
 import { BallFlightPage } from './pages/BallFlight';
+import { SettingsPage } from './pages/Settings';
 import { ToastProvider } from './components/ui/Toast';
 import { useWebSettingsBootstrap } from './api/useWebSettings';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
@@ -30,6 +33,8 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
+      <RouteTitle />
       <ToastProvider>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
@@ -58,6 +63,8 @@ function App() {
           <Route path="/chat" element={<ChatPage />} />
           {/* Settings (#7457): server-persisted preferences surface */}
           <Route path="/settings" element={<SettingsPage />} />
+          {/* Catch-all 404 (#7430) — must stay last. */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <DiagnosticsPanel />
         <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />

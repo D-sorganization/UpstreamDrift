@@ -19,6 +19,15 @@ export interface SimulationParameters {
   gpuAcceleration: boolean;
 }
 
+/** Trajectory recording lifecycle (issue #7452). */
+export type RecordingStatus = 'idle' | 'recording' | 'saved';
+
+export interface RecordingState {
+  status: RecordingStatus;
+  /** Frames captured in the last completed recording. */
+  frameCount: number;
+}
+
 export interface SimulationStoreState {
   /** Current simulation parameters */
   parameters: SimulationParameters;
@@ -28,6 +37,8 @@ export interface SimulationStoreState {
   parametersTouched: boolean;
   /** Whether server-side defaults were already applied this session */
   defaultsHydrated: boolean;
+  /** Server-side trajectory recording state (issue #7452) */
+  recording: RecordingState;
 }
 
 export interface SimulationStoreActions {
@@ -45,6 +56,12 @@ export interface SimulationStoreActions {
   hydrateDefaults: (defaults: Partial<Pick<SimulationParameters, 'duration' | 'timestep'>>) => void;
   /** Mark that a simulation has been started */
   markRun: () => void;
+  /** Mark server-side recording as active (issue #7452) */
+  startRecording: () => void;
+  /** Mark recording stopped, remembering how many frames were saved */
+  finishRecording: (frameCount: number) => void;
+  /** Clear recording state back to idle */
+  resetRecording: () => void;
   /** Reset to defaults */
   resetParameters: () => void;
 }
@@ -60,6 +77,11 @@ export const DEFAULT_PARAMETERS: SimulationParameters = {
   gpuAcceleration: false,
 };
 
+export const DEFAULT_RECORDING: RecordingState = {
+  status: 'idle',
+  frameCount: 0,
+};
+
 // ── Store ─────────────────────────────────────────────────────────────────
 
 export const useSimulationStore = create<SimulationStore>((set) => ({
@@ -67,6 +89,7 @@ export const useSimulationStore = create<SimulationStore>((set) => ({
   hasRun: false,
   parametersTouched: false,
   defaultsHydrated: false,
+  recording: { ...DEFAULT_RECORDING },
 
   setParameters: (partial) =>
     set((state) => ({
@@ -91,10 +114,19 @@ export const useSimulationStore = create<SimulationStore>((set) => ({
 
   markRun: () => set({ hasRun: true }),
 
+  startRecording: () =>
+    set({ recording: { status: 'recording', frameCount: 0 } }),
+
+  finishRecording: (frameCount) =>
+    set({ recording: { status: 'saved', frameCount } }),
+
+  resetRecording: () => set({ recording: { ...DEFAULT_RECORDING } }),
+
   resetParameters: () =>
     set({
       parameters: { ...DEFAULT_PARAMETERS },
       hasRun: false,
       parametersTouched: false,
+      recording: { ...DEFAULT_RECORDING },
     }),
 }));

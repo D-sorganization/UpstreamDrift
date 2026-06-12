@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Golf Modeling Suite">
+  <rect width="64" height="64" rx="12" fill="#111827"/>
+  <!-- Flag pole -->
+  <rect x="30" y="12" width="2.5" height="34" rx="1.25" fill="#e5e7eb"/>
+  <!-- Pennant -->
+  <path d="M32.5 13 L48 19 L32.5 25 Z" fill="#2563eb"/>
+  <!-- Golf ball -->
+  <circle cx="24" cy="46" r="7" fill="#f9fafb"/>
+  <circle cx="22" cy="44" r="1" fill="#9ca3af"/>
+  <circle cx="26" cy="45" r="1" fill="#9ca3af"/>
+  <circle cx="24" cy="48" r="1" fill="#9ca3af"/>
+  <!-- Ground line -->
+  <path d="M10 54 H54" stroke="#16a34a" stroke-width="3" stroke-linecap="round"/>
+</svg>

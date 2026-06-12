@@ -1,37 +1,53 @@
 /**
  * Analysis Tools Hook — Fetches biomechanical metrics, statistical summaries,
- * and export functionality from the backend REST API.
+ * and export downloads from the backend REST API.
+ *
+ * Response shapes mirror the real backend contracts in
+ * `src/api/routes/analysis_tools.py` (issue #7448 — the previous version of
+ * this hook was written against a fictional API and the page rendered
+ * nothing / crashed against the real backend):
+ *  - GET  /api/analysis/metrics    -> { status, metrics: Record<string, number | number[]> }
+ *  - GET  /api/analysis/statistics -> AnalysisStatisticsResponse
+ *  - POST /api/analysis/export     -> streamed CSV/JSON file download
  */
 
 import { useState, useCallback, useRef } from 'react';
 import { apiFetch } from './fetch';
+import { getApiBase } from './backend';
 
-// ── Types ──────────────────────────────────────────────────────────────
+// ── Types (matching src/api/models/responses.py) ───────────────────────
 
-export interface MetricInfo {
-  id: string;
-  name: string;
-  description: string;
-  unit: string;
-  category: string;
-  value?: number;
+/** Raw metrics snapshot from GET /api/analysis/metrics. */
+export interface MetricsSnapshot {
+  status: string;
+  metrics: Record<string, number | number[]>;
 }
 
+/** Per-metric statistical summary (AnalysisMetricsSummary). */
+export interface MetricSummary {
+  metric_name: string;
+  current: number;
+  minimum: number;
+  maximum: number;
+  mean: number;
+  std_dev: number;
+}
+
+/** AnalysisStatisticsResponse from GET /api/analysis/statistics. */
 export interface StatisticsSummary {
-  dataset_id: string;
-  metric_count: number;
-  summary: Record<string, {
-    min: number;
-    max: number;
-    mean: number;
-    median: number;
-    std: number;
-  }>;
+  sim_time: number;
+  sample_count: number;
+  metrics: MetricSummary[];
+  time_series: Record<string, number[]> | null;
 }
+
+/** Only the formats the backend actually implements (no xlsx/pdf). */
+export type ExportFormat = 'csv' | 'json';
+
+export const EXPORT_FORMATS: readonly ExportFormat[] = ['csv', 'json'];
 
 export interface ExportResult {
-  format: string;
-  url: string;
+  format: ExportFormat;
   filename: string;
   size_bytes: number;
 }
@@ -41,7 +57,7 @@ export type AnalysisLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 // ── Hook ───────────────────────────────────────────────────────────────
 
 export function useAnalysisTools() {
-  const [metrics, setMetrics] = useState<MetricInfo[]>([]);
+  const [metrics, setMetrics] = useState<MetricsSnapshot | null>(null);
   const [statistics, setStatistics] = useState<StatisticsSummary | null>(null);
   const [exportResult, setExportResult] = useState<ExportResult | null>(null);
   const [loadState, setLoadState] = useState<AnalysisLoadState>('idle');
@@ -52,9 +68,9 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const data = await apiFetch<{ metrics?: MetricInfo[] } & MetricInfo[]>('/api/analysis/metrics');
+      const data = await apiFetch<MetricsSnapshot>('/api/analysis/metrics');
       if (isMountedRef.current) {
-        setMetrics(data.metrics ?? data ?? []);
+        setMetrics(data);
         setLoadState('loaded');
       }
     } catch (err) {
@@ -82,16 +98,45 @@ export function useAnalysisTools() {
     }
   }, []);
 
-  const exportAnalysis = useCallback(async (format: string, datasetId?: string) => {
+  /**
+   * Export analysis data. The backend streams a file (CSV or JSON), so this
+   * downloads the blob via an anchor element rather than parsing JSON.
+   */
+  const exportAnalysis = useCallback(async (format: ExportFormat) => {
     setLoadState('loading');
     setError(null);
     try {
-      const data = await apiFetch<ExportResult>('/api/analysis/export', {
+      const response = await fetch(`${getApiBase()}/api/analysis/export`, {
         method: 'POST',
-        body: JSON.stringify({ format, dataset_id: datasetId }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format,
+          include_metrics: true,
+          include_time_series: true,
+        }),
       });
+      if (!response.ok) {
+        let detail = `Export failed: HTTP ${response.status}`;
+        try {
+          const body = (await response.json()) as Record<string, unknown>;
+          if (typeof body.detail === 'string') detail = body.detail;
+        } catch {
+          // non-JSON error body — keep generic message
+        }
+        throw new Error(detail);
+      }
+      const blob = await response.blob();
+      const filename = `analysis_export.${format}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       if (isMountedRef.current) {
-        setExportResult(data);
+        setExportResult({ format, filename, size_bytes: blob.size });
         setLoadState('loaded');
       }
     } catch (err) {

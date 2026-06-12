@@ -301,6 +301,17 @@ class CameraPresetResponse(BaseModel):
     up: list[float] = Field(..., description="Camera up vector [x, y, z]")
 
 
+class CameraPresetListResponse(BaseModel):
+    """Response model for enumerating available camera presets.
+
+    See issue #7452
+    """
+
+    presets: list[CameraPresetResponse] = Field(
+        ..., description="Available camera presets with their view vectors"
+    )
+
+
 class TrajectoryRecordResponse(BaseModel):
     """Response model for trajectory recording state.
 
@@ -712,6 +723,19 @@ LauncherCategory = Literal[
 ]
 
 
+class WebLaunchContractResponse(BaseModel):
+    """How a tile is reachable from the web app (issue #7461).
+
+    Mirrors ``src.config.launcher_manifest_loader.WebLaunchContract``.
+    """
+
+    mode: str = Field(..., description="route | native-window | unavailable")
+    route: str | None = Field(None, description="In-app route for mode 'route'")
+    reason: str | None = Field(
+        None, description="Why unavailable, for mode 'unavailable'"
+    )
+
+
 class LauncherTileResponse(BaseModel):
     """A single launcher tile as serialized by ``LauncherTile.to_dict``."""
 
@@ -731,6 +755,9 @@ class LauncherTileResponse(BaseModel):
     working_dir: str | None = Field(None, description="Working directory override")
     python_paths: list[str] | None = Field(None, description="Extra PYTHONPATH roots")
     web_route: str | None = Field(None, description="URL path for web tools")
+    web: WebLaunchContractResponse | None = Field(
+        None, description="Web reachability contract (issue #7461)"
+    )
     default_launch: str = Field("tab", description="tab | dock | window | external")
     shell_surfaces: list[str] | None = Field(
         None, description="Shell surfaces the tile supports (pyqt6, react)"

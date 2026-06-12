@@ -534,7 +534,7 @@ export function PuttingGreenPage() {
           <button
             onClick={handleScatter}
             disabled={loading}
-            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
           >
             Scatter Analysis
           </button>

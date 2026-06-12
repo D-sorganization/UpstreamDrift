@@ -8,7 +8,7 @@
  * See issue #1201, #1199
  */
 
-import { useRef, useMemo, useState } from 'react';
+import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -41,6 +41,19 @@ interface Props {
   forceOverlays?: (ForceOverlay | ForceVector3D)[];
   /** Callback when gizmo is dragged to send position/rotation changes */
   onGizmoDrag?: (bodyName: string, position: number[], rotation: number[]) => void;
+  /**
+   * External camera preset command (#7452). The `seq` counter lets the same
+   * preset be re-applied; follow_* presets enable follow mode, the static
+   * presets (side/front/top) reposition the orbit camera.
+   */
+  cameraCommand?: CameraCommand | null;
+}
+
+/** External camera preset request. See issue #7452. */
+export interface CameraCommand {
+  preset: string;
+  /** Monotonic counter so repeat clicks of the same preset re-apply. */
+  seq: number;
 }
 
 /**
@@ -57,8 +70,11 @@ function CameraController({
 }) {
   useFrame(() => {
     if (!followMode || !rootRef.current || !orbitRef.current) return;
+    // Guard partially-initialized (or test-mocked) refs (#7452)
+    if (typeof rootRef.current.getWorldPosition !== 'function') return;
 
     const controls = orbitRef.current;
+    if (!controls.object || !controls.target) return;
     const worldPosition = new THREE.Vector3();
     rootRef.current.getWorldPosition(worldPosition);
 
@@ -81,6 +97,7 @@ export function Scene3D({
   showJointAxes = false,
   forceOverlays,
   onGizmoDrag,
+  cameraCommand,
 }: Props) {
   const orbitRef = useRef<OrbitControlsImpl | null>(null);
   const rootRef = useRef<THREE.Group>(null);
@@ -116,11 +133,13 @@ export function Scene3D({
   }, [forceOverlays]);
 
   // Handle camera presets
-  const handleCameraPreset = (preset: 'front' | 'side' | 'top') => {
+  const handleCameraPreset = useCallback((preset: 'front' | 'side' | 'top') => {
     setFollowMode(false);
-    if (!orbitRef.current) return;
-
     const controls = orbitRef.current;
+    // Guard the full OrbitControls surface so a partially-initialized (or
+    // test-mocked) controls instance cannot throw.
+    if (!controls?.object || !controls.target) return;
+
     const camera = controls.object;
     const target = new THREE.Vector3(0, 1.0, 0);
 
@@ -138,7 +157,30 @@ export function Scene3D({
     }
 
     controls.update();
-  };
+  }, []);
+
+  // Apply external camera preset commands from SimulationControls (#7452).
+  // follow_ball/follow_club map onto the existing follow mode (the camera
+  // tracks the model root); side/front/top reposition the orbit camera.
+  useEffect(() => {
+    if (!cameraCommand) return;
+    // Deferred a microtask so setState is not called synchronously in the
+    // effect body (react-hooks/set-state-in-effect) — same pattern as
+    // useEngineCapabilities.
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      const { preset } = cameraCommand;
+      if (preset === 'front' || preset === 'side' || preset === 'top') {
+        handleCameraPreset(preset);
+      } else if (preset.startsWith('follow')) {
+        setFollowMode(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cameraCommand, handleCameraPreset]);
 
   const handleGizmoChange = () => {
     if (!selectedObject || !onGizmoDrag) return;

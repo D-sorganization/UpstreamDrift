@@ -30,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';
+import { canLaunchNativeWindow, resolveTileLaunchAction } from '@/api/webLaunch';
+import type { TileLaunchAction } from '@/api/webLaunch';
 
 interface Props {
     tiles: LauncherTile[];
@@ -41,7 +43,14 @@ interface Props {
     onLaunchTile: (tileId: string) => void;
     onFocusLaunchedTile: (tileId: string) => void;
     onShowHelp: () => void;
+    onShowAbout?: () => void;
     onRefetch: () => void;
+    /**
+     * Whether native-window tiles may be launched from this environment
+     * (Tauri or localhost API). Defaults to runtime detection; injectable
+     * for tests (issue #7461).
+     */
+    nativeWindowAllowed?: boolean;
 }
 
 interface TileSection {
@@ -113,24 +122,43 @@ function CategoryIcon({ category }: { category: string }) {
     }
 }
 
+/** Badge shown for tiles that cannot be launched from this environment. */
+function WebReachabilityBadge({ action }: { action: TileLaunchAction }) {
+    if (action.kind !== 'blocked') {
+        return null;
+    }
+    return (
+        <span
+            title={action.reason}
+            className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-gray-600/30 text-gray-300 border-gray-500/50"
+        >
+            <Monitor className="w-3 h-3" aria-hidden="true" />
+            {action.badge}
+        </span>
+    );
+}
+
 function TileCard({
     tile,
     isSelected,
+    launchAction,
     onSelect,
     onLaunch,
 }: {
     tile: LauncherTile;
     isSelected: boolean;
+    launchAction: TileLaunchAction;
     onSelect: () => void;
     onLaunch: () => void;
 }) {
     const status = getStatusChip(tile.status);
+    const blocked = launchAction.kind === 'blocked';
 
     return (
         <button
             id={`tile-${tile.id}`}
             onClick={onSelect}
-            onDoubleClick={onLaunch}
+            onDoubleClick={blocked ? undefined : onLaunch}
             aria-label={`${tile.name} — ${tile.description}`}
             aria-pressed={isSelected}
             className={`
@@ -180,6 +208,10 @@ function TileCard({
                 <CategoryIcon category={tile.category} />
                 {status.label}
             </span>
+
+            {/* Web reachability badge (issue #7461) — honest affordance
+                instead of a launch button that does nothing visible */}
+            <WebReachabilityBadge action={launchAction} />
 
             {/* Capabilities badges — show on hover */}
             <div className="mt-2 flex flex-wrap gap-1 justify-center opacity-0 group-hover:opacity-100 transition-opacity max-h-0 group-hover:max-h-20 overflow-hidden">
@@ -259,12 +291,18 @@ export function LauncherDashboard({
     onLaunchTile,
     onFocusLaunchedTile,
     onShowHelp,
+    onShowAbout,
     onRefetch,
+    nativeWindowAllowed = canLaunchNativeWindow(),
 }: Props) {
     const engines = tiles.filter((t) => t.category === 'physics_engine');
     const toolsAndExternal = tiles.filter((t) => t.category !== 'physics_engine');
     const selectedTile = tiles.find((t) => t.id === selectedTileId);
     const tileSections = buildTileSections(tiles);
+    const selectedTileAction = selectedTile
+        ? resolveTileLaunchAction(selectedTile, nativeWindowAllowed)
+        : null;
+    const selectedLaunchable = selectedTileAction !== null && selectedTileAction.kind !== 'blocked';
 
     if (loadState === 'loading') {
         return (
@@ -392,6 +430,7 @@ export function LauncherDashboard({
                                         key={tile.id}
                                         tile={tile}
                                         isSelected={selectedTileId === tile.id}
+                                        launchAction={resolveTileLaunchAction(tile, nativeWindowAllowed)}
                                         onSelect={() => onSelectTile(tile.id)}
                                         onLaunch={() => onLaunchTile(tile.id)}
                                     />
@@ -407,25 +446,44 @@ export function LauncherDashboard({
                 className="flex items-center justify-between px-6 py-3 bg-gray-800/95 border-t border-gray-700 flex-shrink-0 backdrop-blur-sm"
                 id="launch-footer"
             >
-                <div className="text-sm text-gray-400">
+                <div className="flex items-center gap-3 text-sm text-gray-400">
                     {selectedTile ? (
                         <span>
                             Selected: <strong className="text-white">{selectedTile.name}</strong>
-                            <span className="ml-2 text-xs text-gray-500">{selectedTile.description}</span>
+                            <span className="ml-2 text-xs text-gray-500">
+                                {selectedTileAction?.kind === 'blocked'
+                                    ? selectedTileAction.reason
+                                    : selectedTile.description}
+                            </span>
                         </span>
                     ) : (
                         <span className="text-gray-500">Select a tile to launch</span>
                     )}
+                    {onShowAbout && (
+                        <button
+                            id="about-link"
+                            onClick={onShowAbout}
+                            aria-label="About UpstreamDrift"
+                            className="text-xs text-gray-500 underline-offset-2 hover:text-gray-300 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                        >
+                            About
+                        </button>
+                    )}
                 </div>
                 <button
                     id="launch-simulation-button"
-                    onClick={() => selectedTile && onLaunchTile(selectedTile.id)}
-                    disabled={!selectedTile}
+                    onClick={() => selectedTile && selectedLaunchable && onLaunchTile(selectedTile.id)}
+                    disabled={!selectedTile || !selectedLaunchable}
                     aria-label={selectedTile ? `Launch ${selectedTile.name}` : 'Launch Simulation'}
+                    title={
+                        selectedTileAction?.kind === 'blocked'
+                            ? selectedTileAction.reason
+                            : undefined
+                    }
                     className={`
             inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all
             focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900
-            ${selectedTile
+            ${selectedTile && selectedLaunchable
                             ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/30 hover:shadow-green-500/40'
                             : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                         }

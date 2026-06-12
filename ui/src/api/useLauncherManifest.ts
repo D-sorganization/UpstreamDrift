@@ -30,6 +30,23 @@ export type LauncherTile = LauncherTileResponse;
 export type LauncherCategory = LauncherTile['category'];
 export type LauncherManifest = LauncherManifestResponse;
 
+/** How a tile is reachable from the web app (issue #7461). */
+export type WebLaunchMode = 'route' | 'native-window' | 'unavailable';
+
+/**
+ * Web launch contract declared per tile in the shared manifest.
+ *
+ * - `route`: in-app React route navigation (`route` required, starts with "/")
+ * - `native-window`: spawns a Qt window on the API server's machine — only
+ *   honest when running under Tauri or against a localhost API
+ * - `unavailable`: no web affordance; `reason` explains why
+ */
+export interface WebLaunchContract {
+    mode: WebLaunchMode;
+    route?: string;
+    reason?: string;
+}
+
 export type ManifestLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
 interface UseLauncherManifestResult {

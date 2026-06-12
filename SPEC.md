@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.362                                            |
+| **Spec Version**        | 1.0.364                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -104,6 +104,34 @@ side="right")`, and Nm3/ppm conversions share the DIN 1343 normal state
   and `CapabilityLevelResponse.level`/`EngineCapabilitiesResponse.summary`
   are strictly typed. UI engine-list, engine load/probe, launcher-manifest,
   and engine-capabilities call sites consume the generated types.
+- **2026-06-12** - Added About/version + onboarding web parity (#7459):
+  `GET /api/v1/about` (and `/about/onboarding`) backed by the new shared
+  version-resolution helper `src/shared/python/version_info.py` (VERSION
+  file → importlib.metadata → fallback, plus safe git-commit reading) now
+  used by both the desktop About dialog and the API. Web About modal and
+  first-run onboarding overlay added to the React dashboard; onboarding
+  card copy single-sourced in `src/config/onboarding_cards.json` consumed
+  by the Qt dialog and the web overlay.
+- **2026-06-12** - Added recording persistence and export parity endpoints
+  (#7451): `POST/GET/DELETE /recordings`, `GET /recordings/{id}/export`
+  (FileResponse), and `GET /export/formats`. Recordings persist under
+  `output/recordings/<id>/` with metadata.json; exports reuse the desktop
+  serializers in `src/shared/python/data_io/export.py` (no parallel
+  serialization paths), with format enumeration derived from
+  `get_available_export_formats()` — the same registry the PyQt6 dashboard
+  Export tab uses. The web Simulation page gains a collapsible Recordings
+  panel (list, per-format download, delete with confirm).
+- **2026-06-12** - Web API honesty for stub/partial endpoints (issue #7448):
+  `POST /simulation/recording` `action=export` no longer writes a JSON
+  document into a file named with a client-requested extension; only `json`
+  is implemented and the recognized desktop formats (csv/mat/hdf5/c3d) return
+  an honest `501 {"detail", "tracking_issue": 7451}` until wired to the
+  shared exporters. Added `not_implemented_json()` route helper and an
+  architecture test (`tests/unit/api/test_no_stub_routes.py`) that greps
+  route modules for removed canned-data sentinels. The web Analysis Tools
+  page/hook were rewritten against the real
+  `/api/analysis/{metrics,statistics,export}` contracts (previously a
+  fictional schema with unsupported xlsx/pdf export options).
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
@@ -1291,6 +1319,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-12 | 1.0.360 | Web settings parity for #7457. Added `GET/PUT /settings` (`src/api/routes/settings.py`) persisting a validated `WebSettings` document (appearance/notifications/simulation defaults) atomically to `~/.upstreamdrift/web_settings.json`, a web `/settings` route (`ui/src/pages/Settings.tsx`) with theme selection via the shared `/themes` router, root-CSS-var font scaling, notification preferences consumed by the toast provider, and once-per-session simulation-default hydration that never clobbers in-session edits (#7424 guard). Feature-parity registry: `settings.preferences` → parity; desktop-only settings tabs recorded as a pending-decision exemption (#7460). |
 | 2026-06-12 | 1.0.359 | Fixed vendored Sidekick science accuracy for issues #7411, #7412, and #7413: Buck vapor pressure restores the correct constant roles, `signal_toolkit.calculus.Integrator` includes the upper-bound sample in definite integrals, and SCFM/ACFM/Nm3 plus ppmv/mg/Nm3 conversions use one DIN 1343 normal state. Added reference-value and property tests for vapor pressure, calculus integration, and conversion consistency. |
 | 2026-06-12 | 1.0.358 | Removed the anti-phantom guard's `jq` dependency from the PR retry/API fallback path by using GitHub CLI `--jq` output directly, keeping required PR guard checks portable across local self-hosted runner images that do not install `jq` globally. |
+| 2026-06-12 | 1.0.357 | Web reachability contract for launcher tiles (#7461). Every `launcher_manifest.json` tile now declares `web: {mode: route\|native-window\|unavailable, route?, reason?}`, validated by `WebLaunchContract` in `launcher_manifest_loader.py` and the TS schema parser. The web dashboard navigates route tiles in-app, gates native-window tiles behind Tauri/localhost with a "Desktop app only" badge, and shows reasoned badges for unavailable tiles. `POST /api/launcher/launch/{tile_id}` now returns 409 for non-local clients on non-route tiles so Qt windows never open invisibly on a remote server. Parity tests enforce contract declaration and React-router route existence for all current and future tiles. |
 | 2026-06-11 | 1.0.353 | Made the optional-stack unit lane boundary explicit: the lane runs the non-engine unit suite with optional API, GUI, and body-part dependencies installed, while native engine unit tests remain covered by dedicated engine and cross-engine equivalence lanes to avoid coupling broad optional dependency validation to engine-specific mock behavior. |
 | 2026-06-11 | 1.0.352 | Aligned deployment optional-stack device tests with the hardware-honesty contract: unavailable hardware-backed input devices remain disconnected and raise `StateError` for state operations, `KeyboardMouseInput` remains the connected fallback, and `Demonstration` now carries default canonical `solver_status="success"` through recording, serialization, subsampling, and augmentation. |
 | 2026-06-11 | 1.0.351 | Restored the calc backend ODE solver response contract so `ODESolverResponse` again exposes the default `solver_status="success"` field consumed by optional-stack calc backend callers and tests. |

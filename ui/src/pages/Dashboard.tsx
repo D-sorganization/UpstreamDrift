@@ -6,8 +6,12 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
+import { resolveTileLaunchAction } from '@/api/webLaunch';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
+import { AboutModal } from '@/components/ui/AboutModal';
+import { OnboardingOverlay } from '@/components/ui/OnboardingOverlay';
 import { useToast } from '@/components/ui/Toast';
 import { apiFetch } from '@/api/fetch';
 import {
@@ -27,12 +31,14 @@ export function DashboardPage() {
         refetch,
     } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+    const [aboutOpen, setAboutOpen] = useState(false);
     const [launchedWindows, setLaunchedWindows] = useState(() => loadLauncherWindowRecords());
     const visibleLaunchedWindows = useMemo(
         () => reconcileLauncherWindowRecords(launchedWindows, tiles),
         [launchedWindows, tiles]
     );
     const { showInfo, showError } = useToast();
+    const navigate = useNavigate();
 
     useEffect(() => {
         persistLauncherWindowRecords(visibleLaunchedWindows);
@@ -43,6 +49,19 @@ export function DashboardPage() {
             const tile = tiles.find((t) => t.id === tileId);
             if (!tile) {
                 showError('Tile not found');
+                return;
+            }
+
+            // Resolve the tile's web launch contract (issue #7461):
+            //   route → in-app navigation; native-window → backend POST
+            //   (Tauri/localhost only); blocked → honest error, no dead POST.
+            const action = resolveTileLaunchAction(tile);
+            if (action.kind === 'navigate') {
+                navigate(action.route);
+                return;
+            }
+            if (action.kind === 'blocked') {
+                showError(`${tile.name}: ${action.reason}`);
                 return;
             }
 
@@ -60,7 +79,7 @@ export function DashboardPage() {
                     showError(`Failed to launch ${tile.name}: ${err.message}`);
                 });
         },
-        [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError]
+        [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError, navigate]
     );
 
     const handleFocusLaunchedTile = useCallback(
@@ -76,17 +95,22 @@ export function DashboardPage() {
     }, [showInfo]);
 
     return (
-        <LauncherDashboard
-            tiles={tiles}
-            loadState={loadState}
-            error={error}
-            selectedTileId={selectedTileId}
-            launchedWindows={visibleLaunchedWindows}
-            onSelectTile={setSelectedTileId}
-            onLaunchTile={handleLaunchTile}
-            onFocusLaunchedTile={handleFocusLaunchedTile}
-            onShowHelp={handleShowHelp}
-            onRefetch={refetch}
-        />
+        <>
+            <LauncherDashboard
+                tiles={tiles}
+                loadState={loadState}
+                error={error}
+                selectedTileId={selectedTileId}
+                launchedWindows={visibleLaunchedWindows}
+                onSelectTile={setSelectedTileId}
+                onLaunchTile={handleLaunchTile}
+                onFocusLaunchedTile={handleFocusLaunchedTile}
+                onShowHelp={handleShowHelp}
+                onShowAbout={() => setAboutOpen(true)}
+                onRefetch={refetch}
+            />
+            <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+            <OnboardingOverlay />
+        </>
     );
 }

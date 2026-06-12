@@ -7,6 +7,7 @@ import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
 import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
+import { RecordingsPanel } from '@/components/simulation/RecordingsPanel';
 import { EngineComparisonPanel } from '@/components/simulation/EngineComparisonPanel';
 import {
   buildEngineComparisonOptions,
@@ -14,7 +15,17 @@ import {
   coerceComparisonSelection,
   toggleComparisonEngine,
 } from '@/components/simulation/engineComparisonViewModel';
+import type { CameraPreset } from '@/components/simulation/SimulationControls';
 import { Scene3D } from '@/components/visualization/Scene3D';
+import type { CameraCommand } from '@/components/visualization/Scene3D';
+import { useEngineCapabilities } from '@/api/useEngineCapabilities';
+import {
+  applyCameraPreset,
+  controlRecording,
+  downloadTrajectory,
+  fetchCameraPresets,
+  FALLBACK_CAMERA_PRESETS,
+} from '@/api/simulationControls';
 import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel';
 import type { ForceVector3D } from '@/components/visualization/ForceOverlay';
 import type { SimulationFrame } from '@/api/client';
@@ -40,6 +51,9 @@ export function SimulationPage() {
   const parameters = useSimulationStore((s) => s.parameters);
   const replaceParameters = useSimulationStore((s) => s.replaceParameters);
   const markRun = useSimulationStore((s) => s.markRun);
+  const recording = useSimulationStore((s) => s.recording);
+  const markRecordingStarted = useSimulationStore((s) => s.startRecording);
+  const finishRecording = useSimulationStore((s) => s.finishRecording);
 
   // ── Local state (component-specific) ──────────────────────────────────
   const { showSuccess, showError, showInfo } = useToast();
@@ -49,6 +63,12 @@ export function SimulationPage() {
   const [comparisonFrames, setComparisonFrames] = useState<
     Record<string, SimulationFrame | null>
   >({});
+  // Camera presets are fetched from the canonical server enumeration (#7452);
+  // the fallback keeps the controls usable when the endpoint is unreachable.
+  const [cameraPresets, setCameraPresets] = useState<string[]>(
+    FALLBACK_CAMERA_PRESETS,
+  );
+  const [cameraCommand, setCameraCommand] = useState<CameraCommand | null>(null);
 
   // Only connect to the simulation when an engine is selected AND loaded
   const activeEngine = effectiveEngine || 'mujoco';
@@ -75,7 +95,80 @@ export function SimulationPage() {
     }
   }, [setSpeed, showError]);
 
+  // Hide controls the active engine cannot serve (#7452): recording captures
+  // forward-simulation frames, so without forward_sim it would be a no-op.
+  const { loadState: capabilitiesLoadState, isSupported } =
+    useEngineCapabilities(effectiveEngine ?? undefined);
+  const recordingSupported =
+    capabilitiesLoadState !== 'loaded' || isSupported('forward_sim');
+
+  // Fetch the canonical camera preset list once on mount (#7452).
+  useEffect(() => {
+    let cancelled = false;
+    fetchCameraPresets()
+      .then((presets) => {
+        if (!cancelled && presets.length > 0) {
+          setCameraPresets(presets.map((p) => p.preset));
+        }
+      })
+      .catch(() => {
+        // Keep the canonical fallback list — controls stay functional.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // ── Event handlers ────────────────────────────────────────────────────
+
+  const handleCameraChange = useCallback(
+    (preset: CameraPreset) => {
+      // Drive the local Three.js camera immediately…
+      setCameraCommand((prev) => ({ preset, seq: (prev?.seq ?? 0) + 1 }));
+      // …and mirror the preset to the server-side viewer state.
+      applyCameraPreset(preset).catch((err: unknown) => {
+        showError(
+          err instanceof Error ? err.message : 'Failed to apply camera preset',
+        );
+      });
+    },
+    [showError],
+  );
+
+  const handleRecordingToggle = useCallback(
+    async (next: boolean) => {
+      try {
+        if (next) {
+          await controlRecording('start');
+          markRecordingStarted();
+          showInfo('Trajectory recording started');
+        } else {
+          const result = await controlRecording('stop');
+          finishRecording(result.frame_count);
+          showSuccess(
+            `Recording saved — ${result.frame_count} frame${result.frame_count === 1 ? '' : 's'} captured`,
+          );
+        }
+      } catch (err) {
+        showError(
+          err instanceof Error ? err.message : 'Recording control failed',
+        );
+      }
+    },
+    [markRecordingStarted, finishRecording, showInfo, showSuccess, showError],
+  );
+
+  const handleExportTrajectory = useCallback(() => {
+    if (frames.length === 0) {
+      showError('No trajectory frames to export — run a simulation first');
+      return;
+    }
+    // Client-side export of the accumulated frame buffer. Server-side
+    // recording export lands with the recordings API (#7451).
+    downloadTrajectory(frames, 'csv');
+    downloadTrajectory(frames, 'json');
+    showSuccess(`Exported ${frames.length} frames as CSV + JSON`);
+  }, [frames, showError, showSuccess]);
 
   const handleLoadEngine = useCallback(
     async (engineName: string) => {
@@ -275,6 +368,15 @@ export function SimulationPage() {
           <ActuatorPanel isRunning={isRunning} />
         </div>
 
+        {/* Recordings: persist, export, delete session recordings (#7451).
+            Hidden when the engine lacks forward_sim capability (#7452): with no
+            forward simulation there are no trajectory frames to record. */}
+        {recordingSupported && (
+          <div className="mb-6">
+            <RecordingsPanel isRunning={isRunning} />
+          </div>
+        )}
+
         {/* Speed Factor Control */}
         {isRunning && (
           <div className="mb-4 border-t border-gray-700 pt-4">
@@ -308,6 +410,11 @@ export function SimulationPage() {
             onPause={pause}
             onResume={resume}
             disabled={!canStart && !isRunning}
+            onCameraChange={handleCameraChange}
+            cameraPresets={cameraPresets}
+            onRecordingToggle={recordingSupported ? handleRecordingToggle : undefined}
+            recordingActive={recording.status === 'recording'}
+            onExportTrajectory={recordingSupported ? handleExportTrajectory : undefined}
           />
         </div>
       </aside>
@@ -321,6 +428,7 @@ export function SimulationPage() {
             frame={currentFrame}
             frames={frames}
             forceOverlays={sceneForceOverlays}
+            cameraCommand={cameraCommand}
           />
 
           {/* Overlay: Status */}
