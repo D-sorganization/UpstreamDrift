@@ -15,6 +15,8 @@ from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from ..models.responses import LauncherManifestResponse
+
 logger = get_logger(__name__)
 router = APIRouter(prefix="/launcher", tags=["launcher"])
 
@@ -46,9 +48,18 @@ def _get_manifest() -> LauncherManifest:
     return manifest
 
 
-@router.get("/manifest")
+@router.get(
+    "/manifest",
+    response_model=LauncherManifestResponse,
+    response_model_exclude_none=True,
+)
 async def get_manifest() -> dict[str, Any]:
     """Get the complete launcher manifest.
+
+    The response is validated against ``LauncherManifestResponse`` so the
+    TypeScript contract generated from the OpenAPI schema covers this
+    payload (issue #7447). ``response_model_exclude_none`` preserves the
+    historical ``to_dict`` behavior of omitting unset optional keys.
 
     Returns:
         Full manifest with all tiles, ordered by display order.

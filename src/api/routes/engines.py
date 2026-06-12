@@ -21,6 +21,8 @@ from ..dependencies import get_engine_manager
 from ..models.responses import (
     CapabilityLevelResponse,
     EngineCapabilitiesResponse,
+    EngineLoadResponse,
+    EngineProbeResponse,
     EngineStatusResponse,
 )
 from ..utils.path_validation import validate_model_path
@@ -128,7 +130,11 @@ async def get_engines(
     )
 
 
-@router.get("/engines/{engine_name}/probe")
+@router.get(
+    "/engines/{engine_name}/probe",
+    response_model=EngineProbeResponse,
+    response_model_exclude_none=True,
+)
 @handle_api_errors
 async def probe_engine(
     engine_name: str,
@@ -143,7 +149,11 @@ async def probe_engine(
         return {"available": False, "error": str(e)}
 
 
-@router.post("/engines/{engine_name}/load")
+@router.post(
+    "/engines/{engine_name}/load",
+    response_model=EngineLoadResponse,
+    response_model_exclude_none=True,
+)
 @handle_api_errors
 async def load_engine_lazy(
     engine_name: str,

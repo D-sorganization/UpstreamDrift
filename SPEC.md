@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.356                                            |
-| **Last Spec Update**    | 2026-06-11                                         |
+| **Spec Version**        | 1.0.357                                            |
+| **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Added generated TypeScript API types (issue #7447): the
+  FastAPI OpenAPI contract is emitted to `ui/src/api/generated/types.ts` by
+  `scripts/generate_ui_api_types.py` with a pytest freshness gate
+  (`tests/api/test_generated_ui_api_types.py`). The launcher manifest and
+  engine probe/load endpoints now declare Pydantic response models
+  (`LauncherManifestResponse`, `EngineProbeResponse`, `EngineLoadResponse`),
+  and `CapabilityLevelResponse.level`/`EngineCapabilitiesResponse.summary`
+  are strictly typed. UI engine-list, engine load/probe, launcher-manifest,
+  and engine-capabilities call sites consume the generated types.
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
