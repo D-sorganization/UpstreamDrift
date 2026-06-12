@@ -80,11 +80,12 @@ export function resolveTileLaunchAction(
                 badge: 'Unavailable',
                 reason: web.reason ?? 'Not available in the web app',
             };
+        default:
+            // Unknown mode from a newer/looser backend contract: fail closed.
+            return {
+                kind: 'blocked',
+                badge: 'Unavailable',
+                reason: `Unknown web launch mode: ${String(web.mode)}`,
+            };
     }
-
-    return {
-        kind: 'blocked',
-        badge: 'Unavailable',
-        reason: `Unsupported web launch mode: ${String(web.mode)}`,
-    };
 }
