@@ -71,8 +71,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-06-12** - Made the Hatch wheel package contract explicit for the
-  standalone Sidekick console package by listing `src/shared/python/sidekick`
-  in `tool.hatch.build.targets.wheel.packages`.
+  standalone Sidekick console package by asserting the wheel target maps
+  `src/shared/python/sidekick` to top-level `sidekick` through Hatch
+  `force-include`.
 - **2026-06-12** - Moved shared plot-series label generation into a Qt-free
   `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
   label contracts without importing the Matplotlib/PyQt plotting package.
