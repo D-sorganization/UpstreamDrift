@@ -55,6 +55,8 @@ class SimulationService:
         """
         self.engine_manager = engine_manager
         self._stats = SimulationStats()
+        self._last_recorder: GenericPhysicsRecorder | None = None
+        self._last_recording_meta: dict[str, Any] = {}
 
     @property
     def stats(self) -> SimulationStats:
@@ -69,6 +71,19 @@ class SimulationService:
     def stop_recording(self) -> None:
         """Stop recording trajectory frames."""
         self._stats.is_recording = False
+
+    def get_session_recording(
+        self,
+    ) -> tuple[GenericPhysicsRecorder, dict[str, Any]] | None:
+        """Return the most recent session recorder and its context, if any.
+
+        Used by the recordings API (issue #7451) to persist the active
+        session recorder to disk. Returns ``None`` when no simulation has
+        produced recorded frames yet.
+        """
+        if self._last_recorder is None or self._last_recorder.current_idx == 0:
+            return None
+        return self._last_recorder, dict(self._last_recording_meta)
 
     def set_speed_factor(self, value: float) -> None:
         """Set simulation speed multiplier.
@@ -188,6 +203,15 @@ class SimulationService:
         steps = int(request.duration / timestep)
 
         self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+
+        # Retain the recorder so the recordings API (issue #7451) can
+        # finalize/persist the session via POST /recordings.
+        self._last_recorder = recorder
+        self._last_recording_meta = {
+            "engine": request.engine_type,
+            "model": str(request.model_path) if request.model_path else None,
+            "duration": request.duration,
+        }
 
         simulation_data = self._extract_simulation_data(recorder)
         analysis_results = None

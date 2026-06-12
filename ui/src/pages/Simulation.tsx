@@ -7,6 +7,7 @@ import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
 import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
+import { RecordingsPanel } from '@/components/simulation/RecordingsPanel';
 import { EngineComparisonPanel } from '@/components/simulation/EngineComparisonPanel';
 import {
   buildEngineComparisonOptions,
@@ -273,6 +274,11 @@ export function SimulationPage() {
         {/* See issue #1198: Per-actuator controls */}
         <div className="mb-6 border-t border-gray-700 pt-4">
           <ActuatorPanel isRunning={isRunning} />
+        </div>
+
+        {/* Recordings: persist, export, delete session recordings (#7451) */}
+        <div className="mb-6">
+          <RecordingsPanel isRunning={isRunning} />
         </div>
 
         {/* Speed Factor Control */}

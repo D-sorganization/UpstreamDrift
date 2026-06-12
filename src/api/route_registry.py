@@ -84,6 +84,10 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "simulation",
     "video",
     "analysis",
+    # recordings must precede export: it defines the literal path
+    # "/export/formats" which would otherwise be shadowed by export.py's
+    # parameterized "/export/{task_id}" (FastAPI first-match-wins).
+    "recordings",
     "export",
     "launcher",
     "terrain",
