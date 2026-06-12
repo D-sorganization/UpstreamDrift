@@ -67,6 +67,9 @@
     "flatted": "^3.4.2",
     "rollup": "^4.59.0",
     "esbuild": "^0.25.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.3",
+    "tunnel-rat": {
+      "zustand": "$zustand"
+    }
   }
 }
