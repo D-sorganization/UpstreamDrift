@@ -141,7 +141,9 @@ def _request_time_quota_dependency(
             return None
 
         current_user = await _current_user_from_bearer_header(request, db)
-        return quota_dependency(current_user, db)
+        # Pre-existing pass-through of the quota generator as the dependency
+        # value; this PR only reordered router registration in this file.
+        return quota_dependency(current_user, db)  # type: ignore[return-value]
 
     dependency.enforced_dependency = enforced_dependency  # type: ignore[attr-defined]
     return dependency
