@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.361                                            |
+| **Spec Version**        | 1.0.362                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Made the Hatch wheel package contract explicit for the
+  standalone Sidekick console package by listing `src/shared/python/sidekick`
+  in `tool.hatch.build.targets.wheel.packages`.
 - **2026-06-12** - Moved shared plot-series label generation into a Qt-free
   `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
   label contracts without importing the Matplotlib/PyQt plotting package.
