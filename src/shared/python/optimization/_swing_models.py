@@ -109,6 +109,11 @@ class OptimizationConfig:
     tolerance: float = 1e-6
     solver: str = "SLSQP"
 
+    @property
+    def method(self) -> str:
+        """Backward-compatible alias for the configured solver name."""
+        return self.solver
+
 
 @dataclass
 class SwingTrajectory:
@@ -151,3 +156,8 @@ class OptimizationResult:
 
     speed_improvement: float = 0.0
     risk_reduction: float = 0.0
+
+    @property
+    def solver_status(self) -> str:
+        """Return the canonical optimization status string."""
+        return "success" if self.success else "failure"
