@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
 import { apiFetch } from './fetch';
 import { withLauncherWebSocketToken } from './websocketToken';
+import { logger } from '../utils/logger';
 import type { EngineListResponse, EngineStatusResponse } from './generated/types';
 
 /**
@@ -160,12 +161,12 @@ export function useSimulation(engineType: string) {
           });
         }
       } catch (err) {
-        console.error("WS Parse Error", err);
+        logger.error('WS Parse Error', err);
       }
     };
 
     ws.onerror = () => {
-      console.error('WebSocket error occurred');
+      logger.error('WebSocket error occurred');
       if (isMountedRef.current) {
         setWsError('WebSocket connection error — check server status');
       }
@@ -195,7 +196,7 @@ export function useSimulation(engineType: string) {
       // last frame's time, mark the connection 'lost', and require an explicit
       // user restart (calling start()) to begin a new run. This guarantees we
       // never reset frames/time without user action.
-      console.warn(
+      logger.warn(
         'WebSocket closed unexpectedly. Connection lost — an explicit restart ' +
           'is required (the simulation cannot resume from where it stopped).',
       );

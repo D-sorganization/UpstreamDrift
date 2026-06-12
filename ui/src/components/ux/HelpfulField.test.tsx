@@ -72,4 +72,58 @@ describe('HelpfulField', () => {
     expect(isInRange(meta, 3)).toBe(true);
     expect(isInRange(meta, 1000)).toBe(false);
   });
+
+  it('shows a visible, programmatic error for an out-of-range value', () => {
+    render(
+      <HelpfulField
+        fieldId="simulation.duration"
+        value={3}
+        onChange={() => {}}
+      />,
+    );
+    const input = screen.getByLabelText(/Duration/);
+    fireEvent.change(input, { target: { value: '1000' } });
+
+    const alert = screen.getByRole('alert');
+    expect(alert).toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    // The error element is referenced by aria-describedby.
+    expect(input.getAttribute('aria-describedby')).toContain(alert.id);
+  });
+
+  it('flags empty/NaN numeric input as invalid rather than accepting it', () => {
+    const onViolation = vi.fn();
+    render(
+      <HelpfulField
+        fieldId="simulation.duration"
+        value={3}
+        onChange={() => {}}
+        onViolation={onViolation}
+      />,
+    );
+    const input = screen.getByLabelText(/Duration/);
+    fireEvent.change(input, { target: { value: '' } });
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    // NaN must not be forwarded to onViolation.
+    expect(onViolation).not.toHaveBeenCalled();
+  });
+
+  it('clears the error when the value returns to range', () => {
+    render(
+      <HelpfulField
+        fieldId="simulation.duration"
+        value={3}
+        onChange={() => {}}
+      />,
+    );
+    const input = screen.getByLabelText(/Duration/);
+    fireEvent.change(input, { target: { value: '1000' } });
+    expect(screen.queryByRole('alert')).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: '5' } });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+  });
 });

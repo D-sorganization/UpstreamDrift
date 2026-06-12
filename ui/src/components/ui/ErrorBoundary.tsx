@@ -9,6 +9,7 @@
  */
 
 import { Component, type ReactNode } from 'react';
+import { logger } from '../../utils/logger';
 
 interface Props {
   /** Content to render when no error has occurred. */
@@ -17,11 +18,26 @@ interface Props {
   fallback?: ReactNode;
   /** Optional callback when an error is caught. */
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  /**
+   * When any value in this array changes between renders, a latched error is
+   * cleared automatically. Pass the current route (e.g. `[location.pathname]`)
+   * so navigating away from a crashed page recovers it (#7434).
+   */
+  resetKeys?: ReadonlyArray<unknown>;
+  /** Human-readable label (e.g. the route path) shown in the fallback. */
+  label?: string;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
+}
+
+function keysChanged(
+  a: ReadonlyArray<unknown> = [],
+  b: ReadonlyArray<unknown> = [],
+): boolean {
+  return a.length !== b.length || a.some((v, i) => !Object.is(v, b[i]));
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -34,9 +50,19 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidUpdate(prevProps: Props) {
+    // Clear a latched error once a reset key (typically the route) changes, so
+    // navigation recovers the boundary without a full reload.
+    if (
+      this.state.hasError &&
+      keysChanged(prevProps.resetKeys, this.props.resetKeys)
+    ) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // eslint-disable-next-line no-console
-    console.error('ErrorBoundary caught:', error, errorInfo);
+    logger.error('ErrorBoundary caught:', error, errorInfo);
     this.props.onError?.(error, errorInfo);
   }
 
@@ -81,7 +107,11 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-100">Something went wrong</h2>
-                <p className="text-sm text-gray-400">The application encountered an unexpected error.</p>
+                <p className="text-sm text-gray-400">
+                  {this.props.label
+                    ? `The page "${this.props.label}" encountered an unexpected error.`
+                    : 'The application encountered an unexpected error.'}
+                </p>
               </div>
             </div>
 
@@ -109,6 +139,14 @@ export class ErrorBoundary extends Component<Props, State> {
                 Try Again
               </button>
             </div>
+
+            {/* Plain anchor: works even when the router context is itself dead. */}
+            <a
+              href="/"
+              className="mt-3 block text-center text-sm text-blue-400 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+            >
+              Back to Dashboard
+            </a>
           </div>
         </div>
       );
