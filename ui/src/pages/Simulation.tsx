@@ -479,8 +479,9 @@ export function SimulationPage() {
           )}
         </div>
 
-        {/* Bottom: Live Analysis Charts */}
-        <div className="h-64 bg-gray-800 border-t border-gray-700 p-2">
+        {/* Bottom: Live Analysis Charts.
+            #7419: don't let the fixed 256px strip eat half a short window. */}
+        <div className="h-40 sm:h-48 lg:h-64 bg-gray-800 border-t border-gray-700 p-2">
           <LivePlot frames={frames} maxPoints={200} />
         </div>
       </main>

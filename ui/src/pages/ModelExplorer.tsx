@@ -186,7 +186,10 @@ export function ModelExplorerPage() {
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden text-gray-100">
       {/* Sidebar: dual tree vs single tree */}
-      <aside className={`${frankensteinMode ? 'w-[42rem]' : 'w-80'} bg-gray-950 border-r border-gray-800 flex flex-col flex-shrink-0 transition-all duration-300`}>
+      {/* #7418: cap the expanded Frankenstein width relative to the viewport so
+          the 3D preview keeps a usable share at 1024–1280px instead of being
+          crushed by a hardcoded 42rem sidebar. */}
+      <aside className={`${frankensteinMode ? 'w-[min(42rem,55vw)]' : 'w-80'} bg-gray-950 border-r border-gray-800 flex flex-col flex-shrink-0 transition-all duration-300`}>
         {/* Top controls */}
         <div className="p-4 border-b border-gray-850 space-y-4">
           <div className="flex items-center justify-between">
@@ -257,7 +260,8 @@ export function ModelExplorerPage() {
                 </select>
               </div>
 
-              <div className="flex-1 min-h-0">
+              {/* #7419: scroll the tree instead of clipping a tall model. */}
+              <div className="flex-1 min-h-0 min-w-0 overflow-y-auto">
                 {loading ? (
                   <div className="text-xs text-gray-500 italic text-center py-12">Loading model structure...</div>
                 ) : (
@@ -299,7 +303,7 @@ export function ModelExplorerPage() {
                   </select>
                 </div>
 
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 min-w-0 overflow-y-auto">
                   <ModelTree
                     modelName={sourceModelName || ''}
                     treeNodes={sourceTree}
@@ -336,7 +340,7 @@ export function ModelExplorerPage() {
                   </select>
                 </div>
 
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 min-w-0 overflow-y-auto">
                   <ModelTree
                     modelName={targetModelName || ''}
                     treeNodes={targetTree}
@@ -358,8 +362,15 @@ export function ModelExplorerPage() {
         jointValues={jointValues}
         activePreviewModel={activePreviewModel}
       />
-      {/* Right Sidebar: Inspector */}
-      <aside className="w-72 bg-gray-950 border-l border-gray-800 flex flex-col flex-shrink-0">
+      {/* Right Sidebar: Inspector.
+          #7418: below xl, the inspector competes with the widened Frankenstein
+          tree pane for the same horizontal space, crushing the 3D preview — so
+          hide it (until xl) while Frankenstein mode is active. */}
+      <aside
+        className={`${
+          frankensteinMode ? 'hidden xl:flex' : 'flex'
+        } w-72 bg-gray-950 border-l border-gray-800 flex-col flex-shrink-0`}
+      >
         <div className="p-4 border-b border-gray-850">
           <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
             Properties

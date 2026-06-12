@@ -25,7 +25,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
-      <section className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-6 py-8">
+      <section className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 sm:px-6 py-4 sm:py-8">
         <header className="flex flex-col gap-2 border-b border-gray-800 pb-5">
           <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
             Canonical Core
