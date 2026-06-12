@@ -149,10 +149,9 @@
     "analysis.cross_engine_robustness": {
       "title": "Cross-engine robustness dashboard (perturbation/CV)",
       "pyqt": "src/launchers/cross_engine_dashboard.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 7455,
+      "api": "src/api/routes/cross_engine.py",
+      "web": "ui/src/pages/CrossEngineDashboard.tsx",
+      "status": "parity",
       "tiles": ["cross_engine", "perturbation_analysis"]
     },
     "simulation.shot_tracer": {
