@@ -352,9 +352,10 @@ export function SimulationPage() {
           {loadedEngines.length} engine{loadedEngines.length !== 1 ? 's' : ''} loaded
         </p>
 
-        {/* Connection Status */}
+        {/* Connection Status. #7435: a 'lost' status offers an inline Reconnect
+            that opens a fresh socket (same path as Start). */}
         <div className="mb-4">
-          <ConnectionStatus status={connectionStatus} />
+          <ConnectionStatus status={connectionStatus} onReconnect={handleStart} />
         </div>
 
         {/* Engine Selector with lazy loading */}

@@ -4,6 +4,12 @@ import type { ConnectionStatus as ConnectionStatusType } from '@/api/client';
 interface Props {
   status: ConnectionStatusType;
   className?: string;
+  /**
+   * #7435: when the connection is `lost`, render an inline "Reconnect"
+   * affordance instead of a dead-end message. Wire this to the page's start()
+   * so the stale banner clears the moment the user acts.
+   */
+  onReconnect?: () => void;
 }
 
 const STATUS_CONFIG = {
@@ -55,9 +61,14 @@ const STATUS_CONFIG = {
   },
 };
 
-export function ConnectionStatus({ status, className = '' }: Props) {
+export function ConnectionStatus({
+  status,
+  className = '',
+  onReconnect,
+}: Props) {
   const config = STATUS_CONFIG[status];
   const Icon = config.icon;
+  const showReconnect = status === 'lost' && onReconnect != null;
 
   return (
     <div
@@ -90,6 +101,17 @@ export function ConnectionStatus({ status, className = '' }: Props) {
 
       {/* Text */}
       <span className={`text-xs font-medium ${config.color}`}>{config.text}</span>
+
+      {/* #7435: actionable reconnect instead of a dead-end "lost" banner. */}
+      {showReconnect && (
+        <button
+          type="button"
+          onClick={onReconnect}
+          className="ml-1 rounded-full px-2 py-0.5 text-xs font-semibold text-amber-200 bg-amber-800/60 hover:bg-amber-700/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+        >
+          Reconnect
+        </button>
+      )}
     </div>
   );
 }
