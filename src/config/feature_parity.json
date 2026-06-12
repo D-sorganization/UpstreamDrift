@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason). Desktop-only exemptions were decided in issue #7460 and are documented in docs/adr/0031-web-parity-exemptions.md; changing an exemption requires updating that ADR. See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
+  "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason). Entries with pending_decision=true await the desktop-only exemption decision in issue #7460 (G12). See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
   "features": {
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
@@ -254,7 +254,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Remote shell/REPL/Jupyter execution over HTTP is a non-starter under the local-server trust model (ADR-0031); web chat gets context via #7453 instead.",
+      "reason": "Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460.",
+      "pending_decision": true,
       "tiles": []
     },
     "launcher.embedded_tabs_docks": {
@@ -272,7 +273,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Exposing local Docker daemon control over HTTP is a security risk under the local-server trust model (ADR-0031); Tauri-mode-only candidate.",
+      "reason": "Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": []
     },
     "launcher.mcp_config": {
@@ -281,7 +283,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Writes local MCP configuration files for desktop AI integrations — a local-machine concern outside the web trust boundary (ADR-0031).",
+      "reason": "Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": []
     },
     "tools.matlab_suite": {
@@ -290,7 +293,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Requires a local MATLAB installation on the user's machine; browser-exempt, possible later in Tauri mode (ADR-0031).",
+      "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["matlab_unified"]
     },
     "tools.pose_editing": {
@@ -299,7 +303,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Roadmap — heavy native-viewer coupling makes a web pose editor a major project; revisit after epic #7462 core lands (ADR-0031).",
+      "reason": "Interactive 3D pose editing; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["pose_studio"]
     },
     "docs.document_library": {
@@ -308,7 +313,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Roadmap — indexes local files via SQLite; a thin web reader is plausible but not near-term; revisit after epic #7462 core lands (ADR-0031).",
+      "reason": "Desktop documentation browser; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["project_map"]
     },
     "engines.dashboards": {
@@ -317,7 +323,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Experimental desktop dashboards; the web Simulation page is the equivalent web surface (ADR-0031).",
+      "reason": "Experimental desktop dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["drake_dashboard", "mujoco_dashboard", "pinocchio_dashboard"]
     },
     "biomech.exercise_injury_dashboards": {
@@ -326,7 +333,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Desktop biomechanics dashboards; the web Simulation page is the equivalent web surface — exercise routing is not a web feature (ADR-0031).",
+      "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["biomech_exercise", "injury_analysis"]
     },
     "simulation.golf_suite_batch": {
@@ -335,7 +343,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Roadmap — parameter sweeps/batch runs could become API-backed web jobs, but the desktop GUI stays canonical; revisit after epic #7462 core lands (ADR-0031).",
+      "reason": "Desktop batch-simulation GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["golf_simulation_suite"]
     },
     "optimization.swing_optimizer": {
@@ -344,7 +353,8 @@
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Roadmap — long-running trajectory optimization suits an API-backed web job, but is not near-term; revisit after epic #7462 core lands (ADR-0031).",
+      "reason": "Desktop optimization GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
       "tiles": ["swing_optimizer"]
     }
   }
