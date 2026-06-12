@@ -173,7 +173,7 @@ export function DiagnosticsPanel() {
 
       {/* Panel */}
       {isOpen && (
-        <div className="absolute bottom-10 right-0 w-96 max-h-[70vh] overflow-y-auto rounded-lg border border-gray-600 bg-gray-900 text-gray-200 shadow-xl text-xs">
+        <div className="absolute bottom-10 right-0 z-50 w-96 max-h-[70vh] overflow-y-auto rounded-lg border border-gray-600 bg-gray-900 text-gray-200 shadow-xl text-xs">
           <div className="flex items-center justify-between p-3 border-b border-gray-700">
             <span className="font-semibold text-sm">Diagnostics</span>
             <button

@@ -130,6 +130,41 @@ describe('ModelExplorer Page UI & Frankenstein Mode', () => {
     expect(screen.getAllByText('Target Model')[0]).toBeInTheDocument();
   });
 
+  it('caps the Frankenstein sidebar width to the viewport (#7418)', async () => {
+    render(<ModelExplorerPage />);
+    const toggle = screen.getByLabelText(/Frankenstein Mode/i);
+    const sidebar = toggle.closest('aside');
+    expect(sidebar).not.toBeNull();
+
+    // Collapsed: fixed w-80.
+    expect(sidebar?.className).toContain('w-80');
+    expect(sidebar?.className).not.toContain('w-[min(42rem,55vw)]');
+
+    await act(async () => {
+      fireEvent.click(toggle);
+    });
+
+    // Expanded: viewport-relative cap instead of a hardcoded 42rem.
+    expect(sidebar?.className).toContain('w-[min(42rem,55vw)]');
+    expect(sidebar?.className).not.toContain('w-[42rem]');
+  });
+
+  it('hides the right inspector below xl while Frankenstein is active (#7418)', async () => {
+    render(<ModelExplorerPage />);
+    // The right inspector aside is the one bordered on the left.
+    const asides = Array.from(document.querySelectorAll('aside'));
+    const inspector = asides.find((a) => a.className.includes('border-l'));
+    expect(inspector).toBeDefined();
+    expect(inspector?.className).toContain('flex');
+    expect(inspector?.className).not.toContain('hidden');
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText(/Frankenstein Mode/i));
+    });
+
+    expect(inspector?.className).toContain('hidden xl:flex');
+  });
+
   it('loads and displays dual-tree layout in Frankenstein Mode', async () => {
     render(<ModelExplorerPage />);
 
