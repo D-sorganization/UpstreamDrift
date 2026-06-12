@@ -353,6 +353,10 @@ jobs:
               -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
               2>&1 | tee -a /tmp/unit-test-results.txt
             target_rc=$?
+            if [[ "$target_rc" -eq 5 ]]; then
+              echo "Optional-stack unit target collected no runnable tests; treating as skipped: $target" | tee -a /tmp/unit-test-results.txt
+              continue
+            fi
             if [[ "$target_rc" -ne 0 ]]; then
               rc="$target_rc"
               break

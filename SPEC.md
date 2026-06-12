@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.362                                            |
+| **Spec Version**        | 1.0.363                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -73,6 +73,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-06-12** - Removed a stale frontend console lint suppression and raised
   the Vitest per-test timeout budget so slow shared runners can complete
   already-passing UI tests without weakening assertion behavior.
+- **2026-06-12** - Kept the optional-stack unit lane aligned with optional
+  dependency semantics: a per-target pytest exit code 5 now records that the
+  target collected no runnable tests and continues, while genuine failing
+  pytest exits still fail the lane.
 - **2026-06-12** - Kept CI's Rust Python-binding verification lane on the
   locked dependency policy by installing the editable dev package with
   `--no-deps`, and removed a stale putting-green API mypy suppression so the

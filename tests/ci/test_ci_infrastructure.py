@@ -673,6 +673,9 @@ class TestCIEnvironmentCompatibility:
         assert 'pytest "$target"' in unit_step
         assert "unit_targets" in unit_step
         assert "break" in unit_step
+        assert '[[ "$target_rc" -eq 5 ]]' in unit_step
+        assert "Optional-stack unit target collected no runnable tests" in unit_step
+        assert "continue" in unit_step
         assert 'pip install "trimesh>=4.0.0"' in workflow
         assert "OPTIONAL_STACK_UNIT_WORKERS" not in unit_step
         assert "pytest-xdist" not in unit_step
