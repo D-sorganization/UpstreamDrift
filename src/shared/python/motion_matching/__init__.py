@@ -8,6 +8,10 @@ surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
 from __future__ import annotations
 
 import importlib
+import sys
+import types
+from collections.abc import Sequence
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -21,7 +25,6 @@ if TYPE_CHECKING:
         BodySegmentGroup,
         default_body_segments,
     )
-    from .compute_total_work import compute_total_work
     from .cost import (
         CostBreakdown,
         CostOptions,
@@ -34,10 +37,6 @@ if TYPE_CHECKING:
         MAX_BODY_POSITION_NORM_M,
         BodyEvent,
         BodyTarget,
-    )
-    from .load_body_target import (
-        load_body_target,
-        load_body_target_c3d,
     )
     from .load_club_target import (
         ALLOWED_SHEETS,
@@ -144,7 +143,7 @@ _LAZY_EXPORTS = {
     "BodySegment": ".body_skeleton",
     "BodySegmentGroup": ".body_skeleton",
     "default_body_segments": ".body_skeleton",
-    "compute_total_work": ".compute_total_work",
+    "compute_total_work": ".cost",
     "CostBreakdown": ".cost",
     "CostOptions": ".cost",
     "SimOutput": ".cost",
@@ -155,7 +154,8 @@ _LAZY_EXPORTS = {
     "BodyEvent": ".body_target",
     "BodyTarget": ".body_target",
     "load_body_target": ".load_body_target",
-    "load_body_target_c3d": ".load_body_target",
+    "load_body_target_c3d": ".loaders.c3d_body",
+
     "ALLOWED_SHEETS": ".load_club_target",
     "load_club_target": ".load_club_target",
     "load_club_target_c3d": ".load_club_target",
@@ -192,6 +192,32 @@ _LAZY_EXPORTS = {
 }
 
 
+def compute_total_work(*args: Any, **kwargs: Any) -> float:
+    from .compute_total_work import compute_total_work as _compute_total_work
+
+    return _compute_total_work(*args, **kwargs)
+
+
+def load_body_target(
+    path: Path | str,
+    *,
+    opts: Any | None = None,
+    marker_set: Sequence[str] | None = None,
+    impact_source: Any | None = None,
+) -> Any:
+    from .load_body_target import load_body_target as _load_body_target
+
+    return _load_body_target(
+        path, opts=opts, marker_set=marker_set, impact_source=impact_source
+    )
+
+
+def load_body_target_c3d(*args: Any, **kwargs: Any) -> Any:
+    from .load_body_target import load_body_target_c3d as _load_body_target_c3d
+
+    return _load_body_target_c3d(*args, **kwargs)
+
+
 def __getattr__(name: str) -> Any:
     if name in _LAZY_EXPORTS:
         module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
@@ -201,3 +227,15 @@ def __getattr__(name: str) -> Any:
 
 def __dir__() -> list[str]:
     return list(_LAZY_EXPORTS.keys())
+
+
+class _MotionMatchingModule(types.ModuleType):
+    def __getattribute__(self, name: str) -> Any:
+        value = super().__getattribute__(name)
+        if name in _LAZY_EXPORTS and isinstance(value, types.ModuleType):
+            module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+            return getattr(module, name)
+        return value
+
+
+sys.modules[__name__].__class__ = _MotionMatchingModule

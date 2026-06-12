@@ -63,7 +63,7 @@ def _import_with_warning(name: str) -> tuple[object, list[warnings.WarningMessag
 )
 def test_old_paths_still_importable_with_warning(old_name: str) -> None:
     """The old ``MachineLearning/`` paths still import and emit a deprecation."""
-    pytest.importorskip("torch") if old_name != "extract_dynamics_dataset" else None
+    pytest.importorskip("torch")
     module, caught = _import_with_warning(old_name)
     assert module is not None
     deprecations = [w for w in caught if issubclass(w.category, DeprecationWarning)]

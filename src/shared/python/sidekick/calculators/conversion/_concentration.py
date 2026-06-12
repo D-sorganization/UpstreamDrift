@@ -5,6 +5,13 @@
 
 from __future__ import annotations
 
+# Ideal molar gas volume at the DIN 1343 normal state (0°C, 101.325 kPa), in
+# L/mol. mg/Nm³ is anchored at this normal state, so the ppmv ↔ mg/Nm³ factor
+# must use 22.414, not the 24.45 L/mol value for 25°C (the US-EPA ppmv basis).
+# Using 24.45 made tar ppm conversions 8.3% low — pass/fail across a typical
+# 100 mg/Nm³ syngas tar limit. See issue #7413 / Tools#3389.
+NORMAL_MOLAR_VOLUME_L = 22.414
+
 
 class ConcentrationMixin:
     def tar_concentration(
@@ -79,7 +86,7 @@ class ConcentrationMixin:
         if from_key == "ppm_mass":
             if not (molecular_weight is not None):
                 raise ValueError("DbC Blocked: Precondition failed.")
-            return value * molecular_weight / 24.45
+            return value * molecular_weight / NORMAL_MOLAR_VOLUME_L
         msg = f"Conversion from {from_unit} not implemented"
         raise ValueError(msg)
 
@@ -102,7 +109,7 @@ class ConcentrationMixin:
         if to_key == "ppm_mass":
             if not (molecular_weight is not None):
                 raise ValueError("DbC Blocked: Precondition failed.")
-            return mg_nm3_value * 24.45 / molecular_weight
+            return mg_nm3_value * NORMAL_MOLAR_VOLUME_L / molecular_weight
         msg = f"Conversion to {to_unit} not implemented"
         raise ValueError(msg)
 
