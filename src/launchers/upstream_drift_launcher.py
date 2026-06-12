@@ -77,7 +77,6 @@ from src.launchers.ui_components import (
     StartupResults,
 )
 
-
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui import (
@@ -100,15 +99,14 @@ __all__ = [
     "main",
 ]
 
-
 # Async startup is normally well under a second; 30s is a generous ceiling
 # that comfortably covers cold-disk Docker probes and slow first-run
 # registry imports while still surfacing a true hang (e.g. crashed worker
 # thread) before the user concludes the app is broken.  See issue #5490.
 STARTUP_TIMEOUT_SEC: int = 30
-assert STARTUP_TIMEOUT_SEC > 0, (
-    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
-)
+assert (
+    STARTUP_TIMEOUT_SEC > 0
+), "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
@@ -1191,7 +1189,6 @@ class UpstreamDriftLauncher(QMainWindow):
 
 
 def main() -> None:
-    """Application entry point retained for backward-compatible imports."""
     from src.launchers.upstream_drift_launcher_main import main as launcher_main
 
     launcher_main()
