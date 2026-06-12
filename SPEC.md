@@ -121,6 +121,17 @@ side="right")`, and Nm3/ppm conversions share the DIN 1343 normal state
   `get_available_export_formats()` — the same registry the PyQt6 dashboard
   Export tab uses. The web Simulation page gains a collapsible Recordings
   panel (list, per-format download, delete with confirm).
+- **2026-06-12** - Web API honesty for stub/partial endpoints (issue #7448):
+  `POST /simulation/recording` `action=export` no longer writes a JSON
+  document into a file named with a client-requested extension; only `json`
+  is implemented and the recognized desktop formats (csv/mat/hdf5/c3d) return
+  an honest `501 {"detail", "tracking_issue": 7451}` until wired to the
+  shared exporters. Added `not_implemented_json()` route helper and an
+  architecture test (`tests/unit/api/test_no_stub_routes.py`) that greps
+  route modules for removed canned-data sentinels. The web Analysis Tools
+  page/hook were rewritten against the real
+  `/api/analysis/{metrics,statistics,export}` contracts (previously a
+  fictional schema with unsupported xlsx/pdf export options).
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
