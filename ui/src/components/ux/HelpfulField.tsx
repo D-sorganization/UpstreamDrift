@@ -12,7 +12,7 @@
  * is intentionally NOT implemented here (deferred).
  */
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { getFieldMetadata } from '../../ux/fieldMetadata';
 import { isInRange, isNumericRange } from '../../ux/fieldHelpers';
 
@@ -39,6 +39,8 @@ export function HelpfulField({
   const meta = getFieldMetadata(fieldId);
   const helpId = useId();
   const inputId = useId();
+  const errorId = useId();
+  const [violation, setViolation] = useState<string | null>(null);
   const numeric = isNumericRange(meta.validRange);
   const enumValues =
     Array.isArray(meta.validRange) && !numeric
@@ -47,14 +49,29 @@ export function HelpfulField({
 
   const handleChange = (raw: string) => {
     onChange(raw);
-    if (numeric && onViolation) {
-      const parsed = Number(raw);
-      if (!Number.isNaN(parsed) && !isInRange(meta, parsed)) {
+    if (!numeric) {
+      return;
+    }
+    // Number('') === 0, so an empty/blank input must be detected on the raw
+    // string, not via Number(). Treat empty/NaN input as invalid so it is
+    // surfaced rather than silently accepted (WCAG 3.3.1).
+    const blank = raw.trim() === '';
+    const parsed = Number(raw);
+    const isNumber = !blank && !Number.isNaN(parsed);
+    const range = meta.validRange as [number, number];
+    if (!isNumber || !isInRange(meta, parsed)) {
+      const unit = meta.units ? ` ${meta.units}` : '';
+      setViolation(`Value must be between ${range[0]} and ${range[1]}${unit}`);
+      // Only forward a real numeric breach to parents; never NaN/blank.
+      if (onViolation && isNumber) {
         onViolation(fieldId, parsed);
       }
+    } else {
+      setViolation(null);
     }
   };
 
+  const describedBy = violation ? `${helpId} ${errorId}` : helpId;
   const unitSuffix = meta.units ? ` (${meta.units})` : '';
 
   return (
@@ -89,14 +106,22 @@ export function HelpfulField({
           disabled={disabled}
           min={numeric ? meta.validRange![0] : undefined}
           max={numeric ? meta.validRange![1] : undefined}
-          aria-describedby={helpId}
+          aria-describedby={describedBy}
+          aria-invalid={!!violation}
           onChange={(e) => handleChange(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+          className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white ${
+            violation ? 'border-red-500' : 'border-gray-600'
+          }`}
         />
       )}
       <p id={helpId} className="text-xs text-gray-500" title={meta.defaultSource}>
         {meta.shortHelp}
       </p>
+      {violation && (
+        <p id={errorId} role="alert" className="text-xs text-red-400">
+          {violation}
+        </p>
+      )}
     </div>
   );
 }
