@@ -1,89 +1,62 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import { Input, Select } from '@/components/ui';
-
-export interface SimulationParameters {
-  duration: number;
-  timestep: number;
-  liveAnalysis: boolean;
-  gpuAcceleration: boolean;
-  model?: string;
-}
+import type { SimulationParameters } from '@/stores/useSimulationStore';
 
 interface Props {
   engine: string;
   disabled?: boolean;
-  onChange: (params: SimulationParameters) => void;
+  /** Controlled parameter values (owned by useSimulationStore, #7424). */
+  value: SimulationParameters;
+  /** Apply a partial change to the store. */
+  onChange: (params: Partial<SimulationParameters>) => void;
+  /** Reset duration/timestep to the current engine's defaults. */
+  onResetDefaults?: () => void;
 }
 
-// Engine-specific default configurations
-const ENGINE_DEFAULTS: Record<string, Partial<SimulationParameters>> = {
-  mujoco: {
-    duration: 3.0,
-    timestep: 0.002,
-  },
-  drake: {
-    duration: 5.0,
-    timestep: 0.001,
-  },
-  pinocchio: {
-    duration: 3.0,
-    timestep: 0.001,
-  },
-  opensim: {
-    duration: 2.0,
-    timestep: 0.005,
-  },
-  myosim: {
-    duration: 3.0,
-    timestep: 0.002,
-  },
-  myosuite: {
-    duration: 3.0,
-    timestep: 0.002,
-  },
-};
+/**
+ * ParameterPanel is a controlled view over the simulation store (#7424).
+ *
+ * It holds NO mirror copy of duration/timestep/toggles — the store is the
+ * single source of truth, so remounting (navigate away and back) or switching
+ * engines can no longer clobber user-set values. The numeric inputs keep only a
+ * transient raw-string buffer while editing so clearing the field does not snap
+ * the committed value to a default mid-edit; the parsed value is committed on
+ * change when valid and on blur otherwise.
+ */
+export function ParameterPanel({
+  engine,
+  disabled,
+  value,
+  onChange,
+  onResetDefaults,
+}: Props) {
+  // Transient edit buffer for the duration field; null = mirror the store.
+  const [durationDraft, setDurationDraft] = useState<string | null>(null);
 
-function getEngineDefaults(engine: string): { duration: number; timestep: number } {
-  const defaults = ENGINE_DEFAULTS[engine.toLowerCase()] || {};
-  return {
-    duration: defaults.duration ?? 3.0,
-    timestep: defaults.timestep ?? 0.002,
+  const commitDuration = (raw: string) => {
+    const parsed = Number(raw);
+    if (raw.trim() !== '' && !Number.isNaN(parsed)) {
+      onChange({ duration: parsed });
+    }
   };
-}
-
-export function ParameterPanel({ engine, disabled, onChange }: Props) {
-  const engineDefaults = useMemo(() => getEngineDefaults(engine), [engine]);
-
-  const [duration, setDuration] = useState(engineDefaults.duration);
-  const [timestep, setTimestep] = useState(engineDefaults.timestep);
-  const [liveAnalysis, setLiveAnalysis] = useState(true);
-  const [gpuAcceleration, setGpuAcceleration] = useState(false);
-
-  // Reset values when engine changes
-  useEffect(() => {
-    setDuration(engineDefaults.duration);
-    setTimestep(engineDefaults.timestep);
-  }, [engineDefaults]);
-
-  // Notify parent of parameter changes
-  const notifyChange = useCallback(() => {
-    onChange({
-      duration,
-      timestep,
-      liveAnalysis,
-      gpuAcceleration,
-    });
-  }, [duration, timestep, liveAnalysis, gpuAcceleration, onChange]);
-
-  useEffect(() => {
-    notifyChange();
-  }, [notifyChange]);
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-        Simulation Parameters
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          Simulation Parameters
+        </h3>
+        {onResetDefaults && (
+          <button
+            type="button"
+            onClick={onResetDefaults}
+            disabled={disabled}
+            className="text-xs text-blue-400 hover:text-blue-300 disabled:text-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1"
+          >
+            Reset to engine defaults
+          </button>
+        )}
+      </div>
 
       {/* Duration */}
       <div>
@@ -99,8 +72,17 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
           min="0.1"
           max="60"
           step="0.1"
-          value={duration}
-          onChange={(e) => setDuration(parseFloat(e.target.value) || 3.0)}
+          value={durationDraft ?? value.duration}
+          onChange={(e) => {
+            // Keep the raw string while editing so an empty field does not snap
+            // to a default; commit the parsed value when it is valid.
+            setDurationDraft(e.target.value);
+            commitDuration(e.target.value);
+          }}
+          onBlur={(e) => {
+            commitDuration(e.target.value);
+            setDurationDraft(null);
+          }}
           disabled={disabled}
           className="w-full"
           aria-describedby="duration-help"
@@ -120,8 +102,8 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
         </label>
         <Select
           id="timestep-input"
-          value={timestep}
-          onChange={(e) => setTimestep(parseFloat(e.target.value))}
+          value={value.timestep}
+          onChange={(e) => onChange({ timestep: parseFloat(e.target.value) })}
           disabled={disabled}
           className="w-full"
           aria-describedby="timestep-help"
@@ -150,17 +132,17 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
         <button
           id="live-analysis-toggle"
           role="switch"
-          aria-checked={liveAnalysis}
-          onClick={() => setLiveAnalysis(!liveAnalysis)}
+          aria-checked={value.liveAnalysis}
+          onClick={() => onChange({ liveAnalysis: !value.liveAnalysis })}
           disabled={disabled}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-800
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     ${liveAnalysis ? 'bg-blue-600' : 'bg-gray-600'}`}
+                     ${value.liveAnalysis ? 'bg-blue-600' : 'bg-gray-600'}`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                       ${liveAnalysis ? 'translate-x-6' : 'translate-x-1'}`}
+                       ${value.liveAnalysis ? 'translate-x-6' : 'translate-x-1'}`}
           />
         </button>
       </div>
@@ -179,17 +161,17 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
         <button
           id="gpu-toggle"
           role="switch"
-          aria-checked={gpuAcceleration}
-          onClick={() => setGpuAcceleration(!gpuAcceleration)}
+          aria-checked={value.gpuAcceleration}
+          onClick={() => onChange({ gpuAcceleration: !value.gpuAcceleration })}
           disabled={disabled}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-800
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     ${gpuAcceleration ? 'bg-green-600' : 'bg-gray-600'}`}
+                     ${value.gpuAcceleration ? 'bg-green-600' : 'bg-gray-600'}`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                       ${gpuAcceleration ? 'translate-x-6' : 'translate-x-1'}`}
+                       ${value.gpuAcceleration ? 'translate-x-6' : 'translate-x-1'}`}
           />
         </button>
       </div>
