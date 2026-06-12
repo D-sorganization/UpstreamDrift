@@ -112,6 +112,15 @@ side="right")`, and Nm3/ppm conversions share the DIN 1343 normal state
   first-run onboarding overlay added to the React dashboard; onboarding
   card copy single-sourced in `src/config/onboarding_cards.json` consumed
   by the Qt dialog and the web overlay.
+- **2026-06-12** - Added recording persistence and export parity endpoints
+  (#7451): `POST/GET/DELETE /recordings`, `GET /recordings/{id}/export`
+  (FileResponse), and `GET /export/formats`. Recordings persist under
+  `output/recordings/<id>/` with metadata.json; exports reuse the desktop
+  serializers in `src/shared/python/data_io/export.py` (no parallel
+  serialization paths), with format enumeration derived from
+  `get_available_export_formats()` — the same registry the PyQt6 dashboard
+  Export tab uses. The web Simulation page gains a collapsible Recordings
+  panel (list, per-format download, delete with confirm).
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
