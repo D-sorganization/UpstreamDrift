@@ -281,13 +281,12 @@ def _kalman_filter(
 ) -> np.ndarray:
     """Apply a 1D random-walk Kalman smoother (RTS) to each marker/keypoint coord.
 
-    Uses a forward-pass Kalman filter followed by a backward-pass RTS smoother.
-    This eliminates the forward-pass transient and gives optimal smoothing for
-    offline (batch) mocap data where all frames are available.
-
-    The steady-state P initialization avoids the long high-gain transient that
-    would otherwise reduce smoothing quality for the first 20–30 frames when
-    starting with P=1.0.
+    Delegates to the single canonical implementation in :mod:`.filter`
+    (``_kalman_filter_python``) so the two modules can never drift apart again
+    (issue #7409 / #7410 — this copy previously used a wrong-sign steady-state
+    ``P`` initialization derived from an incorrect DARE). The import is deferred
+    to function call time to avoid a module-level import cycle with
+    :mod:`.filter`, which lazily imports helpers from this module.
 
     Args:
         data: Array of shape (n_frames, n_points, n_dims).
@@ -297,57 +296,9 @@ def _kalman_filter(
     Returns:
         Smoothed array of identical shape.
     """
-    if data.size == 0:
-        return data
+    from .filter import _kalman_filter_python
 
-    q = float(process_noise)
-    r = float(measurement_noise)
-
-    # Steady-state P for a random-walk model solves the DARE:
-    #   P_ss = P_ss * r / (P_ss + r) + q
-    # Positive root: P_ss = 0.5 * (q + sqrt(q^2 + 4*q*r))
-    p_steady = 0.5 * (q + np.sqrt(q**2 + 4.0 * q * r))
-
-    filtered = np.zeros_like(data)
-    n_frames = data.shape[0]
-
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            series = data[:, i, j]
-
-            # --- Forward pass ---
-            x_fwd = np.empty(n_frames)
-            p_fwd = np.empty(n_frames)
-
-            p = p_steady
-            x = float(series[0])
-
-            for t in range(n_frames):
-                # Predict (random-walk: x_k = x_{k-1}, P_k = P_{k-1} + Q)
-                p_pred = p + q
-                # Update (Kalman gain and correction)
-                k_gain = p_pred / (p_pred + r)
-                x = x + k_gain * (series[t] - x)
-                p = (1.0 - k_gain) * p_pred
-                x_fwd[t] = x
-                p_fwd[t] = p
-
-            # --- Backward RTS smoother pass ---
-            smoothed = np.empty(n_frames)
-            smoothed[-1] = x_fwd[-1]
-            p_s = p_fwd[-1]
-
-            for t in range(n_frames - 2, -1, -1):
-                # Predicted covariance at t+1 (using forward filter's P at t)
-                p_pred = p_fwd[t] + q
-                # RTS smoother gain
-                g_s = p_fwd[t] / p_pred
-                smoothed[t] = x_fwd[t] + g_s * (smoothed[t + 1] - x_fwd[t])
-                p_s = p_fwd[t] + g_s**2 * (p_s - p_pred)
-
-            filtered[:, i, j] = smoothed
-
-    return filtered
+    return _kalman_filter_python(data, process_noise, measurement_noise)
 
 
 def _ewma(data: np.ndarray, alpha: float = 0.5) -> np.ndarray:
