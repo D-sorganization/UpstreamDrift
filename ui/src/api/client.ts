@@ -122,11 +122,12 @@ export function useSimulation(engineType: string) {
       // is only reached on an explicit start(), never on a silent reconnect.
       setFrames([]);
 
+      // duration/timestep come from the caller's config (the store is the
+      // single source of truth, #7424) — no hardcoded simulation defaults here.
+      // Only live_analysis carries a safe fallback when the caller omits it.
       ws.send(JSON.stringify({
         action: 'start',
         config: {
-          duration: 3.0,
-          timestep: 0.002,
           live_analysis: true,
           ...config,
         },
