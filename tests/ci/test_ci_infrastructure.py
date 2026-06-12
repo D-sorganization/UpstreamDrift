@@ -509,6 +509,11 @@ class TestCIEnvironmentCompatibility:
         )
         assert "--timeout=60" in core_step["run"]
         assert "-n 2" in core_step["run"]
+        assert (
+            "--ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/"
+            "matlab/motion_matching/option4_python_bridge/tests"
+        ) in core_step["run"]
+        assert "--ignore=src/shared/python/sidekick/tests" in core_step["run"]
 
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
