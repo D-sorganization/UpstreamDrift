@@ -41,6 +41,7 @@ import {
 } from 'react';
 import { Send, MessageSquare, Paperclip, RefreshCw, X, RotateCcw } from 'lucide-react';
 import { ChatMarkdown } from './chatMarkdown';
+import { ChatContextChip } from './ChatContextChip';
 import { getApiBase } from '../../api/backend';
 import { withLauncherWebSocketToken } from '../../api/websocketToken';
 
@@ -614,6 +615,7 @@ export function ChatPanel({
               {sessionId.slice(0, 8)}
             </span>
           )}
+          <ChatContextChip />
         </div>
         <div className="flex items-center gap-2">
           {showReconnect && (
