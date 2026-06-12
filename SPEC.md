@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.363                                            |
+| **Spec Version**        | 1.0.364                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Kept the dependency-light core test lane out of the
+  Simscape MATLAB bridge subtree during full-suite fallback, matching the
+  existing PR change filter and avoiding collection-time conftest aliasing for
+  optional MATLAB integration tests.
 - **2026-06-12** - Removed a stale frontend console lint suppression and raised
   the Vitest per-test timeout budget so slow shared runners can complete
   already-passing UI tests without weakening assertion behavior.
@@ -1270,6 +1274,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-12 | 1.0.364 | Kept the dependency-light core test lane out of the Simscape MATLAB bridge subtree during full-suite fallback, matching the existing PR change filter and avoiding collection-time conftest aliasing for optional MATLAB integration tests. |
 | 2026-06-12 | 1.0.362 | Cleared consolidated PR frontend follow-up failures by removing a stale console lint suppression and raising the Vitest per-test timeout budget so slow shared runners can complete already-passing UI tests without masking assertion failures. |
 | 2026-06-12 | 1.0.360 | Corrected the standalone Sidekick wheel packaging regression test to match Hatch's non-overlap contract: the wheel packages the `src` tree once and force-includes `src/shared/python/sidekick` to the top-level `sidekick/` archive path, preventing an overlapping package declaration from adding `sidekick/__init__.py` twice during `python -m build`. |
 | 2026-06-12 | 1.0.359 | Tightened the Docker security scan gate to block fixable HIGH/CRITICAL container findings while keeping no-fix OS/library CVEs nonblocking: SARIF upload still records all HIGH/CRITICAL findings for Security-tab visibility, and the blocking Trivy table scan now uses `ignore-unfixed: true` so Debian `affected`/`fix_deferred`/`will_not_fix` advisories do not strand unrelated PRs. |

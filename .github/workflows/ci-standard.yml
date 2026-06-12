@@ -1352,6 +1352,7 @@ jobs:
             --dist loadscope \
             --timeout=60 \
             --timeout-method=thread \
+            --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
             --ignore=tests/shared_contracts \
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
