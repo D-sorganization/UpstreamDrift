@@ -1,28 +1,93 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { SimulationPage } from './pages/Simulation';
-import { DashboardPage } from './pages/Dashboard';
-import { ModelExplorerPage } from './pages/ModelExplorer';
-import { PuttingGreenPage } from './pages/PuttingGreen';
-import { VideoAnalyzerPage } from './pages/VideoAnalyzer';
-import { DataExplorerPage } from './pages/DataExplorer';
-import { MotionCapturePage } from './pages/MotionCapture';
-import { ChatPage } from './pages/Chat';
-import { TerrainPage } from './pages/Terrain';
-import { DatasetGeneratorPage } from './pages/DatasetGenerator';
-import { AnalysisToolsPage } from './pages/AnalysisTools';
-import { CharacterBuilderPage } from './pages/CharacterBuilder';
-import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
-import { NotFoundPage } from './pages/NotFound';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { RouteTitle } from './utils/RouteTitle';
-import { BallFlightPage } from './pages/BallFlight';
-import { SettingsPage } from './pages/Settings';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { useWebSettingsBootstrap } from './api/useWebSettings';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
 import { useUIStore } from './stores';
+
+/**
+ * Route-level code splitting (#7433): every page is lazy so the initial bundle
+ * no longer ships three.js / @react-three/fiber / drei (pulled in by Scene3D,
+ * URDFViewer, ModelPreviewViewport) on routes that render no 3D view. Pages use
+ * named exports, so each import is mapped to a `default` for `React.lazy`.
+ */
+const DashboardPage = lazy(() =>
+  import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })),
+);
+const SimulationPage = lazy(() =>
+  import('./pages/Simulation').then((m) => ({ default: m.SimulationPage })),
+);
+const ModelExplorerPage = lazy(() =>
+  import('./pages/ModelExplorer').then((m) => ({ default: m.ModelExplorerPage })),
+);
+const PuttingGreenPage = lazy(() =>
+  import('./pages/PuttingGreen').then((m) => ({ default: m.PuttingGreenPage })),
+);
+const VideoAnalyzerPage = lazy(() =>
+  import('./pages/VideoAnalyzer').then((m) => ({ default: m.VideoAnalyzerPage })),
+);
+const DataExplorerPage = lazy(() =>
+  import('./pages/DataExplorer').then((m) => ({ default: m.DataExplorerPage })),
+);
+const MotionCapturePage = lazy(() =>
+  import('./pages/MotionCapture').then((m) => ({ default: m.MotionCapturePage })),
+);
+const ChatPage = lazy(() =>
+  import('./pages/Chat').then((m) => ({ default: m.ChatPage })),
+);
+const TerrainPage = lazy(() =>
+  import('./pages/Terrain').then((m) => ({ default: m.TerrainPage })),
+);
+const DatasetGeneratorPage = lazy(() =>
+  import('./pages/DatasetGenerator').then((m) => ({
+    default: m.DatasetGeneratorPage,
+  })),
+);
+const AnalysisToolsPage = lazy(() =>
+  import('./pages/AnalysisTools').then((m) => ({ default: m.AnalysisToolsPage })),
+);
+const CharacterBuilderPage = lazy(() =>
+  import('./pages/CharacterBuilder').then((m) => ({
+    default: m.CharacterBuilderPage,
+  })),
+);
+const CanonicalCoreShellPage = lazy(() =>
+  import('./pages/CanonicalCoreShell').then((m) => ({
+    default: m.CanonicalCoreShellPage,
+  })),
+);
+const BallFlightPage = lazy(() =>
+  import('./pages/BallFlight').then((m) => ({ default: m.BallFlightPage })),
+);
+const SettingsPage = lazy(() =>
+  import('./pages/Settings').then((m) => ({ default: m.SettingsPage })),
+);
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFound').then((m) => ({ default: m.NotFoundPage })),
+);
+
+/** Themed full-viewport fallback shown while a route chunk loads (#7433). */
+function PageLoadingFallback() {
+  return (
+    <div
+      className="flex h-screen w-full items-center justify-center bg-gray-900"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex flex-col items-center gap-3 text-gray-300">
+        <span
+          className="h-8 w-8 animate-spin rounded-full border-2 border-gray-600 border-t-blue-500 motion-reduce:animate-none"
+          aria-hidden="true"
+        />
+        <span className="text-sm">Loading…</span>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Route-level error boundary: a crash on one page is contained and reset when
@@ -33,6 +98,7 @@ function RoutedContent() {
   const location = useLocation();
   return (
     <ErrorBoundary resetKeys={[location.pathname]} label={location.pathname}>
+      <Suspense fallback={<PageLoadingFallback />}>
       <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/simulation" element={<SimulationPage />} />
@@ -63,6 +129,7 @@ function RoutedContent() {
           {/* Catch-all 404 (#7430) — must stay last. */}
           <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }
