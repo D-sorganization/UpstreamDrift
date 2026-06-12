@@ -1,7 +1,7 @@
 # PyQt6 vs React UI Feature Parity Matrix
 
 **Document Date:** 2026-05-10  
-**Last Updated:** 2026-05-10  
+**Last Updated:** 2026-06-12  
 **Related Issue:** #4913  
 **EPIC:** #4904 (Launcher UI/UX Remediation & Documentation Sync)
 
@@ -40,47 +40,51 @@ The React UI provides:
 - ❌ = Not implemented
 - 🔄 = In progress
 
-| Feature Category        | Feature                                     | PyQt6 | React/Tauri | Priority | Tracking Issue |
-| ----------------------- | ------------------------------------------- | ----- | ----------- | -------- | -------------- |
-| **Launcher**            | Model tile grid                             | ✅    | ❌          | High     | -              |
-|                         | Drag-and-drop reordering                    | ✅    | ❌          | Low      | -              |
-|                         | View modes (Comfortable/Compact/Dense/List) | ✅    | ❌          | Low      | -              |
-|                         | Zoom slider                                 | ✅    | ❌          | Low      | -              |
-|                         | Search/filter                               | ✅    | ❌          | Medium   | -              |
-|                         | Status chips                                | ✅    | ❌          | Low      | -              |
-|                         | Sidebar navigation                          | ✅    | ❌          | Low      | -              |
-| **Simulation Controls** | Play/Pause/Stop                             | ✅    | ⚠️          | High     | -              |
-|                         | Step frame                                  | ✅    | ❌          | Medium   | #7             |
-|                         | Speed control (0.1x-5x)                     | ✅    | ❌          | Medium   | #7             |
-|                         | Timestep adjustment                         | ✅    | ❌          | Low      | -              |
-|                         | Per-actuator sliders                        | ✅    | ❌          | High     | #2             |
-|                         | Control type selection                      | ✅    | ❌          | High     | #2             |
-|                         | Polynomial generator                        | ✅    | ❌          | Medium   | #2             |
-| **Visualization**       | 3D scene rendering                          | ✅    | ⚠️          | High     | -              |
-|                         | Force/torque overlays                       | ✅    | ❌          | High     | #1             |
-|                         | Contact force visualization                 | ✅    | ❌          | Medium   | #1             |
-|                         | Camera presets                              | ✅    | ❌          | Medium   | #7             |
-|                         | Camera controls (azimuth/elevation)         | ✅    | ⚠️          | Medium   | -              |
-|                         | Trajectory trails                           | ✅    | ⚠️          | Medium   | -              |
-|                         | Swing trajectory recording                  | ✅    | ❌          | Low      | -              |
-| **Model Interaction**   | 6-DOF manipulation                          | ✅    | ❌          | Medium   | #6             |
-|                         | Body selection (raycasting)                 | ✅    | ❌          | Medium   | #6             |
-|                         | Pose library                                | ✅    | ❌          | Low      | #6             |
-|                         | IK-based dragging                           | ✅    | ❌          | Low      | #6             |
-| **Model Explorer**      | URDF tree viewer                            | ✅    | ❌          | Medium   | #3             |
-|                         | Frankenstein Editor                         | ✅    | ❌          | Medium   | #3             |
-|                         | Character Builder                           | ✅    | ❌          | Medium   | #4             |
-|                         | URDF export                                 | ✅    | ❌          | Medium   | #3             |
-| **Specialized Views**   | Putting Green Simulator                     | ✅    | ❌          | Medium   | #5             |
-|                         | C3D Motion Capture Viewer                   | ✅    | ❌          | Medium   | -              |
-|                         | Data Explorer                               | ✅    | ❌          | Low      | -              |
-|                         | Video Analyzer                              | ✅    | ❌          | Low      | -              |
-| **AI Features**         | Chat panel                                  | ✅    | ⚠️          | Medium   | -              |
-|                         | Context-aware help                          | ✅    | ❌          | Low      | -              |
-| **Settings**            | Engine runtime config                       | ✅    | ❌          | High     | -              |
-|                         | Docker/WSL mode                             | ✅    | ❌          | High     | -              |
-|                         | Theme selection                             | ✅    | ❌          | Low      | -              |
-|                         | Layout customization                        | ✅    | ❌          | Low      | -              |
+| Feature Category        | Feature                                      | PyQt6 | React/Tauri | Priority | Tracking Issue |
+| ----------------------- | -------------------------------------------- | ----- | ----------- | -------- | -------------- |
+| **Launcher**            | Model tile grid                              | ✅    | ❌          | High     | -              |
+|                         | Drag-and-drop reordering                     | ✅    | ❌          | Low      | -              |
+|                         | View modes (Comfortable/Compact/Dense/List)  | ✅    | ❌          | Low      | -              |
+|                         | Zoom slider                                  | ✅    | ❌          | Low      | -              |
+|                         | Search/filter                                | ✅    | ❌          | Medium   | -              |
+|                         | Status chips                                 | ✅    | ❌          | Low      | -              |
+|                         | Sidebar navigation                           | ✅    | ❌          | Low      | -              |
+| **Simulation Controls** | Play/Pause/Stop                              | ✅    | ⚠️          | High     | -              |
+|                         | Step frame                                   | ✅    | ❌          | Medium   | #7             |
+|                         | Speed control (0.1x-5x)                      | ✅    | ❌          | Medium   | #7             |
+|                         | Timestep adjustment                          | ✅    | ❌          | Low      | -              |
+|                         | Per-actuator sliders                         | ✅    | ❌          | High     | #2             |
+|                         | Control type selection                       | ✅    | ❌          | High     | #2             |
+|                         | Polynomial generator                         | ✅    | ❌          | Medium   | #2             |
+| **Visualization**       | 3D scene rendering                           | ✅    | ⚠️          | High     | -              |
+|                         | Force/torque overlays                        | ✅    | ❌          | High     | #1             |
+|                         | Contact force visualization                  | ✅    | ❌          | Medium   | #1             |
+|                         | Camera presets                               | ✅    | ❌          | Medium   | #7             |
+|                         | Camera controls (azimuth/elevation)          | ✅    | ⚠️          | Medium   | -              |
+|                         | Trajectory trails                            | ✅    | ⚠️          | Medium   | -              |
+|                         | Swing trajectory recording                   | ✅    | ❌          | Low      | -              |
+| **Model Interaction**   | 6-DOF manipulation                           | ✅    | ❌          | Medium   | #6             |
+|                         | Body selection (raycasting)                  | ✅    | ❌          | Medium   | #6             |
+|                         | Pose library                                 | ✅    | ❌          | Low      | #6             |
+|                         | IK-based dragging                            | ✅    | ❌          | Low      | #6             |
+| **Model Explorer**      | URDF tree viewer                             | ✅    | ❌          | Medium   | #3             |
+|                         | Frankenstein Editor                          | ✅    | ❌          | Medium   | #3             |
+|                         | Character Builder                            | ✅    | ❌          | Medium   | #4             |
+|                         | URDF export                                  | ✅    | ❌          | Medium   | #3             |
+| **Analysis**            | ZTCF counterfactual                          | ✅    | ✅          | High     | #7450          |
+|                         | ZVCF counterfactual                          | ✅    | ✅          | High     | #7450          |
+|                         | Induced-acceleration (gravity/drift/control) | ✅    | ✅          | High     | #7450          |
+|                         | Engine capability gating (data-driven)       | ✅    | ✅          | High     | #7450          |
+| **Specialized Views**   | Putting Green Simulator                      | ✅    | ❌          | Medium   | #5             |
+|                         | C3D Motion Capture Viewer                    | ✅    | ❌          | Medium   | -              |
+|                         | Data Explorer                                | ✅    | ❌          | Low      | -              |
+|                         | Video Analyzer                               | ✅    | ❌          | Low      | -              |
+| **AI Features**         | Chat panel                                   | ✅    | ⚠️          | Medium   | -              |
+|                         | Context-aware help                           | ✅    | ❌          | Low      | -              |
+| **Settings**            | Engine runtime config                        | ✅    | ❌          | High     | -              |
+|                         | Docker/WSL mode                              | ✅    | ❌          | High     | -              |
+|                         | Theme selection                              | ✅    | ❌          | Low      | -              |
+|                         | Layout customization                         | ✅    | ❌          | Low      | -              |
 
 ---
 

@@ -107,7 +107,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       90.0
     ],
     "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "0.0"
@@ -123,7 +123,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       100.0
     ],
     "default": 70.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "70.0"
@@ -139,7 +139,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       80.0
     ],
     "default": 12.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "12.0"
@@ -155,7 +155,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       90.0
     ],
     "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "0.0"
@@ -171,7 +171,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       15000.0
     ],
     "default": 2600.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "2600.0"
@@ -187,7 +187,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
       180.0
     ],
     "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "0.0"
@@ -203,10 +203,30 @@ export const FIELD_METADATA: FieldMetadata[] = [
       40.0
     ],
     "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
     "consumers": [],
     "producers": [],
     "example": "0.0"
+  },
+  {
+    "id": "counterfactual.kind",
+    "label": "Counterfactual kind",
+    "shortHelp": "Which counterfactual or induced-acceleration analysis to run.",
+    "longHelp": "- `ztcf`: zero-torque counterfactual — joint accelerations with applied\n  torques removed (velocity-dependent + gravity effects remain).\n- `zvcf`: zero-velocity counterfactual — accelerations with joint\n  velocities zeroed (gravity/configuration effects).\n- `gravity` / `drift`: passive drift component of the acceleration.\n- `control`: acceleration attributable to the applied torques.\n- `total`: drift + control superposition.\nResults are joint accelerations in rad/s^2, computed by the same\npost-hoc replay the desktop dashboard uses (issue #7450).\n",
+    "units": null,
+    "validRange": [
+      "ztcf",
+      "zvcf",
+      "gravity",
+      "drift",
+      "control",
+      "total"
+    ],
+    "default": "ztcf",
+    "defaultSource": "ZTCF is the first entry in the desktop dashboard analysis combo (src/shared/python/dashboard/window.py).",
+    "consumers": [],
+    "producers": [],
+    "example": "ztcf"
   },
   {
     "id": "pose_studio.show_radians",

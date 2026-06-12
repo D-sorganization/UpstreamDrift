@@ -222,7 +222,7 @@ fields:
     units: m/s
     valid_range: [0.1, 100.0]
     default: 70.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "70.0"
@@ -237,7 +237,7 @@ fields:
     units: deg
     valid_range: [-10.0, 80.0]
     default: 12.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "12.0"
@@ -252,7 +252,7 @@ fields:
     units: deg
     valid_range: [-90.0, 90.0]
     default: 0.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "0.0"
@@ -267,7 +267,7 @@ fields:
     units: rpm
     valid_range: [0.0, 15000.0]
     default: 2600.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "2600.0"
@@ -282,7 +282,7 @@ fields:
     units: deg
     valid_range: [-90.0, 90.0]
     default: 0.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "0.0"
@@ -296,7 +296,7 @@ fields:
     units: m/s
     valid_range: [0.0, 40.0]
     default: 0.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "0.0"
@@ -311,7 +311,29 @@ fields:
     units: deg
     valid_range: [-180.0, 180.0]
     default: 0.0
-    default_source: Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
     consumers: []
     producers: []
     example: "0.0"
+
+  # ---- counterfactual analysis (web Analysis page; desktop dashboard combo)
+  - id: counterfactual.kind
+    label: Counterfactual kind
+    short_help: Which counterfactual or induced-acceleration analysis to run.
+    long_help: |
+      - `ztcf`: zero-torque counterfactual — joint accelerations with applied
+        torques removed (velocity-dependent + gravity effects remain).
+      - `zvcf`: zero-velocity counterfactual — accelerations with joint
+        velocities zeroed (gravity/configuration effects).
+      - `gravity` / `drift`: passive drift component of the acceleration.
+      - `control`: acceleration attributable to the applied torques.
+      - `total`: drift + control superposition.
+      Results are joint accelerations in rad/s^2, computed by the same
+      post-hoc replay the desktop dashboard uses (issue #7450).
+    units: ~
+    valid_range: [ztcf, zvcf, gravity, drift, control, total]
+    default: ztcf
+    default_source: ZTCF is the first entry in the desktop dashboard analysis combo (src/shared/python/dashboard/window.py).
+    consumers: []
+    producers: []
+    example: "ztcf"
