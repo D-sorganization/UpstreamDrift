@@ -23,6 +23,7 @@ import type {
 import type {
   LauncherManifest,
   LauncherTile,
+  WebLaunchMode,
 } from './useLauncherManifest';
 
 /** Error thrown when a backend payload fails runtime validation. */
@@ -99,6 +100,36 @@ export function parseEngineCapabilities(value: unknown): EngineCapabilitiesData 
   };
 }
 
+const WEB_LAUNCH_MODES: readonly WebLaunchMode[] = [
+  'route',
+  'native-window',
+  'unavailable',
+];
+
+/**
+ * Validate the optional `web` launch contract (issue #7461). Absence is
+ * tolerated (older backends), but a present contract must be internally
+ * consistent so the dashboard never renders a dead or dishonest button.
+ */
+function validateWebContract(value: unknown, index: number): void {
+  if (value === undefined) {
+    return;
+  }
+  if (!isRecord(value)) {
+    fail(`tiles[${index}].web must be an object`);
+  }
+  const { mode, route, reason } = value;
+  if (typeof mode !== 'string' || !WEB_LAUNCH_MODES.includes(mode as WebLaunchMode)) {
+    fail(`tiles[${index}].web.mode must be one of ${WEB_LAUNCH_MODES.join('|')}`);
+  }
+  if (mode === 'route' && (typeof route !== 'string' || !route.startsWith('/'))) {
+    fail(`tiles[${index}].web.route must be a string starting with "/" for mode "route"`);
+  }
+  if (mode === 'unavailable' && (typeof reason !== 'string' || reason.trim() === '')) {
+    fail(`tiles[${index}].web.reason must be a non-empty string for mode "unavailable"`);
+  }
+}
+
 function parseLauncherTile(value: unknown, index: number): LauncherTile {
   if (!isRecord(value)) {
     fail(`tiles[${index}] must be an object`);
@@ -118,6 +149,7 @@ function parseLauncherTile(value: unknown, index: number): LauncherTile {
   ) {
     fail(`tiles[${index}].order must be a finite integer`);
   }
+  validateWebContract(tile.web, index);
   // Pass through the remaining (already typed) fields unchanged. The two
   // hard invariants above are what prevent the documented failure modes;
   // remaining optional fields are tolerated as the backend evolves.

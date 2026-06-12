@@ -274,6 +274,73 @@ class TestLaunchEndpoint:
         )
 
 
+# ── Native-window remote-client guard (issue #7461) ─────────────────
+
+
+class TestNativeWindowRemoteGuard:
+    """POST /launch refuses native-window tiles for non-local clients (409)."""
+
+    def test_remote_client_native_window_launch_returns_409(
+        self, client, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A non-local client cannot spawn a server-side Qt window."""
+        monkeypatch.setattr(
+            local_server, "_is_local_request_client", lambda request: False
+        )
+        resp = client.post("/api/launcher/launch/mujoco_unified")
+        assert resp.status_code == 409, f"expected 409, got {resp.status_code}"
+        data = resp.json()
+        assert "native" in data["detail"].lower(), (
+            "409 detail must explain the native-window refusal"
+        )
+        assert data["reason"], "409 body must carry a machine-readable reason"
+        assert data["web_mode"] == "native-window", (
+            "Assertion failed: data[web_mode] == native-window"
+        )
+        client._mock_handler.launch.assert_not_called()
+
+    def test_remote_client_unavailable_tile_also_refused(
+        self, client, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Unavailable tiles are never spawned for remote clients either."""
+        monkeypatch.setattr(
+            local_server, "_is_local_request_client", lambda request: False
+        )
+        resp = client.post("/api/launcher/launch/project_map")
+        assert resp.status_code == 409, f"expected 409, got {resp.status_code}"
+        client._mock_handler.launch.assert_not_called()
+
+    def test_local_client_native_window_launch_succeeds(self, client) -> None:
+        """The in-process (local) test client may still launch native tiles."""
+        resp = client.post("/api/launcher/launch/mujoco_unified")
+        assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
+
+    @pytest.mark.parametrize(
+        ("host", "expected"),
+        [
+            ("127.0.0.1", True),
+            ("::1", True),
+            ("localhost", True),
+            ("testclient", True),
+            ("192.168.1.50", False),
+            ("203.0.113.7", False),
+        ],
+    )
+    def test_is_local_request_client_host_classification(
+        self, host: str, expected: bool
+    ) -> None:
+        """Loopback peers are local; routable peers are not."""
+        request = MagicMock()
+        request.client.host = host
+        assert local_server._is_local_request_client(request) is expected
+
+    def test_is_local_request_client_no_peer_is_local(self) -> None:
+        """An in-process ASGI call without a network peer counts as local."""
+        request = MagicMock()
+        request.client = None
+        assert local_server._is_local_request_client(request) is True
+
+
 # ── GET /api/launcher/processes ──────────────────────────────────────
 
 

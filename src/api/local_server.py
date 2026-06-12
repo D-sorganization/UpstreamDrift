@@ -283,6 +283,45 @@ def _is_loopback_origin(value: str) -> bool:
     return hostname in {"localhost", "127.0.0.1", "::1"}
 
 
+# Hosts considered "the same machine as the API server" for native-window
+# launches. "testclient" is the in-process Starlette TestClient peer.
+_LOCAL_CLIENT_HOSTS = frozenset({"127.0.0.1", "::1", "localhost", "testclient"})
+
+
+def _is_local_request_client(request: Request) -> bool:
+    """Return True when the request originates from the server's own machine.
+
+    Native-window tiles spawn Qt windows on the host running the API server;
+    launching them from a remote browser would open an invisible window on
+    the server (issue #7461), so callers refuse those with a 409.
+    """
+    if request is None:
+        raise ValueError("request must be provided")
+    client = request.client
+    if client is None:
+        # In-process ASGI invocation (no network peer) — local by definition.
+        return True
+    return client.host in _LOCAL_CLIENT_HOSTS
+
+
+def _native_window_remote_refusal(tile_id: str, mode: str) -> JSONResponse:
+    """Build the honest 409 response for non-local native-window launches."""
+    return JSONResponse(
+        status_code=409,
+        content={
+            "detail": (
+                f"Tile '{tile_id}' (web mode '{mode}') opens a native desktop "
+                "window on the machine running the API server. Launching it "
+                "from a remote browser would open an invisible server-side "
+                "window. Use the desktop (Tauri) app or run the server "
+                "locally."
+            ),
+            "reason": "native-window tiles cannot be launched from a remote client",
+            "web_mode": mode,
+        },
+    )
+
+
 def _enforce_launcher_mutation_guard(request: Request) -> None:
     """Require a local capability token and reject browser cross-site writes."""
     if request is None:
@@ -511,6 +550,19 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
                 status_code=404,
                 content={"detail": f"Tile not found: {tile_id}"},
             )
+
+        # Web-reachability guard (issue #7461): a POST launch spawns a
+        # native window on *this* host. Refuse for non-local clients so the
+        # window never opens invisibly on the server.
+        web_contract = tile.get("web") or {}
+        web_mode = web_contract.get("mode", "native-window")
+        if web_mode != "route" and not _is_local_request_client(request):
+            logger.warning(
+                "[launch] Refusing non-local native-window launch: tile=%s client=%s",
+                tile_id,
+                request.client,
+            )
+            return _native_window_remote_refusal(tile_id, web_mode)
 
         return _execute_tile_launch(tile_id, tile, _launcher_service)
 

@@ -57,6 +57,7 @@ LAUNCHER_CATEGORY_LABELS: dict[str, str] = {
     "tool": "Tools",
 }
 LAUNCHER_CATEGORIES = frozenset(LAUNCHER_CATEGORY_LABELS)
+WEB_LAUNCH_MODES = frozenset({"route", "native-window", "unavailable"})
 TOOL_LIKE_CATEGORIES = frozenset(
     {
         "tool",
@@ -122,11 +123,108 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         provider=model.provider,
         source_root=model.source_root,
         web_route=metadata.web_route,
+        web=WebLaunchContract.derive(
+            web_route=metadata.web_route,
+            path=model.path,
+        ),
         default_launch=metadata.default_launch,
         hidden=model.hidden,
         hidden_reason=model.hidden_reason,
         hidden_owner=model.hidden_owner,
     )
+
+
+@dataclass(frozen=True)
+class WebLaunchContract:
+    """How a tile is reachable from the web (browser/Tauri) app.
+
+    Modes (issue #7461):
+        route: The tile opens as an in-app React route. ``route`` is required
+            and must start with "/".
+        native-window: Launching spawns a native (Qt) window on the machine
+            running the API server. Only meaningful when that machine is the
+            user's machine (Tauri mode or localhost API).
+        unavailable: The tile has no web affordance. ``reason`` is required so
+            the dashboard can render an honest badge instead of a dead button.
+    """
+
+    mode: str
+    route: str | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate the contract invariants (DbC)."""
+        if self.mode not in WEB_LAUNCH_MODES:
+            raise ValueError(
+                f"web.mode must be one of {sorted(WEB_LAUNCH_MODES)}, got {self.mode!r}"
+            )
+        if self.mode == "route":
+            if not isinstance(self.route, str) or not self.route.startswith("/"):
+                raise ValueError(
+                    "web.route is required for mode 'route' and must start "
+                    f"with '/', got {self.route!r}"
+                )
+        elif self.route is not None:
+            raise ValueError(
+                f"web.route is only valid for mode 'route', not {self.mode!r}"
+            )
+        if self.mode == "unavailable" and (
+            not isinstance(self.reason, str) or not self.reason.strip()
+        ):
+            raise ValueError("web.reason is required for mode 'unavailable'")
+
+    @classmethod
+    def from_dict(
+        cls, data: dict[str, Any], *, tile_id: str = "?"
+    ) -> WebLaunchContract:
+        """Parse and validate a ``web`` manifest entry.
+
+        Args:
+            data: The ``web`` mapping from the manifest.
+            tile_id: Tile ID for error messages.
+
+        Returns:
+            Validated WebLaunchContract.
+
+        Raises:
+            ValueError: If the contract is malformed.
+        """
+        if not isinstance(data, dict):
+            raise ValueError(f"Tile '{tile_id}': 'web' must be a mapping")
+        try:
+            return cls(
+                mode=data.get("mode", ""),
+                route=data.get("route"),
+                reason=data.get("reason"),
+            )
+        except ValueError as exc:
+            raise ValueError(f"Tile '{tile_id}': {exc}") from exc
+
+    @classmethod
+    def derive(cls, *, web_route: str | None, path: str | None) -> WebLaunchContract:
+        """Derive an honest default contract for tiles without a declaration.
+
+        Used for dynamically generated tiles (e.g. provider-backed registry
+        entries). Manifest tiles must declare ``web`` explicitly — enforced by
+        tests/config/launcher_manifest/test_parity.py.
+        """
+        if isinstance(web_route, str) and web_route.startswith("/"):
+            return cls(mode="route", route=web_route)
+        if path:
+            return cls(mode="native-window")
+        return cls(
+            mode="unavailable",
+            reason="No web route or native entry point declared",
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize for API responses."""
+        result: dict[str, Any] = {"mode": self.mode}
+        if self.route is not None:
+            result["route"] = self.route
+        if self.reason is not None:
+            result["reason"] = self.reason
+        return result
 
 
 @dataclass(frozen=True)
@@ -146,7 +244,10 @@ class LauncherTile:
         capabilities: List of capability tags for filtering/display
         order: Display order (1 = first)
         engine_type: Optional engine type identifier for physics engines
-        web_route: Optional URL path for tiles that open web tools
+        web_route: Optional URL path for tiles that open web tools (legacy;
+            superseded by ``web`` for reachability decisions)
+        web: Web launch contract declaring how (or whether) the tile is
+            reachable from the browser/Tauri app (issue #7461)
     """
 
     id: str
@@ -166,6 +267,7 @@ class LauncherTile:
     working_dir: str | None = None
     python_paths: tuple[str, ...] = ()
     web_route: str | None = None
+    web: WebLaunchContract | None = None
     default_launch: str = "tab"
     shell_surfaces: tuple[str, ...] = ()
     hidden: bool = False
@@ -202,6 +304,15 @@ class LauncherTile:
                     f"Hidden launcher tile '{data.get('id')}' must define hidden_owner"
                 )
 
+        web_raw = data.get("web")
+        if web_raw is not None:
+            web = WebLaunchContract.from_dict(web_raw, tile_id=str(data.get("id")))
+        else:
+            web = WebLaunchContract.derive(
+                web_route=data.get("web_route"),
+                path=data.get("path"),
+            )
+
         return cls(
             id=data["id"],
             name=data["name"],
@@ -220,6 +331,7 @@ class LauncherTile:
             working_dir=data.get("working_dir"),
             python_paths=tuple(data.get("python_paths", [])),
             web_route=data.get("web_route"),
+            web=web,
             default_launch=data.get("default_launch", "tab"),
             shell_surfaces=tuple(data.get("shell_surfaces", [])),
             hidden=hidden,
@@ -261,6 +373,8 @@ class LauncherTile:
             result["python_paths"] = list(self.python_paths)
         if self.web_route:
             result["web_route"] = self.web_route
+        if self.web is not None:
+            result["web"] = self.web.to_dict()
         if self.default_launch:
             result["default_launch"] = self.default_launch
         if self.shell_surfaces:
