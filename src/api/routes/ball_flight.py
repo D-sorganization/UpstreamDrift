@@ -23,6 +23,21 @@ from src.shared.python.physics.flight_models import (
 router = APIRouter(prefix="/tools/ball-flight", tags=["ball-flight"])
 
 
+class FlightModelInfo(BaseModel):
+    """Metadata describing one registered ball-flight model."""
+
+    key: FlightModelType
+    name: str
+    description: str
+    reference: str
+
+
+class FlightModelListResponse(BaseModel):
+    """Enumeration of every flight model in :class:`FlightModelRegistry`."""
+
+    models: list[FlightModelInfo]
+
+
 class BallFlightSimulationRequest(BaseModel):
     """Request to simulate a single ball-flight trajectory."""
 
@@ -49,6 +64,15 @@ class BallFlightSimulationRequest(BaseModel):
         FlightModelType.WATERLOO_PENNER,
         description="Ball-flight model identifier",
     )
+    models: list[FlightModelType] | None = Field(
+        None,
+        description=(
+            "Optional list of flight models for overlay comparison. When"
+            " provided, the response carries one result per (deduplicated)"
+            " model; the top-level trajectory/summary mirror the first entry"
+            " for backwards compatibility."
+        ),
+    )
     max_time_s: float = Field(
         10.0, description="Maximum simulation time [s]", gt=0.0, le=30.0
     )
@@ -61,7 +85,14 @@ class BallFlightSimulationRequest(BaseModel):
         """Keep time discretization bounded by the requested integration window."""
         if self.time_step_s > self.max_time_s:
             raise ValueError("time_step_s must be less than or equal to max_time_s")
+        if self.models is not None and not self.models:
+            raise ValueError("models must contain at least one flight model")
         return self
+
+    def requested_models(self) -> list[FlightModelType]:
+        """Return the deduplicated, order-preserving list of models to run."""
+        requested = self.models or [self.model_name]
+        return list(dict.fromkeys(requested))
 
     def to_launch_conditions(self) -> UnifiedLaunchConditions:
         """Convert validated API fields into the existing physics model contract."""
@@ -94,13 +125,25 @@ class BallFlightSummary(BaseModel):
     lateral_deviation_m: float
 
 
-class BallFlightSimulationResponse(BaseModel):
-    """Response containing ball-flight trajectory and summary metrics."""
+class BallFlightModelResult(BaseModel):
+    """Trajectory and summary metrics for a single flight model."""
 
     model_name: str
     model_key: FlightModelType
     trajectory: list[BallFlightTrajectorySample]
     summary: BallFlightSummary
+
+
+class BallFlightSimulationResponse(BallFlightModelResult):
+    """Response containing ball-flight trajectories and summary metrics.
+
+    The top-level ``model_name``/``trajectory``/``summary`` fields describe
+    the first requested model (backwards compatible with single-model
+    clients); ``results`` carries one entry per requested model for
+    overlay comparison (issue #7456).
+    """
+
+    results: list[BallFlightModelResult]
 
 
 def _trajectory_samples(result_trajectory: list) -> list[BallFlightTrajectorySample]:
@@ -115,25 +158,19 @@ def _trajectory_samples(result_trajectory: list) -> list[BallFlightTrajectorySam
     ]
 
 
-@router.post("/simulate", response_model=BallFlightSimulationResponse)
-@handle_api_errors
-async def simulate_ball_flight(
-    payload: BallFlightSimulationRequest,
-) -> BallFlightSimulationResponse:
-    """Simulate ball flight for headless and batch clients.
-
-    See issue #7218.
-    """
-    model = FlightModelRegistry.get_model(payload.model_name)
+def _simulate_one(
+    model_type: FlightModelType, payload: BallFlightSimulationRequest
+) -> BallFlightModelResult:
+    """Run a single flight model against the requested launch conditions."""
+    model = FlightModelRegistry.get_model(model_type)
     result = model.simulate(
         payload.to_launch_conditions(),
         max_time=payload.max_time_s,
         dt=payload.time_step_s,
     )
-
-    return BallFlightSimulationResponse(
+    return BallFlightModelResult(
         model_name=result.model_name,
-        model_key=payload.model_name,
+        model_key=model_type,
         trajectory=_trajectory_samples(result.trajectory),
         summary=BallFlightSummary(
             carry_m=float(result.carry_distance),
@@ -142,4 +179,47 @@ async def simulate_ball_flight(
             landing_angle_deg=float(result.landing_angle),
             lateral_deviation_m=float(result.lateral_deviation),
         ),
+    )
+
+
+@router.get("/models", response_model=FlightModelListResponse)
+@handle_api_errors
+async def list_flight_models() -> FlightModelListResponse:
+    """Enumerate available flight models from the shared desktop registry.
+
+    Single source of truth: the same :class:`FlightModelRegistry` the
+    PyQt6 Shot Tracer iterates over (issue #7456).
+    """
+    return FlightModelListResponse(
+        models=[
+            FlightModelInfo(
+                key=model_type,
+                name=model.name,
+                description=model.description,
+                reference=model.reference,
+            )
+            for model_type in FlightModelType
+            for model in (FlightModelRegistry.get_model(model_type),)
+        ]
+    )
+
+
+@router.post("/simulate", response_model=BallFlightSimulationResponse)
+@handle_api_errors
+async def simulate_ball_flight(
+    payload: BallFlightSimulationRequest,
+) -> BallFlightSimulationResponse:
+    """Simulate ball flight for headless and batch clients.
+
+    Accepts either a single ``model_name`` (legacy) or a ``models`` list
+    for multi-model overlay comparison. See issues #7218 and #7456.
+    """
+    results = [_simulate_one(mt, payload) for mt in payload.requested_models()]
+    first = results[0]
+    return BallFlightSimulationResponse(
+        model_name=first.model_name,
+        model_key=first.model_key,
+        trajectory=first.trajectory,
+        summary=first.summary,
+        results=results,
     )
