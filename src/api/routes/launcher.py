@@ -198,7 +198,7 @@ _capabilities_state: dict[str, dict[str, dict[str, str]] | None] = {"cache": Non
 def _capability_profile(engine_name: str, **levels: Any) -> Any:
     from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
 
-    defaults = {
+    defaults: dict[str, Any] = {
         "mass_matrix": CapabilityLevel.FULL,
         "jacobian": CapabilityLevel.FULL,
         "contact_forces": CapabilityLevel.FULL,
