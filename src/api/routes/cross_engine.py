@@ -62,7 +62,7 @@ class CrossEngineStudyRequest(BaseModel):
         min_length=1,
         description="Engine names to compare; each must be a recognised engine.",
     )
-    config: CrossEnginePerturbationConfig = CrossEnginePerturbationConfig()
+    config: CrossEnginePerturbationConfig = CrossEnginePerturbationConfig()  # type: ignore[call-arg]
 
     @field_validator("engines")
     @classmethod
