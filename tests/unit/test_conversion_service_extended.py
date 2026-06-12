@@ -330,6 +330,52 @@ class TestModuleConvert:
 
 
 # ---------------------------------------------------------------------------
+# Gas-flow Nm³ / tar-concentration reference states (#7413)
+# ---------------------------------------------------------------------------
+
+
+class TestNormalCubicMetreReferenceState:
+    """Nm³ conversions must use the DIN 1343 normal state (0°C, 101.325 kPa).
+
+    Guards issue #7413: the gas-flow pivot previously used IUPAC STP
+    (0°C, 100 kPa), biasing SCFM/ACFM ↔ Nm³/hr by +1.325% and disagreeing
+    with the tar-concentration mixin's Nm³, while ppm used the 25°C
+    24.45 L/mol factor (8.3% low).
+    """
+
+    @pytest.mark.scientific
+    def test_scfm_to_nm3_per_hour_uses_din1343(self, service) -> None:
+        """1000 SCFM (60°F) → 1607.46 Nm³/hr (DIN 1343), not 1628.76."""
+        result = service.convert(1000.0, "SCFM", "Nm3/hr")
+        assert result.value == pytest.approx(1607.46, rel=0.001)
+
+    @pytest.mark.scientific
+    def test_scfm_nm3_round_trip(self, service) -> None:
+        """SCFM → Nm³/hr → SCFM is identity."""
+        nm3 = service.convert(1000.0, "SCFM", "Nm3/hr").value
+        back = service.convert(nm3, "Nm3/hr", "SCFM").value
+        assert back == pytest.approx(1000.0, rel=1e-9)
+
+    @pytest.mark.scientific
+    def test_tar_ppm_to_mg_per_nm3_uses_normal_molar_volume(self, service) -> None:
+        """1 ppmv benzene (MW 78.11) → 3.485 mg/Nm³ (22.414 L/mol), not 3.195."""
+        value = service.tar_concentration(
+            1.0, "ppm_mass", "mg/Nm3", molecular_weight=78.11
+        )
+        assert value == pytest.approx(3.485, rel=0.005)
+
+    @pytest.mark.scientific
+    def test_gas_flow_and_tar_share_normal_state(self) -> None:
+        """The Nm³ reference used by gas-flow equals the tar mg/Nm³ basis."""
+        from sidekick.calculators.conversion._gas_flow import NORMAL_CONDITION
+
+        temp_k, pressure_pa, _ = NORMAL_CONDITION.value
+        # Tar mg/Nm³ is anchored at 0°C / 101.325 kPa (see _concentration.py).
+        assert temp_k == pytest.approx(273.15)
+        assert pressure_pa == pytest.approx(101325.0)
+
+
+# ---------------------------------------------------------------------------
 # get_service singleton
 # ---------------------------------------------------------------------------
 
