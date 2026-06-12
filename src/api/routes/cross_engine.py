@@ -63,7 +63,7 @@ class CrossEngineStudyRequest(BaseModel):
         description="Engine names to compare; each must be a recognised engine.",
     )
     config: CrossEnginePerturbationConfig = Field(
-        default_factory=CrossEnginePerturbationConfig
+        default_factory=lambda: CrossEnginePerturbationConfig()
     )
 
     @field_validator("engines")
