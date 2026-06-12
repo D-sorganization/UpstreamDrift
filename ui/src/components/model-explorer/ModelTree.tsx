@@ -73,6 +73,7 @@ function TreeNodeComponent({
         role="treeitem"
         aria-selected={isSelected}
         aria-expanded={childNodes.length > 0 ? expanded : undefined}
+        aria-label={`${node.name}, ${node.node_type}`}
       >
         {/* Expand/collapse toggle */}
         {childNodes.length > 0 ? (
@@ -90,8 +91,11 @@ function TreeNodeComponent({
           <span className="w-3 flex-shrink-0" />
         )}
 
-        {/* Node icon */}
-        <span className={`text-[10px] font-bold ${iconColor} w-4 h-4 rounded bg-gray-900/50 flex items-center justify-center flex-shrink-0`}>
+        {/* Node icon (decorative — the type is in the treeitem's aria-label) */}
+        <span
+          aria-hidden="true"
+          className={`text-[10px] font-bold ${iconColor} w-4 h-4 rounded bg-gray-900/50 flex items-center justify-center flex-shrink-0`}
+        >
           {icon}
         </span>
 

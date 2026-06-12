@@ -54,6 +54,15 @@ describe('App', () => {
     expect(typeof App).toBe('function');
   });
 
+  it('renders a skip-to-main-content link as the first focusable (#7441)', () => {
+    render(<App />, { wrapper: createWrapper() });
+    const skip = screen.getByRole('link', { name: /skip to main content/i });
+    expect(skip).toHaveAttribute('href', '#main-content');
+    // sr-only until focused.
+    expect(skip.className).toContain('sr-only');
+    expect(skip.className).toContain('focus:not-sr-only');
+  });
+
   it('renders the branded 404 page for unknown routes (#7430)', async () => {
     window.history.pushState({}, '', '/tools/does-not-exist');
     render(<App />, { wrapper: createWrapper() });

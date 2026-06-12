@@ -31,7 +31,7 @@ export function TreeDiffModal({
         {/* Header */}
         <div className="px-6 py-4 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span className="text-blue-500 font-mono">📊</span> Model Comparison
+            <span className="text-blue-500 font-mono" aria-hidden="true">📊</span> Model Comparison
           </h2>
           <button
             onClick={onClose}

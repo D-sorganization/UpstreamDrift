@@ -35,6 +35,17 @@ describe('WorkspaceShell', () => {
     expect(main.className).toContain('min-h-0');
   });
 
+  it('exposes the skip-link target on main (#7441)', () => {
+    render(
+      <WorkspaceShell leftPanel={<div>L</div>}>
+        <div>MAIN</div>
+      </WorkspaceShell>,
+    );
+    const main = screen.getByRole('main');
+    expect(main).toHaveAttribute('id', 'main-content');
+    expect(main).toHaveAttribute('tabindex', '-1');
+  });
+
   it('opens the left drawer when its toggle is clicked', () => {
     render(
       <WorkspaceShell leftPanel={<div>LEFTPANEL</div>} leftPanelLabel="Controls">

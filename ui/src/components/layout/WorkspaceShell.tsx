@@ -96,8 +96,13 @@ export function WorkspaceShell({
           </>
         )}
 
-        {/* Main: must be allowed to shrink (#7416). */}
-        <main className="flex-1 flex flex-col min-w-0 min-h-0 relative">
+        {/* Main: must be allowed to shrink (#7416). The id is the skip-link
+            target (#7441) so keyboard users can jump past the sidebars. */}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 flex flex-col min-w-0 min-h-0 relative"
+        >
           <div className="flex-1 flex flex-col min-w-0 min-h-0">{children}</div>
           {bottomPanel != null && (
             <div className="flex-shrink-0">{bottomPanel}</div>
