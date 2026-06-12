@@ -1,0 +1,102 @@
+# Feature Parity Matrix (PyQt6 ↔ Tauri/React)
+
+<!-- AUTO-GENERATED — do not edit by hand. -->
+<!-- Regenerate with: python -m scripts.generate_feature_parity_matrix -->
+
+Generated from [`src/config/feature_parity.json`](../../src/config/feature_parity.json) (registry v1.0.0).
+The PyQt6 desktop app is the canonical model; the web app must match
+(epic #7462, registry mechanism #7445).
+
+**Summary:** 9 parity · 16 gap · 11 exempt (0 pending decision in #7460).
+
+| Feature | Status | PyQt6 | API | Web | Tracking |
+| --- | --- | --- | --- | --- | --- |
+| `analysis.analysis_tools_api`<br>Analysis Tools REST endpoints (swing metrics, biomechanics) | 🔴 gap | — | `src/api/routes/analysis_tools.py` | `ui/src/pages/AnalysisTools.tsx` | #7448 |
+| `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | 🔴 gap | `src/shared/python/biomechanics/ztcf.py` | — | — | #7450 |
+| `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | 🔴 gap | `src/launchers/cross_engine_dashboard.py` | — | — | #7455 |
+| `analysis.static_plots`<br>Static analysis plots (20+ plot types) | 🔴 gap | `src/shared/python/plot_engine/pyqt6_widget.py` | — | — | #7449 |
+| `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; the web Simulation page is the equivalent web surface — exercise routing is not a web feature (ADR-0031). |
+| `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
+| `chat.live_context`<br>Live app/engine context in chat | 🔴 gap | `src/launchers/launcher_sidekick_sidebar.py` | — | `ui/src/pages/Chat.tsx` | #7453 |
+| `chat.transport`<br>AI chat transport (message send/stream) | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/routes/chat_ws.py` | `ui/src/pages/Chat.tsx` | — |
+| `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | 🔴 gap | `src/launchers/integrations_health_panel.py` | — | — | #7458 |
+| `docs.document_library`<br>Document library / project map viewer | ⚪ exempt | `src/launchers/library_widget.py` | — | — | Roadmap — indexes local files via SQLite; a thin web reader is plausible but not near-term; revisit after epic #7462 core lands (ADR-0031). |
+| `engines.dashboards`<br>Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; the web Simulation page is the equivalent web surface (ADR-0031). |
+| `engines.load_and_simulate`<br>Engine load/probe + basic simulation loop | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/engines.py` | `ui/src/pages/Simulation.tsx` | — |
+| `export.recordings_downloads`<br>Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | 🔴 gap | `src/shared/python/data_io/export.py` | `src/api/routes/export.py` | — | #7451 |
+| `launcher.docker_management`<br>Docker engine management dialog | ⚪ exempt | `src/launchers/docker_manager.py` | — | — | Exposing local Docker daemon control over HTTP is a security risk under the local-server trust model (ADR-0031); Tauri-mode-only candidate. |
+| `launcher.embedded_tabs_docks`<br>Embedded tool host (tabs + docks) | ⚪ exempt | `src/launchers/embedded_host.py` | — | — | Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks). |
+| `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations — a local-machine concern outside the web trust boundary (ADR-0031). |
+| `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/unified_launcher.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
+| `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | 🔴 gap | `src/launchers/unified_launcher.py` | — | `ui/src/pages/Dashboard.tsx` | #7461 |
+| `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | 🔴 gap | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | #7454 |
+| `onboarding.about_version`<br>About/version info + onboarding | 🔴 gap | `src/launchers/about_dialog.py` | — | — | #7459 |
+| `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Roadmap — long-running trajectory optimization suits an API-backed web job, but is not near-term; revisit after epic #7462 core lands (ADR-0031). |
+| `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
+| `settings.preferences`<br>Settings/preferences surface + persistence | 🔴 gap | `src/launchers/settings_dialog.py` | — | — | #7457 |
+| `sidekick.terminal_repl_jupyter_skills`<br>Sidekick OS terminal / REPL / Jupyter / skills | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | — | — | Remote shell/REPL/Jupyter execution over HTTP is a non-starter under the local-server trust model (ADR-0031); web chat gets context via #7453 instead. |
+| `simulation.controls_wiring`<br>Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls) | 🔴 gap | `src/launchers/launcher_simulation.py` | — | `ui/src/components/simulation/SimulationControls.tsx` | #7452 |
+| `simulation.golf_suite_batch`<br>Golf Simulation Suite (parameter sweeps, batch runs) | ⚪ exempt | `src/tools/golf_simulation_suite/__main__.py` | — | — | Roadmap — parameter sweeps/batch runs could become API-backed web jobs, but the desktop GUI stays canonical; revisit after epic #7462 core lands (ADR-0031). |
+| `simulation.realtime_ws_stream`<br>Live simulation data over WebSocket pub-sub | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/simulation_ws.py` | `ui/src/pages/Simulation.tsx` | — |
+| `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | 🔴 gap | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | — | #7456 |
+| `tools.character_builder`<br>Character Builder (humanoid URDF generation) | 🔴 gap | `src/shared/python/model_generation/cli/main.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | #7448 |
+| `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | 🔴 gap | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | #7448 |
+| `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
+| `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation on the user's machine; browser-exempt, possible later in Tauri mode (ADR-0031). |
+| `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
+| `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Roadmap — heavy native-viewer coupling makes a web pose editor a major project; revisit after epic #7462 core lands (ADR-0031). |
+| `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
+| `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
+
+## Launcher tile coverage
+
+Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
+
+| Tile id | Feature |
+| --- | --- |
+| `actuator_controls` | `simulation.controls_wiring` |
+| `aip` | `platform.aip_protocol` |
+| `analysis_tools_api` | `analysis.analysis_tools_api` |
+| `biomech_exercise` | `biomech.exercise_injury_dashboards` |
+| `bunkershot3d` | `engines.load_and_simulate` |
+| `canonical_core_comparison` | `canonical_core.workspaces` |
+| `canonical_core_estimation` | `canonical_core.workspaces` |
+| `character_builder` | `tools.character_builder` |
+| `chat_assistant` | `chat.transport` |
+| `cross_engine` | `analysis.cross_engine_robustness` |
+| `data_explorer` | `tools.data_explorer` |
+| `data_processor` | `launcher.tile_web_reachability` |
+| `dataset_generator` | `tools.dataset_generator` |
+| `drake_dashboard` | `engines.dashboards` |
+| `drake_golf` | `engines.load_and_simulate` |
+| `force_overlays` | `simulation.controls_wiring` |
+| `golf_simulation_suite` | `simulation.golf_suite_batch` |
+| `injury_analysis` | `biomech.exercise_injury_dashboards` |
+| `matlab_unified` | `tools.matlab_suite` |
+| `model_explorer` | `tools.model_explorer` |
+| `motion_capture` | `mocap.breadth` |
+| `motion_pipeline` | `mocap.breadth` |
+| `motion_target_preview` | `mocap.breadth` |
+| `mujoco_dashboard` | `engines.dashboards` |
+| `mujoco_unified` | `engines.load_and_simulate` |
+| `myosim_suite` | `engines.load_and_simulate` |
+| `opensim_golf` | `engines.load_and_simulate` |
+| `pendulum_simulator` | `engines.load_and_simulate` |
+| `perturbation_analysis` | `analysis.cross_engine_robustness` |
+| `pid_generator` | `launcher.tile_web_reachability` |
+| `pinocchio_dashboard` | `engines.dashboards` |
+| `pinocchio_golf` | `engines.load_and_simulate` |
+| `pose_studio` | `tools.pose_editing` |
+| `project_map` | `docs.document_library` |
+| `putting_green` | `tools.putting_green` |
+| `realtime_ws` | `simulation.realtime_ws_stream` |
+| `robotics_module` | `launcher.tile_web_reachability` |
+| `shot_tracer` | `simulation.shot_tracer` |
+| `simulation_backends` | `analysis.counterfactuals` |
+| `starting_pose_matcher` | `mocap.breadth` |
+| `swing_optimizer` | `optimization.swing_optimizer` |
+| `terrain_engine` | `tools.terrain_engine` |
+| `tools_calculator_hub` | `launcher.tile_web_reachability` |
+| `unreal_integration` | `launcher.tile_web_reachability` |
+| `video_analyzer` | `launcher.tile_web_reachability` |
+| `video_processor` | `launcher.tile_web_reachability` |
