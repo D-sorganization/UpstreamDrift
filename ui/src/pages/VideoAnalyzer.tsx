@@ -9,6 +9,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { apiFetchForm } from '@/api/fetch';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 /** Video analysis result from the API. See issue #1206 */
 export interface VideoAnalysisResult {
@@ -198,10 +199,8 @@ export function VideoAnalyzerPage() {
     setCurrentFrameIdx((prev) => Math.min(totalFrames - 1, prev + 1));
   }, [totalFrames]);
 
-  return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Left Panel: Controls */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Video Analyzer</h2>
           <p className="text-xs text-gray-500">
@@ -344,10 +343,11 @@ export function VideoAnalyzerPage() {
             {error}
           </div>
         )}
-      </aside>
+    </div>
+  );
 
-      {/* Center: Video Player */}
-      <main className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0">
+  const mainContent = (
+    <div className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0 min-h-0 p-2 sm:p-4">
         {videoUrl ? (
           <div className="relative w-full max-w-3xl aspect-video">
             <video
@@ -392,10 +392,11 @@ export function VideoAnalyzerPage() {
             </p>
           </div>
         )}
-      </main>
+    </div>
+  );
 
-      {/* Right Panel: Analysis Results */}
-      <aside className="w-72 bg-gray-800 border-l border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const rightPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         {/* Summary */}
         <div className="p-4 border-b border-gray-700">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -475,7 +476,17 @@ export function VideoAnalyzerPage() {
             </div>
           )}
         </div>
-      </aside>
     </div>
+  );
+
+  return (
+    <WorkspaceShell
+      leftPanel={leftPanel}
+      rightPanel={rightPanel}
+      leftPanelLabel="Controls"
+      rightPanelLabel="Analysis Results"
+    >
+      {mainContent}
+    </WorkspaceShell>
   );
 }

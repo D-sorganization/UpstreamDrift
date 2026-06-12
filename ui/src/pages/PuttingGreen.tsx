@@ -10,6 +10,7 @@
 
 import { useState, useCallback } from 'react';
 import { apiFetch } from '@/api/fetch';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 /** Putt simulation result from the API. See issue #1206 */
 export interface PuttResult {
@@ -344,10 +345,8 @@ export function PuttingGreenPage() {
   const aimPoint = reading?.aim_point ?? null;
   const scatterPoints = scatterResult?.final_positions ?? null;
 
-  return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Left Panel: Controls */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Putting Green Simulator</h2>
           <p className="text-xs text-gray-500">Physics-based putting simulation</p>
@@ -546,11 +545,14 @@ export function PuttingGreenPage() {
             {error}
           </div>
         )}
-      </aside>
+    </div>
+  );
 
-      {/* Center: Green Visualization */}
-      <main className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0">
-        <div className="w-full max-w-[600px] aspect-square p-4">
+  const mainContent = (
+    <div className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0 min-h-0 p-2 sm:p-4">
+        {/* #7417: constrain the square by width AND height so it never
+            overflows narrow or short windows. */}
+        <div className="w-full aspect-square max-w-[min(600px,90vw,calc(100vh-8rem))]">
           <GreenCanvas
             width={greenWidth}
             height={greenHeight}
@@ -597,10 +599,11 @@ export function PuttingGreenPage() {
             </div>
           </div>
         )}
-      </main>
+    </div>
+  );
 
-      {/* Right Panel: Green Reading */}
-      <aside className="w-72 bg-gray-800 border-l border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const rightPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             Green Reading
@@ -685,7 +688,17 @@ export function PuttingGreenPage() {
             </div>
           )}
         </div>
-      </aside>
     </div>
+  );
+
+  return (
+    <WorkspaceShell
+      leftPanel={leftPanel}
+      rightPanel={rightPanel}
+      leftPanelLabel="Controls"
+      rightPanelLabel="Green Reading"
+    >
+      {mainContent}
+    </WorkspaceShell>
   );
 }
