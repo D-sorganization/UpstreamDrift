@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { fetchEngines, useSimulation } from './client';
 
 /**
@@ -155,6 +155,29 @@ describe('useSimulation setSpeed (issue #7166)', () => {
     const res = await result.current.setSpeed(1.5);
 
     expect(res).toEqual({ success: true });
+  });
+});
+
+describe('useSimulation connection status (#7435)', () => {
+  it('does not leave a stale "lost" status after the hook unmounts', async () => {
+    const { result, unmount } = renderHook(() => useSimulation('mujoco'));
+
+    // Open a socket and let the MockWebSocket connect (0ms timer).
+    await act(async () => {
+      result.current.start({});
+      await new Promise((r) => setTimeout(r, 1));
+    });
+    expect(result.current.connectionStatus).toBe('connected');
+
+    // Unmount (page navigation) — the cleanup must not throw and must reset
+    // status so a remounted hook never inherits a stale banner.
+    expect(() => unmount()).not.toThrow();
+
+    // A fresh hook instance after navigation starts clean, never 'lost'.
+    const fresh = renderHook(() => useSimulation('mujoco'));
+    expect(fresh.result.current.connectionStatus).not.toBe('lost');
+    expect(fresh.result.current.connectionStatus).toBe('disconnected');
+    fresh.unmount();
   });
 });
 

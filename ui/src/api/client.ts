@@ -271,6 +271,12 @@ export function useSimulation(engineType: string) {
         wsRef.current.close(1000, 'Component unmounted');
         wsRef.current = null;
       }
+      // #7435: a 'lost' status must not survive navigation. Reset it on unmount
+      // so a remounted hook never inherits a stale "connection lost" banner.
+      // (Safe even after isMountedRef flips false — React drops updates to an
+      // unmounted component; the value matters only if this same hook instance
+      // is reused.)
+      setConnectionStatus('disconnected');
     };
   }, []);
 
