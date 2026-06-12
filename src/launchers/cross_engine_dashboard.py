@@ -21,8 +21,9 @@ Design by Contract
 
 DRY
 ---
-- Reuses ``CrossEnginePerturbationRunner``, ``CrossEngineSimConfig``, and
-  ``SteppableEngine`` from cross_engine_perturbation.py.
+- The compute path (engine construction, comparison run, CV summary,
+  robustness score) lives in ``src.shared.python.analysis.cross_engine``
+  (issue #7455) and is shared with the web API.
 - Style constants match existing dark-theme widgets in the codebase.
 """
 
@@ -37,8 +38,15 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from src.shared.python.analysis.cross_engine import (
+    ENGINE_NAMES as _ENGINE_NAMES,
+    build_engine,
+    cv_values as _cv_values,
+    robustness_score as _robustness_score,
+    run_comparison_with_results as _run_with_results,
+    try_build_real_engine as _try_build_real_engine,
+)
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
-    CrossEnginePerturbationRunner,
     CrossEngineSimConfig,
     CrossEngineRunResult,
 )
@@ -52,7 +60,12 @@ from src.shared.python.plot_style import (
     PresetLibrary,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.launchers.cross_engine_dashboard_stubs import StubEngine as _StubEngine
+# Re-exported for backwards compatibility: tests and downstream callers
+# reference ``cross_engine_dashboard._StubEngine`` (compute moved to the
+# shared service in issue #7455).
+from src.launchers.cross_engine_dashboard_stubs import (  # noqa: F401 - compat re-export
+    StubEngine as _StubEngine,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -61,7 +74,15 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-_ENGINE_NAMES = ("mujoco", "drake", "pinocchio", "pendulum_stub")
+def _build_engine(name: str) -> Any:
+    """Build an engine, honouring module-level ``_try_build_real_engine``.
+
+    Thin delegate to the shared service (issue #7455). The module-global
+    indirection is kept so existing tests can patch
+    ``cross_engine_dashboard._try_build_real_engine``.
+    """
+    return build_engine(name, try_real=_try_build_real_engine)
+
 
 _DEFAULT_ENGINE_CONVENTION = {
     "velocity": "engine-native",
@@ -329,86 +350,6 @@ def build_dashboard_style_set(
     return PlotStyleSet(entries=entries)
 
 
-def _try_build_real_engine(name: str) -> Any | None:
-    """Attempt to instantiate a real physics engine by name.
-
-    Returns the engine instance on success, or None if the package is
-    unavailable.  All import errors are caught and logged as warnings.
-
-    Parameters
-    ----------
-    name : str
-        One of 'mujoco', 'drake', 'pinocchio'.
-
-    Returns
-    SteppableEngine instance or None
-    """
-    try:
-        if name == "mujoco":
-            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: PLC0415
-                MuJoCoPhysicsEngine,
-            )
-
-            return MuJoCoPhysicsEngine()  # type: ignore[abstract]
-        if name == "drake":
-            from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
-                DrakePhysicsEngine,
-            )
-
-            return DrakePhysicsEngine()  # type: ignore[abstract]
-        if name == "pinocchio":
-            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: PLC0415
-                PinocchioPhysicsEngine,
-            )
-
-            return PinocchioPhysicsEngine()
-
-    except (ImportError, ValueError, RuntimeError):  # noqa: BLE001
-        logger.warning("Engine '%s' unavailable — will use stub", name, exc_info=False)
-    return None
-
-
-def _build_engine(name: str) -> Any:
-    """Return a real engine instance or a stub if the real one is unavailable.
-
-    Parameters
-    ----------
-    name : str
-        Engine name.
-
-    Returns
-    SteppableEngine instance (real or stub)
-    """
-    if name == "pendulum_stub":
-        return _StubEngine("pendulum_stub")
-    real = _try_build_real_engine(name)
-    if real is not None:
-        return real
-    return _StubEngine(name)
-
-
-def _run_with_results(
-    engine_names: list[str],
-    config: CrossEngineSimConfig,
-) -> tuple[dict[str, CrossEngineRunResult], dict[str, float]]:
-    """Execute the comparison and return both per-engine results and CV summary.
-
-    DRY helper used by both the GUI worker (which needs trajectories for
-    overlay rendering) and :func:`_run_headless` (which only logs the
-    summary).
-    """
-    if not engine_names:
-        raise ValueError("At least one engine name must be provided")
-    runner = CrossEnginePerturbationRunner(config)
-    for name in engine_names:
-        runner.register_engine(name, _build_engine(name))  # type: ignore[arg-type]
-    n_steps = round(config.t_end / config.dt)
-    base_profile = np.zeros(n_steps)
-    results = runner.run_comparison(base_profile)
-    cv_summary = runner.compute_cv_summary(results)
-    return results, cv_summary
-
-
 def _run_headless(
     engine_names: list[str],
     config: CrossEngineSimConfig,
@@ -451,11 +392,6 @@ def _run_headless(
     return cv_summary
 
 
-_CV_METRIC_KEYS = (
-    "cv_total_energy_final",
-    "cv_end_effector_speed_final",
-    "cv_peak_end_effector_speed",
-)
 _CV_METRIC_LABELS = ("Energy", "Speed", "Peak Speed")
 
 
@@ -517,17 +453,6 @@ def _load_dashboard_mpl_bindings() -> Any:
         FigureCanvasQTAgg=FigureCanvasQTAgg,
         Figure=Figure,
     )
-
-
-def _cv_values(cv_summary: dict[str, float]) -> list[float]:
-    """Return dashboard CV values in stable chart order."""
-    return [cv_summary.get(key, 0.0) for key in _CV_METRIC_KEYS]
-
-
-def _robustness_score(cv_values: list[float]) -> float:
-    """Convert aggregate CV values into the displayed robustness score."""
-    mean_cv = float(np.mean(cv_values)) if cv_values else 0.0
-    return max(0.0, min(1.0, 1.0 - mean_cv))
 
 
 def _draw_bar_value_labels(
