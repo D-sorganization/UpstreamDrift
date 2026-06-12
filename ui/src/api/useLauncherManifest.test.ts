@@ -26,6 +26,7 @@ const MOCK_MANIFEST: LauncherManifest = {
             status: 'utility',
             capabilities: ['model_browsing'],
             order: 1,
+            default_launch: 'tab',
         },
         {
             id: 'mujoco_unified',
@@ -38,6 +39,7 @@ const MOCK_MANIFEST: LauncherManifest = {
             status: 'gui_ready',
             capabilities: ['rigid_body'],
             order: 2,
+            default_launch: 'tab',
             engine_type: 'mujoco',
         },
         {
@@ -51,6 +53,7 @@ const MOCK_MANIFEST: LauncherManifest = {
             status: 'gui_ready',
             capabilities: ['rigid_body'],
             order: 3,
+            default_launch: 'tab',
             engine_type: 'drake',
         },
         {
@@ -64,6 +67,7 @@ const MOCK_MANIFEST: LauncherManifest = {
             status: 'external',
             capabilities: ['simscape'],
             order: 8,
+            default_launch: 'tab',
         },
         {
             id: 'canonical_core_estimation',
@@ -76,6 +80,7 @@ const MOCK_MANIFEST: LauncherManifest = {
             status: 'beta',
             capabilities: ['canonical_core'],
             order: 9,
+            default_launch: 'tab',
             web_route: '/tools/canonical-core/estimation',
             shell_surfaces: ['pyqt6', 'react'],
         },
@@ -287,6 +292,7 @@ describe('useLauncherManifest', () => {
                     status: 'hidden',
                     capabilities: [],
                     order: 99,
+                    default_launch: 'tab',
                     hidden: true,
                 },
             ],
