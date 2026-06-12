@@ -11,9 +11,9 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.analysis.orchestrator import AnalysisOrchestrator
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.dashboard.runner import SimulationRunner
 from src.shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
@@ -26,7 +26,6 @@ from src.shared.python.data_io.export import (
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
-from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 logger = get_logger(__name__)
 
@@ -58,6 +57,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         joint_names = self._resolve_joint_names()
 
         self.plotter = GolfSwingPlotter(self.recorder, joint_names=joint_names)
+        # Headless analysis/plot-data service shared with the web API
+        # (issue #7446): analysis computations live there, not in widgets.
+        self.orchestrator = AnalysisOrchestrator(self.recorder, joint_names=joint_names)
 
         # Status bar
         self.status_label = QtWidgets.QLabel("Ready")
@@ -122,30 +124,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         # Plot Selector
         self.plot_type_combo = QtWidgets.QComboBox()
         self.plot_type_combo.setToolTip("Select the type of plot to display")
-        self.plot_type_combo.addItems(
-            [
-                "Joint Angles",
-                "Joint Velocities",
-                "Joint Torques",
-                "Energies",
-                "Club Head Speed",
-                "Angular Momentum",
-                "Power Flow",
-                "Joint Power Curves",
-                "Impulse Accumulation",
-                "Phase Diagram (Joint 0)",
-                "Poincaré Map (3D)",
-                "Chaos Analysis (Lyapunov)",
-                "Recurrence Plot",
-                "Stability Diagram (CoM vs CoP)",
-                "CoP Trajectory",
-                "GRF Butterfly Diagram",
-                "Club Head Trajectory (3D)",
-                "Kinematic Sequence (Bars)",
-                "Swing Profile (Radar)",
-                "Summary Dashboard",
-            ]
-        )
+        # Single source of truth for the plot catalogue lives in the
+        # headless orchestrator so the web API exposes the same list.
+        self.plot_type_combo.addItems(list(AnalysisOrchestrator.DASHBOARD_PLOT_LABELS))
 
         lbl_plot_type = QtWidgets.QLabel("Plot Type:")
         lbl_plot_type.setBuddy(self.plot_type_combo)
@@ -344,71 +325,18 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _plot_recurrence(self, fig: Any) -> None:
         """Render recurrence plot from recorded data."""
-        times, positions = self.recorder.get_time_series("joint_positions")
-        _, velocities = self.recorder.get_time_series("joint_velocities")
-        if len(times) > 0:
-            analyzer = StatisticalAnalyzer(
-                times=np.asarray(times),
-                joint_positions=np.asarray(positions),
-                joint_velocities=np.asarray(velocities),
-                joint_torques=np.zeros_like(positions),
-            )
-            rm = analyzer.compute_recurrence_matrix()
-            self.plotter.plot_recurrence_plot(fig, rm)
-        else:
-            raise ValueError("No data available")
+        rm = self.orchestrator.compute_recurrence_matrix()
+        self.plotter.plot_recurrence_plot(fig, rm)
 
     def _plot_kinematic_sequence(self, fig: Any) -> None:
         """Render kinematic sequence bar chart."""
-        _, vels = self.recorder.get_time_series("joint_velocities")
-        vels = np.asarray(vels)
-        n_joints = vels.shape[1] if len(vels) > 0 else 0
-        if n_joints >= 3:
-            indices: dict[str, int] = {
-                "proximal": 0,
-                "mid_proximal": 1,
-                "mid_distal": min(2, n_joints - 1),
-            }
-            if n_joints > 3:
-                indices["distal"] = n_joints - 1
-        else:
-            indices = {f"Joint {i}": i for i in range(n_joints)}
+        indices = self.orchestrator.derive_kinematic_sequence_indices()
         self.plotter.plot_kinematic_sequence_bars(fig, indices)
 
     def _plot_swing_radar(self, fig: Any) -> None:
         """Render swing profile radar chart."""
-        times, positions = self.recorder.get_time_series("joint_positions")
-        _, velocities = self.recorder.get_time_series("joint_velocities")
-        _, torques = self.recorder.get_time_series("joint_torques")
-        try:
-            _, club_speed = self.recorder.get_time_series("club_head_speed")
-        except (KeyError, AttributeError):
-            club_speed = None
-
-        if len(times) == 0:
-            raise ValueError("No data available")
-
-        analyzer = StatisticalAnalyzer(
-            times=np.asarray(times),
-            joint_positions=np.asarray(positions),
-            joint_velocities=np.asarray(velocities),
-            joint_torques=np.asarray(torques),
-            club_head_speed=(
-                np.asarray(club_speed) if club_speed is not None else None
-            ),
-        )
-        dna = analyzer.compute_swing_profile()
-        if dna:
-            metrics = {
-                "Speed": dna.speed_score,
-                "Sequence": dna.sequence_score,
-                "Stability": dna.stability_score,
-                "Efficiency": dna.efficiency_score,
-                "Power": dna.power_score,
-            }
-            self.plotter.plot_radar_chart(fig, metrics)
-        else:
-            raise ValueError("Could not compute Swing Profile")
+        metrics = self.orchestrator.compute_swing_profile_metrics()
+        self.plotter.plot_radar_chart(fig, metrics)
 
     def compute_analysis(self) -> None:
         """Trigger post-hoc analysis computation."""
