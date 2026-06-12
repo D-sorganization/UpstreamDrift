@@ -112,6 +112,50 @@ class TestComputeContinuousRelativePhase:
         result = obj.compute_continuous_relative_phase(0, 5)
         assert len(result) == 0
 
+    @staticmethod
+    def _make_two_joint_instance(
+        cycles_1: float, cycles_2: float, phase_offset_deg: float = 0.0, n: int = 400
+    ) -> CoordinationMetricsMixin:
+        """Build a mixin instance with two joints at given cycle counts/offset."""
+
+        class _Concrete(CoordinationMetricsMixin):
+            pass
+
+        obj = _Concrete()
+        obj.times = np.linspace(0.0, 1.0, n)
+        obj.dt = obj.times[1] - obj.times[0]
+        u = np.linspace(0.0, 1.0, n)
+        offset = np.deg2rad(phase_offset_deg)
+        t1 = 2 * np.pi * cycles_1 * u
+        t2 = 2 * np.pi * cycles_2 * u + offset
+        obj.joint_positions = np.column_stack([np.sin(t1), np.sin(t2)])
+        obj.joint_velocities = np.column_stack([np.cos(t1), np.cos(t2)])
+        obj.joint_torques = np.zeros((n, 2))
+        return obj
+
+    def test_crp_constant_offset_equal_frequency_is_bounded(self) -> None:
+        # Two sinusoids 90 deg apart, same frequency -> CRP ~ constant +-90 deg.
+        obj = self._make_two_joint_instance(4, 4, phase_offset_deg=90.0)
+        crp = obj.compute_continuous_relative_phase(0, 1)
+        assert np.all(np.abs(crp) <= 180.0 + 1e-6)
+        # Constant offset -> low spread (ignore unwrap transients at the ends).
+        interior = crp[5:-5]
+        assert np.ptp(interior) < 20.0
+
+    def test_crp_different_frequency_stays_in_range(self) -> None:
+        # Regression for #7409: 4 vs 5 cycles formerly drifted to 360 deg.
+        obj = self._make_two_joint_instance(4, 5)
+        crp = obj.compute_continuous_relative_phase(0, 1)
+        assert np.all(crp >= -180.0 - 1e-6)
+        assert np.all(crp <= 180.0 + 1e-6)
+
+    def test_crp_anti_phase(self) -> None:
+        # Two sinusoids 180 deg apart -> |CRP| ~ 180 deg.
+        obj = self._make_two_joint_instance(4, 4, phase_offset_deg=180.0)
+        crp = obj.compute_continuous_relative_phase(0, 1)
+        interior = crp[5:-5]
+        assert np.allclose(np.abs(interior), 180.0, atol=5.0)
+
 
 class TestComputeCorrelations:
     def test_coordination_metrics_returns_tuple(self) -> None:
