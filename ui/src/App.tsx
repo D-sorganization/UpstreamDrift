@@ -15,6 +15,7 @@ import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
 import { NotFoundPage } from './pages/NotFound';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { RouteTitle } from './utils/RouteTitle';
+import { BallFlightPage } from './pages/BallFlight';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
@@ -50,6 +51,8 @@ function App() {
             path="/tools/canonical-core/comparison"
             element={<CanonicalCoreShellPage mode="comparison" />}
           />
+          {/* Shot Tracer / ball-flight comparison (#7456) */}
+          <Route path="/ball-flight" element={<BallFlightPage />} />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
           {/* Catch-all 404 (#7430) — must stay last. */}

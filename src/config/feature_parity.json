@@ -157,8 +157,8 @@
       "title": "Shot Tracer / ball-flight visualization",
       "pyqt": "src/launchers/_shot_tracer_gui.py",
       "api": "src/api/routes/ball_flight.py",
-      "web": null,
-      "status": "gap",
+      "web": "ui/src/pages/BallFlight.tsx",
+      "status": "parity",
       "issue": 7456,
       "tiles": ["shot_tracer"]
     },
