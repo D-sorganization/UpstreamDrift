@@ -1,0 +1,205 @@
+{
+  "_comment": "Feature parity registry tracking PyQt6 vs React web coverage. See docs/architecture/dual-gui-implementation-plan.md §0.2.",
+  "features": [
+    {
+      "id": "simulation.basic",
+      "name": "Basic simulation (start/stop/pause)",
+      "category": "simulation",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/simulate",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "simulation.recording",
+      "name": "Simulation recording",
+      "category": "simulation",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/simulate",
+      "issue": null,
+      "notes": "Recorder retained in SimulationService.active_recorder"
+    },
+    {
+      "id": "simulation.async_background",
+      "name": "Async/background simulation",
+      "category": "simulation",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/simulate/background",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "engine.discover",
+      "name": "Discover available engines",
+      "category": "engine",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/engines",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "engine.load",
+      "name": "Load/switch engine",
+      "category": "engine",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/engines/load",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "analysis.live_plot",
+      "name": "Live streaming plot during simulation",
+      "category": "analysis",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/ws/simulate",
+      "issue": null,
+      "notes": "Via LivePlot component using simulation WebSocket"
+    },
+    {
+      "id": "analysis.static_analysis_plots",
+      "name": "Static post-run analysis plots (20+ types)",
+      "category": "analysis",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/analysis/plot-data/{plot_type}",
+      "issue": 7449,
+      "notes": "GET /analysis/plot-types enumerates orchestrator registry; GET /analysis/plot-data/{type} returns PlotData JSON. PlotsSection component renders all types via Recharts."
+    },
+    {
+      "id": "analysis.plot_catalogue",
+      "name": "Enumerate available plot types (data-driven)",
+      "category": "analysis",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/analysis/plot-types",
+      "issue": 7449,
+      "notes": "Derived from AnalysisOrchestrator.PLOT_TYPES — single source of truth"
+    },
+    {
+      "id": "analysis.counterfactual",
+      "name": "Counterfactual analysis (ZTCF/ZVCF/gravity/control)",
+      "category": "analysis",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "export.json",
+      "name": "Export to JSON",
+      "category": "export",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/export",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "export.csv",
+      "name": "Export to CSV",
+      "category": "export",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "export.mat",
+      "name": "Export to MATLAB .mat",
+      "category": "export",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "export.hdf5",
+      "name": "Export to HDF5",
+      "category": "export",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "export.c3d",
+      "name": "Export to C3D motion capture",
+      "category": "export",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "viz.live_3d",
+      "name": "Live 3D visualization during simulation",
+      "category": "visualization",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/ws/simulate",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "viz.force_vectors",
+      "name": "Force vector overlays",
+      "category": "visualization",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "viz.contact_forces",
+      "name": "Contact force visualization",
+      "category": "visualization",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "ui.keyboard_shortcuts",
+      "name": "Keyboard shortcuts",
+      "category": "ui_chrome",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    },
+    {
+      "id": "ui.diagnostics_panel",
+      "name": "Diagnostics panel",
+      "category": "ui_chrome",
+      "pyqt": true,
+      "react": true,
+      "api_endpoint": "/api/v1/diagnostics",
+      "issue": null,
+      "notes": ""
+    },
+    {
+      "id": "ui.toast_notifications",
+      "name": "Toast notifications",
+      "category": "ui_chrome",
+      "pyqt": true,
+      "react": false,
+      "api_endpoint": null,
+      "issue": null,
+      "notes": "Gap — tracked in epic #7462"
+    }
+  ]
+}
