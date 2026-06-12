@@ -26,6 +26,7 @@ import { HelpfulField } from '@/components/ux/HelpfulField';
 import { getFieldMetadata } from '@/ux/fieldMetadata';
 import { isInRange } from '@/ux/fieldHelpers';
 import { BallFlightScene3D } from '@/components/visualization/BallFlightScene3D';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 /** Flight-model metadata from GET /tools/ball-flight/models. See issue #7456 */
 export interface FlightModelInfo {
@@ -285,10 +286,8 @@ export function BallFlightPage() {
   const canSimulate =
     !loading && selected.length > 0 && invalidFields.length === 0;
 
-  return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Left panel: launch conditions + model selection */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Shot Tracer</h2>
           <p className="text-xs text-gray-500">
@@ -374,11 +373,12 @@ export function BallFlightPage() {
             </div>
           )}
         </div>
-      </aside>
+    </div>
+  );
 
-      {/* Center: 3D overlay + 2D profiles */}
-      <main className="flex-1 flex flex-col bg-gray-950 min-w-0 overflow-y-auto">
-        <div className="h-80 flex-shrink-0">
+  const mainContent = (
+    <div className="flex-1 flex flex-col bg-gray-950 min-w-0 min-h-0 overflow-y-auto">
+        <div className="h-64 sm:h-80 flex-shrink-0">
           <BallFlightScene3D trajectories={trajectories3d} />
         </div>
         {results && results.length > 0 ? (
@@ -414,10 +414,11 @@ export function BallFlightPage() {
             Simulate to compare trajectories.
           </div>
         )}
-      </main>
+    </div>
+  );
 
-      {/* Right panel: per-model metrics table */}
-      <aside className="w-80 bg-gray-800 border-l border-gray-700 flex-shrink-0 overflow-y-auto">
+  const rightPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             Metrics by Model
@@ -470,7 +471,17 @@ export function BallFlightPage() {
             </p>
           )}
         </div>
-      </aside>
     </div>
+  );
+
+  return (
+    <WorkspaceShell
+      leftPanel={leftPanel}
+      rightPanel={rightPanel}
+      leftPanelLabel="Launch Conditions"
+      rightPanelLabel="Metrics by Model"
+    >
+      {mainContent}
+    </WorkspaceShell>
   );
 }

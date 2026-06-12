@@ -9,6 +9,7 @@
 
 import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 import { apiFetch, apiFetchForm } from '@/api/fetch';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 /** Dataset info from the API. See issue #1206 */
 export interface DatasetInfo {
@@ -377,10 +378,8 @@ export function DataExplorerPage() {
       : [];
   }, [preview?.rows, sortColumn, sortAscending]);
 
-  return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Left Panel: Dataset List + Controls */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Data Explorer</h2>
           <p className="text-xs text-gray-500">
@@ -521,10 +520,12 @@ export function DataExplorerPage() {
             {error}
           </div>
         )}
-      </aside>
+    </div>
+  );
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+  return (
+    <WorkspaceShell leftPanel={leftPanel} leftPanelLabel="Data Explorer">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* Toolbar */}
         <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-4">
           <div className="flex gap-1">
@@ -619,7 +620,7 @@ export function DataExplorerPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </WorkspaceShell>
   );
 }

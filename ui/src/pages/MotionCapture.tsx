@@ -10,6 +10,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { apiFetch, apiFetchForm } from '@/api/fetch';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
 /** Capture source from the API. See issues #1206, #7454 */
 export interface CaptureSource {
@@ -401,10 +402,8 @@ export function MotionCapturePage() {
 
   const selectedSourceInfo = sources.find((s) => s.type === selectedSource);
 
-  return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Left Panel: Source Selection + Controls */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Motion Capture</h2>
           <p className="text-xs text-gray-500">
@@ -655,11 +654,14 @@ export function MotionCapturePage() {
             {error}
           </div>
         )}
-      </aside>
+    </div>
+  );
 
-      {/* Center: Skeleton Visualization */}
-      <main className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0">
-        <div className="w-full max-w-2xl aspect-square p-4">
+  const mainContent = (
+    <div className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0 min-h-0 p-2 sm:p-4">
+        {/* #7417: constrain the square by width AND height so it never
+            overflows narrow or short windows. */}
+        <div className="w-full aspect-square max-w-[min(42rem,90vw,calc(100vh-8rem))]">
           <SkeletonRenderer joints={joints} width={500} height={500} />
         </div>
 
@@ -684,10 +686,11 @@ export function MotionCapturePage() {
             </div>
           </div>
         )}
-      </main>
+    </div>
+  );
 
-      {/* Right Panel: Joint Data */}
-      <aside className="w-72 bg-gray-800 border-l border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
+  const rightPanel = (
+    <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             Joint Data
@@ -765,7 +768,17 @@ export function MotionCapturePage() {
               ))}
           </div>
         )}
-      </aside>
     </div>
+  );
+
+  return (
+    <WorkspaceShell
+      leftPanel={leftPanel}
+      rightPanel={rightPanel}
+      leftPanelLabel="Capture Controls"
+      rightPanelLabel="Joint Data"
+    >
+      {mainContent}
+    </WorkspaceShell>
   );
 }
