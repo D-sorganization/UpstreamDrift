@@ -26,6 +26,7 @@ from src.shared.python.analysis.plot_data import (
     PlotSeries,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.plot_labels import aligned_joint_label, joint_name
 
 logger = get_logger(__name__)
 
@@ -398,23 +399,11 @@ class AnalysisOrchestrator:
 
     def _joint_label(self, idx: int, data_dim: int) -> str:
         """Label aligned with the data dimension (mirrors DataManager)."""
-        if len(self.joint_names) == 0:
-            return f"DoF {idx}"
-        if data_dim == len(self.joint_names):
-            return (
-                self.joint_names[idx] if idx < len(self.joint_names) else f"DoF {idx}"
-            )
-        offset = max(0, data_dim - len(self.joint_names))
-        name_idx = idx - offset
-        if 0 <= name_idx < len(self.joint_names):
-            return self.joint_names[name_idx]
-        return f"DoF {idx}"
+        return aligned_joint_label(self.joint_names, idx, data_dim)
 
     def _joint_name(self, idx: int) -> str:
         """Plain joint name (mirrors DataManager.get_joint_name)."""
-        if 0 <= idx < len(self.joint_names):
-            return self.joint_names[idx]
-        return f"Joint {idx}"
+        return joint_name(self.joint_names, idx)
 
     @staticmethod
     def _empty(

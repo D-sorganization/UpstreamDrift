@@ -85,6 +85,27 @@ class TestBuckEquation:
         p = engine._buck_equation(0.0)
         assert p > 0
 
+    @pytest.mark.scientific
+    @pytest.mark.parametrize(
+        ("temp_c", "expected_pa"),
+        [
+            # Reference values from IAPWS-IF97 / NIST (issue #7411).
+            (0.01, 611.66),
+            (25.0, 3169.9),
+            (100.0, 101417.0),
+        ],
+    )
+    def test_matches_iapws_reference(self, engine, temp_c, expected_pa) -> None:
+        """Buck pressures must match IAPWS-IF97 within 0.5% (#7411).
+
+        Guards against the swapped BUCK_C/BUCK_D constants that biased the
+        default vapor pressure +15% at 25°C and +43% at 100°C.
+        """
+        p = engine._buck_equation(temp_c)
+        assert p == pytest.approx(expected_pa, rel=0.005), (
+            f"Buck at {temp_c}°C = {p:.1f} Pa, expected ~{expected_pa} Pa"
+        )
+
 
 # ---------------------------------------------------------------------------
 # calculate_water_vapor_pressure

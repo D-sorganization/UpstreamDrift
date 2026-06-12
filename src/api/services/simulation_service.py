@@ -59,15 +59,118 @@ class SimulationService:
         """
         self.engine_manager = engine_manager
         self._stats = SimulationStats()
-        # Recorder of the most recently completed simulation session.
-        # Counterfactual analyses (issue #7450) run against this recorder so
-        # the web app analyzes exactly the data the simulation produced.
-        self._last_recorder: GenericPhysicsRecorder | None = None
+        self._active_recorder: GenericPhysicsRecorder | None = None
+        self._active_joint_names: list[str] = []
 
     @property
     def stats(self) -> SimulationStats:
         """Return the authoritative runtime stats for this session."""
         return self._stats
+
+    @property
+    def active_recorder(self) -> GenericPhysicsRecorder | None:
+        """Recorder of the most recently completed simulation, if any.
+
+        Retained so analysis endpoints (issue #7449) can compute post-run
+        plot data from the active session without re-running the
+        simulation. ``None`` until a simulation has completed.
+        """
+        return self._active_recorder
+
+    @property
+    def active_joint_names(self) -> list[str]:
+        """Joint names of the engine used by the active recorder."""
+        return list(self._active_joint_names)
+
+    def _counterfactual_recorder(self) -> GenericPhysicsRecorder | None:
+        """Return the active recorder, including legacy test seam fallback."""
+        return self._active_recorder or getattr(self, "_last_recorder", None)
+
+    def _retain_active_session(self, engine: Any, recorder: Any) -> None:
+        """Retain the completed simulation's recorder for post-run analysis.
+
+        Args:
+            engine: Engine the simulation ran on (joint-name source).
+            recorder: Recorder holding the recorded time series.
+        """
+        self._active_recorder = recorder
+        names_getter = getattr(engine, "get_joint_names", None)
+        joint_names: list[str] = []
+        if callable(names_getter):
+            try:
+                joint_names = [str(n) for n in names_getter()]
+            except (RuntimeError, ValueError, TypeError):
+                logger.exception("Could not read joint names from engine")
+        self._active_joint_names = joint_names
+
+    def describe_counterfactual_support(self) -> dict[str, Any]:
+        """Describe counterfactual capability for the active session."""
+        recorder = self._counterfactual_recorder()
+        engine = recorder.engine if recorder is not None else None
+        engine_name: str | None = None
+        if engine is not None:
+            engine_name = getattr(engine, "engine_type", None) or getattr(
+                engine, "name", None
+            )
+            if engine_name is not None:
+                engine_name = str(engine_name)
+
+        supported = supported_counterfactual_kinds(engine)
+        return {
+            "kinds": supported,
+            "engine": engine_name,
+            "session_available": recorder is not None,
+        }
+
+    def _compute_counterfactual_sync(
+        self, kind: str, run_post_hoc: bool = True
+    ) -> dict[str, Any]:
+        """Compute a counterfactual against the active recorder."""
+        recorder = self._counterfactual_recorder()
+        if recorder is None:
+            raise ValueError("No completed simulation session; run a simulation first")
+        orchestrator = AnalysisOrchestrator(
+            recorder, joint_names=self._active_joint_names
+        )
+        result = orchestrator.compute_counterfactual(kind, run_post_hoc=run_post_hoc)
+        return result.to_dict()
+
+    @precondition(
+        lambda self, task_id, kind, run_post_hoc, active_tasks: (
+            task_id is not None and len(task_id) > 0
+        ),
+        "Task ID must be a non-empty string",
+    )
+    async def run_counterfactual_background(
+        self,
+        task_id: str,
+        kind: str,
+        run_post_hoc: bool,
+        active_tasks: Any,
+    ) -> None:
+        """Run a counterfactual analysis as a background task."""
+        if active_tasks is None:
+            raise ValueError("active_tasks must be provided")
+        active_tasks.set(task_id, {"status": "running", "kind": kind})
+        try:
+            result = await anyio.to_thread.run_sync(
+                self._compute_counterfactual_sync, kind, run_post_hoc
+            )
+            active_tasks.set(
+                task_id,
+                {"status": "completed", "kind": kind, "result": result},
+            )
+        except (
+            GolfSuiteError,
+            ValueError,
+            RuntimeError,
+            AttributeError,
+            OSError,
+        ) as e:
+            logger.exception("Counterfactual '%s' failed", kind)
+            active_tasks.set(
+                task_id, {"status": "failed", "kind": kind, "error": str(e)}
+            )
 
     def start_recording(self) -> None:
         """Begin recording trajectory frames. Clears any previously recorded data."""
@@ -196,7 +299,7 @@ class SimulationService:
         steps = int(request.duration / timestep)
 
         self._execute_simulation_loop(engine, recorder, request, timestep, steps)
-        self._last_recorder = recorder
+        self._retain_active_session(engine, recorder)
 
         simulation_data = self._extract_simulation_data(recorder)
         analysis_results = None
@@ -287,108 +390,6 @@ class SimulationService:
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
             active_tasks.set(task_id, {"status": "failed", "error": str(e)})
-
-    # ------------------------------------------------------------------
-    # Counterfactual / induced-acceleration analyses (issue #7450)
-    # ------------------------------------------------------------------
-
-    @property
-    def last_recorder(self) -> GenericPhysicsRecorder | None:
-        """Recorder of the most recently completed simulation, if any."""
-        return self._last_recorder
-
-    def describe_counterfactual_support(self) -> dict[str, Any]:
-        """Describe counterfactual capability for the current session.
-
-        The supported-kind probe is data-driven from the engine surface via
-        :func:`supported_counterfactual_kinds` (single source in the
-        orchestrator module) — never hardcoded per engine name.
-
-        Returns:
-            Dict with ``kinds`` (supported for the session engine),
-            ``engine`` (engine type or None), and ``session_available``.
-        """
-        recorder = self._last_recorder
-        engine = recorder.engine if recorder is not None else None
-        engine_name: str | None = None
-        if engine is not None:
-            engine_name = getattr(engine, "engine_type", None) or getattr(
-                engine, "model_name_str", None
-            )
-        return {
-            "kinds": supported_counterfactual_kinds(engine),
-            "engine": engine_name,
-            "session_available": recorder is not None,
-        }
-
-    def _compute_counterfactual_sync(
-        self, kind: str, run_post_hoc: bool
-    ) -> dict[str, Any]:
-        """Compute a counterfactual on the last session (blocking).
-
-        Must be invoked off the event loop; the post-hoc replay is
-        CPU-bound (one engine evaluation per recorded frame).
-
-        Raises:
-            ValueError: If no completed simulation session exists or the
-                kind is unknown.
-        """
-        recorder = self._last_recorder
-        if recorder is None:
-            raise ValueError("No completed simulation session; run a simulation first")
-        orchestrator = AnalysisOrchestrator(recorder)
-        result = orchestrator.compute_counterfactual(kind, run_post_hoc=run_post_hoc)
-        return result.to_dict()
-
-    @precondition(
-        lambda self, task_id, kind, run_post_hoc, active_tasks: (
-            task_id is not None and len(task_id) > 0
-        ),
-        "Task ID must be a non-empty string",
-    )
-    async def run_counterfactual_background(
-        self,
-        task_id: str,
-        kind: str,
-        run_post_hoc: bool,
-        active_tasks: Any,
-    ) -> None:
-        """Run a counterfactual analysis as a background task.
-
-        Mirrors :meth:`run_simulation_background`: status transitions are
-        ``running`` -> ``completed`` (with serialized
-        :class:`~src.shared.python.analysis.plot_data.CounterfactualResult`
-        under ``result``) or ``failed`` (with ``error``).
-
-        Args:
-            task_id: Unique task identifier.
-            kind: Counterfactual kind (validated upstream).
-            run_post_hoc: Replay frames through the engine when no stored
-                counterfactual data exists.
-            active_tasks: Task manager for status tracking.
-        """
-        if active_tasks is None:
-            raise ValueError("active_tasks must be provided")
-        active_tasks.set(task_id, {"status": "running", "kind": kind})
-        try:
-            result = await anyio.to_thread.run_sync(
-                self._compute_counterfactual_sync, kind, run_post_hoc
-            )
-            active_tasks.set(
-                task_id,
-                {"status": "completed", "kind": kind, "result": result},
-            )
-        except (
-            GolfSuiteError,
-            ValueError,
-            RuntimeError,
-            AttributeError,
-            OSError,
-        ) as e:
-            logger.exception("Counterfactual '%s' failed", kind)
-            active_tasks.set(
-                task_id, {"status": "failed", "kind": kind, "error": str(e)}
-            )
 
     def _extract_simulation_data(
         self, recorder: GenericPhysicsRecorder
