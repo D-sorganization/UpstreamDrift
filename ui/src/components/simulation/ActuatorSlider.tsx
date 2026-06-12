@@ -1,5 +1,9 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import { ActuatorInfo } from './ActuatorPanel';
+import {
+  useDebouncedCommand,
+  type CommandResult,
+} from '@/utils/useDebouncedCommand';
 
 const CONTROL_TYPE_LABELS: Record<string, string> = {
   constant: 'Constant',
@@ -12,42 +16,25 @@ export function ActuatorSlider({
   actuator,
   onValueChange,
   onControlTypeChange,
+  onError,
   availableTypes,
 }: {
   actuator: ActuatorInfo;
-  onValueChange: (index: number, value: number) => void;
+  onValueChange: (index: number, value: number) => Promise<CommandResult>;
   onControlTypeChange: (index: number, type: string) => void;
+  onError?: (message: string) => void;
   availableTypes: string[];
 }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragValue, setDragValue] = useState(actuator.value);
-  const localValue = isDragging ? dragValue : actuator.value;
-
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleChange = useCallback(
-    (newValue: number) => {
-      setIsDragging(true);
-      setDragValue(newValue);
-
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-        onValueChange(actuator.index, newValue);
-        setIsDragging(false);
-      }, 50);
-    },
-    [actuator.index, onValueChange],
+  // Debounce drag ticks into a single send; revert + report on failure (#7425).
+  const send = useCallback(
+    (value: number) => onValueChange(actuator.index, value),
+    [onValueChange, actuator.index],
   );
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
+  const { value: localValue, setValue: handleChange } = useDebouncedCommand(
+    actuator.value,
+    send,
+    onError ?? (() => {}),
+  );
 
   const range = actuator.max_value - actuator.min_value;
   const percentage =
