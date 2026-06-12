@@ -8,16 +8,36 @@
  * See issue #1206
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { apiFetch } from '@/api/fetch';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { apiFetch, apiFetchForm } from '@/api/fetch';
 
-/** Capture source from the API. See issue #1206 */
+/** Capture source from the API. See issues #1206, #7454 */
 export interface CaptureSource {
   id: string;
   name: string;
   type: string;
   available: boolean;
+  /** Why the source is unavailable (null when available). See #7454 */
+  reason?: string | null;
   description: string;
+}
+
+/** Metadata returned by the C3D upload endpoint. See issue #7454 */
+export interface C3DUploadResult {
+  recording_name: string;
+  marker_names: string[];
+  frame_rate: number;
+  total_frames: number;
+  duration_seconds: number;
+  native_units: string;
+  converted_units: string;
+}
+
+/** One frame of skeleton data from the API. See issue #7454 */
+export interface SkeletonFrame {
+  frame_index: number;
+  timestamp: number;
+  joints: JointData[];
 }
 
 /** Joint data for skeleton rendering. See issue #1206 */
@@ -178,8 +198,10 @@ function SkeletonRenderer({
  * See issue #1206
  */
 export function MotionCapturePage() {
+  // Source list and selection are driven entirely by GET /capture/sources —
+  // no hardcoded source list or default (issue #7454).
   const [sources, setSources] = useState<CaptureSource[]>([]);
-  const [selectedSource, setSelectedSource] = useState<string>('mediapipe');
+  const [selectedSource, setSelectedSource] = useState<string>('');
   const [joints, setJoints] = useState<JointData[]>([]);
   const [recordings, setRecordings] = useState<RecordingInfo[]>([]);
   const [activeSession, setActiveSession] = useState<CaptureSession | null>(null);
@@ -187,13 +209,20 @@ export function MotionCapturePage() {
   const [playback, setPlayback] = useState<PlaybackState | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadResult, setUploadResult] = useState<C3DUploadResult | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch available sources
+  // Fetch available sources; default-select the first available one
   useEffect(() => {
     async function fetchSources() {
       try {
         const data = await apiFetch<CaptureSource[]>('/api/tools/motion-capture/sources');
         setSources(data);
+        const firstAvailable = data.find((s) => s.available);
+        if (firstAvailable) {
+          setSelectedSource((prev) => prev || firstAvailable.type);
+        }
       } catch {
         // API may not be available
       }
@@ -201,8 +230,10 @@ export function MotionCapturePage() {
     fetchSources();
   }, []);
 
-  // Fetch skeleton template when source changes
+  // Fetch skeleton template when source changes (joint sets come from the
+  // backend — never hardcoded in the UI; issue #7454)
   useEffect(() => {
+    if (!selectedSource) return;
     async function fetchSkeleton() {
       try {
         const data = await apiFetch<JointData[]>(
@@ -310,6 +341,66 @@ export function MotionCapturePage() {
     [selectedRecording],
   );
 
+  // Fetch a single frame of an uploaded/recorded clip into the visualizer
+  const loadFrame = useCallback(
+    async (recordingName: string, frameIndex: number) => {
+      try {
+        const frame = await apiFetch<SkeletonFrame>(
+          `/api/tools/motion-capture/frame/${encodeURIComponent(recordingName)}/${frameIndex}`,
+        );
+        setJoints(frame.joints);
+      } catch {
+        // API may not be available
+      }
+    },
+    [],
+  );
+
+  // C3D upload: multipart POST, then select the new recording (issue #7454)
+  const handleC3DUpload = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      setError(null);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const result = await apiFetchForm<C3DUploadResult>(
+          '/api/tools/motion-capture/upload-c3d',
+          formData,
+        );
+        setUploadResult(result);
+        setSelectedRecording(result.recording_name);
+        setPlayback(null);
+        await fetchRecordings();
+        await loadFrame(result.recording_name, 0);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'C3D upload failed');
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    },
+    [fetchRecordings, loadFrame],
+  );
+
+  // Simple playback loop: advance frames at the recording's rate while
+  // status is "playing", rendering each frame through the visualizer.
+  useEffect(() => {
+    if (!playback || playback.status !== 'playing' || !selectedRecording) {
+      return;
+    }
+    const rec = recordings.find((r) => r.name === selectedRecording);
+    const fps = Math.min(Math.max(rec?.frame_rate ?? 30, 1), 30);
+    let frame = playback.current_frame;
+    const timer = window.setInterval(() => {
+      frame = playback.total_frames > 0 ? (frame + 1) % playback.total_frames : 0;
+      loadFrame(selectedRecording, frame);
+    }, 1000 / fps);
+    return () => window.clearInterval(timer);
+  }, [playback, selectedRecording, recordings, loadFrame]);
+
+  const selectedSourceInfo = sources.find((s) => s.type === selectedSource);
+
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
       {/* Left Panel: Source Selection + Controls */}
@@ -330,6 +421,7 @@ export function MotionCapturePage() {
           {sources.map((source) => (
             <button
               key={source.id}
+              data-testid={`source-${source.id}`}
               onClick={() => setSelectedSource(source.type)}
               disabled={!source.available}
               className={`w-full text-left p-2.5 rounded transition-colors ${
@@ -353,6 +445,14 @@ export function MotionCapturePage() {
               <div className="text-xs text-gray-500 mt-0.5 ml-4">
                 {source.description}
               </div>
+              {!source.available && (
+                <div
+                  className="text-xs text-amber-500/80 mt-0.5 ml-4"
+                  data-testid={`source-reason-${source.id}`}
+                >
+                  {source.reason ?? 'Unavailable'}
+                </div>
+              )}
             </button>
           ))}
 
@@ -362,6 +462,67 @@ export function MotionCapturePage() {
             </div>
           )}
         </div>
+
+        {/* C3D File Upload (only for the c3d source; issue #7454) */}
+        {selectedSource === 'c3d' && selectedSourceInfo?.available && (
+          <div className="p-4 border-b border-gray-700 space-y-2">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              C3D File
+            </h3>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".c3d"
+              data-testid="c3d-file-input"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleC3DUpload(file);
+              }}
+              className="block w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs hover:file:bg-blue-500 file:cursor-pointer"
+            />
+            {uploading && (
+              <div className="text-xs text-gray-500 italic">Uploading…</div>
+            )}
+            {uploadResult && (
+              <div
+                className="space-y-1 text-xs bg-gray-700/30 p-2 rounded"
+                data-testid="c3d-upload-metadata"
+              >
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Markers</span>
+                  <span className="text-gray-200 font-mono">
+                    {uploadResult.marker_names.length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Rate</span>
+                  <span className="text-gray-200 font-mono">
+                    {uploadResult.frame_rate} Hz
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Frames</span>
+                  <span className="text-gray-200 font-mono">
+                    {uploadResult.total_frames}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Duration</span>
+                  <span className="text-gray-200 font-mono">
+                    {uploadResult.duration_seconds.toFixed(2)}s
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Units</span>
+                  <span className="text-gray-200 font-mono">
+                    {uploadResult.native_units || '?'} → {uploadResult.converted_units}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Session Controls */}
         <div className="p-4 border-b border-gray-700 space-y-2">
@@ -417,6 +578,7 @@ export function MotionCapturePage() {
               onClick={() => {
                 setSelectedRecording(rec.name);
                 setPlayback(null);
+                loadFrame(rec.name, 0);
               }}
               className={`w-full text-left p-2 rounded mb-1 transition-colors ${
                 selectedRecording === rec.name
@@ -461,6 +623,22 @@ export function MotionCapturePage() {
                 Stop
               </button>
             </div>
+
+            {playback && playback.total_frames > 0 && (
+              <input
+                type="range"
+                min={0}
+                max={playback.total_frames - 1}
+                value={playback.current_frame}
+                data-testid="playback-seek"
+                onChange={(e) => {
+                  const frame = Number(e.target.value);
+                  handlePlayback('seek', frame);
+                  if (selectedRecording) loadFrame(selectedRecording, frame);
+                }}
+                className="w-full"
+              />
+            )}
 
             {playback && (
               <div className="text-xs text-gray-400 text-center">
