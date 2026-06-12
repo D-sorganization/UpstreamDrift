@@ -131,9 +131,9 @@ export function ActuatorPanel({
   }, [fetchActuators, isRunning, refreshInterval]);
 
   const handleValueChange = useCallback(async (index: number, value: number) => {
-    // #6898: surface failures (bad index, engine not loaded) via setError
-    // instead of silently swallowing them, which left the slider moved while
-    // the engine was unchanged.
+    // #6898: surface failures (bad index, engine not loaded) instead of
+    // silently swallowing them. Reports failure in-band so the slider can
+    // revert to the confirmed value (#7425).
     try {
       await apiFetch('/api/simulation/actuators', {
         method: 'POST',
@@ -144,10 +144,12 @@ export function ActuatorPanel({
         }),
       });
       setError(null);
+      return { success: true };
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to update actuator value',
-      );
+      const message =
+        err instanceof Error ? err.message : 'Failed to update actuator value';
+      setError(message);
+      return { success: false, error: message };
     }
   }, []);
 
@@ -294,6 +296,7 @@ export function ActuatorPanel({
                         actuator={act}
                         onValueChange={handleValueChange}
                         onControlTypeChange={handleControlTypeChange}
+                        onError={setError}
                         availableTypes={panelState.available_control_types}
                       />
                     ));
@@ -325,6 +328,7 @@ export function ActuatorPanel({
                               actuator={act}
                               onValueChange={handleValueChange}
                               onControlTypeChange={handleControlTypeChange}
+                              onError={setError}
                               availableTypes={panelState.available_control_types}
                             />
                           ))}
