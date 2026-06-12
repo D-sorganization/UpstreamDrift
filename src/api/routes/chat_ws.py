@@ -302,6 +302,26 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
 # ── REST fallback endpoints ──────────────────────────────────────────
 
 
+@router.get("/chat/context")
+async def get_chat_context_endpoint(request: Request) -> dict[str, Any]:
+    """Return the live app/engine context visible to the chat assistant.
+
+    Issue #7453: lets the web UI display a "context chip" (engine · model ·
+    last run) mirroring the desktop Sidekick's awareness of app state. The
+    payload is the shared ``ChatAppContext`` schema; missing services
+    degrade to empty/null fields rather than erroring.
+    """
+    if not (request is not None):
+        raise ValueError("request must be provided")
+    from src.api.services.chat_app_context import build_chat_app_context
+
+    state = request.app.state
+    return build_chat_app_context(
+        engine_manager=getattr(state, "engine_manager", None),
+        simulation_service=getattr(state, "simulation_service", None),
+    ).model_dump()
+
+
 @router.get("/chat/sessions")
 async def list_sessions(request: Request) -> list[dict[str, Any]]:
     """List all active chat sessions."""
