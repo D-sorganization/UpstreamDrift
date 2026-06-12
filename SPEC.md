@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.359                                            |
+| **Spec Version**        | 1.0.360                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Extracted the static-analysis plotting service layer into
+  `src.shared.python.analysis.AnalysisOrchestrator` and shared `PlotData`
+  models so PyQt dispatch and future web/API plot endpoints use the same
+  headless registry instead of dashboard-widget internals.
 - **2026-06-12** - Corrected three scientific contracts in vendored Sidekick
   copies: Buck water-vapor-pressure constants now match Buck (1996), signal
   integration includes the upper-bound sample via `searchsorted(...,
