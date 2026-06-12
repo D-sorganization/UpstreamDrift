@@ -73,6 +73,7 @@ from src.api.routes import (  # noqa: E402
     analysis_plots,
     chat_ws,
     cross_engine,
+    diagnostics,
     engines,
     export,
     motion_capture,
@@ -231,6 +232,7 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(
         motion_capture.router, prefix=API_PREFIX, tags=["Motion Capture"]
     )
+    app.include_router(diagnostics.router, prefix=API_PREFIX, tags=["Diagnostics"])
 
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
@@ -246,6 +248,7 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(analysis_plots.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
     app.include_router(motion_capture.router, prefix="/api", tags=["Motion Capture"])
+    app.include_router(diagnostics.router, prefix="/api", tags=["Diagnostics"])
 
 
 def _load_launcher_manifest() -> dict[str, Any]:

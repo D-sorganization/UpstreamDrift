@@ -174,11 +174,11 @@
     "diagnostics.integrations_health": {
       "title": "Diagnostics + integrations-health panel",
       "pyqt": "src/launchers/integrations_health_panel.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 7458,
-      "tiles": []
+      "api": "src/api/routes/diagnostics.py",
+      "web": "ui/src/components/ui/DiagnosticsPanel.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Single probe implementation (DIAGNOSTIC_CHECKS in launcher_diagnostics.py + integrations_health_data.py) feeds the desktop panels and GET /api/v1/diagnostics/full + /api/v1/integrations/health (issue #7458)."
     },
     "onboarding.about_version": {
       "title": "About/version info + onboarding",
