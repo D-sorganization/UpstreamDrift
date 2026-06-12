@@ -6,6 +6,7 @@ import { useSimulationStore } from '@/stores/useSimulationStore';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
+import { useDebouncedCommand } from '@/utils/useDebouncedCommand';
 import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
 import { RecordingsPanel } from '@/components/simulation/RecordingsPanel';
 import { EngineComparisonPanel } from '@/components/simulation/EngineComparisonPanel';
@@ -86,14 +87,23 @@ export function SimulationPage() {
     setSpeed,
   } = useSimulation(activeEngine);
 
-  const handleSpeedChange = useCallback(async (value: number) => {
-    setSpeedFactor(value);
-    // setSpeed reports failure in-band (issue #7166) — no rejection to catch.
-    const result = await setSpeed(value);
-    if (!result.success) {
-      showError(result.error ?? 'Failed to update speed');
-    }
-  }, [setSpeed, showError]);
+  // Speed slider: debounce drag ticks into a single in-order send and revert on
+  // failure (#7425). setSpeed reports failure in-band (#7166). `speedFactor` is
+  // the last confirmed value; on success we advance it so the display sticks.
+  const sendSpeed = useCallback(
+    async (value: number) => {
+      const result = await setSpeed(value);
+      if (result.success) {
+        setSpeedFactor(value);
+      }
+      return result;
+    },
+    [setSpeed],
+  );
+  const {
+    value: speedDisplay,
+    setValue: handleSpeedChange,
+  } = useDebouncedCommand(speedFactor, sendSpeed, showError);
 
   // Hide controls the active engine cannot serve (#7452): recording captures
   // forward-simulation frames, so without forward_sim it would be a no-op.
@@ -381,7 +391,7 @@ export function SimulationPage() {
         {isRunning && (
           <div className="mb-4 border-t border-gray-700 pt-4">
             <label htmlFor="speed-factor" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Speed Factor ({speedFactor.toFixed(1)}x)
+              Speed Factor ({speedDisplay.toFixed(1)}x)
             </label>
             <input
               id="speed-factor"
@@ -389,7 +399,7 @@ export function SimulationPage() {
               min="0.1"
               max="5.0"
               step="0.1"
-              value={speedFactor}
+              value={speedDisplay}
               onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
               className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />

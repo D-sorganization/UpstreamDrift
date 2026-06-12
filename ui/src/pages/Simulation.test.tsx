@@ -443,11 +443,26 @@ describe('SimulationPage', () => {
       expect(screen.getByLabelText(/speed factor/i)).toBeInTheDocument();
     });
 
-    it('calls setSpeed when slider value changes', () => {
+    it('calls setSpeed (debounced) when slider value changes (#7425)', async () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
       const slider = screen.getByLabelText(/speed factor/i);
+      // Debounced: the value updates immediately but the send is deferred.
       fireEvent.change(slider, { target: { value: '2.5' } });
-      expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5);
+      await waitFor(() =>
+        expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5),
+      );
+    });
+
+    it('coalesces a rapid speed drag into a single setSpeed call (#7425)', async () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+      const slider = screen.getByLabelText(/speed factor/i);
+      fireEvent.change(slider, { target: { value: '1.5' } });
+      fireEvent.change(slider, { target: { value: '2.0' } });
+      fireEvent.change(slider, { target: { value: '2.5' } });
+      await waitFor(() =>
+        expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5),
+      );
+      expect(mockSimulation.setSpeed).toHaveBeenCalledTimes(1);
     });
   });
 
