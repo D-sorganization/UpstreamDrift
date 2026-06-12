@@ -36,6 +36,7 @@ const tile = (id: string, name: string): LauncherTile => ({
     status: 'utility',
     capabilities: [],
     order: 1,
+    default_launch: 'tab',
 });
 
 describe('launcherWindowRegistry', () => {
