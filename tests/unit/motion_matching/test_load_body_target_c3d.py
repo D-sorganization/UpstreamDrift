@@ -10,10 +10,10 @@ import pytest
 from src.shared.python.motion_matching import (
     AlignOptions,
     BodyTarget,
-    load_body_target,
     load_body_target_c3d,
     load_club_target_c3d,
 )
+from src.shared.python.motion_matching.load_body_target import load_body_target
 from src.shared.python.motion_matching.loaders.c3d_body import (
     DEFAULT_BODY_MARKER_EXCLUDES,
     default_anatomical_marker_set,

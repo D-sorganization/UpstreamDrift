@@ -13,6 +13,14 @@ from .core import (
 )
 from .tables import GAS_DATABASE, StandardCondition
 
+# DIN 1343 / ISO 13443 normal state for "normal cubic metres" (Nm³): 0°C and
+# 101.325 kPa. Single authority for the Nm³ reference used as the gas-flow
+# pivot; the tar-concentration mixin anchors mg/Nm³ at the same normal state.
+# Previously the pivot used StandardCondition.STP (IUPAC 100 kPa), making every
+# SCFM/ACFM ↔ Nm³/hr conversion 1.325% off and inconsistent with the tar Nm³.
+# See issue #7413 / Tools#3389.
+NORMAL_CONDITION = StandardCondition.STP_OLD
+
 
 class GasFlowMixin:
     def _convert_gas_flow(
@@ -72,7 +80,7 @@ class GasFlowMixin:
 
         if from_unit == "SCFM":
             return scfm_to_standard_m3_per_hour(
-                value, standard_condition, StandardCondition.STP
+                value, standard_condition, NORMAL_CONDITION
             )
         if from_unit == "ACFM":
             if not (temperature is not None):
@@ -83,7 +91,7 @@ class GasFlowMixin:
                 value, temperature, pressure, standard_condition
             )
             return scfm_to_standard_m3_per_hour(
-                scfm, standard_condition, StandardCondition.STP
+                scfm, standard_condition, NORMAL_CONDITION
             )
         if from_unit in {"Nm3/hr", "Nm³/hr"}:
             return value
@@ -106,7 +114,7 @@ class GasFlowMixin:
 
         if to_unit == "SCFM":
             return standard_m3_per_hour_to_scfm(
-                m3_hr_std, StandardCondition.STP, standard_condition
+                m3_hr_std, NORMAL_CONDITION, standard_condition
             )
         if to_unit == "ACFM":
             if not (temperature is not None):
@@ -114,7 +122,7 @@ class GasFlowMixin:
             if not (pressure is not None):
                 raise ValueError("DbC Blocked: Precondition failed.")
             scfm = standard_m3_per_hour_to_scfm(
-                m3_hr_std, StandardCondition.STP, standard_condition
+                m3_hr_std, NORMAL_CONDITION, standard_condition
             )
             return standard_to_actual_flow(
                 scfm, temperature, pressure, standard_condition

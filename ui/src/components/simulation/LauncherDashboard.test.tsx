@@ -35,6 +35,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'utility',
         capabilities: ['model_browsing', 'urdf_generation'],
         order: 1,
+        default_launch: 'tab',
     },
     {
         id: 'mujoco_unified',
@@ -47,6 +48,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'gui_ready',
         capabilities: ['rigid_body', 'contact'],
         order: 2,
+        default_launch: 'tab',
         engine_type: 'mujoco',
     },
     {
@@ -60,6 +62,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'gui_ready',
         capabilities: ['rigid_body', 'optimization'],
         order: 3,
+        default_launch: 'tab',
         engine_type: 'drake',
     },
     {
@@ -73,6 +76,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'simulator',
         capabilities: ['ball_physics'],
         order: 7,
+        default_launch: 'tab',
         engine_type: 'putting_green',
     },
     {
@@ -86,6 +90,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'utility',
         capabilities: ['c3d_viewer', 'openpose', 'mediapipe'],
         order: 9,
+        default_launch: 'tab',
     },
     {
         id: 'matlab_unified',
@@ -98,6 +103,7 @@ const MOCK_TILES: LauncherTile[] = [
         status: 'external',
         capabilities: ['simscape_2d', 'simscape_3d'],
         order: 8,
+        default_launch: 'tab',
     },
 ];
 

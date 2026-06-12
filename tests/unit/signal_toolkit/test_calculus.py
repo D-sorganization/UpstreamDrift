@@ -144,6 +144,44 @@ class TestIntegrator:
         assert result.lower_bound == pytest.approx(0.2)
         assert result.upper_bound == pytest.approx(0.8)
 
+    @pytest.mark.scientific
+    def test_simpson_full_range_includes_upper_sample(self) -> None:
+        """Simpson over the full range must include the final sample (#7412).
+
+        y = t^2 on [0, 3] integrates analytically to 9.0; Simpson is exact for
+        parabolas, so dropping the upper-bound sample (the old side="left"
+        searchsorted bug) would return 8.12967 instead.
+        """
+        t = np.linspace(0.0, 3.0, 31)
+        sig = Signal(time=t, values=t**2)
+        integrator = Integrator(method=IntegrationMethod.SIMPSON)
+        result = integrator.integrate(sig)
+        assert result.value == pytest.approx(9.0, abs=1e-9)
+
+    @pytest.mark.scientific
+    def test_trapezoid_full_range_matches_numpy(self) -> None:
+        """Default-range trapezoid equals np.trapezoid over the whole array (#7412)."""
+        t = np.linspace(0.0, np.pi, 101)
+        y = np.sin(t)
+        sig = Signal(time=t, values=y)
+        integrator = Integrator(method=IntegrationMethod.TRAPEZOID)
+        result = integrator.integrate(sig)
+        assert result.value == pytest.approx(float(np.trapezoid(y, t)), abs=1e-12)
+
+    @pytest.mark.scientific
+    def test_trapezoid_exact_match_upper_bound_included(self) -> None:
+        """A bound landing exactly on a sample includes that sample (#7412).
+
+        With side="left" the matching sample was dropped; with side="right" it
+        is kept. y=1 on integer grid [0..10], bound at 5.0 -> area 5.0 (the old
+        bug returned 4.0).
+        """
+        t = np.arange(0.0, 11.0)
+        sig = Signal(time=t, values=np.ones_like(t))
+        integrator = Integrator(method=IntegrationMethod.TRAPEZOID)
+        result = integrator.integrate(sig, lower_bound=0.0, upper_bound=5.0)
+        assert result.value == pytest.approx(5.0, abs=1e-12)
+
 
 class TestConvenienceFunctions:
     def test_compute_derivative_returns_signal(self) -> None:

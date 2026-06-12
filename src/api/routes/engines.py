@@ -6,7 +6,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -20,7 +20,10 @@ from ..auth.middleware import OptionalAuth, is_local_mode
 from ..dependencies import get_engine_manager
 from ..models.responses import (
     CapabilityLevelResponse,
+    CapabilitySummaryResponse,
     EngineCapabilitiesResponse,
+    EngineLoadResponse,
+    EngineProbeResponse,
     EngineStatusResponse,
 )
 from ..utils.path_validation import validate_model_path
@@ -128,7 +131,11 @@ async def get_engines(
     )
 
 
-@router.get("/engines/{engine_name}/probe")
+@router.get(
+    "/engines/{engine_name}/probe",
+    response_model=EngineProbeResponse,
+    response_model_exclude_none=True,
+)
 @handle_api_errors
 async def probe_engine(
     engine_name: str,
@@ -143,7 +150,11 @@ async def probe_engine(
         return {"available": False, "error": str(e)}
 
 
-@router.post("/engines/{engine_name}/load")
+@router.post(
+    "/engines/{engine_name}/load",
+    response_model=EngineLoadResponse,
+    response_model_exclude_none=True,
+)
 @handle_api_errors
 async def load_engine_lazy(
     engine_name: str,
@@ -317,12 +328,14 @@ async def get_engine_capabilities(
         # EngineCapabilities.to_dict() without an explicit allow-list update.
         if not isinstance(level, str) or level not in _VALID_CAPABILITY_LEVELS:
             continue
-        supported = level != "none"
+        # The membership check above guarantees the literal set; mypy cannot
+        # narrow str via frozenset membership, so cast explicitly.
+        level_literal = cast(Literal["full", "partial", "none"], level)
         capability_list.append(
             CapabilityLevelResponse(
                 name=key,
-                level=level,
-                supported=supported,
+                level=level_literal,
+                supported=level_literal != "none",
             )
         )
         summary[level] = summary.get(level, 0) + 1
@@ -331,5 +344,9 @@ async def get_engine_capabilities(
         engine_name=caps_dict.get("engine_name", engine_type),
         engine_type=engine_type,
         capabilities=capability_list,
-        summary=summary,
+        summary=CapabilitySummaryResponse(
+            full=summary["full"],
+            partial=summary["partial"],
+            none=summary["none"],
+        ),
     )
