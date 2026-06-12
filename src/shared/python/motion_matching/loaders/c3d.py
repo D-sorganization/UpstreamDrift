@@ -16,12 +16,12 @@ import numpy as np
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
-from sidekick.lab.bio.c3d_reader import C3DDataReader
-from sidekick.lab.bio._c3d_marker_set import (
+from src.shared.python.sidekick.lab.bio.c3d_reader import C3DDataReader
+from src.shared.python.sidekick.lab.bio._c3d_marker_set import (
     MarkerSet,
     MarkerSetMismatchError,
 )
-from sidekick.lab.bio._c3d_models import C3DEvent
+from src.shared.python.sidekick.lab.bio._c3d_models import C3DEvent
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
