@@ -277,6 +277,7 @@ artifacts = [
 [tool.hatch.build.targets.wheel]
 packages = [
     "src",
+    "src/shared/python/sidekick",
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
