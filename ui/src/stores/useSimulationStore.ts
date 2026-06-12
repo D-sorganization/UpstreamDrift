@@ -54,6 +54,12 @@ export interface SimulationStoreActions {
    * ran), this is a no-op (#7424 parameter-reset bug guard).
    */
   hydrateDefaults: (defaults: Partial<Pick<SimulationParameters, 'duration' | 'timestep'>>) => void;
+  /**
+   * Apply the given engine's default duration/timestep, replacing the current
+   * values. Explicit user action only ("Reset to engine defaults", #7424) —
+   * never called automatically on mount or engine change.
+   */
+  resetToEngineDefaults: (engine: string) => void;
   /** Mark that a simulation has been started */
   markRun: () => void;
   /** Mark server-side recording as active (issue #7452) */
@@ -76,6 +82,35 @@ export const DEFAULT_PARAMETERS: SimulationParameters = {
   liveAnalysis: true,
   gpuAcceleration: false,
 };
+
+/**
+ * Per-engine default duration/timestep (single source of truth, #7424).
+ *
+ * Previously duplicated in ParameterPanel; engines absent here fall back to
+ * `DEFAULT_PARAMETERS`.
+ */
+export const ENGINE_DEFAULTS: Record<
+  string,
+  Pick<SimulationParameters, 'duration' | 'timestep'>
+> = {
+  mujoco: { duration: 3.0, timestep: 0.002 },
+  drake: { duration: 5.0, timestep: 0.001 },
+  pinocchio: { duration: 3.0, timestep: 0.001 },
+  opensim: { duration: 2.0, timestep: 0.005 },
+  myosim: { duration: 3.0, timestep: 0.002 },
+  myosuite: { duration: 3.0, timestep: 0.002 },
+};
+
+/** Resolve an engine's default duration/timestep, falling back to global defaults. */
+export function getEngineDefaults(
+  engine: string,
+): Pick<SimulationParameters, 'duration' | 'timestep'> {
+  const defaults = ENGINE_DEFAULTS[engine.toLowerCase()];
+  return {
+    duration: defaults?.duration ?? DEFAULT_PARAMETERS.duration,
+    timestep: defaults?.timestep ?? DEFAULT_PARAMETERS.timestep,
+  };
+}
 
 export const DEFAULT_RECORDING: RecordingState = {
   status: 'idle',
@@ -111,6 +146,12 @@ export const useSimulationStore = create<SimulationStore>((set) => ({
         defaultsHydrated: true,
       };
     }),
+
+  resetToEngineDefaults: (engine) =>
+    set((state) => ({
+      parameters: { ...state.parameters, ...getEngineDefaults(engine) },
+      parametersTouched: true,
+    })),
 
   markRun: () => set({ hasRun: true }),
 
