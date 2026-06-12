@@ -16,7 +16,9 @@ import { NotFoundPage } from './pages/NotFound';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { RouteTitle } from './utils/RouteTitle';
 import { BallFlightPage } from './pages/BallFlight';
+import { SettingsPage } from './pages/Settings';
 import { ToastProvider } from './components/ui/Toast';
+import { useWebSettingsBootstrap } from './api/useWebSettings';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
 import { useUIStore } from './stores';
@@ -24,6 +26,10 @@ import { useUIStore } from './stores';
 function App() {
   const helpOpen = useUIStore((s) => s.helpOpen);
   const setHelpOpen = useUIStore((s) => s.setHelpOpen);
+
+  // Load persisted web settings (font scale, simulation defaults) at app
+  // start; server file is the source of truth, localStorage is a cache (#7457).
+  useWebSettingsBootstrap();
 
   return (
     <BrowserRouter>
@@ -55,6 +61,8 @@ function App() {
           <Route path="/ball-flight" element={<BallFlightPage />} />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
+          {/* Settings (#7457): server-persisted preferences surface */}
+          <Route path="/settings" element={<SettingsPage />} />
           {/* Catch-all 404 (#7430) — must stay last. */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

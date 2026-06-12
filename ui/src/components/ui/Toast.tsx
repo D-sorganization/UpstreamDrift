@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { readCachedSettings } from '@/api/settingsClient';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -79,9 +80,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info', duration = 4000) => {
+  const showToast = useCallback((message: string, type: ToastType = 'info', duration?: number) => {
+    // Notification preferences (#7457): the cached server settings control
+    // default duration and verbosity. An explicit duration argument wins.
+    const prefs = readCachedSettings()?.notifications;
+    const verbosity = prefs?.verbosity ?? 'all';
+    if (verbosity === 'silent') return;
+    if (verbosity === 'errors' && type !== 'error' && type !== 'warning') return;
+    const resolvedDuration = duration ?? prefs?.toast_duration_ms ?? 4000;
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
+    setToasts((prev) => [...prev, { id, message, type, duration: resolvedDuration }]);
   }, []);
 
   const showSuccess = useCallback((message: string) => showToast(message, 'success'), [showToast]);
