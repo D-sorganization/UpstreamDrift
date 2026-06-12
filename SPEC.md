@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.366                                            |
+| **Spec Version**        | 1.0.367                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Hardened copied Sidekick package tests so targeted
+  validation no longer clears pytest's global module cache; scoped
+  `sys.modules` patches and regression coverage now guard that import-state
+  contract.
 - **2026-06-12** - Hardened the Tauri check workflow against stale restored
   Cargo target artifacts by cleaning the local `golf-modeling-suite` package
   after cache restore while retaining registry/git dependency caching.
@@ -1281,6 +1285,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-12 | 1.0.367 | Hardened copied Sidekick package tests so targeted validation no longer clears pytest's global module cache; scoped `sys.modules` patches and regression coverage now guard that import-state contract. |
 | 2026-06-12 | 1.0.366 | Hardened the Tauri check workflow against stale restored Cargo target artifacts by cleaning the local `golf-modeling-suite` package after cache restore while retaining registry/git dependency caching. |
 | 2026-06-12 | 1.0.365 | Kept package-local Sidekick tests out of CI Standard's dependency-light full-suite fallback so the core lane does not collect the copied Tools child test package under xdist/importlib, while retaining Sidekick tests in default pytest testpaths for targeted package validation. |
 | 2026-06-12 | 1.0.364 | Kept the dependency-light core test lane out of the Simscape MATLAB bridge subtree during full-suite fallback, matching the existing PR change filter and avoiding collection-time conftest aliasing for optional MATLAB integration tests. |

@@ -93,13 +93,13 @@ def test_minimal_species_db_fallback() -> None:
 
     from sidekick.process_calculators import wgs_reactor_calculator
 
-    # Temporarily mock the db import out
-    original_modules = dict(sys.modules)
-    sys.modules[
-        "integrated_process_simulator.calculators.thermodynamic_properties.species_database"
-    ] = None  # type: ignore[assignment]
-
-    try:
+    # Temporarily mock the db import out without clearing pytest's import state.
+    with patch.dict(
+        sys.modules,
+        {
+            "integrated_process_simulator.calculators.thermodynamic_properties.species_database": None
+        },
+    ):
         importlib.reload(wgs_reactor_calculator)
         db = wgs_reactor_calculator._MinimalSpeciesDB()
         sp = db.get_species("CO_g")
@@ -108,10 +108,7 @@ def test_minimal_species_db_fallback() -> None:
         assert sp.formation_entropy > 0
         assert sp.molecular_weight > 0
         assert db.get_species("Unknown") is None
-    finally:
-        sys.modules.clear()
-        sys.modules.update(original_modules)
-        importlib.reload(wgs_reactor_calculator)
+    importlib.reload(wgs_reactor_calculator)
 
 
 import importlib.util

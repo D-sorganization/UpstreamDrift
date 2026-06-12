@@ -264,15 +264,10 @@ class TestImportPyQt6:
 
         mock_pyqt6 = types.ModuleType("PyQt6")
 
-        original_modules = sys.modules.copy()
-        try:
-            sys.modules["PyQt6"] = mock_pyqt6
-            sys.modules["PyQt6.QtWidgets"] = mock_widgets
-
+        with patch.dict(
+            sys.modules,
+            {"PyQt6": mock_pyqt6, "PyQt6.QtWidgets": mock_widgets},
+        ):
             app, qmw = _import_pyqt6()
             # QApplication.instance() returns None so QApplication(sys.argv) is called
             assert qmw is fake_qmainwindow
-        finally:
-            # Restore sys.modules
-            sys.modules.clear()
-            sys.modules.update(original_modules)
