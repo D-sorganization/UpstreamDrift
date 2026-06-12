@@ -70,9 +70,11 @@ from src.api.diagnostics import (  # noqa: E402
 )
 from src.api.routes import (  # noqa: E402
     analysis,
+    ball_flight,
     analysis_plots,
     chat_ws,
     cross_engine,
+    diagnostics,
     engines,
     export,
     observability,
@@ -227,6 +229,8 @@ def _register_api_routers(app: FastAPI) -> None:
     )
     app.include_router(analysis_plots.router, prefix=API_PREFIX, tags=["Analysis"])
     app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
+    app.include_router(ball_flight.router, prefix=API_PREFIX, tags=["Ball Flight"])
+    app.include_router(diagnostics.router, prefix=API_PREFIX, tags=["Diagnostics"])
 
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
@@ -241,6 +245,8 @@ def _register_api_routers(app: FastAPI) -> None:
     )
     app.include_router(analysis_plots.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
+    app.include_router(ball_flight.router, prefix="/api", tags=["Ball Flight"])
+    app.include_router(diagnostics.router, prefix="/api", tags=["Diagnostics"])
 
 
 def _load_launcher_manifest() -> dict[str, Any]:

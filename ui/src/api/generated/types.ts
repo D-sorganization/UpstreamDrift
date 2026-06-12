@@ -255,6 +255,16 @@ export interface AnalysisStatisticsResponse {
 }
 
 /**
+ * Trajectory and summary metrics for a single flight model.
+ */
+export interface BallFlightModelResult {
+  model_name: string;
+  model_key: FlightModelType;
+  trajectory: BallFlightTrajectorySample[];
+  summary: BallFlightSummary;
+}
+
+/**
  * Request to simulate a single ball-flight trajectory.
  */
 export interface BallFlightSimulationRequest {
@@ -274,6 +284,8 @@ export interface BallFlightSimulationRequest {
   wind_direction_deg: number;
   /** Ball-flight model identifier */
   model_name: FlightModelType;
+  /** Optional list of flight models for overlay comparison. When provided, the response carries one result per (deduplicated) model; the top-level trajectory/summary mirror the first entry for backwards compatibility. */
+  models?: FlightModelType[] | null;
   /** Maximum simulation time [s] */
   max_time_s: number;
   /** Returned trajectory sample interval [s] */
@@ -281,13 +293,14 @@ export interface BallFlightSimulationRequest {
 }
 
 /**
- * Response containing ball-flight trajectory and summary metrics.
+ * Response containing ball-flight trajectories and summary metrics. The top-level ``model_name``/``trajectory``/``summary`` fields describe the first requested model (backwards compatible with single-model clients); ``results`` carries one entry per requested model for overlay comparison (issue #7456).
  */
 export interface BallFlightSimulationResponse {
   model_name: string;
   model_key: FlightModelType;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
+  results: BallFlightModelResult[];
 }
 
 /**
@@ -811,6 +824,23 @@ export interface FeatureReportModel {
   message: string;
   missing?: string[];
   depends_on?: string[];
+}
+
+/**
+ * Metadata describing one registered ball-flight model.
+ */
+export interface FlightModelInfo {
+  key: FlightModelType;
+  name: string;
+  description: string;
+  reference: string;
+}
+
+/**
+ * Enumeration of every flight model in :class:`FlightModelRegistry`.
+ */
+export interface FlightModelListResponse {
+  models: FlightModelInfo[];
 }
 
 /**
