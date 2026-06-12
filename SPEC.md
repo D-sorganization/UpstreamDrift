@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.359                                            |
+| **Spec Version**        | 1.0.361                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Moved shared plot-series label generation into a Qt-free
+  `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
+  label contracts without importing the Matplotlib/PyQt plotting package.
+- **2026-06-12** - Added static analysis plot parity for the web UI: `/api/v1/analysis/plot-types`
+  enumerates the headless plot registry and `/api/v1/analysis/plot-data/{plot_type}`
+  returns JSON plot payloads rendered by the React `PlotsSection`.
 - **2026-06-12** - Corrected three scientific contracts in vendored Sidekick
   copies: Buck water-vapor-pressure constants now match Buck (1996), signal
   integration includes the upper-bound sample via `searchsorted(...,

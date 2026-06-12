@@ -1186,6 +1186,23 @@ export interface PlaybackResponse {
 }
 
 /**
+ * One enumerable plot type served by the analysis API.
+ */
+export interface PlotTypeInfo {
+  /** Registry id, e.g. 'joint_angles' */
+  id: string;
+  /** Human-readable dashboard label */
+  label: string;
+}
+
+/**
+ * Catalogue of plot types available from the orchestrator registry.
+ */
+export interface PlotTypesResponse {
+  plot_types: PlotTypeInfo[];
+}
+
+/**
  * Request body for ``POST /realtime/publish``.
  */
 export interface PublishRequest {
