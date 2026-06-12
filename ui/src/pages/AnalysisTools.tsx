@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { useAnalysisTools } from '@/api/useAnalysisTools';
 import type { MetricInfo } from '@/api/useAnalysisTools';
+import { CounterfactualPanel } from '../components/analysis/CounterfactualPanel';
 export type {
   AnalysisLoadState,
   ExportResult,
@@ -164,6 +165,9 @@ export function AnalysisToolsPage() {
                 </div>
               )}
             </div>
+
+            {/* Counterfactual Analysis (issue #7450) */}
+            <CounterfactualPanel />
 
             {/* Export Section */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">

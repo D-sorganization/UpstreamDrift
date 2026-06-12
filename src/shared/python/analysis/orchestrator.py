@@ -29,7 +29,13 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-__all__ = ["AnalysisOrchestrator", "RecorderLike", "get_plot_data"]
+__all__ = [
+    "COUNTERFACTUAL_KIND_REQUIREMENTS",
+    "AnalysisOrchestrator",
+    "RecorderLike",
+    "get_plot_data",
+    "supported_counterfactual_kinds",
+]
 
 #: m/s -> mph conversion used by the dashboard club-head-speed plot.
 MPS_TO_MPH = 2.23694
@@ -40,6 +46,64 @@ COUNTERFACTUAL_KINDS = frozenset({"ztcf", "zvcf"})
 #: Induced-acceleration kinds backed by
 #: ``recorder.get_induced_acceleration_series``.
 INDUCED_ACCELERATION_KINDS = frozenset({"gravity", "drift", "control", "total"})
+
+#: Engine methods each counterfactual kind requires (issue #7450).
+#:
+#: Single source of truth for capability gating: the API only offers a
+#: kind when the active engine implements every required method, and the
+#: desktop post-hoc path (``GenericPhysicsRecorder.compute_analysis_post_hoc``)
+#: calls exactly these methods.  Keep this conservative — a kind listed as
+#: supported must actually be computable end-to-end.
+COUNTERFACTUAL_KIND_REQUIREMENTS: dict[str, tuple[str, ...]] = {
+    "ztcf": ("compute_ztcf",),
+    "zvcf": ("compute_zvcf",),
+    "gravity": ("compute_drift_acceleration",),
+    "drift": ("compute_drift_acceleration",),
+    "control": ("compute_control_acceleration",),
+    "total": ("compute_drift_acceleration", "compute_control_acceleration"),
+}
+
+#: Methods the shared post-hoc recompute loop needs regardless of kind
+#: (it replays every recorded frame through the engine and computes every
+#: kind in one pass — see ``_AnalysisMixin.compute_analysis_post_hoc``).
+_POST_HOC_ENGINE_METHODS: tuple[str, ...] = (
+    "set_state",
+    "set_control",
+    "forward",
+    "compute_ztcf",
+    "compute_zvcf",
+    "compute_drift_acceleration",
+    "compute_control_acceleration",
+)
+
+
+def supported_counterfactual_kinds(engine: Any) -> list[str]:
+    """Return the counterfactual kinds ``engine`` can compute, sorted.
+
+    Conservative probe used for capability gating (issue #7450): because
+    the shared post-hoc recompute path computes every kind in a single
+    pass over the recorded frames, a kind is only reported as supported
+    when the engine implements *all* methods that path calls.  Engines
+    derived from ``BasePhysicsEngine`` implement the full surface; ad-hoc
+    or partial engines are gated out rather than failing mid-task.
+
+    Args:
+        engine: Physics engine instance (may be None).
+
+    Returns:
+        Sorted list of supported kind identifiers (subset of
+        ``COUNTERFACTUAL_KINDS | INDUCED_ACCELERATION_KINDS``); empty when
+        the engine is missing or lacks any required method.
+    """
+    if engine is None:
+        return []
+    if not all(callable(getattr(engine, m, None)) for m in _POST_HOC_ENGINE_METHODS):
+        return []
+    return sorted(
+        kind
+        for kind, methods in COUNTERFACTUAL_KIND_REQUIREMENTS.items()
+        if all(callable(getattr(engine, m, None)) for m in methods)
+    )
 
 
 @runtime_checkable
