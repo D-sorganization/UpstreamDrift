@@ -50,6 +50,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
+    tornado==6.5.6 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
