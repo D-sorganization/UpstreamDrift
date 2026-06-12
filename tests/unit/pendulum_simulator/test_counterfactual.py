@@ -41,12 +41,12 @@ class TestZeroTorqueJointForcesDouble:
             assert np.isfinite(fy), f"Non-finite fy at {key}"
 
     def test_wrong_state_shape_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Expected state shape"):
             zero_torque_joint_forces_double(np.zeros(6), _make_double_params())
 
     def test_non_finite_state_raises(self) -> None:
         state = np.array([np.nan, 0.0, 0.0, 0.0])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="State must be finite"):
             zero_torque_joint_forces_double(state, _make_double_params())
 
     def test_nonzero_state_finite_output(self) -> None:
@@ -77,13 +77,13 @@ class TestZeroTorqueJointForcesTriple:
             assert np.isfinite(fy), f"Non-finite fy at {key}"
 
     def test_wrong_state_shape_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Expected state shape"):
             zero_torque_joint_forces_triple(np.zeros(4), _make_triple_params())
 
     def test_non_finite_state_raises(self) -> None:
         state = np.zeros(6)
         state[0] = np.nan
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="State must be finite"):
             zero_torque_joint_forces_triple(state, _make_triple_params())
 
     def test_nonzero_state_finite_output(self) -> None:

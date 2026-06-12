@@ -54,12 +54,12 @@ class TestEllipsoidFromJacobian:
         assert force is None
 
     def test_assertion_on_wrong_shape(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="shape"):
             ellipsoid_from_jacobian(np.eye(3))
 
     def test_assertion_on_nan(self) -> None:
         J = np.array([[1.0, np.nan], [0.0, 1.0]])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="NaN or Inf"):
             ellipsoid_from_jacobian(J)
 
 
@@ -87,11 +87,11 @@ class TestJacobianDouble:
             assert np.all(np.isfinite(J))
 
     def test_zero_l1_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="L1 must be positive"):
             jacobian_double(0.0, 0.0, 0.0, 1.0)
 
     def test_zero_l2_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="L2 must be positive"):
             jacobian_double(0.0, 0.0, 1.0, 0.0)
 
 

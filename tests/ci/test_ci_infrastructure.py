@@ -547,6 +547,10 @@ class TestCIEnvironmentCompatibility:
             '-o addopts=""'
             in workflow[selected_test_block_start:selected_test_block_end]
         )
+        assert (
+            "--ignore=src/shared/python/sidekick/tests"
+            in workflow[selected_test_block_start:selected_test_block_end]
+        )
         assert 'echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
         assert "steps.core-tests.outputs.full_coverage_generated == 'true'" in workflow
         assert (
@@ -873,7 +877,7 @@ class TestCIEnvironmentCompatibility:
         ]:
             assert path in rust_gate
 
-        editable_install = 'python -m pip install --no-cache-dir -e ".[dev]"'
+        editable_install = 'python -m pip install --no-cache-dir --no-deps -e ".[dev]"'
         wheel_install = "python -m pip install --force-reinstall target/wheels/*.whl"
         assert editable_install in binding_step
         assert wheel_install in binding_step

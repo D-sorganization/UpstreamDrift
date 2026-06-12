@@ -451,8 +451,10 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
     tx = wx + L2 * np.sin(abs_angle2)
     ty = wy - L2 * np.cos(abs_angle2)
 
+    fixed_pivot = (0.0, 0.0)
     return {
-        "hub": (0.0, 0.0),
+        "hub": fixed_pivot,
+        "shoulder": fixed_pivot,
         "wrist": (wx, wy),
         "tip": (tx, ty),
     }

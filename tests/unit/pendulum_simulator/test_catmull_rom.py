@@ -44,7 +44,7 @@ class TestCatmullRomSmooth:
         assert len(result_8) > len(result_4)
 
     def test_zero_n_sub_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="n_sub must be >= 1"):
             catmull_rom_smooth(
                 [(0.0, 0.0), (1.0, 1.0), (2.0, 0.0), (3.0, 1.0)], n_sub=0
             )

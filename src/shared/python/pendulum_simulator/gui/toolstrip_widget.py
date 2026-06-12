@@ -312,9 +312,12 @@ class ToolStrip(QWidget):
         outer.addLayout(row2)
 
     def _add_separator(self, layout: QHBoxLayout) -> None:
+        if layout is None:
+            raise ValueError("layout must be provided")
         layout.addWidget(_vline())
 
-        if not (layout is not None):
+    def _build_row1_title_and_model(self, layout: QHBoxLayout) -> None:
+        if layout is None:
             raise ValueError("layout must be provided")
         title = QLabel("Pendulums")
         title.setStyleSheet(_TITLE)
