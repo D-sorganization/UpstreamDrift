@@ -166,10 +166,20 @@
     "settings.preferences": {
       "title": "Settings/preferences surface + persistence",
       "pyqt": "src/launchers/settings_dialog.py",
+      "api": "src/api/routes/settings.py",
+      "web": "ui/src/pages/Settings.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Web /settings route (appearance/notifications/simulation-defaults/diagnostics) persisted server-side to ~/.upstreamdrift/web_settings.json; theme round-trips via the shared /themes router (#7457)."
+    },
+    "settings.desktop_only_tabs": {
+      "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
+      "pyqt": "src/launchers/settings_dialog.py",
       "api": null,
       "web": null,
-      "status": "gap",
-      "issue": 7457,
+      "status": "exempt",
+      "pending_decision": true,
+      "reason": "Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460.",
       "tiles": []
     },
     "diagnostics.integrations_health": {
