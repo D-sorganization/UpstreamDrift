@@ -124,7 +124,7 @@ const apiFetchMock = vi.fn((path: string) => {
 });
 
 vi.mock('@/api/fetch', () => ({
-  apiFetch: (path: string, init?: RequestInit) => apiFetchMock(path, init),
+  apiFetch: (path: string) => apiFetchMock(path),
 }));
 
 async function openPanel() {

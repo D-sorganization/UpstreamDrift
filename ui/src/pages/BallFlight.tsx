@@ -105,6 +105,7 @@ const FIELD_TO_API_KEY: Record<LaunchFieldId, string> = {
  * Returns the field ids whose values are missing, non-numeric, or outside
  * the declared valid range. Exported for direct unit testing.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function invalidLaunchFields(
   values: Record<LaunchFieldId, string>,
 ): LaunchFieldId[] {
@@ -126,6 +127,7 @@ function defaultLaunchValues(): Record<LaunchFieldId, string> {
 }
 
 /** Color for the i-th selected model (cycles like the desktop palette). */
+// eslint-disable-next-line react-refresh/only-export-components
 export function modelColor(index: number): string {
   return MODEL_COLORS[index % MODEL_COLORS.length];
 }

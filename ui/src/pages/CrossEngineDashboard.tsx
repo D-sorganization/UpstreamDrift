@@ -299,7 +299,10 @@ export function CrossEngineDashboardPage() {
                   contentStyle={{ background: '#1f2937', border: '1px solid #374151' }}
                   labelStyle={{ color: '#d1d5db' }}
                   itemStyle={{ color: '#60a5fa' }}
-                  formatter={(v: number) => [(v * 100).toFixed(1) + '%', 'Robustness']}
+                  formatter={(v) => [
+                    (Number(v) * 100).toFixed(1) + '%',
+                    'Robustness',
+                  ]}
                 />
                 <Legend wrapperStyle={{ color: '#9ca3af', fontSize: 12 }} />
                 <Bar dataKey="robustness" name="Robustness score" radius={[4, 4, 0, 0]}>
