@@ -15,6 +15,8 @@ from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from ..models.responses import LauncherManifestResponse
+
 logger = get_logger(__name__)
 router = APIRouter(prefix="/launcher", tags=["launcher"])
 
@@ -46,9 +48,18 @@ def _get_manifest() -> LauncherManifest:
     return manifest
 
 
-@router.get("/manifest")
+@router.get(
+    "/manifest",
+    response_model=LauncherManifestResponse,
+    response_model_exclude_none=True,
+)
 async def get_manifest() -> dict[str, Any]:
     """Get the complete launcher manifest.
+
+    The response is validated against ``LauncherManifestResponse`` so the
+    TypeScript contract generated from the OpenAPI schema covers this
+    payload (issue #7447). ``response_model_exclude_none`` preserves the
+    historical ``to_dict`` behavior of omitting unset optional keys.
 
     Returns:
         Full manifest with all tiles, ordered by display order.
@@ -184,158 +195,111 @@ async def get_logo(filename: str) -> FileResponse:
 _capabilities_state: dict[str, dict[str, dict[str, str]] | None] = {"cache": None}
 
 
-def _build_engine_profiles() -> dict[str, Any]:
+def _capability_profile(engine_name: str, **levels: Any) -> Any:
     from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
+
+    defaults: dict[str, Any] = {
+        "mass_matrix": CapabilityLevel.FULL,
+        "jacobian": CapabilityLevel.FULL,
+        "contact_forces": CapabilityLevel.FULL,
+        "inverse_dynamics": CapabilityLevel.FULL,
+        "drift_acceleration": CapabilityLevel.FULL,
+        "parameter_gradients": CapabilityLevel.PARTIAL,
+        "state_control_gradients": CapabilityLevel.PARTIAL,
+        "forward_sim": CapabilityLevel.FULL,
+        "contact_step": CapabilityLevel.PARTIAL,
+        "trajectory_opt": CapabilityLevel.PARTIAL,
+        "video_export": CapabilityLevel.PARTIAL,
+        "dataset_export": CapabilityLevel.FULL,
+        "force_visualization": CapabilityLevel.PARTIAL,
+        "model_positioning": CapabilityLevel.FULL,
+        "measurements": CapabilityLevel.FULL,
+    }
+    defaults.update(levels)
+    return EngineCapabilities(engine_name=engine_name, **defaults)
+
+
+def _primary_engine_profiles() -> dict[str, Any]:
+    from src.engines.common.capabilities import CapabilityLevel
+
+    F = CapabilityLevel.FULL
+    P = CapabilityLevel.PARTIAL
+
+    return {
+        "mujoco": _capability_profile(
+            "MuJoCo",
+            contact_step=F,
+            video_export=F,
+            force_visualization=F,
+        ),
+        "drake": _capability_profile(
+            "Drake",
+            contact_forces=P,
+            state_control_gradients=F,
+            contact_step=F,
+            trajectory_opt=F,
+        ),
+        "pinocchio": _capability_profile("Pinocchio", contact_step=P),
+        "opensim": _capability_profile(
+            "OpenSim",
+            contact_forces=P,
+            model_positioning=P,
+        ),
+    }
+
+
+def _specialized_engine_profiles() -> dict[str, Any]:
+    from src.engines.common.capabilities import CapabilityLevel
 
     F = CapabilityLevel.FULL
     P = CapabilityLevel.PARTIAL
     N = CapabilityLevel.NONE
 
     return {
-        "mujoco": EngineCapabilities(
-            engine_name="MuJoCo",
-            mass_matrix=F,
-            jacobian=F,
-            contact_forces=F,
-            inverse_dynamics=F,
-            drift_acceleration=F,
-            parameter_gradients=P,
-            state_control_gradients=P,
-            forward_sim=F,
-            contact_step=F,
-            trajectory_opt=P,
-            video_export=F,
-            dataset_export=F,
-            force_visualization=F,
-            model_positioning=F,
-            measurements=F,
-        ),
-        "drake": EngineCapabilities(
-            engine_name="Drake",
-            mass_matrix=F,
-            jacobian=F,
+        "myosuite": _capability_profile(
+            "MyoSuite",
             contact_forces=P,
-            inverse_dynamics=F,
-            drift_acceleration=F,
-            parameter_gradients=P,
-            state_control_gradients=F,
-            forward_sim=F,
-            contact_step=F,
-            trajectory_opt=F,
-            video_export=P,
-            dataset_export=F,
-            force_visualization=P,
-            model_positioning=F,
-            measurements=F,
-        ),
-        "pinocchio": EngineCapabilities(
-            engine_name="Pinocchio",
-            mass_matrix=F,
-            jacobian=F,
-            contact_forces=F,
-            inverse_dynamics=F,
-            drift_acceleration=F,
-            parameter_gradients=P,
-            state_control_gradients=P,
-            forward_sim=F,
-            contact_step=P,
-            trajectory_opt=P,
-            video_export=P,
-            dataset_export=F,
-            force_visualization=P,
-            model_positioning=F,
-            measurements=F,
-        ),
-        "opensim": EngineCapabilities(
-            engine_name="OpenSim",
-            mass_matrix=F,
-            jacobian=F,
-            contact_forces=P,
-            inverse_dynamics=F,
-            drift_acceleration=F,
-            parameter_gradients=P,
-            state_control_gradients=P,
-            forward_sim=F,
-            contact_step=P,
-            trajectory_opt=P,
-            video_export=P,
-            dataset_export=F,
-            force_visualization=P,
-            model_positioning=P,
-            measurements=F,
-        ),
-        "myosuite": EngineCapabilities(
-            engine_name="MyoSuite",
-            mass_matrix=F,
-            jacobian=F,
-            contact_forces=P,
-            inverse_dynamics=F,
-            drift_acceleration=F,
             parameter_gradients=N,
             state_control_gradients=N,
-            forward_sim=F,
             contact_step=F,
             trajectory_opt=N,
-            video_export=P,
-            dataset_export=F,
-            force_visualization=P,
             model_positioning=P,
-            measurements=F,
         ),
-        "jaxsim": EngineCapabilities(
-            engine_name="JaxSim",
-            mass_matrix=F,
-            jacobian=F,
+        "jaxsim": _capability_profile(
+            "JaxSim",
             contact_forces=P,
-            inverse_dynamics=F,
             drift_acceleration=P,
             parameter_gradients=F,
             state_control_gradients=F,
-            forward_sim=F,
-            contact_step=P,
-            trajectory_opt=P,
             video_export=N,
             dataset_export=P,
             force_visualization=N,
             model_positioning=P,
             measurements=N,
         ),
-        "pendulum": EngineCapabilities(
-            engine_name="Pendulum",
-            mass_matrix=F,
-            jacobian=F,
+        "pendulum": _capability_profile(
+            "Pendulum",
             contact_forces=N,
-            inverse_dynamics=F,
-            drift_acceleration=F,
             parameter_gradients=F,
             state_control_gradients=F,
-            forward_sim=F,
             contact_step=N,
             trajectory_opt=F,
-            video_export=P,
-            dataset_export=F,
             force_visualization=F,
-            model_positioning=F,
-            measurements=F,
         ),
-        "putting_green": EngineCapabilities(
-            engine_name="Putting Green",
-            mass_matrix=F,
-            jacobian=F,
+        "putting_green": _capability_profile(
+            "Putting Green",
             contact_forces=P,
-            inverse_dynamics=F,
-            drift_acceleration=F,
             parameter_gradients=N,
             state_control_gradients=N,
-            forward_sim=F,
-            contact_step=P,
             trajectory_opt=N,
-            video_export=P,
-            dataset_export=F,
-            force_visualization=P,
-            model_positioning=F,
-            measurements=F,
         ),
+    }
+
+
+def _build_engine_profiles() -> dict[str, Any]:
+    return {
+        **_primary_engine_profiles(),
+        **_specialized_engine_profiles(),
     }
 
 
