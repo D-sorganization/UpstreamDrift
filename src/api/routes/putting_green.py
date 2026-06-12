@@ -11,6 +11,7 @@ See issue #1206
 
 from __future__ import annotations
 
+import math
 import numpy as np
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
@@ -166,7 +167,7 @@ async def simulate_putt(
         )
 
     direction = np.array([payload.direction_x, payload.direction_y])
-    norm = np.linalg.norm(direction)
+    norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
 
@@ -263,7 +264,7 @@ async def scatter_analysis(
     sim = PuttingGreenSimulator(green=green)
 
     direction = np.array([request.direction_x, request.direction_y])
-    norm = np.linalg.norm(direction)
+    norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
 

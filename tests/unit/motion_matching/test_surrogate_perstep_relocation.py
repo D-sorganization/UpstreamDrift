@@ -74,6 +74,37 @@ def test_old_paths_still_importable_with_warning(old_name: str) -> None:
     assert "perstep" in text and "#4044" in text
 
 
+def test_extract_dataset_shim_imports_without_torch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The parquet slimmer remains importable in the optional stack without torch."""
+    for name in list(sys.modules):
+        if name == "extract_dynamics_dataset" or name.startswith(
+            "src.shared.python.motion_matching.surrogate"
+        ):
+            monkeypatch.delitem(sys.modules, name, raising=False)
+
+    real_import = __import__
+
+    def guarded_import(
+        name: str,
+        globals: dict[str, object] | None = None,
+        locals: dict[str, object] | None = None,
+        fromlist: tuple[str, ...] = (),
+        level: int = 0,
+    ) -> object:
+        if name == "torch" or name.startswith("torch."):
+            raise ModuleNotFoundError("No module named 'torch'")
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr("builtins.__import__", guarded_import)
+
+    module, caught = _import_with_warning("extract_dynamics_dataset")
+
+    assert hasattr(module, "extract_dataset")
+    assert [w for w in caught if issubclass(w.category, DeprecationWarning)]
+
+
 def test_new_path_imports() -> None:
     """The relocated package and its submodules import cleanly from the new path."""
     pytest.importorskip("torch")

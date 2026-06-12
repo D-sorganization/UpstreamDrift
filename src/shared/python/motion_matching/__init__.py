@@ -8,6 +8,8 @@ surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
 from __future__ import annotations
 
 import importlib
+import sys
+from types import ModuleType
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -21,7 +23,6 @@ if TYPE_CHECKING:
         BodySegmentGroup,
         default_body_segments,
     )
-    from .compute_total_work import compute_total_work
     from .cost import (
         CostBreakdown,
         CostOptions,
@@ -35,10 +36,7 @@ if TYPE_CHECKING:
         BodyEvent,
         BodyTarget,
     )
-    from .load_body_target import (
-        load_body_target,
-        load_body_target_c3d,
-    )
+    from .load_body_target import load_body_target_c3d
     from .load_club_target import (
         ALLOWED_SHEETS,
         load_club_target,
@@ -191,13 +189,57 @@ _LAZY_EXPORTS = {
     "must_have_fields": ".validators",
 }
 
+_SUBMODULE_NAME_COLLISIONS = frozenset(
+    {
+        "compute_total_work",
+        "load_body_target",
+    }
+)
+
+
+def compute_total_work(*args: Any, **kwargs: Any) -> Any:
+    from .cost import compute_total_work as _compute_total_work
+
+    return _compute_total_work(*args, **kwargs)
+
+
+def load_body_target(*args: Any, **kwargs: Any) -> Any:
+    from .load_body_target import load_body_target as _load_body_target
+
+    return _load_body_target(*args, **kwargs)
+
+
+_COLLISION_EXPORTS = {
+    "compute_total_work": compute_total_work,
+    "load_body_target": load_body_target,
+}
+
+
+def _resolve_export(name: str) -> Any:
+    if name in _COLLISION_EXPORTS:
+        return _COLLISION_EXPORTS[name]
+    module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+    value = getattr(module, name)
+    globals()[name] = value
+    return value
+
 
 def __getattr__(name: str) -> Any:
     if name in _LAZY_EXPORTS:
-        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
-        return getattr(module, name)
+        return _resolve_export(name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:
     return list(_LAZY_EXPORTS.keys())
+
+
+class _MotionMatchingModule(ModuleType):
+    def __getattribute__(self, name: str) -> Any:
+        value = super().__getattribute__(name)
+        if name in _SUBMODULE_NAME_COLLISIONS and isinstance(value, ModuleType):
+            return _COLLISION_EXPORTS[name]
+        return value
+
+
+sys.modules[__name__].__class__ = _MotionMatchingModule
