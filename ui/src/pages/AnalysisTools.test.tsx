@@ -1,135 +1,192 @@
 /**
  * Tests for AnalysisTools page.
  *
- * Validates data structures and type contracts for analysis tools.
+ * Renders the page against backend-shaped responses (issue #7448): the
+ * mocked payloads mirror the real contracts in
+ * `src/api/routes/analysis_tools.py`, and the export UI must only offer
+ * formats the backend actually implements (csv/json — no xlsx/pdf).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 
-import type {
-  MetricInfo,
-  StatisticsSummary,
-  ExportResult,
-  AnalysisLoadState,
-} from './AnalysisTools';
+import { AnalysisToolsPage } from './AnalysisTools';
+import type { MetricsSnapshot, StatisticsSummary } from './AnalysisTools';
 
-describe('AnalysisTools data structures', () => {
-  it('should parse metric info', () => {
-    const metric: MetricInfo = {
-      id: 'club_speed',
-      name: 'Club Speed',
-      description: 'Speed of the club head at impact',
-      unit: 'm/s',
-      category: 'kinematics',
-    };
+// Backend-shaped payloads (src/api/routes/analysis_tools.py)
+const metricsPayload: MetricsSnapshot = {
+  status: 'ok',
+  metrics: {
+    sim_time: 1.25,
+    max_velocity: 3.4567,
+    rms_velocity: 1.2345,
+    kinetic_energy: 12.5,
+    joint_positions: [0.1, 0.2, 0.3],
+  },
+};
 
-    expect(metric.id).toBe('club_speed');
-    expect(metric.unit).toBe('m/s');
-    expect(metric.category).toBe('kinematics');
+const statisticsPayload: StatisticsSummary = {
+  sim_time: 1.25,
+  sample_count: 42,
+  metrics: [
+    {
+      metric_name: 'club_head_speed',
+      current: 40.1,
+      minimum: 0.0,
+      maximum: 45.2,
+      mean: 22.3,
+      std_dev: 11.7,
+    },
+    {
+      metric_name: 'kinetic_energy',
+      current: 12.5,
+      minimum: 0.0,
+      maximum: 14.1,
+      mean: 6.2,
+      std_dev: 4.4,
+    },
+  ],
+  time_series: { club_head_speed: [0.0, 20.0, 40.1] },
+};
+
+describe('AnalysisToolsPage', () => {
+  const mockFetch = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockReset();
+    vi.stubGlobal('fetch', mockFetch);
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: vi.fn(() => 'blob:mock-url'),
+      revokeObjectURL: vi.fn(),
+    });
   });
 
-  it('should parse metric info with value', () => {
-    const metric: MetricInfo = {
-      id: 'launch_angle',
-      name: 'Launch Angle',
-      description: 'Vertical launch angle',
-      unit: 'degrees',
-      category: 'launch',
-      value: 12.5,
-    };
-
-    expect(metric.value).toBe(12.5);
-    expect(typeof metric.value).toBe('number');
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
   });
 
-  it('should group metrics by category', () => {
-    const metrics: MetricInfo[] = [
-      { id: 'club_speed', name: 'Club Speed', description: 'Club head speed', unit: 'm/s', category: 'kinematics' },
-      { id: 'ball_speed', name: 'Ball Speed', description: 'Ball speed', unit: 'm/s', category: 'kinematics' },
-      { id: 'launch_angle', name: 'Launch Angle', description: 'Launch angle', unit: 'degrees', category: 'launch' },
-      { id: 'spin_rate', name: 'Spin Rate', description: 'Backspin rate', unit: 'rpm', category: 'launch' },
-      { id: 'carry_distance', name: 'Carry Distance', description: 'Carry distance', unit: 'm', category: 'result' },
-    ];
-
-    const grouped = metrics.reduce<Record<string, MetricInfo[]>>((acc, m) => {
-      if (!acc[m.category]) acc[m.category] = [];
-      acc[m.category].push(m);
-      return acc;
-    }, {});
-
-    expect(Object.keys(grouped)).toHaveLength(3);
-    expect(grouped['kinematics']).toHaveLength(2);
-    expect(grouped['launch']).toHaveLength(2);
-    expect(grouped['result']).toHaveLength(1);
+  it('renders empty state before any fetch', () => {
+    render(<AnalysisToolsPage />);
+    expect(screen.getByText(/No metrics loaded/)).toBeTruthy();
+    expect(screen.getByText(/Click "Load Statistics"/)).toBeTruthy();
   });
 
-  it('should parse statistics summary', () => {
-    const stats: StatisticsSummary = {
-      dataset_id: 'ds_001',
-      metric_count: 3,
-      summary: {
-        club_speed: { min: 25.0, max: 55.0, mean: 42.3, median: 43.1, std: 5.2 },
-        ball_speed: { min: 35.0, max: 80.0, mean: 61.5, median: 62.0, std: 8.1 },
-        launch_angle: { min: -5.0, max: 25.0, mean: 11.2, median: 10.8, std: 4.5 },
-      },
-    };
+  it('fetches and renders the live metrics snapshot', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => metricsPayload,
+    });
 
-    expect(stats.metric_count).toBe(3);
-    expect(Object.keys(stats.summary)).toHaveLength(3);
-    expect(stats.summary.club_speed.mean).toBeCloseTo(42.3, 1);
-    expect(stats.summary.ball_speed.max).toBe(80.0);
+    render(<AnalysisToolsPage />);
+    fireEvent.click(screen.getByText('Refresh Metrics'));
+
+    await waitFor(() => {
+      expect(screen.getByText('max velocity')).toBeTruthy();
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/analysis/metrics',
+      expect.anything(),
+    );
+    // Scalar metric rendered with its real value
+    expect(screen.getByText('3.4567')).toBeTruthy();
+    // Vector metric summarized, not fabricated as a scalar
+    expect(screen.getByText('[3 values]')).toBeTruthy();
   });
 
-  it('should compute derived statistics', () => {
-    const summary = { min: 25.0, max: 55.0, mean: 42.3, median: 43.1, std: 5.2 };
-    const range = summary.max - summary.min;
+  it('fetches and renders backend statistics summaries', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => statisticsPayload,
+    });
 
-    expect(range).toBeCloseTo(30.0, 1);
-    expect(summary.mean).toBeGreaterThanOrEqual(summary.min);
-    expect(summary.mean).toBeLessThanOrEqual(summary.max);
-    expect(summary.std).toBeGreaterThan(0);
+    render(<AnalysisToolsPage />);
+    fireEvent.click(screen.getByText('Load Statistics'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('statistics-panel')).toBeTruthy();
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/analysis/statistics',
+      expect.anything(),
+    );
+    expect(screen.getByText(/2 metrics summarized over 42 samples/)).toBeTruthy();
+    expect(screen.getByText('club_head_speed')).toBeTruthy();
+    expect(screen.getByText('45.200')).toBeTruthy(); // maximum
+    expect(screen.getByText('11.700')).toBeTruthy(); // std_dev
   });
 
-  it('should parse export result', () => {
-    const result: ExportResult = {
-      format: 'csv',
-      url: '/api/analysis/export/ds_001.csv',
-      filename: 'analysis_ds_001.csv',
-      size_bytes: 102400,
-    };
+  it('shows the backend error instead of fake data when the API fails', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      json: async () => ({ detail: 'No physics engine loaded. Load an engine first.' }),
+    });
 
-    expect(result.format).toBe('csv');
-    expect(result.filename).toContain('analysis');
-    expect(result.size_bytes).toBeGreaterThan(0);
-    expect((result.size_bytes / 1024).toFixed(1)).toBe('100.0');
+    render(<AnalysisToolsPage />);
+    fireEvent.click(screen.getByText('Refresh Metrics'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/No physics engine loaded/)).toBeTruthy();
+    });
+    expect(screen.getByText(/No metrics loaded/)).toBeTruthy();
   });
 
-  it('should validate analysis load state transitions', () => {
-    const states: AnalysisLoadState[] = ['idle', 'loading', 'loaded', 'error'];
-
-    expect(states).toContain('idle');
-    expect(states).toContain('loading');
-    expect(states).toHaveLength(4);
+  it('only offers export formats the backend implements (no xlsx/pdf)', () => {
+    render(<AnalysisToolsPage />);
+    const select = screen.getByLabelText('Format') as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+    expect(values).toEqual(['csv', 'json']);
+    expect(values).not.toContain('xlsx');
+    expect(values).not.toContain('pdf');
   });
 
-  it('should filter metrics by category', () => {
-    const metrics: MetricInfo[] = [
-      { id: 'club_speed', name: 'Club Speed', description: 'Club head speed', unit: 'm/s', category: 'kinematics' },
-      { id: 'launch_angle', name: 'Launch Angle', description: 'Launch angle', unit: 'degrees', category: 'launch' },
-      { id: 'carry_distance', name: 'Carry Distance', description: 'Carry distance', unit: 'm', category: 'result' },
-    ];
+  it('downloads the streamed export file and reports its real size', async () => {
+    const blob = new Blob(['a,b\n1,2\n'], { type: 'text/csv' });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      blob: async () => blob,
+    });
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
 
-    const kinematics = metrics.filter((m) => m.category === 'kinematics');
-    expect(kinematics).toHaveLength(1);
-    expect(kinematics[0].id).toBe('club_speed');
+    render(<AnalysisToolsPage />);
+    fireEvent.click(screen.getByText('Export'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('export-result')).toBeTruthy();
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/analysis/export',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    const requestBody = JSON.parse(
+      (mockFetch.mock.calls[0][1] as RequestInit).body as string,
+    );
+    expect(requestBody.format).toBe('csv');
+    expect(clickSpy).toHaveBeenCalled();
+    expect(screen.getByText('analysis_export.csv')).toBeTruthy();
+    clickSpy.mockRestore();
   });
 
-  it('should format size in KB', () => {
-    const sizes = [1024, 5120, 1048576];
-    const formatted = sizes.map((s) => (s / 1024).toFixed(1));
+  it('surfaces export errors from the backend', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      json: async () => ({ detail: 'No data to export. Run a simulation first.' }),
+    });
 
-    expect(formatted[0]).toBe('1.0');
-    expect(formatted[1]).toBe('5.0');
-    expect(formatted[2]).toBe('1024.0');
+    render(<AnalysisToolsPage />);
+    fireEvent.click(screen.getByText('Export'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/No data to export/)).toBeTruthy();
+    });
+    expect(screen.queryByTestId('export-result')).toBeNull();
   });
 });

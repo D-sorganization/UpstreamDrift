@@ -360,6 +360,23 @@ class TrajectoryRecordRequest(BaseModel):
             )
         return normalized
 
+    @field_validator("export_format")
+    @classmethod
+    def validate_export_format(cls, v: str) -> str:
+        """Precondition: export_format must be a recognized trajectory format.
+
+        Formats other than ``json`` are recognized but not yet implemented in
+        the web API; the route returns an honest 501 for them (issue #7448,
+        tracked by #7451).
+        """
+        normalized = v.lower().strip()
+        if normalized not in VALID_EXPORT_FORMATS:
+            raise ValueError(
+                f"Unsupported export_format '{v}'. "
+                f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
+            )
+        return normalized
+
 
 # ──────────────────────────────────────────────────────────────
 #  Phase 3: URDF/MJCF Rendering, Analysis Tools, Simulation Controls

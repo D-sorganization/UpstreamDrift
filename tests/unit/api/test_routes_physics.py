@@ -143,3 +143,73 @@ def test_control_recording(client: TestClient) -> None:
     response = client.post("/simulation/recording", json={"action": "start"})
     assert response.status_code == 200
     assert response.json()["recording"] is True
+
+
+def test_recording_export_json_no_frames(client: TestClient) -> None:
+    """JSON export with no recorded frames reports honestly, no file."""
+    response = client.post(
+        "/simulation/recording",
+        json={"action": "export", "export_format": "json"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "No frames to export"
+    assert data["export_path"] is None
+
+
+def test_recording_export_json_writes_real_json(
+    client: TestClient,
+    mock_simulation_service,
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """JSON export writes an actual .json artifact containing the frames."""
+    import json
+
+    monkeypatch.setenv("ARTIFACT_DIR", str(tmp_path))
+    frames = [{"t": 0.0, "q": [0.0, 0.0]}, {"t": 0.001, "q": [0.1, 0.0]}]
+    mock_simulation_service.stats.recorded_frames = frames
+
+    response = client.post(
+        "/simulation/recording",
+        json={"action": "export", "export_format": "json"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["frame_count"] == 2
+    assert data["export_path"] is not None
+    assert data["export_path"].endswith(".json")
+
+    artifact = tmp_path / data["export_path"]
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["frames"] == frames
+    assert payload["format"] == "json"
+
+
+@pytest.mark.parametrize("fmt", ["csv", "mat", "hdf5", "c3d"])
+def test_recording_export_unimplemented_format_returns_501(
+    client: TestClient, fmt: str
+) -> None:
+    """Non-JSON formats return the honest 501 + tracking_issue contract.
+
+    Issue #7448: the endpoint previously wrote JSON content into a file named
+    with the requested extension, fabricating these formats.
+    """
+    response = client.post(
+        "/simulation/recording",
+        json={"action": "export", "export_format": fmt},
+    )
+    assert response.status_code == 501
+    body = response.json()
+    assert fmt in body["detail"]
+    assert isinstance(body["tracking_issue"], int)
+    assert body["tracking_issue"] == 7451
+
+
+def test_recording_export_unknown_format_rejected(client: TestClient) -> None:
+    """Formats outside the recognized set are rejected at validation."""
+    response = client.post(
+        "/simulation/recording",
+        json={"action": "export", "export_format": "xlsx"},
+    )
+    assert response.status_code == 422
