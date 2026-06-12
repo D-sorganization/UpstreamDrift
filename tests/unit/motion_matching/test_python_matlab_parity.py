@@ -26,9 +26,10 @@ from src.shared.python.motion_matching import (
     SimOutput,
     SourceProvenance,
     compute_cost,
-    compute_total_work,
     must_be_unit_quaternion_rows,
 )
+from src.shared.python.motion_matching.cost import compute_total_work
+
 
 # Spec'd numeric tolerance for cross-language parity (issue #4095).
 PARITY_RMSE_TOL = 1.0e-6

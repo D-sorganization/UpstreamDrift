@@ -14,44 +14,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetchParsed } from './fetch';
 import { parseLauncherManifest } from './schemas';
 import { setLauncherCapabilityToken } from './websocketToken';
+import type {
+    LauncherManifestResponse,
+    LauncherTileResponse,
+} from './generated/types';
 
-export type LauncherCategory =
-    | 'physics_engine'
-    | 'biomechanics'
-    | 'simulation'
-    | 'motion_matching'
-    | 'motion_capture'
-    | 'analysis'
-    | 'documentation'
-    | 'external'
-    | 'developer_tools'
-    | 'tool';
-
-export interface LauncherTile {
-    id: string;
-    name: string;
-    description: string;
-    category: LauncherCategory;
-    type: string;
-    path: string;
-    logo: string;
-    status: string;
-    capabilities: string[];
-    order: number;
-    engine_type?: string;
-    web_route?: string;
-    default_launch?: 'tab' | 'dock' | 'window' | 'external' | string;
-    shell_surfaces?: Array<'pyqt6' | 'react' | string>;
-    hidden?: boolean;
-}
-
-export interface LauncherManifest {
-    version: string;
-    description: string;
-    tiles: LauncherTile[];
-    launcher_csrf_token?: string;
-    launcher_csrf_header?: string;
-}
+/**
+ * Launcher manifest payloads — generated from the API contract (issue #7447).
+ *
+ * Do NOT hand-write these shapes: they mirror `LauncherManifestResponse` /
+ * `LauncherTileResponse` in `src/api/models/responses.py` via
+ * `ui/src/api/generated/types.ts`.
+ */
+export type LauncherTile = LauncherTileResponse;
+export type LauncherCategory = LauncherTile['category'];
+export type LauncherManifest = LauncherManifestResponse;
 
 export type ManifestLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 

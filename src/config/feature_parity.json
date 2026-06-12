@@ -1,0 +1,361 @@
+{
+  "version": "1.0.0",
+  "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason). Entries with pending_decision=true await the desktop-only exemption decision in issue #7460 (G12). See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
+  "features": {
+    "launcher.tile_grid": {
+      "title": "Launcher tile grid from shared manifest",
+      "pyqt": "src/launchers/unified_launcher.py",
+      "api": "src/api/routes/launcher.py",
+      "web": "ui/src/pages/Dashboard.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Both shells render tiles from src/config/launcher_manifest.json via the shared loader."
+    },
+    "engines.load_and_simulate": {
+      "title": "Engine load/probe + basic simulation loop",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": "src/api/routes/engines.py",
+      "web": "ui/src/pages/Simulation.tsx",
+      "status": "parity",
+      "tiles": [
+        "mujoco_unified",
+        "drake_golf",
+        "pinocchio_golf",
+        "opensim_golf",
+        "myosim_suite",
+        "pendulum_simulator",
+        "bunkershot3d"
+      ]
+    },
+    "simulation.realtime_ws_stream": {
+      "title": "Live simulation data over WebSocket pub-sub",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": "src/api/routes/simulation_ws.py",
+      "web": "ui/src/pages/Simulation.tsx",
+      "status": "parity",
+      "tiles": ["realtime_ws"]
+    },
+    "chat.transport": {
+      "title": "AI chat transport (message send/stream)",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": "src/api/routes/chat_ws.py",
+      "web": "ui/src/pages/Chat.tsx",
+      "status": "parity",
+      "tiles": ["chat_assistant"]
+    },
+    "platform.aip_protocol": {
+      "title": "AI Protocol (AIP) structured method dispatch",
+      "pyqt": null,
+      "api": "src/api/routes/aip.py",
+      "web": null,
+      "status": "parity",
+      "tiles": ["aip"],
+      "notes": "API-backed protocol; both shells are thin consumers."
+    },
+    "tools.putting_green": {
+      "title": "Putting green simulation",
+      "pyqt": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "api": "src/api/routes/putting_green.py",
+      "web": "ui/src/pages/PuttingGreen.tsx",
+      "status": "parity",
+      "tiles": ["putting_green"]
+    },
+    "tools.terrain_engine": {
+      "title": "Terrain and topography configuration",
+      "pyqt": null,
+      "api": "src/api/routes/terrain.py",
+      "web": "ui/src/pages/Terrain.tsx",
+      "status": "parity",
+      "tiles": ["terrain_engine"],
+      "notes": "Web-first tool; the desktop launcher opens the web route."
+    },
+    "tools.dataset_generator": {
+      "title": "Swing dataset generation and import",
+      "pyqt": null,
+      "api": "src/api/routes/dataset.py",
+      "web": "ui/src/pages/DatasetGenerator.tsx",
+      "status": "parity",
+      "tiles": ["dataset_generator"],
+      "notes": "Web-first tool; the desktop launcher opens the web route."
+    },
+    "canonical_core.workspaces": {
+      "title": "Canonical-core estimation/comparison workspaces",
+      "pyqt": "src/tools/canonical_core/estimation.py",
+      "api": null,
+      "web": "ui/src/pages/CanonicalCoreShell.tsx",
+      "status": "parity",
+      "tiles": ["canonical_core_estimation", "canonical_core_comparison"]
+    },
+    "analysis.static_plots": {
+      "title": "Static analysis plots (20+ plot types)",
+      "pyqt": "src/shared/python/plot_engine/pyqt6_widget.py",
+      "api": "src/api/routes/analysis_plots.py",
+      "web": "ui/src/components/analysis/PlotsSection.tsx",
+      "status": "parity",
+      "issue": 7449,
+      "tiles": [],
+      "notes": "GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
+    },
+    "analysis.counterfactuals": {
+      "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
+      "pyqt": "src/shared/python/biomechanics/ztcf.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 7450,
+      "tiles": ["simulation_backends"]
+    },
+    "export.recordings_downloads": {
+      "title": "Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings)",
+      "pyqt": "src/shared/python/data_io/export.py",
+      "api": "src/api/routes/export.py",
+      "web": null,
+      "status": "gap",
+      "issue": 7451,
+      "tiles": []
+    },
+    "simulation.controls_wiring": {
+      "title": "Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls)",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": null,
+      "web": "ui/src/components/simulation/SimulationControls.tsx",
+      "status": "gap",
+      "issue": 7452,
+      "tiles": ["force_overlays", "actuator_controls"]
+    },
+    "chat.live_context": {
+      "title": "Live app/engine context in chat",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": null,
+      "web": "ui/src/pages/Chat.tsx",
+      "status": "gap",
+      "issue": 7453,
+      "tiles": []
+    },
+    "mocap.breadth": {
+      "title": "Motion-capture breadth (C3D upload/playback, OpenPose source)",
+      "pyqt": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "api": "src/api/routes/motion_capture.py",
+      "web": "ui/src/pages/MotionCapture.tsx",
+      "status": "gap",
+      "issue": 7454,
+      "tiles": [
+        "motion_capture",
+        "motion_target_preview",
+        "starting_pose_matcher",
+        "motion_pipeline"
+      ]
+    },
+    "analysis.cross_engine_robustness": {
+      "title": "Cross-engine robustness dashboard (perturbation/CV)",
+      "pyqt": "src/launchers/cross_engine_dashboard.py",
+      "api": "src/api/routes/cross_engine.py",
+      "web": "ui/src/pages/CrossEngineDashboard.tsx",
+      "status": "parity",
+      "tiles": ["cross_engine", "perturbation_analysis"]
+    },
+    "simulation.shot_tracer": {
+      "title": "Shot Tracer / ball-flight visualization",
+      "pyqt": "src/launchers/_shot_tracer_gui.py",
+      "api": "src/api/routes/ball_flight.py",
+      "web": null,
+      "status": "gap",
+      "issue": 7456,
+      "tiles": ["shot_tracer"]
+    },
+    "settings.preferences": {
+      "title": "Settings/preferences surface + persistence",
+      "pyqt": "src/launchers/settings_dialog.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 7457,
+      "tiles": []
+    },
+    "diagnostics.integrations_health": {
+      "title": "Diagnostics + integrations-health panel",
+      "pyqt": "src/launchers/integrations_health_panel.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 7458,
+      "tiles": []
+    },
+    "onboarding.about_version": {
+      "title": "About/version info + onboarding",
+      "pyqt": "src/launchers/about_dialog.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 7459,
+      "tiles": []
+    },
+    "launcher.tile_web_reachability": {
+      "title": "Manifest tile web-reachability contract (route / native-window / unavailable)",
+      "pyqt": "src/launchers/unified_launcher.py",
+      "api": null,
+      "web": "ui/src/pages/Dashboard.tsx",
+      "status": "gap",
+      "issue": 7461,
+      "tiles": [
+        "video_analyzer",
+        "video_processor",
+        "data_processor",
+        "tools_calculator_hub",
+        "pid_generator",
+        "unreal_integration",
+        "robotics_module"
+      ],
+      "notes": "External/docs-backed tiles whose web reachability is not yet contract-checked."
+    },
+    "tools.model_explorer": {
+      "title": "Model Explorer (browse/select/build URDF-MJCF)",
+      "pyqt": "src/tools/model_explorer/launch_model_explorer.py",
+      "api": "src/api/routes/model_explorer.py",
+      "web": "ui/src/pages/ModelExplorer.tsx",
+      "status": "gap",
+      "issue": 7448,
+      "tiles": ["model_explorer"],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+    },
+    "tools.character_builder": {
+      "title": "Character Builder (humanoid URDF generation)",
+      "pyqt": "src/shared/python/model_generation/cli/main.py",
+      "api": "src/api/routes/character_builder.py",
+      "web": "ui/src/pages/CharacterBuilder.tsx",
+      "status": "gap",
+      "issue": 7448,
+      "tiles": ["character_builder"],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+    },
+    "tools.data_explorer": {
+      "title": "Data Explorer (import/filter/visualize datasets)",
+      "pyqt": null,
+      "api": "src/api/routes/data_explorer.py",
+      "web": "ui/src/pages/DataExplorer.tsx",
+      "status": "gap",
+      "issue": 7448,
+      "tiles": ["data_explorer"],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+    },
+    "analysis.analysis_tools_api": {
+      "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
+      "pyqt": null,
+      "api": "src/api/routes/analysis_tools.py",
+      "web": "ui/src/pages/AnalysisTools.tsx",
+      "status": "gap",
+      "issue": 7448,
+      "tiles": ["analysis_tools_api"],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+    },
+    "sidekick.terminal_repl_jupyter_skills": {
+      "title": "Sidekick OS terminal / REPL / Jupyter / skills",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460.",
+      "pending_decision": true,
+      "tiles": []
+    },
+    "launcher.embedded_tabs_docks": {
+      "title": "Embedded tool host (tabs + docks)",
+      "pyqt": "src/launchers/embedded_host.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks).",
+      "tiles": []
+    },
+    "launcher.docker_management": {
+      "title": "Docker engine management dialog",
+      "pyqt": "src/launchers/docker_manager.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": []
+    },
+    "launcher.mcp_config": {
+      "title": "MCP server configuration writer/preferences",
+      "pyqt": "src/launchers/mcp_config_writer.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": []
+    },
+    "tools.matlab_suite": {
+      "title": "MATLAB/Simscape model suite",
+      "pyqt": "src/launchers/matlab_suite_dialog.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["matlab_unified"]
+    },
+    "tools.pose_editing": {
+      "title": "Pose Studio interactive pose editing",
+      "pyqt": "src/tools/pose_studio/__main__.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Interactive 3D pose editing; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["pose_studio"]
+    },
+    "docs.document_library": {
+      "title": "Document library / project map viewer",
+      "pyqt": "src/launchers/library_widget.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop documentation browser; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["project_map"]
+    },
+    "engines.dashboards": {
+      "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
+      "pyqt": "src/launchers/drake_dashboard.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Experimental desktop dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["drake_dashboard", "mujoco_dashboard", "pinocchio_dashboard"]
+    },
+    "biomech.exercise_injury_dashboards": {
+      "title": "Exercise + injury-risk biomechanics dashboards",
+      "pyqt": "src/launchers/exercise_dashboard.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["biomech_exercise", "injury_analysis"]
+    },
+    "simulation.golf_suite_batch": {
+      "title": "Golf Simulation Suite (parameter sweeps, batch runs)",
+      "pyqt": "src/tools/golf_simulation_suite/__main__.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop batch-simulation GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["golf_simulation_suite"]
+    },
+    "optimization.swing_optimizer": {
+      "title": "Swing Optimizer (trajectory optimization GUI)",
+      "pyqt": "src/shared/python/optimization/swing_optimizer.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop optimization GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["swing_optimizer"]
+    }
+  }
+}

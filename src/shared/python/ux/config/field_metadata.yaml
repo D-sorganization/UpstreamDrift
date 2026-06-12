@@ -208,3 +208,25 @@ fields:
     consumers: []
     producers: []
     example: "false"
+
+  # ---- counterfactual analysis (web Analysis page; desktop dashboard combo)
+  - id: counterfactual.kind
+    label: Counterfactual kind
+    short_help: Which counterfactual or induced-acceleration analysis to run.
+    long_help: |
+      - `ztcf`: zero-torque counterfactual — joint accelerations with applied
+        torques removed (velocity-dependent + gravity effects remain).
+      - `zvcf`: zero-velocity counterfactual — accelerations with joint
+        velocities zeroed (gravity/configuration effects).
+      - `gravity` / `drift`: passive drift component of the acceleration.
+      - `control`: acceleration attributable to the applied torques.
+      - `total`: drift + control superposition.
+      Results are joint accelerations in rad/s^2, computed by the same
+      post-hoc replay the desktop dashboard uses (issue #7450).
+    units: ~
+    valid_range: [ztcf, zvcf, gravity, drift, control, total]
+    default: ztcf
+    default_source: ZTCF is the first entry in the desktop dashboard analysis combo (src/shared/python/dashboard/window.py).
+    consumers: []
+    producers: []
+    example: "ztcf"
