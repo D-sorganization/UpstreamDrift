@@ -638,7 +638,9 @@ class FrameProcessor:
         """Extract column data as numpy array with error handling."""
         try:
             if col_name in df.columns:
-                data = df.iloc[row_idx][col_name]
+                # ⚡ Bolt: Cache row to avoid repeated expensive .iloc calls
+                row = df.iloc[row_idx]
+                data = row[col_name]
                 if isinstance(data, list | tuple):
                     return np.array(data, dtype=np.float32)
                 else:
@@ -651,8 +653,8 @@ class FrameProcessor:
                         y_col = f"{base_name}_y" if base_name else "CHy"
                         z_col = f"{base_name}_z" if base_name else "CHz"
 
-                        y_val = df.iloc[row_idx][y_col] if y_col in df.columns else 0.0
-                        z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
+                        y_val = row[y_col] if y_col in df.columns else 0.0
+                        z_val = row[z_col] if z_col in df.columns else 0.0
 
                         return np.array([data, y_val, z_val], dtype=np.float32)
                     elif col_name.endswith(("_y", "y")):
@@ -661,8 +663,8 @@ class FrameProcessor:
                         x_col = f"{base_name}_x" if base_name else "CHx"
                         z_col = f"{base_name}_z" if base_name else "CHz"
 
-                        x_val = df.iloc[row_idx][x_col] if x_col in df.columns else 0.0
-                        z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
+                        x_val = row[x_col] if x_col in df.columns else 0.0
+                        z_val = row[z_col] if z_col in df.columns else 0.0
 
                         return np.array([x_val, data, z_val], dtype=np.float32)
                     elif col_name.endswith(("_z", "z")):
@@ -671,8 +673,8 @@ class FrameProcessor:
                         x_col = f"{base_name}_x" if base_name else "CHx"
                         y_col = f"{base_name}_y" if base_name else "CHy"
 
-                        x_val = df.iloc[row_idx][x_col] if x_col in df.columns else 0.0
-                        y_val = df.iloc[row_idx][y_col] if y_col in df.columns else 0.0
+                        x_val = row[x_col] if x_col in df.columns else 0.0
+                        y_val = row[y_col] if y_col in df.columns else 0.0
 
                         return np.array([x_val, y_val, data], dtype=np.float32)
                     else:

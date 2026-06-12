@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.356                                            |
-| **Last Spec Update**    | 2026-06-11                                         |
+| **Spec Version**        | 1.0.359                                            |
+| **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,24 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Corrected three scientific contracts in vendored Sidekick
+  copies: Buck water-vapor-pressure constants now match Buck (1996), signal
+  integration includes the upper-bound sample via `searchsorted(...,
+side="right")`, and Nm3/ppm conversions share the DIN 1343 normal state
+  (273.15 K, 101325 Pa) with 22.414 L/mol ppmv <-> mg/Nm3 conversion.
+- **2026-06-12** - Removed the anti-phantom guard's `jq` dependency from the
+  PR retry/API fallback path by using GitHub CLI `--jq` output directly. This
+  keeps required PR guard checks portable across local self-hosted runner
+  images that do not install `jq` globally.
+- **2026-06-12** - Added generated TypeScript API types (issue #7447): the
+  FastAPI OpenAPI contract is emitted to `ui/src/api/generated/types.ts` by
+  `scripts/generate_ui_api_types.py` with a pytest freshness gate
+  (`tests/api/test_generated_ui_api_types.py`). The launcher manifest and
+  engine probe/load endpoints now declare Pydantic response models
+  (`LauncherManifestResponse`, `EngineProbeResponse`, `EngineLoadResponse`),
+  and `CapabilityLevelResponse.level`/`EngineCapabilitiesResponse.summary`
+  are strictly typed. UI engine-list, engine load/probe, launcher-manifest,
+  and engine-capabilities call sites consume the generated types.
 - **2026-06-11** - Consolidated launcher manager attribute forwarding through
   `src.launchers.launcher_manager_attrs.forward_manager_attribute()` so dialog,
   Sidekick, theme, and UI setup managers share one DbC boundary for local
@@ -1253,6 +1271,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-12 | 1.0.359 | Fixed vendored Sidekick science accuracy for issues #7411, #7412, and #7413: Buck vapor pressure restores the correct constant roles, `signal_toolkit.calculus.Integrator` includes the upper-bound sample in definite integrals, and SCFM/ACFM/Nm3 plus ppmv/mg/Nm3 conversions use one DIN 1343 normal state. Added reference-value and property tests for vapor pressure, calculus integration, and conversion consistency. |
+| 2026-06-12 | 1.0.358 | Removed the anti-phantom guard's `jq` dependency from the PR retry/API fallback path by using GitHub CLI `--jq` output directly, keeping required PR guard checks portable across local self-hosted runner images that do not install `jq` globally. |
 | 2026-06-11 | 1.0.353 | Made the optional-stack unit lane boundary explicit: the lane runs the non-engine unit suite with optional API, GUI, and body-part dependencies installed, while native engine unit tests remain covered by dedicated engine and cross-engine equivalence lanes to avoid coupling broad optional dependency validation to engine-specific mock behavior. |
 | 2026-06-11 | 1.0.352 | Aligned deployment optional-stack device tests with the hardware-honesty contract: unavailable hardware-backed input devices remain disconnected and raise `StateError` for state operations, `KeyboardMouseInput` remains the connected fallback, and `Demonstration` now carries default canonical `solver_status="success"` through recording, serialization, subsampling, and augmentation. |
 | 2026-06-11 | 1.0.351 | Restored the calc backend ODE solver response contract so `ODESolverResponse` again exposes the default `solver_status="success"` field consumed by optional-stack calc backend callers and tests. |
@@ -1572,3 +1592,9 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Optimized magnitude calculations using math.hypot instead of np.linalg.norm in MuJoCo humanoid golf engine
 
 - Optimized 3D vector norm calculations in physics engines using math.hypot instead of np.linalg.norm.
+
+- Updated `golf_data_core.py` to cache Pandas row to avoid expensive `df.iloc[row_idx]` repeated calls during vector operations.
+
+- Fixed CI imports for `compute_total_work`, `sidekick` references in `c3d` and `load_body_target_c3d` routing to appease lazy loading logic.
+
+- `extract_dynamics_dataset` also requires torch now so we require torch to test it in `test_surrogate_perstep_relocation.py`.
