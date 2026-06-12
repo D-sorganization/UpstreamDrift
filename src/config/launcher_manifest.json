@@ -366,6 +366,7 @@
       "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": ["trajectory_visualization", "multi_model_comparison"],
+      "web_route": "/ball-flight",
       "order": 18
     },
     {

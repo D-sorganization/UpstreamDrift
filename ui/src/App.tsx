@@ -13,6 +13,7 @@ import { AnalysisToolsPage } from './pages/AnalysisTools';
 import { CharacterBuilderPage } from './pages/CharacterBuilder';
 import { CanonicalCoreShellPage } from './pages/CanonicalCoreShell';
 import { SettingsPage } from './pages/Settings';
+import { BallFlightPage } from './pages/BallFlight';
 import { ToastProvider } from './components/ui/Toast';
 import { useWebSettingsBootstrap } from './api/useWebSettings';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
@@ -51,6 +52,8 @@ function App() {
             path="/tools/canonical-core/comparison"
             element={<CanonicalCoreShellPage mode="comparison" />}
           />
+          {/* Shot Tracer / ball-flight comparison (#7456) */}
+          <Route path="/ball-flight" element={<BallFlightPage />} />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
           {/* Settings (#7457): server-persisted preferences surface */}
