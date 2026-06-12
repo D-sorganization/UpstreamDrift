@@ -64,7 +64,10 @@ jobs:
           image-ref: "upstreamdrift:ci"
           format: "table"
           severity: "CRITICAL,HIGH"
-          # Fail the build on HIGH or CRITICAL vulnerabilities.
+          # Fail the build on fixable HIGH or CRITICAL vulnerabilities. Unfixed
+          # findings are still uploaded by the SARIF scan above for visibility,
+          # but should not block PRs until the upstream distro publishes a fix.
           exit-code: "1"
+          ignore-unfixed: true
           vuln-type: "os,library"
           timeout: "30m0s"

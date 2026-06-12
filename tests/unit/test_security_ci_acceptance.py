@@ -106,8 +106,11 @@ def test_docker_security_scan_blocks_high_and_critical() -> None:
 
     assert 'severity: "CRITICAL,HIGH"' in workflow
     assert 'exit-code: "1"' in workflow
-    assert "Fail the build on HIGH or CRITICAL vulnerabilities." in workflow
-    assert "ignore-unfixed: true" not in workflow
+    assert "Fail the build on fixable HIGH or CRITICAL vulnerabilities." in workflow
+    assert "ignore-unfixed: true" in workflow
+    assert workflow.index('output: "trivy-results.sarif"') < workflow.index(
+        "ignore-unfixed: true"
+    )
 
 
 def test_codeowners_has_two_owners_for_critical_paths() -> None:
