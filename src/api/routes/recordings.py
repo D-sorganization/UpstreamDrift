@@ -50,10 +50,11 @@ _MEDIA_TYPES: dict[str, str] = {
 
 def get_recording_store(request: Request) -> RecordingStore:
     """Retrieve (or lazily create) the RecordingStore from app state."""
-    store = getattr(request.app.state, "recording_store", None)
+    state = request.app.state
+    store = getattr(state, "recording_store", None)
     if store is None:
         store = RecordingStore()
-        request.app.state.recording_store = store
+        state.recording_store = store
     return store
 
 
