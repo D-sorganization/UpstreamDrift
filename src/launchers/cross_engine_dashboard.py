@@ -60,6 +60,7 @@ from src.shared.python.plot_style import (
     PresetLibrary,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+
 # Re-exported for backwards compatibility: tests and downstream callers
 # reference ``cross_engine_dashboard._StubEngine`` (compute moved to the
 # shared service in issue #7455).
