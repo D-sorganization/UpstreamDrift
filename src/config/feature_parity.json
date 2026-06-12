@@ -136,8 +136,7 @@
       "pyqt": "src/tools/freemocap_sidecar/run_freemocap.py",
       "api": "src/api/routes/motion_capture.py",
       "web": "ui/src/pages/MotionCapture.tsx",
-      "status": "gap",
-      "issue": 7454,
+      "status": "parity",
       "tiles": [
         "motion_capture",
         "motion_target_preview",
