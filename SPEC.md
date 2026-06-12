@@ -1575,3 +1575,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 
 - Updated `golf_data_core.py` to cache Pandas row to avoid expensive `df.iloc[row_idx]` repeated calls during vector operations.
+
+- Fixed CI imports for `compute_total_work`, `sidekick` references in `c3d` and `load_body_target_c3d` routing to appease lazy loading logic.
+
+- `extract_dynamics_dataset` also requires torch now so we require torch to test it in `test_surrogate_perstep_relocation.py`.
