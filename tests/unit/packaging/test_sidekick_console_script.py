@@ -66,16 +66,16 @@ def test_hatch_build_includes_src(pyproject: dict) -> None:
 
 
 def test_hatch_wheel_packages_sidekick_as_top_level(pyproject: dict) -> None:
-    wheel_packages = (
+    wheel_target = (
         pyproject.get("tool", {})
         .get("hatch", {})
         .get("build", {})
         .get("targets", {})
         .get("wheel", {})
-        .get("packages", [])
     )
-    assert "src/shared/python/sidekick" in wheel_packages, (
-        "wheel target must package src/shared/python/sidekick as top-level sidekick"
+    force_include = wheel_target.get("force-include", {})
+    assert force_include.get("src/shared/python/sidekick") == "sidekick", (
+        "wheel target must map src/shared/python/sidekick to top-level sidekick"
     )
 
 

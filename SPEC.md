@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.362                                            |
+| **Spec Version**        | 1.0.363                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -78,9 +78,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   first-run onboarding overlay added to the React dashboard; onboarding
   card copy single-sourced in `src/config/onboarding_cards.json` consumed
   by the Qt dialog and the web overlay.
+- **2026-06-12** - Made the Hatch wheel package contract explicit for the
+  standalone Sidekick console package by asserting the wheel target maps
+  `src/shared/python/sidekick` to top-level `sidekick` through Hatch
+  `force-include`.
+- **2026-06-12** - Refreshed the pinned `python:3.12-slim` Docker base digest
+  and configured the blocking Trivy table scan to ignore unfixed OS findings,
+  keeping the gate focused on actionable HIGH/CRITICAL vulnerabilities.
 - **2026-06-12** - Moved shared plot-series label generation into a Qt-free
   `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
   label contracts without importing the Matplotlib/PyQt plotting package.
+- **2026-06-12** - Kept synthetic C3D event-alignment tests hermetic under the
+  optional stack by patching both short and canonical Sidekick C3D import paths,
+  so installed `ezc3d` cannot parse the intentionally empty fixture files.
 - **2026-06-12** - Added static analysis plot parity for the web UI: `/api/v1/analysis/plot-types`
   enumerates the headless plot registry and `/api/v1/analysis/plot-data/{plot_type}`
   returns JSON plot payloads rendered by the React `PlotsSection`.
