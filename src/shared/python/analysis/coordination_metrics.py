@@ -221,16 +221,23 @@ class CoordinationMetricsMixin:
     ) -> np.ndarray:
         """Compute Continuous Relative Phase (CRP) between two joints.
 
-        CRP = Phase1 - Phase2.
-        Used to analyze coordination dynamics. Near 0 implies in-phase,
-        near 180 implies anti-phase.
+        CRP is the wrapped phase difference ``Phase1 - Phase2`` reported on
+        ``[-180, 180]`` degrees (Hamill et al. convention). Near 0 implies
+        in-phase, near +-180 implies anti-phase.
+
+        The per-joint phase angles are unwrapped (monotonic across cycles), so
+        subtracting them directly would accumulate any per-cycle mismatch and
+        drift outside ``[-180, 180]`` whenever the joints desynchronize by one
+        or more phase wraps. The difference is therefore re-wrapped per frame so
+        the result is always the bounded instantaneous phase offset (issue
+        #7409).
 
         Args:
             joint_idx_1: Proximal joint index
             joint_idx_2: Distal joint index
 
         Returns:
-            Array of CRP values in degrees
+            Array of CRP values in degrees on ``[-180, 180]``.
         """
         if joint_idx_1 is None:
             raise ValueError("joint_idx_1 must be provided")
@@ -240,7 +247,9 @@ class CoordinationMetricsMixin:
         if len(phi1) == 0 or len(phi2) == 0:
             return np.array([])
 
-        crp = phi1 - phi2
+        # Wrap the difference to (-180, 180] so CRP stays bounded even when the
+        # two unwrapped phase series accumulate a different number of cycles.
+        crp = (phi1 - phi2 + 180.0) % 360.0 - 180.0
         return np.asarray(crp)
 
     def compute_correlations(
