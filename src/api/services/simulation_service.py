@@ -58,11 +58,45 @@ class SimulationService:
         """
         self.engine_manager = engine_manager
         self._stats = SimulationStats()
+        self._active_recorder: GenericPhysicsRecorder | None = None
+        self._active_joint_names: list[str] = []
 
     @property
     def stats(self) -> SimulationStats:
         """Return the authoritative runtime stats for this session."""
         return self._stats
+
+    @property
+    def active_recorder(self) -> GenericPhysicsRecorder | None:
+        """Recorder of the most recently completed simulation, if any.
+
+        Retained so analysis endpoints (issue #7449) can compute post-run
+        plot data from the active session without re-running the
+        simulation. ``None`` until a simulation has completed.
+        """
+        return self._active_recorder
+
+    @property
+    def active_joint_names(self) -> list[str]:
+        """Joint names of the engine used by the active recorder."""
+        return list(self._active_joint_names)
+
+    def _retain_active_session(self, engine: Any, recorder: Any) -> None:
+        """Retain the completed simulation's recorder for post-run analysis.
+
+        Args:
+            engine: Engine the simulation ran on (joint-name source).
+            recorder: Recorder holding the recorded time series.
+        """
+        self._active_recorder = recorder
+        names_getter = getattr(engine, "get_joint_names", None)
+        joint_names: list[str] = []
+        if callable(names_getter):
+            try:
+                joint_names = [str(n) for n in names_getter()]
+            except (RuntimeError, ValueError, TypeError):
+                logger.exception("Could not read joint names from engine")
+        self._active_joint_names = joint_names
 
     def start_recording(self) -> None:
         """Begin recording trajectory frames. Clears any previously recorded data."""
@@ -236,6 +270,7 @@ class SimulationService:
         steps = int(request.duration / timestep)
 
         self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+        self._retain_active_session(engine, recorder)
 
         simulation_data = self._extract_simulation_data(recorder)
         analysis_results = None

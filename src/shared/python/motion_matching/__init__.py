@@ -155,7 +155,6 @@ _LAZY_EXPORTS = {
     "BodyTarget": ".body_target",
     "load_body_target": ".load_body_target",
     "load_body_target_c3d": ".loaders.c3d_body",
-
     "ALLOWED_SHEETS": ".load_club_target",
     "load_club_target": ".load_club_target",
     "load_club_target_c3d": ".load_club_target",

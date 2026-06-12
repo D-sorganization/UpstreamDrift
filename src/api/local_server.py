@@ -70,6 +70,7 @@ from src.api.diagnostics import (  # noqa: E402
 )
 from src.api.routes import (  # noqa: E402
     analysis,
+    analysis_plots,
     chat_ws,
     engines,
     export,
@@ -220,6 +221,7 @@ def _register_api_routers(app: FastAPI) -> None:
     )
     app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
     app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
+    app.include_router(analysis_plots.router, prefix=API_PREFIX, tags=["Analysis"])
     app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
 
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
@@ -230,6 +232,7 @@ def _register_api_routers(app: FastAPI) -> None:
     )
     app.include_router(chat_ws.router, prefix="/api", tags=["Chat"])
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
+    app.include_router(analysis_plots.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
 
 
