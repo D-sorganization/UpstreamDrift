@@ -84,6 +84,10 @@ jobs:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-check
 
+      - name: Clean restored Tauri package target
+        working-directory: ui/src-tauri
+        run: cargo clean -p golf-modeling-suite || true
+
       - name: Install Linux dependencies
         run: |
           apt_retry() {

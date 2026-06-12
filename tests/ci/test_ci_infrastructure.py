@@ -566,6 +566,23 @@ class TestCIEnvironmentCompatibility:
             ]
         )
 
+    def test_tauri_build_cleans_restored_package_target_cache(self) -> None:
+        """The Tauri check job must not trust stale package build artifacts."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
+            encoding="utf-8"
+        )
+
+        cache_step = workflow.index("- name: Cache Rust target (check)")
+        clean_step = workflow.index("- name: Clean restored Tauri package target")
+        install_step = workflow.index("- name: Install Linux dependencies")
+
+        assert cache_step < clean_step < install_step
+        assert "working-directory: ui/src-tauri" in workflow[clean_step:install_step]
+        assert (
+            "cargo clean -p golf-modeling-suite || true"
+            in workflow[clean_step:install_step]
+        )
+
     def test_ci_standard_source_prs_do_not_run_only_changed_tests(self) -> None:
         """Source changes must not be validated solely by touched test files."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
