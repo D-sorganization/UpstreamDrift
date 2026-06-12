@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -215,8 +215,22 @@ class CapabilityLevelResponse(BaseModel):
     """Response model for a single capability level."""
 
     name: str = Field(..., description="Capability name")
-    level: str = Field(..., description="Support level: full, partial, or none")
+    level: Literal["full", "partial", "none"] = Field(
+        ..., description="Support level: full, partial, or none"
+    )
     supported: bool = Field(..., description="Whether capability is available")
+
+
+class CapabilitySummaryResponse(BaseModel):
+    """Counts of capabilities per support level (issue #7447).
+
+    Typed (rather than ``dict[str, int]``) so the generated TypeScript
+    contract exposes the exact keys the UI reads.
+    """
+
+    full: int = Field(..., description="Number of fully supported capabilities")
+    partial: int = Field(..., description="Number of partially supported capabilities")
+    none: int = Field(..., description="Number of unsupported capabilities")
 
 
 class EngineCapabilitiesResponse(BaseModel):
@@ -230,7 +244,9 @@ class EngineCapabilitiesResponse(BaseModel):
     capabilities: list[CapabilityLevelResponse] = Field(
         ..., description="All capabilities with support levels"
     )
-    summary: dict[str, int] = Field(..., description="Counts: full, partial, none")
+    summary: CapabilitySummaryResponse = Field(
+        ..., description="Counts: full, partial, none"
+    )
 
 
 class ControlFeaturesResponse(BaseModel):
@@ -675,3 +691,114 @@ class AIPJsonRpcResponse(BaseModel):
     result: Any | None = Field(None, description="Method result (on success)")
     error: dict[str, Any] | None = Field(None, description="Error object (on failure)")
     id: int | str | None = Field(None, description="Matching request ID")
+
+
+# ── Launcher manifest contract (issue #7447) ─────────────────────────────────
+# Typed mirror of src/config/launcher_manifest_loader.py serialization so the
+# generated TypeScript contract covers the launcher manifest payload consumed
+# by ui/src/api/useLauncherManifest.ts.
+
+LauncherCategory = Literal[
+    "physics_engine",
+    "biomechanics",
+    "simulation",
+    "motion_matching",
+    "motion_capture",
+    "analysis",
+    "documentation",
+    "external",
+    "developer_tools",
+    "tool",
+]
+
+
+class WebLaunchContractResponse(BaseModel):
+    """How a launcher tile is reachable from the web/Tauri shell."""
+
+    mode: Literal["route", "native-window", "unavailable"] = Field(
+        ..., description="Web reachability mode for the tile"
+    )
+    route: str | None = Field(None, description="React route for mode='route' tiles")
+    reason: str | None = Field(
+        None, description="Why the tile is unavailable from the web shell"
+    )
+
+
+class LauncherTileResponse(BaseModel):
+    """A single launcher tile as serialized by ``LauncherTile.to_dict``."""
+
+    id: str = Field(..., description="Unique tile identifier")
+    name: str = Field(..., description="Display name shown in both launchers")
+    description: str = Field(..., description="Brief description under the tile")
+    category: LauncherCategory = Field(..., description="Canonical launcher category")
+    type: str = Field(..., description="Engine/handler type for launch dispatch")
+    path: str = Field(..., description="Relative path to the script/entry point")
+    logo: str = Field(..., description="Logo filename relative to assets dir")
+    status: str = Field(..., description="Status chip text (gui_ready, etc.)")
+    capabilities: list[str] = Field(..., description="Capability tags")
+    order: int = Field(..., description="Display order (1 = first)")
+    engine_type: str | None = Field(None, description="Engine type for engines")
+    provider: str | None = Field(None, description="Provider id for external tiles")
+    source_root: str | None = Field(None, description="Provider source root path")
+    working_dir: str | None = Field(None, description="Working directory override")
+    python_paths: list[str] | None = Field(None, description="Extra PYTHONPATH roots")
+    web_route: str | None = Field(None, description="URL path for web tools")
+    web: WebLaunchContractResponse | None = Field(
+        None, description="Declared web/Tauri reachability contract"
+    )
+    default_launch: str = Field("tab", description="tab | dock | window | external")
+    shell_surfaces: list[str] | None = Field(
+        None, description="Shell surfaces the tile supports (pyqt6, react)"
+    )
+    tags: list[str] | None = Field(None, description="Free-form filter tags")
+    hidden: bool | None = Field(None, description="Hidden legacy-alias tile")
+    hidden_reason: str | None = Field(None, description="Why the tile is hidden")
+    hidden_owner: str | None = Field(None, description="Owner of the hidden state")
+
+
+class LauncherManifestResponse(BaseModel):
+    """Launcher manifest as serialized by ``LauncherManifest.to_dict``.
+
+    ``launcher_csrf_token``/``launcher_csrf_header`` are only present when the
+    manifest is served by the local launcher backend (``local_server.py``),
+    which attaches the local capability token for mutating endpoints.
+    """
+
+    version: str = Field(..., description="Manifest schema version")
+    description: str = Field("", description="Manifest description")
+    tiles: list[LauncherTileResponse] = Field(..., description="Visible tiles")
+    category_labels: dict[str, str] = Field(
+        default_factory=dict, description="Canonical category -> display label"
+    )
+    launcher_csrf_token: str | None = Field(
+        None, description="Local launcher capability token (local mode only)"
+    )
+    launcher_csrf_header: str | None = Field(
+        None, description="Header name carrying the capability token"
+    )
+
+
+# ── Engine probe/load contract (issue #7447) ────────────────────────────────
+
+
+class EngineProbeResponse(BaseModel):
+    """Response for ``GET /engines/{engine_name}/probe`` (lazy-loading UI)."""
+
+    available: bool = Field(..., description="Whether the engine is available")
+    version: str | None = Field(None, description="Engine version if available")
+    capabilities: list[str] = Field(
+        default_factory=list, description="Engine capability tags"
+    )
+    error: str | None = Field(None, description="Probe failure detail")
+
+
+class EngineLoadResponse(BaseModel):
+    """Response for ``POST /engines/{engine_name}/load`` (lazy-loading UI)."""
+
+    status: str = Field(..., description="Load status, e.g. 'loaded'")
+    engine: str = Field(..., description="Engine name that was loaded")
+    version: str | None = Field(None, description="Engine version if known")
+    capabilities: list[str] = Field(
+        default_factory=list, description="Engine capability tags"
+    )
+    message: str | None = Field(None, description="Human-readable status message")

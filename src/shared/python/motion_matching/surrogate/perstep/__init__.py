@@ -16,10 +16,14 @@ Public API:
 
 from __future__ import annotations
 
-from .extract_dataset import main as extract_dataset
-from .optimize import main as optimize_torque_sequence
-from .train import DynamicsMLP, TrainConfig
-from .train import main as train_dynamics_surrogate
+import importlib
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .extract_dataset import main as extract_dataset
+    from .optimize import main as optimize_torque_sequence
+    from .train import DynamicsMLP, TrainConfig
+    from .train import main as train_dynamics_surrogate
 
 __all__ = [
     "DynamicsMLP",
@@ -28,3 +32,32 @@ __all__ = [
     "optimize_torque_sequence",
     "train_dynamics_surrogate",
 ]
+
+_LAZY_EXPORTS = {
+    "DynamicsMLP": ".train",
+    "TrainConfig": ".train",
+    "train_dynamics_surrogate": ".train",
+    "optimize_torque_sequence": ".optimize",
+    "extract_dataset": ".extract_dataset",
+}
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_EXPORTS:
+        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+        attr = (
+            "main"
+            if name
+            in {
+                "extract_dataset",
+                "optimize_torque_sequence",
+                "train_dynamics_surrogate",
+            }
+            else name
+        )
+        return getattr(module, attr)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(__all__)

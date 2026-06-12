@@ -14,62 +14,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetchParsed } from './fetch';
 import { parseLauncherManifest } from './schemas';
 import { setLauncherCapabilityToken } from './websocketToken';
-
-export type LauncherCategory =
-    | 'physics_engine'
-    | 'biomechanics'
-    | 'simulation'
-    | 'motion_matching'
-    | 'motion_capture'
-    | 'analysis'
-    | 'documentation'
-    | 'external'
-    | 'developer_tools'
-    | 'tool';
-
-/** How a tile is reachable from the web app (issue #7461). */
-export type WebLaunchMode = 'route' | 'native-window' | 'unavailable';
+import type {
+    LauncherManifestResponse,
+    LauncherTileResponse,
+    WebLaunchContractResponse,
+} from './generated/types';
 
 /**
- * Web launch contract declared per tile in the shared manifest.
+ * Launcher manifest payloads — generated from the API contract (issue #7447).
  *
- * - `route`: in-app React route navigation (`route` required, starts with "/")
- * - `native-window`: spawns a Qt window on the API server's machine — only
- *   honest when running under Tauri or against a localhost API
- * - `unavailable`: no web affordance; `reason` explains why
+ * Do NOT hand-write these shapes: they mirror `LauncherManifestResponse` /
+ * `LauncherTileResponse` in `src/api/models/responses.py` via
+ * `ui/src/api/generated/types.ts`.
  */
-export interface WebLaunchContract {
-    mode: WebLaunchMode;
-    route?: string;
-    reason?: string;
-}
-
-export interface LauncherTile {
-    id: string;
-    name: string;
-    description: string;
-    category: LauncherCategory;
-    type: string;
-    path: string;
-    logo: string;
-    status: string;
-    capabilities: string[];
-    order: number;
-    engine_type?: string;
-    web_route?: string;
-    web?: WebLaunchContract;
-    default_launch?: 'tab' | 'dock' | 'window' | 'external' | string;
-    shell_surfaces?: Array<'pyqt6' | 'react' | string>;
-    hidden?: boolean;
-}
-
-export interface LauncherManifest {
-    version: string;
-    description: string;
-    tiles: LauncherTile[];
-    launcher_csrf_token?: string;
-    launcher_csrf_header?: string;
-}
+export type LauncherTile = LauncherTileResponse;
+export type LauncherCategory = LauncherTile['category'];
+export type LauncherManifest = LauncherManifestResponse;
+export type WebLaunchContract = WebLaunchContractResponse;
+export type WebLaunchMode = WebLaunchContract['mode'];
 
 export type ManifestLoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
