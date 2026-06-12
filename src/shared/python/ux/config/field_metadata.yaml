@@ -209,6 +209,113 @@ fields:
     producers: []
     example: "false"
 
+  # ---- ball flight / shot tracer (web BallFlight page + desktop Shot Tracer)
+  # Units are explicit and load-bearing: the deg-vs-rad / RPM-vs-rad/s
+  # convention bugs of issue #7246 make unit labeling mandatory (issue #7456).
+  - id: ball_flight.ball_speed
+    label: Ball speed
+    short_help: Initial ball speed at launch, in metres per second.
+    long_help: |
+      Speed of the ball leaving the clubface, in m/s (NOT mph).  A driver strike
+      for an amateur is typically 55-75 m/s; tour drivers reach ~80 m/s.
+      The API rejects values outside (0, 100].
+    units: m/s
+    valid_range: [0.1, 100.0]
+    default: 70.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "70.0"
+
+  - id: ball_flight.launch_angle
+    label: Launch angle
+    short_help: Vertical launch angle in degrees above horizontal.
+    long_help: |
+      Vertical angle of the initial velocity vector, in degrees (NOT radians —
+      see the unit-convention bug history in issue #7246).  Drivers launch at
+      ~10-15 deg; wedges at 25-40 deg.  Valid range is [-10, 80] deg.
+    units: deg
+    valid_range: [-10.0, 80.0]
+    default: 12.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "12.0"
+
+  - id: ball_flight.azimuth_angle
+    label: Azimuth angle
+    short_help: Horizontal start direction in degrees; positive is right of target.
+    long_help: |
+      Horizontal angle of the initial velocity vector relative to the target
+      line, in degrees.  0 is straight at the target; positive values start the
+      ball right.  Valid range is [-90, 90] deg.
+    units: deg
+    valid_range: [-90.0, 90.0]
+    default: 0.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "0.0"
+
+  - id: ball_flight.spin_rate
+    label: Spin rate
+    short_help: Initial total spin rate in revolutions per minute (RPM).
+    long_help: |
+      Total spin of the ball at launch, in RPM (NOT rad/s — see issue #7246).
+      Drivers impart ~2000-3500 RPM; wedges can exceed 10000 RPM.  Valid range
+      is [0, 15000] RPM.
+    units: rpm
+    valid_range: [0.0, 15000.0]
+    default: 2600.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "2600.0"
+
+  - id: ball_flight.spin_axis_tilt
+    label: Spin-axis tilt
+    short_help: Spin-axis tilt in degrees; positive tilts produce a fade/slice.
+    long_help: |
+      Tilt of the spin axis from horizontal, in degrees.  0 is pure backspin;
+      positive tilt curves the ball right (fade/slice), negative curves it left
+      (draw/hook).  Valid range is [-90, 90] deg.
+    units: deg
+    valid_range: [-90.0, 90.0]
+    default: 0.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "0.0"
+
+  - id: ball_flight.wind_speed
+    label: Wind speed
+    short_help: Steady wind speed in metres per second.
+    long_help: |
+      Magnitude of the steady wind field, in m/s.  10 m/s is a strong breeze;
+      the API caps wind at 40 m/s.
+    units: m/s
+    valid_range: [0.0, 40.0]
+    default: 0.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "0.0"
+
+  - id: ball_flight.wind_direction
+    label: Wind direction
+    short_help: Wind direction in degrees; 0 is a pure headwind.
+    long_help: |
+      Direction the wind blows FROM relative to the target line, in degrees.
+      0 deg is a headwind, 180/-180 deg a tailwind, 90 deg from the right.
+      Valid range is [-180, 180] deg.
+    units: deg
+    valid_range: [-180.0, 180.0]
+    default: 0.0
+    default_source: "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456)."
+    consumers: []
+    producers: []
+    example: "0.0"
+
   # ---- counterfactual analysis (web Analysis page; desktop dashboard combo)
   - id: counterfactual.kind
     label: Counterfactual kind
