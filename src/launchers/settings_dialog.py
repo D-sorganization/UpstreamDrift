@@ -7,6 +7,7 @@ Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 
 from __future__ import annotations
 
+import functools
 import os
 import subprocess
 import time
@@ -1912,15 +1913,11 @@ class SettingsWidget(QWidget):
             )
         )
         worker.failed.connect(
-            lambda severity,
-            title,
-            html,
-            key=worker_key,
-            btn=button,
-            text=original_text: (
-                self._on_runtime_dependency_check_failed(
-                    key, btn, text, severity, title, html
-                )
+            functools.partial(
+                self._on_runtime_dependency_check_failed,
+                worker_key,
+                button,
+                original_text,
             )
         )
         worker.finished.connect(
