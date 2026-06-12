@@ -43,10 +43,7 @@ export function TreeDiffModal({
             id="tree-diff-title"
             className="text-lg font-bold text-white flex items-center gap-2"
           >
-            <span className="text-blue-500 font-mono" aria-hidden="true">
-              📊
-            </span>{' '}
-            Model Comparison
+            <span className="text-blue-500 font-mono" aria-hidden="true">📊</span> Model Comparison
           </h2>
           <button
             onClick={onClose}
