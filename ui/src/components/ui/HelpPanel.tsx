@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { X, Search, ChevronRight, HelpCircle, Lightbulb } from 'lucide-react';
+import { useModalA11y } from '@/utils/useModalA11y';
 import {
   HELP_TOPICS,
   FEATURE_HELP,
@@ -53,7 +54,6 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
   const [searchQuery, setSearchQuery] = useState('');
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
 
   // -----------------------------------------------------------------------
   // Open/Close helpers
@@ -74,6 +74,10 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
     }
   }, [controlledOpen]);
 
+  // Focus trap + Escape + focus save/restore (#7438). Replaces the prior
+  // timeout-based focus and window-scoped Escape handling.
+  const panelRef = useModalA11y<HTMLDivElement>(isOpen, handleClose);
+
   // -----------------------------------------------------------------------
   // F1 keyboard shortcut
   // -----------------------------------------------------------------------
@@ -88,23 +92,15 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
           handleOpen();
         }
       }
-      if (e.key === 'Escape' && isOpen) {
-        handleClose();
-      }
+      // Escape handling lives in useModalA11y (scoped to the dialog, #7438).
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose, handleOpen]);
 
-  // Focus search input when panel opens
-  useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      // Small delay so the panel renders first
-      const timer = setTimeout(() => searchInputRef.current?.focus(), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+  // Initial focus is handled by useModalA11y (#7438): it focuses the first
+  // focusable element in the dialog (the search input) without a timeout.
 
   const effectiveTopicId = selectedTopicId;
 
