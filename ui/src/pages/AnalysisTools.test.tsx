@@ -52,9 +52,22 @@ const statisticsPayload: StatisticsSummary = {
 describe('AnalysisToolsPage', () => {
   const mockFetch = vi.fn();
 
+  // The page mounts <PlotsSection> and <CounterfactualPanel>, which each fire a
+  // fetch on mount (`/api/analysis/plot-types`, counterfactual support). Those
+  // mount-time calls must not steal the payloads the metric/statistics/export
+  // tests assert, so the base mock answers them with an inert ok-empty response
+  // and lets each test override the endpoint it actually exercises by URL.
+  const okEmpty = () =>
+    Promise.resolve({
+      ok: true,
+      json: async () => ({}),
+      blob: async () => new Blob([]),
+    });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+    mockFetch.mockImplementation(okEmpty);
     vi.stubGlobal('fetch', mockFetch);
     vi.stubGlobal('URL', {
       ...URL,
@@ -75,10 +88,11 @@ describe('AnalysisToolsPage', () => {
   });
 
   it('fetches and renders the live metrics snapshot', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => metricsPayload,
-    });
+    mockFetch.mockImplementation((url: string) =>
+      String(url).includes('/api/analysis/metrics')
+        ? Promise.resolve({ ok: true, json: async () => metricsPayload })
+        : okEmpty(),
+    );
 
     render(<AnalysisToolsPage />);
     fireEvent.click(screen.getByText('Refresh Metrics'));
@@ -97,10 +111,11 @@ describe('AnalysisToolsPage', () => {
   });
 
   it('fetches and renders backend statistics summaries', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => statisticsPayload,
-    });
+    mockFetch.mockImplementation((url: string) =>
+      String(url).includes('/api/analysis/statistics')
+        ? Promise.resolve({ ok: true, json: async () => statisticsPayload })
+        : okEmpty(),
+    );
 
     render(<AnalysisToolsPage />);
     fireEvent.click(screen.getByText('Load Statistics'));
@@ -119,12 +134,18 @@ describe('AnalysisToolsPage', () => {
   });
 
   it('shows the backend error instead of fake data when the API fails', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      statusText: 'Bad Request',
-      json: async () => ({ detail: 'No physics engine loaded. Load an engine first.' }),
-    });
+    mockFetch.mockImplementation((url: string) =>
+      String(url).includes('/api/analysis/metrics')
+        ? Promise.resolve({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            json: async () => ({
+              detail: 'No physics engine loaded. Load an engine first.',
+            }),
+          })
+        : okEmpty(),
+    );
 
     render(<AnalysisToolsPage />);
     fireEvent.click(screen.getByText('Refresh Metrics'));
@@ -146,10 +167,11 @@ describe('AnalysisToolsPage', () => {
 
   it('downloads the streamed export file and reports its real size', async () => {
     const blob = new Blob(['a,b\n1,2\n'], { type: 'text/csv' });
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      blob: async () => blob,
-    });
+    mockFetch.mockImplementation((url: string) =>
+      String(url).includes('/api/analysis/export')
+        ? Promise.resolve({ ok: true, blob: async () => blob })
+        : okEmpty(),
+    );
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {});
@@ -164,8 +186,11 @@ describe('AnalysisToolsPage', () => {
       '/api/analysis/export',
       expect.objectContaining({ method: 'POST' }),
     );
+    const exportCall = mockFetch.mock.calls.find(([url]) =>
+      String(url).includes('/api/analysis/export'),
+    );
     const requestBody = JSON.parse(
-      (mockFetch.mock.calls[0][1] as RequestInit).body as string,
+      (exportCall![1] as RequestInit).body as string,
     );
     expect(requestBody.format).toBe('csv');
     expect(clickSpy).toHaveBeenCalled();
@@ -174,12 +199,18 @@ describe('AnalysisToolsPage', () => {
   });
 
   it('surfaces export errors from the backend', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      statusText: 'Bad Request',
-      json: async () => ({ detail: 'No data to export. Run a simulation first.' }),
-    });
+    mockFetch.mockImplementation((url: string) =>
+      String(url).includes('/api/analysis/export')
+        ? Promise.resolve({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            json: async () => ({
+              detail: 'No data to export. Run a simulation first.',
+            }),
+          })
+        : okEmpty(),
+    );
 
     render(<AnalysisToolsPage />);
     fireEvent.click(screen.getByText('Export'));

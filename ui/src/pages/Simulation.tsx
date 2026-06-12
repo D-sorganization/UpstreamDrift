@@ -368,10 +368,14 @@ export function SimulationPage() {
           <ActuatorPanel isRunning={isRunning} />
         </div>
 
-        {/* Recordings: persist, export, delete session recordings (#7451) */}
-        <div className="mb-6">
-          <RecordingsPanel isRunning={isRunning} />
-        </div>
+        {/* Recordings: persist, export, delete session recordings (#7451).
+            Hidden when the engine lacks forward_sim capability (#7452): with no
+            forward simulation there are no trajectory frames to record. */}
+        {recordingSupported && (
+          <div className="mb-6">
+            <RecordingsPanel isRunning={isRunning} />
+          </div>
+        )}
 
         {/* Speed Factor Control */}
         {isRunning && (
