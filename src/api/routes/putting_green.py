@@ -167,7 +167,7 @@ async def simulate_putt(
         )
 
     direction = np.array([payload.direction_x, payload.direction_y])
-    norm = math.hypot(direction[0], direction[1])  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for 2D arrays
+    norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
 
@@ -264,7 +264,7 @@ async def scatter_analysis(
     sim = PuttingGreenSimulator(green=green)
 
     direction = np.array([request.direction_x, request.direction_y])
-    norm = math.hypot(direction[0], direction[1])  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for 2D arrays
+    norm = math.hypot(float(direction[0]), float(direction[1]))
     if norm > 0:
         direction = direction / norm
 
