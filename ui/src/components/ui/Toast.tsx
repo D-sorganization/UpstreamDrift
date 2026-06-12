@@ -9,7 +9,12 @@ interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
+  /** Number of coalesced occurrences of an identical (message, type) toast. */
+  count: number;
 }
+
+/** Maximum simultaneously-visible toasts; oldest are dropped beyond this. */
+const MAX_TOASTS = 5;
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType, duration?: number) => void;
@@ -44,24 +49,35 @@ const ICON_STYLES = {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const Icon = ICONS[toast.type];
+  const assertive = toast.type === 'error';
 
   useEffect(() => {
     if (toast.duration) {
       const timer = setTimeout(onClose, toast.duration);
       return () => clearTimeout(timer);
     }
-  }, [toast.duration, onClose]);
+    // `toast.count` is a dep so a coalesced duplicate restarts the dismiss timer.
+  }, [toast.duration, toast.count, onClose]);
 
   return (
     <div
-      role="alert"
-      aria-live="polite"
+      role={assertive ? 'alert' : 'status'}
+      aria-live={assertive ? 'assertive' : 'polite'}
+      aria-atomic="true"
       className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg
                   backdrop-blur-sm animate-in slide-in-from-right-5 duration-200
                   ${STYLES[toast.type]}`}
     >
       <Icon className={`w-5 h-5 flex-shrink-0 ${ICON_STYLES[toast.type]}`} aria-hidden="true" />
       <p className="text-sm font-medium flex-1">{toast.message}</p>
+      {toast.count > 1 && (
+        <span
+          className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-white/15"
+          aria-label={`${toast.count} occurrences`}
+        >
+          ×{toast.count}
+        </span>
+      )}
       <button
         onClick={onClose}
         className="p-1 rounded hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
@@ -89,7 +105,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     if (verbosity === 'errors' && type !== 'error' && type !== 'warning') return;
     const resolvedDuration = duration ?? prefs?.toast_duration_ms ?? 4000;
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    setToasts((prev) => [...prev, { id, message, type, duration: resolvedDuration }]);
+    setToasts((prev) => {
+      // Deduplicate: an identical (message, type) toast already on screen is
+      // coalesced — bump its count and restart its timer instead of stacking.
+      const existing = prev.find((t) => t.message === message && t.type === type);
+      if (existing) {
+        return prev.map((t) =>
+          t === existing
+            ? { ...t, count: t.count + 1, duration: resolvedDuration }
+            : t,
+        );
+      }
+      // Cap the stack: drop the oldest beyond MAX_TOASTS.
+      return [
+        ...prev,
+        { id, message, type, duration: resolvedDuration, count: 1 },
+      ].slice(-MAX_TOASTS);
+    });
   }, []);
 
   const showSuccess = useCallback((message: string) => showToast(message, 'success'), [showToast]);
