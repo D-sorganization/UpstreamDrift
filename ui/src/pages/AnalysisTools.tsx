@@ -13,6 +13,7 @@ import { useAnalysisTools, EXPORT_FORMATS } from '@/api/useAnalysisTools';
 import type { ExportFormat } from '@/api/useAnalysisTools';
 import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
   AnalysisLoadState,
   ExportFormat,
@@ -55,11 +56,10 @@ export function AnalysisToolsPage() {
 
   const metricEntries = metrics ? Object.entries(metrics.metrics) : [];
 
-  return (
-    <div className="flex h-screen bg-gray-900 text-gray-100">
-      {/* Left Sidebar - Current Metrics Snapshot */}
-      <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col overflow-y-auto">
-        <div className="p-4 border-b border-gray-700">
+  const leftPanel = (
+    <div className="flex flex-col flex-1 min-h-0 text-gray-100">
+      {/* Current Metrics Snapshot */}
+      <div className="p-4 border-b border-gray-700">
           <h2 className="text-sm font-semibold text-gray-200">Current Metrics</h2>
           <p className="text-xs text-gray-500 mt-1">
             {metricEntries.length} metric{metricEntries.length !== 1 ? 's' : ''} from live engine
@@ -94,10 +94,12 @@ export function AnalysisToolsPage() {
             Refresh Metrics
           </button>
         </div>
-      </aside>
+    </div>
+  );
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+  return (
+    <WorkspaceShell leftPanel={leftPanel} leftPanelLabel="Current Metrics">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 text-gray-100">
         {/* Header */}
         <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
           <h1 className="text-lg font-semibold text-gray-100">Analysis Tools</h1>
@@ -224,7 +226,7 @@ export function AnalysisToolsPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </WorkspaceShell>
   );
 }
