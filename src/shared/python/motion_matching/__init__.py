@@ -143,7 +143,7 @@ _LAZY_EXPORTS = {
     "BodySegment": ".body_skeleton",
     "BodySegmentGroup": ".body_skeleton",
     "default_body_segments": ".body_skeleton",
-    "compute_total_work": ".compute_total_work",
+    "compute_total_work": ".cost",
     "CostBreakdown": ".cost",
     "CostOptions": ".cost",
     "SimOutput": ".cost",
@@ -154,7 +154,8 @@ _LAZY_EXPORTS = {
     "BodyEvent": ".body_target",
     "BodyTarget": ".body_target",
     "load_body_target": ".load_body_target",
-    "load_body_target_c3d": ".load_body_target",
+    "load_body_target_c3d": ".loaders.c3d_body",
+
     "ALLOWED_SHEETS": ".load_club_target",
     "load_club_target": ".load_club_target",
     "load_club_target_c3d": ".load_club_target",
