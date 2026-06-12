@@ -1143,14 +1143,10 @@ class UpstreamDriftLauncher(QMainWindow):
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
-        if True:
-            settings.setValue("chk_live", self.chk_live.isChecked())
-        if True:
-            settings.setValue("chk_gpu", self.chk_gpu.isChecked())
-        if True:
-            settings.setValue("chk_docker", self.chk_docker.isChecked())
-        if True:
-            settings.setValue("chk_wsl", self.chk_wsl.isChecked())
+        settings.setValue("chk_live", self.chk_live.isChecked())
+        settings.setValue("chk_gpu", self.chk_gpu.isChecked())
+        settings.setValue("chk_docker", self.chk_docker.isChecked())
+        settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
     def _stop_background_threads(self) -> None:
         """Stop background timers and threads cleanly."""
