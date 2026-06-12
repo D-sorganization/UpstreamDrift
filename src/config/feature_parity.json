@@ -89,11 +89,12 @@
     "analysis.static_plots": {
       "title": "Static analysis plots (20+ plot types)",
       "pyqt": "src/shared/python/plot_engine/pyqt6_widget.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
+      "api": "src/api/routes/analysis_plots.py",
+      "web": "ui/src/components/analysis/PlotsSection.tsx",
+      "status": "parity",
       "issue": 7449,
-      "tiles": []
+      "tiles": [],
+      "notes": "GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
     },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
@@ -125,11 +126,11 @@
     "chat.live_context": {
       "title": "Live app/engine context in chat",
       "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
-      "api": null,
-      "web": "ui/src/pages/Chat.tsx",
-      "status": "gap",
-      "issue": 7453,
-      "tiles": []
+      "api": "src/api/services/chat_app_context.py",
+      "web": "ui/src/components/ui/ChatContextChip.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Shared ChatAppContext schema (#7453): both server wirings install make_app_state_provider; web chip via GET /chat/context."
     },
     "mocap.breadth": {
       "title": "Motion-capture breadth (C3D upload/playback, OpenPose source)",
@@ -148,10 +149,9 @@
     "analysis.cross_engine_robustness": {
       "title": "Cross-engine robustness dashboard (perturbation/CV)",
       "pyqt": "src/launchers/cross_engine_dashboard.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 7455,
+      "api": "src/api/routes/cross_engine.py",
+      "web": "ui/src/pages/CrossEngineDashboard.tsx",
+      "status": "parity",
       "tiles": ["cross_engine", "perturbation_analysis"]
     },
     "simulation.shot_tracer": {
@@ -175,11 +175,11 @@
     "diagnostics.integrations_health": {
       "title": "Diagnostics + integrations-health panel",
       "pyqt": "src/launchers/integrations_health_panel.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 7458,
-      "tiles": []
+      "api": "src/api/routes/diagnostics.py",
+      "web": "ui/src/components/ui/DiagnosticsPanel.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Single probe implementation (DIAGNOSTIC_CHECKS in launcher_diagnostics.py + integrations_health_data.py) feeds the desktop panels and GET /api/v1/diagnostics/full + /api/v1/integrations/health (issue #7458)."
     },
     "onboarding.about_version": {
       "title": "About/version info + onboarding",

@@ -7,19 +7,19 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 9 parity · 16 gap · 11 exempt (10 pending decision in #7460).
+**Summary:** 12 parity · 13 gap · 11 exempt (10 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
 | `analysis.analysis_tools_api`<br>Analysis Tools REST endpoints (swing metrics, biomechanics) | 🔴 gap | — | `src/api/routes/analysis_tools.py` | `ui/src/pages/AnalysisTools.tsx` | #7448 |
 | `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | 🔴 gap | `src/shared/python/biomechanics/ztcf.py` | — | — | #7450 |
-| `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | 🔴 gap | `src/launchers/cross_engine_dashboard.py` | — | — | #7455 |
-| `analysis.static_plots`<br>Static analysis plots (20+ plot types) | 🔴 gap | `src/shared/python/plot_engine/pyqt6_widget.py` | — | — | #7449 |
+| `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | ✅ parity | `src/launchers/cross_engine_dashboard.py` | `src/api/routes/cross_engine.py` | `ui/src/pages/CrossEngineDashboard.tsx` | — |
+| `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | #7449 |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
-| `chat.live_context`<br>Live app/engine context in chat | 🔴 gap | `src/launchers/launcher_sidekick_sidebar.py` | — | `ui/src/pages/Chat.tsx` | #7453 |
+| `chat.live_context`<br>Live app/engine context in chat | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/services/chat_app_context.py` | `ui/src/components/ui/ChatContextChip.tsx` | — |
 | `chat.transport`<br>AI chat transport (message send/stream) | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/routes/chat_ws.py` | `ui/src/pages/Chat.tsx` | — |
-| `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | 🔴 gap | `src/launchers/integrations_health_panel.py` | — | — | #7458 |
+| `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | ✅ parity | `src/launchers/integrations_health_panel.py` | `src/api/routes/diagnostics.py` | `ui/src/components/ui/DiagnosticsPanel.tsx` | — |
 | `docs.document_library`<br>Document library / project map viewer | ⚪ exempt | `src/launchers/library_widget.py` | — | — | Desktop documentation browser; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `engines.dashboards`<br>Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | ⚪ exempt | `src/launchers/drake_dashboard.py` | — | — | Experimental desktop dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `engines.load_and_simulate`<br>Engine load/probe + basic simulation loop | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/engines.py` | `ui/src/pages/Simulation.tsx` | — |

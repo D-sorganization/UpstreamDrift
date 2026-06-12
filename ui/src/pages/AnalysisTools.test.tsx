@@ -10,6 +10,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 
+vi.mock('@/components/analysis/PlotsSection', () => ({
+  PlotsSection: () => null,
+}));
+
+vi.mock('@/components/analysis/CounterfactualPanel', () => ({
+  CounterfactualPanel: () => null,
+}));
+
 import { AnalysisToolsPage } from './AnalysisTools';
 import type { MetricsSnapshot, StatisticsSummary } from './AnalysisTools';
 
