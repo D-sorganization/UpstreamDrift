@@ -79,7 +79,8 @@ from src.api.routes import (  # noqa: E402
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.api.task_manager import TaskManager  # noqa: E402
-from src.shared.python.app_state import agent_context, get_state_logger  # noqa: E402
+from src.api.services.chat_app_context import make_app_state_provider  # noqa: E402
+from src.shared.python.app_state import get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
@@ -832,8 +833,14 @@ def create_local_app() -> FastAPI:
     app.state.analysis_service = _LazyServiceProxy(
         lambda: _create_analysis_service(engine_manager)
     )
+    # Shared ChatAppContext schema (#5470, #7453): same provider contract as
+    # src/api/server.py so desktop and web chat context cannot drift.
     app.state.chat_service = ChatService(
-        app_state_provider=lambda: agent_context(get_state_logger().store)
+        app_state_provider=make_app_state_provider(
+            lambda: app.state.engine_manager,
+            lambda: app.state.simulation_service,
+            lambda: get_state_logger().store,
+        )
     )
     task_manager = TaskManager()
     app.state.task_manager = task_manager

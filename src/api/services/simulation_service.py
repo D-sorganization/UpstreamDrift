@@ -42,6 +42,9 @@ class SimulationStats:
     speed_factor: float = _DEFAULT_SPEED_FACTOR
     is_recording: bool = False
     recorded_frames: list[Any] = field(default_factory=list)
+    #: Last/current run summary for chat context (#7453). Keys mirror
+    #: ``src.api.services.chat_app_context.SimulationRunContext``.
+    last_run: dict[str, Any] | None = None
 
 
 class SimulationService:
@@ -77,6 +80,50 @@ class SimulationService:
             value: Speed multiplier (>0).
         """
         self._stats.speed_factor = value
+
+    def _begin_last_run(self, request: SimulationRequest) -> None:
+        """Record the start of a simulation run for chat context (#7453).
+
+        Only the model file *name* is recorded (never the full path) so the
+        value is safe to surface in chat context and the web UI chip.
+        """
+        from pathlib import Path
+
+        model_name = None
+        if request.model_path:
+            model_name = Path(str(request.model_path)).name
+        self._stats.last_run = {
+            "engine": str(request.engine_type).lower(),
+            "model": model_name,
+            "duration_seconds": float(request.duration),
+            "status": "running",
+            "frames": 0,
+            "finished_at": None,
+            "error": None,
+            "analysis_summary": None,
+        }
+
+    def _finish_last_run(
+        self,
+        status: str,
+        frames: int | None = None,
+        error: str | None = None,
+        analysis_summary: str | None = None,
+    ) -> None:
+        """Mark the in-flight run as finished for chat context (#7453)."""
+        if not status:
+            raise ValueError("status must be a non-empty string")
+        last_run = self._stats.last_run
+        if last_run is None:
+            return
+        last_run["status"] = status
+        last_run["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        if frames is not None:
+            last_run["frames"] = frames
+        if error is not None:
+            last_run["error"] = error
+        if analysis_summary is not None:
+            last_run["analysis_summary"] = analysis_summary
 
     @precondition(
         lambda self, request: request is not None,
@@ -172,6 +219,7 @@ class SimulationService:
         """
         self._stats.start_time = time.time()
         self._stats.frame_count = 0
+        self._begin_last_run(request)
         engine = self._prepare_engine(request)
         recorder = GenericPhysicsRecorder(engine)
 
@@ -193,6 +241,15 @@ class SimulationService:
         analysis_results = None
         if request.analysis_config:
             analysis_results = self._perform_analysis(recorder, request.analysis_config)
+
+        analysis_summary = None
+        if isinstance(analysis_results, dict) and analysis_results:
+            analysis_summary = "analysis: " + ", ".join(
+                sorted(str(k) for k in analysis_results)
+            )
+        self._finish_last_run(
+            status="completed", frames=steps, analysis_summary=analysis_summary
+        )
 
         return SimulationResponse(
             success=True,
@@ -225,6 +282,7 @@ class SimulationService:
             return response
         except (GolfSuiteError, ValueError, RuntimeError) as e:
             logger.error("Simulation failed: %s", e, exc_info=True)
+            self._finish_last_run(status="failed", error=str(e))
             return SimulationResponse(
                 success=False,
                 duration=0.0,
