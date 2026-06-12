@@ -29,7 +29,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/unified_launcher.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | 🔴 gap | `src/launchers/unified_launcher.py` | — | `ui/src/pages/Dashboard.tsx` | #7461 |
-| `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | 🔴 gap | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | #7454 |
+| `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | 🔴 gap | `src/launchers/about_dialog.py` | — | — | #7459 |
 | `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Desktop optimization GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
