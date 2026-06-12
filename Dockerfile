@@ -1,7 +1,7 @@
 # See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
 # Stage 1: Builder — install all Python dependencies into an isolated venv
 # Base image pinned by digest for reproducible builds
-FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder
+FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1
@@ -50,6 +50,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
+    tornado==6.5.6 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
@@ -80,7 +81,7 @@ RUN set -eu; \
 
 # Stage 2: Runtime — slim production image for the API server
 # Base image pinned by digest for reproducible builds
-FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS runtime
+FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
