@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-13
+  LAST UPDATED: 2026-06-14
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.357                                            |
+| **Spec Version**        | 1.0.356                                            |
 | **Last Spec Update**    | 2026-06-11                                         |
 
 ## 2. Purpose & Mission
@@ -128,12 +128,6 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   failures remain caller-actionable. Production chat tools that do not yet run
   real work now return explicit `not_implemented` payloads instead of queued or
   successful placeholder results.
-
-- **2026-06-12** - Putting-green API norm optimization for #7470. The
-  `/simulate` and `/scatter` direction normalization paths now use
-  `math.hypot` on the known two coordinates instead of dispatching through
-  `np.linalg.norm`, preserving zero-vector handling while avoiding small-array
-  NumPy overhead.
 
 - **2026-06-11** - Honest launcher Document Chat and swing-sequence analytics
   contracts for #7358/#7359. The Library tab no longer enables Document Chat
@@ -1259,7 +1253,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-12 | 1.0.357 | Optimize putting-green API direction normalization by replacing two-coordinate `np.linalg.norm` calls with `math.hypot`, preserving zero-vector behavior while avoiding small-array NumPy dispatch overhead. |
 | 2026-06-11 | 1.0.353 | Made the optional-stack unit lane boundary explicit: the lane runs the non-engine unit suite with optional API, GUI, and body-part dependencies installed, while native engine unit tests remain covered by dedicated engine and cross-engine equivalence lanes to avoid coupling broad optional dependency validation to engine-specific mock behavior. |
 | 2026-06-11 | 1.0.352 | Aligned deployment optional-stack device tests with the hardware-honesty contract: unavailable hardware-backed input devices remain disconnected and raise `StateError` for state operations, `KeyboardMouseInput` remains the connected fallback, and `Demonstration` now carries default canonical `solver_status="success"` through recording, serialization, subsampling, and augmentation. |
 | 2026-06-11 | 1.0.351 | Restored the calc backend ODE solver response contract so `ODESolverResponse` again exposes the default `solver_status="success"` field consumed by optional-stack calc backend callers and tests. |
@@ -1579,3 +1572,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Optimized magnitude calculations using math.hypot instead of np.linalg.norm in MuJoCo humanoid golf engine
 
 - Optimized 3D vector norm calculations in physics engines using math.hypot instead of np.linalg.norm.
+
+### Bolt Optimizations
+- Optimized 2D array magnitude calculations in putting green API by using `math.hypot` instead of `np.linalg.norm`.
