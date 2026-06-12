@@ -104,9 +104,9 @@ __all__ = [
 # registry imports while still surfacing a true hang (e.g. crashed worker
 # thread) before the user concludes the app is broken.  See issue #5490.
 STARTUP_TIMEOUT_SEC: int = 30
-assert (
-    STARTUP_TIMEOUT_SEC > 0
-), "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+assert STARTUP_TIMEOUT_SEC > 0, (
+    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+)
 
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
@@ -1141,14 +1141,10 @@ class UpstreamDriftLauncher(QMainWindow):
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
-        if True:
-            settings.setValue("chk_live", self.chk_live.isChecked())
-        if True:
-            settings.setValue("chk_gpu", self.chk_gpu.isChecked())
-        if True:
-            settings.setValue("chk_docker", self.chk_docker.isChecked())
-        if True:
-            settings.setValue("chk_wsl", self.chk_wsl.isChecked())
+        settings.setValue("chk_live", self.chk_live.isChecked())
+        settings.setValue("chk_gpu", self.chk_gpu.isChecked())
+        settings.setValue("chk_docker", self.chk_docker.isChecked())
+        settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
     def _stop_background_threads(self) -> None:
         """Stop background timers and threads cleanly."""
