@@ -97,6 +97,118 @@ export const FIELD_METADATA: FieldMetadata[] = [
     "example": "0.0"
   },
   {
+    "id": "ball_flight.azimuth_angle",
+    "label": "Azimuth angle",
+    "shortHelp": "Horizontal start direction in degrees; positive is right of target.",
+    "longHelp": "Horizontal angle of the initial velocity vector relative to the target\nline, in degrees.  0 is straight at the target; positive values start the\nball right.  Valid range is [-90, 90] deg.\n",
+    "units": "deg",
+    "validRange": [
+      -90.0,
+      90.0
+    ],
+    "default": 0.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "0.0"
+  },
+  {
+    "id": "ball_flight.ball_speed",
+    "label": "Ball speed",
+    "shortHelp": "Initial ball speed at launch, in metres per second.",
+    "longHelp": "Speed of the ball leaving the clubface, in m/s (NOT mph).  A driver strike\nfor an amateur is typically 55-75 m/s; tour drivers reach ~80 m/s.\nThe API rejects values outside (0, 100].\n",
+    "units": "m/s",
+    "validRange": [
+      0.1,
+      100.0
+    ],
+    "default": 70.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "70.0"
+  },
+  {
+    "id": "ball_flight.launch_angle",
+    "label": "Launch angle",
+    "shortHelp": "Vertical launch angle in degrees above horizontal.",
+    "longHelp": "Vertical angle of the initial velocity vector, in degrees (NOT radians —\nsee the unit-convention bug history in issue #7246).  Drivers launch at\n~10-15 deg; wedges at 25-40 deg.  Valid range is [-10, 80] deg.\n",
+    "units": "deg",
+    "validRange": [
+      -10.0,
+      80.0
+    ],
+    "default": 12.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "12.0"
+  },
+  {
+    "id": "ball_flight.spin_axis_tilt",
+    "label": "Spin-axis tilt",
+    "shortHelp": "Spin-axis tilt in degrees; positive tilts produce a fade/slice.",
+    "longHelp": "Tilt of the spin axis from horizontal, in degrees.  0 is pure backspin;\npositive tilt curves the ball right (fade/slice), negative curves it left\n(draw/hook).  Valid range is [-90, 90] deg.\n",
+    "units": "deg",
+    "validRange": [
+      -90.0,
+      90.0
+    ],
+    "default": 0.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "0.0"
+  },
+  {
+    "id": "ball_flight.spin_rate",
+    "label": "Spin rate",
+    "shortHelp": "Initial total spin rate in revolutions per minute (RPM).",
+    "longHelp": "Total spin of the ball at launch, in RPM (NOT rad/s — see issue #7246).\nDrivers impart ~2000-3500 RPM; wedges can exceed 10000 RPM.  Valid range\nis [0, 15000] RPM.\n",
+    "units": "rpm",
+    "validRange": [
+      0.0,
+      15000.0
+    ],
+    "default": 2600.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "2600.0"
+  },
+  {
+    "id": "ball_flight.wind_direction",
+    "label": "Wind direction",
+    "shortHelp": "Wind direction in degrees; 0 is a pure headwind.",
+    "longHelp": "Direction the wind blows FROM relative to the target line, in degrees.\n0 deg is a headwind, 180/-180 deg a tailwind, 90 deg from the right.\nValid range is [-180, 180] deg.\n",
+    "units": "deg",
+    "validRange": [
+      -180.0,
+      180.0
+    ],
+    "default": 0.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "0.0"
+  },
+  {
+    "id": "ball_flight.wind_speed",
+    "label": "Wind speed",
+    "shortHelp": "Steady wind speed in metres per second.",
+    "longHelp": "Magnitude of the steady wind field, in m/s.  10 m/s is a strong breeze;\nthe API caps wind at 40 m/s.\n",
+    "units": "m/s",
+    "validRange": [
+      0.0,
+      40.0
+    ],
+    "default": 0.0,
+    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue #7456).",
+    "consumers": [],
+    "producers": [],
+    "example": "0.0"
+  },
+  {
     "id": "counterfactual.kind",
     "label": "Counterfactual kind",
     "shortHelp": "Which counterfactual or induced-acceleration analysis to run.",
@@ -115,118 +227,6 @@ export const FIELD_METADATA: FieldMetadata[] = [
     "consumers": [],
     "producers": [],
     "example": "ztcf"
-  },
-  {
-    "id": "ball_flight.azimuth_angle",
-    "label": "Azimuth angle",
-    "shortHelp": "Horizontal start direction in degrees; positive is right of target.",
-    "longHelp": "Horizontal angle of the initial velocity vector relative to the target\nline, in degrees.  0 is straight at the target; positive values start the\nball right.  Valid range is [-90, 90] deg.\n",
-    "units": "deg",
-    "validRange": [
-      -90.0,
-      90.0
-    ],
-    "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "0.0"
-  },
-  {
-    "id": "ball_flight.ball_speed",
-    "label": "Ball speed",
-    "shortHelp": "Initial ball speed at launch, in metres per second.",
-    "longHelp": "Speed of the ball leaving the clubface, in m/s (NOT mph).  A driver strike\nfor an amateur is typically 55-75 m/s; tour drivers reach ~80 m/s.\nThe API rejects values outside (0, 100].\n",
-    "units": "m/s",
-    "validRange": [
-      0.1,
-      100.0
-    ],
-    "default": 70.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "70.0"
-  },
-  {
-    "id": "ball_flight.launch_angle",
-    "label": "Launch angle",
-    "shortHelp": "Vertical launch angle in degrees above horizontal.",
-    "longHelp": "Vertical angle of the initial velocity vector, in degrees (NOT radians —\nsee the unit-convention bug history in issue #7246).  Drivers launch at\n~10-15 deg; wedges at 25-40 deg.  Valid range is [-10, 80] deg.\n",
-    "units": "deg",
-    "validRange": [
-      -10.0,
-      80.0
-    ],
-    "default": 12.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "12.0"
-  },
-  {
-    "id": "ball_flight.spin_axis_tilt",
-    "label": "Spin-axis tilt",
-    "shortHelp": "Spin-axis tilt in degrees; positive tilts produce a fade/slice.",
-    "longHelp": "Tilt of the spin axis from horizontal, in degrees.  0 is pure backspin;\npositive tilt curves the ball right (fade/slice), negative curves it left\n(draw/hook).  Valid range is [-90, 90] deg.\n",
-    "units": "deg",
-    "validRange": [
-      -90.0,
-      90.0
-    ],
-    "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "0.0"
-  },
-  {
-    "id": "ball_flight.spin_rate",
-    "label": "Spin rate",
-    "shortHelp": "Initial total spin rate in revolutions per minute (RPM).",
-    "longHelp": "Total spin of the ball at launch, in RPM (NOT rad/s — see issue #7246).\nDrivers impart ~2000-3500 RPM; wedges can exceed 10000 RPM.  Valid range\nis [0, 15000] RPM.\n",
-    "units": "rpm",
-    "validRange": [
-      0.0,
-      15000.0
-    ],
-    "default": 2600.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "2600.0"
-  },
-  {
-    "id": "ball_flight.wind_direction",
-    "label": "Wind direction",
-    "shortHelp": "Wind direction in degrees; 0 is a pure headwind.",
-    "longHelp": "Direction the wind blows FROM relative to the target line, in degrees.\n0 deg is a headwind, 180/-180 deg a tailwind, 90 deg from the right.\nValid range is [-180, 180] deg.\n",
-    "units": "deg",
-    "validRange": [
-      -180.0,
-      180.0
-    ],
-    "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "0.0"
-  },
-  {
-    "id": "ball_flight.wind_speed",
-    "label": "Wind speed",
-    "shortHelp": "Steady wind speed in metres per second.",
-    "longHelp": "Magnitude of the steady wind field, in m/s.  10 m/s is a strong breeze;\nthe API caps wind at 40 m/s.\n",
-    "units": "m/s",
-    "validRange": [
-      0.0,
-      40.0
-    ],
-    "default": 0.0,
-    "defaultSource": "Default mirrors BallFlightSimulationRequest in src/api/routes/ball_flight.py (issue",
-    "consumers": [],
-    "producers": [],
-    "example": "0.0"
   },
   {
     "id": "pose_studio.show_radians",

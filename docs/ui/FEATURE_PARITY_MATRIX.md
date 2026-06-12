@@ -1,7 +1,7 @@
 # PyQt6 vs React UI Feature Parity Matrix
 
 **Document Date:** 2026-05-10  
-**Last Updated:** 2026-05-10  
+**Last Updated:** 2026-06-12
 **Related Issue:** #4913  
 **EPIC:** #4904 (Launcher UI/UX Remediation & Documentation Sync)
 
@@ -71,6 +71,10 @@ The React UI provides:
 |                         | Frankenstein Editor                              | ✅    | ❌          | Medium   | #3             |
 |                         | Character Builder                                | ✅    | ❌          | Medium   | #4             |
 |                         | URDF export                                      | ✅    | ❌          | Medium   | #3             |
+| **Analysis**            | ZTCF counterfactual                              | ✅    | ✅          | High     | #7450          |
+|                         | ZVCF counterfactual                              | ✅    | ✅          | High     | #7450          |
+|                         | Induced-acceleration (gravity/drift/control)     | ✅    | ✅          | High     | #7450          |
+|                         | Engine capability gating (data-driven)           | ✅    | ✅          | High     | #7450          |
 | **Specialized Views**   | Putting Green Simulator                          | ✅    | ❌          | Medium   | #5             |
 |                         | C3D Motion Capture Viewer                        | ✅    | ❌          | Medium   | -              |
 |                         | Data Explorer                                    | ✅    | ❌          | Low      | -              |
