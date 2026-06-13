@@ -147,17 +147,27 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
     })
 }
 
+/// Kill the managed backend child if one is running. Shared by the
+/// `stop_backend` command and the window-close / app-exit shutdown hooks
+/// (issue #7436) so the Python process never outlives the app.
+fn kill_backend(process: &BackendProcess) {
+    // Lock defensively: a poisoned mutex must not prevent shutdown.
+    let mut guard = match process.0.lock() {
+        Ok(g) => g,
+        Err(poisoned) => poisoned.into_inner(),
+    };
+    if let Some(mut child) = guard.take() {
+        let pid = child.id();
+        let _ = child.kill();
+        let _ = child.wait();
+        log::info!("Backend server stopped (pid {})", pid);
+    }
+}
+
 /// Stop the Python backend server.
 #[tauri::command]
 fn stop_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
-    let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-
-    if let Some(ref mut child) = *guard {
-        let _ = child.kill();
-        let _ = child.wait();
-        log::info!("Backend server stopped");
-    }
-    *guard = None;
+    kill_backend(&state);
 
     Ok(BackendStatus {
         running: false,
@@ -265,12 +275,31 @@ pub fn run() {
             }
             Ok(())
         })
+        // #7436: when a window is destroyed, kill the spawned Python backend so
+        // it does not outlive the app and block the port on relaunch.
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::Destroyed = event {
+                if let Some(process) = window.app_handle().try_state::<BackendProcess>() {
+                    kill_backend(&process);
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             start_backend,
             stop_backend,
             backend_status,
             get_diagnostics,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Golf Modeling Suite");
+        .build(tauri::generate_context!())
+        .expect("error while running Golf Modeling Suite")
+        // #7436: belt-and-suspenders for multi-window / non-window exits —
+        // ensure the backend is killed on any app exit, not just a window
+        // Destroyed event.
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::ExitRequested { .. } = event {
+                if let Some(process) = app_handle.try_state::<BackendProcess>() {
+                    kill_backend(&process);
+                }
+            }
+        });
 }
