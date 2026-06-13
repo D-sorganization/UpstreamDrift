@@ -123,11 +123,11 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
           )}
 
           {busy && !error && (
-            <p className="text-xs text-gray-500 italic">Loading…</p>
+            <p className="text-xs text-gray-400 italic">Loading…</p>
           )}
 
           {loaded && recordings.length === 0 && !busy && (
-            <p className="text-xs text-gray-500 italic">
+            <p className="text-xs text-gray-400 italic">
               No recordings yet. Run a simulation, then save it.
             </p>
           )}

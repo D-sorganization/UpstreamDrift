@@ -82,7 +82,7 @@ function TreeNodeComponent({
               e.stopPropagation();
               setExpanded(!expanded);
             }}
-            className="text-xs text-gray-500 hover:text-gray-300 w-3 flex-shrink-0"
+            className="text-xs text-gray-400 hover:text-gray-300 w-3 flex-shrink-0"
             aria-label={expanded ? 'Collapse' : 'Expand'}
           >
             {expanded ? '▼' : '▶'}
@@ -104,7 +104,7 @@ function TreeNodeComponent({
 
         {/* Joint type badge */}
         {node.node_type === 'joint' && node.properties.joint_type != null && (
-          <span className="text-[10px] text-gray-500 ml-1">
+          <span className="text-[10px] text-gray-400 ml-1">
             ({String(node.properties.joint_type)})
           </span>
         )}
@@ -230,7 +230,7 @@ export function ModelTree({
     <div className="flex flex-col h-full bg-gray-800/40 backdrop-blur-md border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl">
       <div className="px-4 py-3 bg-gray-800 border-b border-gray-700/80 flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
             {side === 'source' ? 'Source Model' : side === 'target' ? 'Target Model' : 'Model Structure'}
           </span>
           <span className="text-xs font-semibold text-gray-200 font-mono truncate max-w-[200px]" title={modelName}>
@@ -244,7 +244,7 @@ export function ModelTree({
 
       <div className="flex-1 overflow-y-auto p-3 space-y-1" role="tree">
         {rootNodes.length === 0 ? (
-          <div className="text-xs text-gray-500 italic text-center py-8">
+          <div className="text-xs text-gray-400 italic text-center py-8">
             No nodes found
           </div>
         ) : (

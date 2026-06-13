@@ -145,7 +145,7 @@ export function PlotDataChart({ data }: Props) {
         : 'No data recorded';
     return (
       <div
-        className="flex items-center justify-center h-full text-gray-500"
+        className="flex items-center justify-center h-full text-gray-400"
         data-testid="plot-empty-state"
       >
         <p className="text-sm italic">{message}</p>

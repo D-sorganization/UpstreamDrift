@@ -349,7 +349,7 @@ export function PuttingGreenPage() {
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Putting Green Simulator</h2>
-          <p className="text-xs text-gray-500">Physics-based putting simulation</p>
+          <p className="text-xs text-gray-400">Physics-based putting simulation</p>
         </div>
 
         {/* Stroke Controls */}
@@ -637,7 +637,7 @@ export function PuttingGreenPage() {
               </div>
             </div>
           ) : (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               Click &quot;Read Green&quot; to analyze the putt line
             </div>
           )}
@@ -683,7 +683,7 @@ export function PuttingGreenPage() {
               </div>
             </div>
           ) : (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               Simulate a putt to see results
             </div>
           )}

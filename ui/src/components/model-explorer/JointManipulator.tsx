@@ -24,7 +24,7 @@ export function JointManipulator({
 }: JointManipulatorProps) {
   if (joints.length === 0) {
     return (
-      <div className="text-xs text-gray-500 italic text-center py-2">
+      <div className="text-xs text-gray-400 italic text-center py-2">
         No movable joints
       </div>
     );

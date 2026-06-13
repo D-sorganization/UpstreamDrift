@@ -61,14 +61,14 @@ export function AnalysisToolsPage() {
       {/* Current Metrics Snapshot */}
       <div className="p-4 border-b border-gray-700">
           <h2 className="text-sm font-semibold text-gray-200">Current Metrics</h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-400 mt-1">
             {metricEntries.length} metric{metricEntries.length !== 1 ? 's' : ''} from live engine
           </p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {metricEntries.length === 0 && !isLoading && (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               No metrics loaded. Load an engine and click Refresh to fetch a live snapshot.
             </div>
           )}
@@ -139,7 +139,7 @@ export function AnalysisToolsPage() {
                     samples (sim time {statistics.sim_time.toFixed(3)}s)
                   </div>
                   {statistics.sample_count === 0 && (
-                    <div className="text-xs text-gray-500 italic text-center py-2">
+                    <div className="text-xs text-gray-400 italic text-center py-2">
                       No metric history yet — run a simulation to collect samples.
                     </div>
                   )}
@@ -149,23 +149,23 @@ export function AnalysisToolsPage() {
                         <div className="text-xs font-medium text-gray-300 mb-1">{stat.metric_name}</div>
                         <div className="grid grid-cols-5 gap-2 text-xs">
                           <div>
-                            <span className="text-gray-500">current</span>
+                            <span className="text-gray-400">current</span>
                             <div className="text-gray-200 font-mono">{stat.current.toFixed(3)}</div>
                           </div>
                           <div>
-                            <span className="text-gray-500">min</span>
+                            <span className="text-gray-400">min</span>
                             <div className="text-gray-200 font-mono">{stat.minimum.toFixed(3)}</div>
                           </div>
                           <div>
-                            <span className="text-gray-500">max</span>
+                            <span className="text-gray-400">max</span>
                             <div className="text-gray-200 font-mono">{stat.maximum.toFixed(3)}</div>
                           </div>
                           <div>
-                            <span className="text-gray-500">mean</span>
+                            <span className="text-gray-400">mean</span>
                             <div className="text-gray-200 font-mono">{stat.mean.toFixed(3)}</div>
                           </div>
                           <div>
-                            <span className="text-gray-500">std</span>
+                            <span className="text-gray-400">std</span>
                             <div className="text-gray-200 font-mono">{stat.std_dev.toFixed(3)}</div>
                           </div>
                         </div>
@@ -174,7 +174,7 @@ export function AnalysisToolsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-xs text-gray-500 italic text-center py-4">
+                <div className="text-xs text-gray-400 italic text-center py-4">
                   Click "Load Statistics" to view summary data
                 </div>
               )}
@@ -217,9 +217,9 @@ export function AnalysisToolsPage() {
                 <div className="mt-3 bg-gray-700/50 p-3 rounded text-xs" data-testid="export-result">
                   <div className="text-green-400 font-medium mb-1">Export Complete</div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div><span className="text-gray-500">Format:</span> <span className="text-gray-200 font-mono">{exportResult.format}</span></div>
-                    <div><span className="text-gray-500">File:</span> <span className="text-gray-200 font-mono">{exportResult.filename}</span></div>
-                    <div><span className="text-gray-500">Size:</span> <span className="text-gray-200 font-mono">{(exportResult.size_bytes / 1024).toFixed(1)} KB</span></div>
+                    <div><span className="text-gray-400">Format:</span> <span className="text-gray-200 font-mono">{exportResult.format}</span></div>
+                    <div><span className="text-gray-400">File:</span> <span className="text-gray-200 font-mono">{exportResult.filename}</span></div>
+                    <div><span className="text-gray-400">Size:</span> <span className="text-gray-200 font-mono">{(exportResult.size_bytes / 1024).toFixed(1)} KB</span></div>
                   </div>
                 </div>
               )}

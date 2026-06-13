@@ -71,7 +71,7 @@ export function LivePlot({ frames, maxPoints = 100 }: Props) {
 
   if (frames.length < 2) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
+      <div className="flex items-center justify-center h-full text-gray-400">
         <p className="text-sm italic">Waiting for simulation data...</p>
       </div>
     );
@@ -79,7 +79,7 @@ export function LivePlot({ frames, maxPoints = 100 }: Props) {
 
   if (!hasJointAngles && !hasVelocities) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
+      <div className="flex items-center justify-center h-full text-gray-400">
         <p className="text-sm italic">No analysis data available. Enable Live Analysis in parameters.</p>
       </div>
     );
