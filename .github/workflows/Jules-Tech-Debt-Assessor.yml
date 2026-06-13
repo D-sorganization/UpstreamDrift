@@ -95,7 +95,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m ensurepip --upgrade || true
-          pip install ruff==0.14.10 mypy bandit radon pip-audit vulture
+          pip install ruff==0.15.17 mypy bandit radon pip-audit vulture
           python -m ensurepip --upgrade || true
           if ! pip install -e ".[dev]"; then
             python -m ensurepip --upgrade || true
