@@ -183,7 +183,7 @@ export function CharacterBuilderPage() {
       {/* Left panel: controls and specs */}
       <aside className="w-96 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-y-auto">
         <div className="p-6 border-b border-gray-700">
-          <h1 className="text-xl font-bold text-white mb-1">Character Builder</h1>
+          <h1 className="heading-page mb-1">Character Builder</h1>
           <p className="text-xs text-gray-400">
             Define humanoid properties and generate URDF models
           </p>

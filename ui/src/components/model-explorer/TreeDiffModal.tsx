@@ -30,7 +30,7 @@ export function TreeDiffModal({
       <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-4 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="heading-section flex items-center gap-2">
             <span className="text-blue-500 font-mono" aria-hidden="true">📊</span> Model Comparison
           </h2>
           <button

@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Typography scale (#7422): one enforced set of heading/label classes so
+ * identical-rank headings look the same on every page and screen-reader
+ * navigation has a consistent hierarchy. Plain CSS (not @apply) for
+ * Tailwind v4 compatibility, matching the .focus-ring convention above. */
+.heading-page {
+  font-size: 1.25rem; /* text-xl */
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.heading-section {
+  font-size: 1rem; /* text-base */
+  line-height: 1.5rem;
+  font-weight: 600;
+  color: #f3f4f6; /* gray-100 */
+}
+.heading-sub {
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #e5e7eb; /* gray-200 */
+}
+.label-overline {
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  font-weight: 600;
+  color: #9ca3af; /* gray-400 (AA on dark, #7439) */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Reduced-motion safety net (#7441): users who request reduced motion get
  * near-instant animations/transitions app-wide. Tailwind `motion-reduce:`
  * variants can still refine individual cases; this is the global guard so
@@ -151,4 +182,35 @@ body {
   --sidekick-border-width: 1px;
   --sidekick-focus-width: 2px;
   --sidekick-font-family: Inter, Segoe UI, system-ui, sans-serif;
+}
+
+/*
+ * Light-mode token block (#7423). The root ships with class="dark", so the
+ * defaults above remain the live theme. This block proves the token plumbing
+ * works: flipping the root class to anything other than `dark` yields a
+ * legible (not yet polished) light theme without touching component classes.
+ * Only the color tokens are overridden — spacing/radius/font are theme-neutral.
+ */
+:root:not(.dark) {
+  --sidekick-color-canvas: #f3f4f6;
+  --sidekick-color-surface: #ffffff;
+  --sidekick-color-surface-muted: #f9fafb;
+  --sidekick-color-surface-raised: #e5e7eb;
+  --sidekick-color-border: #d1d5db;
+  --sidekick-color-border-strong: #2563eb;
+  --sidekick-color-text: #111827;
+  --sidekick-color-text-muted: #374151;
+  --sidekick-color-text-subtle: #4b5563;
+  --sidekick-color-accent: #2563eb;
+  --sidekick-color-accent-hover: #1d4ed8;
+  --sidekick-color-focus: #2563eb;
+  --sidekick-color-input: #ffffff;
+  --sidekick-color-success: #15803d;
+  --sidekick-color-warning: #b45309;
+  --sidekick-color-error: #b91c1c;
+  --sidekick-color-info: #1d4ed8;
+  --sidekick-color-link: #1d4ed8;
+  --sidekick-color-link-hover: #1e40af;
+  --sidekick-color-selection: #bfdbfe;
+  --sidekick-color-selection-text: #111827;
 }

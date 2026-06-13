@@ -236,6 +236,48 @@ describe('ModelExplorer Page UI & Frankenstein Mode', () => {
     // Check that TreeDiffModal is rendered and lists added components in comparison
     expect(screen.getByText(/Model Comparison/i)).toBeInTheDocument();
   });
+
+  it('undoes a copy via Ctrl+Z (#7443)', async () => {
+    render(<ModelExplorerPage />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText(/Frankenstein Mode/i));
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/Select Source/i), {
+        target: { value: 'source_robot' },
+      });
+      fireEvent.change(screen.getByLabelText(/Select Target/i), {
+        target: { value: 'target_robot' },
+      });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText('src_joint_1'));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText('tgt_root'));
+    });
+
+    // Undo is disabled before any edit.
+    expect(
+      screen.getByLabelText(/Undo last Frankenstein edit/i),
+    ).toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText(/Copy Component/i));
+    });
+    expect(screen.getAllByText(/src_joint_1_copy/i)).toHaveLength(1);
+    // After the edit, Undo is enabled.
+    expect(
+      screen.getByLabelText(/Undo last Frankenstein edit/i),
+    ).not.toBeDisabled();
+
+    // Ctrl+Z reverts the copy.
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'z', ctrlKey: true });
+    });
+    expect(screen.queryByText(/src_joint_1_copy/i)).not.toBeInTheDocument();
+  });
 });
 
 describe('JointManipulator component', () => {

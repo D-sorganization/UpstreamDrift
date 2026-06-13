@@ -289,7 +289,7 @@ export function BallFlightPage() {
   const leftPanel = (
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
-          <h2 className="text-lg font-bold text-white mb-1">Shot Tracer</h2>
+          <h1 className="heading-page mb-1">Shot Tracer</h1>
           <p className="text-xs text-gray-400">
             Multi-model ball-flight comparison
           </p>

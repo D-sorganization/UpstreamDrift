@@ -405,7 +405,7 @@ export function MotionCapturePage() {
   const leftPanel = (
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
-          <h2 className="text-lg font-bold text-white mb-1">Motion Capture</h2>
+          <h1 className="heading-page mb-1">Motion Capture</h1>
           <p className="text-xs text-gray-400">
             C3D, OpenPose, and MediaPipe analysis
           </p>

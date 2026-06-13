@@ -46,6 +46,42 @@ Color rules (UI/UX #7421), enforced by `utils/colorGuard.test.ts`:
 Intentional exceptions to the color guard live in
 `utils/colorGuard.allowlist.json` with a documented reason.
 
+### Typography scale (UI/UX #7422)
+
+Use the shared heading/label classes from `index.css` instead of ad-hoc
+`text-* font-*` combinations so identical-rank headings match across pages:
+
+| Class              | Use for                                  | Element |
+| ------------------ | ---------------------------------------- | ------- |
+| `.heading-page`    | the single top-level page title          | `h1`    |
+| `.heading-section` | a section heading                        | `h2`    |
+| `.heading-sub`     | a sub-section heading                    | `h3`    |
+| `.label-overline`  | uppercase overline labels above controls | `label` |
+
+Each page should have exactly one `h1` and must not skip heading ranks (an
+`sr-only` `h1` is fine where the visible hierarchy starts at `h2`).
+
+### Theming tokens (UI/UX #7423)
+
+Theming is class-based: `tailwind.config.js` sets `darkMode: 'class'` and the
+root `<html>` carries `class="dark"`, so the default appearance is the dark
+theme. The runtime-themeable `--sidekick-color-*` CSS variables in `index.css`
+are the source of truth; a `:root:not(.dark)` block provides a light theme,
+proving the plumbing works when the root class is flipped.
+
+Token-backed Tailwind utilities map onto those variables — prefer them in new
+code so a re-theme is a variable swap, not a class-string edit:
+
+| Utility               | Variable                          |
+| --------------------- | --------------------------------- |
+| `bg-canvas`           | `--sidekick-color-canvas`         |
+| `bg-surface`          | `--sidekick-color-surface`        |
+| `bg-surface-raised`   | `--sidekick-color-surface-raised` |
+| `border-token-border` | `--sidekick-color-border`         |
+| `text-token-text`     | `--sidekick-color-text`           |
+| `text-token-muted`    | `--sidekick-color-text-muted`     |
+| `text-token-subtle`   | `--sidekick-color-text-subtle`    |
+
 - `ui/src/api/` - client utilities and hooks that wrap REST and WebSocket flows.
 - `ui/src/stores/` - Zustand state for engines, simulation state, and UI session data.
 - `ui/src/integration/` - integration-focused UI tests.

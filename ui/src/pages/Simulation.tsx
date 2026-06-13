@@ -351,7 +351,7 @@ export function SimulationPage() {
       <h1 className="sr-only">Simulation</h1>
       {/* Left Sidebar - Controls */}
       <aside className="w-80 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto flex-shrink-0 z-10">
-        <h2 className="text-xl font-bold text-white mb-2">Golf Suite</h2>
+        <h2 className="heading-page mb-2">Golf Suite</h2>
         <p className="text-xs text-gray-400 mb-6">
           {loadedEngines.length} engine{loadedEngines.length !== 1 ? 's' : ''} loaded
         </p>

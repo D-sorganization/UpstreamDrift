@@ -339,7 +339,7 @@ export function LauncherDashboard({
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-4 bg-gray-800/80 border-b border-gray-700 flex-shrink-0">
                 <div>
-                    <h1 className="text-xl font-bold text-white">Golf Modeling Suite</h1>
+                    <h1 className="heading-page">Golf Modeling Suite</h1>
                     <p className="text-xs text-gray-400 mt-0.5">
                         {tiles.length} tiles · {engines.length} engines · {toolsAndExternal.length} tools
                     </p>

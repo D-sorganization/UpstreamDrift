@@ -185,7 +185,7 @@ export function CrossEngineDashboardPage() {
     <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100 p-6 gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-gray-100">Cross-Engine Robustness Dashboard</h1>
+        <h1 className="heading-page text-gray-100">Cross-Engine Robustness Dashboard</h1>
         <p className="text-sm text-gray-400 mt-1">
           Perturbation-based comparison across physics engines. Equivalent to the PyQt6 desktop
           dashboard.

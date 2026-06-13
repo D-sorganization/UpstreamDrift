@@ -364,6 +364,38 @@ export const QUICK_TIPS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Keyboard shortcuts (#7443) — single source of truth so HelpPanel can list
+// every global/page binding instead of leaving them undiscoverable.
+// ---------------------------------------------------------------------------
+
+export interface KeyboardShortcut {
+  keys: string;
+  description: string;
+  /** Where the binding applies (global, or a specific page/area). */
+  scope: string;
+}
+
+export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
+  { keys: 'F1', description: 'Open / close this help panel', scope: 'Global' },
+  {
+    keys: 'Space',
+    description: 'Start, pause, resume, or single-step the simulation',
+    scope: 'Simulation',
+  },
+  { keys: 'Esc', description: 'Stop the running simulation', scope: 'Simulation' },
+  {
+    keys: '.',
+    description: 'Single-step while paused',
+    scope: 'Simulation',
+  },
+  {
+    keys: 'Ctrl+Z',
+    description: 'Undo the last Frankenstein tree edit',
+    scope: 'Model Explorer',
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Category Labels
 // ---------------------------------------------------------------------------
 

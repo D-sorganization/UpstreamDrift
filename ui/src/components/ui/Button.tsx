@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
@@ -7,6 +7,13 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /**
+   * #7443: when a button is disabled for a knowable reason, pass it here. The
+   * reason is wired to both `title` (pointer tooltip) and a visually-hidden
+   * `aria-describedby` node so assistive tech announces *why* the control is
+   * dead instead of leaving the user guessing. Ignored when not disabled.
+   */
+  disabledReason?: string;
 }
 
 const BASE =
@@ -35,9 +42,42 @@ const SIZES: Record<ButtonSize, string> = {
  * states stay consistent app-wide.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', className = '', type = 'button', ...rest },
+  {
+    variant = 'primary',
+    size = 'md',
+    className = '',
+    type = 'button',
+    disabledReason,
+    disabled,
+    title,
+    'aria-describedby': ariaDescribedBy,
+    ...rest
+  },
   ref
 ) {
   const classes = `${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`.trim();
-  return <button ref={ref} type={type} className={classes} {...rest} />;
+  const reasonId = useId();
+  // Only surface the reason while actually disabled (#7443).
+  const showReason = Boolean(disabled && disabledReason);
+  const describedBy =
+    [ariaDescribedBy, showReason ? reasonId : null].filter(Boolean).join(' ') ||
+    undefined;
+  return (
+    <>
+      <button
+        ref={ref}
+        type={type}
+        className={classes}
+        disabled={disabled}
+        title={showReason ? disabledReason : title}
+        aria-describedby={describedBy}
+        {...rest}
+      />
+      {showReason && (
+        <span id={reasonId} className="sr-only">
+          {disabledReason}
+        </span>
+      )}
+    </>
+  );
 });
