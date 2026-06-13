@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # local_server creates app state in create_local_app(), including
 # ProcessManager and ModelHandlerRegistry.  We mock both to avoid
 # spawning real subprocesses during tests.

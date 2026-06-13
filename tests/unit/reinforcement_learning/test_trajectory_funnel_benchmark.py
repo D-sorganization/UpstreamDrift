@@ -4,6 +4,8 @@ from src.reinforcement_learning.trajectory_funnel_benchmark import (
     TrajectoryFunnelBenchmark,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_trajectory_funnel_benchmark_initialization() -> None:
     bench = TrajectoryFunnelBenchmark("transverse")
@@ -45,13 +47,17 @@ def test_trajectory_funnel_reward() -> None:
     assert np.isclose(res, -2.5)
 
 
-def test_simulate_agent_training_mock() -> None:
+def test_simulate_agent_training() -> None:
     bench_setpoint = TrajectoryFunnelBenchmark("setpoint")
-    res1 = bench_setpoint.simulate_agent_training_mock()
-    assert res1["convergence_epochs"] == 15000
-    assert res1["terminal_variance"] == 4.5
+    res1 = bench_setpoint.simulate_agent_training(n_episodes=5, n_steps=8, state_dim=2)
+    assert res1["mode"] == "setpoint"
+    assert res1["convergence_epochs"] == 40
+    assert res1["terminal_variance"] == pytest.approx(1.1736967637994)
 
     bench_transverse = TrajectoryFunnelBenchmark("transverse")
-    res2 = bench_transverse.simulate_agent_training_mock()
-    assert res2["convergence_epochs"] == 2400
-    assert res2["terminal_variance"] == 0.03
+    res2 = bench_transverse.simulate_agent_training(
+        n_episodes=5, n_steps=8, state_dim=2
+    )
+    assert res2["mode"] == "transverse"
+    assert res2["convergence_epochs"] == 40
+    assert res2["terminal_variance"] == pytest.approx(3.2042933583273983)

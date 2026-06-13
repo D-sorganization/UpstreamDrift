@@ -60,13 +60,19 @@ import pytest
 # On Windows, missing PyQt6 DLLs can cause a fatal crash.
 # Mock them immediately before any imports happen.
 try:
-    import PyQt6.QtCore as _pyqt6_qtcore
-
-    _has_pyqt6 = _pyqt6_qtcore is not None
-except ImportError:
+    _pyqt6_qtcore = importlib.import_module("PyQt6.QtCore")
+    _pyqt6_qtgui = importlib.import_module("PyQt6.QtGui")
+    _pyqt6_qtwidgets = importlib.import_module("PyQt6.QtWidgets")
+    _has_pyqt6 = all(
+        module is not None for module in (_pyqt6_qtcore, _pyqt6_qtgui, _pyqt6_qtwidgets)
+    )
+except (AttributeError, ImportError):
     _has_pyqt6 = False
 
-if not _has_pyqt6 and "PyQt6" not in sys.modules:
+if not _has_pyqt6:
+    for module_name in tuple(sys.modules):
+        if module_name == "PyQt6" or module_name.startswith("PyQt6."):
+            sys.modules.pop(module_name, None)
 
     class DummySignal:
         def __init__(self, *args, **kwargs):

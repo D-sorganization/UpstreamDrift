@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 from src.shared.python.analysis.coordination_metrics import CoordinationMetricsMixin
 
+pytestmark = pytest.mark.unit
+
 
 def _make_instance(n_samples: int = 50, n_joints: int = 3) -> CoordinationMetricsMixin:
     """Create a concrete instance of the mixin with synthetic data."""

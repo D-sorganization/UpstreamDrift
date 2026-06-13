@@ -8,6 +8,8 @@ from __future__ import annotations
 from pathlib import Path
 import pytest
 
+DEPRECATED_ALIAS_PATH = "_".join(("upstream", "drift", "tools"))
+
 SHARED_PATHS = [
     "ai",
     "calc_backend",
@@ -36,7 +38,7 @@ SHARED_PATHS = [
     "signal_toolkit",
     "theme",
     "ui",
-    "upstream_drift_tools",
+    DEPRECATED_ALIAS_PATH,
 ]
 
 

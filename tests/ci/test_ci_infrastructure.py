@@ -670,10 +670,11 @@ class TestCIEnvironmentCompatibility:
         assert '! -path "tests/unit/engines"' in unit_step
         assert "Native" in unit_step
         assert "engine/equivalence lanes" in unit_step
-        assert 'pytest "$target"' in unit_step
+        assert 'run_with_heartbeat "optional-stack unit target $target"' in unit_step
+        assert 'pytest "$1"' in unit_step
         assert "unit_targets" in unit_step
         assert "break" in unit_step
-        assert 'pip install "trimesh>=4.0.0"' in workflow
+        assert 'pip_retry install "trimesh>=4.0.0"' in workflow
         assert "OPTIONAL_STACK_UNIT_WORKERS" not in unit_step
         assert "pytest-xdist" not in unit_step
         assert " -n " not in unit_step

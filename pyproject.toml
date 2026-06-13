@@ -48,6 +48,8 @@ dependencies = [
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
+    # Security floor for CVE-2026-49854; bokeh accepts fixed Tornado releases.
+    "tornado>=6.5.6",
     "flask>=3.1.3",
 
     # Geospatial projection for sg_optimizer Phase 2 (#6271).
