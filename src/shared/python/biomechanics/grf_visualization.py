@@ -94,11 +94,15 @@ def plot_grf_and_com_3d(
     )
 
     # Plot lines from COP to COM (moment arms)
+    # ⚡ Bolt: Cache DataFrame columns to NumPy arrays to avoid expensive repeated .iloc calls in the loop
+    cop_x_arr = sampled_df["cop_x"].values
+    cop_y_arr = sampled_df["cop_y"].values
+    cop_z_arr = sampled_df["cop_z"].values
     for i in range(len(idx)):
         ax.plot(
-            [sampled_df["cop_x"].iloc[i], sampled_com[i, 0]],
-            [sampled_df["cop_y"].iloc[i], sampled_com[i, 1]],
-            [sampled_df["cop_z"].iloc[i], sampled_com[i, 2]],
+            [cop_x_arr[i], sampled_com[i, 0]],
+            [cop_y_arr[i], sampled_com[i, 1]],
+            [cop_z_arr[i], sampled_com[i, 2]],
             color="gray",
             linestyle="--",
             alpha=0.2,
