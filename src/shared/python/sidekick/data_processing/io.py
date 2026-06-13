@@ -11,6 +11,7 @@ Matlab, Arrow, SQLite, NumPy, and Pickles.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +60,9 @@ class DataReader:
                 raise ImportError("PyArrow is required for Parquet files")
             return pd.read_parquet(path, **kwargs)
         if fmt == "json":
+            if not kwargs:
+                with path.open(encoding="utf-8") as handle:
+                    return pd.DataFrame(json.load(handle))
             return pd.read_json(path, **kwargs)
         if fmt == "pickle":
             raise ValueError("Pickle format is disabled for security reasons.")
@@ -116,7 +120,14 @@ class DataWriter:
                 raise ImportError("PyArrow is required for Parquet files")
             df.to_parquet(path, index=False, **kwargs)
         elif fmt == "json":
-            df.to_json(path, orient="records", indent=2, **kwargs)
+            orient = kwargs.pop("orient", "records")
+            indent = kwargs.pop("indent", 2)
+            if orient == "records" and not kwargs:
+                with path.open("w", encoding="utf-8") as handle:
+                    json.dump(df.to_dict(orient="records"), handle, indent=indent)
+                    handle.write("\n")
+            else:
+                df.to_json(path, orient=orient, indent=indent, **kwargs)
         elif fmt == "pickle":
             raise ValueError("Pickle format is disabled for security reasons.")
         elif fmt == "numpy":

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -125,6 +125,11 @@ class QPSolution:
     dual_eq: NDArray[np.float64] | None = None
     dual_ineq: NDArray[np.float64] | None = None
 
+    @property
+    def solver_status(self) -> str:
+        """Backward-compatible canonical solver status."""
+        return "success" if self.success else "failure"
+
 
 class QPSolver(ABC):
     """Abstract base class for QP solvers."""
@@ -210,6 +215,8 @@ class ScipyQPSolver(QPSolver):
 
         from scipy.optimize import minimize
 
+        minimize_qp = cast(Any, minimize)
+
         start_time = time.perf_counter()
 
         n = problem.n_vars
@@ -227,7 +234,7 @@ class ScipyQPSolver(QPSolver):
         constraints = self._build_constraints(problem)
 
         try:
-            result = minimize(
+            result = minimize_qp(
                 objective,
                 x0,
                 method=self._method,

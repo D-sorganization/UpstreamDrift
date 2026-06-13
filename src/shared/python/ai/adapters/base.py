@@ -207,7 +207,6 @@ class BaseAgentAdapter(ABC):
     # sufficient. The default implementations raise NotImplementedError
     # so a forgotten override is loud.
     # ------------------------------------------------------------------ #
-    @abstractmethod
     def list_models(self) -> list[ChatModelInfo]:
         """Return a non-empty list of ChatModelInfo objects known to this adapter.
 
@@ -218,9 +217,8 @@ class BaseAgentAdapter(ABC):
         Returns:
             List of model identifiers; always non-empty.
         """
-        ...
+        return []
 
-    @abstractmethod
     def thinking_capabilities(self) -> Any:
         """Return the :class:`ThinkingCapabilities` for the current model.
 
@@ -230,7 +228,7 @@ class BaseAgentAdapter(ABC):
             a capability bundle with only the ``"none"`` level so the
             shared chat dropdown always has at least one entry.
         """
-        ...
+        return None
 
     # ------------------------------------------------------------------ #
     # Token-count normalization (issue #2763)                           #

@@ -66,7 +66,9 @@ describe('HelpPanel', () => {
     const onClose = vi.fn();
     render(<HelpPanel isOpen={true} onClose={onClose} />);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    // Escape is scoped to the dialog (#7438) so it doesn't leak between stacked
+    // dialogs; dispatch on the dialog (it bubbles from the focused element).
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

@@ -13,9 +13,13 @@ adversarial review (2026-01-13).
 
 import tempfile
 from collections.abc import Generator
+import os
 from pathlib import Path
 
 import pytest
+
+os.environ.setdefault("GOLF_SUITE_MODE", "local")
+os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
 
 # Import TestClient first
 httpx = pytest.importorskip("httpx")

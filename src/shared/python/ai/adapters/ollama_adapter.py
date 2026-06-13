@@ -514,13 +514,15 @@ class OllamaAdapter(BaseAgentAdapter):
             ]
         )
 
-        # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        # Add current message when non-empty. Chat service callers may pass an
+        # empty current message when it is already present in history.
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         return messages
 
@@ -563,6 +565,12 @@ class OllamaAdapter(BaseAgentAdapter):
         if "eval_count" in data:
             raw_usage["completion_tokens"] = data["eval_count"]
         usage = self._normalize_token_counts(raw_usage)
+        usage.update(
+            {
+                "prompt_tokens": raw_usage.get("prompt_tokens", 0),
+                "completion_tokens": raw_usage.get("completion_tokens", 0),
+            }
+        )
 
         return AgentResponse(
             content=content,
@@ -637,8 +645,16 @@ class OllamaAdapter(BaseAgentAdapter):
 
     def _handle_error(self, error: Exception) -> NoReturn:
         """Handle Ollama-specific errors; always raises (NoReturn)."""
+        import httpx
+
+        if isinstance(error, httpx.ConnectError):
+            raise AIConnectionError(
+                f"Cannot connect to Ollama at {self._host}. "
+                "Is Ollama running? Start with: ollama serve",
+                provider="ollama",
+            ) from error
         err_str = str(error).lower()
-        if "connection" in err_str or "unreachable" in err_str:
+        if "connection" in err_str or "unreachable" in err_str or "refused" in err_str:
             raise AIConnectionError(
                 f"Cannot connect to Ollama at {self._host}. "
                 "Is Ollama running? Start with: ollama serve",

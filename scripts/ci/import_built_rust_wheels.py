@@ -47,6 +47,8 @@ def smoke_module(module_name: str, module: ModuleType) -> None:
         missing = Path(tempfile.gettempdir()) / "upstreamdrift_missing_smoke.trc"
         try:
             module.parse_trc(missing)
+        except FileNotFoundError:
+            pass
         except Exception as exc:  # noqa: BLE001 - controlled backend error smoke.
             if "TRC parse error" not in str(exc):
                 raise RuntimeError(

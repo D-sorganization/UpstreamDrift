@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.365                                            |
-| **Last Spec Update**    | 2026-06-12                                         |
+| **Spec Version**        | 1.0.379                                            |
+| **Last Spec Update**    | 2026-06-13                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,57 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-13** - Documented the C3D/TRC Rust facade benchmarks as bounded
+  smoke checks with runner jitter allowance while preserving the strict
+  parser-only 10x performance gate.
+- **2026-06-13** - Restored Rust/Python aerodynamic parity by keeping the
+  dimpled-sphere drag-crisis centre aligned with the Rust kernel and by
+  matching the public simulator parity fixture's drag coefficient to the Rust
+  trajectory fixture.
+- **2026-06-13** - Aligned the Rust wheel import smoke helper with the
+  documented `upstream-mocap-io` missing-file contract so `parse_trc` raising
+  `FileNotFoundError` remains an expected negative-path smoke result.
+- **2026-06-13** - Repaired the Rust PyO3 CI contract so the Python-feature
+  lane typechecks all targets with `cargo check --workspace --all-targets
+--features python`, while maturin remains responsible for extension-module
+  wheel and import smoke coverage.
+- **2026-06-13** - Refined pointwise ZTCF/ZVCF dimension validation to allow
+  canonical-v2 `nq = nv + 1` states only when the redundant configuration
+  coordinate is populated, while still rejecting plain wrong-length zero vectors.
+- **2026-06-13** - Scoped the optional-stack PR unit lane to the
+  PR-relevant biomechanics, deployment, and robotics unit directories so
+  focused UI/theming PRs do not hang on unrelated broad optional-stack unit
+  sweeps; CI contract tests reject reintroducing the unscoped `tests/unit`
+  discovery.
+- **2026-06-13** - Restored optional-stack ZTCF/ZVCF input length validation
+  for pointwise acceleration helpers and reapplied the Settings page root theme
+  marker after active-theme round-trip.
+- **2026-06-13** - Tightened signal-toolkit limit preconditions so saturation
+  requires `lower < upper` and rate limiting requires `max_rate > 0`, matching
+  the optional-stack contract tests.
+- **2026-06-13** - Scoped PR core-test dependency-light execution to affected
+  unit areas when source files change, preventing self-hosted runner OOMs from
+  full-repository core test attempts while leaving normal coverage reporting in
+  place for full-coverage runs.
+- **2026-06-13** - Restored Sidekick JSON I/O compatibility in optional-stack
+  tests by using stdlib JSON for default records-oriented reads and writes,
+  avoiding pandas JSON C-extension failures in the optional-stack environment
+  while preserving pandas for non-default JSON options.
+- **2026-06-13** - Restored shared-python optional-stack compatibility
+  contracts: package-root config and provenance exports remain importable
+  under the test harness fallback, AI adapters preserve empty-message and
+  legacy token/error contracts, validation and signal-toolkit helpers enforce
+  documented preconditions, and partial Rust wheels no longer make FSP
+  primitive tests fail when the FSP API is absent. Aligned CI numpy/scipy
+  repair pins with the lockfile runtime, kept core tests serial to avoid
+  native-stack xdist worker termination, and added temporary shared-chat
+  architecture-budget exceptions for the pre-existing Qt dock decomposition debt
+  tracked by issue #7362.
+- **2026-06-13** - Restored optional-stack robotics compatibility contracts:
+  QP, whole-body-control, and motion-planning result objects again expose the
+  canonical `solver_status` aliases expected by optional robotics callers, WBC
+  results expose `final_cost` as the legacy alias for `cost`, and default IMU
+  gravity remains on the historical 9.81 m/s^2 sensor contract.
 - **2026-06-12** - Documented the consolidated parity CI follow-up: frontend
   Fast Refresh helpers now live outside component modules, diagnostics imports
   respect API/launcher layer boundaries, recording export artifact writing is
@@ -1324,6 +1375,17 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-13 | 1.0.376 | Aligned the Rust wheel import smoke helper with the documented `upstream-mocap-io` missing-file contract so `parse_trc` raising `FileNotFoundError` remains an expected negative-path smoke result, with focused script regression coverage. |
+| 2026-06-13 | 1.0.375 | Repaired the Rust PyO3 CI contract so Python-feature crates are checked with `cargo check --workspace --all-targets --features python`, avoiding invalid extension-module test executable linkage while maturin continues to build and smoke-test importable wheels. |
+| 2026-06-13 | 1.0.374 | Restored optional-stack contracts by normalizing aerodynamic vector-shaped velocity/spin inputs, preserving drag-coefficient tuning through the Reynolds correction, centering the drag-crisis transition at the documented 8e4 Reynolds boundary, clamping randomized air density to the physical floor, and pinning the legacy API endpoint suite to explicit local/auth-disabled mode. |
+| 2026-06-13 | 1.0.373 | Refined pointwise ZTCF/ZVCF dimension validation to allow canonical-v2 `nq = nv + 1` states only when the redundant configuration coordinate is populated, while still rejecting plain wrong-length zero vectors. |
+| 2026-06-13 | 1.0.372 | Restored optional-stack ZTCF/ZVCF input length validation for pointwise acceleration helpers and reapplied the Settings page root theme marker after active-theme round-trip. |
+| 2026-06-13 | 1.0.371 | Tightened signal-toolkit limit preconditions so saturation requires `lower < upper` and rate limiting requires `max_rate > 0`, matching the optional-stack contract tests. |
+| 2026-06-13 | 1.0.370 | Scoped PR core-test dependency-light execution to affected unit areas when source files change, preventing self-hosted runner OOMs from full-repository core test attempts while leaving normal coverage reporting in place for full-coverage runs. |
+| 2026-06-13 | 1.0.369 | Restored Sidekick JSON I/O compatibility in optional-stack tests. Default records-oriented JSON reads/writes now use stdlib JSON to avoid pandas JSON C-extension failures in the optional-stack environment, while non-default JSON options continue through pandas. |
+| 2026-06-13 | 1.0.368 | Aligned CI numpy/scipy repair pins with the lockfile runtime, added fast `scipy.signal` import checks after the reinstall step, kept core tests serial to avoid native-stack xdist worker termination, and recorded temporary shared-chat architecture-budget exceptions for `ChatDockWidget` legacy decomposition debt under issue #7362. |
+| 2026-06-13 | 1.0.367 | Restored shared-python optional-stack compatibility contracts. Package-root `config` and `data_io` exports remain importable under the fallback test harness, `add_provenance_header` supports both file and string helper forms, AI adapters preserve empty-current-message, token-usage, and connection-error behavior, validation/signal-toolkit helpers enforce their documented preconditions, and FSP primitive tests skip partial Rust wheels that do not expose the FSP API. |
+| 2026-06-13 | 1.0.366 | Restored optional-stack robotics compatibility contracts. `QPSolution`, `WBCSolution`, and `PlannerResult` again expose canonical `solver_status` aliases, `WBCSolution.final_cost` remains a legacy alias for `cost`, and the default IMU gravity vector preserves the historical 9.81 m/s^2 sensor contract while keeping the broader shared physics constants unchanged. |
 | 2026-06-12 | 1.0.365 | Consolidated parity CI follow-up after #7496. Moved BallFlight validation/color helpers into a non-component module to satisfy React Fast Refresh linting, added a fail-closed launch-mode fallback for web launcher contracts, deferred diagnostics launcher imports to request time to preserve API layer direction, extracted recording JSON artifact writing below the changed-function architecture budget, shared export-format validation across request models, and marked newly introduced parity tests with explicit suite markers so the ratchet remains blocking without expanding the baseline. |
 | 2026-06-12 | 1.0.360 | Web settings parity for #7457. Added `GET/PUT /settings` (`src/api/routes/settings.py`) persisting a validated `WebSettings` document (appearance/notifications/simulation defaults) atomically to `~/.upstreamdrift/web_settings.json`, a web `/settings` route (`ui/src/pages/Settings.tsx`) with theme selection via the shared `/themes` router, root-CSS-var font scaling, notification preferences consumed by the toast provider, and once-per-session simulation-default hydration that never clobbers in-session edits (#7424 guard). Feature-parity registry: `settings.preferences` → parity; desktop-only settings tabs recorded as a pending-decision exemption (#7460). |
 | 2026-06-12 | 1.0.359 | Fixed vendored Sidekick science accuracy for issues #7411, #7412, and #7413: Buck vapor pressure restores the correct constant roles, `signal_toolkit.calculus.Integrator` includes the upper-bound sample in definite integrals, and SCFM/ACFM/Nm3 plus ppmv/mg/Nm3 conversions use one DIN 1343 normal state. Added reference-value and property tests for vapor pressure, calculus integration, and conversion consistency. |

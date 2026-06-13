@@ -26,19 +26,21 @@ _needs_contracts = pytest.mark.skipif(
 
 @pytest.fixture(autouse=True)
 def _enforce_contracts():
-    """Force ENFORCE mode by patching the exact module dict that require/ensure read.
+    """Force ENFORCE mode in the exact contract state that require/ensure read.
 
-    set_contract_level() updates sys.modules[__name__], but in a namespace-package
-    environment the module may be loaded under two names, so require.__globals__ can
-    be a different dict.  Patching __globals__ directly is always correct.
+    set_contract_level() updates the canonical module state and compatibility
+    globals, while require.__globals__ holds the primitive module's state class.
+    Updating both keeps the test robust across namespace-package import aliases.
     """
     _g = require.__globals__  # the actual dict require/ensure/_handle_violation read
-    original_dbc = _g["DBC_LEVEL"]
-    _g["DBC_LEVEL"] = _g["ContractLevel"].ENFORCE
-    _g["_ContractState"].level = _g["ContractLevel"].ENFORCE
+    state = _g["_ContractState"]
+    level = _g["ContractLevel"]
+    original_level = state.level
+    set_contract_level(ContractLevel.ENFORCE)
+    state.level = level.ENFORCE
     yield
-    _g["DBC_LEVEL"] = original_dbc
-    _g["_ContractState"].level = original_dbc
+    set_contract_level(original_level)
+    state.level = original_level
 
 
 class TestRequire:

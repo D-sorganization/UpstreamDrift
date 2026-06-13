@@ -23,7 +23,9 @@ from src.robotics.sensing.noise_models import (
     CompositeNoise,
     GaussianNoise,
 )
-from src.shared.python.core.constants import GRAVITY
+
+
+DEFAULT_IMU_GRAVITY_M_S2 = 9.81
 
 
 @dataclass
@@ -52,7 +54,7 @@ class IMUSensorConfig:
     accel_bias_drift: float = 0.0001
     gyro_bias_drift: float = 0.00001
     gravity: NDArray[np.float64] = field(
-        default_factory=lambda: np.array([0.0, 0.0, -GRAVITY])
+        default_factory=lambda: np.array([0.0, 0.0, -DEFAULT_IMU_GRAVITY_M_S2])
     )
     cutoff_frequency: float = 200.0
     sample_rate: float = 1000.0

@@ -455,13 +455,15 @@ class OpenAIAdapter(BaseAgentAdapter):
 
             messages.append(formatted)
 
-        # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        # Add current message when non-empty. Some callers store the latest
+        # user message in history and pass an empty current-message sentinel.
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         return messages
 

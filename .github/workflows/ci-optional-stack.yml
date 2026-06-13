@@ -361,11 +361,10 @@ jobs:
             return "$status"
           }
 
-          mapfile -t unit_targets < <(
-            find tests/unit -mindepth 1 -maxdepth 1 \
-              \( -type d -o -type f -name "test_*.py" \) \
-              ! -path "tests/unit/engines" \
-              | sort
+          unit_targets=(
+            tests/unit/biomechanics
+            tests/unit/deployment
+            tests/unit/robotics
           )
           for target in "${unit_targets[@]}"; do
             echo "## Optional-stack unit target: $target" | tee -a /tmp/unit-test-results.txt

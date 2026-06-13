@@ -391,21 +391,21 @@ class _MockAnalyzer:
 class TestCrossEnginePerturbationRunner:
     def test_requires_profile_before_run(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="set_profile\\(\\) must be called"):
             runner.run_all(_SMALL_CONFIG)
 
     def test_set_profile_validates_dict(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="profile must be a dict"):
             runner.set_profile("not_a_dict")  # type: ignore[arg-type]
 
     def test_set_profile_requires_coeffs(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="'coeffs' key missing"):
             runner.set_profile({"bad_key": []})
 
     def test_rejects_unknown_engine(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Unknown engine"):
             CrossEnginePerturbationRunner(engines=["nonexistent_engine"])
 
     def test_run_all_with_mocked_analyzers(self) -> None:
@@ -474,7 +474,7 @@ class TestCrossEnginePerturbationRunner:
 
     def test_run_single_requires_profile(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="set_profile\\(\\) must be called"):
             runner.run_single("mujoco", _SMALL_CONFIG)
 
 

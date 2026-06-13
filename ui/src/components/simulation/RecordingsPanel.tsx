@@ -72,7 +72,6 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      // eslint-disable-next-line no-alert
       if (!window.confirm(`Delete recording ${id}? This cannot be undone.`)) {
         return;
       }

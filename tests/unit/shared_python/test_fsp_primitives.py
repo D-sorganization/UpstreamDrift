@@ -13,7 +13,15 @@ import pytest
 try:
     import upstream_physics as fsp_mod
 
-    HAS_RUST = True
+    HAS_RUST = all(
+        hasattr(fsp_mod, name)
+        for name in (
+            "calculate_fsp",
+            "fsp_slope_deg",
+            "point_to_fsp_distance",
+            "fsp_direction_deg",
+        )
+    )
 except ImportError:
     HAS_RUST = False
 

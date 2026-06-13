@@ -278,8 +278,24 @@ def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None
     file.write("#\n")  # Blank comment line separator
 
 
-#: Canonical short alias for :func:`add_provenance_header_file`.
-add_provenance_header = add_provenance_header_file
+def add_provenance_header(
+    target: TextIO | str,
+    provenance: ProvenanceInfo | dict[str, Any],
+) -> str | None:
+    """Add provenance to an open file or prepend it to string content.
+
+    The file-object form preserves the historical writer API. The string form
+    is the package-root compatibility helper used by import-contract tests.
+    """
+    if isinstance(target, str):
+        if not isinstance(provenance, dict):
+            raise TypeError("metadata must be a dict when content is a string")
+        info = ProvenanceInfo.capture(parameters=provenance)
+        return "\n".join([*info.to_header_lines(), "#", target])
+    if not isinstance(provenance, ProvenanceInfo):
+        raise TypeError("provenance must be ProvenanceInfo when target is a file")
+    add_provenance_header_file(target, provenance)
+    return None
 
 
 def add_provenance_to_csv(
@@ -326,6 +342,7 @@ def add_provenance_to_csv(
 # Export public API
 __all__ = [
     "ProvenanceInfo",
+    "add_provenance_header",
     "add_provenance_header_file",
     "add_provenance_to_csv",
 ]

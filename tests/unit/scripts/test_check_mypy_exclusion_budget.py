@@ -359,11 +359,14 @@ def test_coverage_gate_validation_requires_production_packages() -> None:
 def test_ci_standard_runs_mypy_exclusion_budget() -> None:
     """The ratchet is only useful when the main CI gate runs it."""
     workflow = yaml.safe_load(Path(".github/workflows/ci-standard.yml").read_text())
-    quality_gate_steps = workflow["jobs"]["quality-gate"]["steps"]
+    code_quality_steps = workflow["jobs"]["code-quality"]["steps"]
+    quality_gate_needs = workflow["jobs"]["quality-gate"]["needs"]
+
+    assert "code-quality" in quality_gate_needs
 
     matching_steps = [
         step
-        for step in quality_gate_steps
+        for step in code_quality_steps
         if step.get("name") == "MyPy Exclusion Budget"
     ]
 

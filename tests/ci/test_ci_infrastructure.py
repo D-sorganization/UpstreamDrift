@@ -652,8 +652,8 @@ class TestCIEnvironmentCompatibility:
         )
         assert "exit 0" not in selected_tests_block
 
-    def test_ci_optional_stack_prs_run_unscoped_unit_lane(self) -> None:
-        """The optional-stack workflow must not skip PRs with no changed tests."""
+    def test_ci_optional_stack_prs_run_scoped_unit_lane(self) -> None:
+        """The optional-stack workflow must run deterministic PR-relevant unit targets."""
         workflow = (
             REPO_ROOT / ".github" / "workflows" / "ci-optional-stack.yml"
         ).read_text(encoding="utf-8")
@@ -666,8 +666,13 @@ class TestCIEnvironmentCompatibility:
         assert 'github.event_name }}" = "pull_request"' not in unit_step
         assert "changed_tests" not in unit_step
         assert "No unit test changes detected" not in unit_step
-        assert "find tests/unit -mindepth 1 -maxdepth 1" in unit_step
-        assert '! -path "tests/unit/engines"' in unit_step
+        assert "find tests/unit -mindepth 1 -maxdepth 1" not in unit_step
+        for target in (
+            "tests/unit/biomechanics",
+            "tests/unit/deployment",
+            "tests/unit/robotics",
+        ):
+            assert target in unit_step
         assert "Native" in unit_step
         assert "engine/equivalence lanes" in unit_step
         assert 'run_with_heartbeat "optional-stack unit target $target"' in unit_step

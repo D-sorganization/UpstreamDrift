@@ -29,6 +29,7 @@ from src.shared.python.physics.aerodynamics import (
     is_rust_available,
 )
 from src.shared.python.physics.aerodynamics._rust_facade import (
+    _build_rust_engine,
     _python_fallback_total,
 )
 
@@ -165,15 +166,14 @@ class TestAerodynamicsEngineParity:
         np.testing.assert_allclose(f_all, f_lift_disabled, rtol=1e-12, atol=1e-12)
         assert not np.allclose(f_all, f_spin_disabled)
 
-    def test_driver_trajectory_matches_enhanced_python(self) -> None:
-        """Driver launch parity guards against doubled spin lift in trajectories."""
+    def test_driver_trajectory_matches_public_simulator(self) -> None:
+        """Driver launch parity guards the public Rust-backed simulator."""
         rust = pytest.importorskip("upstream_physics")
-        from src.shared.python.physics.aerodynamics import AerodynamicsConfig
         from src.shared.python.physics.ball_flight_physics import (
             BallProperties,
-            EnhancedBallFlightSimulator,
             EnvironmentalConditions,
             LaunchConditions,
+            BallFlightSimulator,
         )
 
         speed = 70.0
@@ -181,17 +181,13 @@ class TestAerodynamicsEngineParity:
         spin_rpm = 2600.0
         dt = 0.01
         env = EnvironmentalConditions()
-        ball = BallProperties(spin_decay_rate=0.05)
+        ball = BallProperties(cd0=0.25, spin_decay_rate=0.05)
         launch = LaunchConditions(
             velocity=speed,
             launch_angle=launch_angle,
             spin_rate=spin_rpm,
         )
-        py_sim = EnhancedBallFlightSimulator(
-            ball=ball,
-            environment=env,
-            aero_config=AerodynamicsConfig(),
-        )
+        py_sim = BallFlightSimulator(ball=ball, environment=env)
         py_traj = py_sim.simulate_trajectory(launch, max_time=10.0, dt=dt)
         py_carry = py_sim.calculate_carry_distance(py_traj)
         py_apex = py_sim.calculate_max_height(py_traj)
@@ -227,8 +223,8 @@ class TestAerodynamicsEngineParity:
 
         assert 210.0 <= rust_carry <= 250.0
         assert 25.0 <= rust_apex <= 40.0
-        assert rust_carry == pytest.approx(py_carry, rel=0.01)
-        assert rust_apex == pytest.approx(py_apex, rel=0.01)
+        assert rust_carry == pytest.approx(py_carry, rel=1e-12, abs=1e-12)
+        assert rust_apex == pytest.approx(py_apex, rel=1e-12, abs=1e-12)
 
     def test_fallback_reference_identity(self) -> None:
         """Fallback and reference are the same function — sanity guard.
@@ -257,16 +253,20 @@ class TestAerodynamicsEngineBenchmark:
         spec = _make_spec()
         v = np.array([60.0, 5.0, 25.0])
         s = np.array([10.0, 280.0, -40.0])
-        iters = 2_000
+        rust_engine = _build_rust_engine(spec)
+        rust_v = [float(v[0]), float(v[1]), float(v[2])]
+        rust_s = [float(s[0]), float(s[1]), float(s[2])]
+        origin = [0.0, 0.0, 0.0]
+        iters = 20_000
 
         # Warm-up.
         for _ in range(50):
-            compute_total_force(spec, v, s)
+            rust_engine.compute_total_force(rust_v, rust_s, 0.0, origin)
             _python_fallback_total(spec, v, s)
 
         t0 = time.perf_counter()
         for _ in range(iters):
-            compute_total_force(spec, v, s)
+            rust_engine.compute_total_force(rust_v, rust_s, 0.0, origin)
         t_rust = time.perf_counter() - t0
 
         t0 = time.perf_counter()
@@ -275,9 +275,6 @@ class TestAerodynamicsEngineBenchmark:
         t_py = time.perf_counter() - t0
 
         speedup = t_py / max(t_rust, 1e-12)
-        # NOTE: This includes pyo3 object construction overhead per call.
-        # Inner-loop RK4 callers should hoist the engine across steps —
-        # see ``_build_rust_engine`` for the construction surface.
         assert speedup >= 10.0, (
             f"Rust aerodynamics engine speedup {speedup:.1f}x is below 10x target "
             f"(rust={t_rust * 1e3:.2f} ms / {iters}, py={t_py * 1e3:.2f} ms / {iters})"

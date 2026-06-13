@@ -431,13 +431,15 @@ class AnthropicAdapter(BaseAgentAdapter):
                 }
             )
 
-        # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        # Add current message when non-empty. Some callers store the latest
+        # user message in history and pass an empty current-message sentinel.
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         # Ensure alternating roles (Anthropic requirement)
         messages = self._ensure_alternating_roles(messages)

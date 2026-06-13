@@ -28,20 +28,24 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 # ---------------------------------------------------------------------------
 import sys as _sys
 import types as _types
+import importlib as _early_importlib
+
+
+def _ensure_importable_package(module_name: str, package_path: str) -> None:
+    try:
+        _early_importlib.import_module(module_name)
+    except (AttributeError, ImportError):
+        module = _types.ModuleType(module_name)
+        module.__path__ = [package_path]
+        module.__package__ = module_name
+        _sys.modules[module_name] = module
+
 
 _data_io_name = "src.shared.python.data_io"
-if _data_io_name not in _sys.modules:
-    _data_io_mod = _types.ModuleType(_data_io_name)
-    _data_io_mod.__path__ = ["src/shared/python/data_io"]
-    _data_io_mod.__package__ = _data_io_name
-    _sys.modules[_data_io_name] = _data_io_mod
+_ensure_importable_package(_data_io_name, "src/shared/python/data_io")
 
 _config_name = "src.shared.python.config"
-if _config_name not in _sys.modules:
-    _config_mod = _types.ModuleType(_config_name)
-    _config_mod.__path__ = ["src/shared/python/config"]
-    _config_mod.__package__ = _config_name
-    _sys.modules[_config_name] = _config_mod
+_ensure_importable_package(_config_name, "src/shared/python/config")
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 

@@ -12,7 +12,7 @@ import numpy as np
 
 from src.shared.python.core.physics_constants import AIR_DENSITY_SEA_LEVEL_KG_M3
 
-from ._config import RandomizationConfig, WindConfig
+from ._config import MIN_AIR_DENSITY_KG_M3, RandomizationConfig, WindConfig
 
 
 @dataclass
@@ -46,7 +46,8 @@ class EnvironmentRandomizer:
         if not self.config.enabled or self.config.air_density_variance <= 0:
             return base_density
         std = base_density * self.config.air_density_variance
-        return float(self._rng.normal(base_density, std))
+        randomized_density = float(self._rng.normal(base_density, std))
+        return max(MIN_AIR_DENSITY_KG_M3, randomized_density)
 
     def randomize_temperature(self, base_temperature: float) -> float:
         """Randomize temperature with Gaussian perturbation."""

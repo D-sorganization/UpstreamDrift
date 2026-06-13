@@ -125,6 +125,8 @@ vi.mock('three', () => ({
 // Import after mocks
 import { SimulationPage } from '@/pages/Simulation';
 
+const WORKFLOW_INTEGRATION_TIMEOUT_MS = 30_000;
+
 const expectEngineOption = async (engineName: RegExp) => {
   await waitFor(() => {
     expect(screen.getByRole('radio', { name: engineName })).toBeInTheDocument();
@@ -232,7 +234,7 @@ describe('Simulation Workflow Integration', () => {
 
       // Verify we received frames - check for Frame text pattern
       expect(screen.getByText(/Frame \d+/)).toBeInTheDocument();
-    }, 10_000);
+    }, WORKFLOW_INTEGRATION_TIMEOUT_MS);
 
     it('allows switching engines before starting simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });

@@ -126,6 +126,7 @@ export function SettingsPage() {
         await setActiveTheme(saved.appearance.theme_id);
         const active = await fetchActiveTheme();
         applyThemeToCSSVariables(active.colors);
+        document.documentElement.dataset.theme = active.name;
       } catch {
         showError('Settings saved, but the theme could not be applied');
       }

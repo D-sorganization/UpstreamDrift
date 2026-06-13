@@ -163,6 +163,22 @@
       "expires_on": "2026-08-31"
     },
     {
+      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
+      "symbol": "ChatDockWidget.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7362 legacy shared-chat decomposition: ChatDockWidget.__init__ exceeded the changed-file budget before the optional-stack compatibility fix and needs a cohesive configuration object.",
+      "expires_on": "2026-08-31"
+    },
+    {
+      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
+      "symbol": "ChatDockWidget._setup_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7362 legacy shared-chat decomposition: ChatDockWidget._setup_ui exceeded the changed-file budget before the optional-stack compatibility fix and needs focused widget-builder extraction.",
+      "expires_on": "2026-08-31"
+    },
+    {
       "path": "src/launchers/launcher_ui_setup.py",
       "symbol": "UISetupManager.init_ui",
       "rule": "function-lines",

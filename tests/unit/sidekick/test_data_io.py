@@ -78,7 +78,7 @@ class TestDataReaderCSV:
 
     def test_read_json(self, tmp_path: Path) -> None:
         p = tmp_path / "test.json"
-        pd.DataFrame({"v": [1, 2, 3]}).to_json(p, orient="records")
+        p.write_text('[{"v": 1}, {"v": 2}, {"v": 3}]', encoding="utf-8")
         df = DataReader.read_file(p)
         assert "v" in df.columns
 

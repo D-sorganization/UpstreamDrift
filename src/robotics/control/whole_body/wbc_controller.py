@@ -75,6 +75,16 @@ class WBCSolution:
     status: str = ""
     task_errors: dict[str, float] = field(default_factory=dict)
 
+    @property
+    def solver_status(self) -> str:
+        """Backward-compatible canonical solver status."""
+        return "success" if self.success else "failure"
+
+    @property
+    def final_cost(self) -> float:
+        """Backward-compatible alias for the solution cost."""
+        return self.cost
+
 
 class WholeBodyController:
     """Whole-body controller with hierarchical task prioritization.

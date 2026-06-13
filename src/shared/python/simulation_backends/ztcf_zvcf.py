@@ -262,6 +262,29 @@ def _solve_mass(
     return qddot
 
 
+def _require_compatible_configuration_shape(
+    *, q: np.ndarray, tangent: np.ndarray, tangent_name: str
+) -> None:
+    """Validate pointwise configuration/tangent dimensions.
+
+    Canonical-v2 may carry one redundant configuration coordinate (``nq = nv + 1``)
+    for floating-base layouts. For that case, require the extra coordinate to be
+    populated so a plain wrong-length zero vector does not pass silently.
+    """
+    if q.shape == tangent.shape:
+        return
+    canonical_redundant_coordinate = q.shape[0] == tangent.shape[
+        0
+    ] + 1 and not np.isclose(q[-1], 0.0)
+    require(
+        canonical_redundant_coordinate,
+        f"q and {tangent_name} must share shape unless q has one populated "
+        f"canonical-v2 redundant coordinate; got q={q.shape}, "
+        f"{tangent_name}={tangent.shape}",
+        value=(q.shape, tangent.shape),
+    )
+
+
 def ztcf_acceleration(
     provider: DynamicsProvider, q: np.ndarray, v: np.ndarray
 ) -> np.ndarray:
@@ -293,6 +316,7 @@ def ztcf_acceleration(
     """
     q_arr = _as_state_vector("q", q)
     v_arr = _as_state_vector("v", v)
+    _require_compatible_configuration_shape(q=q_arr, tangent=v_arr, tangent_name="v")
     bias = np.asarray(provider.bias_forces(q_arr, v_arr), dtype=float)
     require(
         bias.shape == v_arr.shape,
@@ -338,6 +362,9 @@ def zvcf_acceleration(
     """
     q_arr = _as_state_vector("q", q)
     tau_arr = _as_state_vector("tau", tau)
+    _require_compatible_configuration_shape(
+        q=q_arr, tangent=tau_arr, tangent_name="tau"
+    )
     bias_zero_v = np.asarray(
         provider.bias_forces(q_arr, np.zeros_like(tau_arr)), dtype=float
     )

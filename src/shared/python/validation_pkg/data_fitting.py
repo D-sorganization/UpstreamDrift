@@ -129,6 +129,11 @@ class FitResult:
     iterations: int = 0
     message: str = ""
 
+    @property
+    def solver_status(self) -> str:
+        """Backward-compatible canonical solver status."""
+        return "success" if self.success else "failure"
+
 
 @dataclass
 class SensitivityResult:
@@ -310,8 +315,13 @@ class InverseKinematicsSolver:
         # Condition number from Jacobian
         try:
             jac = result.jac
-            if jac is not None and jac.size > 0:
-                s = np.linalg.svd(jac, compute_uv=False)
+            jac_array = (
+                np.asarray(jac.toarray(), dtype=float)
+                if hasattr(jac, "toarray")
+                else np.asarray(jac, dtype=float)
+            )
+            if jac_array.size > 0:
+                s = np.linalg.svd(jac_array, compute_uv=False)
                 cond = float(s[0] / s[-1]) if s[-1] > 1e-10 else float("inf")
             else:
                 cond = float("inf")

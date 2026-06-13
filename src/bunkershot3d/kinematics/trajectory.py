@@ -57,11 +57,11 @@ class SwingTrajectory:
             if col not in df.columns:
                 raise ValueError(f"Missing required column '{col}' in trajectory CSV.")
 
-        time = df["time"].values
-        positions = df[["px", "py", "pz"]].values
-        quaternions = df[["qw", "qx", "qy", "qz"]].values
-        lin_vel = df[["vx", "vy", "vz"]].values
-        ang_vel = df[["wx", "wy", "wz"]].values
+        time = df["time"].to_numpy(dtype=float)
+        positions = df[["px", "py", "pz"]].to_numpy(dtype=float)
+        quaternions = df[["qw", "qx", "qy", "qz"]].to_numpy(dtype=float)
+        lin_vel = df[["vx", "vy", "vz"]].to_numpy(dtype=float)
+        ang_vel = df[["wx", "wy", "wz"]].to_numpy(dtype=float)
 
         return cls(time, positions, quaternions, lin_vel, ang_vel)
 

@@ -1,4 +1,5 @@
 import { TreeDiff } from '@/utils/frankensteinTree';
+import { useModalA11y } from '@/utils/useModalA11y';
 
 interface TreeDiffModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export function TreeDiffModal({
   diff,
   onApplyMergeAll,
 }: TreeDiffModalProps) {
+  const dialogRef = useModalA11y<HTMLDivElement>(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const noDiff =
@@ -27,11 +30,23 @@ export function TreeDiffModal({
 
   return (
     <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tree-diff-title"
+        className="bg-gray-900 border border-gray-800 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="px-6 py-4 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span className="text-blue-500 font-mono" aria-hidden="true">📊</span> Model Comparison
+          <h2
+            id="tree-diff-title"
+            className="heading-section flex items-center gap-2"
+          >
+            <span className="text-blue-500 font-mono" aria-hidden="true">
+              📊
+            </span>{' '}
+            Model Comparison
           </h2>
           <button
             onClick={onClose}

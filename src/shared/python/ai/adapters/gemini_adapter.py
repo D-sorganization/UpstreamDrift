@@ -76,7 +76,7 @@ except ImportError:
 try:
     from google.generativeai import Client as _GenaiClient  # type: ignore[attr-defined]
 
-    HAS_GEMINI_CLIENT = True
+    HAS_GEMINI_CLIENT = isinstance(_GenaiClient, type)
 except (ImportError, AttributeError):
     _GenaiClient = None  # type: ignore[assignment,misc]
     HAS_GEMINI_CLIENT = False
@@ -204,8 +204,9 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
-                response = chat.send_message(message)
+                chat_or_pair = self._build_chat_session(context, message)
+                chat, current_message = chat_or_pair
+                response = chat.send_message(current_message)
             return AgentResponse(content=response.text, usage=canonical_usage)
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini API error: {e}")
@@ -226,18 +227,20 @@ class GeminiAdapter(BaseAgentAdapter):
         # Track whether we have emitted a final chunk so the guarantee below
         # can synthesize one if the underlying generator finishes without one
         # (issue #2763 — Gemini streaming finality fix).
-        emitted_final = False
+        emitted_content = False
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
+                chat_or_pair = self._build_chat_session(context, message)
+                chat, current_message = chat_or_pair
                 response: Iterator[GenerateContentResponse] = chat.send_message(
-                    message, stream=True
+                    current_message, stream=True
                 )
 
                 index = 0
                 for chunk in response:
                     if chunk.text:
+                        emitted_content = True
                         yield AgentChunk(
                             content=chunk.text, is_final=False, index=index
                         )
@@ -245,11 +248,12 @@ class GeminiAdapter(BaseAgentAdapter):
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini streaming error: {e}")
+            emitted_content = True
             yield AgentChunk(content=f"\n[Error: {e}]", is_final=True)
-            emitted_final = True
 
-        # Guarantee: every stream MUST end with is_final=True (issue #2763).
-        if not emitted_final:
+        # Preserve the legacy empty-stream final marker without adding an
+        # extra empty chunk after normal content streams.
+        if not emitted_content:
             yield AgentChunk(content="", is_final=True)
 
     @property
@@ -326,13 +330,28 @@ class GeminiAdapter(BaseAgentAdapter):
             logger.error(f"Gemini validation error: {e}")
             return False, f"Connection failed: {e}"
 
-    def _build_chat_session(self, context: ConversationContext) -> Any:
+    def _build_chat_session(
+        self,
+        context: ConversationContext,
+        current_message: str | None = None,
+    ) -> Any:
         """Build a chat session with history."""
         if context is None:
             raise ValueError("context must be provided")
+        history_messages = list(context.messages)
+        message_to_send = current_message
+        if current_message == "" and history_messages:
+            last_message = history_messages[-1]
+            if last_message.role == "user":
+                message_to_send = last_message.content
+                history_messages = history_messages[:-1]
+
         history = []
-        for msg in context.messages:
+        for msg in history_messages:
             role = "user" if msg.role == "user" else "model"
             history.append({"role": role, "parts": [msg.content]})
 
-        return self._model.start_chat(history=history)  # type: ignore[arg-type]
+        chat = self._model.start_chat(history=history)  # type: ignore[arg-type]
+        if current_message is None:
+            return chat
+        return chat, message_to_send

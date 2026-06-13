@@ -24,6 +24,36 @@ from src.shared.python.core.physics_constants import (
 )
 from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 
+_DEFAULT_DRAG_COEFFICIENT = float(GOLF_BALL_DRAG_COEFFICIENT)
+
+
+def _as_vector3(name: str, value: np.ndarray) -> np.ndarray:
+    """Return a flattened 3-vector for force calculations."""
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+    vector = np.asarray(value, dtype=float).reshape(-1)
+    if vector.shape != (3,):
+        raise ValueError(f"{name} must contain exactly 3 elements")
+    return vector
+
+
+def _active_motion_vectors(
+    velocity: np.ndarray,
+    spin: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float, float] | None:
+    """Normalize velocity/spin vectors for spin-induced forces."""
+    velocity_vector = _as_vector3("velocity", velocity)
+    spin_vector = _as_vector3("spin", spin)
+    speed = float(
+        math.sqrt(np.dot(velocity_vector, velocity_vector))
+    )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
+    spin_magnitude = float(
+        math.sqrt(np.dot(spin_vector, spin_vector))
+    )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
+    if speed < 1e-10 or spin_magnitude < 1e-10:
+        return None
+    return velocity_vector, spin_vector, speed, spin_magnitude
+
 
 class DragModel:
     """Model for aerodynamic drag force.
@@ -64,17 +94,16 @@ class DragModel:
         Returns:
             Drag force vector [N]
         """
-        if velocity is None:
-            raise ValueError("velocity must be provided")
+        velocity_vector = _as_vector3("velocity", velocity)
         speed = float(
-            math.sqrt(np.dot(velocity, velocity))
+            math.sqrt(np.dot(velocity_vector, velocity_vector))
         )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
         if speed < 1e-10:
-            return np.zeros(3)
+            return np.zeros_like(velocity_vector)
 
-        cd = self.get_effective_coefficient(velocity, air_density)
+        cd = self.get_effective_coefficient(velocity_vector, air_density)
         force_magnitude = 0.5 * air_density * cd * self.ball_area * speed**2
-        return -force_magnitude * velocity / speed
+        return -force_magnitude * velocity_vector / speed
 
     def get_effective_coefficient(
         self,
@@ -89,13 +118,12 @@ class DragModel:
         supported [1e3, 1e7] range fall back to the nearest endpoint so the
         integrator never sees a discontinuity.
         """
-        if velocity is None:
-            raise ValueError("velocity must be provided")
+        velocity_vector = _as_vector3("velocity", velocity)
         if not self.reynolds_correction:
             return self.base_coefficient
 
         speed = float(
-            math.sqrt(np.dot(velocity, velocity))
+            math.sqrt(np.dot(velocity_vector, velocity_vector))
         )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
         if speed < 1e-10:
             return self.base_coefficient
@@ -106,7 +134,11 @@ class DragModel:
         # Clamp to the model's supported range; outside it the underlying
         # correlation extrapolation is meaningless for golf balls.
         re_clamped = max(1.0e3, min(1.0e7, re))
-        return cd_dimpled_sphere(re_clamped, base_cd=self.base_coefficient)
+        cd = cd_dimpled_sphere(
+            re_clamped,
+            base_cd=_DEFAULT_DRAG_COEFFICIENT,
+        )
+        return cd * self.base_coefficient / _DEFAULT_DRAG_COEFFICIENT
 
 
 class LiftModel:
@@ -137,24 +169,17 @@ class LiftModel:
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     ) -> np.ndarray:
         """Calculate lift force from spin."""
-        if velocity is None:
-            raise ValueError("velocity must be provided")
-        speed = float(
-            math.sqrt(np.dot(velocity, velocity))
-        )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
-        spin_magnitude = float(
-            math.sqrt(np.dot(spin, spin))
-        )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
-
-        if speed < 1e-10 or spin_magnitude < 1e-10:
+        motion = _active_motion_vectors(velocity, spin)
+        if motion is None:
             return np.zeros(3)
+        velocity_vector, spin_vector, speed, spin_magnitude = motion
 
-        spin_axis = spin / spin_magnitude
-        lift_dir = np.cross(spin_axis, velocity)
+        spin_axis = spin_vector / spin_magnitude
+        lift_dir = np.cross(spin_axis, velocity_vector)
         lift_norm = float(math.hypot(*lift_dir))
 
         if lift_norm < 1e-10:
-            return np.zeros(3)
+            return np.zeros_like(velocity_vector)
 
         lift_dir = lift_dir / lift_norm
         spin_ratio = self.ball_radius * spin_magnitude / speed
@@ -196,23 +221,16 @@ class MagnusModel:
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     ) -> np.ndarray:
         """Calculate Magnus force."""
-        if velocity is None:
-            raise ValueError("velocity must be provided")
-        speed = float(
-            math.sqrt(np.dot(velocity, velocity))
-        )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
-        spin_magnitude = float(
-            math.sqrt(np.dot(spin, spin))
-        )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
-
-        if speed < 1e-10 or spin_magnitude < 1e-10:
+        motion = _active_motion_vectors(velocity, spin)
+        if motion is None:
             return np.zeros(3)
+        velocity_vector, spin_vector, speed, spin_magnitude = motion
 
-        magnus_dir = np.cross(spin, velocity)
+        magnus_dir = np.cross(spin_vector, velocity_vector)
         magnus_norm = float(math.hypot(*magnus_dir))
 
         if magnus_norm < 1e-10:
-            return np.zeros(3)
+            return np.zeros_like(velocity_vector)
 
         magnus_dir = magnus_dir / magnus_norm
         spin_param = self.ball_radius * spin_magnitude / speed

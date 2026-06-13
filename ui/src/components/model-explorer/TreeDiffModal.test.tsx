@@ -57,4 +57,56 @@ describe('TreeDiffModal Component', () => {
     fireEvent.click(closeBtn);
     expect(handleClose).toHaveBeenCalled();
   });
+
+  it('exposes dialog semantics and a labelled title (#7438)', () => {
+    render(
+      <TreeDiffModal
+        isOpen
+        onClose={vi.fn()}
+        sourceModelName="S"
+        targetModelName="T"
+        diff={mockDiff}
+      />,
+    );
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    const title = document.getElementById(
+      dialog.getAttribute('aria-labelledby')!,
+    );
+    expect(title).toHaveTextContent('Model Comparison');
+  });
+
+  it('closes on Escape (#7438)', () => {
+    const onClose = vi.fn();
+    render(
+      <TreeDiffModal
+        isOpen
+        onClose={onClose}
+        sourceModelName="S"
+        targetModelName="T"
+        diff={mockDiff}
+      />,
+    );
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('traps Tab focus within the dialog (#7438)', () => {
+    render(
+      <TreeDiffModal
+        isOpen
+        onClose={vi.fn()}
+        sourceModelName="S"
+        targetModelName="T"
+        diff={mockDiff}
+      />,
+    );
+    const dialog = screen.getByRole('dialog');
+    const focusable = dialog.querySelectorAll('button');
+    const last = focusable[focusable.length - 1] as HTMLElement;
+    last.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    // Wrapped back to the first focusable (the close button).
+    expect(focusable[0]).toHaveFocus();
+  });
 });
