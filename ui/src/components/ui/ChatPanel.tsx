@@ -67,6 +67,18 @@ export interface ChatMessage {
   role: ChatRole;
   content: string;
   attachments?: ChatAttachment[];
+  /**
+   * #7426: set when a streaming response was cut off (socket dropped /
+   * reconnect) so the UI can show "response interrupted — retry?" instead of
+   * leaving a half-rendered message with a stuck typing indicator.
+   */
+  interrupted?: boolean;
+}
+
+/** The originating user payload kept per assistant message so retry is exact. */
+interface UserPayload {
+  content: string;
+  attachments?: ChatAttachment[];
 }
 
 export type ConnectionStatus =
@@ -223,10 +235,13 @@ export function ChatPanel({
   const assistantIdRef = useRef<string | null>(null);
   const listEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const lastUserMessageRef = useRef<{
-    content: string;
-    attachments?: ChatAttachment[];
-  } | null>(null);
+  // #7426: the user payload that produced each assistant message, keyed by the
+  // assistant message id, so retry replays exactly the right turn (incl.
+  // attachments) even after intervening quick-actions. `pendingUserPayloadRef`
+  // holds the payload for the *next* assistant message, which is created
+  // lazily on the first streamed chunk.
+  const userPayloadByAssistantRef = useRef<Map<string, UserPayload>>(new Map());
+  const pendingUserPayloadRef = useRef<UserPayload | null>(null);
 
   const targetUrl = useMemo(
     () => (url ? withLauncherWebSocketToken(url) : resolveChatUrl('new')),
@@ -244,6 +259,12 @@ export function ChatPanel({
       }
       const id = makeId();
       assistantIdRef.current = id;
+      // Associate the turn's originating user payload with this assistant
+      // message so a later retry replays exactly it (#7426).
+      if (pendingUserPayloadRef.current) {
+        userPayloadByAssistantRef.current.set(id, pendingUserPayloadRef.current);
+        pendingUserPayloadRef.current = null;
+      }
       return [...prev, { id, role: 'assistant', content: chunk }];
     });
   }, []);
@@ -500,7 +521,10 @@ export function ChatPanel({
     ]);
     const sent = sendOverWire(text, atts);
     if (sent) {
-      lastUserMessageRef.current = { content: text, attachments: atts.length ? atts : undefined };
+      pendingUserPayloadRef.current = {
+        content: text,
+        attachments: atts.length ? atts : undefined,
+      };
       setInput('');
       setAttachments([]);
     }
@@ -524,14 +548,21 @@ export function ChatPanel({
 
   const retryLastUserMessage = useCallback(
     (assistantId: string) => {
-      const last = lastUserMessageRef.current;
-      if (!last) return;
-      // Drop the assistant message we're retrying (and anything after).
+      // #7426: replay exactly the user turn that produced THIS assistant
+      // message — not whatever was sent most recently — so attachments and
+      // quick-action prompts can't be crossed.
+      const payload = userPayloadByAssistantRef.current.get(assistantId);
+      if (!payload) return;
+      // Drop the assistant message we're retrying (and anything after), and
+      // forget its stale payload mapping.
       setMessages((prev) => {
         const idx = prev.findIndex((m) => m.id === assistantId);
         return idx >= 0 ? prev.slice(0, idx) : prev;
       });
-      sendOverWire(last.content, last.attachments ?? []);
+      userPayloadByAssistantRef.current.delete(assistantId);
+      // The replayed turn becomes the pending payload for the new response.
+      pendingUserPayloadRef.current = payload;
+      sendOverWire(payload.content, payload.attachments ?? []);
     },
     [sendOverWire],
   );
@@ -548,11 +579,24 @@ export function ChatPanel({
       { id: makeId(), role: 'user', content: action.prompt },
     ]);
     const sent = sendOverWire(action.prompt, []);
-    if (sent) lastUserMessageRef.current = { content: action.prompt };
+    if (sent) pendingUserPayloadRef.current = { content: action.prompt };
   };
 
   const handleReconnect = () => {
-    // Bumping the nonce re-runs the connect effect.
+    // #7426: if the socket dropped mid-stream, the typing indicator and the
+    // half-rendered assistant message would otherwise persist. Reset stream
+    // state and flag the interrupted message before re-running the connect
+    // effect (the nonce bump).
+    const interruptedId = assistantIdRef.current;
+    if (interruptedId) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === interruptedId ? { ...m, interrupted: true } : m,
+        ),
+      );
+    }
+    setStreaming(false);
+    assistantIdRef.current = null;
     reconnectAttemptsRef.current = 0;
     setReconnectNonce((n) => n + 1);
   };
@@ -697,6 +741,15 @@ export function ChatPanel({
                   <ChatMarkdown source={m.content} data-testid="chat-markdown" />
                 ) : (
                   <span className="whitespace-pre-wrap">{m.content}</span>
+                )}
+                {m.interrupted && (
+                  <div
+                    className="mt-1 text-xs italic opacity-80"
+                    data-testid="chat-interrupted"
+                    style={{ color: 'var(--sidekick-color-warning, #fbbf24)' }}
+                  >
+                    Response interrupted — retry?
+                  </div>
                 )}
                 {m.attachments && m.attachments.length > 0 && (
                   <ul className="mt-1 text-xs opacity-75" data-testid="chat-bubble-attachments">

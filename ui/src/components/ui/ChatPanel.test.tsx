@@ -461,6 +461,87 @@ describe('ChatPanel — retry button', () => {
     // The old assistant message should be gone (we sliced it off).
     expect(screen.queryByText('reply v1')).not.toBeInTheDocument();
   });
+
+  it('retry after a quick action replays the right turn, keeping attachments (#7426)', async () => {
+    render(<ChatPanel />);
+    const socket = await waitForSocket();
+
+    // 1) Send a normal message WITH an attachment.
+    fireEvent.change(screen.getByTestId('chat-input'), {
+      target: { value: 'with image' },
+    });
+    // Attach a file via the hidden input.
+    const file = new File(['x'], 'pic.png', { type: 'image/png' });
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    await waitFor(() =>
+      expect(screen.queryByTestId('chat-attachments')).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByTestId('chat-send'));
+    await waitFor(() => expect(socket.sent.length).toBe(1));
+    // Assistant replies and completes for the first turn.
+    act(() => {
+      socket.emit({ type: 'chunk', content: 'image reply' });
+      socket.emit({ type: 'complete', session_id: 's' });
+    });
+    await waitFor(() => expect(screen.getByText('image reply')).toBeInTheDocument());
+
+    // 2) Fire a quick action (no attachments) — a second assistant message.
+    fireEvent.click(screen.getByText('Summarize'));
+    await waitFor(() => expect(socket.sent.length).toBe(2));
+    act(() => {
+      socket.emit({ type: 'chunk', content: 'summary reply' });
+      socket.emit({ type: 'complete', session_id: 's' });
+    });
+    await waitFor(() => expect(screen.getByText('summary reply')).toBeInTheDocument());
+
+    // 3) Retry the FIRST assistant message — must replay 'with image' WITH the
+    // attachment, not the most-recent quick-action payload.
+    const retries = screen.getAllByTestId('chat-retry');
+    fireEvent.click(retries[0]); // first assistant message's retry
+    await waitFor(() => expect(socket.sent.length).toBe(3));
+    const replay = JSON.parse(socket.sent[2].data) as Record<string, unknown>;
+    expect(replay.message).toBe('with image');
+    expect(Array.isArray(replay.attachments)).toBe(true);
+    expect((replay.attachments as unknown[]).length).toBe(1);
+  });
+});
+
+describe('ChatPanel — reconnect mid-stream (#7426)', () => {
+  it('clears the typing indicator and flags the interrupted message', async () => {
+    render(<ChatPanel />);
+    const socket = await waitForSocket();
+
+    // Start a stream but never complete it.
+    fireEvent.change(screen.getByTestId('chat-input'), {
+      target: { value: 'go' },
+    });
+    fireEvent.click(screen.getByTestId('chat-send'));
+    act(() => {
+      socket.emit({ type: 'chunk', content: 'partial...' });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-streaming')).toBeInTheDocument(),
+    );
+
+    // Socket drops -> status disconnected -> Reconnect affordance appears.
+    act(() => {
+      socket.close();
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-reconnect')).toBeInTheDocument(),
+    );
+
+    fireEvent.click(screen.getByTestId('chat-reconnect'));
+
+    // Typing indicator gone; partial message flagged interrupted.
+    await waitFor(() =>
+      expect(screen.queryByTestId('chat-streaming')).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId('chat-interrupted')).toBeInTheDocument();
+  });
 });
 
 describe('ChatPanel — quick actions', () => {
