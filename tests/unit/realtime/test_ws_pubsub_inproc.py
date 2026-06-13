@@ -12,12 +12,21 @@ from src.api.routes.realtime import router as realtime_router
 
 pytestmark = pytest.mark.unit
 
+_LAUNCHER_TOKEN = "test-launcher-token"
+_WS_HEADERS = {"origin": "http://localhost"}
+
 
 @pytest.fixture()
-def client() -> TestClient:
+def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    monkeypatch.setenv("GOLF_AUTH_DISABLED", "true")
     app = FastAPI()
+    app.state.launcher_csrf_token = _LAUNCHER_TOKEN
     app.include_router(realtime_router)
     return TestClient(app)
+
+
+def _local_ws_url(channel: str) -> str:
+    return f"/realtime/subscribe?channel={channel}&launcher_token={_LAUNCHER_TOKEN}"
 
 
 def test_publish_with_no_subscribers_returns_zero_delivered(
@@ -46,7 +55,7 @@ def test_subscribe_invalid_channel_closes_connection(client: TestClient) -> None
 
     with (
         pytest.raises(WebSocketDisconnect),
-        client.websocket_connect("/realtime/subscribe?channel=BAD/Name") as ws,
+        client.websocket_connect(_local_ws_url("BAD/Name"), headers=_WS_HEADERS) as ws,
     ):
         # The server may close before or after accept; receive forces the
         # disconnect to surface as an exception.
@@ -56,7 +65,9 @@ def test_subscribe_invalid_channel_closes_connection(client: TestClient) -> None
 def test_subscribe_round_trip_under_latency_budget(client: TestClient) -> None:
     payload = {"frame": 7, "values": [1.0, 2.0, 3.0]}
 
-    with client.websocket_connect("/realtime/subscribe?channel=pose/canonical") as ws:
+    with client.websocket_connect(
+        _local_ws_url("pose/canonical"), headers=_WS_HEADERS
+    ) as ws:
         # Give the server a tick to register the subscriber.
         time.sleep(0.05)
 
@@ -80,8 +91,12 @@ def test_subscribe_round_trip_under_latency_budget(client: TestClient) -> None:
 
 def test_multiple_subscribers_each_receive(client: TestClient) -> None:
     with (
-        client.websocket_connect("/realtime/subscribe?channel=target/active") as ws_a,
-        client.websocket_connect("/realtime/subscribe?channel=target/active") as ws_b,
+        client.websocket_connect(
+            _local_ws_url("target/active"), headers=_WS_HEADERS
+        ) as ws_a,
+        client.websocket_connect(
+            _local_ws_url("target/active"), headers=_WS_HEADERS
+        ) as ws_b,
     ):
         time.sleep(0.05)
         r = client.post(
@@ -95,7 +110,9 @@ def test_multiple_subscribers_each_receive(client: TestClient) -> None:
 
 
 def test_subscriber_only_receives_its_channel(client: TestClient) -> None:
-    with client.websocket_connect("/realtime/subscribe?channel=pose/canonical") as ws:
+    with client.websocket_connect(
+        _local_ws_url("pose/canonical"), headers=_WS_HEADERS
+    ) as ws:
         time.sleep(0.05)
         # Publish on a different channel — should NOT be delivered.
         client.post(

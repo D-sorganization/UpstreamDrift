@@ -64,7 +64,10 @@ jobs:
           image-ref: "upstreamdrift:ci"
           format: "table"
           severity: "CRITICAL,HIGH"
-          # Fail the build on HIGH or CRITICAL vulnerabilities.
+          # Fail the build on actionable HIGH or CRITICAL vulnerabilities.
+          # The SARIF upload above still reports unfixed OS findings; this
+          # blocking gate ignores CVEs with no fixed package version available.
           exit-code: "1"
+          ignore-unfixed: "true"
           vuln-type: "os,library"
           timeout: "30m0s"

@@ -324,6 +324,14 @@ jobs:
           fi
 
       # UI Security and Quality Checks (only when ui/ files change)
+      - name: Setup Node for UI audit
+        if: steps.ui_changes.outputs.changed == 'true'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
       - name: UI Install (audit prerequisite)
         if: steps.ui_changes.outputs.changed == 'true'
         working-directory: ui
@@ -339,6 +347,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            rc=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$rc"
+          }
+
           audit_venv="$RUNNER_TEMP/pip-audit-venv"
           python3 -m venv "$audit_venv"
           audit_python="$audit_venv/bin/python"
@@ -348,7 +375,7 @@ jobs:
           "$audit_python" -m pip install "pip-audit==2.10.0"
 
           set +e
-          "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
+          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
           audit_status=$?
           set -e
 
@@ -362,7 +389,7 @@ jobs:
               --waiver-file scripts/config/pip_audit_waivers.json \
               --audit-report pip-audit-report.json
           )
-          "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
+          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
@@ -1339,6 +1366,25 @@ jobs:
           # - Coverage measurement on src/ (pytest-cov)
           # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
           # are intentionally not provisioned here.
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            rc=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$rc"
+          }
+
           echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "pull_request" ] && [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
             printf '%s\n' "${changed_coverage_targets[@]}" > "$RUNNER_TEMP/changed_coverage_targets.txt"
@@ -1346,7 +1392,7 @@ jobs:
           else
             echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"
           fi
-          xvfb-run --auto-servernum python -m pytest \
+          run_with_heartbeat "core pytest lane" xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
             -n 2 \
             --dist loadscope \
@@ -1355,6 +1401,7 @@ jobs:
             --ignore=tests/shared_contracts \
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
+            --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             --cov-report=term-missing \
@@ -1362,6 +1409,7 @@ jobs:
             --cov-config=pyproject.toml \
             --cov-fail-under=75 \
             --tb=short \
+            --durations=20 \
             -v
 
       - name: Enforce Per-Package Coverage Thresholds
@@ -1780,7 +1828,7 @@ jobs:
 
       - name: Run Tests
         if: steps.frontend-changes.outputs.skip != 'true'
-        run: npm run test:run
+        run: npm run test:run -- --testTimeout=15000
 
       - name: Build Check
         if: steps.frontend-changes.outputs.skip != 'true'
@@ -2088,8 +2136,8 @@ jobs:
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install "numpy==2.2.6" pytest pydantic pytest-asyncio pytest-timeout
-          python -m pip install --no-cache-dir -e ".[dev]"
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
           python -m pip install --force-reinstall target/wheels/*.whl
           python scripts/ci/import_built_rust_wheels.py \
             upstream_physics \

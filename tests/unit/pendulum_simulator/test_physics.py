@@ -199,13 +199,14 @@ class TestForwardKinematics:
 
     def test_physics_has_expected_keys(self) -> None:
         result = forward_kinematics(0.0, 0.0, _P)
-        assert "shoulder" in result
+        assert "hub" in result
         assert "wrist" in result
         assert "tip" in result
 
-    def test_shoulder_at_origin(self) -> None:
+    @pytest.mark.unit
+    def test_hub_at_origin(self) -> None:
         result = forward_kinematics(0.0, 0.0, _P)
-        assert result["shoulder"] == pytest.approx((0.0, 0.0))
+        assert result["hub"] == pytest.approx((0.0, 0.0))
 
     def test_wrist_distance_equals_l1(self) -> None:
         result = forward_kinematics(0.5, 0.3, _P)

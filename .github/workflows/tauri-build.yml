@@ -112,6 +112,14 @@ jobs:
         working-directory: ui/src-tauri
         run: cargo fmt --check
 
+      - name: Repair Cargo target cache
+        working-directory: ui/src-tauri
+        run: |
+          for crate in golf-modeling-suite tauri tauri-macros tauri-runtime tauri-runtime-wry; do
+            cargo clean -p "$crate" || echo "No cached package named $crate to clean."
+          done
+          cargo fetch --locked
+
       - name: Rust clippy
         working-directory: ui/src-tauri
         run: cargo clippy -- -D warnings

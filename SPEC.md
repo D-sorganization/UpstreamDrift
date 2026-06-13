@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.364                                            |
+| **Spec Version**        | 1.0.365                                            |
 | **Last Spec Update**    | 2026-06-12                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-12** - Documented the consolidated parity CI follow-up: frontend
+  Fast Refresh helpers now live outside component modules, diagnostics imports
+  respect API/launcher layer boundaries, recording export artifact writing is
+  extracted below the function-size budget, export-format validation is shared,
+  and new parity tests carry suite markers.
 - **2026-06-12** - Made the Hatch wheel package contract explicit for the
   standalone Sidekick console package by asserting the wheel target maps
   `src/shared/python/sidekick` to top-level `sidekick` through Hatch
@@ -77,6 +82,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-06-12** - Refreshed the pinned `python:3.12-slim` Docker base digest
   and configured the blocking Trivy table scan to ignore unfixed OS findings,
   keeping the gate focused on actionable HIGH/CRITICAL vulnerabilities.
+- **2026-06-12** - Kept the Rust Python-binding verification lane on the
+  locked Python dependency contract by installing `requirements-dev.lock`
+  before the editable `.[dev]` package install and using `--no-deps`.
 - **2026-06-12** - Moved shared plot-series label generation into a Qt-free
   `src.shared.python.plot_labels` helper so headless analysis can reuse plotting
   label contracts without importing the Matplotlib/PyQt plotting package.
@@ -407,8 +415,8 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   `--no-cov` shortcut, and per-package coverage enforcement runs whenever that
   lane produces `coverage.xml`.
 - **2026-06-10** - Closed the #7279/#7282 audit hygiene wave. The Docker
-  security scan still uploads HIGH/CRITICAL SARIF findings, but the table scan
-  is now the blocking HIGH/CRITICAL gate without `ignore-unfixed`. The audited
+  security scan still uploads HIGH/CRITICAL SARIF findings, while the table scan
+  is the blocking gate for fixable HIGH/CRITICAL findings. The audited
   API and launcher production modules now route module loggers through
   `logging_pkg.logging_config.get_logger(__name__)`, with a repo-hygiene test
   preventing the remediated files from returning to direct `logging.getLogger`.
@@ -1316,6 +1324,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-12 | 1.0.365 | Consolidated parity CI follow-up after #7496. Moved BallFlight validation/color helpers into a non-component module to satisfy React Fast Refresh linting, added a fail-closed launch-mode fallback for web launcher contracts, deferred diagnostics launcher imports to request time to preserve API layer direction, extracted recording JSON artifact writing below the changed-function architecture budget, shared export-format validation across request models, and marked newly introduced parity tests with explicit suite markers so the ratchet remains blocking without expanding the baseline. |
 | 2026-06-12 | 1.0.360 | Web settings parity for #7457. Added `GET/PUT /settings` (`src/api/routes/settings.py`) persisting a validated `WebSettings` document (appearance/notifications/simulation defaults) atomically to `~/.upstreamdrift/web_settings.json`, a web `/settings` route (`ui/src/pages/Settings.tsx`) with theme selection via the shared `/themes` router, root-CSS-var font scaling, notification preferences consumed by the toast provider, and once-per-session simulation-default hydration that never clobbers in-session edits (#7424 guard). Feature-parity registry: `settings.preferences` → parity; desktop-only settings tabs recorded as a pending-decision exemption (#7460). |
 | 2026-06-12 | 1.0.359 | Fixed vendored Sidekick science accuracy for issues #7411, #7412, and #7413: Buck vapor pressure restores the correct constant roles, `signal_toolkit.calculus.Integrator` includes the upper-bound sample in definite integrals, and SCFM/ACFM/Nm3 plus ppmv/mg/Nm3 conversions use one DIN 1343 normal state. Added reference-value and property tests for vapor pressure, calculus integration, and conversion consistency. |
 | 2026-06-12 | 1.0.358 | Removed the anti-phantom guard's `jq` dependency from the PR retry/API fallback path by using GitHub CLI `--jq` output directly, keeping required PR guard checks portable across local self-hosted runner images that do not install `jq` globally. |

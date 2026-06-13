@@ -20,6 +20,8 @@ from ._local_fixtures import (
     make_sinusoidal_keypoint_sequence,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_apply_filter_unsupported_type_raises() -> None:
     with pytest.raises(ValueError, match="Unsupported"):

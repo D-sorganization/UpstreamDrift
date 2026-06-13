@@ -138,6 +138,22 @@ If you add file upload functionality:
 
 The following CVEs are currently ignored in our security scanning with documented mitigations:
 
+### Container OS Findings Without Fixed Packages
+
+Docker image SARIF scans report all HIGH and CRITICAL OS findings, including
+distribution advisories where Trivy reports no fixed package version yet
+(`affected`, `fix_deferred`, or `will_not_fix`). The blocking PR gate ignores
+only those unfixed OS findings and continues to fail on HIGH or CRITICAL
+vulnerabilities once a fixed package version is available.
+
+**Mitigation:**
+
+- Runtime images run `apt-get upgrade` during the build before package install
+- The base `python:3.12-slim` image is pinned by digest for reproducibility
+- SARIF upload remains enabled so unfixed findings stay visible for review
+- Monthly exception review includes checking whether fixed package versions have
+  become available
+
 ### CVE-2024-23342 (ecdsa)
 
 | Field                | Value                                      |

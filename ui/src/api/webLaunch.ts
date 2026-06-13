@@ -81,4 +81,10 @@ export function resolveTileLaunchAction(
                 reason: web.reason ?? 'Not available in the web app',
             };
     }
+
+    return {
+        kind: 'blocked',
+        badge: 'Unavailable',
+        reason: `Unsupported web launch mode: ${String(web.mode)}`,
+    };
 }
