@@ -68,7 +68,7 @@ export function AboutModal({ isOpen, onClose }: Props) {
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold text-white">UpstreamDrift</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               Biomechanical motion analysis platform
             </p>
           </div>

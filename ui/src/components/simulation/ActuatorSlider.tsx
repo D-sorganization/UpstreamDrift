@@ -64,7 +64,7 @@ export function ActuatorSlider({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 w-12 text-right font-mono">
+        <span className="text-xs text-gray-400 w-12 text-right font-mono">
           {actuator.min_value.toFixed(1)}
         </span>
         <div className="flex-1 relative">
@@ -75,7 +75,7 @@ export function ActuatorSlider({
             step={(range / 200) || 0.1}
             value={localValue}
             onChange={(e) => handleChange(parseFloat(e.target.value))}
-            className="w-full h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-1.5 bg-gray-500 rounded-lg appearance-none cursor-pointer accent-blue-500"
             aria-label={`${actuator.name} control value`}
           />
           <div
@@ -83,7 +83,7 @@ export function ActuatorSlider({
             style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
           />
         </div>
-        <span className="text-xs text-gray-500 w-12 font-mono">
+        <span className="text-xs text-gray-400 w-12 font-mono">
           {actuator.max_value.toFixed(1)}
         </span>
       </div>

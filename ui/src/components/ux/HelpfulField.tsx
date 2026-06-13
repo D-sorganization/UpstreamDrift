@@ -114,7 +114,7 @@ export function HelpfulField({
           }`}
         />
       )}
-      <p id={helpId} className="text-xs text-gray-500" title={meta.defaultSource}>
+      <p id={helpId} className="text-xs text-gray-400" title={meta.defaultSource}>
         {meta.shortHelp}
       </p>
       {violation && (

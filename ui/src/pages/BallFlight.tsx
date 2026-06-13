@@ -290,7 +290,7 @@ export function BallFlightPage() {
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Shot Tracer</h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-400">
             Multi-model ball-flight comparison
           </p>
         </div>
@@ -329,7 +329,7 @@ export function BallFlightPage() {
             Flight Models
           </h3>
           {models.length === 0 && !error && (
-            <p className="text-xs text-gray-500 italic">Loading models…</p>
+            <p className="text-xs text-gray-400 italic">Loading models…</p>
           )}
           {models.map((model) => (
             <label
@@ -409,7 +409,7 @@ export function BallFlightPage() {
             </div>
           </div>
         ) : (
-          <div className="p-8 text-sm text-gray-500 italic text-center">
+          <div className="p-8 text-sm text-gray-400 italic text-center">
             Set launch conditions, pick at least one flight model, and click
             Simulate to compare trajectories.
           </div>
@@ -465,7 +465,7 @@ export function BallFlightPage() {
               </tbody>
             </table>
           ) : (
-            <p className="text-xs text-gray-500 italic text-center py-4">
+            <p className="text-xs text-gray-400 italic text-center py-4">
               Run a simulation to compare carry, apex, flight time, and
               offline distance across models.
             </p>

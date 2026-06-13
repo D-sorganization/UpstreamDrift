@@ -212,7 +212,7 @@ export function ModelExplorerPage() {
               <button
                 onClick={() => setIsDiffOpen(true)}
                 disabled={sourceTree.length === 0 || targetTree.length === 0}
-                className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded text-xs font-medium transition-colors shadow-lg"
+                className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-400 text-white rounded text-xs font-medium transition-colors shadow-lg"
               >
                 Compare
               </button>
@@ -240,7 +240,7 @@ export function ModelExplorerPage() {
           {!error && !frankensteinMode && (
             <div className="flex-1 flex flex-col gap-3 min-w-0">
               <div className="space-y-1">
-                <label htmlFor="single-select" className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                <label htmlFor="single-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                   Select Model
                 </label>
                 <select
@@ -263,7 +263,7 @@ export function ModelExplorerPage() {
               {/* #7419: scroll the tree instead of clipping a tall model. */}
               <div className="flex-1 min-h-0 min-w-0 overflow-y-auto">
                 {loading ? (
-                  <div className="text-xs text-gray-500 italic text-center py-12">Loading model structure...</div>
+                  <div className="text-xs text-gray-400 italic text-center py-12">Loading model structure...</div>
                 ) : (
                   <ModelTree
                     modelName={selectedModelName || ''}
@@ -282,7 +282,7 @@ export function ModelExplorerPage() {
               {/* Source Tree Area */}
               <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
                 <div className="space-y-1">
-                  <label htmlFor="source-select" className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                  <label htmlFor="source-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                     Select Source
                   </label>
                   <select
@@ -319,7 +319,7 @@ export function ModelExplorerPage() {
               {/* Target Tree Area */}
               <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
                 <div className="space-y-1">
-                  <label htmlFor="target-select" className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                  <label htmlFor="target-select" className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                     Select Target
                   </label>
                   <select
@@ -372,13 +372,13 @@ export function ModelExplorerPage() {
         } w-72 bg-gray-950 border-l border-gray-800 flex-col flex-shrink-0`}
       >
         <div className="p-4 border-b border-gray-850">
-          <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
             Properties
           </h3>
           <PropertyInspector node={selectedNode} />
         </div>
         <div className="flex-1 overflow-y-auto p-4">
-          <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
             Joint Manipulator
           </h3>
           <JointManipulator

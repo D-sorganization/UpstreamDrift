@@ -70,7 +70,7 @@ export function TreeDiffModal({
             <div className="text-center py-12 space-y-2">
               <div className="text-4xl">🎉</div>
               <p className="text-sm text-gray-300 font-medium">Models are completely identical!</p>
-              <p className="text-xs text-gray-500">No differences detected in structure or properties.</p>
+              <p className="text-xs text-gray-400">No differences detected in structure or properties.</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -149,7 +149,7 @@ export function TreeDiffModal({
 
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-950 border-t border-gray-800 flex items-center justify-between">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-400">
             {!noDiff && 'Review the tree differences before finalizing your URDF composition.'}
           </div>
           <div className="flex gap-2">

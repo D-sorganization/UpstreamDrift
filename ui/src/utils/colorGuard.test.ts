@@ -40,3 +40,27 @@ describe('color-system guard (#7421)', () => {
     expect(offenders, `Use gray-* (neutrals) / blue-* (primary). Offending files: ${offenders.join(', ')}`).toEqual([]);
   });
 });
+
+/**
+ * Contrast guard (UI/UX #7439): `text-gray-500` (#6B7280) is ~2.8:1 on the
+ * app's gray-900/950 surfaces — below the WCAG AA 4.5:1 minimum for body text.
+ * Foreground text must use `text-gray-400` or lighter. This locks the sweep so
+ * a regression can't silently reintroduce the failing class.
+ */
+describe('contrast guard (#7439)', () => {
+  it('uses no text-gray-500 foreground class in tsx/ts sources', () => {
+    const offenders: string[] = [];
+    for (const file of walk(SRC_ROOT)) {
+      if (!/\.tsx?$/.test(file)) continue;
+      const rel = relative(SRC_ROOT, file).replace(/\\/g, '/');
+      if (rel.startsWith('utils/colorGuard')) continue;
+      if (/text-gray-500/.test(readFileSync(file, 'utf8'))) {
+        offenders.push(rel);
+      }
+    }
+    expect(
+      offenders,
+      `text-gray-500 fails AA on dark surfaces — use text-gray-400+. Offending: ${offenders.join(', ')}`,
+    ).toEqual([]);
+  });
+});

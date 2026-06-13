@@ -256,7 +256,7 @@ export function SimulationToolbar({
                 <span className="text-white font-mono">
                   {joint.angle_deg.toFixed(1)}&deg;
                 </span>
-                <span className="text-gray-500 font-mono">
+                <span className="text-gray-400 font-mono">
                   {joint.velocity.toFixed(2)} rad/s
                 </span>
               </div>

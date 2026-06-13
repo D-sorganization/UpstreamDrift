@@ -164,7 +164,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-700 bg-gray-800/80">
           <HelpCircle className="w-5 h-5 text-blue-400 flex-shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-gray-100 flex-1">Help</h2>
-          <span className="text-xs text-gray-500 hidden sm:inline">Press F1 to toggle</span>
+          <span className="text-xs text-gray-400 hidden sm:inline">Press F1 to toggle</span>
           <button
             onClick={handleClose}
             className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
@@ -178,7 +178,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
         <div className="px-4 py-2 border-b border-gray-700">
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
               aria-hidden="true"
             />
             <input
@@ -202,11 +202,11 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
             {searchQuery.trim() ? (
               // Search results
               <div>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="px-2 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Search Results ({searchResults.length})
                 </div>
                 {searchResults.length === 0 ? (
-                  <div className="px-2 py-4 text-sm text-gray-500 text-center">
+                  <div className="px-2 py-4 text-sm text-gray-400 text-center">
                     No results found
                   </div>
                 ) : (
@@ -232,7 +232,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
                 if (topics.length === 0) return null;
                 return (
                   <div key={category} className="mb-3">
-                    <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="px-2 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
                       {CATEGORY_LABELS[category as HelpCategory]}
                     </div>
                     {topics.map((topic) => (
@@ -278,7 +278,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
                     if (line.startsWith('- ')) {
                       return (
                         <div key={i} className="flex gap-2 ml-2 text-gray-300 text-sm">
-                          <span className="text-gray-500 flex-shrink-0">-</span>
+                          <span className="text-gray-400 flex-shrink-0">-</span>
                           <span>{line.substring(2)}</span>
                         </div>
                       );
@@ -366,7 +366,7 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
                       <div className="text-sm font-medium text-gray-200">
                         {topic.title}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-400 mt-1">
                         {topic.shortDescription}
                       </div>
                     </button>

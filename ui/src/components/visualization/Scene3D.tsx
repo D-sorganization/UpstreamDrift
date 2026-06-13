@@ -303,7 +303,7 @@ export function Scene3D({
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/75 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-xl z-20">
         {/* Camera Views */}
         <div className="flex items-center gap-1 border-r border-white/10 pr-2">
-          <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-1">View</span>
+          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mr-1">View</span>
           <button
             onClick={() => handleCameraPreset('front')}
             className="px-2 py-1 text-xs text-gray-300 hover:text-white rounded hover:bg-white/10 transition-colors"
@@ -334,7 +334,7 @@ export function Scene3D({
 
         {/* Transform Gizmo Controls */}
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-1">Gizmo</span>
+          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mr-1">Gizmo</span>
           <button
             onClick={() => setTransformMode('translate')}
             className={`px-2 py-1 text-xs rounded transition-colors ${
