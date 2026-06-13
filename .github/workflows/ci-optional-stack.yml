@@ -162,10 +162,12 @@ jobs:
         # so this lane only sees the packages it installs itself.
         run: |
           python -m venv "$RUNNER_TEMP/optional-stack-venv"
+          export PATH="$RUNNER_TEMP/optional-stack-venv/bin:$PATH"
           echo "$RUNNER_TEMP/optional-stack-venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/optional-stack-venv" >> "$GITHUB_ENV"
+          source scripts/ci/pip_retry.sh
           python -m ensurepip --upgrade || true
-          "$RUNNER_TEMP/optional-stack-venv/bin/python" -m pip install --upgrade pip
+          pip_retry install --upgrade pip
 
       - name: Document Optional-Stack Lane Identity
         run: |
@@ -188,11 +190,12 @@ jobs:
         # toolcache can carry a half-installed sortedcontainers that is missing
         # SortedSet, causing hypothesis to fail its import at pytest startup.
         run: |
+          source scripts/ci/pip_retry.sh
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          pip_retry install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
-          pip install -e ".[dev,gui-test]"
-          pip install "trimesh>=4.0.0"
+          pip_retry install -e ".[dev,gui-test]"
+          pip_retry install "trimesh>=4.0.0"
 
       - name: Install API Extras
         # Install full FastAPI stack for API-path tests.
@@ -201,10 +204,11 @@ jobs:
         # (installed as a transitive dep) that lacks uts46_remap, breaking
         # email-validator which email validation tests depend on.
         run: |
+          source scripts/ci/pip_retry.sh
           python -m ensurepip --upgrade || true
-          pip install "fastapi[all]" httpx
+          pip_retry install "fastapi[all]" httpx
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall "idna[uts46]>=3.4" "email-validator>=2.0.0"
+          pip_retry install --force-reinstall "idna[uts46]>=3.4" "email-validator>=2.0.0"
 
       - name: Attempt Pinocchio Ecosystem Installation
         # Pinocchio, Pink, and Crocoddyl are not on PyPI for all platforms.
@@ -214,8 +218,9 @@ jobs:
         id: pinocchio_install
         continue-on-error: true
         run: |
+          source scripts/ci/pip_retry.sh
           python -m ensurepip --upgrade || true
-          pip install pin pin-pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
+          pip_retry install pin pin-pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
           if python3 -c "import pinocchio" 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "Pinocchio installation: SUCCESS"
@@ -337,6 +342,25 @@ jobs:
           set -o pipefail
           : > /tmp/unit-test-results.txt
           rc=0
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            status=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$status"
+          }
+
           mapfile -t unit_targets < <(
             find tests/unit -mindepth 1 -maxdepth 1 \
               \( -type d -o -type f -name "test_*.py" \) \
@@ -345,14 +369,21 @@ jobs:
           )
           for target in "${unit_targets[@]}"; do
             echo "## Optional-stack unit target: $target" | tee -a /tmp/unit-test-results.txt
-            xvfb-run --auto-servernum pytest "$target" \
-              -p no:xvfb \
-              --timeout=60 \
-              --timeout-method=thread \
-              -v --tb=short \
-              -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
-              2>&1 | tee -a /tmp/unit-test-results.txt
+            run_with_heartbeat "optional-stack unit target $target" bash -o pipefail -c '
+              xvfb-run --auto-servernum pytest "$1" \
+                -p no:xvfb \
+                --timeout=60 \
+                --timeout-method=thread \
+                -v --tb=short \
+                --durations=20 \
+                -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+                2>&1 | tee -a /tmp/unit-test-results.txt
+            ' bash "$target"
             target_rc=$?
+            if [[ "$target_rc" -eq 5 ]]; then
+              echo "::warning::No runnable tests collected for $target; treating as skipped optional coverage."
+              continue
+            fi
             if [[ "$target_rc" -ne 0 ]]; then
               rc="$target_rc"
               break

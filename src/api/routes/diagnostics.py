@@ -19,17 +19,6 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, status
 
 from src.api.utils.datetime_compat import iso_format, utc_now
-from src.launchers.integrations_health_data import (
-    collect_all,
-    copy_diagnostics,
-    record_to_redacted_dict,
-)
-from src.launchers.launcher_diagnostics import (
-    DIAGNOSTIC_CHECKS,
-    DiagnosticResult,
-    LauncherDiagnostics,
-    build_report,
-)
 from src.shared.python.config.environment import is_production
 from src.shared.python.core.process_safety import safe_gather
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -55,7 +44,11 @@ def _guard_production() -> None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-async def _run_probe(diag: LauncherDiagnostics, check_name: str) -> DiagnosticResult:
+async def _run_probe(
+    diag: Any,
+    check_name: str,
+    diagnostic_result_type: Any,
+) -> Any:
     """Run one diagnostic probe in a worker thread with a timeout.
 
     Args:
@@ -79,7 +72,7 @@ async def _run_probe(diag: LauncherDiagnostics, check_name: str) -> DiagnosticRe
             check_name,
             PROBE_TIMEOUT_SECONDS,
         )
-        return DiagnosticResult(
+        return diagnostic_result_type(
             name=check_name,
             status="warning",
             message=f"Probe timed out after {PROBE_TIMEOUT_SECONDS:.0f}s",
@@ -88,7 +81,7 @@ async def _run_probe(diag: LauncherDiagnostics, check_name: str) -> DiagnosticRe
         )
     except (RuntimeError, ValueError, OSError, ImportError) as exc:
         logger.exception("Diagnostic probe %s raised", check_name)
-        return DiagnosticResult(
+        return diagnostic_result_type(
             name=check_name,
             status="warning",
             message=f"Probe raised {type(exc).__name__}: {exc}",
@@ -117,9 +110,16 @@ async def get_full_diagnostics() -> dict[str, Any]:
     """
     _guard_production()
 
+    from src.launchers.launcher_diagnostics import (
+        DIAGNOSTIC_CHECKS,
+        DiagnosticResult,
+        LauncherDiagnostics,
+        build_report,
+    )
+
     diag = LauncherDiagnostics()
     outcomes = await safe_gather(
-        *(_run_probe(diag, name) for name in DIAGNOSTIC_CHECKS)
+        *(_run_probe(diag, name, DiagnosticResult) for name in DIAGNOSTIC_CHECKS)
     )
     results: list[DiagnosticResult] = []
     for name, outcome in zip(DIAGNOSTIC_CHECKS, outcomes, strict=True):
@@ -161,6 +161,12 @@ async def get_integrations_health() -> dict[str, Any]:
         (the desktop copy-diagnostics report).
     """
     _guard_production()
+
+    from src.launchers.integrations_health_data import (
+        collect_all,
+        copy_diagnostics,
+        record_to_redacted_dict,
+    )
 
     loop = asyncio.get_running_loop()
     try:

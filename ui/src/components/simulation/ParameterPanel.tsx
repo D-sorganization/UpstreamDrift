@@ -32,6 +32,7 @@ export function ParameterPanel({
 }: Props) {
   // Transient edit buffer for the duration field; null = mirror the store.
   const [durationDraft, setDurationDraft] = useState<string | null>(null);
+  const engineKey = engine.toLowerCase();
 
   const commitDuration = (raw: string) => {
     const parsed = Number(raw);
@@ -182,11 +183,12 @@ export function ParameterPanel({
           <span className="font-semibold text-gray-300">Engine:</span> {engine}
         </p>
         <p className="text-xs text-gray-400 mt-1">
-          {engine.toLowerCase() === 'mujoco' && 'Full contact physics, muscle simulation'}
-          {engine.toLowerCase() === 'drake' && 'Optimization & control focused'}
-          {engine.toLowerCase() === 'pinocchio' && 'Fast rigid body dynamics'}
-          {engine.toLowerCase() === 'opensim' && 'Musculoskeletal biomechanics'}
-          {engine.toLowerCase() === 'myosim' && 'Muscle & tendon simulation'}
+          {engineKey === 'mujoco' && 'Full contact physics, muscle simulation'}
+          {engineKey === 'drake' && 'Optimization & control focused'}
+          {engineKey === 'pinocchio' && 'Fast rigid body dynamics'}
+          {engineKey === 'opensim' && 'Musculoskeletal biomechanics'}
+          {(engineKey === 'myosuite' || engineKey === 'myosim') &&
+            'Muscle & tendon simulation'}
         </p>
       </div>
     </div>

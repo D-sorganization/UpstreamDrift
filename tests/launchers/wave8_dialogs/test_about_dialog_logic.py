@@ -11,6 +11,8 @@ import pytest
 from src.launchers import about_dialog as ad
 from src.shared.python import version_info
 
+pytestmark = pytest.mark.unit
+
 # The version-resolution chain is now single-sourced in
 # src.shared.python.version_info (issue #7459); the dialog delegates to it.
 

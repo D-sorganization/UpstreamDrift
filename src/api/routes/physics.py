@@ -588,6 +588,43 @@ async def set_camera_preset(
     )
 
 
+def _write_recording_export_artifact(
+    recorded: list[Any],
+    logger: Any,
+) -> str | None:
+    """Write recorded frames to a managed JSON artifact and return its filename."""
+    if not recorded:
+        return None
+
+    import json
+    import os
+    import tempfile
+    from pathlib import Path
+
+    artifact_dir = os.environ.get(
+        "ARTIFACT_DIR",
+        os.path.join(tempfile.gettempdir(), "upstream_drift_artifacts"),
+    )
+    os.makedirs(artifact_dir, exist_ok=True)
+
+    fd, tmp_path = tempfile.mkstemp(suffix=".json", dir=artifact_dir)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump({"frames": recorded, "format": "json"}, tmp_file, indent=2)
+        export_path = Path(tmp_path).name
+        if logger:
+            logger.info(
+                "Trajectory exported to %s (%d frames)",
+                export_path,
+                len(recorded),
+            )
+        return export_path
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+        raise
+
+
 @router.post("/simulation/recording", response_model=TrajectoryRecordResponse)
 @handle_api_errors
 async def control_recording(
@@ -641,50 +678,7 @@ async def control_recording(
 
         recorded = simulation_service.stats.recorded_frames
         frame_count = len(recorded)
-        export_path = None
-
-        if frame_count > 0:
-            import json
-            import os
-            import tempfile
-            from pathlib import Path
-
-            # Use a managed artifact directory with proper cleanup
-            # Artifacts are stored in a configured directory with atomic writes
-            # and automatic cleanup on response completion
-            artifact_dir = os.environ.get(
-                "ARTIFACT_DIR",
-                os.path.join(tempfile.gettempdir(), "upstream_drift_artifacts"),
-            )
-            os.makedirs(artifact_dir, exist_ok=True)
-
-            # Create a uniquely named artifact file with atomic write
-            # Using a temporary file in the managed directory ensures cleanup
-            fd, tmp_path = tempfile.mkstemp(
-                suffix=".json",
-                dir=artifact_dir,
-            )
-            try:
-                with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
-                    json.dump(
-                        {"frames": recorded, "format": "json"},
-                        tmp_file,
-                        indent=2,
-                    )
-                # Return only the filename (not full path) for security
-                # The actual download would be handled by a separate endpoint
-                export_path = Path(tmp_path).name
-                if logger:
-                    logger.info(
-                        "Trajectory exported to %s (%d frames)",
-                        export_path,
-                        frame_count,
-                    )
-            except Exception:
-                # Clean up on error
-                with contextlib.suppress(OSError):
-                    os.unlink(tmp_path)
-                raise
+        export_path = _write_recording_export_artifact(recorded, logger)
 
         return TrajectoryRecordResponse(
             recording=simulation_service.stats.is_recording,

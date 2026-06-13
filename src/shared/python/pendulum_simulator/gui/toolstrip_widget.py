@@ -312,8 +312,11 @@ class ToolStrip(QWidget):
         outer.addLayout(row2)
 
     def _add_separator(self, layout: QHBoxLayout) -> None:
+        if not (layout is not None):
+            raise ValueError("layout must be provided")
         layout.addWidget(_vline())
 
+    def _build_row1_title_and_model(self, layout: QHBoxLayout) -> None:
         if not (layout is not None):
             raise ValueError("layout must be provided")
         title = QLabel("Pendulums")
@@ -648,6 +651,12 @@ class ToolStrip(QWidget):
         )
         self.chk_3d.toggled.connect(self.mode_3d_toggled.emit)
         extra_col.addWidget(self.chk_3d)
+        self._add_3d_view_sliders(extra_col)
+        extra_col.addStretch()
+        layout.addLayout(extra_col)
+
+    def _add_3d_view_sliders(self, extra_col: QVBoxLayout) -> None:
+        """Add compact 3D azimuth and tilt controls."""
         azimuth_row = QHBoxLayout()
         azimuth_row.setContentsMargins(0, 0, 0, 0)
         azimuth_row.setSpacing(2)
@@ -694,8 +703,6 @@ class ToolStrip(QWidget):
         self._lbl_tilt.setStyleSheet("color:#606080;font-size:10px;min-width:30px;")
         tilt_row.addWidget(self._lbl_tilt)
         extra_col.addLayout(tilt_row)
-        extra_col.addStretch()
-        layout.addLayout(extra_col)
 
     def _overlay_build_frame_rows(self, overlay_layout: QVBoxLayout) -> None:  # type: ignore[no-redef]
         """Build rows A-D: force/mobility/force-ellipsoid checkboxes and segment row."""
@@ -1020,10 +1027,11 @@ class ToolStrip(QWidget):
             return
         # The segment row is the last item in overlay_layout
         seg_item = overlay_layout.itemAt(overlay_layout.count() - 1)
-        if seg_item is not None and seg_item.layout() is not None:
-            seg_layout = seg_item.layout()
-            if not (seg_layout is not None):  # narrowing for mypy
+        if seg_item is not None:
+            recovered_layout = seg_item.layout()
+            if not isinstance(recovered_layout, QHBoxLayout):
                 raise ValueError("DbC Blocked: Precondition failed.")
+            seg_layout = recovered_layout
             # Clear old widgets (keep "Segments:" label at position 0)
             while seg_layout.count() > 1:
                 item = seg_layout.takeAt(1)

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-import src.shared.python.realtime as facade_module
+from src.shared.python.realtime import api as realtime_api
 from src.shared.python.realtime import (
     CHANNEL_REGISTRY,
     Subscription,
@@ -24,9 +24,12 @@ pytestmark = pytest.mark.unit
 @pytest.fixture(autouse=True)
 def reset_transport() -> None:
     """Reset the module-level transport singleton between tests."""
-    facade_module._TRANSPORT = None
+    realtime_api._TRANSPORT = None
     yield
-    facade_module._TRANSPORT = None
+    transport = realtime_api._TRANSPORT
+    if transport is not None:
+        transport.shutdown()
+    realtime_api._TRANSPORT = None
 
 
 @pytest.fixture()
@@ -43,7 +46,7 @@ def patched_transport() -> MagicMock:
 
     transport.subscribe = MagicMock(side_effect=_subscribe)
     transport.unsubscribe = MagicMock()
-    facade_module._TRANSPORT = transport
+    realtime_api._TRANSPORT = transport
     return transport
 
 
@@ -147,13 +150,18 @@ class TestSubscribe:
 class TestRealFileTransportRoundTrip:
     def test_round_trip_via_tmp_path(self, tmp_path: Path) -> None:
         """End-to-end: publish writes a file; the file contains the payload."""
-        os.environ["UPSTREAM_DRIFT_REALTIME_ROOT"] = str(tmp_path)
-        facade_module._TRANSPORT = None
+        os.environ["REALTIME_FILE_ROOT"] = str(tmp_path)
+        realtime_api._TRANSPORT = None
         try:
             publish("target/active", {"answer": 42}, transport="file")
-            expected = tmp_path / "target__active.json"
+            expected = tmp_path / "target__active.jsonl"
             assert expected.exists()
-            assert json.loads(expected.read_text(encoding="utf-8")) == {"answer": 42}
+            lines = expected.read_text(encoding="utf-8").splitlines()
+            assert len(lines) == 1
+            assert json.loads(lines[0])["payload"] == {"answer": 42}
         finally:
-            os.environ.pop("UPSTREAM_DRIFT_REALTIME_ROOT", None)
-            facade_module._TRANSPORT = None
+            os.environ.pop("REALTIME_FILE_ROOT", None)
+            transport = realtime_api._TRANSPORT
+            if transport is not None:
+                transport.shutdown()
+            realtime_api._TRANSPORT = None

@@ -167,7 +167,9 @@ starlette==1.2.1
 structlog==25.5.0
     # via upstream-drift (pyproject.toml)
 tornado==6.5.6
-    # via bokeh
+    # via
+    #   bokeh
+    #   upstream-drift (pyproject.toml)
 typing-extensions==4.15.0
     # via
     #   alembic

@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -88,6 +89,21 @@ def test_standard_ci_uses_locked_python_dependencies_for_dev_and_audit() -> None
     assert "pygments==2.19.2" not in dev_lock
 
 
+def test_ci_long_running_gates_emit_heartbeat_logs() -> None:
+    standard = _read(".github/workflows/ci-standard.yml")
+    optional = _read(".github/workflows/ci-optional-stack.yml")
+
+    assert "- name: Setup Node for UI audit" in standard
+    assert 'node-version: "24"' in standard
+    assert "npm run test:run -- --testTimeout=15000" in standard
+    assert 'run_with_heartbeat "pip-audit JSON report"' in standard
+    assert 'run_with_heartbeat "pip-audit waiver-enforced scan"' in standard
+    assert 'run_with_heartbeat "core pytest lane"' in standard
+    assert 'run_with_heartbeat "optional-stack unit target $target"' in optional
+    assert "still running at $(date -u +%H:%M:%SZ)" in standard
+    assert "still running at $(date -u +%H:%M:%SZ)" in optional
+
+
 def test_standard_ci_shell_continuations_are_not_split_by_blank_lines() -> None:
     workflow = _read(".github/workflows/ci-standard.yml")
     lines = workflow.splitlines()
@@ -103,11 +119,23 @@ def test_standard_ci_shell_continuations_are_not_split_by_blank_lines() -> None:
 
 def test_docker_security_scan_blocks_high_and_critical() -> None:
     workflow = _read(".github/workflows/docker-security-scan.yml")
+    parsed = yaml.safe_load(workflow)
+    steps = parsed["jobs"]["trivy-scan"]["steps"]
+    sarif_scan = next(
+        step for step in steps if step["name"] == "Run Trivy vulnerability scanner"
+    )
+    table_scan = next(
+        step
+        for step in steps
+        if step["name"] == "Run Trivy (table output for PR comments)"
+    )
 
     assert 'severity: "CRITICAL,HIGH"' in workflow
-    assert 'exit-code: "1"' in workflow
-    assert "Fail the build on HIGH or CRITICAL vulnerabilities." in workflow
-    assert "ignore-unfixed: true" not in workflow
+    assert "SARIF upload above still reports unfixed OS findings" in workflow
+    assert sarif_scan["with"]["exit-code"] == "0"
+    assert "ignore-unfixed" not in sarif_scan["with"]
+    assert table_scan["with"]["exit-code"] == "1"
+    assert str(table_scan["with"]["ignore-unfixed"]).lower() == "true"
 
 
 def test_codeowners_has_two_owners_for_critical_paths() -> None:
