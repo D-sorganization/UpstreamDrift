@@ -58,9 +58,12 @@ class Obstacle:
         if not (point is not None):
             raise ValueError("point must be provided")
         if self.obstacle_type == ObstacleType.SPHERE:
+            # ⚡ Bolt: Use explicit indexing instead of unpacking for math.hypot
+            # to avoid the significant overhead of unpacking a numpy array
+            diff = point - self.position
             return float(
                 # Avoid NumPy dispatch overhead for fixed-size 3D vectors.
-                math.hypot(*(point - self.position))
+                math.hypot(diff[0], diff[1], diff[2])
                 - self.dimensions[0]
                 - self.inflation
             )
@@ -70,8 +73,11 @@ class Obstacle:
             half_dims = self.dimensions / 2
             local_point = point - self.position
             clamped = np.clip(local_point, -half_dims, half_dims)
+            # ⚡ Bolt: Use explicit indexing instead of unpacking for math.hypot
+            # to avoid the significant overhead of unpacking a numpy array
+            diff = local_point - clamped
             # Avoid NumPy dispatch overhead for fixed-size 3D vectors.
-            return float(math.hypot(*(local_point - clamped)) - self.inflation)
+            return float(math.hypot(diff[0], diff[1], diff[2]) - self.inflation)
 
         if self.obstacle_type == ObstacleType.CYLINDER:
             # Cylinder distance (axis along z)
