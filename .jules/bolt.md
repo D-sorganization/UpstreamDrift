@@ -4,3 +4,6 @@
 ## 2024-06-13 - [Optimize frequent DataFrame element access in loops]
 **Learning:** Using `df.iloc[i]` frequently inside loops (like plotting or processing loops) creates new Series objects and incurs significant pandas dispatch overhead. Converting whole columns to NumPy arrays via `.values` before the loop and indexing them is drastically faster (over 50x in benchmarks).
 **Action:** When accessing single elements of multiple columns in a loop, extract the columns as `.values` (NumPy arrays) outside the loop rather than repeatedly using `.iloc`.
+## 2024-06-13 - [Correct GRAVITY reference]
+**Learning:** `src.shared.python.core.constants` provides `GRAVITY_FLOAT` as the updated exact floating-point gravity (9.80665). The old integer/float approximation (9.81) causes testing precision issues when replacing variables referencing `GRAVITY`.
+**Action:** Use `-9.80665` when mocking or testing absolute gravity.

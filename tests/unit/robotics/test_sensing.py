@@ -157,9 +157,9 @@ class TestNoiseModels:
 
         # 2nd-order filter should respond more slowly to a step than 1st-order
         # at early samples, the 2nd-order output must lag behind the 1st-order
-        assert arr2[3] < arr1[3], (
-            "order=2 filter should be slower than order=1 at early samples"
-        )
+        assert (
+            arr2[3] < arr1[3]
+        ), "order=2 filter should be slower than order=1 at early samples"
         # Both should eventually converge toward 1.0
         assert arr2[-1] > 0.8
 
@@ -440,7 +440,7 @@ class TestIMUSensor:
 
         # At identity orientation, gravity should be in -z
         gravity = imu.get_gravity_in_sensor_frame()
-        assert_allclose(gravity, [0, 0, -9.81], atol=1e-10)
+        assert_allclose(gravity, [0, 0, -9.80665], atol=1e-10)
 
         # After 90 degree rotation around y, gravity should be in -x
         q = np.array([np.cos(np.pi / 4), 0, np.sin(np.pi / 4), 0])
