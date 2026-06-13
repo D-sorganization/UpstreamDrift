@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -27,3 +30,52 @@ def test_pip_feature_install_commands_strip_shell_quotes() -> None:
     commands = install_features._feature_install_argv("mujoco", REPO_ROOT)
 
     assert commands == [["pip", "install", "--no-cache-dir", "mujoco>=3.2.3,<4.0.0"]]
+
+
+def test_profile_dry_run_works_with_modular_dockerfile_early_copy_set(
+    tmp_path: Path,
+) -> None:
+    """Dockerfile.modular runs profile validation before copying the full source."""
+    (tmp_path / "docker").mkdir()
+    (tmp_path / "scripts" / "docker").mkdir(parents=True)
+    (tmp_path / "src" / "shared" / "python").mkdir(parents=True)
+
+    shutil.copy(REPO_ROOT / "docker" / "profiles.yaml", tmp_path / "docker")
+    shutil.copy(
+        INSTALL_FEATURES_PATH,
+        tmp_path / "scripts" / "docker" / "install_features.py",
+    )
+    shutil.copy(REPO_ROOT / "src" / "__init__.py", tmp_path / "src" / "__init__.py")
+    shutil.copy(
+        REPO_ROOT / "src" / "shared" / "__init__.py",
+        tmp_path / "src" / "shared" / "__init__.py",
+    )
+    shutil.copy(
+        REPO_ROOT / "src" / "shared" / "python" / "__init__.py",
+        tmp_path / "src" / "shared" / "python" / "__init__.py",
+    )
+    shutil.copytree(
+        REPO_ROOT / "src" / "shared" / "python" / "engine_core",
+        tmp_path / "src" / "shared" / "python" / "engine_core",
+    )
+    shutil.copytree(
+        REPO_ROOT / "src" / "shared" / "python" / "feature_registry",
+        tmp_path / "src" / "shared" / "python" / "feature_registry",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(tmp_path / "scripts" / "docker" / "install_features.py"),
+            "--repo-root",
+            str(tmp_path),
+            "--profile",
+            "standard",
+            "--dry-run",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr

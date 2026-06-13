@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.380                                            |
+| **Spec Version**        | 1.0.381                                            |
 | **Last Spec Update**    | 2026-06-13                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-13** - Modular Docker profile dry-run validation now keeps
+  `engine_core.engine_probes` importable from the Dockerfile's early-copy
+  source subset by avoiding the heavyweight config package at module import
+  time; regression coverage mirrors the early-copy set so profile validation
+  continues to fail fast before full source installation layers.
 - **2026-06-13** - CI Standard source PRs now skip the changed-tests-only
   targeted coverage branch and fall through to the dependency-light coverage
   lane; optional-stack unit targets use a 180s per-test timeout for
@@ -1385,6 +1390,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-13 | 1.0.381 | Kept modular Docker profile dry-runs importable from the early Dockerfile copy set by removing the import-time dependency from `engine_core.engine_probes` to the heavyweight config package, with regression coverage that exercises `install_features.py --profile standard --dry-run` against only the early validation files. |
 | 2026-06-13 | 1.0.376 | Aligned the Rust wheel import smoke helper with the documented `upstream-mocap-io` missing-file contract so `parse_trc` raising `FileNotFoundError` remains an expected negative-path smoke result, with focused script regression coverage. |
 | 2026-06-13 | 1.0.375 | Repaired the Rust PyO3 CI contract so Python-feature crates are checked with `cargo check --workspace --all-targets --features python`, avoiding invalid extension-module test executable linkage while maturin continues to build and smoke-test importable wheels. |
 | 2026-06-13 | 1.0.374 | Restored optional-stack contracts by normalizing aerodynamic vector-shaped velocity/spin inputs, preserving drag-coefficient tuning through the Reynolds correction, centering the drag-crisis transition at the documented 8e4 Reynolds boundary, clamping randomized air density to the physical floor, and pinning the legacy API endpoint suite to explicit local/auth-disabled mode. |

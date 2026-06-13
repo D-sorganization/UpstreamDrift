@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import contextlib
 import importlib
+import os
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
-
-from src.shared.python.config.environment import get_env
 
 
 class ProbeStatus(Enum):
@@ -104,6 +103,11 @@ def _resolve_engines_root(suite_root: Path) -> Path:
     if src_engines.exists():
         return src_engines
     return suite_root / "engines"
+
+
+def get_env(key: str, default: str | None = None) -> str | None:
+    """Return an environment value without importing heavyweight config modules."""
+    return os.environ.get(key, default)
 
 
 class MuJoCoProbe(EngineProbe):
