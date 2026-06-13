@@ -90,7 +90,7 @@ function JointAngleChart({
   const entries = Object.entries(angles);
   if (entries.length === 0) {
     return (
-      <div className="text-xs text-gray-500 italic text-center py-2">
+      <div className="text-xs text-gray-400 italic text-center py-2">
         No joint angle data
       </div>
     );
@@ -203,7 +203,7 @@ export function VideoAnalyzerPage() {
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Video Analyzer</h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-400">
             Upload and analyze golf swing videos
           </p>
         </div>
@@ -386,7 +386,7 @@ export function VideoAnalyzerPage() {
             <h3 className="text-lg font-semibold text-gray-400 mb-2">
               Upload a Video
             </h3>
-            <p className="text-sm text-gray-500 max-w-xs">
+            <p className="text-sm text-gray-400 max-w-xs">
               Select a golf swing video to analyze pose estimation,
               joint angles, and swing metrics.
             </p>
@@ -431,7 +431,7 @@ export function VideoAnalyzerPage() {
               </div>
             </div>
           ) : (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               No analysis yet
             </div>
           )}
@@ -464,14 +464,14 @@ export function VideoAnalyzerPage() {
 
           {currentFrame ? (
             <>
-              <div className="text-xs text-gray-500 mb-2">
+              <div className="text-xs text-gray-400 mb-2">
                 t={currentFrame.timestamp.toFixed(3)}s | conf={' '}
                 {(currentFrame.confidence * 100).toFixed(1)}%
               </div>
               <JointAngleChart angles={currentFrame.joint_angles} />
             </>
           ) : (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               Analyze a video to view joint data
             </div>
           )}

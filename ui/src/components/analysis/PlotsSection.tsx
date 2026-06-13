@@ -68,7 +68,7 @@ export function PlotsSection() {
       <div className="h-80">
         {isLoading ? (
           <div
-            className="flex items-center justify-center h-full text-gray-500"
+            className="flex items-center justify-center h-full text-gray-400"
             data-testid="plots-loading"
           >
             <p className="text-sm italic">Loading plot data…</p>
@@ -77,7 +77,7 @@ export function PlotsSection() {
           <PlotDataChart data={plotData} />
         ) : (
           !error && (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="flex items-center justify-center h-full text-gray-400">
               <p className="text-sm italic">
                 Run a simulation, then pick a plot type to view post-run analysis.
               </p>

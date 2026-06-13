@@ -7,7 +7,7 @@ interface PropertyInspectorProps {
 export function PropertyInspector({ node }: PropertyInspectorProps) {
   if (!node) {
     return (
-      <div className="text-xs text-gray-500 italic text-center py-4">
+      <div className="text-xs text-gray-400 italic text-center py-4">
         Select a node to inspect properties
       </div>
     );
@@ -34,12 +34,12 @@ export function PropertyInspector({ node }: PropertyInspectorProps) {
       </div>
 
       {node.parent_id && (
-        <div className="text-[11px] text-gray-500 border-t border-gray-700/50 pt-2 font-mono">
+        <div className="text-[11px] text-gray-400 border-t border-gray-700/50 pt-2 font-mono">
           Parent: {node.parent_id}
         </div>
       )}
       {node.children.length > 0 && (
-        <div className="text-[11px] text-gray-500 font-mono truncate" title={node.children.join(', ')}>
+        <div className="text-[11px] text-gray-400 font-mono truncate" title={node.children.join(', ')}>
           Children: {node.children.join(', ')}
         </div>
       )}

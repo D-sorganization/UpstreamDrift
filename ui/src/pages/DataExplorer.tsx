@@ -63,7 +63,7 @@ const DataTable = memo(function DataTable({
 }) {
   if (columns.length === 0) {
     return (
-      <div className="text-sm text-gray-500 italic text-center py-8">
+      <div className="text-sm text-gray-400 italic text-center py-8">
         No data to display
       </div>
     );
@@ -136,7 +136,7 @@ const DataTable = memo(function DataTable({
 function StatsPanel({ stats }: { stats: DatasetStats | null }) {
   if (!stats) {
     return (
-      <div className="text-xs text-gray-500 italic text-center py-4">
+      <div className="text-xs text-gray-400 italic text-center py-4">
         Load a dataset to view statistics
       </div>
     );
@@ -156,26 +156,26 @@ function StatsPanel({ stats }: { stats: DatasetStats | null }) {
           {colStats.mean != null ? (
             <div className="grid grid-cols-3 gap-1 text-xs">
               <div>
-                <span className="text-gray-500">min</span>
+                <span className="text-gray-400">min</span>
                 <span className="text-gray-300 font-mono ml-1">
                   {colStats.min?.toFixed(2)}
                 </span>
               </div>
               <div>
-                <span className="text-gray-500">avg</span>
+                <span className="text-gray-400">avg</span>
                 <span className="text-gray-300 font-mono ml-1">
                   {colStats.mean?.toFixed(2)}
                 </span>
               </div>
               <div>
-                <span className="text-gray-500">max</span>
+                <span className="text-gray-400">max</span>
                 <span className="text-gray-300 font-mono ml-1">
                   {colStats.max?.toFixed(2)}
                 </span>
               </div>
             </div>
           ) : (
-            <div className="text-xs text-gray-500">Non-numeric</div>
+            <div className="text-xs text-gray-400">Non-numeric</div>
           )}
         </div>
       ))}
@@ -382,7 +382,7 @@ export function DataExplorerPage() {
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Data Explorer</h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-400">
             Browse and analyze simulation datasets
           </p>
         </div>
@@ -408,7 +408,7 @@ export function DataExplorerPage() {
           </h3>
 
           {datasets.length === 0 && (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               No datasets found. Import a CSV or JSON file.
             </div>
           )}
@@ -424,7 +424,7 @@ export function DataExplorerPage() {
               }`}
             >
               <div className="text-xs text-gray-200 truncate">{ds.name}</div>
-              <div className="text-xs text-gray-500 flex gap-2">
+              <div className="text-xs text-gray-400 flex gap-2">
                 <span>{ds.format}</span>
                 {ds.size_bytes > 0 && (
                   <span>{(ds.size_bytes / 1024).toFixed(1)} KB</span>
@@ -596,7 +596,7 @@ export function DataExplorerPage() {
                 <h3 className="text-lg font-semibold text-gray-400 mb-2">
                   Select a Dataset
                 </h3>
-                <p className="text-sm text-gray-500 max-w-xs">
+                <p className="text-sm text-gray-400 max-w-xs">
                   Choose a dataset from the sidebar or import a CSV/JSON file
                   to browse and analyze data.
                 </p>

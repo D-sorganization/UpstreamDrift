@@ -406,7 +406,7 @@ export function MotionCapturePage() {
     <div className="flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-white mb-1">Motion Capture</h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-400">
             C3D, OpenPose, and MediaPipe analysis
           </p>
         </div>
@@ -441,7 +441,7 @@ export function MotionCapturePage() {
                   {source.name}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-0.5 ml-4">
+              <div className="text-xs text-gray-400 mt-0.5 ml-4">
                 {source.description}
               </div>
               {!source.available && (
@@ -456,7 +456,7 @@ export function MotionCapturePage() {
           ))}
 
           {sources.length === 0 && (
-            <div className="text-xs text-gray-500 italic text-center py-2">
+            <div className="text-xs text-gray-400 italic text-center py-2">
               Loading sources...
             </div>
           )}
@@ -481,7 +481,7 @@ export function MotionCapturePage() {
               className="block w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs hover:file:bg-blue-500 file:cursor-pointer"
             />
             {uploading && (
-              <div className="text-xs text-gray-500 italic">Uploading…</div>
+              <div className="text-xs text-gray-400 italic">Uploading…</div>
             )}
             {uploadResult && (
               <div
@@ -534,7 +534,7 @@ export function MotionCapturePage() {
               <div className="flex items-center gap-2 text-xs">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-red-400">Recording...</span>
-                <span className="text-gray-500 ml-auto">
+                <span className="text-gray-400 ml-auto">
                   {activeSession.session_id}
                 </span>
               </div>
@@ -566,7 +566,7 @@ export function MotionCapturePage() {
           </h3>
 
           {recordings.length === 0 && (
-            <div className="text-xs text-gray-500 italic text-center py-2">
+            <div className="text-xs text-gray-400 italic text-center py-2">
               No recordings yet
             </div>
           )}
@@ -586,7 +586,7 @@ export function MotionCapturePage() {
               }`}
             >
               <div className="text-xs text-gray-200 truncate">{rec.name}</div>
-              <div className="text-xs text-gray-500 flex gap-2">
+              <div className="text-xs text-gray-400 flex gap-2">
                 <span>{rec.source_type}</span>
                 <span>{rec.total_frames} frames</span>
                 <span>{rec.duration_seconds.toFixed(1)}s</span>
@@ -679,7 +679,7 @@ export function MotionCapturePage() {
               <h3 className="text-lg font-semibold text-gray-400 mb-2">
                 No Skeleton Data
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs">
+              <p className="text-sm text-gray-400 max-w-xs">
                 Select a capture source and start recording, or load a
                 recording to visualize skeleton data.
               </p>
@@ -719,14 +719,14 @@ export function MotionCapturePage() {
               <span className="text-xs text-gray-300 truncate flex-1">
                 {joint.name}
               </span>
-              <span className="text-xs text-gray-500 font-mono">
+              <span className="text-xs text-gray-400 font-mono">
                 {(joint.confidence * 100).toFixed(0)}%
               </span>
             </div>
           ))}
 
           {joints.length === 0 && (
-            <div className="text-xs text-gray-500 italic text-center py-4">
+            <div className="text-xs text-gray-400 italic text-center py-4">
               No joints loaded
             </div>
           )}

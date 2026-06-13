@@ -149,7 +149,7 @@ export function CounterfactualPanel() {
           Counterfactual Analysis (ZTCF / ZVCF / Induced)
         </h3>
         {support?.engine && (
-          <span className="text-xs text-gray-500">engine: {support.engine}</span>
+          <span className="text-xs text-gray-400">engine: {support.engine}</span>
         )}
       </div>
 
@@ -208,21 +208,21 @@ export function CounterfactualPanel() {
           {summary && (
             <div className="grid grid-cols-4 gap-2 text-xs bg-gray-700/50 p-3 rounded">
               <div>
-                <span className="text-gray-500">kind</span>
+                <span className="text-gray-400">kind</span>
                 <div className="text-gray-200 font-mono">{result.kind}</div>
               </div>
               <div>
-                <span className="text-gray-500">frames × DoFs</span>
+                <span className="text-gray-400">frames × DoFs</span>
                 <div className="text-gray-200 font-mono">
                   {summary.frames} × {summary.dofs}
                 </div>
               </div>
               <div>
-                <span className="text-gray-500">peak |accel| ({result.units})</span>
+                <span className="text-gray-400">peak |accel| ({result.units})</span>
                 <div className="text-gray-200 font-mono">{summary.peakAbs.toFixed(4)}</div>
               </div>
               <div>
-                <span className="text-gray-500">peak time (s)</span>
+                <span className="text-gray-400">peak time (s)</span>
                 <div className="text-gray-200 font-mono">{summary.peakTime.toFixed(3)}</div>
               </div>
             </div>

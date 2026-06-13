@@ -21,7 +21,7 @@ function LoadStateIcon({ state }: { state: EngineLoadState }) {
     case 'error':
       return <AlertCircle className="w-4 h-4 text-red-400" aria-hidden="true" />;
     default:
-      return <Power className="w-4 h-4 text-gray-500" aria-hidden="true" />;
+      return <Power className="w-4 h-4 text-gray-400" aria-hidden="true" />;
   }
 }
 
@@ -40,7 +40,7 @@ function LoadStateLabel({ engine }: { engine: ManagedEngine }) {
     case 'error':
       return <span className="text-red-400">{engine.error || 'Failed to load'}</span>;
     default:
-      return <span className="text-gray-500">Not loaded</span>;
+      return <span className="text-gray-400">Not loaded</span>;
   }
 }
 
@@ -90,7 +90,7 @@ export function EngineSelector({
       >
         Physics Engines
       </label>
-      <p className="text-xs text-gray-500 mb-3">
+      <p className="text-xs text-gray-400 mb-3">
         Click <strong>Load</strong> to activate an engine. Select a loaded engine to simulate.
       </p>
       <div
@@ -239,7 +239,7 @@ export function EngineSelector({
                     className={`
                       px-3 py-1.5 rounded-md text-xs font-medium transition-all
                       ${isUnavailable
-                        ? 'bg-gray-600/30 text-gray-500 border border-gray-600/50'
+                        ? 'bg-gray-600/30 text-gray-400 border border-gray-600/50'
                         : isLoading
                         ? 'bg-blue-500/20 text-blue-400 cursor-wait'
                         : isError

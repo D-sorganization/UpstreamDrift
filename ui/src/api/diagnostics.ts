@@ -87,7 +87,7 @@ export function statusColorClass(status: string): string {
     case 'warning':
       return 'text-yellow-400';
     case 'unconfigured':
-      return 'text-gray-500';
+      return 'text-gray-400';
     case 'info':
       return 'text-blue-400';
     default:

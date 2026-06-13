@@ -200,7 +200,7 @@ export function DiagnosticsPanel() {
                       <span>Process</span>
                       <span
                         className={
-                          diagnostics.backend.running ? 'text-green-400' : 'text-gray-500'
+                          diagnostics.backend.running ? 'text-green-400' : 'text-gray-400'
                         }
                       >
                         {diagnostics.backend.running

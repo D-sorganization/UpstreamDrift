@@ -46,7 +46,7 @@ export function PolynomialGeneratorPanel({
         className="flex items-center justify-between w-full text-left font-semibold text-xs text-gray-300 uppercase tracking-wider"
       >
         <span>Polynomial Generator</span>
-        <span className="text-gray-500">{collapsed ? '+' : '-'}</span>
+        <span className="text-gray-400">{collapsed ? '+' : '-'}</span>
       </button>
 
       {!collapsed && (
@@ -79,7 +79,7 @@ export function PolynomialGeneratorPanel({
                 <div key={index} className="flex items-center gap-2">
                   <label
                     htmlFor={`coeff-${index}`}
-                    className="text-xs text-gray-500 w-24"
+                    className="text-xs text-gray-400 w-24"
                   >
                     Coefficient {index}
                   </label>
@@ -138,7 +138,7 @@ export function PolynomialGeneratorPanel({
               disabled={!canApply}
               title={canApply ? undefined : 'Fix invalid coefficient'}
               onClick={handleApply}
-              className="text-xs bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium px-3 py-1 rounded transition-colors ml-auto"
+              className="text-xs bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-medium px-3 py-1 rounded transition-colors ml-auto"
             >
               Apply Polynomial
             </button>

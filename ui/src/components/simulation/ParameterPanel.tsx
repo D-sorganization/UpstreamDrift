@@ -87,7 +87,7 @@ export function ParameterPanel({
           className="w-full"
           aria-describedby="duration-help"
         />
-        <p id="duration-help" className="mt-1 text-xs text-gray-500">
+        <p id="duration-help" className="mt-1 text-xs text-gray-400">
           Simulation run time (0.1 - 60s)
         </p>
       </div>
@@ -113,7 +113,7 @@ export function ParameterPanel({
           <option value="0.005">0.005s (Fast)</option>
           <option value="0.01">0.01s (Very fast)</option>
         </Select>
-        <p id="timestep-help" className="mt-1 text-xs text-gray-500">
+        <p id="timestep-help" className="mt-1 text-xs text-gray-400">
           Physics integration step size
         </p>
       </div>
@@ -127,7 +127,7 @@ export function ParameterPanel({
           >
             Live Analysis
           </label>
-          <p className="text-xs text-gray-500">Stream joint angles & velocities</p>
+          <p className="text-xs text-gray-400">Stream joint angles & velocities</p>
         </div>
         <button
           id="live-analysis-toggle"
@@ -156,7 +156,7 @@ export function ParameterPanel({
           >
             GPU Acceleration
           </label>
-          <p className="text-xs text-gray-500">Use GPU for physics (if available)</p>
+          <p className="text-xs text-gray-400">Use GPU for physics (if available)</p>
         </div>
         <button
           id="gpu-toggle"
@@ -181,7 +181,7 @@ export function ParameterPanel({
         <p className="text-xs text-gray-400">
           <span className="font-semibold text-gray-300">Engine:</span> {engine}
         </p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-400 mt-1">
           {engine.toLowerCase() === 'mujoco' && 'Full contact physics, muscle simulation'}
           {engine.toLowerCase() === 'drake' && 'Optimization & control focused'}
           {engine.toLowerCase() === 'pinocchio' && 'Fast rigid body dynamics'}

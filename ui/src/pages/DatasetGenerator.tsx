@@ -83,7 +83,7 @@ export function DatasetGeneratorPage() {
     <div className="flex flex-col flex-1 min-h-0 text-gray-100">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-sm font-semibold text-gray-200">Dataset Generator</h2>
-          <p className="text-xs text-gray-500 mt-1">Generate and import datasets</p>
+          <p className="text-xs text-gray-400 mt-1">Generate and import datasets</p>
         </div>
 
         {/* Sidebar Tabs */}
@@ -110,7 +110,7 @@ export function DatasetGeneratorPage() {
               {catalogLoading ? (
                 <CatalogSkeleton />
               ) : features.length === 0 ? (
-                <div className="text-xs text-gray-500 italic text-center py-4">No features available</div>
+                <div className="text-xs text-gray-400 italic text-center py-4">No features available</div>
               ) : (
                 features.map((f: FeatureInfo) => (
                   <div key={f.id} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
@@ -131,7 +131,7 @@ export function DatasetGeneratorPage() {
               {catalogLoading ? (
                 <CatalogSkeleton />
               ) : plotTypes.length === 0 ? (
-                <div className="text-xs text-gray-500 italic text-center py-4">No plot types available</div>
+                <div className="text-xs text-gray-400 italic text-center py-4">No plot types available</div>
               ) : (
                 plotTypes.map((pt: PlotType) => (
                   <div key={pt.id} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
@@ -156,7 +156,7 @@ export function DatasetGeneratorPage() {
               {catalogLoading ? (
                 <CatalogSkeleton />
               ) : exportFormats.length === 0 ? (
-                <div className="text-xs text-gray-500 italic text-center py-4">No export formats available</div>
+                <div className="text-xs text-gray-400 italic text-center py-4">No export formats available</div>
               ) : (
                 exportFormats.map((ef: ExportFormat) => (
                   <div key={ef.id} className="p-3 bg-gray-700/30 rounded-md border border-gray-600">
@@ -240,7 +240,7 @@ export function DatasetGeneratorPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-gray-500 italic">No controls available</div>
+                <div className="text-xs text-gray-400 italic">No controls available</div>
               )}
 
               <div className="mt-4 flex gap-2">
@@ -317,23 +317,23 @@ export function DatasetGeneratorPage() {
                 <h3 className="text-sm font-semibold text-blue-300 mb-2">Generated Dataset</h3>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-gray-500">ID</span>
+                    <span className="text-gray-400">ID</span>
                     <div className="text-gray-200 font-mono">{generateResult.dataset_id}</div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Name</span>
+                    <span className="text-gray-400">Name</span>
                     <div className="text-gray-200 font-mono">{generateResult.name}</div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Rows</span>
+                    <span className="text-gray-400">Rows</span>
                     <div className="text-gray-200 font-mono">{generateResult.rows}</div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Columns</span>
+                    <span className="text-gray-400">Columns</span>
                     <div className="text-gray-200 font-mono">{generateResult.columns.length}</div>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">Created</span>
+                    <span className="text-gray-400">Created</span>
                     <div className="text-gray-200 font-mono">{generateResult.created_at}</div>
                   </div>
                 </div>

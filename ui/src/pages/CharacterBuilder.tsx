@@ -259,7 +259,7 @@ export function CharacterBuilderPage() {
             <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-gray-800 text-gray-500 font-semibold">
+                  <tr className="border-b border-gray-800 text-gray-400 font-semibold">
                     <th className="pb-1.5">Segment</th>
                     <th className="pb-1.5">Length</th>
                     <th className="pb-1.5">Mass</th>

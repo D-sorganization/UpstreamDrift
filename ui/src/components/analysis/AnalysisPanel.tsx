@@ -237,7 +237,7 @@ export function AnalysisPanel({
         {activeTab === 'metrics' && (
           <div>
             {!statistics ? (
-              <p className="text-gray-500 text-sm italic">
+              <p className="text-gray-400 text-sm italic">
                 {isRunning
                   ? 'Collecting metrics...'
                   : 'Start a simulation to see metrics.'}
@@ -271,7 +271,7 @@ export function AnalysisPanel({
                       <div className="text-lg font-mono text-white">
                         {metric.current.toFixed(3)}
                       </div>
-                      <div className="text-xs text-gray-500 flex justify-between">
+                      <div className="text-xs text-gray-400 flex justify-between">
                         <span>min: {metric.minimum.toFixed(2)}</span>
                         <span>max: {metric.maximum.toFixed(2)}</span>
                       </div>
@@ -321,7 +321,7 @@ export function AnalysisPanel({
         {activeTab === 'plots' && (
           <div>
             {timeSeriesData.length < 2 ? (
-              <p className="text-gray-500 text-sm italic">
+              <p className="text-gray-400 text-sm italic">
                 {isRunning
                   ? 'Collecting data for plots...'
                   : 'Start a simulation to see time-series plots.'}
@@ -444,7 +444,7 @@ export function AnalysisPanel({
                 className={`flex items-center gap-2 px-4 py-2 rounded font-medium text-sm transition-colors ${
                   statistics && statistics.sample_count > 0
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                 }`}
                 aria-label="Export as CSV"
               >
@@ -457,7 +457,7 @@ export function AnalysisPanel({
                 className={`flex items-center gap-2 px-4 py-2 rounded font-medium text-sm transition-colors ${
                   statistics && statistics.sample_count > 0
                     ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                 }`}
                 aria-label="Export as JSON"
               >
@@ -467,7 +467,7 @@ export function AnalysisPanel({
             </div>
 
             {statistics && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-400">
                 {statistics.sample_count} samples available ({statistics.metrics.length}{' '}
                 metrics tracked)
               </div>

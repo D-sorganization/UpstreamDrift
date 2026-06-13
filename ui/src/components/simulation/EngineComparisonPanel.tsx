@@ -37,7 +37,7 @@ export function EngineComparisonPanel({ viewModel, onToggleEngine, disabled }: P
         </h3>
       </div>
 
-      <div className="mb-3 text-xs text-gray-500">{viewModel.datasetLabel}</div>
+      <div className="mb-3 text-xs text-gray-400">{viewModel.datasetLabel}</div>
 
       <div className="mb-4 grid grid-cols-1 gap-2" aria-label="Comparison engines">
         {viewModel.options.map((option) => {
@@ -62,7 +62,7 @@ export function EngineComparisonPanel({ viewModel, onToggleEngine, disabled }: P
               />
               <span className="min-w-0">
                 <span className="block font-medium">{option.displayName}</span>
-                <span className="block truncate text-xs text-gray-500">
+                <span className="block truncate text-xs text-gray-400">
                   {option.disabledReason ?? option.capabilities.join(', ')}
                 </span>
               </span>
@@ -99,19 +99,19 @@ export function EngineComparisonPanel({ viewModel, onToggleEngine, disabled }: P
                 </span>
               </div>
               <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-                <dt className="text-gray-500">Version</dt>
+                <dt className="text-gray-400">Version</dt>
                 <dd className="truncate text-gray-300">{column.provenance.version}</dd>
-                <dt className="text-gray-500">Frame</dt>
+                <dt className="text-gray-400">Frame</dt>
                 <dd className="text-gray-300">
                   {column.provenance.frame ?? 'not run'}
                 </dd>
-                <dt className="text-gray-500">Time</dt>
+                <dt className="text-gray-400">Time</dt>
                 <dd className="text-gray-300">
                   {column.provenance.time === null
                     ? 'not run'
                     : `${column.provenance.time.toFixed(3)}s`}
                 </dd>
-                <dt className="text-gray-500">Metrics</dt>
+                <dt className="text-gray-400">Metrics</dt>
                 <dd className="text-gray-300">{Object.keys(column.metrics).length}</dd>
               </dl>
             </article>

@@ -224,7 +224,7 @@ function TileCard({
                     </span>
                 ))}
                 {tile.capabilities.length > 3 && (
-                    <span className="px-1.5 py-0.5 text-gray-500 text-[9px]">
+                    <span className="px-1.5 py-0.5 text-gray-400 text-[9px]">
                         +{tile.capabilities.length - 3}
                     </span>
                 )}
@@ -340,7 +340,7 @@ export function LauncherDashboard({
             <header className="flex items-center justify-between px-6 py-4 bg-gray-800/80 border-b border-gray-700 flex-shrink-0">
                 <div>
                     <h1 className="text-xl font-bold text-white">Golf Modeling Suite</h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-gray-400 mt-0.5">
                         {tiles.length} tiles · {engines.length} engines · {toolsAndExternal.length} tools
                     </p>
                 </div>
@@ -365,7 +365,7 @@ export function LauncherDashboard({
                             aria-label="Launched windows"
                         >
                             {launchedWindows.length === 0 ? (
-                                <p className="px-3 py-2 text-sm text-gray-500">No launched windows</p>
+                                <p className="px-3 py-2 text-sm text-gray-400">No launched windows</p>
                             ) : (
                                 launchedWindows.map((record) => (
                                     <div
@@ -374,7 +374,7 @@ export function LauncherDashboard({
                                     >
                                         <div className="min-w-0">
                                             <p className="truncate text-sm font-medium text-white">{record.name}</p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-gray-400">
                                                 {record.launchCount} launch{record.launchCount === 1 ? '' : 'es'}
                                             </p>
                                         </div>
@@ -450,21 +450,21 @@ export function LauncherDashboard({
                     {selectedTile ? (
                         <span>
                             Selected: <strong className="text-white">{selectedTile.name}</strong>
-                            <span className="ml-2 text-xs text-gray-500">
+                            <span className="ml-2 text-xs text-gray-400">
                                 {selectedTileAction?.kind === 'blocked'
                                     ? selectedTileAction.reason
                                     : selectedTile.description}
                             </span>
                         </span>
                     ) : (
-                        <span className="text-gray-500">Select a tile to launch</span>
+                        <span className="text-gray-400">Select a tile to launch</span>
                     )}
                     {onShowAbout && (
                         <button
                             id="about-link"
                             onClick={onShowAbout}
                             aria-label="About UpstreamDrift"
-                            className="text-xs text-gray-500 underline-offset-2 hover:text-gray-300 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                            className="text-xs text-gray-400 underline-offset-2 hover:text-gray-300 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
                         >
                             About
                         </button>
@@ -485,7 +485,7 @@ export function LauncherDashboard({
             focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900
             ${selectedTile && selectedLaunchable
                             ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/30 hover:shadow-green-500/40'
-                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                         }
           `}
                 >

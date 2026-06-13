@@ -236,7 +236,7 @@ export function ActuatorPanel({
         <h4 className="text-xs font-semibold text-gray-300 uppercase">
           Actuator Controls
         </h4>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-400">
           {collapsed ? '+' : '-'}
           {panelState ? ` (${panelState.n_actuators})` : ''}
         </span>
@@ -252,7 +252,7 @@ export function ActuatorPanel({
 
           {panelState && panelState.actuators.length > 0 ? (
             <>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-400">
                 Engine: {panelState.engine_name}
               </div>
 
@@ -317,7 +317,7 @@ export function ActuatorPanel({
                         <span className="text-gray-300">
                           {regionName} ({acts.length})
                         </span>
-                        <span className="text-gray-500">{isCollapsed ? '+' : '-'}</span>
+                        <span className="text-gray-400">{isCollapsed ? '+' : '-'}</span>
                       </button>
 
                       {!isCollapsed && (
@@ -340,7 +340,7 @@ export function ActuatorPanel({
               </div>
             </>
           ) : (
-            <div className="text-xs text-gray-500 italic text-center py-2">
+            <div className="text-xs text-gray-400 italic text-center py-2">
               {panelState ? 'No actuators available' : 'Loading actuators...'}
             </div>
           )}
