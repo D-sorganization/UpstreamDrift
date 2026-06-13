@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-13
+  LAST UPDATED: 2026-06-14
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.379                                            |
+| **Spec Version**        | 1.0.380                                            |
 | **Last Spec Update**    | 2026-06-13                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-13** - CI Standard source PRs now skip the changed-tests-only
+  targeted coverage branch and fall through to the dependency-light coverage
+  lane; optional-stack unit targets use a 180s per-test timeout for
+  migration-heavy API tests and are scoped to the PR-relevant biomechanics,
+  deployment, and robotics unit directories so the optional-stack lane does not
+  couple unrelated shared-python baseline failures to focused performance PRs;
+  CI contract tests assert the current PyQt fallback and Rust wheel install
+  order. CI Standard now starts Xvfb with an atomic dynamic display reservation
+  and cleanup step so parallel self-hosted PR jobs do not collide on display
+  `:99`.
 - **2026-06-13** - Documented the C3D/TRC Rust facade benchmarks as bounded
   smoke checks with runner jitter allowance while preserving the strict
   parser-only 10x performance gate.
@@ -1716,3 +1726,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Fixed CI imports for `compute_total_work`, `sidekick` references in `c3d` and `load_body_target_c3d` routing to appease lazy loading logic.
 
 - `extract_dynamics_dataset` also requires torch now so we require torch to test it in `test_surrogate_perstep_relocation.py`.
+
+### 2024-06-13
+
+- **Performance:** Optimized `grf_visualization.py` by extracting DataFrame columns to NumPy arrays (`.values`) before plotting loops, avoiding expensive and repeated `.iloc` series creation.

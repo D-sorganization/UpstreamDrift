@@ -217,6 +217,31 @@ class TestCIEnvironmentCompatibility:
         # This should not raise in CI with xvfb
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+    def test_ci_standard_xvfb_uses_dynamic_display_reservation(self) -> None:
+        """Self-hosted PR jobs must not collide on a single fixed X display."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8",
+        )
+        start_step = workflow[
+            workflow.index("- name: Start Xvfb") : workflow.index(
+                "- name: Clean Stale Coverage Data"
+            )
+        ]
+        stop_step = workflow[
+            workflow.index("- name: Stop Xvfb") : workflow.index(
+                "- name: Enforce Per-Package Coverage Thresholds"
+            )
+        ]
+
+        assert "for display_num in $(seq 90 129)" in start_step
+        assert 'lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"' in start_step
+        assert 'mkdir "$lockdir"' in start_step
+        assert 'echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"' in start_step
+        assert "Xvfb :99" not in start_step
+        assert "UPSTREAMDRIFT_XVFB_PID" in stop_step
+        assert "UPSTREAMDRIFT_XVFB_LOCKDIR" in stop_step
+        assert "rmdir" in stop_step
+
     def test_pr_scoped_core_tests_treat_all_skipped_selection_as_noop(self) -> None:
         """PR-scoped pytest must not fail when every selected test self-skips."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
@@ -508,12 +533,15 @@ class TestCIEnvironmentCompatibility:
             if step.get("name") == "Run Core Test Suite"
         )
         assert "--timeout=60" in core_step["run"]
-        assert "-n 2" in core_step["run"]
+        assert "pytest_parallel_args=(-n 0)" in core_step["run"]
+        assert (
+            "using serial pytest to avoid xdist worker termination" in core_step["run"]
+        )
 
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:
-        """PR-scoped tests must collect targeted coverage for source changes."""
+        """Source PRs must run the scoped dependency-light lane."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
@@ -527,9 +555,10 @@ class TestCIEnvironmentCompatibility:
         assert 'echo "coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
         assert "Full dependency-light lane will run after PR-scoped tests" in workflow
         assert (
-            "Source/dependency targets changed; running the dependency-light unit lane"
+            "Source/dependency targets changed; running scoped dependency-light unit targets"
             in workflow
         )
+        assert "PR-scoped dependency-light lane is running without coverage" in workflow
         assert '"${coverage_args[@]}"' in workflow
         selected_test_block_start = workflow.index(
             "printf '  %s\\n' \"${changed_tests[@]}\""
@@ -579,10 +608,7 @@ class TestCIEnvironmentCompatibility:
 
         assert source_branch in pr_block
         assert pr_block.index(source_branch) < pr_block.index(changed_test_command)
-        assert (
-            "running the dependency-light unit lane instead of only changed tests"
-            in pr_block
-        )
+        assert "running scoped dependency-light unit targets for this PR" in pr_block
 
     def test_ci_standard_pr_targeted_coverage_runs_changed_file_ratchet(
         self,
@@ -803,9 +829,9 @@ class TestCIEnvironmentCompatibility:
         """The global PyQt fallback may prevent crashes, but not satisfy UI asserts."""
         conftest = (REPO_ROOT / "tests" / "conftest.py").read_text(encoding="utf-8")
         pyqt_fallback = conftest[
-            conftest.index(
-                'if not _has_pyqt6 and "PyQt6" not in sys.modules:'
-            ) : conftest.index("@pytest.fixture(autouse=True)")
+            conftest.index("if not _has_pyqt6:") : conftest.index(
+                "@pytest.fixture(autouse=True)"
+            )
         ]
 
         for forbidden in [
@@ -854,7 +880,7 @@ class TestCIEnvironmentCompatibility:
         ]:
             assert path in rust_gate
 
-        editable_install = 'python -m pip install --no-cache-dir -e ".[dev]"'
+        editable_install = 'python -m pip install --no-cache-dir --no-deps -e ".[dev]"'
         wheel_install = "python -m pip install --force-reinstall target/wheels/*.whl"
         assert editable_install in binding_step
         assert wheel_install in binding_step

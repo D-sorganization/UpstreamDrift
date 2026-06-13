@@ -1192,9 +1192,35 @@ jobs:
       - name: Start Xvfb
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
-          Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
-          sleep 1
-          echo "DISPLAY=:99" >> $GITHUB_ENV
+          for display_num in $(seq 90 129); do
+            lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"
+            if ! mkdir "$lockdir" 2>/dev/null; then
+              continue
+            fi
+
+            if [ -e "/tmp/.X${display_num}-lock" ] && \
+               ! pgrep -f "Xvfb :${display_num}( |$)" >/dev/null; then
+              rm -f "/tmp/.X${display_num}-lock"
+            fi
+
+            Xvfb ":${display_num}" -screen 0 1280x720x24 -ac +extension GLX +render -noreset >"/tmp/upstreamdrift-xvfb-${display_num}.log" 2>&1 &
+            xvfb_pid=$!
+            sleep 2
+
+            if kill -0 "$xvfb_pid" 2>/dev/null; then
+              echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"
+              echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}" >> "$GITHUB_ENV"
+              echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}" >> "$GITHUB_ENV"
+              echo "Started Xvfb on display :${display_num}"
+              exit 0
+            fi
+
+            cat "/tmp/upstreamdrift-xvfb-${display_num}.log" || true
+            rmdir "$lockdir" || true
+          done
+
+          echo "::error::Unable to start Xvfb on displays 90-129"
+          exit 1
 
       - name: Clean Stale Coverage Data
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -1427,6 +1453,17 @@ jobs:
             --tb=short \
             --durations=20 \
             -v
+
+      - name: Stop Xvfb
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        run: |
+          if [ -n "${UPSTREAMDRIFT_XVFB_PID:-}" ]; then
+            kill "${UPSTREAMDRIFT_XVFB_PID}" 2>/dev/null || true
+            wait "${UPSTREAMDRIFT_XVFB_PID}" 2>/dev/null || true
+          fi
+          if [ -n "${UPSTREAMDRIFT_XVFB_LOCKDIR:-}" ]; then
+            rmdir "${UPSTREAMDRIFT_XVFB_LOCKDIR}" 2>/dev/null || true
+          fi
 
       - name: Enforce Per-Package Coverage Thresholds
         if: >-

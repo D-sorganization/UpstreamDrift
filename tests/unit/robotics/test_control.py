@@ -378,7 +378,7 @@ class TestWholeBodyController:
 
         solution = wbc.solve()
 
-        assert solution.solver_status != "success"
+        assert not solution.success
         assert "No tasks" in solution.status
 
     def test_solve_single_task(self) -> None:
@@ -398,7 +398,7 @@ class TestWholeBodyController:
 
         solution = wbc.solve()
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert solution.joint_accelerations is not None
         assert solution.joint_torques is not None
         assert len(solution.joint_accelerations) == 6
@@ -434,7 +434,7 @@ class TestWholeBodyController:
 
         solution = wbc.solve()
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert "high_priority" in solution.task_errors
         assert "low_priority" in solution.task_errors
 
@@ -457,7 +457,7 @@ class TestWholeBodyController:
         wbc.add_task(task)
 
         solution = wbc.solve()
-        assert solution.solver_status == "success"
+        assert solution.success
 
     def test_solve_hierarchical_vs_weighted(self) -> None:
         """Test hierarchical and weighted modes produce results."""
@@ -482,8 +482,8 @@ class TestWholeBodyController:
         wbc_weighted.add_task(task)
         solution_weighted = wbc_weighted.solve()
 
-        assert solution_hqp.solver_status == "success"
-        assert solution_weighted.solver_status == "success"
+        assert solution_hqp.success
+        assert solution_weighted.success
 
     def test_solve_with_contact_jacobians(self) -> None:
         """Test solve with contact Jacobians."""
@@ -506,7 +506,7 @@ class TestWholeBodyController:
 
         # May or may not succeed depending on constraints
         # Just verify it doesn't crash
-        assert isinstance(solution.solver_status == "success", bool)
+        assert isinstance(solution.success, bool)
 
     def test_task_sorting_by_priority(self) -> None:
         """Test tasks are sorted by priority."""
@@ -570,9 +570,9 @@ class TestWBCSolution:
         """Test failed solution defaults."""
         solution = WBCSolution(success=False, status="Failed")
 
-        assert solution.solver_status != "success"
+        assert not solution.success
         assert solution.joint_accelerations is None
-        assert solution.final_cost == float("inf")
+        assert solution.cost == float("inf")
 
     def test_successful_solution(self) -> None:
         """Test successful solution."""
@@ -587,10 +587,10 @@ class TestWBCSolution:
             status="Optimal",
         )
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert_array_equal(solution.joint_accelerations, qdd)
         assert_array_equal(solution.joint_torques, tau)
-        assert solution.final_cost == 0.5
+        assert solution.cost == 0.5
 
 
 class TestIntegration:
@@ -618,7 +618,7 @@ class TestIntegration:
         solution = wbc.solve()
 
         # Verify
-        assert solution.solver_status == "success"
+        assert solution.success
         assert solution.joint_accelerations is not None
         assert len(solution.joint_accelerations) == 7
         assert "posture" in solution.task_errors
@@ -640,7 +640,7 @@ class TestIntegration:
 
         solution = wbc.solve()
 
-        assert solution.solver_status == "success"
+        assert solution.success
         # First joint should have positive acceleration toward target
         assert solution.joint_accelerations[0] > 0
 
@@ -660,7 +660,7 @@ class TestIntegration:
         wbc.add_task(task)
 
         solution = wbc.solve()
-        assert solution.solver_status == "success"
+        assert solution.success
 
 
 class TestIssue2501NullspaceAndTorqueLimits:
@@ -679,7 +679,7 @@ class TestIssue2501NullspaceAndTorqueLimits:
         solver = NullspaceQPSolver()
         solution = solver.solve(problem)
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert solution.x is not None
         assert np.all(solution.x >= x_lb - 1e-9), (
             f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
@@ -710,7 +710,7 @@ class TestIssue2501NullspaceAndTorqueLimits:
         wbc.add_task(task)
         solution = wbc.solve()
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert solution.joint_torques is not None
         assert np.all(np.abs(solution.joint_torques) <= max_tau + 1e-9), (
             f"Torques {solution.joint_torques} exceed limit {max_tau}. "
@@ -734,5 +734,5 @@ class TestIssue2501NullspaceAndTorqueLimits:
         wbc.add_task(task)
         solution = wbc.solve()
 
-        assert solution.solver_status == "success"
+        assert solution.success
         assert solution.joint_torques is not None

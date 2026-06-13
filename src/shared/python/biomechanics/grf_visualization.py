@@ -16,6 +16,44 @@ except ImportError:
     plt = None  # type: ignore
 
 
+def _plot_moment_arms(
+    ax: Any, sampled_df: pd.DataFrame, sampled_com: np.ndarray
+) -> None:
+    """Plot dashed COP-to-COM moment arms for downsampled force data."""
+    cop_x = sampled_df["cop_x"].values
+    cop_y = sampled_df["cop_y"].values
+    cop_z = sampled_df["cop_z"].values
+    for i in range(len(sampled_df)):
+        ax.plot(
+            [cop_x[i], sampled_com[i, 0]],
+            [cop_y[i], sampled_com[i, 1]],
+            [cop_z[i], sampled_com[i, 2]],
+            color="gray",
+            linestyle="--",
+            alpha=0.2,
+        )
+
+
+def _set_equal_3d_axes(ax: Any) -> None:
+    """Scale a 3D matplotlib axis equally across all dimensions."""
+    x_limits = ax.get_xlim3d()
+    y_limits = ax.get_ylim3d()
+    z_limits = ax.get_zlim3d()
+
+    x_range = abs(x_limits[1] - x_limits[0])
+    x_middle = np.mean(x_limits)
+    y_range = abs(y_limits[1] - y_limits[0])
+    y_middle = np.mean(y_limits)
+    z_range = abs(z_limits[1] - z_limits[0])
+    z_middle = np.mean(z_limits)
+
+    plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+
 def plot_grf_and_com_3d(
     force_df: pd.DataFrame,
     com_trajectory: np.ndarray,
@@ -93,16 +131,7 @@ def plot_grf_and_com_3d(
         label="GRF Vectors",
     )
 
-    # Plot lines from COP to COM (moment arms)
-    for i in range(len(idx)):
-        ax.plot(
-            [sampled_df["cop_x"].iloc[i], sampled_com[i, 0]],
-            [sampled_df["cop_y"].iloc[i], sampled_com[i, 1]],
-            [sampled_df["cop_z"].iloc[i], sampled_com[i, 2]],
-            color="gray",
-            linestyle="--",
-            alpha=0.2,
-        )
+    _plot_moment_arms(ax, sampled_df, sampled_com)
 
     ax.set_xlabel("X [m]")
     ax.set_ylabel("Y [m]")
@@ -110,22 +139,6 @@ def plot_grf_and_com_3d(
     ax.set_title("Dynamic Center of Mass and Ground Reaction Forces")
     ax.legend()
 
-    # Auto-scale axes to be equal
-    x_limits = ax.get_xlim3d()  # type: ignore
-    y_limits = ax.get_ylim3d()  # type: ignore
-    z_limits = ax.get_zlim3d()  # type: ignore
-
-    x_range = abs(x_limits[1] - x_limits[0])
-    x_middle = np.mean(x_limits)
-    y_range = abs(y_limits[1] - y_limits[0])
-    y_middle = np.mean(y_limits)
-    z_range = abs(z_limits[1] - z_limits[0])
-    z_middle = np.mean(z_limits)
-
-    plot_radius = 0.5 * max([x_range, y_range, z_range])
-
-    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])  # type: ignore
-    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])  # type: ignore
-    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])  # type: ignore
+    _set_equal_3d_axes(ax)
 
     return fig, ax

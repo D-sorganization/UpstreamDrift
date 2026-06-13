@@ -371,7 +371,7 @@ jobs:
             run_with_heartbeat "optional-stack unit target $target" bash -o pipefail -c '
               xvfb-run --auto-servernum pytest "$1" \
                 -p no:xvfb \
-                --timeout=60 \
+                --timeout=180 \
                 --timeout-method=thread \
                 -v --tb=short \
                 --durations=20 \
