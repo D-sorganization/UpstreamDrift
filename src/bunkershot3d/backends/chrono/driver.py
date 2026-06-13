@@ -9,8 +9,8 @@ from typing import Any
 
 import numpy as np
 
-from bunkershot3d.config import BunkerShotConfig
-from bunkershot3d.io.schema import BunkerShotResultWriter
+from ...config import BunkerShotConfig
+from ...io.schema import BunkerShotResultWriter
 
 try:
     import pychrono as chrono  # type: ignore[import-untyped]
@@ -20,7 +20,7 @@ except ImportError:
     _HAS_CHRONO = False
 
 
-from bunkershot3d.exceptions import BackendNotImplementedError
+from ...exceptions import BackendNotImplementedError
 
 
 class ChronoDriver:

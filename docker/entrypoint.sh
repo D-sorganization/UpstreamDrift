@@ -12,6 +12,10 @@
 # security; set it in production (e.g. your load balancer's internal IP).
 set -eu
 
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 FORWARDED_ALLOW_IPS="${FORWARDED_ALLOW_IPS:-127.0.0.1}"
 
 exec python3 -m uvicorn src.api.server:app \

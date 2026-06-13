@@ -97,7 +97,7 @@ profile catalog ([`docker/profiles.yaml`](../../docker/profiles.yaml)):
 
 | Profile        | Includes                  | Budget |
 | -------------- | ------------------------- | ------ |
-| `slim`         | API + pendulum only       | 900 MB |
+| `slim`         | API + pendulum + MuJoCo   | 900 MB |
 | `standard`     | + MuJoCo + Pinocchio      | 2.2 GB |
 | `research`     | + Drake + MediaPipe       | 3.5 GB |
 | `biomech`      | + OpenSim + MyoSuite      | 4.8 GB |

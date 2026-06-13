@@ -32,6 +32,15 @@ def test_pip_feature_install_commands_strip_shell_quotes() -> None:
     assert commands == [["pip", "install", "--no-cache-dir", "mujoco>=3.2.3,<4.0.0"]]
 
 
+def test_slim_profile_matches_core_runtime_contract() -> None:
+    install_features = _load_install_features_module()
+
+    profiles = install_features._load_profiles(REPO_ROOT / "docker" / "profiles.yaml")
+    features = install_features._resolve_profile_features(profiles["profiles"], "slim")
+
+    assert features == ["api", "pendulum", "mujoco"]
+
+
 def test_profile_dry_run_works_with_modular_dockerfile_early_copy_set(
     tmp_path: Path,
 ) -> None:
@@ -79,3 +88,16 @@ def test_profile_dry_run_works_with_modular_dockerfile_early_copy_set(
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_bunkershot3d_imports_through_src_package_namespace() -> None:
+    """Runtime Docker health checks import BunkerShot3D through ``src``."""
+    import src.bunkershot3d.backends.chrono.driver as chrono_driver
+    import src.bunkershot3d.backends.liggghts.driver as liggghts_driver
+    import src.bunkershot3d.backends.mpm.driver as mpm_driver
+    from src.bunkershot3d.calibration.angle_of_repose import AngleOfReposeExperiment
+
+    assert chrono_driver.ChronoDriver.__name__ == "ChronoDriver"
+    assert liggghts_driver.LiggghtsDriver.__name__ == "LiggghtsDriver"
+    assert mpm_driver.MPMDriver.__name__ == "MPMDriver"
+    assert AngleOfReposeExperiment.__name__ == "AngleOfReposeExperiment"

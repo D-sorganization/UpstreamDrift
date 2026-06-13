@@ -11,8 +11,6 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 
-from humanoid_character_builder.core.body_parameters import BodyParameters, BuildType
-from humanoid_character_builder.generators.urdf_generator import HumanoidURDFGenerator
 from src.api.middleware.error_handler import handle_api_errors
 
 from ..dependencies import get_logger
@@ -20,6 +18,27 @@ from ..models.requests import CharacterBuilderRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+def _load_character_builder_provider() -> tuple[type[Any], type[Any], type[Any]]:
+    try:
+        from humanoid_character_builder.core.body_parameters import (
+            BodyParameters,
+            BuildType,
+        )
+        from humanoid_character_builder.generators.urdf_generator import (
+            HumanoidURDFGenerator,
+        )
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Character builder provider is unavailable. Install the "
+                "humanoid_character_builder provider before generating URDF output."
+            ),
+        ) from exc
+
+    return BodyParameters, BuildType, HumanoidURDFGenerator
 
 
 @router.post(
@@ -54,6 +73,9 @@ async def generate_character_urdf(
             request.build_type,
         )
 
+    BodyParameters, BuildType, HumanoidURDFGenerator = (
+        _load_character_builder_provider()
+    )
     build_map = {
         "athletic": BuildType.MESOMORPH,
         "average": BuildType.AVERAGE,
@@ -78,6 +100,8 @@ async def generate_character_urdf(
                 "Content-Disposition": f'attachment; filename="{request.build_type.lower()}_humanoid.urdf"'
             },
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         if logger:
             logger.error("Failed to generate humanoid URDF: %s", exc, exc_info=True)

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from bunkershot3d.exceptions import BackendNotImplementedError
+from ..exceptions import BackendNotImplementedError
 
 
 def _mock_angle_of_repose(friction: float) -> float:

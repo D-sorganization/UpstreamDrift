@@ -80,6 +80,7 @@ RUN pip install --upgrade pip==26.1.2 && \
 COPY pyproject.toml ./
 COPY README.md ./
 COPY build_hooks.py ./
+COPY launch_golf_suite.py ./
 COPY src/ ./src/
 COPY docker/profiles.yaml ./docker/profiles.yaml
 COPY scripts/docker/install_features.py ./scripts/docker/install_features.py

@@ -168,7 +168,7 @@ Profile presets are defined in `docker/profiles.yaml`:
 
 ```yaml
 profiles:
-  slim:        { features: [api, pendulum] }                   # ~700 MB
+  slim:        { features: [api, pendulum, mujoco] }            # ~800 MB
   standard:    { features: [api, mujoco, pinocchio, pendulum] } # ~1.8 GB (current default)
   research:    { features: [standard, drake, pose-mediapipe] } # ~3.4 GB
   biomech:     { features: [standard, opensim, myosuite] }     # ~4.5 GB
@@ -243,7 +243,7 @@ image; no behavioral change to existing loaders.
 - Launcher `validate_docker_stage()` reads from `profiles.yaml`.
 - CI: profile size matrix in `docker-size-gates.yml`.
 
-**Acceptance:** `slim` profile <800 MB, `standard` ≈ current size,
+**Acceptance:** `slim` profile <900 MB, `standard` ≈ current size,
 `research` <3.5 GB, `full` <6 GB; all profiles boot and `/health`
 responds; profile capability assertions in CI pass.
 

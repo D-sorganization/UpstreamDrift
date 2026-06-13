@@ -20,8 +20,8 @@ version: 1
 
 profiles:
   slim:
-    description: API + pure-Python pendulum models. Smallest viable image.
-    features: [api, pendulum]
+    description: API, pure-Python pendulum models, and core MuJoCo runtime.
+    features: [api, pendulum, mujoco]
     max_size_mb: 900
 
   standard:

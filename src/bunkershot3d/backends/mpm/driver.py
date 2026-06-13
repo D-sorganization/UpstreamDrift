@@ -14,9 +14,9 @@ except ImportError:
 
 import numpy as np
 
-from bunkershot3d.config import BunkerShotConfig
-from bunkershot3d.io.schema import BunkerShotResultWriter
-from bunkershot3d.kinematics.trajectory import SwingTrajectory
+from ...config import BunkerShotConfig
+from ...io.schema import BunkerShotResultWriter
+from ...kinematics.trajectory import SwingTrajectory
 
 
 class MPMDriver:

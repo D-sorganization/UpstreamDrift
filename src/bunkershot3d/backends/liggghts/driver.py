@@ -15,9 +15,9 @@ from pathlib import Path
 
 import numpy as np
 
-from bunkershot3d.config import BunkerShotConfig
-from bunkershot3d.exceptions import BackendNotImplementedError
-from bunkershot3d.io.schema import BunkerShotResultWriter
+from ...config import BunkerShotConfig
+from ...exceptions import BackendNotImplementedError
+from ...io.schema import BunkerShotResultWriter
 
 
 class LiggghtsDriver:

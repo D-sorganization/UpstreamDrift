@@ -25,6 +25,8 @@ HEALTHCHECK CMD python3 -c "import urllib.request; urllib.request.urlopen('http:
 COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
 COPY src/shared/python/engine_core/ ./src/shared/python/engine_core/
 RUN python scripts/docker/install_features.py --profile standard --dry-run
+COPY launch_golf_suite.py ./
+RUN python scripts/docker/install_features.py --profile "$PROFILE"
 RUN pip install --upgrade pip=={modular_pip}
 """,
         encoding="utf-8",
@@ -114,5 +116,27 @@ RUN pip install --upgrade pip==26.1.2
 
     assert any(
         "copy engine_core before profile dry-run" in failure
+        for failure in guard.docker_contract_failures(tmp_path)
+    )
+
+
+def test_docker_contracts_reject_modular_feature_install_before_launcher_copy(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "Dockerfile.modular").write_text(
+        """
+COPY src/shared/python/feature_registry/ ./src/shared/python/feature_registry/
+COPY src/shared/python/engine_core/ ./src/shared/python/engine_core/
+RUN python scripts/docker/install_features.py --profile standard --dry-run
+RUN python scripts/docker/install_features.py --profile "$PROFILE"
+COPY launch_golf_suite.py ./
+RUN pip install --upgrade pip==26.1.2
+""",
+        encoding="utf-8",
+    )
+
+    assert any(
+        "copy launch_golf_suite.py before feature install" in failure
         for failure in guard.docker_contract_failures(tmp_path)
     )

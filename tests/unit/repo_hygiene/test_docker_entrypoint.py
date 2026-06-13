@@ -54,6 +54,11 @@ class TestEntrypointExpandsForwardedAllowIps:
         # POSIX default-expansion of the documented localhost default.
         assert 'FORWARDED_ALLOW_IPS="${FORWARDED_ALLOW_IPS:-127.0.0.1}"' in text
 
+    def test_honors_explicit_container_commands(self) -> None:
+        text = _entrypoint_text()
+        assert 'if [ "$#" -gt 0 ]; then' in text
+        assert 'exec "$@"' in text
+
     def test_passes_expanded_value_to_uvicorn(self) -> None:
         text = _entrypoint_text()
         assert "--forwarded-allow-ips" in text

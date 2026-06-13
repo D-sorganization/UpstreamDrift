@@ -57,15 +57,16 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
-          # slim: api + pendulum only; mujoco and pinocchio must be ABSENT
+          # slim: api + pendulum + core MuJoCo; Pinocchio and Drake must be ABSENT
           - profile: slim
-            must_have: "api,pendulum"
-            must_not_have: "mujoco,pinocchio,drake"
+            must_have: "api,pendulum,mujoco"
+            must_not_have: "pinocchio,drake"
             advisory: false
 
-          # standard: slim + mujoco + pinocchio; drake must be ABSENT
+          # standard: slim + Pinocchio; Drake must be ABSENT
           - profile: standard
             must_have: "api,pendulum,mujoco,pinocchio"
             must_not_have: "drake"
@@ -85,6 +86,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
 
+      - name: Prepare local BuildKit cache (profile=${{ matrix.profile }})
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}"
+          rm -rf "${CACHE_BASE}-next"
+          mkdir -p "${CACHE_BASE}"
+
       - name: Build modular image (profile=${{ matrix.profile }})
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
         with:
@@ -94,8 +101,17 @@ jobs:
             PROFILE=${{ matrix.profile }}
           load: true
           tags: upstream-drift-smoke:${{ matrix.profile }}
-          cache-from: type=gha,scope=smoke-${{ matrix.profile }}
-          cache-to: type=gha,scope=smoke-${{ matrix.profile }},mode=max
+          cache-from: type=local,src=${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}
+          cache-to: type=local,dest=${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}-next,mode=max
+
+      - name: Promote local BuildKit cache (profile=${{ matrix.profile }})
+        if: always()
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}"
+          if [ -d "${CACHE_BASE}-next" ]; then
+            rm -rf "${CACHE_BASE}"
+            mv "${CACHE_BASE}-next" "${CACHE_BASE}"
+          fi
 
       - name: Positive capability checks (profile=${{ matrix.profile }})
         # Each feature listed in must_have must report AVAILABLE inside the image.
@@ -107,9 +123,11 @@ jobs:
           IFS=',' read -ra FEATURES <<< "$MUST_HAVE"
           for feature in "${FEATURES[@]}"; do
             echo "Checking that '$feature' is AVAILABLE in profile '$PROFILE'..."
-            STATUS=$(docker run --rm upstream-drift-smoke:${PROFILE} \
-              python -m src.shared.python.feature_registry --check "${feature}" --json \
-              2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','UNKNOWN'))" 2>/dev/null || echo "PROBE_ERROR")
+            if STATUS=$(python3 scripts/ci/docker_feature_probe.py "upstream-drift-smoke:${PROFILE}" "${feature}"); then
+              :
+            else
+              STATUS="PROBE_ERROR"
+            fi
 
             if [ "$STATUS" = "AVAILABLE" ]; then
               echo "  [OK] $feature -> $STATUS"
@@ -135,9 +153,11 @@ jobs:
           IFS=',' read -ra FEATURES <<< "$MUST_NOT_HAVE"
           for feature in "${FEATURES[@]}"; do
             echo "Checking that '$feature' is NOT available in profile '$PROFILE'..."
-            STATUS=$(docker run --rm upstream-drift-smoke:${PROFILE} \
-              python -m src.shared.python.feature_registry --check "${feature}" --json \
-              2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','UNKNOWN'))" 2>/dev/null || echo "PROBE_ERROR")
+            if STATUS=$(python3 scripts/ci/docker_feature_probe.py "upstream-drift-smoke:${PROFILE}" "${feature}"); then
+              :
+            else
+              STATUS="PROBE_ERROR"
+            fi
 
             if [ "$STATUS" != "AVAILABLE" ]; then
               echo "  [OK] $feature -> $STATUS (not leaked)"

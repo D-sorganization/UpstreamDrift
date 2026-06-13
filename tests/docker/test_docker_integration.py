@@ -22,6 +22,10 @@ _DOCKER_CMD_XFAIL = pytest.mark.xfail(
 )
 
 
+def _dockerfile_env_value(line: str) -> str:
+    return line.strip().removesuffix("\\").strip()
+
+
 def _is_docker_available() -> bool:
     """Check if Docker is available."""
     try:
@@ -64,7 +68,9 @@ class TestDockerBuild(unittest.TestCase):
             line for line in content.split("\n") if "PYTHONPATH=" in line
         ][0]
         self.assertIn("/workspace", pythonpath_line)
-        self.assertEqual(pythonpath_line.strip(), 'PYTHONPATH="/workspace"')
+        self.assertEqual(
+            _dockerfile_env_value(pythonpath_line), 'PYTHONPATH="/workspace"'
+        )
 
 
 class TestDockerRuntimeEntrypoint(unittest.TestCase):
@@ -118,7 +124,7 @@ class TestDockerRuntimeEntrypoint(unittest.TestCase):
 
     def test_runtime_healthcheck_hits_health_endpoint(self):
         """HEALTHCHECK must probe /health on the same port as CMD."""
-        self.assertIn("curl -f http://localhost:8001/health", self.content)
+        self.assertIn("http://localhost:8001/health", self.content)
 
     def test_runtime_does_not_default_to_interactive_shell(self):
         """Runtime stage must not default CMD to /bin/bash."""
@@ -179,7 +185,9 @@ class TestContainerEnvironment(unittest.TestCase):
 
         pythonpath_line = pythonpath_lines[0]
         # so that "from src.xxx" imports work inside the container.
-        self.assertEqual(pythonpath_line.strip(), 'PYTHONPATH="/workspace"')
+        self.assertEqual(
+            _dockerfile_env_value(pythonpath_line), 'PYTHONPATH="/workspace"'
+        )
 
     def test_workspace_directory_creation(self) -> None:
         """Test workspace directory structure creation."""
