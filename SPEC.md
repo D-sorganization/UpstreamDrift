@@ -1654,3 +1654,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Fixed CI imports for `compute_total_work`, `sidekick` references in `c3d` and `load_body_target_c3d` routing to appease lazy loading logic.
 
 - `extract_dynamics_dataset` also requires torch now so we require torch to test it in `test_surrogate_perstep_relocation.py`.
+
+### 2024-06-13
+* **Performance:** Optimized `grf_visualization.py` by extracting DataFrame columns to NumPy arrays (`.values`) before plotting loops, avoiding expensive and repeated `.iloc` series creation.
