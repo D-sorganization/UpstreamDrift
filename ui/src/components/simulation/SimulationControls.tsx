@@ -219,7 +219,9 @@ export function SimulationControls({
           <button
             onClick={onStart}
             disabled={disabled}
-            aria-label="Start simulation"
+            aria-label="Start simulation (Space)"
+            aria-keyshortcuts="Space"
+            title="Start simulation (Space)"
             className={`${buttonStyles.base} ${disabled ? buttonStyles.disabled : buttonStyles.primary}`}
           >
             <Play size={20} aria-hidden="true" />
@@ -230,7 +232,9 @@ export function SimulationControls({
             {isPaused ? (
               <button
                 onClick={onResume}
-                aria-label="Resume simulation"
+                aria-label="Resume simulation (Space)"
+                aria-keyshortcuts="Space"
+                title="Resume simulation (Space)"
                 className={`${buttonStyles.base} ${buttonStyles.primary}`}
               >
                 <Play size={20} aria-hidden="true" />
@@ -239,7 +243,9 @@ export function SimulationControls({
             ) : (
               <button
                 onClick={onPause}
-                aria-label="Pause simulation"
+                aria-label="Pause simulation (Space)"
+                aria-keyshortcuts="Space"
+                title="Pause simulation (Space)"
                 className={`${buttonStyles.base} ${buttonStyles.warning}`}
               >
                 <Pause size={20} aria-hidden="true" />
@@ -251,7 +257,8 @@ export function SimulationControls({
               <button
                 onClick={onStep}
                 disabled={!isPaused}
-                aria-label="Single step"
+                aria-label="Single step (.)"
+                aria-keyshortcuts="Period"
                 title="Single step (. key)"
                 className={`${buttonStyles.base} ${buttonStyles.small} ${
                   isPaused ? buttonStyles.secondary : buttonStyles.disabled
@@ -263,7 +270,9 @@ export function SimulationControls({
 
             <button
               onClick={onStop}
-              aria-label="Stop simulation"
+              aria-label="Stop simulation (Esc)"
+              aria-keyshortcuts="Escape"
+              title="Stop simulation (Esc)"
               className={`${buttonStyles.base} ${buttonStyles.danger}`}
             >
               <Square size={20} aria-hidden="true" />

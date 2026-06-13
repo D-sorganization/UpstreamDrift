@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useURDFModel } from '@/api/useURDFModel';
 import { apiFetch } from '@/api/fetch';
 import { ModelPreviewViewport } from '@/components/model-explorer/ModelPreviewViewport';
@@ -41,6 +41,32 @@ export function ModelExplorerPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDiffOpen, setIsDiffOpen] = useState(false);
+
+  // #7443: bounded undo history for Frankenstein tree edits. Each mutating
+  // op snapshots the pre-edit (source, target) trees; Undo / Ctrl+Z restores
+  // the most recent snapshot. Capped so a long editing session can't grow it
+  // without bound.
+  const FRANKENSTEIN_UNDO_LIMIT = 20;
+  const undoStackRef = useRef<
+    { source: URDFTreeNode[]; target: URDFTreeNode[] }[]
+  >([]);
+  const [canUndo, setCanUndo] = useState(false);
+
+  const snapshotForUndo = useCallback(() => {
+    undoStackRef.current.push({ source: sourceTree, target: targetTree });
+    if (undoStackRef.current.length > FRANKENSTEIN_UNDO_LIMIT) {
+      undoStackRef.current.shift();
+    }
+    setCanUndo(true);
+  }, [sourceTree, targetTree]);
+
+  const handleUndo = useCallback(() => {
+    const prev = undoStackRef.current.pop();
+    if (!prev) return;
+    setSourceTree(prev.source);
+    setTargetTree(prev.target);
+    setCanUndo(undoStackRef.current.length > 0);
+  }, []);
 
   // Fetch model for 3D preview (renders target model in Frankenstein mode if loaded)
   const activePreviewModel = frankensteinMode
@@ -101,19 +127,22 @@ export function ModelExplorerPage() {
     loadModelData(name, 'target');
   }, [loadModelData]);
 
-  // Tree action handlers
+  // Tree action handlers. Each snapshots state first so the op is undoable (#7443).
   const handleCopyComponent = useCallback((nodeId: string) => {
+    snapshotForUndo();
     const updated = copyComponent(sourceTree, targetTree, nodeId, selectedTargetNodeId);
     setTargetTree(updated);
-  }, [sourceTree, targetTree, selectedTargetNodeId]);
+  }, [sourceTree, targetTree, selectedTargetNodeId, snapshotForUndo]);
 
   const handleCopyChain = useCallback((nodeId: string) => {
+    snapshotForUndo();
     const updated = copyLinkChain(sourceTree, targetTree, nodeId, selectedTargetNodeId);
     setTargetTree(updated);
-  }, [sourceTree, targetTree, selectedTargetNodeId]);
+  }, [sourceTree, targetTree, selectedTargetNodeId, snapshotForUndo]);
 
   const handleSwapSubtrees = useCallback(() => {
     if (!selectedSourceNodeId || !selectedTargetNodeId) return;
+    snapshotForUndo();
     const { sourceTree: newSrc, targetTree: newTgt } = swapSubtrees(
       sourceTree,
       targetTree,
@@ -122,12 +151,34 @@ export function ModelExplorerPage() {
     );
     setSourceTree(newSrc);
     setTargetTree(newTgt);
-  }, [sourceTree, targetTree, selectedSourceNodeId, selectedTargetNodeId]);
+  }, [sourceTree, targetTree, selectedSourceNodeId, selectedTargetNodeId, snapshotForUndo]);
 
   const handleMergeAll = useCallback(() => {
+    snapshotForUndo();
     const updated = mergeTrees(sourceTree, targetTree, selectedTargetNodeId);
     setTargetTree(updated);
-  }, [sourceTree, targetTree, selectedTargetNodeId]);
+  }, [sourceTree, targetTree, selectedTargetNodeId, snapshotForUndo]);
+
+  // #7443: Ctrl+Z undoes the last Frankenstein edit. Scoped to the page and
+  // ignored while typing in a field.
+  useEffect(() => {
+    if (!frankensteinMode) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [frankensteinMode, handleUndo]);
 
   // Compute diff
   const treeDiff = useMemo(() => {
@@ -209,12 +260,49 @@ export function ModelExplorerPage() {
 
           {frankensteinMode && (
             <div className="flex gap-2">
+              {(() => {
+                const compareDisabled =
+                  sourceTree.length === 0 || targetTree.length === 0;
+                // #7443: explain WHY Compare is dead instead of a silent
+                // no-op button.
+                const compareReason = compareDisabled
+                  ? 'Load both a source and a target model to compare'
+                  : undefined;
+                return (
+                  <>
+                    <button
+                      onClick={() => setIsDiffOpen(true)}
+                      disabled={compareDisabled}
+                      title={compareReason}
+                      aria-describedby={
+                        compareReason ? 'compare-disabled-reason' : undefined
+                      }
+                      className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-400 text-white rounded text-xs font-medium transition-colors shadow-lg"
+                    >
+                      Compare
+                    </button>
+                    {compareReason && (
+                      <span id="compare-disabled-reason" className="sr-only">
+                        {compareReason}
+                      </span>
+                    )}
+                  </>
+                );
+              })()}
+              {/* #7443: undo the last Frankenstein tree edit (also Ctrl+Z). */}
               <button
-                onClick={() => setIsDiffOpen(true)}
-                disabled={sourceTree.length === 0 || targetTree.length === 0}
-                className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-400 text-white rounded text-xs font-medium transition-colors shadow-lg"
+                onClick={handleUndo}
+                disabled={!canUndo}
+                title={
+                  canUndo
+                    ? 'Undo last edit (Ctrl+Z)'
+                    : 'Nothing to undo'
+                }
+                aria-label="Undo last Frankenstein edit"
+                aria-keyshortcuts="Control+Z"
+                className="py-1.5 px-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-400 text-gray-100 rounded text-xs font-medium transition-colors"
               >
-                Compare
+                Undo
               </button>
               {selectedSourceNodeId && selectedTargetNodeId && (
                 <button

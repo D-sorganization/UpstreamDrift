@@ -17,6 +17,7 @@ import {
   HELP_TOPICS,
   FEATURE_HELP,
   CATEGORY_LABELS,
+  KEYBOARD_SHORTCUTS,
   searchHelp,
   getTopicsByCategory,
   getRelatedTopics,
@@ -375,6 +376,29 @@ export function HelpPanel({ initialTopicId, isOpen: controlledOpen, onClose }: H
                       </div>
                     </button>
                   ))}
+                </div>
+
+                {/* #7443: surface the otherwise-undiscoverable shortcuts. */}
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold text-gray-200 mb-2">
+                    Keyboard shortcuts
+                  </h4>
+                  <ul className="divide-y divide-gray-800 rounded-lg border border-gray-700 bg-gray-800/50">
+                    {KEYBOARD_SHORTCUTS.map((sc) => (
+                      <li
+                        key={`${sc.scope}-${sc.keys}`}
+                        className="flex items-center justify-between gap-3 px-3 py-2 text-xs"
+                      >
+                        <span className="text-gray-300">{sc.description}</span>
+                        <span className="flex items-center gap-2 flex-shrink-0">
+                          <kbd className="rounded bg-gray-700 px-1.5 py-0.5 font-mono text-gray-100">
+                            {sc.keys}
+                          </kbd>
+                          <span className="text-gray-400">{sc.scope}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             )}

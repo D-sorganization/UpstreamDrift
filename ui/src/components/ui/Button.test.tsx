@@ -37,6 +37,28 @@ describe('Button (#7420)', () => {
     render(<Button className="w-full">Wide</Button>);
     expect(screen.getByRole('button', { name: 'Wide' }).className).toContain('w-full');
   });
+
+  it('wires disabledReason to title + aria-describedby when disabled (#7443)', () => {
+    render(
+      <Button disabled disabledReason="Load both models to compare">
+        Compare
+      </Button>,
+    );
+    const btn = screen.getByRole('button', { name: /compare/i });
+    expect(btn).toHaveAttribute('title', 'Load both models to compare');
+    const describedBy = btn.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const reason = document.getElementById(describedBy as string);
+    expect(reason?.textContent).toBe('Load both models to compare');
+    expect(reason?.className).toContain('sr-only');
+  });
+
+  it('does not surface disabledReason while enabled (#7443)', () => {
+    render(<Button disabledReason="nope">Active</Button>);
+    const btn = screen.getByRole('button', { name: 'Active' });
+    expect(btn).not.toHaveAttribute('aria-describedby');
+    expect(btn).not.toHaveAttribute('title');
+  });
 });
 
 describe('Input/Select (#7420)', () => {
