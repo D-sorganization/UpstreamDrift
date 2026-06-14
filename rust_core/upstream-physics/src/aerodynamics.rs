@@ -23,6 +23,9 @@ const RE_MIN_CD: f64 = 7.0e4;
 const CD_HIGH: f64 = 0.30;
 const TRANSITION_WIDTH: f64 = 0.16;
 const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
+const MAX_LIFT_COEFFICIENT: f64 = 0.26;
+const PENNER_LIFT_SCALE: f64 = 0.70;
+const PENNER_LIFT_EXPONENT: f64 = 0.645;
 
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -354,17 +357,18 @@ pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
 
 /// Compute lift coefficient from dimensionless spin ratio.
 ///
-/// Empirical relationship (Smits & Ogg form): Cl saturates below 0.4 for
-/// driver-scale trajectories.
+/// Penner-style spin-ratio fit, bounded to avoid high-spin ballooning.
 #[must_use]
 pub fn compute_lift_coefficient(spin_ratio: f64) -> f64 {
-    let cl_max = 0.35;
-    cl_max * (1.0 - (-spin_ratio / 0.1).exp())
+    if spin_ratio <= 0.0 {
+        return 0.0;
+    }
+    (PENNER_LIFT_SCALE * spin_ratio.powf(PENNER_LIFT_EXPONENT)).min(MAX_LIFT_COEFFICIENT)
 }
 
 /// Compute the spin-induced Magnus/lift coefficient from spin parameter ωR/v.
 ///
-/// Uses the same Smits & Ogg saturation curve as the legacy lift coefficient.
+/// Uses the same Penner-style curve as the legacy lift coefficient.
 #[must_use]
 pub fn compute_magnus_coefficient(spin_param: f64) -> f64 {
     compute_lift_coefficient(spin_param)
@@ -812,8 +816,9 @@ mod tests {
     fn test_lift_coefficient_saturates() {
         let cl_very_high = compute_lift_coefficient(10.0);
         assert!(
-            (cl_very_high - 0.35).abs() < 0.01,
-            "Cl should saturate near 0.35, got {}",
+            (cl_very_high - MAX_LIFT_COEFFICIENT).abs() < 1e-12,
+            "Cl should saturate near {}, got {}",
+            MAX_LIFT_COEFFICIENT,
             cl_very_high
         );
     }
@@ -822,9 +827,25 @@ mod tests {
     fn test_magnus_coefficient_capped() {
         let cm = compute_magnus_coefficient(1.0);
         assert!(
-            (cm - 0.35).abs() < 1e-4,
-            "Magnus/lift coeff should saturate near 0.35, got {}",
+            (cm - MAX_LIFT_COEFFICIENT).abs() < 1e-12,
+            "Magnus/lift coeff should saturate near {}, got {}",
+            MAX_LIFT_COEFFICIENT,
             cm
+        );
+    }
+
+    #[test]
+    fn test_lift_coefficient_trackman_calibration_anchors() {
+        let driver_cl = compute_lift_coefficient(0.08);
+        let iron_cl = compute_lift_coefficient(0.30);
+
+        assert!(
+            (0.08..=0.16).contains(&driver_cl),
+            "driver spin ratio Cl should stay in TrackMan calibration band, got {driver_cl}"
+        );
+        assert!(
+            (0.18..=0.28).contains(&iron_cl),
+            "7-iron spin ratio Cl should stay in TrackMan calibration band, got {iron_cl}"
         );
     }
 

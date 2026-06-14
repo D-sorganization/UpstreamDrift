@@ -23,6 +23,7 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_RADIUS_M,
 )
 from src.shared.python.physics.atmosphere import cd_dimpled_sphere
+from src.shared.python.physics.ball_properties import calculate_spin_lift_coefficient
 
 _DEFAULT_DRAG_COEFFICIENT = float(GOLF_BALL_DRAG_COEFFICIENT)
 
@@ -153,7 +154,7 @@ class LiftModel:
         base_coefficient: float = float(GOLF_BALL_LIFT_COEFFICIENT),
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
-        max_coefficient: float = 0.35,
+        max_coefficient: float = float("inf"),
     ) -> None:
         if base_coefficient is None:
             raise ValueError("base_coefficient must be provided")
@@ -191,8 +192,10 @@ class LiftModel:
         """Compute lift coefficient based on spin ratio."""
         if spin_ratio is None:
             raise ValueError("spin_ratio must be provided")
-        cl = self.max_coefficient * (1 - math.exp(-spin_ratio / 0.1))
-        return min(cl, self.max_coefficient)
+        return min(
+            self.max_coefficient,
+            calculate_spin_lift_coefficient(float(spin_ratio)),
+        )
 
 
 class MagnusModel:
@@ -204,7 +207,7 @@ class MagnusModel:
 
     def __init__(
         self,
-        coefficient: float = 0.35,
+        coefficient: float = float("inf"),
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
     ) -> None:
@@ -240,7 +243,10 @@ class MagnusModel:
 
     def _compute_magnus_coefficient(self, spin_param: float) -> float:
         """Compute Magnus/lift coefficient based on spin parameter."""
-        return self.coefficient * (1 - math.exp(-spin_param / 0.1))
+        return min(
+            self.coefficient,
+            calculate_spin_lift_coefficient(float(spin_param)),
+        )
 
 
 __all__ = ["DragModel", "LiftModel", "MagnusModel"]

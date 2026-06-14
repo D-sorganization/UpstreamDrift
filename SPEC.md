@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.391                                            |
+| **Spec Version**        | 1.0.392                                            |
 | **Last Spec Update**    | 2026-06-14                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-14** - Calibrated the flagship Rust and enhanced ball-flight
+  aerodynamic coefficient contracts for issue #7405: `BallProperties`,
+  Python `LiftModel`/`MagnusModel`, and the Rust upstream-physics kernel now
+  share a bounded Penner-style spin-lift curve (`Cl(0.08)` driver and
+  `Cl(0.30)` 7-iron anchors), while `BallProperties` uses stronger
+  spin-dependent drag coefficients for reported-force consistency. Added
+  scientific TrackMan benchmark tests for driver and 7-iron trajectories,
+  coefficient anchors, and Rust-vs-enhanced agreement when the Rust wheel is
+  available.
 - **2026-06-14** - Corrected the multi-model ball-flight lift calibration for
   issue #7404: Waterloo/Penner now uses a Penner-style spin-ratio lift fit with
   a bounded golf-ball lift coefficient, and the MacDonald-Hanzely plus constant
