@@ -22,7 +22,9 @@ from src.shared.python.physics.ball_flight_physics import (
 )
 from src.shared.python.physics.flight_model_options import compute_spin_decay
 from src.shared.python.physics.impact_model import (
+    ImpactModelType,
     ImpactParameters,
+    ImpactSolverAPI,
     PreImpactState,
     RigidBodyImpactModel,
 )
@@ -122,6 +124,44 @@ def test_rigid_impact_smash_factor_is_finite_and_driver_sane() -> None:
     assert np.all(np.isfinite(post_state.clubhead_velocity))
     assert 1.0 < smash_factor <= 1.52
     assert float(np.linalg.norm(post_state.clubhead_velocity)) < club_speed
+
+
+def test_lofted_driver_impact_derives_lift_producing_spin_axis() -> None:
+    """Pipeline-derived backspin should add upward Magnus force."""
+    loft = math.radians(10.5)
+    normal = np.array([math.cos(loft), 0.0, math.sin(loft)])
+    post_state = ImpactSolverAPI(ImpactModelType.RIGID_BODY).solve_impact(
+        timestamp=0.0,
+        clubhead_velocity=np.array([50.5, 0.0, 0.0]),
+        clubhead_orientation=normal,
+        record=False,
+    )
+    spin_rate_rad_s = float(np.linalg.norm(post_state.ball_angular_velocity))
+    spin_axis = post_state.ball_angular_velocity / spin_rate_rad_s
+    ball_velocity = post_state.ball_velocity
+    launch_speed = float(np.linalg.norm(ball_velocity))
+    launch_angle = math.atan2(
+        float(ball_velocity[2]),
+        float(math.hypot(ball_velocity[0], ball_velocity[1])),
+    )
+    launch = LaunchConditions(
+        velocity=launch_speed,
+        launch_angle=launch_angle,
+        spin_rate=spin_rate_rad_s * 60.0 / (2.0 * math.pi),
+        spin_axis=spin_axis,
+    )
+    forces = BallFlightSimulator()._calculate_forces(
+        ball_velocity,
+        LaunchConditions(
+            velocity=launch_speed,
+            launch_angle=launch_angle,
+            spin_rate=launch.spin_rate,
+            spin_axis=spin_axis,
+        ),
+    )
+
+    assert spin_axis[1] < 0.0
+    assert forces["magnus"][2] > 0.0
 
 
 def test_impossible_cor_and_negative_launch_speed_are_rejected() -> None:

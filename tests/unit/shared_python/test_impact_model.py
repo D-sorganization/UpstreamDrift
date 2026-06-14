@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
@@ -91,96 +93,36 @@ def test_rigid_body_friction_spin(basic_pre_state, default_impact_params) -> Non
     model = RigidBodyImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
 
-    # Expect backspin (rotation around -Y or +Z depending on coord system)
-    # Velocity is +X, +Y. Normal is +X.
-    # Tangential v_rel = v_club - v_ball = (45, 5, 0).
-    # v_normal = 45 * n = (45, 0, 0).
-    # v_tangent = (0, 5, 0).
-    # Friction opposes v_tangent of contact point relative to surface.
-    # Contact point on ball velocity is v_ball + w x r. Initially 0.
-    # Relative tangential velocity of CLUB FACE relative to BALL SURFACE is (0, 5, 0).
-    # Friction force on BALL is in direction (0, 5, 0).
-    # Torque on ball: r x F. r is from center to contact point (-R*n = (-R, 0, 0)).
-    # r x F = (-R, 0, 0) x (0, Fy, 0) = (0, 0, -R*Fy).
-    # So spin should be around Z axis (negative).
-    #
-    # Wait, coordinate system check:
-    # n = (1, 0, 0).
-    # v_tangent = (0, 5, 0).
-    # Tangent direction = (0, 1, 0).
-    # Spin axis = n x tangent = (1,0,0) x (0,1,0) = (0,0,1).
-    # This formula in code: spin_axis = np.cross(n, tangent_dir)
-    # The code adds spin: ball_spin += spin_magnitude * spin_axis.
-    # So spin is POSITIVE Z.
-    # The thought process about r x F giving negative Z is:
-    # Torque = r x F.
-    # F on ball is in direction of tangent (friction accelerates ball tangentially).
-    # No, friction opposes SLIDING.
-    # Relative velocity of CLUB point vs BALL point.
-    # v_rel = v_club - v_ball.
-    # v_tangent = (0, 5, 0).
-    # Club is moving +Y relative to ball.
-    # So ball sees club sliding UP (+Y).
-    # Friction on ball is in direction of sliding? No, friction drags ball along.
-    # Friction on ball is in direction of v_tangent (+Y).
-    # r is vector from COM to contact point. Contact is at -R along normal (back of ball).
-    # r = (-R, 0, 0).
-    # Torque = (-R, 0, 0) x (0, F, 0) = (0, 0, -R*F).
-    # So physical torque is NEGATIVE Z. Backspin.
-
-    # Let's check the code implementation:
-    # spin_axis = np.cross(n, tangent_dir) = (1,0,0) x (0,1,0) = (0,0,1).
-    # spin_magnitude is positive.
-    # So code produces POSITIVE Z spin.
-    # This means the code produces TOPSPIN for an upward strike?
-    # If club moves UP (+Y) across ball back (-X), it should create TOPSPIN?
-    # No, brushing up on back of ball creates TOPSPIN.
-    # Wait.
-    # Club face is at X=0 (approx). Ball is at X>0.
-    # Club moves +X towards ball.
-    # Normal n points -X?
-    # Code: n = pre_state.clubhead_orientation / norm.
-    # In test: orientation = (1, 0, 0). So n = (1, 0, 0).
-    # Does n point from club to ball?
-    # RigidBodyImpactModel: n points away from club?
-    # "Contact normal (clubface normal, pointing away from club)"
-    # If club is at origin, facing +X. Ball is at +X.
-    # Normal points +X (towards ball).
-    # Contact point on ball surface is at -R relative to ball center.
-    # So r = -R * n.
-    # Torque = r x F_friction.
-    # F_friction on ball is in direction of tangent velocity of CLUB relative to BALL.
-    # v_rel = v_club - v_ball.
-    # If v_club has +Y component, F_friction is +Y.
-    # r x F = (-R, 0, 0) x (0, F, 0) = (0, 0, -R*F).
-    # Spin should be -Z.
-
-    # Code implementation:
-    # spin_axis = np.cross(n, tangent_dir) = (0, 0, 1).
-    # This produces +Z spin.
-    # So the code seems to have sign error or different convention.
-    # "Spin from friction: τ = r × F ... spin_axis = np.cross(n, tangent_dir)"
-    # If r = -R*n.
-    # r x F = -R * (n x F).
-    # tangent_dir is direction of F.
-    # So torque is proportional to -(n x tangent_dir).
-    # But code uses +(n x tangent_dir).
-    # So code produces opposite spin.
-
-    # HOWEVER, I should fix the test to match the code for now if I am just adding coverage,
-    # OR fix the code if it's definitely wrong.
-    # Given the prompt is "Expand test coverage", I should probably respect existing code behavior unless explicitly asked to fix bugs.
-    # BUT, "Write high-quality... code". A bug is not high quality.
-    # And "Scientific-Auditor" persona implies correctness.
-
-    # Let's assume for now I adjust the test to expect what the code produces,
-    # but I'll note it.
-    # Actually, let's look at the failure value: 234.19 > 0.
-    # So it is indeed producing positive spin.
-
-    assert post_state.ball_angular_velocity[2] > 0
+    # Contact is at r = -R*n on the ball and the friction impulse is along the
+    # tangential club-face motion, so torque is -R * (n x tangent_dir).
+    assert post_state.ball_angular_velocity[2] < 0
     assert post_state.ball_angular_velocity[0] == 0
     assert post_state.ball_angular_velocity[1] == 0
+
+
+def test_lofted_center_strike_generates_backspin_not_topspin() -> None:
+    """A lofted driver center strike should produce -Y backspin."""
+    loft = math.radians(10.5)
+    normal = np.array([math.cos(loft), 0.0, math.sin(loft)])
+    pre_state = PreImpactState(
+        clubhead_velocity=np.array([50.5, 0.0, 0.0]),
+        clubhead_angular_velocity=np.zeros(3),
+        clubhead_orientation=normal,
+        ball_position=np.array([0.05, 0.0, 0.0]),
+        ball_velocity=np.zeros(3),
+        ball_angular_velocity=np.zeros(3),
+        clubhead_mass=0.2,
+        clubhead_loft=loft,
+        clubhead_lie=math.radians(60.0),
+    )
+
+    post_state = RigidBodyImpactModel().solve(pre_state, ImpactParameters())
+    spin_mag = float(np.linalg.norm(post_state.ball_angular_velocity))
+
+    assert post_state.ball_angular_velocity[1] < 0.0
+    assert 250.0 <= spin_mag <= 350.0
+    assert abs(post_state.ball_angular_velocity[0]) < 1e-12
+    assert abs(post_state.ball_angular_velocity[2]) < 1e-12
 
 
 def test_finite_time_model(basic_pre_state, default_impact_params) -> None:
