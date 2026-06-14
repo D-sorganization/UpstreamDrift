@@ -147,6 +147,7 @@ class GasProperties:
     specific_heat_ratio: float
     critical_temp: float
     critical_pressure: float
+    acentric_factor: float
     source: str
 
 
@@ -186,6 +187,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.400,
             132.5,
             3_771_000.0,
+            0.035,
             source="NASA Glenn thermodynamic data, Dry Air mixture",
         ),
         "nitrogen": GasProperties(
@@ -195,6 +197,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.400,
             126.2,
             3_394_000.0,
+            0.037,
             source="NIST Chemistry WebBook, Nitrogen properties",
         ),
         "oxygen": GasProperties(
@@ -204,6 +207,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.395,
             154.6,
             5_043_000.0,
+            0.022,
             source="NIST Chemistry WebBook, Oxygen properties",
         ),
         "hydrogen": GasProperties(
@@ -213,6 +217,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.405,
             33.2,
             1_296_000.0,
+            -0.216,
             source="NIST Chemistry WebBook, Hydrogen properties",
         ),
         "methane": GasProperties(
@@ -222,6 +227,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.321,
             190.6,
             4_600_000.0,
+            0.011,
             source="NIST Chemistry WebBook, Methane properties",
         ),
         "co": GasProperties(
@@ -231,6 +237,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.400,
             132.9,
             3_494_000.0,
+            0.048,
             source="NIST Chemistry WebBook, Carbon Monoxide properties",
         ),
         "co2": GasProperties(
@@ -240,6 +247,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.289,
             304.1,
             7_377_000.0,
+            0.224,
             source="NIST Chemistry WebBook, Carbon Dioxide properties",
         ),
         "h2o": GasProperties(
@@ -249,6 +257,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.330,
             647.1,
             22_064_000.0,
+            0.344,
             source="IAPWS IF-97 steam tables",
         ),
         "syngas_typical": GasProperties(
@@ -258,6 +267,7 @@ GAS_DATABASE: Mapping[str, GasProperties] = MappingProxyType(
             1.35,
             150.0,
             4_000_000.0,
+            0.0,
             source="Representative biomass-derived syngas (project baseline)",
         ),
     }

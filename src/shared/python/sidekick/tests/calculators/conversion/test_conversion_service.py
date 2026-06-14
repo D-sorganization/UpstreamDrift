@@ -401,6 +401,30 @@ class TestCompressibilityFactor:
         Z = svc.compressibility_factor("air", temperature=400.0, pressure=200.0)
         assert 0.9 < Z < 1.1  # Near ideal for moderate conditions
 
+    def test_methane_pitzer_correlation_matches_reference_point(self, svc):
+        """Methane at 300 K and 5 MPa should use Abbott/Pitzer with omega."""
+        Z = svc.compressibility_factor(
+            "methane", temperature=300.0, pressure=5_000_000.0
+        )
+        assert pytest.approx(0.9171, abs=5e-4) == Z
+
+    def test_air_pitzer_correlation_matches_reference_point(self, svc):
+        """Air at 200 K and 10 MPa catches the historical Pr**2 error."""
+        Z = svc.compressibility_factor("air", temperature=200.0, pressure=10_000_000.0)
+        assert pytest.approx(0.7688, abs=5e-4) == Z
+
+    def test_pitzer_correlation_approaches_ideal_gas_at_low_pressure(self, svc):
+        """As reduced pressure tends to zero, Z tends to one."""
+        Z = svc.compressibility_factor("methane", temperature=300.0, pressure=1.0)
+        assert pytest.approx(1.0, abs=1e-6) == Z
+
+    def test_methane_matches_nist_reference_within_two_percent(self, svc):
+        """NIST methane 300 K / 5 MPa reference is Z ~= 0.9069."""
+        Z = svc.compressibility_factor(
+            "methane", temperature=300.0, pressure=5_000_000.0
+        )
+        assert abs(Z - 0.9069) / 0.9069 < 0.02
+
     def test_extreme_conditions_returns_one(self, svc):
         """Line 816: outside Pitzer range → Z = 1.0."""
         Z = svc.compressibility_factor("air", temperature=10.0, pressure=1000000.0)

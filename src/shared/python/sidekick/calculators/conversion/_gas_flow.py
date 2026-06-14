@@ -189,6 +189,8 @@ class GasFlowMixin:
         Pr = pressure / gas_props.critical_pressure
 
         if 0.7 < Tr < 4 and Pr < 10:
-            Z = 1 + (0.083 - 0.422 / Tr**1.6) * Pr + (0.139 - 0.172 / Tr**4.2) * Pr**2
+            B0 = 0.083 - 0.422 / Tr**1.6
+            B1 = 0.139 - 0.172 / Tr**4.2
+            Z = 1.0 + (B0 + gas_props.acentric_factor * B1) * Pr / Tr
             return float(max(Z, 0.1))
         return 1.0
