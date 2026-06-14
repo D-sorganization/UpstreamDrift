@@ -27,7 +27,6 @@ from typing import Any
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Invariant 4 — WS URL default reads ``GOLF_API_PORT`` / ``API_PORT``
 # ---------------------------------------------------------------------------
@@ -119,11 +118,25 @@ _EXPECTED_WS_PATHS: tuple[str, ...] = (
 
 
 def _collect_ws_paths(app: Any) -> set[str]:
-    return {
-        route.path
-        for route in app.routes
-        if type(route).__name__ == "APIWebSocketRoute"
-    }
+    def _get_ws_paths(routes, prefix=""):
+        paths = set()
+        for route in routes:
+            if type(route).__name__ == "APIWebSocketRoute":
+                paths.add(prefix + route.path)
+            elif type(route).__name__ == "Mount":
+                paths.update(_get_ws_paths(route.routes, prefix + route.path))
+            elif type(route).__name__ == "_IncludedRouter":
+                paths.update(
+                    _get_ws_paths(
+                        route.original_router.routes,
+                        prefix + route.include_context.prefix,
+                    )
+                )
+            elif hasattr(route, "routes"):
+                paths.update(_get_ws_paths(route.routes, prefix))
+        return paths
+
+    return _get_ws_paths(app.routes)
 
 
 def test_chat_ws_mounted_at_every_public_prefix(
@@ -135,9 +148,9 @@ def test_chat_ws_mounted_at_every_public_prefix(
 
     ws_paths = _collect_ws_paths(app)
     missing = [p for p in _EXPECTED_WS_PATHS if p not in ws_paths]
-    assert not missing, (
-        f"chat_ws is missing from prefixes: {missing}. Got: {sorted(ws_paths)}"
-    )
+    assert (
+        not missing
+    ), f"chat_ws is missing from prefixes: {missing}. Got: {sorted(ws_paths)}"
 
 
 # ---------------------------------------------------------------------------
@@ -245,9 +258,9 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     last = chunks[-1]
     assert isinstance(last, dict), f"expected dict error chunk, got {type(last)}"
     assert last.get("type") == "error", f"expected type=error, got {last}"
-    assert "provider" in last.get("detail", "").lower(), (
-        f"expected human-readable provider hint in detail, got {last!r}"
-    )
+    assert (
+        "provider" in last.get("detail", "").lower()
+    ), f"expected human-readable provider hint in detail, got {last!r}"
 
 
 # ---------------------------------------------------------------------------
