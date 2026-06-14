@@ -38,6 +38,21 @@ GOLF_BALL_RADIUS = float(GOLF_BALL_RADIUS_M)
 STD_AIR_DENSITY = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
 STD_GRAVITY = float(GRAVITY_M_S2)
 MIN_SPEED_THRESHOLD = float(MIN_SPEED_THRESHOLD_M_S)
+MAX_GOLF_BALL_LIFT_COEFFICIENT = 0.155
+
+
+def _capped_lift_coefficient(value: float) -> float:
+    """Return a physically bounded golf-ball lift coefficient."""
+    if value <= 0.0:
+        return 0.0
+    return min(MAX_GOLF_BALL_LIFT_COEFFICIENT, value)
+
+
+def _spin_ratio_lift_coefficient(spin_ratio: float, max_coefficient: float) -> float:
+    """Calibrate low-spin lift without letting high-spin shots balloon."""
+    if spin_ratio <= 0.0 or max_coefficient <= 0.0:
+        return 0.0
+    return _capped_lift_coefficient(min(max_coefficient, 1.7 * spin_ratio))
 
 
 class FlightModelType(Enum):
@@ -298,9 +313,9 @@ class WaterlooPennerModel(BallFlightModel):
         cd1: float = 0.05,
         cd2: float = 0.02,
         cl0: float = 0.00,
-        cl1: float = 0.38,
-        cl2: float = 0.08,
-        cl_max: float = 0.25,
+        cl1: float = 0.70,
+        cl2: float = 0.645,
+        cl_max: float = MAX_GOLF_BALL_LIFT_COEFFICIENT,
     ) -> None:
         self.params = (cd0, cd1, cd2, cl0, cl1, cl2, cl_max)
 
@@ -312,12 +327,12 @@ class WaterlooPennerModel(BallFlightModel):
     @property
     def description(self) -> str:
         """Return the Waterloo/Penner model description."""
-        return "Quadratic Cd/Cl from Waterloo tunnel data"
+        return "Waterloo quadratic Cd with Penner spin-ratio lift fit"
 
     @property
     def reference(self) -> str:
         """Return the Waterloo/Penner model citation."""
-        return "McPhee et al. (Waterloo)"
+        return "Penner (2003); McPhee et al. (Waterloo)"
 
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
@@ -350,8 +365,8 @@ class WaterlooPennerModel(BallFlightModel):
             vu = v_rel / speed
             s = (omega_m * launch.ball_radius) / speed
             cd = cd0 + cd1 * s + cd2 * s**2
-            cl_val = float(cl0 + cl1 * s + cl2 * s**2)
-            cl = min(cl_max, cl_val)
+            cl_val = cl0 + cl1 * s**cl2 if s > 0.0 else cl0
+            cl = min(cl_max, _capped_lift_coefficient(cl_val))
 
             acc = (
                 -(0.5 * launch.air_density * speed**2 * cd * area / launch.ball_mass)
@@ -435,7 +450,8 @@ class MacDonaldHanzelyModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                cl_eff = self.cl * (omega * launch.ball_radius / speed)
+                spin_ratio = omega * launch.ball_radius / speed
+                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
@@ -532,7 +548,8 @@ class ConstantCoefficientModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                cl_eff = self._spec.cl * (omega * launch.ball_radius / speed)
+                spin_ratio = omega * launch.ball_radius / speed
+                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self._spec.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:

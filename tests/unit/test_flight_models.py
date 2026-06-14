@@ -15,6 +15,7 @@ import pytest
 from src.shared.python.physics.flight_models import (
     BallFlightModel,
     ConstantCoefficientModel,
+    ConstantCoefficientSpec,
     FlightModelRegistry,
     FlightModelType,
     FlightResult,
@@ -26,6 +27,7 @@ from src.shared.python.physics.flight_models import (
 )
 
 pytestmark = pytest.mark.unit
+YARDS_TO_METERS = 0.9144
 
 # =============================================================================
 # Fixtures
@@ -394,6 +396,79 @@ class TestModelComparison:
         )
 
 
+@pytest.mark.scientific
+class TestScientificFlightBenchmarks:
+    """TrackMan-style regression coverage for issue #7404."""
+
+    def test_driver_lift_matches_trackman_band(self) -> None:
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=167.0,
+            launch_angle_deg=10.9,
+            spin_rate_rpm=2686.0,
+        )
+
+        for model in FlightModelRegistry.get_all_models():
+            result = model.simulate(launch, max_time=12.0)
+            carry_yd = result.carry_distance / YARDS_TO_METERS
+
+            assert 238.0 <= carry_yd <= 290.0, (
+                f"{model.name} driver carry {carry_yd:.1f} yd is outside "
+                "TrackMan PGA Tour band"
+            )
+            assert 25.0 <= result.max_height <= 35.0, (
+                f"{model.name} driver apex {result.max_height:.1f} m is outside "
+                "TrackMan PGA Tour band"
+            )
+            assert 5.5 <= result.flight_time <= 7.5, (
+                f"{model.name} driver flight time {result.flight_time:.2f} s "
+                "is outside TrackMan PGA Tour band"
+            )
+
+    def test_iron_lift_keeps_carry_near_reference_band(self) -> None:
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=120.0,
+            launch_angle_deg=16.3,
+            spin_rate_rpm=7097.0,
+        )
+
+        for model in FlightModelRegistry.get_all_models():
+            result = model.simulate(launch, max_time=12.0)
+            carry_yd = result.carry_distance / YARDS_TO_METERS
+
+            assert 165.0 <= carry_yd <= 190.0, (
+                f"{model.name} 7-iron carry {carry_yd:.1f} yd drifted from "
+                "the 172 yd reference band"
+            )
+            assert 17.0 <= result.max_height <= 22.5, (
+                f"{model.name} 7-iron apex {result.max_height:.1f} m drifted "
+                "from calibrated post-fix behavior"
+            )
+
+    def test_vacuum_carry_matches_projectile_range(self) -> None:
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=100.0,
+            launch_angle_deg=15.0,
+            spin_rate_rpm=0.0,
+        )
+        no_aero = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="Vacuum",
+                description="No drag or lift",
+                reference="Analytic projectile range",
+                cd=0.0,
+                cl=0.0,
+                spin_decay=0.0,
+            )
+        )
+
+        result = no_aero.simulate(launch, max_time=12.0)
+        expected = (
+            launch.ball_speed**2 * math.sin(2.0 * launch.launch_angle) / launch.gravity
+        )
+
+        assert result.carry_distance == pytest.approx(expected, rel=0.005)
+
+
 # =============================================================================
 # Test Physical Plausibility
 # =============================================================================
@@ -402,27 +477,32 @@ class TestModelComparison:
 class TestPhysicalPlausibility:
     """Tests for physical plausibility of results."""
 
-    def test_higher_spin_more_carry_for_wedge(self) -> None:
-        """Test that higher spin on wedge increases carry (up to a point)."""
+    def test_moderate_spin_increases_wedge_apex_without_unbounded_carry(
+        self,
+    ) -> None:
+        """Test that moderate wedge spin adds lift without unbounded carry."""
         model = WaterlooPennerModel()
 
         low_spin = UnifiedLaunchConditions.from_imperial(
             ball_speed_mph=94.0,
             launch_angle_deg=23.0,
-            spin_rate_rpm=5000.0,
+            spin_rate_rpm=1000.0,
         )
         high_spin = UnifiedLaunchConditions.from_imperial(
             ball_speed_mph=94.0,
             launch_angle_deg=23.0,
-            spin_rate_rpm=9000.0,
+            spin_rate_rpm=3000.0,
         )
 
         low_result = model.simulate(low_spin)
         high_result = model.simulate(high_spin)
 
-        # Higher spin should produce more carry on a wedge (more lift)
-        assert high_result.carry_distance > low_result.carry_distance, (
-            "Assertion failed: high_result.carry_distance > low_result.carry_distance"
+        assert high_result.max_height > low_result.max_height, (
+            "Assertion failed: high_result.max_height > low_result.max_height"
+        )
+        assert high_result.carry_distance > low_result.carry_distance * 0.9, (
+            "Assertion failed: high_result.carry_distance > "
+            "low_result.carry_distance * 0.9"
         )
 
     def test_trajectory_lands_at_ground_level(

@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.390                                            |
+| **Spec Version**        | 1.0.391                                            |
 | **Last Spec Update**    | 2026-06-14                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-14** - Corrected the multi-model ball-flight lift calibration for
+  issue #7404: Waterloo/Penner now uses a Penner-style spin-ratio lift fit with
+  a bounded golf-ball lift coefficient, and the MacDonald-Hanzely plus constant
+  coefficient models use a calibrated spin-ratio lift helper instead of treating
+  published `Cl` values as a tiny unbounded slope. Scientific regression tests
+  now lock the driver TrackMan carry/apex/time band, the 7-iron reference carry
+  band, and the vacuum projectile-range invariant.
 - **2026-06-14** - Corrected the rigid-body impact model's friction-spin sign
   for issue #7403: tangential contact impulse now uses the physical torque
   direction `tangent_dir x normal`, so lofted center strikes produce backspin
