@@ -15,6 +15,7 @@ golf swing trajectories, including:
 
 from __future__ import annotations
 
+import math
 import time
 
 import mujoco
@@ -389,7 +390,9 @@ class SwingOptimizer:
             mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
 
         vel = jacp @ self.data.qvel
-        return float(np.linalg.norm(vel))
+        return float(
+            math.hypot(vel[0], vel[1], vel[2])
+        )  # ⚡ Bolt: math.hypot is significantly faster than np.linalg.norm for small 3D arrays  # noqa: E501
 
     def _collect_simulation_metrics(
         self,

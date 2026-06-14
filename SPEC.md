@@ -1760,3 +1760,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2024-06-13
 
 - **Performance:** Optimized `grf_visualization.py` by extracting DataFrame columns to NumPy arrays (`.values`) before plotting loops, avoiding expensive and repeated `.iloc` series creation.
+- **Performance:** Replaced `np.linalg.norm` with `math.hypot` for 3D vector magnitudes in MuJoCo motion optimization, avoiding array overhead.

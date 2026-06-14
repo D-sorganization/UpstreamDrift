@@ -9,6 +9,7 @@ This module provides professional video export capabilities:
 
 from __future__ import annotations
 
+import math
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any  # noqa: ICN003
@@ -378,7 +379,9 @@ def _build_frame_metrics(
             jacr = np.zeros((3, model.nv))
             mj.mj_jacBody(model, data, jacp, jacr, club_id)
             vel = jacp @ data.qvel
-            speed = np.linalg.norm(vel) * 2.237  # m/s to mph
+            speed = (
+                math.hypot(vel[0], vel[1], vel[2]) * 2.237
+            )  # ⚡ Bolt: math.hypot is significantly faster than np.linalg.norm for small 3D arrays  # noqa: E501  # m/s to mph
             metrics["Club Speed"] = lambda d, s=speed: int(s)  # type: ignore[assignment]
     except (ValueError, TypeError, RuntimeError):
         pass

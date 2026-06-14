@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import mujoco
 import numpy as np
 
@@ -75,7 +77,9 @@ def compute_club_speed(
         mujoco.mj_jacBody(model, data, jacp, jacr, club_head_id)
 
     vel = jacp @ data.qvel
-    return float(np.linalg.norm(vel))
+    return float(
+        math.hypot(vel[0], vel[1], vel[2])
+    )  # ⚡ Bolt: math.hypot is significantly faster than np.linalg.norm for small 3D arrays  # noqa: E501
 
 
 def collect_simulation_metrics(

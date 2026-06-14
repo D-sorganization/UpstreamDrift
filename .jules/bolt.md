@@ -1,9 +1,3 @@
-## 2024-06-10 - [Optimize 1D Array Norm Calculation]
-**Learning:** `np.linalg.norm` has significant dispatch and object-creation overhead for very small 1D arrays (like quaternions). `math.hypot` (which supports N arguments in Python 3.8+) operates directly on the floats and is measurably faster (~4.5x) for tiny vectors.
-**Action:** Use `math.hypot(v[0], v[1], ...)` instead of `np.linalg.norm(v)` when calculating the magnitude of small fixed-size arrays where performance matters.
-## 2024-06-13 - [Optimize frequent DataFrame element access in loops]
-**Learning:** Using `df.iloc[i]` frequently inside loops (like plotting or processing loops) creates new Series objects and incurs significant pandas dispatch overhead. Converting whole columns to NumPy arrays via `.values` before the loop and indexing them is drastically faster (over 50x in benchmarks).
-**Action:** When accessing single elements of multiple columns in a loop, extract the columns as `.values` (NumPy arrays) outside the loop rather than repeatedly using `.iloc`.
-## 2024-06-13 - [Correct GRAVITY reference]
-**Learning:** `src.shared.python.core.constants` provides `GRAVITY_FLOAT` as the updated exact floating-point gravity (9.80665). The old integer/float approximation (9.81) causes testing precision issues when replacing variables referencing `GRAVITY`.
-**Action:** Use `-9.80665` when mocking or testing absolute gravity.
+## 2026-06-14 - math.hypot for 3D vector magnitudes
+**Learning:** For small fixed-size numpy arrays (like 3D velocity vectors), extracting individual components and using `math.hypot(x, y, z)` avoids NumPy's type checking, dispatching, and temporary array allocation overhead.
+**Action:** Use explicit component extraction and `math.hypot` instead of `np.linalg.norm` in tight inner loops processing very small arrays, but ensure the array size is rigidly fixed to avoid IndexError.
