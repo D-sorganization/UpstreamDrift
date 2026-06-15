@@ -138,10 +138,16 @@ class AnalysisOrchestrator:
         "joint_power_curves": "_plot_joint_power_curves",
         "impulse_accumulation": "_plot_impulse_accumulation",
         "phase_diagram": "_plot_phase_diagram",
+        "poincare_map_3d": "_plot_poincare_map_3d",
+        "lyapunov_exponent": "_plot_lyapunov_exponent",
+        "recurrence_plot": "_plot_recurrence_plot",
         "cop_trajectory": "_plot_cop_trajectory",
         "stability_diagram": "_plot_stability_diagram",
+        "grf_butterfly_diagram": "_plot_grf_butterfly_diagram",
         "club_head_trajectory_3d": "_plot_club_head_trajectory_3d",
+        "kinematic_sequence_bars": "_plot_kinematic_sequence_bars",
         "swing_profile_radar": "_plot_swing_profile_radar",
+        "summary_dashboard": "_plot_summary_dashboard",
     }
 
     #: Dashboard combo-box labels, in display order.  Single source of
@@ -182,10 +188,16 @@ class AnalysisOrchestrator:
         "Joint Power Curves": "joint_power_curves",
         "Impulse Accumulation": "impulse_accumulation",
         "Phase Diagram (Joint 0)": "phase_diagram",
+        "Poincaré Map (3D)": "poincare_map_3d",
+        "Chaos Analysis (Lyapunov)": "lyapunov_exponent",
+        "Recurrence Plot": "recurrence_plot",
         "Stability Diagram (CoM vs CoP)": "stability_diagram",
         "CoP Trajectory": "cop_trajectory",
+        "GRF Butterfly Diagram": "grf_butterfly_diagram",
         "Club Head Trajectory (3D)": "club_head_trajectory_3d",
+        "Kinematic Sequence (Bars)": "kinematic_sequence_bars",
         "Swing Profile (Radar)": "swing_profile_radar",
+        "Summary Dashboard": "summary_dashboard",
     }
 
     def __init__(
@@ -397,6 +409,14 @@ class AnalysisOrchestrator:
             return np.array([]), np.array([])
         return np.asarray(times), np.asarray(values)
 
+    def _series_column(
+        self, field_name: str, idx: int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        times, values = self._series(field_name)
+        if values.ndim != 2 or idx < 0 or idx >= values.shape[1]:
+            return np.array([]), np.array([])
+        return times, np.asarray(values[:, idx], dtype=float)
+
     def _joint_label(self, idx: int, data_dim: int) -> str:
         """Label aligned with the data dimension (mirrors DataManager)."""
         return aligned_joint_label(self.joint_names, idx, data_dim)
@@ -564,7 +584,7 @@ class AnalysisOrchestrator:
                 "Angular Momentum (kg m²/s)",
                 message="No Angular Momentum Data",
             )
-        am_f = am.astype(float, copy=False)
+        am_f: np.ndarray = am.astype(float, copy=False)
         magnitude = np.sqrt(np.einsum("...i,...i->...", am_f, am_f))
         units = "kg m^2/s"
         x = times.tolist()
@@ -702,6 +722,174 @@ class AnalysisOrchestrator:
             metadata={"joint_idx": joint_idx},
         )
 
+    def _plot_poincare_map_3d(self, joint_idx: int = 0) -> PlotData:
+        times, positions = self._series_column("joint_positions", joint_idx)
+        _, velocities = self._series_column("joint_velocities", joint_idx)
+        _, accelerations = self._series_column("joint_accelerations", joint_idx)
+        if (
+            len(times) == 0
+            or len(velocities) != len(times)
+            or len(accelerations) != len(times)
+        ):
+            return self._empty(
+                "poincare_map_3d",
+                "Poincaré Map (Joint 0)",
+                "Position (deg)",
+                "Velocity (deg/s)",
+                message="Position, velocity, or acceleration data unavailable",
+            )
+
+        crossings = self._section_crossings(velocities, 0.0)
+        if not crossings:
+            return self._empty(
+                "poincare_map_3d",
+                "Poincaré Map (Joint 0)",
+                "Position (deg)",
+                "Velocity (deg/s)",
+                message="No section crossings found",
+            )
+
+        point_times: list[float] = []
+        x: list[float] = []
+        y: list[float] = []
+        z: list[float] = []
+        for idx in crossings:
+            alpha = self._crossing_alpha(
+                float(velocities[idx]),
+                float(velocities[idx + 1]),
+                0.0,
+            )
+            point_times.append(
+                float(times[idx] + alpha * (times[idx + 1] - times[idx]))
+            )
+            x.append(
+                float(
+                    np.rad2deg(
+                        positions[idx] + alpha * (positions[idx + 1] - positions[idx])
+                    )
+                )
+            )
+            y.append(
+                float(
+                    np.rad2deg(
+                        velocities[idx]
+                        + alpha * (velocities[idx + 1] - velocities[idx])
+                    )
+                )
+            )
+            z.append(
+                float(
+                    np.rad2deg(
+                        accelerations[idx]
+                        + alpha * (accelerations[idx + 1] - accelerations[idx])
+                    )
+                )
+            )
+
+        return PlotData(
+            plot_type="poincare_map_3d",
+            title="Poincaré Map (Joint 0)",
+            x_label="Position (deg)",
+            y_label="Velocity (deg/s)",
+            series=[
+                PlotSeries(
+                    "Section Crossings",
+                    x=x,
+                    y=y,
+                    z=z,
+                    units="deg/s",
+                    metadata={"times": point_times},
+                )
+            ],
+            metadata={"joint_idx": joint_idx, "z_label": "Acceleration (deg/s^2)"},
+        )
+
+    def _plot_lyapunov_exponent(self, joint_idx: int = 0) -> PlotData:
+        try:
+            analyzer = self._build_statistical_analyzer(require_torques=False)
+        except ValueError as exc:
+            return self._empty(
+                "lyapunov_exponent",
+                f"Lyapunov Exponent Estimation: {self._joint_name(joint_idx)}",
+                "Time Lag",
+                "Divergence",
+                message=str(exc),
+            )
+        _, velocities = self._series_column("joint_velocities", joint_idx)
+        if len(velocities) == 0:
+            return self._empty(
+                "lyapunov_exponent",
+                f"Lyapunov Exponent Estimation: {self._joint_name(joint_idx)}",
+                "Time Lag",
+                "Divergence",
+                message="Joint index out of bounds",
+            )
+        try:
+            time_div, divergence, slope = analyzer.compute_lyapunov_divergence(
+                velocities,
+                tau=5,
+                dim=3,
+            )
+        except AttributeError:
+            return self._empty(
+                "lyapunov_exponent",
+                f"Lyapunov Exponent Estimation: {self._joint_name(joint_idx)}",
+                "Time Lag",
+                "Divergence",
+                message="Method not implemented",
+            )
+        if len(time_div) == 0:
+            return self._empty(
+                "lyapunov_exponent",
+                f"Lyapunov Exponent Estimation: {self._joint_name(joint_idx)}",
+                "Time Lag",
+                "Divergence",
+                message="Insufficient data for Lyapunov analysis",
+            )
+        return PlotData(
+            plot_type="lyapunov_exponent",
+            title=f"Lyapunov Exponent Estimation: {self._joint_name(joint_idx)}",
+            x_label="Time Lag",
+            y_label="Divergence",
+            series=[
+                PlotSeries(
+                    "Divergence",
+                    x=np.asarray(time_div, dtype=float).tolist(),
+                    y=np.asarray(divergence, dtype=float).tolist(),
+                    metadata={"estimated_mle": float(slope), "joint_idx": joint_idx},
+                )
+            ],
+            metadata={"joint_idx": joint_idx, "estimated_mle": float(slope)},
+        )
+
+    def _plot_recurrence_plot(self) -> PlotData:
+        try:
+            matrix = self.compute_recurrence_matrix()
+        except ValueError as exc:
+            return self._empty(
+                "recurrence_plot",
+                "Recurrence Plot",
+                "Time Index",
+                "Time Index",
+                message=str(exc),
+            )
+        indices = [float(i) for i in range(matrix.shape[0])]
+        return PlotData(
+            plot_type="recurrence_plot",
+            title="Recurrence Plot",
+            x_label="Time Index",
+            y_label="Time Index",
+            series=[
+                PlotSeries(
+                    "Recurrence Matrix",
+                    x=indices,
+                    y=indices,
+                    metadata={"matrix": matrix.astype(float).tolist()},
+                )
+            ],
+            metadata={"matrix_shape": list(matrix.shape), "chart": "heatmap"},
+        )
+
     def _plot_cop_trajectory(self) -> PlotData:
         times, cop = self._series("cop_position")
         if len(times) == 0 or cop.size == 0 or cop.ndim != 2 or cop.shape[1] < 2:
@@ -760,6 +948,63 @@ class AnalysisOrchestrator:
             metadata={"n_frames": int(len(times))},
         )
 
+    def _plot_grf_butterfly_diagram(
+        self,
+        skip_steps: int = 5,
+        scale: float = 0.001,
+    ) -> PlotData:
+        times, cop = self._series("cop_position")
+        _, grf = self._series("ground_forces")
+        if (
+            len(times) == 0
+            or cop.size == 0
+            or grf.size == 0
+            or cop.ndim != 2
+            or grf.ndim != 2
+            or cop.shape[1] < 2
+            or grf.shape[1] < 3
+        ):
+            return self._empty(
+                "grf_butterfly_diagram",
+                "GRF Butterfly Diagram",
+                "X (m)",
+                "Y (m)",
+                message="GRF/CoP Data unavailable",
+            )
+        cx = cop[:, 0]
+        cy = cop[:, 1]
+        cz = cop[:, 2] if cop.shape[1] > 2 else np.zeros_like(cx)
+        sampled = list(range(0, len(times), skip_steps))
+        vectors = [
+            {
+                "origin": [float(cx[i]), float(cy[i]), float(cz[i])],
+                "tip": [
+                    float(cx[i] + grf[i, 0] * scale),
+                    float(cy[i] + grf[i, 1] * scale),
+                    float(cz[i] + grf[i, 2] * scale),
+                ],
+                "time": float(times[i]),
+            }
+            for i in sampled
+        ]
+        return PlotData(
+            plot_type="grf_butterfly_diagram",
+            title="GRF Butterfly Diagram",
+            x_label="X (m)",
+            y_label="Y (m)",
+            series=[
+                PlotSeries(
+                    "CoP Path", cx.tolist(), cy.tolist(), z=cz.tolist(), units="m"
+                )
+            ],
+            metadata={
+                "vectors": vectors,
+                "scale": scale,
+                "skip_steps": skip_steps,
+                "z_label": "Force (scaled)",
+            },
+        )
+
     def _plot_club_head_trajectory_3d(self) -> PlotData:
         times, pos = self._series("club_head_position")
         if len(times) == 0 or pos.size == 0 or pos.ndim != 2 or pos.shape[1] < 3:
@@ -816,6 +1061,81 @@ class AnalysisOrchestrator:
             ],
             metadata={"chart": "radar"},
         )
+
+    def _plot_kinematic_sequence_bars(self) -> PlotData:
+        indices = self.derive_kinematic_sequence_indices()
+        if not indices:
+            return self._empty(
+                "kinematic_sequence_bars",
+                "Kinematic Sequence",
+                "Segment",
+                "Joint Index",
+                message="No data available",
+            )
+        categories = list(indices)
+        return PlotData(
+            plot_type="kinematic_sequence_bars",
+            title="Kinematic Sequence",
+            x_label="Segment",
+            y_label="Joint Index",
+            series=[
+                PlotSeries(
+                    "Segment Joint Indices",
+                    x=[float(i) for i in range(len(categories))],
+                    y=[float(indices[name]) for name in categories],
+                    metadata={"categories": categories},
+                )
+            ],
+            metadata={"categories": categories, "indices": indices},
+        )
+
+    def _plot_summary_dashboard(self) -> PlotData:
+        panel_types = (
+            "club_head_speed",
+            "energies",
+            "angular_momentum",
+            "joint_angles",
+            "cop_trajectory",
+            "joint_torques",
+        )
+        panels = [self.get_plot_data(plot_type).to_dict() for plot_type in panel_types]
+        return PlotData(
+            plot_type="summary_dashboard",
+            title="Golf Swing Analysis Dashboard",
+            x_label="",
+            y_label="",
+            series=[],
+            metadata={
+                "chart": "dashboard",
+                "panels": panels,
+                "message": "No data available"
+                if all(p["series"] == [] for p in panels)
+                else "",
+            },
+        )
+
+    @staticmethod
+    def _section_crossings(
+        data: np.ndarray,
+        value: float,
+        direction: str = "both",
+    ) -> list[int]:
+        diff = data - value
+        crossings: list[int] = []
+        for idx in range(len(diff) - 1):
+            crosses = diff[idx] * diff[idx + 1] <= 0
+            positive = diff[idx] < diff[idx + 1] and direction in ("positive", "both")
+            negative = diff[idx] > diff[idx + 1] and direction in ("negative", "both")
+            if crosses and (positive or negative):
+                crossings.append(idx)
+        return crossings
+
+    @staticmethod
+    def _crossing_alpha(left: float, right: float, value: float) -> float:
+        denominator = right - left
+        if denominator == 0.0:
+            return 0.0
+        return float((value - left) / denominator)
 
 
 def get_plot_data(

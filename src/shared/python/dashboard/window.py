@@ -273,6 +273,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         if plot_type is None:
             raise ValueError("plot_type must be provided")
         fig = self.static_canvas.fig
+        plot_type_id = AnalysisOrchestrator.DASHBOARD_LABEL_TO_PLOT_TYPE.get(plot_type)
+        if plot_type_id is not None:
+            self.orchestrator.get_plot_data(plot_type_id)
 
         simple_plots = {
             "Joint Angles": lambda: self.plotter.plot_joint_angles(fig),

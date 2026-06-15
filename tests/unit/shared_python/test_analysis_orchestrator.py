@@ -60,6 +60,8 @@ class StubRecorder:
             "angular_momentum": 0.2 * base * np.array([[1.0, 0.5, 0.25]]),
             "cop_position": 0.05 * base * np.array([[1.0, -1.0, 0.0]]),
             "com_position": 0.04 * base * np.array([[1.0, 1.0, 1.0]]),
+            "ground_forces": 10.0 * base * np.array([[1.0, -0.5, 2.0]]),
+            "joint_accelerations": 0.2 * base * cols,
         }
         cf = np.ones((N_FRAMES, N_JOINTS)) * 0.5
         self.counterfactuals = {"ztcf": (self.times, cf), "zvcf": (self.times, 2 * cf)}
@@ -126,7 +128,10 @@ def test_non_string_plot_type_raises(orchestrator: AnalysisOrchestrator) -> None
 def test_registry_and_labels_consistent() -> None:
     types = AnalysisOrchestrator.available_plot_types()
     assert types == sorted(AnalysisOrchestrator.PLOT_TYPES)
-    # every label mapping points at a registered plot type
+    # every dashboard label is routed through a registered headless plot type
+    assert set(AnalysisOrchestrator.DASHBOARD_LABEL_TO_PLOT_TYPE) == set(
+        AnalysisOrchestrator.DASHBOARD_PLOT_LABELS
+    )
     for label, pt in AnalysisOrchestrator.DASHBOARD_LABEL_TO_PLOT_TYPE.items():
         assert label in AnalysisOrchestrator.DASHBOARD_PLOT_LABELS
         assert pt in AnalysisOrchestrator.PLOT_TYPES
@@ -246,6 +251,37 @@ def test_trajectory_plots(
     np.testing.assert_allclose(
         club.series[0].z, recorder.data["club_head_position"][:, 2]
     )
+
+
+def test_remaining_dashboard_plot_types_are_structured(
+    orchestrator: AnalysisOrchestrator,
+) -> None:
+    poincare = orchestrator.get_plot_data("poincare_map_3d")
+    assert poincare.plot_type == "poincare_map_3d"
+    assert poincare.metadata["z_label"] == "Acceleration (deg/s^2)"
+
+    lyap = orchestrator.get_plot_data("lyapunov_exponent")
+    assert lyap.plot_type == "lyapunov_exponent"
+    assert "estimated_mle" in lyap.metadata or lyap.is_empty
+
+    recurrence = orchestrator.get_plot_data("recurrence_plot")
+    assert recurrence.metadata["chart"] == "heatmap"
+    assert "matrix" in recurrence.series[0].metadata
+
+    grf = orchestrator.get_plot_data("grf_butterfly_diagram")
+    assert grf.series[0].name == "CoP Path"
+    assert grf.metadata["vectors"]
+
+    sequence = orchestrator.get_plot_data("kinematic_sequence_bars")
+    assert sequence.metadata["indices"] == {
+        "proximal": 0,
+        "mid_proximal": 1,
+        "mid_distal": 2,
+    }
+
+    summary = orchestrator.get_plot_data("summary_dashboard")
+    assert summary.metadata["chart"] == "dashboard"
+    assert len(summary.metadata["panels"]) == 6
 
 
 def test_module_level_convenience(recorder: StubRecorder) -> None:
