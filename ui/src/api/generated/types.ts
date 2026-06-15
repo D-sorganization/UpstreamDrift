@@ -545,6 +545,18 @@ export interface CharacterBuilderRequest {
 }
 
 /**
+ * Request body for deterministic contraction-rate estimation.
+ */
+export interface ContractionEstimateRequest {
+  decay_rate: number;
+  dimension: number;
+  horizon: number;
+  n_steps: number;
+  n_trials: number;
+  perturbation_scale: number;
+}
+
+/**
  * Response model for control features registry data. See issue #1209
  */
 export interface ControlFeaturesResponse {
@@ -753,6 +765,15 @@ export interface DatasetStatsResponse {
   columns: string[];
   row_count: number;
   stats: Record<string, Record<string, number | null>>;
+}
+
+/**
+ * Request body for generalized-force drift-control ratio analysis.
+ */
+export interface DriftControlRatioRequest {
+  drift_generalized_force: number[][];
+  control_generalized_force: number[][];
+  epsilon: number;
 }
 
 /**

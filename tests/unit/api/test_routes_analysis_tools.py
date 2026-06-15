@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from src.api.routes.analysis_tools import router
 from src.api.dependencies import get_engine_manager
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngine:
     def __init__(self):
@@ -155,3 +157,29 @@ def test_get_measurement_tools(client: TestClient) -> None:
     assert "joint_angles" in data
     assert len(data["joint_angles"]) == 2
     assert data["joint_angles"][0]["joint_name"] == "joint1"
+
+
+def test_compute_drift_control_ratio(client: TestClient) -> None:
+    payload = {
+        "drift_generalized_force": [[3.0, 4.0]],
+        "control_generalized_force": [[0.0, 5.0]],
+    }
+
+    response = client.post("/analysis/tools/drift-control/ratio", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ratio"] == [1.0]
+    assert data["summary"]["mean"] == 1.0
+
+
+def test_estimate_contraction_rate(client: TestClient) -> None:
+    response = client.post(
+        "/analysis/tools/contraction/estimate",
+        json={"decay_rate": 1.25, "n_trials": 4, "perturbation_scale": 1e-3},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["is_contracting"] is True
+    assert data["estimated_rate"] > 1.0

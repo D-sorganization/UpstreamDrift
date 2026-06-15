@@ -21,9 +21,12 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
 
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger as get_module_logger
+from src.tools.contraction.verifier import ContractionVerifier
+from src.tools.drift_control.analyzer import DriftControlAnalyzer
 
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
@@ -46,6 +49,25 @@ if TYPE_CHECKING:
 router = APIRouter()
 
 logger = get_module_logger(__name__)
+
+
+class DriftControlRatioRequest(BaseModel):
+    """Request body for generalized-force drift-control ratio analysis."""
+
+    drift_generalized_force: list[list[float]] = Field(min_length=1)
+    control_generalized_force: list[list[float]] = Field(min_length=1)
+    epsilon: float = Field(default=1e-12, gt=0.0)
+
+
+class ContractionEstimateRequest(BaseModel):
+    """Request body for deterministic contraction-rate estimation."""
+
+    decay_rate: float = Field(default=1.0, gt=0.0)
+    dimension: int = Field(default=3, gt=0)
+    horizon: float = Field(default=1.0, gt=0.0)
+    n_steps: int = Field(default=100, ge=2)
+    n_trials: int = Field(default=16, gt=0)
+    perturbation_scale: float = Field(default=1e-3, gt=0.0)
 
 
 def _check_position_support(engine: Any) -> None:
@@ -172,6 +194,57 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
         logger.debug("numpy unavailable for club head speed metric: %s", exc)
 
     return metrics
+
+
+# ──────────────────────────────────────────────────────────────
+#  Public Analysis Tool APIs (See issue #7431)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.post("/analysis/tools/drift-control/ratio")
+async def compute_drift_control_ratio(
+    request: DriftControlRatioRequest,
+) -> dict[str, Any]:
+    """Compute rho(t)=||f(x)||/||g(x)u|| from generalized-force arrays."""
+    try:
+        analyzer = DriftControlAnalyzer(epsilon=request.epsilon)
+        ratio = analyzer.compute_ratio_from_arrays(
+            request.drift_generalized_force,
+            request.control_generalized_force,
+        )
+        return {
+            "ratio": ratio.tolist(),
+            "summary": analyzer.summarize_ratio(ratio),
+        }
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/analysis/tools/contraction/estimate")
+async def estimate_contraction_rate(
+    request: ContractionEstimateRequest,
+) -> dict[str, bool | float | int]:
+    """Estimate local contraction rate from nearby deterministic rollouts."""
+    try:
+        verifier = ContractionVerifier(
+            decay_rate=request.decay_rate,
+            dimension=request.dimension,
+            horizon=request.horizon,
+            n_steps=request.n_steps,
+        )
+        result = verifier.verify(
+            n_trials=request.n_trials,
+            perturbation_scale=request.perturbation_scale,
+        )
+        return {
+            "estimated_rate": float(result.estimated_rate),
+            "n_trials": int(result.n_trials),
+            "perturbation_scale": float(result.perturbation_scale),
+            "horizon": float(result.horizon),
+            "is_contracting": bool(result.is_contracting),
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def _get_metric_history(engine_manager: EngineManager) -> list[dict[str, Any]]:

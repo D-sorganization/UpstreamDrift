@@ -201,6 +201,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   canonical `solver_status` aliases expected by optional robotics callers, WBC
   results expose `final_cost` as the legacy alias for `cost`, and default IMU
   gravity remains on the historical 9.81 m/s^2 sensor contract.
+- **2026-06-14** - Added public AffineDrift analysis-tool parity for issue
+  #7431: `src.tools.drift_control` computes generalized-force
+  drift/control ratios from NPZ trajectories, `src.tools.contraction` exposes
+  contraction-rate and Floquet helpers, the analysis-tools API provides
+  headless JSON endpoints for both workflows, and
+  `src.engines.pinocchio.benchmarks.aba_timing` reports optional Pinocchio ABA
+  timing without requiring the Pinocchio extra in core CI.
 - **2026-06-12** - Documented the consolidated parity CI follow-up: frontend
   Fast Refresh helpers now live outside component modules, diagnostics imports
   respect API/launcher layer boundaries, recording export artifact writing is
@@ -955,7 +962,9 @@ UpstreamDrift/
 │   ├── tools/                      # Embeddable tool tabs (model_explorer,
 │   │                               # ball_flight_gui, putting_green_gui,
 │   │                               # swing_flight_pipeline, pose_studio,
-│   │                               # video_analyzer, sidekick, …)
+│   │                               # video_analyzer, sidekick, …) plus
+│   │                               # headless analysis CLIs (drift_control,
+│   │                               # contraction)
 │   └── shared/python/              # Cross-cutting libraries; highlights:
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
@@ -999,6 +1008,7 @@ UpstreamDrift/
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
+| Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
 | Workspace Metadata       | `src/shared/python/workspace/`           | Project/session/dataset metadata store and CC-4 HDF5 result browser view models            |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
@@ -1459,6 +1469,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-14 | 1.0.393 | Corrected the impact model gear-effect spin direction and driver COR calibration for issue #7406. Toe/heel offsets now produce hook/slice spin in the launch-monitor sign convention, high-face/low-face offsets reduce/increase backspin, default gear-effect scales put realistic 20 mm toe and 10 mm vertical strikes in expected rad/s bands, and `DRIVER_COR` now reflects the USGA/R&A CT-limit-equivalent COR so center strikes can reach tour smash-factor ranges; regression coverage asserts toe/heel antisymmetry, vertical gear effect, default smash factor, and energy balance. |
 | 2026-06-13 | 1.0.382 | Copied the hatch force-included `launch_golf_suite.py` entrypoint into the modular Docker builder before feature installation so `pip install .` metadata generation matches the wheel packaging contract; the Docker contract guard now rejects moving the entrypoint copy after feature installation. |
 | 2026-06-13 | 1.0.381 | Kept modular Docker profile dry-runs importable from the early Dockerfile copy set by removing the import-time dependency from `engine_core.engine_probes` to the heavyweight config package, with regression coverage that exercises `install_features.py --profile standard --dry-run` against only the early validation files. |
+| 2026-06-14 | 1.0.395 | Public AffineDrift analysis-tool parity for #7431. Added `src.tools.drift_control.DriftControlAnalyzer` for generalized-force NPZ ratio analysis, `src.tools.contraction.ContractionVerifier` plus Floquet multiplier helpers, FastAPI JSON endpoints under `/analysis/tools/*`, and an optional-backend Pinocchio ABA timing CLI that reports unavailable cleanly when Pinocchio is not installed. |
 | 2026-06-13 | 1.0.376 | Aligned the Rust wheel import smoke helper with the documented `upstream-mocap-io` missing-file contract so `parse_trc` raising `FileNotFoundError` remains an expected negative-path smoke result, with focused script regression coverage. |
 | 2026-06-14 | 1.0.390 | Corrected the rigid-body impact model friction-spin sign for issue #7403. Tangential contact impulse now uses `tangent_dir x normal`, preserving the rolling cap while producing lofted-driver backspin under the repository's `[0, -1, 0]` convention; regression coverage asserts the backspin sign, expected spin magnitude, and upward Magnus force from the derived spin axis. |
 | 2026-06-14 | 1.0.389 | Corrected the vendored Sidekick gas-flow compressibility-factor contract for issue #7408. Supported gases now carry acentric factors and `compressibility_factor()` uses the Abbott/Pitzer generalized second-virial approximation `(B0 + omega * B1) * Pr / Tr`, with regression coverage for methane, air, the low-pressure ideal limit, and the NIST methane 300 K / 5 MPa tolerance. |
