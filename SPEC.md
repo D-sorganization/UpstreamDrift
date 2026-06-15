@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.394                                            |
-| **Last Spec Update**    | 2026-06-14                                         |
+| **Spec Version**        | 1.0.395                                            |
+| **Last Spec Update**    | 2026-06-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-15** - Optimized the starting-pose matcher Simscape trajectory CSV
+  loader: `load_simscape_trajectory_csv(...)` now pre-extracts each resolved
+  joint's XYZ columns to NumPy arrays before frame construction, avoiding
+  repeated row-wise pandas `iloc` materialization while preserving finite-value
+  filtering and the existing `SkeletonTrajectory` contract.
 - **2026-06-14** - Added the ball-flight physical benchmark contract for issue
   #7407: TrackMan-style driver and 7-iron tests now cover the enhanced
   simulator, the public flight-model registry, and the REST route; the suite
@@ -1827,7 +1832,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Optimized `grf_visualization.py` by extracting DataFrame columns to NumPy arrays (`.values`) before plotting loops, avoiding expensive and repeated `.iloc` series creation.
 - **Performance:** Replaced `np.linalg.norm` with `math.hypot` for 3D vector magnitudes in MuJoCo motion optimization, avoiding array overhead.
 
-### LAST UPDATED: 2024-06-14
-
-### Performance Changes
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `DriftControlAnalyzer.compute_ratio` for a 2.4x speedup.

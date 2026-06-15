@@ -663,15 +663,22 @@ def load_simscape_trajectory_csv(path: str | Path) -> SkeletonTrajectory:
         )
 
     times = df["time"].astype(float).to_numpy()
+
+    # Pre-extract resolved XYZ columns to avoid materializing a pandas row
+    # for every trajectory frame.
+    col_arrays = {
+        short: df.loc[:, xyz].to_numpy(dtype=float, copy=True)
+        for short, xyz in resolved.items()
+    }
+
     frames: list[Skeleton] = []
     n = len(df)
     for i in range(n):
-        row = df.iloc[i]
         joints: dict[str, np.ndarray] = {}
-        for short, xyz in resolved.items():
-            v = np.array([float(row[c]) for c in xyz])
+        for short, arr in col_arrays.items():
+            v = arr[i]
             if np.all(np.isfinite(v)):
-                joints[short] = v
+                joints[short] = v.copy()
         if "lw" in joints and "rw" in joints:
             joints["mp"] = (joints["lw"] + joints["rw"]) / 2.0
             joints["butt"] = joints["mp"].copy()
