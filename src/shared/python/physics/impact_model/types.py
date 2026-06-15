@@ -91,8 +91,8 @@ class ImpactParameters:
     contact_damping: float = 1e3  # [N·s/m]
     friction_coefficient: float = 0.4
     gear_effect_factor: float = 0.5
-    gear_effect_h_scale: float = 100.0
-    gear_effect_v_scale: float = 50.0
+    gear_effect_h_scale: float = 350.0
+    gear_effect_v_scale: float = 150.0
 
 
 @dataclass

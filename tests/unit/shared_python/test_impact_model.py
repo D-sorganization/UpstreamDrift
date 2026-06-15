@@ -176,22 +176,74 @@ def test_gear_effect_spin() -> None:
     v_club = np.array([45.0, 0.0, 0.0])
     normal = np.array([1.0, 0.0, 0.0])
 
-    # Toe impact (positive horizontal offset) -> Draw spin (counter-clockwise from top?)
-    # Implementation: horizontal_spin = -factor * h_offset * speed
-    # Vertical axis is Z.
     offset_toe = np.array([0.02, 0.0])  # 2cm toe
     spin_toe = compute_gear_effect_spin(offset_toe, v_club, normal)
 
-    # Should have negative Z component? Or positive?
-    # horizontal_spin = -k * 0.02 * 45 * 100 < 0.
-    # spin = horizontal_spin * up (Z).
-    # So spin Z < 0.
-    assert spin_toe[2] < 0
+    assert 100.0 <= spin_toe[2] <= 300.0
 
-    # Heel impact -> Fade spin
     offset_heel = np.array([-0.02, 0.0])
     spin_heel = compute_gear_effect_spin(offset_heel, v_club, normal)
-    assert spin_heel[2] > 0
+    assert spin_heel[2] < 0
+    assert spin_heel[2] == pytest.approx(-spin_toe[2])
+
+
+def test_high_face_gear_effect_reduces_backspin() -> None:
+    """High-face driver gear effect should reduce backspin, not add it."""
+    loft = math.radians(10.5)
+    normal = np.array([math.cos(loft), 0.0, math.sin(loft)])
+    solver = RigidBodyImpactModel()
+    pre_state = PreImpactState(
+        clubhead_velocity=np.array([50.5, 0.0, 0.0]),
+        clubhead_angular_velocity=np.zeros(3),
+        clubhead_orientation=normal,
+        ball_position=np.array([0.05, 0.0, 0.0]),
+        ball_velocity=np.zeros(3),
+        ball_angular_velocity=np.zeros(3),
+        clubhead_mass=0.2,
+        clubhead_loft=loft,
+        clubhead_lie=math.radians(60.0),
+    )
+    center = solver.solve(pre_state, ImpactParameters())
+    high_face_delta = compute_gear_effect_spin(
+        np.array([0.0, 0.01]),
+        pre_state.clubhead_velocity,
+        pre_state.clubhead_orientation,
+    )
+    low_face_delta = compute_gear_effect_spin(
+        np.array([0.0, -0.01]),
+        pre_state.clubhead_velocity,
+        pre_state.clubhead_orientation,
+    )
+
+    high_face_spin = center.ball_angular_velocity + high_face_delta
+    low_face_spin = center.ball_angular_velocity + low_face_delta
+
+    assert high_face_spin[1] > center.ball_angular_velocity[1]
+    assert abs(high_face_spin[1]) < abs(center.ball_angular_velocity[1])
+    assert low_face_spin[1] < center.ball_angular_velocity[1]
+    assert abs(low_face_spin[1]) > abs(center.ball_angular_velocity[1])
+
+
+def test_default_driver_cor_supports_tour_smash_factor() -> None:
+    """Default driver COR should not cap center strikes at old 1.42 smash."""
+    pre_state = PreImpactState(
+        clubhead_velocity=np.array([50.5, 0.0, 0.0]),
+        clubhead_angular_velocity=np.zeros(3),
+        clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        ball_position=np.array([0.05, 0.0, 0.0]),
+        ball_velocity=np.zeros(3),
+        ball_angular_velocity=np.zeros(3),
+        clubhead_mass=0.2,
+    )
+
+    post_state = RigidBodyImpactModel().solve(pre_state, ImpactParameters())
+    smash_factor = float(np.linalg.norm(post_state.ball_velocity)) / float(
+        np.linalg.norm(pre_state.clubhead_velocity)
+    )
+    energy = validate_energy_balance(pre_state, post_state, ImpactParameters())
+
+    assert 1.45 <= smash_factor <= 1.51
+    assert energy["total_ke_post"] <= energy["total_ke_pre"] + 1e-9
 
 
 def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None:

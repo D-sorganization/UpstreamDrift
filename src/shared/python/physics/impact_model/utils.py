@@ -12,7 +12,7 @@ from .types import ImpactParameters, PostImpactState, PreImpactState
 
 # fmt: off
 @precondition(  # fmt: skip
-    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
+    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=350.0, v_scale=150.0: (
         0 <= gear_factor <= 1
     ),
     "Gear effect factor must be between 0 and 1",
@@ -22,8 +22,8 @@ def compute_gear_effect_spin(
     clubhead_velocity: np.ndarray,
     clubface_normal: np.ndarray,
     gear_factor: float = 0.5,
-    h_scale: float = 100.0,
-    v_scale: float = 50.0,
+    h_scale: float = 350.0,
+    v_scale: float = 150.0,
 ) -> np.ndarray:
 # fmt: on
     """Compute spin from gear effect for off-center impact.
@@ -55,8 +55,8 @@ def compute_gear_effect_spin(
 
     # Gear effect spin rate (empirical relationship)
     # Higher offset = more spin, proportional to speed
-    horizontal_spin = -gear_factor * h_offset * speed * h_scale  # [rad/s]
-    vertical_spin = gear_factor * v_offset * speed * v_scale  # [rad/s]
+    horizontal_spin = gear_factor * h_offset * speed * h_scale  # [rad/s]
+    vertical_spin = -gear_factor * v_offset * speed * v_scale  # [rad/s]
 
     # Convert to 3D spin vector
     # Assuming clubface normal is approximately in X direction

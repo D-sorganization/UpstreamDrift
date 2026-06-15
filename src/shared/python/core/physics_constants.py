@@ -196,7 +196,10 @@ AIR_VISCOSITY_KG_M_S = PhysicalConstant(
 
 # Impact parameters
 DRIVER_COR = PhysicalConstant(
-    0.78, "dimensionless", "USGA Rule Limit", "Coefficient of restitution for driver"
+    0.83,
+    "dimensionless",
+    "USGA/R&A CT limit (~0.83 equivalent COR)",
+    "Coefficient of restitution for driver",
 )
 TYPICAL_CONTACT_DURATION_S = PhysicalConstant(
     0.0005, "s", "High-speed video studies", "Typical ball-clubface contact time"
