@@ -14,6 +14,7 @@ import numpy as np
 
 from src.shared.python.core.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
 from src.shared.python.physics.atmosphere import air_density as _isa_air_density
+from src.shared.python.physics.atmosphere import humid_air_density as _humid_air_density
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,7 @@ class EnvironmentalConditions:
     gravity: float = float(GRAVITY_M_S2)
     altitude: float = 0.0
     temperature: float = 15.0
+    relative_humidity: float = 0.0
     sea_level_pressure_pa: float | None = None
 
     @classmethod
@@ -99,6 +101,7 @@ class EnvironmentalConditions:
         wind_velocity: np.ndarray | None = None,
         gravity: float = float(GRAVITY_M_S2),
         pressure_pa: float | None = None,
+        relative_humidity: float = 0.0,
     ) -> EnvironmentalConditions:
         """Build an ``EnvironmentalConditions`` with ISA-derived density.
 
@@ -116,17 +119,29 @@ class EnvironmentalConditions:
             Gravitational acceleration magnitude [m/s^2].
         pressure_pa
             Optional sea-level pressure override [Pa]; defaults to 101325.
+        relative_humidity
+            Optional relative humidity fraction in ``[0, 1]``. Defaults to dry
+            air to preserve the historical ISA density contract. Humid air is
+            less dense than dry air at the same temperature and pressure.
 
         Returns
         -------
         EnvironmentalConditions
             Frozen dataclass with ``air_density`` populated from ISA.
         """
-        rho = _isa_air_density(
-            altitude_m=altitude_m,
-            temperature_c=temperature_c,
-            pressure_pa=pressure_pa,
-        )
+        if relative_humidity == 0.0:
+            rho = _isa_air_density(
+                altitude_m=altitude_m,
+                temperature_c=temperature_c,
+                pressure_pa=pressure_pa,
+            )
+        else:
+            rho = _humid_air_density(
+                altitude_m=altitude_m,
+                temperature_c=temperature_c,
+                relative_humidity=relative_humidity,
+                pressure_pa=pressure_pa,
+            )
         wind = (
             np.asarray(wind_velocity, dtype=float)
             if wind_velocity is not None
@@ -138,6 +153,7 @@ class EnvironmentalConditions:
             gravity=float(gravity),
             altitude=float(altitude_m),
             temperature=float(temperature_c),
+            relative_humidity=float(relative_humidity),
             sea_level_pressure_pa=(
                 float(pressure_pa) if pressure_pa is not None else None
             ),

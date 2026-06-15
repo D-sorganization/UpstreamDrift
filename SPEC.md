@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.393                                            |
+| **Spec Version**        | 1.0.394                                            |
 | **Last Spec Update**    | 2026-06-14                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-14** - Added the ball-flight physical benchmark contract for issue
+  #7407: TrackMan-style driver and 7-iron tests now cover the enhanced
+  simulator, the public flight-model registry, and the REST route; the suite
+  locks cross-engine carry agreement, 5 m/s headwind/tailwind sanity, analytic
+  vacuum range, explicit zero-drag semantics for Python/Rust drag-crisis
+  helpers, and humidity-aware density through
+  `EnvironmentalConditions.from_altitude(...)`.
 - **2026-06-14** - Corrected the impact model's gear-effect spin direction and
   driver COR calibration for issue #7406: toe/heel offsets now produce
   hook/slice spin in the launch-monitor sign convention, high-face/low-face
@@ -1448,6 +1455,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-14 | 1.0.394 | Added the ball-flight physical benchmark contract for issue #7407. TrackMan-style driver and 7-iron tests now cover the enhanced simulator, the public flight-model registry, and the REST route; the suite locks cross-engine carry agreement, 5 m/s headwind/tailwind sanity, analytic vacuum range, explicit zero-drag semantics for Python/Rust drag-crisis helpers, humidity-aware density through `EnvironmentalConditions.from_altitude(...)`, and the calibrated Magnus coefficient cap contract. |
 | 2026-06-14 | 1.0.393 | Corrected the impact model gear-effect spin direction and driver COR calibration for issue #7406. Toe/heel offsets now produce hook/slice spin in the launch-monitor sign convention, high-face/low-face offsets reduce/increase backspin, default gear-effect scales put realistic 20 mm toe and 10 mm vertical strikes in expected rad/s bands, and `DRIVER_COR` now reflects the USGA/R&A CT-limit-equivalent COR so center strikes can reach tour smash-factor ranges; regression coverage asserts toe/heel antisymmetry, vertical gear effect, default smash factor, and energy balance. |
 | 2026-06-13 | 1.0.382 | Copied the hatch force-included `launch_golf_suite.py` entrypoint into the modular Docker builder before feature installation so `pip install .` metadata generation matches the wheel packaging contract; the Docker contract guard now rejects moving the entrypoint copy after feature installation. |
 | 2026-06-13 | 1.0.381 | Kept modular Docker profile dry-runs importable from the early Dockerfile copy set by removing the import-time dependency from `engine_core.engine_probes` to the heavyweight config package, with regression coverage that exercises `install_features.py --profile standard --dry-run` against only the early validation files. |

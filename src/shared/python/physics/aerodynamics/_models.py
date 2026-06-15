@@ -76,7 +76,9 @@ class DragModel:
     ) -> None:
         if base_coefficient is None:
             raise ValueError("base_coefficient must be provided")
-        self.base_coefficient = base_coefficient
+        if not math.isfinite(base_coefficient) or base_coefficient < 0.0:
+            raise ValueError("base_coefficient must be finite and non-negative")
+        self.base_coefficient = float(base_coefficient)
         self.ball_area = ball_area
         self.ball_radius = ball_radius
         self.reynolds_correction = reynolds_correction

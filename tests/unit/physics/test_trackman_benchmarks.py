@@ -7,18 +7,34 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
-from src.shared.python.physics.aerodynamics import LiftModel
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from src.api.routes.ball_flight import router as ball_flight_router
+from src.shared.python.physics.aerodynamics import (
+    AerodynamicsConfig,
+    DragModel,
+    LiftModel,
+)
+from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     EnhancedBallFlightSimulator,
+    EnvironmentalConditions,
     LaunchConditions,
 )
 from src.shared.python.physics.ball_properties import BallProperties
+from src.shared.python.physics.flight_models import (
+    FlightModelRegistry,
+    FlightModelType,
+    FlightResult,
+    UnifiedLaunchConditions,
+)
 from src.shared.python.physics.rust_kernel import is_rust_available
 
 pytestmark = [pytest.mark.unit, pytest.mark.scientific]
 
 YARDS_TO_METERS = 0.9144
+GRAVITY = 9.80665
 
 
 def _launch(
@@ -39,6 +55,31 @@ def _analysis(
     simulator = simulator_factory()
     trajectory = simulator.simulate_trajectory(launch, max_time=12.0, dt=0.01)
     return simulator.analyze_trajectory(trajectory)
+
+
+def _registry_launch(
+    ball_speed_mph: float,
+    launch_deg: float,
+    spin_rpm: float,
+    wind_speed_mps: float = 0.0,
+    wind_direction_deg: float = 0.0,
+) -> UnifiedLaunchConditions:
+    return UnifiedLaunchConditions.from_imperial(
+        ball_speed_mph=ball_speed_mph,
+        launch_angle_deg=launch_deg,
+        spin_rate_rpm=spin_rpm,
+        wind_speed_mph=wind_speed_mps / 0.44704,
+        wind_direction_deg=wind_direction_deg,
+    )
+
+
+def _registry_result(
+    model_type: FlightModelType,
+    launch: UnifiedLaunchConditions,
+) -> FlightResult:
+    return FlightModelRegistry.get_model(model_type).simulate(
+        launch, max_time=12.0, dt=0.01
+    )
 
 
 def _simulator_factories() -> list[
@@ -110,3 +151,112 @@ def test_aero_coefficients_match_trackman_calibration_band() -> None:
     assert 0.18 <= ball.calculate_cl(0.30) <= 0.28
     assert 0.18 <= lift._compute_lift_coefficient(0.30) <= 0.28
     assert 0.23 <= ball.calculate_cd(0.08) <= 0.29
+
+
+@pytest.mark.parametrize(
+    ("shot", "launch", "carry_window_yd"),
+    [
+        ("driver", _registry_launch(167.0, 10.9, 2686.0), (250.0, 300.0)),
+        ("7-iron", _registry_launch(120.0, 16.3, 7097.0), (165.0, 190.0)),
+    ],
+)
+def test_registered_flight_models_match_trackman_carry_band(
+    shot: str,
+    launch: UnifiedLaunchConditions,
+    carry_window_yd: tuple[float, float],
+) -> None:
+    carries: list[float] = []
+    for model_type in FlightModelType:
+        result = _registry_result(model_type, launch)
+        carry_yd = result.carry_distance / YARDS_TO_METERS
+        carries.append(carry_yd)
+        assert carry_window_yd[0] <= carry_yd <= carry_window_yd[1], (
+            f"{model_type.value} {shot} carry={carry_yd:.1f} yd"
+        )
+        assert result.max_height > 0.0
+        assert result.flight_time > 0.0
+
+    mean_carry = sum(carries) / len(carries)
+    for carry_yd in carries:
+        assert carry_yd == pytest.approx(mean_carry, rel=0.10)
+
+
+def test_rest_route_matches_trackman_driver_benchmark() -> None:
+    app = FastAPI()
+    app.include_router(ball_flight_router)
+    client = TestClient(app)
+
+    response = client.post(
+        "/tools/ball-flight/simulate",
+        json={
+            "ball_speed_mps": 167.0 * 0.44704,
+            "launch_angle_deg": 10.9,
+            "spin_rate_rpm": 2686.0,
+            "model_name": FlightModelType.WATERLOO_PENNER.value,
+            "max_time_s": 12.0,
+            "time_step_s": 0.01,
+        },
+    )
+
+    assert response.status_code == 200
+    summary = response.json()["summary"]
+    carry_yd = summary["carry_m"] / YARDS_TO_METERS
+    assert 250.0 <= carry_yd <= 300.0
+    assert 24.0 <= summary["apex_m"] <= 37.0
+    assert 5.5 <= summary["flight_time_s"] <= 7.5
+
+
+def test_vacuum_trajectory_uses_air_density_not_drag_coefficient_clamp() -> None:
+    launch = _launch(30.0 / 0.44704, 45.0, 0.0)
+    environment = EnvironmentalConditions(air_density=0.0)
+    simulator = EnhancedBallFlightSimulator(
+        environment=environment,
+        aero_config=AerodynamicsConfig(enabled=False),
+    )
+
+    trajectory = simulator.simulate_trajectory(launch, max_time=8.0, dt=0.002)
+    analysis = simulator.analyze_trajectory(trajectory)
+    expected_range = launch.velocity**2 * math.sin(2.0 * launch.launch_angle) / GRAVITY
+
+    assert analysis["carry_distance"] == pytest.approx(expected_range, rel=0.005)
+    assert cd_dimpled_sphere(1.0e5, base_cd=0.0) == 0.0
+    np.testing.assert_allclose(
+        DragModel(base_coefficient=0.0).calculate(np.array([50.0, 0.0, 0.0])),
+        np.zeros(3),
+    )
+    with pytest.raises(ValueError):
+        DragModel(base_coefficient=-0.01)
+
+
+def test_five_meter_per_second_wind_changes_driver_carry_sensibly() -> None:
+    calm = _registry_result(
+        FlightModelType.WATERLOO_PENNER, _registry_launch(167.0, 10.9, 2686.0)
+    )
+    headwind = _registry_result(
+        FlightModelType.WATERLOO_PENNER,
+        _registry_launch(167.0, 10.9, 2686.0, wind_speed_mps=5.0),
+    )
+    tailwind = _registry_result(
+        FlightModelType.WATERLOO_PENNER,
+        _registry_launch(
+            167.0, 10.9, 2686.0, wind_speed_mps=5.0, wind_direction_deg=180.0
+        ),
+    )
+
+    headwind_loss_yd = (calm.carry_distance - headwind.carry_distance) / YARDS_TO_METERS
+    tailwind_gain_yd = (tailwind.carry_distance - calm.carry_distance) / YARDS_TO_METERS
+    assert 9.0 <= headwind_loss_yd <= 18.0
+    assert 7.0 <= tailwind_gain_yd <= 14.0
+
+
+def test_humid_air_is_less_dense_than_dry_air() -> None:
+    dry = EnvironmentalConditions.from_altitude(
+        altitude_m=0.0, temperature_c=30.0, relative_humidity=0.0
+    )
+    saturated = EnvironmentalConditions.from_altitude(
+        altitude_m=0.0, temperature_c=30.0, relative_humidity=1.0
+    )
+    reduction = (dry.air_density - saturated.air_density) / dry.air_density
+
+    assert saturated.air_density < dry.air_density
+    assert 0.01 <= reduction <= 0.02

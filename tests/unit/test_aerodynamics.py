@@ -437,7 +437,7 @@ class TestMagnusModel:
         velocity = np.array([50.0, 0.0, 0.0])
         spin = np.array([0.0, -200.0, 0.0])
 
-        model_low = MagnusModel(coefficient=0.15)
+        model_low = MagnusModel(coefficient=0.05)
         model_high = MagnusModel(coefficient=0.35)
 
         mag_low = np.linalg.norm(model_low.calculate(velocity, spin, air_density=1.225))

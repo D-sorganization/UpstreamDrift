@@ -53,6 +53,9 @@ ISA_GRAVITY_M_S2: float = 9.80665
 #: Specific gas constant for dry air [J/(kg*K)].
 DRY_AIR_R_SPECIFIC_J_KG_K: float = 287.05
 
+#: Specific gas constant for water vapor [J/(kg*K)].
+WATER_VAPOR_R_SPECIFIC_J_KG_K: float = 461.5
+
 #: Validated altitude bounds (metres). Below the lower bound or above the
 #: upper bound the ISA troposphere model is no longer reliable for golf
 #: trajectories and we refuse to extrapolate silently.
@@ -162,6 +165,85 @@ def air_density(
     return pressure_at_alt / (DRY_AIR_R_SPECIFIC_J_KG_K * t_at_alt)
 
 
+def saturation_vapor_pressure_pa(temperature_c: float) -> float:
+    """Return saturation vapor pressure over water [Pa]."""
+    if not isinstance(temperature_c, (int, float)) or isinstance(temperature_c, bool):
+        raise TypeError("temperature_c must be a real number")
+    if not math.isfinite(temperature_c):
+        raise ValueError("temperature_c must be finite")
+    if (
+        temperature_c < MIN_VALID_TEMPERATURE_C
+        or temperature_c > MAX_VALID_TEMPERATURE_C
+    ):
+        raise ValueError(
+            f"temperature_c={temperature_c} is outside the supported range "
+            f"[{MIN_VALID_TEMPERATURE_C}, {MAX_VALID_TEMPERATURE_C}] C"
+        )
+    return 610.94 * math.exp(
+        17.625 * float(temperature_c) / (float(temperature_c) + 243.04)
+    )
+
+
+def humid_air_density(
+    altitude_m: float,
+    temperature_c: float = 15.0,
+    relative_humidity: float = 0.0,
+    pressure_pa: float | None = None,
+) -> float:
+    """Return moist-air density [kg/m^3] for ball-flight calculations.
+
+    ``relative_humidity`` is a fraction in ``[0, 1]``. Humid air is less dense
+    than dry air at the same pressure and temperature because water vapor has a
+    larger specific gas constant than dry air.
+    """
+    if not isinstance(relative_humidity, (int, float)) or isinstance(
+        relative_humidity, bool
+    ):
+        raise TypeError("relative_humidity must be a real number")
+    if not math.isfinite(relative_humidity):
+        raise ValueError("relative_humidity must be finite")
+    rh = float(relative_humidity)
+    if not 0.0 <= rh <= 1.0:
+        raise ValueError("relative_humidity must be between 0 and 1")
+    if rh == 0.0:
+        return air_density(
+            altitude_m=altitude_m,
+            temperature_c=temperature_c,
+            pressure_pa=pressure_pa,
+        )
+
+    if not isinstance(altitude_m, (int, float)) or isinstance(altitude_m, bool):
+        raise TypeError("altitude_m must be a real number")
+    if not math.isfinite(altitude_m):
+        raise ValueError("altitude_m must be finite")
+    if altitude_m < MIN_VALID_ALTITUDE_M or altitude_m > MAX_VALID_ALTITUDE_M:
+        raise ValueError(
+            f"altitude_m={altitude_m} is outside the supported range "
+            f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_ALTITUDE_M}] metres"
+        )
+
+    p0 = ISA_P0_PA if pressure_pa is None else float(pressure_pa)
+    if p0 <= 0:
+        raise ValueError("pressure_pa must be positive when provided")
+
+    t0 = float(temperature_c) + 273.15
+    lapse = ISA_LAPSE_RATE_K_PER_M
+    t_at_alt = t0 - lapse * float(altitude_m)
+    if t_at_alt <= 0:
+        raise ValueError(
+            "Computed temperature at altitude is non-positive; check inputs"
+        )
+
+    exponent = ISA_GRAVITY_M_S2 / (DRY_AIR_R_SPECIFIC_J_KG_K * lapse)
+    pressure_at_alt = p0 * (t_at_alt / t0) ** exponent
+    vapor_pressure = rh * saturation_vapor_pressure_pa(t_at_alt - 273.15)
+    vapor_pressure = min(vapor_pressure, pressure_at_alt)
+    dry_pressure = pressure_at_alt - vapor_pressure
+    return dry_pressure / (DRY_AIR_R_SPECIFIC_J_KG_K * t_at_alt) + vapor_pressure / (
+        WATER_VAPOR_R_SPECIFIC_J_KG_K * t_at_alt
+    )
+
+
 # ---------------------------------------------------------------------------
 # Drag-crisis model for dimpled spheres
 # ---------------------------------------------------------------------------
@@ -212,7 +294,8 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
        asymptote near ``_CD_HIGH``.
 
     The ``base_cd`` argument lets callers shift the post-crisis floor to
-    account for ball-to-ball variation (the registry default is 0.21).
+    account for ball-to-ball variation (the registry default is 0.21). Passing
+    ``base_cd=0`` explicitly disables drag; negative values are rejected.
 
     A ``tanh``-based smooth blend is used so that ``Cd(Re)`` and its first
     derivative are continuous everywhere; this matters for the trajectory
@@ -224,13 +307,14 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
         Reynolds number based on ball diameter and free-stream speed. Must
         lie within ``[MIN_VALID_REYNOLDS, MAX_VALID_REYNOLDS]``.
     base_cd
-        Post-crisis floor Cd; the function clamps this into ``[0.18, 0.30]``
-        to keep the curve in the empirically observed envelope.
+        Post-crisis floor Cd. Positive values are clamped into ``[0.18, 0.30]``
+        to keep the curve in the empirically observed envelope; exactly zero
+        returns ``0`` so callers can deliberately disable drag.
 
     Returns
     -------
     float
-        Drag coefficient (dimensionless) in the range ``[0.15, 0.55]``.
+        Drag coefficient (dimensionless), either ``0`` or in ``[0.15, 0.55]``.
 
     Raises
     ------
@@ -259,6 +343,11 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
             f"reynolds={reynolds} is outside the supported range "
             f"[{MIN_VALID_REYNOLDS:g}, {MAX_VALID_REYNOLDS:g}]"
         )
+
+    if math.isnan(base_cd) or math.isinf(base_cd) or base_cd < 0:
+        raise ValueError("base_cd must be a finite non-negative number")
+    if base_cd == 0:
+        return 0.0
 
     # Clamp the post-crisis floor into a physically plausible band so a
     # mistuned ``base_cd`` cannot drive the curve outside [0.15, 0.55].
@@ -294,6 +383,9 @@ __all__ = [
     "ISA_LAPSE_RATE_K_PER_M",
     "ISA_GRAVITY_M_S2",
     "DRY_AIR_R_SPECIFIC_J_KG_K",
+    "WATER_VAPOR_R_SPECIFIC_J_KG_K",
     "air_density",
     "cd_dimpled_sphere",
+    "humid_air_density",
+    "saturation_vapor_pressure_pa",
 ]

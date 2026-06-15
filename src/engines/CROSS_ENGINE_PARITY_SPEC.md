@@ -139,6 +139,27 @@ shared Python plotters (`shared/python/motion_matching/plot_*.py`); only
 engine-specific 3D viewers (Drake Visualizer, MuJoCo Viewer, OpenSim's GUI,
 Meshcat for Pinocchio) need engine-bespoke code.
 
+### 2.5.1 Ball-flight physical benchmark gate
+
+Ball-flight engines and UI/API adapters must preserve the same measured-shot
+calibration envelope. `tests/unit/physics/test_trackman_benchmarks.py` is the
+canonical gate:
+
+- Enhanced/Rust-backed simulators must reproduce TrackMan-style driver and
+  7-iron carry/apex/time windows.
+- Every public `FlightModelRegistry` model must land driver and 7-iron carry in
+  the documented measured-shot bands and stay within 10% carry of the registry
+  mean for each shot.
+- The REST `/tools/ball-flight/simulate` route must return the same benchmark
+  family through the shared registry path.
+- Vacuum behavior is expressed with `air_density=0` or disabled aerodynamics;
+  `drag_coefficient=0` is an explicit zero-drag coefficient and must never be
+  silently clamped to a nonzero golf-ball Cd.
+- A 5 m/s headwind must reduce driver carry and a 5 m/s tailwind must increase
+  driver carry within the benchmark bands.
+- Humid-air density uses the two-gas dry-air/water-vapor formula; saturated air
+  at 30 C must be less dense than dry air at the same pressure.
+
 ### 2.6 Body model (humanoid + club)
 
 Every engine has **a single canonical full-body humanoid model** with the

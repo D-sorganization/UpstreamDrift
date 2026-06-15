@@ -324,10 +324,11 @@ fn smoothstep_tanh(x: f64, x0: f64, width: f64) -> f64 {
 /// # Design by Contract
 /// ## Preconditions
 /// - `reynolds` must be finite and in `[1e3, 1e7]`
-/// - `base_cd` must be finite
+/// - `base_cd` must be finite and non-negative
 ///
 /// ## Postconditions
-/// - Returned Cd is finite and clamped to `[0.15, 0.55]`
+/// - Returned Cd is either zero (explicit drag disabled) or finite and clamped
+///   to `[0.15, 0.55]`
 pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
     if !reynolds.is_finite() || reynolds <= 0.0 {
         return Err("reynolds must be a positive finite number".to_string());
@@ -337,8 +338,11 @@ pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
             "reynolds={reynolds} is outside the supported range [{MIN_VALID_REYNOLDS}, {MAX_VALID_REYNOLDS}]"
         ));
     }
-    if !base_cd.is_finite() {
-        return Err("base_cd must be finite".to_string());
+    if !base_cd.is_finite() || base_cd < 0.0 {
+        return Err("base_cd must be finite and non-negative".to_string());
+    }
+    if base_cd == 0.0 {
+        return Ok(0.0);
     }
 
     let cd_floor = base_cd.clamp(0.18, 0.30);
@@ -803,6 +807,13 @@ mod tests {
         assert!(cd_dimpled_sphere(999.0, 0.25).is_err());
         assert!(cd_dimpled_sphere(1.0e8, 0.25).is_err());
         assert!(cd_dimpled_sphere(1.0e5, f64::INFINITY).is_err());
+        assert!(cd_dimpled_sphere(1.0e5, -0.01).is_err());
+    }
+
+    #[test]
+    fn test_cd_dimpled_sphere_allows_explicit_zero_drag() {
+        let cd = cd_dimpled_sphere(1.0e5, 0.0).unwrap();
+        assert_eq!(cd, 0.0);
     }
 
     #[test]
