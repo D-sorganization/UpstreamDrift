@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-15
+  LAST UPDATED: 2026-06-16
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.396                                            |
+| **Spec Version**        | 1.0.397                                            |
 | **Last Spec Update**    | 2026-06-16                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-16** - Optimized cross-engine and Pinocchio kinematic
+  equivalence RMSE distance accumulation to use `np.einsum`, preserving the
+  existing tolerance contract while avoiding temporary squared-distance arrays
+  in hot parity-test paths.
 - **2026-06-16** - Coordinated with Tools #3316 by moving production
   consumers of the Tools Sidekick surface from direct `sidekick.*` imports to
   `shared.python.sidekick.*` imports, keeping the compatibility package intact
@@ -1838,4 +1842,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.linalg.norm` with `math.hypot` for 3D vector magnitudes in MuJoCo motion optimization, avoiding array overhead.
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `DriftControlAnalyzer.compute_ratio` for a 2.4x speedup.
-Updated analyze_coordinate_system.py to use math.hypot for 3D vector magnitude
+  Updated analyze_coordinate_system.py to use math.hypot for 3D vector magnitude
