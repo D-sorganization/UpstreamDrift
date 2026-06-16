@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sidekick.lab.bio.c3d_reader import (  # noqa: F401
+from shared.python.sidekick.lab.bio.c3d_reader import (  # noqa: F401
     BIOMECHANICAL_MARKER_MAX_M,
     BIOMECHANICAL_MARKER_MIN_M,
     SCHEMA_VERSION,

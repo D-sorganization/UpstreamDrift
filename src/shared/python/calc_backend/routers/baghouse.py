@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/calc/baghouse", tags=["baghouse"])
 @router.post("", response_model=BaghouseResponse)
 def calculate_baghouse(request: BaghouseRequest) -> BaghouseResponse:
     """Calculate baghouse filter performance."""
-    from sidekick.process_calculators import BaghouseCalculator
+    from shared.python.sidekick.process_calculators import BaghouseCalculator
 
     calc = BaghouseCalculator()
 

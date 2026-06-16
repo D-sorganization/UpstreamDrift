@@ -18,12 +18,12 @@ import time
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sidekick.api import (
+from shared.python.sidekick.api import (
     ErrorCode,
     ErrorDetail,
     StandardResponse,
 )
-from sidekick.process_calculators.pressure_drop_calculator import (
+from shared.python.sidekick.process_calculators.pressure_drop_calculator import (
     PressureDropCalculator,
     PressureDropResult,
 )

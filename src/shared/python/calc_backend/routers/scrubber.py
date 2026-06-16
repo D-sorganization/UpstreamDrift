@@ -37,7 +37,7 @@ def _as_float(value: Any, field_name: str) -> float:
 @router.post("", response_model=ScrubberResponse)
 def calculate_scrubber(request: ScrubberRequest) -> ScrubberResponse:
     """Calculate packed-bed scrubber column sizing and caustic requirements."""
-    from sidekick.process_calculators.scrubber_calculator import (
+    from shared.python.sidekick.process_calculators.scrubber_calculator import (
         PACKING_DATABASE,
         WATER_DENSITY,
         WATER_VISCOSITY,

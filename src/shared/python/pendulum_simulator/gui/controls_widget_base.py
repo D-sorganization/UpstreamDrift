@@ -477,7 +477,7 @@ class ControlsWidgetBase(QWidget):
         from .controls_utils import parse_float
 
         try:
-            from sidekick.ui.widgets.unit_aware_input import (
+            from shared.python.sidekick.ui.widgets.unit_aware_input import (
                 UnitAwareInput as _UAI,
             )
 

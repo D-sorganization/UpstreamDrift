@@ -17,7 +17,7 @@ Preferred imports (direct from package, since src/shared/python is on sys.path):
     from humanoid_character_builder import CharacterBuilder, BodyParameters
     from model_generation import quick_urdf, ManualBuilder, FrankensteinEditor
     from signal_toolkit import Signal, SignalGenerator, FunctionFitter
-    from sidekick.process_calculators import FlareCalculator
+    from shared.python.sidekick.process_calculators import FlareCalculator
     from gui_launcher import GUIType, LaunchConfig, register_gui
     from plot_engine.specs import PlotSpec, SeriesData
     from plot_theme import apply_plot_theme

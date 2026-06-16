@@ -29,14 +29,14 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
-from sidekick.agent.subtab_adapter import (
+from shared.python.sidekick.agent.subtab_adapter import (
     CalculatorRun,
     StateProfile,
     SubtabAdapter,
     WorkspaceSnapshot,
 )
-from sidekick.agent.action_service import SidekickActionService
-from sidekick.agent.host_adapter import (
+from shared.python.sidekick.agent.action_service import SidekickActionService
+from shared.python.sidekick.agent.host_adapter import (
     HostAdapter,
     HostCapability,
     HostInvocationResult,

@@ -31,7 +31,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from sidekick.utils.logging import get_logger
+from shared.python.sidekick.utils.logging import get_logger
 
 from .._types import Sex
 

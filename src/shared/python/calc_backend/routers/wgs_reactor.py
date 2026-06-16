@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/calc/wgs-reactor", tags=["wgs-reactor"])
 @router.post("", response_model=WGSReactorResponse)
 def calculate_wgs(request: WGSReactorRequest) -> WGSReactorResponse:
     """Calculate WGS reactor equilibrium and optional sizing."""
-    from sidekick.process_calculators import WGSReactorEngine
+    from shared.python.sidekick.process_calculators import WGSReactorEngine
 
     if WGSReactorEngine is None:
         raise HTTPException(

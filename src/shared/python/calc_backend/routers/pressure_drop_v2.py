@@ -26,7 +26,7 @@ from calc_backend.contracts.pressure_drop_v2 import (
     PressureDropResponseV2,
 )
 from fastapi import APIRouter
-from sidekick.process_calculators.pressure_drop_calculator import (
+from shared.python.sidekick.process_calculators.pressure_drop_calculator import (
     PressureDropCalculator,
     PressureDropResult,
 )

@@ -77,9 +77,12 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter
-    from sidekick.agent.action_service import ActionResult, SidekickActionService
-    from sidekick.agent.chat_surface import ChatActionEnvelope
-    from sidekick.agent.planner import SidekickAgentPlanner, ToolCall
+    from shared.python.sidekick.agent.action_service import (
+        ActionResult,
+        SidekickActionService,
+    )
+    from shared.python.sidekick.agent.chat_surface import ChatActionEnvelope
+    from shared.python.sidekick.agent.planner import SidekickAgentPlanner, ToolCall
 
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
@@ -614,7 +617,9 @@ class AIAssistantPanel(QWidget):
         if self._sidekick_action_service is None:
             self._context.metadata.pop("sidekick_system_prompt", None)
         else:
-            from sidekick.agent.planner import build_sidekick_system_prompt
+            from shared.python.sidekick.agent.planner import (
+                build_sidekick_system_prompt,
+            )
 
             self._context.metadata["sidekick_system_prompt"] = (
                 build_sidekick_system_prompt(service=self._sidekick_action_service)
@@ -857,8 +862,8 @@ class AIAssistantPanel(QWidget):
             self._sidekick_planner = None
             self._refresh_prompt_memory()
             return
-        from sidekick.agent.action_service import SidekickActionService
-        from sidekick.agent.planner import SidekickAgentPlanner
+        from shared.python.sidekick.agent.action_service import SidekickActionService
+        from shared.python.sidekick.agent.planner import SidekickAgentPlanner
 
         if not isinstance(service, SidekickActionService):
             raise TypeError(
@@ -874,7 +879,7 @@ class AIAssistantPanel(QWidget):
         """Plan tool calls and render their confirmation chips."""
         if self._sidekick_action_service is None or self._sidekick_planner is None:
             raise RuntimeError("no Sidekick action service is attached")
-        from sidekick.agent.chat_surface import (
+        from shared.python.sidekick.agent.chat_surface import (
             ChatActionEnvelope,
             build_chip,
             serialize_envelope,

@@ -39,7 +39,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 try:
-    from sidekick.ui.widgets.notepad_widget import NotepadWidget
+    from shared.python.sidekick.ui.widgets.notepad_widget import NotepadWidget
 
     HAS_NOTEPAD = True
 except ImportError:

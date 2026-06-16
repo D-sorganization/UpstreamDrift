@@ -32,13 +32,12 @@ def calculate_acid_gas_dewpoint(
     request: AcidGasDewpointRequest,
 ) -> AcidGasDewpointResponse:
     """Calculate acid gas dewpoint for a mixture."""
-    from sidekick.process_calculators.acid_gas_dewpoint_calculator import (
-        AcidGasComposition,
-        AcidGasDewpointCalculator,
+    from shared.python.sidekick.process_calculators import (
+        acid_gas_dewpoint_calculator as acid_gas_dewpoint,
     )
 
-    calc = AcidGasDewpointCalculator()
-    composition = AcidGasComposition(
+    calc = acid_gas_dewpoint.AcidGasDewpointCalculator()
+    composition = acid_gas_dewpoint.AcidGasComposition(
         h2o=request.h2o_fraction,
         hf=request.hf_fraction,
         hcl=request.hcl_fraction,

@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.395                                            |
-| **Last Spec Update**    | 2026-06-15                                         |
+| **Spec Version**        | 1.0.396                                            |
+| **Last Spec Update**    | 2026-06-16                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-16** - Coordinated with Tools #3316 by moving production
+  consumers of the Tools Sidekick surface from direct `sidekick.*` imports to
+  `shared.python.sidekick.*` imports, keeping the compatibility package intact
+  while reducing duplicate module spellings at launcher, calc-backend,
+  motion-capture, and assistant integration boundaries.
 - **2026-06-15** - Optimized the starting-pose matcher Simscape trajectory CSV
   loader: `load_simscape_trajectory_csv(...)` now pre-extracts each resolved
   joint's XYZ columns to NumPy arrays before frame construction, avoiding

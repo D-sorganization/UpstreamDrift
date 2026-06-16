@@ -468,7 +468,7 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
             detail=f"C3D import is unavailable: {reason}",
         )
 
-    from sidekick.lab.bio.c3d_reader import C3DDataReader
+    from shared.python.sidekick.lab.bio.c3d_reader import C3DDataReader
 
     with tempfile.TemporaryDirectory(prefix="mocap_c3d_") as tmp_dir:
         tmp_path = Path(tmp_dir) / "upload.c3d"

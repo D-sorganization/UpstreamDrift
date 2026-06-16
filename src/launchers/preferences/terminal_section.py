@@ -27,7 +27,7 @@ def discover_shells_safe() -> list[dict[str, str]]:
     bash / zsh) so the UI is still usable when Tools is missing.
     """
     try:
-        from sidekick.terminal.shells import discover_shells  # type: ignore[import-not-found]
+        from shared.python.sidekick.terminal.shells import discover_shells  # type: ignore[import-not-found]
     except ImportError:
         logger.debug(
             "Sidekick terminal package not available — using fallback shell list"

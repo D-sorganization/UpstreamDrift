@@ -4,8 +4,7 @@ Canonical path:
 ``src/shared/python/sidekick/lab/bio/_c3d_models.py`` (issue #4484).
 """
 
-from sidekick.lab.bio._c3d_models import *  # noqa: F401,F403
-from sidekick.lab.bio._c3d_models import (  # noqa: F401
+from shared.python.sidekick.lab.bio._c3d_models import (  # noqa: F401
     BIOMECHANICAL_MARKER_MAX_M,
     BIOMECHANICAL_MARKER_MIN_M,
     SCHEMA_VERSION,
