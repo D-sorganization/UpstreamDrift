@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+import math
 import numpy as np
 import numpy.typing as npt
 
@@ -123,7 +124,7 @@ def quat_wxyz_to_euler_xyz_deg(
     q = np.asarray(quat_wxyz, dtype=float)
     if q.shape != (4,):
         raise ValueError(f"quat must have shape (4,), got {q.shape}")
-    n = np.linalg.norm(q)
+    n = math.sqrt(float(np.dot(q, q)))
     if n == 0.0:
         raise ValueError("quat_wxyz_to_euler_xyz_deg: zero-norm quaternion")
     w, x, y, z = q / n

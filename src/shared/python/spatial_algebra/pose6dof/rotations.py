@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import numpy.typing as npt
 
@@ -82,10 +83,11 @@ def quaternion_to_euler(quat: Quat | list[float]) -> Vec3:
     require(
         quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
     )
+    q_norm = float(math.sqrt(np.dot(quat, quat)))
     require(
-        float(np.linalg.norm(quat)) > 1e-10,
+        q_norm > 1e-10,
         "quat must not be a zero vector",
-        float(np.linalg.norm(quat)),
+        q_norm,
     )
     w, x, y, z = quat[0], quat[1], quat[2], quat[3]
 
@@ -108,12 +110,13 @@ def quaternion_to_rotation_matrix(quat: Quat | list[float]) -> Mat3:
     require(
         quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
     )
+    q_norm = float(math.sqrt(np.dot(quat, quat)))
     require(
-        float(np.linalg.norm(quat)) > 1e-10,
+        q_norm > 1e-10,
         "quat must not be a zero vector",
-        float(np.linalg.norm(quat)),
+        q_norm,
     )
-    quat = quat / np.linalg.norm(quat)
+    quat = quat / q_norm
     w, x, y, z = quat[0], quat[1], quat[2], quat[3]
 
     R = np.array(
@@ -138,12 +141,13 @@ def rotation_matrix_to_quaternion(R: Mat3) -> Quat:
 def axis_angle_to_rotation_matrix(axis: Vec3 | list[float], angle: float) -> Mat3:
     axis = np.asarray(axis, dtype=np.float64)
     require(axis.shape == (3,), "axis must be a (3,) vector", axis.shape)
+    a_norm = float(math.hypot(axis[0], axis[1], axis[2]))
     require(
-        float(np.linalg.norm(axis)) > 1e-10,
+        a_norm > 1e-10,
         "axis must not be a zero vector",
-        float(np.linalg.norm(axis)),
+        a_norm,
     )
-    axis = axis / np.linalg.norm(axis)
+    axis = axis / a_norm
 
     K = skew(axis)
     R = np.eye(3) + np.sin(angle) * K + (1 - np.cos(angle)) * (K @ K)
@@ -189,7 +193,8 @@ def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
 
     if dot > 0.9995:
         result = q1 + t * (q2 - q1)
-        return result / np.linalg.norm(result)
+        r_norm = math.sqrt(float(np.dot(result, result)))
+        return result / r_norm
 
     theta_0 = np.arccos(dot)
     theta = theta_0 * t

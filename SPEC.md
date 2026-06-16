@@ -1843,3 +1843,9 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `DriftControlAnalyzer.compute_ratio` for a 2.4x speedup.
   Updated analyze_coordinate_system.py to use math.hypot for 3D vector magnitude
+- Optimized vector and quaternion norm calculations in
+  `src/shared/python/visualization/fsp_renderer.py`,
+  `src/shared/python/pose_interchange/adapters/_base.py`, and
+  `src/shared/python/spatial_algebra/pose6dof/rotations.py` by replacing
+  `np.linalg.norm` with `math.hypot` and `math.sqrt(np.dot)` in fixed-size hot
+  paths.

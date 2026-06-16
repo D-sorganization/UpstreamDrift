@@ -33,6 +33,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
+import math
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -261,19 +262,19 @@ def _orthonormal_basis(normal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     # Pick the world axis least aligned with the normal as our seed.
     abs_n = np.abs(normal)
     seed_axis = int(np.argmin(abs_n))
-    seed = np.zeros(3, dtype=np.float64)
+    seed: np.ndarray = np.zeros(3, dtype=np.float64)
     seed[seed_axis] = 1.0
 
     u = seed - float(np.dot(seed, normal)) * normal
-    u_norm = float(np.linalg.norm(u))
+    u_norm = float(math.hypot(u[0], u[1], u[2]))
     if u_norm < 1e-12:
         # Fallback: another axis must work.
         seed = np.array([1.0, 0.0, 0.0], dtype=np.float64)
         u = seed - float(np.dot(seed, normal)) * normal
-        u_norm = float(np.linalg.norm(u))
+        u_norm = float(math.hypot(u[0], u[1], u[2]))
     u = u / u_norm
     v = np.cross(normal, u)
-    v_norm = float(np.linalg.norm(v))
+    v_norm = float(math.hypot(v[0], v[1], v[2]))
     if v_norm > 0.0:
         v = v / v_norm
     return u, v
