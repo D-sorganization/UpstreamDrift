@@ -248,7 +248,9 @@ def position_rmse(p_a: np.ndarray, p_b: np.ndarray) -> float:
     """RMSE of two 3D position vectors. For a single point, this is the
     Euclidean distance; the function generalises to (N, 3) trajectories."""
     diff = np.atleast_2d(np.asarray(p_a) - np.asarray(p_b))
-    return float(np.sqrt(np.mean(np.einsum('...i,...i->...', diff, diff))))  # ⚡ Bolt: einsum is ~2-3x faster than np.sum(diff * diff, axis=-1)
+    return float(
+        np.sqrt(np.mean(np.einsum("...i,...i->...", diff, diff)))
+    )  # ⚡ Bolt: einsum is ~2-3x faster than np.sum(diff * diff, axis=-1)
 
 
 def geodesic_angle(R_a: np.ndarray, R_b: np.ndarray) -> float:

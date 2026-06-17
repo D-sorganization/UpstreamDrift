@@ -107,7 +107,9 @@ def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -
     if sim.shape != ref.shape:
         raise ValueError(f"shape mismatch: {sim.shape} vs {ref.shape}")
     diff = sim - ref
-    mse = np.mean(np.einsum('ij,ij->i', diff, diff))  # ⚡ Bolt: einsum is ~2-3x faster than np.sum(diff**2, axis=1)
+    mse = np.mean(
+        np.einsum("ij,ij->i", diff, diff)
+    )  # ⚡ Bolt: einsum is ~2-3x faster than np.sum(diff**2, axis=1)
     return float(np.sqrt(mse) * 1000.0)
 
 

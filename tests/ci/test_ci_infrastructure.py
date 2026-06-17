@@ -11,6 +11,7 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 
 import sys
 import subprocess
+import re
 from pathlib import Path
 from typing import Any
 
@@ -254,6 +255,23 @@ class TestCIEnvironmentCompatibility:
         assert "WARNING: pytest exit code 5 (no tests collected) detected." in (
             workflow
         )
+
+    def test_core_only_install_includes_pytest_asyncio_for_repo_config(self) -> None:
+        """Core-only pytest must load plugins required by pyproject config."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        core_only_step = workflow[
+            workflow.index("- name: Run core-only test slice") : workflow.index(
+                "quality-gate:",
+                workflow.index("core-only-install:"),
+            )
+        ]
+
+        assert 'asyncio_mode = "auto"' in (REPO_ROOT / "pyproject.toml").read_text(
+            encoding="utf-8"
+        )
+        assert "pytest-asyncio" in core_only_step
 
     def test_cross_engine_equivalence_uses_recordless_pip_bootstrap(self) -> None:
         """The equivalence workflow must tolerate broken runner pip metadata."""
@@ -534,6 +552,7 @@ class TestCIEnvironmentCompatibility:
             "repo-structure-gates",
             "tests",
             "unit-test-gate",
+            "rust-wheel-parity",
         }
         assert job["if"] == "always()"
         aggregate = next(
@@ -923,6 +942,109 @@ class TestCIEnvironmentCompatibility:
         assert "tests/unit/test_ball_flight_physics.py" in binding_step
         assert "tests/unit/shared_python/test_ball_flight_physics.py" in binding_step
         assert '-o addopts=""' in binding_step
+
+    def test_rust_wheel_parity_verifies_absolute_rust_toolchain(self) -> None:
+        """The Rust parity wheel job must fail before maturin if Cargo is absent."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        parity_job = workflow["jobs"]["rust-wheel-parity"]
+        steps = parity_job["steps"]
+        step_names = [step.get("name") for step in steps]
+
+        assert parity_job["env"]["CARGO_HOME"].startswith("${{ github.workspace }}/")
+        assert step_names.index("Install Rust toolchain") < step_names.index(
+            "Verify Rust toolchain"
+        )
+        assert step_names.index("Verify Rust toolchain") < step_names.index(
+            "Build PyO3 Wheels (Maturin)"
+        )
+
+        verify_step = next(
+            step for step in steps if step.get("name") == "Verify Rust toolchain"
+        )
+        verify_script = verify_step["run"]
+
+        assert 'echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"' in verify_script
+        assert 'export PATH="$CARGO_HOME/bin:$PATH"' in verify_script
+        for binary in ("rustup", "rustc", "cargo"):
+            assert f"command -v {binary}" in verify_script
+            assert f"{binary} --version" in verify_script
+
+    def test_semgrep_push_uses_changed_file_targets_when_before_sha_exists(
+        self,
+    ) -> None:
+        """Push SAST should block new findings without re-failing legacy debt."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        semgrep_step = workflow[
+            workflow.index("- name: Semgrep SAST Scan") : workflow.index(
+                "# SECURITY: Bandit static security analysis",
+            )
+        ]
+
+        assert '"${{ github.event_name }}" = "push"' in semgrep_step
+        assert "${{ github.event.before }}" in semgrep_step
+        assert "origin/${{ github.base_ref }}" in semgrep_step
+        assert (
+            'semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"'
+            in semgrep_step
+        )
+        assert (
+            "No changed source/application files supported by Semgrep" in semgrep_step
+        )
+
+    def test_core_test_matrix_push_uses_changed_file_scope_when_before_sha_exists(
+        self,
+    ) -> None:
+        """Push test runs should not fall through to full-suite OOM by default."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        core_test_step = workflow[
+            workflow.index("- name: Run Core Test Suite") : workflow.index(
+                "- name: Stop Xvfb",
+            )
+        ]
+
+        assert '"${{ github.event_name }}" = "push"' in core_test_step
+        assert "${{ github.event.before }}" in core_test_step
+        assert 'diff_base="${{ github.event.before }}"' in core_test_step
+        assert (
+            'git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD'
+            in core_test_step
+        )
+        assert "No core Python/test/dependency changes detected" in core_test_step
+
+    def test_model_explorer_xml_suppressions_are_build_only(self) -> None:
+        """Model Explorer must parse untrusted XML through defusedxml only."""
+        model_explorer = REPO_ROOT / "src" / "tools" / "model_explorer"
+        suppression = "nosemgrep: python.lang.security.use-defused-xml.use-defused-xml"
+        stdlib_parser_call = re.compile(r"(?<![A-Za-z0-9_])ET\.(?:parse|fromstring)\(")
+
+        for path in model_explorer.rglob("*.py"):
+            source = path.read_text(encoding="utf-8")
+            lines = source.splitlines()
+
+            for line_number, line in enumerate(lines, start=1):
+                imports_stdlib_xml = (
+                    "import xml.etree.ElementTree" in line
+                    or "from xml.etree.ElementTree import" in line
+                    or "from xml.dom import" in line
+                )
+                if imports_stdlib_xml:
+                    assert suppression in line, f"{path}:{line_number}"
+
+            if "import xml.etree.ElementTree as ET" in source:
+                assert stdlib_parser_call.search(source) is None, f"{path}"
 
 
 class TestPyprojectTomlConsistency:
