@@ -97,17 +97,8 @@ def parameter_jacobian(
     params = _as_jax_parameter_vector(parameter_vector, jnp)
     q_vec = _as_jax_state_vector(q, "q", jnp)
     v_vec = _as_jax_state_vector(v, "v", jnp)
-
-    def drift(p: Any) -> Any:
-        return _ztcf_drift_field_jax(p, q_vec, v_vec, jnp)
-
-    if mode == "forward":
-        jacobian = jax.jacfwd(drift)(params)
-    elif mode == "reverse":
-        jacobian = jax.jacrev(drift)(params)
-    else:
-        raise ValueError(f"unsupported gradient mode: {mode!r}")
-    return np.asarray(jacobian, dtype=float)
+    jacobian_fn = _parameter_jacobian_transform(mode, jax, jnp)
+    return _as_parameter_jacobian_output(jacobian_fn(params, q_vec, v_vec))
 
 
 def finite_difference_parameter_jacobian(
@@ -194,17 +185,36 @@ def evaluate_ztcf_parameter_sensitivity_along_trajectory(
         Array with shape ``(T, 2, 5)``.
     """
 
-    params = _as_numpy_parameter_vector(parameter_vector)
+    params_np = _as_numpy_parameter_vector(parameter_vector)
     q_mat = _as_trajectory(q_traj, "q_traj")
     v_mat = _as_trajectory(v_traj, "v_traj")
     if q_mat.shape != v_mat.shape:
         raise ValueError(
             f"q_traj and v_traj must share shape; got {q_mat.shape} vs {v_mat.shape}"
         )
-    out = np.empty((q_mat.shape[0], _STATE_SIZE, _PARAMETER_SIZE), dtype=np.float64)
-    for row in range(q_mat.shape[0]):
-        out[row] = parameter_jacobian(params, q_mat[row], v_mat[row], mode=mode)
-    return out
+    jnp, jax = _require_jax()
+    params = jnp.asarray(params_np)
+    q_batch = jnp.asarray(q_mat)
+    v_batch = jnp.asarray(v_mat)
+    jacobian_fn = _parameter_jacobian_transform(mode, jax, jnp)
+    batched_jacobian = jax.vmap(lambda q_row, v_row: jacobian_fn(params, q_row, v_row))
+    return _as_trajectory_jacobian_output(
+        batched_jacobian(q_batch, v_batch),
+        sample_count=q_mat.shape[0],
+    )
+
+
+def _parameter_jacobian_transform(mode: GradientMode, jax: Any, jnp: Any) -> Any:
+    """Build the parameter Jacobian transform once for one API call."""
+
+    def drift(p: Any, q_vec: Any, v_vec: Any) -> Any:
+        return _ztcf_drift_field_jax(p, q_vec, v_vec, jnp)
+
+    if mode == "forward":
+        return jax.jacfwd(drift, argnums=0)
+    if mode == "reverse":
+        return jax.jacrev(drift, argnums=0)
+    raise ValueError(f"unsupported gradient mode: {mode!r}")
 
 
 def _ztcf_drift_field_jax(
@@ -307,6 +317,35 @@ def _as_jax_parameter_vector(value: ArrayLike, jnp: Any) -> Any:
 
 def _as_jax_state_vector(value: ArrayLike, name: str, jnp: Any) -> Any:
     return jnp.asarray(_as_numpy_state_vector(value, name))
+
+
+def _as_parameter_jacobian_output(value: Any) -> NDArray[np.float64]:
+    array = np.asarray(value, dtype=np.float64)
+    if array.shape != (_STATE_SIZE, _PARAMETER_SIZE):
+        raise FloatingPointError(
+            "parameter jacobian produced shape "
+            f"{array.shape}, expected {(_STATE_SIZE, _PARAMETER_SIZE)}"
+        )
+    if not np.all(np.isfinite(array)):
+        raise FloatingPointError("parameter jacobian produced non-finite values")
+    return array
+
+
+def _as_trajectory_jacobian_output(
+    value: Any,
+    *,
+    sample_count: int,
+) -> NDArray[np.float64]:
+    expected_shape = (sample_count, _STATE_SIZE, _PARAMETER_SIZE)
+    array = np.asarray(value, dtype=np.float64)
+    if array.shape != expected_shape:
+        raise FloatingPointError(
+            f"trajectory jacobian produced shape {array.shape}, "
+            f"expected {expected_shape}"
+        )
+    if not np.all(np.isfinite(array)):
+        raise FloatingPointError("trajectory jacobian produced non-finite values")
+    return array
 
 
 def _as_trajectory(value: ArrayLike, name: str) -> NDArray[np.float64]:
