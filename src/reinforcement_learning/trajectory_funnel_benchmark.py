@@ -8,6 +8,10 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+_CONVERGENCE_EPSILON = 1.0e-12
+_PHASE_REWARD_SCALE = 0.5
+_TRANSVERSE_COST_SCALE = 10.0
+
 
 class TrajectoryFunnelBenchmark:
     """
@@ -32,7 +36,9 @@ class TrajectoryFunnelBenchmark:
         Ignores path geometry, heavily penalizes phase asynchrony.
         """
         assert current_state is not None, "current_state must be provided"
-        error = current_state - target_state
+        error = np.asarray(current_state, dtype=np.float64) - np.asarray(
+            target_state, dtype=np.float64
+        )
         # ⚡ Bolt: np.vdot is ~3x faster than np.sum(error**2) and avoids temporary array allocations
         return float(-np.vdot(error, error))
 
@@ -48,20 +54,61 @@ class TrajectoryFunnelBenchmark:
         """
         # Find the geometrically closest point on the reference trajectory manifold
         assert current_state is not None, "current_state must be provided"
-        # ⚡ Bolt: np.einsum is ~3x faster than np.sum(diff**2, axis=-1)
-        # and avoids temporary array allocations
-        diff = reference_trajectory - current_state
-        squared_distances = np.einsum("...i,...i->...", diff, diff)
-        projected_phase_idx = np.argmin(squared_distances)
-        min_squared_distance = squared_distances[projected_phase_idx]
+        rewards = self._trajectory_funnel_rewards(
+            np.asarray(current_state, dtype=np.float64)[np.newaxis, :],
+            reference_trajectory,
+        )
+        return float(rewards[0])
 
-        # Penalize only the orthogonal deviation from the tube
-        transverse_cost = -10.0 * min_squared_distance
+    def _trajectory_funnel_rewards(
+        self,
+        current_states: np.ndarray,
+        reference_trajectory: np.ndarray,
+    ) -> np.ndarray:
+        """Return trajectory-funnel rewards for a batch of states."""
+        states = np.asarray(current_states, dtype=np.float64)
+        reference = np.asarray(reference_trajectory, dtype=np.float64)
+        assert states.ndim == 2, "current_states must be a 2D array"
+        assert reference.ndim == 2, "reference_trajectory must be a 2D array"
+        assert len(reference) > 0, "reference_trajectory must not be empty"
+        assert states.shape[1] == reference.shape[1], (
+            "current_states and reference_trajectory state dimensions must match"
+        )
+        assert np.all(np.isfinite(states)), "current_states must be finite"
+        assert np.all(np.isfinite(reference)), "reference_trajectory must be finite"
 
-        # Add a small reward for progressive traversal (phase velocity)
-        phase_velocity_reward = 0.5 * (projected_phase_idx / len(reference_trajectory))
+        state_norms = np.einsum("ij,ij->i", states, states, optimize=True)
+        reference_norms = np.einsum("ij,ij->i", reference, reference, optimize=True)
+        squared_distances = (
+            state_norms[:, np.newaxis]
+            + reference_norms[np.newaxis, :]
+            - 2.0 * (states @ reference.T)
+        )
+        np.maximum(squared_distances, 0.0, out=squared_distances)
 
-        return float(transverse_cost + phase_velocity_reward)
+        projected_phase_idx = np.argmin(squared_distances, axis=1)
+        min_squared_distances = squared_distances[
+            np.arange(states.shape[0]), projected_phase_idx
+        ]
+
+        transverse_cost = -_TRANSVERSE_COST_SCALE * min_squared_distances
+        phase_velocity_reward = _PHASE_REWARD_SCALE * (
+            projected_phase_idx / len(reference)
+        )
+        return transverse_cost + phase_velocity_reward
+
+    @staticmethod
+    def _rolling_means(values: np.ndarray, window_size: int) -> np.ndarray:
+        """Return trailing rolling means in O(n) time."""
+        assert window_size > 0, "window_size must be positive"
+        prefix = np.concatenate(
+            (np.array([0.0], dtype=np.float64), np.cumsum(values, dtype=np.float64))
+        )
+        ends = np.arange(1, len(values) + 1)
+        starts = np.maximum(0, ends - window_size)
+        window_sums = prefix[ends] - prefix[starts]
+        window_counts = ends - starts
+        return window_sums / window_counts
 
     def _estimate_convergence(
         self,
@@ -82,24 +129,31 @@ class TrajectoryFunnelBenchmark:
         if not reward_trajectory:
             return 0, float("inf")
 
-        # Convergence: first epoch where rolling mean improvement < threshold
-        rolling_means: list[float] = []
-        for i in range(len(reward_trajectory)):
-            window = reward_trajectory[max(0, i - window_size + 1) : i + 1]
-            rolling_means.append(float(np.mean(window)))
+        assert window_size > 0, "window_size must be positive"
+        assert threshold >= 0.0 and np.isfinite(threshold), (
+            "threshold must be finite and non-negative"
+        )
+        rewards = np.asarray(reward_trajectory, dtype=np.float64)
+        assert np.all(np.isfinite(rewards)), "reward_trajectory must be finite"
 
-        convergence_epoch = len(reward_trajectory)
+        # Convergence: first epoch where rolling mean improvement < threshold
+        rolling_means = self._rolling_means(rewards, window_size)
+
+        convergence_epoch = len(rewards)
         for i in range(window_size, len(rolling_means)):
             prev = rolling_means[i - window_size]
             curr = rolling_means[i]
-            if prev != 0 and abs((curr - prev) / prev) < threshold:
+            denominator = max(abs(prev), _CONVERGENCE_EPSILON)
+            if abs(curr - prev) / denominator < threshold:
                 convergence_epoch = i
                 break
 
         # Terminal variance: std of final window
-        final_window = reward_trajectory[max(0, -window_size) :]
+        final_window = rewards[-window_size:]
         terminal_variance = (
-            float(np.std(final_window)) if len(final_window) > 1 else 0.0
+            float(np.std(final_window, dtype=np.float64))
+            if len(final_window) > 1
+            else 0.0
         )
 
         return convergence_epoch, terminal_variance
@@ -144,6 +198,7 @@ class TrajectoryFunnelBenchmark:
 
         for episode in range(n_episodes):
             noise_scale = max(0.1, 1.0 - episode / n_episodes)  # decaying exploration
+            episode_states: list[np.ndarray] = []
             for step in range(n_steps):
                 state = reference_trajectory[step] + rng.normal(
                     0, noise_scale, size=state_dim
@@ -151,11 +206,16 @@ class TrajectoryFunnelBenchmark:
 
                 if self.mode == "setpoint":
                     reward = self.setpoint_reward(state, target_state)
+                    reward_trajectory.append(reward)
                 else:
-                    reward = self.trajectory_funnel_reward(
-                        state, reference_trajectory, step / n_steps
-                    )
-                reward_trajectory.append(reward)
+                    episode_states.append(state)
+
+            if self.mode == "transverse":
+                episode_rewards = self._trajectory_funnel_rewards(
+                    np.asarray(episode_states, dtype=np.float64),
+                    reference_trajectory,
+                )
+                reward_trajectory.extend(float(reward) for reward in episode_rewards)
 
         convergence_epoch, terminal_variance = self._estimate_convergence(
             reward_trajectory

@@ -152,6 +152,17 @@ class TestTrajectoryFunnelReward:
         # closest is index 0, distance 0
         assert r == pytest.approx(0.0)
 
+    def test_batched_rewards_match_scalar_projection(self) -> None:
+        ref = np.array([[0.0, 0.0], [1.0, 0.25], [2.0, 1.0], [3.0, 2.25]])
+        states = np.array([[0.1, 0.0], [0.9, 0.2], [2.7, 2.0]])
+
+        batched = self.bench._trajectory_funnel_rewards(states, ref)
+        scalar = np.array(
+            [self.bench.trajectory_funnel_reward(state, ref, 0.0) for state in states]
+        )
+
+        assert batched == pytest.approx(scalar)
+
 
 # ---------------------------------------------------------------------------
 # _estimate_convergence
@@ -210,6 +221,34 @@ class TestEstimateConvergence:
         # Should not crash; either converged at some point or len()
         assert 0 <= epoch <= len(traj)
 
+    def test_rolling_means_match_naive_sliding_windows(self) -> None:
+        rewards = np.array([1.0, 3.0, 6.0, 10.0, 15.0, 21.0])
+        expected = np.array(
+            [np.mean(rewards[max(0, i - 2) : i + 1]) for i in range(len(rewards))],
+            dtype=np.float64,
+        )
+
+        assert self.bench._rolling_means(rewards, window_size=3) == pytest.approx(
+            expected
+        )
+
+    def test_near_zero_previous_mean_uses_epsilon_denominator(self) -> None:
+        traj = [1.0e-15] * 3 + [1.1e-15] * 3
+        epoch, _ = self.bench._estimate_convergence(
+            traj, window_size=3, threshold=1.0e-3
+        )
+
+        assert epoch == 3
+
+    def test_terminal_std_uses_float64_accumulation(self) -> None:
+        traj = [np.float32(100_000.0 + offset) for offset in range(16)]
+        _, terminal_std = self.bench._estimate_convergence(
+            traj, window_size=len(traj), threshold=0.0
+        )
+        expected = float(np.std(np.asarray(traj, dtype=np.float64), dtype=np.float64))
+
+        assert terminal_std == pytest.approx(expected, rel=0.0, abs=1.0e-12)
+
 
 # ---------------------------------------------------------------------------
 # simulate_agent_training
@@ -247,6 +286,22 @@ class TestSimulateAgentTraining:
         result = bench.simulate_agent_training(n_episodes=2, n_steps=3, state_dim=2)
         assert result["convergence_epochs"] >= 0
         assert np.isfinite(result["terminal_variance"])
+
+    def test_transverse_training_uses_batched_projection(self) -> None:
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+
+        def per_step_reward_not_expected(
+            _state: np.ndarray, _reference: np.ndarray, _phase: float
+        ) -> float:
+            raise AssertionError(
+                "transverse training should batch reference projection"
+            )
+
+        bench.trajectory_funnel_reward = per_step_reward_not_expected  # type: ignore[method-assign]
+
+        result = bench.simulate_agent_training(n_episodes=2, n_steps=4, state_dim=2)
+
+        assert result["mode"] == "transverse"
 
     def test_modes_produce_different_dynamics(self) -> None:
         sp = TrajectoryFunnelBenchmark(mode="setpoint").simulate_agent_training(
