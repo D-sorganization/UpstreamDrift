@@ -79,6 +79,18 @@ class LandmarkPoint:
     visible: bool = True
 
 
+def _landmark_point_values(points: list[LandmarkPoint]) -> np.ndarray:
+    return np.fromiter(
+        (
+            value
+            for point in points
+            for value in (point.x, point.y, point.z, point.confidence)
+        ),
+        dtype=float,
+        count=len(points) * 4,
+    )
+
+
 @dataclass
 class LandmarkFrame:
     """A frame of landmark data (all points at one timestep)."""
@@ -103,7 +115,7 @@ class LandmarkFrame:
         """
         if not self.points:
             return np.empty((0, 4))
-        return np.array([[p.x, p.y, p.z, p.confidence] for p in self.points])
+        return _landmark_point_values(self.points).reshape(len(self.points), 4)
 
 
 @dataclass
@@ -133,8 +145,19 @@ class LandmarkSession:
                 "Ragged landmark session: frames have differing point counts "
                 f"{sorted(point_counts)}; expected a uniform landmark schema."
             )
-        frame_arrays = [f.to_array() for f in self.frames]
-        return np.stack(frame_arrays, axis=0)
+        point_count = point_counts.pop()
+        if point_count == 0:
+            return np.empty((len(self.frames), 0, 4))
+        return np.fromiter(
+            (
+                value
+                for frame in self.frames
+                for point in frame.points
+                for value in (point.x, point.y, point.z, point.confidence)
+            ),
+            dtype=float,
+            count=len(self.frames) * point_count * 4,
+        ).reshape(len(self.frames), point_count, 4)
 
 
 class FreeMoCapOutputAdapter:

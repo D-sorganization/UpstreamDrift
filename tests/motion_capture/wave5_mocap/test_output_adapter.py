@@ -81,6 +81,27 @@ def test_landmark_session_to_array_stacks_frames() -> None:
     assert arr.shape == (2, 1, 4)
 
 
+def test_landmark_session_to_array_uses_direct_numeric_block(monkeypatch) -> None:
+    points = [LandmarkPoint("a", 1.0, 2.0, 3.0, confidence=0.75)]
+    session = LandmarkSession(
+        session_id="x",
+        frames=[
+            LandmarkFrame(0, 0.0, points=points),
+            LandmarkFrame(1, 0.1, points=points),
+        ],
+    )
+
+    def reject_per_frame_conversion(self: LandmarkFrame) -> np.ndarray:
+        raise AssertionError("session conversion should not build per-frame arrays")
+
+    monkeypatch.setattr(LandmarkFrame, "to_array", reject_per_frame_conversion)
+
+    arr = session.to_array()
+
+    assert arr.shape == (2, 1, 4)
+    np.testing.assert_allclose(arr[:, 0, :], [[1.0, 2.0, 3.0, 0.75]] * 2)
+
+
 def test_mediapipe_landmarks_list_nonempty() -> None:
     assert len(MEDIAPIPE_LANDMARKS) > 0
     assert "nose" in MEDIAPIPE_LANDMARKS
@@ -203,10 +224,11 @@ def test_parse_skips_bad_rows(tmp_path: Path) -> None:
     _write_landmarks_csv(csv_path, rows=2, bad_row=True)
     adapter = FreeMoCapOutputAdapter(tmp_path)
     session = adapter.parse()
-    # 2 good rows; bad row's points were skipped so frame exists but with 0 points
-    # Empty trailing row dropped entirely
+    # 2 good rows plus one schema-preserving bad row; empty trailing row dropped.
     assert len(session.frames) == 3
-    assert session.frames[-1].points == []
+    assert len(session.frames[-1].points) == 2
+    assert all(not point.visible for point in session.frames[-1].points)
+    assert np.isnan(session.to_array()[-1, :, :3]).all()
 
 
 def test_export_to_numpy_requires_session(tmp_path: Path) -> None:
