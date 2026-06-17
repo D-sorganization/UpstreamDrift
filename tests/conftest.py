@@ -856,3 +856,89 @@ def pytest_terminal_summary(
         f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",
         yellow=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Rust-wheel parity enforcement (issue #7601)
+#
+# Several parity / binding suites guard themselves with
+# ``pytest.mark.skipif(not is_rust_available())`` or
+# ``pytest.importorskip("upstream_...")`` so a clean checkout (no maturin
+# build) stays green. The downside is that the main Test lane silently SKIPS
+# those tests instead of exercising the Rust kernels, so a parity regression
+# can land unnoticed.
+#
+# The dedicated ``rust-wheel-parity`` CI job builds + installs all six PyO3
+# wheels and runs the parity suite with ``CI_RUST_WHEELS_EXPECTED=1``. In that
+# lane a missing wheel (and therefore a skipped parity test) is a hard error:
+# the wheel is *expected* to be present, so a skip means the build/install
+# regressed. This hook converts such skips into failures.
+#
+# Note: this lives in the test layer on purpose. The Python facades
+# (``rust_kernel`` et al.) keep their graceful pure-Python fallback untouched.
+# ---------------------------------------------------------------------------
+
+# Python extension modules produced by the maturin wheel build. A skip whose
+# reason names one of these (or the generic "Rust kernel not available"
+# message) is treated as a missing-wheel regression when wheels are expected.
+_RUST_WHEEL_MODULES: tuple[str, ...] = (
+    "upstream_physics",
+    "upstream_mocap_preproc",
+    "upstream_mocap_io",
+    "upstream_muscle",
+    "upstream_motion_matching",
+    "ai_backend",
+)
+
+
+def _rust_wheels_expected() -> bool:
+    return os.environ.get("CI_RUST_WHEELS_EXPECTED") == "1"
+
+
+def _skip_reason_is_missing_rust_wheel(reason: str) -> bool:
+    """Return True if a skip reason indicates an unavailable Rust wheel."""
+    lowered = reason.lower()
+    if any(module in lowered for module in _RUST_WHEEL_MODULES):
+        return True
+    # ``is_rust_available()`` skipif messages and importorskip phrasing.
+    return "rust kernel not available" in lowered or (
+        "rust" in lowered and "not available" in lowered
+    )
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(
+    item: pytest.Item, call: pytest.CallInfo[None]
+) -> Generator[None, Any, None]:
+    """Fail (instead of skip) Rust-parity tests when wheels are expected.
+
+    Precondition: only active when ``CI_RUST_WHEELS_EXPECTED=1``; otherwise the
+    normal skip behaviour is preserved so clean checkouts stay green.
+    Postcondition: a skip caused by a missing Rust wheel becomes a failure so
+    the wheel-installing CI lane cannot pass while silently skipping parity.
+    """
+    outcome = yield
+    if not _rust_wheels_expected():
+        return
+
+    report = outcome.get_result()
+    if not report.skipped:
+        return
+
+    longrepr = report.longrepr
+    reason = ""
+    # Skipped longrepr is typically a (path, lineno, "Skipped: <reason>") tuple.
+    if isinstance(longrepr, tuple) and len(longrepr) == 3:
+        reason = str(longrepr[2])
+    else:
+        reason = str(longrepr)
+
+    if _skip_reason_is_missing_rust_wheel(reason):
+        report.outcome = "failed"
+        report.longrepr = (
+            f"CI_RUST_WHEELS_EXPECTED=1 but {item.nodeid} skipped because a Rust "
+            f"wheel is unavailable ({reason!r}). In the rust-wheel-parity lane "
+            "all six PyO3 wheels must be importable so parity actually runs. "
+            "This skip indicates the maturin build or wheel install regressed. "
+            "See issue #7601."
+        )
