@@ -124,7 +124,91 @@ def test_build_msi(mock_getcwd, mock_chdir, mock_run, monkeypatch, tmp_path) -> 
 @patch("os.getcwd", return_value="/tmp")
 def test_build_msi_fail(mock_getcwd, mock_chdir, mock_run) -> None:
     mock_run.return_value.returncode = 1
-    assert bi.build_msi("hybrid") is False
+    mock_run.return_value.stdout = ""
+    mock_run.return_value.stderr = "msi failed"
+    with pytest.raises(bi.SetupCommandError, match="msi failed"):
+        bi.build_msi("hybrid")
+
+
+@patch("subprocess.run")
+@patch("os.chdir")
+@patch("os.getcwd", return_value="/tmp")
+def test_build_executable_failure_surfaces_setup_diagnostics(
+    mock_getcwd,
+    mock_chdir,
+    mock_run,
+) -> None:
+    mock_run.return_value.returncode = 42
+    mock_run.return_value.stdout = "build stdout detail"
+    mock_run.return_value.stderr = "build stderr detail"
+
+    with pytest.raises(bi.SetupCommandError) as exc_info:
+        bi.build_executable("hybrid")
+
+    message = str(exc_info.value)
+    assert "setup.py build" in message
+    assert "return code 42" in message
+    assert "build stdout detail" in message
+    assert "build stderr detail" in message
+    mock_chdir.assert_any_call("/tmp")
+
+
+@patch("subprocess.run")
+@patch("os.chdir")
+@patch("os.getcwd", return_value="/tmp")
+def test_build_msi_failure_surfaces_setup_diagnostics(
+    mock_getcwd,
+    mock_chdir,
+    mock_run,
+) -> None:
+    mock_run.return_value.returncode = 43
+    mock_run.return_value.stdout = "msi stdout detail"
+    mock_run.return_value.stderr = "msi stderr detail"
+
+    with pytest.raises(bi.SetupCommandError) as exc_info:
+        bi.build_msi("hybrid")
+
+    message = str(exc_info.value)
+    assert "setup.py bdist_msi" in message
+    assert "return code 43" in message
+    assert "msi stdout detail" in message
+    assert "msi stderr detail" in message
+    mock_chdir.assert_any_call("/tmp")
+
+
+@patch("installer.windows.build_installer.check_prerequisites", return_value=True)
+@patch("installer.windows.build_installer.clean_build_dirs")
+@patch("installer.windows.build_installer.install_dependencies", return_value=True)
+@patch(
+    "installer.windows.build_installer.detect_physics_engines", return_value=["mujoco"]
+)
+@patch("installer.windows.build_installer.build_executable")
+def test_main_prints_build_failure_and_exits_one(
+    mock_exe,
+    mock_detect,
+    mock_deps,
+    mock_clean,
+    mock_prereq,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.setattr("sys.argv", ["build_installer.py"])
+    mock_exe.side_effect = bi.SetupCommandError(
+        ("python", "setup.py", "build"),
+        44,
+        "main stdout detail",
+        "main stderr detail",
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        bi.main()
+
+    assert exc.value.code == 1
+    captured = capsys.readouterr()
+    assert "setup.py build" in captured.err
+    assert "return code 44" in captured.err
+    assert "main stdout detail" in captured.err
+    assert "main stderr detail" in captured.err
 
 
 def test_create_installer_info(tmp_path, monkeypatch) -> None:

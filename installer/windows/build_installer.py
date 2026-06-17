@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 from installer.windows.packaging_profiles import (
@@ -28,6 +29,53 @@ BUILD_DIR = INSTALLER_DIR / "build"
 DIST_DIR = INSTALLER_DIR / "dist"
 
 logger = logging.getLogger(__name__)
+
+
+class SetupCommandError(RuntimeError):
+    """Raised when an installer setup.py command exits unsuccessfully."""
+
+    def __init__(
+        self,
+        command: Sequence[str],
+        returncode: int,
+        stdout: str | None,
+        stderr: str | None,
+    ) -> None:
+        self.command = tuple(str(part) for part in command)
+        self.returncode = returncode
+        self.stdout = stdout or ""
+        self.stderr = stderr or ""
+        super().__init__(self._format_message())
+
+    def _format_message(self) -> str:
+        command_text = " ".join(self.command)
+        stdout = self.stdout.rstrip() or "<empty>"
+        stderr = self.stderr.rstrip() or "<empty>"
+        return (
+            "setup.py command failed: "
+            f"{command_text} (return code {self.returncode})\n"
+            f"stdout:\n{stdout}\n"
+            f"stderr:\n{stderr}"
+        )
+
+
+def _run_setup_command(
+    setup_args: Sequence[str],
+    env: dict[str, str],
+) -> subprocess.CompletedProcess[str]:
+    """Run setup.py and preserve captured output in failures."""
+    command = [sys.executable, "setup.py", *setup_args]
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    if result.returncode != 0:
+        raise SetupCommandError(
+            command, result.returncode, result.stdout, result.stderr
+        )
+    return result
 
 
 def check_prerequisites() -> bool:
@@ -113,15 +161,11 @@ def build_executable(
     os.chdir(INSTALLER_DIR)
 
     try:
-        # Run setup.py build
-        result = subprocess.run(
-            [sys.executable, "setup.py", "build"],
-            capture_output=True,
-            text=True,
+        _run_setup_command(
+            ["build"],
             env=build_profile_environment(profile, provider_roots),
         )
-
-        return result.returncode == 0
+        return True
 
     finally:
         os.chdir(original_cwd)
@@ -139,16 +183,10 @@ def build_msi(
     os.chdir(INSTALLER_DIR)
 
     try:
-        # Run setup.py bdist_msi
-        result = subprocess.run(
-            [sys.executable, "setup.py", "bdist_msi"],
-            capture_output=True,
-            text=True,
+        _run_setup_command(
+            ["bdist_msi"],
             env=build_profile_environment(profile, provider_roots),
         )
-
-        if result.returncode != 0:
-            return False
 
         # Find the generated MSI file
         msi_files = list(DIST_DIR.glob("*.msi"))
@@ -245,17 +283,21 @@ def main() -> None:
     if not available_engines:
         sys.exit(1)
 
-    # Build executable
-    if not build_executable(args.profile, provider_roots):
-        sys.exit(1)
-
-    # Build MSI (unless exe-only)
-    if not args.exe_only:
-        if not build_msi(args.profile, provider_roots):
+    try:
+        # Build executable
+        if not build_executable(args.profile, provider_roots):
             sys.exit(1)
 
-        # Create installer info
-        create_installer_info(args.profile, provider_roots)
+        # Build MSI (unless exe-only)
+        if not args.exe_only:
+            if not build_msi(args.profile, provider_roots):
+                sys.exit(1)
+
+            # Create installer info
+            create_installer_info(args.profile, provider_roots)
+    except SetupCommandError as exc:
+        sys.stderr.write(f"{exc}\n")
+        sys.exit(1)
 
     # List output files
     output_files = list(DIST_DIR.glob("*"))
