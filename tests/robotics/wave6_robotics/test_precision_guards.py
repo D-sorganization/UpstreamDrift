@@ -15,13 +15,22 @@ from src.robotics.sensing.imu_sensor import IMUSensor
 pytestmark = pytest.mark.unit
 
 
-def test_normalize_angle_wraps_large_values_without_looping() -> None:
+@pytest.mark.parametrize(
+    ("angle", "expected"),
+    [
+        (1_000_000_000.0 * math.tau + 0.25, 0.25),
+        (-(1_000_000_000.0 * math.tau + 0.25), -0.25),
+    ],
+)
+def test_normalize_angle_wraps_large_values_without_looping(
+    angle: float, expected: float
+) -> None:
     planner = FootstepPlanner(GaitParameters())
 
-    wrapped = planner._normalize_angle(1_000_000.0 * math.pi + 0.25)
+    wrapped = planner._normalize_angle(angle)
 
     assert -math.pi <= wrapped <= math.pi
-    assert wrapped == pytest.approx(0.25, abs=1e-9)
+    assert wrapped == pytest.approx(expected, abs=1e-6)
 
 
 def test_normalize_angle_preserves_nan_and_rejects_infinite() -> None:
