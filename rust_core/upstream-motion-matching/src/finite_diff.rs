@@ -87,6 +87,85 @@ pub struct FiniteDiffResult {
     pub qddot: Vec<Vec<f64>>,
 }
 
+#[derive(Debug, Clone)]
+struct RowMajorMatrix {
+    data: Vec<f64>,
+    rows: usize,
+    cols: usize,
+}
+
+impl RowMajorMatrix {
+    fn from_rows(q: &[Vec<f64>]) -> Result<Self, FiniteDiffError> {
+        debug_assert!(!q.is_empty());
+        let rows = q.len();
+        let cols = q[0].len();
+        let mut data = Vec::with_capacity(rows * cols);
+
+        for (row_idx, row) in q.iter().enumerate() {
+            if row.len() != cols {
+                return Err(FiniteDiffError::RaggedRows {
+                    expected: cols,
+                    got: row.len(),
+                    row: row_idx,
+                });
+            }
+            for (col_idx, &v) in row.iter().enumerate() {
+                if !v.is_finite() {
+                    return Err(FiniteDiffError::NonFiniteInput {
+                        row: row_idx,
+                        col: col_idx,
+                        value: v,
+                    });
+                }
+                data.push(v);
+            }
+        }
+
+        debug_assert_eq!(data.len(), rows * cols);
+        Ok(Self { data, rows, cols })
+    }
+
+    fn zeroed(rows: usize, cols: usize) -> Self {
+        Self {
+            data: vec![0.0_f64; rows * cols],
+            rows,
+            cols,
+        }
+    }
+
+    fn row(&self, row: usize) -> &[f64] {
+        debug_assert!(row < self.rows);
+        let start = row * self.cols;
+        &self.data[start..start + self.cols]
+    }
+
+    fn row_mut(&mut self, row: usize) -> &mut [f64] {
+        debug_assert!(row < self.rows);
+        let start = row * self.cols;
+        &mut self.data[start..start + self.cols]
+    }
+
+    fn copy_row(&mut self, src: usize, dst: usize) {
+        debug_assert!(src < self.rows);
+        debug_assert!(dst < self.rows);
+        let src_start = src * self.cols;
+        let dst_start = dst * self.cols;
+        self.data
+            .copy_within(src_start..src_start + self.cols, dst_start);
+    }
+
+    fn into_rows(self) -> Vec<Vec<f64>> {
+        if self.cols == 0 {
+            return vec![Vec::new(); self.rows];
+        }
+
+        self.data
+            .chunks_exact(self.cols)
+            .map(|row| row.to_vec())
+            .collect()
+    }
+}
+
 /// Compute `qdot` and `qddot` from a uniformly sampled `q` trajectory.
 ///
 /// # Arguments
@@ -121,28 +200,10 @@ pub fn finite_diff_uniform(q: &[Vec<f64>], dt: f64) -> Result<FiniteDiffResult, 
     if !dt.is_finite() || dt <= 0.0 {
         return Err(FiniteDiffError::InvalidDt(dt));
     }
-    let d = q[0].len();
-    for (row_idx, row) in q.iter().enumerate() {
-        if row.len() != d {
-            return Err(FiniteDiffError::RaggedRows {
-                expected: d,
-                got: row.len(),
-                row: row_idx,
-            });
-        }
-        for (col_idx, &v) in row.iter().enumerate() {
-            if !v.is_finite() {
-                return Err(FiniteDiffError::NonFiniteInput {
-                    row: row_idx,
-                    col: col_idx,
-                    value: v,
-                });
-            }
-        }
-    }
-
-    let mut qdot = vec![vec![0.0_f64; d]; n];
-    let mut qddot = vec![vec![0.0_f64; d]; n];
+    let q = RowMajorMatrix::from_rows(q)?;
+    let d = q.cols;
+    let mut qdot = RowMajorMatrix::zeroed(n, d);
+    let mut qddot = RowMajorMatrix::zeroed(n, d);
 
     let inv_2dt = 0.5 / dt;
     let inv_dt = 1.0 / dt;
@@ -150,11 +211,11 @@ pub fn finite_diff_uniform(q: &[Vec<f64>], dt: f64) -> Result<FiniteDiffResult, 
 
     // Interior central differences.
     for i in 1..n - 1 {
-        let qm = &q[i - 1];
-        let qc = &q[i];
-        let qp = &q[i + 1];
-        let qd = &mut qdot[i];
-        let qdd = &mut qddot[i];
+        let qm = q.row(i - 1);
+        let qc = q.row(i);
+        let qp = q.row(i + 1);
+        let qd = qdot.row_mut(i);
+        let qdd = qddot.row_mut(i);
         for j in 0..d {
             qd[j] = (qp[j] - qm[j]) * inv_2dt;
             qdd[j] = (qp[j] - 2.0 * qc[j] + qm[j]) * inv_dt2;
@@ -163,17 +224,17 @@ pub fn finite_diff_uniform(q: &[Vec<f64>], dt: f64) -> Result<FiniteDiffResult, 
 
     // Boundary qdot: one-sided.
     {
-        let q0 = &q[0];
-        let q1 = &q[1];
-        let qd0 = &mut qdot[0];
+        let q0 = q.row(0);
+        let q1 = q.row(1);
+        let qd0 = qdot.row_mut(0);
         for j in 0..d {
             qd0[j] = (q1[j] - q0[j]) * inv_dt;
         }
     }
     {
-        let qn1 = &q[n - 1];
-        let qn2 = &q[n - 2];
-        let qd_last = &mut qdot[n - 1];
+        let qn1 = q.row(n - 1);
+        let qn2 = q.row(n - 2);
+        let qd_last = qdot.row_mut(n - 1);
         for j in 0..d {
             qd_last[j] = (qn1[j] - qn2[j]) * inv_dt;
         }
@@ -183,11 +244,17 @@ pub fn finite_diff_uniform(q: &[Vec<f64>], dt: f64) -> Result<FiniteDiffResult, 
     // Python reference's `if len(times) >= 3` branch — for N == 2 the
     // boundary qddot stay zero.
     if n >= 3 {
-        qddot[0] = qddot[1].clone();
-        qddot[n - 1] = qddot[n - 2].clone();
+        qddot.copy_row(1, 0);
+        qddot.copy_row(n - 2, n - 1);
     }
 
-    Ok(FiniteDiffResult { qdot, qddot })
+    debug_assert_eq!(qdot.data.len(), n * d);
+    debug_assert_eq!(qddot.data.len(), n * d);
+
+    Ok(FiniteDiffResult {
+        qdot: qdot.into_rows(),
+        qddot: qddot.into_rows(),
+    })
 }
 
 #[cfg(test)]

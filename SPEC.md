@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized Rust motion-matching finite differences for issue
+  #7575: the internal q/qdot/qddot working storage now uses contiguous
+  row-major buffers instead of scattered nested vectors, while preserving the
+  public nested-vector `FiniteDiffResult` API and adding irregular multi-DOF
+  parity coverage.
 - **2026-06-17** - Optimized the Rust mocap preprocessing median filter for
   issue #7574: `medfilt_1d` now uses introselect (`select_nth_unstable_by`) to
   find the padded-window median without fully sorting each window, preserving

@@ -57,6 +57,41 @@ fn output_shape_matches_input_shape() {
 }
 
 #[test]
+fn irregular_multi_dof_matches_reference_values() {
+    let q = vec![
+        vec![0.0, 1.0, -2.0],
+        vec![0.2, 0.4, -1.7],
+        vec![0.9, -0.3, -1.0],
+        vec![2.1, -1.1, 0.1],
+    ];
+    let r = finite_diff_uniform(&q, 0.2).unwrap();
+
+    let expected_qdot = [
+        [1.0, -3.0, 1.5],
+        [2.25, -3.25, 2.5],
+        [4.75, -3.75, 4.5],
+        [6.0, -4.0, 5.5],
+    ];
+    let expected_qddot = [
+        [12.5, -2.5, 10.0],
+        [12.5, -2.5, 10.0],
+        [12.5, -2.5, 10.0],
+        [12.5, -2.5, 10.0],
+    ];
+
+    for (actual, expected) in r.qdot.iter().zip(expected_qdot) {
+        for (&actual, expected) in actual.iter().zip(expected) {
+            assert_relative_eq!(actual, expected, max_relative = 1e-12, epsilon = 1e-12);
+        }
+    }
+    for (actual, expected) in r.qddot.iter().zip(expected_qddot) {
+        for (&actual, expected) in actual.iter().zip(expected) {
+            assert_relative_eq!(actual, expected, max_relative = 1e-12, epsilon = 1e-12);
+        }
+    }
+}
+
+#[test]
 fn boundary_qddot_copies_neighbor_when_n_ge_3() {
     // Quadratic data: interior qddot is exactly the constant. The
     // boundary frames must equal the interior — that's the reference
