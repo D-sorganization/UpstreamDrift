@@ -160,7 +160,7 @@ def test_leaderboard_cli_default_output_path(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 def test_leaderboard_cli_nonexistent_dir_fails(tmp_path: Path) -> None:
-    """The CLI fails gracefully if results directory doesn't exist."""
+    """The CLI fails with an actionable diagnostic for a missing results dir."""
     nonexistent = tmp_path / "nonexistent"
 
     cmd = [
@@ -173,7 +173,47 @@ def test_leaderboard_cli_nonexistent_dir_fails(tmp_path: Path) -> None:
         "--output",
         str(tmp_path / "output.md"),
     ]
-    result = subprocess.run(cmd, cwd=_REPO_ROOT, env=_SUBPROCESS_ENV)
+    result = subprocess.run(
+        cmd,
+        cwd=_REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+    )
 
     # Should fail with exit code 1
     assert result.returncode == 1
+    assert "results directory does not exist" in result.stderr
+    assert str(nonexistent.resolve()) in result.stderr
+
+
+@pytest.mark.unit
+def test_leaderboard_cli_malformed_result_json_reports_path(
+    tmp_path: Path,
+) -> None:
+    """Malformed result JSON fails nonzero and names the bad input file."""
+    bad_file = tmp_path / "results" / "test_trial" / "simscape.json"
+    bad_file.parent.mkdir(parents=True)
+    bad_file.write_text("{not json", encoding="utf-8")
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "src.shared.python.motion_matching",
+        "leaderboard",
+        "--results-dir",
+        str(tmp_path / "results"),
+        "--output",
+        str(tmp_path / "output.md"),
+    ]
+    result = subprocess.run(
+        cmd,
+        cwd=_REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "could not parse" in result.stderr
+    assert str(bad_file.resolve()) in result.stderr

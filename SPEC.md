@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.401                                            |
+| **Spec Version**        | 1.0.402                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Hardened durable task and motion-matching CLI contracts for
+  issues #7549 and #7552: completed task persistence now distinguishes
+  `None` from empty result objects, durable SQLite shutdown releases the
+  database file on Windows, and the motion-matching leaderboard CLI writes
+  actionable stderr diagnostics for bad paths or malformed result JSON instead
+  of exiting `1` silently.
 - **2026-06-17** - Tightened the biomechanics analysis request contract for
   issues #7550 and #7551: `AnalysisRequest.parameters` is now accepted as a
   first-class analysis payload source instead of being silently ignored, and

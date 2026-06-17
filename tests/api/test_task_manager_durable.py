@@ -1,5 +1,6 @@
 """Tests for the durable task manager."""
 
+import asyncio
 import time
 from pathlib import Path
 
@@ -17,7 +18,10 @@ def sqlite_backend(tmp_path: Path):
     """Provide a temporary SQLite backend."""
     db_path = tmp_path / "tasks.db"
     backend = SQLiteBackend(db_path=db_path)
-    return backend
+    try:
+        yield backend
+    finally:
+        backend.close()
 
 
 @pytest.fixture
@@ -78,6 +82,35 @@ class TestSQLiteBackend:
         # Delete
         assert sqlite_backend.delete_task("test-task-1") is True
         assert sqlite_backend.get_task("test-task-1") is None
+
+    def test_empty_result_objects_survive_reload(self, tmp_path: Path):
+        """Completed empty result payloads are not normalized to None."""
+        db_path = tmp_path / "tasks.db"
+        backend = SQLiteBackend(db_path=db_path)
+        try:
+            empty_dict = TaskRecord(
+                task_id="empty-dict",
+                status=TaskStatus.COMPLETED.value,
+                result={},
+                completed_at=time.time(),
+            )
+            empty_items = TaskRecord(
+                task_id="empty-items",
+                status=TaskStatus.COMPLETED.value,
+                result={"items": []},
+                completed_at=time.time(),
+            )
+            backend.create_task(empty_dict)
+            backend.create_task(empty_items)
+        finally:
+            backend.close()
+
+        reloaded = SQLiteBackend(db_path=db_path)
+        try:
+            assert reloaded.get_task("empty-dict").result == {}
+            assert reloaded.get_task("empty-items").result == {"items": []}
+        finally:
+            reloaded.close()
 
     def test_find_by_run_id(self, sqlite_backend: SQLiteBackend):
         """Test finding task by idempotency key."""
@@ -314,6 +347,25 @@ class TestDurableTaskManager:
         assert manager._closed is True
         assert manager._cleanup_task.cancelled() or manager._cleanup_task.done()
 
+    @pytest.mark.asyncio
+    async def test_shutdown_releases_sqlite_db_for_deletion(self, tmp_path: Path):
+        """Shutdown closes SQLite resources so Windows can delete the DB file."""
+        db_path = tmp_path / "tasks.db"
+        backend = SQLiteBackend(db_path=db_path)
+        manager = DurableTaskManager(backend=backend, auto_cleanup=False)
+
+        task_id = manager.create_task()
+        assert manager.mark_completed(task_id, {}) is True
+
+        await manager.shutdown()
+
+        assert getattr(backend._local, "conn", None) is None
+        for suffix in ("", "-wal", "-shm"):
+            path = Path(f"{db_path}{suffix}")
+            if path.exists():
+                path.unlink()
+        assert not db_path.exists()
+
 
 class TestDurableTaskManagerAutoCleanupFallback:
     """#6979: DurableTaskManager auto-cleanup fallback when no event loop."""
@@ -327,19 +379,24 @@ class TestDurableTaskManagerAutoCleanupFallback:
         db_path = tmp_path / "tasks.db"
         backend = SQLiteBackend(db_path=db_path)
 
-        with caplog.at_level(logging.WARNING):
-            manager = DurableTaskManager(
-                backend=backend, auto_cleanup=True, cleanup_interval=60
+        manager = None
+        try:
+            with caplog.at_level(logging.WARNING):
+                manager = DurableTaskManager(
+                    backend=backend, auto_cleanup=True, cleanup_interval=60
+                )
+
+            warning_text = " ".join(r.message for r in caplog.records).lower()
+            assert "no running event loop" in warning_text or "daemon" in warning_text, (
+                f"Expected warning about missing event loop, got: {caplog.text!r}"
             )
 
-        warning_text = " ".join(r.message for r in caplog.records).lower()
-        assert "no running event loop" in warning_text or "daemon" in warning_text, (
-            f"Expected warning about missing event loop, got: {caplog.text!r}"
-        )
-
-        assert manager._cleanup_thread is not None, "Expected daemon cleanup thread"
-        assert manager._cleanup_thread.is_alive()
-        assert manager._cleanup_thread.daemon
+            assert manager._cleanup_thread is not None, "Expected daemon cleanup thread"
+            assert manager._cleanup_thread.is_alive()
+            assert manager._cleanup_thread.daemon
+        finally:
+            if manager is not None:
+                asyncio.run(manager.shutdown())
 
     def test_daemon_thread_runs_cleanup(self, tmp_path: Path) -> None:
         """Daemon cleanup thread must actually delete expired tasks."""
@@ -351,30 +408,28 @@ class TestDurableTaskManagerAutoCleanupFallback:
         manager = DurableTaskManager(
             backend=backend, auto_cleanup=True, cleanup_interval=1
         )
+        try:
+            # Insert an already-expired task
+            now = time.time()
+            expired_record = TaskRecord(
+                task_id="expired-task",
+                status=TaskStatus.PENDING.value,
+                created_at=now - 7200.0,
+                ttl_seconds=3600,
+            )
+            backend.create_task(expired_record)
 
-        # Insert an already-expired task
-        now = time.time()
-        expired_record = TaskRecord(
-            task_id="expired-task",
-            status=TaskStatus.PENDING.value,
-            created_at=now - 7200.0,
-            ttl_seconds=3600,
-        )
-        backend.create_task(expired_record)
+            assert backend.get_task("expired-task") is not None
 
-        assert backend.get_task("expired-task") is not None
+            # Wait up to 3 s for the daemon thread's first cleanup sweep
+            deadline = time.time() + 3.0
+            while time.time() < deadline:
+                if backend.get_task("expired-task") is None:
+                    break
+                time.sleep(0.1)
 
-        # Wait up to 3 s for the daemon thread's first cleanup sweep
-        deadline = time.time() + 3.0
-        while time.time() < deadline:
-            if backend.get_task("expired-task") is None:
-                break
-            time.sleep(0.1)
-
-        manager._closed = True
-        if manager._cleanup_stop is not None:
-            manager._cleanup_stop.set()
-
-        assert backend.get_task("expired-task") is None, (
-            "Daemon cleanup thread did not delete the expired task within 3 s"
-        )
+            assert backend.get_task("expired-task") is None, (
+                "Daemon cleanup thread did not delete the expired task within 3 s"
+            )
+        finally:
+            asyncio.run(manager.shutdown())

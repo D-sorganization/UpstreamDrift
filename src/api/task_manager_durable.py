@@ -144,6 +144,10 @@ class StorageBackend(Protocol):
         """Clean up expired tasks, return count deleted."""
         ...
 
+    def close(self) -> None:
+        """Release any resources owned by the backend."""
+        ...
+
 
 class SQLiteBackend:
     """SQLite-based durable storage backend.
@@ -272,7 +276,7 @@ class SQLiteBackend:
             config_hash=row["config_hash"] or "",
             code_version=row["code_version"] or "",
             progress=row["progress"],
-            result=json.loads(row["result"]) if row["result"] else None,
+            result=json.loads(row["result"]) if row["result"] is not None else None,
             error=row["error"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
@@ -298,7 +302,7 @@ class SQLiteBackend:
             record.config_hash,
             record.code_version,
             record.progress,
-            json.dumps(record.result) if record.result else None,
+            json.dumps(record.result) if record.result is not None else None,
             record.error,
             record.created_at,
             record.updated_at,
@@ -360,7 +364,7 @@ class SQLiteBackend:
                     record.config_hash,
                     record.code_version,
                     record.progress,
-                    json.dumps(record.result) if record.result else None,
+                    json.dumps(record.result) if record.result is not None else None,
                     record.error,
                     record.updated_at,
                     record.heartbeat_at,
@@ -510,6 +514,15 @@ class SQLiteBackend:
                 logger.debug("Cleaned up expired task: %s", task.task_id)
         return count
 
+    def close(self) -> None:
+        """Close the thread-local SQLite connection for the current thread."""
+        with self._lock:
+            conn = getattr(self._local, "conn", None)
+            if conn is None:
+                return
+            conn.close()
+            self._local.conn = None
+
 
 class DurableTaskManager:
     """Production-ready task manager with durable storage.
@@ -586,15 +599,18 @@ class DurableTaskManager:
 
     def _cleanup_loop_sync(self) -> None:
         """Daemon-thread fallback for periodic cleanup when no event loop is present."""
-        while not self._cleanup_stop.wait(timeout=self._cleanup_interval):
-            if self._closed:
-                return
-            try:
-                count = self.backend.cleanup()
-                if count > 0:
-                    logger.info("Cleaned up %d expired tasks", count)
-            except Exception as e:  # noqa: BLE001
-                logger.error("Cleanup error: %s", e)
+        try:
+            while not self._cleanup_stop.wait(timeout=self._cleanup_interval):
+                if self._closed:
+                    return
+                try:
+                    count = self.backend.cleanup()
+                    if count > 0:
+                        logger.info("Cleaned up %d expired tasks", count)
+                except Exception as e:  # noqa: BLE001
+                    logger.error("Cleanup error: %s", e)
+        finally:
+            self.backend.close()
 
     def create_task(
         self,
@@ -817,4 +833,5 @@ class DurableTaskManager:
         if self._cleanup_thread is not None:
             self._cleanup_stop.set()
             self._cleanup_thread.join(timeout=5.0)
+        self.backend.close()
         logger.info("DurableTaskManager shutdown complete")

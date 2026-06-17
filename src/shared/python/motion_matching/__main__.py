@@ -14,6 +14,11 @@ from pathlib import Path
 from src.shared.python.motion_matching.leaderboard import generate_report
 
 
+def _print_error(message: str) -> None:
+    """Emit a leaderboard CLI diagnostic on stderr."""
+    sys.stderr.write(f"motion_matching leaderboard: {message}\n")
+
+
 def leaderboard_cli(args: argparse.Namespace) -> int:
     """Generate a cross-engine leaderboard from a results directory.
 
@@ -28,15 +33,18 @@ def leaderboard_cli(args: argparse.Namespace) -> int:
     """
     results_dir = Path(args.results_dir).resolve()
     if not results_dir.exists():
+        _print_error(f"results directory does not exist: {results_dir}")
         return 1
     if not results_dir.is_dir():
+        _print_error(f"results path is not a directory: {results_dir}")
         return 1
 
     output_path = Path(args.output).resolve()
     try:
         generate_report(results_dir, output_path)
         return 0
-    except Exception:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
+        _print_error(f"failed to generate report from {results_dir}: {exc}")
         return 1
 
 
