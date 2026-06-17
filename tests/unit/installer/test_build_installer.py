@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 import installer.windows.build_installer as bi
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_prerequisites(monkeypatch) -> None:
     original_import = __import__

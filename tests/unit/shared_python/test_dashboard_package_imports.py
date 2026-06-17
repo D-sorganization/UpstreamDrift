@@ -5,6 +5,10 @@ from __future__ import annotations
 import importlib
 import sys
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 def _drop_modules(*module_names: str) -> None:
     for module_name in module_names:

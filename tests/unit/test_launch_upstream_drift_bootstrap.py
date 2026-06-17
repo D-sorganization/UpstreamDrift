@@ -8,6 +8,8 @@ import pytest
 
 import launch_upstream_drift
 
+pytestmark = pytest.mark.unit
+
 
 def test_launcher_bootstrap_defaults_to_repo_and_vendored_tools(tmp_path: Path) -> None:
     repo_root = tmp_path / "UpstreamDrift"

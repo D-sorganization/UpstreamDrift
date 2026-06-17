@@ -19,6 +19,8 @@ from src.research.multi_robot.system import (
     TaskType,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFormationConfig:
     def test_line_formation(self) -> None:

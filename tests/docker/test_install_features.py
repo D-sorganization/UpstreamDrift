@@ -8,6 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INSTALL_FEATURES_PATH = REPO_ROOT / "scripts" / "docker" / "install_features.py"

@@ -12,6 +12,8 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.character_builder import router
 
+pytestmark = pytest.mark.unit
+
 
 def _install_fake_character_builder_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     package = ModuleType("humanoid_character_builder")

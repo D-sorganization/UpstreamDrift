@@ -10,6 +10,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+pytestmark = pytest.mark.unit
+
 
 def test_theme_route_imports_without_desktop_theme_manager(
     monkeypatch: pytest.MonkeyPatch,

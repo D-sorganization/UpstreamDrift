@@ -10,6 +10,8 @@ from src.learning.retargeting.retargeter import (
     SkeletonConfig,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _simple_skel(name: str = "s") -> SkeletonConfig:
     return SkeletonConfig(

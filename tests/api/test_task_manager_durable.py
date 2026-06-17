@@ -12,6 +12,8 @@ from src.api.task_manager_durable import (
     TaskStatus,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def sqlite_backend(tmp_path: Path):
@@ -387,9 +389,9 @@ class TestDurableTaskManagerAutoCleanupFallback:
                 )
 
             warning_text = " ".join(r.message for r in caplog.records).lower()
-            assert "no running event loop" in warning_text or "daemon" in warning_text, (
-                f"Expected warning about missing event loop, got: {caplog.text!r}"
-            )
+            assert (
+                "no running event loop" in warning_text or "daemon" in warning_text
+            ), f"Expected warning about missing event loop, got: {caplog.text!r}"
 
             assert manager._cleanup_thread is not None, "Expected daemon cleanup thread"
             assert manager._cleanup_thread.is_alive()

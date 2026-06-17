@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from src.api.routes.analysis import router
 from src.api.dependencies import get_analysis_service
 
+pytestmark = pytest.mark.unit
+
 
 class MockAnalysisService:
     async def analyze_biomechanics(self, request):

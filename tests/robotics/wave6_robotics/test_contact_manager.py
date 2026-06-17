@@ -10,6 +10,8 @@ from src.robotics.contact.contact_manager import ContactManager
 from src.robotics.core.exceptions import ContactError
 from src.robotics.core.types import ContactState
 
+pytestmark = pytest.mark.unit
+
 
 class FakeRoboticsEngine:
     """Implements RoboticsCapable but not ContactCapable."""

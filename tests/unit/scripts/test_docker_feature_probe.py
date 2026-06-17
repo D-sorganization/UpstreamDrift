@@ -9,6 +9,8 @@ from scripts.ci import docker_feature_probe as probe
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
+pytestmark = pytest.mark.unit
+
 
 def test_extract_status_from_registry_json() -> None:
     stdout = '{\n  "name": "api",\n  "status": "AVAILABLE"\n}\n'
