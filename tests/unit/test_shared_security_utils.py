@@ -130,6 +130,7 @@ def test_download_to_file_rejects_nonpositive_timeout(tmp_path: Path) -> None:
         download_to_file("http://127.0.0.1/x", tmp_path / "out", timeout=0)
 
 
+@pytest.mark.unit
 def test_download_to_file_rejects_local_file_scheme_before_open(
     tmp_path: Path,
 ) -> None:

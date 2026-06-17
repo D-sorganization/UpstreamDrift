@@ -88,6 +88,7 @@ def test_process_svgs_is_idempotent_for_existing_shadow_wrapper(tmp_path):
     assert len(_shadow_wrappers(svg_path)) == 1
 
 
+@pytest.mark.unit
 def test_process_svgs_rejects_entity_bearing_svg(tmp_path):
     svg_path = tmp_path / "bad.svg"
     svg_path.write_text(
