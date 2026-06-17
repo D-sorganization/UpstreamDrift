@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.research.multi_robot import coordination as coord
 from src.research.multi_robot.coordination import (
     CooperativeManipulation,
     FormationConfig,
@@ -167,6 +168,32 @@ class TestCooperativeManipulation:
         # total z force ~ 10
         z_total = forces[0][2] + forces[1][2]
         assert z_total == pytest.approx(10.0, rel=1e-3)
+
+    def test_compute_load_sharing_uses_solve_not_inverse(self, monkeypatch) -> None:
+        """Test."""
+        cm = CooperativeManipulation(["r1", "r2"])
+        cm.set_grasp_points([np.array([1.0, 0, 0]), np.array([-1.0, 0, 0])])
+        solve_calls = 0
+        real_solve = coord.np.linalg.solve
+
+        def failing_inv(_: np.ndarray) -> np.ndarray:
+            raise AssertionError("explicit inverse should not be formed")
+
+        def counting_solve(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+            nonlocal solve_calls
+            solve_calls += 1
+            return real_solve(a, b)
+
+        monkeypatch.setattr(coord.np.linalg, "inv", failing_inv)
+        monkeypatch.setattr(coord.np.linalg, "solve", counting_solve)
+
+        forces = cm.compute_load_sharing(
+            np.array([0.0, 0, 10, 0, 0, 0]),
+            np.array([0.0, 0, 0, 1, 0, 0, 0]),
+        )
+
+        assert solve_calls == 1
+        assert forces[0][2] + forces[1][2] == pytest.approx(10.0, rel=1e-3)
 
     def test_plan_cooperative_motion(self) -> None:
         """Test."""

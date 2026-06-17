@@ -594,8 +594,9 @@ class FootstepPlanner(ContractChecker):
         """Normalize angle to [-pi, pi]."""
         if angle is None:
             raise ValueError("angle must be provided")
-        while angle > np.pi:
-            angle -= 2 * np.pi
-        while angle < -np.pi:
-            angle += 2 * np.pi
-        return angle
+        angle_float = float(angle)
+        if np.isnan(angle_float):
+            return angle_float
+        if not np.isfinite(angle_float):
+            raise ValueError("angle must be finite")
+        return float((angle_float + np.pi) % (2 * np.pi) - np.pi)

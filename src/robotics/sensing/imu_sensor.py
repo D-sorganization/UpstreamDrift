@@ -26,6 +26,8 @@ from src.robotics.sensing.noise_models import (
 
 
 DEFAULT_IMU_GRAVITY_M_S2 = 9.81
+QUATERNION_NORM_EPS = 1e-12
+QUATERNION_RENORMALIZE_TOL = 1e-10
 
 
 @dataclass
@@ -257,7 +259,17 @@ class IMUSensor:
         # where omega = [0, wx, wy, wz]
         if angular_vel is None:
             raise ValueError("angular_vel must be provided")
-        angular_vel_arr = np.asarray(angular_vel, dtype=float).reshape(-1)
+        angular_vel = np.asarray(angular_vel, dtype=np.float64)
+        if angular_vel.shape != (3,):
+            raise ValueError(f"angular_vel must be (3,), got {angular_vel.shape}")
+        if not np.all(np.isfinite(angular_vel)):
+            raise ValueError("angular_vel must be finite")
+        if dt is None:
+            raise ValueError("dt must be provided")
+        dt_float = float(dt)
+        if not math.isfinite(dt_float):
+            raise ValueError("dt must be finite")
+        angular_vel_arr = angular_vel.reshape(-1)
         omega_mag = float(
             0.0 if angular_vel_arr.size == 0 else math.hypot(*angular_vel_arr)
         )
@@ -266,7 +278,7 @@ class IMUSensor:
             return
 
         # Compute rotation quaternion
-        half_angle = 0.5 * omega_mag * dt
+        half_angle = 0.5 * omega_mag * dt_float
         axis = angular_vel / omega_mag
 
         dq = np.array(
@@ -281,11 +293,7 @@ class IMUSensor:
         # Quaternion multiplication: q_new = q * dq
         self._orientation = _quaternion_multiply(self._orientation, dq)
 
-        # Normalize
-        orientation_arr = np.asarray(self._orientation, dtype=float).reshape(-1)
-        self._orientation /= float(
-            1.0 if orientation_arr.size == 0 else math.hypot(*orientation_arr)
-        )
+        self._orientation = _normalize_quaternion(self._orientation, lazy=True)
 
     def reset(self) -> None:
         """Reset sensor state."""
@@ -305,12 +313,10 @@ class IMUSensor:
         quaternion = np.asarray(quaternion, dtype=np.float64)
         if quaternion.shape != (4,):
             raise ValueError(f"Quaternion must be (4,), got {quaternion.shape}")
+        if not np.all(np.isfinite(quaternion)):
+            raise ValueError("Quaternion must be finite")
 
-        # Normalize
-        quaternion_arr = np.asarray(quaternion, dtype=float).reshape(-1)
-        self._orientation = quaternion / float(
-            1.0 if quaternion_arr.size == 0 else math.hypot(*quaternion_arr)
-        )
+        self._orientation = _normalize_quaternion(quaternion, lazy=True)
 
     def get_gravity_in_sensor_frame(self) -> NDArray[np.float64]:
         """Get gravity vector in current sensor frame.
@@ -349,6 +355,22 @@ def _quaternion_multiply(
             w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
         ]
     )
+
+
+def _normalize_quaternion(
+    quaternion: NDArray[np.float64],
+    *,
+    lazy: bool = False,
+) -> NDArray[np.float64]:
+    """Return a unit quaternion with a small-norm guard."""
+    q = np.asarray(quaternion, dtype=np.float64)
+    q_arr = q.reshape(-1)
+    norm = float(0.0 if q_arr.size == 0 else math.hypot(*q_arr))
+    if not math.isfinite(norm) or norm < QUATERNION_NORM_EPS:
+        raise ValueError("Quaternion norm is too small to normalize")
+    if lazy and abs(norm - 1.0) <= QUATERNION_RENORMALIZE_TOL:
+        return q.copy()
+    return q / max(norm, QUATERNION_NORM_EPS)
 
 
 def _quaternion_inverse(q: NDArray[np.float64]) -> NDArray[np.float64]:

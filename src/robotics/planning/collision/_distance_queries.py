@@ -195,10 +195,11 @@ def _gjk_distance(  # noqa: C901
     direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(
         np.array([-1, 0, 0])
     )
-    if math.hypot(direction[0], direction[1], direction[2]) < 1e-10:
+    direction_norm = math.hypot(direction[0], direction[1], direction[2])
+    if direction_norm < 1e-10:
         direction = np.array([1.0, 0.0, 0.0])
     else:
-        direction = direction / math.hypot(direction[0], direction[1], direction[2])
+        direction = direction / direction_norm
 
     # Simplex vertices
     simplex: list[np.ndarray] = []

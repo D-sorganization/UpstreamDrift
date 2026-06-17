@@ -384,24 +384,14 @@ def _graham_scan(points: NDArray[np.float64]) -> NDArray[np.float64]:
         return points.copy()
 
     # Find bottom-most point (or left-most if tie)
-    start_idx = 0
-    for i in range(1, n):
-        if points[i, 1] < points[start_idx, 1] or (
-            points[i, 1] == points[start_idx, 1] and points[i, 0] < points[start_idx, 0]
-        ):
-            start_idx = i
-
+    start_idx = int(np.lexsort((points[:, 0], points[:, 1]))[0])
     start = points[start_idx].copy()
 
     # Sort by polar angle from start point, then by distance for ties
-    def sort_key(idx: int) -> tuple[float, float]:
-        """Return polar angle and distance from start for sorting."""
-        p = points[idx]
-        angle = np.arctan2(p[1] - start[1], p[0] - start[0])
-        dist = np.sqrt((p[0] - start[0]) ** 2 + (p[1] - start[1]) ** 2)
-        return (float(angle), float(dist))
-
-    sorted_indices = sorted(range(n), key=sort_key)
+    offsets = points - start
+    angles = np.arctan2(offsets[:, 1], offsets[:, 0])
+    dist_sq = np.einsum("ij,ij->i", offsets, offsets)
+    sorted_indices = np.lexsort((dist_sq, angles))
     sorted_points = points[sorted_indices]
 
     # Graham scan - use < 0 to include collinear points on hull

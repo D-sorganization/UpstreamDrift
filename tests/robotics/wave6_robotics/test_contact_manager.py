@@ -220,6 +220,24 @@ def test_compute_support_polygon_returns_hull() -> None:
     assert len(hull) <= 5
 
 
+def test_graham_scan_sorts_angle_and_distance_with_vectorized_keys() -> None:
+    points = np.array(
+        [
+            [0.0, 0.0],
+            [2.0, 0.0],
+            [1.0, 0.0],
+            [2.0, 1.0],
+            [0.0, 1.0],
+        ]
+    )
+
+    hull = cm._graham_scan(points)
+
+    assert hull.shape[1] == 2
+    np.testing.assert_allclose(hull[0], [0.0, 0.0])
+    assert any(np.allclose(point, [2.0, 0.0]) for point in hull)
+
+
 def test_point_in_support_polygon_inside_and_outside() -> None:
     m = ContactManager(FakeRoboticsEngine())
     pts = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]

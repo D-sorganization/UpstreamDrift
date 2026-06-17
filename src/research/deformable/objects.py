@@ -212,11 +212,24 @@ class DeformableObject(ABC):
         """
         if node_indices is None:
             raise ValueError("node_indices must be provided")
+        node_indices = np.atleast_1d(np.asarray(node_indices, dtype=np.intp))
+        if node_indices.ndim != 1:
+            raise ValueError("node_indices must be one-dimensional")
+        if np.any((node_indices < 0) | (node_indices >= len(self._external_forces))):
+            raise IndexError("node_indices are out of bounds")
+        forces = np.asarray(forces, dtype=self._external_forces.dtype)
+        if not np.all(np.isfinite(forces)):
+            raise ValueError("forces must be finite")
         if forces.ndim == 1:
-            forces = np.tile(forces, (len(node_indices), 1))
+            if forces.shape != (3,):
+                raise ValueError(f"forces must be (3,), got {forces.shape}")
+            forces = np.broadcast_to(forces, (len(node_indices), 3))
+        if forces.shape != (len(node_indices), 3):
+            raise ValueError(
+                "forces must be shape (len(node_indices), 3) or broadcastable (3,)"
+            )
 
-        for i, idx in enumerate(node_indices):
-            self._external_forces[idx] += forces[i]
+        np.add.at(self._external_forces, node_indices, forces)
 
     def clear_external_forces(self) -> None:
         """Clear all external forces."""

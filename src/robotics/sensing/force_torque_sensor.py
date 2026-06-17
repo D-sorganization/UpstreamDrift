@@ -10,7 +10,6 @@ Design by Contract:
 
 from __future__ import annotations
 
-import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -304,19 +303,23 @@ class ForceTorqueSensor(ContractChecker):
         if wrench is None:
             raise ValueError("wrench must be provided")
         wrench = np.asarray(wrench, dtype=np.float64)
+        if wrench.shape != (6,):
+            raise ValueError(f"wrench must be (6,), got {wrench.shape}")
+        if not np.all(np.isfinite(wrench)):
+            raise ValueError("wrench must be finite")
         force = wrench[:3]
         torque = wrench[3:]
 
-        force_arr = np.asarray(force, dtype=float).reshape(-1)
-        force_mag = float(0.0 if force_arr.size == 0 else math.hypot(*force_arr))
-        if force_mag < 1e-6:
+        min_force_mag = 1e-6
+        force_mag_sq = float(np.dot(force, force))
+        if force_mag_sq < min_force_mag**2:
             return None
 
         # For a point contact at position r with force f:
         # tau = r x f
         # This gives us constraints on r
         # Using r = (f x tau) / |f|^2 as approximation
-        r = np.cross(force, torque) / (force_mag**2)
+        r = np.cross(force, torque) / force_mag_sq
 
         return r  # type: ignore[return-value]
 

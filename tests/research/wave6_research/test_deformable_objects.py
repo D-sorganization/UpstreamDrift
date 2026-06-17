@@ -203,6 +203,24 @@ class TestSoftBody:
         assert sb._external_forces[0, 2] == -1.0
         assert sb._external_forces[2, 2] == -1.0
 
+    def test_apply_external_force_accumulates_duplicate_nodes(self, tet_mesh) -> None:
+        mesh, tets = tet_mesh
+        sb = SoftBody(mesh, tets, MaterialProperties())
+
+        sb.apply_external_force(
+            [1, 1, 2],
+            np.array(
+                [
+                    [1.0, 0.0, 0.0],
+                    [0.0, 2.0, 0.0],
+                    [0.0, 0.0, 3.0],
+                ]
+            ),
+        )
+
+        np.testing.assert_allclose(sb._external_forces[1], [1.0, 2.0, 0.0])
+        np.testing.assert_allclose(sb._external_forces[2], [0.0, 0.0, 3.0])
+
     def test_clear_external_forces(self, tet_mesh) -> None:
         mesh, tets = tet_mesh
         sb = SoftBody(mesh, tets, MaterialProperties())

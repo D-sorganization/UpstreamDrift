@@ -396,14 +396,23 @@ class CooperativeManipulation:
         """
         if desired_object_wrench is None:
             raise ValueError("desired_object_wrench must be provided")
+        desired_object_wrench = np.asarray(desired_object_wrench, dtype=float)
+        if desired_object_wrench.shape != (6,):
+            raise ValueError(
+                f"desired_object_wrench must be (6,), got {desired_object_wrench.shape}"
+            )
+        if not np.all(np.isfinite(desired_object_wrench)):
+            raise ValueError("desired_object_wrench must be finite")
         G = self.compute_grasp_matrix(object_pose)
         n_contacts = len(self._grasp_points)
 
-        # Solve: min ||f||^2 s.t. G^T @ f = w
-        # Using pseudo-inverse: f = G @ (G^T @ G)^-1 @ w
+        # Solve the regularized least-norm wrench system without forming inv().
         try:
-            GTG_inv = np.linalg.inv(G @ G.T + np.eye(6) * 1e-6)
-            f_optimal = G.T @ GTG_inv @ desired_object_wrench
+            wrench_solution = np.linalg.solve(
+                G @ G.T + np.eye(6) * 1e-6,
+                desired_object_wrench,
+            )
+            f_optimal = G.T @ wrench_solution
         except np.linalg.LinAlgError:
             f_optimal = np.zeros(3 * n_contacts)
 
