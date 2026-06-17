@@ -136,6 +136,136 @@ class TestKinematicForceAnalyzer:
         assert np.all(np.isfinite(centrifugal))
         assert np.all(np.isfinite(coupling))
 
+    def test_decompose_coriolis_forces_preserves_legacy_split(
+        self, model_and_data, monkeypatch
+    ) -> None:
+        """Characterize the existing split as total minus single-DOF terms."""
+        model, data = model_and_data
+        analyzer = KinematicForceAnalyzer(model, data)
+
+        qpos = data.qpos.copy()
+        qvel = np.array([0.4, -0.2])
+
+        def fake_coriolis(_qpos: np.ndarray, qvel_arg: np.ndarray) -> np.ndarray:
+            return np.array(
+                [
+                    3.0 * qvel_arg[0] ** 2 + 5.0 * qvel_arg[0] * qvel_arg[1],
+                    -2.0 * qvel_arg[1] ** 2 + 7.0 * qvel_arg[0] * qvel_arg[1],
+                ]
+            )
+
+        monkeypatch.setattr(analyzer, "compute_coriolis_forces", fake_coriolis)
+
+        centrifugal, coupling = analyzer.decompose_coriolis_forces(qpos, qvel)
+
+        expected_total = fake_coriolis(qpos, qvel)
+        expected_centrifugal = fake_coriolis(
+            qpos, np.array([qvel[0], 0.0])
+        ) + fake_coriolis(qpos, np.array([0.0, qvel[1]]))
+        np.testing.assert_allclose(centrifugal, expected_centrifugal, atol=1e-12)
+        np.testing.assert_allclose(coupling, expected_total - expected_centrifugal)
+
+    def test_analyze_trajectory_reuses_coriolis_decomposition_for_power(
+        self, model_and_data, monkeypatch
+    ) -> None:
+        """One trajectory frame should compute each expensive force term once."""
+        model, data = model_and_data
+        analyzer = KinematicForceAnalyzer(model, data)
+
+        qpos = data.qpos.copy()
+        qvel = np.array([0.4, -0.2])
+        qacc = np.zeros(model.nv)
+        coriolis = np.array([1.25, -0.5])
+        centrifugal = np.array([0.75, -0.25])
+        coupling = coriolis - centrifugal
+        gravity = np.array([0.1, 0.2])
+        calls = {"coriolis": 0, "decompose": 0, "gravity": 0}
+
+        def fake_coriolis(_qpos: np.ndarray, _qvel: np.ndarray) -> np.ndarray:
+            calls["coriolis"] += 1
+            return coriolis.copy()
+
+        def fake_decompose(
+            _qpos: np.ndarray,
+            _qvel: np.ndarray,
+            *,
+            coriolis_forces: np.ndarray | None = None,
+        ) -> tuple[np.ndarray, np.ndarray]:
+            calls["decompose"] += 1
+            assert coriolis_forces is not None
+            np.testing.assert_allclose(coriolis_forces, coriolis)
+            return centrifugal.copy(), coupling.copy()
+
+        def fake_gravity(_qpos: np.ndarray) -> np.ndarray:
+            calls["gravity"] += 1
+            return gravity.copy()
+
+        monkeypatch.setattr(analyzer, "compute_coriolis_forces", fake_coriolis)
+        monkeypatch.setattr(analyzer, "decompose_coriolis_forces", fake_decompose)
+        monkeypatch.setattr(analyzer, "compute_gravity_forces", fake_gravity)
+        monkeypatch.setattr(
+            analyzer,
+            "compute_club_head_apparent_forces",
+            lambda _qpos, _qvel, _qacc, *, coriolis_forces=None: (
+                np.zeros(3),
+                np.zeros(3),
+                np.zeros(3),
+            ),
+        )
+        monkeypatch.setattr(
+            analyzer,
+            "compute_kinetic_energy_components",
+            lambda _qpos, _qvel: {
+                "rotational": 2.0,
+                "translational": 3.0,
+                "total": 5.0,
+            },
+        )
+
+        results = analyzer.analyze_trajectory(
+            np.array([0.0]),
+            qpos.reshape(1, model.nq),
+            qvel.reshape(1, model.nv),
+            qacc.reshape(1, model.nv),
+        )
+
+        assert calls == {"coriolis": 1, "decompose": 1, "gravity": 1}
+        np.testing.assert_allclose(results[0].coriolis_forces, coriolis)
+        np.testing.assert_allclose(results[0].centrifugal_forces, centrifugal)
+        assert results[0].coriolis_power == pytest.approx(float(coriolis @ qvel))
+        assert results[0].centrifugal_power == pytest.approx(float(centrifugal @ qvel))
+
+    def test_compute_coriolis_forces_rejects_bad_state_vectors(
+        self, model_and_data
+    ) -> None:
+        """Boundary contracts reject wrong-shaped or non-finite state vectors."""
+        model, data = model_and_data
+        analyzer = KinematicForceAnalyzer(model, data)
+
+        with pytest.raises(ValueError, match="qvel must have shape"):
+            analyzer.compute_coriolis_forces(data.qpos.copy(), np.zeros(model.nv + 1))
+
+        qvel = np.zeros(model.nv)
+        qvel[0] = np.nan
+        with pytest.raises(ValueError, match="qvel must contain only finite values"):
+            analyzer.compute_coriolis_forces(data.qpos.copy(), qvel)
+
+    def test_coriolis_rne_is_independent_of_scratch_data_order(
+        self, model_and_data
+    ) -> None:
+        """The same state should produce the same RNE result after scratch reuse."""
+        model, data = model_and_data
+        analyzer = KinematicForceAnalyzer(model, data)
+
+        qpos = np.array([0.1, -0.04])
+        qvel = np.array([0.3, -0.15])
+
+        first = analyzer.compute_coriolis_forces_rne(qpos, qvel)
+        analyzer.compute_gravity_forces(qpos)
+        second = analyzer.compute_coriolis_forces_rne(qpos, qvel)
+
+        np.testing.assert_allclose(second, first, atol=1e-12, rtol=0.0)
+
     def test_kinematic_forces_compute_mass_matrix(self, model_and_data) -> None:
         """Test computing mass matrix."""
         model, data = model_and_data
@@ -395,6 +525,7 @@ class TestKinematicForceAnalyzer:
 #: Minimal MuJoCo model with one limited hinge joint (range [-1, 1] rad).
 _LIMITED_JOINT_XML = """
 <mujoco model="limited_hinge_test">
+  <compiler angle="radian"/>
   <worldbody>
     <body name="link" pos="0 0 0.5">
       <joint name="hinge" type="hinge" axis="0 0 1"

@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.412                                            |
+| **Spec Version**        | 1.0.413                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized MuJoCo kinematic Coriolis decomposition for issue
+  #7558: `KinematicForceAnalyzer` now reuses the base inverse-dynamics
+  solution and scratch buffers across the per-DOF Coriolis split, reducing
+  redundant `mj_rne` passes while preserving the legacy component-sum contract.
 - **2026-06-17** - Optimized deformable soft-body FEM root-node force
   accumulation: `SoftBody.compute_internal_forces` now uses a batched
   `np.einsum("ijk->ij", H)` reduction for per-tetrahedron root forces instead
@@ -1604,6 +1608,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-17 | 1.0.410 | Optimized JaxSim trajectory parameter-gradient evaluation for #7562 by constructing the selected autodiff transform once per API call, vectorizing over the measured trajectory with `jax.vmap`, and adding finite shape postcondition checks plus local fake-JAX contract coverage. |
 | 2026-06-17 | 1.0.411 | Optimized RRT/RRT* nearest-neighbor and RRT* cost-propagation paths for #7564. Sampling trees now maintain a finite append-friendly configuration index for vectorized nearest/near queries, RRT* honors `use_kd_tree` with periodically rebuilt `cKDTree` coverage when enabled, and rewiring cost propagation walks a maintained child-adjacency map with `deque` instead of scanning every node for descendants. |
 | 2026-06-17 | 1.0.412 | Optimized deformable soft-body FEM root-node force accumulation by replacing the generic last-axis sum over per-tetrahedron force blocks with a batched `np.einsum("ijk->ij", H)` reduction and focused coverage for the vectorized reduction shape. |
+| 2026-06-17 | 1.0.413 | Optimized MuJoCo kinematic Coriolis decomposition for #7558 by reusing the base inverse-dynamics solution and scratch buffers across the per-DOF split, reducing redundant `mj_rne` passes while preserving the legacy component-sum contract. |
 | 2026-06-11 | 1.0.345 | Restored main CI API, launcher, and Docker contracts: `jaxsim` is accepted by the public simulation request allowlist, Data Explorer import responses keep generated dataset IDs while allowing legacy direct model construction, canonical-core launcher tiles use a recognized status and served biomechanics logo, symlink model-path validation preserves explicit 400 security failures, and Docker feature dry-runs import shared engine probe configuration through the package-qualified path. |
 | 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
 | 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |
