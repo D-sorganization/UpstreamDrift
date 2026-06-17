@@ -172,7 +172,7 @@ class CustomTitleBar(QWidget):
             tm = get_theme_manager()
             if tm is not None and hasattr(tm, "themeChanged"):
                 tm.themeChanged.connect(self._on_theme_changed)
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError, RuntimeError):
             pass
 
         layout.addWidget(self.title_label)
@@ -225,7 +225,7 @@ class CustomTitleBar(QWidget):
         colors = _get_title_bar_colors()
         bg = colors["bg"]
         border = colors["border"]
-        text = colors["text"]  # noqa: F841
+        text = colors["text"]
 
         self.setStyleSheet(
             f'QWidget[class="title-bar"] {{'
@@ -234,7 +234,11 @@ class CustomTitleBar(QWidget):
             f" }}"
         )
         self.title_label.setStyleSheet(
-            "font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 14px; letter-spacing: 0.5px; background: transparent;"
+            "font-family: 'Inter', 'Segoe UI', sans-serif; "
+            "font-size: 14px; "
+            "letter-spacing: 0.5px; "
+            f"color: {text}; "
+            "background: transparent;"
         )
 
     def _on_theme_changed(self, _colors: object = None) -> None:

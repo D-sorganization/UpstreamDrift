@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.426                                            |
+| **Spec Version**        | 1.0.427                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Restored the current-main error-handling ratchet for issue
+  #7621: `CustomTitleBar` now applies the themed title text color instead of
+  carrying an unused `F841` suppression, and construction tolerates a deleted
+  Qt-backed theme manager during defensive theme-change hookup.
 - **2026-06-17** - Hardened the Tauri desktop check workflow for issue #7616:
   after the pinned Rust toolchain action runs, the `Check (Rust + TypeScript)`
   job now verifies `rustup`, `rustc`, and `cargo` are on `PATH` and prints their
