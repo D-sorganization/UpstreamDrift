@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from src.robotics.planning.motion.rrt import TreeNode
 from src.robotics.planning.motion import (
     PlannerConfig,
     PlannerResult,
@@ -553,3 +554,122 @@ class TestPlannerIntegration:
         # Should succeed in open space
         assert result.success
         assert result.path[0].shape == (6,)
+
+
+def _rrt_for_index_contract() -> RRTPlanner:
+    planner = RRTPlanner(MockCollisionChecker(), RRTConfig())
+    planner.set_bounds(np.array([-10.0, -10.0]), np.array([10.0, 10.0]))
+    return planner
+
+
+def _rrt_star_for_index_contract(**config_kwargs) -> RRTStarPlanner:
+    config = RRTStarConfig(**{"rewire_radius": 1.5, **config_kwargs})
+    planner = RRTStarPlanner(MockCollisionChecker(), config)
+    planner.set_bounds(np.array([-10.0, -10.0]), np.array([10.0, 10.0]))
+    return planner
+
+
+@pytest.mark.unit
+def test_rrt_find_nearest_uses_vectorized_index(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Nearest-neighbor lookup should not scalar-scan via _distance."""
+    planner = _rrt_for_index_contract()
+    planner._reset_tree()
+    for config in (
+        np.array([0.0, 0.0]),
+        np.array([3.0, 4.0]),
+        np.array([0.25, 0.25]),
+    ):
+        planner._append_node(TreeNode(config=config, parent_idx=-1, cost=0.0))
+
+    def fail_distance(q1, q2):
+        raise AssertionError("_find_nearest must not call _distance per node")
+
+    monkeypatch.setattr(planner, "_distance", fail_distance)
+
+    assert planner._find_nearest(np.array([0.2, 0.2])) == 2
+
+
+@pytest.mark.unit
+def test_rrt_star_find_near_matches_scalar_result_without_distance_calls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Near-neighbor lookup preserves scalar semantics without scalar scanning."""
+    planner = _rrt_star_for_index_contract(rewire_radius=1.5)
+    planner._reset_tree()
+    configs = [
+        np.array([0.0, 0.0]),
+        np.array([1.0, 0.0]),
+        np.array([0.0, 2.0]),
+        np.array([3.0, 0.0]),
+    ]
+    for config in configs:
+        planner._append_node(TreeNode(config=config, parent_idx=-1, cost=0.0))
+
+    query = np.array([0.0, 0.0])
+    expected = [
+        i for i, config in enumerate(configs) if np.linalg.norm(config - query) <= 1.5
+    ]
+
+    def fail_distance(q1, q2):
+        raise AssertionError("_find_near must not call _distance per node")
+
+    monkeypatch.setattr(planner, "_distance", fail_distance)
+
+    assert planner._find_near(query) == expected
+
+
+@pytest.mark.unit
+def test_rrt_star_kd_tree_queries_match_vectorized_queries() -> None:
+    """The use_kd_tree flag preserves nearest/near query results."""
+    query = np.array([0.2, 0.2])
+    configs = [
+        np.array([0.0, 0.0]),
+        np.array([1.0, 0.0]),
+        np.array([0.0, 1.0]),
+        np.array([2.0, 2.0]),
+    ]
+
+    vectorized = _rrt_star_for_index_contract(rewire_radius=1.1, use_kd_tree=False)
+    kd_tree = _rrt_star_for_index_contract(rewire_radius=1.1, use_kd_tree=True)
+    for planner in (vectorized, kd_tree):
+        planner._reset_tree()
+        for config in configs:
+            planner._append_node(TreeNode(config=config, parent_idx=-1, cost=0.0))
+
+    assert kd_tree._find_nearest(query) == vectorized._find_nearest(query)
+    assert kd_tree._find_near(query) == vectorized._find_near(query)
+
+
+class _NoIterationList(list):
+    def __iter__(self):
+        raise AssertionError("_propagate_cost_update must use child adjacency")
+
+
+@pytest.mark.unit
+def test_rrt_star_cost_propagation_uses_child_adjacency() -> None:
+    """Cost propagation should walk descendants without scanning all nodes."""
+    planner = _rrt_star_for_index_contract(rewire_radius=2.0)
+    planner._reset_tree()
+    root_idx = planner._append_node(TreeNode(config=np.array([0.0, 0.0]), cost=0.0))
+    node_a_idx = planner._append_node(
+        TreeNode(config=np.array([1.0, 0.0]), parent_idx=root_idx, cost=1.0)
+    )
+    node_b_idx = planner._append_node(
+        TreeNode(config=np.array([2.0, 0.0]), parent_idx=node_a_idx, cost=2.0)
+    )
+    node_c_idx = planner._append_node(
+        TreeNode(config=np.array([0.0, 1.0]), parent_idx=root_idx, cost=1.0)
+    )
+
+    planner._set_parent(node_a_idx, node_c_idx)
+    planner._nodes[node_a_idx].cost = 2.0
+    planner._nodes = _NoIterationList(planner._nodes)
+
+    planner._propagate_cost_update(node_a_idx)
+
+    assert planner._nodes[node_b_idx].cost == pytest.approx(3.0)
+    assert planner._nodes[node_a_idx].parent_idx == node_c_idx
+    assert node_a_idx not in planner._children[root_idx]
+    assert node_a_idx in planner._children[node_c_idx]

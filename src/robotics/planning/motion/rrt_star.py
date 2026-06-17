@@ -12,9 +12,11 @@ from __future__ import annotations
 
 import math
 import time
+from collections import deque
 from dataclasses import dataclass
 
 import numpy as np
+from src.robotics.planning.motion._tree_index import TreeConfigIndex
 from src.robotics.planning.motion.planner_base import (
     CollisionCheckerProtocol,
     MotionPlanner,
@@ -33,7 +35,7 @@ class RRTStarConfig(PlannerConfig):
     Additional Attributes:
         rewire_radius: Radius for rewiring neighbors (None = auto).
         rewire_factor: Factor for computing rewire radius.
-        use_kd_tree: Use KD-tree for nearest neighbor (future).
+        use_kd_tree: Use periodically rebuilt cKDTree for neighbor queries.
     """
 
     rewire_radius: float | None = None
@@ -95,6 +97,8 @@ class RRTStarPlanner(MotionPlanner):
         super().__init__(collision_checker, config or RRTStarConfig())
         self._config: RRTStarConfig = self._config  # type: ignore[assignment]
         self._nodes: list[TreeNode] = []
+        self._node_index = TreeConfigIndex(use_kd_tree=self._config.use_kd_tree)
+        self._children: dict[int, list[int]] = {}
         self._num_collision_checks = 0
         self._dimension = 0
 
@@ -118,7 +122,7 @@ class RRTStarPlanner(MotionPlanner):
         q_goal = np.asarray(q_goal)
         self._dimension = len(q_start)
 
-        self._nodes = []
+        self._reset_tree()
         self._num_collision_checks = 0
         start_time = time.perf_counter()
 
@@ -126,7 +130,7 @@ class RRTStarPlanner(MotionPlanner):
         if validation_result is not None:
             return validation_result
 
-        self._nodes.append(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
+        self._append_node(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
 
         goal_idx = -1
         best_goal_cost = float("inf")
@@ -196,7 +200,7 @@ class RRTStarPlanner(MotionPlanner):
             cost=new_cost,
         )
         new_idx = len(self._nodes)
-        self._nodes.append(new_node)
+        self._append_node(new_node)
 
         self._rewire(new_idx, near_indices)
         return new_idx, new_cost
@@ -226,8 +230,9 @@ class RRTStarPlanner(MotionPlanner):
 
         if goal_idx >= 0:
             if not self._is_ancestor(goal_idx, new_idx):
-                self._nodes[goal_idx].parent_idx = new_idx
+                self._set_parent(goal_idx, new_idx)
                 self._nodes[goal_idx].cost = goal_cost
+                self._propagate_cost_update(goal_idx)
         else:
             goal_node = TreeNode(
                 config=q_goal.copy(),
@@ -235,7 +240,7 @@ class RRTStarPlanner(MotionPlanner):
                 cost=goal_cost,
             )
             goal_idx = len(self._nodes)
-            self._nodes.append(goal_node)
+            self._append_node(goal_node)
         best_goal_cost = goal_cost
         return goal_idx, best_goal_cost
 
@@ -326,16 +331,7 @@ class RRTStarPlanner(MotionPlanner):
         """
         if q is None:
             raise ValueError("q must be provided")
-        min_dist = float("inf")
-        min_idx = 0
-
-        for i, node in enumerate(self._nodes):
-            dist = self._distance(node.config, q)
-            if dist < min_dist:
-                min_dist = dist
-                min_idx = i
-
-        return min_idx
+        return self._node_index.nearest(q)
 
     def _find_near(self, q: np.ndarray) -> list[int]:
         """Find all nodes within rewiring radius.
@@ -349,13 +345,7 @@ class RRTStarPlanner(MotionPlanner):
         if q is None:
             raise ValueError("q must be provided")
         radius = self._compute_rewire_radius()
-        near_indices = []
-
-        for i, node in enumerate(self._nodes):
-            if self._distance(node.config, q) <= radius:
-                near_indices.append(i)
-
-        return near_indices
+        return self._node_index.within_radius(q, radius)
 
     def _choose_parent(
         self,
@@ -430,7 +420,7 @@ class RRTStarPlanner(MotionPlanner):
                 self._num_collision_checks += self._config.collision_check_resolution
                 if self._is_path_valid(new_node.config, node.config):
                     # Rewire: update parent and cost
-                    node.parent_idx = new_idx
+                    self._set_parent(idx, new_idx)
                     node.cost = new_cost
                     # Propagate cost updates to descendants
                     self._propagate_cost_update(idx)
@@ -444,19 +434,64 @@ class RRTStarPlanner(MotionPlanner):
         # Find all children and update their costs
         if start_idx is None:
             raise ValueError("start_idx must be provided")
-        queue = [start_idx]
+        queue: deque[int] = deque([start_idx])
         while queue:
-            current_idx = queue.pop(0)
+            current_idx = queue.popleft()
             current_node = self._nodes[current_idx]
 
-            for i, node in enumerate(self._nodes):
-                if node.parent_idx == current_idx:
-                    # Update child cost
-                    node.cost = current_node.cost + self._distance(
-                        current_node.config,
-                        node.config,
-                    )
-                    queue.append(i)
+            for child_idx in self._children.get(current_idx, ()):
+                child = self._nodes[child_idx]
+                child.cost = current_node.cost + self._distance(
+                    current_node.config,
+                    child.config,
+                )
+                queue.append(child_idx)
+
+    def _reset_tree(self) -> None:
+        self._nodes = []
+        self._node_index = TreeConfigIndex(use_kd_tree=self._config.use_kd_tree)
+        self._children = {}
+
+    def _append_node(self, node: TreeNode) -> int:
+        if node is None:
+            raise ValueError("node must be provided")
+        idx = len(self._nodes)
+        self._nodes.append(node)
+        indexed_idx = self._node_index.append(node.config)
+        if indexed_idx != idx:
+            raise RuntimeError("tree node index is inconsistent")
+        self._children.setdefault(idx, [])
+        if node.parent_idx >= 0:
+            self._add_child(node.parent_idx, idx)
+        return idx
+
+    def _set_parent(self, child_idx: int, parent_idx: int) -> None:
+        if child_idx is None:
+            raise ValueError("child_idx must be provided")
+        if parent_idx is None:
+            raise ValueError("parent_idx must be provided")
+        child = self._nodes[child_idx]
+        old_parent_idx = child.parent_idx
+        if old_parent_idx == parent_idx:
+            return
+        if old_parent_idx >= 0:
+            self._remove_child(old_parent_idx, child_idx)
+        child.parent_idx = parent_idx
+        self._add_child(parent_idx, child_idx)
+
+    def _add_child(self, parent_idx: int, child_idx: int) -> None:
+        children = self._children.setdefault(parent_idx, [])
+        if child_idx not in children:
+            children.append(child_idx)
+
+    def _remove_child(self, parent_idx: int, child_idx: int) -> None:
+        children = self._children.get(parent_idx)
+        if children is None:
+            return
+        try:
+            children.remove(child_idx)
+        except ValueError:
+            return
 
     def _extract_path(self, goal_idx: int) -> list[np.ndarray]:
         """Extract path from tree by backtracking from goal.

@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.410                                            |
+| **Spec Version**        | 1.0.411                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized RRT/RRT* tree-neighbor and cost-propagation
+  paths for issue #7564: both planners now maintain an append-friendly
+  finite configuration index for vectorized nearest-neighbor queries, RRT*
+  can route neighbor lookups through the existing `use_kd_tree` flag with
+  periodically rebuilt `cKDTree` coverage, and rewiring cost propagation now
+  walks a maintained child-adjacency map with a deque instead of scanning the
+  full node list for each descendant.
 - **2026-06-17** - Replaced the iLQR backward-pass gain calculation for issue
   #7570: `src/research/mpc/controller.py` now solves the regularized `Quu`
   system directly, using a finite-checked Cholesky path for symmetric positive
@@ -1583,6 +1590,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-11 | 1.0.350 | Restored body-part visualization optional-stack contracts: `FittedShape.n_frames` again reports the validated frame count, theme and fitted-shape validation errors use the documented precise type/range messages, and CI Optional Stack installs `trimesh` before running unit chunks so mesh-backed body-part visualization tests exercise the intended full dependency path. |
 | 2026-06-11 | 1.0.346 | Preserved symlink traversal security failures in model and output path validation. Candidates lexically under an allowed root now reject symlink components before resolved containment fallback can mask escaped targets as generic 404 misses, keeping Linux optional-stack path validation on the documented 400 contract. Added suite markers to newly merged unit-level regression tests so the suite-marker ratchet remains blocking without expanding the unmarked-test baseline. Runs optional-stack unit tests as serial top-level `tests/unit` chunks because full-suite optional dependency collection is xdist-unsafe and can exceed local runner memory before tests execute, and raises the bounded CI Standard tests matrix timeout so the core suite is not cancelled before its per-test timeout contract can report real failures. |
 | 2026-06-17 | 1.0.410 | Optimized JaxSim trajectory parameter-gradient evaluation for #7562 by constructing the selected autodiff transform once per API call, vectorizing over the measured trajectory with `jax.vmap`, and adding finite shape postcondition checks plus local fake-JAX contract coverage. |
+| 2026-06-17 | 1.0.411 | Optimized RRT/RRT* nearest-neighbor and RRT* cost-propagation paths for #7564. Sampling trees now maintain a finite append-friendly configuration index for vectorized nearest/near queries, RRT* honors `use_kd_tree` with periodically rebuilt `cKDTree` coverage when enabled, and rewiring cost propagation walks a maintained child-adjacency map with `deque` instead of scanning every node for descendants. |
 | 2026-06-11 | 1.0.345 | Restored main CI API, launcher, and Docker contracts: `jaxsim` is accepted by the public simulation request allowlist, Data Explorer import responses keep generated dataset IDs while allowing legacy direct model construction, canonical-core launcher tiles use a recognized status and served biomechanics logo, symlink model-path validation preserves explicit 400 security failures, and Docker feature dry-runs import shared engine probe configuration through the package-qualified path. |
 | 2026-06-11 | 1.0.344 | Capability truthfulness contracts for #7355 and #7356. Generated motion-pipeline compatibility docs now mark Drake trajectory-optimization matching as unsupported until the solver is implemented. Drake, RRA, and CMC matching placeholders now report `status: not_implemented` with `production_ready: false`, and production chat placeholder tools return explicit `not_implemented` payloads instead of queued or successful no-op results. |
 | 2026-06-11 | 1.0.343 | Honest Document Chat and swing-sequence analytics contracts for #7358/#7359. The launcher Library tab keeps Document Chat disabled without a configured backend and reports a backend-not-configured message instead of a fabricated Notebook LM response. `swing_sequence` analysis now computes segment peak timing from trajectory angular velocities, marks instantaneous-only segment velocities as `requires_trajectory`, preserves analysis payloads through `AnalysisRequest.data`, and emits X-factor metrics only when shoulder/hip joint trajectory inputs are available. |

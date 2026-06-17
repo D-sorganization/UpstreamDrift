@@ -14,6 +14,7 @@ import time
 from dataclasses import dataclass
 
 import numpy as np
+from src.robotics.planning.motion._tree_index import TreeConfigIndex
 from src.robotics.planning.motion.planner_base import (
     CollisionCheckerProtocol,
     MotionPlanner,
@@ -97,6 +98,7 @@ class RRTPlanner(MotionPlanner):
             raise ValueError("collision_checker must be provided")
         super().__init__(collision_checker, config or RRTConfig())
         self._nodes: list[TreeNode] = []
+        self._node_index = TreeConfigIndex()
         self._num_collision_checks = 0
 
     def plan(
@@ -118,7 +120,7 @@ class RRTPlanner(MotionPlanner):
         q_start = np.asarray(q_start)
         q_goal = np.asarray(q_goal)
 
-        self._nodes = []
+        self._reset_tree()
         self._num_collision_checks = 0
         start_time = time.perf_counter()
 
@@ -126,7 +128,7 @@ class RRTPlanner(MotionPlanner):
         if validation_result is not None:
             return validation_result
 
-        self._nodes.append(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
+        self._append_node(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
 
         goal_idx = -1
         iterations = 0
@@ -190,7 +192,7 @@ class RRTPlanner(MotionPlanner):
             cost=new_cost,
         )
         new_idx = len(self._nodes)
-        self._nodes.append(new_node)
+        self._append_node(new_node)
         return new_idx, new_cost
 
     def _try_connect_goal(
@@ -216,7 +218,7 @@ class RRTPlanner(MotionPlanner):
             cost=goal_cost,
         )
         goal_idx = len(self._nodes)
-        self._nodes.append(goal_node)
+        self._append_node(goal_node)
         return goal_idx
 
     def _timeout_result(self, iterations: int, start_time: float) -> PlannerResult:
@@ -269,16 +271,21 @@ class RRTPlanner(MotionPlanner):
         """
         if q is None:
             raise ValueError("q must be provided")
-        min_dist = float("inf")
-        min_idx = 0
+        return self._node_index.nearest(q)
 
-        for i, node in enumerate(self._nodes):
-            dist = self._distance(node.config, q)
-            if dist < min_dist:
-                min_dist = dist
-                min_idx = i
+    def _reset_tree(self) -> None:
+        self._nodes = []
+        self._node_index.clear()
 
-        return min_idx
+    def _append_node(self, node: TreeNode) -> int:
+        if node is None:
+            raise ValueError("node must be provided")
+        idx = len(self._nodes)
+        self._nodes.append(node)
+        indexed_idx = self._node_index.append(node.config)
+        if indexed_idx != idx:
+            raise RuntimeError("tree node index is inconsistent")
+        return idx
 
     def _extract_path(self, goal_idx: int) -> list[np.ndarray]:
         """Extract path from tree by backtracking from goal.
