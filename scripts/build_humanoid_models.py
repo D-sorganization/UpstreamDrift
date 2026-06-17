@@ -52,8 +52,10 @@ import argparse
 import filecmp
 import sys
 import tempfile
-import xml.etree.ElementTree as ET  # noqa: N817
 from pathlib import Path
+
+import defusedxml.ElementTree as ET  # noqa: N817
+from defusedxml.common import DefusedXmlException
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SHARED_YAML = REPO_ROOT / "shared" / "models" / "golf_humanoid_dimensions.yaml"
@@ -236,6 +238,9 @@ def _build_pinocchio(yaml_path: Path, *, check: bool) -> int:  # noqa: ARG001
     except ET.ParseError as exc:
         sys.stderr.write(f"FAIL: pinocchio URDF is malformed XML: {exc}\n")
         return 1
+    except DefusedXmlException as exc:
+        sys.stderr.write(f"FAIL: pinocchio URDF contains unsafe XML: {exc}\n")
+        return 1
     if check:
         sys.stdout.write(
             "OK: pinocchio URDF exists and parses (verify-only mode; "
@@ -299,6 +304,8 @@ def _build_mujoco(yaml_path: Path, *, check: bool) -> int:  # noqa: ARG001
             ET.fromstring(xml_str)
         except ET.ParseError as exc:
             failures.append(f"{module_path}.{attr}: malformed XML ({exc})")
+        except DefusedXmlException as exc:
+            failures.append(f"{module_path}.{attr}: unsafe XML ({exc})")
     if failures:
         for line in failures:
             sys.stderr.write(f"FAIL: mujoco {line}\n")

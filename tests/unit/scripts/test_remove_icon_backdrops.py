@@ -1,5 +1,8 @@
 import xml.etree.ElementTree as ET
 
+import pytest
+from defusedxml.common import DefusedXmlException
+
 from scripts.remove_icon_backdrops import process_svgs
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -83,3 +86,19 @@ def test_process_svgs_is_idempotent_for_existing_shadow_wrapper(tmp_path):
     rects = _rects(svg_path)
     assert rects == []
     assert len(_shadow_wrappers(svg_path)) == 1
+
+
+def test_process_svgs_rejects_entity_bearing_svg(tmp_path):
+    svg_path = tmp_path / "bad.svg"
+    svg_path.write_text(
+        """<?xml version="1.0"?>
+<!DOCTYPE svg [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<svg xmlns="http://www.w3.org/2000/svg">&xxe;</svg>
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(DefusedXmlException):
+        process_svgs(str(tmp_path))

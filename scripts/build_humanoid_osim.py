@@ -62,6 +62,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+import defusedxml.ElementTree as DefusedET
+
 # Repository root, derived from this script's location.
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -171,7 +173,7 @@ def _parse(path: Path) -> ET.ElementTree:
             f"Base OSIM not found: {path}. "
             "Run `git submodule update --init shared/models/opensim/opensim-models`."
         )
-    return ET.parse(path)
+    return DefusedET.parse(path)
 
 
 def _find_one(parent: ET.Element, tag: str) -> ET.Element:
