@@ -12,7 +12,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 if PYQT6_AVAILABLE:
     from PyQt6 import QtCore, QtWidgets
 else:
-    QtWidgets = None  # type: ignore
+    QtWidgets = None  # type: ignore[assignment]
     QtCore = None  # type: ignore
 
 logger = get_logger(__name__)

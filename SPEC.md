@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.427                                            |
+| **Spec Version**        | 1.0.428                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Restored the current-main test-layout gate for issue
+  #7626 by adding `src/shared/python/movement_optimizer/tests` to the root
+  pytest `testpaths` contract and the intentional in-tree package-test
+  allowlist.
+- **2026-06-17** - Restored the current-main suppression ratchet for issue
+  #7625 by replacing seven bare `# type: ignore` fallbacks in launcher, chat,
+  biomechanics, and screw-theory modules with explicit `assignment` codes.
 - **2026-06-17** - Restored the current-main error-handling ratchet for issue
   #7621: `CustomTitleBar` now applies the themed title text color instead of
   carrying an unused `F841` suppression, and construction tolerates a deleted

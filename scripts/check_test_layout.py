@@ -46,6 +46,7 @@ LEGACY_SRC_TEST_DIRS = frozenset(
         "src/shared/python/data_processing/tests",
         "src/shared/python/humanoid_character_builder/tests",
         "src/shared/python/model_generation/tests",
+        "src/shared/python/movement_optimizer/tests",
         "src/shared/python/optimization/tests",
         "src/shared/python/plot_engine/tests",
         "src/shared/python/plot_theme/tests",
