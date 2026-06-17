@@ -23,6 +23,80 @@ def _squared_euclidean_error(
     return float(np.vdot(diff, diff))
 
 
+def _validate_finite_array(
+    value: NDArray[np.floating],
+    *,
+    name: str,
+    shape: tuple[int | None, ...],
+) -> NDArray[np.floating]:
+    """Validate an array boundary contract and return a float ndarray view."""
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+    array = np.asarray(value, dtype=float)
+    if array.ndim != len(shape):
+        raise ValueError(f"{name} must have {len(shape)} dimensions")
+    for axis, expected in enumerate(shape):
+        if expected is not None and array.shape[axis] != expected:
+            raise ValueError(
+                f"{name}.shape[{axis}] must be {expected}; got {array.shape[axis]}",
+            )
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain finite values")
+    return array
+
+
+def _validate_joint_angles(
+    joint_angles: NDArray[np.floating],
+    skeleton: SkeletonConfig,
+    *,
+    name: str = "joint_angles",
+) -> NDArray[np.floating]:
+    return _validate_finite_array(
+        joint_angles,
+        name=name,
+        shape=(skeleton.n_joints,),
+    )
+
+
+def _validate_motion_matrix(
+    motion: NDArray[np.floating],
+    skeleton: SkeletonConfig,
+    *,
+    name: str = "source_motion",
+) -> NDArray[np.floating]:
+    return _validate_finite_array(
+        motion,
+        name=name,
+        shape=(None, skeleton.n_joints),
+    )
+
+
+def _validate_position_mapping(
+    positions: dict[str, NDArray[np.floating]],
+    *,
+    name: str,
+) -> None:
+    if positions is None:
+        raise ValueError(f"{name} must be provided")
+    for joint_name, position in positions.items():
+        _validate_finite_array(position, name=f"{name}[{joint_name!r}]", shape=(3,))
+
+
+def _build_end_effector_chain_indices(
+    skeleton: SkeletonConfig,
+) -> dict[str, tuple[int, ...]]:
+    """Build root-to-end-effector FK chains once using joint indices."""
+    chains: dict[str, tuple[int, ...]] = {}
+    for ee_name in skeleton.end_effectors:
+        idx = skeleton.get_joint_index(ee_name)
+        chain: list[int] = []
+        while idx >= 0:
+            chain.append(idx)
+            idx = skeleton.parent_indices[idx]
+        chains[ee_name] = tuple(reversed(chain))
+    return chains
+
+
 @dataclass
 class SkeletonConfig:
     """Skeleton configuration for motion retargeting.
@@ -60,6 +134,21 @@ class SkeletonConfig:
                 f"must match joint_names ({n_joints})",
             )
 
+        self.joint_offsets = _validate_finite_array(
+            self.joint_offsets,
+            name="joint_offsets",
+            shape=(n_joints, 3),
+        )
+
+        for joint_idx, parent_idx in enumerate(self.parent_indices):
+            if parent_idx >= n_joints or parent_idx < -1:
+                raise ValueError(
+                    "parent_indices entries must be -1 or valid joint indices; "
+                    f"got parent_indices[{joint_idx}]={parent_idx}",
+                )
+            if parent_idx == joint_idx:
+                raise ValueError("parent_indices entries cannot reference themselves")
+
         if self.joint_offsets.shape[0] != n_joints:
             raise ValueError(
                 f"joint_offsets rows ({self.joint_offsets.shape[0]}) "
@@ -68,11 +157,25 @@ class SkeletonConfig:
 
         if self.joint_axes is None:
             # Default to z-axis rotation
-            self.joint_axes = np.tile(np.array([0, 0, 1]), (n_joints, 1))
+            self.joint_axes = np.tile(np.array([0.0, 0.0, 1.0]), (n_joints, 1))
+        else:
+            self.joint_axes = _validate_finite_array(
+                self.joint_axes,
+                name="joint_axes",
+                shape=(n_joints, 3),
+            )
 
         if self.joint_limits is None:
             # Default to +/- pi
             self.joint_limits = np.array([[-np.pi, np.pi]] * n_joints)
+        else:
+            self.joint_limits = _validate_finite_array(
+                self.joint_limits,
+                name="joint_limits",
+                shape=(n_joints, 2),
+            )
+        if np.any(self.joint_limits[:, 0] > self.joint_limits[:, 1]):
+            raise ValueError("joint_limits lower bounds must be <= upper bounds")
 
     @property
     def n_joints(self) -> int:
@@ -283,10 +386,27 @@ class MotionRetargeter:
         """
         if source_skeleton is None:
             raise ValueError("source_skeleton must be provided")
+        if target_skeleton is None:
+            raise ValueError("target_skeleton must be provided")
         self.source = source_skeleton
         self.target = target_skeleton
         self._joint_mapping = self._compute_joint_mapping()
         self._scale_factors = self._compute_scale_factors()
+        self._end_effector_chain_indices = {
+            id(self.source): _build_end_effector_chain_indices(self.source),
+            id(self.target): _build_end_effector_chain_indices(self.target),
+        }
+
+    def _end_effector_chains_for(
+        self,
+        skeleton: SkeletonConfig,
+    ) -> dict[str, tuple[int, ...]]:
+        cache_key = id(skeleton)
+        chains = self._end_effector_chain_indices.get(cache_key)
+        if chains is None:
+            chains = _build_end_effector_chain_indices(skeleton)
+            self._end_effector_chain_indices[cache_key] = chains
+        return chains
 
     def _compute_joint_mapping(self) -> dict[str, str]:
         """Compute mapping between source and target joints.
@@ -361,8 +481,7 @@ class MotionRetargeter:
         Returns:
             Target joint angles (T, n_target).
         """
-        if source_motion is None:
-            raise ValueError("source_motion must be provided")
+        source_motion = _validate_motion_matrix(source_motion, self.source)
         n_frames = source_motion.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
 
@@ -379,6 +498,7 @@ class MotionRetargeter:
                 lower, upper = self.target.joint_limits[j]
                 target_motion[:, j] = np.clip(target_motion[:, j], lower, upper)
 
+        _validate_motion_matrix(target_motion, self.target, name="target_motion")
         return target_motion
 
     def _retarget_optimization(
@@ -395,8 +515,7 @@ class MotionRetargeter:
         Returns:
             Optimized target motion.
         """
-        if source_motion is None:
-            raise ValueError("source_motion must be provided")
+        source_motion = _validate_motion_matrix(source_motion, self.source)
         n_frames = source_motion.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
 
@@ -420,6 +539,7 @@ class MotionRetargeter:
             )
             target_motion[t] = target_frame
 
+        _validate_motion_matrix(target_motion, self.target, name="target_motion")
         return target_motion
 
     def _compute_end_effector_positions(
@@ -436,35 +556,28 @@ class MotionRetargeter:
         Returns:
             Dictionary of end-effector positions.
         """
-        if joint_angles is None:
-            raise ValueError("joint_angles must be provided")
-        positions = {}
+        joint_angles = _validate_joint_angles(joint_angles, skeleton)
+        positions: dict[str, NDArray[np.floating]] = {}
 
         # Compute forward kinematics for each end-effector
-        for ee_name in skeleton.end_effectors:
-            chain = skeleton.get_kinematic_chain(ee_name)
-            position = np.zeros(3)
+        for ee_name, chain_indices in self._end_effector_chains_for(skeleton).items():
+            position = np.zeros(3, dtype=float)
 
-            for joint_name in chain:
-                idx = skeleton.get_joint_index(joint_name)
+            for idx in chain_indices:
                 offset = skeleton.joint_offsets[idx]
-                angle = joint_angles[idx] if idx < len(joint_angles) else 0
+                angle = joint_angles[idx]
 
                 # Simplified: assume z-axis rotation
                 c, s = np.cos(angle), np.sin(angle)
-                rotation = np.array(
-                    [
-                        [c, -s, 0],
-                        [s, c, 0],
-                        [0, 0, 1],
-                    ],
-                )
-
-                position = rotation @ position + offset
+                x, y, z = position
+                position[0] = c * x - s * y + offset[0]
+                position[1] = s * x + c * y + offset[1]
+                position[2] = z + offset[2]
 
             positions[ee_name] = position
 
-        return positions  # type: ignore[return-value]
+        _validate_position_mapping(positions, name="positions")
+        return positions
 
     def _compute_end_effector_error(
         self,
@@ -498,10 +611,16 @@ class MotionRetargeter:
         Returns:
             Optimized joint angles.
         """
-        if initial_angles is None:
-            raise ValueError("initial_angles must be provided")
+        initial_angles = _validate_joint_angles(
+            initial_angles, self.target, name="initial_angles"
+        )
+        _validate_position_mapping(target_ee_positions, name="target_ee_positions")
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be >= 1")
         angles = initial_angles.copy()
         step_size = 0.01
+        gradient = np.empty_like(angles)
+        angles_plus = angles.copy()
 
         for _ in range(max_iterations):
             # Compute current end-effector positions
@@ -516,11 +635,11 @@ class MotionRetargeter:
                 break
 
             # Gradient descent step (numerical gradient)
-            gradient = np.zeros_like(angles)
+            gradient.fill(0.0)
             eps = 1e-4
+            angles_plus[:] = angles
 
             for j in range(len(angles)):
-                angles_plus = angles.copy()
                 angles_plus[j] += eps
                 ee_plus = self._compute_end_effector_positions(angles_plus, self.target)
 
@@ -529,6 +648,7 @@ class MotionRetargeter:
                 )
 
                 gradient[j] = (error_plus - total_error) / eps
+                angles_plus[j] = angles[j]
 
             angles = angles - step_size * gradient
 
@@ -538,6 +658,7 @@ class MotionRetargeter:
                     lower, upper = self.target.joint_limits[j]
                     angles[j] = np.clip(angles[j], lower, upper)
 
+        _validate_joint_angles(angles, self.target, name="optimized_angles")
         return angles
 
     def _retarget_ik(
@@ -574,8 +695,13 @@ class MotionRetargeter:
         Returns:
             Retargeted joint angles.
         """
-        if marker_positions is None:
-            raise ValueError("marker_positions must be provided")
+        if marker_names is None:
+            raise ValueError("marker_names must be provided")
+        marker_positions = _validate_finite_array(
+            marker_positions,
+            name="marker_positions",
+            shape=(None, len(marker_names), 3),
+        )
         n_frames = marker_positions.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
 
@@ -583,17 +709,25 @@ class MotionRetargeter:
         if marker_to_joint_mapping is None:
             marker_to_joint_mapping = self._infer_marker_mapping(marker_names)
 
+        name_to_idx: dict[str, int] = {}
+        for marker_idx, marker_name in enumerate(marker_names):
+            name_to_idx.setdefault(marker_name, marker_idx)
+        mapped_marker_indices: list[tuple[int, str]] = []
+        for marker_name, joint_name in marker_to_joint_mapping.items():
+            marker_lookup_idx = name_to_idx.get(marker_name)
+            if marker_lookup_idx is not None:
+                mapped_marker_indices.append((marker_lookup_idx, joint_name))
+
         for t in range(n_frames):
             # Extract joint positions from markers
             joint_positions = {}
-            for marker_name, joint_name in marker_to_joint_mapping.items():
-                if marker_name in marker_names:
-                    marker_idx = marker_names.index(marker_name)
-                    joint_positions[joint_name] = marker_positions[t, marker_idx]
+            for marker_idx, joint_name in mapped_marker_indices:
+                joint_positions[joint_name] = marker_positions[t, marker_idx]
 
             # Convert positions to joint angles via IK
             target_motion[t] = self._positions_to_angles(joint_positions)
 
+        _validate_motion_matrix(target_motion, self.target, name="target_motion")
         return target_motion
 
     def _infer_marker_mapping(
@@ -649,8 +783,7 @@ class MotionRetargeter:
             Joint angles.
         """
         # Start with zero angles
-        if joint_positions is None:
-            raise ValueError("joint_positions must be provided")
+        _validate_position_mapping(joint_positions, name="joint_positions")
         angles = np.zeros(self.target.n_joints)
 
         # For each kinematic chain ending at a positioned joint,

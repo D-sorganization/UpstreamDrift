@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized learning retargeter FK and mocap marker lookup
+  hot paths for issue #7566: `MotionRetargeter` now caches end-effector
+  kinematic chains as joint indices, reuses finite-difference perturbation
+  buffers during frame optimization, evaluates simplified z-axis FK without
+  per-joint rotation-matrix allocation, precomputes mocap marker-name indices
+  once per call, and validates retargeting array shapes/finite values at
+  public/internal boundaries.
 - **2026-06-17** - Optimized RRT/RRT* tree-neighbor and cost-propagation
   paths for issue #7564: both planners now maintain an append-friendly
   finite configuration index for vectorized nearest-neighbor queries, RRT*
