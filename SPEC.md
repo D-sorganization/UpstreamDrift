@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.399                                            |
+| **Spec Version**        | 1.0.400                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Tightened the direct launcher Tools override contract for
+  issue #7544: `launch_upstream_drift.py` no longer auto-discovers arbitrary
+  sibling `Tools` checkouts ahead of the repository and vendored dependency
+  paths. Development overrides now require an explicit valid `TOOLS_REPO_PATH`,
+  while the default bootstrap order remains repository source followed by the
+  vendored `vendor/ud-tools` shared package.
 - **2026-06-17** - Restored Windows installer build diagnostics for issue
   #7545: the `setup.py build` and `setup.py bdist_msi` helper paths now share
   failure formatting that preserves the command, return code, stdout, and

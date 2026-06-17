@@ -39,67 +39,54 @@ from sys import exit, path
 # `python launch_upstream_drift.py` invocation does not.
 _REPO_ROOT = Path(__file__).resolve().parent
 
-# Discover sibling Tools repository to prioritize real subtabs over stubs
-_TOOLS_ROOT = None
-_env_tools = os.environ.get("TOOLS_REPO_PATH")
-if _env_tools and Path(_env_tools).is_dir():
-    _TOOLS_ROOT = Path(_env_tools)
-else:
-    _vendor_resolved: Path | None = None
-    try:
-        _vendor_resolved = (_REPO_ROOT / "vendor" / "ud-tools").resolve()
-    except Exception:  # noqa: BLE001
-        _vendor_resolved = None
-    _p_walk = _REPO_ROOT
-    for _ in range(10):
-        _p_walk = _p_walk.parent
-        for _candidate in (
-            _p_walk / "Tools",
-            _p_walk / "Repositories" / "Tools",
-            Path.home() / "Repositories" / "Tools",
-        ):
-            if _candidate.is_dir() and (_candidate / "src").is_dir():
-                try:
-                    # Skip candidate if it is nested inside our repo (e.g. the vendored copy)
-                    # to prioritize a true sibling checkout.
-                    if _candidate.is_relative_to(_REPO_ROOT):
-                        continue
-                except (ValueError, AttributeError):
-                    if str(_REPO_ROOT) in str(_candidate.resolve()):
-                        continue
-                except Exception:  # noqa: BLE001
-                    pass
-                _TOOLS_ROOT = _candidate
-                break
-        if _TOOLS_ROOT:
-            break
 
-_paths_to_add = []
-if _TOOLS_ROOT:
-    _paths_to_add.extend(
+def _resolve_explicit_tools_root(env_value: str | None) -> Path | None:
+    """Return the explicitly configured Tools checkout, if one was requested."""
+    if not env_value:
+        return None
+
+    tools_root = Path(env_value).expanduser().resolve()
+    tools_src = tools_root / "src"
+    if not tools_root.is_dir() or not tools_src.is_dir():
+        raise RuntimeError(
+            "TOOLS_REPO_PATH must point to a Tools checkout containing a src/ "
+            f"directory, got: {tools_root}"
+        )
+    return tools_root
+
+
+def _launcher_bootstrap_paths(repo_root: Path, tools_root: Path | None) -> list[str]:
+    """Build deterministic import precedence for direct launcher execution."""
+    paths_to_add: list[str] = []
+    if tools_root is not None:
+        paths_to_add.extend(
+            [
+                str(tools_root / "src"),
+                str(tools_root / "src" / "shared" / "python"),
+                str(tools_root / "src" / "python" / "src"),
+            ]
+        )
+
+    paths_to_add.extend(
         [
-            str(_TOOLS_ROOT / "src"),
-            str(_TOOLS_ROOT / "src" / "shared" / "python"),
-            str(_TOOLS_ROOT / "src" / "python" / "src"),
+            str(repo_root / "src" / "shared" / "python"),
+            str(repo_root / "src"),
+            str(repo_root),
+            str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
         ]
     )
+    return paths_to_add
 
-_paths_to_add.extend(
-    [
-        str(_REPO_ROOT / "src" / "shared" / "python"),
-        str(_REPO_ROOT / "src"),
-        str(_REPO_ROOT),
-    ]
-)
 
-_VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
-_paths_to_add.append(str(_VENDOR_SHARED))
+def _bootstrap_import_paths(paths_to_add: list[str]) -> None:
+    """Prepend bootstrap paths while preserving the supplied precedence order."""
+    for path_entry in reversed(paths_to_add):
+        if path_entry not in path:
+            path.insert(0, path_entry)
 
-# Insert paths to the front of sys.path in reverse order so the first item in _paths_to_add
-# ends up at the very beginning of sys.path.
-for _path_entry in reversed(_paths_to_add):
-    if _path_entry not in path:
-        path.insert(0, _path_entry)
+
+_TOOLS_ROOT = _resolve_explicit_tools_root(os.environ.get("TOOLS_REPO_PATH"))
+_bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _TOOLS_ROOT))
 
 from src.api._version import warn_if_unsupported_platform  # noqa: E402
 
