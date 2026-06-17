@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.403                                            |
+| **Spec Version**        | 1.0.405                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized the Rust mocap preprocessing per-series filter
+  dispatcher for issue #7573: `apply_per_series` now gathers/scatters each
+  `(point, dim)` time series through ndarray lane views with explicit
+  shape/finite-value contracts, preserving numeric output while avoiding
+  repeated full 3-index ndarray indexing in the hot filter path.
 - **2026-06-17** - Optimized Rust motion-matching finite differences for issue
   #7575: the internal q/qdot/qddot working storage now uses contiguous
   row-major buffers instead of scattered nested vectors, while preserving the

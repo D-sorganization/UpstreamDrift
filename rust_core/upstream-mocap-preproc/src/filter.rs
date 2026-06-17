@@ -3,7 +3,7 @@
 //! All filters operate per-`(point, dim)` series on data shaped
 //! `(n_frames, n_points, n_dims)` and return arrays of the same shape.
 
-use ndarray::{Array1, Array3, ArrayView3};
+use ndarray::{s, Array1, Array3, ArrayView1, ArrayView3};
 
 // ── Butterworth ──────────────────────────────────────────────────────────────
 
@@ -638,6 +638,11 @@ where
     let (nt, np, nd) = data.dim();
     let total = np * nd;
 
+    debug_assert!(
+        data.iter().all(|v| v.is_finite()),
+        "filter input must contain only finite values"
+    );
+
     // Collect (point_idx, dim_idx, filtered_series) in parallel, then stitch
     // back into a single Array3. Each thread allocates its own input/output
     // buffers — small and short-lived.
@@ -646,24 +651,52 @@ where
         .map(|s| {
             let i = s / nd;
             let j = s % nd;
-            let mut buf = vec![0.0_f64; nt];
-            for t in 0..nt {
-                buf[t] = data[[t, i, j]];
-            }
+            let buf = gather_time_series(data, i, j, nt);
             f(&buf)
         })
         .collect();
 
     let mut out = Array3::<f64>::zeros((nt, np, nd));
-    for s in 0..total {
+    for (s, series) in results.iter().enumerate() {
+        assert_eq!(
+            series.len(),
+            nt,
+            "per-series filter must preserve the time-axis length"
+        );
+        debug_assert!(
+            series.iter().all(|v| v.is_finite()),
+            "filter output must contain only finite values"
+        );
         let i = s / nd;
         let j = s % nd;
-        let series = &results[s];
-        for t in 0..nt {
-            out[[t, i, j]] = series[t];
-        }
+        scatter_time_series(&mut out, i, j, series);
     }
     out
+}
+
+fn gather_time_series(
+    data: ArrayView3<f64>,
+    point_idx: usize,
+    dim_idx: usize,
+    nt: usize,
+) -> Vec<f64> {
+    debug_assert!(point_idx < data.dim().1, "point index must be in bounds");
+    debug_assert!(dim_idx < data.dim().2, "dimension index must be in bounds");
+    let lane = data.slice(s![.., point_idx, dim_idx]);
+    debug_assert_eq!(lane.len(), nt, "time lane length must match input shape");
+    lane.iter().copied().collect()
+}
+
+fn scatter_time_series(out: &mut Array3<f64>, point_idx: usize, dim_idx: usize, series: &[f64]) {
+    debug_assert!(point_idx < out.dim().1, "point index must be in bounds");
+    debug_assert!(dim_idx < out.dim().2, "dimension index must be in bounds");
+    let mut lane = out.slice_mut(s![.., point_idx, dim_idx]);
+    assert_eq!(
+        lane.len(),
+        series.len(),
+        "filtered series length must match output time lane"
+    );
+    lane.assign(&ArrayView1::from(series));
 }
 
 // Re-export an axis helper for tests that operate on Array1.
@@ -768,5 +801,27 @@ mod tests {
         let x = vec![2.0_f64; 50];
         let y = kalman_1d(&x, 0.01, 0.1);
         assert!((y[49] - 2.0).abs() < 1e-3);
+    }
+
+    #[test]
+    fn apply_per_series_preserves_per_lane_numeric_results() {
+        let data = Array3::from_shape_fn((7, 3, 2), |(t, i, j)| {
+            (t as f64 * 100.0) + (i as f64 * 10.0) + j as f64 + 0.25
+        });
+
+        let actual = apply_per_series(data.view(), |series| {
+            series
+                .iter()
+                .enumerate()
+                .map(|(t, value)| value.mul_add(1.5, t as f64 - 2.0))
+                .collect()
+        });
+
+        let expected = Array3::from_shape_fn((7, 3, 2), |(t, i, j)| {
+            let value = (t as f64 * 100.0) + (i as f64 * 10.0) + j as f64 + 0.25;
+            value.mul_add(1.5, t as f64 - 2.0)
+        });
+
+        assert_eq!(actual, expected);
     }
 }
