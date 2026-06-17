@@ -65,6 +65,8 @@ class QPProblem:
             raise ValueError(f"H must be square, got {self.H.shape}")
         if self.g.shape != (n,):
             raise ValueError(f"g shape {self.g.shape} doesn't match H dimension {n}")
+        self._require_finite("H", self.H)
+        self._require_finite("g", self.g)
 
         # Validate equality constraints
         if self.A_eq is not None:
@@ -76,6 +78,15 @@ class QPProblem:
                 raise ValueError(
                     f"A_eq columns {self.A_eq.shape[1]} doesn't match n={n}",
                 )
+            if self.b_eq.shape != (self.A_eq.shape[0],):
+                raise ValueError(
+                    f"b_eq shape {self.b_eq.shape} doesn't match A_eq rows "
+                    f"{self.A_eq.shape[0]}",
+                )
+            self._require_finite("A_eq", self.A_eq)
+            self._require_finite("b_eq", self.b_eq)
+        elif self.b_eq is not None:
+            raise ValueError("A_eq required when b_eq provided")
 
         # Validate inequality constraints
         if self.A_ineq is not None:
@@ -84,6 +95,71 @@ class QPProblem:
                 raise ValueError(
                     f"A_ineq columns {self.A_ineq.shape[1]} doesn't match n={n}",
                 )
+            self._require_finite("A_ineq", self.A_ineq)
+            self._validate_inequality_bounds()
+        elif self.lb_ineq is not None or self.ub_ineq is not None:
+            raise ValueError("A_ineq required when inequality bounds provided")
+
+        self._validate_variable_bounds(n)
+
+    @staticmethod
+    def _require_finite(name: str, values: NDArray[np.float64]) -> None:
+        if not np.all(np.isfinite(values)):
+            raise ValueError(f"{name} must contain only finite values")
+
+    @staticmethod
+    def _require_no_nan(name: str, values: NDArray[np.float64]) -> None:
+        if np.any(np.isnan(values)):
+            raise ValueError(f"{name} must not contain NaN")
+
+    def _validate_inequality_bounds(self) -> None:
+        if self.A_ineq is None:
+            raise ValueError("A_ineq required when validating inequality bounds")
+        n_ineq = self.A_ineq.shape[0]
+        if self.lb_ineq is not None:
+            self.lb_ineq = np.asarray(self.lb_ineq, dtype=np.float64)
+            if self.lb_ineq.shape != (n_ineq,):
+                raise ValueError(
+                    f"lb_ineq shape {self.lb_ineq.shape} doesn't match A_ineq rows "
+                    f"{n_ineq}",
+                )
+            self._require_no_nan("lb_ineq", self.lb_ineq)
+        if self.ub_ineq is not None:
+            self.ub_ineq = np.asarray(self.ub_ineq, dtype=np.float64)
+            if self.ub_ineq.shape != (n_ineq,):
+                raise ValueError(
+                    f"ub_ineq shape {self.ub_ineq.shape} doesn't match A_ineq rows "
+                    f"{n_ineq}",
+                )
+            self._require_no_nan("ub_ineq", self.ub_ineq)
+        if (
+            self.lb_ineq is not None
+            and self.ub_ineq is not None
+            and np.any(self.lb_ineq > self.ub_ineq)
+        ):
+            raise ValueError("lb_ineq must be less than or equal to ub_ineq")
+
+    def _validate_variable_bounds(self, n_vars: int) -> None:
+        if self.x_lb is not None:
+            self.x_lb = np.asarray(self.x_lb, dtype=np.float64)
+            if self.x_lb.shape != (n_vars,):
+                raise ValueError(
+                    f"x_lb shape {self.x_lb.shape} doesn't match H dimension {n_vars}",
+                )
+            self._require_no_nan("x_lb", self.x_lb)
+        if self.x_ub is not None:
+            self.x_ub = np.asarray(self.x_ub, dtype=np.float64)
+            if self.x_ub.shape != (n_vars,):
+                raise ValueError(
+                    f"x_ub shape {self.x_ub.shape} doesn't match H dimension {n_vars}",
+                )
+            self._require_no_nan("x_ub", self.x_ub)
+        if (
+            self.x_lb is not None
+            and self.x_ub is not None
+            and np.any(self.x_lb > self.x_ub)
+        ):
+            raise ValueError("x_lb must be less than or equal to x_ub")
 
     @property
     def n_vars(self) -> int:
@@ -275,10 +351,10 @@ class ScipyQPSolver(QPSolver):
         ub = problem.x_ub if problem.x_ub is not None else np.inf * np.ones(n)
         return Bounds(lb, ub)
 
-    def _build_constraints(self, problem: QPProblem) -> list[dict]:
+    def _build_constraints(self, problem: QPProblem) -> list[dict[str, Any]]:
         if problem is None:
             raise ValueError("problem must be provided")
-        constraints: list[dict] = []
+        constraints: list[dict[str, Any]] = []
 
         if problem.A_eq is not None and problem.b_eq is not None:
             constraints.append(
@@ -296,39 +372,86 @@ class ScipyQPSolver(QPSolver):
 
     def _add_inequality_constraints(
         self,
-        constraints: list[dict],
+        constraints: list[dict[str, Any]],
         problem: QPProblem,
     ) -> None:
         if constraints is None:
             raise ValueError("constraints must be provided")
-        lb = (
-            problem.lb_ineq
-            if problem.lb_ineq is not None
-            else -np.inf * np.ones(problem.n_ineq)
-        )
-        ub = (
-            problem.ub_ineq
-            if problem.ub_ineq is not None
-            else np.inf * np.ones(problem.n_ineq)
+        if problem.A_ineq is None:
+            raise ValueError("A_ineq required when inequality constraints are added")
+
+        lb = self._bound_vector(problem.lb_ineq, problem.n_ineq, -np.inf, "lb_ineq")
+        ub = self._bound_vector(problem.ub_ineq, problem.n_ineq, np.inf, "ub_ineq")
+
+        lower_mask = np.isfinite(lb)
+        if np.any(lower_mask):
+            self._append_inequality_lower_bound(
+                constraints,
+                problem.A_ineq[lower_mask],
+                lb[lower_mask],
+            )
+
+        upper_mask = np.isfinite(ub)
+        if np.any(upper_mask):
+            self._append_inequality_upper_bound(
+                constraints,
+                problem.A_ineq[upper_mask],
+                ub[upper_mask],
+            )
+
+    @staticmethod
+    def _bound_vector(
+        values: NDArray[np.float64] | None,
+        size: int,
+        default: float,
+        name: str,
+    ) -> NDArray[np.float64]:
+        if size < 0:
+            raise ValueError("size must be non-negative")
+        if values is None:
+            return np.full(size, default, dtype=np.float64)
+        bounds = np.asarray(values, dtype=np.float64)
+        if bounds.shape != (size,):
+            raise ValueError(f"{name} shape {bounds.shape} doesn't match size {size}")
+        if np.any(np.isnan(bounds)):
+            raise ValueError(f"{name} must not contain NaN")
+        return bounds
+
+    @staticmethod
+    def _append_inequality_lower_bound(
+        constraints: list[dict[str, Any]],
+        A: NDArray[np.float64],
+        lb: NDArray[np.float64],
+    ) -> None:
+        if A.ndim != 2:
+            raise ValueError("A must be two-dimensional")
+        if lb.shape != (A.shape[0],):
+            raise ValueError("lb must match A rows")
+        constraints.append(
+            {
+                "type": "ineq",
+                "fun": lambda x, A=A, lb=lb: A @ x - lb,
+                "jac": lambda x, A=A: A,
+            },
         )
 
-        for i in range(problem.n_ineq):
-            if lb[i] > -1e10:
-                constraints.append(
-                    {
-                        "type": "ineq",
-                        "fun": lambda x, A=problem.A_ineq, lb=lb, i=i: A[i] @ x - lb[i],
-                        "jac": lambda x, A=problem.A_ineq, i=i: A[i],
-                    },
-                )
-            if ub[i] < 1e10:
-                constraints.append(
-                    {
-                        "type": "ineq",
-                        "fun": lambda x, A=problem.A_ineq, ub=ub, i=i: ub[i] - A[i] @ x,
-                        "jac": lambda x, A=problem.A_ineq, i=i: -A[i],
-                    },
-                )
+    @staticmethod
+    def _append_inequality_upper_bound(
+        constraints: list[dict[str, Any]],
+        A: NDArray[np.float64],
+        ub: NDArray[np.float64],
+    ) -> None:
+        if A.ndim != 2:
+            raise ValueError("A must be two-dimensional")
+        if ub.shape != (A.shape[0],):
+            raise ValueError("ub must match A rows")
+        constraints.append(
+            {
+                "type": "ineq",
+                "fun": lambda x, A=A, ub=ub: ub - A @ x,
+                "jac": lambda x, A=A: -A,
+            },
+        )
 
 
 class NullspaceQPSolver(QPSolver):

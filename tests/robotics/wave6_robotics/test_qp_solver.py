@@ -119,6 +119,58 @@ def test_scipy_solver_constructor() -> None:
     assert isinstance(s.is_available(), bool)
 
 
+def test_scipy_solver_builds_vectorized_inequality_constraints() -> None:
+    solver = ScipyQPSolver(method="SLSQP", max_iter=50)
+    problem = QPProblem(
+        H=np.eye(3),
+        g=np.zeros(3),
+        A_ineq=np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 2.0, 0.0],
+                [0.0, 0.0, 3.0],
+                [1.0, 1.0, 1.0],
+            ],
+        ),
+        lb_ineq=np.array([-1.0, -np.inf, 0.5, -np.inf]),
+        ub_ineq=np.array([np.inf, 2.0, 4.0, np.inf]),
+    )
+
+    constraints = solver._build_constraints(problem)
+    x = np.array([0.75, 0.5, 1.0])
+
+    assert len(constraints) == 2
+    lower, upper = constraints
+    assert lower["type"] == "ineq"
+    assert upper["type"] == "ineq"
+    np.testing.assert_allclose(lower["fun"](x), [1.75, 2.5])
+    np.testing.assert_allclose(
+        lower["jac"](x),
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 3.0],
+        ],
+    )
+    np.testing.assert_allclose(upper["fun"](x), [1.0, 1.0])
+    np.testing.assert_allclose(
+        upper["jac"](x),
+        [
+            [-0.0, -2.0, -0.0],
+            [-0.0, -0.0, -3.0],
+        ],
+    )
+
+
+def test_qp_problem_rejects_mismatched_inequality_bounds() -> None:
+    with pytest.raises(ValueError, match="lb_ineq"):
+        QPProblem(
+            H=np.eye(2),
+            g=np.zeros(2),
+            A_ineq=np.eye(2),
+            lb_ineq=np.zeros(3),
+        )
+
+
 def test_scipy_solver_solves_simple() -> None:
     s = ScipyQPSolver(method="SLSQP", max_iter=50)
     if not s.is_available():

@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.405                                            |
+| **Spec Version**        | 1.0.406                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized whole-body SciPy QP inequality construction for
+  issue #7568: inequality rows now build as vector-valued lower/upper SLSQP
+  callbacks from finite-bound masks instead of O(m) per-row Python callbacks,
+  with focused validation for QP matrix finiteness and constraint/bound shapes.
 - **2026-06-17** - Optimized the Rust mocap preprocessing per-series filter
   dispatcher for issue #7573: `apply_per_series` now gathers/scatters each
   `(point, dim)` time series through ndarray lane views with explicit
@@ -1538,6 +1542,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-17 | 1.0.406 | Optimized whole-body SciPy QP inequality construction for issue #7568. Finite lower and upper inequality bounds now each build one vector-valued SLSQP callback instead of per-row Python callbacks, while QP construction validates finite matrices plus constraint and bound shapes before entering the solver hot path. |
 | 2026-06-14 | 1.0.394 | Added the ball-flight physical benchmark contract for issue #7407. TrackMan-style driver and 7-iron tests now cover the enhanced simulator, the public flight-model registry, and the REST route; the suite locks cross-engine carry agreement, 5 m/s headwind/tailwind sanity, analytic vacuum range, explicit zero-drag semantics for Python/Rust drag-crisis helpers, humidity-aware density through `EnvironmentalConditions.from_altitude(...)`, and the calibrated Magnus coefficient cap contract. |
 | 2026-06-14 | 1.0.396 | Completed the AnalysisOrchestrator dashboard plot migration for #7446. Every PyQt6 static-dashboard label now maps to a registered headless `PlotData` extractor, including Poincare, Lyapunov, recurrence, GRF butterfly, kinematic-sequence, and summary-dashboard outputs, and the desktop dispatch path exercises `AnalysisOrchestrator.get_plot_data(...)` before renderer-specific plotting. |
 | 2026-06-14 | 1.0.393 | Corrected the impact model gear-effect spin direction and driver COR calibration for issue #7406. Toe/heel offsets now produce hook/slice spin in the launch-monitor sign convention, high-face/low-face offsets reduce/increase backspin, default gear-effect scales put realistic 20 mm toe and 10 mm vertical strikes in expected rad/s bands, and `DRIVER_COR` now reflects the USGA/R&A CT-limit-equivalent COR so center strikes can reach tour smash-factor ranges; regression coverage asserts toe/heel antisymmetry, vertical gear effect, default smash factor, and energy balance. |

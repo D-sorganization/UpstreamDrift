@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Optimized whole-body SciPy QP inequality construction for #7568 by replacing
+  per-row SLSQP callbacks with vector-valued lower/upper bound callbacks and
+  tightening QP matrix/bound validation at construction.
 - Hardened the standard CI PR-scoped unit gate for #7314: source/dependency PRs
   now use the dependency-light unit lane instead of passing solely on touched
   test files, and targeted PR coverage runs a changed-file policy ratchet.
