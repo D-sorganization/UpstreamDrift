@@ -317,6 +317,34 @@ class TestSoftBody:
 
         assert calls == [(2, 3, 3)]
 
+    def test_compute_internal_forces_batches_root_force_reduction(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        mesh = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+            dtype=float,
+        )
+        tets = np.array([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=int)
+        sb = SoftBody(mesh, tets, MaterialProperties())
+        original_einsum = np.einsum
+        calls: list[tuple[str, tuple[int, ...]]] = []
+
+        def counting_einsum(subscripts: str, operand: np.ndarray) -> np.ndarray:
+            calls.append((subscripts, operand.shape))
+            return original_einsum(subscripts, operand)
+
+        monkeypatch.setattr(np, "einsum", counting_einsum)
+        sb.compute_internal_forces()
+
+        assert calls == [("ijk->ij", (2, 3, 3))]
+
 
 class TestCable:
     def test_construction(self) -> None:

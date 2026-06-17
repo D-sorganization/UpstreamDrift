@@ -9,3 +9,6 @@
 ## 2026-06-16 - np.einsum for L2 norms over axes
 **Learning:** For multi-dimensional NumPy arrays where you compute an L2 norm along a specific axis (like calculating RMSE distance over an array of 3D coordinates using `np.mean(np.sum(diff**2, axis=1))`), `np.sum(...**2, axis=...)` allocates a temporary array for the intermediate squares. `np.einsum` avoids this.
 **Action:** Replace `np.sum(diff**2, axis=1)` with `np.einsum('ij,ij->i', diff, diff)` or `np.sum(diff*diff, axis=-1)` with `np.einsum('...i,...i->...', diff, diff)` to achieve a 2-3x speedup.
+## 2026-06-17 - np.einsum for sum over axis
+**Learning:** For multi-dimensional NumPy arrays where you compute a sum along a specific axis (like calculating `np.sum(H, axis=2)`), `np.sum(..., axis=...)` has more overhead. `np.einsum` avoids this.
+**Action:** For fixed-shape FEM tensors, consider replacing `np.sum(H, axis=2)` with `np.einsum('ijk->ij', H)` only after parity coverage locks the batched reduction shape.

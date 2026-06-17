@@ -401,7 +401,7 @@ class SoftBody(DeformableObject):
         np.add.at(forces, self._tetrahedra[:, 1], H[:, :, 0])
         np.add.at(forces, self._tetrahedra[:, 2], H[:, :, 1])
         np.add.at(forces, self._tetrahedra[:, 3], H[:, :, 2])
-        np.add.at(forces, self._tetrahedra[:, 0], -np.sum(H, axis=2))
+        np.add.at(forces, self._tetrahedra[:, 0], -np.einsum("ijk->ij", H))
 
         if not np.all(np.isfinite(forces)):
             raise ValueError("computed FEM internal forces must be finite")
