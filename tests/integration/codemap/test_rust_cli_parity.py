@@ -9,6 +9,7 @@ available on ``PATH`` or under ``target/release/`` — otherwise the test
 
 from __future__ import annotations
 
+import os
 import shutil
 import sqlite3
 import subprocess
@@ -30,6 +31,29 @@ def _rust_binary() -> str | None:
     if candidate.exists():
         return str(candidate)
     return None
+
+
+def _require_or_skip_binary(kind: str) -> str:
+    """Return the codemap binary path, or skip — unless CI demands it.
+
+    The ``rust-wheel-parity`` CI job builds the binary and sets
+    ``CI_RUST_WHEELS_EXPECTED=1``. In that lane a missing binary is a hard
+    failure (the build/install regressed), mirroring the wheel-skip ratchet in
+    ``tests/conftest.py``. Outside that lane the test skips so clean checkouts
+    that haven't built the binary stay green.
+    """
+    binary = _rust_binary()
+    if binary is not None:
+        return binary
+    msg = f"upstream-codemap binary not built; skipping {kind} test"
+    if os.environ.get("CI_RUST_WHEELS_EXPECTED") == "1":
+        pytest.fail(
+            "CI_RUST_WHEELS_EXPECTED=1 but the upstream-codemap binary is not "
+            "built (looked on PATH and target/release/). The rust-wheel-parity "
+            "lane must build it so the Python vs Rust codemap parity actually "
+            "runs. See issue #7603."
+        )
+    pytest.skip(msg)
 
 
 def _write_fixture(root: Path) -> None:
@@ -92,9 +116,7 @@ def _build_with_rust(root: Path, binary: str) -> Path:
 
 @pytest.mark.integration
 def test_python_and_rust_produce_equivalent_index(tmp_path: Path) -> None:
-    binary = _rust_binary()
-    if binary is None:
-        pytest.skip("upstream-codemap binary not built; skipping parity test")
+    binary = _require_or_skip_binary("parity")
 
     py_root = tmp_path / "py_repo"
     rs_root = tmp_path / "rs_repo"
@@ -144,9 +166,7 @@ def test_rust_cold_rebuild_under_budget(tmp_path: Path) -> None:
     log the actual time and only fail at a generous 90s ceiling — this is
     intended as a regression tripwire, not a precise benchmark.
     """
-    binary = _rust_binary()
-    if binary is None:
-        pytest.skip("upstream-codemap binary not built; skipping perf test")
+    binary = _require_or_skip_binary("perf")
 
     # Use a fresh .codemap/ to force a true cold rebuild.
     sandbox = tmp_path / "drift_index"

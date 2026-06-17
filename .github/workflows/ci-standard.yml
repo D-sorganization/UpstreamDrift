@@ -2488,6 +2488,14 @@ jobs:
           echo "Wheels built successfully"
           ls target/wheels/
 
+      # Build the upstream-codemap CLI binary so the Python-vs-Rust codemap
+      # parity test runs instead of self-skipping (issue #7603). The binary is
+      # a [[bin]] target (no pymodule), so it ships via cargo, not maturin.
+      - name: Build codemap CLI binary
+        run: |
+          cargo build --release -p upstream-codemap --bin upstream-codemap
+          ls -l target/release/upstream-codemap
+
       - name: Install project + built wheels
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
@@ -2495,6 +2503,14 @@ jobs:
           python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
           python -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
           python -m pip install --force-reinstall target/wheels/*.whl
+          # tree-sitter grammars for the Python codemap side so the Python-vs-Rust
+          # codemap parity test can index the same languages the Rust binary does
+          # (rust + markdown), instead of degrading to Python-only (issue #7603).
+          python -m pip install --no-cache-dir \
+            "tree-sitter==0.25.2" \
+            "tree-sitter-python==0.25.0" \
+            "tree-sitter-rust==0.24.2" \
+            "tree-sitter-markdown==0.5.1"
           # Fail-closed probe: every wheel must import + expose its bindings.
           python scripts/ci/import_built_rust_wheels.py \
             upstream_physics \
@@ -2522,6 +2538,7 @@ jobs:
             tests/unit/motion_matching/test_cmc_rust_parity.py \
             tests/unit/realtime/test_rust_parity.py \
             tests/unit/urdf/test_rust_facade_parity.py \
+            tests/integration/codemap/test_rust_cli_parity.py \
             tests/unit/test_ball_flight_physics.py \
             tests/unit/shared_python/test_ball_flight_physics.py \
             -p no:xvfb \
