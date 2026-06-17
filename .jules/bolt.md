@@ -12,3 +12,7 @@
 ## 2026-06-17 - np.einsum for sum over axis
 **Learning:** For multi-dimensional NumPy arrays where you compute a sum along a specific axis (like calculating `np.sum(H, axis=2)`), `np.sum(..., axis=...)` has more overhead. `np.einsum` avoids this.
 **Action:** For fixed-shape FEM tensors, consider replacing `np.sum(H, axis=2)` with `np.einsum('ijk->ij', H)` only after parity coverage locks the batched reduction shape.
+
+## 2024-05-14 - Replace np.linalg.norm with math.hypot for 2D/3D vectors
+**Learning:** `math.hypot(x, y)` is significantly faster (~5x) than `np.linalg.norm` for explicitly unpacked 2D arrays, and `math.hypot(x, y, z)` is similarly faster for 3D arrays, but array dimension assumptions should be verified carefully, or explicit bounds checks (`len()`) applied to avoid indexing errors when vectors might be 2D or 3D.
+**Action:** Replace `np.linalg.norm(v)` with `math.hypot(v[0], v[1])` or `math.hypot(v[0], v[1], v[2])` when vector sizes are known to be 2D or 3D to improve performance. Use length checks if the size varies.

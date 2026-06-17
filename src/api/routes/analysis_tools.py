@@ -189,7 +189,9 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 
             _, v = engine.get_state()
             linear_vel = jac["linear"] @ v
-            metrics["club_head_speed"] = float(np.linalg.norm(linear_vel))
+            metrics["club_head_speed"] = float(
+                math.hypot(*(float(component) for component in linear_vel))
+            )
     except ImportError as exc:
         logger.debug("numpy unavailable for club head speed metric: %s", exc)
 
@@ -351,6 +353,7 @@ async def get_analysis_statistics(  # noqa: C901
 
         # Identify scalar metric keys
         scalar_keys: set[str] = set()
+
         for snapshot in history:
             for key, value in snapshot.items():
                 if isinstance(value, int | float) and not math.isnan(value):

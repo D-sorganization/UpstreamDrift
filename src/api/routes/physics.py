@@ -17,6 +17,7 @@ No module-level mutable state.
 from __future__ import annotations
 
 import contextlib
+import math
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -380,7 +381,9 @@ async def get_metrics(
                 import numpy as np
 
                 linear_vel = jac["linear"] @ v
-                club_head_speed = float(np.linalg.norm(linear_vel))
+                club_head_speed = float(
+                    math.hypot(*(float(component) for component in linear_vel))
+                )
         except ImportError as exc:
             _logger.warning(
                 "numpy unavailable for club-head speed calculation: %s", exc

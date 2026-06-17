@@ -173,7 +173,13 @@ class TrajectoryPoint:
     @property
     def speed(self) -> float:
         """Return the scalar speed from the velocity vector."""
-        return float(np.linalg.norm(self.velocity))
+        return float(
+            math.hypot(
+                float(self.velocity[0]),
+                float(self.velocity[1]),
+                float(self.velocity[2]),
+            )
+        )
 
     @property
     def height(self) -> float:

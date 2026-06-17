@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -231,7 +232,9 @@ class TeleoperationInterface:
             delta_pos = (device_pose[:3] - self._reference_pose[:3]) * self._scaling
 
             # Apply deadband
-            delta_norm = np.linalg.norm(delta_pos)
+            delta_norm = math.hypot(
+                float(delta_pos[0]), float(delta_pos[1]), float(delta_pos[2])
+            )
             if delta_norm < self._workspace.deadband:
                 delta_pos = np.zeros(3)
 
@@ -296,7 +299,9 @@ class TeleoperationInterface:
         scaled_twist = device_twist * self._scaling
 
         # Apply rate limit
-        linear_norm = np.linalg.norm(scaled_twist[:3])
+        linear_norm = math.hypot(
+            float(scaled_twist[0]), float(scaled_twist[1]), float(scaled_twist[2])
+        )
         if linear_norm > self._workspace.rate_limit:
             scaled_twist[:3] *= self._workspace.rate_limit / linear_norm
 
