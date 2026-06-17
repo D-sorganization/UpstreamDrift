@@ -129,21 +129,53 @@ def compute_coriolis_matrix(
     Returns:
         Coriolis matrix [nv x nv]
     """
-    if qpos is None:
-        raise ValueError("qpos must be provided")
+    nv = int(model.nv)
+    nq = int(getattr(model, "nq", nv))
+    qpos = _finite_vector("qpos", qpos, nq)
+    qvel = _finite_vector("qvel", qvel, nv)
     epsilon = EPSILON_FINITE_DIFF_JACOBIAN
-    C = np.zeros((model.nv, model.nv))
+    C = np.zeros((nv, nv))
 
-    c_ref = compute_coriolis_fn(qpos, qvel)
+    for i in range(nv):
+        qvel_plus = qvel.copy()
+        qvel_minus = qvel.copy()
+        qvel_plus[i] += epsilon
+        qvel_minus[i] -= epsilon
 
-    for i in range(model.nv):
-        qvel_perturb = qvel.copy()
-        qvel_perturb[i] += epsilon
-
-        c_perturb = compute_coriolis_fn(qpos, qvel_perturb)
-        C[:, i] = (c_perturb - c_ref) / epsilon
+        c_plus = _evaluate_coriolis_vector(compute_coriolis_fn, qpos, qvel_plus, nv)
+        c_minus = _evaluate_coriolis_vector(compute_coriolis_fn, qpos, qvel_minus, nv)
+        C[:, i] = (c_plus - c_minus) / (2.0 * epsilon)
 
     return C
+
+
+def _finite_vector(name: str, values: np.ndarray, expected_size: int) -> np.ndarray:
+    if values is None:
+        raise ValueError(f"{name} must be provided")
+    array = np.asarray(values, dtype=float)
+    if array.shape != (expected_size,):
+        raise ValueError(
+            f"{name} must have shape ({expected_size},), got {array.shape}"
+        )
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must be finite")
+    return array
+
+
+def _evaluate_coriolis_vector(
+    compute_coriolis_fn,
+    qpos: np.ndarray,
+    qvel: np.ndarray,
+    nv: int,
+) -> np.ndarray:
+    forces = np.asarray(compute_coriolis_fn(qpos, qvel), dtype=float)
+    if forces.shape != (nv,):
+        raise ValueError(
+            f"compute_coriolis_fn must return shape ({nv},), got {forces.shape}"
+        )
+    if not np.all(np.isfinite(forces)):
+        raise ValueError("compute_coriolis_fn must return finite values")
+    return forces
 
 
 def validate_effective_mass_direction(direction: np.ndarray) -> np.ndarray:
