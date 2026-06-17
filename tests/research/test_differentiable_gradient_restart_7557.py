@@ -10,7 +10,8 @@ re-simulation from ``baseline_traj[t]`` — for a Markovian step this yields a
 
 These tests pin both properties:
 
-* **parity** — the optimized gradient equals the naive full-resim gradient, and
+* **parity** — the optimized gradient equals the naive full-resim central
+  gradient, and
 * **complexity** — the optimized path performs strictly fewer engine ``step``
   calls than the naive O(T^2 * n_u) approach (the red→green driver).
 """
@@ -70,18 +71,22 @@ def _naive_gradient(
     x0: np.ndarray,
     controls: np.ndarray,
     dt: float,
-    eps: float = 1e-5,
+    rel_eps: float = 1e-6,
 ) -> np.ndarray:
-    """The original algorithm: full re-simulation per perturbed element."""
+    """Full re-simulation central-difference reference."""
     T, n_u = controls.shape
     grad = np.zeros_like(controls)
-    base = de.simulate_trajectory(x0, controls, dt)
-    base_loss = _loss(base)
     for t in range(T):
         for i in range(n_u):
+            eps = rel_eps * max(1.0, abs(float(controls[t, i])))
             up = controls.copy()
+            down = controls.copy()
             up[t, i] += eps
-            grad[t, i] = (_loss(de.simulate_trajectory(x0, up, dt)) - base_loss) / eps
+            down[t, i] -= eps
+            grad[t, i] = (
+                _loss(de.simulate_trajectory(x0, up, dt))
+                - _loss(de.simulate_trajectory(x0, down, dt))
+            ) / (2.0 * eps)
     return grad
 
 
@@ -120,7 +125,7 @@ def test_gradient_uses_fewer_engine_steps() -> None:
     _naive_gradient(DifferentiableEngine(eng_naive, backend="numpy"), x0, controls, dt)
 
     assert eng_opt.step_calls < eng_naive.step_calls
-    # Naive does T baseline + T*n_u full (T-step) rollouts.
-    assert eng_naive.step_calls == T + T * n_u * T
-    # Optimized does T baseline + sum_t n_u*(T-t) suffix rollouts.
-    assert eng_opt.step_calls == T + n_u * T * (T + 1) // 2
+    # Naive does two T-step rollouts per element.
+    assert eng_naive.step_calls == 2 * T * n_u * T
+    # Optimized does T baseline + two suffix rollouts per element.
+    assert eng_opt.step_calls == T + 2 * n_u * T * (T + 1) // 2

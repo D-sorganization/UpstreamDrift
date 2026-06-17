@@ -19,6 +19,79 @@ if TYPE_CHECKING:
     from src.engines.protocols import PhysicsEngineProtocol
 
 
+_DEFAULT_FD_REL_STEP = 1e-6
+
+
+def _as_finite_array(
+    name: str,
+    values: NDArray[np.floating] | None,
+    *,
+    ndim: int | None = None,
+    shape: tuple[int, ...] | None = None,
+) -> NDArray[np.floating]:
+    if values is None:
+        raise ValueError(f"{name} must be provided")
+    array = np.asarray(values, dtype=float)
+    if ndim is not None and array.ndim != ndim:
+        raise ValueError(f"{name} must be {ndim}D; got shape {array.shape}")
+    if shape is not None and array.shape != shape:
+        raise ValueError(f"{name} must have shape {shape}; got {array.shape}")
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain only finite values")
+    return array
+
+
+def _require_positive_dt(dt: float) -> float:
+    dt_value = float(dt)
+    if not np.isfinite(dt_value) or dt_value <= 0.0:
+        raise ValueError("dt must be finite and positive")
+    return dt_value
+
+
+def _scaled_central_step(
+    value: float,
+    rel_step: float = _DEFAULT_FD_REL_STEP,
+) -> float:
+    rel_step = float(rel_step)
+    if not np.isfinite(rel_step) or rel_step <= 0.0:
+        raise ValueError("finite-difference relative step must be finite and positive")
+    return rel_step * max(1.0, abs(float(value)))
+
+
+def _finite_loss(
+    loss_fn: Callable[[NDArray[np.floating]], float],
+    trajectory: NDArray[np.floating],
+) -> float:
+    loss = float(loss_fn(trajectory))
+    if not np.isfinite(loss):
+        raise ValueError("loss_fn must return a finite scalar")
+    return loss
+
+
+def _central_difference_vector(
+    evaluate: Callable[[NDArray[np.floating]], NDArray[np.floating]],
+    point: NDArray[np.floating],
+    index: int,
+) -> NDArray[np.floating]:
+    step = _scaled_central_step(float(point[index]))
+    point_plus = point.copy()
+    point_minus = point.copy()
+    point_plus[index] += step
+    point_minus[index] -= step
+
+    value_plus = _as_finite_array(
+        "finite-difference plus evaluation",
+        evaluate(point_plus),
+        ndim=1,
+    )
+    value_minus = _as_finite_array(
+        "finite-difference minus evaluation",
+        evaluate(point_minus),
+        shape=value_plus.shape,
+    )
+    return (value_plus - value_minus) / (2.0 * step)
+
+
 class AutodiffBackend(Enum):
     """Automatic differentiation backend."""
 
@@ -113,10 +186,19 @@ class DifferentiableEngine:
         Returns:
             State trajectory (T+1, n_x).
         """
-        if initial_state is None:
-            raise ValueError("initial_state must be provided")
-        T = len(controls)
-        trajectory = np.zeros((T + 1, self._n_x))
+        initial_state = _as_finite_array(
+            "initial_state",
+            initial_state,
+            shape=(self._n_x,),
+        )
+        controls = _as_finite_array("controls", controls, ndim=2)
+        if controls.shape[1] != self._n_u:
+            raise ValueError(
+                f"controls must have shape (T, {self._n_u}); got {controls.shape}"
+            )
+        dt = _require_positive_dt(dt)
+        T = controls.shape[0]
+        trajectory = np.zeros((T + 1, self._n_x), dtype=float)
         trajectory[0] = initial_state
 
         # Set initial state
@@ -134,8 +216,9 @@ class DifferentiableEngine:
                 self.engine.set_joint_torques(controls[t])
 
             # Step simulation
-            if hasattr(self.engine, "step"):
-                self.engine.step(dt)
+            step = getattr(self.engine, "step", None)
+            if callable(step):
+                step(dt)
 
             # Record state
             if hasattr(self.engine, "get_joint_positions"):
@@ -148,9 +231,13 @@ class DifferentiableEngine:
             else:
                 v = trajectory[t, self._n_q :]
 
-            trajectory[t + 1] = np.concatenate([q, v])
+            trajectory[t + 1] = _as_finite_array(
+                "simulated state",
+                np.concatenate([q, v]),
+                shape=(self._n_x,),
+            )
 
-        return trajectory
+        return _as_finite_array("trajectory", trajectory, shape=(T + 1, self._n_x))
 
     def compute_gradient(
         self,
@@ -172,43 +259,57 @@ class DifferentiableEngine:
         Returns:
             Gradient of loss w.r.t. controls (T, n_u).
         """
-        if initial_state is None:
-            raise ValueError("initial_state must be provided")
-        eps = 1e-5
+        initial_state = _as_finite_array(
+            "initial_state",
+            initial_state,
+            shape=(self._n_x,),
+        )
+        controls = _as_finite_array("controls", controls, ndim=2)
+        if controls.shape[1] != self._n_u:
+            raise ValueError(
+                f"controls must have shape (T, {self._n_u}); got {controls.shape}"
+            )
+        dt = _require_positive_dt(dt)
         T, n_u = controls.shape
-        gradient = np.zeros_like(controls)
+        gradient = np.zeros_like(controls, dtype=float)
 
-        # Baseline trajectory and loss
+        # Baseline trajectory supplies the exact prefix state for suffix rollouts.
         baseline_traj = self.simulate_trajectory(initial_state, controls, dt)
-        baseline_loss = loss_fn(baseline_traj)
 
-        # Numerical gradient (issue #7557).
+        # Numerical gradient (issues #7557 and #7569).
         #
         # Perturbing ``controls[t, i]`` cannot change any state at or before
         # index ``t`` (the step closure is Markovian in the state vector), so
         # the baseline prefix ``baseline_traj[: t + 1]`` is reused and only the
-        # suffix is re-simulated from ``baseline_traj[t]``. This turns the inner
-        # cost from O(T) full rollouts into O(T - t) suffix rollouts (~2x fewer
-        # engine steps overall) and is bit-identical to a full re-simulation.
-        # ``perturbed`` and ``traj_plus`` are allocated once and reused in place
-        # instead of a fresh ``controls.copy()`` per element.
+        # suffix is re-simulated from ``baseline_traj[t]``. Central differences
+        # double the suffix evaluations but reduce truncation error from O(h) to
+        # O(h^2), and each element uses h = 1e-6 * max(1, abs(value)) to stay
+        # scale-aware without exposing a wider public API.
         perturbed = controls.copy()
         traj_plus = baseline_traj.copy()
+        traj_minus = baseline_traj.copy()
         for t in range(T):
             for i in range(n_u):
-                perturbed[t, i] += eps
+                step = _scaled_central_step(float(controls[t, i]))
 
+                perturbed[t, i] = controls[t, i] + step
                 suffix = self.simulate_trajectory(baseline_traj[t], perturbed[t:], dt)
                 traj_plus[t:] = suffix
-                loss_plus = loss_fn(traj_plus)
+                loss_plus = _finite_loss(loss_fn, traj_plus)
 
-                gradient[t, i] = (loss_plus - baseline_loss) / eps
+                perturbed[t, i] = controls[t, i] - step
+                suffix = self.simulate_trajectory(baseline_traj[t], perturbed[t:], dt)
+                traj_minus[t:] = suffix
+                loss_minus = _finite_loss(loss_fn, traj_minus)
+
+                gradient[t, i] = (loss_plus - loss_minus) / (2.0 * step)
                 perturbed[t, i] = controls[t, i]  # exact restore (no fp drift)
 
-            # Restore this row so later steps see the unperturbed prefix.
+            # Restore this row so later steps expose the unperturbed prefix.
             traj_plus[t] = baseline_traj[t]
+            traj_minus[t] = baseline_traj[t]
 
-        return gradient
+        return _as_finite_array("gradient", gradient, shape=controls.shape)
 
     def _set_engine_state(
         self,
@@ -216,8 +317,9 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         torques: NDArray[np.floating],
     ) -> None:
-        if q is None:
-            raise ValueError("q must be provided")
+        q = _as_finite_array("q", q, shape=(self._n_q,))
+        v = _as_finite_array("v", v, shape=(self._n_v,))
+        torques = _as_finite_array("torques", torques, shape=(self._n_u,))
         if hasattr(self.engine, "set_joint_positions"):
             self.engine.set_joint_positions(q)
         if hasattr(self.engine, "set_joint_velocities"):
@@ -231,10 +333,12 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        if q is None:
-            raise ValueError("q must be provided")
-        if hasattr(self.engine, "step"):
-            self.engine.step(dt)
+        q = _as_finite_array("q", q, shape=(self._n_q,))
+        v = _as_finite_array("v", v, shape=(self._n_v,))
+        dt = _require_positive_dt(dt)
+        step = getattr(self.engine, "step", None)
+        if callable(step):
+            step(dt)
 
         if hasattr(self.engine, "get_joint_positions"):
             q_new = self.engine.get_joint_positions()
@@ -246,7 +350,11 @@ class DifferentiableEngine:
         else:
             v_new = v
 
-        return np.concatenate([q_new, v_new])
+        return _as_finite_array(
+            "next state",
+            np.concatenate([q_new, v_new]),
+            shape=(self._n_x,),
+        )
 
     def _compute_nominal_next_state(
         self,
@@ -254,8 +362,9 @@ class DifferentiableEngine:
         control: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        if state is None:
-            raise ValueError("state must be provided")
+        state = _as_finite_array("state", state, shape=(self._n_x,))
+        control = _as_finite_array("control", control, shape=(self._n_u,))
+        dt = _require_positive_dt(dt)
         q = state[: self._n_q]
         v = state[self._n_q :]
         self._set_engine_state(q, v, control)
@@ -265,48 +374,39 @@ class DifferentiableEngine:
         self,
         state: NDArray[np.floating],
         control: NDArray[np.floating],
-        x_next: NDArray[np.floating],
         dt: float,
-        eps: float,
     ) -> NDArray[np.floating]:
-        if state is None:
-            raise ValueError("state must be provided")
+        state = _as_finite_array("state", state, shape=(self._n_x,))
+        control = _as_finite_array("control", control, shape=(self._n_u,))
+        dt = _require_positive_dt(dt)
         A = np.zeros((self._n_x, self._n_x))
+
+        def evaluate(state_candidate: NDArray[np.floating]) -> NDArray[np.floating]:
+            return self._compute_nominal_next_state(state_candidate, control, dt)
+
         for i in range(self._n_x):
-            state_plus = state.copy()
-            state_plus[i] += eps
+            A[:, i] = _central_difference_vector(evaluate, state, i)
 
-            q_plus = state_plus[: self._n_q]
-            v_plus = state_plus[self._n_q :]
-
-            self._set_engine_state(q_plus, v_plus, control)
-            x_new = self._step_and_read_state(q_plus, v_plus, dt)
-            A[:, i] = (x_new - x_next) / eps
-
-        return A
+        return _as_finite_array("state jacobian", A, shape=(self._n_x, self._n_x))
 
     def _compute_control_jacobian(
         self,
         state: NDArray[np.floating],
         control: NDArray[np.floating],
-        x_next: NDArray[np.floating],
         dt: float,
-        eps: float,
     ) -> NDArray[np.floating]:
-        if state is None:
-            raise ValueError("state must be provided")
-        q = state[: self._n_q]
-        v = state[self._n_q :]
+        state = _as_finite_array("state", state, shape=(self._n_x,))
+        control = _as_finite_array("control", control, shape=(self._n_u,))
+        dt = _require_positive_dt(dt)
         B = np.zeros((self._n_x, self._n_u))
+
+        def evaluate(control_candidate: NDArray[np.floating]) -> NDArray[np.floating]:
+            return self._compute_nominal_next_state(state, control_candidate, dt)
+
         for i in range(self._n_u):
-            control_plus = control.copy()
-            control_plus[i] += eps
+            B[:, i] = _central_difference_vector(evaluate, control, i)
 
-            self._set_engine_state(q, v, control_plus)
-            x_new = self._step_and_read_state(q, v, dt)
-            B[:, i] = (x_new - x_next) / eps
-
-        return B
+        return _as_finite_array("control jacobian", B, shape=(self._n_x, self._n_u))
 
     def compute_jacobian(
         self,
@@ -324,12 +424,11 @@ class DifferentiableEngine:
         Returns:
             Tuple of (df/dx, df/du) Jacobians.
         """
-        if state is None:
-            raise ValueError("state must be provided")
-        eps = 1e-5
-        x_next = self._compute_nominal_next_state(state, control, dt)
-        A = self._compute_state_jacobian(state, control, x_next, dt, eps)
-        B = self._compute_control_jacobian(state, control, x_next, dt, eps)
+        state = _as_finite_array("state", state, shape=(self._n_x,))
+        control = _as_finite_array("control", control, shape=(self._n_u,))
+        dt = _require_positive_dt(dt)
+        A = self._compute_state_jacobian(state, control, dt)
+        B = self._compute_control_jacobian(state, control, dt)
         return A, B
 
     def optimize_trajectory(
