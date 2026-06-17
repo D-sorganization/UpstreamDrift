@@ -888,6 +888,7 @@ jobs:
         repo-structure-gates,
         tests,
         unit-test-gate,
+        rust-wheel-parity,
       ]
     if: always()
     runs-on: d-sorg-fleet-docker
@@ -901,6 +902,7 @@ jobs:
           echo "repo-structure-gates:${{ needs.repo-structure-gates.result }}"
           echo "tests:              ${{ needs.tests.result }}"
           echo "unit-test-gate:      ${{ needs.unit-test-gate.result }}"
+          echo "rust-wheel-parity:   ${{ needs.rust-wheel-parity.result }}"
           {
             echo "## Quality Gate Summary"
             echo "| Job | Result |"
@@ -910,12 +912,14 @@ jobs:
             echo "| repo-structure-gates | ${{ needs.repo-structure-gates.result }} |"
             echo "| tests | ${{ needs.tests.result }} |"
             echo "| unit-test-gate | ${{ needs.unit-test-gate.result }} |"
+            echo "| rust-wheel-parity | ${{ needs.rust-wheel-parity.result }} |"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ needs.code-quality.result }}" != "success" ] \
             || [ "${{ needs.security-scans.result }}" != "success" ] \
             || [ "${{ needs.repo-structure-gates.result }}" != "success" ] \
             || [ "${{ needs.tests.result }}" != "success" ] \
-            || [ "${{ needs.unit-test-gate.result }}" != "success" ]; then
+            || [ "${{ needs.unit-test-gate.result }}" != "success" ] \
+            || [ "${{ needs.rust-wheel-parity.result }}" != "success" ]; then
             echo "::error::One or more quality-gate jobs failed."
             exit 1
           fi
@@ -2353,3 +2357,189 @@ jobs:
           import upstream_physics
           print(upstream_physics.IntegratorConfig())
           "
+
+  # ----------------------------------------------------------------------
+  # rust-wheel-parity (issue #7601)
+  #
+  # The path-gated `rust-quality-gate` job builds the six PyO3 wheels into a
+  # throwaway venv but the main `tests:` job never installs them, so the
+  # parity / Rust-binding suites SKIP via `skipif(not is_rust_available())`
+  # and `importorskip("upstream_...")`. A parity regression could therefore
+  # land unnoticed.
+  #
+  # This REQUIRED job (wired into `quality-gate.needs`) runs on every PR. It
+  # builds + installs all six wheels (mirroring the exact maturin invocation
+  # in `rust-quality-gate`) and runs the parity suite with
+  # `CI_RUST_WHEELS_EXPECTED=1`, which the test layer (tests/conftest.py +
+  # tests/rust_bindings/test_ci_rust_wheels_available.py) turns into a hard
+  # failure if any wheel is missing — so parity actually executes per-PR
+  # instead of silently skipping. It does NOT touch the Python facades, which
+  # keep their pure-Python fallback for clean checkouts.
+  # ----------------------------------------------------------------------
+  rust-wheel-parity:
+    name: rust-wheel-parity
+    needs: pick-runner
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 30
+    env:
+      CARGO_HOME: ${{ runner.temp }}/cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+      CI_RUST_WHEELS_EXPECTED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          fetch-depth: 0
+
+      - name: Install System Dependencies
+        run: |
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      # Pin Python 3.12 (pyo3 0.24 supports up to 3.13; 3.12 is the safe
+      # middle of its range, matching rust-quality-gate). See issue #5221.
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo registry and build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+
+      # Mirror the exact maturin build invocation used in `rust-quality-gate`
+      # so the two lanes stay in lock-step.
+      - name: Build PyO3 Wheels (Maturin)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/rust-venv"
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip maturin
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
+            (cd "$crate" && python -m maturin build --interpreter python --features python --release)
+          done
+          echo "Wheels built successfully"
+          ls target/wheels/
+
+      - name: Install project + built wheels
+        run: |
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
+          python -m pip install --force-reinstall target/wheels/*.whl
+          # Fail-closed probe: every wheel must import + expose its bindings.
+          python scripts/ci/import_built_rust_wheels.py \
+            upstream_physics \
+            upstream_mocap_preproc \
+            upstream_mocap_io \
+            upstream_muscle \
+            upstream_motion_matching \
+            ai_backend
+
+      - name: Run parity suite (wheels mandatory)
+        # CI_RUST_WHEELS_EXPECTED=1 (job env) makes a skipped Rust-parity test
+        # a hard failure (tests/conftest.py), so parity actually executes.
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          xvfb-run --auto-servernum python -m pytest \
+            tests/rust_bindings \
+            tests/parity \
+            tests/unit/motion_pipeline/preprocessing/test_rust_parity.py \
+            tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py \
+            tests/unit/motion_pipeline/test_rust_finite_diff_parity.py \
+            tests/unit/motion_matching/test_cmc_rust_parity.py \
+            tests/unit/realtime/test_rust_parity.py \
+            tests/unit/urdf/test_rust_facade_parity.py \
+            tests/unit/test_ball_flight_physics.py \
+            tests/unit/shared_python/test_ball_flight_physics.py \
+            -p no:xvfb \
+            -n 0 \
+            --timeout=120 \
+            --timeout-method=thread \
+            -o addopts="" \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            --no-cov \
+            --tb=short \
+            -v
+
+      - name: Rust Wheel Parity Summary
+        if: always()
+        run: |
+          {
+            echo "## Rust Wheel Parity (issue #7601)"
+            echo "- six PyO3 wheels built via maturin and installed into the test venv"
+            echo "- CI_RUST_WHEELS_EXPECTED=1 makes a skipped parity test a hard failure"
+            echo "- parity suite executed (no longer skipped) per-PR"
+          } >> "$GITHUB_STEP_SUMMARY"
