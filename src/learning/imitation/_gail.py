@@ -93,10 +93,26 @@ class GAIL(ImitationLearner):
                 x = np.maximum(0, x)  # ReLU
         return x
 
-    def _forward_discriminator(
+    @staticmethod
+    def _stable_sigmoid(z: NDArray[np.floating]) -> NDArray[np.floating]:
+        """Overflow-safe elementwise logistic sigmoid (issue #7567).
+
+        ``1 / (1 + exp(-z))`` overflows for large negative ``z`` (``exp`` of a
+        large positive number). Branching on the sign keeps every ``exp``
+        argument <= 0, so the result is finite for any input.
+        """
+        z = np.asarray(z, dtype=float)
+        out = np.empty_like(z)
+        pos = z >= 0
+        out[pos] = 1.0 / (1.0 + np.exp(-z[pos]))
+        exp_z = np.exp(z[~pos])
+        out[~pos] = exp_z / (1.0 + exp_z)
+        return out
+
+    def _discriminator_logits(
         self, state: NDArray[np.floating], action: NDArray[np.floating]
     ) -> NDArray[np.floating]:
-        """Forward pass through discriminator."""
+        """Pre-sigmoid discriminator logits for a state-action pair."""
         if state is None:
             raise ValueError("state must be provided")
         x = np.concatenate([state, action], axis=-1)
@@ -104,9 +120,13 @@ class GAIL(ImitationLearner):
             x = x @ layer["W"] + layer["b"]
             if i < len(self._discriminator) - 1:
                 x = np.maximum(0, x)  # ReLU
-            else:
-                x = 1 / (1 + np.exp(-x))  # Sigmoid
         return x
+
+    def _forward_discriminator(
+        self, state: NDArray[np.floating], action: NDArray[np.floating]
+    ) -> NDArray[np.floating]:
+        """Discriminator output: probability the input is expert, in [0, 1]."""
+        return self._stable_sigmoid(self._discriminator_logits(state, action))
 
     def train(
         self,
@@ -143,28 +163,27 @@ class GAIL(ImitationLearner):
             policy_states = expert_states + noise
             policy_actions = self._forward_policy(policy_states)
 
-            # Train discriminator
-            expert_preds = self._forward_discriminator(expert_states, expert_actions)
-            policy_preds = self._forward_discriminator(policy_states, policy_actions)
+            # Train discriminator on logits (expert labelled 1, policy 0).
+            expert_logits = self._discriminator_logits(expert_states, expert_actions)
+            policy_logits = self._discriminator_logits(policy_states, policy_actions)
 
-            # Binary cross entropy
-            eps = 1e-8
-            disc_loss = -np.mean(
-                np.log(expert_preds + eps) + np.log(1 - policy_preds + eps)
+            # Stable binary cross-entropy via softplus (issue #7567):
+            #   -log(sigmoid(z))     = softplus(-z) = logaddexp(0, -z)
+            #   -log(1 - sigmoid(z)) = softplus(z)  = logaddexp(0,  z)
+            disc_loss = float(
+                np.mean(np.logaddexp(0.0, -expert_logits))
+                + np.mean(np.logaddexp(0.0, policy_logits))
             )
 
             # Update discriminator (simplified gradient)
-            # expert_grad = expert_preds - 1  # gradient towards 1
-            # policy_grad = policy_preds  # gradient towards 0
-
             for _i, layer in enumerate(self._discriminator):
                 # Simplified update
                 layer["W"] -= lr * 0.01 * layer["W"]
                 layer["b"] -= lr * 0.01 * layer["b"]
 
-            # Policy reward is discriminator output
-            policy_reward = -np.log(1 - policy_preds + eps)
-            policy_loss = -np.mean(policy_reward)
+            # Policy reward = -log(1 - D(policy)) = softplus(policy_logits).
+            policy_reward = np.logaddexp(0.0, policy_logits)
+            policy_loss = -float(np.mean(policy_reward))
 
             history["discriminator_loss"].append(float(disc_loss))
             history["policy_loss"].append(float(policy_loss))
@@ -222,9 +241,9 @@ class GAIL(ImitationLearner):
         if action.ndim == 1:
             action = action.reshape(1, -1)
 
-        disc_output = self._forward_discriminator(state, action)
-        # Reward is -log(1 - D(s,a))
-        return (-np.log(1 - disc_output + 1e-8)).item()
+        # Reward = -log(1 - D(s,a)) = softplus(logit), overflow-safe (#7567).
+        logits = self._discriminator_logits(state, action)
+        return float(np.logaddexp(0.0, logits).item())
 
     def save(self, path: str | Path) -> None:
         """Save GAIL networks."""
