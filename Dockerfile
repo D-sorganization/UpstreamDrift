@@ -74,7 +74,7 @@ RUN pip install --upgrade pip==26.1.2 && \
 RUN pip install \
     slowapi==0.1.9 \
     "pydantic[email]==2.12.5" \
-    python-multipart==0.0.27 \
+    python-multipart==0.0.31 \
     aiofiles==24.1.0 \
     python-dateutil==2.9.0.post0 \
     structlog==25.5.0 \
@@ -99,7 +99,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
-    tornado==6.5.6 \
+    tornado==6.5.7 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
