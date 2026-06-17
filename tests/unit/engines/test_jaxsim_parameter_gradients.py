@@ -70,6 +70,32 @@ def test_trajectory_sensitivity_is_pointwise() -> None:
     )
 
 
+def test_trajectory_sensitivity_builds_autodiff_transform_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    q_traj = np.array([[0.1, -0.2], [0.2, -0.15], [0.3, -0.1]], dtype=np.float64)
+    v_traj = np.array([[0.3, -0.4], [0.2, -0.1], [0.1, 0.05]], dtype=np.float64)
+    original_jacfwd = jax.jacfwd
+    jacfwd_calls = 0
+
+    def counting_jacfwd(*args: object, **kwargs: object) -> object:
+        nonlocal jacfwd_calls
+        jacfwd_calls += 1
+        return original_jacfwd(*args, **kwargs)
+
+    monkeypatch.setattr(jax, "jacfwd", counting_jacfwd)
+
+    sensitivity = evaluate_ztcf_parameter_sensitivity_along_trajectory(
+        DEFAULT_PARAMETER_VECTOR,
+        q_traj,
+        v_traj,
+        mode="forward",
+    )
+
+    assert jacfwd_calls == 1
+    assert sensitivity.shape == (3, 2, len(PARAMETER_NAMES))
+
+
 @pytest.mark.parametrize(
     ("params", "q", "v", "match"),
     [

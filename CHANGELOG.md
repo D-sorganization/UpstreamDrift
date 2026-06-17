@@ -62,6 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced MuJoCo humanoid golf effective-mass explicit inverse calculations
   with a shared solve-based kernel and finite/symmetry postconditions for
   #7560.
+- Optimized JaxSim trajectory parameter-gradient evaluation for #7562 by
+  constructing the selected autodiff transform once per API call, batching
+  samples with `jax.vmap`, and validating finite Jacobian output shapes.
 
 ### Refactor
 
