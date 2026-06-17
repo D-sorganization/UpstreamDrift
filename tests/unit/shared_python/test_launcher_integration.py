@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from PyQt6 import QtWidgets
@@ -41,12 +41,7 @@ def test_engine_availability_check() -> None:
     assert engine_availability.is_engine_available("non_existent_engine") is False
 
 
-@patch("src.shared.python.dashboard.launcher.UnifiedDashboardWindow")
-@patch("src.shared.python.dashboard.launcher.sys.exit")
-@patch("src.shared.python.dashboard.launcher.get_qapp")
-def test_dashboard_launch(
-    mock_get_qapp: Any, mock_exit: Any, mock_window: Any, qapp: Any
-) -> None:
+def test_dashboard_launch(monkeypatch: pytest.MonkeyPatch, qapp: Any) -> None:
     """Test launching the dashboard with a mock engine."""
 
     # Mock valid engine class
@@ -54,10 +49,14 @@ def test_dashboard_launch(
     mock_engine = MagicMock()
     mock_engine_class.return_value = mock_engine
 
-    # Use a MagicMock for qapp so app.exec() returns 0 immediately (not blocking)
     mock_qapp = MagicMock()
     mock_qapp.exec.return_value = 0
-    mock_get_qapp.return_value = mock_qapp
+    mock_window = MagicMock()
+    mock_exit = MagicMock()
+
+    monkeypatch.setattr(launcher, "get_qapp", MagicMock(return_value=mock_qapp))
+    monkeypatch.setattr(launcher, "UnifiedDashboardWindow", mock_window)
+    monkeypatch.setattr(launcher.sys, "exit", mock_exit)
 
     # Run launch
     launcher.launch_dashboard(
@@ -70,7 +69,8 @@ def test_dashboard_launch(
     # Verify initialization
     mock_engine_class.assert_called_once_with("arg1", kwarg1="val")
     mock_window.assert_called_once_with(mock_engine, title="Test Dashboard")
-    mock_exit.assert_called_once()
+    mock_qapp.exec.assert_called_once_with()
+    mock_exit.assert_called_once_with(0)
 
 
 def test_mujoco_availability_logic() -> None:

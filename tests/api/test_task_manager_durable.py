@@ -37,6 +37,17 @@ def task_manager(sqlite_backend: SQLiteBackend):
     return manager
 
 
+def _wait_until_task_missing(
+    backend: SQLiteBackend, task_id: str, timeout_seconds: float
+) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if backend.get_task(task_id) is None:
+            return True
+        time.sleep(0.1)
+    return backend.get_task(task_id) is None
+
+
 class TestSQLiteBackend:
     """Test the SQLite storage backend."""
 
@@ -402,8 +413,6 @@ class TestDurableTaskManagerAutoCleanupFallback:
 
     def test_daemon_thread_runs_cleanup(self, tmp_path: Path) -> None:
         """Daemon cleanup thread must actually delete expired tasks."""
-        import time
-
         db_path = tmp_path / "tasks.db"
         backend = SQLiteBackend(db_path=db_path)
 
@@ -424,14 +433,33 @@ class TestDurableTaskManagerAutoCleanupFallback:
             assert backend.get_task("expired-task") is not None
 
             # Wait up to 3 s for the daemon thread's first cleanup sweep
-            deadline = time.time() + 3.0
-            while time.time() < deadline:
-                if backend.get_task("expired-task") is None:
-                    break
-                time.sleep(0.1)
-
-            assert backend.get_task("expired-task") is None, (
+            assert _wait_until_task_missing(backend, "expired-task", 3.0), (
                 "Daemon cleanup thread did not delete the expired task within 3 s"
+            )
+        finally:
+            asyncio.run(manager.shutdown())
+
+    def test_daemon_thread_runs_startup_cleanup_without_full_interval(
+        self, tmp_path: Path
+    ) -> None:
+        """Daemon cleanup should sweep once at startup before sleeping."""
+        db_path = tmp_path / "tasks.db"
+        backend = SQLiteBackend(db_path=db_path)
+        now = time.time()
+        expired_record = TaskRecord(
+            task_id="startup-expired-task",
+            status=TaskStatus.PENDING.value,
+            created_at=now - 7200.0,
+            ttl_seconds=3600,
+        )
+        backend.create_task(expired_record)
+
+        manager = DurableTaskManager(
+            backend=backend, auto_cleanup=True, cleanup_interval=60
+        )
+        try:
+            assert _wait_until_task_missing(backend, "startup-expired-task", 3.0), (
+                "Daemon cleanup waited for the full interval before its first sweep"
             )
         finally:
             asyncio.run(manager.shutdown())

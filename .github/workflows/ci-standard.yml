@@ -1413,6 +1413,11 @@ jobs:
               # - Other: Tests failed or error
               if [ $pytest_exit_code -eq 0 ]; then
                 echo "All PR-scoped tests passed."
+                if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                  echo "No source/dependency coverage targets changed; PR-scoped tests passed, skipping targeted coverage lane."
+                  echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
               elif [ $pytest_exit_code -eq 5 ]; then
                 # Exit code 5 means no tests were collected, not that tests were skipped
                 # This can happen if changed files don't contain any test functions
@@ -1430,7 +1435,7 @@ jobs:
                 exit $pytest_exit_code
               fi
 
-              echo "Full dependency-light lane will run after PR-scoped tests."
+              echo "Source/dependency coverage targets changed; targeted coverage lane will run after PR-scoped tests."
             fi
           fi
 
@@ -2409,14 +2414,17 @@ jobs:
   # and `importorskip("upstream_...")`. A parity regression could therefore
   # land unnoticed.
   #
-  # This REQUIRED job (wired into `quality-gate.needs`) runs on every PR. It
-  # builds + installs all six wheels (mirroring the exact maturin invocation
-  # in `rust-quality-gate`) and runs the parity suite with
+  # This REQUIRED job (wired into `quality-gate.needs`) runs for Rust wheel,
+  # parity-test, and Python facade changes on PRs, and always runs on push,
+  # schedule, and manual dispatch events. It builds + installs all PyO3 wheels
+  # (mirroring the exact maturin invocation in `rust-quality-gate`) and runs
+  # the parity suite with
   # `CI_RUST_WHEELS_EXPECTED=1`, which the test layer (tests/conftest.py +
   # tests/rust_bindings/test_ci_rust_wheels_available.py) turns into a hard
-  # failure if any wheel is missing — so parity actually executes per-PR
-  # instead of silently skipping. It does NOT touch the Python facades, which
-  # keep their pure-Python fallback for clean checkouts.
+  # failure if any wheel is missing. Non-Rust PRs get an explicit successful
+  # skip summary instead of burning a parity lane on unrelated changes. It does
+  # NOT touch the Python facades, which keep their pure-Python fallback for
+  # clean checkouts.
   # ----------------------------------------------------------------------
   rust-wheel-parity:
     name: rust-wheel-parity
@@ -2447,7 +2455,65 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check for Rust wheel parity changes
+        id: rust-wheel-parity-changes
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity runs for ${{ github.event_name }} events."
+            exit 0
+          fi
+
+          git fetch origin "${{ github.base_ref }}"
+          BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+          if [ -z "$BASE_SHA" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          fi
+
+          PARITY_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            'rust_core/**' \
+            'Cargo.toml' \
+            'Cargo.lock' \
+            '*/Cargo.toml' \
+            'rust-toolchain.toml' \
+            'src/shared/python/ai/adapters/rust_adapter.py' \
+            'src/shared/python/biomechanics/rust_muscle.py' \
+            'src/shared/python/humanoid_character_builder/mesh/**' \
+            'src/shared/python/model_generation/converters/*rust_facade.py' \
+            'src/shared/python/motion_pipeline/**' \
+            'src/shared/python/physics/**' \
+            'src/shared/python/pose_interchange/adapters/pinocchio_reference.py' \
+            'src/shared/python/realtime/**' \
+            'tests/rust_bindings/**' \
+            'tests/parity/**' \
+            'tests/ai/test_rust_rag_pipeline.py' \
+            'tests/integration/codemap/test_rust_cli_parity.py' \
+            'tests/unit/biomechanics/test_rust_muscle.py' \
+            'tests/unit/motion_matching/test_cmc_rust_parity.py' \
+            'tests/unit/motion_matching/test_pinocchio_id_rust_parity.py' \
+            'tests/unit/motion_pipeline/preprocessing/test_rust_parity.py' \
+            'tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py' \
+            'tests/unit/motion_pipeline/test_rust_finite_diff_parity.py' \
+            'tests/unit/realtime/test_rust_parity.py' \
+            'tests/unit/urdf/test_mjcf_rust_facade.py' \
+            'tests/unit/urdf/test_rust_facade_parity.py' \
+            'tests/unit/test_ball_flight_physics.py' \
+            'tests/unit/shared_python/test_ball_flight_physics.py' \
+            'scripts/ci/import_built_rust_wheels.py' \
+            'scripts/ci/check_rust_parity_wheel_gates.py' \
+            || true)
+
+          if [ -n "$PARITY_FILES" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity relevant changes detected:"
+            echo "$PARITY_FILES"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust wheel parity changes detected; skipping mandatory wheel parity suite."
+          fi
+
       - name: Install System Dependencies
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |
           apt_retry() {
             for attempt in {1..12}; do
@@ -2474,7 +2540,7 @@ jobs:
             libxcb-xkb1
 
       - name: Isolate Python tool cache (prevent shared-cache races)
-        if: runner.os != 'Windows'
+        if: runner.os != 'Windows' && steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           if [ -f /.dockerenv ]; then
@@ -2488,6 +2554,7 @@ jobs:
       # Pin Python 3.12 (pyo3 0.24 supports up to 3.13; 3.12 is the safe
       # middle of its range, matching rust-quality-gate). See issue #5221.
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         with:
           python-version: "3.12"
           cache: "pip"
@@ -2496,14 +2563,17 @@ jobs:
             requirements*.lock
 
       - name: Purge pip cache
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: python -m pip cache purge || true
 
       - name: Install Rust toolchain
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           components: rustfmt, clippy
 
       - name: Verify Rust toolchain
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
@@ -2516,6 +2586,7 @@ jobs:
           cargo --version
 
       - name: Cache Cargo registry and build
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: |
@@ -2526,11 +2597,13 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Create stub ui/dist for editable install
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: mkdir -p ui/dist
 
       # Mirror the exact maturin build invocation used in `rust-quality-gate`
       # so the two lanes stay in lock-step.
       - name: Build PyO3 Wheels (Maturin)
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
@@ -2546,11 +2619,13 @@ jobs:
       # parity test runs instead of self-skipping (issue #7603). The binary is
       # a [[bin]] target (no pymodule), so it ships via cargo, not maturin.
       - name: Build codemap CLI binary
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |
           cargo build --release -p upstream-codemap --bin upstream-codemap
           ls -l target/release/upstream-codemap
 
       - name: Install project + built wheels
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
@@ -2579,6 +2654,7 @@ jobs:
             upstream_pinocchio_id
 
       - name: Run parity suite (wheels mandatory)
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         # CI_RUST_WHEELS_EXPECTED=1 (job env) makes a skipped Rust-parity test
         # a hard failure (tests/conftest.py), so parity actually executes.
         env:
@@ -2614,7 +2690,13 @@ jobs:
         run: |
           {
             echo "## Rust Wheel Parity (issue #7601)"
-            echo "- six PyO3 wheels built via maturin and installed into the test venv"
-            echo "- CI_RUST_WHEELS_EXPECTED=1 makes a skipped parity test a hard failure"
-            echo "- parity suite executed (no longer skipped) per-PR"
+            if [ "${{ steps.rust-wheel-parity-changes.outputs.has_changes }}" = "true" ]; then
+              echo "- PyO3 wheels built via maturin and installed into the test venv"
+              echo "- CI_RUST_WHEELS_EXPECTED=1 makes a skipped parity test a hard failure"
+              echo "- parity suite executed for Rust wheel/parity relevant changes"
+            else
+              echo "- no Rust wheel/parity/facade changes detected"
+              echo "- skipped mandatory wheel parity suite for this non-Rust PR"
+              echo "- pushes, scheduled runs, and manual dispatches still execute parity"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

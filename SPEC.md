@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.430                                            |
+| **Spec Version**        | 1.0.435                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Closed the test-only PR core-lane OOM regression for issue
+  #7635: CI Standard now exits after changed-test PR slices pass when no
+  source/dependency coverage targets changed, while preserving the scoped
+  dependency-light lane for source/dependency PRs and the no-collected-tests
+  fallback.
+- **2026-06-17** - Closed the push-scoped Semgrep regression for issue #7633
+  by making the SVG backdrop regression-test inspection helpers parse generated
+  SVGs with defusedxml instead of stdlib ElementTree.
 - **2026-06-17** - Restored the suite-marker ratchet for issue #7631 by
   marking the three #7629 Bandit regression tests as unit tests, preserving
   the explicit suite ownership contract for new tests.
@@ -1643,6 +1651,11 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-17 | 1.0.435 | Closed the dashboard launcher unit-test event-loop hang for issue #7639. `tests/unit/shared_python/test_launcher_integration.py` now patches the already-imported launcher module with `monkeypatch`, verifies the mocked Qt event-loop return code, and cannot enter the real `QApplication.exec()` loop when prior tests reload launcher modules. |
+| 2026-06-17 | 1.0.434 | Closed the durable task daemon cleanup startup race for issue #7638. `src/api/task_manager_durable.py` now shares cleanup execution between async and daemon-thread loops and performs an eager daemon startup sweep before sleeping for the full interval; `tests/api/test_task_manager_durable.py` covers both periodic deletion and startup deletion of expired tasks. |
+| 2026-06-17 | 1.0.433 | Closed the Rust wheel parity overreach for issue #7637. `.github/workflows/ci-standard.yml` now keeps `rust-wheel-parity` required and fail-closed for Rust wheel, parity-test, and Python facade changes while explicitly skipping the expensive parity suite on unrelated PRs; `tests/ci/test_ci_infrastructure.py` locks the path-gated contract and the successful skip summary. |
+| 2026-06-17 | 1.0.432 | Closed the test-only PR core-lane OOM regression for issue #7635. CI Standard now exits after changed-test PR slices pass when no source/dependency coverage targets changed, preserving the no-collected-tests fallback and the scoped dependency-light lane for source/dependency PRs. |
+| 2026-06-17 | 1.0.431 | Closed the push-scoped Semgrep regression for issue #7633 by making `tests/unit/scripts/test_remove_icon_backdrops.py` parse generated SVGs with defusedxml in its assertion helpers while preserving the existing entity-bearing SVG rejection coverage. |
 | 2026-06-17 | 1.0.430 | Restored the suite-marker ratchet for issue #7631 by marking the three #7629 Bandit regression tests as unit tests: coverage XML entity rejection, SVG entity rejection, and `download_to_file()` local-file scheme rejection before opener invocation. |
 | 2026-06-17 | 1.0.429 | Cleared the main-branch Bandit security-scan regression for issue #7629. `scripts/build_humanoid_models.py`, `scripts/build_humanoid_osim.py`, `scripts/config/coverage_enforcer.py`, and `scripts/remove_icon_backdrops.py` now route XML parsing through defusedxml while keeping stdlib ElementTree for XML construction/writing where needed. `src/shared/python/security/security_utils.py::download_to_file()` now validates URL schemes internally before the audited opener. Focused regression tests cover entity-bearing XML rejection and local file URL rejection before `urlopen` is called. |
 | 2026-06-17 | 1.0.423 | Optimized lower-body simulator history eviction for #7561. `LowerBodySimulator` now records scrub/playback frames in a bounded `deque`, preserving FIFO order, frame indexing, and clear/restore behavior while avoiding the previous `list.pop(0)` overflow path in the simulation step loop. |

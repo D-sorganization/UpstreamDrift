@@ -589,26 +589,27 @@ class DurableTaskManager:
     async def _cleanup_loop(self) -> None:
         """Background task to periodically clean up expired tasks."""
         while not self._closed:
+            self._cleanup_once()
             await asyncio.sleep(self._cleanup_interval)
-            try:
-                count = self.backend.cleanup()
-                if count > 0:
-                    logger.info("Cleaned up %d expired tasks", count)
-            except Exception:  # noqa: BLE001
-                logger.exception("Cleanup error")
+
+    def _cleanup_once(self) -> int:
+        """Run one expired-task cleanup sweep and return the deletion count."""
+        try:
+            count = self.backend.cleanup()
+            if count > 0:
+                logger.info("Cleaned up %d expired tasks", count)
+            return count
+        except Exception:  # noqa: BLE001
+            logger.exception("Cleanup error")
+            return 0
 
     def _cleanup_loop_sync(self) -> None:
         """Daemon-thread fallback for periodic cleanup when no event loop is present."""
         try:
-            while not self._cleanup_stop.wait(timeout=self._cleanup_interval):
-                if self._closed:
+            while not self._closed:
+                self._cleanup_once()
+                if self._cleanup_stop.wait(timeout=self._cleanup_interval):
                     return
-                try:
-                    count = self.backend.cleanup()
-                    if count > 0:
-                        logger.info("Cleaned up %d expired tasks", count)
-                except Exception as e:  # noqa: BLE001
-                    logger.error("Cleanup error: %s", e)
         finally:
             self.backend.close()
 

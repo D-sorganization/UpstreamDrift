@@ -1,7 +1,6 @@
-import xml.etree.ElementTree as ET
-
 import pytest
 from defusedxml.common import DefusedXmlException
+from defusedxml import ElementTree as ET
 
 from scripts.remove_icon_backdrops import process_svgs
 

@@ -605,7 +605,10 @@ class TestCIEnvironmentCompatibility:
         assert 'coverage_args+=(--cov="${coverage_module//\\//.}")' in workflow
         assert "src/**/*.py" in workflow
         assert 'echo "coverage_generated=true" >> "$GITHUB_OUTPUT"' in workflow
-        assert "Full dependency-light lane will run after PR-scoped tests" in workflow
+        assert (
+            "Source/dependency coverage targets changed; targeted coverage lane will run after PR-scoped tests"
+            in workflow
+        )
         assert (
             "Source/dependency targets changed; running scoped dependency-light unit targets"
             in workflow
@@ -710,8 +713,8 @@ class TestCIEnvironmentCompatibility:
             ]
         )
 
-    def test_ci_standard_test_only_prs_fall_through_to_full_lane(self) -> None:
-        """Changed tests may run first, but must not be the only PR coverage."""
+    def test_ci_standard_test_only_prs_stop_after_changed_tests_pass(self) -> None:
+        """Changed-test-only PRs should not launch the broad core lane."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
@@ -721,14 +724,17 @@ class TestCIEnvironmentCompatibility:
             )
         ]
 
-        assert "Full dependency-light lane will run after PR-scoped tests" in (
+        assert (
+            "No source/dependency coverage targets changed; PR-scoped tests passed, skipping targeted coverage lane"
+            in selected_tests_block
+        )
+        assert 'echo "coverage_generated=false" >> "$GITHUB_OUTPUT"' in (
             selected_tests_block
         )
-        assert (
-            "No source/dependency coverage targets changed; skipping targeted coverage lane"
-            not in selected_tests_block
+        assert "exit 0" in selected_tests_block
+        assert "Full dependency-light lane will run after PR-scoped tests" not in (
+            selected_tests_block
         )
-        assert "exit 0" not in selected_tests_block
 
     def test_ci_optional_stack_prs_run_scoped_unit_lane(self) -> None:
         """The optional-stack workflow must run deterministic PR-relevant unit targets."""
@@ -977,6 +983,68 @@ class TestCIEnvironmentCompatibility:
         for binary in ("rustup", "rustc", "cargo"):
             assert f"command -v {binary}" in verify_script
             assert f"{binary} --version" in verify_script
+
+    def test_rust_wheel_parity_is_path_gated_for_non_rust_prs(self) -> None:
+        """Rust wheel parity must stay fail-closed without running on every PR."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_text = (
+            REPO_ROOT / ".github" / "workflows" / "ci-standard.yml"
+        ).read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        parity_job = workflow["jobs"]["rust-wheel-parity"]
+        steps = parity_job["steps"]
+
+        assert parity_job["env"]["CI_RUST_WHEELS_EXPECTED"] == "1"
+        change_step = next(
+            step for step in steps if step.get("id") == "rust-wheel-parity-changes"
+        )
+        change_script = change_step["run"]
+        assert '"${{ github.event_name }}" != "pull_request"' in change_script
+        assert "No Rust wheel parity changes detected" in change_script
+        for pathspec in [
+            "'rust_core/**'",
+            "'src/shared/python/physics/**'",
+            "'src/shared/python/motion_pipeline/**'",
+            "'tests/rust_bindings/**'",
+            "'tests/parity/**'",
+            "'tests/unit/realtime/test_rust_parity.py'",
+            "'scripts/ci/import_built_rust_wheels.py'",
+            "'scripts/ci/check_rust_parity_wheel_gates.py'",
+        ]:
+            assert pathspec in change_script
+
+        gated_step_names = {
+            "Install System Dependencies",
+            "Verify Rust toolchain",
+            "Cache Cargo registry and build",
+            "Build PyO3 Wheels (Maturin)",
+            "Build codemap CLI binary",
+            "Install project + built wheels",
+            "Run parity suite (wheels mandatory)",
+        }
+        gate_expression = (
+            "steps.rust-wheel-parity-changes.outputs.has_changes == 'true'"
+        )
+        gated_steps = {
+            step.get("name"): step
+            for step in steps
+            if step.get("name") in gated_step_names
+        }
+        assert gated_steps.keys() == gated_step_names
+        assert all(step.get("if") == gate_expression for step in gated_steps.values())
+
+        summary_step = next(
+            step for step in steps if step.get("name") == "Rust Wheel Parity Summary"
+        )
+        summary_script = summary_step["run"]
+        assert summary_step["if"] == "always()"
+        assert "skipped mandatory wheel parity suite for this non-Rust PR" in (
+            summary_script
+        )
 
     def test_semgrep_push_uses_changed_file_targets_when_before_sha_exists(
         self,
