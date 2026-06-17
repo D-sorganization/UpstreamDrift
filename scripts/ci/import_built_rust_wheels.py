@@ -26,6 +26,10 @@ EXPECTED_BINDINGS: dict[str, tuple[str, ...]] = {
     "upstream_muscle": ("f_l", "f_v", "HillMuscleModel"),
     "upstream_motion_matching": ("finite_diff_q_to_qdot_qddot",),
     "ai_backend": ("AIConfig", "AIEngine", "RagPipeline"),
+    "upstream_urdf": ("parse_urdf", "write_urdf", "parse_mjcf", "write_mjcf"),
+    "upstream_realtime": ("Server", "Subscriber", "validate_channel"),
+    "upstream_mesh": ("compute_convex_hull", "fit_aabb", "fit_obb"),
+    "upstream_pinocchio_id": ("compute_qdot", "compute_qddot", "inverse_dynamics"),
 }
 
 
@@ -74,6 +78,51 @@ def smoke_module(module_name: str, module: ModuleType) -> None:
         cfg = module.AIConfig("k", "https://api.example/v1", "m", ":memory:")
         if cfg.chat_url() != "https://api.example/v1/chat/completions":
             raise RuntimeError("ai_backend AIConfig smoke returned wrong chat URL")
+    elif module_name == "upstream_urdf":
+        minimal_urdf = '<robot name="r"><link name="base"/></robot>'
+        robot_json = module.parse_urdf(minimal_urdf)
+        if '"base"' not in robot_json:
+            raise RuntimeError("upstream_urdf parse_urdf smoke dropped the base link")
+        round_tripped = module.write_urdf(robot_json)
+        if "base" not in round_tripped:
+            raise RuntimeError("upstream_urdf write_urdf smoke dropped the base link")
+    elif module_name == "upstream_realtime":
+        # Channels must match the scope/topic pattern (see channels.rs).
+        module.validate_channel("swing/telemetry")
+        try:
+            module.validate_channel("not-a-valid-channel")
+        except Exception as exc:  # noqa: BLE001 - controlled backend error smoke.
+            _ = exc
+        else:
+            raise RuntimeError(
+                "upstream_realtime validate_channel accepted an invalid channel"
+            )
+    elif module_name == "upstream_mesh":
+        import numpy as np
+
+        # Primitive fitting requires at least 4 points (a tetrahedron here).
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]],
+            dtype=np.float32,
+        )
+        center, extents, _volume_ratio = module.fit_aabb(vertices)
+        # AABB of these points: center = (min+max)/2, extents = (max-min).
+        if tuple(round(c, 3) for c in center) != (1.0, 1.0, 1.0):
+            raise RuntimeError(f"upstream_mesh fit_aabb smoke returned center {center}")
+        if tuple(round(e, 3) for e in extents) != (2.0, 2.0, 2.0):
+            raise RuntimeError(
+                f"upstream_mesh fit_aabb smoke returned extents {extents}"
+            )
+    elif module_name == "upstream_pinocchio_id":
+        import numpy as np
+
+        q = np.array([[0.0], [1.0], [4.0]], dtype=np.float64)
+        times = np.array([0.0, 1.0, 2.0], dtype=np.float64)
+        qdot = np.asarray(module.compute_qdot(q, times))
+        if qdot.shape != (3, 1):
+            raise RuntimeError(
+                f"upstream_pinocchio_id compute_qdot smoke returned shape {qdot.shape}"
+            )
 
 
 def verify_module(module_name: str) -> None:

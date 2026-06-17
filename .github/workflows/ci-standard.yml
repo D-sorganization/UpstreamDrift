@@ -2185,7 +2185,7 @@ jobs:
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip maturin
-          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend rust_core/upstream-urdf rust_core/upstream-realtime rust_core/upstream-mesh rust_core/upstream-pinocchio-id; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
           echo "Wheels built successfully"
@@ -2205,7 +2205,11 @@ jobs:
             upstream_mocap_io \
             upstream_muscle \
             upstream_motion_matching \
-            ai_backend
+            ai_backend \
+            upstream_urdf \
+            upstream_realtime \
+            upstream_mesh \
+            upstream_pinocchio_id
           CI_RUST_WHEELS_EXPECTED=1 python -m pytest \
             tests/unit/test_ball_flight_physics.py \
             tests/unit/shared_python/test_ball_flight_physics.py \
@@ -2482,7 +2486,7 @@ jobs:
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip maturin
-          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend rust_core/upstream-urdf rust_core/upstream-realtime rust_core/upstream-mesh rust_core/upstream-pinocchio-id; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
           echo "Wheels built successfully"
@@ -2502,7 +2506,11 @@ jobs:
             upstream_mocap_io \
             upstream_muscle \
             upstream_motion_matching \
-            ai_backend
+            ai_backend \
+            upstream_urdf \
+            upstream_realtime \
+            upstream_mesh \
+            upstream_pinocchio_id
 
       - name: Run parity suite (wheels mandatory)
         # CI_RUST_WHEELS_EXPECTED=1 (job env) makes a skipped Rust-parity test
