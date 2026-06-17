@@ -24,6 +24,11 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.ball_properties import (
+    MAX_LIFT_COEFFICIENT,
+    PENNER_LIFT_EXPONENT,
+    PENNER_LIFT_SCALE,
+)
 
 logger = get_logger(__name__)
 
@@ -190,8 +195,10 @@ def _python_fallback_total(
         magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
             spin_param = spec.radius * spin_mag / speed
-            # Rust: Smits/Ogg saturation, cl_max = 0.35.
-            cl = 0.35 * (1.0 - math.exp(-spin_param / 0.1))
+            cl = min(
+                MAX_LIFT_COEFFICIENT,
+                PENNER_LIFT_SCALE * spin_param**PENNER_LIFT_EXPONENT,
+            )
             f_mag = 0.5 * spec.air_density * cl * area * speed * speed
             total = total + f_mag * magnus_dir / magnus_norm
 

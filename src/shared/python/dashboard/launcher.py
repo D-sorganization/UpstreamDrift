@@ -1,6 +1,8 @@
 """Common launcher utilities for the unified dashboard."""
 
 import sys
+from collections.abc import Callable
+from typing import Any
 
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 from src.shared.python.engine_core.interfaces import PhysicsEngine
@@ -19,6 +21,7 @@ def launch_dashboard(
     model_path: str | None = None,
     engine_args: list | None = None,
     engine_kwargs: dict | None = None,
+    event_loop_runner: Callable[[Any], int] | None = None,
 ) -> None:
     """Launches the Unified Dashboard with the specified physics engine.
 
@@ -28,6 +31,7 @@ def launch_dashboard(
         model_path: Optional path to a model file to load on startup.
         engine_args: Optional positional arguments for the engine constructor.
         engine_kwargs: Optional keyword arguments for the engine constructor.
+        event_loop_runner: Optional test hook for running the Qt event loop.
     """
     if engine_class is None:
         raise ValueError("engine_class must be provided")
@@ -72,4 +76,5 @@ def launch_dashboard(
 
     window.show()
 
-    sys.exit(app.exec())
+    runner = event_loop_runner or (lambda qt_app: int(qt_app.exec()))
+    sys.exit(runner(app))

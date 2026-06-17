@@ -21,6 +21,7 @@ from __future__ import annotations
 import importlib
 import importlib.util
 from pathlib import Path
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -34,7 +35,10 @@ def _has_pinocchio_runtime() -> bool:
         pin = importlib.import_module("pinocchio")
     except ImportError:
         return False
-    return hasattr(pin, "buildModelFromUrdf")
+    if isinstance(pin, Mock):
+        return False
+    builder = getattr(pin, "buildModelFromUrdf", None)
+    return callable(builder) and not isinstance(builder, Mock)
 
 
 _PIN_AVAILABLE = _has_pinocchio_runtime()

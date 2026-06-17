@@ -104,8 +104,8 @@ class DragModel:
         if speed < 1e-10:
             return np.zeros_like(velocity_vector)
 
-        cd = self.get_effective_coefficient(velocity_vector, air_density)
-        force_magnitude = 0.5 * air_density * cd * self.ball_area * speed**2
+        cd = self._effective_coefficient_from_speed(speed, air_density)
+        force_magnitude = 0.5 * air_density * cd * self.ball_area * speed * speed
         return -force_magnitude * velocity_vector / speed
 
     def get_effective_coefficient(
@@ -129,6 +129,17 @@ class DragModel:
             math.sqrt(np.dot(velocity_vector, velocity_vector))
         )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
         if speed < 1e-10:
+            return self.base_coefficient
+
+        return self._effective_coefficient_from_speed(speed, air_density)
+
+    def _effective_coefficient_from_speed(
+        self,
+        speed: float,
+        air_density: float,
+    ) -> float:
+        """Return the Reynolds-corrected drag coefficient for a known speed."""
+        if not self.reynolds_correction:
             return self.base_coefficient
 
         viscosity = float(AIR_VISCOSITY_KG_M_S)

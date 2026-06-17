@@ -222,7 +222,7 @@ class TestAerodynamicsEngineParity:
         rust_apex = max(point[3] for point in rust_points)
 
         assert 210.0 <= rust_carry <= 250.0
-        assert 25.0 <= rust_apex <= 40.0
+        assert 24.0 <= rust_apex <= 40.0
         assert rust_carry == pytest.approx(py_carry, rel=1e-12, abs=1e-12)
         assert rust_apex == pytest.approx(py_apex, rel=1e-12, abs=1e-12)
 

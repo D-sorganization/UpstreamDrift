@@ -26,8 +26,11 @@ from src.shared.python.physics.ball_launch_conditions import (
     TrajectoryPoint,
 )
 from src.shared.python.physics.ball_properties import (
+    MAX_LIFT_COEFFICIENT,
     MIN_SPEED_THRESHOLD,
     NUMERICAL_EPSILON,
+    PENNER_LIFT_EXPONENT,
+    PENNER_LIFT_SCALE,
     BallProperties,
 )
 from src.shared.python.physics.ball_trajectory_analysis import TrajectoryAnalysisMixin
@@ -264,7 +267,11 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
 
         # Magnus
-        cl = self.ball.calculate_cl(s_ratio)
+        cl = np.minimum(
+            MAX_LIFT_COEFFICIENT,
+            PENNER_LIFT_SCALE
+            * np.power(np.maximum(s_ratio, 0.0), PENNER_LIFT_EXPONENT),
+        )
         magnus_force_mag = aero_prefix * cl * (valid_speed**2)
 
         axis = spin_axis.reshape(3, 1)

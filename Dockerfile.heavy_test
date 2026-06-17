@@ -112,4 +112,7 @@ RUN if [ -f "pyproject.toml" ]; then \
 #    the default pytest invocation.
 COPY docker/heavy_test_entrypoint.sh /usr/local/bin/heavy_test_entrypoint.sh
 RUN chmod +x /usr/local/bin/heavy_test_entrypoint.sh
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 ENTRYPOINT ["/usr/local/bin/heavy_test_entrypoint.sh"]

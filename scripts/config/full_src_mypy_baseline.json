@@ -3,6 +3,22 @@
   "command": "python -m mypy src --config-file pyproject.toml",
   "errors": [
     {
+      "path": "src/shared/python/motion_pipeline/sources/_unit_contracts.py",
+      "line": 102,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"float\" has incompatible type \"object\"; expected \"str | Buffer | SupportsFloat | SupportsIndex\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/sources/trc_adapter.py",
+      "line": 105,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"float\" has incompatible type \"object\"; expected \"str | Buffer | SupportsFloat | SupportsIndex\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
       "line": 145,
       "column": null,
@@ -11,27 +27,115 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 214,
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 153,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"set_step_params\" of \"ControlSystem\" has incompatible type \"Any | dict[Any, Any]\"; expected \"float\"",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 162,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
+      "line": 164,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"question\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
+      "line": 170,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"getSaveFileName\" of \"QFileDialog\" has incompatible type \"_SessionMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/api/services/recording_service.py",
+      "line": 173,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"savez_compressed\" has incompatible type \"**dict[str, ndarray[Any, Any]]\"; expected \"bool\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
+      "line": 186,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"getOpenFileName\" of \"QFileDialog\" has incompatible type \"_SessionMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
+      "line": 187,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"question\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 195,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"QDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
+      "line": 229,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 230,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_controls_mixin.py",
+      "line": 236,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"_ActuatorControlsMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 240,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 249,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"QDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
       "path": "src/learning/imitation/_gail.py",
-      "line": 250,
+      "line": 269,
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/simulate_with_coefficients.py",
-      "line": 254,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"postcondition\" has incompatible type \"Callable[[Any], numpy.bool[builtins.bool]]\"; expected \"Callable[[Any], builtins.bool]\"",
       "code": "arg-type"
     },
     {
@@ -59,11 +163,19 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/opensim/python/opensim_golf/simulate_with_coefficients.py",
-      "line": 335,
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 300,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 to \"postcondition\" has incompatible type \"Callable[[Any], numpy.bool[builtins.bool]]\"; expected \"Callable[[Any], builtins.bool]\"",
+      "message": "Argument 1 to \"getSaveFileName\" of \"QFileDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 305,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"getOpenFileName\" of \"QFileDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -83,11 +195,19 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/simulate_with_coefficients.py",
-      "line": 375,
+      "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
+      "line": 40,
       "column": null,
       "severity": "error",
-      "message": "Argument \"time\" to \"SimOut\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
+      "message": "Argument 1 to \"getSaveFileName\" of \"QFileDialog\" has incompatible type \"_SessionMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/pose_estimation/keypoint_offsets.py",
+      "line": 426,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"require\" has incompatible type \"Literal[False] | numpy.bool[builtins.bool]\"; expected \"builtins.bool\"",
       "code": "arg-type"
     },
     {
@@ -115,11 +235,27 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/opensim/python/opensim_golf/simulate_with_coefficients.py",
-      "line": 453,
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 447,
       "column": null,
       "severity": "error",
-      "message": "Argument \"time\" to \"SimOut\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 459,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 466,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"getItem\" of \"QInputDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -136,6 +272,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument \"y\" to \"Marker\" has incompatible type \"floating[Any] | float64\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 481,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"critical\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -179,14 +323,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/opensim/python/opensim_golf/simulate_with_coefficients.py",
-      "line": 517,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"time\" to \"SimOut\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 536,
       "column": null,
@@ -235,6 +371,14 @@
       "code": "arg-type"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
+      "line": 552,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"signal_obj\" to \"_show_generator_dialog\" of \"HumanoidConfigTab\" has incompatible type \"pyqtBoundSignal\"; expected \"pyqtSignal\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 560,
       "column": null,
@@ -280,6 +424,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
+      "line": 597,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"RunFitButton\" has incompatible type \"_BuildersMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -571,6 +723,14 @@
       "code": "arg-type"
     },
     {
+      "path": "src/tools/contraction/verifier.py",
+      "line": 81,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"_estimate_single_rate\" of \"ContractionVerifier\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 811,
       "column": null,
@@ -584,6 +744,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "line": 96,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"getColor\" of \"QColorDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -613,14 +781,6 @@
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
       "line": 169,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/shared/python/physics/aerodynamics/_rust_facade.py",
-      "line": 188,
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
@@ -675,19 +835,19 @@
       "code": "assignment"
     },
     {
-      "path": "src/shared/python/visualization/fsp_renderer.py",
-      "line": 271,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
       "path": "src/shared/python/pendulum_simulator/cross_engine_perturbation.py",
       "line": 275,
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[Any]]\", variable has type \"ndarray[tuple[int, int], dtype[Any]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 287,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"QVBoxLayout\", variable has type \"Callable[[], QLayout | None]\")",
       "code": "assignment"
     },
     {
@@ -699,11 +859,27 @@
       "code": "assignment"
     },
     {
+      "path": "src/deployment/digital_twin/twin.py",
+      "line": 364,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], Any]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
       "line": 408,
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 43,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"QVBoxLayout\", variable has type \"Callable[[], QLayout | None]\")",
       "code": "assignment"
     },
     {
@@ -715,27 +891,35 @@
       "code": "assignment"
     },
     {
+      "path": "src/research/differentiable/engine.py",
+      "line": 506,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "line": 580,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "line": 583,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_export.py",
       "line": 62,
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"bool | ExportOutcome\", variable has type \"bool\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
-      "line": 623,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
-      "line": 626,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -752,6 +936,22 @@
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"bool | ExportOutcome\", variable has type \"bool\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/research/deformable/objects.py",
+      "line": 745,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[signedinteger[_32Bit | _64Bit]]]\", variable has type \"ndarray[tuple[int], dtype[signedinteger[_32Bit | _64Bit]]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/research/deformable/objects.py",
+      "line": 750,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[signedinteger[_32Bit | _64Bit]]]\", variable has type \"ndarray[tuple[int], dtype[signedinteger[_32Bit | _64Bit]]]\")",
       "code": "assignment"
     },
     {
@@ -825,6 +1025,14 @@
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"ndarray[Any, Any] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[Any, Any]\")",
       "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_session_state.py",
+      "line": 10,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
     },
     {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py",
@@ -971,6 +1179,30 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/movement_optimizer/tests/test_export_excel.py",
+      "line": 11,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_import.py",
+      "line": 11,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_persistence.py",
+      "line": 11,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_parser.py",
       "line": 11,
       "column": null,
@@ -992,14 +1224,6 @@
       "column": null,
       "severity": "error",
       "message": "Module has no attribute \"log6\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 113,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_sine_params\"; maybe \"set_sine_wave_params\" or \"set_step_params\"?",
       "code": "attr-defined"
     },
     {
@@ -1059,11 +1283,35 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/movement_optimizer/tests/test_cli.py",
+      "line": 12,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 120,
       "column": null,
       "severity": "error",
       "message": "\"AnalysisMixin\" has no attribute \"mode_help_label\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui.py",
+      "line": 120,
+      "column": null,
+      "severity": "error",
+      "message": "\"QCoreApplication\" has no attribute \"setStyle\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui.py",
+      "line": 121,
+      "column": null,
+      "severity": "error",
+      "message": "\"QCoreApplication\" has no attribute \"setStyleSheet\"",
       "code": "attr-defined"
     },
     {
@@ -1107,6 +1355,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/tools/starting_pose_matcher/gui.py",
+      "line": 123,
+      "column": null,
+      "severity": "error",
+      "message": "\"QCoreApplication\" has no attribute \"setFont\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 124,
       "column": null,
@@ -1136,6 +1392,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_live_view\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_kfa_effective_mass.py",
+      "line": 130,
+      "column": null,
+      "severity": "error",
+      "message": "\"_KFAEffectiveMassMixin\" has no attribute \"compute_mass_matrix\"",
       "code": "attr-defined"
     },
     {
@@ -1227,6 +1491,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_kfa_effective_mass.py",
+      "line": 136,
+      "column": null,
+      "severity": "error",
+      "message": "\"_KFAEffectiveMassMixin\" has no attribute \"_compute_jacobian\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 136,
       "column": null,
@@ -1248,6 +1520,14 @@
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"open_signal_toolkit\"; maybe \"btn_signal_toolkit\"?",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_issue_222_decompose.py",
+      "line": 139,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
       "code": "attr-defined"
     },
     {
@@ -1339,19 +1619,27 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/movement_optimizer/tests/test_export.py",
+      "line": 149,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_issue_222_decompose.py",
+      "line": 149,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
       "line": 149,
       "column": null,
       "severity": "error",
       "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 151,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_step_params\"; maybe \"set_step_params\"?",
       "code": "attr-defined"
     },
     {
@@ -1435,14 +1723,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_kfa_effective_mass.py",
-      "line": 159,
-      "column": null,
-      "severity": "error",
-      "message": "\"_KFAEffectiveMassMixin\" has no attribute \"compute_mass_matrix\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 160,
       "column": null,
@@ -1464,14 +1744,6 @@
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_kfa_effective_mass.py",
-      "line": 165,
-      "column": null,
-      "severity": "error",
-      "message": "\"_KFAEffectiveMassMixin\" has no attribute \"_compute_jacobian\"",
       "code": "attr-defined"
     },
     {
@@ -1763,14 +2035,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 207,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_sine_params\"; maybe \"set_sine_wave_params\" or \"set_step_params\"?",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
       "line": 207,
       "column": null,
@@ -1784,14 +2048,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"lbl_residual\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 209,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"set_sine_params\"; maybe \"set_step_params\" or \"set_sine_wave_params\"?",
       "code": "attr-defined"
     },
     {
@@ -1824,14 +2080,6 @@
       "column": null,
       "severity": "error",
       "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 212,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_step_params\"; maybe \"set_step_params\"?",
       "code": "attr-defined"
     },
     {
@@ -1888,6 +2136,22 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"_load_xlsx\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
+      "line": 222,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"spn_f_scale\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
+      "line": 223,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"spn_t_scale\"",
       "code": "attr-defined"
     },
     {
@@ -2035,27 +2299,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/simulate_with_coefficients.py",
-      "line": 238,
-      "column": null,
-      "severity": "error",
-      "message": "Module has no attribute \"Quaternion\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 238,
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"event_labels\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/simulate_with_coefficients.py",
-      "line": 239,
-      "column": null,
-      "severity": "error",
-      "message": "Module has no attribute \"Quaternion\"",
       "code": "attr-defined"
     },
     {
@@ -2104,6 +2352,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"poses\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_thread_safety.py",
+      "line": 25,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
       "code": "attr-defined"
     },
     {
@@ -2160,6 +2416,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"_pose_trajectory_buttons\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
+      "line": 259,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"spn_f_scale\"",
       "code": "attr-defined"
     },
     {
@@ -2403,11 +2667,27 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 289,
+      "column": null,
+      "severity": "error",
+      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addWidget\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
       "line": 289,
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"plot_induced_acceleration\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
+      "line": 29,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"_on_load_model\"; maybe \"load_model\"?",
       "code": "attr-defined"
     },
     {
@@ -2456,6 +2736,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
+      "line": 293,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"spn_t_scale\"",
       "code": "attr-defined"
     },
     {
@@ -2635,6 +2923,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
+      "line": 32,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"mode_selector\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 320,
       "column": null,
@@ -2755,6 +3051,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
+      "line": 33,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"mode_selector\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 330,
       "column": null,
@@ -2864,6 +3168,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_redraw\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
+      "line": 34,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"mode_selector\"",
       "code": "attr-defined"
     },
     {
@@ -3027,6 +3339,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
+      "line": 36,
+      "column": null,
+      "severity": "error",
+      "message": "\"PinocchioGUI\" has no attribute \"mode_selector\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 360,
       "column": null,
@@ -3187,6 +3507,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/movement_optimizer/tests/test_exercise_tab.py",
+      "line": 38,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 380,
       "column": null,
@@ -3235,14 +3563,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/launchers/launcher_process_manager.py",
-      "line": 391,
-      "column": null,
-      "severity": "error",
-      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 392,
       "column": null,
@@ -3264,6 +3584,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"combo_playback_target\"; maybe \"playback_target\"?",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_main_window.py",
+      "line": 40,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
       "code": "attr-defined"
     },
     {
@@ -3312,6 +3640,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/launchers/launcher_process_manager.py",
+      "line": 416,
+      "column": null,
+      "severity": "error",
+      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
       "code": "attr-defined"
     },
     {
@@ -3387,6 +3723,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/tests/unit/test_grip_modelling_xml.py",
+      "line": 43,
+      "column": null,
+      "severity": "error",
+      "message": "\"type[GripModellingTab]\" has no attribute \"_inline_hand_includes\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
       "line": 430,
       "column": null,
@@ -3408,6 +3752,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_step_frame\"; maybe \"spin_frame\"?",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 44,
+      "column": null,
+      "severity": "error",
+      "message": "\"Callable[[], QLayout | None]\" has no attribute \"setContentsMargins\"",
       "code": "attr-defined"
     },
     {
@@ -3515,6 +3867,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/api/auth/security.py",
+      "line": 473,
+      "column": null,
+      "severity": "error",
+      "message": "\"Result[Any]\" has no attribute \"rowcount\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 473,
       "column": null,
@@ -3563,6 +3923,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
+      "line": 488,
+      "column": null,
+      "severity": "error",
+      "message": "\"pyqtSignal\" has no attribute \"connect\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_pose_library.py",
       "line": 49,
       "column": null,
@@ -3576,6 +3944,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"transform\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_issue_217_decompose.py",
+      "line": 492,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
       "code": "attr-defined"
     },
     {
@@ -3827,6 +4203,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/movement_optimizer/tests/test_comparison.py",
+      "line": 6,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 60,
       "column": null,
@@ -3867,11 +4251,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 64,
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 63,
       "column": null,
       "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_control_type\"; maybe \"set_control_type\"?",
+      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addLayout\"",
       "code": "attr-defined"
     },
     {
@@ -3883,11 +4267,27 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
+      "line": 654,
+      "column": null,
+      "severity": "error",
+      "message": "\"MuJoCoSimWidget\" has no attribute \"open_meshcat_browser\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 66,
       "column": null,
       "severity": "error",
       "message": "\"AnalysisMixin\" has no attribute \"txt_log\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 67,
+      "column": null,
+      "severity": "error",
+      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addWidget\"",
       "code": "attr-defined"
     },
     {
@@ -3904,6 +4304,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_KFAAnalysisMixin\" has no attribute \"_compute_jacobian\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_observability_metrics.py",
+      "line": 7,
+      "column": null,
+      "severity": "error",
+      "message": "Module \"conftest\" has no attribute \"make_test_result\"",
       "code": "attr-defined"
     },
     {
@@ -3944,6 +4352,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"events\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/simulation_controls_mixin.py",
+      "line": 76,
+      "column": null,
+      "severity": "error",
+      "message": "\"MuJoCoSimWidget\" has no attribute \"get_pixmap\"",
       "code": "attr-defined"
     },
     {
@@ -4123,27 +4539,19 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 86,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_constant_value\"; maybe \"set_constant_value\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/launchers/launcher_process_manager.py",
-      "line": 878,
-      "column": null,
-      "severity": "error",
-      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 88,
       "column": null,
       "severity": "error",
       "message": "\"AnalysisMixin\" has no attribute \"config\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/launchers/launcher_process_manager.py",
+      "line": 881,
+      "column": null,
+      "severity": "error",
+      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
       "code": "attr-defined"
     },
     {
@@ -4160,14 +4568,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 93,
-      "column": null,
-      "severity": "error",
-      "message": "\"ControlSystem\" has no attribute \"get_damping\"; maybe \"set_damping\"?",
       "code": "attr-defined"
     },
     {
@@ -4259,27 +4659,27 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 102,
+      "path": "src/learning/sim2real/system_identification.py",
+      "line": 185,
       "column": null,
       "severity": "error",
-      "message": "Unexpected keyword argument \"actuator_index\" for \"PolynomialGeneratorWidget\"",
+      "message": "Too many arguments for \"step\" of \"PhysicsEngineProtocol\"",
       "code": "call-arg"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 102,
+      "path": "src/deployment/digital_twin/twin.py",
+      "line": 196,
       "column": null,
       "severity": "error",
-      "message": "Unexpected keyword argument \"control_system\" for \"PolynomialGeneratorWidget\"",
+      "message": "Too many arguments for \"step\" of \"PhysicsEngineProtocol\"",
       "code": "call-arg"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 214,
+      "path": "src/research/multi_robot/system.py",
+      "line": 355,
       "column": null,
       "severity": "error",
-      "message": "Missing positional argument \"step_value\" in call to \"set_step_params\" of \"ControlSystem\"",
+      "message": "Too many arguments for \"step\" of \"PhysicsEngineProtocol\"",
       "code": "call-arg"
     },
     {
@@ -4307,14 +4707,6 @@
       "code": "call-overload"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 247,
-      "column": null,
-      "severity": "error",
-      "message": "Cannot determine type of \"txt_log\"",
-      "code": "has-type"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 360,
       "column": null,
@@ -4329,150 +4721,6 @@
       "severity": "error",
       "message": "Cannot determine type of \"auto_fit_axes\"",
       "code": "has-type"
-    },
-    {
-      "path": "src/shared/python/config/model_registry.py",
-      "line": 11,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/config/standard_models.py",
-      "line": 11,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/config/config_utils.py",
-      "line": 126,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/sg_optimizer/shot_model/baseline.py",
-      "line": 13,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/sg_optimizer/course/conditions.py",
-      "line": 14,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/sg_optimizer/shot_model/player_profile.py",
-      "line": 14,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/programmatic_pid/spec_loader.py",
-      "line": 17,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_training/trajectory_exporter.py",
-      "line": 201,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/ux/error_envelope.py",
-      "line": 22,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/simulation_backends/model_params.py",
-      "line": 24,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/ux/field_metadata.py",
-      "line": 33,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
-      "line": 37,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/data_io/io_utils.py",
-      "line": 41,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/bunkershot3d/config.py",
-      "line": 5,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/shared/python/gui_launcher/manifest_loader.py",
-      "line": 60,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/bunkershot3d/calibration/calibrate_all.py",
-      "line": 8,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/dtack/utils/mjcf_exporter.py",
-      "line": 9,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/dtack/utils/urdf_exporter.py",
-      "line": 9,
-      "column": null,
-      "severity": "error",
-      "message": "Library stubs not installed for \"yaml\"",
-      "code": "import-untyped"
     },
     {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
@@ -4523,11 +4771,59 @@
       "code": "index"
     },
     {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 288,
+      "column": null,
+      "severity": "error",
+      "message": "Value of type \"Any | None\" is not indexable",
+      "code": "index"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 287,
+      "column": null,
+      "severity": "error",
+      "message": "Cannot assign to a method",
+      "code": "method-assign"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 43,
+      "column": null,
+      "severity": "error",
+      "message": "Cannot assign to a method",
+      "code": "method-assign"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 106,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 120,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 124,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_toggle_frames\" with type \"Callable[[PinocchioGUI, bool], None]\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 126,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_toggle_coms\" with type \"Callable[[PinocchioGUI, bool], None]\"",
       "code": "misc"
     },
     {
@@ -4548,7 +4844,7 @@
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
-      "line": 133,
+      "line": 134,
       "column": null,
       "severity": "error",
       "message": "Expected iterable as variadic argument",
@@ -4579,11 +4875,27 @@
       "code": "misc"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
+      "line": 173,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/analysis_mixin.py",
       "line": 178,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin.AnalysisMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
+      "line": 181,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
       "code": "misc"
     },
     {
@@ -4696,6 +5008,14 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin.UISetupMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 260,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
       "code": "misc"
     },
     {
@@ -4827,6 +5147,14 @@
       "code": "misc"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 385,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 387,
       "column": null,
@@ -4875,11 +5203,27 @@
       "code": "misc"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
+      "line": 79,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_init_meshcat_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/analysis_mixin.py",
       "line": 79,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin.AnalysisMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
+      "line": 84,
+      "column": null,
+      "severity": "error",
+      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_setup_ui\" with type \"Callable[[PinocchioGUI], None]\"",
       "code": "misc"
     },
     {
@@ -4891,11 +5235,35 @@
       "code": "misc"
     },
     {
+      "path": "src/tools/pose_studio/gui.py",
+      "line": 218,
+      "column": null,
+      "severity": "error",
+      "message": "Name \"QtGui.QMenuBar\" is not defined",
+      "code": "name-defined"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/tests/test_scipy_dependency_contract.py",
+      "line": 10,
+      "column": null,
+      "severity": "error",
+      "message": "Name \"tomllib\" already defined (by an import)",
+      "code": "no-redef"
+    },
+    {
       "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
       "line": 33,
       "column": null,
       "severity": "error",
       "message": "Name \"SMPLX_AVAILABLE\" already defined (possibly by an import)",
+      "code": "no-redef"
+    },
+    {
+      "path": "src/api/versioning.py",
+      "line": 33,
+      "column": null,
+      "severity": "error",
+      "message": "Name \"tomllib\" already defined (by an import)",
       "code": "no-redef"
     },
     {
@@ -4907,20 +5275,44 @@
       "code": "no-redef"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/simulate_with_coefficients.py",
-      "line": 254,
+      "path": "src/launchers/startup.py",
+      "line": 285,
       "column": null,
       "severity": "error",
-      "message": "Incompatible return value type (got \"numpy.bool[builtins.bool]\", expected \"builtins.bool\")",
-      "code": "return-value"
+      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QSplashScreen\"; supertype defines the argument type as \"QMouseEvent | None\"",
+      "code": "override"
     },
     {
-      "path": "src/engines/physics_engines/opensim/python/opensim_golf/simulate_with_coefficients.py",
-      "line": 335,
+      "path": "src/launchers/startup.py",
+      "line": 285,
       "column": null,
       "severity": "error",
-      "message": "Incompatible return value type (got \"numpy.bool[builtins.bool]\", expected \"builtins.bool\")",
-      "code": "return-value"
+      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QWidget\"; supertype defines the argument type as \"QMouseEvent | None\"",
+      "code": "override"
+    },
+    {
+      "path": "src/launchers/startup.py",
+      "line": 290,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 of \"keyPressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QWidget\"; supertype defines the argument type as \"QKeyEvent | None\"",
+      "code": "override"
+    },
+    {
+      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
+      "line": 32,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QObject | None\"",
+      "code": "override"
+    },
+    {
+      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
+      "line": 32,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QEvent | None\"",
+      "code": "override"
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
@@ -4939,6 +5331,102 @@
       "code": "union-attr"
     },
     {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 155,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"code\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/launchers/docker_manager.py",
+      "line": 203,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"IO[str] | None\" has no attribute \"readline\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/launchers/docker_manager.py",
+      "line": 208,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"IO[str] | None\" has no attribute \"close\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 219,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"code\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 220,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"message\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 221,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"details\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 303,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"code\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 304,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"message\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 330,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"ErrorDetail | None\" has no attribute \"code\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
+      "line": 377,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"QWidget | None\" has no attribute \"deleteLater\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/ui/info_button.py",
+      "line": 58,
+      "column": null,
+      "severity": "error",
+      "message": "Item \"None\" of \"QStyle | None\" has no attribute \"standardIcon\"",
+      "code": "union-attr"
+    },
+    {
+      "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
+      "line": 147,
+      "column": null,
+      "severity": "error",
+      "message": "Need type annotation for \"response\"",
+      "code": "var-annotated"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 154,
       "column": null,
@@ -4952,6 +5440,14 @@
       "column": null,
       "severity": "error",
       "message": "Need type annotation for \"joint_spinboxes\" (hint: \"joint_spinboxes: list[<type>] = ...\")",
+      "code": "var-annotated"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
+      "line": 292,
+      "column": null,
+      "severity": "error",
+      "message": "Need type annotation for \"_open_readers\" (hint: \"_open_readers: list[<type>] = ...\")",
       "code": "var-annotated"
     },
     {
@@ -4972,26 +5468,18 @@
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
-      "line": 579,
+      "line": 582,
       "column": null,
       "severity": "error",
       "message": "Need type annotation for \"swings\" (hint: \"swings: list[<type>] = ...\")",
       "code": "var-annotated"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_detail_dialog.py",
-      "line": 102,
-      "column": null,
-      "severity": "note",
-      "message": "\"PolynomialGeneratorWidget\" defined in \"src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.polynomial_generator\"",
-      "code": null
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
-      "line": 133,
+      "line": 134,
       "column": null,
       "severity": "note",
-      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"misc\" not covered by \"type: ignore[attr-defined]\" comment",
       "code": null
     },
     {
@@ -4999,7 +5487,7 @@
       "line": 257,
       "column": null,
       "severity": "note",
-      "message": "Error code \"call-overload\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"call-overload\" not covered by \"type: ignore[arg-type]\" comment",
       "code": null
     },
     {
@@ -5059,35 +5547,59 @@
       "code": null
     },
     {
+      "path": "src/launchers/startup.py",
+      "line": 285,
+      "column": null,
+      "severity": "note",
+      "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
+      "code": null
+    },
+    {
+      "path": "src/launchers/startup.py",
+      "line": 285,
+      "column": null,
+      "severity": "note",
+      "message": "This violates the Liskov substitution principle",
+      "code": null
+    },
+    {
+      "path": "src/launchers/startup.py",
+      "line": 290,
+      "column": null,
+      "severity": "note",
+      "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
+      "code": null
+    },
+    {
+      "path": "src/launchers/startup.py",
+      "line": 290,
+      "column": null,
+      "severity": "note",
+      "message": "This violates the Liskov substitution principle",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
+      "line": 32,
+      "column": null,
+      "severity": "note",
+      "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
+      "line": 32,
+      "column": null,
+      "severity": "note",
+      "message": "This violates the Liskov substitution principle",
+      "code": null
+    },
+    {
       "path": "src/shared/python/perturbation/noise.py",
       "line": 64,
       "column": null,
       "severity": "note",
-      "message": "Error code \"assignment\" not covered by \"type: ignore\" comment",
-      "code": null
-    },
-    {
-      "path": "src/bunkershot3d/calibration/calibrate_all.py",
-      "line": 8,
-      "column": null,
-      "severity": "note",
-      "message": "(or run \"mypy --install-types\" to install all missing stub packages)",
-      "code": null
-    },
-    {
-      "path": "src/bunkershot3d/calibration/calibrate_all.py",
-      "line": 8,
-      "column": null,
-      "severity": "note",
-      "message": "Hint: \"python3 -m pip install types-PyYAML\"",
-      "code": null
-    },
-    {
-      "path": "src/bunkershot3d/calibration/calibrate_all.py",
-      "line": 8,
-      "column": null,
-      "severity": "note",
-      "message": "See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports",
+      "message": "Error code \"assignment\" not covered by \"type: ignore[operator]\" comment",
       "code": null
     }
   ]

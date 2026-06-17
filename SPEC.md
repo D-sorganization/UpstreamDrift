@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.435                                            |
+| **Spec Version**        | 1.0.437                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Closed current-main CI recovery issue #7640 by path-scoping
+  the mandatory Rust wheel parity lane on push events with
+  `github.event.before`, preserving full parity only for schedule/manual runs,
+  and hardening the full-Trivy Dockerfile set with minimal apt installs plus
+  non-root runtime users.
+- **2026-06-17** - Recovered current-main CI after the #7632 merge: the
+  Python aerodynamics fallback and vectorized ball-force path now share the
+  Rust Penner-style bounded spin-lift coefficient, the Rust parity fixture
+  anchors were refreshed to the corrected trajectory, parity TestClient runs
+  opt into a high simulation rate-limit budget, PyO3 binding tests assert only
+  supported construction/precondition contracts, `DragModel.calculate()` reuses
+  its speed calculation for the Reynolds-corrected coefficient path, and
+  dashboard launcher tests can inject a non-blocking Qt event-loop runner.
 - **2026-06-17** - Closed the test-only PR core-lane OOM regression for issue
   #7635: CI Standard now exits after changed-test PR slices pass when no
   source/dependency coverage targets changed, while preserving the scoped

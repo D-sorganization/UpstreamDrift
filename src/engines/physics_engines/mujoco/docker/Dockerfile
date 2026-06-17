@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 1. System Dependencies
 # Includes tools for building, math libraries, and GUI support
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     pkg-config \
@@ -87,6 +87,10 @@ ENV MUJOCO_GL="osmesa"
 ENV PYOPENGL_PLATFORM="osmesa"
 ENV PYTHONPATH="/workspace"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN useradd --create-home --shell /bin/bash developer \
+    && chown -R developer:developer /workspace /setup /opt/upstream-drift
+USER developer
 
 # 8. Interactive Shell
 CMD ["/bin/bash"]

@@ -53,6 +53,7 @@ def test_dashboard_launch(monkeypatch: pytest.MonkeyPatch, qapp: Any) -> None:
     mock_qapp.exec.return_value = 0
     mock_window = MagicMock()
     mock_exit = MagicMock()
+    mock_event_loop_runner = MagicMock(return_value=0)
 
     monkeypatch.setattr(launcher, "get_qapp", MagicMock(return_value=mock_qapp))
     monkeypatch.setattr(launcher, "UnifiedDashboardWindow", mock_window)
@@ -64,12 +65,14 @@ def test_dashboard_launch(monkeypatch: pytest.MonkeyPatch, qapp: Any) -> None:
         title="Test Dashboard",
         engine_args=["arg1"],
         engine_kwargs={"kwarg1": "val"},
+        event_loop_runner=mock_event_loop_runner,
     )
 
     # Verify initialization
     mock_engine_class.assert_called_once_with("arg1", kwarg1="val")
     mock_window.assert_called_once_with(mock_engine, title="Test Dashboard")
-    mock_qapp.exec.assert_called_once_with()
+    mock_event_loop_runner.assert_called_once_with(mock_qapp)
+    mock_qapp.exec.assert_not_called()
     mock_exit.assert_called_once_with(0)
 
 

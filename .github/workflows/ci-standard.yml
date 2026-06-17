@@ -2415,8 +2415,8 @@ jobs:
   # land unnoticed.
   #
   # This REQUIRED job (wired into `quality-gate.needs`) runs for Rust wheel,
-  # parity-test, and Python facade changes on PRs, and always runs on push,
-  # schedule, and manual dispatch events. It builds + installs all PyO3 wheels
+  # parity-test, and Python facade changes on PRs and pushes, and always runs on
+  # schedule and manual dispatch events. It builds + installs all PyO3 wheels
   # (mirroring the exact maturin invocation in `rust-quality-gate`) and runs
   # the parity suite with
   # `CI_RUST_WHEELS_EXPECTED=1`, which the test layer (tests/conftest.py +
@@ -2458,16 +2458,41 @@ jobs:
       - name: Check for Rust wheel parity changes
         id: rust-wheel-parity-changes
         run: |
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
+          EVENT_NAME="${{ github.event_name }}"
+          BASE_SHA=""
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ "$EVENT_NAME" = "schedule" ]; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            echo "Rust wheel parity runs for ${{ github.event_name }} events."
+            echo "Rust wheel parity runs for $EVENT_NAME events."
             exit 0
           fi
 
-          git fetch origin "${{ github.base_ref }}"
-          BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-          if [ -z "$BASE_SHA" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+          elif [ "$EVENT_NAME" = "push" ]; then
+            BEFORE_SHA="${{ github.event.before }}"
+            if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA="$BEFORE_SHA"
+              if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+                git fetch --no-tags --depth=1 origin "$BASE_SHA" || true
+              fi
+            else
+              BASE_SHA=$(git rev-parse HEAD^ 2>/dev/null || true)
+            fi
+
+            if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              echo "Unable to resolve push base for Rust wheel parity diff; running fail-closed."
+              exit 0
+            fi
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity runs fail-closed for unsupported event: $EVENT_NAME"
+            exit 0
           fi
 
           PARITY_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- \
@@ -2509,7 +2534,7 @@ jobs:
             echo "$PARITY_FILES"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No Rust wheel parity changes detected; skipping mandatory wheel parity suite."
+            echo "No Rust wheel parity changes detected; skipping mandatory wheel parity suite for this $EVENT_NAME change."
           fi
 
       - name: Install System Dependencies
@@ -2696,7 +2721,7 @@ jobs:
               echo "- parity suite executed for Rust wheel/parity relevant changes"
             else
               echo "- no Rust wheel/parity/facade changes detected"
-              echo "- skipped mandatory wheel parity suite for this non-Rust PR"
-              echo "- pushes, scheduled runs, and manual dispatches still execute parity"
+              echo "- skipped mandatory wheel parity suite for this non-Rust change"
+              echo "- scheduled runs and manual dispatches still execute parity"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

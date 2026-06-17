@@ -64,14 +64,9 @@ fn aerodynamics_forces_match_python_reference_fixture() {
     assert_close(forces.lift.x, 0.0, 1e-12, "lift.x");
     assert_close(forces.lift.y, 0.0, 1e-12, "lift.y");
     assert_close(forces.lift.z, 0.0, 1e-12, "lift.z");
-    assert_close(forces.magnus.x, 0.201_834_620_874_059_1, 1e-12, "magnus.x");
-    assert_close(
-        forces.magnus.y,
-        -0.104_012_398_575_703_03,
-        1e-12,
-        "magnus.y",
-    );
-    assert_close(forces.magnus.z, -0.718_322_004_916_359_9, 1e-12, "magnus.z");
+    assert_close(forces.magnus.x, 0.143_857_999_343_142_6, 1e-12, "magnus.x");
+    assert_close(forces.magnus.y, -0.074_135_029_467_114_1, 1e-12, "magnus.y");
+    assert_close(forces.magnus.z, -0.511_985_337_619_072_2, 1e-12, "magnus.z");
 }
 
 #[test]
@@ -95,14 +90,14 @@ fn ball_flight_matches_python_reference_fixture() {
 
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
-    assert_eq!(result.steps, 116);
+    assert_eq!(result.steps, 126);
+    assert_close(final_point.t, 2.520_000_000_000_002, 1e-12, "landing time");
+    assert_close(final_point.x, 65.398_808_090_680_66, 1e-10, "landing x");
+    assert_close(final_point.y, 1.010_106_797_748_850_7, 1e-12, "landing y");
     assert_close(
-        final_point.t,
-        2.320_000_000_000_001_6,
+        final_point.z,
+        -0.008_670_452_489_379_865,
         1e-12,
-        "landing time",
+        "landing z",
     );
-    assert_close(final_point.x, 61.664_670_686_686_485, 1e-10, "landing x");
-    assert_close(final_point.y, 0.945_150_330_272_271, 1e-12, "landing y");
-    assert_close(final_point.z, -0.192_800_148_205_597, 1e-12, "landing z");
 }

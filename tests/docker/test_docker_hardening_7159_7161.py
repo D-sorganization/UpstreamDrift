@@ -56,6 +56,25 @@ def test_heavy_test_entrypoint_surfaces_marker() -> None:
     assert "missing" in entry
 
 
+@pytest.mark.parametrize(
+    "relpath",
+    [
+        "Dockerfile.heavy_test",
+        "src/engines/physics_engines/drake/Dockerfile",
+        "src/engines/physics_engines/mujoco/docker/Dockerfile",
+        "src/engines/physics_engines/pinocchio/Dockerfile",
+    ],
+)
+def test_trivy_high_policy_dockerfiles_install_minimally_and_drop_root(
+    relpath: str,
+) -> None:
+    """Dockerfiles scanned by full-main Trivy must satisfy high-risk policy."""
+    dockerfile = _read(relpath)
+    if "apt-get install -y" in dockerfile:
+        assert "apt-get install -y --no-install-recommends" in dockerfile
+    assert "\nUSER " in dockerfile
+
+
 # ── #7161 D3 — compose health gating + python healthcheck ──────────────────
 
 

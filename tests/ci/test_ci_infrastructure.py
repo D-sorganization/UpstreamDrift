@@ -984,8 +984,8 @@ class TestCIEnvironmentCompatibility:
             assert f"command -v {binary}" in verify_script
             assert f"{binary} --version" in verify_script
 
-    def test_rust_wheel_parity_is_path_gated_for_non_rust_prs(self) -> None:
-        """Rust wheel parity must stay fail-closed without running on every PR."""
+    def test_rust_wheel_parity_is_path_gated_for_non_rust_prs_and_pushes(self) -> None:
+        """Rust wheel parity must stay fail-closed without running on every push."""
         try:
             import yaml
         except ImportError:
@@ -1003,7 +1003,13 @@ class TestCIEnvironmentCompatibility:
             step for step in steps if step.get("id") == "rust-wheel-parity-changes"
         )
         change_script = change_step["run"]
-        assert '"${{ github.event_name }}" != "pull_request"' in change_script
+        assert 'EVENT_NAME="${{ github.event_name }}"' in change_script
+        assert '"$EVENT_NAME" = "workflow_dispatch"' in change_script
+        assert '"$EVENT_NAME" = "schedule"' in change_script
+        assert '"$EVENT_NAME" = "pull_request"' in change_script
+        assert '"$EVENT_NAME" = "push"' in change_script
+        assert "${{ github.event.before }}" in change_script
+        assert "0000000000000000000000000000000000000000" in change_script
         assert "No Rust wheel parity changes detected" in change_script
         for pathspec in [
             "'rust_core/**'",
@@ -1042,7 +1048,10 @@ class TestCIEnvironmentCompatibility:
         )
         summary_script = summary_step["run"]
         assert summary_step["if"] == "always()"
-        assert "skipped mandatory wheel parity suite for this non-Rust PR" in (
+        assert "skipped mandatory wheel parity suite for this non-Rust change" in (
+            summary_script
+        )
+        assert "scheduled runs and manual dispatches still execute parity" in (
             summary_script
         )
 
