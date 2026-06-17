@@ -97,6 +97,7 @@ def test_collect_policy_results_accepts_threshold_compliant_groups(
     assert failures == []
 
 
+@pytest.mark.unit
 def test_parse_coverage_report_rejects_entity_payload(tmp_path: Path) -> None:
     mod = _load_module()
     coverage_xml = tmp_path / "coverage.xml"
