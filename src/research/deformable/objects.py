@@ -18,6 +18,79 @@ from src.shared.python.core.constants import GRAVITY
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+_MIN_SPRING_LENGTH = 1e-10
+
+
+def _validate_node_mesh(mesh: NDArray[np.floating]) -> None:
+    if mesh.ndim != 2 or mesh.shape[1] != 3:
+        raise ValueError("mesh must have shape (N, 3)")
+    if not np.all(np.isfinite(mesh)):
+        raise ValueError("mesh must contain only finite coordinates")
+
+
+def _validate_spring_arrays(
+    mesh: NDArray[np.floating],
+    i_idx: NDArray[np.intp],
+    j_idx: NDArray[np.intp],
+    rest_lengths: NDArray[np.floating],
+    stiffness: NDArray[np.floating],
+) -> None:
+    if not (
+        i_idx.shape == j_idx.shape == rest_lengths.shape == stiffness.shape
+        and i_idx.ndim == 1
+    ):
+        raise ValueError("spring arrays must be one-dimensional arrays of equal length")
+    if i_idx.size == 0:
+        return
+    if np.min(i_idx) < 0 or np.min(j_idx) < 0:
+        raise ValueError("spring indices must be non-negative")
+    if np.max(i_idx) >= len(mesh) or np.max(j_idx) >= len(mesh):
+        raise ValueError("spring indices must be within mesh bounds")
+    if not (np.all(np.isfinite(rest_lengths)) and np.all(np.isfinite(stiffness))):
+        raise ValueError("spring rest lengths and stiffnesses must be finite")
+
+
+def _accumulate_spring_forces(
+    mesh: NDArray[np.floating],
+    i_idx: NDArray[np.intp],
+    j_idx: NDArray[np.intp],
+    rest_lengths: NDArray[np.floating],
+    stiffness: NDArray[np.floating],
+    *,
+    rest_normalized: bool,
+) -> NDArray[np.floating]:
+    """Vectorized spring force scatter for cable and cloth internals."""
+    _validate_node_mesh(mesh)
+    _validate_spring_arrays(mesh, i_idx, j_idx, rest_lengths, stiffness)
+    forces = np.zeros_like(mesh)
+    if i_idx.size == 0:
+        return forces
+
+    delta = mesh[j_idx] - mesh[i_idx]
+    lengths = np.sqrt(np.einsum("ij,ij->i", delta, delta))
+    active = lengths > _MIN_SPRING_LENGTH
+    if not np.any(active):
+        return forces
+
+    safe_lengths = lengths[active]
+    active_delta = delta[active]
+    if rest_normalized:
+        active_rest = rest_lengths[active]
+        if np.any(active_rest <= _MIN_SPRING_LENGTH):
+            raise ValueError("cable spring rest lengths must be positive")
+        extension = (safe_lengths - active_rest) / active_rest
+    else:
+        extension = safe_lengths - rest_lengths[active]
+
+    spring_forces = (stiffness[active] * extension / safe_lengths)[
+        :, np.newaxis
+    ] * active_delta
+    np.add.at(forces, i_idx[active], spring_forces)
+    np.add.at(forces, j_idx[active], -spring_forces)
+    if not np.all(np.isfinite(forces)):
+        raise ValueError("computed spring forces must be finite")
+    return forces
+
 
 @dataclass
 class MaterialProperties:
@@ -74,6 +147,7 @@ class DeformableObject(ABC):
         """
         if mesh is None:
             raise ValueError("mesh must be provided")
+        _validate_node_mesh(mesh)
         self._mesh = mesh.copy()
         self._rest_mesh = mesh.copy()
         self._velocities = np.zeros_like(mesh)
@@ -118,6 +192,11 @@ class DeformableObject(ABC):
         Args:
             positions: New node positions (N, 3).
         """
+        if positions is None:
+            raise ValueError("positions must be provided")
+        if positions.shape != self._mesh.shape:
+            raise ValueError("positions must match current mesh shape")
+        _validate_node_mesh(positions)
         self._mesh = positions.copy()
 
     def apply_external_force(
@@ -207,6 +286,13 @@ class SoftBody(DeformableObject):
         if mesh is None:
             raise ValueError("mesh must be provided")
         super().__init__(mesh, material)
+        tetrahedra = np.asarray(tetrahedra, dtype=np.intp)
+        if tetrahedra.ndim != 2 or tetrahedra.shape[1] != 4:
+            raise ValueError("tetrahedra must have shape (M, 4)")
+        if tetrahedra.size and (
+            np.min(tetrahedra) < 0 or np.max(tetrahedra) >= self.n_nodes
+        ):
+            raise ValueError("tetrahedra indices must be within mesh bounds")
         self._tetrahedra = tetrahedra
         self._rest_volumes = self._compute_volumes(self._rest_mesh)
         self._B_matrices = self._compute_shape_matrices()
@@ -222,26 +308,30 @@ class SoftBody(DeformableObject):
         """
         if positions is None:
             raise ValueError("positions must be provided")
-        volumes = np.zeros(len(self._tetrahedra))
+        _validate_node_mesh(positions)
+        if len(self._tetrahedra) == 0:
+            return np.zeros(0, dtype=positions.dtype)
 
-        for i, tet in enumerate(self._tetrahedra):
-            v0 = positions[tet[0]]
-            v1 = positions[tet[1]]
-            v2 = positions[tet[2]]
-            v3 = positions[tet[3]]
+        vertices = positions[self._tetrahedra]
+        mats = np.stack(
+            (
+                vertices[:, 1] - vertices[:, 0],
+                vertices[:, 2] - vertices[:, 0],
+                vertices[:, 3] - vertices[:, 0],
+            ),
+            axis=2,
+        )
+        return np.abs(np.linalg.det(mats)) / 6
 
-            # Volume = |det([v1-v0, v2-v0, v3-v0])| / 6
-            mat = np.column_stack([v1 - v0, v2 - v0, v3 - v0])
-            volumes[i] = abs(np.linalg.det(mat)) / 6
-
-        return volumes
-
-    def _compute_shape_matrices(self) -> list[NDArray[np.floating]]:
+    def _compute_shape_matrices(self) -> NDArray[np.floating]:
         """Compute shape function matrices for each element.
 
         Returns:
-            List of B matrices.
+            B matrices with shape (M, 3, 3).
         """
+        if len(self._tetrahedra) == 0:
+            return np.zeros((0, 3, 3), dtype=self._rest_mesh.dtype)
+
         B_matrices = []
 
         for tet in self._tetrahedra:
@@ -259,7 +349,7 @@ class SoftBody(DeformableObject):
 
             B_matrices.append(B)
 
-        return B_matrices
+        return np.asarray(B_matrices, dtype=self._rest_mesh.dtype)
 
     def compute_internal_forces(self) -> NDArray[np.floating]:
         """Compute internal elastic forces using FEM.
@@ -268,6 +358,8 @@ class SoftBody(DeformableObject):
             Internal forces (N, 3).
         """
         forces = np.zeros_like(self._mesh)
+        if len(self._tetrahedra) == 0:
+            return forces
 
         mu = self._material.shear_modulus
         lam = (
@@ -279,31 +371,40 @@ class SoftBody(DeformableObject):
             )
         )
 
-        for i, tet in enumerate(self._tetrahedra):
-            # Compute deformation gradient F
-            v0 = self._mesh[tet[0]]
-            v1 = self._mesh[tet[1]]
-            v2 = self._mesh[tet[2]]
-            v3 = self._mesh[tet[3]]
+        vertices = self._mesh[self._tetrahedra]
+        D = np.stack(
+            (
+                vertices[:, 1] - vertices[:, 0],
+                vertices[:, 2] - vertices[:, 0],
+                vertices[:, 3] - vertices[:, 0],
+            ),
+            axis=2,
+        )
+        F = D @ self._B_matrices
 
-            D = np.column_stack([v1 - v0, v2 - v0, v3 - v0])
-            F = D @ self._B_matrices[i]
+        # Neo-Hookean stress (simplified)
+        J = np.linalg.det(F)
+        safe_J = np.where(J <= 0, 0.01, J)
 
-            # Neo-Hookean stress (simplified)
-            J = np.linalg.det(F)
-            if J <= 0:
-                J = 0.01  # Prevent inversion
+        # First Piola-Kirchhoff stress. Invert each deformation gradient once.
+        F_inv_t = np.linalg.inv(F).transpose(0, 2, 1)
+        P = (
+            mu * (F - F_inv_t)
+            + lam * np.log(safe_J)[:, np.newaxis, np.newaxis] * F_inv_t
+        )
 
-            # First Piola-Kirchhoff stress
-            P = mu * (F - np.linalg.inv(F).T) + lam * np.log(J) * np.linalg.inv(F).T
+        # Nodal forces
+        H = -self._rest_volumes[:, np.newaxis, np.newaxis] * (
+            P @ self._B_matrices.transpose(0, 2, 1)
+        )
 
-            # Nodal forces
-            H = -self._rest_volumes[i] * P @ self._B_matrices[i].T
+        np.add.at(forces, self._tetrahedra[:, 1], H[:, :, 0])
+        np.add.at(forces, self._tetrahedra[:, 2], H[:, :, 1])
+        np.add.at(forces, self._tetrahedra[:, 3], H[:, :, 2])
+        np.add.at(forces, self._tetrahedra[:, 0], -np.sum(H, axis=2))
 
-            forces[tet[1]] += H[:, 0]
-            forces[tet[2]] += H[:, 1]
-            forces[tet[3]] += H[:, 2]
-            forces[tet[0]] -= H[:, 0] + H[:, 1] + H[:, 2]
+        if not np.all(np.isfinite(forces)):
+            raise ValueError("computed FEM internal forces must be finite")
 
         return forces
 
@@ -372,9 +473,17 @@ class Cable(DeformableObject):
             diffs = np.diff(mesh, axis=0)
             self._rest_lengths = np.sqrt(np.einsum("ij,ij->i", diffs, diffs))
         else:
-            self._rest_lengths = rest_lengths
+            self._rest_lengths = np.asarray(rest_lengths, dtype=mesh.dtype).copy()
 
         self._total_rest_length = float(np.sum(self._rest_lengths))
+        self._spring_i = np.arange(max(len(self._mesh) - 1, 0), dtype=np.intp)
+        self._spring_j = self._spring_i + 1
+        self._spring_rest_lengths = self._rest_lengths.copy()
+        self._spring_stiffness = np.full(
+            self._spring_i.shape,
+            self._material.youngs_modulus,
+            dtype=self._mesh.dtype,
+        )
 
     @property
     def rest_length(self) -> float:
@@ -415,42 +524,44 @@ class Cable(DeformableObject):
         k_bend = self._material.bending_stiffness or k_stretch * 0.1
 
         # Spring forces
-        for i in range(len(self._mesh) - 1):
-            delta = self._mesh[i + 1] - self._mesh[i]
-            # ⚡ Bolt: math.hypot is ~4-6x faster than np.linalg.norm for small 3D arrays
-            length = math.hypot(delta[0], delta[1], delta[2])
-
-            if length > 1e-10:
-                direction = delta / length
-                strain = (length - self._rest_lengths[i]) / self._rest_lengths[i]
-                force_mag = k_stretch * strain
-
-                force = force_mag * direction
-                forces[i] += force
-                forces[i + 1] -= force
+        self._spring_stiffness.fill(k_stretch)
+        forces += _accumulate_spring_forces(
+            self._mesh,
+            self._spring_i,
+            self._spring_j,
+            self._spring_rest_lengths,
+            self._spring_stiffness,
+            rest_normalized=True,
+        )
 
         # Bending forces
-        for i in range(1, len(self._mesh) - 1):
-            v1 = self._mesh[i] - self._mesh[i - 1]
-            v2 = self._mesh[i + 1] - self._mesh[i]
-
-            # Angle between segments
-            # ⚡ Bolt: math.hypot is ~4-6x faster than np.linalg.norm for small 3D arrays
-            l1 = math.hypot(v1[0], v1[1], v1[2])
-            l2 = math.hypot(v2[0], v2[1], v2[2])
-
-            if l1 > 1e-10 and l2 > 1e-10:
-                cos_angle = np.dot(v1, v2) / (l1 * l2)
+        if len(self._mesh) > 2:
+            v1 = self._mesh[1:-1] - self._mesh[:-2]
+            v2 = self._mesh[2:] - self._mesh[1:-1]
+            l1 = np.sqrt(np.einsum("ij,ij->i", v1, v1))
+            l2 = np.sqrt(np.einsum("ij,ij->i", v2, v2))
+            active = (l1 > _MIN_SPRING_LENGTH) & (l2 > _MIN_SPRING_LENGTH)
+            if np.any(active):
+                cos_angle = np.einsum("ij,ij->i", v1[active], v2[active]) / (
+                    l1[active] * l2[active]
+                )
                 cos_angle = np.clip(cos_angle, -1, 1)
-
-                # Bending force (simplified)
                 bend_force = k_bend * (1 - cos_angle)
-                direction = v2 / l2 - v1 / l1
-                # ⚡ Bolt: math.hypot is ~4-6x faster than np.linalg.norm for small 3D arrays
-                direction_norm = math.hypot(direction[0], direction[1], direction[2])
-
-                if direction_norm > 1e-10:
-                    forces[i] -= bend_force * direction / direction_norm
+                direction = (
+                    v2[active] / l2[active, np.newaxis]
+                    - v1[active] / l1[active, np.newaxis]
+                )
+                direction_norm = np.sqrt(np.einsum("ij,ij->i", direction, direction))
+                bending_active = direction_norm > _MIN_SPRING_LENGTH
+                if np.any(bending_active):
+                    middle_indices = np.arange(1, len(self._mesh) - 1, dtype=np.intp)[
+                        active
+                    ][bending_active]
+                    forces[middle_indices] -= (
+                        bend_force[bending_active, np.newaxis]
+                        * direction[bending_active]
+                        / direction_norm[bending_active, np.newaxis]
+                    )
 
         return forces
 
@@ -519,6 +630,7 @@ class Cloth(DeformableObject):
 
         # Build spring connectivity
         self._springs = self._build_springs()
+        self._build_spring_arrays()
 
     @property
     def width(self) -> int:
@@ -600,42 +712,58 @@ class Cloth(DeformableObject):
 
         return springs  # type: ignore[return-value]
 
+    def _build_spring_arrays(self) -> None:
+        """Cache cloth spring connectivity in vectorized arrays."""
+        if not self._springs:
+            self._spring_i = np.zeros(0, dtype=np.intp)
+            self._spring_j = np.zeros(0, dtype=np.intp)
+            self._spring_rest_lengths = np.zeros(0, dtype=self._mesh.dtype)
+            self._spring_stiffness = np.zeros(0, dtype=self._mesh.dtype)
+            return
+
+        k_stretch = self._material.youngs_modulus
+        k_shear = self._material.shear_stiffness or k_stretch * 0.5
+        k_bend = self._material.bending_stiffness or k_stretch * 0.1
+        stiffness_by_type = {
+            "stretch": k_stretch,
+            "shear": k_shear,
+            "bend": k_bend,
+        }
+        self._spring_i = np.fromiter(
+            (spring[0] for spring in self._springs),
+            dtype=np.intp,
+            count=len(self._springs),
+        )
+        self._spring_j = np.fromiter(
+            (spring[1] for spring in self._springs),
+            dtype=np.intp,
+            count=len(self._springs),
+        )
+        self._spring_rest_lengths = np.fromiter(
+            (spring[2] for spring in self._springs),
+            dtype=self._mesh.dtype,
+            count=len(self._springs),
+        )
+        self._spring_stiffness = np.fromiter(
+            (stiffness_by_type[spring[3]] for spring in self._springs),
+            dtype=self._mesh.dtype,
+            count=len(self._springs),
+        )
+
     def compute_internal_forces(self) -> NDArray[np.floating]:
         """Compute spring forces for cloth.
 
         Returns:
             Internal forces (N, 3).
         """
-        forces = np.zeros_like(self._mesh)
-
-        k_stretch = self._material.youngs_modulus
-        k_shear = self._material.shear_stiffness or k_stretch * 0.5
-        k_bend = self._material.bending_stiffness or k_stretch * 0.1
-
-        for i, j, rest_length, spring_type in self._springs:
-            delta = self._mesh[j] - self._mesh[i]
-            # ⚡ Bolt: math.hypot is ~4-6x faster than np.linalg.norm for small 3D arrays
-            length = math.hypot(delta[0], delta[1], delta[2])
-
-            if length < 1e-10:
-                continue
-
-            # Spring stiffness based on type
-            if spring_type == "stretch":
-                k = k_stretch
-            elif spring_type == "shear":
-                k = k_shear
-            else:  # bend
-                k = k_bend
-
-            direction = delta / length
-            strain = length - rest_length
-            force = k * strain * direction
-
-            forces[i] += force
-            forces[j] -= force
-
-        return forces
+        return _accumulate_spring_forces(
+            self._mesh,
+            self._spring_i,
+            self._spring_j,
+            self._spring_rest_lengths,
+            self._spring_stiffness,
+            rest_normalized=False,
+        )
 
     def step(self, dt: float) -> None:
         """Advance cloth simulation.

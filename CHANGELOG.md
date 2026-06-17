@@ -53,6 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Vectorized deformable object internal-force hot paths for #7571/#7572:
+  FEM assembly now batches tetrahedral deformation gradients, inversions, and
+  nodal force scatter while reusing each inverse once; cable and cloth spring
+  forces now use cached vector connectivity with scalar-reference parity tests.
 - Replaced the iLQR backward-pass explicit `np.linalg.inv` gain solve with a
   finite-checked Cholesky solve path plus general-solve fallback for #7570.
 

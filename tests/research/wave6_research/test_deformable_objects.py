@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -11,6 +13,110 @@ from src.research.deformable.objects import (
     MaterialProperties,
     SoftBody,
 )
+
+pytestmark = pytest.mark.unit
+
+
+def _reference_soft_body_forces(soft_body: SoftBody) -> np.ndarray:
+    forces = np.zeros_like(soft_body._mesh)
+    mu = soft_body._material.shear_modulus
+    lam = (
+        soft_body._material.youngs_modulus
+        * soft_body._material.poisson_ratio
+        / (
+            (1 + soft_body._material.poisson_ratio)
+            * (1 - 2 * soft_body._material.poisson_ratio)
+        )
+    )
+
+    for i, tet in enumerate(soft_body._tetrahedra):
+        v0 = soft_body._mesh[tet[0]]
+        v1 = soft_body._mesh[tet[1]]
+        v2 = soft_body._mesh[tet[2]]
+        v3 = soft_body._mesh[tet[3]]
+
+        D = np.column_stack([v1 - v0, v2 - v0, v3 - v0])
+        F = D @ soft_body._B_matrices[i]
+        J = np.linalg.det(F)
+        if J <= 0:
+            J = 0.01
+
+        F_inv_t = np.linalg.inv(F).T
+        P = mu * (F - F_inv_t) + lam * np.log(J) * F_inv_t
+        H = -soft_body._rest_volumes[i] * P @ soft_body._B_matrices[i].T
+
+        forces[tet[1]] += H[:, 0]
+        forces[tet[2]] += H[:, 1]
+        forces[tet[3]] += H[:, 2]
+        forces[tet[0]] -= H[:, 0] + H[:, 1] + H[:, 2]
+
+    return forces
+
+
+def _reference_cable_forces(cable: Cable) -> np.ndarray:
+    forces = np.zeros_like(cable._mesh)
+    k_stretch = cable._material.youngs_modulus
+    k_bend = cable._material.bending_stiffness or k_stretch * 0.1
+
+    for i in range(len(cable._mesh) - 1):
+        delta = cable._mesh[i + 1] - cable._mesh[i]
+        length = math.hypot(delta[0], delta[1], delta[2])
+
+        if length > 1e-10:
+            direction = delta / length
+            strain = (length - cable._rest_lengths[i]) / cable._rest_lengths[i]
+            force_mag = k_stretch * strain
+            force = force_mag * direction
+            forces[i] += force
+            forces[i + 1] -= force
+
+    for i in range(1, len(cable._mesh) - 1):
+        v1 = cable._mesh[i] - cable._mesh[i - 1]
+        v2 = cable._mesh[i + 1] - cable._mesh[i]
+        l1 = math.hypot(v1[0], v1[1], v1[2])
+        l2 = math.hypot(v2[0], v2[1], v2[2])
+
+        if l1 > 1e-10 and l2 > 1e-10:
+            cos_angle = np.dot(v1, v2) / (l1 * l2)
+            cos_angle = np.clip(cos_angle, -1, 1)
+            bend_force = k_bend * (1 - cos_angle)
+            direction = v2 / l2 - v1 / l1
+            direction_norm = math.hypot(direction[0], direction[1], direction[2])
+
+            if direction_norm > 1e-10:
+                forces[i] -= bend_force * direction / direction_norm
+
+    return forces
+
+
+def _reference_cloth_forces(cloth: Cloth) -> np.ndarray:
+    forces = np.zeros_like(cloth._mesh)
+    k_stretch = cloth._material.youngs_modulus
+    k_shear = cloth._material.shear_stiffness or k_stretch * 0.5
+    k_bend = cloth._material.bending_stiffness or k_stretch * 0.1
+
+    for i, j, rest_length, spring_type in cloth._springs:
+        delta = cloth._mesh[j] - cloth._mesh[i]
+        length = math.hypot(delta[0], delta[1], delta[2])
+
+        if length < 1e-10:
+            continue
+
+        if spring_type == "stretch":
+            k = k_stretch
+        elif spring_type == "shear":
+            k = k_shear
+        else:
+            k = k_bend
+
+        direction = delta / length
+        strain = length - rest_length
+        force = k * strain * direction
+
+        forces[i] += force
+        forces[j] -= force
+
+    return forces
 
 
 class TestGuards:
@@ -145,6 +251,72 @@ class TestSoftBody:
         sb = SoftBody(mesh, tets, MaterialProperties())
         assert sb._B_matrices[0].shape == (3, 3)
 
+    def test_compute_internal_forces_matches_scalar_reference_for_multiple_tets(
+        self,
+    ) -> None:
+        mesh = np.array(
+            [
+                [0.00, 0.00, 0.00],
+                [1.12, 0.05, 0.02],
+                [0.04, 1.03, 0.06],
+                [0.02, 0.08, 0.94],
+                [1.06, 1.12, 0.88],
+            ],
+            dtype=float,
+        )
+        rest_mesh = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+            dtype=float,
+        )
+        tets = np.array([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=int)
+        sb = SoftBody(
+            rest_mesh,
+            tets,
+            MaterialProperties(youngs_modulus=850.0, poisson_ratio=0.28),
+        )
+        sb.set_node_positions(mesh)
+
+        np.testing.assert_allclose(
+            sb.compute_internal_forces(),
+            _reference_soft_body_forces(sb),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
+    def test_compute_internal_forces_batches_deformation_inversion(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        mesh = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+            dtype=float,
+        )
+        tets = np.array([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=int)
+        sb = SoftBody(mesh, tets, MaterialProperties())
+        original_inv = np.linalg.inv
+        calls: list[tuple[int, ...]] = []
+
+        def counting_inv(matrix: np.ndarray) -> np.ndarray:
+            calls.append(matrix.shape)
+            return original_inv(matrix)
+
+        monkeypatch.setattr(np.linalg, "inv", counting_inv)
+        sb.compute_internal_forces()
+
+        assert calls == [(2, 3, 3)]
+
 
 class TestCable:
     def test_construction(self) -> None:
@@ -193,6 +365,39 @@ class TestCable:
         # Straight cable: cos_angle == 1, so bending contribution is zero
         assert np.allclose(f, 0.0)
 
+    def test_compute_internal_forces_matches_scalar_reference(self) -> None:
+        mesh = np.array(
+            [
+                [0.00, 0.00, 0.00],
+                [1.08, 0.06, 0.02],
+                [2.03, 0.21, 0.10],
+                [2.88, 0.29, 0.31],
+                [4.02, 0.45, 0.27],
+            ],
+            dtype=float,
+        )
+        rest = np.array([1.0, 0.95, 0.9, 1.05])
+        c = Cable(
+            mesh,
+            MaterialProperties(youngs_modulus=120.0, bending_stiffness=7.5),
+            rest_lengths=rest,
+        )
+
+        np.testing.assert_allclose(
+            c.compute_internal_forces(),
+            _reference_cable_forces(c),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
+    def test_spring_connectivity_is_cached_as_vectors(self) -> None:
+        mesh = np.array([[0, 0, 0], [1.1, 0, 0], [2.1, 0.1, 0]], dtype=float)
+        c = Cable(mesh, MaterialProperties())
+
+        assert c._spring_i.tolist() == [0, 1]
+        assert c._spring_j.tolist() == [1, 2]
+        np.testing.assert_allclose(c._spring_rest_lengths, c._rest_lengths)
+
 
 class TestCloth:
     def _grid_mesh(self, w: int = 3, h: int = 3) -> np.ndarray:
@@ -240,3 +445,45 @@ class TestCloth:
         cl = Cloth(mesh, 2, 2, MaterialProperties())
         f = cl.compute_internal_forces()
         np.testing.assert_allclose(f, 0.0)
+
+    def test_compute_internal_forces_matches_scalar_reference(self) -> None:
+        mesh = self._grid_mesh(4, 3)
+        mesh[:, 2] = np.array(
+            [0.00, 0.04, -0.02, 0.03, 0.02, 0.08, 0.03, -0.01, 0.01, 0.05, 0.09, 0.04]
+        )
+        mesh[5, :2] += np.array([0.07, -0.03])
+        mesh[10, :2] += np.array([-0.05, 0.04])
+        cl = Cloth(
+            mesh,
+            4,
+            3,
+            MaterialProperties(
+                youngs_modulus=140.0,
+                shear_stiffness=44.0,
+                bending_stiffness=8.0,
+            ),
+        )
+        deformed = mesh.copy()
+        deformed[2] += np.array([0.04, -0.02, 0.05])
+        deformed[5] += np.array([-0.03, 0.06, -0.01])
+        deformed[10] += np.array([0.02, 0.03, 0.04])
+        cl.set_node_positions(deformed)
+
+        np.testing.assert_allclose(
+            cl.compute_internal_forces(),
+            _reference_cloth_forces(cl),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
+    def test_spring_connectivity_is_cached_as_vectors(self) -> None:
+        mesh = self._grid_mesh(3, 3)
+        cl = Cloth(mesh, 3, 3, MaterialProperties())
+
+        assert cl._spring_i.shape == cl._spring_j.shape == cl._spring_rest_lengths.shape
+        assert cl._spring_i.shape == cl._spring_stiffness.shape
+        assert cl._spring_i.size == len(cl._springs)
+        np.testing.assert_array_equal(
+            cl._spring_i,
+            np.array([i for i, _, _, _ in cl._springs], dtype=np.intp),
+        )
