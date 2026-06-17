@@ -129,8 +129,8 @@ def download_to_file(
     block forever on a hung server.  This helper streams the response via
     :func:`urllib.request.urlopen`, which honours *timeout*, into *dest*.
 
-    The caller is responsible for validating the URL scheme
-    (:func:`validate_url_scheme`) before calling this helper.
+    The URL scheme is validated before opening the request so local files,
+    data URLs, and other custom schemes cannot reach ``urlopen``.
 
     Args:
         url: The URL to download.  Must already be scheme-validated.
@@ -147,11 +147,12 @@ def download_to_file(
     """
     if timeout <= 0:
         raise ValueError(f"timeout must be positive, got {timeout!r}")
+    validated_url = validate_url_scheme(url)
     dest_path = Path(dest)
-    req = urllib.request.Request(url)
-    # nosec B310 - scheme validation is the caller's responsibility (see docstring)
+    req = urllib.request.Request(validated_url)
+    # The request URL has already passed validate_url_scheme above.
     with (
-        urllib.request.urlopen(req, timeout=timeout) as response,  # noqa: S310
+        urllib.request.urlopen(req, timeout=timeout) as response,  # noqa: S310  # nosec B310
         open(dest_path, "wb") as out,
     ):
         shutil.copyfileobj(response, out)

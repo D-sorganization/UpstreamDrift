@@ -2,6 +2,8 @@ import glob
 import os
 import xml.etree.ElementTree as ET
 
+import defusedxml.ElementTree as DefusedET
+
 SVG_NS = "http://www.w3.org/2000/svg"
 SHADOW_FILTER_ID = "drop-shadow"
 
@@ -89,7 +91,7 @@ def process_svgs(directory):
             continue
 
         print(f"Processing {filename}...")
-        tree = ET.parse(filepath)
+        tree = DefusedET.parse(filepath)
         root = tree.getroot()
 
         # 1. Remove background rects
@@ -114,7 +116,7 @@ def process_svgs(directory):
             root.insert(0, defs)
 
         if not _has_shadow_filter(defs):
-            shadow_clone = ET.fromstring("""
+            shadow_clone = DefusedET.fromstring("""
             <filter xmlns="http://www.w3.org/2000/svg" id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.5"/>
             </filter>

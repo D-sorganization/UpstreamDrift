@@ -173,6 +173,29 @@ def test_pinocchio_check_catches_corrupted_urdf(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_pinocchio_check_rejects_entity_bearing_urdf(tmp_path: Path) -> None:
+    """Pinocchio validation must reject entity expansion payloads cleanly."""
+    backup = tmp_path / "golfer.urdf.bak"
+    shutil.copy2(PINOCCHIO_URDF, backup)
+    try:
+        PINOCCHIO_URDF.write_text(
+            """<?xml version="1.0"?>
+<!DOCTYPE robot [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<robot name="bad">&xxe;</robot>
+""",
+            encoding="utf-8",
+        )
+        proc = _run("--engine", "pinocchio", "--check")
+        assert proc.returncode == 1, proc.stderr
+        assert "unsafe XML" in proc.stderr
+        assert "Traceback" not in proc.stderr
+    finally:
+        shutil.copy2(backup, PINOCCHIO_URDF)
+
+
+@pytest.mark.unit
 def test_pinocchio_check_catches_missing_urdf(tmp_path: Path) -> None:
     """If the Pinocchio URDF is missing, ``--check pinocchio`` returns 1."""
     backup = tmp_path / "golfer.urdf.bak"

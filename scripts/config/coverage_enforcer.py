@@ -8,7 +8,8 @@ import logging
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from xml.etree import ElementTree
+
+import defusedxml.ElementTree as ElementTree
 
 logger = logging.getLogger(__name__)
 

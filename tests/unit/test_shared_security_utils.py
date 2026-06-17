@@ -3,6 +3,7 @@
 import socket
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from src.shared.python.security.security_utils import (
@@ -127,6 +128,19 @@ def test_download_to_file_rejects_nonpositive_timeout(tmp_path: Path) -> None:
     """A non-positive timeout is a precondition violation."""
     with pytest.raises(ValueError, match="timeout must be positive"):
         download_to_file("http://127.0.0.1/x", tmp_path / "out", timeout=0)
+
+
+def test_download_to_file_rejects_local_file_scheme_before_open(
+    tmp_path: Path,
+) -> None:
+    """Downloads validate schemes internally before opening a URL."""
+    with (
+        patch("urllib.request.urlopen") as urlopen,
+        pytest.raises(ValueError, match="not allowed"),
+    ):
+        download_to_file("file:///etc/passwd", tmp_path / "out")
+
+    urlopen.assert_not_called()
 
 
 def test_download_to_file_times_out_on_unresponsive_socket(tmp_path: Path) -> None:

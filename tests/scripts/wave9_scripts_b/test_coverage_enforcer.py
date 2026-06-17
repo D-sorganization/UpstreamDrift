@@ -8,6 +8,9 @@ from pathlib import Path
 from textwrap import dedent
 from types import ModuleType
 
+import pytest
+from defusedxml.common import DefusedXmlException
+
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[3]
@@ -92,6 +95,23 @@ def test_collect_policy_results_accepts_threshold_compliant_groups(
     failures = mod.find_policy_failures(report, mod.DEFAULT_POLICIES)
 
     assert failures == []
+
+
+def test_parse_coverage_report_rejects_entity_payload(tmp_path: Path) -> None:
+    mod = _load_module()
+    coverage_xml = tmp_path / "coverage.xml"
+    coverage_xml.write_text(
+        """<?xml version="1.0"?>
+<!DOCTYPE coverage [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<coverage>&xxe;</coverage>
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(DefusedXmlException):
+        mod.parse_coverage_report(coverage_xml)
 
 
 def test_collect_policy_results_flags_undercovered_group(tmp_path: Path) -> None:
