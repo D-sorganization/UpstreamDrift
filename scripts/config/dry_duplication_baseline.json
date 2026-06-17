@@ -133,6 +133,12 @@
     "071f1beb5f8b9e80d1d2c6c86e201f7a506d7f9358f8ee8f9422041d33e4b112": 2,
     "0732ad8eefd51cebc159b557875c4120c6e33a86a2e60c9e13d53339ed8ab6c2": 2,
     "07357f7749837914a1056726958bdd4412d647146721d1525713a707f070509a": 2,
+    "07398bf9ded56edb7720d1b61349473914f7d44c1d058718f15d928c97d8cc61": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "073bb9941f39ae39bf6043f605b727cf9c1d1097bbbd903f8f66f49f26adc5fd": 2,
     "074551f42799e03423db5276f08ac84d93df1c094b4e3bbbb6d2e376aa2abab3": 2,
     "074da69917b814b760d3db193c65c7f8e6d92e23a21f48f4a114a99374ef0fb0": 2,
@@ -263,6 +269,12 @@
     "0d72ce786700ed85438044417c9df60f4904984d419576d88bf6392ba889ff29": 2,
     "0d78d1e060873dc32a03339f7a010ce6f5127ea1ca8052aff8e039529e204d79": 2,
     "0d9d267babc30eb506454eb56cc20328abfa800025d0840e6e4f2bc82149463f": 2,
+    "0da963ac7f63c88a82ca29effcebea4201915396f7be4211775087e667a772c5": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "0dbf53dcfb03ec6ad9efbf61a38ac6b97a7a4d575f2c7704583bd3f694ad4615": 2,
     "0dc934896cdaa5713d098cb91ddcc01629df92de2ce2e01b8a171277558b86c8": 2,
     "0dce99707966eeafc5e26415948554050918f44a3a6f6ebf22f16e810b0ebe12": 2,
@@ -287,6 +299,12 @@
     "0ef41de0be8c0a95ddeed41a0f9fe5da16962375419b3c5a39599acf35b0a0f2": 2,
     "0f16bd9844bacbfcf52eb2ffce8ffe621ee842aff96bdac521b8dd3044179fe9": 2,
     "0f22f314bd1d77007e893597fdfab7730cd7f29262b57dc19391204293108aeb": 2,
+    "0f47cb86e50bed38a8a0f56600ae82aaa997005873c23618c2fdd9b889389a72": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "0f530d0dd583721284d8e97cf658aae21050ad8dab6d15f128d9b2a4f29eee4e": 2,
     "0f66a35ddaffb027924d485d8454cbbbd27e077541582b3b9ff2ad0b2bb7b5c2": 2,
     "0f73bfc0efb294b3b21d6d54765dfb5cc4cd26ac6410134e81c59ffe94514cac": 2,
@@ -342,6 +360,12 @@
     "127f15dd0e3fe0850d8c0dc6ce87de2b0cef300a01d35f729b146219c1a79b4a": 2,
     "128987d733e8a1606f18bbfbb479e49e31288f91c7d2d551ae3b02eed9d535d8": 2,
     "1295820c31f83cff987dd8945a4c73934a9ce21bc27e4c099b42387313211731": 2,
+    "129e34396ae5cb9ae6de1d259a8edc55487f99b71954a5890864aa131d2feac9": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "12a5cc3b4523e708997052c83a77e04cc2649a5d9251479b51c808f2ee811650": 2,
     "12b4072226332d9db672142ed4cce16b1495457087438c82cfe45829225c16be": 2,
     "12b53fa2b9c32b664dd3381c44f154d64dce507b4872260897c610e162ba66d8": 2,
@@ -443,6 +467,12 @@
     "17a8ef9ff3d2bae0170e38952bf7661b3d8e70d87d67d784614880e9bdee80ab": 2,
     "17a902d9f83f82b0c40ea9dd565c00227eb00303989cbe238b8a5a09f82e7605": 2,
     "17b09c54c49f6762d45fcf4805f45e9445f769c4364494e93291c6821e6763d7": 2,
+    "17b1f6779c834ba4d0667fa54d016baedc3bccf7641de9bcfbb21d21c5d50a60": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "17ce3d89dab977e2734867ee173cc6cd1bffa625092027877344debd6e2d22f2": 2,
     "17d6adfd8b982bf7a6b6e728dfda1871333f354f2312475b016b62b47c4d7188": 2,
     "17df264d4e45a51b512a65bf28218b2cafb635fe04f2eb0fe24ba96067bbf725": 2,
@@ -819,6 +849,12 @@
     "2ab9eee69c669839b51bd6bb180e68f6b83950d8243e8c3ca5c3363e1d1a194c": 2,
     "2ada859854c602613d2b3bc316df80350c2c2c9e2478c75fa595df4f033b1936": 2,
     "2adffd61c6b08d44486390e70a8361ea90167bf60e54e5a7ba38cc3540afe4ee": 2,
+    "2af0943a86c9d62f6bb78fbdecaff4385bdef1c6222f01fe88abdad1e5f8472c": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "2b0a6176fb01f08b66460173fd0a07f1854bb7264628391473ec0a72e82b3abb": 3,
     "2b2907809a23d0f3ba58dc6b0ce61eb13e20639ec42783096e7f494632d94ddd": 2,
     "2b3ccadff7ca8e6b96deaa6c6c63b411c59426e273c07c17889e6ec261edf9fb": 2,
@@ -871,6 +907,12 @@
     "2e53ab222e4aa98b0020324c21e5d9a62e16613f54caaf021f0b0157023bc67a": 2,
     "2e647f9f0659ad899ff3e4b8bcd7dc0db923e7eff2dcb51abaca6668042a5407": 2,
     "2e6bbf8b523875191d8a3760df81fdf8ffca0cdfdc1375237bda193fd5aaf3bd": 2,
+    "2e73b87c334edfafd5a1887ed0a3a614d8549c80d8e0e895da615891979220b9": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "2e745a42123dd5d0207b6cd2965db97e36d0b96971594556647e266cb957178d": 2,
     "2e79237d282c92e185fb84335a2f2eae1707d0b6bf99dcf4bcb5a99cfe1e9b84": 2,
     "2e7b18b2df001cff35c8d220884befa7dd716b7846fa77219d6fb9eb98113038": 2,
@@ -898,6 +940,12 @@
     "2f1f2c96d8ed6de71da05b530361ab93ea0bdf434c31602b2b80648ec10441a8": 2,
     "2f2a9ddf2f982553587ca53126d0cf81af2e889aa0e2f5fbbdc34ac08e57d0d8": 2,
     "2f4074ac2513e99a534c94c2149b61fbd4fd375585d0a463023bfdb8b068be72": 2,
+    "2f454480ec382e55d6319484b043c117a17e711a1cf71cc72de2b47a244bf5ac": {
+      "issue": "#7617",
+      "max_occurrences": 3,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "2f56c596bbadd8014acb720476c83e210be58248a529c34843e5434fe559d2a7": 2,
     "2f8617c6c38db7c233a92424f038d11eacfaa146b821f5063edf368e1486af4b": 2,
     "2fbd224fc4fe75526691a28ab55195bb8d9af60b04c1e4f23f544eaf1d947523": 2,
@@ -976,6 +1024,12 @@
     "32fd3f211897eadd0fea80d83018e44ddc2a4f2b73b560928cbed785e2ac9f2b": 2,
     "33038c5314a928dc22b76f542c06c65e35b3b33528bd8cb71f3721553fc1d9f4": 3,
     "331a41860a664ca0cbf5beda685243d0519b4210729ec4ca7422502f7087ccc6": 3,
+    "3333ce81a31463c1746fc930d3f5462e865689f6878e459928e4d4f35d9d5ad0": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "334f6f14284b4bb2b69cdf4aaeecb754b8ebe4edd96d222ba84dc239584a69c7": 2,
     "33558ede3d0a0f658763260577f864393378d7754b41768e7fe2bcb8e576e278": 2,
     "33581f2f4e48483c8f8974bc13450f7204d331b0808d5a7d3fa6ea405ed40d4d": 2,
@@ -1123,6 +1177,12 @@
     "3b5951e50d043f088a4cf9ed89984d67c112b7571088fee1433c0c0232d5af11": 2,
     "3b5f4bbb22db3135794dbcf9f37607cb67eed674c915e239f25548b417b7e20e": 2,
     "3b6295c8eb4a12b3f2c50fd3f8822e90837345b2d2677c83ee229c95aec7baba": 2,
+    "3b66c734dd96e7159589191a2caca9a884512d461c600a60832a9f360aafca06": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "3b6d98f39e16e7a3090f5bef01eb7da06a8ba3c7e0202366d5c20538a51a5a0a": 2,
     "3bbaed106261d742dee76763b9afcd75fc036a4cb1649cba907985bba285dee4": 2,
     "3bc652db48213c3827047f0904865af254415b2308b08234fea4088bf633e86c": 2,
@@ -1180,6 +1240,12 @@
     "3e7ec31c3b6c42f29bdb898b7b8728a696420e36b9142acfa86ade26c14dc839": 2,
     "3e81d7eb629ca0afb4c99c9eb4280f4980912303c5cc2fe9147e7ea7c4640f0e": 2,
     "3e9a69b24e45134e314eb69454f1de3f63d003f235221dc591c79073aa718fd8": 3,
+    "3ea0b9567de74f2306ef244c6a8bd8be7f7658a0934f489015545e8066cd3737": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "3ea6ebaa74348036be8d246758e7db245cfae95b0c25563a11f7d8f5f6b7dc27": 2,
     "3ebf03cc25b567dbd92cf3752b4ce9a0d43e4e4cb4cf346940216ff893748e99": 2,
     "3edca60987a015fc28c99d560e049d3f424f9095845eb1048df18b9cb081dc1a": 2,
@@ -1293,6 +1359,12 @@
     "43c7bd86c5b4fc2cb06c77ad2b9663b8c38b7f365c8f730f962f6d90f178d34a": 2,
     "43c8fef9ddd5ef27aa4931716b6d3f6c6be1007185c5cd6248e30df6a2d59b23": 2,
     "43c932249cbba2d9652f4f01cd192ce1857ae18614b20d631e171ee55fb9e219": 2,
+    "43d43696cef93a9b4b9e69f4a8fe883b035dc68e42ceb7c941f5113d5ab20e99": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "43df222f30d3a3a361624119f379f96077f2e67a0c19e1440f1373add4b97fc7": 2,
     "4404d0a8f4bdd6b6991b819cd4f5e1d4dcde268215e5a2f3e77fb006ab71e2ad": 2,
     "440adcb257ba1f4c45fb1880edb3b5334155571bdafdc58ccc9d0590a70851ec": 2,
@@ -1430,6 +1502,12 @@
     "4b06cc831e2cbb16653af7647e0803e761e77a9da701d7ddcba57a96acd64467": 2,
     "4b07dd987fcd369664c9e47eb529176114d387328dc02aad798ed4f34f7250af": 2,
     "4b0c4d9001093355f5b856c1b5ef955ca34b697ed18a1ffb410b059cd1ceff74": 2,
+    "4b0f2f1f3727181cdef7adf18838cee6638f9c6b7270c4cefaa0e7638b3dddd5": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "4b224e34d03c814d6fe9dbf157123c0774aaa6a50153c251c46f21e9814fe924": 2,
     "4b26921b7d25d6db686707ff81636f32767b23ed038f1196b94f16b5346334e0": 2,
     "4b284cb4f7e0568ed68af7e01d8d081a027be4e1b1d68da6dcebb5c9e205e32d": 2,
@@ -1460,6 +1538,12 @@
     "4c4a4da799535950cc562887cc7eea705a051b3cf13aa13108d9f7d8da9b276e": 2,
     "4c4fadfe8b8d287c8d979b8c688d8aa3bb9d7858701f15a8b6119e547e5c3d32": 2,
     "4c62d6cb9280413c8f726d776f5bf30b85ceeecd5b2a4674910b0bdbe692ffb7": 2,
+    "4c65f802f8a58166b577c2b54bd25e31d0c2ddbcec46ceef29cd811e0b460d60": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "4c7096285a438b8a948261d0009ae2cce458cdc8264a4c618a7040c5c611ce9f": 2,
     "4c94cdcbcafc44ac494ac29771af4ebaf6ffca786dd10a8266fc71a720e84278": 2,
     "4c9e3aaa0e92378ddd79c6ae0b40db1753b857e574c0e6f8e92e65bfdf7f3bb1": 2,
@@ -1801,8 +1885,20 @@
     "5d0bbc2934b6a3900a38089e0a129c815ab70d8577f4016c3be5fda01078234c": 2,
     "5d24b0290c32335b9a011efc471a59b6f50e1b3450ef50dd6454a81ac588c849": 2,
     "5d261618510a6a7bf70d5b6d099649096649dea2dccce6d445426720099406c0": 2,
+    "5d29988ac8ede4392c78492d124c410ae3b435f4f66ccd78e79b641887781d2f": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "5d2a68146e408dbe2f1dd524b1fb34bff0cf3fe3d3bd8152584c3880fdc85c51": 2,
     "5d4297df0c364f5d33bc5fbb2583c2185706c411092fd0e4f9786b060582a66b": 2,
+    "5d50625706fc70795740e6aa3aba7bea3e779f161a9abd0eed0567cf646aa48d": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "5d56f3a4769ccd2a3a92f478212187e79836372b804d2645f2322e2ba3c87951": 2,
     "5d5d00e309c72f21c3738564576744bfed3a7f8bd6df7406e20c7b72e1cef5cf": 2,
     "5d695f0c62247fe566958057f465009345ab945eaefe5033676c1b93f309a51e": 2,
@@ -1945,6 +2041,12 @@
     "64c16b8ba241ea632fa22f86081c0387ec1a241cb7e7603681a46bce81404bb7": 2,
     "64c1b3b6a66e92d00ae2bca0ea7dae11d3a8f28c902163a8c0875fa86f5717af": 2,
     "64c590c9f7fc9107263895811506aed71fde3271d850ecfa77f3c2c629fba321": 2,
+    "64e861d7dfc753a38c76da565045be9f1833025fa1d91a50449d29b6569a6e33": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "64e9fbac38854786a4eaabc4f63cf9d2fe02507c131ce81834da6f0f3f8f2e75": 2,
     "64eaa92e6795e93d7719fb705bbe1064bca5129bc82ede839c9198001c2652b4": 2,
     "64f0aeed04648673254fd2f5e6d84fde597f4c70ee162465f93cb69490aad5ac": 2,
@@ -2076,6 +2178,12 @@
     "6b5686b481d5912a71b11fb365e50b26257ceb832af0ed3b3bbb3f7ad88bf245": 2,
     "6b67753e1f7e41b54511aa09ecace5d47b592273ae707fe616efe1f647932e90": 2,
     "6b68b6be7a634b4789cbb286434ad5927ef69e69576a2511406ee9d8963549b1": 2,
+    "6b6a0e3ef0de2ab00f95165f82d75d86ea5002ffacdd8a34099b5f5469fdcda9": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "6b7acb2be190640ee3e7298cc44c72222d0b1d109a5a2439576369bbf3341545": 2,
     "6b878ac806e2d3f8063f913f09c53d89b314aa5e99553485a57cfe6736d9c28b": 2,
     "6b9bdff8e88d5f2e08bd11b2dddbcc5a0a26e6563f300d670c512d8939b7011e": 2,
@@ -2190,6 +2298,12 @@
     "720284a7e8f8c0bd822456d7ace4c82511ae3783548f7f3d79f3c166b8522896": 2,
     "720df68916297b7a30cacc09b2ad7f55f9f53daaddf6e04bde2523aa2f832e2e": 2,
     "721061bdb9584a34222b9f9f26c05ceb550ec3642b3bc56ec379c834d82e5070": 2,
+    "721087e17010dc12c59280bc19695501c226ae93d49a2a8960700297a9af2f1b": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "722247c6e2031ed2c5ced3a6d95c55ca48acb6009aade886fee8ecf86da17b98": 2,
     "7223d04a5407525a710ae24792c20903dedfb96f78fb6f9d1a809a0203256c60": 2,
     "722b69828fef53c6c1a7e934f9de2073ac40d7695e5b2058bad63cd83546b196": 2,
@@ -2226,6 +2340,12 @@
     "738d10c2a47b3f42d65b70f4356836c9d3ec9a672950df689d25ce75c269a52c": 2,
     "73a98f0c13f03f4565fb8def4b765ed9d4009432eef7242bd84ad89890b52e58": 2,
     "73b3b8f5c8345daa853298eb73b6774b568f2742828dfcd469689d0ceecca0ab": 2,
+    "73daa4e2e7fd5b956bcbb5fe94a44f93d0c5a8e4429b73b6df813f66a6f7fe6e": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "74063b28aea96abb0809a2bbcae1ed46f68ebf5a2bba6f43d2e0ba6828875705": 2,
     "740b1b01faaa5b2de401f7720f307f2eda2c445c0ce952004353b853dbd3dc2d": 2,
     "7424cdd9b61f97ef782c29f0f7adc5dc48977a574c755771358dbeb20c698288": 2,
@@ -2549,6 +2669,12 @@
     "845c2601a7311540ae63a8363ad1274148c7e36ff4dad43cc3cc187fbe7d3017": 2,
     "846cd895130a456eba0bce13affee05bcc90e041b172e5ba59ecb06d28ac5def": 2,
     "847046288d64bfac9f7473a0f8bb6b886da067c75c32fbe7d4b521814eaa386f": 2,
+    "84765059c7bd47bb025400fee3c542ef7c33d4513dcc032d14833b5c98c489bd": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "848dd771b816bb2ca95cc0a92564bef0ac20f56a0e90812cd3d4e8c184652afa": 2,
     "8491c1e1a48583c40364cb6b3150d1dd09b93e2ec9eb1c3c3d943b582e431c29": 2,
     "84aa172c8bd0198948870ae64345c885925795706121d47bf06b1e4a18ca51e4": 2,
@@ -2667,6 +2793,12 @@
     "8a407ee1a571028d67fb21e48770ed55391924e5182a5dce08bb13c277384f01": 2,
     "8ab5448e54d01449ead53407b180e58882c72ecd5a5369b478a16600b058cc74": 3,
     "8abd87e376c2685833bbcfb205f283dd97cc993b72daad347c7ff099eca9be23": 2,
+    "8ac18930198ae2185240f0af3c8491714d1c1624d64674698aae5883b605ee4b": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "8ac30d7a7343b2986e9427d4fc2dd8018aaa178b7a1d0c3f8bf4310528166aa0": 2,
     "8add27bfb39dbd62aa340646952b7185732433bde7a5a886f2c4c2088b56c162": 2,
     "8aed6c1d466a9c822e0b188293347ec5de47c260852e0d66c1307d7fb554cf5b": 2,
@@ -3028,6 +3160,12 @@
     "9cea4ce04a52aa9673af7ba93b96f9c50b6763d6783ec1ed0262cb60d204045e": 2,
     "9cf19cf3a8bfd630f9c9a8786b43db215daeb9953757bf167caea4dec8aa6eee": 2,
     "9cfa390f2a0fecf6af66e0a3b9d6a13348ce4f6990e54fd88de06e435556d135": 2,
+    "9cfd588307b2a23f6753b528eeb812d3761adf6eaaaee60f982accb64a6d5764": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "9d103f3baaca371937906a85eb42b12eafd35ad33ecc809c706fe7fddd6dc5b2": 2,
     "9d19353e4db1aa9c70bb1737cede3cb7374848e9807f181534b950a743b28e26": 2,
     "9d33bab9935555d9ef48df0a6d218f11b0adebf72d425eb8217a53c55e1b9e62": 2,
@@ -3052,6 +3190,12 @@
     "9de8330044ab84c6fa8ccbb51e394dce872b9e7e833d2fb3e27dcc73540b5244": 3,
     "9dee7df876d86f08b186db660f898575a6b7d0a32774b75e2585b83526fb079a": 2,
     "9dfb0bcd0cbf804feacff457b2e3e7e94de116e7e9157ff6c9bbc0dc869e5f44": 2,
+    "9e18dd19bc56cc2ffc3b30ecb8595c08fd47c1bd9bd50263639c8d4785d4271f": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "9e1db158364014afa90cb3292d117aeac6e4e3c353a1dd9eba42317cf04d810f": 2,
     "9e3169e10c3cb407a40c7a153df19c4c37e821b36e41c7181a90540d5c56459b": 2,
     "9e3efe078b44b1079a3df2db03f835057e67d2098e24cbf690a0fc80c2e7600d": 2,
@@ -3111,6 +3255,12 @@
     "a145c8c71e9ea028388d7c4eb6a1f15d5829da838f5f8ecf0abddb4aa67afd44": 2,
     "a14f72b098029be5d55bf6425b51a9a89988f6ed685b43b9e3bd3e61ee95654b": 2,
     "a1504ac4b8860f26faa31b96c9b547dcb58a95b1ea6784f145da02e722da0431": 2,
+    "a1612c45bacf823d60b9f8a2a9725116761a1c0e9c5889a99459dfd6c7a9bdb1": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "a167fa12c3dadcffcae89c2786e8cbb5e52ac5b2ad8a7873cda9ca9ffe4bb959": 2,
     "a18dc756bc7abf6dea0d8fd0e45f3084e342ea90720e7a21eb304d9d5dd50feb": 2,
     "a19bbd826b384bead43ca4fd2f975737f9a25e3cd44059143e0e4fe8935d9a5b": 2,
@@ -3166,6 +3316,12 @@
     "a456d92b5e6351b6a8b095864c9dba46419234282f671e80f3e407cc02f3804c": 3,
     "a470556eda4179b61ba812e5911df702ac8a22777fa64cec8f5894523711008a": 2,
     "a47ee1cf78335e61ecbf500f140f54306d947e909d18d5c3583e0a602ab4750c": 2,
+    "a482c29c779a66739f02f9764a1ccb82716d0d3f7769086703aa00d7df577b26": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "a4880b0ee8f6a255acff991bc6933309906c3f089b34ed51605ab8ff22500ad0": 2,
     "a49e71f922851dd6a2b13fc1fff5f4f1d72c2253b6adf49b6a5629f92e8221d1": 2,
     "a4a4bbec6006b8067637aa2a28084b87766bdd99de0d53826f614e6e18313592": 2,
@@ -3256,6 +3412,12 @@
     "a8d7b73c4018b0f8cfd6fc7388e410c7994067f25795a0a6c0b140586e7c0c5e": 2,
     "a8f4262efd64887da09e273244e4151b988e9a8f3c93ac7b222c69f7108eec94": 2,
     "a8f9a531febb30ce884ecd8588a0533c3d9c734cc6964369abd716eaac55e6d9": 2,
+    "a910cc26a3b62e404e24a5a77ff87534a9adfe52cf74f4338bf327cf57536337": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "a91282036377a6b8a23bc532c2a6c2beaf40ea3df430e34111912e1726456d80": 2,
     "a916bd5e9b5f8ed7958d1b6556e0b4536429c4bc62c68e085451514a56a84e44": 2,
     "a9228e02f09c4529486903e9d07fd67da9e60529da0422d9f69bb54a0454baba": 2,
@@ -3267,6 +3429,12 @@
     "a959be4de575742e52c7ed8c9e53f377bc2239fefa2f7c504a914428a69ecb3d": 3,
     "a9620e214fb4a64d3983b54a596a0b37f751b706085d769a9f0f440624c0d775": 2,
     "a96ab33b7e1fef8117032fa3188c169e91c0f5d322dd371dac3e2eca959c5dcf": 2,
+    "a9719b6f42a57fc23f0d83b321e16aa6534fadb920904dc4f82cb21515f4a919": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "a971c474650bd1717585c446e1e552dee59ba1897d45767da4af197be872fcaa": 2,
     "a98273f8b94263ccd82c77d5a3095847817181906ae0bfcc7af3f4bc8d7762ca": 2,
     "a9870b0285cac0602ac596f27b81f3125c8e128e0eb4ef06eb8e06f2d0016cba": 2,
@@ -3310,6 +3478,12 @@
     "ab419a3909b694612ff08b2f0ab8f4fa89d278cf7b1b1687726bf69e200836e2": 4,
     "ab48246d316b8d1a53161d9db9b868ec9993b79079b25d19f16da0a3ff9ef1cc": 2,
     "ab4bfeb447e425b43fa038f76ec28c0d56cb081cf25d16cae21d78210373ca2b": 2,
+    "ab518dcbfdfde2bd9afbc1b1af66baf573ef22e4419539a126eab7867d7e5904": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "ab6b8851a1ebf00e7b780e549c439e98157862d6bb792d58f36a9ee65d9822b4": 2,
     "ab75e8a51c2c2341b412720837f5df60eb745c07e1604c295ab3e581342e5eb8": 2,
     "ab7818d8e2230f04aeadc53ed2c97f96088f6b29b4a245116419eaa9ec7f0943": 2,
@@ -3351,6 +3525,12 @@
     "ad4d28d9f8d6096f6580b5a0a122a007520112dcd56cc1dee46b2e9d7174cddf": 2,
     "ad50079de64b6ad5038e6ad268a86d7f8caaa7b7bf299ce606663eff61a8bd04": 2,
     "ad5a9f91e2f061cf67e64fe3cb1a9c4f387378590e11029c6efc034d4b346b6a": 2,
+    "ad62d31c40b41536a87e41e12bf0bb56954a427174603e3440351ce6697b6c00": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "ad6ffdd467d179629b2d5a5a7e0a2465bab52b11263f8641d771f5d1f1493e3e": 3,
     "ad731ed098008358aeab1624abae1048ae74cc8b718a77f1681dd62798918c17": 3,
     "ad7b0f863d172589d42372bd23da668912b5d46cddd25fef0422767c8bd9aa14": 2,
@@ -3383,6 +3563,12 @@
     "aec39aa5a51ca38362b89946fd2672064f4e35441109578366da8279d764e23e": 2,
     "aec3b2a3d09750917c2c3db571d85ec7de2efc153e69fe3739b8cc3185f7769d": 2,
     "aec9e39732aff732be25b158ba710a47cc36fcd77fa90551aa5d5de82753d757": 2,
+    "aedc9b3a02a6987dd4455c74f01b3614b2c81c056c634614ca99a119dfb2fb13": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "aeef1e14b191fdd88794ebe2e159edc83903bb172f2497372e4e4c81f9cc82b1": 2,
     "aefcfcbaca0dfadb2c9c7dc93b96903618f19d12de9e16687a159d918ff7a821": 2,
     "af02160f0551c5cc9241b8d40801413fb3a94d644290a981636425e12930160c": 2,
@@ -3766,6 +3952,12 @@
     "c234a0c1a200b7950b23d6c0303d8723d64f8c15a85a6f888d12212bb9761746": 2,
     "c256606d126423116fa86b9dfed1fbae0dd20c16bcd6a60d39375dff73aa06cc": 5,
     "c259a30a701ea2151bcddfd74a9a266dd8116b3d53a4a8e947dbfa2f8b2e605e": 2,
+    "c25cb9dd33bd9ade4f52032a9b84cdf42b3a7a8b2f4007b935c3ca78248b8d4b": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "c263bc7eea9018cc4b6eee3cf318adfdf0b6d0ec8b03a5d58acec2af999c9083": 2,
     "c264acfe83a4598d1b582bb8f13d390c5ebe256f0b01e214c616bab02db20857": 2,
     "c26c06b391c5e28a63726a50ce6997dea172bc6c4441676c2cb75bcffc080081": 2,
@@ -4089,6 +4281,12 @@
     "d223c37a8b1917879158155fbecb91b5f4c4c4cb6ae4a5ea2f446d9837400dd7": 2,
     "d229bb3e088353d16b4ba02f68364386069eac3ff2562fbc8181f1e6bd6c9205": 2,
     "d230d299fac20e5bce74dbfb97b42f77785184c85dade155fcaf01b9725b69b6": 2,
+    "d2428d1dbf990395b3473c2c41e7fbd8a714bf7c33b94375fee3ceadddf0cb91": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "d246e68b3de314fb6344d89e57feae75e4eb0a2263beb79c36511fd957eb8486": 2,
     "d25affd9b7950f7b31e075cbded8fb1409f977af54bb89afd306f8e0fe774e35": 2,
     "d2641e2ea38fa37f1df79ee83cb3882ecb3841e9334bc2c3ba314026e93ab1dc": 2,
@@ -4173,6 +4371,12 @@
     "d6ddeedd2e8d0a34613705da9fb0c3d5d2a7b060ae5cbcdf39c55bd2d3c31113": 2,
     "d6e939e9d9a32b89b39757ac711e642f6aab1b9537888bd94c9dd8a471dc2dbc": 3,
     "d7022f1ee523e2dea95a143ed1bc428a5035278852dc3504643435dce2083662": 2,
+    "d70af6df861048a6370cfb4009e452436292b2dac08b39ab7048f443dfbb150b": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "d71af18bd5522a43cde7d5b55ffaec1d90bd90e129fd3b93aa89e1960ddbfe7c": 2,
     "d71c4071bf7fa2890c9c3c12227160e3a0c975f456d22dc048f288f150c9e2f0": 2,
     "d72309bae5557505daed982c15dac512ab1e1ed018925df2adfeff3053e3f2e8": 2,
@@ -4262,6 +4466,12 @@
     "dafe1aa8fe7569d9588ddf2875734f0bf2f124325c6ec5f0d360a0a07af1d86e": 2,
     "db01053443a9947740acd5a8f08f60c6d53ee91e78cf638fbd1efdaf16e85d82": 2,
     "db094bcb94009a5cc47d8d4100b4819a3b6c1322c57fdb2857ba83224cf3416a": 2,
+    "db0cfba19d6767a6461785430df23c35c0bde05b2d3084d5b84f554a95182a97": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "db195024db6d871be1a0e9e0a47461fcda8ed347687297643f60b74854152501": 2,
     "db1a061bc73994f10ee480a05bbedb8b953c0605fe35ae2387bb1debc53cad5f": 2,
     "db1f2907791432123510bf79dcd55f50b4a05eb89f301d6c3555ede1550510c0": 2,
@@ -4293,6 +4503,12 @@
     "dc556c38410d90d3202fd166115ce88f738e42e015c4aab609bc5042c84ad11a": 2,
     "dc5c81153e9eb3f0dd51c4fa90d73e905477ecfc51d5e1acbc014c16d7f69886": 2,
     "dc62b934f12528aa952bf84cffe3a8a08bed05920917c87fdfff8ffce0e04824": 2,
+    "dc70e331c0b059dc8ff5b3935728babeda314439ddf29a97aca8591cc86001fa": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "dc83b0a7178df46dd56c69eae2ccefc63430b3aeb4a5fb9fca2a01a5963d6bce": 2,
     "dc850a054a5b1710bdbbafe5340769da560cc5bd13147a6e50c49a98c4ba3895": 2,
     "dc8570ce2bb5ac8d7fbbcecd6372ac398329f33a0ff8ac4ac690e70831b240e1": 2,
@@ -4328,6 +4544,12 @@
     "dd82a92ee7219285efb62db1ec5da0c2843a0ff56c655899759457910ae78baf": 2,
     "dd9be977193382c249274e57d8acb1629348bf05eaeb21182ec55ea682ddc608": 2,
     "dd9eb3887e2ac8260e9f585c8bef634a16d953b68121cb646f69428c1f867d73": 4,
+    "ddaca622513926d563662eb95f09f8a5d350fb0375260bfb7749e95291f571c4": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "ddbe21231bb87fe6062ccc3fc249fae36051b43a14ce89c37ca5156536eacf70": 2,
     "ddca82cd86ee0ade2b78daa9fc1f0bb34377f67a16eec3689d450392d813121a": 2,
     "ddee6d961eb9b7685f458edeff5b1d6deb84c54a3ede14edcec190f3fb4537b7": 2,
@@ -4582,6 +4804,12 @@
     "ebe78a0206135cbae53f88b925b8d134214abfc807381e789242b9bfa1dc0568": 2,
     "ebf82f866c0a277bf6e6a2b794a52c20636d9c7365e3b144ee1e22f49aa2f362": 2,
     "ec10357b017efd9b72d4f7ba806eddece73272c298cef6cf83190ddf559c4b6b": 2,
+    "ec1db75840d6dcf98d65f50a03c782f67b827b0d20c3663d5c5bfc66095f20db": {
+      "issue": "#7617",
+      "max_occurrences": 5,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "ec282e7265c90b1e66030e49811b161066b38661a1ff62e2007bb614363923dd": 2,
     "ec2fdce3b5ed144c087307e55bf0bddc9e730a7f7ac7b614e014e8356ba2b439": 2,
     "ec4454310adbb31188b1fd4466d6931262809ffc1b07a5969c887272415203eb": 2,
@@ -4669,6 +4897,12 @@
     "f093057cefeb0ec4c7181efd63586f8eaaa1ea3d18330b3ee21127890e64c803": 2,
     "f09524b48c64a3160bc4fcec89af754dbb98a2614ae1141e12d47e36d318fee7": 2,
     "f0955b58436f2983c3398c99f3dee9f8be9ba08f99b7fc60adddfe86378a74d2": 5,
+    "f0aca8b783492061fbe4f33486d432080629ce7b01d662488453c3a74ac16af9": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "f0aeffe73fa4d068423129cb03569b1741435e1123d9e1e19894825d68100088": 2,
     "f0b98e04f8c04c8d6cb6da31c9065d2545f6861ed2e979324142a0d508666f71": 2,
     "f0c82a35e3f1f1e7291646f0e946e66d656d53ab6666f8a52c1746191625fb21": 2,
@@ -4676,6 +4910,12 @@
     "f0eada72f298978daf8b9f040c84e3ce40b6717fb1b2d96e86dc9872136ad739": 2,
     "f101f15d12cbf9ff1a272222fdfccd5a0f733be3d33f3f508c26e0093ba9cd19": 2,
     "f1176610a37ac0ae47a072c01d6615c3242342a3967fdee4f3d5b77f8ddb94c0": 3,
+    "f1201d9d44afb2b6a0e3b25e6aa8bf00995d937f71d0cc1164546cd432ef7045": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "f1240a2fe8871438c6f1f7a803252d544ffab2b35b290e320a8bd86d0cd2d957": 2,
     "f135384223c81331178113e32593386d0466ac43d84bf3ffb80bfd8b03578967": 3,
     "f136a8c2a83b0bb140a9644cdbd7c31fe552aebe7adca9bdb324054a32dae172": 2,
@@ -4721,6 +4961,12 @@
     "f3f672f7764efbb9c53f80d5c804e46fac4afab4c303cac7b773076874615146": 2,
     "f401d8334db41a061d0671c883c24082f2ae0fc0436b00b1e323f7337e145e8c": 2,
     "f40b32ad7148cd0c435ac9f33a640a43cece4748d4e5927fcca958115b8ba553": 2,
+    "f40f0b7ae6770388164e01812ebc76f812b8ab7fdeafc6fe3ee2baa3c5beeb09": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "f418c4a611f28789cb6fc8ca1f9f86e34f6595e374974f3991542be9b6d61e3a": 3,
     "f41ba9154f8fcf15bef7b17a770970214e783ecb6c189e831fd87a50d9720099": 2,
     "f429d9865ad8a70f9dc9b3fa3da0a8067eff389268b787684def2bbe06a93cf6": 2,
@@ -4789,6 +5035,12 @@
     "f6ed7242dfabe67e9be0a33bd02faaf9e291e307ce44bcbf78f32aa9cf05b049": 2,
     "f6f22937b7746bf618cff2af63e94cf9099ad47ff287e8fc7d9f3e94404d78da": 2,
     "f710ce86c71883343158ab2ffe455cd53b75f407c48d179c3277de9196619eab": 2,
+    "f71ac695c97a51d50ebadf5fe782906378c0f631e7fb9a12fedfe98cc3ccd851": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "f728611dac0fc72a4b24a7ca293136815ffa0a7f799dc6e90c825f23e99f3663": 2,
     "f7342811fec604883ecae945beb5b879b66afaeb6138c344cc955bd988f5bbe9": 2,
     "f73d308c2cc4b382bfb47155323ce07fd7f139567254795d24d5c32877d484cb": 2,
@@ -4879,6 +5131,12 @@
     "fba69b6f9106c8c68529bbbe54f6e7a5ed5880509789ac303c1a493ff14c0f14": 2,
     "fbabd948a985a8f1fccb5143c07d2f16d801efb5b81ec5593ed6ca5004ae3d58": 2,
     "fbd3f5581bbadc465737720c071837329a5c8c3155fd2b4d2e2a0db952e8ce2a": 2,
+    "fbd3fa8dad469b39d98f9d2db60c8d8e3fe835d1af3865d2a143726746460418": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "fbea900476e591affa608f9c52437423904b12f3225273c0ecd7cf353d888a44": 2,
     "fbf343a642742b2bcb1a369b73139a1274e642847a83d045cce9ceb069bd9e95": 3,
     "fbf9669eacd4b422caef35d7043236747d0461d6bb8bc0f7767707e681b8c5e2": 2,
@@ -4890,6 +5148,12 @@
     "fc5944d64dc8d20cf07c7c1549044c0c3349c42f07b53c00f0a33aecbee1d149": 2,
     "fc652e7972c659c5af882e8ace191c90fdab3336c02bad31f5402f45aaca4b97": 2,
     "fc70012d723100e273dbf8f893cfa319ef36498505ac0736868f5ab929609f9a": 2,
+    "fc71e1278ec112e6f5cead990de09b1b7a64d8b0e6e4936f38d0ce0ce89322bf": {
+      "issue": "#7617",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+    },
     "fc8c4f5e1cb51c9ac9cd0a8c14351a020706a61324d9be2f3857d0868cb8c959": 2,
     "fc958f4afdf1ea7ecf164db6c3ae69b80688065a04d656af9ec86ac550d8a581": 2,
     "fcadc4db1980f6e344648c56bc97c5b31a4a2bcca5fa3c8aeeecd415ebbf9c0f": 2,

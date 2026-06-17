@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from pathlib import Path
 from typing import Any
 

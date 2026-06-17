@@ -42,7 +42,7 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
-      CARGO_HOME: .cargo-home
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     defaults:
       run:

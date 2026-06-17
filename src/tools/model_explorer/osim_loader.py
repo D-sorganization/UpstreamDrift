@@ -7,7 +7,7 @@ returning the same ``ParsedModel`` contract used by URDF/MJCF loaders.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path

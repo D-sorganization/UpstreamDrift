@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 

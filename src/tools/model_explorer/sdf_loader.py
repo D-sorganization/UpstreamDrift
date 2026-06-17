@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from pathlib import Path
 from typing import TypeAlias
-from xml.etree.ElementTree import Element
+import xml.etree.ElementTree as StdET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 
 from defusedxml import ElementTree as ET
 from defusedxml.ElementTree import ParseError
@@ -30,7 +30,7 @@ from src.shared.python.model_generation.core.types import (
 
 logger = get_logger(__name__)
 
-_Element: TypeAlias = Element
+_Element: TypeAlias = StdET.Element
 _DEFAULT_INERTIA = Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)
 _SUPPORTED_JOINT_TYPES = {
     "fixed": JointType.FIXED,

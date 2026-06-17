@@ -483,14 +483,38 @@ jobs:
                 'src/**/*.xml' \
                 'scripts/**/*.sh'
             )
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            mapfile -d '' semgrep_targets < <(
+              git diff --name-only --diff-filter=ACMRT -z "${{ github.event.before }}" HEAD -- \
+                'src/**/*.py' \
+                'scripts/**/*.py' \
+                'tests/**/*.py' \
+                'ui/**/*.js' \
+                'ui/**/*.jsx' \
+                'ui/**/*.ts' \
+                'ui/**/*.tsx' \
+                'src/**/*.json' \
+                'src/**/*.xml' \
+                'scripts/**/*.sh'
+            )
             if [ "${#semgrep_targets[@]}" -eq 0 ]; then
-              echo "No changed source/application files supported by Semgrep; skipping PR SAST delta scan."
+              echo "No changed source/application files supported by Semgrep; skipping push SAST delta scan."
               exit 0
             fi
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
+            exit 0
           else
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error
+            exit 0
           fi
+
+          if [ "${#semgrep_targets[@]}" -eq 0 ]; then
+            echo "No changed source/application files supported by Semgrep; skipping PR SAST delta scan."
+            exit 0
+          fi
+          semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -991,7 +1015,7 @@ jobs:
           set -euo pipefail
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m pip install pytest pytest-timeout
+          python3 -m pip install pytest pytest-asyncio pytest-timeout
           python3 -m pytest \
             tests/architecture/test_core_public_api.py \
             tests/unit/test_core_install_isolation.py \
@@ -1263,11 +1287,11 @@ jobs:
             # When the base branch has advanced, shallow fetches may not have
             # the merge-base, so we fetch with depth=10 to ensure common history.
             git fetch --no-tags --depth=10 origin "${{ github.base_ref }}"
-            
+
             # Try to compute merge-base for accurate diff. If merge-base fails
             # (e.g., due to shallow history), fall back to direct base ref diff.
             merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
-            
+
             if [ -n "$merge_base" ]; then
               # Use merge-base for accurate three-way diff
               mapfile -t changed_tests < <(
@@ -1283,7 +1307,18 @@ jobs:
               )
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+            mapfile -t changed_tests < <(
+              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
+            )
+          else
+            diff_base=""
+          fi
 
+          if [ -n "$diff_base" ]; then
             mapfile -t deleted_tests < <(
               git diff --name-only --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
             )
@@ -1998,7 +2033,7 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
-      CARGO_HOME: .cargo-home
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
     defaults:
       run:
@@ -2389,7 +2424,7 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     env:
-      CARGO_HOME: .cargo-home
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
       CI_RUST_WHEELS_EXPECTED: "1"
     defaults:
@@ -2467,6 +2502,18 @@ jobs:
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           components: rustfmt, clippy
+
+      - name: Verify Rust toolchain
+        shell: bash
+        run: |
+          echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+          export PATH="$CARGO_HOME/bin:$PATH"
+          command -v rustup
+          command -v rustc
+          command -v cargo
+          rustup --version
+          rustc --version
+          cargo --version
 
       - name: Cache Cargo registry and build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae

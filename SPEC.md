@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.425                                            |
+| **Spec Version**        | 1.0.426                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -76,6 +76,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   versions before cache restore or any Cargo command. CI infrastructure tests
   pin the setup -> verification -> Cargo-step ordering so a runner without a
   usable Rust toolchain fails early with a direct diagnostic.
+- **2026-06-17** - Recovered current-main CI Standard gates for issue #7617:
+  Semgrep and Python matrix push runs now use changed-file scopes when GitHub
+  supplies a `before` SHA, current DRY debt is owned in the no-growth ratchet,
+  dependency locks use LF line endings, and Model Explorer XML construction
+  suppressions are backed by defusedxml parser regression tests.
 - **2026-06-17** - Optimized lower-body simulator history eviction for
   issue #7561: `LowerBodySimulator` now stores scrub/playback frames in a
   bounded `deque`, preserving FIFO order, frame indexing, and clear/restore

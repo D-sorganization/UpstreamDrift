@@ -148,9 +148,9 @@ def test_chat_ws_mounted_at_every_public_prefix(
 
     ws_paths = _collect_ws_paths(app)
     missing = [p for p in _EXPECTED_WS_PATHS if p not in ws_paths]
-    assert (
-        not missing
-    ), f"chat_ws is missing from prefixes: {missing}. Got: {sorted(ws_paths)}"
+    assert not missing, (
+        f"chat_ws is missing from prefixes: {missing}. Got: {sorted(ws_paths)}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -258,9 +258,9 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     last = chunks[-1]
     assert isinstance(last, dict), f"expected dict error chunk, got {type(last)}"
     assert last.get("type") == "error", f"expected type=error, got {last}"
-    assert (
-        "provider" in last.get("detail", "").lower()
-    ), f"expected human-readable provider hint in detail, got {last!r}"
+    assert "provider" in last.get("detail", "").lower(), (
+        f"expected human-readable provider hint in detail, got {last!r}"
+    )
 
 
 # ---------------------------------------------------------------------------
