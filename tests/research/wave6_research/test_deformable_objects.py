@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import ast
+import inspect
 import math
+import textwrap
 
 import numpy as np
 import pytest
@@ -220,6 +223,13 @@ class TestSoftBody:
 
         np.testing.assert_allclose(sb._external_forces[1], [1.0, 2.0, 0.0])
         np.testing.assert_allclose(sb._external_forces[2], [0.0, 0.0, 3.0])
+
+    def test_apply_external_force_has_no_python_scatter_loop(self) -> None:
+        source = textwrap.dedent(inspect.getsource(SoftBody.apply_external_force))
+        tree = ast.parse(source)
+
+        loop_types = (ast.For, ast.AsyncFor, ast.While)
+        assert not any(isinstance(node, loop_types) for node in ast.walk(tree))
 
     def test_clear_external_forces(self, tet_mesh) -> None:
         mesh, tets = tet_mesh
