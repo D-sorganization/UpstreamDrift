@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.ci import check_dockerfile_contracts as guard
+
+pytestmark = pytest.mark.unit
 
 
 def _write_minimal_tree(root: Path, *, modular_pip: str = "26.1.2") -> None:

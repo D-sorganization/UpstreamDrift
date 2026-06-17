@@ -17,6 +17,8 @@ from src.engines.physics_engines.jaxsim import (
 )
 from src.shared.python.engine_core.sub_protocols import SupportsParameterGradients
 
+pytestmark = pytest.mark.unit
+
 jax = pytest.importorskip("jax")
 
 

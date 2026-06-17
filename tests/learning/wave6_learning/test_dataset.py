@@ -11,6 +11,8 @@ import pytest
 from src.learning.imitation import dataset as dataset_module
 from src.learning.imitation.dataset import Demonstration, DemonstrationDataset
 
+pytestmark = pytest.mark.unit
+
 
 def _make_demo(
     n_frames: int = 10,

@@ -15,6 +15,8 @@ from src.research.mpc.controller import (
     MPCResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def mock_engine() -> MagicMock:

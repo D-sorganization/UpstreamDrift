@@ -12,6 +12,8 @@ from mujoco_humanoid_golf.kinematic_forces import (
 )
 from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
+pytestmark = pytest.mark.unit
+
 
 def create_limited_club_model() -> SimpleNamespace:
     """Create a minimal mock model with a limited hinge and club-head body."""

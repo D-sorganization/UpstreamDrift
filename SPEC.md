@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.423                                            |
+| **Spec Version**        | 1.0.424                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -231,6 +231,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   scientific TrackMan benchmark tests for driver and 7-iron trajectories,
   coefficient anchors, and Rust-vs-enhanced agreement when the Rust wheel is
   available.
+- **2026-06-17** - Hardened GitHub Actions workflow-context validation for
+  issues #7613/#7614: CI Standard, Tauri Build, and the movement_optimizer Maturin
+  lane now use workspace-relative Cargo homes instead of job-level
+  `${{ runner.temp }}` expressions, and the standard repo-structure gate runs
+  `scripts/ci/check_workflow_contexts.py` to reject job-level environment
+  expressions that GitHub cannot resolve before scheduling a runner. The
+  exposed suite-marker ratchet drift is also classified with module-level unit
+  markers instead of growing the unmarked-test baseline.
 - **2026-06-14** - Corrected the multi-model ball-flight lift calibration for
   issue #7404: Waterloo/Penner now uses a Penner-style spin-ratio lift fit with
   a bounded golf-ball lift coefficient, and the MacDonald-Hanzely plus constant

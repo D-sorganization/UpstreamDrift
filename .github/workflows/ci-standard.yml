@@ -690,6 +690,9 @@ jobs:
       - name: Workflow Run Trust Boundary Guard
         run: python3 scripts/check_workflow_run_trust_boundary.py
 
+      - name: Workflow Context Availability Guard
+        run: python3 scripts/ci/check_workflow_contexts.py
+
       - name: Workflow Pytest Path Guard
         run: python3 scripts/ci/check_workflow_pytest_paths.py
 
@@ -1995,7 +1998,7 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
-      CARGO_HOME: ${{ runner.temp }}/cargo-home
+      CARGO_HOME: .cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
     defaults:
       run:
@@ -2386,7 +2389,7 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     env:
-      CARGO_HOME: ${{ runner.temp }}/cargo-home
+      CARGO_HOME: .cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
       CI_RUST_WHEELS_EXPECTED: "1"
     defaults:

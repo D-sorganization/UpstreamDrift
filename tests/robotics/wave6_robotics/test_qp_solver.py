@@ -13,6 +13,8 @@ from src.robotics.control.whole_body.qp_solver import (
     create_default_solver,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_qp_problem_basic_validation() -> None:
     p = QPProblem(H=np.eye(3), g=np.zeros(3))

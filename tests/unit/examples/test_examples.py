@@ -11,6 +11,8 @@ import pytest
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "examples"
 
+pytestmark = pytest.mark.unit
+
 
 def run_example(name, monkeypatch) -> None:
     """Run an example script and assert it completes without error."""

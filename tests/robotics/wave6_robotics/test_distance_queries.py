@@ -14,6 +14,8 @@ from src.robotics.planning.collision._distance_queries import (
 )
 from src.robotics.planning.collision._primitive_shapes import Box, Capsule, Sphere
 
+pytestmark = pytest.mark.unit
+
 
 def test_sphere_sphere_separated() -> None:
     a = Sphere(center=np.zeros(3), radius=1.0)
