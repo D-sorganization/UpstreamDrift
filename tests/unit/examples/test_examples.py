@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+import runpy
+import sys
+from types import ModuleType
 from typing import Any
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "examples"
 
 
 def run_example(name, monkeypatch) -> None:
     """Run an example script and assert it completes without error."""
-    import runpy
-
     # Prevent sys.exit from killing tests
     monkeypatch.setattr("sys.exit", lambda code=0: None)
     result = runpy.run_path(str(EXAMPLES_DIR / name), run_name="__main__")
@@ -71,8 +74,6 @@ def test_topography_demo(monkeypatch) -> None:
 @patch("matplotlib.pyplot.show")
 @patch("matplotlib.pyplot.close")
 def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path) -> None:
-    import sys
-
     sys.modules["motion_training"] = MagicMock()
     sys.modules["motion_training.club_trajectory_parser"] = MagicMock()
     sys.modules["motion_training.dual_hand_ik_solver"] = MagicMock()
@@ -135,3 +136,57 @@ def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path) -> N
     monkeypatch.setattr("pathlib.Path.exists", lambda s: True)
 
     run_example("motion_training_demo.py", monkeypatch)
+
+
+def test_motion_training_demo_main_fails_when_ik_solver_construction_fails(
+    capsys, monkeypatch, tmp_path
+) -> None:
+    fake_motion_training = ModuleType("motion_training")
+    fake_parser_module = ModuleType("motion_training.club_trajectory_parser")
+    fake_ik_module = ModuleType("motion_training.dual_hand_ik_solver")
+
+    mock_parser_class = MagicMock()
+    mock_parser = mock_parser_class.return_value
+    mock_trajectory = MagicMock()
+    mock_trajectory.frames = [object()]
+    mock_parser.parse.return_value = mock_trajectory
+    fake_parser_module.ClubTrajectoryParser = mock_parser_class
+
+    fake_ik_module.IKSolverSettings = MagicMock(return_value=object())
+    fake_ik_module.create_ik_solver = MagicMock(
+        side_effect=RuntimeError("solver construction failed")
+    )
+
+    monkeypatch.setitem(sys.modules, "motion_training", fake_motion_training)
+    monkeypatch.setitem(
+        sys.modules, "motion_training.club_trajectory_parser", fake_parser_module
+    )
+    monkeypatch.setitem(
+        sys.modules, "motion_training.dual_hand_ik_solver", fake_ik_module
+    )
+    monkeypatch.setattr("pathlib.Path.exists", lambda _path: True)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "motion_training_demo.py",
+            "--trajectory",
+            "dummy.xlsx",
+            "--sheet",
+            "TW_wiffle",
+            "--urdf",
+            "dummy.urdf",
+            "--output",
+            str(tmp_path),
+            "--subsample",
+            "1",
+        ],
+    )
+
+    namespace = runpy.run_path(str(EXAMPLES_DIR / "motion_training_demo.py"))
+
+    with pytest.raises(SystemExit) as exc_info:
+        namespace["main"]()
+
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "solver construction failed" in captured.err

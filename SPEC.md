@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.397                                            |
+| **Spec Version**        | 1.0.398                                            |
 | **Last Spec Update**    | 2026-06-16                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-16** - Tightened the motion training demo CLI failure contract for
+  issue #7543: `examples/motion_training_demo.py` now treats IK solver
+  construction failures as explicit initialization errors, reports the
+  underlying cause on stderr, and exits with status 1 instead of continuing as
+  a successful run. Regression coverage locks the CLI `main()` behavior when
+  `create_ik_solver(...)` raises.
 - **2026-06-16** - Optimized cross-engine and Pinocchio kinematic
   equivalence RMSE distance accumulation to use `np.einsum`, preserving the
   existing tolerance contract while avoiding temporary squared-distance arrays

@@ -30,6 +30,10 @@ _pinocchio_python_dir = (
 sys.path.insert(0, str(_pinocchio_python_dir))
 
 
+class IKSolverInitializationError(RuntimeError):
+    """Raised when the demo cannot initialize the IK solver."""
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -166,8 +170,10 @@ def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
             urdf_path=urdf_path,
             settings=settings,
         )
-    except Exception as e:  # noqa: BLE001, F841
-        return None
+    except Exception as exc:  # noqa: BLE001
+        raise IKSolverInitializationError(
+            f"Failed to initialize IK solver: {exc}"
+        ) from exc
 
     ik_result = solver.solve_trajectory(trajectory, verbose=True)
 
@@ -283,15 +289,22 @@ def main() -> None:
     if args.plot_only:
         run_trajectory_analysis(trajectory_path, args.sheet, output_dir)
     else:
-        run_ik_demo(
-            trajectory_path=trajectory_path,
-            sheet_name=args.sheet,
-            urdf_path=urdf_path,
-            output_dir=output_dir,
-            subsample=args.subsample,
-            visualize=args.visualize,
-            playback=args.playback,
-        )
+        try:
+            ik_result = run_ik_demo(
+                trajectory_path=trajectory_path,
+                sheet_name=args.sheet,
+                urdf_path=urdf_path,
+                output_dir=output_dir,
+                subsample=args.subsample,
+                visualize=args.visualize,
+                playback=args.playback,
+            )
+        except IKSolverInitializationError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(1)
+        if ik_result is None:
+            print("Error: IK demo did not produce a result.", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
