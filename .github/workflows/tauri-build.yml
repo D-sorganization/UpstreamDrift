@@ -76,6 +76,15 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Verify Rust toolchain
+        run: |
+          command -v rustup
+          command -v rustc
+          command -v cargo
+          rustup --version
+          rustc --version
+          cargo --version
+
       # Cache cargo registry, git deps, and ui/src-tauri/target/. Cold Tauri
       # builds compile ~400 crates; warm cache typically cuts time by 60-70%.
       - name: Cache Rust target (check)
