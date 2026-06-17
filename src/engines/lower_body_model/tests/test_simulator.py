@@ -1,12 +1,90 @@
+import inspect
+from collections import deque
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("mujoco")
 
 from src.engines.lower_body_model import simulator as simulator_module  # noqa: E402
+
+
+def test_step_history_uses_bounded_deque_without_linear_front_pop(monkeypatch):
+    model = SimpleNamespace(
+        njnt=0,
+        nu=0,
+        jnt_qposadr=np.array([], dtype=int),
+        jnt_dofadr=np.array([], dtype=int),
+    )
+    data = SimpleNamespace(
+        time=0.0,
+        qpos=np.array([0.0, 10.0], dtype=float),
+        qvel=np.array([100.0], dtype=float),
+        ctrl=np.array([1000.0], dtype=float),
+    )
+    body_ids = {
+        "pelvis": 0,
+        "r_calf": 1,
+        "l_calf": 2,
+        "r_foot": 3,
+        "l_foot": 4,
+    }
+    site_ids = {"r_foot_center": 10, "l_foot_center": 11}
+    geom_ids = {"floor": 20, "r_foot_geom": 21, "l_foot_geom": 22}
+
+    def fake_name_to_id(_model, obj_type, name):
+        if obj_type == simulator_module.mujoco.mjtObj.mjOBJ_BODY:
+            return body_ids[name]
+        if obj_type == simulator_module.mujoco.mjtObj.mjOBJ_SITE:
+            return site_ids[name]
+        if obj_type == simulator_module.mujoco.mjtObj.mjOBJ_GEOM:
+            return geom_ids[name]
+        raise AssertionError(f"unexpected lookup for {obj_type!r}:{name}")
+
+    def fake_mj_step(_model, mj_data):
+        mj_data.time += 0.25
+        mj_data.qpos[:] += 1.0
+        mj_data.qvel[:] += 10.0
+        mj_data.ctrl[:] += 100.0
+
+    monkeypatch.setattr(
+        simulator_module.mujoco,
+        "MjModel",
+        SimpleNamespace(from_xml_string=lambda _xml: model),
+    )
+    monkeypatch.setattr(simulator_module.mujoco, "MjData", lambda _model: data)
+    monkeypatch.setattr(simulator_module.mujoco, "mj_id2name", lambda *_: None)
+    monkeypatch.setattr(simulator_module.mujoco, "mj_name2id", fake_name_to_id)
+    monkeypatch.setattr(simulator_module.mujoco, "mj_forward", lambda *_: None)
+    monkeypatch.setattr(simulator_module.mujoco, "mj_step", fake_mj_step)
+
+    sim = simulator_module.LowerBodySimulator("<mujoco/>")
+
+    assert isinstance(sim.history, deque)
+    assert sim.history.maxlen == sim.max_history_length
+    assert ".pop(0)" not in inspect.getsource(simulator_module.LowerBodySimulator.step)
+
+    sim.max_history_length = 3
+    sim.history = deque(maxlen=sim.max_history_length)
+
+    for _ in range(4):
+        sim.step()
+
+    assert len(sim.history) == 3
+    assert [frame["time"] for frame in sim.history] == [0.5, 0.75, 1.0]
+    np.testing.assert_allclose([frame["qpos"][0] for frame in sim.history], [2, 3, 4])
+    np.testing.assert_allclose(
+        [frame["qvel"][0] for frame in sim.history],
+        [120, 130, 140],
+    )
+    np.testing.assert_allclose(
+        [frame["ctrl"][0] for frame in sim.history],
+        [1200, 1300, 1400],
+    )
 
 
 def test_inverse_kinematics_uses_solve_for_damped_least_squares(monkeypatch):

@@ -1,7 +1,8 @@
+import math
+from collections import deque
 from typing import Any
 
 import mujoco
-import math
 import numpy as np
 
 from .hip_rotation import InclinedPlaneHipRotationTarget
@@ -45,9 +46,9 @@ class LowerBodySimulator:
         self.kp_stability = 0.0
         self.kd_stability = 0.0
 
-        # Simulation history for scrubbing (QPOS, QVEL, TIME)
-        self.history: list[dict[str, Any]] = []
         self.max_history_length = 5000
+        # Simulation history for scrubbing (QPOS, QVEL, TIME)
+        self.history: deque[dict[str, Any]] = deque(maxlen=self.max_history_length)
 
         mujoco.mj_forward(self.model, self.data)
 
@@ -741,9 +742,6 @@ class LowerBodySimulator:
                 ),
             }
         )
-
-        if len(self.history) > self.max_history_length:
-            self.history.pop(0)
 
     def restore_frame(self, index: int) -> None:
         """Restores the simulator completely to a cached history frame state."""
