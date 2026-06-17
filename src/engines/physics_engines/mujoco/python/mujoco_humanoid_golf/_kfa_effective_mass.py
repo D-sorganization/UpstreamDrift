@@ -9,6 +9,8 @@ from src.shared.python.core.numerical_constants import (
     EPSILON_SINGULARITY_DETECTION,
 )
 
+from ._effective_mass_kernel import compute_effective_mass_from_solve
+
 
 class _KFAEffectiveMassMixin:
     model: mujoco.MjModel
@@ -57,38 +59,7 @@ class _KFAEffectiveMassMixin:
     def _compute_effective_mass_value(
         self, direction: np.ndarray, jacp: np.ndarray, M: np.ndarray
     ) -> float:
-        J_dir = direction @ jacp
-        M_inv = np.linalg.inv(M)
-        denominator = J_dir @ M_inv @ J_dir.T + EPSILON_SINGULARITY_DETECTION
-
-        if abs(denominator) < 1e-8:
-            warnings.warn(
-                f"Effective mass denominator near zero: {denominator:.2e}. "
-                "Robot is at or very close to a kinematic singularity in the "
-                f"specified direction {direction}. Effective mass is extremely large.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-
-        m_eff = 1.0 / denominator
-
-        if m_eff < 0:
-            raise ValueError(
-                f"Computed negative effective mass: {m_eff:.2e} kg. "
-                "This indicates a numerical error or modeling issue."
-            )
-
-        if not np.isfinite(m_eff):
-            warnings.warn(
-                f"Effective mass is non-finite: {m_eff}. "
-                "Robot is at a kinematic singularity. "
-                "Returning large finite value instead.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-            m_eff = 1e10
-
-        return float(m_eff)
+        return compute_effective_mass_from_solve(direction, jacp, M)
 
     def compute_effective_mass(
         self,

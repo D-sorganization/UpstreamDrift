@@ -59,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   forces now use cached vector connectivity with scalar-reference parity tests.
 - Replaced the iLQR backward-pass explicit `np.linalg.inv` gain solve with a
   finite-checked Cholesky solve path plus general-solve fallback for #7570.
+- Replaced MuJoCo humanoid golf effective-mass explicit inverse calculations
+  with a shared solve-based kernel and finite/symmetry postconditions for
+  #7560.
 
 ### Refactor
 
