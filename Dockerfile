@@ -7,13 +7,62 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1
 
 # Build tools for packages that compile C extensions (cryptography, etc.)
+# `curl` + `pkg-config`/`libssl-dev` are also needed to install the Rust
+# toolchain and build the PyO3 crates below (issue #7600).
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# Rust extension wheels (issue #7600 — ship Rust to installs/deploys).
+#
+# The release wheel is pure-Python (hatchling); the PyO3 crates under
+# rust_core/ were never built into the image, so deployed containers fell back
+# to the slow Python paths. Build them here in the builder stage with maturin
+# and stage the wheels into /wheels for pip to install — mirroring the
+# build-then-install pattern from Gasification_Model PR #4323. No external
+# wheel index is used; everything is compiled from source in this layer.
+#
+# Pin the toolchain via rustup; keep it in /opt/cargo so it never leaks into
+# the runtime stage (only the built wheels are pip-installed into the venv).
+# ---------------------------------------------------------------------------
+ENV RUSTUP_HOME=/opt/rustup \
+    CARGO_HOME=/opt/cargo \
+    PATH="/opt/cargo/bin:/opt/venv/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --profile minimal --default-toolchain 1.94.0 && \
+    rustc --version && cargo --version
+
+RUN pip install --upgrade pip==26.1.2 && pip install maturin==1.13.3
+
+# Cargo needs the git CLI to fetch the tools-core git dependency reliably.
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
+# Build each PyO3 crate's wheel into /wheels. Keep this list in lock-step with
+# the maturin build loop in .github/workflows/ci-standard.yml.
+COPY Cargo.toml /tmp/rust/Cargo.toml
+COPY rust_core /tmp/rust/rust_core
+RUN mkdir -p /wheels && \
+    cd /tmp/rust && \
+    for crate in \
+        rust_core/upstream-physics \
+        rust_core/upstream-mocap-preproc \
+        rust_core/upstream-mocap-io \
+        rust_core/upstream-muscle \
+        rust_core/upstream-motion-matching \
+        rust_core/ai_backend; do \
+        maturin build --release --features python \
+            -m "$crate/Cargo.toml" --out /wheels; \
+    done && \
+    ls -1 /wheels
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
@@ -25,7 +74,7 @@ RUN pip install --upgrade pip==26.1.2 && \
 RUN pip install \
     slowapi==0.1.9 \
     "pydantic[email]==2.12.5" \
-    python-multipart==0.0.27 \
+    python-multipart==0.0.31 \
     aiofiles==24.1.0 \
     python-dateutil==2.9.0.post0 \
     structlog==25.5.0 \
@@ -50,10 +99,16 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
-    tornado==6.5.6 \
+    tornado==6.5.7 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
+
+# Install the Rust extension wheels built above into the venv (issue #7600).
+# Their pure-Python deps (e.g. numpy) are already present from the lockfile, so
+# --no-deps keeps the resolver from pulling unpinned transitives.
+RUN pip install --no-deps /wheels/*.whl && \
+    python -c "import upstream_physics, ai_backend; print('Rust wheels installed:', upstream_physics.__name__, ai_backend.__name__)"
 
 # Audit the *resolved* environment inside the image (issue #7159 D2). The
 # Dockerfile pins ~36 lines that can drift from requirements.lock, so a manual

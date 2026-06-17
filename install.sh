@@ -74,6 +74,67 @@ echo
 
 "${INSTALL_CMD[@]}"
 
+# ---------------------------------------------------------------------------
+# Optional Rust extension wheels (issue #7600).
+#
+# The package install above is pure-Python; the PyO3 crates under rust_core/
+# accelerate the physics / mocap hot paths. When installing from a local
+# checkout that contains rust_core/, build each crate's wheel with maturin and
+# install it into the same environment the package went to. No external wheel
+# index is used — everything compiles from source. The Python facades fall
+# back to pure Python if these are absent, so a missing Rust toolchain is a
+# warning, not a hard failure. Keep this crate list in lock-step with the
+# maturin build loop in .github/workflows/ci-standard.yml.
+# ---------------------------------------------------------------------------
+RUST_CRATES=(
+    "rust_core/upstream-physics"
+    "rust_core/upstream-mocap-preproc"
+    "rust_core/upstream-mocap-io"
+    "rust_core/upstream-muscle"
+    "rust_core/upstream-motion-matching"
+    "rust_core/ai_backend"
+)
+
+if [ "$INSTALL_SOURCE" = "." ] && [ -d "rust_core" ]; then
+    if command -v cargo &> /dev/null; then
+        echo
+        echo "Building Rust extension wheels (maturin)..."
+        if ! command -v maturin &> /dev/null; then
+            echo "  Installing maturin..."
+            python3 -m pip install --user maturin || python3 -m pip install maturin
+        fi
+
+        WHEEL_DIR="$(mktemp -d)"
+        build_failed=0
+        for crate in "${RUST_CRATES[@]}"; do
+            echo "  - $crate"
+            if ! maturin build --release --features python \
+                -m "$crate/Cargo.toml" --out "$WHEEL_DIR"; then
+                echo "  ⚠ Failed to build $crate; skipping Rust acceleration."
+                build_failed=1
+                break
+            fi
+        done
+
+        if [ "$build_failed" -eq 0 ]; then
+            if command -v pipx &> /dev/null; then
+                # pipx installed the package in its own venv; inject wheels there.
+                for whl in "$WHEEL_DIR"/*.whl; do
+                    pipx inject upstream-drift "$whl" || true
+                done
+            else
+                python3 -m pip install --user --no-deps "$WHEEL_DIR"/*.whl
+            fi
+            echo "✓ Rust extension wheels installed"
+        fi
+        rm -rf "$WHEEL_DIR"
+    else
+        echo
+        echo "⚠ Rust toolchain (cargo) not found — skipping Rust acceleration."
+        echo "  Install Rust from https://rustup.rs to enable the native kernels."
+    fi
+fi
+
 echo
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                    Installation Complete!                     ║"

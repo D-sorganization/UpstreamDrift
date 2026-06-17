@@ -20,6 +20,10 @@ build
 *.swp
 *.swo
 
+# Rust build artifacts (the image compiles the PyO3 wheels from source; the
+# local target/ dir is large and must not bloat the build context — #7600)
+target/
+
 # Testing / CI artifacts
 .pytest_cache
 .mypy_cache
