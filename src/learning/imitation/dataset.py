@@ -278,27 +278,45 @@ class DemonstrationDataset:
                 continue
 
             n = demo.n_frames
-            for i in range(n - 1):
-                state = np.concatenate(
-                    [
-                        demo.joint_positions[i],
-                        demo.joint_velocities[i],
-                    ]
+            if n < 2:
+                continue
+            if demo.joint_positions.ndim != 2:
+                raise ValueError("joint_positions must be a 2D array")
+            if demo.joint_velocities.ndim != 2:
+                raise ValueError("joint_velocities must be a 2D array")
+            if demo.actions.ndim != 2:
+                raise ValueError("actions must be a 2D array")
+            if len(demo.actions) != n:
+                raise ValueError(
+                    f"actions ({len(demo.actions)}) and timestamps ({n}) "
+                    "must have same length"
                 )
-                next_state = np.concatenate(
-                    [
-                        demo.joint_positions[i + 1],
-                        demo.joint_velocities[i + 1],
-                    ]
-                )
-                states.append(state)
-                actions.append(demo.actions[i])
-                next_states.append(next_state)
+            if (
+                not np.isfinite(demo.joint_positions).all()
+                or not np.isfinite(demo.joint_velocities).all()
+                or not np.isfinite(demo.actions).all()
+            ):
+                raise ValueError("transition arrays must contain only finite values")
+
+            states.append(
+                np.hstack((demo.joint_positions[:-1], demo.joint_velocities[:-1]))
+            )
+            actions.append(demo.actions[:-1])
+            next_states.append(
+                np.hstack((demo.joint_positions[1:], demo.joint_velocities[1:]))
+            )
+
+        if not states:
+            return (
+                np.array([]),
+                np.array([]),
+                np.array([]),
+            )
 
         return (
-            np.array(states),
-            np.array(actions),
-            np.array(next_states),
+            np.concatenate(states, axis=0),
+            np.concatenate(actions, axis=0),
+            np.concatenate(next_states, axis=0),
         )
 
     def to_state_action_pairs(

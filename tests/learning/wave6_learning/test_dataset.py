@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.learning.imitation import dataset as dataset_module
 from src.learning.imitation.dataset import Demonstration, DemonstrationDataset
 
 
@@ -160,10 +161,52 @@ class TestDataset:
         assert a.shape == (4, 2)
         assert ns.shape == (4, 4)
 
+    def test_to_transitions_builds_states_per_demo_not_per_frame(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        demos = [_make_demo(5, 2), _make_demo(4, 2)]
+        expected_states = np.vstack(
+            [
+                np.hstack((demo.joint_positions[:-1], demo.joint_velocities[:-1]))
+                for demo in demos
+            ]
+        )
+        expected_actions = np.vstack([demo.actions[:-1] for demo in demos])
+        expected_next_states = np.vstack(
+            [
+                np.hstack((demo.joint_positions[1:], demo.joint_velocities[1:]))
+                for demo in demos
+            ]
+        )
+
+        real_concatenate = dataset_module.np.concatenate
+
+        def reject_frame_state_concat(arrays: object, *args: object, **kwargs: object):
+            array_list = list(arrays)  # type: ignore[arg-type]
+            if array_list and all(np.asarray(array).ndim == 1 for array in array_list):
+                raise AssertionError("to_transitions must not concatenate per frame")
+            return real_concatenate(array_list, *args, **kwargs)
+
+        monkeypatch.setattr(dataset_module.np, "concatenate", reject_frame_state_concat)
+
+        states, actions, next_states = DemonstrationDataset(demos).to_transitions()
+
+        np.testing.assert_array_equal(states, expected_states)
+        np.testing.assert_array_equal(actions, expected_actions)
+        np.testing.assert_array_equal(next_states, expected_next_states)
+
     def test_to_transitions_skips_no_actions(self) -> None:
         ds = DemonstrationDataset([_make_demo(5, 2, with_actions=False)])
         s, a, ns = ds.to_transitions()
         assert s.size == 0
+
+    def test_to_transitions_rejects_action_length_mismatch(self) -> None:
+        demo = _make_demo(5, 2)
+        demo.actions = demo.actions[:-1]
+        ds = DemonstrationDataset([demo])
+
+        with pytest.raises(ValueError, match="must have same length"):
+            ds.to_transitions()
 
     def test_state_action_pairs(self) -> None:
         ds = DemonstrationDataset([_make_demo(4, 2)])
