@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.419                                            |
+| **Spec Version**        | 1.0.420                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Tightened MuJoCo humanoid golf Coriolis finite
+  differences for issue #7556: `compute_coriolis_matrix` now uses central
+  velocity perturbations, validates finite `qpos`/`qvel` shape contracts, and
+  rejects malformed or non-finite callback force vectors before assembling the
+  matrix.
 - **2026-06-17** - Optimized FreeMoCap landmark array conversion for issue
   #7563: `LandmarkFrame.to_array` now builds numeric point blocks through
   `np.fromiter`, and `LandmarkSession.to_array` constructs the full
