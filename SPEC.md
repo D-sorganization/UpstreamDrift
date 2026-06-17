@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.424                                            |
+| **Spec Version**        | 1.0.425                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Hardened the Tauri desktop check workflow for issue #7616:
+  after the pinned Rust toolchain action runs, the `Check (Rust + TypeScript)`
+  job now verifies `rustup`, `rustc`, and `cargo` are on `PATH` and prints their
+  versions before cache restore or any Cargo command. CI infrastructure tests
+  pin the setup -> verification -> Cargo-step ordering so a runner without a
+  usable Rust toolchain fails early with a direct diagnostic.
 - **2026-06-17** - Optimized lower-body simulator history eviction for
   issue #7561: `LowerBodySimulator` now stores scrub/playback frames in a
   bounded `deque`, preserving FIFO order, frame indexing, and clear/restore
