@@ -1,0 +1,123 @@
+name: Maturin Movement Optimizer
+# Builds the vendored shared `movement_optimizer` sub-app's Rust accelerator
+# (`movement_optimizer_core`), installs the wheel, hard-asserts the extension
+# imports, and runs its parity suite NON-SKIPPED.
+#
+# Why a dedicated workflow (issue #7604):
+#   The sub-app is vendored in-tree at `src/shared/python/movement_optimizer/`
+#   and its `rust_core/Cargo.toml` declares its own standalone `[workspace]`,
+#   so it is intentionally NOT a member of the repo-root Rust workspace
+#   (`Cargo.toml`) and is not built by the `rust-wheel-parity` job. Building it
+#   here keeps the two lanes independent and mirrors the Tools-side maturin gate
+#   for the same crate (Tools #3522).
+#
+# Without the compiled extension installed, `tests/test_rust_parity.py` SKIPS
+# via `pytest.importorskip("movement_optimizer_core")`, so a Rust regression in
+# the inverse-dynamics hot path could land unnoticed. This job builds + installs
+# the wheel so the parity contract actually executes per-PR.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/shared/python/movement_optimizer/**"
+      - ".github/workflows/maturin-movement-optimizer.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/shared/python/movement_optimizer/**"
+      - ".github/workflows/maturin-movement-optimizer.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  movement-optimizer-rust-parity:
+    name: movement_optimizer_core build + parity
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 25
+    env:
+      CARGO_HOME: ${{ runner.temp }}/cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        run: |
+          if [ -f /.dockerenv ]; then
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          fi
+
+      # pyo3 0.21 (this crate) supports CPython up to 3.12; pin 3.12 to match
+      # the repo-root rust-wheel-parity lane.
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.12"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo registry and build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-movement-optimizer-${{ hashFiles('src/shared/python/movement_optimizer/rust_core/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-movement-optimizer-
+
+      - name: Build movement_optimizer_core wheel (Maturin)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/mo-venv"
+          source "$RUNNER_TEMP/mo-venv/bin/activate"
+          python -m pip install --upgrade pip maturin "numpy<2" scipy pytest
+          python -m maturin build --release \
+            -m src/shared/python/movement_optimizer/rust_core/Cargo.toml
+          echo "Wheel built:"
+          ls src/shared/python/movement_optimizer/rust_core/target/wheels/
+
+      - name: Install wheel + hard-assert import
+        run: |
+          source "$RUNNER_TEMP/mo-venv/bin/activate"
+          python -m pip install --force-reinstall --no-deps \
+            src/shared/python/movement_optimizer/rust_core/target/wheels/*.whl
+          # Fail-closed: the extension MUST import. A skipped parity test is a
+          # bug, not an acceptable outcome, on this gate.
+          python -c "import movement_optimizer_core; print('movement_optimizer_core import OK')"
+
+      - name: Run parity suite (extension mandatory, non-skipped)
+        env:
+          PYTHONPATH: src/shared/python
+        run: |
+          source "$RUNNER_TEMP/mo-venv/bin/activate"
+          # -c /dev/null ignores the sub-app's own pyproject pytest config
+          # (it references pytest-qt's `qt_api` option, unused for this suite).
+          python -m pytest \
+            src/shared/python/movement_optimizer/tests/test_rust_parity.py \
+            -c /dev/null -o addopts="" -p no:cacheprovider \
+            -v
+          echo "Parity suite executed with the Rust extension installed."
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## movement_optimizer_core build + parity (issue #7604)"
+            echo "- vendored sub-app: src/shared/python/movement_optimizer/"
+            echo "- Rust wheel built via maturin and installed"
+            echo "- import movement_optimizer_core hard-asserted"
+            echo "- tests/test_rust_parity.py executed NON-SKIPPED"
+          } >> "$GITHUB_STEP_SUMMARY"
