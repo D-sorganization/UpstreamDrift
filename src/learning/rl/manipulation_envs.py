@@ -21,6 +21,25 @@ if TYPE_CHECKING:
     from src.engines.protocols import PhysicsEngineProtocol
 
 
+Position3 = tuple[float, float, float]
+
+_DEFAULT_OBJECT_INITIAL_POS: Position3 = (0.5, 0.0, 0.1)
+_DEFAULT_TARGET_POS: Position3 = (0.5, 0.3, 0.1)
+
+
+def _position_or_default(
+    value: NDArray[np.floating] | None,
+    default: Position3,
+    *,
+    name: str,
+) -> NDArray[np.floating]:
+    """Return a defensive 3D float position without ndarray truthiness."""
+    position = np.asarray(default if value is None else value, dtype=np.float64)
+    if position.shape != (3,):
+        raise ValueError(f"{name} must be a 3-element position vector")
+    return position.copy()
+
+
 class ManipulationPickPlaceEnv(RoboticsGymEnv):
     """Pick and place manipulation environment.
 
@@ -61,8 +80,16 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         """
         if engine is None:
             raise ValueError("engine must be provided")
-        self._object_pos = object_initial_pos or np.array([0.5, 0.0, 0.1])
-        self._target_pos = target_pos or np.array([0.5, 0.3, 0.1])
+        self._object_pos = _position_or_default(
+            object_initial_pos,
+            _DEFAULT_OBJECT_INITIAL_POS,
+            name="object_initial_pos",
+        )
+        self._target_pos = _position_or_default(
+            target_pos,
+            _DEFAULT_TARGET_POS,
+            name="target_pos",
+        )
 
         task_config = TaskConfig(
             task_type=TaskType.MANIPULATION,

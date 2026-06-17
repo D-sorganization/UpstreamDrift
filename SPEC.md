@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Fixed manipulation pick/place ndarray position overrides for
+  issue #7565: explicit `object_initial_pos` and `target_pos` arrays now use
+  explicit `None` fallback handling, are coerced to defensive 3D float vectors,
+  and no longer raise NumPy ambiguous truth-value errors during environment
+  construction.
 - **2026-06-17** - Improved differentiable-engine finite differences for
   issue #7569: trajectory-control gradients and state/control Jacobians now use
   scaled central differences (`1e-6 * max(1, abs(value))`) with shared finite
