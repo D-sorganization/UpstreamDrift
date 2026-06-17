@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 if PYQT6_AVAILABLE:
     from PyQt6.QtWidgets import QApplication
 else:
-    QApplication = None  # type: ignore
+    QApplication = None  # type: ignore[assignment]
 
 logger = get_logger(__name__)
 

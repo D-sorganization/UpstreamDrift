@@ -52,10 +52,10 @@ class ThinkingLevel:
     label: str
 
     # Enum compatibility
-    OFF: ThinkingLevel = None  # type: ignore
-    LOW: ThinkingLevel = None  # type: ignore
-    MEDIUM: ThinkingLevel = None  # type: ignore
-    HIGH: ThinkingLevel = None  # type: ignore
+    OFF: ThinkingLevel = None  # type: ignore[assignment]
+    LOW: ThinkingLevel = None  # type: ignore[assignment]
+    MEDIUM: ThinkingLevel = None  # type: ignore[assignment]
+    HIGH: ThinkingLevel = None  # type: ignore[assignment]
 
     @property
     def value(self) -> str:

@@ -13,7 +13,7 @@ try:
     from matplotlib.axes import Axes  # noqa: F401
     from matplotlib.figure import Figure  # noqa: F401
 except ImportError:
-    plt = None  # type: ignore
+    plt = None  # type: ignore[assignment]
 
 
 def _plot_moment_arms(
