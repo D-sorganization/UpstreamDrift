@@ -182,16 +182,31 @@ class DifferentiableEngine:
         baseline_traj = self.simulate_trajectory(initial_state, controls, dt)
         baseline_loss = loss_fn(baseline_traj)
 
-        # Numerical gradient
+        # Numerical gradient (issue #7557).
+        #
+        # Perturbing ``controls[t, i]`` cannot change any state at or before
+        # index ``t`` (the step closure is Markovian in the state vector), so
+        # the baseline prefix ``baseline_traj[: t + 1]`` is reused and only the
+        # suffix is re-simulated from ``baseline_traj[t]``. This turns the inner
+        # cost from O(T) full rollouts into O(T - t) suffix rollouts (~2x fewer
+        # engine steps overall) and is bit-identical to a full re-simulation.
+        # ``perturbed`` and ``traj_plus`` are allocated once and reused in place
+        # instead of a fresh ``controls.copy()`` per element.
+        perturbed = controls.copy()
+        traj_plus = baseline_traj.copy()
         for t in range(T):
             for i in range(n_u):
-                controls_plus = controls.copy()
-                controls_plus[t, i] += eps
+                perturbed[t, i] += eps
 
-                traj_plus = self.simulate_trajectory(initial_state, controls_plus, dt)
+                suffix = self.simulate_trajectory(baseline_traj[t], perturbed[t:], dt)
+                traj_plus[t:] = suffix
                 loss_plus = loss_fn(traj_plus)
 
                 gradient[t, i] = (loss_plus - baseline_loss) / eps
+                perturbed[t, i] = controls[t, i]  # exact restore (no fp drift)
+
+            # Restore this row so later steps see the unperturbed prefix.
+            traj_plus[t] = baseline_traj[t]
 
         return gradient
 
