@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized the Rust mocap preprocessing median filter for
+  issue #7574: `medfilt_1d` now uses introselect (`select_nth_unstable_by`) to
+  find the padded-window median without fully sorting each window, preserving
+  SciPy-compatible zero-padding and even-kernel normalization with focused
+  full-sort parity coverage.
 - **2026-06-17** - Fixed manipulation pick/place ndarray position overrides for
   issue #7565: explicit `object_initial_pos` and `target_pos` arrays now use
   explicit `None` fallback handling, are coerced to defensive 3D float vectors,

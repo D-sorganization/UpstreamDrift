@@ -522,8 +522,10 @@ pub fn medfilt_1d(x: &[f64], kernel_size: usize) -> Vec<f64> {
                 x[idx as usize]
             };
         }
-        // Sort to find median.
-        window.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        // Only the middle element is needed; introselect avoids a full O(k log k) sort.
+        window.select_nth_unstable_by(half, |a, b| {
+            a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)
+        });
         out[i] = window[half];
     }
     out
@@ -713,6 +715,42 @@ mod tests {
         // window at i=0 is {0, 3, 3}, median 3.
         for v in y {
             assert!((v - 3.0).abs() < 1e-12);
+        }
+    }
+
+    #[test]
+    fn medfilt_matches_full_sort_reference_with_zero_padding() {
+        fn reference_medfilt_1d(x: &[f64], kernel_size: usize) -> Vec<f64> {
+            let k = if kernel_size % 2 == 0 {
+                kernel_size + 1
+            } else {
+                kernel_size
+            };
+            let half = k / 2;
+            let n = x.len();
+            let mut out = vec![0.0_f64; n];
+            let mut window = vec![0.0_f64; k];
+            for (i, dst) in out.iter_mut().enumerate() {
+                for (j, sample) in window.iter_mut().enumerate() {
+                    let idx = i as isize + j as isize - half as isize;
+                    *sample = if idx < 0 || idx >= n as isize {
+                        0.0
+                    } else {
+                        x[idx as usize]
+                    };
+                }
+                window.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                *dst = window[half];
+            }
+            out
+        }
+
+        let x = vec![7.0, -1.5, 3.25, 3.25, 0.0, 12.0, -4.0, 8.5, 2.0];
+
+        for kernel_size in [1, 2, 3, 5, 8] {
+            let expected = reference_medfilt_1d(&x, kernel_size);
+            let actual = medfilt_1d(&x, kernel_size);
+            assert_eq!(actual, expected, "kernel_size={kernel_size}");
         }
     }
 
