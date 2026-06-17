@@ -106,6 +106,93 @@ class TestAnalyzeKinematicsInternal:
         assert result["metadata"]["data_source"] == "engine"
 
 
+class TestAnalyzeBiomechanicsContract:
+    """Public service contract tests for analysis request payload handling."""
+
+    async def test_kinematics_consumes_parameters_only_payload(
+        self, analysis_service
+    ) -> None:
+        """Regression: request.parameters is a supported analysis payload."""
+        from src.api.models.requests import AnalysisRequest
+
+        request = AnalysisRequest(
+            analysis_type="kinematics",
+            data_source="simulation",
+            parameters={
+                "joint_angles": [1.0, 2.0, 3.0],
+                "angular_velocities": [4.0, 5.0, 6.0],
+                "angular_accelerations": [7.0, 8.0, 9.0],
+            },
+        )
+
+        response = await analysis_service.analyze_biomechanics(request)
+
+        assert response.success is True
+        assert response.results["joint_angles"] == [1.0, 2.0, 3.0]
+        assert response.results["angular_velocities"] == [4.0, 5.0, 6.0]
+        assert response.results["angular_accelerations"] == [7.0, 8.0, 9.0]
+        assert response.results["metadata"]["data_source"] == "request"
+
+    async def test_kinematics_preserves_data_payload_path(
+        self, analysis_service
+    ) -> None:
+        """Existing request.data payloads remain valid."""
+        from src.api.models.requests import AnalysisRequest
+
+        request = AnalysisRequest(
+            analysis_type="kinematics",
+            data_source="simulation",
+            data={"joint_angles": [0.25, 0.5, 0.75]},
+        )
+
+        response = await analysis_service.analyze_biomechanics(request)
+
+        assert response.success is True
+        assert response.results["joint_angles"] == [0.25, 0.5, 0.75]
+        assert response.results["metadata"]["data_source"] == "request"
+
+    async def test_ambiguous_data_and_parameters_payloads_fail_closed(
+        self, analysis_service
+    ) -> None:
+        """Conflicting input payloads must not be silently prioritized."""
+        from src.api.models.requests import AnalysisRequest
+
+        request = AnalysisRequest(
+            analysis_type="kinematics",
+            data_source="simulation",
+            parameters={"joint_angles": [1.0]},
+            data={"joint_angles": [2.0]},
+        )
+
+        response = await analysis_service.analyze_biomechanics(request)
+
+        assert response.success is False
+        assert "Ambiguous analysis input" in response.results["error"]
+
+    async def test_engine_extraction_failure_returns_failed_response(
+        self, mock_engine_manager
+    ) -> None:
+        """Engine extraction errors are not successful empty analyses."""
+        from src.api.models.requests import AnalysisRequest
+        from src.api.services.analysis_service import AnalysisService
+
+        class FailingEngine:
+            def get_joint_positions(self):
+                raise RuntimeError("kinematic extractor unavailable")
+
+        mock_engine_manager.get_active_physics_engine.return_value = FailingEngine()
+        service = AnalysisService(mock_engine_manager)
+        request = AnalysisRequest(
+            analysis_type="kinematics",
+            data_source="simulation",
+        )
+
+        response = await service.analyze_biomechanics(request)
+
+        assert response.success is False
+        assert "kinematic extractor unavailable" in response.results["error"]
+
+
 class TestAnalyzeKineticsInternal:
     """Tests for _analyze_kinetics internal method."""
 

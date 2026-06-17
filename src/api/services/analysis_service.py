@@ -84,6 +84,8 @@ class AnalysisService:
             )
 
         try:
+            self._resolve_request_payload(request)
+
             # Get the active engine for analysis
             engine = self.engine_manager.get_active_physics_engine()
 
@@ -101,6 +103,16 @@ class AnalysisService:
                     value=request.analysis_type,
                     reason="Unknown analysis type",
                     valid_values=sorted(VALID_ANALYSIS_TYPES),
+                )
+
+            failure_reason = self._analysis_failure_reason(
+                request.analysis_type,
+                results,
+            )
+            if failure_reason is not None:
+                raise ValidationError(
+                    field="analysis_input",
+                    reason=failure_reason,
                 )
 
             return AnalysisResponse(
@@ -184,7 +196,7 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        request_data = getattr(request, "data", None)
+        request_data = self._resolve_request_payload(request)
         if request_data:
             if "joint_angles" in request_data:
                 result["joint_angles"] = request_data["joint_angles"]
@@ -195,6 +207,62 @@ class AnalysisService:
                 result["angular_accelerations"] = request_data["angular_accelerations"]
 
         return result
+
+    def _resolve_request_payload(self, request: AnalysisRequest) -> dict[str, Any]:
+        """Resolve the single caller-supplied analysis payload.
+
+        ``AnalysisRequest.parameters`` is part of the public API contract, while
+        ``data`` exists for backward-compatible explicit trajectory payloads.
+        Distinct non-empty values are ambiguous and must be rejected instead of
+        silently preferring one field.
+        """
+        data = dict(getattr(request, "data", None) or {})
+        parameters = dict(getattr(request, "parameters", None) or {})
+
+        if data and parameters:
+            if data == parameters:
+                return data
+            raise ValidationError(
+                field="analysis_input",
+                value={
+                    "data_keys": sorted(data),
+                    "parameter_keys": sorted(parameters),
+                },
+                reason=(
+                    "Ambiguous analysis input: provide biomechanical input in "
+                    "either 'data' or 'parameters', not both"
+                ),
+            )
+
+        return data or parameters
+
+    def _analysis_failure_reason(
+        self,
+        analysis_type: str,
+        results: dict[str, Any],
+    ) -> str | None:
+        """Return a contract failure message when results are not usable."""
+        metadata = results.get("metadata")
+        if not isinstance(metadata, dict):
+            return None
+
+        if metadata.get("data_source") in {"request", "engine"}:
+            return None
+
+        engine_error = metadata.get("engine_error")
+        if engine_error:
+            return (
+                f"Failed to extract {analysis_type} analysis data from the "
+                f"active engine: {engine_error}"
+            )
+
+        if metadata.get("data_source") == "none":
+            return (
+                f"No usable {analysis_type} analysis input was provided; "
+                "provide 'parameters' or 'data', or load an active engine"
+            )
+
+        return None
 
     async def _analyze_kinetics(  # noqa: C901
         self, request: AnalysisRequest, engine: Any
@@ -249,10 +317,22 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        request_data = getattr(request, "data", None)
-        if request_data and "joint_torques" in request_data:
-            result["joint_torques"] = request_data["joint_torques"]
-            result["metadata"]["data_source"] = "request"
+        request_data = self._resolve_request_payload(request)
+        if request_data:
+            if "joint_torques" in request_data:
+                result["joint_torques"] = request_data["joint_torques"]
+                result["metadata"]["data_source"] = "request"
+            if "reaction_forces" in request_data:
+                result["reaction_forces"] = request_data["reaction_forces"]
+                result["metadata"]["data_source"] = "request"
+            if "muscle_forces" in request_data:
+                result["muscle_forces"] = request_data["muscle_forces"]
+                result["metadata"]["data_source"] = "request"
+            if "ground_reaction_forces" in request_data:
+                result["ground_reaction_forces"] = request_data[
+                    "ground_reaction_forces"
+                ]
+                result["metadata"]["data_source"] = "request"
 
         return result
 
@@ -318,6 +398,24 @@ class AnalysisService:
             metadata["data_source"] = "none"
             metadata["note"] = "No engine loaded - load an engine first"
 
+        request_data = self._resolve_request_payload(request)
+        if request_data:
+            if "kinetic_energy" in request_data:
+                result["kinetic_energy"] = float(request_data["kinetic_energy"])
+                result["metadata"]["data_source"] = "request"
+            if "potential_energy" in request_data:
+                result["potential_energy"] = float(request_data["potential_energy"])
+                result["metadata"]["data_source"] = "request"
+            if "total_energy" in request_data:
+                result["total_energy"] = float(request_data["total_energy"])
+                result["metadata"]["data_source"] = "request"
+            if "power" in request_data:
+                result["power"] = request_data["power"]
+                result["metadata"]["data_source"] = "request"
+            if "energy_flow" in request_data:
+                result["energy_flow"] = request_data["energy_flow"]
+                result["metadata"]["data_source"] = "request"
+
         return result
 
     async def _analyze_swing_sequence(  # noqa: C901
@@ -350,6 +448,7 @@ class AnalysisService:
             "kinematic_sequence": {},
             "metadata": {},
         }
+        request_data = self._resolve_request_payload(request)
 
         if engine is not None:
             try:
@@ -363,9 +462,14 @@ class AnalysisService:
                 if hasattr(engine, "get_segment_angular_velocities"):
                     seg_vel = engine.get_segment_angular_velocities()
                     if seg_vel is not None:
-                        self._populate_kinematic_sequence(result, request, seg_vel)
+                        self._populate_kinematic_sequence(
+                            result,
+                            request,
+                            seg_vel,
+                            request_data,
+                        )
 
-                x_factor = self._compute_x_factor(request, engine)
+                x_factor = self._compute_x_factor(request, engine, request_data)
                 if x_factor is not None:
                     result["x_factor"] = x_factor
 
@@ -384,13 +488,19 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided timing data if available
-        request_data = getattr(request, "data", None)
         if request_data:
+            if "current_phase" in request_data:
+                result["current_phase"] = request_data["current_phase"]
+                result["metadata"]["data_source"] = "request"
             if "phase_transitions" in request_data:
                 result["phase_transitions"] = request_data["phase_transitions"]
                 result["metadata"]["data_source"] = "request"
             if "sequence_timing" in request_data:
                 result["sequence_timing"] = request_data["sequence_timing"]
+                result["metadata"]["data_source"] = "request"
+            if "kinematic_sequence" in request_data:
+                result["kinematic_sequence"] = request_data["kinematic_sequence"]
+                result["metadata"]["data_source"] = "request"
 
         return result
 
@@ -399,6 +509,7 @@ class AnalysisService:
         result: dict[str, Any],
         request: AnalysisRequest,
         segment_velocities: Any,
+        request_data: dict[str, Any] | None = None,
     ) -> None:
         """Populate computed segment timing or an explicit no-trajectory marker."""
         normalized = self._normalize_segment_velocity_trajectories(segment_velocities)
@@ -407,7 +518,7 @@ class AnalysisService:
             metadata["kinematic_sequence"] = "requires_trajectory"
             return
 
-        times = self._resolve_sequence_times(request, normalized)
+        times = self._resolve_sequence_times(request, normalized, request_data)
         if times is None:
             metadata["kinematic_sequence"] = "requires_trajectory"
             return
@@ -466,10 +577,12 @@ class AnalysisService:
         self,
         request: AnalysisRequest,
         segment_velocities: dict[str, np.ndarray],
+        request_data: dict[str, Any] | None = None,
     ) -> np.ndarray | None:
         """Resolve a timebase for segment velocity trajectories."""
         trajectory_length = len(next(iter(segment_velocities.values())))
-        request_data = getattr(request, "data", None) or {}
+        if request_data is None:
+            request_data = self._resolve_request_payload(request)
         raw_times = request_data.get("times", request_data.get("time"))
         if raw_times is None:
             return np.arange(trajectory_length, dtype=float)
@@ -483,9 +596,11 @@ class AnalysisService:
         self,
         request: AnalysisRequest,
         engine: Any,
+        request_data: dict[str, Any] | None = None,
     ) -> dict[str, Any] | None:
         """Compute X-factor only when joint trajectory data and indices are available."""
-        request_data = getattr(request, "data", None) or {}
+        if request_data is None:
+            request_data = self._resolve_request_payload(request)
         joint_positions = request_data.get("joint_positions")
         if joint_positions is None and hasattr(engine, "get_joint_positions"):
             joint_positions = engine.get_joint_positions()
