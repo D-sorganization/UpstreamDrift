@@ -148,6 +148,10 @@ class ChainRollout:
     energy_j: FloatArray
     tip_speed_m_s: FloatArray
 
+    def frame_count(self) -> int:
+        """Return the number of rendered chain frames."""
+        return int(self.positions.shape[0])
+
 
 def segment_vectors(config: ChainConfig, angles_rad: FloatArray) -> FloatArray:
     angles = _as_float_array("angles_rad", angles_rad, config.segment_count)

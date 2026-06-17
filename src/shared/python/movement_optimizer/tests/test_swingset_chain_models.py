@@ -106,6 +106,7 @@ def test_chain_simulation_damps_energy() -> None:
     rollout = simulate_chain(config, initial, steps=24, dt_s=0.01)
 
     assert len(rollout.states) == 25
+    assert rollout.frame_count() == 25
     assert rollout.positions.shape == (25, 7, 2)
     assert np.all(np.isfinite(rollout.energy_j))
     assert total_energy(config, rollout.states[-1]) == pytest.approx(rollout.energy_j[-1])
@@ -392,6 +393,9 @@ def test_swingset_heuristic_policy_builds_amplitude() -> None:
     )
 
     assert rollout.controls.shape == (80, 5)
+    assert rollout.max_abs_swing_angle_rad() == pytest.approx(
+        rollout.metrics.max_abs_swing_angle_rad
+    )
     assert rollout.metrics.max_abs_swing_angle_rad > 0.08
     assert rollout.metrics.max_height_gain_m > 0.0
     assert rollout.metrics.final_energy_proxy_j >= 0.0

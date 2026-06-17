@@ -46,6 +46,14 @@ class OptimizationResult:
     n_evals: int = 0
     n_joint_limit_violations: int = 0
 
+    def torque_joint_count(self) -> int:
+        """Return the number of torque columns in the trajectory."""
+        return int(self.torques.shape[1])
+
+    def has_com_samples(self) -> bool:
+        """Return ``True`` when the COM trajectory has at least one sample."""
+        return bool(self.com.shape[0])
+
 
 @dataclass
 class ProgressReport:

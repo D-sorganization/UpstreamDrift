@@ -268,6 +268,10 @@ class SwingRollout:
     snapshots: tuple[SwingSetSnapshot, ...]
     metrics: SwingRolloutMetrics
 
+    def max_abs_swing_angle_rad(self) -> float:
+        """Return the maximum absolute swing angle in radians."""
+        return self.metrics.max_abs_swing_angle_rad
+
 
 @dataclass(frozen=True)
 class CyclicPolicyParameters:

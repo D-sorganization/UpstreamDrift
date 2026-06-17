@@ -456,12 +456,15 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
         """
         if self._rollout is None:
             raise RuntimeError("DbC Blocked: force field requires a simulated rollout")
-        frame_count = self._rollout.positions.shape[0]
+        frame_count = self._rollout.frame_count()
         if not 0 <= self._frame_index < frame_count:
             raise RuntimeError("DbC Blocked: frame index is outside the rollout")
         if self._force_fields is None or len(self._force_fields) != frame_count:
             self._force_fields = chain_force_fields(self._config(), self._rollout, self._dt_s)
-        return self._force_fields[self._frame_index]
+        force_fields = self._force_fields
+        if force_fields is None:
+            raise RuntimeError("DbC Blocked: force-field cache was not initialized")
+        return force_fields[self._frame_index]
 
     def _toggle_playback(self) -> None:
         created_rollout = self._rollout is None
@@ -485,7 +488,7 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
             return
         self._timer.stop()
         self.play_button.setText("Play")
-        self._frame_index = min(self._frame_index + 1, self._rollout.positions.shape[0] - 1)
+        self._frame_index = min(self._frame_index + 1, self._rollout.frame_count() - 1)
         self._render_chain_frame()
         self.playbackStateChanged.emit()
 
@@ -515,7 +518,7 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
             return
         self._timer.stop()
         self.play_button.setText("Play")
-        self._frame_index = self._rollout.positions.shape[0] - 1
+        self._frame_index = self._rollout.frame_count() - 1
         self._render_chain_frame()
         self.playbackStateChanged.emit()
 
@@ -526,7 +529,7 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
         self.playbackStateChanged.emit()
 
     def playback_status(self) -> tuple[int, int, bool]:
-        total = self._rollout.positions.shape[0] if self._rollout is not None else 0
+        total = self._rollout.frame_count() if self._rollout is not None else 0
         return self._frame_index + 1 if total else 0, total, self._timer.isActive()
 
     def _ensure_rollout(self) -> None:
@@ -536,7 +539,7 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
     def _advance_frame(self) -> None:
         if self._rollout is None:
             return
-        self._frame_index = (self._frame_index + 1) % self._rollout.positions.shape[0]
+        self._frame_index = (self._frame_index + 1) % self._rollout.frame_count()
         self._render_chain_frame()
         self._timer.start(self._playback_interval_ms())
         self.playbackStateChanged.emit()

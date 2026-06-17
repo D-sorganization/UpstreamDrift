@@ -51,8 +51,9 @@ class ResultAnalyzer:
     def torque_statistics(self) -> list[JointTorqueStatistics]:
         """Return mean, standard deviation, range, peak, and RMS per joint."""
         stats: list[JointTorqueStatistics] = []
-        for idx in range(self.result.torques.shape[1]):
-            col = self.result.torques[:, idx]
+        torques = self.result.torques
+        for idx in range(self.result.torque_joint_count()):
+            col = torques[:, idx]
             stats.append(
                 JointTorqueStatistics(
                     joint=self._joint_label(idx),
@@ -103,7 +104,7 @@ class ResultAnalyzer:
 
     def com_range_cm(self) -> float:
         """Return horizontal COM range in centimeters."""
-        if self.result.com.shape[0] == 0:
+        if not self.result.has_com_samples():
             return 0.0
         horizontal_com: NDArray[np.float64] = self.result.com[:, 0]
         return float((np.max(horizontal_com) - np.min(horizontal_com)) * 100.0)

@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from conftest import make_test_result
 
 from movement_optimizer.result_analysis import ResultAnalyzer
+from movement_optimizer.tests.conftest import make_test_result
 
 
 def test_torque_statistics_include_mean_std_and_range() -> None:
@@ -20,6 +20,7 @@ def test_torque_statistics_include_mean_std_and_range() -> None:
         ]
     )
 
+    assert result.torque_joint_count() == 3
     stats = ResultAnalyzer(result).torque_statistics()
 
     assert stats[0].joint == "Ankle"
@@ -57,3 +58,11 @@ def test_analyzer_rejects_non_matrix_torques() -> None:
 
     with pytest.raises(ValueError, match="torques"):
         ResultAnalyzer(result)
+
+
+def test_result_reports_empty_com_samples() -> None:
+    result = make_test_result()
+    result.com = np.zeros((0, 2))
+
+    assert not result.has_com_samples()
+    assert ResultAnalyzer(result).com_range_cm() == 0.0

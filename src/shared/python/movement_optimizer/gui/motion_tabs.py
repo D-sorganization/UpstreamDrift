@@ -921,10 +921,11 @@ class SwingsetTab(_MotionViewMixin, QWidget):
         )
 
     def _set_policy_result(self, result: CyclicPolicySearchResult) -> None:
-        self._rollout = result.rollout
+        rollout = result.rollout
+        self._rollout = rollout
         self._force_fields = None
         self._frame_index = 0
-        self._render_snapshot(result.rollout.snapshots[0])
+        self._render_snapshot(rollout.snapshots[0])
         self._populate_analysis_panel()
         self._refresh_overlays()
         self.policy_trace_canvas.set_trace(result.trace)
@@ -933,11 +934,11 @@ class SwingsetTab(_MotionViewMixin, QWidget):
         cycle_text = (
             f"{result.optimized_cycles:.1f} cycles"
             if result.optimized_cycles is not None
-            else f"{len(result.rollout.states) - 1} steps"
+            else f"{len(rollout.states) - 1} steps"
         )
         self.metric_label.setText(
             f"Best height {result.objective_height_m:.3f} m | "
-            f"peak angle {np.rad2deg(result.rollout.metrics.max_abs_swing_angle_rad):.1f} deg | "
+            f"peak angle {np.rad2deg(rollout.max_abs_swing_angle_rad()):.1f} deg | "
             f"freq {params.frequency_hz:.2f} Hz | "
             f"{result.evaluated_candidates} candidates | "
             f"{cycle_text}"
@@ -1030,7 +1031,10 @@ class SwingsetTab(_MotionViewMixin, QWidget):
                 self._rollout,
                 DEFAULT_POLICY_DT_S,
             )
-        return self._force_fields[self._frame_index]
+        force_fields = self._force_fields
+        if force_fields is None:
+            raise RuntimeError("DbC Blocked: force-field cache was not initialized")
+        return force_fields[self._frame_index]
 
     def _toggle_playback(self) -> None:
         if self._rollout is None:
