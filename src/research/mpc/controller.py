@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
+from scipy import linalg
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -277,8 +278,9 @@ class ModelPredictiveController:
             self.model.set_joint_torques(u)
 
         # Step simulation
-        if hasattr(self.model, "step"):
-            self.model.step(self.dt)
+        step = getattr(self.model, "step", None)
+        if callable(step):
+            step(self.dt)
 
         # Get new state
         if hasattr(self.model, "get_joint_positions"):
@@ -357,8 +359,8 @@ class ModelPredictiveController:
             self._cost.x_ref = reference_trajectory
 
         # Initialize trajectory with zero controls
-        X = np.zeros((self.horizon + 1, self._n_x))
-        U = np.zeros((self.horizon, self._n_u))
+        X: NDArray[np.floating] = np.zeros((self.horizon + 1, self._n_x))
+        U: NDArray[np.floating] = np.zeros((self.horizon, self._n_u))
         X[0] = initial_state
 
         # Forward rollout with initial controls
@@ -461,9 +463,7 @@ class ModelPredictiveController:
             Quu_reg = Quu + np.eye(self._n_u) * 1e-6
 
             # Compute gains
-            Quu_inv = np.linalg.inv(Quu_reg)
-            K_k = -Quu_inv @ Qux
-            d_k = -Quu_inv @ Qu
+            K_k, d_k = self._solve_backward_pass_gains(Quu_reg, Qux, Qu)
 
             K.insert(0, K_k)
             d.insert(0, d_k)
@@ -473,6 +473,45 @@ class ModelPredictiveController:
             Vxx = Qxx + K_k.T @ Quu @ K_k + K_k.T @ Qux + Qux.T @ K_k
 
         return K, d
+
+    def _solve_backward_pass_gains(
+        self,
+        Quu_reg: NDArray[np.floating],
+        Qux: NDArray[np.floating],
+        Qu: NDArray[np.floating],
+    ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
+        """Solve the regularized iLQR gain system without forming an inverse."""
+        if Quu_reg.shape != (self._n_u, self._n_u):
+            raise ValueError(
+                f"Quu_reg must have shape {(self._n_u, self._n_u)}, got {Quu_reg.shape}"
+            )
+        if Qux.shape[0] != self._n_u:
+            raise ValueError(f"Qux must have {self._n_u} rows, got shape {Qux.shape}")
+        if Qu.shape != (self._n_u,):
+            raise ValueError(f"Qu must have shape {(self._n_u,)}, got {Qu.shape}")
+        if not np.all(np.isfinite(Quu_reg)):
+            raise ValueError("Quu_reg must contain only finite values")
+        if not np.all(np.isfinite(Qux)):
+            raise ValueError("Qux must contain only finite values")
+        if not np.all(np.isfinite(Qu)):
+            raise ValueError("Qu must contain only finite values")
+
+        rhs = np.column_stack((Qux, Qu))
+
+        try:
+            if not np.allclose(Quu_reg, Quu_reg.T):
+                raise np.linalg.LinAlgError("Quu_reg is not symmetric")
+            factor = linalg.cho_factor(Quu_reg, lower=True, check_finite=False)
+            solution = linalg.cho_solve(factor, rhs, check_finite=False)
+        except (np.linalg.LinAlgError, ValueError):
+            solution = np.linalg.solve(Quu_reg, rhs)
+
+        if not np.all(np.isfinite(solution)):
+            raise ValueError("iLQR backward-pass gain solution must be finite")
+
+        K_k = -solution[:, : Qux.shape[1]]
+        d_k = -solution[:, Qux.shape[1]]
+        return K_k, d_k
 
     def _forward_pass(
         self,

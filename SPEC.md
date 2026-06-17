@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.406                                            |
+| **Spec Version**        | 1.0.407                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Replaced the iLQR backward-pass gain calculation for issue
+  #7570: `src/research/mpc/controller.py` now solves the regularized `Quu`
+  system directly, using a finite-checked Cholesky path for symmetric positive
+  definite matrices and a general linear solve fallback while preserving gain
+  parity with the previous inverse-based math.
 - **2026-06-17** - Optimized whole-body SciPy QP inequality construction for
   issue #7568: inequality rows now build as vector-valued lower/upper SLSQP
   callbacks from finite-bound masks instead of O(m) per-row Python callbacks,
@@ -1542,6 +1547,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-17 | 1.0.407 | Replaced the iLQR backward-pass gain calculation for issue #7570. The MPC controller now solves the regularized `Quu` system directly, using a finite-checked Cholesky path for symmetric positive definite matrices and a general linear solve fallback while preserving gain parity with the previous inverse-based math. |
 | 2026-06-17 | 1.0.406 | Optimized whole-body SciPy QP inequality construction for issue #7568. Finite lower and upper inequality bounds now each build one vector-valued SLSQP callback instead of per-row Python callbacks, while QP construction validates finite matrices plus constraint and bound shapes before entering the solver hot path. |
 | 2026-06-14 | 1.0.394 | Added the ball-flight physical benchmark contract for issue #7407. TrackMan-style driver and 7-iron tests now cover the enhanced simulator, the public flight-model registry, and the REST route; the suite locks cross-engine carry agreement, 5 m/s headwind/tailwind sanity, analytic vacuum range, explicit zero-drag semantics for Python/Rust drag-crisis helpers, humidity-aware density through `EnvironmentalConditions.from_altitude(...)`, and the calibrated Magnus coefficient cap contract. |
 | 2026-06-14 | 1.0.396 | Completed the AnalysisOrchestrator dashboard plot migration for #7446. Every PyQt6 static-dashboard label now maps to a registered headless `PlotData` extractor, including Poincare, Lyapunov, recurrence, GRF butterfly, kinematic-sequence, and summary-dashboard outputs, and the desktop dispatch path exercises `AnalysisOrchestrator.get_plot_data(...)` before renderer-specific plotting. |

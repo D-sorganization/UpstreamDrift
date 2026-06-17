@@ -51,6 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Dockerfile.heavy_test` stays heavy-test parity only, and
   `Dockerfile.modular` remains the opt-in profile build surface (#6097).
 
+### Fixed
+
+- Replaced the iLQR backward-pass explicit `np.linalg.inv` gain solve with a
+  finite-checked Cholesky solve path plus general-solve fallback for #7570.
+
 ### Refactor
 
 - Renamed source-revealing identifiers and directories in motion-matching code
