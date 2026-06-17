@@ -368,6 +368,39 @@ class TestCIEnvironmentCompatibility:
             assert "pydantic-core==" not in workflow
             assert "--no-deps pydantic-core" not in workflow
 
+    def test_tauri_check_verifies_rust_toolchain_before_cargo_steps(self) -> None:
+        """The Tauri check job must fail early when Rust setup is unusable."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        steps = workflow["jobs"]["check"]["steps"]
+        step_names = [step.get("name") for step in steps]
+
+        setup_index = step_names.index("Setup Rust")
+        verify_index = step_names.index("Verify Rust toolchain")
+        first_cargo_index = min(
+            step_names.index(name)
+            for name in (
+                "Rust format check",
+                "Repair Cargo target cache",
+                "Rust clippy",
+                "Cargo check",
+            )
+        )
+
+        assert setup_index < verify_index < first_cargo_index
+        verify_script = steps[verify_index]["run"]
+        for executable in ("rustup", "rustc", "cargo"):
+            assert f"command -v {executable}" in verify_script
+            assert f"{executable} --version" in verify_script
+
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
     ) -> None:
