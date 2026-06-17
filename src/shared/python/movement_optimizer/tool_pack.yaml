@@ -1,0 +1,26 @@
+schema: tool_pack/v1
+repo: Movement-Optimizer
+package: movement_optimizer
+role: optimizer
+formulation: lagrangian
+muscle_model: hill
+plane: sagittal
+links: 3
+anthropometrics: winter_2009
+supported_exercises:
+  - squat
+  - full_squat
+  - deadlift
+  - bench_press
+  - snatch
+  - clean
+  - jerk
+consumes_models_from:
+  - mujoco_models
+  - drake_models
+  - pinocchio_models
+  - opensim_models
+produces:
+  - trajectories
+  - muscle_activations
+  - spinal_load_estimates
