@@ -687,7 +687,8 @@ class LowerBodySimulator:
             J[:, 0:6] = 0.0
 
             J_T = J.T
-            dq = J_T @ np.linalg.inv(J @ J_T + alpha * np.eye(6)) @ err
+            damped_normal = J @ J_T + alpha * np.eye(6)
+            dq = J_T @ np.linalg.solve(damped_normal, err)
             mujoco.mj_integratePos(self.model, self.data.qpos, dq, 1.0)
 
         # Failure: restore the snapshot and leave qpos_target untouched.

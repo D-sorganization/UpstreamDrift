@@ -88,6 +88,7 @@ jobs:
           sudo apt-get update || true
           sudo apt-get install -y xvfb
           python -m ensurepip --upgrade || true
+          pip install --force-reinstall "idna[uts46]>=3.4"
           pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
           python - <<'PY'
