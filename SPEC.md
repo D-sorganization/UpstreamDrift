@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.422                                            |
+| **Spec Version**        | 1.0.423                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Optimized lower-body simulator history eviction for
+  issue #7561: `LowerBodySimulator` now stores scrub/playback frames in a
+  bounded `deque`, preserving FIFO order, frame indexing, and clear/restore
+  behavior while avoiding `list.pop(0)` work on every overflow step.
 - **2026-06-17** - Pinned deformable external-force scatter coverage for
   issue #7563: `SoftBody.apply_external_force` now has a source-level
   regression guard against Python-level scatter loops, complementing the
@@ -1600,6 +1604,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-17 | 1.0.423 | Optimized lower-body simulator history eviction for #7561. `LowerBodySimulator` now records scrub/playback frames in a bounded `deque`, preserving FIFO order, frame indexing, and clear/restore behavior while avoiding the previous `list.pop(0)` overflow path in the simulation step loop. |
 | 2026-06-17 | 1.0.422 | Pinned deformable external-force scatter coverage for #7563. `SoftBody.apply_external_force()` now has source-level regression coverage that rejects Python-level scatter loops, complementing duplicate-node accumulation tests that preserve the existing `np.add.at` duplicate-index semantics. |
 | 2026-06-17 | 1.0.408 | Deformable object internal-force performance for #7571/#7572. Soft-body FEM force assembly now batches tetrahedral deformation gradients, determinants, inversions, stresses, and nodal scatter while reusing each inverse once. Cable and cloth spring-force accumulation now uses cached NumPy connectivity/stiffness arrays plus shared vectorized scatter kernels, with focused scalar-reference parity and allocation/vectorization tests for the deformable internals. |
 | 2026-06-17 | 1.0.407 | Replaced the iLQR backward-pass gain calculation for issue #7570. The MPC controller now solves the regularized `Quu` system directly, using a finite-checked Cholesky path for symmetric positive definite matrices and a general linear solve fallback while preserving gain parity with the previous inverse-based math. |
