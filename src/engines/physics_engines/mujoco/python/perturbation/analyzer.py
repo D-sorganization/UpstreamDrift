@@ -236,10 +236,8 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
 
         nu = model.nu
 
-        # Build a padded (nu, K) coefficient matrix in DESCENDING power order so
-        # the per-step control can be evaluated for all actuators at once with a
-        # single vectorized Horner pass into a preallocated buffer, instead of
-        # rebuilding a poly1d / calling np.polyval per actuator every step.
+        # Build a padded (nu, K) descending-power matrix so each step evaluates
+        # all actuators with vectorized Horner into a preallocated buffer.
         # Leading zeros (high-order coeffs) are exact no-ops, so the result is
         # identical to per-actuator np.polyval(coeffs[j][::-1], t).
         n_actuators_coeff = len(coeffs)
