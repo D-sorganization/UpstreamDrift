@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
+import math
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -27,6 +28,11 @@ logger = get_logger(__name__)
 
 # Geometric computation tolerance
 GEOMETRIC_TOLERANCE = 1e-10  # [unitless] For near-zero vector magnitude checks
+
+
+def _norm3(vector: np.ndarray) -> float:
+    """Return the Euclidean norm for a 3D vector without NumPy dispatch overhead."""
+    return math.hypot(vector[0], vector[1], vector[2])
 
 
 class ReferenceFrame(Enum):
@@ -161,7 +167,7 @@ def fit_instantaneous_swing_plane(
     if clubhead_velocity is None:
         raise ValueError("clubhead_velocity must be provided")
     grip_to_club = clubhead_position - grip_position
-    grip_axis_length = np.linalg.norm(grip_to_club)
+    grip_axis_length = _norm3(grip_to_club)
     if grip_axis_length < GEOMETRIC_TOLERANCE:
         logger.warning("Grip and clubhead positions too close")
         grip_axis = np.array([0.0, 0.0, 1.0])
@@ -169,7 +175,7 @@ def fit_instantaneous_swing_plane(
         grip_axis = grip_to_club / grip_axis_length
 
     # In-plane X is the velocity direction (tangent to swing)
-    vel_magnitude = np.linalg.norm(clubhead_velocity)
+    vel_magnitude = _norm3(clubhead_velocity)
     if vel_magnitude < GEOMETRIC_TOLERANCE:
         logger.warning("Clubhead velocity too small for plane fitting")
         in_plane_x = np.array([1.0, 0.0, 0.0])
@@ -178,7 +184,7 @@ def fit_instantaneous_swing_plane(
 
     # Normal is perpendicular to both velocity and grip axis
     normal = np.cross(grip_axis, in_plane_x)
-    normal_mag = np.linalg.norm(normal)
+    normal_mag = _norm3(normal)
     if normal_mag < GEOMETRIC_TOLERANCE:
         # Velocity is parallel to shaft - degenerate case
         logger.warning("Degenerate swing plane: velocity parallel to shaft")
@@ -188,7 +194,7 @@ def fit_instantaneous_swing_plane(
 
     # In-plane Y is perpendicular to both normal and in-plane X
     in_plane_y = np.cross(normal, in_plane_x)
-    in_plane_y = in_plane_y / np.linalg.norm(in_plane_y)
+    in_plane_y = in_plane_y / _norm3(in_plane_y)
 
     return SwingPlaneFrame(
         origin=clubhead_position,
@@ -258,15 +264,15 @@ def fit_functional_swing_plane(
 
     # In-plane axes: X along principal direction, Y perpendicular
     in_plane_x = vh[0, :]  # Largest singular value direction
-    in_plane_x = in_plane_x / np.linalg.norm(in_plane_x)
+    in_plane_x = in_plane_x / _norm3(in_plane_x)
 
     in_plane_y = np.cross(normal, in_plane_x)
-    in_plane_y = in_plane_y / np.linalg.norm(in_plane_y)
+    in_plane_y = in_plane_y / _norm3(in_plane_y)
 
     # Grip axis approximation (from first to last point in window)
     if len(window_points) >= 2:
         grip_axis = window_points[-1] - window_points[0]
-        grip_length = np.linalg.norm(grip_axis)
+        grip_length = _norm3(grip_axis)
         if grip_length > 1e-10:
             grip_axis = grip_axis / grip_length
         else:
