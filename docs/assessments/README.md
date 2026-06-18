@@ -3,6 +3,9 @@
 ## Canonical Current Quality Status
 
 - Canonical status file: `docs/assessments/CANONICAL_QUALITY_STATUS.md`
+- Latest adversarial A-O assessment:
+  `docs/assessments/2026-06-18-comprehensive-assessment.md` with dashboard
+  data in `docs/assessments/2026-06-18-comprehensive-assessment.json`.
 - Current migrated root assessment notes include
   `docs/assessments/may_10_12_audit_plan.md`, with fleet tracking and
   remediation summaries retained under `docs/operations/` as operational status
