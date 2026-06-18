@@ -10,9 +10,9 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import json
-import sys
-import subprocess
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +21,27 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _major_minor(version: str) -> tuple[int, int]:
+    """Return a crate/package major.minor tuple from an exact semver string."""
+    parts = version.split(".")
+    if len(parts) < 2:
+        raise ValueError(f"Expected at least major.minor version, got {version!r}")
+    return int(parts[0]), int(parts[1])
+
+
+def _load_tauri_cargo_packages() -> dict[str, str]:
+    """Load package versions from the generated Tauri Cargo lockfile."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[import-not-found, no-redef]
+
+    with open(REPO_ROOT / "ui" / "src-tauri" / "Cargo.lock", "rb") as lock_file:
+        cargo_lock = tomllib.load(lock_file)
+
+    return {package["name"]: package["version"] for package in cargo_lock["package"]}
 
 
 class TestCoreDependencies:
@@ -479,6 +500,35 @@ class TestCIEnvironmentCompatibility:
 
         assert scripts["tauri"] == "tauri"
         assert scripts["tauri:build"] == "tauri build"
+
+    def test_tauri_rust_and_npm_api_versions_share_minor(self) -> None:
+        """Tauri app builds require Rust tauri and @tauri-apps/api parity."""
+        package_lock = json.loads(
+            (REPO_ROOT / "ui" / "package-lock.json").read_text(encoding="utf-8")
+        )
+        npm_api_version = package_lock["packages"]["node_modules/@tauri-apps/api"][
+            "version"
+        ]
+        cargo_packages = _load_tauri_cargo_packages()
+        rust_tauri_version = cargo_packages["tauri"]
+
+        assert _major_minor(rust_tauri_version) == _major_minor(npm_api_version), (
+            "tauri-action rejects mismatched Tauri minor versions: "
+            f"tauri {rust_tauri_version} vs @tauri-apps/api {npm_api_version}"
+        )
+
+    def test_tauri_linux_dependencies_cover_lockfile_native_packages(self) -> None:
+        """Linux Tauri builds must install native -dev packages for sys crates."""
+        cargo_packages = _load_tauri_cargo_packages()
+        workflow = (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
+            encoding="utf-8"
+        )
+        install_lines = re.findall(r"apt_retry install -y .+", workflow)
+
+        assert "libdbus-sys" in cargo_packages
+        assert len(install_lines) == 2
+        for install_line in install_lines:
+            assert "libdbus-1-dev" in install_line
 
     def test_tauri_build_matrix_uses_named_runner_metadata(self) -> None:
         """Tauri build jobs must not expose array runner labels in job names."""

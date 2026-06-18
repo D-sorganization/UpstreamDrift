@@ -53,6 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Restored the Tauri release-build dependency contract for #7652 by aligning
+  the Rust `tauri` lockfile package with the locked `@tauri-apps/api` minor
+  version, installing the `libdbus-1-dev` Linux header package required by the
+  updated Rust graph, and adding CI infrastructure regression tests that fail
+  before `tauri-action` can reject release builds for Rust/npm Tauri minor drift
+  or missing native Linux headers.
 - Vectorized deformable object internal-force hot paths for #7571/#7572:
   FEM assembly now batches tetrahedral deformation gradients, inversions, and
   nodal force scatter while reusing each inverse once; cable and cloth spring
