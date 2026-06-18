@@ -61,10 +61,11 @@ fn simulate_ball_trajectory_py(
     ball: aerodynamics::AeroBallProperties,
     air: aerodynamics::AirProperties,
     config: rk4::IntegratorConfig,
-) -> ball_flight::BallTrajectoryResult {
+) -> PyResult<ball_flight::BallTrajectoryResult> {
     ball_flight::simulate_ball_trajectory(
         pos0, vel0, spin_axis, omega0, gravity, wind, &ball, &air, &config,
     )
+    .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
 #[cfg(feature = "python")]

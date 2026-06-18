@@ -17,7 +17,29 @@ use crate::error::{UrdfError, UrdfResult};
 
 /// Parse a URDF document supplied as a string. The input must be valid XML
 /// with `<robot>` as the root element.
+///
+/// In addition to XML/structural parsing, this enforces the biomechanics
+/// domain invariants via [`Robot::validate`] (mass positivity, inertia
+/// positive-definiteness, joint-limit ordering) and returns
+/// [`UrdfError::Schema`] on the first violation (issue #7659).
+///
+/// Callers that only care about structural fidelity — e.g. parse→write→parse
+/// round-trip checks over arbitrary real-world URDFs that may carry
+/// massless placeholder links — should use [`parse_urdf_str_lenient`].
 pub fn parse_urdf_str(xml: &str) -> UrdfResult<Robot> {
+    let robot = parse_urdf_str_lenient(xml)?;
+    robot.validate()?;
+    Ok(robot)
+}
+
+/// Parse a URDF document without enforcing domain invariants.
+///
+/// Performs the same XML/structural parsing as [`parse_urdf_str`] (including
+/// rejecting malformed numeric attributes) but skips [`Robot::validate`]. Use
+/// this when the input is known to contain physically-degenerate-but-valid
+/// structures (massless connector links, etc.) and only structural fidelity
+/// matters.
+pub fn parse_urdf_str_lenient(xml: &str) -> UrdfResult<Robot> {
     let mut reader = Reader::from_str(xml);
     reader.config_mut().trim_text(true);
 
@@ -196,18 +218,18 @@ fn handle_open(
         "limit" => {
             if let Some(j) = cur_joint.as_mut() {
                 j.limits = Some(JointLimits {
-                    lower: attr_f64(&attrs, "lower", -std::f64::consts::PI),
-                    upper: attr_f64(&attrs, "upper", std::f64::consts::PI),
-                    effort: attr_f64(&attrs, "effort", 1000.0),
-                    velocity: attr_f64(&attrs, "velocity", 10.0),
+                    lower: attr_f64(&attrs, "lower", -std::f64::consts::PI)?,
+                    upper: attr_f64(&attrs, "upper", std::f64::consts::PI)?,
+                    effort: attr_f64(&attrs, "effort", 1000.0)?,
+                    velocity: attr_f64(&attrs, "velocity", 10.0)?,
                 });
             }
         }
         "dynamics" => {
             if let Some(j) = cur_joint.as_mut() {
                 j.dynamics = JointDynamics {
-                    damping: attr_f64(&attrs, "damping", 0.0),
-                    friction: attr_f64(&attrs, "friction", 0.0),
+                    damping: attr_f64(&attrs, "damping", 0.0)?,
+                    friction: attr_f64(&attrs, "friction", 0.0)?,
                 };
             }
         }
@@ -216,17 +238,17 @@ fn handle_open(
         }
         "mass" => {
             if let Some(inert) = cur_inertial.as_mut() {
-                inert.mass = attr_f64(&attrs, "value", 0.0);
+                inert.mass = attr_f64(&attrs, "value", 0.0)?;
             }
         }
         "inertia" => {
             if let Some(inert) = cur_inertial.as_mut() {
-                inert.ixx = attr_f64(&attrs, "ixx", 0.0);
-                inert.iyy = attr_f64(&attrs, "iyy", 0.0);
-                inert.izz = attr_f64(&attrs, "izz", 0.0);
-                inert.ixy = attr_f64(&attrs, "ixy", 0.0);
-                inert.ixz = attr_f64(&attrs, "ixz", 0.0);
-                inert.iyz = attr_f64(&attrs, "iyz", 0.0);
+                inert.ixx = attr_f64(&attrs, "ixx", 0.0)?;
+                inert.iyy = attr_f64(&attrs, "iyy", 0.0)?;
+                inert.izz = attr_f64(&attrs, "izz", 0.0)?;
+                inert.ixy = attr_f64(&attrs, "ixy", 0.0)?;
+                inert.ixz = attr_f64(&attrs, "ixz", 0.0)?;
+                inert.iyz = attr_f64(&attrs, "iyz", 0.0)?;
             }
         }
         "origin" => {
@@ -291,8 +313,8 @@ fn handle_open(
             }
         }
         "cylinder" => {
-            let radius = attr_f64(&attrs, "radius", 0.0);
-            let length = attr_f64(&attrs, "length", 0.0);
+            let radius = attr_f64(&attrs, "radius", 0.0)?;
+            let length = attr_f64(&attrs, "length", 0.0)?;
             set_current_geometry(
                 stack_top.as_deref(),
                 cur_vis,
@@ -301,7 +323,7 @@ fn handle_open(
             );
         }
         "sphere" => {
-            let radius = attr_f64(&attrs, "radius", 0.0);
+            let radius = attr_f64(&attrs, "radius", 0.0)?;
             set_current_geometry(
                 stack_top.as_deref(),
                 cur_vis,
@@ -451,10 +473,20 @@ fn collect_attrs(e: &BytesStart<'_>) -> UrdfResult<std::collections::HashMap<Str
     Ok(out)
 }
 
-fn attr_f64(map: &std::collections::HashMap<String, String>, key: &str, default: f64) -> f64 {
-    map.get(key)
-        .and_then(|s| s.parse::<f64>().ok())
-        .unwrap_or(default)
+/// Parse a numeric attribute. Returns the `default` only when the key is
+/// **absent**; a key that is present but unparseable is a hard error rather
+/// than a silently-swallowed default (issue #7659).
+fn attr_f64(
+    map: &std::collections::HashMap<String, String>,
+    key: &str,
+    default: f64,
+) -> UrdfResult<f64> {
+    match map.get(key) {
+        None => Ok(default),
+        Some(s) => s.parse::<f64>().map_err(|e| {
+            UrdfError::Parse(format!("attribute {key:?} has invalid float {s:?}: {e}"))
+        }),
+    }
 }
 
 fn parse_vec3(s: &str) -> UrdfResult<[f64; 3]> {
