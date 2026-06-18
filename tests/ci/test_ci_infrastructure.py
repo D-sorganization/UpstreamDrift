@@ -1152,6 +1152,40 @@ class TestCIEnvironmentCompatibility:
         )
         assert "python3 scripts/ci/run_full_mypy_baseline.py" in mypy_step
 
+    def test_strict_api_mypy_push_uses_changed_api_scope_when_before_sha_exists(
+        self,
+    ) -> None:
+        """Push strict API mypy must not re-fail unrelated API type debt."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        strict_step = workflow[
+            workflow.index("- name: MyPy Strict (src/api)") : workflow.index(
+                "- name: Alembic Drift Check",
+            )
+        ]
+
+        assert '"${{ github.event_name }}" = "push"' in strict_step
+        assert "${{ github.event.before }}" in strict_step
+        assert "0000000000000000000000000000000000000000" in strict_step
+        assert 'diff_base="${{ github.event.before }}"' in strict_step
+        assert (
+            "git diff --name-only --diff-filter=ACMRT -z "
+            "\"$diff_base\" HEAD -- 'src/api/**/*.py' 'src/api/*.py'"
+        ) in strict_step
+        assert (
+            "No changed API Python files; skipping strict API mypy check."
+            in strict_step
+        )
+        assert (
+            'mypy "${api_py_files[@]}" --strict --follow-imports=silent --config-file pyproject.toml'
+            in strict_step
+        )
+        assert (
+            "mypy src/api --strict --follow-imports=silent --config-file pyproject.toml"
+            in strict_step
+        )
+
     def test_jules_pr_cleanup_falls_back_to_repository_token(self) -> None:
         """Scheduled cleanup must authenticate gh even without an optional PAT secret."""
         workflow = (

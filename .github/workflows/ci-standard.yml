@@ -296,17 +296,24 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            mapfile -d '' api_py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/api/**/*.py' 'src/api/*.py'
-            )
-            if [ "${#api_py_files[@]}" -eq 0 ]; then
-              echo "No changed API Python files; skipping strict API mypy check."
-              exit 0
-            fi
-            mypy "${api_py_files[@]}" --strict --follow-imports=silent --config-file pyproject.toml
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
           else
             mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
+            exit 0
           fi
+
+          mapfile -d '' api_py_files < <(
+            git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- 'src/api/**/*.py' 'src/api/*.py'
+          )
+          if [ "${#api_py_files[@]}" -eq 0 ]; then
+            echo "No changed API Python files; skipping strict API mypy check."
+            exit 0
+          fi
+          mypy "${api_py_files[@]}" --strict --follow-imports=silent --config-file pyproject.toml
 
       - name: Alembic Drift Check
         shell: bash

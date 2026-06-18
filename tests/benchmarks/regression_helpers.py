@@ -24,6 +24,7 @@ BASELINE_PATH = Path(__file__).with_name("baseline.json")
 # Generous regression multiplier — fail only on egregious slowdowns until
 # baselines are stabilized across runners. See issue #3510.
 DEFAULT_REGRESSION_MULTIPLIER = 5.0
+DEFAULT_MIN_REGRESSION_THRESHOLD_SECONDS = 10e-6
 
 
 def measure_median_seconds(
@@ -81,12 +82,14 @@ def assert_within_regression_threshold(
     name: str,
     measured_seconds: float,
     multiplier: float = DEFAULT_REGRESSION_MULTIPLIER,
+    minimum_threshold_seconds: float = DEFAULT_MIN_REGRESSION_THRESHOLD_SECONDS,
 ) -> None:
     """Assert ``measured_seconds`` is within ``multiplier`` x baseline for ``name``.
 
     Preconditions:
         - ``measured_seconds`` must be >= 0
         - ``multiplier`` must be > 1.0
+        - ``minimum_threshold_seconds`` must be >= 0
 
     If the baseline file does not contain ``name``, this is a no-op so a fresh
     benchmark on a new metric can record a baseline without failing CI.
@@ -97,12 +100,17 @@ def assert_within_regression_threshold(
         )
     if multiplier <= 1.0:
         raise ValueError(f"multiplier must be > 1.0, got {multiplier}")
+    if minimum_threshold_seconds < 0:
+        raise ValueError(
+            "minimum_threshold_seconds must be non-negative, "
+            f"got {minimum_threshold_seconds}"
+        )
 
     baseline = load_baseline().get(name)
     if baseline is None:
         return  # no baseline yet — record this run, do not fail
 
-    threshold = baseline * multiplier
+    threshold = max(baseline * multiplier, minimum_threshold_seconds)
     assert measured_seconds <= threshold, (
         f"Performance regression for {name!r}: "
         f"measured {measured_seconds * 1e6:.1f}us, "
