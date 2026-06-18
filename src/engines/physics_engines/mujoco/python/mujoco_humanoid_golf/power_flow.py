@@ -120,6 +120,22 @@ class PowerFlowAnalyzer:
 
         self._data = mujoco.MjData(model)
 
+        # Cache per-joint damping/dof-address once, so the per-step power
+        # dissipation loop does not rebuild a `model.jnt(i)` view for every
+        # joint on every call. Only joints with positive damping and an in-range
+        # dof address contribute, exactly as the original scalar loop.
+        njnt = int(model.njnt)
+        nv = int(model.nv)
+        damping = np.empty(njnt, dtype=np.float64)
+        dofadr = np.empty(njnt, dtype=np.int64)
+        for i in range(njnt):
+            joint = model.jnt(i)
+            damping[i] = float(joint.damping[0])
+            dofadr[i] = int(joint.dofadr[0])
+        active = (damping > 0) & (dofadr < nv) & (dofadr >= 0)
+        self._diss_damping = damping[active]
+        self._diss_dofadr = dofadr[active]
+
     def _compute_work_decomposition(
         self,
         tau: np.ndarray,
@@ -181,15 +197,12 @@ class PowerFlowAnalyzer:
     def _compute_power_dissipation(self, qvel: np.ndarray) -> float:
         if qvel is None:
             raise ValueError("qvel must be provided")
-        power_diss = 0.0
-        for i in range(self.model.njnt):
-            joint = self.model.jnt(i)
-            if joint.damping[0] > 0:
-                v_idx = joint.dofadr[0]
-                if v_idx < self.model.nv:
-                    # perf: qvel*qvel avoids ** 2 overhead
-                    power_diss += joint.damping[0] * (qvel[v_idx] * qvel[v_idx])
-        return power_diss
+        if self._diss_dofadr.size == 0:
+            return 0.0
+        # Vectorized over the precomputed damped joints; identical to summing
+        # damping * qvel[dofadr]^2 over each joint with positive damping.
+        v = np.asarray(qvel)[self._diss_dofadr]
+        return float(np.dot(self._diss_damping, v * v))
 
     @precondition(
         lambda self, qpos, qvel, qacc, tau, dt=0.01, **kw: dt > 0,

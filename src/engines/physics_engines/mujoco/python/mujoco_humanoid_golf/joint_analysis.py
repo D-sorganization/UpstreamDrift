@@ -150,35 +150,52 @@ class UniversalJointAnalyzer:
             msg = "One or both joints not found"
             raise ValueError(msg)
 
-        self.model.jnt_qposadr[input_id]
-        self.model.jnt_qposadr[output_id]
-
         # Sample over full rotations
         angles = np.linspace(0, 2 * np.pi * num_cycles, num_cycles * 360)
-        velocity_ratios = []
-        torque_ratios = []
 
-        for angle in angles:
-            # Get current joint angles
-            angle1, angle2 = self.get_universal_joint_angles(input_joint, output_joint)
+        # The shaft bend angle is constant over the sweep (get_universal_joint_angles
+        # reads the current model state and does not depend on `angle`), so hoist it
+        # out of the loop instead of recomputing it 360*num_cycles times.
+        angle1, angle2 = self.get_universal_joint_angles(input_joint, output_joint)
+        joint_angle = float(np.sqrt(angle1**2 + angle2**2))
 
-            # Calculate joint bend angle (angle between shafts)
-            joint_angle = np.sqrt(angle1**2 + angle2**2)
-
-            # Calculate velocity and torque ratios
-            vel_ratio = self.calculate_torque_wobble(angle, joint_angle)
-            torque_ratio = 1.0 / vel_ratio if abs(vel_ratio) > 1e-9 else 0.0
-
-            velocity_ratios.append(vel_ratio)
-            torque_ratios.append(torque_ratio)
+        # Vectorized velocity ratio: identical element-wise to
+        # calculate_torque_wobble(angle, joint_angle) over `angles`.
+        velocity_ratios = self._torque_wobble_vectorized(angles, joint_angle)
+        # Torque ratio is the reciprocal, with the same |vel| > 1e-9 guard.
+        torque_ratios = np.where(
+            np.abs(velocity_ratios) > 1e-9,
+            1.0 / np.where(velocity_ratios != 0.0, velocity_ratios, 1.0),
+            0.0,
+        )
 
         return {
             "angles": angles,
-            "velocity_ratios": np.array(velocity_ratios),
-            "torque_ratios": np.array(torque_ratios),
+            "velocity_ratios": velocity_ratios,
+            "torque_ratios": torque_ratios,
             "wobble_amplitude": float(np.std(velocity_ratios)),
             "mean_velocity_ratio": float(np.mean(velocity_ratios)),
         }
+
+    @staticmethod
+    def _torque_wobble_vectorized(
+        input_angles: np.ndarray, joint_angle: float
+    ) -> np.ndarray:
+        """Vectorized form of :meth:`calculate_torque_wobble` over input angles.
+
+        Returns element-wise ``cos(beta) / (1 - sin^2(beta) sin^2(theta))`` with
+        the same guards as the scalar method: a constant 1.0 when the bend angle
+        is below 1e-6, and +inf where the denominator collapses below 1e-9.
+        """
+        thetas = np.asarray(input_angles, dtype=np.float64)
+        if abs(joint_angle) < 1e-6:
+            return np.ones_like(thetas)
+        sin_beta = np.sin(joint_angle)
+        cos_beta = np.cos(joint_angle)
+        denominator = 1.0 - (sin_beta**2) * (np.sin(thetas) ** 2)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            ratios = cos_beta / denominator
+        return np.where(np.abs(denominator) < 1e-9, np.inf, ratios)
 
 
 class GimbalJointAnalyzer:
