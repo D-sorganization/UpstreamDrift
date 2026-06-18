@@ -19,6 +19,54 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 126,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"mean\" has incompatible type \"ndarray[tuple[int, ...], dtype[number[Any, int | float | complex]]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 129,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"std\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]]] | builtins.bool | int | float | complex | _NestedSequence[builtins.bool | int | float | complex]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 130,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 130,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float] | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 142,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"differential_evolution\" has incompatible type \"list[tuple[float, float]]\"; expected \"tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Bounds[tuple[Any, ...], float64 | Any]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_processor.py",
+      "line": 142,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"kind\" to \"interp1d\" has incompatible type \"str\"; expected \"Literal['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next'] | int\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
       "line": 145,
       "column": null,
@@ -32,6 +80,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/model_generation/editor/editor_modifications.py",
+      "line": 159,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"tuple\" has incompatible type \"float\"; expected \"Iterable[Never]\"",
       "code": "arg-type"
     },
     {
@@ -67,6 +123,38 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/plot_engine/trendline.py",
+      "line": 180,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"exp_func\" has incompatible type \"float64 | ndarray[tuple[int, ...], dtype[float64]]\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/plot_engine/trendline.py",
+      "line": 180,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 3 to \"exp_func\" has incompatible type \"float64 | ndarray[tuple[int, ...], dtype[float64]]\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/plot_engine/trendline.py",
+      "line": 181,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"exp_func\" has incompatible type \"float64 | ndarray[tuple[int, ...], dtype[float64]]\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/plot_engine/trendline.py",
+      "line": 181,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 3 to \"exp_func\" has incompatible type \"float64 | ndarray[tuple[int, ...], dtype[float64]]\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 186,
       "column": null,
@@ -88,6 +176,30 @@
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"QDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/programmatic_pid/document.py",
+      "line": 206,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"profile\" to \"generate_process_sheet\" has incompatible type \"None\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/programmatic_pid/document.py",
+      "line": 217,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"profile\" to \"generate_controls_sheet\" has incompatible type \"None\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 222,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 has incompatible type \"ndarray[tuple[int], dtype[float64]] | None\"; expected \"_SupportsArray[dtype[float64]] | _NestedSequence[_SupportsArray[dtype[float64]]]\"",
       "code": "arg-type"
     },
     {
@@ -115,6 +227,14 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/programmatic_pid/document.py",
+      "line": 236,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"profile\" to \"generate_process_sheet\" has incompatible type \"None\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
       "line": 240,
       "column": null,
@@ -131,11 +251,35 @@
       "code": "arg-type"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/perturbation/analyzer.py",
+      "line": 254,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 4 to \"forwardKinematics\" has incompatible type \"float64\"; expected \"ndarray[Any, Any] | None\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/deployment/digital_twin/twin.py",
+      "line": 263,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"affected_joints\" to \"AnomalyReport\" has incompatible type \"list[signedinteger[_32Bit | _64Bit]]\"; expected \"list[int]\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/learning/imitation/_gail.py",
       "line": 269,
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/perturbation/analyzer.py",
+      "line": 270,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 4 to \"computeKineticEnergy\" has incompatible type \"float64\"; expected \"ndarray[Any, Any]\"",
       "code": "arg-type"
     },
     {
@@ -160,6 +304,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/deployment/digital_twin/twin.py",
+      "line": 288,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"affected_joints\" to \"AnomalyReport\" has incompatible type \"list[signedinteger[_32Bit | _64Bit]]\"; expected \"list[int]\"",
       "code": "arg-type"
     },
     {
@@ -195,6 +347,22 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 385,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"differential_evolution\" has incompatible type \"list[tuple[float, float]]\"; expected \"tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Bounds[tuple[Any, ...], float64 | Any]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 388,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"callback\" to \"differential_evolution\" has incompatible type \"Callable[[Any, float], builtins.bool]\"; expected \"Callable[[OptimizeResult], None] | Callable[[ndarray[tuple[int], dtype[float64]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], None] | None\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 40,
       "column": null,
@@ -208,6 +376,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"require\" has incompatible type \"Literal[False] | numpy.bool[builtins.bool]\"; expected \"builtins.bool\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer.py",
+      "line": 434,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 6 to \"evaluate_solution\" has incompatible type \"Callable[[CubicSpline[float64]], tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]]\"; expected \"_TrajectoryCallable\"",
       "code": "arg-type"
     },
     {
@@ -795,6 +971,22 @@
       "code": "assignment"
     },
     {
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
+      "line": 21,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
+      "line": 22,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type \"Callable[[Any, Any, Any, Any, Any], Any]\")",
+      "code": "assignment"
+    },
+    {
       "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
       "line": 234,
       "column": null,
@@ -835,6 +1027,14 @@
       "code": "assignment"
     },
     {
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_decimation.py",
+      "line": 26,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
+      "code": "assignment"
+    },
+    {
       "path": "src/shared/python/pendulum_simulator/cross_engine_perturbation.py",
       "line": 275,
       "column": null,
@@ -859,6 +1059,14 @@
       "code": "assignment"
     },
     {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 328,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
       "path": "src/deployment/digital_twin/twin.py",
       "line": 364,
       "column": null,
@@ -872,6 +1080,14 @@
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
+      "line": 43,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
       "code": "assignment"
     },
     {
@@ -992,6 +1208,14 @@
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"CollisionModel | None\", base class \"SimulationMixin\" defined the type as \"GeometryModel\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_decimation.py",
+      "line": 92,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[signedinteger[Any]]]\", variable has type \"ndarray[tuple[int], dtype[signedinteger[Any]]]\")",
       "code": "assignment"
     },
     {
@@ -1747,6 +1971,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 165,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"plot_surface\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 166,
       "column": null,
@@ -1784,6 +2016,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_KFAAnalysisMixin\" has no attribute \"decompose_coriolis_forces\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 169,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -2131,6 +2371,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/plotting/renderers/stability.py",
+      "line": 219,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 219,
       "column": null,
@@ -2216,6 +2464,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"events\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/stability.py",
+      "line": 228,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlim\"",
       "code": "attr-defined"
     },
     {
@@ -2587,6 +2843,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/plotting/renderers/kinematics.py",
+      "line": 278,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_pose_library.py",
       "line": 28,
       "column": null,
@@ -2712,6 +2976,14 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"s_rx\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/stability.py",
+      "line": 291,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -4187,6 +4459,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/plotting/renderers/kinematics.py",
+      "line": 564,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 568,
       "column": null,
@@ -4256,6 +4536,14 @@
       "column": null,
       "severity": "error",
       "message": "\"Callable[[], QLayout | None]\" has no attribute \"addLayout\"",
+      "code": "attr-defined"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/kinetics.py",
+      "line": 633,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -4611,6 +4899,14 @@
       "code": "attr-defined"
     },
     {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 97,
+      "column": null,
+      "severity": "error",
+      "message": "\"Axes\" has no attribute \"set_zlabel\"",
+      "code": "attr-defined"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
       "line": 97,
       "column": null,
@@ -4699,12 +4995,92 @@
       "code": "call-arg"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[tuple[float, float]]\", \"Any\", \"dict[str, int]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 184,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"pdist\" matches argument types \"Any\", \"str\"",
+      "code": "call-overload"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/widgets/calibration_dialog.py",
       "line": 257,
       "column": null,
       "severity": "error",
       "message": "No overload variant of \"int\" matches argument type \"object\"",
       "code": "call-overload"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int], dtype[float64]]\", \"str\", \"list[tuple[Any, Any]]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[float64]]\", \"str\", \"list[tuple[float, float]]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[floating[Any]]]\", \"str\", \"dict[str, object]\", \"list[tuple[float, float]]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[dict[Any, Any]]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[..., Any]\", \"ndarray[Any, Any]\", \"str\", \"dict[str, int]\", \"Callable[[Any], bool]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/plot_engine/contour.py",
+      "line": 53,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"griddata\" matches argument types \"ndarray[tuple[int, ...], dtype[Any]]\", \"ndarray[Any, Any]\", \"tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]\", \"str\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], float]\", \"ndarray[tuple[int, ...], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"list[dict[Any, Any]]\", \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], None]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
+      "line": 352,
+      "column": null,
+      "severity": "error",
+      "message": "Cannot determine type of \"show_ground\"",
+      "code": "has-type"
     },
     {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
@@ -4721,6 +5097,14 @@
       "severity": "error",
       "message": "Cannot determine type of \"auto_fit_axes\"",
       "code": "has-type"
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 168,
+      "column": null,
+      "severity": "error",
+      "message": "Value of type \"float | ndarray[tuple[Any, ...], dtype[float64]]\" is not indexable",
+      "code": "index"
     },
     {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
@@ -4827,6 +5211,14 @@
       "code": "misc"
     },
     {
+      "path": "src/robotics/planning/motion/_tree_index.py",
+      "line": 13,
+      "column": null,
+      "severity": "error",
+      "message": "Cannot assign to a type",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/analysis_mixin.py",
       "line": 130,
       "column": null,
@@ -4840,14 +5232,6 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
-      "line": 134,
-      "column": null,
-      "severity": "error",
-      "message": "Expected iterable as variadic argument",
       "code": "misc"
     },
     {
@@ -5019,11 +5403,27 @@
       "code": "misc"
     },
     {
+      "path": "src/shared/python/plotting/renderers/kinematics.py",
+      "line": 260,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 262,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/kinematics.py",
+      "line": 264,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5056,6 +5456,14 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/physics/flight_models.py",
+      "line": 297,
+      "column": null,
+      "severity": "error",
+      "message": "\"None\" not callable",
       "code": "misc"
     },
     {
@@ -5139,6 +5547,14 @@
       "code": "misc"
     },
     {
+      "path": "src/shared/python/plotting/renderers/kinetics.py",
+      "line": 372,
+      "column": null,
+      "severity": "error",
+      "message": "Too many values to unpack (5 expected, 6 provided)",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 378,
       "column": null,
@@ -5160,6 +5576,14 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/kinetics.py",
+      "line": 434,
+      "column": null,
+      "severity": "error",
+      "message": "Too many values to unpack (5 expected, 6 provided)",
       "code": "misc"
     },
     {
@@ -5187,6 +5611,22 @@
       "code": "misc"
     },
     {
+      "path": "src/shared/python/plotting/renderers/kinematics.py",
+      "line": 545,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/kinetics.py",
+      "line": 614,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 67,
       "column": null,
@@ -5195,11 +5635,27 @@
       "code": "misc"
     },
     {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 73,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 75,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin.UISetupMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 76,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5224,6 +5680,14 @@
       "column": null,
       "severity": "error",
       "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_setup_ui\" with type \"Callable[[PinocchioGUI], None]\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/shared/python/plotting/renderers/club.py",
+      "line": 85,
+      "column": null,
+      "severity": "error",
+      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5275,11 +5739,19 @@
       "code": "no-redef"
     },
     {
+      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
+      "line": 41,
+      "column": null,
+      "severity": "error",
+      "message": "Name \"_trimesh_module\" already defined (by an import)",
+      "code": "no-redef"
+    },
+    {
       "path": "src/launchers/startup.py",
       "line": 285,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QSplashScreen\"; supertype defines the argument type as \"QMouseEvent | None\"",
+      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"QSplashScreen\"; supertype defines the argument type as \"QMouseEvent | None\"",
       "code": "override"
     },
     {
@@ -5287,7 +5759,7 @@
       "line": 285,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QWidget\"; supertype defines the argument type as \"QMouseEvent | None\"",
+      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"QWidget\"; supertype defines the argument type as \"QMouseEvent | None\"",
       "code": "override"
     },
     {
@@ -5295,7 +5767,7 @@
       "line": 290,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"keyPressEvent\" is incompatible with supertype \"PyQt6.QtWidgets.QWidget\"; supertype defines the argument type as \"QKeyEvent | None\"",
+      "message": "Argument 1 of \"keyPressEvent\" is incompatible with supertype \"QWidget\"; supertype defines the argument type as \"QKeyEvent | None\"",
       "code": "override"
     },
     {
@@ -5303,7 +5775,7 @@
       "line": 32,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QObject | None\"",
+      "message": "Argument 1 of \"eventFilter\" is incompatible with supertype \"QObject\"; supertype defines the argument type as \"QObject | None\"",
       "code": "override"
     },
     {
@@ -5311,8 +5783,32 @@
       "line": 32,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QEvent | None\"",
+      "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"QObject\"; supertype defines the argument type as \"QEvent | None\"",
       "code": "override"
+    },
+    {
+      "path": "src/research/mpc/controller.py",
+      "line": 504,
+      "column": null,
+      "severity": "error",
+      "message": "Value of type variable \"_Shape2T\" of \"cho_factor\" cannot be \"tuple[int, ...]\"",
+      "code": "type-var"
+    },
+    {
+      "path": "src/shared/python/analysis/basic_stats.py",
+      "line": 102,
+      "column": null,
+      "severity": "error",
+      "message": "TypedDict \"_PeakProperties_0\" has no key \"prominences\"",
+      "code": "typeddict-item"
+    },
+    {
+      "path": "src/shared/python/analysis/basic_stats.py",
+      "line": 107,
+      "column": null,
+      "severity": "error",
+      "message": "TypedDict \"_PeakProperties_0\" has no key \"widths\"",
+      "code": "typeddict-item"
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
@@ -5443,14 +5939,6 @@
       "code": "var-annotated"
     },
     {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 292,
-      "column": null,
-      "severity": "error",
-      "message": "Need type annotation for \"_open_readers\" (hint: \"_open_readers: list[<type>] = ...\")",
-      "code": "var-annotated"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui_ui_setup.py",
       "line": 337,
       "column": null,
@@ -5475,11 +5963,75 @@
       "code": "var-annotated"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
-      "line": 134,
+      "path": "src/robotics/planning/motion/_tree_index.py",
+      "line": 13,
       "column": null,
       "severity": "note",
-      "message": "Error code \"misc\" not covered by \"type: ignore[attr-defined]\" comment",
+      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 184,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 184,
+      "column": null,
+      "severity": "note",
+      "message": "def pdist(X: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], metric: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None], *, out: ndarray[tuple[int], dtype[float64]] | None = ..., **kwargs: object) -> ndarray[tuple[int], dtype[float64]]",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "line": 184,
+      "column": null,
+      "severity": "note",
+      "message": "def pdist(X: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], metric: Literal['braycurtis', 'canberra', 'chebychev', 'chebyshev', 'cheby', 'cheb', 'ch', 'cityblock', 'cblock', 'cb', 'c', 'correlation', 'co', 'cosine', 'cos', 'dice', 'euclidean', 'euclid', 'eu', 'e', 'hamming', 'hamm', 'ha', 'h', 'minkowski', 'mi', 'm', 'pnorm', 'jaccard', 'jacc', 'ja', 'j', 'jensenshannon', 'js', 'mahalanobis', 'mahal', 'mah', 'rogerstanimoto', 'russellrao', 'seuclidean', 'se', 's', 'sokalsneath', 'sqeuclidean', 'sqe', 'sqeuclid', 'yule'] = ..., *, out: ndarray[tuple[int], dtype[float64]] | None = ..., p: float = ..., w: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., V: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., VI: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ...) -> ndarray[tuple[int], dtype[float64]]",
       "code": null
     },
     {
@@ -5487,7 +6039,7 @@
       "line": 257,
       "column": null,
       "severity": "note",
-      "message": "Error code \"call-overload\" not covered by \"type: ignore[arg-type]\" comment",
+      "message": "Error code \"call-overload\" not covered by \"type: ignore\" comment",
       "code": null
     },
     {
@@ -5515,6 +6067,46 @@
       "code": null
     },
     {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "line": 259,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
       "path": "src/tools/starting_pose_matcher/live_view_controller.py",
       "line": 277,
       "column": null,
@@ -5579,6 +6171,46 @@
       "code": null
     },
     {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
       "path": "src/shared/python/qt_utils/wheel_event_filter.py",
       "line": 32,
       "column": null,
@@ -5592,6 +6224,158 @@
       "column": null,
       "severity": "note",
       "message": "This violates the Liskov substitution principle",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 361,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 424,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/plot_engine/contour.py",
+      "line": 53,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/plot_engine/contour.py",
+      "line": 53,
+      "column": null,
+      "severity": "note",
+      "message": "def griddata(points: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], values: _CanArrayND[complexfloating[Any, Any]] | Sequence[JustComplex | complexfloating[Any, Any]], xi: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | tuple[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], ...], method: Literal['nearest', 'linear', 'cubic'] = ..., fill_value: complex | number[Any, int | float | complex] | numpy.bool[builtins.bool] = ..., rescale: bool = ...) -> ndarray[tuple[int, *tuple[Any, ...]], dtype[complex128]]",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/plot_engine/contour.py",
+      "line": 53,
+      "column": null,
+      "severity": "note",
+      "message": "def griddata(points: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], values: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], xi: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | tuple[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], ...], method: Literal['nearest', 'linear', 'cubic'] = ..., fill_value: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] = ..., rescale: bool = ...) -> ndarray[tuple[int, *tuple[Any, ...]], dtype[float64]]",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/plot_engine/contour.py",
+      "line": 53,
+      "column": null,
+      "severity": "note",
+      "message": "def griddata(points: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], values: _CanArrayND[number[Any, int | float | complex] | numpy.bool[builtins.bool]] | Sequence[complex | number[Any, int | float | complex] | numpy.bool[builtins.bool]], xi: _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | tuple[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], ...], method: Literal['nearest', 'linear', 'cubic'] = ..., fill_value: complex | number[Any, int | float | complex] | numpy.bool[builtins.bool] = ..., rescale: bool = ...) -> ndarray[tuple[int, *tuple[Any, ...]], dtype[Any]]",
       "code": null
     },
     {
@@ -5599,7 +6383,47 @@
       "line": 64,
       "column": null,
       "severity": "note",
-      "message": "Error code \"assignment\" not covered by \"type: ignore[operator]\" comment",
+      "message": "Error code \"assignment\" not covered by \"type: ignore\" comment",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: Callable[[_Float1DT, VarArg(Any), KwArg(Any)], _Float1DT], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: Callable[[ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: Callable[[ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], VarArg(Any), KwArg(Any)], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
       "code": null
     }
   ]

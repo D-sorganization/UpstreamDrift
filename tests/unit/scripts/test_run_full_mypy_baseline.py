@@ -27,8 +27,23 @@ def test_parse_mypy_line_normalizes_error_code_and_windows_path() -> None:
         "src\\package\\module.py:12: error: "
         'Incompatible return value type (got "str", expected "int") [return-value]'
     )
+    constructor_note = mod.parse_mypy_line(
+        "src\\gui\\calibration_dialog.py:257: note:     def __new__(cls, "
+        "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc = ..., /) -> int"
+    )
 
     assert parsed == _error()
+    assert constructor_note == mod.MypyError(
+        path="src/gui/calibration_dialog.py",
+        line=257,
+        column=None,
+        severity="note",
+        message=(
+            "def int(str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc = "
+            "..., /) -> int"
+        ),
+        code=None,
+    )
 
 
 def test_compare_to_baseline_reports_new_and_stale_errors() -> None:

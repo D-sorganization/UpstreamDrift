@@ -29,6 +29,8 @@ SUMMARY_PREFIXES = (
     "Found ",
     "Success: ",
 )
+INT_CONSTRUCTOR_NOTE_PREFIX = "def __new__(cls, "
+INT_CONSTRUCTOR_NOTE_SUFFIX = ") -> int"
 
 
 @dataclass(frozen=True)
@@ -73,6 +75,16 @@ def normalize_path(path: str) -> str:
     return path.strip().replace("\\", "/")
 
 
+def normalize_message(message: str) -> str:
+    """Normalize equivalent mypy diagnostic spellings across Python builds."""
+    stripped = message.strip()
+    if stripped.startswith(INT_CONSTRUCTOR_NOTE_PREFIX) and stripped.endswith(
+        INT_CONSTRUCTOR_NOTE_SUFFIX
+    ):
+        return f"def int({stripped[len(INT_CONSTRUCTOR_NOTE_PREFIX) :]}"
+    return stripped
+
+
 def parse_mypy_line(line: str) -> MypyError | None:
     """Parse one mypy diagnostic line into a stable baseline key."""
     stripped = line.strip()
@@ -110,6 +122,8 @@ def parse_mypy_line(line: str) -> MypyError | None:
         message, raw_code = message.rsplit(" [", 1)
         message = message.strip()
         code = raw_code[:-1]
+
+    message = normalize_message(message)
 
     return MypyError(
         path=path,
@@ -169,7 +183,7 @@ def _parse_baseline_error(raw_error: Any) -> MypyError:
         line=_optional_int(raw_error.get("line"), "line"),
         column=_optional_int(raw_error.get("column"), "column"),
         severity=severity,
-        message=message.strip(),
+        message=normalize_message(message),
         code=_optional_str(raw_error.get("code"), "code"),
     )
 

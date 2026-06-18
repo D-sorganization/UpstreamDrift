@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.438                                            |
+| **Spec Version**        | 1.0.439                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Stabilized the full-src mypy baseline gate by normalizing
+  equivalent built-in `int` constructor note spellings across local and CI
+  Python/mypy environments, and refreshed the accountable baseline snapshot.
 - **2026-06-17** - Restored the current-main `repo-structure-gates` lane by
   installing the pinned PyYAML parser dependency before workflow YAML guards
   run, and added CI infrastructure coverage that keeps the trust-boundary guard
