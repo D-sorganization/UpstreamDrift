@@ -308,11 +308,13 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
         qvel_arr = np.array(qvel_list)
         ee_pos_arr = np.array(ee_pos_list)
 
-        # EE velocities via finite difference
+        # EE velocities via finite difference (vectorized; identical to the
+        # per-row loop: ee_vel[i] = (ee_pos[i] - ee_pos[i-1]) / max(dt, 1e-12),
+        # with ee_vel[0] left at zero).
         ee_vel_arr = np.zeros_like(ee_pos_arr)
-        for i in range(1, len(t_arr)):
-            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
-            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+        if len(t_arr) > 1:
+            dts = np.maximum(np.diff(t_arr), 1e-12)[:, None]
+            ee_vel_arr[1:] = np.diff(ee_pos_arr, axis=0) / dts
 
         return MuJoCoSimResult(
             t=t_arr,
