@@ -11,6 +11,8 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.joint_analys
     analyze_constraint_forces_over_time,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_mujoco():

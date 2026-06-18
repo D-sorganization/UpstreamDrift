@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import numpy as np  # noqa: TID253
+import pytest
 from double_pendulum_model.physics.triple_pendulum import (
     TriplePendulumDynamics,
     TriplePendulumState,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_triple_pendulum_mass_matrix_positive_definite() -> None:

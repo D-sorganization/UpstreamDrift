@@ -11,6 +11,8 @@ from src.learning.sim2real.system_identification import (
     SystemIdentifier,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class FakeModel:
     """Minimal physics model that emulates a passive integrator."""
