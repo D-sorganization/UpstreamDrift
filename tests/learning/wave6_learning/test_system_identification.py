@@ -165,3 +165,45 @@ class TestSystemIdentifier:
         metrics = ident.validate_identification(demos, params)
         assert metrics["n_trajectories"] == 2
         assert "mean_error" in metrics
+
+
+class TestEvaluateParamsCaching:
+    """Cached trajectory prep must not change _evaluate_params output (#7561)."""
+
+    def test_evaluate_params_repeated_calls_identical(self) -> None:
+        ident = SystemIdentifier(FakeModel())
+        demos = [_make_demo(), _make_demo(n_frames=8, n_joints=2)]
+        params = np.ones(len(ident.param_bounds))
+
+        first = ident._evaluate_params(params, demos)
+        # Second call hits the prepared-trajectory cache; must match exactly.
+        second = ident._evaluate_params(params, demos)
+        assert first == second
+        assert np.isfinite(first)
+
+    def test_prepared_trajectories_match_inline(self) -> None:
+        ident = SystemIdentifier(FakeModel())
+        demos = [_make_demo()]
+        prepared = ident._prepared_trajectories(demos)
+
+        demo = demos[0]
+        exp_initial = np.concatenate(
+            [demo.joint_positions[0], demo.joint_velocities[0]]
+        )
+        exp_real = np.concatenate([demo.joint_positions, demo.joint_velocities], axis=1)
+        exp_dt = float(np.mean(np.diff(demo.timestamps)))
+
+        initial_state, actions, dt, real_traj = prepared[0]
+        np.testing.assert_array_equal(initial_state, exp_initial)
+        np.testing.assert_array_equal(real_traj, exp_real)
+        assert dt == exp_dt
+        assert actions is demo.actions
+
+    def test_prepared_trajectories_cache_invalidates_on_new_list(self) -> None:
+        ident = SystemIdentifier(FakeModel())
+        demos_a = [_make_demo()]
+        demos_b = [_make_demo(n_frames=10)]
+        prep_a = ident._prepared_trajectories(demos_a)
+        prep_b = ident._prepared_trajectories(demos_b)
+        # Different trajectory lists must produce different prepared data.
+        assert prep_a[0][3].shape != prep_b[0][3].shape

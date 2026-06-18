@@ -300,30 +300,49 @@ class SystemIdentifier:
         self._apply_params(params)
         total_error = 0.0
 
-        for demo in trajectories:
-            if demo.actions is None:
-                continue
-
-            initial_state = np.concatenate(
-                [
-                    demo.joint_positions[0],
-                    demo.joint_velocities[0],
-                ],
-            )
-
-            real_traj = np.concatenate(
-                [
-                    demo.joint_positions,
-                    demo.joint_velocities,
-                ],
-                axis=1,
-            )
-
-            dt = float(np.mean(np.diff(demo.timestamps)))
-            sim_traj = self._simulate_trajectory(initial_state, demo.actions, dt)
+        # initial_state / real_traj / dt depend only on the (fixed) demos, not
+        # on `params`, but _evaluate_params is called once per coordinate-descent
+        # probe. Precompute them once per trajectory set instead of rebuilding
+        # the concatenations and dt on every probe.
+        prepared = self._prepared_trajectories(trajectories)
+        for initial_state, actions, dt, real_traj in prepared:
+            sim_traj = self._simulate_trajectory(initial_state, actions, dt)
             total_error += self._compute_trajectory_error(sim_traj, real_traj)
 
         return total_error / len(trajectories)
+
+    def _prepared_trajectories(
+        self,
+        trajectories: list[Demonstration],
+    ) -> list[tuple[NDArray[np.floating], Any, float, NDArray[np.floating]]]:
+        """Cache per-demo (initial_state, actions, dt, real_traj) tuples.
+
+        Keyed by the identity of the trajectory list so repeated probes during
+        coordinate descent reuse the concatenations and dt instead of rebuilding
+        them each call. Values are identical to the inline computation.
+        """
+        cache = getattr(self, "_prepared_traj_cache", None)
+        if cache is not None and cache[0] is trajectories:
+            return cache[1]
+
+        prepared: list[
+            tuple[NDArray[np.floating], Any, float, NDArray[np.floating]]
+        ] = []
+        for demo in trajectories:
+            if demo.actions is None:
+                continue
+            initial_state = np.concatenate(
+                [demo.joint_positions[0], demo.joint_velocities[0]],
+            )
+            real_traj = np.concatenate(
+                [demo.joint_positions, demo.joint_velocities],
+                axis=1,
+            )
+            dt = float(np.mean(np.diff(demo.timestamps)))
+            prepared.append((initial_state, demo.actions, dt, real_traj))
+
+        self._prepared_traj_cache = (trajectories, prepared)
+        return prepared
 
     def _coordinate_descent(
         self,
