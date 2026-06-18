@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Hardened the Tauri Build check after the UI audit recovery
+  PR exposed DeskComputer runner PATH drift: `CARGO_HOME` is now rooted at the
+  workspace, the Rust toolchain verifier persists `$CARGO_HOME/bin` into
+  `$GITHUB_PATH`, and CI infrastructure tests pin that Cargo remains reachable
+  before rustfmt/clippy/check steps run.
 - **2026-06-18** - Restored the current-main CI Standard lane after #7645 by
   path-scoping strict API mypy on ordinary pushes with `github.event.before`
   and adding a 10 microsecond absolute floor to microbenchmark regression

@@ -398,9 +398,11 @@ class TestCIEnvironmentCompatibility:
                 encoding="utf-8",
             ),
         )
-        steps = workflow["jobs"]["check"]["steps"]
+        check_job = workflow["jobs"]["check"]
+        steps = check_job["steps"]
         step_names = [step.get("name") for step in steps]
 
+        assert check_job["env"]["CARGO_HOME"].startswith("${{ github.workspace }}/")
         setup_index = step_names.index("Setup Rust")
         verify_index = step_names.index("Verify Rust toolchain")
         first_cargo_index = min(
@@ -415,6 +417,8 @@ class TestCIEnvironmentCompatibility:
 
         assert setup_index < verify_index < first_cargo_index
         verify_script = steps[verify_index]["run"]
+        assert 'echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"' in verify_script
+        assert 'export PATH="$CARGO_HOME/bin:$PATH"' in verify_script
         for executable in ("rustup", "rustc", "cargo"):
             assert f"command -v {executable}" in verify_script
             assert f"{executable} --version" in verify_script
