@@ -211,3 +211,67 @@ def analyzer():  # type: ignore[no-untyped-def]
 def analyzer_with_profile(analyzer):  # type: ignore[no-untyped-def]
     analyzer.set_base_torque_profile(_ZERO_PROFILE)
     return analyzer
+
+
+# ---------------------------------------------------------------------------
+# Polynomial control vectorization parity (#7559)
+# ---------------------------------------------------------------------------
+
+
+def _vectorized_horner_ctrl(coeffs, nu, t_values):
+    """Mirror analyzer._simulate's padded-matrix Horner control evaluation."""
+    n_actuators_coeff = len(coeffs)
+    max_order = 1
+    for j in range(min(nu, n_actuators_coeff)):
+        max_order = max(max_order, len(coeffs[j]))
+    poly_matrix = np.zeros((nu, max_order), dtype=np.float64)
+    for j in range(nu):
+        if j < n_actuators_coeff and len(coeffs[j]) > 0:
+            desc = np.asarray(coeffs[j][::-1], dtype=np.float64)
+            poly_matrix[j, max_order - desc.size :] = desc
+
+    out = []
+    ctrl = np.zeros(nu, dtype=np.float64)
+    for t in t_values:
+        ctrl[:] = poly_matrix[:, 0]
+        for col in range(1, max_order):
+            ctrl *= t
+            ctrl += poly_matrix[:, col]
+        out.append(ctrl.copy())
+    return np.array(out)
+
+
+def test_vectorized_poly_control_matches_polyval():
+    """Vectorized padded Horner must equal per-actuator np.polyval (ragged)."""
+    nu = 4
+    # Ragged ascending-power coeff lists (some shorter, one empty, one extra).
+    coeffs = [
+        [1.0, 2.0, 3.0],  # 1 + 2t + 3t^2
+        [0.5],  # constant
+        [],  # padded to zero
+        [0.0, -1.0, 0.0, 4.0],  # -t + 4t^3
+    ]
+    t_values = [0.0, 0.01, 0.5, 1.0, 2.5]
+
+    got = _vectorized_horner_ctrl(coeffs, nu, t_values)
+
+    expected = np.zeros((len(t_values), nu))
+    for ti, t in enumerate(t_values):
+        for j in range(nu):
+            if j < len(coeffs) and len(coeffs[j]) > 0:
+                expected[ti, j] = float(np.polyval(coeffs[j][::-1], t))
+            else:
+                expected[ti, j] = 0.0
+
+    np.testing.assert_allclose(got, expected, rtol=0, atol=1e-12)
+
+
+def test_vectorized_poly_control_more_actuators_than_coeffs():
+    """Actuators beyond provided coeffs must produce zero control."""
+    nu = 5
+    coeffs = [[2.0, 1.0], [3.0]]  # only 2 actuators specified
+    got = _vectorized_horner_ctrl(coeffs, nu, [0.7])
+    assert got.shape == (1, nu)
+    np.testing.assert_allclose(got[0, 2:], 0.0, atol=1e-12)
+    np.testing.assert_allclose(got[0, 0], np.polyval([1.0, 2.0], 0.7), atol=1e-12)
+    np.testing.assert_allclose(got[0, 1], 3.0, atol=1e-12)

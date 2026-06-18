@@ -236,14 +236,22 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
 
         nu = model.nu
 
-        # Build per-actuator polynomial arrays (ascending → reversed for polyval)
+        # Build a padded (nu, K) coefficient matrix in DESCENDING power order so
+        # the per-step control can be evaluated for all actuators at once with a
+        # single vectorized Horner pass into a preallocated buffer, instead of
+        # rebuilding a poly1d / calling np.polyval per actuator every step.
+        # Leading zeros (high-order coeffs) are exact no-ops, so the result is
+        # identical to per-actuator np.polyval(coeffs[j][::-1], t).
         n_actuators_coeff = len(coeffs)
-        joint_polys: list[np.ndarray] = []
+        max_order = 1
+        for j in range(min(nu, n_actuators_coeff)):
+            max_order = max(max_order, len(coeffs[j]))
+        poly_matrix = np.zeros((nu, max_order), dtype=np.float64)
         for j in range(nu):
-            if j < n_actuators_coeff:
-                joint_polys.append(np.array(coeffs[j][::-1]))
-            else:
-                joint_polys.append(np.array([0.0]))
+            if j < n_actuators_coeff and len(coeffs[j]) > 0:
+                desc = np.asarray(coeffs[j][::-1], dtype=np.float64)
+                poly_matrix[j, max_order - desc.size :] = desc
+        ctrl = np.zeros(nu, dtype=np.float64)
 
         dt = model.opt.timestep
         n_steps = max(2, int(self._t_end / dt))
@@ -267,7 +275,11 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
 
         for _ in range(n_steps):
             t = float(data.time)
-            ctrl = np.array([float(np.polyval(joint_polys[j], t)) for j in range(nu)])
+            # Vectorized Horner over all actuators: ctrl = ((c0*t + c1)*t + ...).
+            ctrl[:] = poly_matrix[:, 0]
+            for col in range(1, max_order):
+                ctrl *= t
+                ctrl += poly_matrix[:, col]
             data.ctrl[:] = ctrl
 
             mujoco.mj_step(model, data)
