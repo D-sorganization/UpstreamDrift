@@ -26,3 +26,17 @@ def test_inverse_matches_forward() -> None:
     torques = dynamics.inverse_dynamics(state, desired_acc)
     computed_acc = dynamics.forward_dynamics(state, torques)
     assert np.allclose(computed_acc, desired_acc, atol=1e-6)
+
+
+def test_polynomial_profile_cached_eval_matches_poly1d() -> None:
+    """Cached poly/deriv must equal a fresh np.poly1d evaluation (#7559)."""
+    from double_pendulum_model.physics.triple_pendulum import PolynomialProfile
+
+    coeffs = (2.0, -3.0, 0.5, 1.0)  # 2t^3 - 3t^2 + 0.5t + 1
+    profile = PolynomialProfile(coeffs)
+    poly = np.poly1d(coeffs)
+    deriv = np.poly1d(np.polyder(coeffs))
+
+    for t in (-2.0, 0.0, 0.25, 1.0, 3.5):
+        assert profile.omega(t) == float(poly(t))
+        assert profile.alpha(t) == float(deriv(t))

@@ -97,19 +97,24 @@ class TripleJointTorques:
 class PolynomialProfile:
     coefficients: tuple[float, ...]
 
+    def __post_init__(self) -> None:
+        # Build the polynomial and its derivative once instead of rebuilding a
+        # fresh np.poly1d (and recomputing np.polyder) on every omega()/alpha()
+        # call. Evaluation results are unchanged.
+        self._poly = np.poly1d(self.coefficients)
+        self._deriv = np.poly1d(np.polyder(self.coefficients))
+
     def omega(self, t: float) -> float:
         """Evaluate angular velocity polynomial at time t."""
         if not (t is not None):
             raise ValueError("t must be provided")
-        poly = np.poly1d(self.coefficients)
-        return float(poly(t))
+        return float(self._poly(t))
 
     def alpha(self, t: float) -> float:
         """Evaluate angular acceleration polynomial at time t."""
         if not (t is not None):
             raise ValueError("t must be provided")
-        derivative = np.polyder(self.coefficients)
-        return float(np.poly1d(derivative)(t))
+        return float(self._deriv(t))
 
 
 def _calc_mass_matrix(
