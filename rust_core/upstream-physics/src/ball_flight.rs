@@ -131,7 +131,11 @@ impl BallTrajectoryResult {
 /// - All position/velocity/gravity/wind components must be finite
 /// - `omega0 >= 0`
 /// - `config.dt > 0`, `ball.mass > 0`, `air.density >= 0`
-#[must_use]
+/// # Errors
+/// Returns `Err` with a descriptive message when any precondition is violated:
+/// non-finite inputs, `omega0 < 0`, or invalid ball/air/integrator properties.
+/// These were previously `assert!`/`expect` panics that crossed the PyO3
+/// boundary as a `PanicException` (issue #7663).
 #[allow(clippy::too_many_arguments)]
 pub fn simulate_ball_trajectory(
     pos0: [f64; 3],
@@ -143,37 +147,28 @@ pub fn simulate_ball_trajectory(
     ball: &AeroBallProperties,
     air: &AirProperties,
     config: &IntegratorConfig,
-) -> BallTrajectoryResult {
-    assert!(
-        pos0.iter().all(|v| v.is_finite()),
-        "DbC: initial position must be finite"
-    );
-    assert!(
-        vel0.iter().all(|v| v.is_finite()),
-        "DbC: initial velocity must be finite"
-    );
-    assert!(
-        spin_axis.iter().all(|v| v.is_finite()),
-        "DbC: spin axis must be finite"
-    );
-    assert!(
-        omega0.is_finite() && omega0 >= 0.0,
-        "DbC: omega0 must be finite and non-negative"
-    );
-    assert!(
-        gravity.iter().all(|v| v.is_finite()),
-        "DbC: gravity must be finite"
-    );
-    assert!(
-        wind.iter().all(|v| v.is_finite()),
-        "DbC: wind must be finite"
-    );
-    ball.validate()
-        .expect("invalid aerodynamic ball properties");
-    air.validate().expect("invalid air properties");
-    config
-        .validate()
-        .expect("invalid RK4 integrator configuration");
+) -> Result<BallTrajectoryResult, String> {
+    if !pos0.iter().all(|v| v.is_finite()) {
+        return Err("initial position must be finite".to_string());
+    }
+    if !vel0.iter().all(|v| v.is_finite()) {
+        return Err("initial velocity must be finite".to_string());
+    }
+    if !spin_axis.iter().all(|v| v.is_finite()) {
+        return Err("spin axis must be finite".to_string());
+    }
+    if !(omega0.is_finite() && omega0 >= 0.0) {
+        return Err("omega0 must be finite and non-negative".to_string());
+    }
+    if !gravity.iter().all(|v| v.is_finite()) {
+        return Err("gravity must be finite".to_string());
+    }
+    if !wind.iter().all(|v| v.is_finite()) {
+        return Err("wind must be finite".to_string());
+    }
+    ball.validate()?;
+    air.validate()?;
+    config.validate()?;
 
     // State: [x, y, z, vx, vy, vz, omega]
     let y0 = [pos0[0], pos0[1], pos0[2], vel0[0], vel0[1], vel0[2], omega0];
@@ -224,7 +219,7 @@ pub fn simulate_ball_trajectory(
     let terminate = |t: f64, state: &[f64]| -> bool { t > 0.05 && state[2] <= 0.0 };
 
     let max_time = config.max_steps as f64 * config.dt;
-    let result = integrate(derivative, 0.0, max_time, &y0, config, Some(terminate));
+    let result = integrate(derivative, 0.0, max_time, &y0, config, Some(terminate))?;
 
     // Convert IntegrationResult to BallTrajectoryResult
     let state_dim = result.state_dim;
@@ -251,11 +246,11 @@ pub fn simulate_ball_trajectory(
         .map(|p| p.z <= 0.0 && p.t > 0.05)
         .unwrap_or(false);
 
-    BallTrajectoryResult {
+    Ok(BallTrajectoryResult {
         completed: result.completed || landed,
         steps: result.steps_taken,
         points,
-    }
+    })
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -274,13 +269,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "invalid aerodynamic ball properties")]
-    fn test_simulation_rejects_invalid_mass_in_release_mode() {
+    fn test_simulation_rejects_invalid_mass() {
         let ball = AeroBallProperties {
             mass: 0.0,
             ..AeroBallProperties::default()
         };
-        let _ = simulate_ball_trajectory(
+        let result = simulate_ball_trajectory(
             [0.0, 0.0, 0.5],
             [10.0, 0.0, 10.0],
             [0.0, 1.0, 0.0],
@@ -291,6 +285,23 @@ mod tests {
             &AirProperties::default(),
             &default_config(),
         );
+        assert!(result.is_err(), "invalid ball mass must be rejected");
+    }
+
+    #[test]
+    fn test_simulation_rejects_non_finite_input() {
+        let result = simulate_ball_trajectory(
+            [f64::NAN, 0.0, 0.5],
+            [10.0, 0.0, 10.0],
+            [0.0, 1.0, 0.0],
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+        );
+        assert!(result.is_err(), "non-finite position must be rejected");
     }
 
     /// Test 1: Basic trajectory — ball launched at 45° should travel ~20-50m in range.
@@ -311,7 +322,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         assert!(!result.points.is_empty(), "Should have trajectory points");
         assert!(result.steps > 10, "Should take more than 10 steps");
@@ -357,7 +369,8 @@ mod tests {
             &ball,
             &air,
             &config,
-        );
+        )
+        .unwrap();
 
         assert!(!result.points.is_empty());
         let last = result.points.last().unwrap();
@@ -393,7 +406,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
         let result2 = simulate_ball_trajectory(
             params.0,
             params.1,
@@ -404,7 +418,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         assert_eq!(result1.steps, result2.steps);
         assert_eq!(result1.points.len(), result2.points.len());
@@ -435,7 +450,8 @@ mod tests {
             &fast_decay,
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
         let result_slow = simulate_ball_trajectory(
             [0.0, 0.0, 0.0],
             [25.0, 0.0, 15.0],
@@ -446,7 +462,8 @@ mod tests {
             &slow_decay,
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         // Fast decay → less lift → shorter (or comparable) range
         let range_fast = result_fast.points.last().map(|p| p.x).unwrap_or(0.0);
@@ -475,7 +492,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         let headwind_result = simulate_ball_trajectory(
             [0.0, 0.0, 0.0],
@@ -487,7 +505,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         let base_range = base_result.points.last().map(|p| p.x).unwrap_or(0.0);
         let headwind_range = headwind_result.points.last().map(|p| p.x).unwrap_or(0.0);
@@ -511,7 +530,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         assert!(
             result.completed,
@@ -533,7 +553,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
         let result_scaled = simulate_ball_trajectory(
             [0.0, 0.0, 0.5],
             [20.0, 0.0, 10.0],
@@ -544,7 +565,8 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
-        );
+        )
+        .unwrap();
 
         assert_eq!(
             result_unit.steps, result_scaled.steps,

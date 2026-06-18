@@ -127,8 +127,12 @@ impl IntegratorConfig {
 /// * `config` - Integrator configuration
 /// * `terminate` - Optional early termination: `terminate(t, state) -> bool`
 ///
-/// # Panics (debug only)
-/// Panics if `dt <= 0`, `t_end <= t_start`, or initial state contains NaN.
+/// # Errors
+/// Returns `Err` if the configuration is invalid, `t_start`/`t_end` are
+/// non-finite, `t_end <= t_start`, the initial state contains NaN/Inf, or the
+/// derivative closure returns a vector whose length differs from the state
+/// dimension (which would otherwise panic in `copy_from_slice` mid-loop —
+/// issue #7663).
 pub fn integrate<F, T>(
     f: F,
     t_start: f64,
@@ -136,21 +140,24 @@ pub fn integrate<F, T>(
     y0: &[f64],
     config: &IntegratorConfig,
     terminate: Option<T>,
-) -> IntegrationResult
+) -> Result<IntegrationResult, String>
 where
     F: Fn(f64, &[f64]) -> Vec<f64>,
     T: Fn(f64, &[f64]) -> bool,
 {
-    config
-        .validate()
-        .expect("invalid RK4 integrator configuration");
-    assert!(t_start.is_finite(), "t_start must be finite");
-    assert!(t_end.is_finite(), "t_end must be finite");
-    assert!(t_end > t_start, "t_end must be greater than t_start");
-    assert!(
-        y0.iter().all(|v| v.is_finite()),
-        "Initial state must be finite"
-    );
+    config.validate()?;
+    if !t_start.is_finite() {
+        return Err("t_start must be finite".to_string());
+    }
+    if !t_end.is_finite() {
+        return Err("t_end must be finite".to_string());
+    }
+    if t_end <= t_start {
+        return Err("t_end must be greater than t_start".to_string());
+    }
+    if !y0.iter().all(|v| v.is_finite()) {
+        return Err("Initial state must be finite".to_string());
+    }
 
     let state_dim = y0.len();
     let mut t = t_start;
@@ -180,6 +187,7 @@ where
 
         // k1 = f(t, y)
         let k1_val = f(t, &y);
+        check_deriv_len(&k1_val, state_dim)?;
         k1.copy_from_slice(&k1_val);
 
         // k2 = f(t + h/2, y + h/2 * k1)
@@ -187,6 +195,7 @@ where
             y_temp[i] = y[i] + 0.5 * h * k1[i];
         }
         let k2_val = f(t + 0.5 * h, &y_temp);
+        check_deriv_len(&k2_val, state_dim)?;
         k2.copy_from_slice(&k2_val);
 
         // k3 = f(t + h/2, y + h/2 * k2)
@@ -194,6 +203,7 @@ where
             y_temp[i] = y[i] + 0.5 * h * k2[i];
         }
         let k3_val = f(t + 0.5 * h, &y_temp);
+        check_deriv_len(&k3_val, state_dim)?;
         k3.copy_from_slice(&k3_val);
 
         // k4 = f(t + h, y + h * k3)
@@ -201,6 +211,7 @@ where
             y_temp[i] = y[i] + h * k3[i];
         }
         let k4_val = f(t + h, &y_temp);
+        check_deriv_len(&k4_val, state_dim)?;
         k4.copy_from_slice(&k4_val);
 
         // y_new = y + h/6 * (k1 + 2*k2 + 2*k3 + k4)
@@ -217,24 +228,38 @@ where
         // Check termination
         if let Some(ref term) = terminate {
             if term(t, &y) {
-                return IntegrationResult {
+                return Ok(IntegrationResult {
                     times,
                     states,
                     state_dim,
                     steps_taken: steps,
                     completed: false,
-                };
+                });
             }
         }
     }
 
-    IntegrationResult {
+    Ok(IntegrationResult {
         times,
         states,
         state_dim,
         steps_taken: steps,
         completed: t >= t_end - 1e-12,
+    })
+}
+
+/// Verify the derivative closure returned a vector of the expected length.
+/// Guards the `copy_from_slice` calls in [`integrate`] from a length-mismatch
+/// panic (issue #7663).
+fn check_deriv_len(deriv: &[f64], state_dim: usize) -> Result<(), String> {
+    if deriv.len() != state_dim {
+        return Err(format!(
+            "derivative closure returned {} values, expected state_dim = {}",
+            deriv.len(),
+            state_dim
+        ));
     }
+    Ok(())
 }
 
 // ── Tests (TDD) ─────────────────────────────────────────────────────────────
@@ -266,20 +291,42 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "invalid RK4 integrator configuration")]
-    fn test_integrate_rejects_zero_dt_in_release_mode() {
+    fn test_integrate_rejects_zero_dt() {
         let config = IntegratorConfig {
             dt: 0.0,
             max_steps: 10,
         };
         let f = |_t: f64, y: &[f64]| vec![-y[0]];
-        integrate(
+        let result = integrate(
             f,
             0.0,
             1.0,
             &[1.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
+        );
+        assert!(result.is_err(), "zero dt must be rejected");
+    }
+
+    #[test]
+    fn test_integrate_rejects_wrong_length_derivative() {
+        // Closure returns 2 values for a 1-D state: must error, not panic in
+        // copy_from_slice (issue #7663).
+        let config = IntegratorConfig {
+            dt: 0.01,
+            max_steps: 10,
+        };
+        let result = integrate(
+            |_t, _y| vec![1.0, 2.0],
+            0.0,
+            1.0,
+            &[0.0],
+            &config,
+            None::<fn(f64, &[f64]) -> bool>,
+        );
+        assert!(
+            result.is_err(),
+            "derivative length mismatch must be a Result error"
         );
     }
 
@@ -299,7 +346,8 @@ mod tests {
             &[1.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert!(result.completed);
         let final_y = result.states[result.states.len() - 1];
@@ -327,7 +375,8 @@ mod tests {
             &[1.0, 0.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert!(result.completed);
         let n = result.times.len();
@@ -361,7 +410,8 @@ mod tests {
             &[0.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert!(result.completed);
         let final_y = result.states[result.states.len() - 1];
@@ -384,7 +434,8 @@ mod tests {
             &[0.0],
             &config,
             Some(|_t: f64, y: &[f64]| y[0] >= 3.0),
-        );
+        )
+        .unwrap();
 
         assert!(!result.completed, "Should have terminated early");
         let final_y = result.states[result.states.len() - 1];
@@ -410,7 +461,8 @@ mod tests {
             &[0.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert!(!result.completed, "Should not complete with max_steps=10");
         assert_eq!(result.steps_taken, 10);
@@ -431,7 +483,8 @@ mod tests {
             &[0.0, 10.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert_eq!(result.state_dim, 2);
         // 10 steps + initial = 11, possibly +1 from final step clamping
@@ -466,7 +519,8 @@ mod tests {
             &[0.0, 0.0, vx0, vy0],
             &config,
             Some(|t: f64, y: &[f64]| t > 0.1 && y[1] < 0.0), // Ground hit
-        );
+        )
+        .unwrap();
 
         // Check max height is approximately v0² sin²(θ) / (2g) ≈ 10.19m
         let expected_max_h = vy0 * vy0 / (2.0 * g);
@@ -501,7 +555,8 @@ mod tests {
             &[42.0],
             &config,
             None::<fn(f64, &[f64]) -> bool>,
-        );
+        )
+        .unwrap();
 
         assert!(result.times.len() >= 2); // At least initial + 1 step
         assert!((result.states[0] - 42.0).abs() < 1e-12);

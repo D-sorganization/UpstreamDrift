@@ -6,6 +6,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::error::{UrdfError, UrdfResult};
+
 /// A `<robot>` document — the URDF root element.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Robot {
@@ -16,6 +18,102 @@ pub struct Robot {
     pub joints: Vec<Joint>,
     #[serde(default)]
     pub materials: Vec<Material>,
+}
+
+impl Robot {
+    /// Validate biomechanics/physics domain invariants on the parsed robot.
+    ///
+    /// Enforced constraints (issue #7659):
+    /// - every link inertial has `mass > 0`;
+    /// - the inertia tensor has a positive diagonal and is symmetric
+    ///   positive-definite (checked via Sylvester's leading-minor criterion);
+    /// - every joint limit has `lower <= upper` and non-negative
+    ///   `effort`/`velocity`.
+    ///
+    /// Returns [`UrdfError::Schema`] describing the first violation found.
+    pub fn validate(&self) -> UrdfResult<()> {
+        for link in &self.links {
+            if let Some(inert) = &link.inertial {
+                inert.validate(&link.name)?;
+            }
+        }
+        for joint in &self.joints {
+            if let Some(limits) = &joint.limits {
+                limits.validate(&joint.name)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Strict, NaN-rejecting positivity test (`x > 0` and finite-ish): returns
+/// `false` for `0.0`, negatives, and `NaN`.
+fn is_strictly_positive(x: f64) -> bool {
+    x > 0.0
+}
+
+impl Inertial {
+    /// Validate mass positivity and inertia-tensor positive-definiteness for a
+    /// single link. `link` names the owning link for diagnostics.
+    pub(crate) fn validate(&self, link: &str) -> UrdfResult<()> {
+        if !is_strictly_positive(self.mass) {
+            return Err(UrdfError::Schema(format!(
+                "link {link:?}: mass must be positive, got {}",
+                self.mass
+            )));
+        }
+        // Diagonal must be strictly positive.
+        for (name, v) in [("ixx", self.ixx), ("iyy", self.iyy), ("izz", self.izz)] {
+            if !is_strictly_positive(v) {
+                return Err(UrdfError::Schema(format!(
+                    "link {link:?}: inertia {name} must be positive, got {v}"
+                )));
+            }
+        }
+        // Symmetric positive-definiteness via Sylvester's criterion on the
+        // leading principal minors of
+        //   [ ixx  ixy  ixz ]
+        //   [ ixy  iyy  iyz ]
+        //   [ ixz  iyz  izz ].
+        let (ixx, iyy, izz) = (self.ixx, self.iyy, self.izz);
+        let (ixy, ixz, iyz) = (self.ixy, self.ixz, self.iyz);
+        let minor2 = ixx * iyy - ixy * ixy;
+        let det = ixx * (iyy * izz - iyz * iyz) - ixy * (ixy * izz - iyz * ixz)
+            + ixz * (ixy * iyz - iyy * ixz);
+        if !is_strictly_positive(minor2) || !is_strictly_positive(det) {
+            return Err(UrdfError::Schema(format!(
+                "link {link:?}: inertia tensor must be positive-definite \
+                 (leading minors: {minor2}, {det})"
+            )));
+        }
+        Ok(())
+    }
+}
+
+impl JointLimits {
+    /// Validate `lower <= upper` and non-negative effort/velocity for a single
+    /// joint. `joint` names the owning joint for diagnostics.
+    pub(crate) fn validate(&self, joint: &str) -> UrdfResult<()> {
+        if self.lower > self.upper {
+            return Err(UrdfError::Schema(format!(
+                "joint {joint:?}: limit lower ({}) must be <= upper ({})",
+                self.lower, self.upper
+            )));
+        }
+        if self.effort < 0.0 {
+            return Err(UrdfError::Schema(format!(
+                "joint {joint:?}: limit effort must be >= 0, got {}",
+                self.effort
+            )));
+        }
+        if self.velocity < 0.0 {
+            return Err(UrdfError::Schema(format!(
+                "joint {joint:?}: limit velocity must be >= 0, got {}",
+                self.velocity
+            )));
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]

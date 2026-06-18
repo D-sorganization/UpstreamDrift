@@ -7,7 +7,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use upstream_urdf::{parse_urdf_str, write_urdf};
+use upstream_urdf::{parse_urdf_str, parse_urdf_str_lenient, write_urdf};
 
 fn repo_root() -> PathBuf {
     // CARGO_MANIFEST_DIR is …/rust_core/upstream-urdf. Walk up two parents.
@@ -74,7 +74,12 @@ fn round_trip_all_urdfs_in_repo() {
                 continue;
             }
         };
-        let r1 = match parse_urdf_str(&xml) {
+        // Use the lenient parser: this test asserts structural round-trip
+        // fidelity over arbitrary real-world URDFs (some carry massless
+        // placeholder links that intentionally fail domain validation). The
+        // strict `parse_urdf_str` + `Robot::validate` path is exercised by the
+        // dedicated validation tests below.
+        let r1 = match parse_urdf_str_lenient(&xml) {
             Ok(r) => r,
             Err(e) => {
                 failures.push(format!("{}: first parse: {e}", path.display()));
@@ -88,7 +93,7 @@ fn round_trip_all_urdfs_in_repo() {
                 continue;
             }
         };
-        let r2 = match parse_urdf_str(&written) {
+        let r2 = match parse_urdf_str_lenient(&written) {
             Ok(r) => r,
             Err(e) => {
                 failures.push(format!("{}: re-parse: {e}", path.display()));

@@ -35,7 +35,8 @@ fn rk4_decay_matches_python_reference_fixture() {
         &[2.0],
         &config,
         None::<fn(f64, &[f64]) -> bool>,
-    );
+    )
+    .expect("integrate should succeed");
 
     assert!(result.completed);
     assert_eq!(result.steps_taken, 61);
@@ -86,7 +87,8 @@ fn ball_flight_matches_python_reference_fixture() {
         &AeroBallProperties::default(),
         &AirProperties::default(),
         &config,
-    );
+    )
+    .expect("simulate_ball_trajectory should succeed");
 
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
