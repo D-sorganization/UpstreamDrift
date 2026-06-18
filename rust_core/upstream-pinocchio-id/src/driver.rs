@@ -121,7 +121,12 @@ where
         }
         buf.qdot.assign(&v);
     } else {
-        buf.qdot = finite_diff_qdot(q, times);
+        // The shape precondition was already checked above, so this cannot
+        // fail; map defensively to `ShapeMismatch` rather than unwrap.
+        buf.qdot = finite_diff_qdot(q, times).map_err(|_| DriverError::ShapeMismatch {
+            q_rows: n_frames,
+            n_times: times.len(),
+        })?;
     }
     if let Some(a) = qddot_override {
         let (ar, ac) = a.dim();
@@ -135,7 +140,10 @@ where
         }
         buf.qddot.assign(&a);
     } else {
-        buf.qddot = finite_diff_qddot(q, times);
+        buf.qddot = finite_diff_qddot(q, times).map_err(|_| DriverError::ShapeMismatch {
+            q_rows: n_frames,
+            n_times: times.len(),
+        })?;
     }
 
     for i in 0..n_frames {

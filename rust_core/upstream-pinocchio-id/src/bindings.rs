@@ -43,7 +43,8 @@ fn compute_qdot<'py>(
     validate_q_times_shapes(&q, &times)?;
     let qv = q.as_array();
     let tv = times.as_array();
-    let out = finite_diff_qdot(qv, tv);
+    let out = finite_diff_qdot(qv, tv)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
     Ok(out.into_pyarray(py))
 }
 
@@ -58,7 +59,8 @@ fn compute_qddot<'py>(
     validate_q_times_shapes(&q, &times)?;
     let qv = q.as_array();
     let tv = times.as_array();
-    let out = finite_diff_qddot(qv, tv);
+    let out = finite_diff_qddot(qv, tv)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
     Ok(out.into_pyarray(py))
 }
 

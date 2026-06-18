@@ -35,6 +35,6 @@ pub use mjcf_ast::{
     RawSection as MjRawSection, Site as MjSite, Worldbody as MjWorldbody,
 };
 pub use parser::mjcf::parse_mjcf_str;
-pub use parser::urdf::parse_urdf_str;
+pub use parser::urdf::{parse_urdf_str, parse_urdf_str_lenient};
 pub use writer::mjcf::write_mjcf;
 pub use writer::urdf::write_urdf;

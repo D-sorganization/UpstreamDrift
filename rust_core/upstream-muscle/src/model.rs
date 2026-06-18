@@ -52,7 +52,97 @@ impl MuscleParameters {
         if self.l_slack <= 0.0 {
             return Err(format!("l_slack must be positive, got {}", self.l_slack));
         }
+        if self.v_max <= 0.0 {
+            return Err(format!("v_max must be positive, got {}", self.v_max));
+        }
+        // Pennation must lie in [0, pi/2): at pi/2 the fibre is perpendicular to
+        // the tendon and `cos(alpha)` collapses to zero, producing zero/garbage
+        // muscle force. Negative angles are unphysical.
+        if !(0.0..std::f64::consts::FRAC_PI_2).contains(&self.pennation_angle) {
+            return Err(format!(
+                "pennation_angle must be in [0, pi/2), got {}",
+                self.pennation_angle
+            ));
+        }
+        if self.damping < 0.0 {
+            return Err(format!(
+                "damping must be non-negative, got {}",
+                self.damping
+            ));
+        }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod model_validation_tests {
+    use super::MuscleParameters;
+
+    fn valid() -> [f64; 6] {
+        // f_max, l_opt, l_slack, v_max, pennation_angle, damping
+        [1000.0, 0.15, 0.20, 10.0, 0.0, 0.05]
+    }
+
+    fn build(p: [f64; 6]) -> Result<MuscleParameters, String> {
+        MuscleParameters::new(p[0], p[1], p[2], p[3], p[4], p[5])
+    }
+
+    #[test]
+    fn valid_params_construct() {
+        assert!(build(valid()).is_ok());
+        // Pennation just under pi/2 is allowed.
+        let mut p = valid();
+        p[4] = std::f64::consts::FRAC_PI_2 - 1e-9;
+        assert!(build(p).is_ok());
+        // Zero damping is allowed (>= 0).
+        let mut p = valid();
+        p[5] = 0.0;
+        assert!(build(p).is_ok());
+    }
+
+    #[test]
+    fn non_positive_v_max_rejected() {
+        let mut p = valid();
+        p[3] = 0.0;
+        assert!(build(p).is_err());
+        p[3] = -1.0;
+        assert!(build(p).is_err());
+    }
+
+    #[test]
+    fn out_of_range_pennation_rejected() {
+        // Negative pennation.
+        let mut p = valid();
+        p[4] = -0.01;
+        assert!(build(p).is_err());
+        // Exactly pi/2 (excluded upper bound).
+        let mut p = valid();
+        p[4] = std::f64::consts::FRAC_PI_2;
+        assert!(build(p).is_err());
+        // Beyond pi/2.
+        let mut p = valid();
+        p[4] = 2.0;
+        assert!(build(p).is_err());
+    }
+
+    #[test]
+    fn negative_damping_rejected() {
+        let mut p = valid();
+        p[5] = -0.01;
+        assert!(build(p).is_err());
+    }
+
+    #[test]
+    fn existing_positive_constraints_still_enforced() {
+        let mut p = valid();
+        p[0] = 0.0; // f_max
+        assert!(build(p).is_err());
+        let mut p = valid();
+        p[1] = -0.1; // l_opt
+        assert!(build(p).is_err());
+        let mut p = valid();
+        p[2] = 0.0; // l_slack
+        assert!(build(p).is_err());
     }
 }
 
