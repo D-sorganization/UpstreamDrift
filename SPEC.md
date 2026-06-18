@@ -1197,6 +1197,8 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
+- **2026-06-18:** Optimized `src/deployment/digital_twin/twin.py` to use `math.sqrt(np.dot())` and `math.hypot()` instead of `np.linalg.norm()` for scalar inputs and small vectors.
+
 The operational companion to this map (startup phases, tab/sidekick wiring,
 and the tracked implementation-gap inventory) lives in
 [`docs/architecture/PROJECT_MAP.md`](docs/architecture/PROJECT_MAP.md) §16.
