@@ -118,28 +118,15 @@ class PolynomialProfile:
 
 
 def _calc_mass_matrix(
-    theta1: float,
-    theta2: float,
-    theta3: float,
-    omega1: float,
-    omega2: float,
-    omega3: float,
-    l1: float,
-    l2: float,
-    l3: float,
-    lc1: float,
-    lc2: float,
-    lc3: float,
-    m1: float,
-    m2: float,
-    m3: float,
-    I1: float,
-    I2: float,
-    I3: float,
-    g: float,
+    theta: tuple[float, float, float],
+    omega: tuple[float, float, float],
+    params: tuple[float, ...],
 ) -> np.ndarray:
-    if theta1 is None:
-        raise ValueError("theta1 must be provided")
+    if theta is None:
+        raise ValueError("theta must be provided")
+    theta1, theta2, theta3 = theta
+    omega1, omega2, omega3 = omega
+    l1, l2, l3, lc1, lc2, lc3, m1, m2, m3, I1, I2, I3, g = params
     mass = np.zeros((3, 3))
     mass[0, 0] = (
         I1
@@ -199,28 +186,15 @@ def _calc_mass_matrix(
 
 
 def _calc_bias_vector(
-    theta1: float,
-    theta2: float,
-    theta3: float,
-    omega1: float,
-    omega2: float,
-    omega3: float,
-    l1: float,
-    l2: float,
-    l3: float,
-    lc1: float,
-    lc2: float,
-    lc3: float,
-    m1: float,
-    m2: float,
-    m3: float,
-    I1: float,
-    I2: float,
-    I3: float,
-    g: float,
+    theta: tuple[float, float, float],
+    omega: tuple[float, float, float],
+    params: tuple[float, ...],
 ) -> np.ndarray:
-    if theta1 is None:
-        raise ValueError("theta1 must be provided")
+    if theta is None:
+        raise ValueError("theta must be provided")
+    theta1, theta2, theta3 = theta
+    omega1, omega2, omega3 = omega
+    l1, l2, l3, lc1, lc2, lc3, m1, m2, m3, I1, I2, I3, g = params
     bias = np.zeros((3,))
     bias[0] = (
         g * l1 * m2 * np.sin(theta1)
@@ -268,25 +242,13 @@ def _calc_bias_vector(
 
 
 def _calc_gravity_vector(
-    theta1: float,
-    theta2: float,
-    theta3: float,
-    l1: float,
-    l2: float,
-    l3: float,
-    lc1: float,
-    lc2: float,
-    lc3: float,
-    m1: float,
-    m2: float,
-    m3: float,
-    I1: float,
-    I2: float,
-    I3: float,
-    g: float,
+    theta: tuple[float, float, float],
+    params: tuple[float, ...],
 ) -> np.ndarray:
-    if theta1 is None:
-        raise ValueError("theta1 must be provided")
+    if theta is None:
+        raise ValueError("theta must be provided")
+    theta1, theta2, theta3 = theta
+    l1, l2, l3, lc1, lc2, lc3, m1, m2, m3, I1, I2, I3, g = params
     gravity = np.zeros((3,))
     gravity[0] = (
         g * l1 * m2 * np.sin(theta1)
@@ -345,7 +307,7 @@ class TriplePendulumDynamics:
         params = self._parameter_vector()
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
-        mass = self._mass_func(*theta, *omega, *params)
+        mass = self._mass_func(theta, omega, params)
         return np.array(mass, dtype=float)
 
     def bias_vector(self, state: TriplePendulumState) -> np.ndarray:
@@ -355,7 +317,7 @@ class TriplePendulumDynamics:
         params = self._parameter_vector()
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
-        bias = self._bias_func(*theta, *omega, *params)
+        bias = self._bias_func(theta, omega, params)
         damping = np.array(self.parameters.damping, dtype=float) * np.array(
             omega, dtype=float
         )
@@ -397,7 +359,7 @@ class TriplePendulumDynamics:
         theta = (state.theta1, state.theta2, state.theta3)
         params = self._parameter_vector()
         gravity_components = np.array(
-            self._gravity_func(*theta, *params), dtype=float
+            self._gravity_func(theta, params), dtype=float
         ).flatten()
         damping_components = tuple(
             float(self.parameters.damping[i] * state_component)
