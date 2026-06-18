@@ -600,7 +600,9 @@ class TestCIEnvironmentCompatibility:
 
         assert unix_setup["if"] == "matrix.os != 'windows'"
         assert "dtolnay/rust-toolchain" in unix_setup["uses"]
-        assert windows_setup["if"] == "matrix.os == 'windows'"
+        assert windows_setup["if"] == (
+            "matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'"
+        )
         assert windows_setup["shell"] == "pwsh"
         assert "dtolnay/rust-toolchain" not in windows_setup.get("uses", "")
         windows_script = windows_setup["run"]
@@ -618,6 +620,56 @@ class TestCIEnvironmentCompatibility:
         cache_key = cache_step["with"]["key"]
         assert "${{ runner.name }}" in cache_key
         assert "${{ matrix.target }}" in cache_key
+
+    def test_tauri_windows_release_packaging_requires_policy_opt_in(self) -> None:
+        """Windows packaging needs an App-Control-compatible runner policy."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        build_job = workflow["jobs"]["build"]
+        steps = build_job["steps"]
+        build_enabled = (
+            "matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'"
+        )
+
+        assert (
+            build_job["env"]["WINDOWS_TAURI_RELEASE_ENABLED"]
+            == "${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}"
+        )
+
+        notice_step = next(
+            step
+            for step in steps
+            if step.get("name") == "Report Windows Tauri release disabled"
+        )
+        assert notice_step["if"] == (
+            "matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED != 'true'"
+        )
+        assert "Application Control" in notice_step["run"]
+        assert "os error 4551" in notice_step["run"]
+        assert "TAURI_WINDOWS_RELEASE_ENABLED=true" in notice_step["run"]
+
+        gated_step_names = {
+            "Setup Node.js",
+            "Cache Rust target (build)",
+            "Install frontend dependencies",
+            "Build frontend",
+            "Build Tauri app",
+            "Upload artifacts",
+        }
+        gated_steps = {
+            step["name"]: step for step in steps if step.get("name") in gated_step_names
+        }
+        assert set(gated_steps) == gated_step_names
+        for step in gated_steps.values():
+            assert step["if"] == build_enabled
 
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,

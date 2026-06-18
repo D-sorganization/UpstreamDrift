@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.444                                            |
+| **Spec Version**        | 1.0.445                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Gated Windows Tauri release packaging behind the
+  `TAURI_WINDOWS_RELEASE_ENABLED=true` repository variable after main CI showed
+  the current self-hosted Windows runner blocks Cargo build-script executables
+  with Application Control (`os error 4551`). Linux Tauri release packaging and
+  the Tauri Rust/TypeScript check remain enforced; Windows packaging can be
+  re-enabled once a selected Windows runner policy permits Cargo build scripts.
 - **2026-06-18** - Restored the Tauri release build contract after main CI
   exposed two packaging-lane failures: the UI package now declares the
   `tauri` npm script expected by `tauri-apps/tauri-action`, and the Windows
@@ -1709,6 +1715,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.445 | Gated Windows Tauri release packaging behind `TAURI_WINDOWS_RELEASE_ENABLED=true` because the current self-hosted Windows runner blocks Cargo build-script executables with Application Control (`os error 4551`). Linux Tauri release packaging and the Tauri Rust/TypeScript check remain enforced, and `tests/ci/test_ci_infrastructure.py` now pins the repo-variable opt-in plus diagnostic notice contract. |
 | 2026-06-18 | 1.0.444 | Restored the final Tauri Build release contract for issue #7652. `ui/src-tauri/Cargo.lock` now resolves Rust `tauri` to the same locked major/minor as `@tauri-apps/api`, `.github/workflows/tauri-build.yml` installs `libdbus-1-dev` for the updated Linux Rust graph, and `tests/ci/test_ci_infrastructure.py` now parses lockfiles/workflow metadata to fail fast when a future dependency update would make `tauri-action` reject release builds for Rust/npm Tauri minor drift or miss required native Linux headers. |
 | 2026-06-18 | 1.0.443 | Restored the main-side Tauri Build release lane for issue #7652. `ui/package.json` now exposes the `tauri` script entrypoint required by `tauri-action`'s default `npm run tauri build` invocation, and `.github/workflows/tauri-build.yml` now separates build matrix runner labels from artifact names while using a PowerShell `rustup` setup path for the Windows self-hosted leg to avoid the bash path failure seen in run `27732025577`. |
 | 2026-06-18 | 1.0.442 | Restored the Nightly Cross-Engine Validation workflow for issue #7646. The scheduled job now runs `tests/integration/test_cross_engine_validation.py`, `tests/unit/test_cross_engine_validator.py`, and `tests/integration/cross_engine/test_conformance_harness.py` against `src.shared.python.engine_core.cross_engine_validator`, preserving the 75% coverage threshold with real validator/conformance tests and marking zero collected tests as a failure in the summary output. |

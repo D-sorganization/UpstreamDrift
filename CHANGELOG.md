@@ -59,6 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   updated Rust graph, and adding CI infrastructure regression tests that fail
   before `tauri-action` can reject release builds for Rust/npm Tauri minor drift
   or missing native Linux headers.
+- Gated Windows Tauri release packaging behind the
+  `TAURI_WINDOWS_RELEASE_ENABLED=true` repository variable because the current
+  self-hosted Windows runner blocks Cargo build-script executables with
+  Application Control (`os error 4551`). Linux release packaging and the Tauri
+  Rust/TypeScript check remain enforced.
 - Vectorized deformable object internal-force hot paths for #7571/#7572:
   FEM assembly now batches tetrahedral deformation gradients, inversions, and
   nodal force scatter while reusing each inverse once; cable and cloth spring
