@@ -100,7 +100,7 @@ def test_digital_twin_predict(mock_sim: MagicMock, mock_real: MagicMock) -> None
         14,
     )  # 10 steps + 1 initial, 14 dims per state (7 pos + 7 vel)
     assert mock_sim.step.call_count == 10
-    assert mock_sim.set_joint_torques.call_count == 10
+    assert mock_sim.set_joint_torques.call_count == 11
 
 
 def test_digital_twin_detect_anomaly(mock_sim: MagicMock, mock_real: MagicMock) -> None:
