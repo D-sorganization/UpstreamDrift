@@ -78,6 +78,36 @@ fn deterministic_seed_100_random_points_is_stable() {
 }
 
 #[test]
+fn volume_is_translation_invariant_far_from_origin() {
+    // Precision regression (#7556): summing per-tetrahedron volumes against the
+    // raw origin loses precision via catastrophic cancellation when the hull
+    // sits far from the origin. Volume is translation-invariant, so a unit cube
+    // translated by a large offset must still report volume ~= 1.0. The
+    // centroid-centered + Kahan accumulation keeps this tight where the naive
+    // origin summation drifts.
+    let corners = [
+        [0.0_f32, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [1.0, 1.0, 0.0],
+        [1.0, 0.0, 1.0],
+        [0.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0],
+    ];
+
+    for offset in [0.0_f32, 1.0e3, 1.0e5, 1.0e6] {
+        let pts: Vec<[f32; 3]> = corners
+            .iter()
+            .map(|c| [c[0] + offset, c[1] + offset, c[2] + offset])
+            .collect();
+        let hull = compute_convex_hull(&pts).expect("hull");
+        assert_eq!(hull.num_vertices(), 8);
+        assert_relative_eq!(hull.volume(), 1.0, max_relative = 1e-3);
+    }
+}
+
+#[test]
 fn too_few_points_returns_error() {
     let pts = vec![[0.0_f32, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
     match compute_convex_hull(&pts) {
