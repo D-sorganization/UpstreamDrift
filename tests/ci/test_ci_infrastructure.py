@@ -467,6 +467,9 @@ class TestCIEnvironmentCompatibility:
             assert f"command -v {executable}" in verify_script
             assert f"{executable} --version" in verify_script
 
+        cache_step = steps[step_names.index("Cache Rust target (check)")]
+        assert "${{ runner.name }}" in cache_step["with"]["key"]
+
     def test_tauri_action_script_exists_for_build_workflow(self) -> None:
         """The Tauri action invokes npm run tauri build by default."""
         package_json = json.loads(
@@ -523,7 +526,8 @@ class TestCIEnvironmentCompatibility:
                 encoding="utf-8",
             ),
         )
-        steps = workflow["jobs"]["build"]["steps"]
+        build_job = workflow["jobs"]["build"]
+        steps = build_job["steps"]
         unix_setup = next(
             step for step in steps if step.get("name") == "Setup Rust (Unix)"
         )
@@ -535,10 +539,22 @@ class TestCIEnvironmentCompatibility:
         assert "dtolnay/rust-toolchain" in unix_setup["uses"]
         assert windows_setup["if"] == "matrix.os == 'windows'"
         assert windows_setup["shell"] == "pwsh"
+        assert "dtolnay/rust-toolchain" not in windows_setup.get("uses", "")
         windows_script = windows_setup["run"]
-        assert "rustup toolchain install stable --profile minimal" in windows_script
+        assert (
+            "rustup toolchain install stable --profile minimal --target $env:RUST_TARGET"
+            in windows_script
+        )
         assert "rustup default stable" in windows_script
+        assert "rustup target add $env:RUST_TARGET" in windows_script
         assert "cargo --version" in windows_script
+
+        cache_step = next(
+            step for step in steps if step.get("name") == "Cache Rust target (build)"
+        )
+        cache_key = cache_step["with"]["key"]
+        assert "${{ runner.name }}" in cache_key
+        assert "${{ matrix.target }}" in cache_key
 
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
