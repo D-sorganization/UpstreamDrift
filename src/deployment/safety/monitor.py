@@ -138,6 +138,25 @@ class SafetyMonitor:
         self._human_nearby = False
         self._emergency_stop = False
 
+    def _build_status(self, violations: list[str], warnings: list[str]) -> SafetyStatus:
+        if violations:
+            level = SafetyStatusLevel.ERROR
+            is_safe = False
+        elif warnings:
+            level = SafetyStatusLevel.WARNING
+            is_safe = True
+        else:
+            level = SafetyStatusLevel.OK
+            is_safe = True
+
+        return SafetyStatus(
+            level=level,
+            is_safe=is_safe,
+            violations=violations,
+            warnings=warnings,
+            speed_override=self._speed_override,
+        )
+
     def check_state(self, state: RobotState) -> SafetyStatus:  # noqa: C901
         """Check if current state is safe.
 
@@ -189,24 +208,7 @@ class SafetyMonitor:
         if self._emergency_stop:
             violations.append("Emergency stop active")
 
-        # Determine status level
-        if violations:
-            level = SafetyStatusLevel.ERROR
-            is_safe = False
-        elif warnings:
-            level = SafetyStatusLevel.WARNING
-            is_safe = True
-        else:
-            level = SafetyStatusLevel.OK
-            is_safe = True
-
-        return SafetyStatus(
-            level=level,
-            is_safe=is_safe,
-            violations=violations,
-            warnings=warnings,
-            speed_override=self._speed_override,
-        )
+        return self._build_status(violations, warnings)
 
     def check_command(self, command: ControlCommand) -> SafetyStatus:  # noqa: C901
         """Check if command would result in safe state.
@@ -231,6 +233,15 @@ class SafetyMonitor:
                 joints = list(np.where(torque_violation)[0])
                 violations.append(f"Command torque exceeds limit on joints {joints}")
 
+        # Check velocity limits
+        if command.velocity_targets is not None:
+            velocity_violation = (
+                np.abs(command.velocity_targets) > self.limits.max_joint_velocity
+            )
+            if np.any(velocity_violation):
+                joints = list(np.where(velocity_violation)[0])
+                violations.append(f"Command velocity exceeds limit on joints {joints}")
+
         # Check position targets against limits
         if command.position_targets is not None:
             if self.limits.joint_limits_lower is not None:
@@ -249,24 +260,10 @@ class SafetyMonitor:
                     joints = list(np.where(upper_violation)[0])
                     violations.append(f"Position target above limit on joints {joints}")
 
-        # Determine status
-        if violations:
-            level = SafetyStatusLevel.ERROR
-            is_safe = False
-        elif warnings:
-            level = SafetyStatusLevel.WARNING
-            is_safe = True
-        else:
-            level = SafetyStatusLevel.OK
-            is_safe = True
+        if self._emergency_stop:
+            violations.append("Emergency stop active")
 
-        return SafetyStatus(
-            level=level,
-            is_safe=is_safe,
-            violations=violations,
-            warnings=warnings,
-            speed_override=self._speed_override,
-        )
+        return self._build_status(violations, warnings)
 
     def compute_safe_command(  # noqa: C901
         self,
@@ -323,14 +320,30 @@ class SafetyMonitor:
             if safe_command.torque_commands is not None:
                 safe_command.torque_commands *= self._speed_override
 
-        # Enforce E-stop: freeze position to current and zero feedforward torque
+        # Enforce E-stop as an authoritative no-actuation state.
         if self._emergency_stop:
             if safe_command.position_targets is not None:
                 safe_command.position_targets = state.joint_positions.copy()
+            if safe_command.velocity_targets is not None:
+                safe_command.velocity_targets = np.zeros_like(
+                    safe_command.velocity_targets
+                )
+            if safe_command.torque_commands is not None:
+                safe_command.torque_commands = np.zeros_like(
+                    safe_command.torque_commands
+                )
             if safe_command.feedforward_torque is not None:
                 safe_command.feedforward_torque = np.zeros_like(
                     safe_command.feedforward_torque
                 )
+
+        # Clip velocity targets
+        if safe_command.velocity_targets is not None:
+            safe_command.velocity_targets = np.clip(
+                safe_command.velocity_targets,
+                -self.limits.max_joint_velocity,
+                self.limits.max_joint_velocity,
+            )
 
         # Clip torque commands
         if safe_command.torque_commands is not None:
@@ -385,6 +398,9 @@ class SafetyMonitor:
         Args:
             factor: Speed reduction (0.0 to 1.0).
         """
+        if self._emergency_stop:
+            self._speed_override = 0.0
+            return
         self._speed_override = max(0.0, min(1.0, factor))
 
     def set_human_nearby(self, nearby: bool) -> None:

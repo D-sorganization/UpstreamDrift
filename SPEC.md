@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.450                                            |
+| **Spec Version**        | 1.0.451                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Hardened `SafetyMonitor` command contracts for issues
+  #7683, #7684, and #7692: command preflight now rejects velocity targets over
+  `max_joint_velocity` and any command while emergency stop is active, safe
+  command shaping clips velocity targets like torque and position targets, and
+  emergency stop authoritatively zeros velocity, torque, and feedforward torque
+  even if a later speed-override call tries to raise the override.
 - **2026-06-18** - Restored the scheduled Vendor Submodule Freshness workflow
   for issue #7672: `scripts/check_vendor_updates.py --json` now emits a
   parseable status array, text mode prints the per-submodule messages again,
@@ -1738,6 +1744,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.451 | Hardened `SafetyMonitor` command contracts for issues #7683, #7684, and #7692. `check_command()` now rejects velocity targets over `max_joint_velocity` and any command while emergency stop is active; `compute_safe_command()` clips velocity targets and treats emergency stop as an authoritative no-actuation state by zeroing velocity, torque, and feedforward torque regardless of later speed-override calls. |
 | 2026-06-18 | 1.0.450 | Restored the scheduled Vendor Submodule Freshness workflow for issue #7672. `scripts/check_vendor_updates.py --json` now emits a parseable JSON status array, text mode prints per-submodule status messages again, and `.github/workflows/vendor-freshness.yml` keeps stderr out of `vendor_status.json` while letting real script failures fail closed. |
 | 2026-06-18 | 1.0.446 | Optimized allocation hot paths for issue #7559. `MuJoCoPerturbationAnalyzer._simulate()` now builds a padded descending-power coefficient matrix once, evaluates every actuator each step with a vectorized Horner pass into a preallocated control buffer, and preserves per-actuator `np.polyval(coeffs[j][::-1], t)` parity for ragged, empty, and over-count coefficient lists. `PolynomialProfile` now caches its `np.poly1d` polynomial and derivative once, and the triple-pendulum hardcoded dynamics helpers accept packed theta/omega/parameter tuples instead of 16-19 scalar arguments. Focused MuJoCo and pendulum unit coverage locks parity. |
 | 2026-06-18 | 1.0.445 | Gated Windows Tauri release packaging behind `TAURI_WINDOWS_RELEASE_ENABLED=true` because the current self-hosted Windows runner blocks Cargo build-script executables with Application Control (`os error 4551`). Linux Tauri release packaging and the Tauri Rust/TypeScript check remain enforced, and `tests/ci/test_ci_infrastructure.py` now pins the repo-variable opt-in plus diagnostic notice contract. |
