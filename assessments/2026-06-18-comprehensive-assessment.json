@@ -1,0 +1,125 @@
+{
+  "repository": "D-sorganization/UpstreamDrift",
+  "date": "2026-06-18",
+  "timestamp": "2026-06-18T12:00:00Z",
+  "commit": "608aab809",
+  "branch": "main",
+  "provider": "adversarial-ao-assessment",
+  "agent": "claude-code (Opus 4.8)",
+  "overall_score": 76.5,
+  "letter_grade": "C",
+  "delta_vs_previous": null,
+  "previous_score": null,
+  "summary": "UpstreamDrift is a large (538K LOC, 5591 py files), multi-engine golf-swing physics platform that presents as a genuine showpiece: ruff-clean at HEAD, bandit shows 0 HIGH / 1 annotated MEDIUM, security anti-patterns (shell=True, yaml.load, eval) are all either forbidden by guard modules, pinned to SafeLoader, or replaced by an AST-hardened safe_eval. Governance and documentation are exemplary (README, AGENTS.md 770 lines, CLAUDE.md, ADRs, CHANGELOG, SECURITY.md, CODEOWNERS, feature-parity registry, error-handling ratchet with baseline). DbC is first-class (require/ensure/precondition/postcondition/class_invariant with DBC_LEVEL toggle), and the test suite is deep (2343 test files, fail_under=75 enforced). The honest weaknesses are tech-debt DENSITY managed-but-present: 762 functions at CC>=C (one cc=70 GUI session-restore), 2350 noqa / 1945 type-ignore, 373 no-cover pragmas, and a 493-instance broad-except tail (grandfathered via ratchet; new code must use narrow_catch). Sampled unannotated broad-excepts all correctly re-raise after cleanup, so Crash-Early is better than the raw count suggests, but Crash-Early (F) still carries the largest confirmed-finding cluster (28). Weighted score lands at 76.5 (C) — production-ready engineering with a long, well-tracked debt tail rather than acute defects. The score is held below B by the heavy-weight criteria (C correctness w12, H DRY w12, D DbC w10, F Crash-Early w8) each carrying real confirmed findings.",
+  "criteria": {
+    "A": {
+      "name": "Project Organization",
+      "grade": 8,
+      "weight": 5,
+      "confidence": "high",
+      "findings_count": 7
+    },
+    "B": {
+      "name": "Documentation",
+      "grade": 8,
+      "weight": 6,
+      "confidence": "high",
+      "findings_count": 15
+    },
+    "C": {
+      "name": "Testing",
+      "grade": 8,
+      "weight": 12,
+      "confidence": "high",
+      "findings_count": 10
+    },
+    "D": {
+      "name": "Robustness",
+      "grade": 7,
+      "weight": 10,
+      "confidence": "high",
+      "findings_count": 10
+    },
+    "E": {
+      "name": "Performance",
+      "grade": 7,
+      "weight": 5,
+      "confidence": "high",
+      "findings_count": 11
+    },
+    "F": {
+      "name": "Code Craftsmanship",
+      "grade": 6,
+      "weight": 8,
+      "confidence": "high",
+      "findings_count": 28
+    },
+    "G": {
+      "name": "Dependencies",
+      "grade": 8,
+      "weight": 6,
+      "confidence": "high",
+      "findings_count": 11
+    },
+    "H": {
+      "name": "Security",
+      "grade": 7,
+      "weight": 12,
+      "confidence": "high",
+      "findings_count": 7
+    },
+    "I": {
+      "name": "Configuration",
+      "grade": 8,
+      "weight": 4,
+      "confidence": "medium",
+      "findings_count": 7
+    },
+    "J": {
+      "name": "Observability",
+      "grade": 8,
+      "weight": 6,
+      "confidence": "medium",
+      "findings_count": 0
+    },
+    "K": {
+      "name": "Maintainability",
+      "grade": 8,
+      "weight": 6,
+      "confidence": "high",
+      "findings_count": 4
+    },
+    "L": {
+      "name": "CI/CD",
+      "grade": 8,
+      "weight": 8,
+      "confidence": "high",
+      "findings_count": 5
+    },
+    "M": {
+      "name": "Deployment",
+      "grade": 9,
+      "weight": 4,
+      "confidence": "high",
+      "findings_count": 0
+    },
+    "N": {
+      "name": "Compliance",
+      "grade": 9,
+      "weight": 2,
+      "confidence": "high",
+      "findings_count": 0
+    },
+    "O": {
+      "name": "Agentic Usability",
+      "grade": 8,
+      "weight": 6,
+      "confidence": "high",
+      "findings_count": 0
+    }
+  },
+  "confirmed_findings": 115,
+  "issues_filed": 60,
+  "umbrella_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/7740",
+  "methodology": "Adversarial A-O review (TDD/DbC/LoD/DRY): read-only worktree off origin/main, uvx static sweeps, parallel deep reviewers per dimension+subsystem, independent skeptic-verification at each cited line, synthesis, weighted scoring."
+}
