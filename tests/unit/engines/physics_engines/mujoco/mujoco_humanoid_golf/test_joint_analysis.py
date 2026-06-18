@@ -126,6 +126,49 @@ def test_analyze_torque_transmission(mock_mujoco, mock_model, mock_data):
     assert len(result["angles"]) == 360
 
 
+def test_analyze_torque_transmission_vectorized_parity(
+    mock_mujoco, mock_model, mock_data
+):
+    """Vectorized sweep must match the original per-element scalar loop (#7561)."""
+    analyzer = UniversalJointAnalyzer(mock_model, mock_data)
+    analyzer.get_universal_joint_angles = MagicMock(return_value=(0.3, 0.4))
+
+    result = analyzer.analyze_torque_transmission("joint_1", "joint_2", num_cycles=2)
+
+    # Reference: the exact pre-optimization scalar loop.
+    angles = result["angles"]
+    angle1, angle2 = 0.3, 0.4
+    joint_angle = np.sqrt(angle1**2 + angle2**2)
+    expected_vel = []
+    expected_torque = []
+    for angle in angles:
+        vr = analyzer.calculate_torque_wobble(float(angle), float(joint_angle))
+        expected_vel.append(vr)
+        expected_torque.append(1.0 / vr if abs(vr) > 1e-9 else 0.0)
+
+    np.testing.assert_allclose(
+        result["velocity_ratios"], expected_vel, rtol=0, atol=1e-12
+    )
+    np.testing.assert_allclose(
+        result["torque_ratios"], expected_torque, rtol=0, atol=1e-12
+    )
+    # Bend angle is read once (hoisted), not 720 times.
+    assert analyzer.get_universal_joint_angles.call_count == 1
+
+
+def test_torque_wobble_vectorized_matches_scalar(mock_mujoco, mock_model, mock_data):
+    """_torque_wobble_vectorized must equal calculate_torque_wobble element-wise."""
+    analyzer = UniversalJointAnalyzer(mock_model, mock_data)
+    thetas = np.linspace(0, 4 * np.pi, 200)
+
+    for beta in (0.0, 1e-9, np.pi / 6, np.pi / 4, np.pi / 2 - 1e-3):
+        vec = analyzer._torque_wobble_vectorized(thetas, beta)
+        scalar = np.array(
+            [analyzer.calculate_torque_wobble(float(t), beta) for t in thetas]
+        )
+        np.testing.assert_allclose(vec, scalar, rtol=0, atol=1e-12)
+
+
 def test_gimbal_joint_angles(mock_mujoco, mock_model, mock_data):
     """Test gimbal joint angles."""
     analyzer = GimbalJointAnalyzer(mock_model, mock_data)

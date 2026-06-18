@@ -346,3 +346,41 @@ class TestInterSegmentTransfer:
 @pytest.mark.integration
 class TestPowerFlowPhysics:
     """Integration tests for power flow physics validation."""
+
+
+class TestPowerDissipationParity:
+    """Vectorized power dissipation must equal the original scalar loop (#7561)."""
+
+    def test_dissipation_matches_scalar_reference(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+        model = simple_pendulum_model
+
+        for qvel in (np.array([0.0]), np.array([2.0]), np.array([-3.5])):
+            # Reference: the exact pre-optimization scalar loop.
+            expected = 0.0
+            for i in range(model.njnt):
+                joint = model.jnt(i)
+                if joint.damping[0] > 0:
+                    v_idx = joint.dofadr[0]
+                    if v_idx < model.nv:
+                        expected += joint.damping[0] * (qvel[v_idx] * qvel[v_idx])
+
+            got = analyzer._compute_power_dissipation(qvel)
+            assert abs(got - expected) < 1e-12
+
+    def test_dissipation_zero_when_no_damping(self) -> None:
+        xml = """
+        <mujoco>
+            <worldbody>
+                <body name="b" pos="0 0 0">
+                    <joint name="j" type="hinge" axis="0 1 0"/>
+                    <geom type="capsule" size="0.01 0.5" mass="1.0"/>
+                </body>
+            </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        analyzer = PowerFlowAnalyzer(model)
+        assert analyzer._compute_power_dissipation(np.array([5.0])) == 0.0
