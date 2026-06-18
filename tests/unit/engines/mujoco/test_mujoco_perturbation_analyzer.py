@@ -275,3 +275,48 @@ def test_vectorized_poly_control_more_actuators_than_coeffs():
     np.testing.assert_allclose(got[0, 2:], 0.0, atol=1e-12)
     np.testing.assert_allclose(got[0, 0], np.polyval([1.0, 2.0], 0.7), atol=1e-12)
     np.testing.assert_allclose(got[0, 1], 3.0, atol=1e-12)
+
+
+# ---------------------------------------------------------------------------
+# EE finite-difference velocity vectorization parity (#7563)
+# ---------------------------------------------------------------------------
+
+
+def _ee_vel_scalar_reference(t_arr, ee_pos_arr):
+    """The exact pre-optimization per-row finite-difference loop."""
+    ee_vel = np.zeros_like(ee_pos_arr)
+    for i in range(1, len(t_arr)):
+        dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
+        ee_vel[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+    return ee_vel
+
+
+def _ee_vel_vectorized(t_arr, ee_pos_arr):
+    """Mirror analyzer._simulate's vectorized EE velocity finite difference."""
+    ee_vel = np.zeros_like(ee_pos_arr)
+    if len(t_arr) > 1:
+        dts = np.maximum(np.diff(t_arr), 1e-12)[:, None]
+        ee_vel[1:] = np.diff(ee_pos_arr, axis=0) / dts
+    return ee_vel
+
+
+def test_ee_velocity_vectorized_matches_scalar():
+    """Vectorized EE finite difference must equal the per-row loop."""
+    rng = np.random.default_rng(7563)
+    # Uneven timestamps including a near-duplicate to exercise the 1e-12 clamp.
+    t_arr = np.array([0.0, 0.01, 0.01 + 1e-15, 0.05, 0.2, 0.5])
+    ee_pos_arr = rng.standard_normal((len(t_arr), 3))
+
+    got = _ee_vel_vectorized(t_arr, ee_pos_arr)
+    expected = _ee_vel_scalar_reference(t_arr, ee_pos_arr)
+
+    np.testing.assert_allclose(got, expected, rtol=0, atol=0.0)
+    np.testing.assert_array_equal(got[0], np.zeros(3))
+
+
+def test_ee_velocity_vectorized_single_frame():
+    """A single sample yields all-zero velocities (no crash)."""
+    t_arr = np.array([0.0])
+    ee_pos_arr = np.array([[1.0, 2.0, 3.0]])
+    got = _ee_vel_vectorized(t_arr, ee_pos_arr)
+    np.testing.assert_array_equal(got, np.zeros((1, 3)))
