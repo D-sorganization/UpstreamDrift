@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Rendered the catch-all 404 route synchronously so unknown deep links show the
+  recoverable branded "Page not found" screen immediately instead of racing the
+  route-level lazy-loading fallback (#7430).
 - Restored the Tauri release-build dependency contract for #7652 by aligning
   the Rust `tauri` lockfile package with the locked `@tauri-apps/api` minor
   version, installing the `libdbus-1-dev` Linux header package required by the

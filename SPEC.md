@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.446                                            |
+| **Spec Version**        | 1.0.447                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Made the lightweight catch-all 404 page an eager route
+  dependency so unknown deep links render the branded recoverable "Page not
+  found" screen immediately, without depending on route chunk load timing. The
+  heavier feature pages remain lazy-loaded behind the shared Suspense fallback.
 - **2026-06-18** - Gated Windows Tauri release packaging behind the
   `TAURI_WINDOWS_RELEASE_ENABLED=true` repository variable after main CI showed
   the current self-hosted Windows runner blocks Cargo build-script executables

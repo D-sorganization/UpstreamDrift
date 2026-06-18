@@ -8,6 +8,7 @@ import { useWebSettingsBootstrap } from './api/useWebSettings';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
 import { useUIStore } from './stores';
+import { NotFoundPage } from './pages/NotFound';
 
 /**
  * Route-level code splitting (#7433): every page is lazy so the initial bundle
@@ -66,10 +67,6 @@ const BallFlightPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('./pages/Settings').then((m) => ({ default: m.SettingsPage })),
 );
-const NotFoundPage = lazy(() =>
-  import('./pages/NotFound').then((m) => ({ default: m.NotFoundPage })),
-);
-
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -99,7 +96,7 @@ function RoutedContent() {
   return (
     <ErrorBoundary resetKeys={[location.pathname]} label={location.pathname}>
       <Suspense fallback={<PageLoadingFallback />}>
-      <Routes>
+        <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/simulation" element={<SimulationPage />} />
           <Route path="/tools/model-explorer" element={<ModelExplorerPage />} />
@@ -128,7 +125,7 @@ function RoutedContent() {
           <Route path="/settings" element={<SettingsPage />} />
           {/* Catch-all 404 (#7430) — must stay last. */}
           <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+        </Routes>
       </Suspense>
     </ErrorBoundary>
   );
