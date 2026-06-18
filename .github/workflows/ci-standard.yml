@@ -261,25 +261,33 @@ jobs:
       - name: MyPy Exclusion Budget
         run: python3 scripts/check_mypy_exclusion_budget.py
 
-      # Baseline mypy check across all of src/. On PRs, only check changed
-      # source files so unrelated repository-wide type debt does not block
-      # narrowly scoped quality and documentation work.
+      # Baseline mypy check across all of src/. On PRs and ordinary pushes,
+      # only check changed source files so unrelated repository-wide type debt
+      # does not block narrowly scoped quality, documentation, or CI-only work.
+      # Scheduled/manual runs retain the full baseline audit.
       - name: MyPy Baseline
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            mapfile -d '' src_py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/**/*.py' 'src/*.py'
-            )
-            if [ "${#src_py_files[@]}" -eq 0 ]; then
-              echo "No changed source Python files; skipping baseline mypy check."
-              exit 0
-            fi
-            python3 scripts/ci/run_mypy.py "${src_py_files[@]}" --config-file pyproject.toml
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
           else
             python3 scripts/ci/run_full_mypy_baseline.py
+            exit 0
           fi
+
+          mapfile -d '' src_py_files < <(
+            git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- 'src/**/*.py' 'src/*.py'
+          )
+          if [ "${#src_py_files[@]}" -eq 0 ]; then
+            echo "No changed source Python files; skipping baseline mypy check."
+            exit 0
+          fi
+          python3 scripts/ci/run_mypy.py "${src_py_files[@]}" --config-file pyproject.toml
       # Strict mypy for the fully-annotated API layer (issue #2105).
       # --follow-imports=silent applies strict rules only to src/api/ files,
       # not to their transitive dependencies (which have pre-existing issues).

@@ -1122,6 +1122,45 @@ class TestCIEnvironmentCompatibility:
         )
         assert "No core Python/test/dependency changes detected" in core_test_step
 
+    def test_mypy_baseline_push_uses_changed_source_scope_when_before_sha_exists(
+        self,
+    ) -> None:
+        """Push mypy should block changed-file debt without re-failing baseline drift."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        mypy_step = workflow[
+            workflow.index("- name: MyPy Baseline") : workflow.index(
+                "# Strict mypy for the fully-annotated API layer",
+            )
+        ]
+
+        assert '"${{ github.event_name }}" = "push"' in mypy_step
+        assert "${{ github.event.before }}" in mypy_step
+        assert "0000000000000000000000000000000000000000" in mypy_step
+        assert 'diff_base="${{ github.event.before }}"' in mypy_step
+        assert (
+            "git diff --name-only --diff-filter=ACMRT -z "
+            "\"$diff_base\" HEAD -- 'src/**/*.py' 'src/*.py'"
+        ) in mypy_step
+        assert (
+            "No changed source Python files; skipping baseline mypy check." in mypy_step
+        )
+        assert (
+            'python3 scripts/ci/run_mypy.py "${src_py_files[@]}" --config-file pyproject.toml'
+            in mypy_step
+        )
+        assert "python3 scripts/ci/run_full_mypy_baseline.py" in mypy_step
+
+    def test_jules_pr_cleanup_falls_back_to_repository_token(self) -> None:
+        """Scheduled cleanup must authenticate gh even without an optional PAT secret."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "Jules-PR-Cleanup.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}" in workflow
+        assert "pull-requests: write" in workflow
+
     def test_model_explorer_xml_suppressions_are_build_only(self) -> None:
         """Model Explorer must parse untrusted XML through defusedxml only."""
         model_explorer = REPO_ROOT / "src" / "tools" / "model_explorer"

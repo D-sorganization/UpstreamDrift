@@ -72,7 +72,7 @@ jobs:
       - name: Find Stale Jules PRs
         id: find
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
           MAX_AGE_DAYS: ${{ inputs.max_age_days || '7' }}
         run: |
           echo "Looking for stale Jules PRs..."
@@ -102,7 +102,7 @@ jobs:
         id: check_ci
         if: steps.find.outputs.count != '0'
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
         run: |
           echo "Checking CI status for stale PRs..."
 
@@ -132,7 +132,7 @@ jobs:
       - name: Close Stale PRs
         if: steps.check_ci.outputs.close_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
           DRY_RUN: ${{ inputs.dry_run || 'true' }}
         run: |
           CLOSED=0

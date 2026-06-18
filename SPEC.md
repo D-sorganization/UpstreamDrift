@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.439                                            |
-| **Last Spec Update**    | 2026-06-17                                         |
+| **Spec Version**        | 1.0.440                                            |
+| **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Closed current-main CI issue #7643 by path-scoping the
+  baseline mypy gate on ordinary pushes with a concrete `github.event.before`
+  SHA while keeping scheduled/manual full-baseline audits, and by allowing
+  Jules PR Cleanup to fall back to the repository token when the optional
+  runner token is absent.
 - **2026-06-17** - Stabilized the full-src mypy baseline gate by normalizing
   equivalent built-in `int` constructor note spellings across local and CI
   Python/mypy environments, and refreshed the accountable baseline snapshot.
@@ -1523,7 +1528,7 @@ Beyond standard tools, CI enforces custom checks:
 - **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
-- **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Push-to-main full-src mypy runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics.
+- **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Pull requests and ordinary pushes with a concrete diff base run baseline mypy only on changed `src/` Python files so legacy type drift does not block unrelated work; scheduled/manual full-src mypy still runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics during explicit full-audit lanes.
 - **Docker Size Gate**: Built images must not exceed 800 MB
 
 ### CI/CD Pipeline
@@ -1671,6 +1676,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.440 | Closed current-main CI issue #7643. `ci-standard.yml` now scopes baseline mypy on ordinary pushes to changed `src/` Python files when `github.event.before` is available while retaining full-src baseline audits for scheduled/manual runs, and `Jules-PR-Cleanup.yml` now authenticates scheduled cleanup with `secrets.RUNNER_CHECK_TOKEN || github.token` so missing optional runner tokens no longer fail stale-PR discovery with HTTP 401. |
 | 2026-06-17 | 1.0.435 | Closed the dashboard launcher unit-test event-loop hang for issue #7639. `tests/unit/shared_python/test_launcher_integration.py` now patches the already-imported launcher module with `monkeypatch`, verifies the mocked Qt event-loop return code, and cannot enter the real `QApplication.exec()` loop when prior tests reload launcher modules. |
 | 2026-06-17 | 1.0.434 | Closed the durable task daemon cleanup startup race for issue #7638. `src/api/task_manager_durable.py` now shares cleanup execution between async and daemon-thread loops and performs an eager daemon startup sweep before sleeping for the full interval; `tests/api/test_task_manager_durable.py` covers both periodic deletion and startup deletion of expired tasks. |
 | 2026-06-17 | 1.0.433 | Closed the Rust wheel parity overreach for issue #7637. `.github/workflows/ci-standard.yml` now keeps `rust-wheel-parity` required and fail-closed for Rust wheel, parity-test, and Python facade changes while explicitly skipping the expensive parity suite on unrelated PRs; `tests/ci/test_ci_infrastructure.py` locks the path-gated contract and the successful skip summary. |
