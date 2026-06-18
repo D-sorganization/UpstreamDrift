@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.442                                            |
+| **Spec Version**        | 1.0.443                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -75,6 +75,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   workspace, the Rust toolchain verifier persists `$CARGO_HOME/bin` into
   `$GITHUB_PATH`, and CI infrastructure tests pin that Cargo remains reachable
   before rustfmt/clippy/check steps run.
+- **2026-06-18** - Restored the main-side Tauri Build release lane after the
+  check recovery: the UI manifest now exposes the `npm run tauri` entrypoint
+  that `tauri-action` invokes, and the build matrix uses named runner metadata
+  with a PowerShell Rust setup on Windows so the self-hosted Windows leg does
+  not route through the failing bash action path.
 - **2026-06-18** - Restored the current-main CI Standard lane after #7645 by
   path-scoping strict API mypy on ordinary pushes with `github.event.before`
   and adding a 10 microsecond absolute floor to microbenchmark regression
@@ -1689,6 +1694,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.443 | Restored the main-side Tauri Build release lane for issue #7652. `ui/package.json` now exposes the `tauri` script entrypoint required by `tauri-action`'s default `npm run tauri build` invocation, and `.github/workflows/tauri-build.yml` now separates build matrix runner labels from artifact names while using a PowerShell `rustup` setup path for the Windows self-hosted leg to avoid the bash path failure seen in run `27732025577`. |
 | 2026-06-18 | 1.0.442 | Restored the Nightly Cross-Engine Validation workflow for issue #7646. The scheduled job now runs `tests/integration/test_cross_engine_validation.py`, `tests/unit/test_cross_engine_validator.py`, and `tests/integration/cross_engine/test_conformance_harness.py` against `src.shared.python.engine_core.cross_engine_validator`, preserving the 75% coverage threshold with real validator/conformance tests and marking zero collected tests as a failure in the summary output. |
 | 2026-06-18 | 1.0.441 | Restored current-main CI Standard after #7645. Strict API mypy now mirrors the baseline mypy push contract by checking only changed `src/api` Python files when `github.event.before` is available while preserving full strict API audits for scheduled/manual runs. The benchmark regression helper now keeps the 5x multiplier but applies a 10 microsecond absolute threshold floor for tiny hot paths, preventing sub-microsecond runner jitter from failing the 3.11 performance lane. |
 | 2026-06-18 | 1.0.440 | Closed current-main CI issue #7643. `ci-standard.yml` now scopes baseline mypy on ordinary pushes to changed `src/` Python files when `github.event.before` is available while retaining full-src baseline audits for scheduled/manual runs, and `Jules-PR-Cleanup.yml` now authenticates scheduled cleanup with `secrets.RUNNER_CHECK_TOKEN || github.token` so missing optional runner tokens no longer fail stale-PR discovery with HTTP 401. |

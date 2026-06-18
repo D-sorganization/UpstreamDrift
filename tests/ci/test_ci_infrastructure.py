@@ -9,6 +9,7 @@ These tests verify that:
 This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
+import json
 import sys
 import subprocess
 import re
@@ -465,6 +466,79 @@ class TestCIEnvironmentCompatibility:
         for executable in ("rustup", "rustc", "cargo"):
             assert f"command -v {executable}" in verify_script
             assert f"{executable} --version" in verify_script
+
+    def test_tauri_action_script_exists_for_build_workflow(self) -> None:
+        """The Tauri action invokes npm run tauri build by default."""
+        package_json = json.loads(
+            (REPO_ROOT / "ui" / "package.json").read_text(encoding="utf-8")
+        )
+        scripts = package_json["scripts"]
+
+        assert scripts["tauri"] == "tauri"
+        assert scripts["tauri:build"] == "tauri build"
+
+    def test_tauri_build_matrix_uses_named_runner_metadata(self) -> None:
+        """Tauri build jobs must not expose array runner labels in job names."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "tauri-build.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        build_job = workflow["jobs"]["build"]
+        matrix_entries = build_job["strategy"]["matrix"]["include"]
+
+        assert build_job["name"] == "Build (${{ matrix.artifact_name }})"
+        assert build_job["runs-on"] == "${{ matrix.runner }}"
+        assert "matrix.platform" not in workflow_text
+        assert {entry["artifact_name"] for entry in matrix_entries} == {
+            "linux-x64",
+            "windows-x64",
+        }
+        for entry in matrix_entries:
+            assert "platform" not in entry
+            assert isinstance(entry["artifact_name"], str)
+            assert entry["os"] in {"linux", "windows"}
+
+        upload = next(
+            step
+            for step in build_job["steps"]
+            if step.get("name") == "Upload artifacts"
+        )
+        assert upload["with"]["name"] == (
+            "golf-modeling-suite-${{ matrix.artifact_name }}"
+        )
+
+    def test_tauri_windows_build_avoids_bash_rust_toolchain_action(self) -> None:
+        """Windows self-hosted build setup must avoid the bash-based Rust action."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        steps = workflow["jobs"]["build"]["steps"]
+        unix_setup = next(
+            step for step in steps if step.get("name") == "Setup Rust (Unix)"
+        )
+        windows_setup = next(
+            step for step in steps if step.get("name") == "Setup Rust (Windows)"
+        )
+
+        assert unix_setup["if"] == "matrix.os != 'windows'"
+        assert "dtolnay/rust-toolchain" in unix_setup["uses"]
+        assert windows_setup["if"] == "matrix.os == 'windows'"
+        assert windows_setup["shell"] == "pwsh"
+        windows_script = windows_setup["run"]
+        assert "rustup toolchain install stable --profile minimal" in windows_script
+        assert "rustup default stable" in windows_script
+        assert "cargo --version" in windows_script
 
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
