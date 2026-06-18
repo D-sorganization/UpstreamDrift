@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.441                                            |
+| **Spec Version**        | 1.0.442                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -79,6 +79,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   path-scoping strict API mypy on ordinary pushes with `github.event.before`
   and adding a 10 microsecond absolute floor to microbenchmark regression
   thresholds so sub-microsecond runner jitter does not fail the gate.
+- **2026-06-18** - Restored the Nightly Cross-Engine Validation workflow for
+  issue #7646 by replacing the empty heavy-integration placeholder target with
+  the real validator and conformance harness tests, correcting the coverage
+  target, and treating zero collected tests as a validation failure.
 - **2026-06-18** - Closed current-main CI issue #7643 by path-scoping the
   baseline mypy gate on ordinary pushes with a concrete `github.event.before`
   SHA while keeping scheduled/manual full-baseline audits, and by allowing
@@ -1685,6 +1689,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.442 | Restored the Nightly Cross-Engine Validation workflow for issue #7646. The scheduled job now runs `tests/integration/test_cross_engine_validation.py`, `tests/unit/test_cross_engine_validator.py`, and `tests/integration/cross_engine/test_conformance_harness.py` against `src.shared.python.engine_core.cross_engine_validator`, preserving the 75% coverage threshold with real validator/conformance tests and marking zero collected tests as a failure in the summary output. |
 | 2026-06-18 | 1.0.441 | Restored current-main CI Standard after #7645. Strict API mypy now mirrors the baseline mypy push contract by checking only changed `src/api` Python files when `github.event.before` is available while preserving full strict API audits for scheduled/manual runs. The benchmark regression helper now keeps the 5x multiplier but applies a 10 microsecond absolute threshold floor for tiny hot paths, preventing sub-microsecond runner jitter from failing the 3.11 performance lane. |
 | 2026-06-18 | 1.0.440 | Closed current-main CI issue #7643. `ci-standard.yml` now scopes baseline mypy on ordinary pushes to changed `src/` Python files when `github.event.before` is available while retaining full-src baseline audits for scheduled/manual runs, and `Jules-PR-Cleanup.yml` now authenticates scheduled cleanup with `secrets.RUNNER_CHECK_TOKEN || github.token` so missing optional runner tokens no longer fail stale-PR discovery with HTTP 401. |
 | 2026-06-17 | 1.0.435 | Closed the dashboard launcher unit-test event-loop hang for issue #7639. `tests/unit/shared_python/test_launcher_integration.py` now patches the already-imported launcher module with `monkeypatch`, verifies the mocked Qt event-loop return code, and cannot enter the real `QApplication.exec()` loop when prior tests reload launcher modules. |

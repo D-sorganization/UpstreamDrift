@@ -124,11 +124,14 @@ jobs:
           UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
           UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT: "true"
         run: |
-          pytest tests/heavy_integration/test_cross_engine_integration.py \
+          pytest \
+            tests/integration/test_cross_engine_validation.py \
+            tests/unit/test_cross_engine_validator.py \
+            tests/integration/cross_engine/test_conformance_harness.py \
             -v \
             --tb=short \
             --junitxml=test-results/cross-engine-junit.xml \
-            --cov=shared/python/cross_engine_validator \
+            --cov=src.shared.python.engine_core.cross_engine_validator \
             --cov-report=xml:coverage/cross-engine-coverage.xml
 
       - name: Upload test results
@@ -187,7 +190,7 @@ jobs:
           failures = int(suite.attrib.get("failures", "0"))
           errors = int(suite.attrib.get("errors", "0"))
           skipped = int(suite.attrib.get("skipped", "0"))
-          has_failures = failures > 0 or errors > 0
+          has_failures = tests == 0 or failures > 0 or errors > 0
 
           lines = [
               "## Cross-Engine Validation Summary",
@@ -197,6 +200,8 @@ jobs:
               f"- Errors: {errors}",
               f"- Skipped: {skipped}",
           ]
+          if tests == 0:
+              lines.append("- No tests were collected.")
 
           imports_path = Path("test-results/native-engine-imports.md")
           if imports_path.exists():
@@ -224,7 +229,7 @@ jobs:
               1. Review test results in [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
               2. Investigate which engine import or cross-engine assertion failed
               3. Check for recent engine updates or integration changes
-              4. Run local validation: \`pytest tests/heavy_integration/test_cross_engine_integration.py -v\`
+              4. Run local validation: \`pytest tests/integration/test_cross_engine_validation.py tests/unit/test_cross_engine_validator.py tests/integration/cross_engine/test_conformance_harness.py -v\`
 
               **Possible Causes:**
               - Engine library version upgrade

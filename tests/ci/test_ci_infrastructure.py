@@ -386,6 +386,49 @@ class TestCIEnvironmentCompatibility:
             assert "pydantic-core==" not in workflow
             assert "--no-deps pydantic-core" not in workflow
 
+    def test_nightly_cross_engine_runs_real_validator_suite(self) -> None:
+        """Nightly validation must not target an empty placeholder test file."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "nightly-cross-engine.yml"
+        ).read_text(encoding="utf-8")
+        validation_step = workflow[
+            workflow.index(
+                "- name: Run cross-engine validation tests"
+            ) : workflow.index(
+                "- name: Upload test results",
+            )
+        ]
+
+        assert "tests/heavy_integration/test_cross_engine_integration.py" not in (
+            validation_step
+        )
+        for test_path in (
+            "tests/integration/test_cross_engine_validation.py",
+            "tests/unit/test_cross_engine_validator.py",
+            "tests/integration/cross_engine/test_conformance_harness.py",
+        ):
+            assert test_path in validation_step
+        assert "--cov=src.shared.python.engine_core.cross_engine_validator" in (
+            validation_step
+        )
+        assert "--cov=shared/python/cross_engine_validator" not in validation_step
+
+    def test_nightly_cross_engine_summary_fails_when_no_tests_collect(self) -> None:
+        """Zero collected tests are a workflow failure, not a clean validation run."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "nightly-cross-engine.yml"
+        ).read_text(encoding="utf-8")
+        summary_step = workflow[
+            workflow.index("- name: Summarize validation results") : workflow.index(
+                "- name: Send notification on ERROR",
+            )
+        ]
+
+        assert "has_failures = tests == 0 or failures > 0 or errors > 0" in (
+            summary_step
+        )
+        assert "- No tests were collected." in summary_step
+
     def test_tauri_check_verifies_rust_toolchain_before_cargo_steps(self) -> None:
         """The Tauri check job must fail early when Rust setup is unusable."""
         try:
