@@ -41,16 +41,52 @@ impl ConvexHullResult {
     /// and equal to the enclosed volume — matches `scipy.spatial.ConvexHull.volume`
     /// and `trimesh.Trimesh.volume` to within float tolerance.
     pub fn volume(&self) -> f64 {
+        if self.vertices.is_empty() {
+            return 0.0;
+        }
+        // Volume is translation-invariant. Summing tetrahedra against the raw
+        // origin loses precision via catastrophic cancellation when the hull is
+        // far from the origin (large `a·(b×c)` terms that nearly cancel). Center
+        // every vertex on the centroid first so the per-tetrahedron terms stay
+        // small and comparable in magnitude, then accumulate with Kahan
+        // (compensated) summation to recover lost low-order bits.
+        let n = self.vertices.len() as f64;
+        let mut cx = 0.0_f64;
+        let mut cy = 0.0_f64;
+        let mut cz = 0.0_f64;
+        for v in &self.vertices {
+            cx += v[0] as f64;
+            cy += v[1] as f64;
+            cz += v[2] as f64;
+        }
+        cx /= n;
+        cy /= n;
+        cz /= n;
+
         let mut acc = 0.0_f64;
+        let mut comp = 0.0_f64; // Kahan compensation
         for &[i, j, k] in &self.indices {
             let a = self.vertices[i as usize];
             let b = self.vertices[j as usize];
             let c = self.vertices[k as usize];
-            // (a · (b × c)) / 6
-            let cross_x = (b[1] as f64) * (c[2] as f64) - (b[2] as f64) * (c[1] as f64);
-            let cross_y = (b[2] as f64) * (c[0] as f64) - (b[0] as f64) * (c[2] as f64);
-            let cross_z = (b[0] as f64) * (c[1] as f64) - (b[1] as f64) * (c[0] as f64);
-            acc += (a[0] as f64) * cross_x + (a[1] as f64) * cross_y + (a[2] as f64) * cross_z;
+            let ax = a[0] as f64 - cx;
+            let ay = a[1] as f64 - cy;
+            let az = a[2] as f64 - cz;
+            let bx = b[0] as f64 - cx;
+            let by = b[1] as f64 - cy;
+            let bz = b[2] as f64 - cz;
+            let cx_ = c[0] as f64 - cx;
+            let cy_ = c[1] as f64 - cy;
+            let cz_ = c[2] as f64 - cz;
+            // ((a-g) · ((b-g) × (c-g))) / 6
+            let cross_x = by * cz_ - bz * cy_;
+            let cross_y = bz * cx_ - bx * cz_;
+            let cross_z = bx * cy_ - by * cx_;
+            let term = ax * cross_x + ay * cross_y + az * cross_z;
+            let y = term - comp;
+            let t = acc + y;
+            comp = (t - acc) - y;
+            acc = t;
         }
         (acc / 6.0).abs()
     }
