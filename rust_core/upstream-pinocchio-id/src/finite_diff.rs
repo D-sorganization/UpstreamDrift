@@ -40,7 +40,7 @@
 //! zero-fill is retained only as a defined-but-guarded fallback so the kernels
 //! never panic on a degenerate row.
 
-use ndarray::{Array2, ArrayView1, ArrayView2};
+use ndarray::{Array2, ArrayView1, ArrayView2, Zip};
 
 /// Error returned by the finite-difference kernels when their shape
 /// precondition is violated.
@@ -91,21 +91,39 @@ pub fn finite_diff_qdot(
     if n_frames < 2 {
         return Ok(qdot);
     }
-    // Interior centred difference.
+    // Interior centred difference. Hoist the (i-1, i+1) rows to contiguous
+    // slices so the DOF loop is a slice-vs-slice elementwise op the compiler
+    // can autovectorize, instead of (i, k) tuple indexing into the Array2.
     for i in 1..n_frames.saturating_sub(1) {
         let dt = times[i + 1] - times[i - 1];
         if dt > 0.0 {
-            for k in 0..n_dof {
-                qdot[(i, k)] = (q[(i + 1, k)] - q[(i - 1, k)]) / dt;
-            }
+            let prev = q.row(i - 1);
+            let next = q.row(i + 1);
+            let mut out = qdot.row_mut(i);
+            Zip::from(&mut out)
+                .and(&next)
+                .and(&prev)
+                .for_each(|o, &qn, &qp| *o = (qn - qp) / dt);
         }
     }
     // Endpoints: forward / backward with a 1e-9 floor on dt (matches Python).
     let dt_first = (times[1] - times[0]).max(1e-9);
     let dt_last = (times[n_frames - 1] - times[n_frames - 2]).max(1e-9);
-    for k in 0..n_dof {
-        qdot[(0, k)] = (q[(1, k)] - q[(0, k)]) / dt_first;
-        qdot[(n_frames - 1, k)] = (q[(n_frames - 1, k)] - q[(n_frames - 2, k)]) / dt_last;
+    {
+        let (row0, row1) = (q.row(0), q.row(1));
+        let mut out0 = qdot.row_mut(0);
+        Zip::from(&mut out0)
+            .and(&row1)
+            .and(&row0)
+            .for_each(|o, &q1, &q0| *o = (q1 - q0) / dt_first);
+    }
+    {
+        let (rn1, rn2) = (q.row(n_frames - 1), q.row(n_frames - 2));
+        let mut outn = qdot.row_mut(n_frames - 1);
+        Zip::from(&mut outn)
+            .and(&rn1)
+            .and(&rn2)
+            .for_each(|o, &qn1, &qn2| *o = (qn1 - qn2) / dt_last);
     }
     Ok(qdot)
 }
@@ -135,18 +153,26 @@ pub fn finite_diff_qddot(
         let dt_f = times[i + 1] - times[i];
         if dt_b > 0.0 && dt_f > 0.0 {
             let denom = dt_b * dt_f * (dt_b + dt_f);
-            for k in 0..n_dof {
-                qddot[(i, k)] = 2.0
-                    * (q[(i + 1, k)] * dt_b - q[(i, k)] * (dt_b + dt_f) + q[(i - 1, k)] * dt_f)
-                    / denom;
-            }
+            let sum = dt_b + dt_f;
+            // Hoist the three rows to slices for an autovectorizable DOF loop.
+            let prev = q.row(i - 1);
+            let cur = q.row(i);
+            let next = q.row(i + 1);
+            let mut out = qddot.row_mut(i);
+            Zip::from(&mut out)
+                .and(&next)
+                .and(&cur)
+                .and(&prev)
+                .for_each(|o, &qn, &qc, &qp| {
+                    *o = 2.0 * (qn * dt_b - qc * sum + qp * dt_f) / denom;
+                });
         }
     }
     // Endpoints copy nearest interior row.
-    for k in 0..n_dof {
-        qddot[(0, k)] = qddot[(1, k)];
-        qddot[(n_frames - 1, k)] = qddot[(n_frames - 2, k)];
-    }
+    let row1 = qddot.row(1).to_owned();
+    let rown2 = qddot.row(n_frames - 2).to_owned();
+    qddot.row_mut(0).assign(&row1);
+    qddot.row_mut(n_frames - 1).assign(&rown2);
     Ok(qddot)
 }
 
@@ -173,6 +199,86 @@ mod tests {
         let a = finite_diff_qddot(q.view(), times.view()).unwrap();
         for i in 0..5 {
             assert_abs_diff_eq!(a[(i, 0)], 2.0, epsilon = 1e-9);
+        }
+    }
+
+    // Naive (i, k) tuple-indexed reference implementations — the exact
+    // pre-vectorization scheme. The Zip/row-slice versions must match bit-for-bit.
+    fn qdot_naive(q: ArrayView2<'_, f64>, times: ArrayView1<'_, f64>) -> Array2<f64> {
+        let (n_frames, n_dof) = q.dim();
+        let mut qdot = Array2::<f64>::zeros((n_frames, n_dof));
+        if n_frames < 2 {
+            return qdot;
+        }
+        for i in 1..n_frames.saturating_sub(1) {
+            let dt = times[i + 1] - times[i - 1];
+            if dt > 0.0 {
+                for k in 0..n_dof {
+                    qdot[(i, k)] = (q[(i + 1, k)] - q[(i - 1, k)]) / dt;
+                }
+            }
+        }
+        let dt_first = (times[1] - times[0]).max(1e-9);
+        let dt_last = (times[n_frames - 1] - times[n_frames - 2]).max(1e-9);
+        for k in 0..n_dof {
+            qdot[(0, k)] = (q[(1, k)] - q[(0, k)]) / dt_first;
+            qdot[(n_frames - 1, k)] = (q[(n_frames - 1, k)] - q[(n_frames - 2, k)]) / dt_last;
+        }
+        qdot
+    }
+
+    fn qddot_naive(q: ArrayView2<'_, f64>, times: ArrayView1<'_, f64>) -> Array2<f64> {
+        let (n_frames, n_dof) = q.dim();
+        let mut qddot = Array2::<f64>::zeros((n_frames, n_dof));
+        if n_frames < 3 {
+            return qddot;
+        }
+        for i in 1..n_frames - 1 {
+            let dt_b = times[i] - times[i - 1];
+            let dt_f = times[i + 1] - times[i];
+            if dt_b > 0.0 && dt_f > 0.0 {
+                let denom = dt_b * dt_f * (dt_b + dt_f);
+                for k in 0..n_dof {
+                    qddot[(i, k)] = 2.0
+                        * (q[(i + 1, k)] * dt_b - q[(i, k)] * (dt_b + dt_f) + q[(i - 1, k)] * dt_f)
+                        / denom;
+                }
+            }
+        }
+        for k in 0..n_dof {
+            qddot[(0, k)] = qddot[(1, k)];
+            qddot[(n_frames - 1, k)] = qddot[(n_frames - 2, k)];
+        }
+        qddot
+    }
+
+    #[test]
+    fn vectorized_matches_naive_multidof_nonuniform() {
+        // Non-uniform dt, multiple DOF, including a near-zero interior dt.
+        let times = array![0.0_f64, 0.05, 0.05, 0.2, 0.5, 0.55];
+        let q = array![
+            [0.0_f64, 1.0, -2.0],
+            [0.1, 0.9, -1.7],
+            [0.25, 0.7, -1.0],
+            [0.4, 0.2, 0.3],
+            [0.42, -0.5, 1.1],
+            [0.5, -1.2, 2.0],
+        ];
+
+        let v = finite_diff_qdot(q.view(), times.view()).unwrap();
+        let v_ref = qdot_naive(q.view(), times.view());
+        for i in 0..v.dim().0 {
+            for k in 0..v.dim().1 {
+                assert_abs_diff_eq!(v[(i, k)], v_ref[(i, k)], epsilon = 0.0);
+            }
+        }
+
+        let a = finite_diff_qddot(q.view(), times.view()).unwrap();
+        let a_ref = qddot_naive(q.view(), times.view());
+        for i in 0..a.dim().0 {
+            for k in 0..a.dim().1 {
+                assert_abs_diff_eq!(a[(i, k)], a_ref[(i, k)], epsilon = 0.0);
+            }
         }
     }
 
