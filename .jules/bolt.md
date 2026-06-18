@@ -22,3 +22,7 @@
 ## 2026-06-18 - [NumPy vs Math Overhead in Robotics Simulation Loops]
 **Learning:** `np.linalg.norm()` carries a significant amount of Python-level overhead (input validation, general-purpose shape handling) which makes it considerably slower than `math.sqrt(np.dot(v, v))` for small 1D vectors, and slower than `math.hypot()` for small statically sized vectors (like 3D coordinates). These changes yield genuine speedups in tight loops (e.g. simulation environments). When optimizing mock assertions in related tests, carefully track test assertions that expect specific mock call counts, as optimizations might indirectly affect or expose pre-existing mock count bugs.
 **Action:** Use `math.sqrt(np.dot(x, x))` and `math.hypot` instead of `np.linalg.norm` for small array magnitude operations in critical paths.
+
+## 2026-06-19 - Unmeasurable micro-optimizations
+**Learning:** Replacing `np.linalg.norm` with `math.hypot` inside camera controllers (like `golf_camera_system.py`) to avoid numpy array allocation overhead only saves a few microseconds per call. This has no measurable impact on the overall application performance.
+**Action:** Do not apply micro-optimizations (like converting from `np.linalg.norm` to `math.hypot`) in paths that do not have a measurable performance impact (like UI or camera controllers). This sacrifices code readability for unmeasurable gains.
