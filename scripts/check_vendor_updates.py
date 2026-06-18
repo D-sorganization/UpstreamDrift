@@ -43,7 +43,7 @@ import json
 import logging
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -278,15 +278,16 @@ def main(argv: list[str] | None = None) -> int:
         results.append(status)
 
     if args.json:
-        pass
+        json.dump([asdict(result) for result in results], sys.stdout, indent=2)
+        sys.stdout.write("\n")
     else:
-        for _r in results:
-            pass
+        for result in results:
+            print(result.message)
 
     stale_count = sum(1 for r in results if not r.is_current)
 
     if stale_count > 0 and not args.json:
-        pass
+        print(f"\n{stale_count} submodule(s) are behind upstream.")
 
     if args.fail_on_stale and stale_count > 0:
         return 1
