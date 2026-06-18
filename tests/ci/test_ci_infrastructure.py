@@ -564,6 +564,27 @@ class TestCIEnvironmentCompatibility:
         assert "tests:              ${{ needs.tests.result }}" in aggregate
         assert '${{ needs.tests.result }}" != "success"' in aggregate
 
+    def test_ci_standard_repo_structure_installs_workflow_parser(self) -> None:
+        """Workflow YAML guards must run after their parser dependency is present."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        steps = workflow["jobs"]["repo-structure-gates"]["steps"]
+        step_names = [step.get("name", "") for step in steps]
+
+        parser_index = step_names.index("Install workflow parser dependency")
+        trust_boundary_index = step_names.index("Workflow Run Trust Boundary Guard")
+
+        assert parser_index < trust_boundary_index
+        assert "pyyaml==6.0.2" in steps[parser_index]["run"]
+
     def test_ci_standard_tests_matrix_timeout_covers_core_suite_runtime(self) -> None:
         """The core tests matrix must not cancel before the bounded suite completes."""
         try:

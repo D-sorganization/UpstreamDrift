@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.437                                            |
+| **Spec Version**        | 1.0.438                                            |
 | **Last Spec Update**    | 2026-06-17                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-17** - Restored the current-main `repo-structure-gates` lane by
+  installing the pinned PyYAML parser dependency before workflow YAML guards
+  run, and added CI infrastructure coverage that keeps the trust-boundary guard
+  ordered after that dependency setup.
 - **2026-06-17** - Closed current-main CI recovery issue #7640 by path-scoping
   the mandatory Rust wheel parity lane on push events with
   `github.event.before`, preserving full parity only for schedule/manual runs,
