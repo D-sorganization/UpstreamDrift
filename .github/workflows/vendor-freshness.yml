@@ -77,11 +77,12 @@ jobs:
       - name: Run freshness check
         id: check
         run: |
-          python scripts/check_vendor_updates.py --no-network --json > vendor_status.json 2>&1 || true
+          python scripts/check_vendor_updates.py --no-network --json > vendor_status.json
           cat vendor_status.json
           STALE=$(python -c "
-          import json, sys
-          data = json.load(open('vendor_status.json'))
+          import json
+          with open('vendor_status.json', encoding='utf-8') as handle:
+              data = json.load(handle)
           stale = [d for d in data if not d['is_current']]
           print('true' if stale else 'false')
           ")

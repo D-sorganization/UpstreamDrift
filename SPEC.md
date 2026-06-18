@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-17
+  LAST UPDATED: 2026-06-18
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.449                                            |
+| **Spec Version**        | 1.0.450                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Restored the scheduled Vendor Submodule Freshness workflow
+  for issue #7672: `scripts/check_vendor_updates.py --json` now emits a
+  parseable status array, text mode prints the per-submodule messages again,
+  and the workflow keeps JSON stdout separate from diagnostics instead of
+  redirecting stderr into the artifact or masking script failures.
 - **2026-06-18** - Regenerated the full-src mypy baseline from the Linux
   Python 3.11 quality-gate environment used by `main` CI so push-triggered
   code-quality checks compare against the same platform family that enforces
@@ -1731,6 +1736,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-18 | 1.0.450 | Restored the scheduled Vendor Submodule Freshness workflow for issue #7672. `scripts/check_vendor_updates.py --json` now emits a parseable JSON status array, text mode prints per-submodule status messages again, and `.github/workflows/vendor-freshness.yml` keeps stderr out of `vendor_status.json` while letting real script failures fail closed. |
 | 2026-06-18 | 1.0.446 | Optimized allocation hot paths for issue #7559. `MuJoCoPerturbationAnalyzer._simulate()` now builds a padded descending-power coefficient matrix once, evaluates every actuator each step with a vectorized Horner pass into a preallocated control buffer, and preserves per-actuator `np.polyval(coeffs[j][::-1], t)` parity for ragged, empty, and over-count coefficient lists. `PolynomialProfile` now caches its `np.poly1d` polynomial and derivative once, and the triple-pendulum hardcoded dynamics helpers accept packed theta/omega/parameter tuples instead of 16-19 scalar arguments. Focused MuJoCo and pendulum unit coverage locks parity. |
 | 2026-06-18 | 1.0.445 | Gated Windows Tauri release packaging behind `TAURI_WINDOWS_RELEASE_ENABLED=true` because the current self-hosted Windows runner blocks Cargo build-script executables with Application Control (`os error 4551`). Linux Tauri release packaging and the Tauri Rust/TypeScript check remain enforced, and `tests/ci/test_ci_infrastructure.py` now pins the repo-variable opt-in plus diagnostic notice contract. |
 | 2026-06-18 | 1.0.444 | Restored the final Tauri Build release contract for issue #7652. `ui/src-tauri/Cargo.lock` now resolves Rust `tauri` to the same locked major/minor as `@tauri-apps/api`, `.github/workflows/tauri-build.yml` installs `libdbus-1-dev` for the updated Linux Rust graph, and `tests/ci/test_ci_infrastructure.py` now parses lockfiles/workflow metadata to fail fast when a future dependency update would make `tauri-action` reject release builds for Rust/npm Tauri minor drift or miss required native Linux headers. |
