@@ -179,18 +179,31 @@ class TestEngineAvailabilityFlags:
         assert is_engine_available("scipy") is True
         assert is_engine_available("structlog") is True
 
-    def test_get_available_engines_returns_list(self) -> None:
-        """Test that get_available_engines returns a list."""
-        from src.shared.python.engine_core.engine_availability import (
-            get_available_engines,
-        )
+    def test_get_available_engines_returns_list(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that get_available_engines returns a list for core deps."""
+        from src.shared.python.engine_core import engine_availability
 
-        available = get_available_engines()
-        assert isinstance(available, list)
-        assert len(available) > 0
-        # Core dependencies should be in the list
-        assert "numpy" in available
-        assert "scipy" in available
+        core_engine_mapping = {
+            "numpy": "numpy",
+            "scipy": "scipy",
+            "structlog": "structlog",
+        }
+        monkeypatch.setattr(engine_availability, "_MODULE_MAPPING", core_engine_mapping)
+        engine_availability.reset_engine_status_cache()
+
+        try:
+            available = engine_availability.get_available_engines()
+            assert isinstance(available, list)
+            assert len(available) > 0
+            assert set(available) <= set(core_engine_mapping)
+            # Core dependencies should be in the list
+            assert "numpy" in available
+            assert "scipy" in available
+            assert "structlog" in available
+        finally:
+            engine_availability.reset_engine_status_cache()
 
 
 class TestOptionalDependencyHandling:
@@ -501,21 +514,21 @@ class TestCIEnvironmentCompatibility:
         assert scripts["tauri"] == "tauri"
         assert scripts["tauri:build"] == "tauri build"
 
-    def test_tauri_rust_and_npm_api_versions_share_minor(self) -> None:
-        """Tauri app builds require Rust tauri and @tauri-apps/api parity."""
+    def test_tauri_rust_and_npm_versions_share_minor(self) -> None:
+        """Tauri app builds require Rust tauri and npm package parity."""
         package_lock = json.loads(
             (REPO_ROOT / "ui" / "package-lock.json").read_text(encoding="utf-8")
         )
-        npm_api_version = package_lock["packages"]["node_modules/@tauri-apps/api"][
-            "version"
-        ]
+        npm_packages = package_lock["packages"]
         cargo_packages = _load_tauri_cargo_packages()
         rust_tauri_version = cargo_packages["tauri"]
 
-        assert _major_minor(rust_tauri_version) == _major_minor(npm_api_version), (
-            "tauri-action rejects mismatched Tauri minor versions: "
-            f"tauri {rust_tauri_version} vs @tauri-apps/api {npm_api_version}"
-        )
+        for package_name in ("@tauri-apps/api", "@tauri-apps/cli"):
+            npm_version = npm_packages[f"node_modules/{package_name}"]["version"]
+            assert _major_minor(rust_tauri_version) == _major_minor(npm_version), (
+                "tauri-action rejects mismatched Tauri minor versions: "
+                f"tauri {rust_tauri_version} vs {package_name} {npm_version}"
+            )
 
     def test_tauri_linux_dependencies_cover_lockfile_native_packages(self) -> None:
         """Linux Tauri builds must install native -dev packages for sys crates."""
