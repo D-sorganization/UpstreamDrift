@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.448                                            |
+| **Spec Version**        | 1.0.449                                            |
 | **Last Spec Update**    | 2026-06-18                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-18** - Regenerated the full-src mypy baseline from the Linux
+  Python 3.11 quality-gate environment used by `main` CI so push-triggered
+  code-quality checks compare against the same platform family that enforces
+  the gate.
 - **2026-06-18** - Made the lightweight catch-all 404 page an eager route
   dependency so unknown deep links render the branded recoverable "Page not
   found" screen immediately, without depending on route chunk load timing. The
