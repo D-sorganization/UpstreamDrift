@@ -93,9 +93,15 @@ def resolve_output_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
     resolved candidate, and symlink traversal of any existing parent component
     is rejected as defense-in-depth (issue #6926).
 
+    Returns:
+        The resolved candidate path (which may not exist yet).
+
     Raises:
-        HTTPException: 400 if the path is malformed or escapes every allowed
-            root.
+        HTTPException: 400 if the path is malformed, traverses a symlink, or
+            escapes every allowed root.
+
+    Direct test coverage for this security-critical guard lives in
+    ``tests/unit/utils/test_path_validation.py`` (issue #7710).
     """
     try:
         resolved_candidate = candidate.resolve()
