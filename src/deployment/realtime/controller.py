@@ -443,6 +443,25 @@ class RealTimeController:
         )
         self._send_command(zero_command)
 
+    def _loopback_joint_count(self) -> int:
+        """Return the authoritative LOOPBACK joint count.
+
+        The caller must hold ``_sim_state_lock`` so the answer stays consistent
+        with the state used by the current command.
+        """
+        if self._sim_state is not None:
+            return len(self._sim_state[0])
+        if self._config is not None:
+            return self._config.n_joints
+        return 7
+
+    @staticmethod
+    def _copy_command_vector(
+        vector: NDArray[np.floating],
+    ) -> NDArray[np.floating]:
+        """Copy a caller-owned command vector before storing or integrating it."""
+        return np.array(vector, dtype=float, copy=True)
+
     def _read_state(self) -> RobotState:
         """Read current robot state.
 
@@ -469,8 +488,8 @@ class RealTimeController:
                 current_sim_state = self._sim_state
             return RobotState(
                 timestamp=timestamp,
-                joint_positions=current_sim_state[0],
-                joint_velocities=current_sim_state[1],
+                joint_positions=current_sim_state[0].copy(),
+                joint_velocities=current_sim_state[1].copy(),
                 joint_torques=np.zeros(n_joints),
             )
 
@@ -499,37 +518,41 @@ class RealTimeController:
                     self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
 
                 q, qd = self._sim_state
+                command.validate(self._loopback_joint_count())
 
                 if command.mode == ControlMode.TORQUE:
-                    if command.torque_commands is not None:
-                        damping = 0.1
-                        qdd = command.torque_commands - damping * qd
-                        qd = qd + qdd * self.dt
-                        q = q + qd * self.dt
+                    torque_commands = self._copy_command_vector(command.torque_commands)
+                    damping = 0.1
+                    qdd = torque_commands - damping * qd
+                    qd = qd + qdd * self.dt
+                    q = q + qd * self.dt
 
                 elif command.mode == ControlMode.POSITION:
-                    if command.position_targets is not None:
-                        q = command.position_targets
-                        qd = np.zeros_like(q)
+                    q = self._copy_command_vector(command.position_targets)
+                    qd = np.zeros_like(q)
 
                 elif command.mode == ControlMode.VELOCITY:
-                    if command.velocity_targets is not None:
-                        qd = command.velocity_targets
-                        q = q + qd * self.dt
+                    qd = self._copy_command_vector(command.velocity_targets)
+                    q = q + qd * self.dt
 
-                elif (
-                    command.mode == ControlMode.IMPEDANCE
-                    and command.position_targets is not None
-                    and command.stiffness is not None
-                    and command.damping is not None
-                ):
-                    q_err = command.position_targets - q
-                    tau = command.stiffness * q_err - command.damping * qd
+                elif command.mode == ControlMode.IMPEDANCE:
+                    position_targets = self._copy_command_vector(
+                        command.position_targets
+                    )
+                    stiffness = self._copy_command_vector(command.stiffness)
+                    damping = self._copy_command_vector(command.damping)
+                    q_err = position_targets - q
+                    tau = stiffness * q_err - damping * qd
                     if command.feedforward_torque is not None:
-                        tau += command.feedforward_torque
+                        tau += self._copy_command_vector(command.feedforward_torque)
                     qdd = tau
                     qd = qd + qdd * self.dt
                     q = q + qd * self.dt
+
+                else:
+                    raise ValueError(
+                        f"LOOPBACK does not support {command.mode.value} commands"
+                    )
 
                 self._sim_state = (q, qd)
             return
