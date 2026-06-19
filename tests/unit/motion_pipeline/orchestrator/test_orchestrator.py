@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import logging
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -15,6 +18,9 @@ from src.shared.python.motion_pipeline.orchestrator import (
 )
 
 from ._local_fixtures import make_minimal_config
+
+
+ORCHESTRATOR_LOGGER = "src.shared.python.motion_pipeline.orchestrator"
 
 
 def test_motion_pipeline_constructs() -> None:
@@ -108,6 +114,94 @@ def test_motion_pipeline_fire_hooks_lenient_logs_traceback(
     assert "Hook 'test_motion_pipeline_fire_hooks_lenient_logs_traceback" in caplog.text
     assert "adapter" in caplog.text
     assert "RuntimeError: hook exploded for adapter" in caplog.text
+
+
+def _assert_unexpected_stage_failure_logs_traceback(
+    caplog: pytest.LogCaptureFixture,
+    run_stage: Callable[[MotionPipeline], StageResult],
+    expected_error: str,
+) -> None:
+    pipeline = MotionPipeline(make_minimal_config())
+
+    with caplog.at_level(logging.ERROR, logger=ORCHESTRATOR_LOGGER):
+        result = run_stage(pipeline)
+
+    assert result.success is False
+    assert result.error == expected_error
+    records = [
+        record for record in caplog.records if record.name == ORCHESTRATOR_LOGGER
+    ]
+    assert records
+    assert records[-1].exc_info is not None
+    assert expected_error in caplog.text
+
+
+def test_unexpected_pipeline_stage_failures_log_tracebacks(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "source.json"
+    source_path.write_text("{}", encoding="utf-8")
+
+    def fail_load_source(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("adapter boom")
+
+    def fail_preprocessing(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("preprocessing boom")
+
+    def fail_scaling(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("scaling boom")
+
+    def fail_make_solver(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("ik boom")
+
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.sources.loader.load_source",
+        fail_load_source,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.preprocessing.apply_preprocessing",
+        fail_preprocessing,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.scaling.scale_skeleton",
+        fail_scaling,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.ik.base.make_ik_solver",
+        fail_make_solver,
+    )
+
+    stage_cases: tuple[tuple[Callable[[MotionPipeline], StageResult], str], ...] = (
+        (
+            lambda pipeline: pipeline._run_adapter(source_path),
+            "Adapter failed: adapter boom",
+        ),
+        (
+            lambda pipeline: pipeline._run_preprocessing(object()),
+            "Preprocessing failed: preprocessing boom",
+        ),
+        (
+            lambda pipeline: pipeline._run_scaling(object(), SimpleNamespace()),
+            "Scaling failed: scaling boom",
+        ),
+        (
+            lambda pipeline: pipeline._run_inverse_kinematics(
+                object(),
+                SimpleNamespace(),
+            ),
+            "IK failed: ik boom",
+        ),
+    )
+
+    for run_stage, expected_error in stage_cases:
+        caplog.clear()
+        _assert_unexpected_stage_failure_logs_traceback(
+            caplog,
+            run_stage,
+            expected_error,
+        )
 
 
 def test_motion_pipeline_fire_hooks_strict_raises_diagnostic() -> None:
