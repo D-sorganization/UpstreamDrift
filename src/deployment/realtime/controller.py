@@ -127,8 +127,8 @@ class RealTimeController:
                 errors tolerated before the loop stops and sends zero torque.
                 Must be positive.
         """
-        if not (control_frequency is not None):
-            raise ValueError("control_frequency must be provided")
+        if control_frequency is None or control_frequency <= 0:
+            raise ValueError("control_frequency must be a positive number of Hz")
         if max_consecutive_failures <= 0:
             raise ValueError("max_consecutive_failures must be positive")
         self.control_frequency = control_frequency
