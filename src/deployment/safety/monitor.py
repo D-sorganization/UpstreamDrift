@@ -281,6 +281,8 @@ class SafetyMonitor:
         """
         if not (desired is not None):
             raise ValueError("desired must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         from src.deployment.realtime import ControlCommand
 
         # Start with desired command
