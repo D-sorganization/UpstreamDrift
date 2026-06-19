@@ -10,7 +10,11 @@ import math
 from dataclasses import dataclass, field
 from typing import Any
 
+from src.shared.python.core.physics_constants import AIR_DENSITY_SEA_LEVEL_KG_M3
+
 from .geometry import Vector3
+
+_DEFAULT_AIR_DENSITY_KG_M3 = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
 
 
 @dataclass
@@ -343,7 +347,7 @@ class EnvironmentState:
     temperature: float = 20.0
     humidity: float = 0.5
     altitude: float = 0.0
-    air_density: float = 1.225
+    air_density: float = _DEFAULT_AIR_DENSITY_KG_M3
     pressure: float = 1013.25
 
     @classmethod
@@ -358,7 +362,7 @@ class EnvironmentState:
             temperature=20.0,
             humidity=0.5,
             altitude=0.0,
-            air_density=1.225,
+            air_density=_DEFAULT_AIR_DENSITY_KG_M3,
             pressure=1013.25,
         )
 
@@ -387,6 +391,6 @@ class EnvironmentState:
             temperature=d.get("temperature", 20.0),
             humidity=d.get("humidity", 0.5),
             altitude=d.get("altitude", 0.0),
-            air_density=d.get("air_density", 1.225),
+            air_density=d.get("air_density", _DEFAULT_AIR_DENSITY_KG_M3),
             pressure=d.get("pressure", 1013.25),
         )
