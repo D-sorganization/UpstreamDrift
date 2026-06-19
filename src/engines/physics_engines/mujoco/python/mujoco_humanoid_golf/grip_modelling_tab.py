@@ -840,7 +840,7 @@ class GripModellingTab(QtWidgets.QWidget):
                 f"Slip Detected: {'Yes' if summary['any_slip_detected'] else 'No'}",
             )
 
-        except ImportError as e:
+        except (OSError, TypeError, ValueError) as e:
             logger.exception("Failed to export contact data")
             QtWidgets.QMessageBox.critical(
                 self, "Export Failed", f"Failed to export: {e}"
