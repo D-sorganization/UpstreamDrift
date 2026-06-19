@@ -241,6 +241,59 @@ def _engine_state_to_dict(engine: object) -> dict[str, Any]:
     }
 
 
+def _to_json_list(arr: object) -> list[float] | None:
+    """Convert a numpy array (or sequence) to a JSON-safe list, or None."""
+    if arr is None:
+        return None
+    if isinstance(arr, np.ndarray):
+        return arr.tolist()
+    try:
+        return list(arr)  # type: ignore[arg-type]
+    except TypeError:
+        return None
+
+
+def _engine_analysis_to_dict(engine: object) -> dict[str, Any]:
+    """Build the live-analysis payload (joint angles + velocities).
+
+    Issue #7718: the previous implementation only consulted
+    ``engine.get_joint_angles()`` / ``engine.get_velocities()``, which no
+    engine implements, so the analysis frame was always ``{"joint_angles":
+    null, "velocities": null}``. Engines expose state via ``get_state()``
+    (``(q, v)``), so we derive angles/velocities from there, while still
+    honouring the legacy bespoke methods if an engine ever provides them.
+
+    Returns:
+        Dict with JSON-safe ``joint_angles`` and ``velocities`` lists. When
+        the engine cannot supply state, a ``warning`` key is included instead
+        of silently returning nulls.
+    """
+    joint_angles: list[float] | None = None
+    velocities: list[float] | None = None
+
+    if hasattr(engine, "get_joint_angles"):
+        joint_angles = _to_json_list(engine.get_joint_angles())
+    if hasattr(engine, "get_velocities"):
+        velocities = _to_json_list(engine.get_velocities())
+
+    # Fall back to the canonical get_state() (q, v) tuple.
+    if (joint_angles is None or velocities is None) and hasattr(engine, "get_state"):
+        result = engine.get_state()
+        if isinstance(result, (tuple, list)) and len(result) >= 2:
+            if joint_angles is None:
+                joint_angles = _to_json_list(result[0])
+            if velocities is None:
+                velocities = _to_json_list(result[1])
+
+    payload: dict[str, Any] = {
+        "joint_angles": joint_angles,
+        "velocities": velocities,
+    }
+    if joint_angles is None and velocities is None:
+        payload["warning"] = "engine does not expose live-analysis state"
+    return payload
+
+
 def _get_simulation_speed_factor(
     websocket: WebSocket,
     config: dict[str, Any],
@@ -497,20 +550,10 @@ async def _run_simulation_loop(
                 "state": state,
             }
 
-            # Include analysis if requested
+            # Include analysis if requested (issue #7718: derive real q/v from
+            # the engine's get_state() instead of unimplemented bespoke calls).
             if config.get("live_analysis"):
-                frame_data["analysis"] = {
-                    "joint_angles": (
-                        engine.get_joint_angles()
-                        if hasattr(engine, "get_joint_angles")
-                        else None
-                    ),
-                    "velocities": (
-                        engine.get_velocities()
-                        if hasattr(engine, "get_velocities")
-                        else None
-                    ),
-                }
+                frame_data["analysis"] = _engine_analysis_to_dict(engine)
 
             await websocket.send_json(frame_data)
 
