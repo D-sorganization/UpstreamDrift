@@ -19,7 +19,7 @@ def _resolve_contract_level() -> ContractLevel:
     env_val = os.environ.get("DBC_LEVEL", "").lower().strip()
     if env_val in ("off", "warn", "enforce"):
         return ContractLevel(env_val)
-    return ContractLevel.ENFORCE if __debug__ else ContractLevel.OFF
+    return ContractLevel.ENFORCE
 
 
 class _ContractState:
