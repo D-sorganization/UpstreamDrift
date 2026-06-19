@@ -21,6 +21,12 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.golf_viz import (
+    circle_fan_vertices,
+    rect_vertices,
+    speed_colors,
+)
+
 logger = logging.getLogger(__name__)
 
 # Try to import pyqtgraph
@@ -194,45 +200,34 @@ class EnvironmentRenderer(QWidget):
             self._gl_view.addItem(pin)
 
     def _create_rect(self, x: float, y: float, w: float, h: float) -> np.ndarray:
-        return np.array(
-            [
-                [x, y, 0],
-                [x + w, y, 0],
-                [x, y + h, 0],
-                [x, y + h, 0],
-                [x + w, y, 0],
-                [x + w, y + h, 0],
-            ]
-        )
+        # Delegates to the shared golf_viz geometry builder (DRY).
+        return rect_vertices(x, y, w, h, z=0.0)
 
     def _create_circle(
         self, cx: float, cy: float, r: float, segments: int = 32
     ) -> np.ndarray:
-        angles = np.linspace(0, 2 * np.pi, segments)
-        pts = []
-        for i in range(segments - 1):
-            x1 = cx + r * np.cos(angles[i])
-            y1 = cy + r * np.sin(angles[i])
-            x2 = cx + r * np.cos(angles[i + 1])
-            y2 = cy + r * np.sin(angles[i + 1])
-            pts.extend([[cx, cy, 0.05], [x1, y1, 0.05], [x2, y2, 0.05]])
-        return np.array(pts)
+        # Raised 5 cm above ground so the disc renders above the fairway (DRY).
+        return circle_fan_vertices(cx, cy, r, z=0.05, segments=segments)
 
     def add_trajectory(
         self,
         points: np.ndarray,
-        color: tuple[float, float, float, float] = (1.0, 1.0, 0.0, 1.0),
+        color: tuple[float, float, float, float] | None = None,
     ) -> None:
         """Add a ball flight trajectory.
 
         Args:
             points: Array of shape (N, 3) with [x, y, z] coordinates.
-            color: RGBA tuple.
+            color: Optional RGBA tuple for a flat-coloured line. When omitted,
+                the line is shaded by height (apex hot, ground cool) using the
+                shared :mod:`golf_viz` palette.
         """
         if self._gl_view is None or len(points) == 0:
             return
 
-        path = gl.GLLinePlotItem(pos=points, color=color, width=3, antialias=True)
+        points = np.asarray(points, dtype=float)
+        line_color: Any = speed_colors(points[:, 2]) if color is None else color
+        path = gl.GLLinePlotItem(pos=points, color=line_color, width=3, antialias=True)
         self._gl_view.addItem(path)
         self._trajectories.append(path)
 
