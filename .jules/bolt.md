@@ -25,6 +25,6 @@
 ## 2026-06-18 - np.einsum for sum over axis
 **Learning:** For multi-dimensional NumPy arrays where you compute an L2 norm along a specific axis (like calculating `np.linalg.norm(..., axis=2)`), `np.linalg.norm` has more overhead and allocates a temporary array. `np.sqrt(np.einsum('...i,...i->...', x, x))` avoids this.
 **Action:** For replacing `np.linalg.norm(..., axis=2)` over the last dimension, use `np.sqrt(np.einsum('...i,...i->...', x, x))` to avoid intermediate array allocations and improve performance.
-## 2026-06-18 - np.einsum for sum over axis
-**Learning:** For multi-dimensional NumPy arrays where you compute an L2 norm along a specific axis (like calculating `np.linalg.norm(..., axis=2)`), `np.linalg.norm` has more overhead and allocates a temporary array. `np.sqrt(np.einsum('...i,...i->...', x, x))` avoids this.
-**Action:** For replacing `np.linalg.norm(..., axis=2)` over the last dimension, use `np.sqrt(np.einsum('...i,...i->...', x, x))` to avoid intermediate array allocations and improve performance.
+## 2026-06-18 - Replacing np.linalg.norm with math.hypot in Camera Controllers
+**Learning:** `np.linalg.norm` creates significant overhead for small arrays. For calculating distances in a camera controller (often 3D or 2D offsets), `math.hypot` is significantly faster, avoiding intermediate array allocation and function dispatch overhead.
+**Action:** Replace `np.linalg.norm(offset)` with `math.hypot(offset[0], offset[1], offset[2])` for 3D vectors and `math.hypot(velocity[0], velocity[1])` for 2D vectors in camera and UI updates to prevent unnecessary overhead. Ensure the lengths are fixed and known.
