@@ -254,14 +254,24 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 # Tools issue #2547 / PR #2566: poll the configured provider
                 # for available models and ship the result over the chat
                 # socket so the dock widget can repopulate its dropdown.
-                payload = await asyncio.to_thread(chat_service.refresh_models)
-                await websocket.send_json(
-                    {
-                        "type": "model_list",
-                        "models": payload["models"],
-                        "refreshed_at": payload["refreshed_at"],
-                    }
-                )
+                # Issue #7687: a provider/network failure here used to escape
+                # chat_stream and tear the socket down with no error frame.
+                try:
+                    payload = await asyncio.to_thread(chat_service.refresh_models)
+                    await websocket.send_json(
+                        {
+                            "type": "model_list",
+                            "models": payload["models"],
+                            "refreshed_at": payload["refreshed_at"],
+                        }
+                    )
+                except WebSocketDisconnect:
+                    raise
+                except Exception:  # noqa: BLE001
+                    logger.exception("Error refreshing models")
+                    await websocket.send_json(
+                        {"type": "error", "detail": _INTERNAL_ERROR_DETAIL}
+                    )
 
             elif action == "index_codebase":
                 # Tools issue #2549 / PR #2567. Run the existing
@@ -270,6 +280,8 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 # ``complete`` (or ``error``) event when the rebuild
                 # finishes. We deliberately don't reimplement the
                 # indexer here — see ``src/shared/python/codemap``.
+                # Issue #7687: a rebuild failure must surface as an error frame
+                # instead of crashing the whole chat socket.
                 await websocket.send_json(
                     {
                         "type": "index_status",
@@ -278,8 +290,20 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                         "symbols_inserted": 0,
                     }
                 )
-                payload = await chat_service.run_codemap_rebuild()
-                await websocket.send_json({"type": "index_status", **payload})
+                try:
+                    payload = await chat_service.run_codemap_rebuild()
+                    await websocket.send_json({"type": "index_status", **payload})
+                except WebSocketDisconnect:
+                    raise
+                except Exception:  # noqa: BLE001
+                    logger.exception("Error indexing codebase")
+                    await websocket.send_json(
+                        {
+                            "type": "index_status",
+                            "state": "error",
+                            "detail": _INTERNAL_ERROR_DETAIL,
+                        }
+                    )
 
             else:
                 await websocket.send_json(
