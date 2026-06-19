@@ -463,6 +463,41 @@ class TestUsageTrackerQuotaTableCoverage:
             for resource in ("api_calls", "video_analyses", "simulations"):
                 assert resource in summary
 
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    @pytest.mark.parametrize(
+        "resource",
+        ["api_calls", "video_analyses", "simulations"],
+    )
+    def test_check_quota_resolves_for_every_role(
+        self, role_name: str, resource: str
+    ) -> None:
+        """check_quota must not KeyError for any role (incl. ADMIN).
+
+        check_quota is the production-reachable caller of quota_limit; a
+        missing SUBSCRIPTION_QUOTAS entry surfaces here as a KeyError before
+        any request is served. Exercise it for a fresh (zero-usage) user of
+        every role so the admin path stays covered.
+        """
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+            user.api_calls_this_month = 0
+            user.video_analyses_this_month = 0
+            user.simulations_this_month = 0
+
+            # A fresh user is always within quota; the assertion mainly guards
+            # against the quota_limit lookup raising for the role.
+            assert tracker.check_quota(user, resource) is True
+
 
 class TestUsageTrackerContract:
     """Design by Contract tests for UsageTracker class."""
