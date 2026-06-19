@@ -160,7 +160,7 @@ def chain_force_history(
     per_link = config.link_mass_kg * accelerations - weight
     # Reverse cumulative sum along the link axis for every frame.
     tension_vectors = np.cumsum(per_link[:, ::-1, :], axis=1)[:, ::-1, :]
-    link_tension = np.linalg.norm(tension_vectors, axis=2)
+    link_tension = np.sqrt(np.einsum('...i,...i->...', tension_vectors, tension_vectors))  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=2)
     max_tension = (
         np.max(link_tension, axis=1)
         if link_tension.shape[1]

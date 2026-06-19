@@ -110,7 +110,8 @@ def test_chain_simulation_damps_energy() -> None:
     assert rollout.positions.shape == (25, 7, 2)
     assert np.all(np.isfinite(rollout.energy_j))
     assert total_energy(config, rollout.states[-1]) == pytest.approx(rollout.energy_j[-1])
-    link_lengths = np.linalg.norm(np.diff(rollout.positions, axis=1), axis=2)
+    diffs = np.diff(rollout.positions, axis=1)
+    link_lengths = np.sqrt(np.einsum('...i,...i->...', diffs, diffs))  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=2)
     np.testing.assert_allclose(link_lengths, config.segment_length_m)
 
 
