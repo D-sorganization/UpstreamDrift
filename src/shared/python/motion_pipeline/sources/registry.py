@@ -8,6 +8,7 @@ their own files and the registry knows nothing about format internals.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TypeVar
 
@@ -19,6 +20,7 @@ from src.shared.python.motion_pipeline.sources.base import (
 )
 
 _REGISTRY: list[type[MocapSourceAdapter]] = []
+logger = logging.getLogger(__name__)
 
 A = TypeVar("A", bound=type[MocapSourceAdapter])
 
@@ -54,6 +56,12 @@ def detect_format(path: Path) -> type[MocapSourceAdapter]:
             if cls.supports(p):
                 return cls
         except Exception:  # noqa: BLE001 - faulty adapter must not block others
+            logger.warning(
+                "Adapter %s.supports() raised while probing %s; skipping",
+                cls.__name__,
+                p,
+                exc_info=True,
+            )
             continue
     raise UnsupportedFormatError(
         f"No registered MocapSourceAdapter supports {p!s}. "
