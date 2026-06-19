@@ -29,6 +29,28 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 T = TypeVar("T")
+PositiveNumber = TypeVar("PositiveNumber", int, float)
+
+
+def _require_positive(
+    value: PositiveNumber | None,
+    name: str,
+) -> PositiveNumber:
+    """Require a strictly positive numeric value even when DbC checks are off."""
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+    try:
+        is_positive = value > 0
+    except TypeError as exc:
+        raise ValueError(f"{name} must be positive") from exc
+    if not is_positive:
+        raise ValueError(f"{name} must be positive")
+    return value
+
+
+def _require_non_empty_string(value: object, name: str) -> None:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{name} must be a non-empty string")
 
 
 class EngineLifecycleState(Enum):
@@ -138,10 +160,8 @@ class StateManager:
             nv: Number of velocity coordinates
             max_history: Maximum history for undo buffer
         """
-        if nq is None:
-            raise ValueError("nq must be provided")
-        if nv is None:
-            raise ValueError("nv must be provided")
+        nq = _require_positive(nq, "nq")
+        nv = _require_positive(nv, "nv")
         self.nq = nq
         self.nv = nv
         self.max_history = max_history
@@ -224,8 +244,7 @@ class StateManager:
         Args:
             dt: Time step
         """
-        if dt is None:
-            raise ValueError("dt must be provided")
+        dt = _require_positive(dt, "dt")
         self._state.time += dt
         self._state.step_count += 1
 
@@ -413,8 +432,7 @@ class ForceAccumulator:
         Args:
             nv: Number of generalized velocity coordinates
         """
-        if nv is None:
-            raise ValueError("nv must be provided")
+        nv = _require_positive(nv, "nv")
         self.nv = nv
         self._sources: dict[str, ForceSource] = {}
         self._generalized_forces: dict[str, np.ndarray] = {}
@@ -445,6 +463,7 @@ class ForceAccumulator:
             torque: Torque vector [N·m] (optional)
             category: Force category
         """
+        _require_non_empty_string(name, "force source name")
         self._sources[name] = ForceSource(
             name=name,
             force=force.copy(),
