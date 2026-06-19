@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
+import subprocess
+import sys
 
 import pytest
 
@@ -15,6 +18,49 @@ from src.shared.python._contracts_level import (
     get_contract_level,
     set_contract_level,
 )
+
+OPTIMIZED_LEVEL_PROBE = """
+import json
+from src.shared.python import contracts as shared_contracts
+from src.shared.python import _contracts_level as shared_level
+from src.shared.python.core import contracts as core_contracts
+from src.shared.python.core.contracts import level as core_level
+
+def raises_precondition(require):
+    try:
+        require(False, "must fail")
+    except Exception:
+        return True
+    return False
+
+print(json.dumps({
+    "debug": __debug__,
+    "shared_level": shared_level.get_contract_level().value,
+    "shared_enabled": shared_level.CONTRACTS_ENABLED,
+    "shared_require_raises": raises_precondition(shared_contracts.require),
+    "core_level": core_level.get_contract_level().value,
+    "core_enabled": core_level.contracts_enabled(),
+    "core_require_raises": raises_precondition(core_contracts.require),
+}))
+"""
+
+
+def _run_optimized_level_probe(dbc_level: str | None) -> dict[str, object]:
+    env = os.environ.copy()
+    if dbc_level is None:
+        env.pop("DBC_LEVEL", None)
+    else:
+        env["DBC_LEVEL"] = dbc_level
+    result = subprocess.run(
+        [sys.executable, "-O", "-c", OPTIMIZED_LEVEL_PROBE],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    import json
+
+    return json.loads(result.stdout)
 
 
 class TestResolveLevel:
@@ -41,6 +87,28 @@ class TestResolveLevel:
     def test_unknown_env_falls_back_to_debug_default(self, monkeypatch):
         monkeypatch.setenv("DBC_LEVEL", "garbage")
         assert _resolve_contract_level() == ContractLevel.ENFORCE
+
+    def test_optimized_python_defaults_to_enforce_when_env_unset(self):
+        state = _run_optimized_level_probe(dbc_level=None)
+
+        assert state["debug"] is False
+        assert state["shared_level"] == ContractLevel.ENFORCE.value
+        assert state["shared_enabled"] is True
+        assert state["shared_require_raises"] is True
+        assert state["core_level"] == ContractLevel.ENFORCE.value
+        assert state["core_enabled"] is True
+        assert state["core_require_raises"] is True
+
+    def test_optimized_python_respects_explicit_off(self):
+        state = _run_optimized_level_probe(dbc_level="off")
+
+        assert state["debug"] is False
+        assert state["shared_level"] == ContractLevel.OFF.value
+        assert state["shared_enabled"] is False
+        assert state["shared_require_raises"] is False
+        assert state["core_level"] == ContractLevel.OFF.value
+        assert state["core_enabled"] is False
+        assert state["core_require_raises"] is False
 
 
 class TestSetGet:
