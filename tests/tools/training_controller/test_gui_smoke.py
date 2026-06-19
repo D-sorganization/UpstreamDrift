@@ -183,3 +183,32 @@ def test_lifecycle_buttons_call_controller_methods(
     finally:
         window.close()
         scheduler.shutdown()
+
+
+def test_gui_does_not_reach_through_scheduler_registry() -> None:
+    """LoD guard (#7708): the GUI must not chain through the private registry.
+
+    ``self.controller.scheduler.registry.get(...)`` is a four-level reach into
+    the Scheduler's internal storage, and ``self.controller.scheduler.get(...)``
+    still couples the widget to the scheduler composition. The GUI must look
+    jobs up through the dashboard controller facade so a change to backend
+    storage does not break the dashboard.
+    """
+    gui_source = (
+        Path(__file__).resolve().parents[3]
+        / "src"
+        / "tools"
+        / "training_controller"
+        / "gui.py"
+    ).read_text(encoding="utf-8")
+
+    assert ".scheduler.registry" not in gui_source, (
+        "gui.py reaches through Scheduler's private registry (LoD violation); "
+        "use TrainingDashboardController.get_job() instead"
+    )
+    assert ".controller.scheduler.get(" not in gui_source, (
+        "gui.py should not reach through controller.scheduler to look up jobs"
+    )
+    assert ".controller.get_job(" in gui_source, (
+        "gui.py should look up jobs via the dashboard controller facade"
+    )
