@@ -346,6 +346,13 @@ class RealTimeController:
 
     def _control_loop(self) -> None:
         """Main real-time control loop."""
+        try:
+            self._run_control_loop()
+        finally:
+            self._is_running = False
+
+    def _run_control_loop(self) -> None:
+        """Run control cycles until stopped or failure-aborted."""
         next_cycle_time = time.perf_counter()
         consecutive_failures = 0
 
@@ -391,7 +398,7 @@ class RealTimeController:
                     )
                     self._aborted_on_failure = True
                     self._should_stop = True
-                    self._command_zero_torque()
+                    self._command_zero_torque_for_abort()
                     break
 
             # Record timing
@@ -412,7 +419,14 @@ class RealTimeController:
                 # Missed deadline, reset timing
                 next_cycle_time = time.perf_counter()
 
-        self._is_running = False
+    def _command_zero_torque_for_abort(self) -> None:
+        """Best-effort emergency zero torque during failure abort."""
+        try:
+            self._command_zero_torque()
+        except (RuntimeError, OSError):
+            logger.exception(
+                "Emergency zero-torque command failed during control-loop abort"
+            )
 
     def _command_zero_torque(self) -> None:
         """Send a zero-torque command as a safety fallback.
