@@ -159,6 +159,48 @@ def test_filter_rejects_invalid_operator(client: TestClient, temp_dataset_dir) -
     assert response.status_code == 422
 
 
+def test_stats_ignores_non_finite_cells(client: TestClient, temp_dataset_dir) -> None:
+    """Issue #7732: 'inf'/'nan' textual cells must not poison stats."""
+    csv_content = b"a\n1\n2\ninf\nnan\n3\n"
+    files = {"file": ("finite.csv", csv_content, "text/csv")}
+    assert client.post("/tools/data-explorer/import", files=files).status_code == 200
+
+    response = client.get("/tools/data-explorer/datasets/finite.csv/stats")
+    assert response.status_code == 200
+    # Response must be strictly valid JSON (no bare NaN/Infinity tokens).
+    stats = response.json()["stats"]
+    col = stats["a"]
+    import math as _math
+
+    assert _math.isfinite(col["min"])
+    assert _math.isfinite(col["max"])
+    assert _math.isfinite(col["mean"])
+    # Only the finite cells (1, 2, 3) are aggregated.
+    assert col["min"] == 1.0
+    assert col["max"] == 3.0
+    assert col["mean"] == 2.0
+
+
+def test_row_matches_filter_rejects_non_finite_operands() -> None:
+    """Issue #7732: 'inf'/'nan' filter operands must not match rows."""
+    from src.api.routes.data_explorer import (
+        DatasetFilterRequest,
+        _row_matches_filter,
+    )
+
+    # A filter value of 'inf' must not match an ordinary numeric row.
+    req = DatasetFilterRequest(column="a", operator="lt", value="inf")
+    assert _row_matches_filter({"a": "5"}, req) is False
+
+    # A non-finite cell value must not match a finite numeric filter.
+    req2 = DatasetFilterRequest(column="a", operator="gt", value="0")
+    assert _row_matches_filter({"a": "inf"}, req2) is False
+
+    # Sanity: a finite comparison still works.
+    req3 = DatasetFilterRequest(column="a", operator="gt", value="0")
+    assert _row_matches_filter({"a": "5"}, req3) is True
+
+
 def test_filter_wraps_midstream_csv_decode_errors(
     app: FastAPI, tmp_path, monkeypatch
 ) -> None:
