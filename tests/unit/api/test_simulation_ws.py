@@ -27,6 +27,7 @@ from src.api.routes import simulation_ws
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
     _compute_real_time_sleep_delay,
+    _engine_analysis_to_dict,
     _engine_state_to_dict,
     _engine_type_from_str,
     _get_simulation_speed_factor,
@@ -180,6 +181,48 @@ class TestEngineStateToDict:
         )
         result = _engine_state_to_dict(engine)
         json.dumps(result)  # must not raise
+
+
+class TestEngineAnalysisToDict:
+    """Issue #7718: live-analysis payload must carry real q/v from get_state,
+    not the always-null output of the removed bespoke-method-only path."""
+
+    def test_derives_angles_and_velocities_from_get_state(self) -> None:
+        engine = MagicMock(spec=["get_state"])
+        engine.get_state.return_value = (
+            np.array([0.1, 0.2, 0.3]),
+            np.array([1.0, 2.0, 3.0]),
+        )
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] == pytest.approx([0.1, 0.2, 0.3])
+        assert result["velocities"] == pytest.approx([1.0, 2.0, 3.0])
+        assert "warning" not in result
+
+    def test_result_is_json_serialisable(self) -> None:
+        engine = MagicMock(spec=["get_state"])
+        engine.get_state.return_value = (
+            np.array([0.1], dtype=np.float32),
+            np.array([0.2], dtype=np.float32),
+        )
+        result = _engine_analysis_to_dict(engine)
+        json.dumps(result)  # must not raise
+        assert isinstance(result["joint_angles"], list)
+        assert isinstance(result["velocities"], list)
+
+    def test_legacy_methods_take_precedence_when_present(self) -> None:
+        engine = MagicMock(spec=["get_joint_angles", "get_velocities"])
+        engine.get_joint_angles.return_value = np.array([9.0])
+        engine.get_velocities.return_value = np.array([8.0])
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] == pytest.approx([9.0])
+        assert result["velocities"] == pytest.approx([8.0])
+
+    def test_warns_instead_of_silent_null_when_no_state(self) -> None:
+        engine = MagicMock(spec=[])  # no get_state / bespoke methods
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] is None
+        assert result["velocities"] is None
+        assert "warning" in result
 
 
 class _Stats:
