@@ -1,5 +1,7 @@
 """Tests for collision avoidance module."""
 
+import re
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -12,12 +14,27 @@ from src.deployment.safety.collision import (
     ObstacleType,
 )
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_COLLISION_SOURCE = _REPO_ROOT / "src" / "deployment" / "safety" / "collision.py"
+
 
 @pytest.fixture
 def mock_sim() -> MagicMock:
     """Mock simulation engine."""
     sim = MagicMock()
     return sim
+
+
+def test_collision_source_has_no_bare_noqa() -> None:
+    """Safety collision code must not use blanket noqa suppressions."""
+    bare_noqa_lines = [
+        line_number
+        for line_number, line in enumerate(
+            _COLLISION_SOURCE.read_text().splitlines(), 1
+        )
+        if re.search(r"#\s*noqa(?!:)", line)
+    ]
+    assert bare_noqa_lines == []
 
 
 def test_obstacle_distance_box() -> None:
