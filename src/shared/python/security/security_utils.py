@@ -55,7 +55,13 @@ def validate_path(
     for root in allowed_roots:
         try:
             resolved_root = root.resolve()
-            if str(resolved_path).startswith(str(resolved_root)):
+            # Separator-aware containment: a plain startswith() admits
+            # sibling directories sharing a string prefix (e.g.
+            # /data/models-evil under allowed root /data/models). Use path
+            # ancestry instead (issue #7689).
+            if resolved_path == resolved_root or resolved_path.is_relative_to(
+                resolved_root
+            ):
                 is_allowed = True
                 break
         except (RuntimeError, TypeError, ValueError):

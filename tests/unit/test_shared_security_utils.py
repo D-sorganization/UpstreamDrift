@@ -61,6 +61,36 @@ def test_validate_path_traversal(tmp_path: Path) -> None:
         validate_path(traversal_path, [root], strict=True)
 
 
+def test_validate_path_rejects_sibling_prefix_bypass(tmp_path: Path) -> None:
+    """A sibling dir sharing a string prefix must not pass (issue #7689).
+
+    With a naive startswith() check, allowed root ``<tmp>/models`` would
+    admit ``<tmp>/models-evil/secret`` because the resolved string starts
+    with the root string. A separator-aware check rejects it.
+    """
+    root = tmp_path / "models"
+    root.mkdir()
+    sibling = tmp_path / "models-evil"
+    sibling.mkdir()
+    secret = sibling / "secret.txt"
+    secret.touch()
+
+    with pytest.raises(ValueError, match="Path traversal blocked"):
+        validate_path(secret, [root], strict=True)
+
+
+def test_validate_path_allows_nested_child(tmp_path: Path) -> None:
+    """A genuine descendant of an allowed root is still permitted (#7689)."""
+    root = tmp_path / "models"
+    sub = root / "sub"
+    sub.mkdir(parents=True)
+    child = sub / "model.bin"
+    child.touch()
+
+    result = validate_path(child, [root], strict=True)
+    assert result == child.resolve()
+
+
 # ---------------------------------------------------------------------------
 # safe_extract_zip — Zip Slip regression (issue #7183)
 # ---------------------------------------------------------------------------
