@@ -67,6 +67,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 
 # Bcrypt cost factor (12 is the recommended minimum for security)
 BCRYPT_ROUNDS = 12
+BCRYPT_MAX_INPUT_BYTES = 72
 
 _USAGE_COUNTER_COLUMNS = {
     "api_calls": User.api_calls_this_month,
@@ -79,6 +80,24 @@ _USAGE_QUOTA_FIELDS = {
     "video_analyses": "video_analyses_per_month",
     "simulations": "simulations_per_month",
 }
+
+
+def _validate_bcrypt_secret(value: str, field_name: str) -> bytes:
+    """Return UTF-8 bytes for a bcrypt secret after enforcing bcrypt limits."""
+    if value is None:
+        raise ValueError(f"{field_name} must be provided")
+    if not isinstance(value, str):
+        raise TypeError(f"{field_name} must be a string")
+    if not value:
+        raise ValueError(f"{field_name} must be a non-empty string")
+
+    encoded = value.encode("utf-8")
+    if len(encoded) > BCRYPT_MAX_INPUT_BYTES:
+        raise ValueError(
+            f"{field_name} must be at most {BCRYPT_MAX_INPUT_BYTES} bytes "
+            "when UTF-8 encoded for bcrypt"
+        )
+    return encoded
 
 
 @precondition(
@@ -133,10 +152,9 @@ class SecurityManager:
         Returns:
             Hashed password
         """
-        if password is None:
-            raise ValueError("password must be provided")
+        password_bytes = _validate_bcrypt_secret(password, "password")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
-        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        hashed = bcrypt.hashpw(password_bytes, salt)
         if not isinstance(hashed, bytes):
             raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
@@ -164,11 +182,13 @@ class SecurityManager:
             True if password matches, False otherwise
         """
         try:
-            return bool(
-                bcrypt.checkpw(
-                    plain_password.encode("utf-8"), hashed_password.encode("utf-8")
-                )
+            plain_password_bytes = _validate_bcrypt_secret(
+                plain_password, "plain_password"
             )
+            hashed_password_bytes = _validate_bcrypt_secret(
+                hashed_password, "hashed_password"
+            )
+            return bool(bcrypt.checkpw(plain_password_bytes, hashed_password_bytes))
         except (ValueError, TypeError):
             return False
 
@@ -190,6 +210,10 @@ class SecurityManager:
         """
         if data is None:
             raise ValueError("data must be provided")
+        if not isinstance(data, dict):
+            raise TypeError("data must be a dict containing a 'sub' claim")
+        if "sub" not in data:
+            raise ValueError("data must contain a 'sub' claim")
         to_encode = data.copy()
 
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
@@ -289,10 +313,9 @@ class SecurityManager:
             SECURITY: Uses bcrypt instead of SHA256 for brute-force resistance.
             SHA256 is fast and unsuitable for key storage; bcrypt is slow by design.
         """
-        if api_key is None:
-            raise ValueError("api_key must be provided")
+        api_key_bytes = _validate_bcrypt_secret(api_key, "api_key")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
-        hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
+        hashed = bcrypt.hashpw(api_key_bytes, salt)
         if not isinstance(hashed, bytes):
             raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
@@ -308,9 +331,9 @@ class SecurityManager:
             True if key matches, False otherwise
         """
         try:
-            return bool(
-                bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
-            )
+            api_key_bytes = _validate_bcrypt_secret(api_key, "api_key")
+            hashed_key_bytes = _validate_bcrypt_secret(hashed_key, "hashed_key")
+            return bool(bcrypt.checkpw(api_key_bytes, hashed_key_bytes))
         except (ValueError, TypeError):
             return False
 

@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.451                                            |
-| **Last Spec Update**    | 2026-06-18                                         |
+| **Spec Version**        | 1.0.452                                            |
+| **Last Spec Update**    | 2026-06-19                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-19** - Hardened auth and signal-toolkit validation for issues
+  #7698, #7699, #7702, and #7703: access-token creation now validates required
+  subject claims even when DbC decorators are disabled, bcrypt-backed password
+  and API-key hashing rejects inputs above bcrypt's 72-byte UTF-8 limit before
+  truncation can occur, password/API-key verification fails closed for
+  overlong secrets, and public `signal_toolkit.calculus`/`noise` boundaries use
+  explicit `TypeError` guards instead of stripped `assert` statements.
 - **2026-06-18** - Hardened `SafetyMonitor` command contracts for issues
   #7683, #7684, and #7692: command preflight now rejects velocity targets over
   `max_joint_velocity` and any command while emergency stop is active, safe
