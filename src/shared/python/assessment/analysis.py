@@ -12,6 +12,9 @@ logger = get_logger(__name__)
 
 def get_python_metrics(file_path: Path) -> dict[str, Any]:
     """Extract metrics from a Python file using AST."""
+    if file_path is None:
+        raise ValueError("file_path must be provided")
+
     metrics = {
         "functions": 0,
         "classes": 0,
@@ -22,6 +25,14 @@ def get_python_metrics(file_path: Path) -> dict[str, Any]:
 
     try:
         content = file_path.read_text(encoding="utf-8")
+    except OSError as e:
+        logger.warning("Failed to read Python metrics source %s: %s", file_path, e)
+        raise
+    except UnicodeDecodeError as e:
+        logger.warning("Failed to decode Python metrics source %s: %s", file_path, e)
+        return metrics
+
+    try:
         tree = ast.parse(content)
 
         for node in ast.walk(tree):
@@ -38,8 +49,8 @@ def get_python_metrics(file_path: Path) -> dict[str, Any]:
             elif isinstance(node, ast.If | ast.For | ast.While | ast.ExceptHandler):
                 metrics["branches"] += 1
 
-    except (OSError, SyntaxError, UnicodeDecodeError) as e:
-        logger.debug("Failed to parse %s: %s", file_path, e)
+    except SyntaxError as e:
+        logger.warning("Failed to parse Python metrics source %s: %s", file_path, e)
 
     return metrics
 
