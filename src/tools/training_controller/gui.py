@@ -470,7 +470,7 @@ class MainWidget(QWidget):
             return
 
         # Summary Tab
-        job = self.controller.scheduler.get(selected_id)
+        job = self.controller.get_job(selected_id)
         if job:
             elapsed = model.selected_row.elapsed_s if model.selected_row else 0.0
             html = f"""
