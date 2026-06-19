@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from src.shared.python.assessment.analysis import (
@@ -45,10 +47,12 @@ def test_get_python_metrics_counts(tmp_path):
 
 
 @pytest.mark.unit
-def test_get_python_metrics_bad_syntax(tmp_path):
+def test_get_python_metrics_bad_syntax(tmp_path, caplog):
     src = tmp_path / "bad.py"
     src.write_text("def def def", encoding="utf-8")
-    m = get_python_metrics(src)
+    with caplog.at_level(logging.WARNING):
+        m = get_python_metrics(src)
+
     assert m == {
         "functions": 0,
         "classes": 0,
@@ -56,12 +60,18 @@ def test_get_python_metrics_bad_syntax(tmp_path):
         "typed_returns": 0,
         "branches": 0,
     }
+    assert "Failed to parse Python metrics source" in caplog.text
+    assert str(src) in caplog.text
 
 
 @pytest.mark.unit
-def test_get_python_metrics_missing_file(tmp_path):
-    m = get_python_metrics(tmp_path / "nope.py")
-    assert m["functions"] == 0
+def test_get_python_metrics_missing_file(tmp_path, caplog):
+    missing = tmp_path / "nope.py"
+    with caplog.at_level(logging.WARNING), pytest.raises(FileNotFoundError):
+        get_python_metrics(missing)
+
+    assert "Failed to read Python metrics source" in caplog.text
+    assert str(missing) in caplog.text
 
 
 # ---------------------------------------------------------------------------

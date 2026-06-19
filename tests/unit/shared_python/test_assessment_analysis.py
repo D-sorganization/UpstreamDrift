@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pytest
@@ -105,16 +106,27 @@ class TestGetPythonMetrics:
         m = get_python_metrics(tmp_py_file)
         assert m["branches"] >= 1  # at least the if True
 
-    def test_nonexistent_file_returns_zero_metrics(self) -> None:
-        m = get_python_metrics(Path("/nonexistent/path.py"))
-        assert m["functions"] == 0
-        assert m["classes"] == 0
+    def test_nonexistent_file_warns_and_raises(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        missing = Path("/nonexistent/path.py")
+        with caplog.at_level(logging.WARNING), pytest.raises(FileNotFoundError):
+            get_python_metrics(missing)
 
-    def test_invalid_syntax_returns_zero_metrics(self, tmp_path: Path) -> None:
+        assert str(missing) in caplog.text
+        assert "Failed to read Python metrics source" in caplog.text
+
+    def test_invalid_syntax_warns_and_returns_zero_metrics(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
         bad = tmp_path / "broken.py"
         bad.write_text("def (syntax error:", encoding="utf-8")
-        m = get_python_metrics(bad)
+        with caplog.at_level(logging.WARNING):
+            m = get_python_metrics(bad)
+
         assert m["functions"] == 0
+        assert "Failed to parse Python metrics source" in caplog.text
+        assert str(bad) in caplog.text
 
 
 # ---------------------------------------------------------------------------
