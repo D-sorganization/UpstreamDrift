@@ -4,7 +4,7 @@ This module implements ``∂q(t) / ∂θ`` along a polynomial-torque rollout via
 
 1. The closed-form polynomial chain rule ``∂u(t) / ∂θ``: at time ``t`` and
    joint ``j``, the column of ``θ_{j,k}`` in ``∂u_j / ∂θ`` is just the
-   monomial ``t^(6-k)``. Every other entry is zero.
+   monomial ``t^k``. Every other entry is zero.
 2. MuJoCo's ``mjd_transitionFD``, which finite-differences the discrete
    state-transition map and returns the Jacobian matrices
 
@@ -73,9 +73,9 @@ def polynomial_du_dtheta(
 
     Layout matches :class:`PolynomialTorqueDriver`: ``θ`` is flattened
     row-major as ``θ.reshape(n_joints, 7)``, where column ``k`` is the
-    coefficient of ``t^(6-k)``. Therefore
+    coefficient of ``t^k``. Therefore
 
-        ∂u_j / ∂θ_{j', k} = δ_{j, j'} · t^(6-k)
+        ∂u_j / ∂θ_{j', k} = δ_{j, j'} · t^k
 
     Args:
         n_joints: number of actuated joints (``model.nu``).
@@ -87,7 +87,7 @@ def polynomial_du_dtheta(
     """
     if n_joints <= 0:
         raise ValueError(f"n_joints must be > 0; got {n_joints}")
-    powers = np.array([t**6, t**5, t**4, t**3, t**2, t, 1.0], dtype=np.float64)
+    powers = np.array([1.0, t, t**2, t**3, t**4, t**5, t**6], dtype=np.float64)
     out = np.zeros((n_joints, n_joints * 7), dtype=np.float64)
     for j in range(n_joints):
         out[j, j * 7 : j * 7 + 7] = powers
@@ -164,8 +164,8 @@ def _evaluate_polynomial_ctrl(
     t: float,
 ) -> NDArray[np.float64]:
     """Evaluate the polynomial torque at scalar time ``t`` (Horner)."""
-    out = np.zeros(theta.shape[0], dtype=np.float64)
-    for k in range(7):
+    out = theta[:, -1].copy()
+    for k in range(5, -1, -1):
         out = out * t + theta[:, k]
     return out
 

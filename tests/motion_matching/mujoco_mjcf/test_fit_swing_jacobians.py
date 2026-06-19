@@ -125,7 +125,7 @@ def _synth_target(theta: np.ndarray, sim_opts: SimOptions) -> ClubTarget:
 
 
 def test_polynomial_du_dtheta_matches_closed_form() -> None:
-    """``∂u_j / ∂θ_{j',k} = δ_{j,j'} · t^(6-k)`` exactly."""
+    """``∂u_j / ∂θ_{j',k} = δ_{j,j'} · t^k`` exactly."""
     nu = 4
     t = 0.13
     J = polynomial_du_dtheta(nu, t)
@@ -135,7 +135,7 @@ def test_polynomial_du_dtheta_matches_closed_form() -> None:
         row = J[j]
         nz_cols = np.flatnonzero(row != 0.0)
         assert nz_cols.tolist() == list(range(j * 7, j * 7 + 7))
-        expected = np.array([t**6, t**5, t**4, t**3, t**2, t, 1.0])
+        expected = np.array([1.0, t, t**2, t**3, t**4, t**5, t**6])
         np.testing.assert_allclose(row[j * 7 : j * 7 + 7], expected, atol=1e-15)
 
 

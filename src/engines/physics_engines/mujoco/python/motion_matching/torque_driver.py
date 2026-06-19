@@ -4,8 +4,8 @@ Implements the Stateflow analogue from ``MUJOCO_PARITY_SPEC.md`` §2.3.
 
 The torque law is the canonical 6th-order polynomial::
 
-    tau_j(t; theta) = A_j*t^6 + B_j*t^5 + C_j*t^4 + D_j*t^3
-                    + E_j*t^2 + F_j*t + G_j
+    tau_j(t; theta) = A_j + B_j*t + C_j*t^2 + D_j*t^3
+                    + E_j*t^4 + F_j*t^5 + G_j*t^6
 
 with parameter bounds (mirrored from the Simscape reference):
 
@@ -31,7 +31,7 @@ from numpy.typing import NDArray
 
 # --- Coefficient bounds (mirrored from Simscape build_coefficient_bounds) ---
 
-# Order: A (t^6), B (t^5), C (t^4), D (t^3), E (t^2), F (t^1), G (t^0)
+# Order: A (t^0), B (t^1), C (t^2), D (t^3), E (t^4), F (t^5), G (t^6)
 POLY_BOUNDS: tuple[float, float, float, float, float, float, float] = (
     1000.0,  # |A|
     1000.0,  # |B|
@@ -49,7 +49,7 @@ def polynomial_torque_bounds(
     """Return ``(lb, ub)`` element-wise bounds for the flattened theta vector.
 
     The flattened layout is row-major over joints, i.e.
-    ``theta.reshape(n_joints, 7)[j, k]`` is the coefficient of ``t^(6-k)``
+    ``theta.reshape(n_joints, 7)[j, k]`` is the coefficient of ``t^k``
     for joint ``j`` (so column 0 holds A, ..., column 6 holds G). This
     matches the contract in :class:`PolynomialTorqueDriver`.
     """
@@ -68,15 +68,16 @@ def _evaluate_polynomial(
 
     Args:
         theta: ``(n_joints, 7)`` coefficient matrix. Column ``k`` is the
-            coefficient of ``t^(6-k)`` (i.e. ``theta[:, 0]`` is A).
+            coefficient of ``t^k`` (i.e. ``theta[:, 0]`` is A).
         t: time in seconds (relative to ``t0``).
 
     Returns:
         ``(n_joints,)`` torque vector.
     """
-    # Horner's method on shape (7,) descending powers.
-    out = np.zeros(theta.shape[0], dtype=np.float64)
-    for k in range(7):
+    # Horner's method using the highest-degree coefficient first because
+    # theta[:, k] is the t^k coefficient.
+    out = theta[:, -1].copy()
+    for k in range(5, -1, -1):
         out = out * t + theta[:, k]
     return out
 
@@ -88,8 +89,8 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
         model: a compiled ``mujoco.MjModel``.
         theta: ``(n_joints, 7)`` coefficient matrix or a flat
             ``(n_joints*7,)`` vector. ``n_joints`` must equal
-            ``model.nu``. Layout: column 0 = A (t^6), ..., column 6 = G
-            (t^0).
+            ``model.nu``. Layout: column 0 = A (t^0), ..., column 6 = G
+            (t^6).
         t0: reference time in seconds; the polynomial is evaluated at
             ``data.time - t0``.
         clip_to_ctrlrange: if ``True`` and the model declares
@@ -172,18 +173,18 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
             t = d.time - t0
             # Horner's method on a fixed (7,) shape — no allocations beyond
             # the temporary scalar product. This is the inner-loop hot path.
-            ctrl = theta[:, 0] * t
-            ctrl += theta[:, 1]
-            ctrl *= t
-            ctrl += theta[:, 2]
-            ctrl *= t
-            ctrl += theta[:, 3]
+            ctrl = theta[:, 6] * t
+            ctrl += theta[:, 5]
             ctrl *= t
             ctrl += theta[:, 4]
             ctrl *= t
-            ctrl += theta[:, 5]
+            ctrl += theta[:, 3]
             ctrl *= t
-            ctrl += theta[:, 6]
+            ctrl += theta[:, 2]
+            ctrl *= t
+            ctrl += theta[:, 1]
+            ctrl *= t
+            ctrl += theta[:, 0]
             np.clip(ctrl, lo, hi, out=ctrl)
             d.ctrl[:] = ctrl
 

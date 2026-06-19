@@ -71,6 +71,11 @@ def simulate_with_coefficients(
     ...
 ```
 
+The flattened `theta` layout is canonical across all engines: each joint owns
+one contiguous seven-coefficient block `[A, B, C, D, E, F, G]`, and column `k`
+is the coefficient on `t^k`. In other words, each engine must evaluate
+`tau_j(t) = A_j + B_j*t + C_j*t^2 + ... + G_j*t^6` for the same flat `theta`.
+
 Returning the canonical `SimOut`:
 
 ```python

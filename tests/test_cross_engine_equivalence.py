@@ -473,6 +473,49 @@ def test_theta_truth_respects_amplitude_bounds() -> None:
 
 
 @pytest.mark.unit
+def test_nonzero_theta_polynomial_order_matches_across_engine_helpers() -> None:
+    """Pure evaluators agree that column k is the coefficient on t^k."""
+    from src.engines.physics_engines.drake.python.motion_matching.simulate import (
+        evaluate_torque_polynomial as evaluate_drake_torque,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching.torque_driver import (
+        PolynomialTorqueDriver,
+    )
+    from src.engines.physics_engines.opensim.python.motion_matching.simulate import (
+        evaluate_polynomial_torque as evaluate_opensim_torque,
+    )
+    from src.engines.physics_engines.pinocchio.python.motion_matching.simulate import (
+        evaluate_polynomial_torque as evaluate_pinocchio_torque,
+    )
+
+    class FakeMuJoCoModel:
+        def __init__(self, nu: int) -> None:
+            self.nu = nu
+
+    n_joints = 2
+    theta = np.zeros((n_joints, _COEFFS_PER_JOINT), dtype=np.float64)
+    theta[:, 0] = [1.0, -1.5]
+    theta[:, 1] = [2.0, -3.0]
+    theta[:, 6] = [0.5, -0.75]
+    t = 0.25
+    expected = theta[:, 0] + theta[:, 1] * t + theta[:, 6] * t**6
+
+    mujoco_driver = PolynomialTorqueDriver(
+        FakeMuJoCoModel(n_joints),
+        theta,
+        clip_to_ctrlrange=False,
+    )
+
+    np.testing.assert_allclose(mujoco_driver.evaluate(t), expected)
+    np.testing.assert_allclose(
+        evaluate_drake_torque(theta.reshape(-1), t, n_joints),
+        expected,
+    )
+    np.testing.assert_allclose(evaluate_pinocchio_torque(theta, t), expected)
+    np.testing.assert_allclose(evaluate_opensim_torque(theta, t), expected)
+
+
+@pytest.mark.unit
 def test_quat_angle_zero() -> None:
     """Identical quaternions → zero angular distance."""
     q = np.array([1.0, 0.0, 0.0, 0.0])
