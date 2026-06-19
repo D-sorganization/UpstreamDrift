@@ -422,9 +422,18 @@ class SafetyMonitor:
         self._speed_override = 0.0
 
     def clear_emergency_stop(self) -> None:
-        """Clear emergency stop."""
+        """Clear emergency stop.
+
+        Restores motion but preserves the human-proximity speed derate: if a
+        human is still nearby (issue #7691) the speed override is capped at the
+        same 0.5 factor applied by :meth:`set_human_nearby`, rather than
+        jumping back to full speed.
+        """
         self._emergency_stop = False
-        self._speed_override = 1.0
+        if self._human_nearby:
+            self._speed_override = 0.5
+        else:
+            self._speed_override = 1.0
 
     def is_emergency_stopped(self) -> bool:
         """Check if emergency stopped.
