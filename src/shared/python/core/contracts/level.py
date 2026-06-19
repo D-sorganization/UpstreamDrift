@@ -9,39 +9,22 @@ Controls how Design by Contract checks behave at runtime via the
 
 from __future__ import annotations
 
-import enum
-import os
-
+from src.shared.python._contracts_level import (
+    ContractLevel,
+    _resolve_contract_level as _shared_resolve_contract_level,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 
-class ContractLevel(enum.Enum):
-    """Tri-state enforcement level for Design by Contract checks.
-
-    Attributes:
-        OFF: No checks (production hot path, maximum performance).
-        WARN: Log violations at WARNING level without raising.
-        ENFORCE: Raise contract violation errors on any failure.
-    """
-
-    OFF = "off"
-    WARN = "warn"
-    ENFORCE = "enforce"
-
-
 def _resolve_contract_level() -> ContractLevel:
     """Determine the contract level from environment.
 
-    Reads ``DBC_LEVEL`` environment variable.  Falls back to ``enforce``
-    when ``__debug__`` is True (normal Python) or ``off`` when running
-    with ``python -O``.
+    Reads ``DBC_LEVEL`` environment variable. Falls back to ``enforce`` even
+    under optimized Python; ``DBC_LEVEL=off`` remains the explicit opt-out.
     """
-    env_val = os.environ.get("DBC_LEVEL", "").lower().strip()
-    if env_val in ("off", "warn", "enforce"):
-        return ContractLevel(env_val)
-    return ContractLevel.ENFORCE if __debug__ else ContractLevel.OFF
+    return _shared_resolve_contract_level()
 
 
 # Mutable state holder (avoids 'global' keyword)
