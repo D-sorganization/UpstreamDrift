@@ -100,6 +100,20 @@ def _validate_bcrypt_secret(value: str, field_name: str) -> bytes:
     return encoded
 
 
+def _log_bcrypt_verification_failure(
+    operation: str, exc: ValueError | TypeError
+) -> None:
+    """Log failed bcrypt verification without exposing credentials or hashes."""
+    operation_label = "API key" if operation == "api_key" else operation
+    logger.warning(
+        "Malformed stored bcrypt hash during %s verification",
+        operation_label,
+        exc_info=(type(exc), exc, exc.__traceback__),
+        operation=operation,
+        exception_type=type(exc).__name__,
+    )
+
+
 @precondition(
     lambda prefix: isinstance(prefix, str) and len(prefix) > 0,
     "prefix must be a non-empty string",
@@ -189,7 +203,8 @@ class SecurityManager:
                 hashed_password, "hashed_password"
             )
             return bool(bcrypt.checkpw(plain_password_bytes, hashed_password_bytes))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as exc:
+            _log_bcrypt_verification_failure("password", exc)
             return False
 
     @precondition(
@@ -334,7 +349,8 @@ class SecurityManager:
             api_key_bytes = _validate_bcrypt_secret(api_key, "api_key")
             hashed_key_bytes = _validate_bcrypt_secret(hashed_key, "hashed_key")
             return bool(bcrypt.checkpw(api_key_bytes, hashed_key_bytes))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as exc:
+            _log_bcrypt_verification_failure("api_key", exc)
             return False
 
 
