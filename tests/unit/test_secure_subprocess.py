@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 # package level (e.g., via pyproject.toml or conftest.py), so no manual
 from src.shared.python.security.secure_subprocess import (
     SecureSubprocessError,
+    _is_within_root,
     secure_popen,
     secure_run,
     validate_executable,
@@ -81,6 +82,46 @@ class TestSecureSubprocess(unittest.TestCase):
 
         with self.assertRaises(SecureSubprocessError):
             validate_script_path(bad_script, self.suite_root)
+
+    def test_is_within_root_rejects_sibling_prefix(self) -> None:
+        """A sibling sharing a string prefix must not count as contained.
+
+        Regression for the prefix-collision bypass (mirrors issue #7689): an
+        allowed root ``.../models`` must not admit the sibling
+        ``.../models-backup`` just because the path strings share a prefix.
+        """
+        base = Path(self.temp_dir)
+        root = base / "models"
+        sibling = base / "models-backup"
+        root.mkdir()
+        sibling.mkdir()
+
+        self.assertTrue(_is_within_root(root.resolve(), root.resolve()))
+        self.assertTrue(_is_within_root((root / "src").resolve(), root.resolve()))
+        self.assertFalse(_is_within_root(sibling.resolve(), root.resolve()))
+        self.assertFalse(
+            _is_within_root((sibling / "src" / "x.py").resolve(), root.resolve())
+        )
+
+    def test_validate_script_path_rejects_sibling_prefix(self) -> None:
+        """validate_script_path must reject a sibling-prefix script directly.
+
+        The script lives in a sibling directory whose path string is prefixed
+        by the suite root (``<suite>-evil``). A separator-blind containment
+        check would treat it as in-suite; the fix rejects it as outside the
+        allowed roots.
+        """
+        base = Path(self.temp_dir)
+        suite = base / "suite"
+        evil_root = base / "suite-evil"
+        (suite / "src").mkdir(parents=True)
+        evil_script = evil_root / "src" / "evil.py"
+        evil_script.parent.mkdir(parents=True)
+        evil_script.write_text("print('evil')")
+
+        with self.assertRaises(SecureSubprocessError) as ctx:
+            validate_script_path(evil_script, suite)
+        self.assertIn("outside allowed suite/tools directories", str(ctx.exception))
 
     def test_validate_script_path_nonexistent(self) -> None:
         """Test that nonexistent scripts are rejected."""
