@@ -242,6 +242,109 @@ class TestRealTimeController:
         assert q_pos[0] == 10.0
         assert qd_pos[0] == 0.0
 
+    @pytest.mark.parametrize(
+        "command, match",
+        [
+            pytest.param(
+                {"mode": "TORQUE"},
+                "Torque mode requires torque_commands",
+                id="torque",
+            ),
+            pytest.param(
+                {"mode": "POSITION"},
+                "Position mode requires position_targets",
+                id="position",
+            ),
+            pytest.param(
+                {"mode": "VELOCITY"},
+                "Velocity mode requires velocity_targets",
+                id="velocity",
+            ),
+            pytest.param(
+                {"mode": "IMPEDANCE", "position_targets": np.zeros(2)},
+                "Impedance mode requires stiffness and damping",
+                id="impedance",
+            ),
+        ],
+    )
+    def test_loopback_rejects_missing_required_command_payloads(
+        self,
+        command: dict[str, object],
+        match: str,
+    ) -> None:
+        """#7695: LOOPBACK commands must fail closed when payloads are missing."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+        controller._read_state()
+        before_q, before_qd = controller._sim_state  # type: ignore[misc]
+
+        command_kwargs = dict(command)
+        mode_name = command_kwargs.pop("mode")
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=getattr(ControlMode, str(mode_name)),
+            **command_kwargs,
+        )
+
+        with pytest.raises(ValueError, match=match):
+            controller._send_command(cmd)
+
+        after_q, after_qd = controller._sim_state  # type: ignore[misc]
+        np.testing.assert_array_equal(after_q, before_q)
+        np.testing.assert_array_equal(after_qd, before_qd)
+
+    def test_loopback_copies_caller_owned_arrays_before_storing_sim_state(
+        self,
+    ) -> None:
+        """#7696: caller-owned command arrays must not alias into _sim_state."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        positions = np.array([1.0, 2.0])
+        controller._send_command(
+            ControlCommand(
+                timestamp=0.0,
+                mode=ControlMode.POSITION,
+                position_targets=positions,
+            )
+        )
+        positions[:] = [99.0, 100.0]
+        q, qd = controller._sim_state  # type: ignore[misc]
+        np.testing.assert_array_equal(q, np.array([1.0, 2.0]))
+        np.testing.assert_array_equal(qd, np.zeros(2))
+
+        velocities = np.array([3.0, 4.0])
+        controller._send_command(
+            ControlCommand(
+                timestamp=0.0,
+                mode=ControlMode.VELOCITY,
+                velocity_targets=velocities,
+            )
+        )
+        _, stored_qd = controller._sim_state  # type: ignore[misc]
+        velocities[:] = [88.0, 89.0]
+        np.testing.assert_array_equal(stored_qd, np.array([3.0, 4.0]))
+
     def test_wait_for_state_wakes_within_one_cycle(self) -> None:
         """#6975: wait_for_state must return within one cycle, not block to full timeout."""
         from src.deployment.realtime import (
