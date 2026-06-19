@@ -238,12 +238,12 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 - Use when explicitly working on biomechanics integration tasks
 - **See**: [src/engines/physics_engines/myosuite/README.md](src/engines/physics_engines/myosuite/README.md)
 
-**See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases.**
+**See [Engine Selection Guide](docs/engines/engine_selection_guide.md) for detailed comparison and use cases.**
 **See [Supported Engine Tiers](docs/engines/support_tiers.md) for the support and validation contract.**
 
 ## Documentation
 
-- **[Project Map](docs/PROJECT_MAP.md)**: Complete guide to every feature, module, and integration in the platform
+- **[Project Map](docs/architecture/PROJECT_MAP.md)**: Complete guide to every feature, module, and integration in the platform
 - **[User Guide](docs/user_guide/README.md)**: Installation, running simulations, and using the GUI
 - **[Character Builder Quickstart](docs/user_guide/character_builder_quickstart.md)**: Generate humanoid URDFs in 5 minutes
 - **[Engines](docs/engines/README.md)**: Detailed engine documentation and comparison
