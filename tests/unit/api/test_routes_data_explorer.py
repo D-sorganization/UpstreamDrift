@@ -111,6 +111,27 @@ def test_imported_dataset_list_exposes_dataset_id(
     assert listed["dataset_id"] == dataset_id
 
 
+def test_list_datasets_parses_quoted_csv_header(
+    client: TestClient, temp_dataset_dir
+) -> None:
+    """CSV dataset listing must parse quoted header fields with csv semantics."""
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    csv_file = output_dir / "quoted_header.csv"
+    csv_file.write_text('"club,head",speed\n7i,92\n', encoding="utf-8")
+
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        response = client.get("/tools/data-explorer/datasets")
+
+    assert response.status_code == 200
+    listed = next(
+        ds for ds in response.json()["datasets"] if ds["name"] == csv_file.name
+    )
+    assert listed["columns"] == ["club,head", "speed"]
+
+
 def test_import_dataset_json(client: TestClient, temp_dataset_dir) -> None:
     """Test importing a JSON dataset."""
     json_content = b'[{"a": 1, "b": 2}, {"a": 3, "b": 4}]'
