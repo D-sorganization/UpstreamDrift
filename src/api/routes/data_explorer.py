@@ -14,6 +14,7 @@ import csv
 import hashlib
 import io
 import json
+import math
 import os
 import sqlite3
 import tempfile
@@ -719,6 +720,11 @@ def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> b
         logger.debug("Non-numeric value in filter comparison: %s", exc)
         return False
 
+    # 'inf'/'nan' parse as real floats and would silently match/exclude
+    # arbitrary rows; reject non-finite operands (issue #7732).
+    if not (math.isfinite(num_val) and math.isfinite(num_filter)):
+        return False
+
     if request.operator == "gt":
         return num_val > num_filter
     if request.operator == "lt":
@@ -867,6 +873,11 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
             try:
                 num = float(val)
             except (ValueError, TypeError):
+                continue
+            # float() accepts 'inf'/'-inf'/'nan'/'Infinity'; a single such
+            # textual cell would poison min/max/sum/mean and 'nan' produces
+            # invalid JSON. Ignore non-finite values (issue #7732).
+            if not math.isfinite(num):
                 continue
             entry = agg[col]
             entry["min"] = min(entry["min"], num)
