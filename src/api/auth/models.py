@@ -1,5 +1,6 @@
 """Authentication and user models for Golf Modeling Suite API."""
 
+import sys
 from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -323,5 +324,16 @@ SUBSCRIPTION_QUOTAS = {
         max_simulation_duration=3600,
         max_video_length=3600,
         concurrent_requests=20,
+    ),
+    # ADMIN is effectively unlimited. Without this entry, SUBSCRIPTION_QUOTAS
+    # lookups for admin users raise KeyError -> HTTP 500 on every quota-gated
+    # endpoint (see issue #7681).
+    UserRole.ADMIN: UsageQuotas(
+        api_calls_per_month=sys.maxsize,
+        video_analyses_per_month=sys.maxsize,
+        simulations_per_month=sys.maxsize,
+        max_simulation_duration=sys.maxsize,
+        max_video_length=sys.maxsize,
+        concurrent_requests=sys.maxsize,
     ),
 }
