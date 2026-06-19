@@ -52,6 +52,17 @@ class SecureSubprocessError(Exception):
     """Exception raised for subprocess security violations."""
 
 
+def _is_within_root(resolved: Path, root: Path) -> bool:
+    """Return True if *resolved* is *root* itself or a true descendant.
+
+    A plain ``str.startswith`` containment check has no separator boundary, so
+    an allowed root like ``/srv/models`` would wrongly admit the sibling
+    ``/srv/models-backup`` (prefix-collision bypass, mirrors issue #7689). Use
+    path ancestry instead so only the root and its real descendants pass.
+    """
+    return resolved == root or resolved.is_relative_to(root)
+
+
 def _apply_hidden_window_default(kwargs: dict[str, Any]) -> None:
     """Hide background subprocess console windows on Windows by default."""
     if os.name != "nt" or "creationflags" in kwargs:
@@ -104,9 +115,9 @@ def validate_script_path(script_path: Path, suite_root: Path) -> None:
         abs_suite_root = suite_root.resolve()
 
         tools_repo = _find_tools_repo_for_security(abs_suite_root)
-        in_suite = str(abs_script).startswith(str(abs_suite_root))
-        in_tools = tools_repo is not None and str(abs_script).startswith(
-            str(tools_repo.resolve())
+        in_suite = _is_within_root(abs_script, abs_suite_root)
+        in_tools = tools_repo is not None and _is_within_root(
+            abs_script, tools_repo.resolve()
         )
 
         # Ensure script is within suite directory or tools directory
