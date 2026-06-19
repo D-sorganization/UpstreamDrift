@@ -63,29 +63,29 @@ class Signal:
         self.time = np.asarray(self.time, dtype=np.float64)
         self.values = np.asarray(self.values, dtype=np.float64)
 
-        require(
-            self.time.ndim == 1,
-            f"Time must be 1D array, got shape {self.time.shape}",
-            self.time.shape,
-        )
+        # Structural invariants are enforced with always-on raises rather than
+        # require() because require() early-returns when the contract level is
+        # OFF (and is a no-op under ``python -O``). Constructing a Signal with
+        # mismatched shapes is a data-model corruption that must never be
+        # silently accepted, regardless of the runtime contract level.
+        if self.time.ndim != 1:
+            raise ValueError(f"Time must be 1D array, got shape {self.time.shape}")
 
         if self.values.ndim == 1:
-            require(
-                len(self.time) == len(self.values),
-                f"Time and values must have same length: "
-                f"{len(self.time)} vs {len(self.values)}",
-            )
+            if len(self.time) != len(self.values):
+                raise ValueError(
+                    f"Time and values must have same length: "
+                    f"{len(self.time)} vs {len(self.values)}"
+                )
         elif self.values.ndim == 2:
-            require(
-                self.values.shape[0] == len(self.time),
-                f"First dimension of values must match time length: "
-                f"{self.values.shape[0]} vs {len(self.time)}",
-            )
+            if self.values.shape[0] != len(self.time):
+                raise ValueError(
+                    f"First dimension of values must match time length: "
+                    f"{self.values.shape[0]} vs {len(self.time)}"
+                )
         else:
-            require(
-                False,
-                f"Values must be 1D or 2D array, got shape {self.values.shape}",
-                self.values.shape,
+            raise ValueError(
+                f"Values must be 1D or 2D array, got shape {self.values.shape}"
             )
 
     @property
