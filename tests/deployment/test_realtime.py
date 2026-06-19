@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 
@@ -546,6 +547,54 @@ class TestControlLoopFailureEscalation:
         np.testing.assert_array_equal(
             last.torque_commands,  # type: ignore[attr-defined]
             np.zeros(2),
+        )
+
+    def test_loop_abort_survives_zero_torque_send_failure(
+        self,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """A failing emergency zero-torque send must not keep the loop running."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=2,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        def raising_send(_command: ControlCommand) -> None:
+            raise OSError("faulted command bus")
+
+        controller._send_command = raising_send  # type: ignore[method-assign]
+
+        def torque_callback(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.ones(2),
+            )
+
+        controller.set_control_callback(torque_callback)
+
+        with caplog.at_level(logging.ERROR):
+            controller.start()
+            wait_until(
+                lambda: not controller.is_running,
+                timeout=2.0,
+                message="control loop did not stop after abort send failure",
+            )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        assert "Emergency zero-torque command failed during control-loop abort" in (
+            caplog.text
         )
 
     def test_transient_failures_do_not_abort(self) -> None:
