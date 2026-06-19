@@ -360,6 +360,7 @@ class MotionPipeline:
                 error_kind="invalid_input",
             )
         except Exception as e:  # noqa: BLE001
+            logger.exception("Adapter failed: %s", e)
             return StageResult(
                 success=False, data=None, metadata={}, error=f"Adapter failed: {e}"
             )
@@ -387,6 +388,7 @@ class MotionPipeline:
             )
 
         except Exception as e:  # noqa: BLE001
+            logger.exception("Preprocessing failed: %s", e)
             return StageResult(
                 success=False,
                 data=None,
@@ -415,6 +417,7 @@ class MotionPipeline:
             )
 
         except Exception as e:  # noqa: BLE001
+            logger.exception("Scaling failed: %s", e)
             return StageResult(
                 success=False, data=None, metadata={}, error=f"Scaling failed: {e}"
             )
@@ -468,6 +471,7 @@ class MotionPipeline:
                 error=f"IK backend not available: {e}",
             )
         except Exception as e:  # noqa: BLE001
+            logger.exception("IK failed: %s", e)
             return StageResult(
                 success=False, data=None, metadata={}, error=f"IK failed: {e}"
             )
