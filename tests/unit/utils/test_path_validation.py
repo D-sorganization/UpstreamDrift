@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
 
 import pytest
 from fastapi import HTTPException
+import src.api.utils.path_validation as path_validation
 from src.api.utils.path_validation import (
     resolve_output_path,
     validate_model_path,
@@ -49,6 +51,46 @@ class TestValidateModelPath:
         with pytest.raises(HTTPException) as exc_info:
             validate_model_path("nonexistent_model.urdf")
         assert exc_info.value.status_code == 404
+
+    def test_default_model_roots_are_independent_of_process_cwd(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Issue #7711: default model roots must be anchored to the repo."""
+        expected_roots = list(path_validation.ALLOWED_MODEL_DIRS)
+        monkeypatch.chdir(tmp_path)
+
+        reloaded = importlib.reload(path_validation)
+        try:
+            assert expected_roots == reloaded.ALLOWED_MODEL_DIRS
+        finally:
+            importlib.reload(path_validation)
+
+    def test_accepts_filename_with_double_dot(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Issue #7712: ``..`` inside a filename is not parent traversal."""
+        model_root = tmp_path / "shared" / "models"
+        model_root.mkdir(parents=True)
+        model_path = model_root / "model..v1.osim"
+        model_path.write_text("<OpenSimDocument />", encoding="utf-8")
+        monkeypatch.setattr(path_validation, "ALLOWED_MODEL_DIRS", [model_root])
+
+        assert path_validation.validate_model_path("model..v1.osim") == str(
+            model_path.resolve()
+        )
+
+    def test_rejects_parent_directory_traversal_filename(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        model_root = tmp_path / "shared" / "models"
+        model_root.mkdir(parents=True)
+        monkeypatch.setattr(path_validation, "ALLOWED_MODEL_DIRS", [model_root])
+
+        with pytest.raises(HTTPException) as exc_info:
+            path_validation.validate_model_path("../model.osim")
+
+        assert exc_info.value.status_code == 400
+        assert "parent directory" in exc_info.value.detail.lower()
 
 
 class TestResolveOutputPath:
