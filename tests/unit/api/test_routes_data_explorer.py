@@ -159,6 +159,28 @@ def test_filter_rejects_invalid_operator(client: TestClient, temp_dataset_dir) -
     assert response.status_code == 422
 
 
+def test_filter_wraps_midstream_csv_decode_errors(
+    app: FastAPI, tmp_path, monkeypatch
+) -> None:
+    """Corrupt streamed CSV rows return a structured API error."""
+    import src.api.routes.data_explorer as de
+
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    csv_path = output_dir / "corrupt.csv"
+    csv_path.write_bytes(b"g\n1\n\xff\n")
+    monkeypatch.setattr(de, "_get_output_dir", lambda: output_dir)
+    no_raise_client = TestClient(app, raise_server_exceptions=False)
+
+    response = no_raise_client.post(
+        "/tools/data-explorer/datasets/corrupt.csv/filter",
+        json={"column": "g", "operator": "eq", "value": "1"},
+    )
+
+    assert response.status_code == 400
+    assert "detail" in response.json()
+
+
 def test_list_datasets_no_absolute_paths(client: TestClient, temp_dataset_dir) -> None:
     """Test that listing datasets does not return absolute paths."""
     from pathlib import Path
