@@ -187,6 +187,13 @@ class TrainingDashboardController:
         with self._lock:
             return self._build_model_locked()
 
+    def get_job(self, job_id: JobId) -> TrainingJob | None:
+        """Return a job by id without exposing scheduler internals to the GUI."""
+
+        if not isinstance(job_id, JobId):
+            raise TypeError(f"job_id must be a JobId (got {type(job_id).__name__})")
+        return self._scheduler.get(job_id)
+
     def select_job(self, job_id: JobId | None) -> None:
         """Update the selected job and notify observers.
 
