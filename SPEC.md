@@ -2154,3 +2154,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   `src/shared/python/spatial_algebra/pose6dof/rotations.py` by replacing
   `np.linalg.norm` with `math.hypot` and `math.sqrt(np.dot)` in fixed-size hot
   paths.
+### Module Map Changelog
+
+- `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
