@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pytest
@@ -99,6 +100,51 @@ def test_first_registered_wins(tmp_path: Path) -> None:
     finally:
         unregister_adapter(_A)
         unregister_adapter(_B)
+
+
+def test_detect_format_logs_probe_failure_and_keeps_trying(
+    caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
+    class _Raises(MocapSourceAdapter):
+        format_name = "_raises"
+        file_extensions = (".probe_test",)
+
+        @classmethod
+        def supports(cls, path: Path) -> bool:
+            raise RuntimeError("probe exploded")
+
+        def metadata(self, path: Path) -> SourceMetadata:
+            return SourceMetadata(
+                format_name="_raises", fps=30.0, frame_count=1, unit_system="meters"
+            )
+
+        def load(self, path: Path, calibration=None):  # noqa: ARG002
+            raise NotImplementedError
+
+    class _Fallback(_Raises):
+        format_name = "_fallback"
+
+        @classmethod
+        def supports(cls, path: Path) -> bool:
+            return path.suffix == ".probe_test"
+
+    register_adapter(_Raises)
+    register_adapter(_Fallback)
+    try:
+        p = tmp_path / "x.probe_test"
+        p.write_text("")
+        caplog.set_level(
+            logging.WARNING,
+            logger="src.shared.python.motion_pipeline.sources.registry",
+        )
+
+        assert detect_format(p) is _Fallback
+
+        assert "_Raises" in caplog.text
+        assert "probe exploded" in caplog.text
+    finally:
+        unregister_adapter(_Raises)
+        unregister_adapter(_Fallback)
 
 
 def test_registered_adapters_snapshot_is_tuple() -> None:
