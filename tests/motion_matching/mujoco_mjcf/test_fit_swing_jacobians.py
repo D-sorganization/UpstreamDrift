@@ -89,8 +89,8 @@ def _euler_sim_q(
         substeps = 0
         while d.time + 1e-12 < t_grid[k] and substeps < max_substeps:
             t_now = d.time
-            ctrl = np.zeros(nu, dtype=np.float64)
-            for kk in range(7):
+            ctrl = theta_mat[:, -1].copy()
+            for kk in range(5, -1, -1):
                 ctrl = ctrl * t_now + theta_mat[:, kk]
             d.ctrl[:] = ctrl
             mujoco.mj_step(m, d)
