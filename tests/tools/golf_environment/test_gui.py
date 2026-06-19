@@ -20,6 +20,8 @@ from src.tools.golf_environment.gui import (
     get_dockable_ui,
 )
 
+pytestmark = pytest.mark.unit
+
 _APP: QApplication | None = None
 
 
@@ -267,3 +269,49 @@ def test_environment_window_unknown_label_is_noop() -> None:
 def test_get_dockable_ui_returns_environment_window() -> None:
     w = get_dockable_ui()
     assert isinstance(w, EnvironmentWindow)
+
+
+# ---------------------------------------------------------------------------
+# golf_viz integration (DRY geometry + height-shaded flight)
+# ---------------------------------------------------------------------------
+
+
+def test_create_rect_matches_golf_viz() -> None:
+    from src.shared.python.golf_viz import rect_vertices
+
+    r = EnvironmentRenderer()
+    np.testing.assert_allclose(
+        r._create_rect(2.0, -1.0, 5.0, 3.0), rect_vertices(2.0, -1.0, 5.0, 3.0, z=0.0)
+    )
+
+
+def test_create_circle_matches_golf_viz() -> None:
+    from src.shared.python.golf_viz import circle_fan_vertices
+
+    r = EnvironmentRenderer()
+    np.testing.assert_allclose(
+        r._create_circle(1.0, 2.0, 4.0, segments=20),
+        circle_fan_vertices(1.0, 2.0, 4.0, z=0.05, segments=20),
+    )
+
+
+def test_add_trajectory_default_is_height_shaded() -> None:
+    if not ge_gui.PYQTGRAPH_AVAILABLE:
+        pytest.skip("pyqtgraph not available")
+    r = EnvironmentRenderer()
+    pts = np.array([[0.0, 0.0, 0.0], [50.0, 0.0, 25.0], [100.0, 0.0, 0.0]])
+    r.add_trajectory(pts)
+    item_color = np.asarray(r._trajectories[-1].color)
+    # Per-vertex RGBA array (not a single flat colour) keyed on height.
+    assert item_color.shape == (3, 4)
+    # Apex (highest z) is warmer (more red) than the launch point.
+    assert item_color[1, 0] >= item_color[0, 0]
+
+
+def test_add_trajectory_explicit_color_is_flat() -> None:
+    if not ge_gui.PYQTGRAPH_AVAILABLE:
+        pytest.skip("pyqtgraph not available")
+    r = EnvironmentRenderer()
+    pts = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 1.0]])
+    r.add_trajectory(pts, color=(1.0, 0.0, 0.0, 1.0))
+    assert tuple(np.asarray(r._trajectories[-1].color).tolist()) == (1.0, 0.0, 0.0, 1.0)
