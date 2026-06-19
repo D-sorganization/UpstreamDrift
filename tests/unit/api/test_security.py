@@ -415,6 +415,55 @@ class TestRoleChecker:
             assert pro_checker(free_user) is False
 
 
+class TestUsageTrackerQuotaTableCoverage:
+    """All UserRole values must resolve a quota entry (issue #7681)."""
+
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    def test_quota_limit_resolves_for_every_role(self, role_name: str) -> None:
+        """quota_limit must not KeyError for any defined role (incl. ADMIN)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+
+            for resource in ("api_calls", "video_analyses", "simulations"):
+                limit = tracker.quota_limit(user, resource)
+                assert isinstance(limit, int)
+                assert limit > 0
+
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    def test_get_usage_summary_resolves_for_every_role(self, role_name: str) -> None:
+        """get_usage_summary must return a dict for any role (incl. ADMIN)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+            user.api_calls_this_month = 0
+            user.video_analyses_this_month = 0
+            user.simulations_this_month = 0
+
+            summary = tracker.get_usage_summary(user)
+            assert summary["subscription_tier"] == UserRole[role_name].value
+            for resource in ("api_calls", "video_analyses", "simulations"):
+                assert resource in summary
+
+
 class TestUsageTrackerContract:
     """Design by Contract tests for UsageTracker class."""
 
