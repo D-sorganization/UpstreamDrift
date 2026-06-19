@@ -1,6 +1,9 @@
-"""Tests for the putting green simulator GUI (non-GUI logic + smoke).
+"""Tests for the putting green simulator GUI.
 
-Qt runs in ``offscreen`` mode so these tests stay headless-safe and fast.
+The GUI is a thin renderer over the real :class:`PuttingGreenSimulator`
+(via :mod:`src.tools.putting_green_gui._scene_builder`). Qt runs in
+``offscreen`` mode so these stay headless-safe; OpenGL-specific assertions
+are skipped when ``pyqtgraph`` is unavailable.
 """
 
 from __future__ import annotations
@@ -12,7 +15,6 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-import numpy as np  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QMainWindow  # noqa: E402
 
 from src.tools.putting_green_gui import gui as gui_mod  # noqa: E402
@@ -20,6 +22,18 @@ from src.tools.putting_green_gui.gui import (  # noqa: E402
     PuttingGreenWidget,
     PuttingGreenWindow,
     get_dockable_ui,
+)
+
+pytestmark = pytest.mark.unit
+
+_HAS_PYQTGRAPH = True
+try:  # pragma: no cover - environment dependent
+    import pyqtgraph.opengl  # noqa: F401
+except ImportError:  # pragma: no cover - environment dependent
+    _HAS_PYQTGRAPH = False
+
+_needs_gl = pytest.mark.skipif(
+    not _HAS_PYQTGRAPH, reason="pyqtgraph.opengl not installed"
 )
 
 
@@ -33,7 +47,9 @@ def qapp() -> QApplication:
 
 @pytest.fixture
 def widget(qapp: QApplication) -> PuttingGreenWidget:
-    return PuttingGreenWidget()
+    w = PuttingGreenWidget()
+    yield w
+    w.cleanup()
 
 
 # ---------------------------------------------------------------------------
@@ -69,18 +85,25 @@ def test_default_results_text_shows_help(widget: PuttingGreenWidget) -> None:
     assert widget._results_text.isReadOnly()
 
 
+@_needs_gl
 def test_3d_view_initialized_when_pyqtgraph_present(
     widget: PuttingGreenWidget,
 ) -> None:
-    # pyqtgraph.opengl is installed in CI; if so the view + items exist.
     assert widget._gl_view is not None
-    assert widget._terrain_item is not None
-    assert widget._cup_item is not None
-    assert widget._path_item is not None
+    for item in (
+        widget._terrain_item,
+        widget._cup_item,
+        widget._path_item,
+        widget._ball_item,
+        widget._flag_item,
+        widget._aim_item,
+        widget._start_item,
+    ):
+        assert item is not None
 
 
 # ---------------------------------------------------------------------------
-# Preset behavior
+# Preset behaviour
 # ---------------------------------------------------------------------------
 
 
@@ -111,7 +134,6 @@ def test_apply_preset_does_not_touch_aim_or_green(
 
 
 def test_apply_preset_clamped_to_spin_bounds(widget: PuttingGreenWidget) -> None:
-    # QDoubleSpinBox clamps out-of-range values.
     widget._apply_preset(99.0, 999.0)
     assert widget._speed_spin.value() == pytest.approx(widget._speed_spin.maximum())
     assert widget._distance_spin.value() == pytest.approx(
@@ -120,25 +142,49 @@ def test_apply_preset_clamped_to_spin_bounds(widget: PuttingGreenWidget) -> None
 
 
 # ---------------------------------------------------------------------------
-# Simulation behavior
+# Simulation behaviour (real physics)
 # ---------------------------------------------------------------------------
 
 
-def test_run_simulation_updates_results_text(widget: PuttingGreenWidget) -> None:
-    widget._speed_spin.setValue(3.0)
-    widget._aim_spin.setValue(2.0)
-    widget._stimp_spin.setValue(11.0)
-    widget._slope_spin.setValue(1.5)
+def test_run_simulation_reports_real_metrics(widget: PuttingGreenWidget) -> None:
+    widget._speed_spin.setValue(2.5)
     widget._distance_spin.setValue(12.0)
-
     widget._run_simulation()
     text = widget._results_text.toPlainText()
-
     assert "Putting Simulation" in text
-    assert "3.0 m/s" in text
-    assert "2.0" in text
-    assert "11.0" in text
-    assert "1.5" in text
+    assert "Total roll" in text
+    assert "Peak break" in text
+    assert ("HOLED" in text) or ("Missed" in text)
+
+
+def test_run_simulation_stores_scene_with_trajectory(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._run_simulation()
+    assert widget._scene is not None
+    assert widget._scene.trajectory_xyz.shape[0] >= 1
+    assert len(widget._scene.roll_modes) == widget._scene.trajectory_xyz.shape[0]
+
+
+def test_flat_straight_putt_reports_holed(widget: PuttingGreenWidget) -> None:
+    widget._speed_spin.setValue(2.2)
+    widget._aim_spin.setValue(0.0)
+    widget._distance_spin.setValue(12.0)
+    widget._slope_spin.setValue(0.0)
+    widget._run_simulation()
+    assert widget._scene.holed is True
+    assert "HOLED" in widget._results_text.toPlainText()
+
+
+def test_cross_slope_straight_putt_breaks_offline(widget: PuttingGreenWidget) -> None:
+    widget._speed_spin.setValue(2.6)
+    widget._aim_spin.setValue(0.0)
+    widget._distance_spin.setValue(15.0)
+    widget._slope_spin.setValue(3.0)
+    widget._run_simulation()
+    assert widget._scene.holed is False
+    assert widget._scene.peak_break_m > 0.05
+    assert "Missed" in widget._results_text.toPlainText()
 
 
 def test_run_simulation_does_not_error_for_each_preset(
@@ -150,41 +196,51 @@ def test_run_simulation_does_not_error_for_each_preset(
         assert "error" not in widget._results_text.toPlainText().lower()
 
 
-def test_run_simulation_updates_3d_items(widget: PuttingGreenWidget) -> None:
-    widget._distance_spin.setValue(8.0)
-    widget._run_simulation()
-    # Cup item should be moved to a non-default position.
-    pos = widget._cup_item.pos
-    assert pos.shape == (1, 3)
-    # 8 ft -> 2.4384 m
-    assert pos[0, 0] == pytest.approx(8.0 * 0.3048, rel=1e-3)
-
-
 def test_run_simulation_negative_aim(widget: PuttingGreenWidget) -> None:
     widget._aim_spin.setValue(-30.0)
     widget._run_simulation()
-    assert "-30.0" in widget._results_text.toPlainText()
+    assert widget._scene is not None
+    assert "error" not in widget._results_text.toPlainText().lower()
 
 
-def test_run_simulation_handles_simulator_import_failure(
+def test_run_simulation_handles_builder_failure(
     widget: PuttingGreenWidget, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Force the dynamic import to fail.
-    monkeypatch.setitem(sys.modules, "src.engines.physics_engines", None)
-    widget._run_simulation()
-    text = widget._results_text.toPlainText()
-    assert "Simulator not available" in text or "Putting Simulation" in text
+    def boom(_config: object) -> None:
+        raise ValueError("kaboom")
 
-
-def test_run_simulation_handles_runtime_exception(
-    widget: PuttingGreenWidget, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def boom(*_a, **_kw):
-        raise RuntimeError("kaboom")
-
-    monkeypatch.setattr(np, "linspace", boom)
+    monkeypatch.setattr(gui_mod, "build_putt_scene", boom)
     widget._run_simulation()
     assert "Simulation error" in widget._results_text.toPlainText()
+
+
+def test_run_simulation_without_gl_still_updates_metrics(
+    widget: PuttingGreenWidget,
+) -> None:
+    widget._gl_view = None  # simulate the headless / no-pyqtgraph fallback
+    widget._run_simulation()
+    assert "Putting Simulation" in widget._results_text.toPlainText()
+    assert widget._scene is not None
+
+
+# ---------------------------------------------------------------------------
+# Animation
+# ---------------------------------------------------------------------------
+
+
+def test_animation_advances_index(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._anim_index = 0
+    widget._advance_animation()
+    widget._advance_animation()
+    assert widget._anim_index > 0
+
+
+def test_animation_stops_at_end(widget: PuttingGreenWidget) -> None:
+    widget._run_simulation()
+    widget._anim_index = widget._scene.trajectory_xyz.shape[0] + 5
+    widget._advance_animation()
+    assert not widget._anim_timer.isActive()
 
 
 # ---------------------------------------------------------------------------
@@ -211,10 +267,10 @@ def test_window_close_event_calls_cleanup(qapp: QApplication) -> None:
     assert called == [True]
 
 
-def test_widget_cleanup_is_safe(widget: PuttingGreenWidget) -> None:
-    # cleanup should be idempotent and not raise.
+def test_widget_cleanup_is_idempotent(widget: PuttingGreenWidget) -> None:
     widget.cleanup()
     widget.cleanup()
+    assert not widget._anim_timer.isActive()
 
 
 # ---------------------------------------------------------------------------
