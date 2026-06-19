@@ -19,6 +19,21 @@ class MockChatService:
     def __init__(self):
         self.add_message_error = False
         self.stream_chunks = [{"type": "chunk", "content": "mock "}, "response"]
+        # Issue #7687: toggles that make the model-refresh / codemap-rebuild
+        # actions raise, to verify failures surface as error frames instead of
+        # tearing down the socket.
+        self.refresh_models_error = False
+        self.codemap_rebuild_error = False
+
+    def refresh_models(self):
+        if self.refresh_models_error:
+            raise RuntimeError("provider unreachable")
+        return {"models": ["m1", "m2"], "refreshed_at": "now"}
+
+    async def run_codemap_rebuild(self):
+        if self.codemap_rebuild_error:
+            raise RuntimeError("indexer crashed")
+        return {"state": "complete", "files_parsed": 3, "symbols_inserted": 9}
 
     def get_or_create_session(self, session_id):
         return MockSession(session_id or "new_id")
@@ -165,6 +180,63 @@ def test_chat_websocket_unknown_action(client: TestClient) -> None:
         data = websocket.receive_json()
         assert data["type"] == "error"
         assert "Unknown action: unknown_action" in data["detail"]
+
+
+def test_refresh_models_success(client: TestClient) -> None:
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "refresh_models"})
+        data = websocket.receive_json()
+        assert data["type"] == "model_list"
+        assert data["models"] == ["m1", "m2"]
+
+
+def test_refresh_models_failure_sends_error_frame(
+    client: TestClient, app: FastAPI
+) -> None:
+    """Issue #7687: a refresh failure must yield an error frame, and the
+    socket must stay alive for subsequent actions."""
+    app.state.chat_service.refresh_models_error = True
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "refresh_models"})
+        data = websocket.receive_json()
+        assert data["type"] == "error"
+        # Socket survived — a follow-up action still works.
+        websocket.send_json({"action": "history"})
+        follow = websocket.receive_json()
+        assert follow["type"] == "history"
+
+
+def test_index_codebase_success(client: TestClient) -> None:
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "index_codebase"})
+        running = websocket.receive_json()
+        assert running["type"] == "index_status"
+        assert running["state"] == "running"
+        final = websocket.receive_json()
+        assert final["type"] == "index_status"
+        assert final["state"] == "complete"
+
+
+def test_index_codebase_failure_sends_error_status(
+    client: TestClient, app: FastAPI
+) -> None:
+    """Issue #7687: a rebuild crash must produce an ``error`` index_status
+    frame rather than killing the socket."""
+    app.state.chat_service.codemap_rebuild_error = True
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "index_codebase"})
+        running = websocket.receive_json()
+        assert running["state"] == "running"
+        err = websocket.receive_json()
+        assert err["type"] == "index_status"
+        assert err["state"] == "error"
+        # Socket survived.
+        websocket.send_json({"action": "history"})
+        assert websocket.receive_json()["type"] == "history"
 
 
 def test_chat_websocket_disconnect(client: TestClient) -> None:
