@@ -229,8 +229,13 @@ class SwingFlightWidget(QWidget):
                 if self._plot_item is not None:
                     self._gl_view.removeItem(self._plot_item)
 
+                # Shade the flight line by height (apex hot, ground cool) using
+                # the shared golf_viz palette (DRY across the golf viewers).
+                from src.shared.python.golf_viz import speed_colors
+
+                flight_colors = speed_colors(pts[:, 2])
                 self._plot_item = gl.GLLinePlotItem(
-                    pos=pts, color=(1.0, 0.5, 0.0, 1.0), width=3, antialias=True
+                    pos=pts, color=flight_colors, width=3, antialias=True
                 )
                 self._gl_view.addItem(self._plot_item)
 
