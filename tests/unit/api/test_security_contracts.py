@@ -5,12 +5,28 @@ ContractViolationError for all security-critical functions.
 """
 
 import os
+from collections.abc import Iterator
 from unittest.mock import MagicMock, patch
 
 import pytest
+from src.shared.python._contracts_level import (
+    ContractLevel,
+    get_contract_level,
+    set_contract_level,
+)
 
 # All tests require GOLF_API_SECRET_KEY to be set
 ENV_PATCH = {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+
+
+@pytest.fixture
+def contracts_off() -> Iterator[None]:
+    original = get_contract_level()
+    set_contract_level(ContractLevel.OFF)
+    try:
+        yield
+    finally:
+        set_contract_level(original)
 
 
 class TestHashPasswordContracts:
@@ -32,6 +48,16 @@ class TestHashPasswordContracts:
             with pytest.raises((ValueError, AssertionError)):
                 mgr.hash_password(None)  # type: ignore[arg-type]
 
+    def test_rejects_passwords_over_bcrypt_byte_limit(
+        self, contracts_off: None
+    ) -> None:
+        with patch.dict(os.environ, ENV_PATCH):
+            from src.api.auth.security import SecurityManager
+
+            mgr = SecurityManager(secret_key="test-secret")
+            with pytest.raises(ValueError, match="72 bytes"):
+                mgr.hash_password("a" * 73)
+
 
 class TestVerifyPasswordContracts:
     """Test verify_password preconditions on both arguments."""
@@ -52,6 +78,21 @@ class TestVerifyPasswordContracts:
             with pytest.raises((ValueError, AssertionError), match="non-empty"):
                 mgr.verify_password("password", "")
 
+    def test_overlong_password_does_not_verify_by_bcrypt_truncation(
+        self, contracts_off: None
+    ) -> None:
+        with patch.dict(os.environ, ENV_PATCH):
+            import bcrypt
+
+            from src.api.auth.security import SecurityManager
+
+            mgr = SecurityManager(secret_key="test-secret")
+            stored_hash = bcrypt.hashpw(
+                ("a" * 72).encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8")
+
+            assert mgr.verify_password(("a" * 72) + "b", stored_hash) is False
+
 
 class TestCreateAccessTokenContracts:
     """Test create_access_token precondition: data must contain 'sub'."""
@@ -62,6 +103,16 @@ class TestCreateAccessTokenContracts:
 
             mgr = SecurityManager(secret_key="test-secret-32-chars-long!!")
             with pytest.raises((ValueError, AssertionError), match="sub"):
+                mgr.create_access_token({"email": "test@example.com"})
+
+    def test_missing_sub_claim_raises_when_contracts_off(
+        self, contracts_off: None
+    ) -> None:
+        with patch.dict(os.environ, ENV_PATCH):
+            from src.api.auth.security import SecurityManager
+
+            mgr = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            with pytest.raises(ValueError, match="sub"):
                 mgr.create_access_token({"email": "test@example.com"})
 
     def test_non_dict_raises(self) -> None:
@@ -116,3 +167,15 @@ class TestComputePrefixHashContracts:
 
             with pytest.raises((ValueError, AssertionError), match="non-empty"):
                 compute_prefix_hash("")
+
+
+class TestHashApiKeyContracts:
+    """Test hash_api_key rejects secrets bcrypt would truncate."""
+
+    def test_rejects_api_keys_over_bcrypt_byte_limit(self, contracts_off: None) -> None:
+        with patch.dict(os.environ, ENV_PATCH):
+            from src.api.auth.security import SecurityManager
+
+            mgr = SecurityManager(secret_key="test-secret")
+            with pytest.raises(ValueError, match="72 bytes"):
+                mgr.hash_api_key("k" * 73)
