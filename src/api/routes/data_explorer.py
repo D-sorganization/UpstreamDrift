@@ -747,9 +747,8 @@ async def list_datasets() -> DatasetListResponse:
                 columns: list[str] = []
                 try:
                     if filepath.suffix.lower() == ".csv":
-                        with open(filepath, encoding="utf-8") as f:
-                            header = f.readline().strip()
-                        columns = [c.strip().strip('"') for c in header.split(",")]
+                        with open(filepath, encoding="utf-8", newline="") as f:
+                            columns = next(csv.reader(f), [])
                     elif filepath.suffix.lower() == ".json":
                         # Stream only the header/first object instead of
                         # json.load()-ing a possibly-huge file (issue #6990).
