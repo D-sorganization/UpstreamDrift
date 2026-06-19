@@ -7,10 +7,12 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
 ALLOWED_MODEL_DIRS = [
-    Path("shared/models").resolve(),
-    Path("models").resolve(),
-    Path("data").resolve(),
+    (_PROJECT_ROOT / "shared/models").resolve(),
+    (_PROJECT_ROOT / "models").resolve(),
+    (_PROJECT_ROOT / "data").resolve(),
 ]
 
 
@@ -163,7 +165,7 @@ def validate_model_path(model_path: str) -> str:
             detail="Invalid path: absolute paths are not allowed",
         )
 
-    if ".." in user_path.parts or ".." in model_path:
+    if ".." in user_path.parts:
         raise HTTPException(
             status_code=400,
             detail="Invalid path: parent directory references not allowed",
