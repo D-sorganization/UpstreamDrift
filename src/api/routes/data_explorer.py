@@ -1017,6 +1017,7 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
     lambda name, request: name is not None and len(name.strip()) > 0,
     "Dataset name must be a non-empty string",
 )
+@handle_api_errors
 async def filter_dataset(
     name: str, request: DatasetFilterRequest
 ) -> DatasetPreviewResponse:
