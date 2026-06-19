@@ -21,12 +21,19 @@ def test_code_quality_check_wrappers_delegate_to_shared_implementation() -> None
         "src/engines/physics_engines/pinocchio/tools/code_quality_check.py",
         "src/engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py",
+        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py",
     ]
 
     for relative_path in wrapper_paths:
         content = _read_text(relative_path)
         assert "from src.tools.code_quality_check import main" in content
         assert 'if __name__ == "__main__":' in content
+        assert "BANNED_PATTERNS" not in content
+        assert "PASS_PATTERNS" not in content
+        assert "MAGIC_NUMBERS" not in content
+        assert "check_banned_patterns" not in content
+        assert "check_magic_numbers" not in content
+        assert "check_ast_issues" not in content
         assert content.count("def ") == 0
         assert content.count("main()") == 1
 
