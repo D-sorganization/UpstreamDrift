@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def t100() -> np.ndarray:
@@ -36,6 +38,54 @@ class TestSignal:
     def test_invalid_length_mismatch(self, t100: np.ndarray) -> None:
         with pytest.raises((ValueError, AssertionError)):
             Signal(time=t100, values=np.zeros(50))
+
+    def test_invalid_values_3d_raises(self, t100: np.ndarray) -> None:
+        with pytest.raises(ValueError):
+            Signal(time=t100, values=np.zeros((100, 2, 2)))
+
+    @pytest.mark.parametrize(
+        "snippet",
+        [
+            # mismatched 1D length
+            "Signal(time=np.zeros(3), values=np.zeros(4))",
+            # 2D time array (ndim != 1)
+            "Signal(time=np.zeros((2, 2)), values=np.zeros(4))",
+            # 3D values array
+            "Signal(time=np.zeros(3), values=np.zeros((3, 2, 2)))",
+        ],
+    )
+    def test_structural_invariants_enforced_under_O(self, snippet: str) -> None:
+        """Issue #7704: shape invariants must raise even under ``python -O``.
+
+        ``require()`` is a no-op when the contract level is OFF (which is the
+        default under ``-O``), so the structural checks must use always-on
+        ``raise`` statements. Run a child interpreter with ``-O`` to confirm
+        the malformed Signal is rejected rather than silently constructed.
+        """
+        import subprocess
+        import sys
+
+        program = (
+            "import numpy as np\n"
+            "from src.shared.python.signal_toolkit.core import Signal\n"
+            "try:\n"
+            f"    {snippet}\n"
+            "except ValueError:\n"
+            "    print('REJECTED')\n"
+            "else:\n"
+            "    print('ACCEPTED')\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-O", "-c", program],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        assert "REJECTED" in result.stdout, (
+            f"invalid Signal accepted under -O: stdout={result.stdout!r} "
+            f"stderr={result.stderr!r}"
+        )
 
     def test_fs_property(self, basic_signal: Signal) -> None:
         assert np.isclose(basic_signal.fs, 99.0, rtol=0.02)
