@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import Enum
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -366,8 +367,8 @@ class CollisionAvoidance:
                 self.model.set_joint_positions(q)
 
             link_positions = self.get_link_positions(
-                # Create minimal state
-                type("State", (), {"joint_positions": q})()  # noqa
+                # Create minimal state.
+                SimpleNamespace(joint_positions=q)
             )
 
             # Check distance to all obstacles
