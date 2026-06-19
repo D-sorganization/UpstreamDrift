@@ -220,6 +220,42 @@ def validate_expression(
     return tree
 
 
+# Upper bounds for exponentiation to prevent integer-blowup DoS. An
+# expression like ``9**9**9**9`` would otherwise construct an integer with
+# hundreds of millions of digits, pinning a CPU core and risking OOM. These
+# limits are generous for legitimate scientific use while rejecting abuse.
+_MAX_POW_EXPONENT = 1000.0
+_MAX_POW_BASE = 1e6
+
+
+def _safe_pow(base: Any, exponent: Any) -> Any:
+    """Bounded exponentiation (issue #7690).
+
+    Raises ``ValueError`` when a numeric base/exponent exceeds the configured
+    magnitude limits, guarding against integer-blowup denial of service.
+    """
+    if (
+        isinstance(exponent, (int, float))
+        and not isinstance(exponent, bool)
+        and abs(exponent) > _MAX_POW_EXPONENT
+    ):
+        raise ValueError(
+            f"exponent magnitude exceeds the safe limit ({_MAX_POW_EXPONENT})"
+        )
+    if (
+        isinstance(base, (int, float))
+        and not isinstance(base, bool)
+        and abs(base) > _MAX_POW_BASE
+        and isinstance(exponent, (int, float))
+        and abs(exponent) > 1
+    ):
+        raise ValueError(
+            f"base magnitude exceeds the safe limit ({_MAX_POW_BASE}) "
+            "for exponentiation"
+        )
+    return operator.pow(base, exponent)
+
+
 _OPERATORS: dict[type[ast.AST], Callable[..., Any]] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -227,7 +263,7 @@ _OPERATORS: dict[type[ast.AST], Callable[..., Any]] = {
     ast.Div: operator.truediv,
     ast.FloorDiv: operator.floordiv,
     ast.Mod: operator.mod,
-    ast.Pow: operator.pow,
+    ast.Pow: _safe_pow,
     ast.LShift: operator.lshift,
     ast.RShift: operator.rshift,
     ast.BitOr: operator.or_,

@@ -188,3 +188,35 @@ class TestNamespaces:
     def test_scalar_namespace_has_constants(self) -> None:
         assert "pi" in SCALAR_MATH_NAMESPACE
         assert "e" in SCALAR_MATH_NAMESPACE
+
+
+# ---------------------------------------------------------------------------
+# Bounded exponentiation (issue #7690)
+# ---------------------------------------------------------------------------
+
+
+class TestBoundedExponentiation:
+    def test_integer_blowup_tower_rejected_fast(self) -> None:
+        import time
+
+        start = time.perf_counter()
+        with pytest.raises(ValueError, match="exceeds the safe limit"):
+            safe_eval("9**9**9**9", {})
+        # Must reject quickly rather than hang building a giant integer.
+        assert time.perf_counter() - start < 1.0
+
+    def test_large_exponent_rejected(self) -> None:
+        with pytest.raises(ValueError, match="exponent magnitude"):
+            safe_eval("2**5000", {})
+
+    def test_large_base_rejected(self) -> None:
+        with pytest.raises(ValueError, match="base magnitude"):
+            safe_eval("10000000 ** 50", {})
+
+    def test_ordinary_power_still_works(self) -> None:
+        assert safe_eval("2 ** 10", {}) == 1024
+        assert safe_eval("x ** 2", {"x": 3}) == 9
+
+    def test_exponent_at_limit_allowed(self) -> None:
+        # 2 ** 1000 is within the configured exponent bound.
+        assert safe_eval("2 ** 1000", {}) == 2**1000
