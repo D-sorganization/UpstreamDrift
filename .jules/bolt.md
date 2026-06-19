@@ -22,6 +22,9 @@
 ## 2026-06-18 - [NumPy vs Math Overhead in Robotics Simulation Loops]
 **Learning:** `np.linalg.norm()` carries a significant amount of Python-level overhead (input validation, general-purpose shape handling) which makes it considerably slower than `math.sqrt(np.dot(v, v))` for small 1D vectors, and slower than `math.hypot()` for small statically sized vectors (like 3D coordinates). These changes yield genuine speedups in tight loops (e.g. simulation environments). When optimizing mock assertions in related tests, carefully track test assertions that expect specific mock call counts, as optimizations might indirectly affect or expose pre-existing mock count bugs.
 **Action:** Use `math.sqrt(np.dot(x, x))` and `math.hypot` instead of `np.linalg.norm` for small array magnitude operations in critical paths.
+## 2026-06-18 - np.einsum for sum over axis
+**Learning:** For multi-dimensional NumPy arrays where you compute an L2 norm along a specific axis (like calculating `np.linalg.norm(..., axis=2)`), `np.linalg.norm` has more overhead and allocates a temporary array. `np.sqrt(np.einsum('...i,...i->...', x, x))` avoids this.
+**Action:** For replacing `np.linalg.norm(..., axis=2)` over the last dimension, use `np.sqrt(np.einsum('...i,...i->...', x, x))` to avoid intermediate array allocations and improve performance.
 ## 2026-06-18 - Replacing np.linalg.norm with math.hypot in Camera Controllers
 **Learning:** `np.linalg.norm` creates significant overhead for small arrays. For calculating distances in a camera controller (often 3D or 2D offsets), `math.hypot` is significantly faster, avoiding intermediate array allocation and function dispatch overhead.
 **Action:** Replace `np.linalg.norm(offset)` with `math.hypot(offset[0], offset[1], offset[2])` for 3D vectors and `math.hypot(velocity[0], velocity[1])` for 2D vectors in camera and UI updates to prevent unnecessary overhead. Ensure the lengths are fixed and known.
