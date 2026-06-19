@@ -219,6 +219,15 @@ class TestSubmitGate:
             controller.close()
             scheduler.shutdown()
 
+    def test_get_job_passes_through_without_exposing_scheduler_to_gui(self) -> None:
+        controller, scheduler = _make_controller()
+        try:
+            job = controller.submit_job(_config())
+            assert controller.get_job(job.job_id) is job
+        finally:
+            controller.close()
+            scheduler.shutdown()
+
     def test_submit_runs_compat_check_first(self) -> None:
         controller, scheduler = _make_controller()
         try:
