@@ -29,6 +29,26 @@ def _callback_zero(state: RobotState) -> ControlCommand:
     )
 
 
+class TestControlFrequencyValidation:
+    """control_frequency must be a positive number (issue #7686)."""
+
+    def test_zero_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="control_frequency"):
+            RealTimeController(control_frequency=0.0)
+
+    def test_negative_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="control_frequency"):
+            RealTimeController(control_frequency=-100.0)
+
+    def test_none_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="control_frequency"):
+            RealTimeController(control_frequency=None)
+
+    def test_positive_constructs_and_sets_dt(self) -> None:
+        c = RealTimeController(control_frequency=200.0)
+        assert c.dt == pytest.approx(1.0 / 200.0)
+
+
 class TestRobotConfig:
     def test_default_joint_names(self) -> None:
         c = RobotConfig(name="bot", n_joints=3)
