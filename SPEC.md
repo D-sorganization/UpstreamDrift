@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-19** - Logged tracebacks for unexpected motion-pipeline stage
+  failures in issue #7701: adapter loading, preprocessing, skeleton scaling,
+  and inverse-kinematics handlers now call `logger.exception` before returning
+  failed `StageResult` values, preserving file/line stack context for
+  scientific runtime failures while keeping caller-contract errors classified
+  as invalid input.
 - **2026-06-19** - Hardened auth and signal-toolkit validation for issues
   #7698, #7699, #7700, #7702, and #7703: access-token creation now validates required
   subject claims even when DbC decorators are disabled, bcrypt-backed password
