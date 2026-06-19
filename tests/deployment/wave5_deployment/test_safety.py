@@ -224,6 +224,16 @@ class TestSafetyMonitorComputeSafe:
         np.testing.assert_array_equal(safe.torque_commands, np.zeros(3))
         np.testing.assert_array_equal(safe.feedforward_torque, np.zeros(3))
 
+    @pytest.mark.unit
+    def test_emergency_stop_requires_state_before_freezing_position(self) -> None:
+        """Issue #7693: E-stop must fail with a deterministic DbC error."""
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        cmd = ControlCommand.position_command(0.0, np.array([0.5, 0.5, 0.5]))
+
+        with pytest.raises(ValueError, match="state must be provided"):
+            m.compute_safe_command(cmd, None)  # type: ignore[arg-type]
+
 
 class TestSafetyMonitorMisc:
     def test_stopping_distance(self) -> None:
