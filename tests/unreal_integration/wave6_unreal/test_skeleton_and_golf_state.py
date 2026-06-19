@@ -7,10 +7,13 @@ roundtrips, derived properties, validation.
 
 from __future__ import annotations
 
+import ast
 import math
+from pathlib import Path
 
 import pytest
 
+from src.shared.python.core.physics_constants import AIR_DENSITY_SEA_LEVEL_KG_M3
 from src.unreal_integration.geometry import Quaternion, Vector3
 from src.unreal_integration.golf_state import (
     BallState,
@@ -294,8 +297,28 @@ class TestEnvironmentState:
     def test_default(self) -> None:
         env = EnvironmentState.default()
         assert env.temperature == 20.0
-        assert env.air_density == pytest.approx(1.225)
+        assert env.air_density == pytest.approx(float(AIR_DENSITY_SEA_LEVEL_KG_M3))
         assert env.wind_velocity == Vector3.zero()
+
+    def test_air_density_defaults_use_canonical_constant(self) -> None:
+        canonical_air_density = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
+        source_path = Path("src/unreal_integration/golf_state.py")
+        tree = ast.parse(source_path.read_text(encoding="utf-8"))
+
+        repeated_literals = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and node.value == canonical_air_density
+        ]
+        assert repeated_literals == []
+
+        assert EnvironmentState().air_density == pytest.approx(canonical_air_density)
+        assert EnvironmentState.default().air_density == pytest.approx(
+            canonical_air_density
+        )
+        assert EnvironmentState.from_dict(
+            {"wind_velocity": Vector3.zero().to_dict()}
+        ).air_density == pytest.approx(canonical_air_density)
 
     def test_roundtrip(self) -> None:
         env = EnvironmentState(
