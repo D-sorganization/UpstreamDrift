@@ -262,3 +262,26 @@ class TestSafetyMonitorMisc:
         m.clear_emergency_stop()
         assert not m.is_emergency_stopped()
         assert m._speed_override == 1.0
+
+    @pytest.mark.unit
+    def test_clear_emergency_stop_preserves_human_derate(self) -> None:
+        """Issue #7691: clearing E-stop must not restore full speed while a
+        human is still nearby — it should keep the proximity derate."""
+        m = SafetyMonitor(_cfg())
+        m.set_human_nearby(True)
+        m.trigger_emergency_stop()
+        assert m._speed_override == 0.0
+
+        m.clear_emergency_stop()
+
+        assert not m.is_emergency_stopped()
+        assert m._human_nearby
+        # Must NOT jump back to full speed with a human present.
+        assert m._speed_override == 0.5
+
+    @pytest.mark.unit
+    def test_clear_emergency_stop_restores_full_speed_when_no_human(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.clear_emergency_stop()
+        assert m._speed_override == 1.0
