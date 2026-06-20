@@ -73,6 +73,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-06-20** - Hoisted OpenSim Manager/Integrator construction out of the
   perturbation per-step loop for issue #7713, preserving analyzer behavior
   while avoiding repeated runtime setup on every simulated step.
+- **2026-06-20** - Vectorized clubhead trajectory assembly for issue #7714:
+  `compute_clubhead_trajectory()` now computes the trunk, shoulder, and wrist
+  angle path with NumPy array operations instead of a per-frame Python loop,
+  while parity tests pin the vectorized positions and velocities to the
+  original loop contract, including missing-joint defaults.
 - **2026-06-20** - Added feature-parity tile-id uniqueness validation for
   issue #7730: registry loading now rejects duplicate launcher tile claims
   across entries while preserving distinct tile coverage, with focused loader
