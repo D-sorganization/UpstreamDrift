@@ -391,14 +391,8 @@ class CameraController(QObject):
         self._apply_constraints()
         self.cameraChanged.emit()
 
-    def handle_mouse_pan(self, dx: float, dy: float) -> None:
-        """Handle mouse panning movement"""
-        if dx is None:
-            raise ValueError("dx must be provided")
-        if self.mode not in [CameraMode.ORBIT, CameraMode.FLY]:
-            return
-
-        # Calculate camera right and up vectors
+    def _camera_pan_axes(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return camera right/up axes for target-plane pan movement."""
         eye = self._spherical_to_cartesian()
         forward = self.current_state.target - eye
         forward = forward / math.hypot(forward[0], forward[1], forward[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
@@ -406,9 +400,17 @@ class CameraController(QObject):
         right = np.cross(forward, self.current_state.up)
         right = right / math.hypot(right[0], right[1], right[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
-        up = np.cross(right, forward)
+        return right, np.cross(right, forward)
+
+    def handle_mouse_pan(self, dx: float, dy: float) -> None:
+        """Handle mouse panning movement"""
+        if dx is None:
+            raise ValueError("dx must be provided")
+        if self.mode not in [CameraMode.ORBIT, CameraMode.FLY]:
+            return
 
         # Apply pan movement
+        right, up = self._camera_pan_axes()
         pan_speed = self.current_state.distance * self.pan_sensitivity
         pan_offset = right * dx * pan_speed + up * dy * pan_speed
 
@@ -466,16 +468,7 @@ class CameraController(QObject):
             self.velocity_zoom *= self.inertia_damping
 
         if math.hypot(self.velocity_pan[0], self.velocity_pan[1]) > 0.001:  # noqa: E501 ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
-            # Calculate camera vectors for pan
-            eye = self._spherical_to_cartesian()
-            forward = self.current_state.target - eye
-            forward = forward / math.hypot(forward[0], forward[1], forward[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
-
-            right = np.cross(forward, self.current_state.up)
-            right = right / math.hypot(right[0], right[1], right[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
-
-            up = np.cross(right, forward)
-
+            right, up = self._camera_pan_axes()
             pan_offset = right * self.velocity_pan[0] + up * self.velocity_pan[1]
             self.current_state.target += pan_offset
             self.velocity_pan *= self.inertia_damping
