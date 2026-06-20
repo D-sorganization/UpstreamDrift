@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-19** - Added realtime abort coverage for issue #7697:
+  control-loop failure escalation tests now exercise the emergency
+  zero-torque fallback when command sends raise, asserting the loop still
+  clears `is_running`, records `aborted_on_failure`, and attempts the
+  fail-safe send instead of wedging.
 - **2026-06-20** - Restored standalone Sidekick package frontend builds:
   the UI now uses `@vitejs/plugin-react@5.2.0`, whose peer range includes
   Vite 7, instead of plugin-react 6.x which imports Vite 8-only internals.
