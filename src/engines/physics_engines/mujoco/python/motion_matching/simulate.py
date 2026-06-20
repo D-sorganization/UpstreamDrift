@@ -294,8 +294,10 @@ def simulate_with_coefficients(  # noqa: C901
     Args:
         theta: ``(n_joints * 7,)`` flat vector, or ``(n_joints, 7)`` matrix.
             ``n_joints`` must equal the compiled model's ``nu``. Layout per
-            joint: ``[A, B, C, D, E, F, G]`` for
-            ``A*t^6 + B*t^5 + C*t^4 + D*t^3 + E*t^2 + F*t + G``.
+            joint is ascending in power (column k = ``t^k``):
+            ``[A, B, C, D, E, F, G]`` for
+            ``A + B*t + C*t^2 + D*t^3 + E*t^4 + F*t^5 + G*t^6`` (canonical
+            cross-engine convention, #7688).
         options: :class:`SimOptions`.
         initial_pose: optional ``(<= nq,)`` initial generalised
             coordinates. ``None`` uses the MJCF default.
