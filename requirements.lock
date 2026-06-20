@@ -129,7 +129,7 @@ pydantic==2.12.5
     #   upstream-drift (pyproject.toml)
 pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.14.1
+pydantic-settings==2.14.2
     # via upstream-drift (pyproject.toml)
 pyjwt==2.13.0
     # via upstream-drift (pyproject.toml)
