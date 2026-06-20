@@ -137,7 +137,7 @@ def _is_numeric_sequence(value: object) -> bool:
 # start path already validates through that model, but ``_apply_initial_state``
 # must not assume it was reached only via the validated path. Reusing the same
 # constant keeps the two layers consistent (DRY).
-_MAX_INITIAL_STATE_LEN = MAX_STATE_VECTOR_LEN
+_MAX_INITIAL_STATE_LEN = cast("int", MAX_STATE_VECTOR_LEN)
 
 
 def _max_initial_state_len(engine: object) -> int:
