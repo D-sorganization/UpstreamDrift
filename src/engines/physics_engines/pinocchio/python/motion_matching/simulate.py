@@ -46,11 +46,16 @@ from typing import Any, Literal
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.motion_matching.polynomial_torque import (
+    COEFFS_PER_JOINT,
+    evaluate_polynomial_torque,
+)
+from src.shared.python.motion_matching.polynomial_torque import (
+    POLY_DEGREE as _POLY_DEGREE,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
-# Canonical polynomial form: tau_j(t) = sum_{k=0}^{6} a_{jk} * t^k.
-POLY_DEGREE: int = 6
-COEFFS_PER_JOINT: int = POLY_DEGREE + 1
+POLY_DEGREE = _POLY_DEGREE
 
 # Default URDF lives next to the engine; resolved lazily so tests can override.
 _DEFAULT_URDF = (
@@ -158,56 +163,6 @@ class SimOut:
     kinetic_energy: npt.NDArray[np.float64]
     potential_energy: npt.NDArray[np.float64]
     meta: dict[str, Any] = field(default_factory=dict)
-
-
-# --------------------------------------------------------------------------- #
-# Pure-numpy polynomial torque (testable without pinocchio)
-# --------------------------------------------------------------------------- #
-
-
-def evaluate_polynomial_torque(
-    coeffs: npt.NDArray[np.float64],
-    t: float,
-) -> npt.NDArray[np.float64]:
-    """Evaluate the per-joint degree-6 polynomial torque at time ``t``.
-
-    Implements the canonical contract::
-
-        tau_j(t) = sum_{k=0}^{6} a_{j,k} * t^k
-
-    Args:
-        coeffs: Coefficient matrix of shape ``(n_joints, 7)`` where
-            ``coeffs[j, k] == a_{j, k}``. Element ``k=0`` is the
-            constant term, ``k=6`` is the highest degree.
-        t: Evaluation time (scalar, seconds).
-
-    Returns:
-        Joint-torque vector of shape ``(n_joints,)``.
-
-    Raises:
-        ValueError: If ``coeffs`` is not 2D with 7 columns, or ``t`` is
-            non-finite.
-    """
-    coeffs_arr = np.asarray(coeffs, dtype=np.float64)
-    if coeffs_arr.ndim != 2:
-        msg = f"coeffs must be 2D (n_joints, 7); got ndim={coeffs_arr.ndim}"
-        raise ValueError(msg)
-    if coeffs_arr.shape[1] != COEFFS_PER_JOINT:
-        msg = (
-            f"coeffs must have {COEFFS_PER_JOINT} columns "
-            f"(degree {POLY_DEGREE}); got shape {coeffs_arr.shape}"
-        )
-        raise ValueError(msg)
-    if not np.isfinite(t):
-        raise ValueError(f"t must be finite, got {t!r}")
-
-    # Horner's method for numerical stability and ~7x fewer multiplies.
-    # Using the highest-degree term first because coeffs[:, k] is the t^k
-    # coefficient: tau = a0 + t*(a1 + t*(a2 + t*(... + t*a6)))
-    out = coeffs_arr[:, POLY_DEGREE].copy()
-    for k in range(POLY_DEGREE - 1, -1, -1):
-        out = out * t + coeffs_arr[:, k]
-    return out
 
 
 # --------------------------------------------------------------------------- #

@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Deduplicated the cross-engine motion-matching polynomial
+  torque evaluator for issue #7728: Drake, MuJoCo, Pinocchio, and OpenSim now
+  share the same lowest-power-first `[A..G]` Horner helper and constant,
+  with unit coverage pinning shared and engine-wrapper parity.
 - **2026-06-20** - Added isolated transition hazard-rule coverage for issue
   #7715: the MDP transition tests now pin hazard penalties and DbC guard
   behavior directly so policy updates cannot bypass invalid-state validation.

@@ -34,7 +34,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.motion_matching.validate_theta import COEFFS_PER_JOINT
+from src.shared.python.motion_matching.polynomial_torque import (
+    COEFFS_PER_JOINT,
+    evaluate_polynomial_torque,
+)
 
 # --- Coefficient bounds (mirrored from Simscape build_coefficient_bounds) ---
 
@@ -83,14 +86,7 @@ def _evaluate_polynomial(
     Returns:
         ``(n_joints,)`` torque vector.
     """
-    # Horner's method on shape (7,) ascending-power coefficients: start
-    # from the highest power (column 6) and fold in descending columns so
-    # column 0 is the constant term (canonical cross-engine convention,
-    # #7688).
-    out = theta[:, -1].astype(np.float64, copy=True)
-    for k in range(theta.shape[1] - 2, -1, -1):
-        out = out * t + theta[:, k]
-    return out
+    return evaluate_polynomial_torque(theta, t)
 
 
 class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
