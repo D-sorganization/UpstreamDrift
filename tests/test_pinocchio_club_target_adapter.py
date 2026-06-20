@@ -23,6 +23,8 @@ from src.engines.physics_engines.pinocchio.python.motion_matching.club_target_ad
     load_robneal_target,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -180,6 +182,41 @@ def test_dropped_impact_frame_uses_next_survivor(tmp_path: Path) -> None:
     # -> 1-based 10.
     assert target.impact_idx == 10
     assert target.time.shape == (19,)
+
+
+def test_dedups_duplicate_timestamp_frames(tmp_path: Path) -> None:
+    """A duplicate boundary timestamp is dropped (keep-first) via the dedup branch.
+
+    Exercises ``club_target_adapter`` lines 406-422: the non-monotonic-time
+    path that filters time/butt/clubhead/club_quat/keep_idx through
+    ``unique_mask`` and the impact remap through the deduped ``keep_idx``.
+    The ``_write_synthetic_pair(monotonic_time=False)`` knob injects
+    ``time[5] = time[4]``, so frame 5 (0-based) is the dropped duplicate.
+    """
+    n = 50
+    impact_one_based = 25  # 0-based 24, after the duplicate at index 5
+    raw = _write_synthetic_pair(
+        tmp_path,
+        n=n,
+        impact_one_based=impact_one_based,
+        monotonic_time=False,
+    )
+    target = load_robneal_target(raw)
+
+    # Exactly one duplicate-timestamp frame is dropped: N -> N-1.
+    assert target.time.shape == (n - 1,)
+    assert target.butt.shape == (n - 1, 3)
+    assert target.clubhead.shape == (n - 1, 3)
+    assert target.club_quat.shape == (n - 1, 4)
+
+    # Time is rebased to start at 0 and is now strictly increasing.
+    assert target.time[0] == pytest.approx(0.0)
+    assert np.all(np.diff(target.time) > 0.0)
+
+    # The impact frame (raw 0-based 24) sits after the dropped frame (raw
+    # 0-based 5), so its position in the deduped array shifts down by one:
+    # 1-based 25 -> 24.
+    assert target.impact_idx == impact_one_based - 1  # 24 (1-based)
 
 
 def test_missing_partner_raises(tmp_path: Path) -> None:
