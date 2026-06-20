@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
+from src.shared.python.math_utils.quaternion import slerp as _canonical_slerp
 from src.shared.python.spatial_algebra import quaternion_to_rotation_matrix
 
 if TYPE_CHECKING:
@@ -503,25 +504,9 @@ class CooperativeManipulation:
         """
         if q0 is None:
             raise ValueError("q0 must be provided")
-        dot = np.dot(q0, q1)
-
-        # If negative dot, negate one quaternion
-        if dot < 0:
-            q1 = -q1
-            dot = -dot
-
-        if dot > 0.9995:
-            # Linear interpolation for nearly identical quaternions
-            result = (1 - t) * q0 + t * q1
-            return result / np.linalg.norm(result)
-
-        theta = np.arccos(dot)
-        sin_theta = np.sin(theta)
-
-        s0 = np.sin((1 - t) * theta) / sin_theta
-        s1 = np.sin(t * theta) / sin_theta
-
-        return s0 * q0 + s1 * q1
+        # Delegate to the canonical SLERP so the algorithm and the
+        # nlerp-fallback threshold live in exactly one place (issue #7707).
+        return _canonical_slerp(q0, q1, t)
 
     def _quat_to_rotation(
         self,
