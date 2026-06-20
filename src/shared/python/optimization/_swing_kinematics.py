@@ -122,18 +122,16 @@ def compute_clubhead_trajectory(
     arm_length = golfer.arm_length
     club_length = club.total_length
 
-    for i in range(n_frames):
-        trunk_rot = joint_angles.get("trunk_rotation", np.zeros(n_frames))[i]
-        shoulder_h = joint_angles.get("shoulder_horizontal", np.zeros(n_frames))[i]
-        joint_angles.get("shoulder_vertical", np.zeros(n_frames))[i]
-        joint_angles.get("elbow_flexion", np.zeros(n_frames))[i]
-        wrist = joint_angles.get("wrist_cock", np.zeros(n_frames))[i]
+    zero = np.zeros(n_frames)
+    trunk_rot = joint_angles.get("trunk_rotation", zero)
+    shoulder_h = joint_angles.get("shoulder_horizontal", zero)
+    wrist = joint_angles.get("wrist_cock", zero)
 
-        total_angle = trunk_rot + shoulder_h + wrist
+    total_angle = trunk_rot + shoulder_h + wrist
 
-        position[i, 0] = (arm_length + club_length) * np.sin(total_angle)
-        position[i, 1] = 0
-        position[i, 2] = (arm_length + club_length) * np.cos(total_angle) - club_length
+    radius = arm_length + club_length
+    position[:, 0] = radius * np.sin(total_angle)
+    position[:, 2] = radius * np.cos(total_angle) - club_length
 
     dt = time[1] - time[0] if len(time) > 1 else 0.001
     for dim in range(3):
