@@ -214,6 +214,24 @@ class FeatureParityRegistry:
         if len(ids) != len(set(ids)):
             raise ValueError("Duplicate feature ids in registry")
 
+        # DbC postcondition: every launcher tile is claimed by at most one
+        # entry. Without this check a tile listed by two entries would
+        # silently collapse in the coverage matrix (last-write-wins),
+        # hiding the duplicate claim from reviewers.
+        tile_owners: dict[str, list[str]] = {}
+        for entry in entries:
+            for tile in entry.tiles:
+                tile_owners.setdefault(tile, []).append(entry.feature_id)
+        duplicate_tiles = {
+            tile: owners for tile, owners in tile_owners.items() if len(owners) > 1
+        }
+        if duplicate_tiles:
+            details = "; ".join(
+                f"{tile!r} claimed by {sorted(owners)}"
+                for tile, owners in sorted(duplicate_tiles.items())
+            )
+            raise ValueError(f"Duplicate launcher tile ids in registry: {details}")
+
         logger.info(
             "Loaded %d feature parity entries (v%s)", len(entries), registry.version
         )
