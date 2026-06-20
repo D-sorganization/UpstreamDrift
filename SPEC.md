@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.463                                            |
+| **Spec Version**        | 1.0.464                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Repaired Drake cross-engine theta sizing for issue #7725:
+  the Drake equivalence smoke gate now derives its zero-theta vector length
+  from the finalized Drake plant actuator count, matching the stricter
+  production contract that rejects mismatched nonzero coefficient vectors
+  instead of silently logging phantom torques.
 - **2026-06-20** - Consolidated quaternion SLERP behavior for issue #7707:
   `math_utils.quaternion.slerp` now owns the shared nlerp fallback threshold,
   while spatial algebra rotations, cooperative manipulation, and Unreal
@@ -1799,6 +1804,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-20 | 1.0.464 | Repaired Drake cross-engine theta sizing for issue #7725. `tests/motion_matching/test_cross_engine_equivalence.py` now derives Drake's gravity-only zero-theta vector from the finalized plant actuator count before invoking `simulate_with_coefficients`, preserving the production guard that rejects mismatched nonzero theta vectors instead of silently disconnecting actuation and logging phantom torques. |
 | 2026-06-20 | 1.0.463 | Consolidated quaternion SLERP behavior for issue #7707. The canonical `math_utils.quaternion.slerp` implementation now owns the named nlerp fallback threshold, while spatial algebra rotations, cooperative manipulation, and Unreal skeleton mapping delegate to it with focused parity tests covering sibling behavior and the threshold boundary. |
 | 2026-06-20 | 1.0.462 | Reconciled cross-engine torque polynomial coefficient ordering for issue #7688 after the mainline dependency/security refresh. The cross-engine parity spec documents the canonical flat theta block as `[A, B, C, D, E, F, G]` where column `k` multiplies `t^k`; MuJoCo's polynomial torque driver, callback Horner chain, analytical Jacobian monomials, and shared theta validator documentation follow the same lowest-power-first convention as Drake, Pinocchio, and OpenSim. The cross-engine equivalence smoke gate feeds a nonzero theta through all four pure evaluator helpers to catch future ordering drift. |
 | 2026-06-20 | 1.0.461 | Restored standalone Sidekick package frontend builds by pinning `@vitejs/plugin-react` to 5.2.0, whose peer range includes the locked Vite 7.x runtime. This avoids plugin-react 6.x importing Vite 8-only internals during `npm run build` in `package-standalone-sidekick.yml`. |

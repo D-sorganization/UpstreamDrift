@@ -175,7 +175,13 @@ def _run_drake() -> tuple[np.ndarray, np.ndarray]:
     options = sim_mod.SimOptions(
         simulation_time_s=0.30, sample_rate_hz=1000.0, time_step_s=1.0e-3
     )
-    theta = np.zeros(64 * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
+    from pydrake.multibody.plant import MultibodyPlant
+
+    plant = MultibodyPlant(options.time_step_s)
+    sim_mod.load_humanoid_into_plant(plant, options.urdf_path or sim_mod.CANONICAL_URDF)
+    plant.Finalize()
+    n_act = sim_mod._resolve_n_actuators(plant)
+    theta = np.zeros(n_act * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
     out = sim_mod.simulate_with_coefficients(theta, options=options)
     return np.asarray(out.time), np.asarray(out.grip)
 
