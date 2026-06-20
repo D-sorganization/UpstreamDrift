@@ -75,6 +75,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   codemap rebuild exceptions, assert sanitized client error frames, preserve
   server-side traceback logging, and keep the socket usable after a model
   refresh failure.
+- **2026-06-20** - Added feature-parity tile-id uniqueness validation for
+  issue #7730: registry loading now rejects duplicate launcher tile claims
+  across entries while preserving distinct tile coverage, with focused loader
+  tests for duplicate and unique tile lists.
 - **2026-06-20** - Consolidated quaternion SLERP behavior for issue #7707:
   `math_utils.quaternion.slerp` now owns the shared nlerp fallback threshold,
   while spatial algebra rotations, cooperative manipulation, and Unreal
@@ -2220,3 +2224,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### Module Map Changelog
 
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
+
+### Module Map
+
+- Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
