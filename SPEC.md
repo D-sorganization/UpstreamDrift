@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.456                                            |
-| **Last Spec Update**    | 2026-06-19                                         |
+| **Spec Version**        | 1.0.457                                            |
+| **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Hardened shared CORS credential handling for issue #7740:
+  `add_cors_middleware()` now rejects wildcard origins when credentials are
+  enabled, including origins resolved from `CORS_ORIGINS`, while preserving
+  wildcard support for non-credentialed CORS responses.
 - **2026-06-19** - Hardened Data Explorer numeric contracts for issue #7732:
   dataset stats now ignore textual `inf`, `-inf`, `nan`, and `Infinity`
   cells instead of allowing one non-finite value to poison min/max/mean or
@@ -1767,6 +1771,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-20 | 1.0.457 | Hardened shared CORS credential handling for issue #7740. `add_cors_middleware()` now rejects wildcard origins when `allow_credentials=True`, including origins resolved from `CORS_ORIGINS`, so credentialed responses cannot be paired with `*` origins while non-credentialed wildcard CORS remains supported. Focused unit tests cover explicit wildcard rejection, environment-origin wildcard rejection, explicit-origin credentials, and non-credentialed wildcard behavior. |
 | 2026-06-19 | 1.0.456 | Hardened Data Explorer numeric contracts for issue #7732. `dataset_stats()` now ignores textual non-finite cells such as `inf`, `-inf`, `nan`, and `Infinity` so one stray value cannot corrupt min/max/mean or serialize invalid JSON tokens, and `_row_matches_filter()` rejects non-finite numeric row/filter operands before applying comparison operators. Focused API route tests cover finite-only aggregation, strict JSON response behavior, non-finite filter rejection, and unchanged finite comparisons. |
 | 2026-06-19 | 1.0.455 | Hardened common engine state validation for issue #7705. `StateManager` and `ForceAccumulator` now enforce positive dimensions, positive time steps, and non-empty force-source names through body-level guards that remain active when Python optimization or `ContractLevel.OFF` disables decorator-based DbC checks. Focused optimized-runtime regressions run subprocesses under `python -O` to pin the always-on contract while preserving the existing decorator-backed precondition behavior. |
 | 2026-06-19 | 1.0.454 | Hardened realtime controller failure abort handling for issue #7685. `_control_loop()` now clears `is_running` from a `finally` cleanup path even when the loop exits through a raised exception, and the emergency zero-torque fallback used after consecutive failures is best-effort with `logger.exception` telemetry if the safety send itself fails. Focused regression coverage drives `_send_command` to fail during both normal command dispatch and abort zero-torque dispatch, then asserts the loop terminates, `aborted_on_failure` stays true, and the zero-torque send failure is logged. |
