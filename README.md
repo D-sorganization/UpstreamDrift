@@ -190,6 +190,9 @@ The suite now features a **Unified Launcher** that provides access to all engine
 
 ```bash
 # Unified launcher (recommended) - select engine and model
+python3 launch_upstream_drift.py
+
+# Deprecated compatibility shim (kept for existing scripts)
 python3 launch_golf_suite.py
 
 # Alternative: Direct launch of specific engines
