@@ -21,6 +21,9 @@ from src.shared.python.motion_pipeline.sources.base import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 class _ClaimsAll(MocapSourceAdapter):
     format_name = "_claims_all"
     file_extensions = (".unique_test_ext",)
