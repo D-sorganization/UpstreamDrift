@@ -15,7 +15,6 @@ The following Drake engine modules were fully tested using mock-based testing st
 - `drake_gui_app.py`: Created robust tests for `DrakeSimApp` PyQt6 initialization and UI building routines.
 - `drake_gui_sim.py`: Tested the simulation game loop, dynamic vs. kinematic mode changes, and slider updates.
 - `drake_ui_mixin.py`: Resolved complex PyQt6 mocking challenges (e.g., `QApplication` absence crashes) and tested `DrakeUIMixin`.
-- `drake_visualization_mixin.py`: Handled vector drawing, counterfactual plotting, and ellipsoid computation logic.
 - `drake_recorder.py`: Verified import proxy configuration.
 
 ### 2. Infrastructure Debugging and Remediation

@@ -74,6 +74,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   handler for issue #7719: runtime speed changes now route through one
   canonical branch for validation and state updates, with focused WebSocket
   regression coverage preserving accepted payload behavior.
+- **2026-06-20** - Removed the dead duplicate Drake visualization monolith
+  for issue #7709: Drake visualization now relies on the active maintained
+  implementation instead of the stale `drake_visualization_mixin.py` copy,
+  with obsolete unit coverage and suite-marker baseline entries removed.
 - **2026-06-20** - Vectorized clubhead trajectory assembly for issue #7714:
   `compute_clubhead_trajectory()` now computes the trunk, shoulder, and wrist
   angle path with NumPy array operations instead of a per-frame Python loop,
