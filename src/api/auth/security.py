@@ -105,8 +105,10 @@ def _log_bcrypt_verification_failure(
 ) -> None:
     """Log failed bcrypt verification without exposing credentials or hashes."""
     operation_label = "API key" if operation == "api_key" else operation
+    failure_label = "API key" if operation == "api_key" else "Password"
     logger.warning(
-        "Malformed stored bcrypt hash during %s verification",
+        "%s verification failed: Malformed stored bcrypt hash during %s verification",
+        failure_label,
         operation_label,
         exc_info=(type(exc), exc, exc.__traceback__),
         operation=operation,
