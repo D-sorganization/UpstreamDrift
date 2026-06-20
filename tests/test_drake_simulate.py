@@ -444,7 +444,8 @@ def test_mocked_simulate_advance_to_value_error_propagates(
 
 _pydrake_available = False
 try:  # pragma: no cover - best-effort detection
-    import pydrake  # noqa: F401
+    from pydrake.multibody.parsing import Parser as _Parser  # noqa: F401
+    from pydrake.multibody.plant import MultibodyPlant as _MultibodyPlant  # noqa: F401
 
     _pydrake_available = True
 except Exception:  # noqa: BLE001
@@ -452,7 +453,9 @@ except Exception:  # noqa: BLE001
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not _pydrake_available, reason="pydrake not installed")
+@pytest.mark.skipif(
+    not _pydrake_available, reason="pydrake multibody modules not installed"
+)
 def test_live_simulate_zero_theta_falls_under_gravity() -> None:
     """With theta = 0 the unactuated humanoid drops in -Z under gravity."""
     pytest.importorskip("pydrake")
