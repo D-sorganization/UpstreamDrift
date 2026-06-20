@@ -251,7 +251,7 @@ def compute_qpos_jacobian(  # noqa: C901
             )
         theta_mat = flat.reshape(nu, 7)
     elif flat.shape == (nu, 7):
-        theta_mat = flat
+        theta_mat = flat.reshape(nu, 7)
     else:
         raise ValueError(f"theta must have shape ({nu}, 7); got {flat.shape}")
     if not np.all(np.isfinite(theta_mat)):
@@ -267,7 +267,7 @@ def compute_qpos_jacobian(  # noqa: C901
 
     # S[k] = ∂x / ∂θ at output frame k. Initial state independent of θ.
     out_dq_dtheta = np.zeros((n_out, nv, n_theta), dtype=np.float64)
-    S = np.zeros((nx, n_theta), dtype=np.float64)
+    S: NDArray[np.float64] = np.zeros((nx, n_theta), dtype=np.float64)
     out_dq_dtheta[0] = S[:nv, :]
 
     do_clip = bool(sim_opts.clip_torque_to_ctrlrange)
