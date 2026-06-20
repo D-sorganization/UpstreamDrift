@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.461                                            |
+| **Spec Version**        | 1.0.463                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Added feature-parity tile-id uniqueness validation for
+  issue #7730: registry loading now rejects duplicate launcher tile claims
+  across entries while preserving distinct tile coverage, with focused loader
+  tests for duplicate and unique tile lists.
+- **2026-06-20** - Consolidated quaternion SLERP behavior for issue #7707:
+  `math_utils.quaternion.slerp` now owns the shared nlerp fallback threshold,
+  while spatial algebra rotations, cooperative manipulation, and Unreal
+  skeleton mapping delegate to the canonical implementation with focused parity
+  coverage across the threshold boundary.
 - **2026-06-19** - Added realtime abort coverage for issue #7697:
   control-loop failure escalation tests now exercise the emergency
   zero-torque fallback when command sends raise, asserting the loop still
@@ -1796,6 +1805,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-20 | 1.0.463 | Consolidated quaternion SLERP behavior for issue #7707. The canonical `math_utils.quaternion.slerp` implementation now owns the named nlerp fallback threshold, while spatial algebra rotations, cooperative manipulation, and Unreal skeleton mapping delegate to it with focused parity tests covering sibling behavior and the threshold boundary. |
+| 2026-06-20 | 1.0.462 | Reconciled cross-engine torque polynomial coefficient ordering for issue #7688 after the mainline dependency/security refresh. The cross-engine parity spec documents the canonical flat theta block as `[A, B, C, D, E, F, G]` where column `k` multiplies `t^k`; MuJoCo's polynomial torque driver, callback Horner chain, analytical Jacobian monomials, and shared theta validator documentation follow the same lowest-power-first convention as Drake, Pinocchio, and OpenSim. The cross-engine equivalence smoke gate feeds a nonzero theta through all four pure evaluator helpers to catch future ordering drift. |
 | 2026-06-20 | 1.0.461 | Restored standalone Sidekick package frontend builds by pinning `@vitejs/plugin-react` to 5.2.0, whose peer range includes the locked Vite 7.x runtime. This avoids plugin-react 6.x importing Vite 8-only internals during `npm run build` in `package-standalone-sidekick.yml`. |
 | 2026-06-20 | 1.0.460 | Cleared #7806 CI ratchets after merging current main. Runtime dependency metadata and lockfiles now require patched `pydantic-settings>=2.14.2` so `pip-audit` no longer reports GHSA-4xgf-cpjx-pc3j, and recent unit-style regression files carry explicit `pytest.mark.unit` suite markers instead of expanding the unmarked-test baseline. |
 | 2026-06-20 | 1.0.459 | Deduplicated golf GUI camera pan axes after the DRY duplication ratchet surfaced repeated target-plane basis construction in `golf_camera_system.py`. Mouse pan and pan inertia now share `_camera_pan_axes()` for the camera right/up vectors, preserving the existing orbit/fly pan behavior while removing the duplicated production logic fingerprint. |
