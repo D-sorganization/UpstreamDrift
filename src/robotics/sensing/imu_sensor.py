@@ -23,9 +23,10 @@ from src.robotics.sensing.noise_models import (
     CompositeNoise,
     GaussianNoise,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 
-DEFAULT_IMU_GRAVITY_M_S2 = 9.81
+DEFAULT_IMU_GRAVITY_M_S2 = float(GRAVITY_M_S2)
 QUATERNION_NORM_EPS = 1e-12
 QUATERNION_RENORMALIZE_TOL = 1e-10
 
