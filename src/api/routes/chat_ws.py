@@ -20,7 +20,6 @@ Deduplication
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import hashlib
 import os
 from typing import Any
@@ -28,6 +27,11 @@ from typing import Any
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
 from src.api.auth.ws_auth import resolve_ws_user
+from src.shared.python.chat.websocket_protocol import (
+    ChatWebSocketState,
+    DisconnectLogConfig,
+    run_chat_websocket_protocol,
+)
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -53,7 +57,6 @@ def _chat_service_from(holder: Any) -> Any:
 
 
 _INTERNAL_ERROR_DETAIL = "Internal server error"
-_CONNECTION_ERROR_DETAIL = "Connection error"
 
 # ── Chat-context injection helpers ───────────────────────────────────
 
@@ -146,7 +149,7 @@ def _maybe_inject_chat_context(session: Any) -> str | None:
 
 
 @router.websocket("/ws/chat/{session_id}")
-async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  # noqa: C901
+async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
     """Stream AI chat over WebSocket.
 
     Protocol:
@@ -166,161 +169,83 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
             {"type": "index_status", "state": "running"|"complete"|"error", ...}
             {"type": "error", "detail": "..."}
     """
-    if not (websocket is not None):
-        raise ValueError("websocket must be provided")
-    user = await resolve_ws_user(websocket)
-    if user is None:
-        return
-    await websocket.accept()
+    await run_chat_websocket_protocol(
+        websocket,
+        session_id,
+        authorize_fn=_authorize_chat_websocket,
+        chat_service_getter=_chat_service_from,
+        before_send=_maybe_inject_chat_context,
+        action_handlers={
+            "refresh_models": _handle_refresh_models,
+            "index_codebase": _handle_index_codebase,
+        },
+        log=logger,
+        disconnect_log=DisconnectLogConfig(
+            message="Chat WebSocket disconnected: session_token=%s",
+            args_fn=lambda current_session_id: (
+                _session_log_token(current_session_id),
+            ),
+        ),
+    )
 
-    chat_service = _chat_service_from(websocket)
 
-    # Resolve or create session
-    if session_id == "new":
-        ctx = chat_service.get_or_create_session(None)
-        session_id = ctx.session_id
-    else:
-        ctx = chat_service.get_or_create_session(session_id)
-        session_id = ctx.session_id
+async def _authorize_chat_websocket(websocket: WebSocket) -> bool:
+    return await resolve_ws_user(websocket) is not None
 
-    await websocket.send_json({"type": "session_info", "session_id": session_id})
 
+async def _handle_refresh_models(
+    websocket: WebSocket,
+    _msg: dict[str, Any],
+    state: ChatWebSocketState,
+) -> None:
+    # Tools issue #2547 / PR #2566: poll the configured provider for available
+    # models and ship the result over the chat socket so the dock widget can
+    # repopulate its dropdown. Issue #7687: failures must surface as frames.
     try:
-        while True:
-            msg = await websocket.receive_json()
-            action = msg.get("action")
-
-            if action == "send":
-                user_message = msg.get("message", "").strip()
-                if not user_message:
-                    await websocket.send_json(
-                        {"type": "error", "detail": "Empty message"}
-                    )
-                    continue
-
-                # Accept both keys: React clients send ``engine_context``;
-                # PyQt clients send ``app_context``. Mirrors router_factory.py.
-                engine_context = msg.get("engine_context") or msg.get("app_context")
-
-                # Inject recent app-state context into the session before the
-                # assistant replies (skipped when env var is "0" or buffer empty).
-                _maybe_inject_chat_context(ctx)
-
-                try:
-                    chat_service.add_user_message(
-                        session_id, user_message, engine_context
-                    )
-                except ValueError as e:
-                    await websocket.send_json({"type": "error", "detail": str(e)})
-                    continue
-
-                # Stream response chunks
-                try:
-                    async for chunk in chat_service.stream_response(session_id):
-                        if isinstance(chunk, dict):
-                            await websocket.send_json(chunk)
-                        else:
-                            await websocket.send_json(
-                                {"type": "chunk", "content": str(chunk)}
-                            )
-
-                    await websocket.send_json(
-                        {"type": "complete", "session_id": session_id}
-                    )
-                except WebSocketDisconnect:
-                    # A mid-stream client disconnect is a normal event, not an
-                    # internal error. Re-raise so the outer handler logs it as a
-                    # disconnect and we never send a frame on a dead socket
-                    # (issue #7057).
-                    raise
-                except Exception:  # noqa: BLE001
-                    logger.exception("Error during streaming response")
-                    await websocket.send_json(
-                        {"type": "error", "detail": _INTERNAL_ERROR_DETAIL}
-                    )
-
-            elif action == "history":
-                messages = chat_service.get_session_history(session_id)
-                await websocket.send_json({"type": "history", "messages": messages})
-
-            elif action == "new_session":
-                ctx = chat_service.get_or_create_session(None)
-                session_id = ctx.session_id
-                await websocket.send_json(
-                    {"type": "session_created", "session_id": session_id}
-                )
-
-            elif action == "refresh_models":
-                # Tools issue #2547 / PR #2566: poll the configured provider
-                # for available models and ship the result over the chat
-                # socket so the dock widget can repopulate its dropdown.
-                # Issue #7687: a provider/network failure here used to escape
-                # chat_stream and tear the socket down with no error frame.
-                try:
-                    payload = await asyncio.to_thread(chat_service.refresh_models)
-                    await websocket.send_json(
-                        {
-                            "type": "model_list",
-                            "models": payload["models"],
-                            "refreshed_at": payload["refreshed_at"],
-                        }
-                    )
-                except WebSocketDisconnect:
-                    raise
-                except Exception:  # noqa: BLE001
-                    logger.exception("Error refreshing models")
-                    await websocket.send_json(
-                        {"type": "error", "detail": _INTERNAL_ERROR_DETAIL}
-                    )
-
-            elif action == "index_codebase":
-                # Tools issue #2549 / PR #2567. Run the existing
-                # codemap.indexer.rebuild pathway in a worker thread and
-                # ship a ``running`` event up front, then a final
-                # ``complete`` (or ``error``) event when the rebuild
-                # finishes. We deliberately don't reimplement the
-                # indexer here — see ``src/shared/python/codemap``.
-                # Issue #7687: a rebuild failure must surface as an error frame
-                # instead of crashing the whole chat socket.
-                await websocket.send_json(
-                    {
-                        "type": "index_status",
-                        "state": "running",
-                        "files_parsed": 0,
-                        "symbols_inserted": 0,
-                    }
-                )
-                try:
-                    payload = await chat_service.run_codemap_rebuild()
-                    await websocket.send_json({"type": "index_status", **payload})
-                except WebSocketDisconnect:
-                    raise
-                except Exception:  # noqa: BLE001
-                    logger.exception("Error indexing codebase")
-                    await websocket.send_json(
-                        {
-                            "type": "index_status",
-                            "state": "error",
-                            "detail": _INTERNAL_ERROR_DETAIL,
-                        }
-                    )
-
-            else:
-                await websocket.send_json(
-                    {"type": "error", "detail": f"Unknown action: {action}"}
-                )
-
-    except WebSocketDisconnect:
-        logger.debug(
-            "Chat WebSocket disconnected: session_token=%s",
-            _session_log_token(session_id),
+        payload = await asyncio.to_thread(state.chat_service.refresh_models)
+        await websocket.send_json(
+            {
+                "type": "model_list",
+                "models": payload["models"],
+                "refreshed_at": payload["refreshed_at"],
+            }
         )
-    except (ConnectionError, TimeoutError, OSError):
-        logger.exception("Chat WebSocket connection error")
-        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json(
-                {"type": "error", "detail": _CONNECTION_ERROR_DETAIL}
-            )
+    except WebSocketDisconnect:
+        raise
+    except Exception:  # noqa: BLE001
+        logger.exception("Error refreshing models")
+        await websocket.send_json({"type": "error", "detail": _INTERNAL_ERROR_DETAIL})
+
+
+async def _handle_index_codebase(
+    websocket: WebSocket,
+    _msg: dict[str, Any],
+    state: ChatWebSocketState,
+) -> None:
+    # Tools issue #2549 / PR #2567. Run the codemap rebuild pathway and ship
+    # running/final status frames without reimplementing the indexer here.
+    await websocket.send_json(
+        {
+            "type": "index_status",
+            "state": "running",
+            "files_parsed": 0,
+            "symbols_inserted": 0,
+        }
+    )
+    try:
+        payload = await state.chat_service.run_codemap_rebuild()
+        await websocket.send_json({"type": "index_status", **payload})
+    except WebSocketDisconnect:
+        raise
+    except Exception:  # noqa: BLE001
+        logger.exception("Error indexing codebase")
+        await websocket.send_json(
+            {
+                "type": "index_status",
+                "state": "error",
+                "detail": _INTERNAL_ERROR_DETAIL,
+            }
+        )
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────

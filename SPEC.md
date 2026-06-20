@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Deduplicated the chat WebSocket protocol loop for issue
+  #7720: `src/api/routes/chat_ws.py` and the portable chat router factory now
+  share one handshake/send/history/new-session/transport-error loop, with
+  route-specific hooks preserving API context injection and router-factory
+  extension actions plus focused regression coverage across both entrypoints.
 - **2026-06-20** - Deduplicated the cross-engine motion-matching polynomial
   torque evaluator for issue #7728: Drake, MuJoCo, Pinocchio, and OpenSim now
   share the same lowest-power-first `[A..G]` Horner helper and constant,
