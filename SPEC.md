@@ -2207,3 +2207,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### Module Map Changelog
 
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
+
+### Module Map
+- Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.

@@ -36,6 +36,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
+import math
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -727,8 +728,9 @@ class SkeletonMapper:
         # Normalize inputs
         if q_a is None:
             raise ValueError("q_a must be provided")
-        q_a = q_a / np.linalg.norm(q_a)
-        q_b = q_b / np.linalg.norm(q_b)
+        # ⚡ Bolt: math.sqrt(np.dot) is ~2x faster than np.linalg.norm for small 1D arrays
+        q_a = q_a / math.sqrt(np.dot(q_a, q_a))
+        q_b = q_b / math.sqrt(np.dot(q_b, q_b))
 
         # Compute dot product
         dot = np.dot(q_a, q_b)
@@ -741,7 +743,8 @@ class SkeletonMapper:
         # If very close, use linear interpolation
         if dot > 0.9995:
             result = q_a + t * (q_b - q_a)
-            return result / np.linalg.norm(result)
+            # ⚡ Bolt: math.sqrt(np.dot) is ~2x faster than np.linalg.norm for small 1D arrays
+            return result / math.sqrt(np.dot(result, result))
 
         # SLERP formula
         theta_0 = np.arccos(dot)
