@@ -38,6 +38,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.math_utils.quaternion import slerp as _canonical_slerp
+
 logger = logging.getLogger(__name__)
 
 
@@ -724,35 +726,14 @@ class SkeletonMapper:
         Returns:
             Interpolated quaternion.
         """
-        # Normalize inputs
+        # Normalize inputs, then delegate to the canonical SLERP so the
+        # algorithm and the nlerp-fallback threshold live in exactly one
+        # place (issue #7707).
         if q_a is None:
             raise ValueError("q_a must be provided")
         q_a = q_a / np.linalg.norm(q_a)
         q_b = q_b / np.linalg.norm(q_b)
-
-        # Compute dot product
-        dot = np.dot(q_a, q_b)
-
-        # If negative dot, negate one quaternion to take shorter path
-        if dot < 0:
-            q_b = -q_b
-            dot = -dot
-
-        # If very close, use linear interpolation
-        if dot > 0.9995:
-            result = q_a + t * (q_b - q_a)
-            return result / np.linalg.norm(result)
-
-        # SLERP formula
-        theta_0 = np.arccos(dot)
-        theta = theta_0 * t
-        sin_theta = np.sin(theta)
-        sin_theta_0 = np.sin(theta_0)
-
-        s0 = np.cos(theta) - dot * sin_theta / sin_theta_0
-        s1 = sin_theta / sin_theta_0
-
-        return s0 * q_a + s1 * q_b
+        return _canonical_slerp(q_a, q_b, t)
 
     @staticmethod
     def _euler_to_quaternion(roll: float, pitch: float, yaw: float) -> np.ndarray:
