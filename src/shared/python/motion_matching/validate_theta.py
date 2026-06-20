@@ -34,7 +34,7 @@ __all__ = [
     "validate_theta",
 ]
 
-# A polynomial torque has 7 coefficients per joint (A..G for t^6..t^0).
+# A polynomial torque has 7 coefficients per joint (A..G for t^0..t^6).
 COEFFS_PER_JOINT: int = 7
 
 # Default per-letter bound table, keyed by single-character A..G.
