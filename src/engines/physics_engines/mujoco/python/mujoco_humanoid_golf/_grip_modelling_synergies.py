@@ -6,8 +6,25 @@ Used in the Grip Modelling Tab.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 
 from PyQt6 import QtCore, QtWidgets
+
+# Named angle-limit constants (radians) for the default grip synergies.
+# Previously these were inline literals scattered across six near-identical
+# branches in ``rebuild_synergy_controls`` (issue #7723); centralising them
+# gives a single source of truth.
+SHADOW_FIST_MAX = 1.4
+SHADOW_INDEX_MAX = 1.4
+SHADOW_PINCH_FINGER_MAX = 1.0
+SHADOW_PINCH_THUMB_MAX = 0.8
+ALLEGRO_FIST_MAX = 1.5
+ALLEGRO_INDEX_MAX = 1.5
+ALLEGRO_PINCH_MAX = 1.0
+
+# A joint spec is (joint_name, min_angle, max_angle); the resolver turns the
+# joint name into a qpos address (or None when the joint is absent).
+JointSpec = tuple[str, float, float]
 
 
 def get_descriptive_joint_name(name: str) -> str:
@@ -243,3 +260,179 @@ class AddSynergyDialog(QtWidgets.QDialog):
             return None
 
         return Synergy(name, bindings)
+
+
+def build_synergy_from_specs(
+    name: str,
+    specs: list[JointSpec],
+    resolve: Callable[[str], int | None],
+) -> Synergy | None:
+    """Build a :class:`Synergy` from a list of joint specs.
+
+    Single, data-driven replacement for the six previously duplicated
+    Fist/Index/Pinch binding-build blocks (issue #7723). Each spec is resolved
+    to a qpos address; specs whose joint is missing are skipped.
+
+    Args:
+        name: Display name of the synergy.
+        specs: Ordered list of ``(joint_name, min_angle, max_angle)`` tuples.
+        resolve: Callable mapping a joint name to a qpos address, or ``None``
+            when the joint does not exist in the loaded model.
+
+    Returns:
+        A :class:`Synergy` when at least one spec resolves, else ``None``.
+    """
+    bindings: list[SynergyJointBinding] = []
+    for joint_name, min_val, max_val in specs:
+        q_adr = resolve(joint_name)
+        if q_adr is not None:
+            bindings.append(SynergyJointBinding(q_adr, min_val, max_val))
+    if not bindings:
+        return None
+    return Synergy(name, bindings)
+
+
+def shadow_synergy_specs(prefixes: list[str]) -> list[tuple[str, list[JointSpec]]]:
+    """Build the ordered Shadow-hand synergy specs for the given prefixes.
+
+    Behaviour-preserving extraction of the Shadow branch of
+    ``rebuild_synergy_controls`` (issue #7723). Spec ordering matches the
+    original nested-loop construction exactly so resolved binding order is
+    unchanged.
+
+    Args:
+        prefixes: Hand prefixes such as ``["rh"]`` or ``["rh", "lh"]``.
+
+    Returns:
+        Ordered ``(synergy_name, specs)`` pairs for Fist/Index/Pinch.
+    """
+    fist: list[JointSpec] = [
+        (f"{p}_{f}J{j}", 0.0, SHADOW_FIST_MAX)
+        for p in prefixes
+        for f in ("FF", "MF", "RF", "LF")
+        for j in (3, 2, 1)
+    ]
+    index: list[JointSpec] = [
+        (f"{p}_FFJ{j}", 0.0, SHADOW_INDEX_MAX) for p in prefixes for j in (3, 2, 1)
+    ]
+    pinch: list[JointSpec] = []
+    for p in prefixes:
+        pinch.extend((f"{p}_FFJ{j}", 0.0, SHADOW_PINCH_FINGER_MAX) for j in (3, 2, 1))
+        pinch.extend((f"{p}_THJ{j}", 0.0, SHADOW_PINCH_THUMB_MAX) for j in (4, 3, 2, 1))
+    return [
+        ("Fist Curl", fist),
+        ("Index Curl", index),
+        ("Pinch Grip", pinch),
+    ]
+
+
+def allegro_synergy_specs(joint_names: list[str]) -> list[tuple[str, list[JointSpec]]]:
+    """Build the ordered Allegro-hand synergy specs from model joint names.
+
+    Behaviour-preserving extraction of the Allegro branch of
+    ``rebuild_synergy_controls`` (issue #7723). Matching is substring-based
+    against the lowercased joint name, preserving the original iteration order
+    over ``joint_names``.
+
+    Args:
+        joint_names: All joint names enumerated from the loaded model.
+
+    Returns:
+        Ordered ``(synergy_name, specs)`` pairs for Fist/Index/Pinch.
+    """
+    fist_targets = (
+        "ffj1",
+        "ffj2",
+        "ffj3",
+        "mfj1",
+        "mfj2",
+        "mfj3",
+        "rfj1",
+        "rfj2",
+        "rfj3",
+    )
+    index_targets = ("ffj1", "ffj2", "ffj3")
+    pinch_thumb_targets = ("thj1", "thj2", "thj3")
+
+    fist: list[JointSpec] = [
+        (n, 0.0, ALLEGRO_FIST_MAX)
+        for n in joint_names
+        if any(t in n.lower() for t in fist_targets)
+    ]
+    index: list[JointSpec] = [
+        (n, 0.0, ALLEGRO_INDEX_MAX)
+        for n in joint_names
+        if any(t in n.lower() for t in index_targets)
+    ]
+    pinch: list[JointSpec] = []
+    for n in joint_names:
+        if any(t in n.lower() for t in index_targets):
+            pinch.append((n, 0.0, ALLEGRO_PINCH_MAX))
+        if any(t in n.lower() for t in pinch_thumb_targets):
+            pinch.append((n, 0.0, ALLEGRO_PINCH_MAX))
+    return [
+        ("Fist Curl", fist),
+        ("Index Curl", index),
+        ("Pinch Grip", pinch),
+    ]
+
+
+def resolve_hand_prefixes(model_name: str, *, is_shadow: bool) -> list[str]:
+    """Resolve the joint-name prefixes for a hand model selection.
+
+    Behaviour-preserving extraction of the prefix logic in
+    ``rebuild_synergy_controls`` (issue #7723).
+
+    Args:
+        model_name: Lowercased hand-model display string.
+        is_shadow: Whether the selected model is a Shadow hand.
+
+    Returns:
+        Ordered list of prefixes (e.g. ``["rh", "lh"]``).
+    """
+    if "both" in model_name:
+        return ["rh", "lh"]
+    if "right" in model_name:
+        return ["rh" if is_shadow else "right"]
+    if "left" in model_name:
+        return ["lh" if is_shadow else "left"]
+    return []
+
+
+def build_default_synergies(
+    model_name: str,
+    resolve: Callable[[str], int | None],
+    allegro_joint_names: list[str],
+) -> list[Synergy]:
+    """Build the default synergy list for a hand model (data-driven).
+
+    Single entry point that replaces the CC-48 branch matrix in
+    ``rebuild_synergy_controls`` (issue #7723). Pure: it depends only on the
+    model name, a qpos resolver, and the enumerated joint names, so it is
+    unit-testable without a live Qt tab.
+
+    Args:
+        model_name: Lowercased hand-model display string.
+        resolve: Callable mapping a joint name to a qpos address (or ``None``).
+        allegro_joint_names: Joint names from the model (only used for Allegro).
+
+    Returns:
+        Ordered list of resolvable :class:`Synergy` objects.
+    """
+    is_shadow = "shadow" in model_name
+    is_allegro = "allegro" in model_name
+
+    if is_shadow:
+        prefixes = resolve_hand_prefixes(model_name, is_shadow=True)
+        spec_groups = shadow_synergy_specs(prefixes)
+    elif is_allegro:
+        spec_groups = allegro_synergy_specs(allegro_joint_names)
+    else:
+        return []
+
+    synergies: list[Synergy] = []
+    for name, specs in spec_groups:
+        synergy = build_synergy_from_specs(name, specs, resolve)
+        if synergy is not None:
+            synergies.append(synergy)
+    return synergies
