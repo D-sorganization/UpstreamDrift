@@ -356,6 +356,83 @@ def test_mocked_simulate_recovers_known_torque_pattern(
     np.testing.assert_allclose(out.tau[:, 1:], 0.0)
 
 
+def test_mocked_simulate_rejects_theta_actuator_mismatch(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #7725: theta sized for a different joint count must crash early.
+
+    The plant mock reports ``num_actuators() == 19``. Supplying a theta
+    sized for a *different* joint count previously fell back silently to
+    the theta-derived dimension, leaving the actuation port disconnected
+    while ``tau_log`` still recorded nonzero torques (a torque-free rollout
+    reported as ``"success"`` with phantom torques). The corrected
+    behaviour raises a descriptive ``ValueError`` so no SimOut with phantom
+    torques is ever produced.
+    """
+    # 7 joints * 7 coeffs = 49, but the plant has 19 actuators -> mismatch.
+    theta = np.zeros(7 * COEFFS_PER_JOINT)
+    with pytest.raises(ValueError, match="actuator"):
+        simulate_with_coefficients(
+            theta,
+            options=SimOptions(simulation_time_s=0.01, sample_rate_hz=1000.0),
+        )
+
+
+def test_mocked_simulate_advance_to_failure_reports_failed(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #7727/#7729: a diverging ``AdvanceTo`` yields a logged 'failed'.
+
+    When the Drake integrator raises :class:`RuntimeError` (solver
+    divergence), the rollout must stop, ``solver_status`` must be
+    ``"failed"``, the traceback must be logged, and ``metadata['error']``
+    must carry the failure repr. The success-only finiteness postcondition
+    must NOT fire on the failed path.
+    """
+    simulator = _mocked_pydrake["simulator"]
+    simulator.AdvanceTo.side_effect = RuntimeError("integrator diverged: dt underflow")
+
+    n_joints = 19  # matches the plant mock's num_actuators
+    theta = np.linspace(-0.1, 0.1, n_joints * COEFFS_PER_JOINT)
+
+    out = simulate_with_coefficients(
+        theta,
+        options=SimOptions(simulation_time_s=0.01, sample_rate_hz=1000.0),
+    )
+
+    assert out.solver_status == "failed"
+    assert "error" in out.metadata
+    assert "integrator diverged" in out.metadata["error"]
+    # The success-only finiteness postcondition must not have fired: the
+    # first step (t=0) was recorded, later steps remain NaN. q/qd are not
+    # claimed finite on the failed path.
+    assert not np.all(np.isfinite(out.q))
+
+
+def test_mocked_simulate_advance_to_value_error_propagates(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #7727: non-solver programming errors must propagate, not be hidden.
+
+    Only :class:`RuntimeError` (Drake solver divergence) is relabelled
+    ``"failed"``. A different exception type raised inside the rollout
+    (e.g. a programming bug surfacing as ``ValueError``) must propagate so
+    it is reported as the real defect rather than being swallowed into a
+    generic physics 'solver failure' with no traceback.
+    """
+    simulator = _mocked_pydrake["simulator"]
+    simulator.AdvanceTo.side_effect = ValueError("not a solver-divergence error")
+
+    n_joints = 19
+    theta = np.linspace(-0.1, 0.1, n_joints * COEFFS_PER_JOINT)
+
+    with pytest.raises(ValueError, match="not a solver-divergence error"):
+        simulate_with_coefficients(
+            theta,
+            options=SimOptions(simulation_time_s=0.01, sample_rate_hz=1000.0),
+        )
+
+
 # ---------------------------------------------------------------------------
 # 4. Live-pydrake integration tests (skipped when pydrake unavailable).
 # ---------------------------------------------------------------------------
