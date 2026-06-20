@@ -11,6 +11,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.research.multi_robot.coordination import CooperativeManipulation
 from src.shared.python.math_utils.quaternion import (
     SLERP_LERP_FALLBACK_THRESHOLD,
@@ -20,6 +22,8 @@ from src.shared.python.spatial_algebra.pose6dof.rotations import (
     slerp as rotations_slerp,
 )
 from src.unreal_integration.skeleton_mapper import SkeletonMapper
+
+pytestmark = pytest.mark.unit
 
 
 def _angle_quat(angle: float) -> np.ndarray:

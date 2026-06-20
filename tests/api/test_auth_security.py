@@ -1,11 +1,14 @@
 """Tests for authentication and authorization security utilities."""
 
+import logging
 import os
 from datetime import timedelta
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
+
+pytestmark = pytest.mark.unit
 
 # Patch environment variable before importing security module
 os.environ["GOLF_API_SECRET_KEY"] = (
@@ -42,6 +45,37 @@ def test_password_hashing() -> None:
     assert hashed != password
     assert security_manager.verify_password(password, hashed)
     assert not security_manager.verify_password("wrong_password", hashed)
+
+
+def test_verify_password_logs_malformed_stored_hash_without_secret(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Malformed stored password hashes fail closed with diagnostic context."""
+    password = "my_secure_password"  # nosec B105 - test fixture, not a real credential
+    malformed_hash = "not-a-bcrypt-hash"
+
+    with caplog.at_level(logging.WARNING, logger="src.api.auth.security"):
+        assert not security_manager.verify_password(password, malformed_hash)
+
+    [record] = caplog.records
+    assert record.exc_info is not None
+    assert record.operation == "password"
+    assert record.exception_type == "ValueError"
+    assert "Malformed stored bcrypt hash during password verification" in record.message
+    assert password not in record.message
+    assert malformed_hash not in record.message
+
+
+def test_verify_password_wrong_password_stays_silent(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Normal credential mismatch is not noisy."""
+    hashed = security_manager.hash_password("expected-password")
+
+    with caplog.at_level(logging.WARNING, logger="src.api.auth.security"):
+        assert not security_manager.verify_password("wrong-password", hashed)
+
+    assert caplog.records == []
 
 
 def test_create_access_token() -> None:
@@ -104,6 +138,37 @@ def test_generate_and_verify_api_key() -> None:
     hashed = security_manager.hash_api_key(api_key)
     assert security_manager.verify_api_key(api_key, hashed)
     assert not security_manager.verify_api_key("gms_wrong_key", hashed)
+
+
+def test_verify_api_key_logs_malformed_stored_hash_without_secret(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Malformed stored API-key hashes fail closed with diagnostic context."""
+    api_key = "gms_test_api_key"
+    malformed_hash = "not-a-bcrypt-hash"
+
+    with caplog.at_level(logging.WARNING, logger="src.api.auth.security"):
+        assert not security_manager.verify_api_key(api_key, malformed_hash)
+
+    [record] = caplog.records
+    assert record.exc_info is not None
+    assert record.operation == "api_key"
+    assert record.exception_type == "ValueError"
+    assert "Malformed stored bcrypt hash during API key verification" in record.message
+    assert api_key not in record.message
+    assert malformed_hash not in record.message
+
+
+def test_verify_api_key_wrong_key_stays_silent(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Normal API-key mismatch is not noisy."""
+    hashed = security_manager.hash_api_key("gms_expected_key")
+
+    with caplog.at_level(logging.WARNING, logger="src.api.auth.security"):
+        assert not security_manager.verify_api_key("gms_wrong_key", hashed)
+
+    assert caplog.records == []
 
 
 def test_role_checker() -> None:

@@ -234,6 +234,49 @@ class TestSafetyMonitorComputeSafe:
         with pytest.raises(ValueError, match="state must be provided"):
             m.compute_safe_command(cmd, None)  # type: ignore[arg-type]
 
+    @pytest.mark.unit
+    def test_velocity_clip_not_reachable_by_speed_override_alone(self) -> None:
+        """Issue #7694: with the default (1.0) speed override, no scaling is
+        applied, so an over-speed VELOCITY command must still be hard-clipped to
+        ``max_joint_velocity`` by ``compute_safe_command``.
+
+        This pins the dedicated clip step (not the speed-override branch): the
+        request is well above the limit on every joint and the override is left
+        at its default, so only the clip can bring it back in bounds.
+        """
+        m = SafetyMonitor(_cfg())
+        assert m._speed_override == 1.0  # default: override scaling is a no-op
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([5.0, -7.5, 9.0]),
+        )
+        safe = m.compute_safe_command(cmd, _state())
+        assert safe.velocity_targets is not None
+        # Hard limit is 2.0 rad/s per joint (see ``_cfg``).
+        np.testing.assert_array_equal(safe.velocity_targets, np.array([2.0, -2.0, 2.0]))
+        assert np.all(np.abs(safe.velocity_targets) <= m.limits.max_joint_velocity)
+
+    @pytest.mark.unit
+    def test_emergency_stop_zeroes_pure_torque_command(self) -> None:
+        """Issue #7694 (suggested fix 3): a pure TORQUE-mode command issued while
+        E-stopped, after the speed override was explicitly raised to 1.0, must be
+        neutralised to all-zero torque.
+
+        ``set_speed_override(1.0)`` is a no-op under E-stop (it is clamped back to
+        0.0), so the all-zero result is enforced by the E-stop branch itself, not
+        by speed scaling. This is the exact unsafe path the issue calls out.
+        """
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.set_speed_override(1.0)
+        assert m._speed_override == 0.0  # override cannot be raised under E-stop
+        cmd = ControlCommand.torque_command(0.0, np.array([40.0, -30.0, 12.0]))
+        state = _state(joint_positions=np.array([0.1, 0.2, 0.3]))
+        safe = m.compute_safe_command(cmd, state)
+        assert safe.torque_commands is not None
+        np.testing.assert_array_equal(safe.torque_commands, np.zeros(3))
+
 
 class TestSafetyMonitorMisc:
     def test_stopping_distance(self) -> None:

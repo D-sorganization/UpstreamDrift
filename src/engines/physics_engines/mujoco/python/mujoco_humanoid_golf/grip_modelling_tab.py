@@ -31,7 +31,7 @@ from src.shared.python.physics.grip_contact_model import (
 from ._grip_modelling_synergies import (
     AddSynergyDialog,
     Synergy,
-    SynergyJointBinding,
+    build_default_synergies,
     get_descriptive_joint_name,
 )
 
@@ -480,106 +480,30 @@ class GripModellingTab(QtWidgets.QWidget):
             return
 
         model_name = self.combo_hand.currentText().lower()
-        is_shadow = "shadow" in model_name
-        is_allegro = "allegro" in model_name
-
-        defaults: list[Synergy] = []
-        prefixes: list[str] = []
-
-        if "both" in model_name:
-            prefixes = ["rh", "lh"]
-        elif "right" in model_name:
-            prefixes = ["rh" if is_shadow else "right"]
-        elif "left" in model_name:
-            prefixes = ["lh" if is_shadow else "left"]
-
-        if is_shadow:
-            fist_bindings = []
-            for p in prefixes:
-                for f in ["FF", "MF", "RF", "LF"]:
-                    for j in [3, 2, 1]:
-                        jnt_name = f"{p}_{f}J{j}"
-                        q_adr = self._find_qpos_adr_by_name(jnt_name)
-                        if q_adr is not None:
-                            fist_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.4))
-            if fist_bindings:
-                defaults.append(Synergy("Fist Curl", fist_bindings))
-
-            index_bindings = []
-            for p in prefixes:
-                for j in [3, 2, 1]:
-                    jnt_name = f"{p}_FFJ{j}"
-                    q_adr = self._find_qpos_adr_by_name(jnt_name)
-                    if q_adr is not None:
-                        index_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.4))
-            if index_bindings:
-                defaults.append(Synergy("Index Curl", index_bindings))
-
-            pinch_bindings = []
-            for p in prefixes:
-                for j in [3, 2, 1]:
-                    q_adr = self._find_qpos_adr_by_name(f"{p}_FFJ{j}")
-                    if q_adr is not None:
-                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
-                for j in [4, 3, 2, 1]:
-                    q_adr = self._find_qpos_adr_by_name(f"{p}_THJ{j}")
-                    if q_adr is not None:
-                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 0.8))
-            if pinch_bindings:
-                defaults.append(Synergy("Pinch Grip", pinch_bindings))
-
-        elif is_allegro:
-            all_joints = []
-            model = self.sim_widget.model
-            for i in range(model.njnt):
-                jnt_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
-                if jnt_name:
-                    all_joints.append(jnt_name)
-
-            fist_bindings = []
-            for jnt_name in all_joints:
-                target_joints = [
-                    "ffj1",
-                    "ffj2",
-                    "ffj3",
-                    "mfj1",
-                    "mfj2",
-                    "mfj3",
-                    "rfj1",
-                    "rfj2",
-                    "rfj3",
-                ]
-                if any(x in jnt_name.lower() for x in target_joints):
-                    q_adr = self._find_qpos_adr_by_name(jnt_name)
-                    if q_adr is not None:
-                        fist_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.5))
-            if fist_bindings:
-                defaults.append(Synergy("Fist Curl", fist_bindings))
-
-            index_bindings = []
-            for jnt_name in all_joints:
-                if any(x in jnt_name.lower() for x in ["ffj1", "ffj2", "ffj3"]):
-                    q_adr = self._find_qpos_adr_by_name(jnt_name)
-                    if q_adr is not None:
-                        index_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.5))
-            if index_bindings:
-                defaults.append(Synergy("Index Curl", index_bindings))
-
-            pinch_bindings = []
-            for jnt_name in all_joints:
-                if any(x in jnt_name.lower() for x in ["ffj1", "ffj2", "ffj3"]):
-                    q_adr = self._find_qpos_adr_by_name(jnt_name)
-                    if q_adr is not None:
-                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
-                if any(x in jnt_name.lower() for x in ["thj1", "thj2", "thj3"]):
-                    q_adr = self._find_qpos_adr_by_name(jnt_name)
-                    if q_adr is not None:
-                        pinch_bindings.append(SynergyJointBinding(q_adr, 0.0, 1.0))
-            if pinch_bindings:
-                defaults.append(Synergy("Pinch Grip", pinch_bindings))
+        defaults = build_default_synergies(
+            model_name,
+            self._find_qpos_adr_by_name,
+            self._enumerate_joint_names(),
+        )
 
         for syn in defaults:
             self.add_synergy_slider(syn)
+
+    def _enumerate_joint_names(self) -> list[str]:
+        """Return the named joints of the loaded model in index order.
+
+        Used by Allegro synergy generation; returns an empty list when no
+        model is loaded.
+        """
+        model = self.sim_widget.model
+        if model is None:
+            return []
+        names: list[str] = []
+        for i in range(model.njnt):
+            jnt_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)
+            if jnt_name:
+                names.append(jnt_name)
+        return names
 
     def _on_add_custom_synergy(self) -> None:
         """Open the dialog to define a custom synergy slider."""

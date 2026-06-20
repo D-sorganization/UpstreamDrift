@@ -6,11 +6,14 @@ implementation so the optimization is provably numerically identical.
 """
 
 import numpy as np
+import pytest
 
 from src.shared.python.optimization._swing_kinematics import (
     compute_clubhead_trajectory,
 )
 from src.shared.python.optimization._swing_models import ClubModel, GolferModel
+
+pytestmark = pytest.mark.unit
 
 
 def _reference_clubhead_trajectory(

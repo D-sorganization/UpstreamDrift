@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.464                                            |
+| **Spec Version**        | 1.0.465                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,10 +70,34 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Added isolated transition hazard-rule coverage for issue
+  #7715: the MDP transition tests now pin hazard penalties and DbC guard
+  behavior directly so policy updates cannot bypass invalid-state validation.
+- **2026-06-20** - Hoisted OpenSim Manager/Integrator construction out of the
+  perturbation per-step loop for issue #7713, preserving analyzer behavior
+  while avoiding repeated runtime setup on every simulated step.
+- **2026-06-20** - Covered chat WebSocket failure paths for issue #7721:
+  `refresh_models` and `index_codebase` tests now drive provider and
+  codemap rebuild exceptions, assert sanitized client error frames, preserve
+  server-side traceback logging, and keep the socket usable after a model
+  refresh failure.
 - **2026-06-20** - Deduplicated the simulation WebSocket `set_speed`
   handler for issue #7719: runtime speed changes now route through one
   canonical branch for validation and state updates, with focused WebSocket
   regression coverage preserving accepted payload behavior.
+- **2026-06-20** - Removed the dead duplicate Drake visualization monolith
+  for issue #7709: Drake visualization now relies on the active maintained
+  implementation instead of the stale `drake_visualization_mixin.py` copy,
+  with obsolete unit coverage and suite-marker baseline entries removed.
+- **2026-06-20** - Repaired Drake cross-engine theta sizing for issue #7725:
+  the Drake equivalence smoke gate now derives its zero-theta vector length
+  from the finalized Drake plant actuator count, matching the stricter
+  production contract that rejects mismatched nonzero coefficient vectors
+  instead of silently logging phantom torques.
+- **2026-06-20** - Documented MuJoCo humanoid golf grip modelling for issues
+  #7723/#7724: grip synergy construction and contact extraction now live in a
+  focused helper module with regression coverage for finite contact geometry,
+  deterministic synergy transforms, and the leaner GUI tab integration.
 - **2026-06-20** - Vectorized clubhead trajectory assembly for issue #7714:
   `compute_clubhead_trajectory()` now computes the trunk, shoulder, and wrist
   angle path with NumPy array operations instead of a per-frame Python loop,
@@ -88,6 +112,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   while spatial algebra rotations, cooperative manipulation, and Unreal
   skeleton mapping delegate to the canonical implementation with focused parity
   coverage across the threshold boundary.
+- **2026-06-19** - Extended `SafetyMonitor` regression coverage for issue
+  #7694: velocity-limit tests now pin unsafe target rejection and safe-command
+  clipping, and emergency-stop torque regressions assert pure torque commands
+  remain unsafe while emergency stop is active.
 - **2026-06-19** - Added realtime abort coverage for issue #7697:
   control-loop failure escalation tests now exercise the emergency
   zero-torque fallback when command sends raise, asserting the loop still
@@ -132,12 +160,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   scientific runtime failures while keeping caller-contract errors classified
   as invalid input.
 - **2026-06-19** - Hardened auth and signal-toolkit validation for issues
-  #7698, #7699, #7702, and #7703: access-token creation now validates required
+  #7698, #7699, #7700, #7702, and #7703: access-token creation now validates required
   subject claims even when DbC decorators are disabled, bcrypt-backed password
   and API-key hashing rejects inputs above bcrypt's 72-byte UTF-8 limit before
   truncation can occur, password/API-key verification fails closed for
-  overlong secrets, and public `signal_toolkit.calculus`/`noise` boundaries use
-  explicit `TypeError` guards instead of stripped `assert` statements.
+  overlong secrets, malformed stored bcrypt hashes are logged with traceback
+  context before verification returns `False`, and public
+  `signal_toolkit.calculus`/`noise` boundaries use explicit `TypeError` guards
+  instead of stripped `assert` statements.
 - **2026-06-18** - Hardened `SafetyMonitor` command contracts for issues
   #7683, #7684, and #7692: command preflight now rejects velocity targets over
   `max_joint_velocity` and any command while emergency stop is active, safe
@@ -1812,7 +1842,12 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-20 | 1.0.465 | Added isolated transition hazard-rule coverage for issue #7715. The MDP transition tests now pin hazard penalties and DbC guard behavior directly so policy updates cannot bypass invalid-state validation. |
+| 2026-06-20 | 1.0.465 | Hoisted OpenSim Manager/Integrator construction out of the perturbation per-step loop for issue #7713, preserving analyzer behavior while avoiding repeated runtime setup on every simulated step. |
+| 2026-06-20 | 1.0.465 | Added chat WebSocket failure-path coverage for issue #7721. `tests/unit/api/test_chat_ws.py` now exercises `refresh_models` provider exceptions and `index_codebase` codemap rebuild exceptions, asserting sanitized client-facing error frames, server-side traceback logging, and continued socket usability after a model refresh failure. |
 | 2026-06-20 | 1.0.464 | Deduplicated the simulation WebSocket `set_speed` handler for issue #7719. Runtime speed changes now route through one canonical validation and state-update branch, and focused WebSocket regression coverage preserves accepted payload behavior while preventing branch drift in future command handling changes. |
+| 2026-06-20 | 1.0.464 | Repaired Drake cross-engine theta sizing for issue #7725. `tests/motion_matching/test_cross_engine_equivalence.py` now derives Drake's gravity-only zero-theta vector from the finalized plant actuator count before invoking `simulate_with_coefficients`, preserving the production guard that rejects mismatched nonzero theta vectors instead of silently disconnecting actuation and logging phantom torques. |
+| 2026-06-20 | 1.0.464 | Documented MuJoCo humanoid golf grip modelling for issues #7723/#7724. Grip synergy construction and contact extraction now live in a focused helper module with regression coverage for finite contact geometry, deterministic synergy transforms, and the leaner GUI tab integration. |
 | 2026-06-20 | 1.0.463 | Consolidated quaternion SLERP behavior for issue #7707. The canonical `math_utils.quaternion.slerp` implementation now owns the named nlerp fallback threshold, while spatial algebra rotations, cooperative manipulation, and Unreal skeleton mapping delegate to it with focused parity tests covering sibling behavior and the threshold boundary. |
 | 2026-06-20 | 1.0.462 | Reconciled cross-engine torque polynomial coefficient ordering for issue #7688 after the mainline dependency/security refresh. The cross-engine parity spec documents the canonical flat theta block as `[A, B, C, D, E, F, G]` where column `k` multiplies `t^k`; MuJoCo's polynomial torque driver, callback Horner chain, analytical Jacobian monomials, and shared theta validator documentation follow the same lowest-power-first convention as Drake, Pinocchio, and OpenSim. The cross-engine equivalence smoke gate feeds a nonzero theta through all four pure evaluator helpers to catch future ordering drift. |
 | 2026-06-20 | 1.0.461 | Restored standalone Sidekick package frontend builds by pinning `@vitejs/plugin-react` to 5.2.0, whose peer range includes the locked Vite 7.x runtime. This avoids plugin-react 6.x importing Vite 8-only internals during `npm run build` in `package-standalone-sidekick.yml`. |
@@ -1820,6 +1855,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-20 | 1.0.459 | Deduplicated golf GUI camera pan axes after the DRY duplication ratchet surfaced repeated target-plane basis construction in `golf_camera_system.py`. Mouse pan and pan inertia now share `_camera_pan_axes()` for the camera right/up vectors, preserving the existing orbit/fly pan behavior while removing the duplicated production logic fingerprint. |
 | 2026-06-20 | 1.0.458 | Hardened shared CORS credential handling for issue #7740. `add_cors_middleware()` now rejects wildcard origins when `allow_credentials=True`, including origins resolved from `CORS_ORIGINS`, so credentialed responses cannot be paired with `*` origins while non-credentialed wildcard CORS remains supported. Focused unit tests cover explicit wildcard rejection, environment-origin wildcard rejection, explicit-origin credentials, and non-credentialed wildcard behavior. |
 | 2026-06-20 | 1.0.457 | Corrected Drake theta contract coverage for issue #7726. `tests/parity/test_simulate_contract_drake.py` now replaces the dead optional-validator module probe with direct coverage that `validate_theta(..., bounds=DEFAULT_THETA_BOUND_TABLE)` rejects a `1e9` coefficient, while the Drake simulate path remains documented and tested as calling validation with `bounds=None` so the same large-but-finite coefficient can produce finite output or a failed solver status. |
+| 2026-06-20 | 1.0.462 | Extended `SafetyMonitor` regression coverage for issue #7694. Velocity-limit tests now pin unsafe target rejection and safe-command clipping, and emergency-stop torque regressions assert pure torque commands remain unsafe while emergency stop is active. |
 | 2026-06-19 | 1.0.456 | Hardened Data Explorer numeric contracts for issue #7732. `dataset_stats()` now ignores textual non-finite cells such as `inf`, `-inf`, `nan`, and `Infinity` so one stray value cannot corrupt min/max/mean or serialize invalid JSON tokens, and `_row_matches_filter()` rejects non-finite numeric row/filter operands before applying comparison operators. Focused API route tests cover finite-only aggregation, strict JSON response behavior, non-finite filter rejection, and unchanged finite comparisons. |
 | 2026-06-19 | 1.0.455 | Hardened common engine state validation for issue #7705. `StateManager` and `ForceAccumulator` now enforce positive dimensions, positive time steps, and non-empty force-source names through body-level guards that remain active when Python optimization or `ContractLevel.OFF` disables decorator-based DbC checks. Focused optimized-runtime regressions run subprocesses under `python -O` to pin the always-on contract while preserving the existing decorator-backed precondition behavior. |
 | 2026-06-19 | 1.0.454 | Hardened realtime controller failure abort handling for issue #7685. `_control_loop()` now clears `is_running` from a `finally` cleanup path even when the loop exits through a raised exception, and the emergency zero-torque fallback used after consecutive failures is best-effort with `logger.exception` telemetry if the safety send itself fails. Focused regression coverage drives `_send_command` to fail during both normal command dispatch and abort zero-torque dispatch, then asserts the loop terminates, `aborted_on_failure` stays true, and the zero-torque send failure is logged. |
@@ -2232,3 +2268,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### Module Map
 
 - Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
+
+### 2026-06-21
+
+- **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
