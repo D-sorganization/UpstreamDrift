@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Added feature-parity tile-id uniqueness validation for
+  issue #7730: registry loading now rejects duplicate launcher tile claims
+  across entries while preserving distinct tile coverage, with focused loader
+  tests for duplicate and unique tile lists.
 - **2026-06-20** - Consolidated quaternion SLERP behavior for issue #7707:
   `math_utils.quaternion.slerp` now owns the shared nlerp fallback threshold,
   while spatial algebra rotations, cooperative manipulation, and Unreal
