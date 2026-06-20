@@ -11,6 +11,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.research.multi_robot.coordination import CooperativeManipulation
 from src.shared.python.math_utils.quaternion import (
     SLERP_LERP_FALLBACK_THRESHOLD,
