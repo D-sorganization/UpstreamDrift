@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.463                                            |
+| **Spec Version**        | 1.0.464                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Vectorized clubhead trajectory assembly for issue #7714:
+  `compute_clubhead_trajectory()` now computes the trunk, shoulder, and wrist
+  angle path with NumPy array operations instead of a per-frame Python loop,
+  while parity tests pin the vectorized positions and velocities to the
+  original loop contract, including missing-joint defaults.
 - **2026-06-20** - Added feature-parity tile-id uniqueness validation for
   issue #7730: registry loading now rejects duplicate launcher tile claims
   across entries while preserving distinct tile coverage, with focused loader
