@@ -191,6 +191,46 @@ class TestLoaderContracts:
         with pytest.raises(ValueError, match="non-empty"):
             FeatureParityEntry.from_dict("", {"title": "X", "status": "parity"})
 
+    def test_rejects_non_dict_data_branch(self) -> None:
+        with pytest.raises(TypeError, match="must be an object"):
+            FeatureParityEntry.from_dict("x.y", ["not", "a", "dict"])  # type: ignore[arg-type]
+
+    def test_rejects_non_gap_negative_issue_branch(self) -> None:
+        with pytest.raises(ValueError, match="invalid issue number"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "issue": -1}
+            )
+
+    def test_rejects_non_gap_zero_issue_branch(self) -> None:
+        with pytest.raises(ValueError, match="invalid issue number"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "issue": 0}
+            )
+
+    def test_rejects_empty_path_field_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a non-empty string or null"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "pyqt": ""}
+            )
+
+    def test_rejects_non_list_tiles_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": "t1"}
+            )
+
+    def test_rejects_non_string_tile_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": [123]}
+            )
+
+    def test_rejects_empty_string_tile_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": [""]}
+            )
+
     def test_valid_gap_entry_loads(self) -> None:
         entry = FeatureParityEntry.from_dict(
             "a.b",
