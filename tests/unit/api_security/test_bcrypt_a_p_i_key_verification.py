@@ -16,6 +16,8 @@ import pytest
 # Python 3.10 compatibility: datetime.UTC is only available in 3.11+
 UTC = timezone.utc  # noqa: UP017
 
+pytestmark = pytest.mark.unit
+
 # Check if sqlalchemy is available
 try:
     import sqlalchemy  # noqa: F401
@@ -81,6 +83,28 @@ class TestBcryptAPIKeyVerification:
         assert not bcrypt_lib.checkpw(
             wrong_key.encode("utf-8"), key_hash.encode("utf-8")
         )
+
+    @requires_bcrypt
+    def test_verify_api_key_malformed_hash_logs(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A corrupt stored key hash must leave a log trace (issue #7700)."""
+        import logging
+
+        from src.api.auth.security import SecurityManager
+
+        manager = SecurityManager(secret_key="test-secret-key-32chars-long!!")
+        with caplog.at_level(logging.WARNING, logger="src.api.auth.security"):
+            # "not-a-bcrypt-hash" makes bcrypt.checkpw raise ValueError, which
+            # the verify path swallows into False.
+            result = manager.verify_api_key("gms_some_key", "not-a-bcrypt-hash")
+
+        assert result is False
+        assert any(
+            "API key verification failed" in record.getMessage()
+            and record.levelno >= logging.WARNING
+            for record in caplog.records
+        ), "expected a logged trace for the malformed stored key hash"
 
     @requires_bcrypt
     def test_api_key_constant_time_comparison(self) -> None:
