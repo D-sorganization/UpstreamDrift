@@ -26,6 +26,7 @@ from fastapi.testclient import TestClient
 from src.api.routes import simulation_ws
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
+    _apply_set_speed,
     _compute_real_time_sleep_delay,
     _engine_analysis_to_dict,
     _engine_state_to_dict,
@@ -282,6 +283,34 @@ class TestRealTimeSleepDelay:
 
     def test_never_returns_negative_delay(self) -> None:
         assert _compute_real_time_sleep_delay(0.002, 2.0, 0.01) == pytest.approx(0.0)
+
+
+class TestApplySetSpeed:
+    """_apply_set_speed is the single source of set_speed mutation (issue #7719)."""
+
+    def test_clamps_and_propagates_valid_factor(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 1.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": 4.5})
+
+        assert config["speed_factor"] == pytest.approx(4.5)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(4.5)
+        )
+
+    def test_invalid_factor_falls_back_to_default(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 2.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": "not-a-number"})
+
+        assert config["speed_factor"] == pytest.approx(1.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(1.0)
+        )
 
 
 class TestClientCommandHandling:

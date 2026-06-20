@@ -137,7 +137,7 @@ def _is_numeric_sequence(value: object) -> bool:
 # start path already validates through that model, but ``_apply_initial_state``
 # must not assume it was reached only via the validated path. Reusing the same
 # constant keeps the two layers consistent (DRY).
-_MAX_INITIAL_STATE_LEN = MAX_STATE_VECTOR_LEN
+_MAX_INITIAL_STATE_LEN = cast("int", MAX_STATE_VECTOR_LEN)
 
 
 def _max_initial_state_len(engine: object) -> int:
@@ -248,6 +248,8 @@ def _to_json_list(arr: object) -> list[float] | None:
         return None
     if isinstance(arr, np.ndarray):
         return cast("list[float]", arr.tolist())
+    if not isinstance(arr, Iterable):
+        return None
     try:
         return list(cast("Iterable[float]", arr))
     except TypeError:
@@ -408,6 +410,34 @@ async def _load_simulation_engine(
         return None
 
 
+def _apply_set_speed(
+    websocket: WebSocket,
+    config: dict[str, Any],
+    msg: dict[str, Any],
+) -> None:
+    """Apply a ``set_speed`` command, clamping and propagating the factor.
+
+    Resolves the requested speed factor via :func:`_clamp_speed_factor`,
+    writes it to ``config['speed_factor']``, and mirrors it onto the
+    simulation service stats when available. Shared by both the running
+    (:func:`_handle_client_commands`) and paused
+    (:func:`_wait_for_resume_or_stop`) command handlers so the two paths
+    cannot diverge.
+
+    Args:
+        websocket: The active WebSocket connection.
+        config: Simulation configuration dict (mutated in place).
+        msg: The decoded client message; ``speed_factor`` is read from it.
+    """
+    speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
+    config["speed_factor"] = speed_factor
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    stats = getattr(simulation_service, "stats", None)
+    if stats is not None:
+        stats.speed_factor = speed_factor
+
+
 async def _handle_client_commands(
     websocket: WebSocket,
     config: dict[str, Any],
@@ -425,15 +455,7 @@ async def _handle_client_commands(
         if action == "pause":
             return "pause"
         if action == "set_speed":
-            speed_factor = _clamp_speed_factor(
-                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
-            )
-            config["speed_factor"] = speed_factor
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = speed_factor
+            _apply_set_speed(websocket, config, msg)
     except TimeoutError:
         pass  # No message, continue simulation
     except json.JSONDecodeError:
@@ -474,15 +496,7 @@ async def _wait_for_resume_or_stop(
         if action == "stop":
             return True
         if action == "set_speed":
-            speed_factor = _clamp_speed_factor(
-                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
-            )
-            config["speed_factor"] = speed_factor
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = speed_factor
+            _apply_set_speed(websocket, config, msg)
 
 
 async def _run_simulation_loop(
