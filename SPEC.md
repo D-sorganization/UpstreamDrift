@@ -75,6 +75,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   angle path with NumPy array operations instead of a per-frame Python loop,
   while parity tests pin the vectorized positions and velocities to the
   original loop contract, including missing-joint defaults.
+- **2026-06-20** - Added feature-parity tile-id uniqueness validation for
+  issue #7730: registry loading now rejects duplicate launcher tile claims
+  across entries while preserving distinct tile coverage, with focused loader
+  tests for duplicate and unique tile lists.
 - **2026-06-20** - Consolidated quaternion SLERP behavior for issue #7707:
   `math_utils.quaternion.slerp` now owns the shared nlerp fallback threshold,
   while spatial algebra rotations, cooperative manipulation, and Unreal
