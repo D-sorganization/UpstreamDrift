@@ -15,6 +15,8 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
+
 PARAMETER_NAMES: tuple[str, ...] = (
     "upper_length_m",
     "upper_mass_kg",
@@ -32,7 +34,7 @@ DEFAULT_PARAMETER_VECTOR: NDArray[np.float64] = np.array(
 
 _STATE_SIZE = 2
 _PARAMETER_SIZE = len(PARAMETER_NAMES)
-_GRAVITY_M_S2 = 9.80665
+_GRAVITY_M_S2 = float(GRAVITY_M_S2)
 _DAMPING = np.array([0.05, 0.02], dtype=np.float64)
 
 GradientMode = Literal["forward", "reverse"]
