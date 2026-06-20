@@ -26,6 +26,7 @@ from fastapi.testclient import TestClient
 from src.api.routes import simulation_ws
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
+    _apply_set_speed,
     _compute_real_time_sleep_delay,
     _engine_analysis_to_dict,
     _engine_state_to_dict,
@@ -334,6 +335,58 @@ class TestClientCommandHandling:
             websocket.app.state.simulation_service.stats.speed_factor
             == pytest.approx(3.0)
         )
+
+
+class TestApplySetSpeed:
+    """_apply_set_speed must clamp, update config, and mirror onto live stats (issue #7719)."""
+
+    def test_updates_config_and_mirrors_stats(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 1.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": 4.5})
+
+        assert config["speed_factor"] == pytest.approx(4.5)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(4.5)
+        )
+
+    def test_clamps_invalid_speed_to_default(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 2.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": float("nan")})
+
+        # Non-finite value is clamped to the default factor (1.0).
+        assert config["speed_factor"] == pytest.approx(1.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(1.0)
+        )
+
+    def test_defaults_when_speed_factor_absent(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=3.0)
+        config: dict[str, Any] = {}
+
+        _apply_set_speed(websocket, config, {"action": "set_speed"})
+
+        assert config["speed_factor"] == pytest.approx(1.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(1.0)
+        )
+
+    def test_no_op_on_stats_when_service_chain_absent(self) -> None:
+        # No speed_factor passed to _WebSocket -> no simulation_service/stats.
+        websocket: Any = _WebSocket()
+        config: dict[str, Any] = {"speed_factor": 1.0}
+
+        # Must not raise even though the stats chain is unreachable.
+        _apply_set_speed(websocket, config, {"speed_factor": 2.0})
+
+        assert config["speed_factor"] == pytest.approx(2.0)
+        assert getattr(websocket.app.state, "simulation_service", None) is None
 
 
 class _FailingEngine:

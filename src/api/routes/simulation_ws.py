@@ -45,6 +45,29 @@ def _clamp_speed_factor(raw: object) -> float:
     return value
 
 
+def _apply_set_speed(
+    websocket: WebSocket, config: dict[str, Any], msg: dict[str, Any]
+) -> None:
+    """Apply a set_speed command: clamp the factor, update config, and mirror onto live stats.
+
+    Args:
+        websocket: The active WebSocket connection (source of live stats).
+        config: Simulation configuration dict, updated in place.
+        msg: The decoded client message containing an optional ``speed_factor``.
+
+    Postcondition:
+        ``config["speed_factor"]`` holds a clamped, positive finite float, and
+        any reachable ``simulation_service.stats.speed_factor`` mirrors it.
+    """
+    speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
+    config["speed_factor"] = speed_factor
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    stats = getattr(simulation_service, "stats", None)
+    if stats is not None:
+        stats.speed_factor = speed_factor
+
+
 _MAX_WS_DURATION = 3600.0  # 1 hour hard cap for WebSocket sessions
 _MAX_WS_TIMESTEP = 1.0  # 1 second upper bound
 _MIN_WS_TIMESTEP = 1e-6  # 1 microsecond lower bound
@@ -424,15 +447,7 @@ async def _handle_client_commands(
         if action == "pause":
             return "pause"
         if action == "set_speed":
-            speed_factor = _clamp_speed_factor(
-                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
-            )
-            config["speed_factor"] = speed_factor
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = speed_factor
+            _apply_set_speed(websocket, config, msg)
     except TimeoutError:
         pass  # No message, continue simulation
     except json.JSONDecodeError:
@@ -473,15 +488,7 @@ async def _wait_for_resume_or_stop(
         if action == "stop":
             return True
         if action == "set_speed":
-            speed_factor = _clamp_speed_factor(
-                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
-            )
-            config["speed_factor"] = speed_factor
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = speed_factor
+            _apply_set_speed(websocket, config, msg)
 
 
 async def _run_simulation_loop(
