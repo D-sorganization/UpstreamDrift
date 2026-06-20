@@ -20,6 +20,8 @@ from src.shared.python.sg_optimizer.mdp.transition import (
     sample_transitions,
 )
 
+pytestmark = pytest.mark.unit
+
 _FAIRWAY = LIE_CODES["fairway"]
 _ROUGH = LIE_CODES["rough"]
 _WATER = LIE_CODES["water"]
