@@ -36,6 +36,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
+import math
 import numpy as np
 
 from src.shared.python.math_utils.quaternion import slerp as _canonical_slerp
@@ -731,8 +732,8 @@ class SkeletonMapper:
         # place (issue #7707).
         if q_a is None:
             raise ValueError("q_a must be provided")
-        q_a = q_a / np.linalg.norm(q_a)
-        q_b = q_b / np.linalg.norm(q_b)
+        q_a = q_a / math.sqrt(np.dot(q_a, q_a))
+        q_b = q_b / math.sqrt(np.dot(q_b, q_b))
         return _canonical_slerp(q_a, q_b, t)
 
     @staticmethod
