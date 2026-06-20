@@ -357,6 +357,7 @@ def test_mocked_simulate_recovers_known_torque_pattern(
     np.testing.assert_allclose(out.tau[:, 1:], 0.0)
 
 
+@pytest.mark.unit
 def test_mocked_simulate_rejects_theta_actuator_mismatch(
     _mocked_pydrake: dict[str, MagicMock],
 ) -> None:
@@ -379,6 +380,7 @@ def test_mocked_simulate_rejects_theta_actuator_mismatch(
         )
 
 
+@pytest.mark.unit
 def test_mocked_simulate_advance_to_failure_reports_failed(
     _mocked_pydrake: dict[str, MagicMock],
 ) -> None:
@@ -410,6 +412,7 @@ def test_mocked_simulate_advance_to_failure_reports_failed(
     assert not np.all(np.isfinite(out.q))
 
 
+@pytest.mark.unit
 def test_mocked_simulate_advance_to_value_error_propagates(
     _mocked_pydrake: dict[str, MagicMock],
 ) -> None:
