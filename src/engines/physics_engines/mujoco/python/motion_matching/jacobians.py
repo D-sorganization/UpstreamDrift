@@ -4,7 +4,8 @@ This module implements ``∂q(t) / ∂θ`` along a polynomial-torque rollout via
 
 1. The closed-form polynomial chain rule ``∂u(t) / ∂θ``: at time ``t`` and
    joint ``j``, the column of ``θ_{j,k}`` in ``∂u_j / ∂θ`` is just the
-   monomial ``t^k``. Every other entry is zero.
+   monomial ``t^k`` (ascending-power layout, column 0 = constant term;
+   canonical cross-engine convention, #7688). Every other entry is zero.
 2. MuJoCo's ``mjd_transitionFD``, which finite-differences the discrete
    state-transition map and returns the Jacobian matrices
 
@@ -73,7 +74,8 @@ def polynomial_du_dtheta(
 
     Layout matches :class:`PolynomialTorqueDriver`: ``θ`` is flattened
     row-major as ``θ.reshape(n_joints, 7)``, where column ``k`` is the
-    coefficient of ``t^k``. Therefore
+    coefficient of ``t^k`` (ascending power; canonical cross-engine
+    convention, #7688). Therefore
 
         ∂u_j / ∂θ_{j', k} = δ_{j, j'} · t^k
 
@@ -163,9 +165,15 @@ def _evaluate_polynomial_ctrl(
     theta: NDArray[np.float64],
     t: float,
 ) -> NDArray[np.float64]:
-    """Evaluate the polynomial torque at scalar time ``t`` (Horner)."""
-    out = theta[:, -1].copy()
-    for k in range(5, -1, -1):
+    """Evaluate the polynomial torque at scalar time ``t`` (Horner).
+
+    Coefficients are ascending in power (column k = t^k), so Horner folds
+    from the highest power (column 6) down to the constant term (column 0),
+    matching :func:`torque_driver._evaluate_polynomial` and the canonical
+    cross-engine convention (#7688).
+    """
+    out = theta[:, -1].astype(np.float64, copy=True)
+    for k in range(theta.shape[1] - 2, -1, -1):
         out = out * t + theta[:, k]
     return out
 
@@ -251,7 +259,7 @@ def compute_qpos_jacobian(  # noqa: C901
             )
         theta_mat = flat.reshape(nu, 7)
     elif flat.shape == (nu, 7):
-        theta_mat = flat.reshape(nu, 7)
+        theta_mat = flat
     else:
         raise ValueError(f"theta must have shape ({nu}, 7); got {flat.shape}")
     if not np.all(np.isfinite(theta_mat)):
@@ -267,7 +275,7 @@ def compute_qpos_jacobian(  # noqa: C901
 
     # S[k] = ∂x / ∂θ at output frame k. Initial state independent of θ.
     out_dq_dtheta = np.zeros((n_out, nv, n_theta), dtype=np.float64)
-    S: NDArray[np.float64] = np.zeros((nx, n_theta), dtype=np.float64)
+    S = np.zeros((nx, n_theta), dtype=np.float64)
     out_dq_dtheta[0] = S[:nv, :]
 
     do_clip = bool(sim_opts.clip_torque_to_ctrlrange)

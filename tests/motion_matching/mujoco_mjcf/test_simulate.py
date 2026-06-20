@@ -111,7 +111,7 @@ def test_zero_torque_falls_under_gravity_full() -> None:
 
     out = simulate_with_coefficients(theta, opts)
 
-    assert out.solver_status == "success"
+    assert out.solver_status == "ok"
     # Grip Z at the end is strictly below grip Z at the start under gravity.
     assert out.grip[-1, 2] < out.grip[0, 2] - 1e-3, (
         f"grip Z did not drop under gravity: "
@@ -130,7 +130,7 @@ def test_zero_torque_falls_under_gravity_upper() -> None:
     nu = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML).nu
     theta = np.zeros(nu * 7, dtype=np.float64)
     out = simulate_with_coefficients(theta, opts)
-    assert out.solver_status == "success"
+    assert out.solver_status == "ok"
     assert out.clubhead[-1, 2] < out.clubhead[0, 2]
 
 
@@ -174,7 +174,9 @@ def test_callback_uninstalls_cleanly_between_runs() -> None:
     nu = mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu
     theta_zero = np.zeros(nu * 7, dtype=np.float64)
     theta_const = np.zeros((nu, 7), dtype=np.float64)
-    theta_const[:, 6] = 5.0  # constant torque on every joint
+    # Constant torque on every joint: column 0 is the t^0 (constant) term
+    # under the ascending-power convention (#7688).
+    theta_const[:, 0] = 5.0
 
     out_zero = simulate_with_coefficients(theta_zero, opts)
     out_const = simulate_with_coefficients(theta_const.flatten(), opts)
@@ -242,8 +244,8 @@ def test_output_shapes_match_canonical_grid() -> None:
     assert out.grip_quat.shape == (n_expected, 4)
     assert out.clubhead.shape == (n_expected, 3)
     assert out.club_quat.shape == (n_expected, 4)
-    assert out.solver_status == "success"
-    assert out.duration_s > 0.0
+    assert out.solver_status == "ok"
+    assert out.wall_clock_s > 0.0
 
 
 def test_output_unit_quaternions() -> None:
@@ -302,7 +304,7 @@ def test_perf_under_100ms_per_swing() -> None:
     out = simulate_with_coefficients(theta, opts)
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
-    assert out.solver_status == "success"
+    assert out.solver_status == "ok"
     # The spec target is <100 ms; allow 300 ms as a stable upper bound.
     assert elapsed_ms < 300.0, (
         f"forward-sim wall-clock {elapsed_ms:.1f} ms exceeds 300 ms "
@@ -323,7 +325,9 @@ def test_polynomial_evaluate_matches_handcomputed() -> None:
     m = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML)
     nu = m.nu
     theta = np.zeros((nu, 7), dtype=np.float64)
-    # First joint: tau_0(t) = 1 + 2*t + 3*t^2 + 4*t^3 + 5*t^4 + 6*t^5 + 7*t^6
+    # Ascending-power layout (column k = t^k; canonical cross-engine
+    # convention, #7688). First joint:
+    #   tau_0(t) = 1 + 2*t + 3*t^2 + 4*t^3 + 5*t^4 + 6*t^5 + 7*t^6
     theta[0] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
     drv = PolynomialTorqueDriver(m, theta, t0=0.0, clip_to_ctrlrange=False)
 
