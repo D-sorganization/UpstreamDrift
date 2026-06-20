@@ -18,11 +18,13 @@ from src.robotics.sensing.force_torque_sensor import (
     create_realistic_sensor,
 )
 from src.robotics.sensing.imu_sensor import (
+    DEFAULT_IMU_GRAVITY_M_S2,
     IMUSensor,
     IMUSensorConfig,
     create_ideal_imu,
     create_realistic_imu,
 )
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.robotics.sensing.noise_models import (
     BandwidthLimitedNoise,
     BrownianNoise,
@@ -323,6 +325,18 @@ class TestIMUSensor:
         assert imu.sensor_id == "test_imu"
         assert imu.config == config
 
+    def test_default_gravity_is_canonical(self) -> None:
+        """DEFAULT_IMU_GRAVITY_M_S2 derives from the canonical GRAVITY_FLOAT (#7737).
+
+        The previous standalone ``9.81`` literal drifted ~0.05 m/s^2 from the
+        single source of truth (9.80665), undercutting cross-engine parity.
+        """
+        assert DEFAULT_IMU_GRAVITY_M_S2 == GRAVITY_FLOAT
+        assert pytest.approx(9.80665) == DEFAULT_IMU_GRAVITY_M_S2
+        # Default config gravity vector must use the canonical magnitude.
+        config = IMUSensorConfig()
+        assert_allclose(config.gravity, np.array([0.0, 0.0, -GRAVITY_FLOAT]))
+
     def test_ideal_imu_no_noise(self) -> None:
         """Test ideal IMU adds no noise."""
         imu = create_ideal_imu()
@@ -438,16 +452,17 @@ class TestIMUSensor:
         """Test gravity vector in sensor frame."""
         imu = IMUSensor()
 
-        # At identity orientation, gravity should be in -z
+        # At identity orientation, gravity should be in -z. Magnitude is the
+        # canonical GRAVITY_FLOAT (9.80665), not the legacy 9.81 literal (#7737).
         gravity = imu.get_gravity_in_sensor_frame()
-        assert_allclose(gravity, [0, 0, -9.81], atol=1e-10)
+        assert_allclose(gravity, [0, 0, -GRAVITY_FLOAT], atol=1e-10)
 
         # After 90 degree rotation around y, gravity should be in -x
         q = np.array([np.cos(np.pi / 4), 0, np.sin(np.pi / 4), 0])
         imu.set_orientation(q)
 
         gravity = imu.get_gravity_in_sensor_frame()
-        assert abs(gravity[0] - 9.81) < 0.1  # ~9.81 in x direction
+        assert abs(gravity[0] - GRAVITY_FLOAT) < 0.1  # ~9.80665 in x direction
 
 
 class TestSensorFactories:

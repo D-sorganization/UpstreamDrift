@@ -8,8 +8,20 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.jaxsim import parameter_gradients
+from src.shared.python.core.constants import GRAVITY_FLOAT
 
 pytestmark = pytest.mark.unit
+
+
+def test_gravity_constant_is_canonical() -> None:
+    """``_GRAVITY_M_S2`` derives from the canonical ``GRAVITY_FLOAT`` (#7737).
+
+    Previously this module re-declared a ``9.80665`` literal instead of
+    importing the single source of truth. The value must be identical so the
+    ZTCF drift field is unchanged.
+    """
+    assert parameter_gradients._GRAVITY_M_S2 == GRAVITY_FLOAT
+    assert pytest.approx(9.80665) == parameter_gradients._GRAVITY_M_S2
 
 
 class _FakeJnp:

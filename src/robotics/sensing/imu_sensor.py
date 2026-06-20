@@ -23,9 +23,15 @@ from src.robotics.sensing.noise_models import (
     CompositeNoise,
     GaussianNoise,
 )
+from src.shared.python.core.constants import GRAVITY_FLOAT
 
 
-DEFAULT_IMU_GRAVITY_M_S2 = 9.81
+# Canonical gravity magnitude (#7737). Previously a separate ``9.81`` literal
+# that drifted ~0.05 m/s^2 from the canonical ``GRAVITY_FLOAT`` (~9.80665),
+# silently undercutting cross-engine parity (same rationale as #6638). This
+# module-level alias is retained for backward-compatible imports but now
+# resolves to the single source of truth.
+DEFAULT_IMU_GRAVITY_M_S2 = GRAVITY_FLOAT
 QUATERNION_NORM_EPS = 1e-12
 QUATERNION_RENORMALIZE_TOL = 1e-10
 

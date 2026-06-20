@@ -15,6 +15,8 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.core.constants import GRAVITY_FLOAT as _GRAVITY_M_S2
+
 PARAMETER_NAMES: tuple[str, ...] = (
     "upper_length_m",
     "upper_mass_kg",
@@ -32,7 +34,9 @@ DEFAULT_PARAMETER_VECTOR: NDArray[np.float64] = np.array(
 
 _STATE_SIZE = 2
 _PARAMETER_SIZE = len(PARAMETER_NAMES)
-_GRAVITY_M_S2 = 9.80665
+# Gravity magnitude is the canonical ``GRAVITY_FLOAT`` (9.80665 m/s^2), imported
+# above as ``_GRAVITY_M_S2`` instead of being re-declared as a local literal
+# (#7737). Same value as before, so the ZTCF drift field is unchanged.
 _DAMPING = np.array([0.05, 0.02], dtype=np.float64)
 
 GradientMode = Literal["forward", "reverse"]
