@@ -9,10 +9,10 @@ simulate_with_coefficients``:
     ``grip_quat`` and ``club_quat`` arrays are aligned and finite.
 2.  ``theta = zeros`` runs without raising and yields a non-trivial
     gravity-driven trajectory.
-3.  Out-of-bounds theta (``1e9``) is rejected by ``ValueError`` *or* —
-    if the canonical theta validator from PR #4252 is not yet wired in
-    — produces a finite clamped sim. The test accepts either outcome
-    so it lands ahead of the validator.
+3.  Out-of-bounds theta (``1e9``) is rejected by ``ValueError`` when the
+    canonical ``validate_theta`` is invoked with the default bound table,
+    while the Drake simulate path (which calls ``validate_theta`` with
+    ``bounds=None`` by design) accepts a large-but-finite coefficient.
 4.  Wrong-length theta raises ``ValueError`` (``not divisible by 7``).
 5.  NaN-containing theta raises ``ValueError``.
 6.  ``SimOut.time`` is monotonic non-decreasing and starts at ``0``.
@@ -25,7 +25,6 @@ missing pydrake install is a clean skip.
 
 from __future__ import annotations
 
-import importlib
 import importlib.util
 import sys
 from collections.abc import Generator
@@ -40,24 +39,16 @@ from src.engines.physics_engines.drake.python.motion_matching.simulate import (
     SimOut,
     simulate_with_coefficients,
 )
+from src.shared.python.motion_matching.validate_theta import (
+    DEFAULT_THETA_BOUND_TABLE,
+    validate_theta,
+)
 
 pytestmark = [pytest.mark.unit]
 
 # Canonical 189-vec theta = 27 joints * 7 coeffs (per cross-engine spec).
 N_JOINTS_CANONICAL = 27
 THETA_LEN_CANONICAL = N_JOINTS_CANONICAL * COEFFS_PER_JOINT  # 189
-
-
-# --------------------------------------------------------------------------- #
-# Try to load the canonical theta validator (PR #4252). If absent, the
-# bound-rejection test downgrades to "either ValueError OR finite output".
-# --------------------------------------------------------------------------- #
-
-
-def _has_canonical_theta_validator() -> bool:
-    """Return True if Drake's simulate_with_coefficients enforces theta bounds."""
-    spec = importlib.util.find_spec("src.shared.python.motion_matching.theta_validator")
-    return spec is not None
 
 
 # --------------------------------------------------------------------------- #
@@ -213,27 +204,40 @@ def test_zero_theta_runs_without_error(
 
 
 # --------------------------------------------------------------------------- #
-# Gap 3 — Out-of-bounds theta. Defensive: PR #4252 may not have landed.
+# Gap 3 — Out-of-bounds theta.
+#
+# The canonical ``validate_theta`` enforces per-letter magnitude bounds only
+# when a bound table is supplied. This test pins both halves of that contract:
+#   * ``validate_theta(..., bounds=DEFAULT_THETA_BOUND_TABLE)`` rejects a 1e9
+#     coefficient with ``ValueError`` (the real bound-rejection path);
+#   * the Drake simulate path calls ``validate_theta`` with ``bounds=None`` by
+#     design (simulate.py: bounds are engine-local to the optimizer), so the
+#     same coefficient is accepted and yields a finite trajectory.
 # --------------------------------------------------------------------------- #
 
 
-def test_out_of_bounds_theta_rejected_or_clamped(
-    mocked_pydrake: dict[str, MagicMock],
-) -> None:
-    """theta with a 1e9 coefficient is rejected (ValueError) or clamped."""
+def test_out_of_bounds_theta_rejected_by_default_bound_table() -> None:
+    """A 1e9 coefficient violates DEFAULT_THETA_BOUND_TABLE -> ValueError."""
     theta = np.zeros(THETA_LEN_CANONICAL)
     theta[0] = 1.0e9  # blatantly out of any reasonable physical bound.
 
-    if _has_canonical_theta_validator():
-        with pytest.raises(ValueError):
-            simulate_with_coefficients(theta, options=_short_opts())
-    else:
-        # Validator not yet wired — accept either outcome.
-        try:
-            out = simulate_with_coefficients(theta, options=_short_opts())
-        except ValueError:
-            return  # acceptable: simulator's own DbC caught the magnitude
-        assert np.all(np.isfinite(out.tau)) or out.solver_status == "failed"
+    with pytest.raises(ValueError, match=r"violates bounds"):
+        validate_theta(
+            theta,
+            n_joints=N_JOINTS_CANONICAL,
+            bounds=DEFAULT_THETA_BOUND_TABLE,
+        )
+
+
+def test_out_of_bounds_theta_accepted_by_drake_simulate_path(
+    mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Drake's simulate path skips bounds (bounds=None) -> finite output."""
+    theta = np.zeros(THETA_LEN_CANONICAL)
+    theta[0] = 1.0e9  # large but finite: passes length + finiteness checks.
+
+    out = simulate_with_coefficients(theta, options=_short_opts())
+    assert np.all(np.isfinite(out.tau)) or out.solver_status == "failed"
 
 
 # --------------------------------------------------------------------------- #
