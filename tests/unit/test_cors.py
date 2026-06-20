@@ -10,6 +10,9 @@ import pytest
 from src.shared.python.cors import DEFAULT_ORIGINS, add_cors_middleware
 
 
+pytestmark = pytest.mark.unit
+
+
 class TestDefaultOrigins:
     def test_contains_localhost(self) -> None:
         assert any("localhost" in o for o in DEFAULT_ORIGINS)

@@ -14,6 +14,9 @@ from src.shared.python.security.security_utils import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_validate_path_with_tmp_path(tmp_path: Path) -> None:
     """Test path validation using temporary directories."""
     root = tmp_path / "root"

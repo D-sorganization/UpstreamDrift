@@ -14,6 +14,9 @@ from src.shared.python.signal_toolkit.noise import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.fixture
 def t() -> np.ndarray:
     return np.linspace(0, 2.0, 400)
