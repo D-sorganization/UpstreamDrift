@@ -5,7 +5,8 @@ import contextlib
 import json
 import math
 import time
-from typing import Any
+from collections.abc import Iterable
+from typing import Any, cast
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -246,9 +247,9 @@ def _to_json_list(arr: object) -> list[float] | None:
     if arr is None:
         return None
     if isinstance(arr, np.ndarray):
-        return arr.tolist()
+        return cast("list[float]", arr.tolist())
     try:
-        return list(arr)  # type: ignore[arg-type]
+        return list(cast("Iterable[float]", arr))
     except TypeError:
         return None
 
