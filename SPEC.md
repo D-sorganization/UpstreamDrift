@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.462                                            |
+| **Spec Version**        | 1.0.463                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Added isolated transition hazard-rule coverage for issue
+  #7715: the MDP transition tests now pin hazard penalties and DbC guard
+  behavior directly so policy updates cannot bypass invalid-state validation.
 - **2026-06-19** - Added realtime abort coverage for issue #7697:
   control-loop failure escalation tests now exercise the emergency
   zero-torque fallback when command sends raise, asserting the loop still
