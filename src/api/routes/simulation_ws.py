@@ -251,7 +251,7 @@ def _to_json_list(arr: object) -> list[float] | None:
     if not isinstance(arr, Iterable):
         return None
     try:
-        return list(arr)
+        return list(cast("Iterable[float]", arr))
     except TypeError:
         return None
 
