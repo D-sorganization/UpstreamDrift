@@ -320,6 +320,20 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         body_set = model.getBodySet()
         ground = model.getGround()
 
+        # Build the SimTK integrator/Manager once before the loop and reuse it
+        # each step (setInitialTime/setFinalTime + integrate). Constructing a
+        # fresh RungeKuttaMersonIntegrator/Manager per timestep — as the code
+        # previously did — incurred hundreds-to-thousands of redundant SimTK
+        # allocations per simulation with no change in numerical results.
+        # ``manager`` is ``None`` when the integrator/Manager pair cannot be
+        # constructed (e.g. OpenSim variants without these APIs); in that case
+        # every step falls back to the manual Euler integrator below.
+        manager = None
+        with contextlib.suppress(ValueError, RuntimeError, TypeError):
+            integrator = osim.RungeKuttaMersonIntegrator(model.getSystem())
+            integrator.setAccuracy(1e-4)
+            manager = osim.Manager(model, integrator)
+
         for step in range(n_steps):
             t = step * dt
 
@@ -397,11 +411,10 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
             ke_list.append(ke)
             pe_list.append(pe)
 
-            # Integrate one step using Euler (simple, no Manager overhead)
+            # Integrate one step by reusing the hoisted Manager/integrator.
             try:
-                integrator = osim.RungeKuttaMersonIntegrator(model.getSystem())
-                integrator.setAccuracy(1e-4)
-                manager = osim.Manager(model, integrator)
+                if manager is None:
+                    raise RuntimeError("OpenSim Manager unavailable")
                 manager.setInitialTime(t)
                 manager.setFinalTime(t + dt)
                 manager.integrate(state)
