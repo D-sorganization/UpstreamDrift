@@ -47,6 +47,7 @@ from src.engines.physics_engines.drake.python.motion_matching.simulate import (
     evaluate_torque_polynomial,
     simulate_with_coefficients,
 )
+from src.shared.python.core.contracts.exceptions import PreconditionError
 
 # ---------------------------------------------------------------------------
 # 1. Pure-data tests
@@ -187,11 +188,11 @@ class TestSimulateInputValidation:
             simulate_with_coefficients(bad)
 
     def test_theta_length_divisible_by_seven(self) -> None:
-        with pytest.raises(ValueError, match="divisible"):
+        with pytest.raises(PreconditionError, match="multiple of 7"):
             simulate_with_coefficients(np.zeros(13))
 
     def test_initial_pose_type(self) -> None:
-        with pytest.raises(TypeError, match="initial_pose"):
+        with pytest.raises(PreconditionError, match="initial_pose"):
             simulate_with_coefficients(
                 np.zeros(7),
                 initial_pose="not a dict",  # type: ignore[arg-type]
