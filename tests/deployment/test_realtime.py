@@ -600,6 +600,66 @@ class TestControlLoopFailureEscalation:
             caplog.text
         )
 
+    @pytest.mark.unit
+    def test_emergency_stop_send_failure_still_aborts(self) -> None:
+        """Abort completes even when the emergency zero-torque send raises.
+
+        The escalation path issues a best-effort zero-torque command as a
+        safety fallback. If the hardware comm layer raises while sending that
+        command, the controller must still terminate the loop, clear
+        ``is_running``, and record the abort instead of leaving the thread
+        wedged. This exercises the ``_command_zero_torque_for_abort`` except
+        branch that earlier tests stubbed away (issue #7697).
+        """
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=2,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        send_calls = {"count": 0}
+
+        def raising_send(_command: object) -> None:
+            # Every send raises, including the emergency zero-torque fallback,
+            # so the hardware-failure branch of the abort path is exercised.
+            send_calls["count"] += 1
+            raise OSError("simulated hardware comm failure")
+
+        controller._send_command = raising_send  # type: ignore[method-assign]
+
+        def callback(state: RobotState) -> object:
+            from src.deployment.realtime import ControlCommand, ControlMode
+
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(2),
+            )
+
+        controller.set_control_callback(callback)
+        controller.start()
+
+        # The loop must self-abort even though every send (control and the
+        # emergency fallback) raises (#7156 bounded wait).
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="control loop did not self-abort when send raised",
+        )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        # The emergency zero-torque fallback was attempted (and raised),
+        # proving the hardware-failure abort branch ran.
+        assert send_calls["count"] >= 1
+
     def test_transient_failures_do_not_abort(self) -> None:
         """An occasional failure that recovers must not abort the loop."""
         from src.deployment.realtime import (
