@@ -34,6 +34,8 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.validate_theta import COEFFS_PER_JOINT
+
 # --- Coefficient bounds (mirrored from Simscape build_coefficient_bounds) ---
 
 # Order: A (t^0), B (t^1), C (t^2), D (t^3), E (t^4), F (t^5), G (t^6)
@@ -54,7 +56,7 @@ def polynomial_torque_bounds(
     """Return ``(lb, ub)`` element-wise bounds for the flattened theta vector.
 
     The flattened layout is row-major over joints, i.e.
-    ``theta.reshape(n_joints, 7)[j, k]`` is the coefficient of ``t^k``
+    ``theta.reshape(n_joints, COEFFS_PER_JOINT)[j, k]`` is the coefficient of ``t^k``
     for joint ``j`` (so column 0 holds A = ``t^0``, ..., column 6 holds
     G = ``t^6``). This matches the contract in
     :class:`PolynomialTorqueDriver`.
@@ -126,13 +128,17 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
             raise ValueError("model has no actuators (nu == 0)")
         arr = np.asarray(theta, dtype=np.float64)
         if arr.ndim == 1:
-            if arr.shape[0] != nu * 7:
+            if arr.shape[0] != nu * COEFFS_PER_JOINT:
                 raise ValueError(
-                    f"flat theta must have length nu*7 = {nu * 7}; got {arr.shape[0]}"
+                    "flat theta must have length "
+                    f"nu*{COEFFS_PER_JOINT} = {nu * COEFFS_PER_JOINT}; "
+                    f"got {arr.shape[0]}"
                 )
-            arr = arr.reshape(nu, 7)
-        elif arr.shape != (nu, 7):
-            raise ValueError(f"theta must have shape ({nu}, 7); got {arr.shape}")
+            arr = arr.reshape(nu, COEFFS_PER_JOINT)
+        elif arr.shape != (nu, COEFFS_PER_JOINT):
+            raise ValueError(
+                f"theta must have shape ({nu}, {COEFFS_PER_JOINT}); got {arr.shape}"
+            )
         if not np.all(np.isfinite(arr)):
             raise ValueError("theta must be finite (no NaN/inf)")
         self._theta: NDArray[np.float64] = arr.copy()

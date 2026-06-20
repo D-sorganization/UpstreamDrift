@@ -242,6 +242,30 @@
       "issue": 7725,
       "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
       "expires_on": "2026-09-17"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "symbol": "compute_qpos_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_qpos_jacobian was already over the changed-file function-lines budget (pre-existing rollout/linearisation loop) and needs setup/rollout/propagation split.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "symbol": "compute_cost_gradient_analytical",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_cost_gradient_analytical was already over the changed-file function-lines budget (pre-existing analytical gradient assembly) and needs decomposition.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches simulate.py; simulate_with_coefficients was already over the changed-file function-lines budget (pre-existing forward-sim orchestration) and needs setup/rollout/output-assembly split.",
+      "expires_on": "2026-09-30"
     }
   ]
 }
