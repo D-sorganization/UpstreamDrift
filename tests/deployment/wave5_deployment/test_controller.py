@@ -19,6 +19,9 @@ from src.deployment.realtime.state import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def _config(n: int = 3) -> RobotConfig:
     return RobotConfig(name="bot", n_joints=n)
 
