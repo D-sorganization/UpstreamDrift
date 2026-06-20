@@ -190,6 +190,11 @@ class SecurityManager:
             )
             return bool(bcrypt.checkpw(plain_password_bytes, hashed_password_bytes))
         except (ValueError, TypeError):
+            # A malformed/corrupt stored hash (truncation, encoding, migration
+            # bug) raises here and must not be silently indistinguishable from a
+            # wrong password. Log the failure (never the secret) before
+            # returning False so the data-integrity error leaves a trace.
+            logger.exception("Password verification failed for a malformed input")
             return False
 
     @precondition(
@@ -335,6 +340,11 @@ class SecurityManager:
             hashed_key_bytes = _validate_bcrypt_secret(hashed_key, "hashed_key")
             return bool(bcrypt.checkpw(api_key_bytes, hashed_key_bytes))
         except (ValueError, TypeError):
+            # A malformed/corrupt stored key hash must not be silently
+            # indistinguishable from a wrong key. Log the failure (never the
+            # secret) before returning False so the data-integrity error leaves
+            # a trace.
+            logger.exception("API key verification failed for a malformed input")
             return False
 
 
