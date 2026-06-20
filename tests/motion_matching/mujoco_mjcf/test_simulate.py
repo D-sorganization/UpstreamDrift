@@ -174,7 +174,9 @@ def test_callback_uninstalls_cleanly_between_runs() -> None:
     nu = mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu
     theta_zero = np.zeros(nu * 7, dtype=np.float64)
     theta_const = np.zeros((nu, 7), dtype=np.float64)
-    theta_const[:, 6] = 5.0  # constant torque on every joint
+    # Constant torque on every joint: column 0 is the t^0 (constant) term
+    # under the ascending-power convention (#7688).
+    theta_const[:, 0] = 5.0
 
     out_zero = simulate_with_coefficients(theta_zero, opts)
     out_const = simulate_with_coefficients(theta_const.flatten(), opts)
@@ -323,13 +325,15 @@ def test_polynomial_evaluate_matches_handcomputed() -> None:
     m = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML)
     nu = m.nu
     theta = np.zeros((nu, 7), dtype=np.float64)
-    # First joint: tau_0(t) = 1*t^6 + 2*t^5 + 3*t^4 + 4*t^3 + 5*t^2 + 6*t + 7
+    # Ascending-power layout (column k = t^k; canonical cross-engine
+    # convention, #7688). First joint:
+    #   tau_0(t) = 1 + 2*t + 3*t^2 + 4*t^3 + 5*t^4 + 6*t^5 + 7*t^6
     theta[0] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
     drv = PolynomialTorqueDriver(m, theta, t0=0.0, clip_to_ctrlrange=False)
 
     t = 0.1
     expected = (
-        1.0 * t**6 + 2.0 * t**5 + 3.0 * t**4 + 4.0 * t**3 + 5.0 * t**2 + 6.0 * t + 7.0
+        1.0 + 2.0 * t + 3.0 * t**2 + 4.0 * t**3 + 5.0 * t**4 + 6.0 * t**5 + 7.0 * t**6
     )
     got = drv.evaluate(t)
     assert got[0] == pytest.approx(expected, rel=1e-12, abs=1e-12)
