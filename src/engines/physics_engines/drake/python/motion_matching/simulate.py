@@ -41,6 +41,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from src.shared.python.motion_matching.polynomial_torque import (
+    COEFFS_PER_JOINT,
+)
+from src.shared.python.motion_matching.polynomial_torque import (
+    evaluate_polynomial_torque as _evaluate_polynomial_torque_matrix,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
@@ -56,11 +62,6 @@ __all__ = [
     "evaluate_torque_polynomial",
     "simulate_with_coefficients",
 ]
-
-
-#: Per-joint polynomial degree + 1 (``A + B t + C t^2 + D t^3 + E t^4 +
-#: F t^5 + G t^6`` is seven coefficients per joint).
-COEFFS_PER_JOINT: int = 7
 
 
 # ---------------------------------------------------------------------------
@@ -223,11 +224,7 @@ def evaluate_torque_polynomial(
         msg = "theta must be finite"
         raise ValueError(msg)
     coeffs = theta.reshape(n_joints, COEFFS_PER_JOINT)
-    # Horner-style evaluation for numerical stability.
-    out = coeffs[:, -1].copy()
-    for k in range(COEFFS_PER_JOINT - 2, -1, -1):
-        out = out * t + coeffs[:, k]
-    return out
+    return _evaluate_polynomial_torque_matrix(coeffs, t)
 
 
 # ---------------------------------------------------------------------------
@@ -268,9 +265,7 @@ def _build_polynomial_torque_system(
 
         def _calc_output(self, context: Any, output: Any) -> None:
             t = float(context.get_time())
-            tau = self._coeffs[:, -1].copy()
-            for k in range(COEFFS_PER_JOINT - 2, -1, -1):
-                tau = tau * t + self._coeffs[:, k]
+            tau = _evaluate_polynomial_torque_matrix(self._coeffs, t)
             output.SetFromVector(tau)
 
     return _PolynomialTorqueSource()

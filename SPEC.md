@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.464                                            |
+| **Spec Version**        | 1.0.465                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Deduplicated the cross-engine motion-matching polynomial
+  torque evaluator for issue #7728: Drake, MuJoCo, Pinocchio, and OpenSim now
+  share the same lowest-power-first `[A..G]` Horner helper and constant,
+  with unit coverage pinning shared and engine-wrapper parity.
 - **2026-06-20** - Deduplicated the simulation WebSocket `set_speed`
   handler for issue #7719: runtime speed changes now route through one
   canonical branch for validation and state updates, with focused WebSocket

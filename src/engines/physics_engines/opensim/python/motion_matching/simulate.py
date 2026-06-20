@@ -41,11 +41,12 @@ from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
     GRIP_FRAME_NAME,
     extract_full_pose,
 )
+from src.shared.python.motion_matching.polynomial_torque import (
+    COEFFS_PER_JOINT,
+    POLY_DEGREE,
+    evaluate_polynomial_torque,
+)
 from src.shared.python.motion_matching.validate_theta import validate_theta
-
-# Canonical polynomial form: tau_j(t) = sum_{k=0}^{6} a_{j,k} * t^k.
-POLY_DEGREE: int = 6
-COEFFS_PER_JOINT: int = POLY_DEGREE + 1
 
 # Default model path lives next to the engine; resolved lazily so tests
 # can override via SimOptions.osim_path.
@@ -155,54 +156,6 @@ class SimOut:
     solver_status: str
     duration_s: float
     meta: dict[str, Any] = field(default_factory=dict)
-
-
-# --------------------------------------------------------------------------- #
-# Pure-numpy polynomial torque (testable without opensim)
-# --------------------------------------------------------------------------- #
-
-
-def evaluate_polynomial_torque(
-    coeffs: npt.NDArray[np.float64],
-    t: float,
-) -> npt.NDArray[np.float64]:
-    """Evaluate the per-joint degree-6 polynomial torque at time ``t``.
-
-    Implements the canonical contract::
-
-        tau_j(t) = sum_{k=0}^{6} a_{j,k} * t^k
-
-    Args:
-        coeffs: ``(n_joints, 7)`` matrix where ``coeffs[j, k]`` is the
-            coefficient on ``t^k``. Element ``k=0`` is the constant
-            term, ``k=6`` is the highest degree.
-        t: Evaluation time (scalar, seconds).
-
-    Returns:
-        ``(n_joints,)`` joint-torque vector.
-
-    Raises:
-        ValueError: If ``coeffs`` is not 2D with 7 columns, or ``t`` is
-            non-finite.
-    """
-    coeffs_arr = np.asarray(coeffs, dtype=np.float64)
-    if coeffs_arr.ndim != 2:
-        msg = f"coeffs must be 2D (n_joints, 7); got ndim={coeffs_arr.ndim}"
-        raise ValueError(msg)
-    if coeffs_arr.shape[1] != COEFFS_PER_JOINT:
-        msg = (
-            f"coeffs must have {COEFFS_PER_JOINT} columns "
-            f"(degree {POLY_DEGREE}); got shape {coeffs_arr.shape}"
-        )
-        raise ValueError(msg)
-    if not np.isfinite(t):
-        raise ValueError(f"t must be finite, got {t!r}")
-
-    # Horner's method for numerical stability and ~7x fewer multiplies.
-    out = coeffs_arr[:, POLY_DEGREE].copy()
-    for k in range(POLY_DEGREE - 1, -1, -1):
-        out = out * t + coeffs_arr[:, k]
-    return out
 
 
 # --------------------------------------------------------------------------- #

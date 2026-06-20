@@ -34,6 +34,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.club_target import ClubTarget, SourceProvenance
+from src.shared.python.motion_matching.polynomial_torque import COEFFS_PER_JOINT
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,6 @@ __all__ = [
 # Per-joint coefficient ordering: [A, B, C, D, E, F, G].
 # ---------------------------------------------------------------------------
 _COEFF_BOUNDS: tuple[float, ...] = (1000.0, 1000.0, 500.0, 500.0, 100.0, 100.0, 25.0)
-_COEFFS_PER_JOINT: int = 7
 _BOUND_TOL: float = 1.0e-9
 
 # Quaternion / target validation tolerances (CLUB_IK_SPEC).
@@ -179,16 +179,16 @@ def _validate_theta(theta: Any) -> NDArray[np.float64]:
             f"theta must be array-like of floats, got {type(theta).__name__}"
         ) from exc
 
-    if arr.size == 0 or arr.size % _COEFFS_PER_JOINT != 0:
+    if arr.size == 0 or arr.size % COEFFS_PER_JOINT != 0:
         raise ValueError(
             "theta length must be a positive multiple of "
-            f"{_COEFFS_PER_JOINT} (got {arr.size})"
+            f"{COEFFS_PER_JOINT} (got {arr.size})"
         )
     if not np.all(np.isfinite(arr)):
         raise ValueError("theta contains NaN or Inf")
 
-    n_joints = arr.size // _COEFFS_PER_JOINT
-    matrix = arr.reshape(n_joints, _COEFFS_PER_JOINT)  # rows = joints
+    n_joints = arr.size // COEFFS_PER_JOINT
+    matrix = arr.reshape(n_joints, COEFFS_PER_JOINT)  # rows = joints
     for col, bound in enumerate(_COEFF_BOUNDS):
         if np.any(np.abs(matrix[:, col]) > bound + _BOUND_TOL):
             letter = chr(ord("A") + col)

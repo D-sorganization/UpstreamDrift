@@ -53,6 +53,7 @@ if TYPE_CHECKING:
         plot_fit_quality_card,
     )
     from .plot_trajectory_overlay import plot_trajectory_overlay
+    from .polynomial_torque import POLY_DEGREE, evaluate_polynomial_torque
     from .sim_out import FitResult, SimFitResult, SimOut
     from .synthesize_target_from_coefficients import (
         THETA_BOUNDS,
@@ -104,6 +105,7 @@ __all__ = [
     "FitResult",
     "MAX_BODY_POSITION_NORM_M",
     "MultiSourceTarget",
+    "POLY_DEGREE",
     "REGULARIZER_KINDS",
     "SimOut",
     "SimFitResult",
@@ -132,6 +134,7 @@ __all__ = [
     "plot_error_timecourse",
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
+    "evaluate_polynomial_torque",
     "synthesize_target_from_coefficients",
     "validate_theta",
 ]
@@ -166,6 +169,8 @@ _LAZY_EXPORTS = {
     "fit_quality_summary": ".plot_fit_quality_card",
     "plot_fit_quality_card": ".plot_fit_quality_card",
     "plot_trajectory_overlay": ".plot_trajectory_overlay",
+    "POLY_DEGREE": ".polynomial_torque",
+    "evaluate_polynomial_torque": ".polynomial_torque",
     "FitResult": ".sim_out",
     "SimFitResult": ".sim_out",
     "SimOut": ".sim_out",
