@@ -230,6 +230,79 @@ class TestWebSocket:
             assert done["files_parsed"] == 7
             assert done["symbols_inserted"] == 42
 
+    def test_refresh_models_failure_is_sanitized_and_socket_stays_open(
+        self, client, mock_chat_service, caplog
+    ) -> None:
+        """A ``refresh_models`` provider failure sends a sanitized error frame.
+
+        Issue #7721 / #7687: the handler must not leak the raw exception and
+        must keep the socket usable for a subsequent action.
+        """
+        mock_chat_service.refresh_models.side_effect = RuntimeError(
+            "token=super-secret"
+        )
+
+        with (
+            caplog.at_level("ERROR"),
+            client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws,
+        ):
+            ws.receive_json()  # session_info
+
+            ws.send_json({"action": "refresh_models"})
+            error = ws.receive_json()
+            # The raw exception (with the secret) must not reach the client.
+            assert error == {"type": "error", "detail": "Internal server error"}
+
+            # Socket remains usable for a follow-up action.
+            ws.send_json({"action": "history"})
+            history = ws.receive_json()
+            assert history["type"] == "history"
+
+        # The traceback is logged server-side (via logger.exception) for ops.
+        assert any(
+            record.message == "Error refreshing models" and record.exc_info is not None
+            for record in caplog.records
+        )
+
+    def test_index_codebase_failure_is_sanitized(
+        self, client, mock_chat_service, caplog
+    ) -> None:
+        """An ``index_codebase`` rebuild failure ships an ``error`` status frame.
+
+        Issue #7721 / #7687: a ``run_codemap_rebuild`` exception must surface as
+        an ``index_status`` error frame (after the initial ``running`` event)
+        rather than crashing the chat socket.
+        """
+
+        async def broken_rebuild() -> dict:
+            raise RuntimeError("session=secret-session")
+
+        mock_chat_service.run_codemap_rebuild = broken_rebuild
+
+        with (
+            caplog.at_level("ERROR"),
+            client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws,
+        ):
+            ws.receive_json()  # session_info
+
+            ws.send_json({"action": "index_codebase"})
+
+            running = ws.receive_json()
+            assert running["type"] == "index_status"
+            assert running["state"] == "running"
+
+            error = ws.receive_json()
+            # The raw exception (with the secret) must not reach the client.
+            assert error["type"] == "index_status"
+            assert error["state"] == "error"
+            assert error["detail"] == "Internal server error"
+
+        # The traceback is logged server-side (via logger.exception) for ops.
+        assert any(
+            record.message == "Error indexing codebase" and record.exc_info is not None
+            for record in caplog.records
+        )
+
     def test_unknown_action(self, client) -> None:
         """Sending an unknown action returns an error."""
         with client.websocket_connect(_chat_ws_url(), headers=_WS_HEADERS) as ws:

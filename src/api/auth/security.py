@@ -13,12 +13,13 @@ try:
     from datetime import timezone
 except ImportError:
     timezone.utc = timezone.utc  # noqa: UP017
-from typing import Any
+from typing import Any, cast
 
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
 from sqlalchemy import update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 from .models import User, UserRole
@@ -98,6 +99,22 @@ def _validate_bcrypt_secret(value: str, field_name: str) -> bytes:
             "when UTF-8 encoded for bcrypt"
         )
     return encoded
+
+
+def _log_bcrypt_verification_failure(
+    operation: str, exc: ValueError | TypeError
+) -> None:
+    """Log failed bcrypt verification without exposing credentials or hashes."""
+    operation_label = "API key" if operation == "api_key" else operation
+    failure_label = "API key" if operation == "api_key" else "Password"
+    logger.warning(
+        "%s verification failed: Malformed stored bcrypt hash during %s verification",
+        failure_label,
+        operation_label,
+        exc_info=(type(exc), exc, exc.__traceback__),
+        operation=operation,
+        exception_type=type(exc).__name__,
+    )
 
 
 @precondition(
@@ -189,12 +206,8 @@ class SecurityManager:
                 hashed_password, "hashed_password"
             )
             return bool(bcrypt.checkpw(plain_password_bytes, hashed_password_bytes))
-        except (ValueError, TypeError):
-            # A malformed/corrupt stored hash (truncation, encoding, migration
-            # bug) raises here and must not be silently indistinguishable from a
-            # wrong password. Log the failure (never the secret) before
-            # returning False so the data-integrity error leaves a trace.
-            logger.exception("Password verification failed for a malformed input")
+        except (ValueError, TypeError) as exc:
+            _log_bcrypt_verification_failure("password", exc)
             return False
 
     @precondition(
@@ -339,12 +352,8 @@ class SecurityManager:
             api_key_bytes = _validate_bcrypt_secret(api_key, "api_key")
             hashed_key_bytes = _validate_bcrypt_secret(hashed_key, "hashed_key")
             return bool(bcrypt.checkpw(api_key_bytes, hashed_key_bytes))
-        except (ValueError, TypeError):
-            # A malformed/corrupt stored key hash must not be silently
-            # indistinguishable from a wrong key. Log the failure (never the
-            # secret) before returning False so the data-integrity error leaves
-            # a trace.
-            logger.exception("API key verification failed for a malformed input")
+        except (ValueError, TypeError) as exc:
+            _log_bcrypt_verification_failure("api_key", exc)
             return False
 
 
@@ -410,16 +419,17 @@ class UsageTracker:
             raise ValueError("user must be provided")
 
         if resource_type == "api_calls":
-            return int(user.api_calls_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.api_calls_this_month) < self.quota_limit(user, resource_type)
             )
         if resource_type == "video_analyses":
-            return int(user.video_analyses_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.video_analyses_this_month)
+                < self.quota_limit(user, resource_type)
             )
         if resource_type == "simulations":
-            return int(user.simulations_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.simulations_this_month) < self.quota_limit(user, resource_type)
             )
 
         return False
@@ -502,7 +512,7 @@ class UsageTracker:
         )
 
         with SQLAlchemySession(bind=db.get_bind(), autoflush=False) as quota_db:
-            result = quota_db.execute(statement)
+            result = cast(CursorResult[Any], quota_db.execute(statement))
             if result.rowcount != 1:
                 quota_db.rollback()
                 return False
