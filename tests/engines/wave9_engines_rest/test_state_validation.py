@@ -18,6 +18,9 @@ from src.engines.common.state import (
 from src.shared.python.core.contracts import PreconditionError
 
 
+pytestmark = pytest.mark.unit
+
+
 def _run_optimized_state_contract(script: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, "-O", "-c", script],
@@ -88,6 +91,8 @@ for dt in (0.0, -0.01):
 import numpy as np
 from src.shared.python.core.contracts import ContractLevel, set_contract_level
 from src.engines.common.state import ForceAccumulator
+
+
 set_contract_level(ContractLevel.OFF)
 accumulator = ForceAccumulator(nv=3)
 for name in ("", 123):
