@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.460                                            |
+| **Spec Version**        | 1.0.461                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Restored standalone Sidekick package frontend builds:
+  the UI now uses `@vitejs/plugin-react@5.2.0`, whose peer range includes
+  Vite 7, instead of plugin-react 6.x which imports Vite 8-only internals.
 - **2026-06-20** - Cleared #7806 CI ratchets after merging current main:
   runtime dependency locks now require patched `pydantic-settings>=2.14.2`,
   and recent unit-style regression files carry explicit `pytest.mark.unit`
@@ -1786,6 +1789,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-20 | 1.0.461 | Restored standalone Sidekick package frontend builds by pinning `@vitejs/plugin-react` to 5.2.0, whose peer range includes the locked Vite 7.x runtime. This avoids plugin-react 6.x importing Vite 8-only internals during `npm run build` in `package-standalone-sidekick.yml`. |
 | 2026-06-20 | 1.0.460 | Cleared #7806 CI ratchets after merging current main. Runtime dependency metadata and lockfiles now require patched `pydantic-settings>=2.14.2` so `pip-audit` no longer reports GHSA-4xgf-cpjx-pc3j, and recent unit-style regression files carry explicit `pytest.mark.unit` suite markers instead of expanding the unmarked-test baseline. |
 | 2026-06-20 | 1.0.459 | Deduplicated golf GUI camera pan axes after the DRY duplication ratchet surfaced repeated target-plane basis construction in `golf_camera_system.py`. Mouse pan and pan inertia now share `_camera_pan_axes()` for the camera right/up vectors, preserving the existing orbit/fly pan behavior while removing the duplicated production logic fingerprint. |
 | 2026-06-20 | 1.0.458 | Hardened shared CORS credential handling for issue #7740. `add_cors_middleware()` now rejects wildcard origins when `allow_credentials=True`, including origins resolved from `CORS_ORIGINS`, so credentialed responses cannot be paired with `*` origins while non-credentialed wildcard CORS remains supported. Focused unit tests cover explicit wildcard rejection, environment-origin wildcard rejection, explicit-origin credentials, and non-credentialed wildcard behavior. |
