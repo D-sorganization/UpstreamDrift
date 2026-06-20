@@ -67,6 +67,11 @@ def add_cors_middleware(
     else:
         resolved_origins = DEFAULT_ORIGINS
 
+    if allow_credentials and "*" in resolved_origins:
+        raise ValueError(
+            "CORS_ORIGINS must not contain '*' when credentials are enabled (fail-closed)"
+        )
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=resolved_origins,
