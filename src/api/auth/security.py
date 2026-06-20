@@ -13,12 +13,13 @@ try:
     from datetime import timezone
 except ImportError:
     timezone.utc = timezone.utc  # noqa: UP017
-from typing import Any
+from typing import Any, cast
 
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
 from sqlalchemy import update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 from .models import User, UserRole
@@ -418,16 +419,17 @@ class UsageTracker:
             raise ValueError("user must be provided")
 
         if resource_type == "api_calls":
-            return int(user.api_calls_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.api_calls_this_month) < self.quota_limit(user, resource_type)
             )
         if resource_type == "video_analyses":
-            return int(user.video_analyses_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.video_analyses_this_month)
+                < self.quota_limit(user, resource_type)
             )
         if resource_type == "simulations":
-            return int(user.simulations_this_month) < self.quota_limit(
-                user, resource_type
+            return bool(
+                int(user.simulations_this_month) < self.quota_limit(user, resource_type)
             )
 
         return False
@@ -510,7 +512,7 @@ class UsageTracker:
         )
 
         with SQLAlchemySession(bind=db.get_bind(), autoflush=False) as quota_db:
-            result = quota_db.execute(statement)
+            result = cast(CursorResult[Any], quota_db.execute(statement))
             if result.rowcount != 1:
                 quota_db.rollback()
                 return False

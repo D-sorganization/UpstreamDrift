@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi import HTTPException
 
+pytestmark = pytest.mark.unit
+
 # Patch environment variable before importing security module
 os.environ["GOLF_API_SECRET_KEY"] = (
     "super-secret-test-key-must-be-at-least-thirty-two-bytes-long"
