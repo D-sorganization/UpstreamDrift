@@ -21,6 +21,8 @@ from src.shared.python.spatial_algebra.pose6dof.rotations import (
 )
 from src.unreal_integration.skeleton_mapper import SkeletonMapper
 
+pytestmark = pytest.mark.unit
+
 
 def _angle_quat(angle: float) -> np.ndarray:
     """Unit quaternion of a rotation by ``angle`` about the X axis (w-first)."""
