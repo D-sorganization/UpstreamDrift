@@ -23,6 +23,7 @@ from src.robotics.sensing.imu_sensor import (
     create_ideal_imu,
     create_realistic_imu,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.robotics.sensing.noise_models import (
     BandwidthLimitedNoise,
     BrownianNoise,
@@ -440,14 +441,14 @@ class TestIMUSensor:
 
         # At identity orientation, gravity should be in -z
         gravity = imu.get_gravity_in_sensor_frame()
-        assert_allclose(gravity, [0, 0, -9.81], atol=1e-10)
+        assert_allclose(gravity, [0, 0, -float(GRAVITY_M_S2)], atol=1e-10)
 
         # After 90 degree rotation around y, gravity should be in -x
         q = np.array([np.cos(np.pi / 4), 0, np.sin(np.pi / 4), 0])
         imu.set_orientation(q)
 
         gravity = imu.get_gravity_in_sensor_frame()
-        assert abs(gravity[0] - 9.81) < 0.1  # ~9.81 in x direction
+        assert abs(gravity[0] - float(GRAVITY_M_S2)) < 0.1  # ~9.8 in x direction
 
 
 class TestSensorFactories:
