@@ -17,6 +17,9 @@ from src.shared.python.assessment.analysis import (
     grep_count,
 )
 
+
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
 # ---------------------------------------------------------------------------
@@ -58,6 +61,8 @@ def danger():
 
 LOGGING_PYTHON = """\
 import logging as logging
+
+
 logger = logging.getLogger(__name__)
 logger.info("hello")
 print("debug msg")
