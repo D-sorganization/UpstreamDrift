@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.462                                            |
+| **Spec Version**        | 1.0.463                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Deduplicated the simulation WebSocket `set_speed`
+  handler for issue #7719: runtime speed changes now route through one
+  canonical branch for validation and state updates, with focused WebSocket
+  regression coverage preserving accepted payload behavior.
 - **2026-06-19** - Added realtime abort coverage for issue #7697:
   control-loop failure escalation tests now exercise the emergency
   zero-torque fallback when command sends raise, asserting the loop still
