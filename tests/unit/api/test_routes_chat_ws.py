@@ -10,6 +10,9 @@ from starlette.websockets import WebSocketDisconnect as StarletteWSDisconnect
 from src.api.routes.chat_ws import router
 
 
+pytestmark = pytest.mark.unit
+
+
 class MockSession:
     def __init__(self, session_id):
         self.session_id = session_id
