@@ -32,6 +32,7 @@ so that the *module* imports cleanly even on systems without ``pydrake``.
 
 from __future__ import annotations
 
+import logging
 import time as _time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,6 +48,9 @@ from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
     from pydrake.multibody.plant import MultibodyPlant
+
+
+logger = logging.getLogger(__name__)
 
 
 __all__ = [
@@ -322,6 +326,92 @@ def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     return max(nv - 6, 0)
 
 
+@dataclass
+class _RolloutResult:
+    """Outcome of stepping the Drake simulator over the output time grid.
+
+    ``solver_status`` is ``"success"`` if every ``AdvanceTo`` step
+    completed, or ``"failed"`` if the integrator raised a solver-divergence
+    error. ``error`` carries the caught exception (``None`` on success) so
+    the caller can record ``metadata['error']``.
+    """
+
+    solver_status: str
+    error: BaseException | None
+
+
+@dataclass
+class _RolloutLogs:
+    """Pre-allocated, NaN-filled output buffers mutated in place per step."""
+
+    q: NDArray[np.float64]
+    v: NDArray[np.float64]
+    tau: NDArray[np.float64]
+    grip: NDArray[np.float64]
+    grip_quat: NDArray[np.float64]
+    clubhead: NDArray[np.float64]
+    club_quat: NDArray[np.float64]
+
+
+def _record_rollout(
+    *,
+    simulator: Any,
+    plant: MultibodyPlant,
+    grid: NDArray[np.float64],
+    theta: NDArray[np.float64],
+    n_actuators: int,
+    grip_body_name: str,
+    clubhead_body_name: str,
+    logs: _RolloutLogs,
+) -> _RolloutResult:
+    """Step the simulator over ``grid`` and record state / torque / FK logs.
+
+    The ``logs`` arrays are mutated in place. Stepping stops at the first
+    ``AdvanceTo`` that raises a Drake solver-divergence error
+    (:class:`RuntimeError`), returning ``solver_status="failed"`` with the
+    traceback logged via :func:`logging.Logger.exception` (issue #7727).
+
+    Only :class:`RuntimeError` — the exception pydrake's ``AdvanceTo``
+    raises on integrator divergence / step-size failure — is treated as a
+    solver failure. Any other exception (indexing bugs in the recording
+    loop, FK extraction errors, programming mistakes) propagates so it is
+    reported as the real bug it is rather than being mislabelled a physics
+    "solver failure". This replaces the previous nested ``except Exception``
+    handlers that swallowed every error into a generic ``"failed"`` status
+    with only a ``repr`` and no logging.
+    """
+    for idx, t_target in enumerate(grid):
+        if t_target > 0.0:
+            try:
+                simulator.AdvanceTo(float(t_target))
+            except RuntimeError as exc:
+                logger.exception(
+                    "Drake AdvanceTo diverged at t=%.6f s (step %d/%d)",
+                    float(t_target),
+                    idx,
+                    len(grid),
+                )
+                return _RolloutResult(solver_status="failed", error=exc)
+
+        ctx = simulator.get_context()
+        plant_ctx = plant.GetMyContextFromRoot(ctx)
+
+        logs.q[idx, :] = plant.GetPositions(plant_ctx)
+        logs.v[idx, :] = plant.GetVelocities(plant_ctx)
+        logs.tau[idx, :] = evaluate_torque_polynomial(
+            theta, float(t_target), n_actuators
+        )
+
+        grip_pose = _resolve_world_pose(plant, plant_ctx, grip_body_name)
+        if grip_pose is not None:
+            logs.grip[idx, :], logs.grip_quat[idx, :] = grip_pose
+        club_pose = _resolve_world_pose(plant, plant_ctx, clubhead_body_name)
+        if club_pose is not None:
+            logs.clubhead[idx, :], logs.club_quat[idx, :] = club_pose
+
+    return _RolloutResult(solver_status="success", error=None)
+
+
 # ---------------------------------------------------------------------------
 # Public entry point (cross-engine §2.2)
 # ---------------------------------------------------------------------------
@@ -446,14 +536,28 @@ def simulate_with_coefficients(  # noqa: C901
     plant.Finalize()
 
     # ---- 3. Add the polynomial-torque source ---------------------------
+    # Crash Early (issue #7725): the plant's actuator count is the ground
+    # truth for the torque dimension. If the supplied ``theta`` implies a
+    # different joint count we must NOT silently fall back to the theta-derived
+    # dimension: doing so left the actuation port disconnected (the
+    # ``num_actuators() == n_actuators`` guard below failed) so the body fell
+    # under gravity torque-free, yet ``tau_log`` still recorded the nonzero
+    # polynomial torques and ``solver_status`` stayed ``"success"`` — phantom
+    # torques in the log of an unactuated rollout. Reject the mismatch instead.
     n_actuators = _resolve_n_actuators(plant)
     expected_theta_len = n_actuators * COEFFS_PER_JOINT
     if expected_theta_len > 0 and theta.shape[0] != expected_theta_len:
-        # If the URDF's actuator count does not match the supplied theta,
-        # we trust the caller's intent (some callers supply theta in joint-
-        # space rather than actuator-space) and fall back to the theta-derived
-        # joint count. The polynomial source runs in its own dimension.
-        n_actuators = theta.shape[0] // COEFFS_PER_JOINT
+        msg = (
+            "theta is sized for "
+            f"{theta.shape[0] // COEFFS_PER_JOINT} joint(s) "
+            f"(length {theta.shape[0]}) but the plant has {n_actuators} "
+            f"actuator(s), so it expects theta of length {expected_theta_len} "
+            f"({n_actuators} * {COEFFS_PER_JOINT}). Supplying a mismatched "
+            "theta would leave the actuation port disconnected while tau_log "
+            "still recorded nonzero torques (issue #7725). Resize theta to the "
+            "plant's actuator count."
+        )
+        raise ValueError(msg)
 
     # Spec §2.2: validate exact length+finiteness against the actuator
     # count we just resolved. The bounds check is engine-local (Drake
@@ -517,53 +621,36 @@ def simulate_with_coefficients(  # noqa: C901
     n_q = plant.num_positions()
     n_v = plant.num_velocities()
 
-    q_log = np.full((n_t, n_q), np.nan, dtype=np.float64)
-    v_log = np.full((n_t, n_v), np.nan, dtype=np.float64)
-    tau_log = np.full((n_t, n_actuators), np.nan, dtype=np.float64)
-    grip_log = np.full((n_t, 3), np.nan, dtype=np.float64)
-    grip_quat_log = np.full((n_t, 4), np.nan, dtype=np.float64)
-    clubhead_log = np.full((n_t, 3), np.nan, dtype=np.float64)
-    club_quat_log = np.full((n_t, 4), np.nan, dtype=np.float64)
+    logs = _RolloutLogs(
+        q=np.full((n_t, n_q), np.nan, dtype=np.float64),
+        v=np.full((n_t, n_v), np.nan, dtype=np.float64),
+        tau=np.full((n_t, n_actuators), np.nan, dtype=np.float64),
+        grip=np.full((n_t, 3), np.nan, dtype=np.float64),
+        grip_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
+        clubhead=np.full((n_t, 3), np.nan, dtype=np.float64),
+        club_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
+    )
 
-    solver_status = "success"
-    sim_error: BaseException | None = None
-
-    try:
-        for idx, t_target in enumerate(grid):
-            if t_target > 0.0:
-                try:
-                    simulator.AdvanceTo(float(t_target))
-                except Exception as exc:  # noqa: BLE001
-                    solver_status = "failed"
-                    sim_error = exc
-                    break
-
-            ctx = simulator.get_context()
-            plant_ctx = plant.GetMyContextFromRoot(ctx)
-
-            q_log[idx, :] = plant.GetPositions(plant_ctx)
-            v_log[idx, :] = plant.GetVelocities(plant_ctx)
-            tau_log[idx, :] = evaluate_torque_polynomial(
-                theta, float(t_target), n_actuators
-            )
-
-            grip_pose = _resolve_world_pose(plant, plant_ctx, opts.grip_body_name)
-            if grip_pose is not None:
-                grip_log[idx, :], grip_quat_log[idx, :] = grip_pose
-            club_pose = _resolve_world_pose(plant, plant_ctx, opts.clubhead_body_name)
-            if club_pose is not None:
-                clubhead_log[idx, :], club_quat_log[idx, :] = club_pose
-    except Exception as exc:  # pragma: no cover - defensive  # noqa: BLE001
-        solver_status = "failed"
-        sim_error = exc
+    rollout = _record_rollout(
+        simulator=simulator,
+        plant=plant,
+        grid=grid,
+        theta=theta,
+        n_actuators=n_actuators,
+        grip_body_name=opts.grip_body_name,
+        clubhead_body_name=opts.clubhead_body_name,
+        logs=logs,
+    )
+    solver_status = rollout.solver_status
+    sim_error = rollout.error
 
     # ---- 6. Finite-difference qdd from v_log --------------------------
-    qdd_log = np.zeros_like(v_log)
+    qdd_log = np.zeros_like(logs.v)
     if n_t >= 2:
         dt = 1.0 / opts.sample_rate_hz
-        qdd_log[1:-1, :] = (v_log[2:, :] - v_log[:-2, :]) / (2.0 * dt)
-        qdd_log[0, :] = (v_log[1, :] - v_log[0, :]) / dt
-        qdd_log[-1, :] = (v_log[-1, :] - v_log[-2, :]) / dt
+        qdd_log[1:-1, :] = (logs.v[2:, :] - logs.v[:-2, :]) / (2.0 * dt)
+        qdd_log[0, :] = (logs.v[1, :] - logs.v[0, :]) / dt
+        qdd_log[-1, :] = (logs.v[-1, :] - logs.v[-2, :]) / dt
 
     duration_s = _time.perf_counter() - t_start
 
@@ -578,14 +665,14 @@ def simulate_with_coefficients(  # noqa: C901
 
     out = SimOut(
         time=grid,
-        q=q_log,
-        qd=v_log,
+        q=logs.q,
+        qd=logs.v,
         qdd=qdd_log,
-        tau=tau_log,
-        grip=grip_log,
-        grip_quat=grip_quat_log,
-        clubhead=clubhead_log,
-        club_quat=club_quat_log,
+        tau=logs.tau,
+        grip=logs.grip,
+        grip_quat=logs.grip_quat,
+        clubhead=logs.clubhead,
+        club_quat=logs.club_quat,
         solver_status=solver_status,
         duration_s=duration_s,
         metadata=metadata,
