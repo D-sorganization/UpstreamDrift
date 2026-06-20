@@ -229,7 +229,9 @@ class ConservationMonitor:
         """
         # Heuristic: For biomechanical systems, estimate based on velocity magnitude
         _, v = self.engine.get_state()
-        v_norm = math.sqrt(np.dot(v, v))  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
+        v_norm = math.sqrt(
+            np.dot(v, v)
+        )  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
 
         # Typical angular velocity: ω ~ 10 rad/s → dt < 0.01 s
         # High-speed motion: ω ~ 100 rad/s → dt < 0.001 s

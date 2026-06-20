@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
+# Above this absolute dot product the two quaternions are nearly identical and
+# the ``sin(theta_0)`` denominator in the SLERP formula approaches zero, so we
+# fall back to normalized linear interpolation (nlerp) for numerical stability.
+SLERP_LERP_FALLBACK_THRESHOLD = 0.9995
+
 
 def rotmat_to_quat(rot: np.ndarray) -> np.ndarray:
     """Convert rotation matrix data to canonical ``[w, x, y, z]`` quaternions.
@@ -90,7 +95,7 @@ def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
     if dot < 0.0:
         b = -b
         dot = -dot
-    if dot > 0.9995:
+    if dot > SLERP_LERP_FALLBACK_THRESHOLD:
         result = a + t * (b - a)
         return result / np.linalg.norm(result)
     theta_0 = np.arccos(dot)
