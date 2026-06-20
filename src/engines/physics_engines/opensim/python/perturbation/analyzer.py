@@ -36,6 +36,7 @@ import contextlib
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -166,6 +167,39 @@ class OpenSimSimResult:
         return len(self.t)
 
 
+@dataclass
+class _SimulationTrajectory:
+    """Mutable trajectory samples collected during one OpenSim simulation."""
+
+    t: list[float]
+    qpos: list[np.ndarray]
+    qvel: list[np.ndarray]
+    ee_pos: list[np.ndarray]
+    kinetic_energy: list[float]
+    potential_energy: list[float]
+
+    @classmethod
+    def empty(cls) -> _SimulationTrajectory:
+        return cls([], [], [], [], [], [])
+
+    def append(
+        self,
+        *,
+        t: float,
+        q: np.ndarray,
+        qdot: np.ndarray,
+        ee_pos: np.ndarray,
+        kinetic_energy: float,
+        potential_energy: float,
+    ) -> None:
+        self.t.append(t)
+        self.qpos.append(q)
+        self.qvel.append(qdot)
+        self.ee_pos.append(ee_pos)
+        self.kinetic_energy.append(kinetic_energy)
+        self.potential_energy.append(potential_energy)
+
+
 # ---------------------------------------------------------------------------
 # Main analyzer
 # ---------------------------------------------------------------------------
@@ -280,7 +314,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _simulate(self, coeffs: list[list[float]]) -> OpenSimSimResult:  # noqa: C901
+    def _simulate(self, coeffs: list[list[float]]) -> OpenSimSimResult:
         """Run an OpenSim forward simulation with polynomial torques.
 
         Each actuator's control follows ctrl_j(t) = sum_k c_jk * t^k.
@@ -295,135 +329,176 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         force_set = model.getForceSet()
         nu = force_set.getSize()
 
-        # Build per-actuator polynomial arrays
-        n_coeff_sets = len(coeffs)
-        joint_polys: list[np.ndarray] = []
-        for j in range(nu):
-            if j < n_coeff_sets:
-                joint_polys.append(np.array(coeffs[j][::-1]))  # high→low for polyval
-            else:
-                joint_polys.append(np.array([0.0]))
-
         dt = self._dt
         n_steps = max(2, int(self._t_end / dt))
-
-        t_list: list[float] = []
-        qpos_list: list[np.ndarray] = []
-        qvel_list: list[np.ndarray] = []
-        ee_pos_list: list[np.ndarray] = []
-        ke_list: list[float] = []
-        pe_list: list[float] = []
-
-        # Reset to initial state
-        model.initStateFromProperties(state)
-
         body_set = model.getBodySet()
         ground = model.getGround()
+        joint_polys = self._build_joint_polys(coeffs, nu)
+        trajectory = _SimulationTrajectory.empty()
+
+        model.initStateFromProperties(state)
+        manager = self._build_reusable_manager(osim, model)
 
         for step in range(n_steps):
             t = step * dt
 
-            # Apply polynomial torques via coordinate actuators
-            for j in range(nu):
-                try:
-                    force_obj = force_set.get(j)
-                    ctrl = float(np.polyval(joint_polys[j], t))
-                    force_obj.setControls(
-                        osim.Vector(1, ctrl), model.updDefaultControls()
-                    )
-                except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
-                    pass
-
-            # Realize to acceleration
+            self._apply_polynomial_controls(osim, model, force_set, joint_polys, t, nu)
             with contextlib.suppress(ValueError, RuntimeError, TypeError):
                 model.realizeAcceleration(state)
 
-            # Read state
-            nq = coord_set.getSize()
-            q = np.zeros(nq)
-            qdot = np.zeros(nq)
-            for k in range(nq):
-                coord = coord_set.get(k)
-                q[k] = coord.getValue(state)
-                qdot[k] = coord.getSpeedValue(state)
+            q, qdot = self._read_coordinate_state(coord_set, state)
+            ee_pos = self._end_effector_position(osim, state, body_set, ground, q)
+            ke, pe = self._read_energy(model, state)
+            trajectory.append(
+                t=t,
+                q=q,
+                qdot=qdot,
+                ee_pos=ee_pos,
+                kinetic_energy=ke,
+                potential_energy=pe,
+            )
+            self._integrate_step(manager, state, coord_set, q, qdot, t, dt)
 
-            # EE position: last body in body set, expressed in ground
-            ee_pos = np.zeros(3)
-            try:
-                n_bodies = body_set.getSize()
-                if n_bodies > 0:
-                    ee_body = body_set.get(n_bodies - 1)
-                    pos_in_ground = ground.findStationLocationInGround(
-                        state,
-                        ee_body.findStationLocationInGround(state, osim.Vec3(0, 0, 0)),
-                    )
-                    ee_pos = np.array(
-                        [pos_in_ground[0], pos_in_ground[1], pos_in_ground[2]]
-                    )
-            except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
-                # Fallback: use simple forward kinematics from joint angles
-                link_len = 0.5
-                angle_sum = float(np.sum(q))
-                ee_pos = np.array(
-                    [
-                        (
-                            link_len * np.sin(q[0]) + link_len * np.sin(angle_sum)
-                            if nq >= 2
-                            else link_len * np.sin(q[0])
-                        ),
-                        (
-                            -(link_len * np.cos(q[0]) + link_len * np.cos(angle_sum))
-                            if nq >= 2
-                            else -link_len * np.cos(q[0])
-                        ),
-                        0.0,
-                    ]
-                )
+        return self._build_sim_result(trajectory)
 
-            # Energy
-            ke = 0.0
-            pe = 0.0
+    def _build_joint_polys(
+        self, coeffs: list[list[float]], nu: int
+    ) -> list[np.ndarray]:
+        """Return per-actuator polynomial arrays ordered for ``np.polyval``."""
+        n_coeff_sets = len(coeffs)
+        return [
+            np.array(coeffs[j][::-1]) if j < n_coeff_sets else np.array([0.0])
+            for j in range(nu)
+        ]
+
+    def _build_reusable_manager(self, osim: Any, model: Any) -> Any | None:
+        """Build the hoisted OpenSim Manager, or ``None`` for Euler fallback."""
+        with contextlib.suppress(ValueError, RuntimeError, TypeError):
+            integrator = osim.RungeKuttaMersonIntegrator(model.getSystem())
+            integrator.setAccuracy(1e-4)
+            return osim.Manager(model, integrator)
+        return None
+
+    def _apply_polynomial_controls(
+        self,
+        osim: Any,
+        model: Any,
+        force_set: Any,
+        joint_polys: list[np.ndarray],
+        t: float,
+        nu: int,
+    ) -> None:
+        """Apply polynomial torques via OpenSim coordinate actuators."""
+        for j in range(nu):
             try:
-                model.realizeVelocity(state)
-                ke = float(model.calcKineticEnergy(state))
-                pe = float(model.calcPotentialEnergy(state))
+                force_obj = force_set.get(j)
+                ctrl = float(np.polyval(joint_polys[j], t))
+                force_obj.setControls(osim.Vector(1, ctrl), model.updDefaultControls())
             except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                 pass
 
-            t_list.append(t)
-            qpos_list.append(q)
-            qvel_list.append(qdot)
-            ee_pos_list.append(ee_pos)
-            ke_list.append(ke)
-            pe_list.append(pe)
+    def _read_coordinate_state(
+        self, coord_set: Any, state: Any
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Read generalized coordinates and speeds from the OpenSim state."""
+        nq = coord_set.getSize()
+        q = np.zeros(nq)
+        qdot = np.zeros(nq)
+        for k in range(nq):
+            coord = coord_set.get(k)
+            q[k] = coord.getValue(state)
+            qdot[k] = coord.getSpeedValue(state)
+        return q, qdot
 
-            # Integrate one step using Euler (simple, no Manager overhead)
+    def _end_effector_position(
+        self, osim: Any, state: Any, body_set: Any, ground: Any, q: np.ndarray
+    ) -> np.ndarray:
+        """Return end-effector position, falling back to planar kinematics."""
+        try:
+            n_bodies = body_set.getSize()
+            if n_bodies > 0:
+                ee_body = body_set.get(n_bodies - 1)
+                pos_in_ground = ground.findStationLocationInGround(
+                    state,
+                    ee_body.findStationLocationInGround(state, osim.Vec3(0, 0, 0)),
+                )
+                return np.array([pos_in_ground[0], pos_in_ground[1], pos_in_ground[2]])
+        except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
+            pass
+        return self._fallback_end_effector_position(q)
+
+    def _fallback_end_effector_position(self, q: np.ndarray) -> np.ndarray:
+        """Approximate end-effector position from joint angles."""
+        nq = len(q)
+        if nq == 0:
+            return np.zeros(3)
+        link_len = 0.5
+        angle_sum = float(np.sum(q))
+        x_pos = (
+            link_len * np.sin(q[0]) + link_len * np.sin(angle_sum)
+            if nq >= 2
+            else link_len * np.sin(q[0])
+        )
+        y_pos = (
+            -(link_len * np.cos(q[0]) + link_len * np.cos(angle_sum))
+            if nq >= 2
+            else -link_len * np.cos(q[0])
+        )
+        return np.array([x_pos, y_pos, 0.0])
+
+    def _read_energy(self, model: Any, state: Any) -> tuple[float, float]:
+        """Return kinetic and potential energy if OpenSim can realize velocity."""
+        try:
+            model.realizeVelocity(state)
+            return float(model.calcKineticEnergy(state)), float(
+                model.calcPotentialEnergy(state)
+            )
+        except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
+            return 0.0, 0.0
+
+    def _integrate_step(
+        self,
+        manager: Any | None,
+        state: Any,
+        coord_set: Any,
+        q: np.ndarray,
+        qdot: np.ndarray,
+        t: float,
+        dt: float,
+    ) -> None:
+        """Integrate one step with the hoisted Manager or Euler fallback."""
+        try:
+            if manager is None:
+                raise RuntimeError("OpenSim Manager unavailable")
+            manager.setInitialTime(t)
+            manager.setFinalTime(t + dt)
+            manager.integrate(state)
+        except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
+            self._integrate_step_euler(coord_set, state, q, qdot, dt)
+
+    def _integrate_step_euler(
+        self,
+        coord_set: Any,
+        state: Any,
+        q: np.ndarray,
+        qdot: np.ndarray,
+        dt: float,
+    ) -> None:
+        """Manual Euler fallback for joint coordinates."""
+        for k in range(len(q)):
+            coord = coord_set.get(k)
             try:
-                integrator = osim.RungeKuttaMersonIntegrator(model.getSystem())
-                integrator.setAccuracy(1e-4)
-                manager = osim.Manager(model, integrator)
-                manager.setInitialTime(t)
-                manager.setFinalTime(t + dt)
-                manager.integrate(state)
+                coord.setValue(state, q[k] + qdot[k] * dt)
+                coord.setSpeedValue(state, qdot[k])
             except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
-                # Manual Euler fallback for joint coordinates
-                for k in range(nq):
-                    coord = coord_set.get(k)
-                    try:
-                        new_val = q[k] + qdot[k] * dt
-                        coord.setValue(state, new_val)
-                        coord.setSpeedValue(state, qdot[k])
-                    except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
-                        pass
+                pass
 
-        t_arr = np.array(t_list)
-        qpos_arr = np.array(qpos_list)
-        qvel_arr = np.array(qvel_list)
-        ee_pos_arr = np.array(ee_pos_list)
-        ke_arr = np.array(ke_list)
-        pe_arr = np.array(pe_list)
-
-        # EE velocities via finite difference
+    def _build_sim_result(self, trajectory: _SimulationTrajectory) -> OpenSimSimResult:
+        """Pack collected trajectory samples into ``OpenSimSimResult``."""
+        t_arr = np.array(trajectory.t)
+        qpos_arr = np.array(trajectory.qpos)
+        qvel_arr = np.array(trajectory.qvel)
+        ee_pos_arr = np.array(trajectory.ee_pos)
         ee_vel_arr = np.zeros_like(ee_pos_arr)
         for i in range(1, len(t_arr)):
             dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
@@ -435,6 +510,6 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
             qvel_traj=qvel_arr,
             ee_pos_traj=ee_pos_arr,
             ee_vel_traj=ee_vel_arr,
-            kinetic_energy_traj=ke_arr,
-            potential_energy_traj=pe_arr,
+            kinetic_energy_traj=np.array(trajectory.kinetic_energy),
+            potential_energy_traj=np.array(trajectory.potential_energy),
         )
