@@ -15,6 +15,9 @@ from src.api.utils.path_validation import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 class TestValidateModelPath:
     """Tests for validate_model_path function."""
 
