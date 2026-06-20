@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.456                                            |
+| **Spec Version**        | 1.0.457                                            |
 | **Last Spec Update**    | 2026-06-19                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-19** - Added realtime abort coverage for issue #7697:
+  control-loop failure escalation tests now exercise the emergency
+  zero-torque fallback when command sends raise, asserting the loop still
+  clears `is_running`, records `aborted_on_failure`, and attempts the
+  fail-safe send instead of wedging.
 - **2026-06-19** - Hardened Data Explorer numeric contracts for issue #7732:
   dataset stats now ignore textual `inf`, `-inf`, `nan`, and `Infinity`
   cells instead of allowing one non-finite value to poison min/max/mean or
