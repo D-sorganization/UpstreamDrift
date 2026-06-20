@@ -413,8 +413,13 @@ class ImpactSolverAPI:
 
         max_spin_rad = max_spin_rpm * 2 * np.pi / 60  # Convert to rad/s
 
+        # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 3D vectors
         spins = [
-            np.linalg.norm(event.post_state.ball_angular_velocity)
+            math.hypot(
+                event.post_state.ball_angular_velocity[0],
+                event.post_state.ball_angular_velocity[1],
+                event.post_state.ball_angular_velocity[2]
+            )
             for event in self.recorder.events
         ]
 
