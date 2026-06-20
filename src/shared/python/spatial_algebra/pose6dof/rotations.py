@@ -3,6 +3,7 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.contracts import require
+from src.shared.python.math_utils.quaternion import slerp as _canonical_slerp
 
 from ..spatial_vectors import skew
 
@@ -180,28 +181,12 @@ def quaternion_inverse(q: Quat | list[float]) -> Quat:
 
 
 def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
+    """Spherical linear interpolation between two unit quaternions.
+
+    Thin delegate to the canonical implementation in
+    :mod:`src.shared.python.math_utils.quaternion` so the algorithm and the
+    nlerp-fallback threshold live in exactly one place (issue #7707).
+    """
     if q1 is None:
         raise ValueError("q1 must be provided")
-    q1 = np.asarray(q1, dtype=np.float64)
-    q2 = np.asarray(q2, dtype=np.float64)
-
-    dot = np.dot(q1, q2)
-
-    if dot < 0:
-        q2 = -q2
-        dot = -dot
-
-    if dot > 0.9995:
-        result = q1 + t * (q2 - q1)
-        r_norm = math.sqrt(float(np.dot(result, result)))
-        return result / r_norm
-
-    theta_0 = np.arccos(dot)
-    theta = theta_0 * t
-    sin_theta = np.sin(theta)
-    sin_theta_0 = np.sin(theta_0)
-
-    s1 = np.cos(theta) - dot * sin_theta / sin_theta_0
-    s2 = sin_theta / sin_theta_0
-
-    return s1 * q1 + s2 * q2
+    return _canonical_slerp(q1, q2, t)

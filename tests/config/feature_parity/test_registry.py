@@ -191,6 +191,46 @@ class TestLoaderContracts:
         with pytest.raises(ValueError, match="non-empty"):
             FeatureParityEntry.from_dict("", {"title": "X", "status": "parity"})
 
+    def test_rejects_non_dict_data_branch(self) -> None:
+        with pytest.raises(TypeError, match="must be an object"):
+            FeatureParityEntry.from_dict("x.y", ["not", "a", "dict"])  # type: ignore[arg-type]
+
+    def test_rejects_non_gap_negative_issue_branch(self) -> None:
+        with pytest.raises(ValueError, match="invalid issue number"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "issue": -1}
+            )
+
+    def test_rejects_non_gap_zero_issue_branch(self) -> None:
+        with pytest.raises(ValueError, match="invalid issue number"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "issue": 0}
+            )
+
+    def test_rejects_empty_path_field_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a non-empty string or null"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "pyqt": ""}
+            )
+
+    def test_rejects_non_list_tiles_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": "t1"}
+            )
+
+    def test_rejects_non_string_tile_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": [123]}
+            )
+
+    def test_rejects_empty_string_tile_branch(self) -> None:
+        with pytest.raises(ValueError, match="must be a list of non-empty strings"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "tiles": [""]}
+            )
+
     def test_valid_gap_entry_loads(self) -> None:
         entry = FeatureParityEntry.from_dict(
             "a.b",
@@ -209,6 +249,59 @@ class TestLoaderContracts:
     def test_missing_registry_file_raises(self, tmp_path: Path) -> None:
         with pytest.raises(FileNotFoundError):
             FeatureParityRegistry.load(tmp_path / "nope.json")
+
+    def test_duplicate_tile_id_across_entries_rejected(self, tmp_path: Path) -> None:
+        """Two entries claiming the same launcher tile must raise (not collapse)."""
+        registry_file = tmp_path / "dup_tiles.json"
+        registry_file.write_text(
+            json.dumps(
+                {
+                    "version": "1.0.0",
+                    "features": {
+                        "a.b": {
+                            "title": "A",
+                            "status": "parity",
+                            "tiles": ["shared_tile"],
+                        },
+                        "c.d": {
+                            "title": "C",
+                            "status": "parity",
+                            "tiles": ["shared_tile"],
+                        },
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        with pytest.raises(ValueError, match="Duplicate launcher tile ids") as exc:
+            FeatureParityRegistry.load(registry_file)
+        assert "shared_tile" in str(exc.value)
+
+    def test_unique_tile_ids_load_successfully(self, tmp_path: Path) -> None:
+        """Distinct tile ids across entries load without error."""
+        registry_file = tmp_path / "unique_tiles.json"
+        registry_file.write_text(
+            json.dumps(
+                {
+                    "version": "1.0.0",
+                    "features": {
+                        "a.b": {
+                            "title": "A",
+                            "status": "parity",
+                            "tiles": ["tile_a"],
+                        },
+                        "c.d": {
+                            "title": "C",
+                            "status": "parity",
+                            "tiles": ["tile_c"],
+                        },
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        loaded = FeatureParityRegistry.load(registry_file)
+        assert loaded.covered_tile_ids == frozenset({"tile_a", "tile_c"})
 
     def test_by_status_rejects_unknown(self, registry: FeatureParityRegistry) -> None:
         with pytest.raises(ValueError, match="Unknown parity status"):
