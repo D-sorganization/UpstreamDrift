@@ -473,6 +473,7 @@ class TestMeasurementToolsResponseContract:
 # ──────────────────────────────────────────────────────────────
 
 
+@pytest.mark.unit
 class TestURDFParser:
     """Test the URDF XML parser in the models route."""
 

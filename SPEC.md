@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.465                                            |
+| **Spec Version**        | 1.0.466                                            |
 | **Last Spec Update**    | 2026-06-20                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-20** - Hardened API auth/security cache and secret handling for
+  issue #7740: `src/api/auth/security.py` now rejects unsafe production
+  short-key configurations, preserves fail-closed API-key/password verification
+  for malformed or overlong secrets, removes a dead compatibility shim, and
+  keeps bounded auth-cache eviction deterministic, with focused unit coverage
+  in `tests/unit/api/test_security.py`.
 - **2026-06-20** - Deduplicated the chat WebSocket protocol loop for issue
   #7720: `src/api/routes/chat_ws.py` and the portable chat router factory now
   share one handshake/send/history/new-session/transport-error loop, with
