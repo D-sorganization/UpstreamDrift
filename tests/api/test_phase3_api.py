@@ -640,6 +640,7 @@ class TestURDFParser:
         assert result.joints[0].parent_link == "a"
         assert result.joints[1].parent_link == "b"
 
+    @pytest.mark.unit
     def test_parse_empty_content_raises(self) -> None:
         """Empty URDF content raises a descriptive ValueError."""
         from src.api.routes.models import _parse_urdf
@@ -647,6 +648,7 @@ class TestURDFParser:
         with pytest.raises(ValueError, match="non-empty"):
             _parse_urdf("")
 
+    @pytest.mark.unit
     def test_parse_non_numeric_box_size_raises(self) -> None:
         """A non-numeric float attribute raises ValueError naming the element."""
         from src.api.routes.models import _parse_urdf
@@ -661,6 +663,7 @@ class TestURDFParser:
         with pytest.raises(ValueError, match="box size"):
             _parse_urdf(urdf)
 
+    @pytest.mark.unit
     def test_parse_non_numeric_origin_raises(self) -> None:
         """A non-numeric origin xyz attribute raises ValueError."""
         from src.api.routes.models import _parse_urdf
@@ -676,6 +679,7 @@ class TestURDFParser:
         with pytest.raises(ValueError, match="visual origin xyz"):
             _parse_urdf(urdf)
 
+    @pytest.mark.unit
     def test_parse_short_origin_vector_raises(self) -> None:
         """An origin xyz with fewer than 3 components raises ValueError."""
         from src.api.routes.models import _parse_urdf
@@ -691,6 +695,7 @@ class TestURDFParser:
         with pytest.raises(ValueError, match="3 components"):
             _parse_urdf(urdf)
 
+    @pytest.mark.unit
     def test_parse_empty_axis_vector_raises(self) -> None:
         """An empty joint axis attribute raises ValueError (not a silent [])."""
         from src.api.routes.models import _parse_urdf
@@ -706,6 +711,7 @@ class TestURDFParser:
         with pytest.raises(ValueError, match="joint axis xyz"):
             _parse_urdf(urdf)
 
+    @pytest.mark.unit
     def test_parse_short_rgba_color_raises(self) -> None:
         """An rgba color with fewer than 4 components raises ValueError."""
         from src.api.routes.models import _parse_urdf

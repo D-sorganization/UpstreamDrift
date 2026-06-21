@@ -52,6 +52,7 @@ def test_get_model_urdf_not_found(client: TestClient) -> None:
     assert response.status_code == 404
 
 
+@pytest.mark.unit
 def test_get_model_urdf_basename_fallback(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -73,6 +74,7 @@ def test_get_model_urdf_basename_fallback(
     assert "file not found" in response.json()["detail"].lower()
 
 
+@pytest.mark.unit
 def test_get_model_urdf_ambiguous_basename(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -94,6 +96,7 @@ def test_get_model_urdf_ambiguous_basename(
     assert "a/widget" in detail and "b/widget" in detail
 
 
+@pytest.mark.unit
 def test_get_model_urdf_no_substring_match(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
