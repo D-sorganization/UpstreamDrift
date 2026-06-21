@@ -130,6 +130,125 @@ class TestSafetyMonitor:
         assert monitor._speed_override <= 0.5
 
 
+class TestNearLimitWarnings:
+    """Issue #7740: approaching-limit WARNING must be symmetric on both bounds."""
+
+    @staticmethod
+    def _monitor_with_limits():
+        from src.deployment.realtime import RobotConfig
+        from src.deployment.safety import SafetyLimits, SafetyMonitor
+
+        config = RobotConfig(name="test", n_joints=3)
+        limits = SafetyLimits(
+            max_joint_velocity=np.ones(3) * 10.0,
+            max_joint_torque=np.ones(3) * 100.0,
+            joint_limits_lower=np.full(3, -1.0),
+            joint_limits_upper=np.full(3, 1.0),
+        )
+        return SafetyMonitor(config, limits)
+
+    @staticmethod
+    def _state(positions: np.ndarray):
+        from src.deployment.realtime import RobotState
+
+        return RobotState(
+            timestamp=0.0,
+            joint_positions=positions,
+            joint_velocities=np.zeros(3),
+            joint_torques=np.zeros(3),
+        )
+
+    @pytest.mark.unit
+    def test_near_lower_limit_warns(self) -> None:
+        """A joint just inside the lower limit raises an approaching-limit warning."""
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._monitor_with_limits()
+        # -0.95 is within the 0.1 rad margin of the -1.0 lower limit.
+        status = monitor.check_state(self._state(np.array([-0.95, 0.0, 0.0])))
+
+        assert status.is_safe
+        assert status.level == SafetyStatusLevel.WARNING
+        assert any("lower limit" in w for w in status.warnings)
+
+    @pytest.mark.unit
+    def test_near_upper_limit_still_warns(self) -> None:
+        """The upper-limit warning remains intact alongside the new lower mirror."""
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._monitor_with_limits()
+        status = monitor.check_state(self._state(np.array([0.95, 0.0, 0.0])))
+
+        assert status.level == SafetyStatusLevel.WARNING
+        assert any("upper limit" in w for w in status.warnings)
+
+    @pytest.mark.unit
+    def test_mid_range_no_warning(self) -> None:
+        """A joint comfortably inside both limits raises no approaching warnings."""
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._monitor_with_limits()
+        status = monitor.check_state(self._state(np.zeros(3)))
+
+        assert status.level == SafetyStatusLevel.OK
+        assert status.warnings == []
+
+
+class TestStoppingDistanceSignature:
+    """Issue #7740: get_stopping_distance dropped its unused ``body`` parameter."""
+
+    @staticmethod
+    def _monitor():
+        from src.deployment.realtime import RobotConfig
+        from src.deployment.safety import SafetyMonitor
+
+        return SafetyMonitor(RobotConfig(name="test", n_joints=3))
+
+    @pytest.mark.unit
+    def test_stopping_distance_no_body_param(self) -> None:
+        """The method is callable with state only and returns a finite angle."""
+        from src.deployment.realtime import RobotState
+
+        monitor = self._monitor()
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=np.zeros(3),
+            joint_velocities=np.array([2.0, 0.0, 0.0]),
+            joint_torques=np.zeros(3),
+        )
+        # s = omega^2 / (2 * alpha) = 4 / 4 = 1.0 (rad) with alpha=2.0 rad/s^2.
+        assert monitor.get_stopping_distance(state) == pytest.approx(1.0, rel=1e-3)
+
+    @pytest.mark.unit
+    def test_stopping_distance_rejects_extra_positional_arg(self) -> None:
+        """Passing a body name (old signature) now raises a TypeError."""
+        from src.deployment.realtime import RobotState
+
+        monitor = self._monitor()
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=np.zeros(3),
+            joint_velocities=np.zeros(3),
+            joint_torques=np.zeros(3),
+        )
+        with pytest.raises(TypeError):
+            monitor.get_stopping_distance(state, "ee")  # type: ignore[call-arg]
+
+    @pytest.mark.unit
+    def test_stopping_distance_zero_velocity(self) -> None:
+        """A stationary robot has zero stopping angle."""
+        from src.deployment.realtime import RobotState
+
+        monitor = self._monitor()
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=np.zeros(3),
+            joint_velocities=np.zeros(3),
+            joint_torques=np.zeros(3),
+        )
+        assert monitor.get_stopping_distance(state) == pytest.approx(0.0)
+
+
 class TestCollisionAvoidance:
     """Tests for CollisionAvoidance."""
 

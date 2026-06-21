@@ -70,6 +70,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sorting the whole tree synchronously, and the dead contract-violating
   `_store_cached_dataset` helper was removed. Added filter operator/edge-case
   and ambiguous-name 409 tests.
+- Hardened the deployment safety/realtime layer and the Pinocchio club-target
+  adapter (#7740): `RealTimeController._is_running` is now read/written under a
+  shared lock and cleared in a `try/finally` so a stale `True` cannot survive
+  the abort-raises path; `SafetyMonitor.check_state` raises an approaching-limit
+  WARNING symmetrically on both joint bounds (margin hoisted to
+  `NEAR_LIMIT_MARGIN_RAD`); `SafetyMonitor.get_stopping_distance` dropped its
+  unused `body` parameter and documents that it returns a joint-space braking
+  angle (rad), not a Cartesian distance; the club-target adapter shares the
+  canonical validation tolerance constants instead of re-declaring them and
+  drops a dead `butt_rotmats` re-slice with a corrected comment; added coverage
+  for the resampled-shape-mismatch raw fallback in `load_robneal_target`.
 - Rendered the catch-all 404 route synchronously so unknown deep links show the
   recoverable branded "Page not found" screen immediately instead of racing the
   route-level lazy-loading fallback (#7430).

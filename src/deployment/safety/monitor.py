@@ -14,6 +14,11 @@ if TYPE_CHECKING:
     from src.deployment.realtime import ControlCommand, RobotConfig, RobotState
 
 
+# Margin (rad) from a joint limit at which an approaching-limit WARNING is
+# raised. Applied symmetrically to both the upper and lower joint limits.
+NEAR_LIMIT_MARGIN_RAD = 0.1
+
+
 class SafetyStatusLevel(Enum):
     """Safety status levels."""
 
@@ -119,6 +124,10 @@ class SafetyMonitor:
         status: Current safety status.
     """
 
+    #: Assumed constant angular deceleration (rad/s²) used by
+    #: :meth:`get_stopping_distance` for the joint-space braking-angle estimate.
+    _STOPPING_DECELERATION_RAD_S2 = 2.0
+
     def __init__(
         self,
         robot_config: RobotConfig,
@@ -196,13 +205,24 @@ class SafetyMonitor:
                 joints = list(np.where(upper_violation)[0])
                 violations.append(f"Upper joint limit exceeded on joints {joints}")
 
-        # Check for approaching limits (warnings)
+        # Check for approaching limits (warnings) — symmetric on both bounds.
         if self.limits.joint_limits_upper is not None:
-            margin = 0.1  # 0.1 rad margin
-            near_upper = state.joint_positions > self.limits.joint_limits_upper - margin
+            near_upper = (
+                state.joint_positions
+                > self.limits.joint_limits_upper - NEAR_LIMIT_MARGIN_RAD
+            )
             if np.any(near_upper):
                 joints = list(np.where(near_upper)[0])
                 warnings.append(f"Approaching upper limit on joints {joints}")
+
+        if self.limits.joint_limits_lower is not None:
+            near_lower = (
+                state.joint_positions
+                < self.limits.joint_limits_lower + NEAR_LIMIT_MARGIN_RAD
+            )
+            if np.any(near_lower):
+                joints = list(np.where(near_lower)[0])
+                warnings.append(f"Approaching lower limit on joints {joints}")
 
         # Emergency stop check
         if self._emergency_stop:
@@ -371,28 +391,35 @@ class SafetyMonitor:
     def get_stopping_distance(
         self,
         state: RobotState,
-        body: str,
     ) -> float:
-        """Compute minimum stopping distance for a body.
+        """Estimate the worst-case joint-space stopping angle.
+
+        This is a conservative, body-agnostic heuristic. A true per-body
+        Cartesian stopping *distance* would require the robot's forward
+        kinematics / Jacobian to map joint velocities (rad/s) to end-effector
+        velocity (m/s), which this monitor does not hold. The previous
+        signature took a ``body`` name that was never read (every body got the
+        same answer) and mixed rad/s with m/s² to claim "meters"; both were
+        misleading, so the parameter was removed (issue #7740).
+
+        The returned value is the braking *angle* of the fastest joint under a
+        constant angular deceleration, ``s = ω² / (2·α)``, expressed in
+        radians. Callers that need a Cartesian clearance must multiply by the
+        relevant link length using their own kinematics model.
 
         Args:
             state: Current robot state.
-            body: Name of the body.
 
         Returns:
-            Minimum stopping distance in meters.
+            Worst-case joint braking angle in radians (>= 0).
         """
-        # Simplified: estimate from maximum velocity
-        # Full implementation would use dynamics model
         if not (state is not None):
             raise ValueError("state must be provided")
-        max_vel = float(np.max(np.abs(state.joint_velocities)))
-        max_decel = 2.0  # m/s² typical deceleration
+        max_joint_vel = float(np.max(np.abs(state.joint_velocities)))  # rad/s
+        max_decel = self._STOPPING_DECELERATION_RAD_S2  # rad/s²
 
-        # s = v² / (2a)
-        stopping_distance = (max_vel**2) / (2 * max_decel)
-
-        return stopping_distance
+        # s = ω² / (2·α) — units: (rad/s)² / (rad/s²) = rad.
+        return (max_joint_vel**2) / (2 * max_decel)
 
     def set_speed_override(self, factor: float) -> None:
         """Set speed reduction factor.

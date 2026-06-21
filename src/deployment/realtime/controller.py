@@ -162,6 +162,10 @@ class RealTimeController:
         # Condition that notifies waiters whenever a new state is stored (#6975)
         self._state_cond = threading.Condition()
         self._command_lock = threading.Lock()
+        # Guards the _is_running flag shared between start()/stop() and the
+        # control-loop thread so a stale True cannot survive the abort path
+        # (issue #7740). All reads and writes of _is_running go through it.
+        self._running_lock = threading.Lock()
         # Separate lock for timing counters so stats reads don't block the control loop
         self._stats_lock = threading.Lock()
         # Lock for _sim_state to prevent racy read-modify-write (#6977)
@@ -175,7 +179,8 @@ class RealTimeController:
     @property
     def is_running(self) -> bool:
         """Check if control loop is running."""
-        return self._is_running
+        with self._running_lock:
+            return self._is_running
 
     @property
     def aborted_on_failure(self) -> bool:
@@ -191,7 +196,7 @@ class RealTimeController:
         Returns:
             True if connection successful.
         """
-        if not (robot_config is not None):
+        if robot_config is None:
             raise ValueError("robot_config must be provided")
         if self._is_running:
             raise RuntimeError(
@@ -292,12 +297,13 @@ class RealTimeController:
             raise RuntimeError("Must connect to robot before starting")
         if self._control_callback is None:
             raise RuntimeError("Must set control callback before starting")
-        if self._is_running:
-            return
+        with self._running_lock:
+            if self._is_running:
+                return
+            self._is_running = True
 
         self._should_stop = False
         self._aborted_on_failure = False
-        self._is_running = True
         self._start_time = time.perf_counter()
         with self._stats_lock:
             self._cycle_times.clear()
@@ -339,17 +345,24 @@ class RealTimeController:
                 )
             self._control_thread = None
 
-        self._is_running = False
+        with self._running_lock:
+            self._is_running = False
 
         # Send zero command only after the loop is confirmed stopped.
         self._command_zero_torque()
 
     def _control_loop(self) -> None:
-        """Main real-time control loop."""
+        """Main real-time control loop.
+
+        ``_is_running`` is cleared in a ``finally`` under ``_running_lock`` so a
+        stale ``True`` cannot survive even the abort-raises path where
+        ``_run_control_loop`` propagates an exception (issue #7740).
+        """
         try:
             self._run_control_loop()
         finally:
-            self._is_running = False
+            with self._running_lock:
+                self._is_running = False
 
     def _run_control_loop(self) -> None:
         """Run control cycles until stopped or failure-aborted."""
@@ -505,7 +518,7 @@ class RealTimeController:
         Args:
             command: Control command to send.
         """
-        if not (command is not None):
+        if command is None:
             raise ValueError("command must be provided")
         if self.comm_type == CommunicationType.SIMULATION:
             # Simulated: command is "sent"
@@ -615,7 +628,7 @@ class RealTimeController:
         Returns:
             Robot state or None if timeout.
         """
-        if not (timeout is not None):
+        if timeout is None:
             raise ValueError("timeout must be provided")
         with self._state_cond:
             initial_state = self._last_state
