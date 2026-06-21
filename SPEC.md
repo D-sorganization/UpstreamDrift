@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.466                                            |
+| **Spec Version**        | 1.0.467                                            |
 | **Last Spec Update**    | 2026-06-21                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-21** - Hardened deployment safety, realtime controller, and
+  Pinocchio club-target contracts for deferred #7740 findings:
+  `SafetyMonitor` now reports stopping distance as a joint-space braking angle
+  and warns near both lower and upper joint limits, `RealTimeController`
+  synchronizes `_is_running` reads/writes and clears it in the control-loop
+  `finally` path, and the Pinocchio club-target adapter reuses canonical
+  validation tolerances while preserving raw fallback coverage for resampled
+  shape mismatches and missing fields.
 - **2026-06-21** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
   non-positive speed factors and shares duration/timestep bounds with
