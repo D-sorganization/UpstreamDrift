@@ -50,3 +50,64 @@ def test_get_model_urdf_not_found(client: TestClient) -> None:
     """Test getting parsed URDF data for non-existent model."""
     response = client.get("/models/unknown_model/urdf")
     assert response.status_code == 404
+
+
+def test_get_model_urdf_basename_fallback(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A disambiguated 'dir/name' entry resolves by exact basename."""
+    import src.api.routes.models as models_mod
+
+    monkeypatch.setattr(
+        models_mod,
+        "discover_models",
+        lambda: [
+            {"name": "sub/widget", "format": "urdf", "path": "missing/widget.urdf"},
+        ],
+    )
+    # Exact basename "widget" matches the single "sub/widget" entry. The file
+    # does not exist, so resolution gets past the name lookup and 404s on the
+    # missing file (deterministic basename match, not a substring guess).
+    response = client.get("/models/widget/urdf")
+    assert response.status_code == 404
+    assert "file not found" in response.json()["detail"].lower()
+
+
+def test_get_model_urdf_ambiguous_basename(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Two entries sharing a basename yield a 404 listing the candidates."""
+    import src.api.routes.models as models_mod
+
+    monkeypatch.setattr(
+        models_mod,
+        "discover_models",
+        lambda: [
+            {"name": "a/widget", "format": "urdf", "path": "a/widget.urdf"},
+            {"name": "b/widget", "format": "urdf", "path": "b/widget.urdf"},
+        ],
+    )
+    response = client.get("/models/widget/urdf")
+    assert response.status_code == 404
+    detail = response.json()["detail"]
+    assert "ambiguous" in detail.lower()
+    assert "a/widget" in detail and "b/widget" in detail
+
+
+def test_get_model_urdf_no_substring_match(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A substring of a model name no longer resolves (deterministic match)."""
+    import src.api.routes.models as models_mod
+
+    monkeypatch.setattr(
+        models_mod,
+        "discover_models",
+        lambda: [
+            {"name": "simple_pendulum", "format": "urdf", "path": "x/sp.urdf"},
+        ],
+    )
+    # "pendulum" used to match via the old substring fallback; now it 404s.
+    response = client.get("/models/pendulum/urdf")
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower()
