@@ -372,6 +372,12 @@ def simulate_with_coefficients(  # noqa: C901
         raise ValueError(msg)
 
     # ----- Allocate output buffers ------------------------------------- #
+    # NOTE (issue #7740): unlike Drake/MuJoCo — which resample onto the shared
+    # ``build_output_grid`` (pinned endpoint) — this ``t_grid`` is Pinocchio's
+    # fixed-step *integration clock*: each ``t_grid[i-1]`` is the time the
+    # explicit step is taken at ``opts.dt`` spacing. Pinning the endpoint here
+    # would change the integration timeline, so the grid stays ``arange * dt``
+    # with ceil-snapping for non-divisible ``(t_final, dt)``.
     n_steps = int(round(opts.t_final / opts.dt))
     if not np.isclose(n_steps * opts.dt, opts.t_final, rtol=1e-9, atol=1e-12):
         # Allow non-exact division by snapping; warn through meta.

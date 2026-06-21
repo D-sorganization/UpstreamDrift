@@ -273,10 +273,7 @@ class _SessionMixin:
             ("scale", self.s_scale),
         ]:
             if attr in tf:
-                with QSignalBlocker(widget.spin):
-                    widget.set_value(float(tf[attr]))
-                with QSignalBlocker(widget.slider):
-                    widget.slider.setValue(int(round(float(tf[attr]) / widget._scale)))
+                widget.set_value_silent(float(tf[attr]))
                 setattr(self.transform, attr, float(tf[attr]))
         if "pivot" in tf:
             self.transform.pivot = tuple(tf["pivot"])

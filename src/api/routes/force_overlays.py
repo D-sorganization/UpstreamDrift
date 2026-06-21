@@ -156,6 +156,49 @@ def _is_filtered_out(config: ForceOverlayRequest, body_name: str) -> bool:
     return bool(config.body_filter and body_name not in config.body_filter)
 
 
+def _make_force_vector(
+    *,
+    body_name: str,
+    force_type: str,
+    origin: list[float],
+    direction: list[float],
+    magnitude: float,
+    show_labels: bool,
+    unit: str,
+    label_value: float | None = None,
+) -> ForceVector3D:
+    """Construct a :class:`ForceVector3D` with consistent color and labelling.
+
+    Centralizes the identical construction previously duplicated across the
+    applied-torque, gravity, and demo branches. ``label_value`` defaults to
+    ``magnitude`` but may differ (e.g. applied torque labels the *signed*
+    value while the magnitude is its absolute value).
+
+    Args:
+        body_name: Body the force acts on.
+        force_type: One of the keys in :data:`FORCE_TYPE_COLORS`.
+        origin: Application point ``[x, y, z]``.
+        direction: Force direction ``[dx, dy, dz]``.
+        magnitude: Force magnitude.
+        show_labels: Whether to attach a display label.
+        unit: Unit suffix for the label (e.g. ``"N"`` or ``"N*m"``).
+        label_value: Value shown in the label; defaults to ``magnitude``.
+
+    Returns:
+        A populated :class:`ForceVector3D`.
+    """
+    shown = magnitude if label_value is None else label_value
+    return ForceVector3D(
+        body_name=body_name,
+        force_type=force_type,
+        origin=origin,
+        direction=direction,
+        magnitude=magnitude,
+        color=FORCE_TYPE_COLORS[force_type],
+        label=f"{shown:.1f} {unit}" if show_labels else None,
+    )
+
+
 def _build_applied_torque_vectors(
     config: ForceOverlayRequest,
     torques: list[Any],
@@ -193,14 +236,15 @@ def _build_applied_torque_vectors(
         direction = [0.0, 0.0, 1.0] if torque_val > 0 else [0.0, 0.0, -1.0]
 
         vectors.append(
-            ForceVector3D(
+            _make_force_vector(
                 body_name=body_name,
                 force_type="applied",
                 origin=[0.0, y_pos, 0.0],
                 direction=direction,
                 magnitude=abs(torque_val),
-                color=FORCE_TYPE_COLORS["applied"],
-                label=f"{torque_val:.1f} N*m" if config.show_labels else None,
+                show_labels=config.show_labels,
+                unit="N*m",
+                label_value=torque_val,
             )
         )
     return vectors
@@ -235,14 +279,14 @@ def _build_gravity_vectors(
         y_pos = 0.5 + i * 0.3
         gravity_mag = GRAVITY * (0.5 + 0.1 * i)
         vectors.append(
-            ForceVector3D(
+            _make_force_vector(
                 body_name=body_name,
                 force_type="gravity",
                 origin=[0.0, y_pos, 0.0],
                 direction=[0.0, -1.0, 0.0],
                 magnitude=gravity_mag,
-                color=FORCE_TYPE_COLORS["gravity"],
-                label=f"{gravity_mag:.1f} N" if config.show_labels else None,
+                show_labels=config.show_labels,
+                unit="N",
             )
         )
     return vectors
@@ -326,28 +370,28 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
         if "applied" in config.force_types or "all" in config.force_types:
             mag = 10.0 + i * 5.0
             vectors.append(
-                ForceVector3D(
+                _make_force_vector(
                     body_name=body,
                     force_type="applied",
                     origin=[0.0, y_pos, 0.0],
                     direction=[math.sin(i * 0.5), 0.0, math.cos(i * 0.5)],
                     magnitude=mag,
-                    color=FORCE_TYPE_COLORS["applied"],
-                    label=f"{mag:.1f} N*m" if config.show_labels else None,
+                    show_labels=config.show_labels,
+                    unit="N*m",
                 )
             )
 
         if "gravity" in config.force_types or "all" in config.force_types:
             grav_mag = GRAVITY * (1.0 + 0.2 * i)
             vectors.append(
-                ForceVector3D(
+                _make_force_vector(
                     body_name=body,
                     force_type="gravity",
                     origin=[0.0, y_pos, 0.0],
                     direction=[0.0, -1.0, 0.0],
                     magnitude=grav_mag,
-                    color=FORCE_TYPE_COLORS["gravity"],
-                    label=f"{grav_mag:.1f} N" if config.show_labels else None,
+                    show_labels=config.show_labels,
+                    unit="N",
                 )
             )
 

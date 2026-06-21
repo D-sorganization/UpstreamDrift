@@ -42,6 +42,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from src.shared.python.motion_matching.output_time_grid import build_output_grid
 from src.shared.python.motion_matching.polynomial_torque import (
     COEFFS_PER_JOINT,
 )
@@ -304,10 +305,14 @@ def _resolve_world_pose(
 def _sample_grid(
     simulation_time_s: float, sample_rate_hz: float
 ) -> NDArray[np.float64]:
-    """Build the canonical output time grid: ``0 <= t <= simulation_time_s``."""
-    dt = 1.0 / sample_rate_hz
-    n = int(round(simulation_time_s * sample_rate_hz)) + 1
-    return np.arange(n, dtype=np.float64) * dt
+    """Build the canonical output time grid: ``0 <= t <= simulation_time_s``.
+
+    Delegates to the shared :func:`build_output_grid` so every engine uses one
+    grid builder with an aligned, pinned endpoint (issue #7740). For
+    integer-divisible ``(T, rate)`` this is bit-identical to the previous
+    ``np.arange(N) * (1 / rate)`` construction.
+    """
+    return build_output_grid(simulation_time_s, sample_rate_hz)
 
 
 def _resolve_n_actuators(plant: MultibodyPlant) -> int:
@@ -413,11 +418,13 @@ def _record_rollout(
 
 
 @precondition(
-    lambda theta, *args, **kwargs: bool(theta.size % 7 == 0),
+    # ``np.asarray`` so list/tuple ``theta`` doesn't crash on ``.size`` before
+    # the body normalizes the input.
+    lambda theta, *args, **kwargs: bool(np.asarray(theta).size % 7 == 0),
     "theta length must be a multiple of 7",
 )
 @precondition(
-    lambda theta, *args, **kwargs: bool(np.all(np.isfinite(theta))),
+    lambda theta, *args, **kwargs: bool(np.all(np.isfinite(np.asarray(theta)))),
     "theta must be finite",
 )
 @precondition(

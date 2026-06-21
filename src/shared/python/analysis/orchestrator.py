@@ -1120,15 +1120,28 @@ class AnalysisOrchestrator:
         value: float,
         direction: str = "both",
     ) -> list[int]:
-        diff = data - value
-        crossings: list[int] = []
-        for idx in range(len(diff) - 1):
-            crosses = diff[idx] * diff[idx + 1] <= 0
-            positive = diff[idx] < diff[idx + 1] and direction in ("positive", "both")
-            negative = diff[idx] > diff[idx + 1] and direction in ("negative", "both")
-            if crosses and (positive or negative):
-                crossings.append(idx)
-        return crossings
+        diff = np.asarray(data, dtype=np.float64) - value
+        if diff.size < 2:
+            return []
+
+        left = diff[:-1]
+        right = diff[1:]
+        # A crossing occurs when consecutive samples straddle (or touch) the
+        # target value. ``positive`` selects rising segments, ``negative``
+        # falling ones; a flat segment (left == right) matches neither, which
+        # mirrors the original element-wise logic exactly.
+        crosses = left * right <= 0.0
+        rising = left < right
+        falling = left > right
+        if direction == "positive":
+            direction_mask = rising
+        elif direction == "negative":
+            direction_mask = falling
+        else:  # "both"
+            direction_mask = rising | falling
+
+        selected = np.flatnonzero(crosses & direction_mask)
+        return [int(idx) for idx in selected]
 
     @staticmethod
     def _crossing_alpha(left: float, right: float, value: float) -> float:

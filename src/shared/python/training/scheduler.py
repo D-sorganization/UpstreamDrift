@@ -30,7 +30,7 @@ from .contracts import ProgressSink
 from .errors import CompatibilityError, JobNotFoundError, TrainingError
 from .identifiers import JobId, new_job_id, new_run_id
 from .job import RunResult, TrainingJob
-from .registry import JobRegistry
+from .registry import JobFilter, JobRegistry
 from .runtime.driver import Driver, JobHandle
 from .runtime.progress_sinks import NullProgressSink
 from .runtime.runner_registry import RunnerRegistry
@@ -395,6 +395,29 @@ class Scheduler:
         """Convenience: registry passthrough."""
 
         return self._registry.get(job_id)
+
+    def has(self, job_id: JobId) -> bool:
+        """``True`` when ``job_id`` is registered. Does not raise.
+
+        Facade passthrough so callers don't reach through ``scheduler.registry``
+        (Law of Demeter).
+        """
+
+        return self._registry.has(job_id)
+
+    def list_jobs(
+        self,
+        *,
+        status: TrainingStatus | None = None,
+        predicate: JobFilter | None = None,
+    ) -> tuple[TrainingJob, ...]:
+        """Snapshot list of jobs, optionally filtered.
+
+        Facade passthrough to :meth:`JobRegistry.list` so callers don't reach
+        through ``scheduler.registry`` (Law of Demeter).
+        """
+
+        return self._registry.list(status=status, predicate=predicate)
 
     def shutdown(self, *, wait: bool = True) -> None:
         """Tear the scheduler down. Cancels and joins every in-flight job."""

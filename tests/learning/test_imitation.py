@@ -15,6 +15,7 @@ _TEST_RNG_SEED = 0
 
 @pytest.fixture(autouse=True)
 def _seed_numpy_rng() -> None:
+    """Seed the legacy global RNG so ``np.random.randn`` draws are deterministic."""
     np.random.seed(_TEST_RNG_SEED)
 
 
