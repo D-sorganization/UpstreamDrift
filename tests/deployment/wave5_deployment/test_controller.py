@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import ast
+import inspect
+import textwrap
 import time
 
 import numpy as np
@@ -98,6 +101,22 @@ class TestConnect:
         c.disconnect()
         assert not c.is_connected
         assert c._config is None
+
+    @pytest.mark.parametrize("method_name", ["connect", "disconnect"])
+    def test_running_state_reads_go_through_locked_property(
+        self, method_name: str
+    ) -> None:
+        """connect/disconnect must not bypass the _is_running lock (#7740)."""
+        method = getattr(RealTimeController, method_name)
+        tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
+        direct_reads = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Attribute)
+            and node.attr == "_is_running"
+            and isinstance(node.ctx, ast.Load)
+        ]
+        assert direct_reads == []
 
 
 class TestStartStop:
