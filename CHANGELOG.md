@@ -53,6 +53,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Tightened the feature-parity registry loader and reconciled stale issue refs
+  (deferred P2 findings from #7740): `FeatureParityEntry.from_dict` now rejects a
+  non-string `notes` field and rejects a truthy `pending_decision` on any
+  non-`exempt` entry (it is exemption-scoped). The duplicated positive-integer
+  issue-number predicate is extracted into a shared `_is_valid_issue` helper used
+  by both the gap and non-gap branches. The two parity rows that still carried
+  open-issue links — `analysis.static_plots` (#7449) and
+  `simulation.shot_tracer` (#7456), both since closed completed — drop the `issue`
+  field (provenance preserved in `notes`); the generated parity matrix doc is
+  regenerated to match.
 - Hardened the simulation WebSocket and data-explorer API routes (deferred P2
   findings from #7740): the WS start guard now rejects a non-positive
   `speed_factor` instead of silently clamping it to 1.0, and its duration /

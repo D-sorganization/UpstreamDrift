@@ -35,6 +35,16 @@ REGISTRY_PATH = CONFIG_DIR / "feature_parity.json"
 VALID_STATUSES = frozenset({"parity", "gap", "exempt"})
 
 
+def _is_valid_issue(value: Any) -> bool:
+    """True when ``value`` is a positive-integer GitHub issue number.
+
+    ``bool`` is a subclass of ``int`` in Python, so ``True``/``False`` would
+    otherwise sneak through an ``isinstance(value, int)`` check; reject them
+    explicitly.
+    """
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
 @dataclass(frozen=True)
 class FeatureParityEntry:
     """A single feature-parity registry entry.
@@ -99,14 +109,12 @@ class FeatureParityEntry:
 
         issue = data.get("issue")
         if status == "gap":
-            if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
+            if not _is_valid_issue(issue):
                 raise ValueError(
                     f"Gap entry '{feature_id}' requires a positive integer "
                     f"'issue' number, got {issue!r}"
                 )
-        elif issue is not None and (
-            not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0
-        ):
+        elif issue is not None and not _is_valid_issue(issue):
             raise ValueError(f"Entry '{feature_id}' has invalid issue number {issue!r}")
 
         reason = data.get("reason")
@@ -132,6 +140,22 @@ class FeatureParityEntry:
                 f"non-empty strings"
             )
 
+        # pending_decision is exemption-scoped: it flags an exempt entry whose
+        # exemption awaits the #7460 decision. A truthy value on any other
+        # status is a registry authoring error.
+        pending_decision = data.get("pending_decision", False)
+        if pending_decision and status != "exempt":
+            raise ValueError(
+                f"Entry '{feature_id}' sets 'pending_decision' but status is "
+                f"{status!r}; pending_decision is only valid for 'exempt' entries"
+            )
+
+        notes = data.get("notes", "")
+        if not isinstance(notes, str):
+            raise ValueError(
+                f"Entry '{feature_id}' field 'notes' must be a string, got {notes!r}"
+            )
+
         return cls(
             feature_id=feature_id,
             title=title.strip(),
@@ -141,9 +165,9 @@ class FeatureParityEntry:
             web=data.get("web"),
             issue=issue,
             reason=reason.strip() if isinstance(reason, str) else None,
-            pending_decision=bool(data.get("pending_decision", False)),
+            pending_decision=bool(pending_decision),
             tiles=tuple(tiles_raw),
-            notes=data.get("notes", ""),
+            notes=notes,
         )
 
     @property

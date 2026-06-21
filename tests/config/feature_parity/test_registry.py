@@ -231,6 +231,65 @@ class TestLoaderContracts:
                 "x.y", {"title": "X", "status": "parity", "tiles": [""]}
             )
 
+    @pytest.mark.unit
+    def test_pending_decision_on_non_exempt_rejected(self) -> None:
+        with pytest.raises(ValueError, match="pending_decision is only valid"):
+            FeatureParityEntry.from_dict(
+                "x.y",
+                {"title": "X", "status": "parity", "pending_decision": True},
+            )
+
+    @pytest.mark.unit
+    def test_pending_decision_on_gap_rejected(self) -> None:
+        with pytest.raises(ValueError, match="pending_decision is only valid"):
+            FeatureParityEntry.from_dict(
+                "x.y",
+                {
+                    "title": "X",
+                    "status": "gap",
+                    "issue": 7449,
+                    "pending_decision": True,
+                },
+            )
+
+    @pytest.mark.unit
+    def test_pending_decision_on_exempt_allowed(self) -> None:
+        entry = FeatureParityEntry.from_dict(
+            "x.y",
+            {
+                "title": "X",
+                "status": "exempt",
+                "reason": "Desktop-only; pending #7460",
+                "pending_decision": True,
+            },
+        )
+        assert entry.pending_decision is True
+
+    @pytest.mark.unit
+    def test_falsy_pending_decision_on_non_exempt_allowed(self) -> None:
+        # An explicit falsy pending_decision must not trip the exempt-scope check.
+        entry = FeatureParityEntry.from_dict(
+            "x.y",
+            {"title": "X", "status": "parity", "pending_decision": False},
+        )
+        assert entry.pending_decision is False
+
+    @pytest.mark.unit
+    def test_non_string_notes_rejected(self) -> None:
+        with pytest.raises(ValueError, match="'notes' must be a string"):
+            FeatureParityEntry.from_dict(
+                "x.y", {"title": "X", "status": "parity", "notes": 123}
+            )
+
+    @pytest.mark.unit
+    def test_string_notes_accepted(self) -> None:
+        entry = FeatureParityEntry.from_dict(
+            "x.y",
+            {"title": "X", "status": "parity", "notes": "clarifying note"},
+        )
+        assert entry.notes == "clarifying note"
+
+    @pytest.mark.unit
     def test_valid_gap_entry_loads(self) -> None:
         entry = FeatureParityEntry.from_dict(
             "a.b",
