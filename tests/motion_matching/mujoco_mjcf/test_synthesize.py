@@ -161,6 +161,55 @@ def test_rejects_failed_solver_status(monkeypatch) -> None:
         )
 
 
+def test_accepts_warning_solver_status(monkeypatch) -> None:
+    """``solver_status='warning'`` is a converged-but-noisy rollout, not an error."""
+    theta, sim_opts = _theta_zero_full()
+    align = AlignOptions(
+        simulation_time_s=sim_opts.T_s, sample_rate_hz=sim_opts.output_rate_hz
+    )
+
+    real_sim_out = simulate_with_coefficients(theta, sim_opts)
+    warning_sim_out = replace(real_sim_out, solver_status="warning")
+
+    monkeypatch.setattr(
+        mj_synthesize,
+        "simulate_with_coefficients",
+        lambda theta_arr, opts, initial_pose=None: warning_sim_out,
+    )
+
+    target = mj_synthesize.synthesize_target_from_coefficients(
+        theta, align, sim_options=sim_opts
+    )
+    assert isinstance(target, ClubTarget)
+
+
+def test_rejects_legacy_ok_solver_status(monkeypatch) -> None:
+    """The dead ``'ok'`` literal is no longer accepted (issue #7740).
+
+    ``simulate_with_coefficients`` never emits ``'ok'``; treating it as a
+    success masked a real status mismatch. It must now raise like any other
+    non-converged status.
+    """
+    theta, sim_opts = _theta_zero_full()
+    align = AlignOptions(
+        simulation_time_s=sim_opts.T_s, sample_rate_hz=sim_opts.output_rate_hz
+    )
+
+    real_sim_out = simulate_with_coefficients(theta, sim_opts)
+    ok_sim_out = replace(real_sim_out, solver_status="ok")
+
+    monkeypatch.setattr(
+        mj_synthesize,
+        "simulate_with_coefficients",
+        lambda theta_arr, opts, initial_pose=None: ok_sim_out,
+    )
+
+    with pytest.raises(RuntimeError, match="solver_status"):
+        mj_synthesize.synthesize_target_from_coefficients(
+            theta, align, sim_options=sim_opts
+        )
+
+
 def test_round_trip_matches_simulate_clubhead_exactly() -> None:
     """``synthesize.clubhead`` equals ``simulate.clubhead`` byte-for-byte.
 

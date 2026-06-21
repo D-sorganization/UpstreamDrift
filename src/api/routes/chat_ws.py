@@ -20,6 +20,7 @@ Deduplication
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import os
 from typing import Any
@@ -239,13 +240,24 @@ async def _handle_index_codebase(
         raise
     except Exception:  # noqa: BLE001
         logger.exception("Error indexing codebase")
-        await websocket.send_json(
-            {
-                "type": "index_status",
-                "state": "error",
-                "detail": _INTERNAL_ERROR_DETAIL,
-            }
-        )
+        # The recovery frame is best-effort: the socket may already be torn
+        # down, in which case ``send_json`` raises (RuntimeError once the
+        # ASGI send channel is closed, or a transport error). Suppress those
+        # so the original failure isn't masked by a secondary exception.
+        with contextlib.suppress(
+            WebSocketDisconnect,
+            ConnectionError,
+            TimeoutError,
+            OSError,
+            RuntimeError,
+        ):
+            await websocket.send_json(
+                {
+                    "type": "index_status",
+                    "state": "error",
+                    "detail": _INTERNAL_ERROR_DETAIL,
+                }
+            )
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────

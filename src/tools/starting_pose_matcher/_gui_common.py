@@ -397,6 +397,23 @@ class LabelledControl(QWidget):
     def set_value(self, v: float) -> None:
         self.spin.setValue(v)
 
+    def set_value_silent(self, v: float) -> None:
+        """Set the value without emitting ``valueChanged`` on spin or slider.
+
+        Encapsulates the spin/slider/scale coupling so callers (e.g. session
+        restore) don't have to reach into the private ``_scale`` attribute or
+        poke ``spin``/``slider`` directly. Used when programmatically applying
+        a stored value that must not re-trigger transform-change handlers.
+        """
+        spin_blocked = self.spin.blockSignals(True)
+        slider_blocked = self.slider.blockSignals(True)
+        try:
+            self.spin.setValue(v)
+            self.slider.setValue(int(round(v / self._scale)))
+        finally:
+            self.spin.blockSignals(spin_blocked)
+            self.slider.blockSignals(slider_blocked)
+
     def setEnabled(self, ok: bool) -> None:  # noqa: N802 (Qt name)
         self.spin.setEnabled(ok)
         self.slider.setEnabled(ok)

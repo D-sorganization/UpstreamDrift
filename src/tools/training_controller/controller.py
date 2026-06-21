@@ -211,7 +211,7 @@ class TrainingDashboardController:
                     raise TypeError(
                         f"job_id must be a JobId or None (got {type(job_id).__name__})"
                     )
-                if not self._scheduler.registry.has(job_id):
+                if not self._scheduler.has(job_id):
                     raise KeyError(f"cannot select unknown job_id {job_id.value!r}")
                 self._selected_job_id = job_id
         self._notify()
@@ -408,7 +408,7 @@ class TrainingDashboardController:
         # than letting the model builder raise.
         with self._lock:
             if self._selected_job_id is not None and not (
-                self._scheduler.registry.has(self._selected_job_id)
+                self._scheduler.has(self._selected_job_id)
             ):
                 self._selected_job_id = None
         self._notify()
@@ -429,7 +429,7 @@ class TrainingDashboardController:
         now = float(self._clock())
         jobs = tuple(
             job_row_from_training_job(job, now=now)
-            for job in self._scheduler.registry.list()
+            for job in self._scheduler.list_jobs()
         )
         selected = self._selected_job_id
         if selected is not None and not _row_index(jobs, selected.value):
