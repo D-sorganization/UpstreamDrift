@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.models import router
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def app() -> FastAPI:
