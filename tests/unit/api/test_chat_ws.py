@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 from src.api.routes import chat_ws
 
-pytestmark = pytest.mark.anyio
+pytestmark = [pytest.mark.unit, pytest.mark.anyio]
 
 _LAUNCHER_TOKEN = "test-launcher-token"
 _WS_HEADERS = {"origin": "http://localhost"}

@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.465                                            |
-| **Last Spec Update**    | 2026-06-20                                         |
+| **Spec Version**        | 1.0.466                                            |
+| **Last Spec Update**    | 2026-06-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-06-21** - Hardened the simulation WebSocket and Data Explorer API
+  routes for deferred #7740 findings: WebSocket start validation now rejects
+  non-positive speed factors and shares duration/timestep bounds with
+  `SimulationRequest`, simulation stats access is centralized behind one
+  helper, Data Explorer dataset lookup rejects glob metacharacters, recursive
+  dataset listing is paginated and bounded, and the dead cache helper was
+  removed. Focused unit-marked tests cover the new WebSocket success/error
+  branches, filter operators, ambiguous dataset names, glob rejection, and
+  bounded listing behavior.
 - **2026-06-20** - Deduplicated the chat WebSocket protocol loop for issue
   #7720: `src/api/routes/chat_ws.py` and the portable chat router factory now
   share one handshake/send/history/new-session/transport-error loop, with
@@ -1851,6 +1860,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-06-20 | 1.0.465 | Added isolated transition hazard-rule coverage for issue #7715. The MDP transition tests now pin hazard penalties and DbC guard behavior directly so policy updates cannot bypass invalid-state validation. |
 | 2026-06-20 | 1.0.465 | Hoisted OpenSim Manager/Integrator construction out of the perturbation per-step loop for issue #7713, preserving analyzer behavior while avoiding repeated runtime setup on every simulated step. |
 | 2026-06-20 | 1.0.465 | Added chat WebSocket failure-path coverage for issue #7721. `tests/unit/api/test_chat_ws.py` now exercises `refresh_models` provider exceptions and `index_codebase` codemap rebuild exceptions, asserting sanitized client-facing error frames, server-side traceback logging, and continued socket usability after a model refresh failure. |

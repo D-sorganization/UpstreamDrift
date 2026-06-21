@@ -53,6 +53,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Hardened the simulation WebSocket and data-explorer API routes (deferred P2
+  findings from #7740): the WS start guard now rejects a non-positive
+  `speed_factor` instead of silently clamping it to 1.0, and its duration /
+  timestep bounds reuse the Pydantic `SimulationRequest` constants
+  (`MAX_SIMULATION_DURATION` / `MAX_TIMESTEP` / `MIN_TIMESTEP`) so a value
+  between the old looser WS caps and the model caps no longer passes the WS
+  layer only to fail validation with a generic error. The repeated
+  `app.state.simulation_service.stats` reach-through chain was collapsed into a
+  single `_resolve_sim_stats` accessor, and the previously-untested
+  `_run_simulation_loop` success paths (frame emission/throttle, pause/resume,
+  real-time pacing, live-analysis) now have direct async coverage. In the data
+  explorer, `_find_dataset_path` rejects glob metacharacters and matches by
+  exact filename (closing a wildcard existence oracle), `GET /datasets` bounds
+  its recursive scan with `os.scandir` + offset/limit and a hard cap instead of
+  sorting the whole tree synchronously, and the dead contract-violating
+  `_store_cached_dataset` helper was removed. Added filter operator/edge-case
+  and ambiguous-name 409 tests.
 - Rendered the catch-all 404 route synchronously so unknown deep links show the
   recoverable branded "Page not found" screen immediately instead of racing the
   route-level lazy-loading fallback (#7430).
