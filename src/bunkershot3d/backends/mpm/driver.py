@@ -60,24 +60,31 @@ class MPMDriver:
                 </body>
         """
 
-        # Add grains — seeded for reproducibility (mirrors Chrono backend seed=42)
+        # Add grains — seeded for reproducibility (mirrors Chrono backend seed=42).
+        # Accumulate the per-grain blocks in a list and ``"".join`` once instead
+        # of ``xml += ...`` in the loop, which is O(N^2) for up to 1000 grains.
+        parts = [xml]
         rng = np.random.default_rng(seed=42)
         for i in range(num_grains):
             px = rng.uniform(-lx / 2 + r, lx / 2 - r)
             py = rng.uniform(-ly / 2 + r, ly / 2 - r)
             pz = rng.uniform(r, lz - r)
-            xml += f"""
+            parts.append(
+                f"""
                 <body name="g{i}" pos="{px} {py} {pz}">
                     <freejoint/>
                     <geom type="sphere" size="{r}" rgba="0.9 0.8 0.5 1"/>
                 </body>
             """
+            )
 
-        xml += """
+        parts.append(
+            """
             </worldbody>
         </mujoco>
         """
-        return xml
+        )
+        return "".join(parts)
 
     def setup(self) -> None:
         """Setup the MuJoCo model."""

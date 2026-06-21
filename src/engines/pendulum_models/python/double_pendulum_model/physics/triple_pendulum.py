@@ -13,6 +13,8 @@ if typing.TYPE_CHECKING:
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 
+from ._rk4 import rk4_step
+
 GRAVITATIONAL_ACCELERATION = GRAVITY_M_S2
 DAMPING_DEFAULT = (0.35, 0.3, 0.25)
 
@@ -396,50 +398,35 @@ class TriplePendulumDynamics:
         if not (_t is not None):
             raise ValueError("_t must be provided")
 
-        def rk4_increment(
-            current_state: TriplePendulumState,
-            scale: float,
-            derivs: tuple[float, float, float, float, float, float],
-        ) -> TriplePendulumState:
-            """Apply a scaled RK4 derivative increment to the state."""
-            if not (current_state is not None):
-                raise ValueError("current_state must be provided")
-            dtheta1, dtheta2, dtheta3, domega1, domega2, domega3 = derivs
-            return TriplePendulumState(
-                theta1=current_state.theta1 + scale * dtheta1,
-                theta2=current_state.theta2 + scale * dtheta2,
-                theta3=current_state.theta3 + scale * dtheta3,
-                omega1=current_state.omega1 + scale * domega1,
-                omega2=current_state.omega2 + scale * domega2,
-                omega3=current_state.omega3 + scale * domega3,
+        def _derivs(_time: float, vec: tuple[float, ...]) -> tuple[float, ...]:
+            """Velocity and acceleration derivatives for the state vector."""
+            theta1, theta2, theta3, omega1, omega2, omega3 = vec
+            current = TriplePendulumState(
+                theta1=theta1,
+                theta2=theta2,
+                theta3=theta3,
+                omega1=omega1,
+                omega2=omega2,
+                omega3=omega3,
             )
+            acc1, acc2, acc3 = self.forward_dynamics(current, control)
+            return (omega1, omega2, omega3, acc1, acc2, acc3)
 
-        def derivatives(
-            current_state: TriplePendulumState,
-        ) -> tuple[float, float, float, float, float, float]:
-            """Compute velocity and acceleration derivatives for the state."""
-            acc1, acc2, acc3 = self.forward_dynamics(current_state, control)
-            return (
-                current_state.omega1,
-                current_state.omega2,
-                current_state.omega3,
-                acc1,
-                acc2,
-                acc3,
+        new_theta1, new_theta2, new_theta3, new_omega1, new_omega2, new_omega3 = (
+            rk4_step(
+                _derivs,
+                (
+                    state.theta1,
+                    state.theta2,
+                    state.theta3,
+                    state.omega1,
+                    state.omega2,
+                    state.omega3,
+                ),
+                _t,
+                dt,
             )
-
-        k1 = derivatives(state)
-        k2 = derivatives(rk4_increment(state, dt / 2.0, k1))
-        k3 = derivatives(rk4_increment(state, dt / 2.0, k2))
-        k4 = derivatives(rk4_increment(state, dt, k3))
-
-        new_theta1 = state.theta1 + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])
-        new_theta2 = state.theta2 + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])
-        new_theta3 = state.theta3 + dt / 6.0 * (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2])
-
-        new_omega1 = state.omega1 + dt / 6.0 * (k1[3] + 2 * k2[3] + 2 * k3[3] + k4[3])
-        new_omega2 = state.omega2 + dt / 6.0 * (k1[4] + 2 * k2[4] + 2 * k3[4] + k4[4])
-        new_omega3 = state.omega3 + dt / 6.0 * (k1[5] + 2 * k2[5] + 2 * k3[5] + k4[5])
+        )
 
         return TriplePendulumState(
             theta1=new_theta1,

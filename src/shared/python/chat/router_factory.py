@@ -35,6 +35,7 @@ This module has ZERO application-specific imports.
 
 from __future__ import annotations
 
+import contextlib
 import importlib
 import importlib.util
 import logging
@@ -43,7 +44,7 @@ from pathlib import Path
 from typing import Any
 
 from compatibility import UTC
-from fastapi import APIRouter, Request, WebSocket
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 
 from .terminal_contracts import TerminalAgentSessionRequest, TerminalRegistryError
@@ -152,7 +153,19 @@ async def _handle_condense(
         await websocket.send_json({"type": "error", "detail": str(exc)})
     except Exception:
         logger.exception("Unexpected error condensing session=%s", state.session_id)
-        await websocket.send_json({"type": "error", "detail": "Internal server error"})
+        # Best-effort recovery frame: the socket may already be closed, in
+        # which case ``send_json`` itself raises. Suppress so the secondary
+        # failure doesn't mask the original error.
+        with contextlib.suppress(
+            WebSocketDisconnect,
+            ConnectionError,
+            TimeoutError,
+            OSError,
+            RuntimeError,
+        ):
+            await websocket.send_json(
+                {"type": "error", "detail": "Internal server error"}
+            )
 
 
 async def _handle_skill_invoke(
