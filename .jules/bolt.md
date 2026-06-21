@@ -32,3 +32,6 @@
 ## 2026-06-21 - Avoiding False np.einsum Optimizations
 **Learning:** Replacing simple `np.sum(arr, axis=1)` calls with `np.einsum('ij->i', arr)` does not improve performance and is based on a false premise. Simple `np.sum` calls do not allocate temporary arrays (unlike chained operations like `x * y + z`) and are backed by highly optimized C code. `np.einsum` incurs parsing overhead for its subscript string, making it slower and less readable for basic reductions.
 **Action:** Do not replace `np.sum(arr, axis=1)` on plain arrays with `np.einsum`. Only use `np.einsum` to fuse operations where actual temporary arrays would otherwise be allocated (e.g., replacing `np.sum(x * y, axis=1)` with `np.einsum('ij,ij->i', x, y)`).
+## 2024-05-20 - [Clean Code Optimization Practices]
+**Learning:** While testing performance optimizations using temporary scratchpad files (like `test_perf.py` or HEREDOC `patch_analyzer.py` scripts) is essential for verification, leaving these files in the working directory during code submission violates project constraints and renders the PR unmergeable.
+**Action:** Always clean up generated test scripts and scratchpads (e.g., using `rm`) prior to submitting the optimization to ensure the patch remains cleanly scoped and only modifies relevant project files.
