@@ -92,9 +92,8 @@
       "api": "src/api/routes/analysis_plots.py",
       "web": "ui/src/components/analysis/PlotsSection.tsx",
       "status": "parity",
-      "issue": 7449,
       "tiles": [],
-      "notes": "GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
+      "notes": "Reached parity via #7449 (closed completed 2026-06-12). GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
     },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
@@ -159,8 +158,8 @@
       "api": "src/api/routes/ball_flight.py",
       "web": "ui/src/pages/BallFlight.tsx",
       "status": "parity",
-      "issue": 7456,
-      "tiles": ["shot_tracer"]
+      "tiles": ["shot_tracer"],
+      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API."
     },
     "settings.preferences": {
       "title": "Settings/preferences surface + persistence",
