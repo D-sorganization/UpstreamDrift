@@ -26,19 +26,21 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models_swing
 
 
 @pytest.mark.unit
-def test_get_descriptive_joint_name() -> None:
+@pytest.mark.parametrize(
+    ("raw_name", "expected"),
+    [
+        ("rh_FFJ3", "[Right] Index Knuckle Flexion (MCP) (J3)"),
+        ("lh_THJ2", "[Left] Thumb IP Flexion (THJ2)"),
+        ("right_WRJ2", "[Right] Wrist Yaw / Abduction (WRJ2)"),
+        ("left_LFJ5", "[Left] Little (Pinky) CMC Flexion (LFJ5)"),
+        ("ffj1", "Index Knuckle Flexion (MCP) (j1)"),
+        ("thj0", "Thumb CMC Abduction (thj0)"),
+        ("unknown_joint", "unknown_joint"),
+    ],
+)
+def test_get_descriptive_joint_name(raw_name: str, expected: str) -> None:
     """Verify raw joint names are mapped to user-friendly descriptive labels."""
-    assert (
-        get_descriptive_joint_name("rh_FFJ3")
-        == "[Right] Index Knuckle Flexion (MCP) (J3)"
-    )
-    assert get_descriptive_joint_name("lh_THJ2") == "[Left] Thumb IP Flexion (THJ2)"
-    assert get_descriptive_joint_name("ffj1") == "Index Knuckle Flexion (MCP) (j1)"
-    assert get_descriptive_joint_name("thj0") == "Thumb CMC Abduction (thj0)"
-    assert (
-        get_descriptive_joint_name("lh_WRJ1") == "[Left] Wrist Pitch / Flexion (WRJ1)"
-    )
-    assert get_descriptive_joint_name("unknown_joint") == "unknown_joint"
+    assert get_descriptive_joint_name(raw_name) == expected
 
 
 @pytest.mark.unit
