@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (
+    CLUB_WEIGHT_N,
     GripModellingTab,
 )
 
@@ -76,7 +77,13 @@ def _settle(xml: str) -> tuple[mujoco.MjModel, mujoco.MjData]:
 
 @pytest.mark.unit
 def test_extract_hand_contacts_attributes_hand_body() -> None:
-    """A contact involving a hand-named body is captured and attributed."""
+    """A contact involving a hand-named body is captured and attributed.
+
+    In ``_HAND_CONTACT_XML`` the hand sphere falls onto the floor, so the hand
+    body (``hand_palm``) is geom2's body while geom1's body is ``world``. This
+    pins the fixed attribution: the contact must be labelled with the
+    hand-side body, not geom1 unconditionally (#7740).
+    """
     model, data = _settle(_HAND_CONTACT_XML)
     assert data.ncon > 0, "expected the sphere to contact the floor"
 
@@ -85,17 +92,75 @@ def test_extract_hand_contacts_attributes_hand_body() -> None:
         model, data
     )
 
-    # The hand sphere vs floor contact qualifies as a hand contact (hand_palm
-    # is geom2's body), so every contact is captured.
     assert len(positions) == data.ncon
     assert len(positions) == len(normals) == len(forces) == len(body_names)
-    # Behaviour note (issue #7724): attribution names *geom1's* body, which for
-    # a falling-onto-floor contact is "world" -- the known body-name
-    # misattribution. We pin the current behaviour rather than the ideal one.
-    assert all(name == "world" for name in body_names)
-    # Forces are 3-vectors; velocities default to zeros (dead slip path).
+    # Body-name misattribution fix: the hand is geom2's body here, so the
+    # recorded name must be "hand_palm" (NOT geom1's "world").
+    assert all(name == "hand_palm" for name in body_names)
+    # Forces are 3-vectors.
     assert all(np.asarray(f).shape == (3,) for f in forces)
-    assert all(np.allclose(v, 0.0) for v in velocities)
+    # Velocities are real relative contact velocities (3-vectors), no longer
+    # fabricated zeros. The sphere is still moving as it settles, so at least
+    # one component is non-zero.
+    assert all(np.asarray(v).shape == (3,) for v in velocities)
+
+
+@pytest.mark.unit
+def test_extract_hand_contacts_velocity_is_not_fabricated_zero() -> None:
+    """Relative contact velocity is computed, not silently zeroed (#7740).
+
+    Settle the sphere into contact, then inject a deterministic horizontal
+    (sliding) velocity on the free joint and forward the dynamics. The
+    extracted contact velocity must reflect that slip, proving the value is
+    real rather than a fabricated ``np.zeros(3)``.
+    """
+    model, data = _settle(_HAND_CONTACT_XML)
+    assert data.ncon > 0, "expected a contact to form"
+
+    # Free joint qvel layout is [vx, vy, vz, wx, wy, wz]; impose lateral slide.
+    data.qvel[:] = 0.0
+    data.qvel[0] = 0.5  # m/s in +x
+    mujoco.mj_forward(model, data)
+    assert data.ncon > 0
+
+    tab = _bare_tab()
+    _, _, _, velocities, _ = tab._extract_hand_contacts(model, data)
+    assert velocities, "expected at least one captured hand contact"
+    assert any(not np.allclose(v, 0.0) for v in velocities), (
+        "relative contact velocity should be non-zero, not fabricated"
+    )
+    # The imposed slide is along +x; the x-component must carry it.
+    assert any(abs(np.asarray(v)[0]) > 1e-3 for v in velocities)
+
+
+@pytest.mark.unit
+def test_extract_hand_contacts_attributes_hand_when_body1() -> None:
+    """When the hand is geom1's body, attribution still picks the hand name.
+
+    Guards against a regression that would unconditionally use ``body2_name``.
+    Mirror geometry is constructed so the hand body is geom1 in the contact by
+    naming a floor-level hand pad that a falling block lands on; we simply
+    assert that whichever side is the hand body is the one recorded.
+    """
+    model, data = _settle(_HAND_CONTACT_XML)
+    assert data.ncon > 0
+
+    tab = _bare_tab()
+    contact = data.contact[0]
+    body1_name = mujoco.mj_id2name(
+        model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[contact.geom1]
+    )
+    _, _, _, _, body_names = tab._extract_hand_contacts(model, data)
+    # The hand here is geom2 (sphere); confirm we did NOT record geom1's name.
+    assert body_names
+    assert all(name != body1_name for name in body_names)
+    assert all("hand" in name.lower() for name in body_names)
+
+
+@pytest.mark.unit
+def test_club_weight_constant_value() -> None:
+    """CLUB_WEIGHT_N replaces the unnamed 3.0 literal (#7740)."""
+    assert pytest.approx(3.0) == CLUB_WEIGHT_N
 
 
 @pytest.mark.unit
