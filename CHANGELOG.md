@@ -63,6 +63,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `simulation.shot_tracer` (#7456), both since closed completed — drop the `issue`
   field (provenance preserved in `notes`); the generated parity matrix doc is
   regenerated to match.
+- Cleared a batch of scattered deferred P2 findings from #7740: unified the
+  cross-engine output time grid behind a shared `build_output_grid`
+  (Drake/MuJoCo now align endpoints for non-integer-divisible `(T, rate)`;
+  bit-identical for divisible cases); extracted a shared `rk4_step` integrator
+  for the double/triple pendulum models (bit-identical); vectorized the
+  analysis `_section_crossings` zero-crossing scan; replaced O(N^2) grain-XML
+  string concatenation in the MPM driver with a single `"".join`; replaced
+  `assert`-based input guards in `signal_toolkit.series` with `require(...)`
+  (survives `-O`); de-duplicated `ForceVector3D` construction via a
+  `_make_force_vector` helper; added `Scheduler.has()` / `Scheduler.list_jobs()`
+  facade passthroughs and a `LabelledControl.set_value_silent` so callers stop
+  reaching through to private internals (Law of Demeter); dropped the dead
+  `"ok"` solver-status literal from the MuJoCo synthesizer; guarded the
+  best-effort recovery `send_json` in the chat WebSocket index and
+  router-factory condense handlers with `contextlib.suppress`; and seeded the
+  imitation-learning test RNG plus replaced the flaky wall-clock latency budget
+  in the pose-studio realtime test with a readiness handshake.
 - Hardened the simulation WebSocket and data-explorer API routes (deferred P2
   findings from #7740): the WS start guard now rejects a non-positive
   `speed_factor` instead of silently clamping it to 1.0, and its duration /

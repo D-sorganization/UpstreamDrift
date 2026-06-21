@@ -14,13 +14,15 @@ import math
 import typing
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable
 
 from dataclasses import dataclass
 
 # Security: Use simpleeval for safe expression evaluation instead of eval()
 from simpleeval import SimpleEval
 from src.shared.python.core.constants import GRAVITY_M_S2
+
+from ._rk4 import rk4_step
 
 # Physical constants with documented units and references
 # International gravity standard at 45 degrees latitude (m/s^2)
@@ -505,38 +507,29 @@ class DoublePendulumDynamics:
         if not (t is not None):
             raise ValueError("t must be provided")
 
-        def rk4_increment(
-            current_state: DoublePendulumState, scale: float, derivs: Iterable[float]
-        ) -> DoublePendulumState:
-            """Apply a scaled RK4 derivative increment to the state."""
-            if not (current_state is not None):
-                raise ValueError("current_state must be provided")
-            dtheta1, dtheta2, domega1, domega2 = derivs
-            # Preserve phi and omega_phi (out-of-plane motion not yet in dynamics)
-            phi = getattr(current_state, "phi", 0.0)
-            omega_phi = getattr(current_state, "omega_phi", 0.0)
-            return DoublePendulumState(
-                theta1=current_state.theta1 + scale * dtheta1,
-                theta2=current_state.theta2 + scale * dtheta2,
-                omega1=current_state.omega1 + scale * domega1,
-                omega2=current_state.omega2 + scale * domega2,
+        # Preserve phi and omega_phi (out-of-plane motion not yet in dynamics);
+        # they are carried through unchanged by the planar integrator.
+        phi = getattr(state, "phi", 0.0)
+        omega_phi = getattr(state, "omega_phi", 0.0)
+
+        def _derivs(time: float, vec: tuple[float, ...]) -> tuple[float, ...]:
+            theta1, theta2, omega1, omega2 = vec
+            current = DoublePendulumState(
+                theta1=theta1,
+                theta2=theta2,
+                omega1=omega1,
+                omega2=omega2,
                 phi=phi,
                 omega_phi=omega_phi,
             )
+            return tuple(self.derivatives(time, current))
 
-        k1 = self.derivatives(t, state)
-        k2 = self.derivatives(t + dt / 2.0, rk4_increment(state, dt / 2.0, k1))
-        k3 = self.derivatives(t + dt / 2.0, rk4_increment(state, dt / 2.0, k2))
-        k4 = self.derivatives(t + dt, rk4_increment(state, dt, k3))
-
-        new_theta1 = state.theta1 + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])
-        new_theta2 = state.theta2 + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])
-        new_omega1 = state.omega1 + dt / 6.0 * (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2])
-        new_omega2 = state.omega2 + dt / 6.0 * (k1[3] + 2 * k2[3] + 2 * k3[3] + k4[3])
-
-        # Preserve phi and omega_phi
-        phi = getattr(state, "phi", 0.0)
-        omega_phi = getattr(state, "omega_phi", 0.0)
+        new_theta1, new_theta2, new_omega1, new_omega2 = rk4_step(
+            _derivs,
+            (state.theta1, state.theta2, state.omega1, state.omega2),
+            t,
+            dt,
+        )
 
         return DoublePendulumState(
             theta1=new_theta1,

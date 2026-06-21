@@ -34,6 +34,13 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["synthesize_target_from_coefficients"]
 
+# Solver statuses that count as a converged rollout. ``simulate_with_coefficients``
+# only ever emits ``"success"``, ``"warning"``, or ``"failed"`` (see the
+# postcondition in ``simulate.py``); the previously-accepted ``"ok"`` literal was
+# never emitted by this code path. ``"warning"`` is tolerated because the
+# rollout still produced a usable, finite trajectory.
+_CONVERGED_SOLVER_STATUSES: frozenset[str] = frozenset({"success", "warning"})
+
 
 def _sim_options_from_align(opts: AlignOptions) -> SimOptions:
     """Translate :class:`AlignOptions` into :class:`SimOptions`.
@@ -233,7 +240,7 @@ def synthesize_target_from_coefficients(
         initial_pose=initial_pose,
     )
 
-    if sim_out.solver_status not in {"ok", "success"}:
+    if sim_out.solver_status not in _CONVERGED_SOLVER_STATUSES:
         raise RuntimeError(
             f"MuJoCo rollout did not converge: solver_status={sim_out.solver_status!r}"
         )

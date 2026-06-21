@@ -10,6 +10,18 @@ import pytest
 from src.learning.imitation import Demonstration
 
 
+@pytest.fixture(autouse=True)
+def _seed_numpy_rng() -> None:
+    """Seed the legacy global RNG so ``np.random.randn`` draws are deterministic.
+
+    Several tests below populate demonstration buffers with ``np.random.randn``.
+    Without a fixed seed those values vary run to run, making any failure
+    non-reproducible. Seeding here keeps the data deterministic without
+    rewriting every call site.
+    """
+    np.random.seed(0)
+
+
 class TestDemonstration:
     """Tests for Demonstration dataclass."""
 

@@ -27,6 +27,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from src.shared.python.motion_matching.output_time_grid import build_output_grid
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .torque_driver import PolynomialTorqueDriver
@@ -227,14 +228,11 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
     """Return the canonical output time grid (linspace, inclusive endpoints).
 
     ``N = round(T_s * output_rate_hz) + 1``. This matches the contract in
-    ``CROSS_ENGINE_PARITY_SPEC.md`` §2.2 and the test expectations.
+    ``CROSS_ENGINE_PARITY_SPEC.md`` §2.2 and the test expectations. Delegates
+    to the shared :func:`build_output_grid` so every engine uses one grid
+    builder (issue #7740).
     """
-    if T_s <= 0:
-        raise ValueError(f"T_s must be > 0; got {T_s}")
-    if output_rate_hz <= 0:
-        raise ValueError(f"output_rate_hz must be > 0; got {output_rate_hz}")
-    n = int(round(T_s * output_rate_hz)) + 1
-    return np.linspace(0.0, T_s, n, dtype=np.float64)
+    return build_output_grid(T_s, output_rate_hz)
 
 
 # --- Entry point ------------------------------------------------------------

@@ -412,3 +412,47 @@ def test_orchestrator_import_is_qt_and_matplotlib_free() -> None:
         env=env,
     )
     assert result.returncode == 0, result.stderr
+
+
+def _section_crossings_reference(
+    data: np.ndarray, value: float, direction: str = "both"
+) -> list[int]:
+    """Original element-wise implementation, kept as a parity oracle."""
+    diff = data - value
+    crossings: list[int] = []
+    for idx in range(len(diff) - 1):
+        crosses = diff[idx] * diff[idx + 1] <= 0
+        positive = diff[idx] < diff[idx + 1] and direction in ("positive", "both")
+        negative = diff[idx] > diff[idx + 1] and direction in ("negative", "both")
+        if crosses and (positive or negative):
+            crossings.append(idx)
+    return crossings
+
+
+@pytest.mark.parametrize("direction", ["both", "positive", "negative"])
+def test_section_crossings_matches_reference(direction: str) -> None:
+    """Vectorized ``_section_crossings`` is identical to the scalar oracle."""
+    rng = np.random.default_rng(1234)
+    for _ in range(50):
+        n = int(rng.integers(0, 25))
+        data = rng.normal(size=n)
+        value = float(rng.normal())
+        got = AnalysisOrchestrator._section_crossings(data, value, direction)
+        expected = _section_crossings_reference(data, value, direction)
+        assert got == expected
+
+
+@pytest.mark.parametrize("direction", ["both", "positive", "negative"])
+def test_section_crossings_handles_short_inputs(direction: str) -> None:
+    """Fewer than two samples cannot contain a crossing."""
+    assert AnalysisOrchestrator._section_crossings(np.array([]), 0.0, direction) == []
+    assert (
+        AnalysisOrchestrator._section_crossings(np.array([1.0]), 0.0, direction) == []
+    )
+
+
+def test_section_crossings_flat_segment_excluded() -> None:
+    """A flat segment touching the value matches neither rising nor falling."""
+    data = np.array([0.0, 0.0, 1.0])
+    # left==right on the first segment -> excluded; rising cross on the second.
+    assert AnalysisOrchestrator._section_crossings(data, 0.0, "both") == [1]
