@@ -43,12 +43,6 @@ import scipy.io as _sio
 
 logger = logging.getLogger(__name__)
 
-# Validation tolerances mirror the canonical ``ClubTarget`` defaults so the
-# stub fallback below stays consistent with the upstream schema.
-_QUAT_NORM_TOL = 1.0e-6
-_MAX_POSITION_NORM_M = 5.0
-_TIME_EPS = 1.0e-9
-
 
 # ---------------------------------------------------------------------------
 # ClubTarget import w/ defensive local-stub fallback.
@@ -58,10 +52,22 @@ _TIME_EPS = 1.0e-9
 # is always taken in normal checkouts. The stub below only fires for
 # stripped-down environments (e.g. an engine wheel sliced without
 # ``motion_matching``) so this adapter remains importable in isolation.
+#
+# To avoid drift, the canonical-path branch reuses the upstream validator and
+# tolerance constants verbatim (issue #7740) instead of re-implementing them.
 # ---------------------------------------------------------------------------
 
 try:  # pragma: no cover - exercised by both branches via tests
     from src.shared.python.motion_matching.club_target import (  # type: ignore[import-not-found]
+        MAX_POSITION_NORM_M as _MAX_POSITION_NORM_M,
+    )
+    from src.shared.python.motion_matching.club_target import (
+        QUAT_NORM_TOL as _QUAT_NORM_TOL,
+    )
+    from src.shared.python.motion_matching.club_target import (
+        TIME_EPS as _TIME_EPS,
+    )
+    from src.shared.python.motion_matching.club_target import (
         ClubTarget,
         SourceProvenance,
     )
@@ -73,6 +79,13 @@ except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
         "local stub. This branch is only expected in stripped-down checkouts "
         "without the shared motion_matching package."
     )
+
+    # Validation tolerances mirror the canonical ``ClubTarget`` defaults so the
+    # stub fallback stays consistent with the upstream schema even when the
+    # shared module is unavailable to import them from.
+    _QUAT_NORM_TOL = 1.0e-6
+    _MAX_POSITION_NORM_M = 5.0
+    _TIME_EPS = 1.0e-9
 
     @dataclass(frozen=True)
     class SourceProvenance:  # type: ignore[no-redef]
@@ -106,12 +119,18 @@ except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
 
 
 # ---------------------------------------------------------------------------
-# Stub validation helpers (only used when the canonical type isn't available).
+# Stub validation helper (only used when the canonical type isn't available).
 # ---------------------------------------------------------------------------
 
 
 def _validate_stub_target(t: ClubTarget) -> None:  # noqa: C901
-    """Replicate the canonical validation rules for the local stub."""
+    """Validate the local stub against the CLUB_IK_SPEC rules.
+
+    Only invoked in stripped-down checkouts where the canonical
+    ``club_target`` module (and its ``_validate_clubtarget``) is unavailable;
+    the tolerance constants are shared with the canonical module via the import
+    above whenever it is present (issue #7740).
+    """
     time = np.asarray(t.time)
     if time.ndim != 1:
         raise ValueError(f"time must be 1-D, got shape {time.shape}")
@@ -393,10 +412,10 @@ def load_robneal_target(path: Path | str) -> ClubTarget:  # noqa: C901
     time = base_time[keep_idx].astype(np.float64)
     butt = butt_xyz[keep_idx].astype(np.float64)
     clubhead = head_xyz[keep_idx].astype(np.float64)
-    butt_rotmats = butt_rotmats[keep_idx]
     # We expose the *clubhead* (a.k.a. clubface) orientation via club_quat
-    # because that is what downstream IK consumes; the butt rotation is
-    # available as raw data only and used here for impact-frame fallback.
+    # because that is what downstream IK consumes; the butt rotation
+    # (``butt_rotmats``) is parsed only to validate the source arrays and is
+    # not carried into the output target.
     club_quat = _rotmat_stack_to_quat(head_rotmats[keep_idx])
 
     # Rebase time to start at 0 and confirm strict monotonicity (resampled

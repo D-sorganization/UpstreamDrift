@@ -281,9 +281,9 @@ class TestSafetyMonitorComputeSafe:
 class TestSafetyMonitorMisc:
     def test_stopping_distance(self) -> None:
         m = SafetyMonitor(_cfg())
-        d = m.get_stopping_distance(
-            _state(joint_velocities=np.array([2.0, 0, 0])), "ee"
-        )
+        # ``body`` param was removed (issue #7740): worst-case joint braking
+        # angle is s = omega^2 / (2*alpha) = 4 / 4 = 1.0 rad.
+        d = m.get_stopping_distance(_state(joint_velocities=np.array([2.0, 0, 0])))
         assert d == pytest.approx(1.0, rel=1e-3)
 
     def test_set_speed_override_clamps(self) -> None:

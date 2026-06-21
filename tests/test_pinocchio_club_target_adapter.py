@@ -325,6 +325,107 @@ def test_quaternions_are_unit_norm_for_random_rotations(
     assert np.linalg.norm(target.club_quat[-1] - target.club_quat[0]) > 1e-6
 
 
+def _write_pair_with_resampled(
+    tmp_path: Path,
+    *,
+    name: str,
+    n: int,
+    impact_one_based: int,
+    resampled: dict[str, np.ndarray] | None,
+) -> Path:
+    """Write a raw pair whose resampled partner has caller-supplied contents.
+
+    Identity rotations and a simple monotonic trajectory keep the raw side
+    valid; ``resampled`` controls whether the ``_targetKinematics`` partner has
+    matching shapes (``use_resampled=True``) or incompatible/missing fields
+    (forcing the raw-arrays fallback at lines 368-370). Pass ``resampled=None``
+    to write a partner with no ``MH``/``MH_R`` fields at all.
+    """
+    time = np.linspace(0.0, 1.0, n, dtype=np.float64)
+    butt_xyz = np.column_stack(
+        [
+            0.4 * np.cos(2 * np.pi * time),
+            0.4 * np.sin(2 * np.pi * time),
+            np.full_like(time, 1.0),
+        ]
+    ).astype(np.float64)
+    head_xyz = butt_xyz + np.array([0.0, 0.0, -1.0])
+    dircos = _identity_dircos(n)
+
+    raw_path = tmp_path / f"{name}.mat"
+    sio.savemat(
+        str(raw_path),
+        {
+            "data": {
+                "time": time,
+                "midhands_xyz": butt_xyz,
+                "midhands_dircos": dircos,
+                "clubface_xyz": head_xyz,
+                "clubface_dircos": dircos,
+            },
+            "params": {"Impact": impact_one_based, "impact_frame": impact_one_based},
+        },
+        oned_as="column",
+    )
+    resampled_path = tmp_path / f"{name}_targetKinematics.mat"
+    sio.savemat(
+        str(resampled_path),
+        resampled if resampled is not None else {"Time": time},
+        oned_as="column",
+    )
+    return raw_path
+
+
+def test_incompatible_resampled_shape_falls_back_to_raw(tmp_path: Path) -> None:
+    """A shape-mismatched resampled MH/MH_R forces the raw-arrays fallback.
+
+    Every other fixture supplies shape-matching resampled arrays so
+    ``use_resampled`` is always True and the raw fallback (adapter lines
+    368-370, ``base_time = raw_time``; ``butt_rotmats`` from ``midhands_dircos``)
+    is never exercised. Here ``MH`` has the wrong row count, so the adapter must
+    fall back to the raw mid-hands trajectory and the dircos-derived rotations
+    while still producing a valid target.
+    """
+    n = 30
+    impact = 15
+    # MH/MH_R both sized for a different N so the compatibility check fails.
+    bad_resampled = {
+        "Time": np.linspace(0.0, 1.0, n, dtype=np.float64),
+        "MH": np.zeros((n - 5, 3), dtype=np.float64),
+        "MH_R": np.tile(np.eye(3, dtype=np.float64)[:, :, None], (1, 1, n - 5)),
+    }
+    raw = _write_pair_with_resampled(
+        tmp_path, name="RAWFB", n=n, impact_one_based=impact, resampled=bad_resampled
+    )
+
+    target = load_robneal_target(raw)
+
+    assert isinstance(target, ClubTarget)
+    assert target.time.shape == (n,)
+    assert target.butt.shape == (n, 3)
+    # Raw midhands_xyz trajectory (radius 0.4) was used, not the zeroed MH.
+    radii = np.linalg.norm(target.butt[:, :2], axis=1)
+    np.testing.assert_allclose(radii, 0.4, atol=1.0e-9)
+    assert target.impact_idx == impact
+
+
+def test_missing_resampled_fields_falls_back_to_raw(tmp_path: Path) -> None:
+    """A resampled partner lacking MH/MH_R also triggers the raw fallback."""
+    n = 20
+    impact = 8
+    raw = _write_pair_with_resampled(
+        tmp_path, name="NOFLD", n=n, impact_one_based=impact, resampled=None
+    )
+
+    target = load_robneal_target(raw)
+
+    assert isinstance(target, ClubTarget)
+    assert target.time.shape == (n,)
+    radii = np.linalg.norm(target.butt[:, :2], axis=1)
+    np.testing.assert_allclose(radii, 0.4, atol=1.0e-9)
+    assert target.impact_idx == impact
+
+
 # ---------------------------------------------------------------------------
 # Real-fixture tests (skipped when data/ is unavailable)
 # ---------------------------------------------------------------------------

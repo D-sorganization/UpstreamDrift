@@ -782,6 +782,45 @@ class TestControllerStopTimeout:
         )
 
 
+class TestIsRunningCleared:
+    """Issue #7740: ``_is_running`` must not survive an abort-raises path."""
+
+    @pytest.mark.unit
+    def test_is_running_cleared_when_run_loop_raises(self) -> None:
+        """If ``_run_control_loop`` raises, the ``finally`` clears ``is_running``.
+
+        The control loop's inner cycle catches ``(RuntimeError, ValueError,
+        OSError)``, so to exercise the bare ``finally`` we make
+        ``_run_control_loop`` raise an *uncaught* exception type. Without the
+        ``try/finally`` (under ``_running_lock``) a stale ``True`` would persist
+        after the thread died.
+        """
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        def boom() -> None:
+            raise KeyboardInterrupt("uncaught loop failure")
+
+        controller._run_control_loop = boom  # type: ignore[method-assign]
+        controller.set_control_callback(lambda _s: None)  # type: ignore[arg-type,return-value]
+        controller.start()
+
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="is_running not cleared after the control loop raised",
+        )
+        assert not controller.is_running
+
+
 class TestRobotConfig:
     """Tests for RobotConfig."""
 
