@@ -864,6 +864,14 @@ class TestValidateWsNumericFields:
     def test_valid_speed_factor_accepted(self) -> None:
         assert self._call({"speed_factor": 2.0}) is None
 
+    def test_zero_speed_factor_rejected(self) -> None:
+        """A zero speed_factor must be rejected, not silently clamped to 1.0."""
+        assert self._call({"speed_factor": 0.0}) is not None
+
+    def test_negative_speed_factor_rejected(self) -> None:
+        """A negative speed_factor must be rejected, not silently clamped."""
+        assert self._call({"speed_factor": -2.0}) is not None
+
     # duration checks
     def test_nan_duration_rejected(self) -> None:
         assert self._call({"duration": float("nan")}) is not None
@@ -877,12 +885,13 @@ class TestValidateWsNumericFields:
     def test_negative_duration_rejected(self) -> None:
         assert self._call({"duration": -1.0}) is not None
 
-    def test_duration_at_cap_rejected(self) -> None:
-        """duration >= 3600s must be rejected."""
-        assert self._call({"duration": 3600.0}) is not None
+    def test_duration_over_cap_rejected(self) -> None:
+        """duration above the Pydantic cap (300s) must be rejected."""
+        assert self._call({"duration": 300.1}) is not None
 
-    def test_duration_just_below_cap_accepted(self) -> None:
-        assert self._call({"duration": 3599.9}) is None
+    def test_duration_at_cap_accepted(self) -> None:
+        """The cap value itself is valid (Pydantic uses an inclusive ``le``)."""
+        assert self._call({"duration": 300.0}) is None
 
     def test_valid_duration_accepted(self) -> None:
         assert self._call({"duration": 10.0}) is None
@@ -900,9 +909,13 @@ class TestValidateWsNumericFields:
     def test_negative_timestep_rejected(self) -> None:
         assert self._call({"timestep": -0.001}) is not None
 
-    def test_timestep_at_max_rejected(self) -> None:
-        """timestep >= 1.0s must be rejected."""
-        assert self._call({"timestep": 1.0}) is not None
+    def test_timestep_over_max_rejected(self) -> None:
+        """timestep above the Pydantic cap (0.1s) must be rejected."""
+        assert self._call({"timestep": 0.2}) is not None
+
+    def test_timestep_at_max_accepted(self) -> None:
+        """The cap value itself is valid (Pydantic uses an inclusive ``le``)."""
+        assert self._call({"timestep": 0.1}) is None
 
     def test_timestep_too_small_rejected(self) -> None:
         """timestep < 1e-6 must be rejected."""
@@ -1039,3 +1052,226 @@ async def test_simulation_stream_rejects_timestep_too_small(
     assert len(websocket.sent) == 1
     assert "error" in websocket.sent[0]
     load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_non_positive_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A zero/negative speed_factor must be rejected before the engine loads.
+
+    Regression for finding #7740: a non-positive speed_factor was silently
+    clamped to 1.0 by ``_clamp_speed_factor`` instead of being rejected.
+    """
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": -1.0}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+def test_ws_bounds_match_pydantic_single_source_of_truth() -> None:
+    """The WS numeric guard reuses the Pydantic request-model bounds (#7740).
+
+    Previously the WS layer used looser caps (3600s / 1.0s) than the Pydantic
+    model (300s / 0.1s), so gap values passed the WS guard then failed
+    ``model_validate`` with a generic error. They must now be identical.
+    """
+    from src.api.models.requests import (
+        MAX_SIMULATION_DURATION,
+        MAX_TIMESTEP,
+        MIN_TIMESTEP,
+    )
+
+    assert simulation_ws_module._MAX_WS_DURATION == MAX_SIMULATION_DURATION
+    assert simulation_ws_module._MAX_WS_TIMESTEP == MAX_TIMESTEP
+    assert simulation_ws_module._MIN_WS_TIMESTEP == MIN_TIMESTEP
+
+
+# ---------------------------------------------------------------------------
+# _resolve_sim_stats — single reach-through accessor (finding #7740)
+# ---------------------------------------------------------------------------
+
+
+class TestResolveSimStats:
+    """_resolve_sim_stats collapses the app.state.simulation_service.stats chain."""
+
+    def test_returns_stats_when_fully_resolvable(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=2.0)
+        stats = simulation_ws_module._resolve_sim_stats(websocket)
+        assert stats is not None
+        assert stats.speed_factor == pytest.approx(2.0)
+
+    def test_returns_none_when_service_missing(self) -> None:
+        websocket: Any = _WebSocket()  # no simulation_service on app state
+        assert simulation_ws_module._resolve_sim_stats(websocket) is None
+
+    def test_returns_none_when_app_missing(self) -> None:
+        websocket: Any = object()  # no .app attribute at all
+        assert simulation_ws_module._resolve_sim_stats(websocket) is None
+
+
+# ---------------------------------------------------------------------------
+# _run_simulation_loop — direct async coverage of the CC-13 success branches
+# (finding #7740: e2e monkeypatches the loop away, leaving it untested).
+# ---------------------------------------------------------------------------
+
+
+class _FakeStepEngine:
+    """Minimal engine exposing step/get_state for loop tests."""
+
+    def __init__(self) -> None:
+        self.steps = 0
+        self._q = np.array([0.0, 0.0])
+        self._v = np.array([0.0, 0.0])
+
+    def step(self, timestep: float) -> None:
+        self.steps += 1
+        self._q = self._q + timestep
+        self._v = self._v + timestep
+
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        return self._q, self._v
+
+
+class _LoopWebSocket:
+    """WebSocket double driving _run_simulation_loop with scripted commands."""
+
+    def __init__(
+        self,
+        command_messages: list[dict[str, Any]] | None = None,
+        *,
+        speed_factor: float = 1.0,
+    ) -> None:
+        self._messages = list(command_messages or [])
+        self.sent: list[dict[str, Any]] = []
+        self.app = _App(speed_factor=speed_factor)
+
+    async def receive_json(self) -> dict[str, Any]:
+        if self._messages:
+            return self._messages.pop(0)
+        # No queued command -> behave like an idle client so the loop proceeds.
+        raise TimeoutError
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+
+class TestRunSimulationLoop:
+    """Cover the loop's frame-emission, pause/resume, analysis, and pacing paths."""
+
+    @pytest.mark.anyio
+    async def test_emits_frames_and_steps_engine(self) -> None:
+        """The loop steps the engine and streams throttled frame payloads."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        config = {"duration": 0.01, "timestep": 0.01}
+
+        frame, elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert engine.steps >= 1
+        assert frame >= 1
+        assert elapsed == pytest.approx(0.01)
+        # First frame is the "running" status, then at least one data frame.
+        assert websocket.sent[0] == {"status": "running", "duration": 0.01}
+        data_frames = [m for m in websocket.sent if "frame" in m]
+        assert data_frames
+        assert "state" in data_frames[0]
+        assert "q" in data_frames[0]["state"]
+
+    @pytest.mark.anyio
+    async def test_includes_analysis_when_requested(self) -> None:
+        """live_analysis adds an analysis payload derived from get_state."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        config = {"duration": 0.01, "timestep": 0.01, "live_analysis": True}
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        data_frames = [m for m in websocket.sent if "frame" in m]
+        assert data_frames
+        assert "analysis" in data_frames[0]
+        assert data_frames[0]["analysis"]["joint_angles"] is not None
+
+    @pytest.mark.anyio
+    async def test_stop_command_breaks_loop_early(self) -> None:
+        """A stop command ends the loop before the duration elapses."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket([{"action": "stop"}], speed_factor=1000.0)
+        # Long duration so only the stop command ends the loop.
+        config = {"duration": 10.0, "timestep": 0.01}
+
+        frame, _elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert frame == 0
+        assert engine.steps == 0
+
+    @pytest.mark.anyio
+    async def test_pause_then_resume_continues(self) -> None:
+        """A pause command parks the loop until a resume arrives, then runs."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(
+            [{"action": "pause"}, {"action": "resume"}],
+            speed_factor=1000.0,
+        )
+        config = {"duration": 0.01, "timestep": 0.01}
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        assert {"status": "paused"} in websocket.sent
+        assert engine.steps >= 1
+
+    @pytest.mark.anyio
+    async def test_pause_then_stop_breaks(self) -> None:
+        """A stop while paused ends the loop without further stepping."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(
+            [{"action": "pause"}, {"action": "stop"}],
+            speed_factor=1000.0,
+        )
+        config = {"duration": 10.0, "timestep": 0.01}
+
+        frame, _elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert {"status": "paused"} in websocket.sent
+        assert frame == 0
+
+    @pytest.mark.anyio
+    async def test_real_time_pacing_sleeps_between_steps(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """At slow speed the loop awaits a real-time pacing delay each step."""
+        engine = _FakeStepEngine()
+        # speed_factor=1 with a non-trivial timestep -> a positive sleep delay.
+        websocket: Any = _LoopWebSocket(speed_factor=1.0)
+        config = {"duration": 0.02, "timestep": 0.01}
+
+        sleeps: list[float] = []
+
+        async def fake_sleep(delay: float) -> None:
+            sleeps.append(delay)
+
+        monkeypatch.setattr(simulation_ws_module.asyncio, "sleep", fake_sleep)
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        # At least one positive pacing delay was awaited.
+        assert any(d > 0 for d in sleeps)

@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
@@ -58,11 +58,20 @@ class DatasetInfo(BaseModel):
 
 
 class DatasetListResponse(BaseModel):
-    """Response listing available datasets."""
+    """Response listing available datasets.
+
+    ``total`` reports the number of entries returned in this (paginated) page,
+    preserving the historical field semantics. ``offset``/``limit`` echo the
+    pagination window and ``truncated`` flags when the on-disk scan hit the
+    hard cap and more files may exist beyond the returned page (#7740 H).
+    """
 
     datasets: list[DatasetInfo]
     total: int
     search_dir: str
+    offset: int = 0
+    limit: int = 0
+    truncated: bool = False
 
 
 class DatasetPreviewResponse(BaseModel):
@@ -129,6 +138,14 @@ MAX_DATASET_SIZE_BYTES = 50 * 1024 * 1024  # 50MB max file size
 MAX_DATASET_ROWS = 100000  # 100K rows max
 MAX_DATASET_COLUMNS = 500  # 500 columns max
 MAX_CACHE_AGE_SECONDS = 3600  # 1 hour cache TTL
+
+# Pagination bounds for GET /datasets (finding #7740 H). The handler previously
+# did ``sorted(output_dir.rglob("*"))`` — materializing and sorting the whole
+# tree, then a stat()+header-open per entry, synchronously in an async handler.
+# We now cap the scan: iterate lazily, collect at most this many candidate
+# files, and only header-open the requested page.
+DEFAULT_DATASET_PAGE_LIMIT = 100  # default page size when caller omits ``limit``
+MAX_DATASET_LIST_SCAN = 1000  # hard ceiling on files examined per request
 
 # On-disk JSON has no line-oriented streaming guarantee, so reading a preview /
 # stats / filter source must ``json.loads`` the whole document. To keep that
@@ -562,28 +579,29 @@ async def _get_cached_dataset(
     return columns, rows, dataset_format
 
 
-async def _store_cached_dataset(
-    name: str, columns: list[str], rows: list[dict[str, Any]], dataset_format: str
-) -> None:
-    """Store an imported dataset with duplicate rejection and LRU eviction."""
-    async with _cache_lock:
-        if name in _loaded_datasets:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Dataset '{name}' is already imported",
-            )
-        _loaded_datasets[name] = {
-            "columns": columns,
-            "rows": rows,
-            "format": dataset_format,
-        }
-        _enforce_loaded_dataset_limit_locked()
+# Glob metacharacters that would let a client-supplied dataset name be
+# interpreted as an ``rglob`` *pattern* rather than a literal filename
+# (finding #7740 F): e.g. ``*.csv`` or ``swing*`` would match unintended files
+# and turn the 409-vs-404 distinction into an existence oracle.
+_GLOB_METACHARACTERS = frozenset("*?[]")
 
 
 def _find_dataset_path(name: str) -> Path:
-    """Resolve a dataset filename from output, rejecting ambiguous matches."""
+    """Resolve a dataset filename from output, rejecting ambiguous matches.
+
+    ``name`` is matched as a *literal* filename, never as a glob pattern. Names
+    containing glob metacharacters (``* ? [ ]``) are rejected outright so a
+    client cannot enumerate the output tree via wildcard expansion (#7740 F).
+    """
+    if any(ch in _GLOB_METACHARACTERS for ch in name):
+        raise HTTPException(
+            status_code=400,
+            detail="Dataset name must not contain glob metacharacters (* ? [ ])",
+        )
     output_dir = _get_output_dir()
-    matches = sorted(path for path in output_dir.rglob(name) if path.is_file())
+    matches = sorted(
+        path for path in output_dir.rglob("*") if path.name == name and path.is_file()
+    )
     if not matches:
         raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
     if len(matches) > 1:
@@ -734,58 +752,132 @@ def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> b
     return num_val <= num_filter
 
 
+_SUPPORTED_DATASET_SUFFIXES = {".csv", ".json", ".hdf5", ".h5", ".c3d"}
+
+
+def _scan_dataset_files(output_dir: Path, scan_cap: int) -> tuple[list[Path], bool]:
+    """Walk ``output_dir`` for dataset files, bounded by ``scan_cap``.
+
+    Uses ``os.scandir`` (not ``Path.rglob("*")``) so directories are skipped
+    before any sorting/stat work, and stops collecting once ``scan_cap`` files
+    have been gathered. Returns the sorted candidate paths plus a ``truncated``
+    flag set when the cap was reached and more files may exist (#7740 H).
+
+    Precondition: ``scan_cap`` must be positive.
+    Postcondition: at most ``scan_cap`` paths are returned.
+    """
+    collected: list[Path] = []
+    truncated = False
+    stack: list[Path] = [output_dir]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            stack.append(Path(entry.path))
+                            continue
+                        if not entry.is_file(follow_symlinks=False):
+                            continue
+                    except OSError as exc:
+                        logger.debug("Could not stat %s: %s", entry.path, exc)
+                        continue
+                    suffix = os.path.splitext(entry.name)[1].lower()
+                    if suffix not in _SUPPORTED_DATASET_SUFFIXES:
+                        continue
+                    collected.append(Path(entry.path))
+                    if len(collected) >= scan_cap:
+                        truncated = True
+                        break
+        except OSError as exc:
+            logger.debug("Could not scan %s: %s", current, exc)
+        if truncated:
+            break
+    # Sort only the (bounded) candidate set for a stable, paginated order.
+    collected.sort()
+    return collected, truncated
+
+
+def _dataset_info_for_path(filepath: Path, output_dir: Path) -> DatasetInfo:
+    """Build a ``DatasetInfo`` for a single on-disk dataset file."""
+    columns: list[str] = []
+    suffix = filepath.suffix.lower()
+    try:
+        if suffix == ".csv":
+            with open(filepath, encoding="utf-8", newline="") as f:
+                columns = next(csv.reader(f), [])
+        elif suffix == ".json":
+            # Stream only the header/first object instead of json.load()-ing a
+            # possibly-huge file (issue #6990).
+            columns = _stream_json_columns(filepath)
+    except (FileNotFoundError, PermissionError, OSError) as exc:
+        logger.debug("Could not read columns from %s: %s", filepath.name, exc)
+
+    # SECURITY (issue #6636 F6): never return absolute server paths. Expose
+    # only the path relative to the output dir so the filesystem layout is not
+    # leaked to clients.
+    try:
+        rel_path = str(filepath.relative_to(output_dir))
+    except ValueError:
+        rel_path = filepath.name
+
+    try:
+        size_bytes = filepath.stat().st_size
+    except OSError:
+        size_bytes = 0
+
+    return DatasetInfo(
+        name=filepath.name,
+        path=rel_path,
+        format=filepath.suffix.lstrip("."),
+        size_bytes=size_bytes,
+        columns=columns,
+    )
+
+
 # ── Endpoints ──
 
 
 @router.get("/datasets", response_model=DatasetListResponse)
-async def list_datasets() -> DatasetListResponse:
+async def list_datasets(
+    offset: int = Query(0, ge=0, description="Number of on-disk files to skip"),
+    limit: int = Query(
+        DEFAULT_DATASET_PAGE_LIMIT,
+        ge=1,
+        le=MAX_DATASET_LIST_SCAN,
+        description="Maximum number of on-disk datasets to return",
+    ),
+) -> DatasetListResponse:
     """List available datasets in the output directory.
+
+    The on-disk scan is bounded (#7740 H): the directory tree is walked lazily
+    with ``os.scandir`` up to ``MAX_DATASET_LIST_SCAN`` files, and only the
+    requested ``offset``/``limit`` window is header-opened. Imported (in-memory)
+    datasets are always appended.
 
     See issue #1206
     """
     output_dir = _get_output_dir()
     datasets: list[DatasetInfo] = []
+    truncated = False
+    on_disk_names: set[str] = set()
 
     if output_dir.exists():
-        supported = {".csv", ".json", ".hdf5", ".h5", ".c3d"}
-        for filepath in sorted(output_dir.rglob("*")):
-            if filepath.suffix.lower() in supported and filepath.is_file():
-                columns: list[str] = []
-                try:
-                    if filepath.suffix.lower() == ".csv":
-                        with open(filepath, encoding="utf-8", newline="") as f:
-                            columns = next(csv.reader(f), [])
-                    elif filepath.suffix.lower() == ".json":
-                        # Stream only the header/first object instead of
-                        # json.load()-ing a possibly-huge file (issue #6990).
-                        columns = _stream_json_columns(filepath)
-                except (FileNotFoundError, PermissionError, OSError) as exc:
-                    logger.debug(
-                        "Could not read columns from %s: %s", filepath.name, exc
-                    )
+        # Cap the scan at offset+limit (bounded by the hard ceiling) so a deep
+        # tree never materializes fully; only the requested page is opened.
+        scan_cap = min(MAX_DATASET_LIST_SCAN, offset + limit)
+        candidates, truncated = _scan_dataset_files(output_dir, scan_cap)
+        page = candidates[offset : offset + limit]
+        for filepath in page:
+            info = _dataset_info_for_path(filepath, output_dir)
+            on_disk_names.add(info.name)
+            datasets.append(info)
 
-                # SECURITY (issue #6636 F6): never return absolute server
-                # paths. Expose only the path relative to the output dir so
-                # the filesystem layout is not leaked to clients.
-                try:
-                    rel_path = str(filepath.relative_to(output_dir))
-                except ValueError:
-                    rel_path = filepath.name
-
-                datasets.append(
-                    DatasetInfo(
-                        name=filepath.name,
-                        path=rel_path,
-                        format=filepath.suffix.lstrip("."),
-                        size_bytes=filepath.stat().st_size,
-                        columns=columns,
-                    )
-                )
-
-    # Also include any loaded (imported) datasets
+    # Also include any loaded (imported) datasets not already listed on disk.
     async with _cache_lock:
         for name, ds in _loaded_datasets.items():
-            if not any(d.name == name for d in datasets):
+            if name not in on_disk_names:
                 datasets.append(
                     DatasetInfo(
                         dataset_id=ds.get("dataset_id"),
@@ -802,6 +894,9 @@ async def list_datasets() -> DatasetListResponse:
         datasets=datasets,
         total=len(datasets),
         search_dir=output_dir.name,
+        offset=offset,
+        limit=limit,
+        truncated=truncated,
     )
 
 

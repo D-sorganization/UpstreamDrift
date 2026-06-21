@@ -14,7 +14,13 @@ from pydantic import BaseModel, ValidationError
 
 from src.api.auth.ws_auth import resolve_ws_user
 from src.api.dependencies import get_ws_engine_manager
-from src.api.models.requests import MAX_STATE_VECTOR_LEN, SimulationRequest
+from src.api.models.requests import (
+    MAX_SIMULATION_DURATION,
+    MAX_STATE_VECTOR_LEN,
+    MAX_TIMESTEP,
+    MIN_TIMESTEP,
+    SimulationRequest,
+)
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -46,9 +52,17 @@ def _clamp_speed_factor(raw: object) -> float:
     return value
 
 
-_MAX_WS_DURATION = 3600.0  # 1 hour hard cap for WebSocket sessions
-_MAX_WS_TIMESTEP = 1.0  # 1 second upper bound
-_MIN_WS_TIMESTEP = 1e-6  # 1 microsecond lower bound
+# The WebSocket numeric-field guard must agree with the Pydantic request model
+# (``SimulationRequest``), which is the single source of truth for duration /
+# timestep bounds. Previously the WS layer used looser caps (3600s / 1.0s), so
+# values between the WS cap and the Pydantic cap passed the WS guard only to be
+# rejected with a generic "Invalid simulation config" by ``model_validate``.
+# Reusing the model's constants keeps the two layers consistent and yields a
+# specific error frame (DRY; finding #7740). ``MAX_*`` are inclusive upper
+# bounds in the model (``le=``), so the WS guard rejects strictly above them.
+_MAX_WS_DURATION = MAX_SIMULATION_DURATION  # 300s, matches Pydantic ``le``
+_MAX_WS_TIMESTEP = MAX_TIMESTEP  # 0.1s, matches Pydantic ``le``
+_MIN_WS_TIMESTEP = MIN_TIMESTEP  # 1e-6s, matches Pydantic floor
 
 
 def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
@@ -72,9 +86,14 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
         try:
             sf_value = float(raw_sf)
         except (TypeError, ValueError):
-            return "speed_factor must be a finite number"
+            return "speed_factor must be a positive finite number"
         if not math.isfinite(sf_value):
-            return "speed_factor must be a finite number"
+            return "speed_factor must be a positive finite number"
+        # Reject non-positive speed_factor instead of silently clamping it to
+        # 1.0 in ``_clamp_speed_factor`` — the WS guard's contract is to reject,
+        # not clamp, bad start-config values (finding #7740).
+        if sf_value <= 0:
+            return "speed_factor must be a positive finite number"
 
     if "duration" in config_input:
         raw_dur = config_input["duration"]
@@ -84,8 +103,10 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
             return "duration must be a positive finite number"
         if not math.isfinite(dur_value) or dur_value <= 0:
             return "duration must be a positive finite number"
-        if dur_value >= _MAX_WS_DURATION:
-            return f"duration must be less than {_MAX_WS_DURATION}s"
+        # ``_MAX_WS_DURATION`` mirrors the Pydantic ``le`` bound, so the cap
+        # value itself is valid and only strictly-larger values are rejected.
+        if dur_value > _MAX_WS_DURATION:
+            return f"duration must not exceed {_MAX_WS_DURATION}s"
 
     if "timestep" in config_input:
         raw_ts = config_input["timestep"]
@@ -95,8 +116,8 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
             return "timestep must be a positive finite number"
         if not math.isfinite(ts_value) or ts_value <= 0:
             return "timestep must be a positive finite number"
-        if ts_value >= _MAX_WS_TIMESTEP:
-            return f"timestep must be less than {_MAX_WS_TIMESTEP}s"
+        if ts_value > _MAX_WS_TIMESTEP:
+            return f"timestep must not exceed {_MAX_WS_TIMESTEP}s"
         if ts_value < _MIN_WS_TIMESTEP:
             return f"timestep must be at least {_MIN_WS_TIMESTEP}s"
 
@@ -297,14 +318,29 @@ def _engine_analysis_to_dict(engine: object) -> dict[str, Any]:
     return payload
 
 
+def _resolve_sim_stats(websocket: WebSocket) -> Any:
+    """Return the shared simulation-service ``stats`` object, or ``None``.
+
+    Collapses the ``websocket.app.state.simulation_service.stats`` reach-through
+    chain into a single Law-of-Demeter-respecting accessor so the five call
+    sites cannot drift apart (DRY; finding #7740). Every ``getattr`` defaults to
+    ``None`` so a partially-initialised app state (or a test double missing any
+    link) yields ``None`` rather than raising.
+
+    Postcondition: returns the ``stats`` object when fully resolvable, else
+    ``None``.
+    """
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    return getattr(simulation_service, "stats", None)
+
+
 def _get_simulation_speed_factor(
     websocket: WebSocket,
     config: dict[str, Any],
 ) -> float:
     """Return the current simulation speed factor from shared app state."""
-    app_state = getattr(getattr(websocket, "app", None), "state", None)
-    simulation_service = getattr(app_state, "simulation_service", None)
-    stats = getattr(simulation_service, "stats", None)
+    stats = _resolve_sim_stats(websocket)
     speed_factor = getattr(stats, "speed_factor", config.get("speed_factor"))
     if not isinstance(speed_factor, (int, float)) or speed_factor <= 0:
         return _DEFAULT_SPEED_FACTOR
@@ -323,9 +359,7 @@ def _compute_real_time_sleep_delay(
 
 def _reset_simulation_stats(websocket: WebSocket, config: dict[str, Any]) -> None:
     """Reset shared simulation stats for a new WebSocket simulation run."""
-    app_state = getattr(getattr(websocket, "app", None), "state", None)
-    simulation_service = getattr(app_state, "simulation_service", None)
-    stats = getattr(simulation_service, "stats", None)
+    stats = _resolve_sim_stats(websocket)
     if stats is None:
         return
     stats.start_time = time.time()
@@ -431,9 +465,7 @@ def _apply_set_speed(
     """
     speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
     config["speed_factor"] = speed_factor
-    app_state = getattr(getattr(websocket, "app", None), "state", None)
-    simulation_service = getattr(app_state, "simulation_service", None)
-    stats = getattr(simulation_service, "stats", None)
+    stats = _resolve_sim_stats(websocket)
     if stats is not None:
         stats.speed_factor = speed_factor
 
@@ -532,9 +564,7 @@ async def _run_simulation_loop(
     steps_per_second = 1.0 / timestep
     frame_skip = max(1, int(steps_per_second / target_fps))
     loop = asyncio.get_running_loop()
-    app_state = getattr(getattr(websocket, "app", None), "state", None)
-    simulation_service = getattr(app_state, "simulation_service", None)
-    stats = getattr(simulation_service, "stats", None)
+    stats = _resolve_sim_stats(websocket)
 
     while time_elapsed < duration:
         step_started_at = loop.time()
