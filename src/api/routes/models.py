@@ -17,8 +17,6 @@ from typing import Any
 import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.shared.python.core.contracts import postcondition, precondition
-
 from ..dependencies import get_logger
 from ..models.responses import (
     ModelListResponse,
@@ -44,6 +42,98 @@ _MODEL_DIRS = [
 def _find_project_root() -> Path:
     """Find the project root directory by looking for known markers."""
     return find_project_root()
+
+
+# Default attribute values for URDF vector/color attributes.
+_DEFAULT_XYZ = "0 0 0"
+_DEFAULT_RPY = "0 0 0"
+_DEFAULT_AXIS = "0 0 1"
+_DEFAULT_RGBA = "0.5 0.5 0.5 1.0"
+
+
+def _parse_floats(text: str, element: str) -> list[float]:
+    """Parse a whitespace-separated list of floats from a URDF attribute.
+
+    Args:
+        text: Raw attribute text (e.g. ``"0 0 0.2"``).
+        element: Human-readable name of the offending attribute/element,
+            used in the error message.
+
+    Returns:
+        List of parsed floats.
+
+    Raises:
+        ValueError: If any token is not a valid float.
+    """
+    try:
+        return [float(token) for token in text.split()]
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid numeric value in URDF {element} attribute: {text!r}"
+        ) from exc
+
+
+def _parse_scalar(text: str, element: str) -> float:
+    """Parse a single float from a URDF attribute.
+
+    Args:
+        text: Raw attribute text.
+        element: Name of the offending attribute/element for errors.
+
+    Returns:
+        The parsed float.
+
+    Raises:
+        ValueError: If the value is not a valid float.
+    """
+    try:
+        return float(text)
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid numeric value in URDF {element} attribute: {text!r}"
+        ) from exc
+
+
+def _parse_vec3(text: str, element: str) -> list[float]:
+    """Parse and validate a 3-component vector from a URDF attribute.
+
+    Args:
+        text: Raw attribute text.
+        element: Name of the offending attribute/element for errors.
+
+    Returns:
+        A list of exactly three floats.
+
+    Raises:
+        ValueError: If the value is non-numeric or not exactly 3 components.
+    """
+    values = _parse_floats(text, element)
+    if len(values) != 3:
+        raise ValueError(
+            f"URDF {element} must have 3 components, got {len(values)}: {text!r}"
+        )
+    return values
+
+
+def _parse_color(text: str, element: str = "color rgba") -> list[float]:
+    """Parse and validate an RGBA color from a URDF attribute.
+
+    Args:
+        text: Raw ``rgba`` attribute text.
+        element: Name of the offending attribute/element for errors.
+
+    Returns:
+        A list of exactly four floats.
+
+    Raises:
+        ValueError: If the value is non-numeric or not exactly 4 components.
+    """
+    values = _parse_floats(text, element)
+    if len(values) != 4:
+        raise ValueError(
+            f"URDF {element} must have 4 components, got {len(values)}: {text!r}"
+        )
+    return values
 
 
 def discover_models() -> list[dict[str, str]]:
@@ -113,9 +203,9 @@ def _parse_urdf_geometry(  # noqa: C901
     Returns:
         Dictionary with geometry_type, dimensions, origin, rotation, and color.
     """
-    if not (materials is not None):
+    if materials is None:
         raise ValueError("materials must be provided")
-    if not (visual_elem is not None):
+    if visual_elem is None:
         raise ValueError("visual_elem must be provided")
     result: dict[str, Any] = {
         "geometry_type": "box",
@@ -129,10 +219,12 @@ def _parse_urdf_geometry(  # noqa: C901
     # Parse origin
     origin_elem = visual_elem.find("origin")
     if origin_elem is not None:
-        xyz = origin_elem.get("xyz", "0 0 0")
-        rpy = origin_elem.get("rpy", "0 0 0")
-        result["origin"] = [float(x) for x in xyz.split()]
-        result["rotation"] = [float(x) for x in rpy.split()]
+        result["origin"] = _parse_vec3(
+            origin_elem.get("xyz", _DEFAULT_XYZ), "visual origin xyz"
+        )
+        result["rotation"] = _parse_vec3(
+            origin_elem.get("rpy", _DEFAULT_RPY), "visual origin rpy"
+        )
 
     # Parse geometry
     geom_elem = visual_elem.find("geometry")
@@ -144,8 +236,7 @@ def _parse_urdf_geometry(  # noqa: C901
 
         if box is not None:
             result["geometry_type"] = "box"
-            size = box.get("size", "0.1 0.1 0.1")
-            dims = [float(x) for x in size.split()]
+            dims = _parse_floats(box.get("size", "0.1 0.1 0.1"), "box size")
             result["dimensions"] = {
                 "width": dims[0] if len(dims) > 0 else 0.1,
                 "height": dims[1] if len(dims) > 1 else 0.1,
@@ -154,19 +245,22 @@ def _parse_urdf_geometry(  # noqa: C901
         elif cylinder is not None:
             result["geometry_type"] = "cylinder"
             result["dimensions"] = {
-                "radius": float(cylinder.get("radius", "0.05")),
-                "length": float(cylinder.get("length", "0.3")),
+                "radius": _parse_scalar(
+                    cylinder.get("radius", "0.05"), "cylinder radius"
+                ),
+                "length": _parse_scalar(
+                    cylinder.get("length", "0.3"), "cylinder length"
+                ),
             }
         elif sphere is not None:
             result["geometry_type"] = "sphere"
             result["dimensions"] = {
-                "radius": float(sphere.get("radius", "0.1")),
+                "radius": _parse_scalar(sphere.get("radius", "0.1"), "sphere radius"),
             }
         elif mesh is not None:
             result["geometry_type"] = "mesh"
             result["mesh_path"] = mesh.get("filename", "")
-            scale = mesh.get("scale", "1 1 1")
-            scale_vals = [float(x) for x in scale.split()]
+            scale_vals = _parse_floats(mesh.get("scale", "1 1 1"), "mesh scale")
             result["dimensions"] = {
                 "scale_x": scale_vals[0] if len(scale_vals) > 0 else 1.0,
                 "scale_y": scale_vals[1] if len(scale_vals) > 1 else 1.0,
@@ -179,8 +273,7 @@ def _parse_urdf_geometry(  # noqa: C901
         mat_name = mat_elem.get("name", "")
         color_elem = mat_elem.find("color")
         if color_elem is not None:
-            rgba = color_elem.get("rgba", "0.5 0.5 0.5 1.0")
-            result["color"] = [float(x) for x in rgba.split()]
+            result["color"] = _parse_color(color_elem.get("rgba", _DEFAULT_RGBA))
         elif mat_name in materials:
             result["color"] = materials[mat_name]
 
@@ -201,8 +294,7 @@ def _parse_urdf_materials(root: Any) -> dict[str, list[float]]:
         mat_name = mat_elem.get("name", "")
         color_elem = mat_elem.find("color")
         if color_elem is not None:
-            rgba = color_elem.get("rgba", "0.5 0.5 0.5 1.0")
-            materials[mat_name] = [float(x) for x in rgba.split()]
+            materials[mat_name] = _parse_color(color_elem.get("rgba", _DEFAULT_RGBA))
     return materials
 
 
@@ -218,9 +310,9 @@ def _parse_urdf_links(
     Returns:
         List of URDFLinkGeometry descriptors for each link with visual data.
     """
-    if not (materials is not None):
+    if materials is None:
         raise ValueError("materials must be provided")
-    if not (root is not None):
+    if root is None:
         raise ValueError("root must be provided")
     links: list[URDFLinkGeometry] = []
     for link_elem in root.findall("link"):
@@ -259,23 +351,20 @@ def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
     rotation = [0.0, 0.0, 0.0]
     origin_elem = joint_elem.find("origin")
     if origin_elem is not None:
-        xyz = origin_elem.get("xyz", "0 0 0")
-        rpy = origin_elem.get("rpy", "0 0 0")
-        origin = [float(x) for x in xyz.split()]
-        rotation = [float(x) for x in rpy.split()]
+        origin = _parse_vec3(origin_elem.get("xyz", _DEFAULT_XYZ), "joint origin xyz")
+        rotation = _parse_vec3(origin_elem.get("rpy", _DEFAULT_RPY), "joint origin rpy")
 
     axis = [0.0, 0.0, 1.0]
     axis_elem = joint_elem.find("axis")
     if axis_elem is not None:
-        axis_str = axis_elem.get("xyz", "0 0 1")
-        axis = [float(x) for x in axis_str.split()]
+        axis = _parse_vec3(axis_elem.get("xyz", _DEFAULT_AXIS), "joint axis xyz")
 
     lower_limit = None
     upper_limit = None
     limit_elem = joint_elem.find("limit")
     if limit_elem is not None:
-        lower_limit = float(limit_elem.get("lower", "0"))
-        upper_limit = float(limit_elem.get("upper", "0"))
+        lower_limit = _parse_scalar(limit_elem.get("lower", "0"), "joint limit lower")
+        upper_limit = _parse_scalar(limit_elem.get("upper", "0"), "joint limit upper")
 
     return URDFJointDescriptor(
         name=joint_name,
@@ -318,7 +407,7 @@ def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str
     Returns:
         Name of the root link, or "base" if none can be determined.
     """
-    if not (links is not None):
+    if links is None:
         raise ValueError("links must be provided")
     all_link_names = {link.link_name for link in links}
     root_candidates = all_link_names - child_links
@@ -329,14 +418,6 @@ def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str
     )
 
 
-@precondition(
-    lambda urdf_content: urdf_content is not None and len(urdf_content) > 0,
-    "URDF content must be a non-empty string",
-)
-@postcondition(
-    lambda result: result is not None and result.model_name is not None,
-    "Parsed URDF model must have a valid model name",
-)
 def _parse_urdf(urdf_content: str) -> URDFModelResponse:
     """Parse a URDF XML string into a URDFModelResponse.
 
@@ -344,11 +425,14 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
         urdf_content: Raw URDF XML string.
 
     Returns:
-        Parsed model data.
+        Parsed model data. ``model_name`` is always populated (defaults to
+        ``"unknown"`` when the ``<robot>`` element has no ``name`` attribute).
 
     Raises:
-        ValueError: If the URDF cannot be parsed.
+        ValueError: If ``urdf_content`` is empty or the URDF cannot be parsed.
     """
+    if not urdf_content:
+        raise ValueError("URDF content must be a non-empty string")
     try:
         root = ElementTree.fromstring(urdf_content)
     except ElementTree.ParseError as e:
@@ -381,7 +465,13 @@ async def list_models(
     try:
         models = discover_models()
         return ModelListResponse(models=models)
-    except (RuntimeError, TypeError, AttributeError) as exc:
+    except (
+        RuntimeError,
+        TypeError,
+        AttributeError,
+        OSError,
+        ValueError,
+    ) as exc:
         if logger:
             logger.exception("Error listing models")
         raise HTTPException(
@@ -421,11 +511,20 @@ async def get_model_urdf(  # noqa: C901
             break
 
     if model_entry is None:
-        # Try partial match
-        for m in models:
-            if model_name in m["name"] or m["name"].endswith(model_name):
-                model_entry = m
-                break
+        # Fall back to an exact basename match (names may be disambiguated
+        # with a "parent_dir/name" prefix in discover_models()). Require an
+        # unambiguous single match so resolution is deterministic.
+        basename_matches = [
+            m for m in models if m["name"].rsplit("/", 1)[-1] == model_name
+        ]
+        if len(basename_matches) == 1:
+            model_entry = basename_matches[0]
+        elif len(basename_matches) > 1:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Model '{model_name}' is ambiguous. "
+                f"Candidates: {[m['name'] for m in basename_matches]}",
+            )
 
     if model_entry is None:
         raise HTTPException(
