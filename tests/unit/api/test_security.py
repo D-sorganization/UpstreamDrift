@@ -731,6 +731,26 @@ class TestAuthCache:
             # Lookup token is internal; assert the backing store was pruned.
             assert cache._cache == {}
 
+    def test_get_deletes_only_requested_expired_entry(self) -> None:
+        """Expiry cleanup prunes the stale lookup and preserves fresh entries."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=0.0)
+            cache = AuthCache(ttl_seconds=5)
+            cache._time = clock
+
+            cache.set("expired", "old")
+            clock.advance(4.0)
+            cache.set("fresh", "new")
+            clock.advance(2.0)
+
+            assert cache.get("expired") is None
+            assert cache.get("fresh") == "new"
+            assert list(cache._cache) == [cache._cache_lookup_token("fresh")]
+
     def test_ttl_monkeypatch_overrides_instance_value(self) -> None:
         """Monkeypatching the class TTL_SECONDS wins over the instance TTL."""
         with patch.dict(
@@ -746,8 +766,29 @@ class TestAuthCache:
             # Shrink the effective TTL via the class attribute. _effective_ttl
             # detects the monkeypatch and prefers it over the instance's 10s.
             with patch.object(AuthCache, "TTL_SECONDS", 1):
+                assert cache._effective_ttl_seconds() == 1
                 clock.advance(2.0)  # 2s > patched 1s TTL
                 assert cache.get("k") is None
+
+    def test_effective_ttl_uses_instance_value_without_class_monkeypatch(
+        self,
+    ) -> None:
+        """The constructor TTL remains active when TTL_SECONDS is unchanged."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=10.0)
+            cache = AuthCache(ttl_seconds=3)
+            cache._time = clock
+            cache.set("k", "v")
+
+            assert cache._effective_ttl_seconds() == 3
+            clock.advance(2.0)
+            assert cache.get("k") == "v"
+            clock.advance(2.0)
+            assert cache.get("k") is None
 
     def test_evict_overflow_is_bounded_fifo(self) -> None:
         """The cache stays bounded and evicts the oldest entry first (FIFO)."""
@@ -769,6 +810,10 @@ class TestAuthCache:
             assert cache.get("first") is None
             assert cache.get("second") == "2"
             assert cache.get("third") == "3"
+            assert list(cache._cache) == [
+                cache._cache_lookup_token("second"),
+                cache._cache_lookup_token("third"),
+            ]
 
     def test_max_entries_monkeypatch_overrides_instance_value(self) -> None:
         """Monkeypatching MAX_ENTRIES wins over the instance bound."""

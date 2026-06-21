@@ -429,9 +429,12 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
         ``"unknown"`` when the ``<robot>`` element has no ``name`` attribute).
 
     Raises:
-        ValueError: If ``urdf_content`` is empty or the URDF cannot be parsed.
+        ValueError: If ``urdf_content`` is not a string, is empty, or the URDF
+            cannot be parsed.
     """
-    if not urdf_content:
+    if not isinstance(urdf_content, str):
+        raise ValueError("URDF content must be a string")
+    if urdf_content == "":
         raise ValueError("URDF content must be a non-empty string")
     try:
         root = ElementTree.fromstring(urdf_content)
