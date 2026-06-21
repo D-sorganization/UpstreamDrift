@@ -2,18 +2,12 @@
 
 import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from typing import Any, cast
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
-from typing import Any, cast
 
 import bcrypt
 import jwt
@@ -47,13 +41,48 @@ if not _secret_key_env:
         # code to forge valid JWT tokens. A randomly generated key is unguessable
         # and scoped to this process lifetime, so forged tokens cannot be externally
         # crafted. Tokens will be invalidated on process restart.
+        #
+        # CAVEAT: This key is generated independently per process. In a
+        # multi-worker deployment (e.g. several Gunicorn/Uvicorn workers, or
+        # WEB_CONCURRENCY>1) each worker signs JWTs with a different key, so a
+        # token issued by one worker is rejected by another, producing
+        # intermittent 401s. Set GOLF_API_SECRET_KEY to a shared value to keep
+        # tokens valid across all workers.
         SECRET_KEY = secrets.token_urlsafe(32)
-        logger.warning(
-            "SECURITY WARNING: No GOLF_API_SECRET_KEY or SECRET_KEY env var set. "
-            "A random per-process key has been generated; all JWT tokens will be "
-            "invalidated on restart. Set GOLF_API_SECRET_KEY for production."
-        )
+        try:
+            _web_concurrency = int(os.getenv("WEB_CONCURRENCY", "1"))
+        except ValueError:
+            _web_concurrency = 1
+        if _web_concurrency > 1:
+            logger.error(
+                "SECURITY ERROR: No GOLF_API_SECRET_KEY or SECRET_KEY env var "
+                "set while WEB_CONCURRENCY=%s. Each worker generated a distinct "
+                "per-process key, so JWTs issued by one worker will be rejected "
+                "by the others, causing intermittent 401s. Set "
+                "GOLF_API_SECRET_KEY to a shared, random value.",
+                _web_concurrency,
+            )
+        else:
+            logger.warning(
+                "SECURITY WARNING: No GOLF_API_SECRET_KEY or SECRET_KEY env var "
+                "set. A random per-process key has been generated; all JWT "
+                "tokens will be invalidated on restart and will NOT be valid "
+                "across multiple workers (WEB_CONCURRENCY>1). Set "
+                "GOLF_API_SECRET_KEY for production."
+            )
 elif len(_secret_key_env) < 32:
+    if _environment == "production":
+        logger.error(
+            "SECURITY ERROR: SECRET_KEY is less than 32 characters. A short "
+            "signing key materially weakens HS256 JWT security and is not "
+            "permitted in production. Set GOLF_API_SECRET_KEY or SECRET_KEY to "
+            "a key of at least 32 characters."
+        )
+        raise RuntimeError(
+            "SECRET_KEY must be at least 32 characters in production. Set "
+            "GOLF_API_SECRET_KEY or SECRET_KEY to a longer, randomly generated "
+            "value."
+        )
     logger.warning(
         "SECURITY WARNING: SECRET_KEY is less than 32 characters. "
         "Use a longer, randomly generated key for production."
@@ -80,6 +109,16 @@ _USAGE_QUOTA_FIELDS = {
     "api_calls": "api_calls_per_month",
     "video_analyses": "video_analyses_per_month",
     "simulations": "simulations_per_month",
+}
+
+# Maps a resource type to the User instance attribute holding the current
+# month's usage count. Used for attribute access (getattr/setattr) on User
+# instances, as opposed to ``_USAGE_COUNTER_COLUMNS`` which holds the
+# class-level SQLAlchemy columns used to build UPDATE statements.
+_USAGE_COUNTER_FIELDS = {
+    "api_calls": "api_calls_this_month",
+    "video_analyses": "video_analyses_this_month",
+    "simulations": "simulations_this_month",
 }
 
 
@@ -418,21 +457,11 @@ class UsageTracker:
         if user is None:
             raise ValueError("user must be provided")
 
-        if resource_type == "api_calls":
-            return bool(
-                int(user.api_calls_this_month) < self.quota_limit(user, resource_type)
-            )
-        if resource_type == "video_analyses":
-            return bool(
-                int(user.video_analyses_this_month)
-                < self.quota_limit(user, resource_type)
-            )
-        if resource_type == "simulations":
-            return bool(
-                int(user.simulations_this_month) < self.quota_limit(user, resource_type)
-            )
-
-        return False
+        counter_field = _USAGE_COUNTER_FIELDS.get(resource_type)
+        if counter_field is None:
+            return False
+        current = int(getattr(user, counter_field))
+        return bool(current < self.quota_limit(user, resource_type))
 
     @precondition(
         lambda self, user, resource_type: (
@@ -528,12 +557,10 @@ class UsageTracker:
             user: User to increment usage for
             resource_type: Type of resource used
         """
-        if resource_type == "api_calls":
-            user.api_calls_this_month = int(user.api_calls_this_month) + 1  # type: ignore[assignment]
-        elif resource_type == "video_analyses":
-            user.video_analyses_this_month = int(user.video_analyses_this_month) + 1  # type: ignore[assignment]
-        elif resource_type == "simulations":
-            user.simulations_this_month = int(user.simulations_this_month) + 1  # type: ignore[assignment]
+        counter_field = _USAGE_COUNTER_FIELDS.get(resource_type)
+        if counter_field is None:
+            return
+        setattr(user, counter_field, int(getattr(user, counter_field)) + 1)
 
     def get_usage_summary(self, user: User) -> dict[str, Any]:
         """Get usage summary for a user.

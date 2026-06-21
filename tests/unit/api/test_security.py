@@ -19,6 +19,75 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
+class _FakeClock:
+    """Deterministic stand-in for the ``time`` module used by AuthCache.
+
+    Exposes a ``time()`` method so it can be assigned to ``AuthCache._time``,
+    letting tests control TTL expiry without real sleeps.
+    """
+
+    def __init__(self, start: float = 0.0) -> None:
+        self._now = start
+
+    def time(self) -> float:
+        return self._now
+
+    def advance(self, seconds: float) -> None:
+        self._now += seconds
+
+
+class TestSecretKeyValidation:
+    """Module-import-time validation of the JWT signing secret."""
+
+    @staticmethod
+    def _reload_security() -> object:
+        import importlib
+
+        import src.api.auth.security as security_module
+
+        return importlib.reload(security_module)
+
+    def test_short_key_rejected_in_production(self) -> None:
+        """A <32-char SECRET_KEY must raise in production, not just warn."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": "short", "ENVIRONMENT": "production"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            with pytest.raises(RuntimeError, match="at least 32 characters"):
+                self._reload_security()
+        # Restore a clean module state for subsequent tests.
+        self._reload_security()
+
+    def test_short_key_warns_in_development(self) -> None:
+        """A <32-char SECRET_KEY is accepted (warn-only) outside production."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": "short", "ENVIRONMENT": "development"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            module = self._reload_security()
+            secret_key = module.SECRET_KEY  # type: ignore[attr-defined]
+            assert secret_key == "short"
+        self._reload_security()
+
+    def test_long_key_accepted_in_production(self) -> None:
+        """A >=32-char SECRET_KEY is accepted in production."""
+        long_key = "x" * 40
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": long_key, "ENVIRONMENT": "production"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            module = self._reload_security()
+            secret_key = module.SECRET_KEY  # type: ignore[attr-defined]
+            assert secret_key == long_key
+        self._reload_security()
+
+
 class TestSecurityManagerContract:
     """Design by Contract tests for SecurityManager class."""
 
@@ -640,6 +709,82 @@ class TestAuthCache:
 
             assert cache.get("key1") == "value1"
             assert cache.get("key2") == "value2"
+
+    def test_get_expires_entry_after_ttl(self) -> None:
+        """Expired entries are evicted on read and return None."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=1000.0)
+            cache = AuthCache(ttl_seconds=10)
+            cache._time = clock
+
+            cache.set("k", "v")
+            # Within TTL: still cached.
+            clock.advance(9.0)
+            assert cache.get("k") == "v"
+            # Past TTL: expired, returns None and the entry is deleted.
+            clock.advance(2.0)  # now 11s since set, ttl is 10
+            assert cache.get("k") is None
+            # Lookup token is internal; assert the backing store was pruned.
+            assert cache._cache == {}
+
+    def test_ttl_monkeypatch_overrides_instance_value(self) -> None:
+        """Monkeypatching the class TTL_SECONDS wins over the instance TTL."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=0.0)
+            cache = AuthCache(ttl_seconds=10)
+            cache._time = clock
+            cache.set("k", "v")
+
+            # Shrink the effective TTL via the class attribute. _effective_ttl
+            # detects the monkeypatch and prefers it over the instance's 10s.
+            with patch.object(AuthCache, "TTL_SECONDS", 1):
+                clock.advance(2.0)  # 2s > patched 1s TTL
+                assert cache.get("k") is None
+
+    def test_evict_overflow_is_bounded_fifo(self) -> None:
+        """The cache stays bounded and evicts the oldest entry first (FIFO)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache(ttl_seconds=300, max_entries=2)
+
+            cache.set("first", "1")
+            cache.set("second", "2")
+            assert len(cache._cache) == 2
+
+            # Inserting a third entry must evict the oldest ("first") to stay
+            # within max_entries, leaving the two most-recent entries.
+            cache.set("third", "3")
+            assert len(cache._cache) == 2
+            assert cache.get("first") is None
+            assert cache.get("second") == "2"
+            assert cache.get("third") == "3"
+
+    def test_max_entries_monkeypatch_overrides_instance_value(self) -> None:
+        """Monkeypatching MAX_ENTRIES wins over the instance bound."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache(ttl_seconds=300, max_entries=100)
+            with patch.object(AuthCache, "MAX_ENTRIES", 1):
+                cache.set("a", "1")
+                cache.set("b", "2")
+                # Bound is the patched value of 1, so only the newest remains.
+                assert len(cache._cache) == 1
+                assert cache.get("a") is None
+                assert cache.get("b") == "2"
 
 
 class TestComputePrefixHash:
