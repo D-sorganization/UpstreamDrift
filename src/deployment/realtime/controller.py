@@ -198,7 +198,7 @@ class RealTimeController:
         """
         if robot_config is None:
             raise ValueError("robot_config must be provided")
-        if self._is_running:
+        if self.is_running:
             raise RuntimeError(
                 "Cannot call connect() while the control loop is running"
             )
@@ -267,7 +267,7 @@ class RealTimeController:
 
     def disconnect(self) -> None:
         """Safely disconnect from robot."""
-        if self._is_running:
+        if self.is_running:
             self.stop()
 
         self._is_connected = False

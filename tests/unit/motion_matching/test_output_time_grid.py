@@ -11,6 +11,8 @@ expressions (``arange * dt`` vs ``linspace``), which only agreed when
 
 from __future__ import annotations
 
+import inspect
+
 import numpy as np
 import pytest
 
@@ -57,6 +59,31 @@ def test_non_divisible_endpoint_is_aligned(t_s: float, rate: float) -> None:
     n = canonical_sample_count(t_s, rate)
     legacy_endpoint = (n - 1) * (1.0 / rate)
     assert not np.isclose(legacy_endpoint, t_s, atol=1e-9)
+
+
+def test_drake_and_mujoco_wrappers_delegate_to_shared_grid() -> None:
+    """Engine wrappers should share the pinned endpoint builder (#7740)."""
+    from src.engines.physics_engines.drake.python.motion_matching.simulate import (
+        _sample_grid as drake_grid,
+    )
+    from src.engines.physics_engines.mujoco.python.motion_matching.simulate import (
+        _output_grid as mujoco_grid,
+    )
+
+    t_s = 0.123
+    rate = 777.0
+    expected = build_output_grid(t_s, rate)
+    np.testing.assert_array_equal(drake_grid(t_s, rate), expected)
+    np.testing.assert_array_equal(mujoco_grid(t_s, rate), expected)
+
+
+def test_pinocchio_integration_clock_exception_is_explicit() -> None:
+    """Pinocchio keeps a fixed-step integration clock, not an output grid."""
+    from src.engines.physics_engines.pinocchio.python.motion_matching import simulate
+
+    source = inspect.getsource(simulate.simulate_with_coefficients)
+    assert "fixed-step *integration clock*" in source
+    assert "np.arange(n_samples" in source
 
 
 def test_sample_count_formula() -> None:
