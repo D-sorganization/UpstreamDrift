@@ -42,6 +42,42 @@ from .sim_widget import MuJoCoSimWidget
 
 logger = get_logger(__name__)
 
+# Approximate weight of a golf club used as the external load in the static
+# equilibrium check. A driver masses roughly 0.31 kg (0.31 * 9.81 ~= 3.0 N);
+# this is the load the grip must support. Sourced here as a named constant
+# instead of an unexplained literal at the call site.
+CLUB_WEIGHT_N = 3.0
+
+
+def _geom_point_velocity(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    geom_id: int,
+    point: np.ndarray,
+) -> np.ndarray:
+    """Linear velocity (world frame) of ``geom_id`` evaluated at ``point``.
+
+    ``mj_objectVelocity`` returns the spatial velocity (angular, linear) at the
+    geom's frame origin. The linear velocity at an arbitrary contact ``point``
+    on the rigid body is ``v_origin + omega x (point - origin)``.
+
+    Args:
+        model: The MuJoCo model.
+        data: The MuJoCo data (must be post-``mj_forward``).
+        geom_id: Geom whose parent body's velocity is queried.
+        point: World-frame point at which to evaluate the velocity (shape (3,)).
+
+    Returns:
+        World-frame linear velocity at ``point`` (shape (3,)).
+    """
+    spatial = np.zeros(6)
+    # flg_local=0 -> world orientation; result is (angular, linear).
+    mujoco.mj_objectVelocity(model, data, mujoco.mjtObj.mjOBJ_GEOM, geom_id, spatial, 0)
+    omega = spatial[:3]
+    v_origin = spatial[3:]
+    origin = data.geom_xpos[geom_id]
+    return v_origin + np.cross(omega, point - origin)
+
 
 class GripModellingTab(QtWidgets.QWidget):
     """Tab for manipulating advanced hand models (Shadow, Allegro)."""
@@ -383,9 +419,9 @@ class GripModellingTab(QtWidgets.QWidget):
             return
         state = self.sim_widget.get_state()
         state["q"][q_idx] = val
+        # set_state_and_forward already runs mj_forward + renders one frame;
+        # a trailing mj_forward/render would double the solve + GL render.
         self.sim_widget.set_state_and_forward(state)
-        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
-        self.sim_widget.render()
 
     def _update_joints(self, updates: dict[int, float]) -> None:
         """Update multiple joints in simulation and UI in a single pass.
@@ -393,8 +429,10 @@ class GripModellingTab(QtWidgets.QWidget):
         Args:
             updates: Dict mapping qpos_adr to target float value.
         """
-        assert self.sim_widget.model is not None, "Model must be loaded"
-        assert self.sim_widget.data is not None, "Data must be loaded"
+        # Use a runtime guard rather than asserts (stripped under -O), matching
+        # the sibling _update_joint precondition.
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
 
         state = self.sim_widget.get_state()
         qpos = state.get("q", [])
@@ -402,9 +440,8 @@ class GripModellingTab(QtWidgets.QWidget):
             if 0 <= q_idx < len(qpos):
                 qpos[q_idx] = val
 
+        # set_state_and_forward already runs mj_forward + renders one frame.
         self.sim_widget.set_state_and_forward(state)
-        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
-        self.sim_widget.render()
 
         for q_idx, val in updates.items():
             if q_idx in self.joint_controls:
@@ -625,26 +662,39 @@ class GripModellingTab(QtWidgets.QWidget):
             mujoco.mj_contactForce(model, data, i, force)
             contact_force = force[:3]
 
-            vel = np.zeros(3)
-
+            # Relative tangential/normal contact velocity drives slip detection
+            # downstream. Compute the real relative velocity at the contact
+            # point (geom2 minus geom1) instead of feeding a fabricated zero,
+            # which would make slip_velocity dead-always-zero.
             geom1 = contact.geom1
             geom2 = contact.geom2
+            vel = _geom_point_velocity(model, data, geom2, pos) - _geom_point_velocity(
+                model, data, geom1, pos
+            )
+
             body1_id = model.geom_bodyid[geom1]
             body2_id = model.geom_bodyid[geom2]
             body1_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body1_id)
             body2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body2_id)
 
-            is_hand_contact = any(
-                name and ("hand" in name.lower() or "finger" in name.lower())
-                for name in [body1_name, body2_name]
-            )
+            def _is_hand(name: str | None) -> bool:
+                return bool(name) and (
+                    "hand" in name.lower() or "finger" in name.lower()
+                )
 
-            if is_hand_contact:
+            hand_is_body1 = _is_hand(body1_name)
+            hand_is_body2 = _is_hand(body2_name)
+
+            if hand_is_body1 or hand_is_body2:
                 positions.append(pos)
                 normals.append(normal)
                 forces.append(contact_force)
                 velocities.append(vel)
-                body_names.append(body1_name or "unknown")
+                # Attribute the contact to the hand-side body explicitly. Using
+                # body1_name unconditionally mislabelled ~half of contacts with
+                # the club/object body whenever the hand was geom2's body.
+                hand_name = body1_name if hand_is_body1 else body2_name
+                body_names.append(hand_name or "unknown")
 
         return positions, normals, forces, velocities, body_names
 
@@ -665,7 +715,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self.pressure_widget.update_pressure(pressure_data)
 
         margins = self.grip_contact_model.check_slip_margin()
-        equilibrium = self.grip_contact_model.check_static_equilibrium(3.0)
+        equilibrium = self.grip_contact_model.check_static_equilibrium(CLUB_WEIGHT_N)
 
         self.metrics_widget.update_metrics(
             normal_force=state.total_normal_force,

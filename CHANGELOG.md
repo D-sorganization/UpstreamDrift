@@ -81,6 +81,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   canonical validation tolerance constants instead of re-declaring them and
   drops a dead `butt_rotmats` re-slice with a corrected comment; added coverage
   for the resampled-shape-mismatch raw fallback in `load_robneal_target`.
+- Hardened the MuJoCo grip-modelling tab contact pipeline (#7740): compute real
+  relative contact velocity via `mj_objectVelocity` instead of feeding a
+  fabricated `np.zeros(3)` (which left velocity-based slip detection dead);
+  attribute each hand contact to the hand-side body explicitly instead of
+  always using `body1_name` (previously mislabelled ~half of contacts with the
+  club/object body when the hand was `geom2`); drop the redundant
+  `mj_forward`/`render` calls after `set_state_and_forward` in `_update_joint`
+  and `_update_joints` (they doubled the solve + GL render per slider tick);
+  replace `-O`-stripped `assert` model/data preconditions in `_update_joints`
+  with an early-return guard matching `_update_joint`; and name the club-weight
+  static-equilibrium load as `CLUB_WEIGHT_N` instead of an unexplained `3.0`.
 - Rendered the catch-all 404 route synchronously so unknown deep links show the
   recoverable branded "Page not found" screen immediately instead of racing the
   route-level lazy-loading fallback (#7430).
