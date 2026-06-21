@@ -5,12 +5,14 @@ Issue #757: Linked sliders (synergies) and improved visualization.
 
 from __future__ import annotations
 
-import re
 import xml.etree.ElementTree as ET
 
 import mujoco
 import pytest
 
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._grip_modelling_synergies import (
+    get_descriptive_joint_name,
+)
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (
     GripModellingTab,
 )
@@ -23,100 +25,22 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models_swing
 )
 
 
-def get_descriptive_joint_name(name: str) -> str:
-    """Helper to convert joint name to a descriptive name (mirrors planned implementation)."""
-    side_prefix = ""
-    if name.startswith(("rh_", "right_")):
-        side_prefix = "[Right] "
-    elif name.startswith(("lh_", "left_")):
-        side_prefix = "[Left] "
-
-    clean_name = name
-    for prefix in ["rh_", "lh_", "right_", "left_"]:
-        if clean_name.lower().startswith(prefix):
-            clean_name = clean_name[len(prefix) :]
-            break
-
-    finger_map = {
-        "ff": "Index",
-        "mf": "Middle",
-        "rf": "Ring",
-        "lf": "Little (Pinky)",
-        "th": "Thumb",
-        "wr": "Wrist",
-    }
-
-    match_shadow = re.match(r"^([a-zA-Z]+)J(\d+)$", clean_name)
-    match_allegro = re.match(r"^([a-zA-Z]+)j(\d+)$", clean_name)
-
-    if match_shadow:
-        finger_code = match_shadow.group(1).lower()
-        joint_num = int(match_shadow.group(2))
-        finger_name = finger_map.get(finger_code, finger_code.upper())
-
-        if finger_code == "wr":
-            if joint_num == 1:
-                return f"{side_prefix}Wrist Pitch / Flexion (WRJ1)"
-            if joint_num == 2:
-                return f"{side_prefix}Wrist Yaw / Abduction (WRJ2)"
-        elif finger_code == "th":
-            thumb_joints = {
-                5: "CMC Abduction (THJ5)",
-                4: "CMC Flexion (THJ4)",
-                3: "MCP Flexion (THJ3)",
-                2: "IP Flexion (THJ2)",
-                1: "Distal Flexion (THJ1)",
-            }
-            return f"{side_prefix}Thumb {thumb_joints.get(joint_num, f'Joint {joint_num}')}"
-        elif finger_code == "lf" and joint_num == 5:
-            return f"{side_prefix}Little (Pinky) CMC Flexion (LFJ5)"
-        else:
-            finger_joints = {
-                4: "Knuckle Abduction (MCP) (J4)",
-                3: "Knuckle Flexion (MCP) (J3)",
-                2: "Middle Joint Flexion (PIP) (J2)",
-                1: "Distal Joint Flexion (DIP) (J1)",
-            }
-            return f"{side_prefix}{finger_name} {finger_joints.get(joint_num, f'Joint {joint_num}')}"
-
-    elif match_allegro:
-        finger_code = match_allegro.group(1).lower()
-        joint_num = int(match_allegro.group(2))
-        finger_name = finger_map.get(finger_code, finger_code.upper())
-
-        if finger_code == "th":
-            thumb_joints = {
-                0: "CMC Abduction (thj0)",
-                1: "CMC Flexion (thj1)",
-                2: "MCP Flexion (thj2)",
-                3: "IP Flexion (thj3)",
-            }
-            return f"{side_prefix}Thumb {thumb_joints.get(joint_num, f'Joint {joint_num}')}"
-        finger_joints = {
-            0: "Knuckle Abduction (MCP) (j0)",
-            1: "Knuckle Flexion (MCP) (j1)",
-            2: "Middle Joint Flexion (PIP) (j2)",
-            3: "Distal Joint Flexion (DIP) (j3)",
-        }
-        return f"{side_prefix}{finger_name} {finger_joints.get(joint_num, f'Joint {joint_num}')}"
-
-    return f"{side_prefix}{name}"
-
-
 @pytest.mark.unit
-def test_get_descriptive_joint_name() -> None:
+@pytest.mark.parametrize(
+    ("raw_name", "expected"),
+    [
+        ("rh_FFJ3", "[Right] Index Knuckle Flexion (MCP) (J3)"),
+        ("lh_THJ2", "[Left] Thumb IP Flexion (THJ2)"),
+        ("right_WRJ2", "[Right] Wrist Yaw / Abduction (WRJ2)"),
+        ("left_LFJ5", "[Left] Little (Pinky) CMC Flexion (LFJ5)"),
+        ("ffj1", "Index Knuckle Flexion (MCP) (j1)"),
+        ("thj0", "Thumb CMC Abduction (thj0)"),
+        ("unknown_joint", "unknown_joint"),
+    ],
+)
+def test_get_descriptive_joint_name(raw_name: str, expected: str) -> None:
     """Verify raw joint names are mapped to user-friendly descriptive labels."""
-    assert (
-        get_descriptive_joint_name("rh_FFJ3")
-        == "[Right] Index Knuckle Flexion (MCP) (J3)"
-    )
-    assert get_descriptive_joint_name("lh_THJ2") == "[Left] Thumb IP Flexion (THJ2)"
-    assert get_descriptive_joint_name("ffj1") == "Index Knuckle Flexion (MCP) (j1)"
-    assert get_descriptive_joint_name("thj0") == "Thumb CMC Abduction (thj0)"
-    assert (
-        get_descriptive_joint_name("lh_WRJ1") == "[Left] Wrist Pitch / Flexion (WRJ1)"
-    )
-    assert get_descriptive_joint_name("unknown_joint") == "unknown_joint"
+    assert get_descriptive_joint_name(raw_name) == expected
 
 
 @pytest.mark.unit
