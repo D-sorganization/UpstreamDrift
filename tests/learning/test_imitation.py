@@ -19,6 +19,7 @@ def _seed_numpy_rng() -> None:
     np.random.seed(_TEST_RNG_SEED)
 
 
+@pytest.mark.unit
 def test_numpy_rng_seed_is_reset_for_deterministic_fixtures() -> None:
     expected = np.random.RandomState(_TEST_RNG_SEED).randn(3)
     np.testing.assert_allclose(np.random.randn(3), expected)
