@@ -726,12 +726,15 @@ export interface DatasetInfo {
 }
 
 /**
- * Response listing available datasets.
+ * Response listing available datasets. ``total`` reports the number of entries returned in this (paginated) page, preserving the historical field semantics. ``offset``/``limit`` echo the pagination window and ``truncated`` flags when the on-disk scan hit the hard cap and more files may exist beyond the returned page (#7740 H).
  */
 export interface DatasetListResponse {
   datasets: DatasetInfo[];
   total: number;
   search_dir: string;
+  offset: number;
+  limit: number;
+  truncated: boolean;
 }
 
 /**
