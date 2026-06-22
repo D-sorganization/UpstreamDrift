@@ -266,6 +266,15 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7688 cross-engine torque ordering fix touches simulate.py; simulate_with_coefficients was already over the changed-file function-lines budget (pre-existing forward-sim orchestration) and needs setup/rollout/output-assembly split.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py",
+      "symbol": "evaluate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 7829,
+      "reason": "Issue #7829: evaluate exceeded the changed-file parameter budget. Temporary exception until configuration object is extracted.",
+      "expires_on": "2026-09-30"
     }
   ]
 }
