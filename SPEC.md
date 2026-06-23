@@ -2292,3 +2292,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2026-06-21
 
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
+
+### 2026-06-23
+
+- **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.

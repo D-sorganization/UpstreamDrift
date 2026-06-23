@@ -35,12 +35,12 @@ def _angle_between(
     """
     if v1 is None:
         raise ValueError("v1 must be provided")
-    n1 = math.hypot(
-        v1[0], v1[1], v1[2]
-    )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D arrays
-    n2 = math.hypot(
-        v2[0], v2[1], v2[2]
-    )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 3D arrays
+    n1 = math.sqrt(
+        np.dot(v1, v1)
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster and safer than np.linalg.norm
+    n2 = math.sqrt(
+        np.dot(v2, v2)
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster and safer than np.linalg.norm
     if n1 < 1e-12 or n2 < 1e-12:
         return float("nan")
     cos_angle = np.dot(v1, v2) / (n1 * n2)
