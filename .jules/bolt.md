@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-05-25 - math.sqrt(np.dot) vs math.hypot for N-dimensional safety
+**Learning:** While `math.hypot(v[0], v[1], v[2])` is extremely fast for explicit 3D arrays, using it in generic utility functions (like `_angle_between(v1, v2)`) that accept N-dimensional arrays causes `IndexError` when passed a 2D array. `math.sqrt(np.dot(v, v))` handles any array length safely and still provides ~2x speedup over `np.linalg.norm`.
+**Action:** Use `math.sqrt(np.dot(v, v))` instead of `math.hypot` with explicit indices when the input array dimension is variable or not explicitly guarded. Use `math.hypot` only when slicing explicitly (e.g. `v[:2]`).
