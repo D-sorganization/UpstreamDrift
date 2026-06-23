@@ -425,7 +425,7 @@ class NonlinearDynamicsMixin:
             diff = p1 - p2
             # ⚡ Bolt: np.einsum is ~2.5x faster than np.sum(diff**2, axis=1)
             diff_f = diff.astype(float, copy=False)
-            dists = np.sqrt(np.einsum('...i,...i->...', diff_f, diff_f))
+            dists = np.sqrt(np.einsum("...i,...i->...", diff_f, diff_f))
 
             valid_dists_mask = dists > 1e-9
             valid_dists = dists[valid_dists_mask]
