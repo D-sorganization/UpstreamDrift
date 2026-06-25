@@ -203,11 +203,10 @@ def evaluate_objective(
         objective += objectives.weight_torque * total_torque
 
     if objectives.target_ball_position is not None:
+        pos_diff = metrics["final_club_position"] - objectives.target_ball_position
         distance_error = float(
-            np.linalg.norm(
-                metrics["final_club_position"] - objectives.target_ball_position,
-            ),
-        )
+            math.hypot(pos_diff[0], pos_diff[1], pos_diff[2])
+        )  # ⚡ Bolt: math.hypot is significantly faster than np.linalg.norm for small 3D arrays  # noqa: E501
         objective += objectives.weight_accuracy * distance_error
 
     return objective
