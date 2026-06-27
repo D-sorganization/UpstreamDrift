@@ -144,20 +144,18 @@ class MotionCapturePlotterDataMixin:
                 raise ValueError("No valid joint position data found in the CSV file")
 
             # Process the data into our standard format
-            data = []
-            for _i, row in df.iterrows():
-                frame_data = {"time": row["time"]}
-                for joint_name, columns in available_joints.items():
-                    if all(col in df.columns for col in columns):
-                        frame_data[f"{joint_name}_X"] = row[columns[0]]
-                        frame_data[f"{joint_name}_Y"] = row[columns[1]]
-                        frame_data[f"{joint_name}_Z"] = row[columns[2]]
-                data.append(frame_data)
+            # ⚡ Bolt: Vectorized dataframe construction avoids .iterrows() overhead and is significantly faster
+            out_df = pd.DataFrame({"time": df["time"]})
+            for joint_name, columns in available_joints.items():
+                if all(col in df.columns for col in columns):
+                    out_df[f"{joint_name}_X"] = df[columns[0]]
+                    out_df[f"{joint_name}_Y"] = df[columns[1]]
+                    out_df[f"{joint_name}_Z"] = df[columns[2]]
 
             # Store the data
             swing_name = "Simscape_Swing"
-            self.simscape_data[swing_name] = pd.DataFrame(data)
-            logger.debug(f"Successfully loaded {len(data)} frames for {swing_name}")
+            self.simscape_data[swing_name] = out_df
+            logger.debug(f"Successfully loaded {len(out_df)} frames for {swing_name}")
 
             # Update swing selection
             self.swing_combo.clear()
