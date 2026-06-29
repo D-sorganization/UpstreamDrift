@@ -43,3 +43,6 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+## 2024-05-14 - Vectorizing pandas iterrows with np.column_stack
+**Learning:** Using `iterrows()` forces pandas to construct a new Series object for every row, creating a massive bottleneck in operations like 3D trajectory generation for visualizations. This is severely inefficient compared to vectorized operations.
+**Action:** When creating multi-dimensional NumPy arrays from pandas DataFrame columns in performance-critical paths (e.g., rendering loops), completely avoid list comprehensions with `iterrows()`. Instead, extract the entire columns as NumPy arrays using `.values` and use `np.column_stack()` to vectorize the array creation.
