@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-03-22 - Fast Euclidean distance with vdot
+**Learning:** In NumPy, calculating the sum of squared differences for vectors via `np.sum((a - b) ** 2)` creates intermediate temporary arrays, which is slow for repeated calculations like finding the nearest neighbor in motion planning.
+**Action:** Replace `np.sum(diff ** 2)` with `np.vdot(diff, diff)` for 1D vectors, which calculates the squared magnitude without creating a temporary array and provides a substantial speedup (~2.5x).
