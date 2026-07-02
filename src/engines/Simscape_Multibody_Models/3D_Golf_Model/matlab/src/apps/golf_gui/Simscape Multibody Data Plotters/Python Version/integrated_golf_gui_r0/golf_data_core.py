@@ -511,6 +511,13 @@ class FrameProcessor:
         """Invalidate cached dynamics data."""
         with self._dynamics_cache_lock:
             self.dynamics_cache = {}
+        # Clear numpy extraction cache
+        if hasattr(self, "_baseq_cache"):
+            delattr(self, "_baseq_cache")
+        if hasattr(self, "_ztcfq_cache"):
+            delattr(self, "_ztcfq_cache")
+        if hasattr(self, "_deltaq_cache"):
+            delattr(self, "_deltaq_cache")
         logger.info("Cache invalidated due to filter change to %s", self.current_filter)
 
     def get_frame_data(self, frame_idx: int) -> FrameData:
@@ -547,12 +554,21 @@ class FrameProcessor:
         start_time = time.time()
 
         # Extract full position and orientation data
-        position_data = np.array(
-            [
-                self.get_column_data(self.baseq_df, "Clubhead", i)
-                for i in range(self.num_frames)
-            ]  # noqa: E501
-        )
+        # ⚡ Bolt: Vectorized construction is much faster than row-by-row iteration
+        if (
+            "CHx" in self.baseq_df.columns
+            and "CHy" in self.baseq_df.columns
+            and "CHz" in self.baseq_df.columns
+        ):
+            position_data = np.column_stack(
+                (
+                    self.baseq_df["CHx"].values,
+                    self.baseq_df["CHy"].values,
+                    self.baseq_df["CHz"].values,
+                )
+            ).astype(np.float32)
+        else:
+            position_data = np.zeros((self.num_frames, 3), dtype=np.float32)
         # Placeholder for orientation data
         orientation_data = np.array([np.identity(3)] * self.num_frames)
 
@@ -579,39 +595,120 @@ class FrameProcessor:
         """Process a single frame from raw data sources."""
         if frame_idx is None:
             raise ValueError("frame_idx must be provided")
+
+        # ⚡ Bolt: Pre-extract DataFrame columns to numpy arrays outside loop/function
+        # to avoid extremely slow repeated row-by-row Series creation via .iloc[]
+        if not hasattr(self, "_baseq_cache"):
+            self._baseq_cache = {
+                col: self.baseq_df[col].values for col in self.baseq_df.columns
+            }
+        if not hasattr(self, "_ztcfq_cache"):
+            self._ztcfq_cache = {
+                col: self.ztcfq_df[col].values for col in self.ztcfq_df.columns
+            }
+        if not hasattr(self, "_deltaq_cache"):
+            self._deltaq_cache = {
+                col: self.deltaq_df[col].values for col in self.deltaq_df.columns
+            }
+
         frame_data = FrameData(
             frame_idx=frame_idx,
             time=self.time_vector[frame_idx],
-            butt=self._get_position_vector(self.baseq_df, "B", frame_idx),
-            clubhead=self._get_position_vector(self.baseq_df, "CH", frame_idx),
-            midpoint=self._get_position_vector(self.baseq_df, "MP", frame_idx),
-            left_wrist=self._get_position_vector(self.baseq_df, "LW", frame_idx),
-            left_elbow=self._get_position_vector(self.baseq_df, "LE", frame_idx),
-            left_shoulder=self._get_position_vector(self.baseq_df, "LS", frame_idx),
-            right_wrist=self._get_position_vector(self.baseq_df, "RW", frame_idx),
-            right_elbow=self._get_position_vector(self.baseq_df, "RE", frame_idx),
-            right_shoulder=self._get_position_vector(self.baseq_df, "RS", frame_idx),
-            hub=self._get_position_vector(self.baseq_df, "H", frame_idx),
+            butt=self._get_position_vector_cached(self._baseq_cache, "B", frame_idx),
+            clubhead=self._get_position_vector_cached(
+                self._baseq_cache, "CH", frame_idx
+            ),
+            midpoint=self._get_position_vector_cached(
+                self._baseq_cache, "MP", frame_idx
+            ),
+            left_wrist=self._get_position_vector_cached(
+                self._baseq_cache, "LW", frame_idx
+            ),
+            left_elbow=self._get_position_vector_cached(
+                self._baseq_cache, "LE", frame_idx
+            ),
+            left_shoulder=self._get_position_vector_cached(
+                self._baseq_cache, "LS", frame_idx
+            ),
+            right_wrist=self._get_position_vector_cached(
+                self._baseq_cache, "RW", frame_idx
+            ),
+            right_elbow=self._get_position_vector_cached(
+                self._baseq_cache, "RE", frame_idx
+            ),
+            right_shoulder=self._get_position_vector_cached(
+                self._baseq_cache, "RS", frame_idx
+            ),
+            hub=self._get_position_vector_cached(self._baseq_cache, "H", frame_idx),
         )
 
         # Extract forces and torques from all datasets
         datasets = {
-            "BASEQ": self.baseq_df,
-            "ZTCFQ": self.ztcfq_df,
-            "DELTAQ": self.deltaq_df,
+            "BASEQ": (self.baseq_df, self._baseq_cache),
+            "ZTCFQ": (self.ztcfq_df, self._ztcfq_cache),
+            "DELTAQ": (self.deltaq_df, self._deltaq_cache),
         }
 
-        for dataset_name, df in datasets.items():
+        for dataset_name, (df, cache) in datasets.items():
             if "Force" in df.columns:
-                frame_data.forces[dataset_name] = self.get_column_data(
-                    df, "Force", frame_idx
+                frame_data.forces[dataset_name] = self.get_column_data_cached(
+                    cache, "Force", frame_idx
                 )  # noqa: E501
             if "Torque" in df.columns:
-                frame_data.torques[dataset_name] = self.get_column_data(
-                    df, "Torque", frame_idx
+                frame_data.torques[dataset_name] = self.get_column_data_cached(
+                    cache, "Torque", frame_idx
                 )  # noqa: E501
 
         return frame_data
+
+    def _get_position_vector_cached(
+        self, cache: dict[str, np.ndarray], prefix: str, row_idx: int
+    ) -> np.ndarray:  # noqa: E501
+        """Get 3D position vector from X, Y, Z arrays with given prefix."""
+        try:
+            x_col = f"{prefix}x"
+            y_col = f"{prefix}y"
+            z_col = f"{prefix}z"
+
+            x_val = cache[x_col][row_idx] if x_col in cache else 0.0
+            y_val = cache[y_col][row_idx] if y_col in cache else 0.0
+            z_val = cache[z_col][row_idx] if z_col in cache else 0.0
+
+            return np.array([x_val, y_val, z_val], dtype=np.float32)
+        except (ValueError, TypeError, RuntimeError, IndexError) as e:
+            logger.error(
+                f"Error extracting position vector for {prefix} from row {row_idx}: {e}"
+            )  # noqa: E501
+            return np.zeros(3, dtype=np.float32)
+
+    def get_column_data_cached(
+        self, cache: dict[str, np.ndarray], col_name: str, row_idx: int
+    ) -> np.ndarray:  # noqa: E501
+        """Extract column data as numpy array with error handling."""
+        try:
+            if col_name in cache:
+                data = cache[col_name][row_idx]
+                if isinstance(data, list | tuple):
+                    return np.array(data, dtype=np.float32)
+                else:
+                    # For single values, we need to get the corresponding
+                    # X, Y, Z components
+                    # The column name should indicate which component it is
+                    if col_name.endswith(("_x", "x")):
+                        # Get Y and Z components from corresponding columns
+                        base_name = col_name[:-2] if col_name.endswith("_x") else col_name[:-1]
+                        y_col = f"{base_name}y"
+                        z_col = f"{base_name}z"
+                        if y_col in cache and z_col in cache:
+                            return np.array(
+                                [data, cache[y_col][row_idx], cache[z_col][row_idx]],
+                                dtype=np.float32,
+                            )
+                    return np.array([data], dtype=np.float32)
+            return np.zeros(3, dtype=np.float32)
+        except (ValueError, TypeError, RuntimeError, IndexError) as e:
+            logger.error(f"Error extracting {col_name} from row {row_idx}: {e}")
+            return np.zeros(3, dtype=np.float32)
 
     def _get_position_vector(
         self, df: pd.DataFrame, prefix: str, row_idx: int
@@ -652,7 +749,7 @@ class FrameProcessor:
                     # The column name should indicate which component it is
                     if col_name.endswith(("_x", "x")):
                         # Get Y and Z components from corresponding columns
-                        base_name = col_name.replace("_x", "").replace("x", "")
+                        base_name = col_name[:-2] if col_name.endswith("_x") else col_name[:-1]
                         y_col = f"{base_name}_y" if base_name else "CHy"
                         z_col = f"{base_name}_z" if base_name else "CHz"
 

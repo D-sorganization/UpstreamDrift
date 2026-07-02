@@ -612,32 +612,43 @@ class WiffleGolfMainWindow(QMainWindow):
 
         # Calculate frame-specific metrics
         try:
-            # ⚡ Bolt: Extract rows once to avoid expensive repeated pandas .iloc lookups  # noqa: E501
-            baseq_row = self.baseq_data.iloc[frame_idx]
-            ztcfq_row = self.ztcfq_data.iloc[frame_idx]
+            # ⚡ Bolt: Use direct array indexing of pre-extracted column arrays
+            # to avoid extremely slow repeated row-by-row Series creation via .iloc[]
 
-            prov1_pos = np.array(
-                [
-                    baseq_row["CHx"],
-                    baseq_row["CHy"],
-                    baseq_row["CHz"],
-                ]
-            )
-
-            wiffle_pos = np.array(
-                [
-                    ztcfq_row["CHx"],
-                    ztcfq_row["CHy"],
-                    ztcfq_row["CHz"],
-                ]
-            )
+            # Re-cache if new data is loaded (check by object id) or missing
+            if getattr(self, "_baseq_ch_cache_id", None) != id(self.baseq_data):
+                self._baseq_ch_cache = {
+                    "x": self.baseq_data["CHx"].values,
+                    "y": self.baseq_data["CHy"].values,
+                    "z": self.baseq_data["CHz"].values,
+                    "time": self.baseq_data["Time"].values,
+                }
+                self._baseq_ch_cache_id = id(self.baseq_data)
+            if getattr(self, "_ztcfq_ch_cache_id", None) != id(self.ztcfq_data):
+                self._ztcfq_ch_cache = {
+                    "x": self.ztcfq_data["CHx"].values,
+                    "y": self.ztcfq_data["CHy"].values,
+                    "z": self.ztcfq_data["CHz"].values,
+                }
+                self._ztcfq_ch_cache_id = id(self.ztcfq_data)
 
             # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
-            diff = prov1_pos - wiffle_pos
-            distance = math.hypot(diff[0], diff[1], diff[2])
+            diff_x = (
+                self._baseq_ch_cache["x"][frame_idx]
+                - self._ztcfq_ch_cache["x"][frame_idx]
+            )
+            diff_y = (
+                self._baseq_ch_cache["y"][frame_idx]
+                - self._ztcfq_ch_cache["y"][frame_idx]
+            )
+            diff_z = (
+                self._baseq_ch_cache["z"][frame_idx]
+                - self._ztcfq_ch_cache["z"][frame_idx]
+            )
+            distance = math.hypot(diff_x, diff_y, diff_z)
 
             # Update status bar with frame info
-            time_val = baseq_row["Time"]
+            time_val = self._baseq_ch_cache["time"][frame_idx]
             self.statusBar().showMessage(
                 f"Frame {frame_idx + 1}, Time: {time_val:.3f}s, "
                 f"Distance: {distance:.3f}m"  # noqa: E501
