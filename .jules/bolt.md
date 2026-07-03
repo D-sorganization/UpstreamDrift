@@ -43,3 +43,6 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+## 2026-06-22 - Avoiding False np.einsum Optimizations
+**Learning:** Replacing simple `np.sum(np.abs(arr), axis=1)` calls with `np.einsum('ij->i', np.abs(arr))` does not improve performance meaningfully and is based on a false premise. The temporary array from `np.abs(arr)` is still allocated. `np.einsum` incurs parsing overhead for its subscript string, making it harder to read and more fragile (strict 2D requirement) for basic reductions.
+**Action:** Do not replace `np.sum(np.abs(arr), axis=1)` with `np.einsum`. Only use `np.einsum` to fuse operations where actual temporary arrays would otherwise be allocated.
