@@ -43,3 +43,6 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+## 2026-06-25 - [Replacing np.sum with np.vdot for Distance Squared]
+**Learning:** When calculating the sum of squared differences of a 1D numpy array in hot loops (like in a KDTree nearest neighbor distance calculation), `np.sum(diff ** 2)` allocates an unnecessary intermediate temporary array for the squared terms, whereas `np.vdot(diff, diff)` avoids this and is considerably faster (~3x).
+**Action:** Replace `np.sum(diff ** 2)` with `np.vdot(diff, diff)` where the elements are real values in order to improve speed without temporary allocations.
