@@ -117,15 +117,13 @@ class MotionCapturePlotterVisualizationMixin:
             raise ValueError("data must be provided")
         if self.trajectory_check.isChecked() and len(data) > 1:
             # Mid-hands path (blue dashed) - flip X for right-handed swing
-            trajectory = np.array(
-                [
-                    [
-                        -row["mid_X"] * self.motion_scale,
-                        row["mid_Y"] * self.motion_scale,
-                        row["mid_Z"] * self.motion_scale,
-                    ]
-                    for _, row in data.iterrows()
-                ]
+            # ⚡ Bolt: Vectorized extraction is faster than .iterrows()
+            trajectory = np.column_stack(
+                (
+                    -data["mid_X"].values * self.motion_scale,
+                    data["mid_Y"].values * self.motion_scale,
+                    data["mid_Z"].values * self.motion_scale,
+                )
             )
             self.ax.plot(
                 trajectory[:, 0],
@@ -139,15 +137,13 @@ class MotionCapturePlotterVisualizationMixin:
 
         if self.club_path_check.isChecked() and len(data) > 1:
             # Club head path (red dashed) - flip X for right-handed swing
-            club_path = np.array(
-                [
-                    [
-                        -row["club_X"] * self.motion_scale,
-                        row["club_Y"] * self.motion_scale,
-                        row["club_Z"] * self.motion_scale,
-                    ]
-                    for _, row in data.iterrows()
-                ]
+            # ⚡ Bolt: Vectorized extraction is faster than .iterrows()
+            club_path = np.column_stack(
+                (
+                    -data["club_X"].values * self.motion_scale,
+                    data["club_Y"].values * self.motion_scale,
+                    data["club_Z"].values * self.motion_scale,
+                )
             )
             self.ax.plot(
                 club_path[:, 0],
@@ -394,18 +390,18 @@ class MotionCapturePlotterVisualizationMixin:
             and len(data) > 1
             and "club_head" in joints
         ):  # noqa: E501
-            club_trajectory = np.array(
-                [
-                    [
-                        -row["club_head_X"]
+            # ⚡ Bolt: Vectorized extraction is faster than .iterrows()
+            if "club_head_X" in data.columns:
+                club_trajectory = np.column_stack(
+                    (
+                        -data["club_head_X"].values
                         * self.motion_scale,  # Flip X for right-handed swing  # noqa: E501
-                        row["club_head_Y"] * self.motion_scale,
-                        row["club_head_Z"] * self.motion_scale,
-                    ]
-                    for _, row in data.iterrows()
-                    if "club_head_X" in row
-                ]
-            )
+                        data["club_head_Y"].values * self.motion_scale,
+                        data["club_head_Z"].values * self.motion_scale,
+                    )
+                )
+            else:
+                club_trajectory = np.array([])
             if len(club_trajectory) > 1:
                 self.ax.plot(
                     club_trajectory[:, 0],
@@ -419,18 +415,18 @@ class MotionCapturePlotterVisualizationMixin:
 
             # Hands trajectory
         if self.club_path_check.isChecked() and len(data) > 1 and "left_hand" in joints:
-            hands_trajectory = np.array(
-                [
-                    [
-                        -row["left_hand_X"]
+            # ⚡ Bolt: Vectorized extraction is faster than .iterrows()
+            if "left_hand_X" in data.columns:
+                hands_trajectory = np.column_stack(
+                    (
+                        -data["left_hand_X"].values
                         * self.motion_scale,  # Flip X for right-handed swing  # noqa: E501
-                        row["left_hand_Y"] * self.motion_scale,
-                        row["left_hand_Z"] * self.motion_scale,
-                    ]
-                    for _, row in data.iterrows()
-                    if "left_hand_X" in row
-                ]
-            )
+                        data["left_hand_Y"].values * self.motion_scale,
+                        data["left_hand_Z"].values * self.motion_scale,
+                    )
+                )
+            else:
+                hands_trajectory = np.array([])
             if len(hands_trajectory) > 1:
                 self.ax.plot(
                     hands_trajectory[:, 0],
@@ -471,18 +467,17 @@ class MotionCapturePlotterVisualizationMixin:
                 and len(data) > 1
             ):  # noqa: E501
                 # Create trajectory for this segment
-                segment_trajectory = np.array(
-                    [
-                        [
-                            -row[f"{segment_key}_X"]
-                            * self.motion_scale,  # Flip X for right-handed swing
-                            row[f"{segment_key}_Y"] * self.motion_scale,
-                            row[f"{segment_key}_Z"] * self.motion_scale,
-                        ]
-                        for _, row in data.iterrows()
-                        if f"{segment_key}_X" in row
-                    ]
-                )
+                # ⚡ Bolt: Vectorized extraction is faster than .iterrows()
+                if f"{segment_key}_X" in data.columns:
+                    segment_trajectory = np.column_stack(
+                        (
+                            -data[f"{segment_key}_X"].values * self.motion_scale,
+                            data[f"{segment_key}_Y"].values * self.motion_scale,
+                            data[f"{segment_key}_Z"].values * self.motion_scale,
+                        )
+                    )
+                else:
+                    segment_trajectory = np.array([])
                 if len(segment_trajectory) > 1:
                     color = trace_colors.get(segment_key, "gray")
                     self.ax.plot(
