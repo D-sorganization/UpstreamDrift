@@ -19,7 +19,6 @@
 ## 2026-06-18 - [NumPy vs Math Overhead in Robotics Simulation Loops]
 **Learning:**  carries a significant amount of Python-level overhead (input validation, general-purpose shape handling) which makes it considerably slower than  for small 1D vectors, and slower than  for small statically sized vectors (like 3D coordinates). These changes yield genuine speedups in tight loops (e.g. simulation environments). When optimizing mock assertions in related tests, carefully track test assertions that expect specific mock call counts, as optimizations might indirectly affect or expose pre-existing mock count bugs.
 **Action:** Use  and  instead of  for small array magnitude operations in critical paths.
-## 2026-06-18 - [NumPy vs Math Overhead in Robotics Simulation Loops]
 **Learning:** `np.linalg.norm()` carries a significant amount of Python-level overhead (input validation, general-purpose shape handling) which makes it considerably slower than `math.sqrt(np.dot(v, v))` for small 1D vectors, and slower than `math.hypot()` for small statically sized vectors (like 3D coordinates). These changes yield genuine speedups in tight loops (e.g. simulation environments). When optimizing mock assertions in related tests, carefully track test assertions that expect specific mock call counts, as optimizations might indirectly affect or expose pre-existing mock count bugs.
 **Action:** Use `math.sqrt(np.dot(x, x))` and `math.hypot` instead of `np.linalg.norm` for small array magnitude operations in critical paths.
 ## 2026-06-18 - np.einsum for sum over axis
@@ -43,3 +42,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-05-18 - [Optimized DataFrame row-wise iterrows() loops in Motion Capture Plotter]
+**Learning:** Found multiple instances of `iterrows()` over Pandas DataFrames in `motion_capture_plotter_visualization.py` and `mocap_data_loader.py`. `iterrows()` is incredibly slow, especially when it iterates frame by frame to assemble multidimensional trajectory paths or copy values from dictionaries into DataFrames. Constructing NumPy arrays directly from DataFrame column subsets (e.g. `np.column_stack((df["A"], df["B"]))`) or directly initializing the DataFrame from standard dictionaries rather than appending row-by-row can yield speedups of 100x+.
+**Action:** Replace `for _, row in df.iterrows()` with vectorized `np.column_stack(...)` when extracting subset paths, and avoid row-by-row dictionary assignments where a single dictionary constructed from series mapping suffices.
