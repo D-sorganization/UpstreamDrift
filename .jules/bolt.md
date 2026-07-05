@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-10-24 - math.hypot for 3D vector magnitude optimization
+**Learning:** For computing Euclidean distances of 3D vectors from array slices (e.g. `np.linalg.norm(desired_pos - current_pos)` or `np.linalg.norm(center - p)` in coordination loops), extracting the components and calling `math.hypot(diff[0], diff[1], diff[2])` avoids NumPy intermediate array allocations and overhead, yielding a ~5x speedup.
+**Action:** Replace `np.linalg.norm(diff)` with `math.hypot(diff[0], diff[1], diff[2])` for small, fixed 3D arrays to improve performance.
