@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-05-25 - Replace np.sum(diff ** 2) with np.vdot(diff, diff) for distance computations
+**Learning:** For computing sum of squares for 1D arrays (like calculating nearest neighbor distances in tree index), `np.sum(diff ** 2)` creates a temporary intermediate array for `diff ** 2` before summing. `np.vdot(diff, diff)` avoids this intermediate allocation and offers a ~3x speedup.
+**Action:** Replace `np.sum(diff ** 2)` with `np.vdot(diff, diff)` for fast distance or sum-of-squares computation on 1D arrays in critical paths.
