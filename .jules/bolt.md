@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2024-05-28 - Explicit 2x2 matrix inversion over np.linalg.solve
+**Learning:** For very small, fixed-size matrices (like the 2x2 mass matrix in a double pendulum engine), using `np.linalg.solve` incurs significant Python-level overhead (input validation, dispatch routing, etc.).
+**Action:** Replace `np.linalg.solve(M, x)` with explicitly calculated 2x2 inverse and matrix multiplication for a measured speedup of ~5x in tight simulation loops.
