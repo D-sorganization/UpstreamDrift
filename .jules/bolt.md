@@ -43,3 +43,7 @@
 ## 2026-06-22 - Code Quality check limits (function budget)
 **Learning:** The project's code quality CI script (`scripts/ci/check_architecture_budget.py`) enforces parameter count budgets for modified files, checking `scripts/config/architecture_budget.json`. If an optimization triggers an architecture violation simply by modifying an already-violating file, you must append an exception explicitly in `architecture_budget.json`.
 **Action:** When a PR triggers architecture budget failures in CI on files you've modified, temporarily add a budget exception in `scripts/config/architecture_budget.json` (including an expiry and an issue reference) to bypass the block.
+
+## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.dot) and math.hypot in Simulation Paths]
+**Learning:** `np.linalg.norm` has significant overhead for small, fixed-size arrays (like 2D/3D vectors or concatenations) in tight simulation and UI calculation paths. `math.hypot` is around ~5-6x faster for explicitly unpacked 2D/3D vectors. For small 1D vectors where unpacking is cumbersome, `math.sqrt(np.dot(err, err))` is about ~1.8x faster than `np.linalg.norm`.
+**Action:** Replaced `np.linalg.norm` with `math.hypot` for fixed-size 3D calculations (e.g. `golf_video_export.py`, `golf_gui_tabs.py`, `hip_rotation.py`) and with `math.sqrt(np.dot(err, err))` for small 1D vectors (e.g., concatenated foot error in `simulator.py`) to reduce simulation overhead.
