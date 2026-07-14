@@ -1637,6 +1637,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-07-14 | 1.0.467  | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | ruff       | latest  | Linting and formatting                                                             | Yes       |
 | mypy       | 1.7+    | Static type checking                                                               | Yes       |
