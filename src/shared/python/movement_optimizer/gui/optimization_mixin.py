@@ -18,7 +18,12 @@ import numpy as np
 
 from ..cli import EXERCISE_FACTORIES
 from ..constants import trapezoid
-from ..errors import MovementOptimizerError, OptimizationError, PhysicsError, ValidationError
+from ..errors import (
+    MovementOptimizerError,
+    OptimizationError,
+    PhysicsError,
+    ValidationError,
+)
 from ..models import BodyModel
 from ..trajectory import (
     CancelledError,
@@ -320,7 +325,7 @@ class OptimizationMixin:
     ) -> None:
         """Build and display the results summary in the sidebar."""
         pk = np.max(np.abs(r.torques), axis=0)
-        work = trapezoid(np.sum(np.abs(r.power), axis=1), r.t)
+        work = trapezoid(np.einsum("ij->i", np.abs(r.power)), r.t)
         if exercise_type == "bench_press":
             joint_lines = (
                 f"  Shoulder: {pk[0]:>6.0f} N\u00b7m\n"

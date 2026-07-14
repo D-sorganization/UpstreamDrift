@@ -88,7 +88,7 @@ def comparison_metrics(trials: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # Sum joint powers per timestep first, then take absolute value.
         # This correctly accounts for power transfer between joints within
         # each timestep rather than treating each joint independently.
-        total_work = float(trapezoid(np.abs(np.sum(r.power, axis=1)), r.t))
+        total_work = float(trapezoid(np.abs(np.einsum("ij->i", r.power)), r.t))
         com_sway_cm = float(r.com_horizontal_range_cm)
 
         metrics.append(
