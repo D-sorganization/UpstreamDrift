@@ -29,7 +29,9 @@ def add_security_headers_to_response(response: Response, request: Request) -> Re
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     # Allow CDN and inline scripts for FastAPI Swagger UI/ReDoc
-    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' cdn.jsdelivr.net fastly.jsdelivr.net"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self' 'unsafe-inline' cdn.jsdelivr.net fastly.jsdelivr.net"
+    )
     if request.url.scheme == "https":
         response.headers["Strict-Transport-Security"] = (
             f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
