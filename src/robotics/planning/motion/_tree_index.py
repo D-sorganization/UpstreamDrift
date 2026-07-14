@@ -144,7 +144,7 @@ class TreeConfigIndex:
         _, tree_idx = self._kd_tree.query(query, k=1)
         best_idx = int(tree_idx)
         diff = self._view()[best_idx] - query
-        best_squared = float(np.vdot(diff, diff))  # ⚡ Bolt: np.vdot is ~2.5x faster than np.sum(diff ** 2) for 1D arrays
+        best_squared = float(np.vdot(diff, diff))  # ⚡ Bolt: faster than np.sum
         if self._kd_tree_size < self._count:
             tail_idx, tail_squared = self._nearest_in_view(
                 query,
