@@ -107,3 +107,8 @@
 **Vulnerability:** Found uses of `xml.etree.ElementTree` to parse potentially untrusted XML/URDF/MJCF/SDF files, which is vulnerable to XML External Entity (XXE) and billion laughs attacks.
 **Learning:** Standard library `xml.etree.ElementTree` is not secure against maliciously constructed data.
 **Prevention:** Always use the `defusedxml` package, which acts as a drop-in replacement but protects against these vulnerabilities.
+
+## 2024-05-24 - Content-Security-Policy Header
+**Vulnerability:** Missing Content-Security-Policy (CSP) header in the FastAPI application.
+**Learning:** CSP is an important defense-in-depth layer to mitigate XSS attacks by restricting the sources from which content can be loaded. It was missing from the standard security headers middleware.
+**Prevention:** Always include a baseline CSP (like `default-src 'self'`) in the security headers middleware and test for its presence.
