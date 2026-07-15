@@ -10,7 +10,7 @@ import numpy as np
 try:  # SciPy is a project dependency, but keep the vector path as fallback.
     from scipy.spatial import cKDTree
 except ImportError:  # pragma: no cover - exercised only in stripped installs
-    cKDTree = None  # type: ignore[assignment]
+    cKDTree = None  # type: ignore[assignment, misc]
 
 
 @dataclass

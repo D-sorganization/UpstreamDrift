@@ -37,9 +37,10 @@ cffi==2.0.0
     # via cryptography
 charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.4.2
     # via
     #   flask
+    #   upstream-drift (pyproject.toml)
     #   uvicorn
 contourpy==1.3.3
     # via
@@ -171,7 +172,7 @@ pandas==3.0.2
     #   upstream-drift (pyproject.toml)
 pathspec==1.0.4
     # via mypy
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   bokeh
     #   matplotlib

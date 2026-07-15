@@ -17,6 +17,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "click>=8.3.3",
     # Core (always installed)
     "numpy>=2.0.0",
     "scipy>=1.13.1",
@@ -44,7 +45,7 @@ dependencies = [
     "platformdirs>=4.2.0",
 
     # Runtime security floor constraints documented in issue #3838.
-    "pillow>=12.2.0",
+    "pillow>=12.3.0",
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
