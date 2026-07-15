@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.466                                            |
-| **Last Spec Update**    | 2026-06-21                                         |
+| **Spec Version**        | 1.0.467                                            |
+| **Last Spec Update**    | 2026-07-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -2104,6 +2104,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-05-09 | 1.0.147 | ⚡ Bolt: Added realtime WebSocket pubsub, channels, and file-based pubsub for live simulation streaming |
 | 2026-05-09 | 1.0.142 | 🛡️ Sentinel: Fix insecure deserialization in imitation learning models |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-15 | 1.0.143 | ⚡ Bolt: Optimize motion planning tree index with np.vdot |
 | 2026-05-09 | 1.0.142 | ⚡ Bolt: Optimize Root Mean Square Error computation using np.vdot |
 | 2026-05-08 | 1.0.141 | ⚡ Bolt: Optimize velocity magnitude and argmax calculation using np.einsum |
 | 2026-05-07 | 1.0.140 | Added a pure-unit OpenSim prescribed-controller boundary for polynomial torque trajectories, including validation of time grids, coefficient shapes, finite values, actuator names, parity with the canonical polynomial torque evaluator, and typed unavailable behavior before native OpenSim integration. |
