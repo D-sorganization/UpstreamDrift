@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2024-05-18 - Replacing np.mean(x**2, axis=0) with np.einsum for multi-dimensional rmse calculations
+**Learning:** For multi-dimensional root mean square calculations across a single axis (e.g. `np.sqrt(np.mean(diff**2, axis=0))`), calculating the sum of squares using `np.einsum('ij,ij->j', diff, diff)` and then dividing by the shape length is about 2x faster than using `np.mean(diff**2, axis=0)`. This optimization avoids allocating the temporary array for `diff**2`.
+**Action:** When computing standard deviation, variance, or RMSE over a specific axis on an array, replace `np.mean(x**2, axis=...)` with the corresponding `np.einsum` sum normalized by length, when performance matters. Make sure to apply it directly to the array `x` and not an already-squared intermediate array.
