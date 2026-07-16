@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.466                                            |
+| **Spec Version**        | 1.0.467                                            |
 | **Last Spec Update**    | 2026-06-21                                         |
 
 ## 2. Purpose & Mission
@@ -2283,6 +2283,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Module Map Changelog
 
+- 2026-07-16 (1.0.467) Optimized `_tree_index.py` distance calculation for performance, replacing `np.sum(diff ** 2)` with `np.vdot(diff, diff)`.
+
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
 
 ### Module Map
@@ -2295,3 +2297,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+
+- 2026-07-16 (1.0.467) Optimized `_tree_index.py` distance calculation for performance, replacing `np.sum(diff ** 2)` with `np.vdot(diff, diff)`.
