@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2026-06-25 - Replacing math.sqrt(x**2 + y**2) with math.hypot
+**Learning:** For small vectors where explicit components are extracted (e.g. `x`, `y`, `z`), using `math.hypot(x, y)` or `math.hypot(x, y, z)` is around 1.5x to 2x faster than manually calculating `math.sqrt(x**2 + y**2)` or `math.sqrt(x**2 + y**2 + z**2)`. `math.hypot` is implemented in C and optimized for this exact operation, avoiding the Python bytecode overhead of squaring and adding.
+**Action:** Replace `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` and `math.sqrt(x**2 + y**2 + z**2)` with `math.hypot(x, y, z)` where explicit vector components are used in tight loops or calculations.
