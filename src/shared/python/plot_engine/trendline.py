@@ -26,7 +26,7 @@ class TrendlineResult:
     """Result of a trendline computation."""
 
     trend_type: str
-    theta_optimal: list[float]
+    coefficients: list[float]
     equation: str
     r_squared: float
     x_pred: np.ndarray = field(repr=False)
@@ -50,7 +50,7 @@ def compute_trendline(
         n_points: Number of points in the prediction curve.
 
     Returns:
-        TrendlineResult with theta_optimal, equation, R², and prediction arrays.
+        TrendlineResult with coefficients, equation, R², and prediction arrays.
 
     Raises:
         ValueError: If insufficient data points or invalid data for the fit type.
@@ -106,7 +106,7 @@ def _linear(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineResult
 
     return TrendlineResult(
         trend_type="linear",
-        theta_optimal=[float(m), float(b)],
+        coefficients=[float(m), float(b)],
         equation=equation,
         r_squared=r2,
         x_pred=x_pred,
@@ -144,7 +144,7 @@ def _polynomial(
 
     return TrendlineResult(
         trend_type="polynomial",
-        theta_optimal=[float(c) for c in coeffs],
+        coefficients=[float(c) for c in coeffs],
         equation=equation,
         r_squared=r2,
         x_pred=x_pred,
@@ -186,7 +186,7 @@ def _exponential(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineR
 
     return TrendlineResult(
         trend_type="exponential",
-        theta_optimal=[float(a), float(b)],
+        coefficients=[float(a), float(b)],
         equation=equation,
         r_squared=r2,
         x_pred=x_pred,
@@ -220,7 +220,7 @@ def _power(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineResult:
 
     return TrendlineResult(
         trend_type="power",
-        theta_optimal=[float(a), float(b)],
+        coefficients=[float(a), float(b)],
         equation=equation,
         r_squared=r2,
         x_pred=x_pred_pos,
