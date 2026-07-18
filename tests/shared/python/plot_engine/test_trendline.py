@@ -22,9 +22,9 @@ class TestLinearTrendline:
         assert isinstance(result, TrendlineResult)
         assert result.trend_type == "linear"
         assert result.r_squared == pytest.approx(1.0, abs=1e-10)
-        assert len(result.theta_optimal) == 2
-        assert result.theta_optimal[0] == pytest.approx(2.0, abs=1e-6)
-        assert result.theta_optimal[1] == pytest.approx(3.0, abs=1e-6)
+        assert len(result.coefficients) == 2
+        assert result.coefficients[0] == pytest.approx(2.0, abs=1e-6)
+        assert result.coefficients[1] == pytest.approx(3.0, abs=1e-6)
 
     def test_equation_format(self) -> None:
         x = np.array([0.0, 1.0, 2.0, 3.0])
@@ -40,8 +40,8 @@ class TestLinearTrendline:
         result = compute_trendline(x, y, "linear")
 
         assert result.r_squared > 0.95
-        assert result.theta_optimal[0] == pytest.approx(3.0, abs=0.3)
-        assert result.theta_optimal[1] == pytest.approx(5.0, abs=1.0)
+        assert result.coefficients[0] == pytest.approx(3.0, abs=0.3)
+        assert result.coefficients[1] == pytest.approx(5.0, abs=1.0)
 
     def test_prediction_arrays(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
@@ -71,9 +71,9 @@ class TestPolynomialTrendline:
 
         assert result.trend_type == "polynomial"
         assert result.r_squared == pytest.approx(1.0, abs=1e-8)
-        assert result.theta_optimal[0] == pytest.approx(3.0, abs=1e-4)
-        assert result.theta_optimal[1] == pytest.approx(-2.0, abs=1e-4)
-        assert result.theta_optimal[2] == pytest.approx(1.0, abs=1e-4)
+        assert result.coefficients[0] == pytest.approx(3.0, abs=1e-4)
+        assert result.coefficients[1] == pytest.approx(-2.0, abs=1e-4)
+        assert result.coefficients[2] == pytest.approx(1.0, abs=1e-4)
 
     def test_cubic(self) -> None:
         x = np.linspace(0, 5, 100)
@@ -92,7 +92,7 @@ class TestPolynomialTrendline:
         y = np.array([0.0, 1.0, 4.0])
         # degree=5 but only 3 points — should cap at degree 2
         result = compute_trendline(x, y, "polynomial", degree=5)
-        assert len(result.theta_optimal) == 3  # degree 2 + 1
+        assert len(result.coefficients) == 3  # degree 2 + 1
 
 
 # ── Exponential trendline ────────────────────────────────────────────────────
@@ -106,8 +106,8 @@ class TestExponentialTrendline:
 
         assert result.trend_type == "exponential"
         assert result.r_squared > 0.999
-        assert result.theta_optimal[0] == pytest.approx(2.0, abs=0.1)
-        assert result.theta_optimal[1] == pytest.approx(0.5, abs=0.05)
+        assert result.coefficients[0] == pytest.approx(2.0, abs=0.1)
+        assert result.coefficients[1] == pytest.approx(0.5, abs=0.05)
 
     def test_equation_format(self) -> None:
         x = np.linspace(0, 2, 20)
@@ -133,8 +133,8 @@ class TestPowerTrendline:
 
         assert result.trend_type == "power"
         assert result.r_squared > 0.999
-        assert result.theta_optimal[0] == pytest.approx(3.0, abs=0.1)
-        assert result.theta_optimal[1] == pytest.approx(2.0, abs=0.05)
+        assert result.coefficients[0] == pytest.approx(3.0, abs=0.1)
+        assert result.coefficients[1] == pytest.approx(2.0, abs=0.05)
 
     def test_equation_format(self) -> None:
         x = np.linspace(1, 5, 20)
@@ -157,7 +157,7 @@ class TestEdgeCases:
         x = np.array([0.0, 1.0])
         y = np.array([0.0, 5.0])
         result = compute_trendline(x, y, "linear")
-        assert result.theta_optimal[0] == pytest.approx(5.0)
+        assert result.coefficients[0] == pytest.approx(5.0)
 
     def test_insufficient_data(self) -> None:
         x = np.array([1.0])
