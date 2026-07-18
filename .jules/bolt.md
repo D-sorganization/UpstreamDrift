@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2024-07-25 - Using `np.vdot` to avoid temporary arrays
+**Learning:** When calculating the sum of squares over a multi-dimensional array or a sliced array (e.g. `np.sum(arr ** 2)`), it evaluates an intermediate temporary array due to exponentiation before sum. For small-sized arrays repeatedly processed, replacing this with `np.vdot(arr, arr)` leverages optimized dot product without intermediate copies. However, you MUST assign the sliced array to a variable `v = arr` first; computing `np.vdot(arr, arr)` by passing the slice expression twice evaluates the slice twice, negating the benefit.
+**Action:** Always assign expressions to a variable before passing them to both arguments of `np.vdot`.

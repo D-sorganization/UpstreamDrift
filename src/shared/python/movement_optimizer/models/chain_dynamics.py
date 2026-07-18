@@ -185,7 +185,9 @@ def total_energy(config: ChainConfig, state: ChainState) -> float:
     checked = state.validated(config)
     positions = checked.node_positions(config)
     velocities = node_velocities(config, checked)
-    kinetic = 0.5 * config.link_mass_kg * np.sum(velocities[1:] ** 2)
+    v = velocities[1:]
+    # Optimization: vdot replaces sum(v**2) to avoid temporary array allocation
+    kinetic = 0.5 * config.link_mass_kg * np.vdot(v, v)
     potential_height = config.total_length_m - positions[1:, 1]
     potential = config.link_mass_kg * config.gravity_m_s2 * np.sum(potential_height)
     return float(kinetic + potential)
