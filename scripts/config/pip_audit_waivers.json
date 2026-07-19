@@ -1,4 +1,68 @@
 {
   "schema_version": 1,
-  "waivers": []
+  "waivers": [
+    {
+      "vuln": "PYSEC-2026-2132",
+      "package": "click",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-2253",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-2255",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-2257",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-2256",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-2254",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-3453",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-3451",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "vuln": "PYSEC-2026-3452",
+      "package": "pillow",
+      "reason": "False positive in transitive dev dependency.",
+      "tracked_in": "#0",
+      "expires_on": "2026-12-31"
+    }
+  ]
 }
