@@ -2294,4 +2294,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- Replaced `np.sum(diff ** 2)` with `np.vdot(diff, diff)` in KD-Tree distance calculations for nearest-neighbor lookups to avoid intermediate array allocations and improve performance.
+- Replaced `np.sum(diff ** 2)` with `np.vdot(diff, diff)` in KD-Tree distance calculations for nearest-neighbor lookups to avoid intermediate array allocations and improve performance.
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
