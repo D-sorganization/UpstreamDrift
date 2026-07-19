@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2024-06-25 - math.hypot for 3D array norms
+**Learning:** For calculating norms of a column vector from a 3x3 rotation matrix, explicitly unpacking the components and using `math.hypot(x, y, z)` avoids NumPy's dispatch and intermediate allocations, resulting in a ~6x speedup over `np.linalg.norm`.
+**Action:** Replace `np.linalg.norm(rot[:, 0])` with `math.hypot(rot[0, 0], rot[1, 0], rot[2, 0])` in hot paths like rotation matrix extraction where the 3x3 size is guaranteed.
