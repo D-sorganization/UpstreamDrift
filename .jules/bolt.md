@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2026-07-19 - [Vectorizing Trajectory Generation in Mocap]
+**Learning:** Constructing multi-dimensional NumPy arrays (e.g., 3D trajectories) from a Pandas DataFrame using list comprehensions with `df.iterrows()` (e.g., `np.array([[row['X'], ... ] for _, row in df.iterrows()])`) creates massive overhead (~500x slower in mocap plotting). Row-level column existence checks are also redundant inside the loop.
+**Action:** Use vectorized `np.column_stack((df['X'].values, ...))` to bypass row-by-row Series creation and achieve significant speedups. Move column existence checks outside the iteration logic (`if 'col' in df.columns`).
