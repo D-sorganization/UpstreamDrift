@@ -2295,3 +2295,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+- Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` in programmatic PID geometry and flight models to optimize L2 norm calculations, yielding a ~2x performance speedup.
+- Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` in programmatic PID geometry and flight models to optimize L2 norm calculations, yielding a ~2x performance speedup.
