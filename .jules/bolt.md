@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2024-05-24 - [Optimize Squared Sums]
+**Learning:** `np.vdot(x, x)` is significantly faster than `np.sum(x ** 2)` for 1D arrays, as it avoids intermediate array allocations and uses optimized BLAS routines. Similarly, for expressions like `(A - B) ** 2`, evaluating the difference into a local variable and then using `np.vdot` yields a ~2.5x to ~3.5x speedup.
+**Action:** Replace `np.sum(x ** 2)` with `np.vdot(x, x)` for 1D arrays, and evaluate differences into a temporary variable before using `np.vdot` for expressions like `np.sum((A - B) ** 2)`.

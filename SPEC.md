@@ -2295,3 +2295,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+- **Performance:** Replaced `np.sum((A - B) ** 2)` with `diff = A - B; np.vdot(diff, diff)` for 1D arrays in `_tree_index.py` for significant performance speedups.
