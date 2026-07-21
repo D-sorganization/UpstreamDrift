@@ -36,7 +36,13 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Install workflow parser dependency
         shell: bash
         run: |
@@ -63,7 +69,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Run GitHub Actions pinning guard
         shell: bash
         run: python3 scripts/check_github_actions_pinned.py
@@ -85,7 +97,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Run workflow inventory guard
         shell: bash
         run: python3 scripts/check_workflow_inventory.py
@@ -107,7 +125,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Run URDF layering guard
         shell: bash
         run: python3 scripts/ci/check_urdf_layering.py
@@ -155,7 +179,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
         with:
           fetch-depth: 0
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -446,7 +476,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
         with:
           fetch-depth: 0
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -674,7 +710,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
 
         with:
           fetch-depth: 0
@@ -822,7 +864,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Install System Dependencies
         run: |
           apt_retry() {
@@ -988,7 +1036,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -1059,7 +1113,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -1125,7 +1185,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Check for core test relevant changes
         id: core-test-changes
         shell: bash
@@ -1626,7 +1692,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -1698,7 +1770,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -1789,7 +1867,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Checkout Tools Hub
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -1908,7 +1992,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Check for frontend changes
         id: frontend-changes
         working-directory: .
@@ -1980,7 +2070,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
       - uses: matlab-actions/run-command@bcd446a219949c24051c1d04a4b4e0274c42f23b
         with:
@@ -2012,7 +2108,13 @@ jobs:
             fi
           fi
 
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -2077,7 +2179,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
         with:
           fetch-depth: 0
 
@@ -2339,7 +2447,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
         with:
           fetch-depth: 0
 
@@ -2469,7 +2583,13 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
         with:
           fetch-depth: 0
 
