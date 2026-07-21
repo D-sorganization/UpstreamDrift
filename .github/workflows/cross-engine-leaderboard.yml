@@ -88,8 +88,8 @@ jobs:
           sudo apt-get update || true
           sudo apt-get install -y xvfb
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall "idna[uts46]>=3.4"
-          pip install -e ".[dev]"
+          pip install --default-timeout=100 --force-reinstall "idna[uts46]>=3.4"
+          pip install --default-timeout=100 -e ".[dev]"
           python -m ensurepip --upgrade || true
           python - <<'PY'
           import pathlib
@@ -104,9 +104,9 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
+          pip install --default-timeout=100 --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
           python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+          pip install --default-timeout=100 --force-reinstall "pydantic==2.12.5"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
 
