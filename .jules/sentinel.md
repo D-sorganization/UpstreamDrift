@@ -107,3 +107,8 @@
 **Vulnerability:** Found uses of `xml.etree.ElementTree` to parse potentially untrusted XML/URDF/MJCF/SDF files, which is vulnerable to XML External Entity (XXE) and billion laughs attacks.
 **Learning:** Standard library `xml.etree.ElementTree` is not secure against maliciously constructed data.
 **Prevention:** Always use the `defusedxml` package, which acts as a drop-in replacement but protects against these vulnerabilities.
+
+## 2026-07-21 - [Fix API Key Timing Attack]
+**Vulnerability:** The API key validation in `ModelGenerationAPI._check_api_key` used a standard string comparison (`!=`), exposing the endpoint to timing attacks where an attacker could deduce the key character-by-character based on response times.
+**Learning:** Even internal or utility API endpoints must use constant-time comparison functions for secrets to prevent side-channel leaks, regardless of expected traffic volume.
+**Prevention:** Always use `secrets.compare_digest()` from the Python standard library when comparing sensitive tokens, passwords, or API keys instead of standard equality operators.
