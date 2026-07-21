@@ -163,6 +163,7 @@ jobs:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
           if-no-files-found: ignore
+          if-no-files-found: ignore
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
