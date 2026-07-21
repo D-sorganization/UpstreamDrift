@@ -136,7 +136,7 @@ class InclinedPlaneHipRotationTarget:
             ],
             dtype=float,
         )
-        axis /= np.linalg.norm(axis)
+        # axis is already a unit vector since sin^2(x) + cos^2(x) = 1
 
         angle_rad = np.radians(self.rotation_degrees_at(time_sec))
         half = 0.5 * angle_rad

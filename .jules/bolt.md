@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2026-06-25 - Redundant normalizations
+**Learning:** Normalizing a vector created with sine and cosine of the same angle (e.g. `[sin(theta), 0.0, cos(theta)]`) is redundant since $\sin^2(\theta) + \cos^2(\theta) = 1$. The vector inherently has a length of 1.0.
+**Action:** Remove redundant `np.linalg.norm` divisions when vectors are derived directly from trigonometric functions of the same angle.
