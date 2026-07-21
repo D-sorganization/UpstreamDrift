@@ -107,3 +107,9 @@
 **Vulnerability:** Found uses of `xml.etree.ElementTree` to parse potentially untrusted XML/URDF/MJCF/SDF files, which is vulnerable to XML External Entity (XXE) and billion laughs attacks.
 **Learning:** Standard library `xml.etree.ElementTree` is not secure against maliciously constructed data.
 **Prevention:** Always use the `defusedxml` package, which acts as a drop-in replacement but protects against these vulnerabilities.
+
+## 2026-06-26 - Insecure XML Parsing in rest_api_routes.py
+
+**Vulnerability:** Found `xml.etree.ElementTree` being used to parse potentially untrusted XML inside `src/shared/python/model_generation/api/rest_api_routes.py`.
+**Learning:** Even though `defusedxml.ElementTree` is used extensively throughout the repository to prevent XXE attacks, some isolated files still manually import `xml.etree.ElementTree`. This indicates that standard library imports can easily sneak in despite project-wide guidelines.
+**Prevention:** Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` when parsing XML, and append `# noqa: S314` to bypass static analyzer false positives.
