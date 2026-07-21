@@ -112,3 +112,8 @@
 **Vulnerability:** The API key validation in `ModelGenerationAPI._check_api_key` used a standard string comparison (`!=`), exposing the endpoint to timing attacks where an attacker could deduce the key character-by-character based on response times.
 **Learning:** Even internal or utility API endpoints must use constant-time comparison functions for secrets to prevent side-channel leaks, regardless of expected traffic volume.
 **Prevention:** Always use `secrets.compare_digest()` from the Python standard library when comparing sensitive tokens, passwords, or API keys instead of standard equality operators.
+
+## 2026-07-21 - [Mitigate Git Network Flakes in CI]
+**Vulnerability:** CI environments occasionally hit `curl 92 HTTP/2 stream 5 was not closed cleanly: CANCEL (err 8)` or `curl 56` errors.
+**Learning:** These intermittent failures on large checkouts are often related to git's experimental HTTP/2 support interacting poorly with specific proxies or GnuTLS versions on GitHub Actions runners.
+**Prevention:** Forcing `git config --global http.version HTTP/1.1` in a step prior to `actions/checkout` or during `fetch` resolves the instability for these large repository checkouts.

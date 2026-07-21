@@ -83,6 +83,18 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
+      - name: Configure Git to use HTTP/1.1
+        run: git config --global http.version HTTP/1.1
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Reject Raw Merge Conflict Markers
         run: |
