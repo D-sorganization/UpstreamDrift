@@ -135,6 +135,8 @@ jobs:
       - name: Upload leaderboard artifact
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        continue-on-error: true
         with:
           name: cross-engine-leaderboard
           path: motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
+          if-no-files-found: ignore
