@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2026-07-21 - CI Timeout Fix
+**Learning:** For workflows doing heavy `pip install` on environments prone to transient network stutters, it is necessary to override the default pip timeout using `--default-timeout=100` to prevent intermittent `ReadTimeoutError` during dependency fetching.
+**Action:** Append `--default-timeout=100` to pip installation commands in GitHub actions workflows that execute frequently and fetch heavy data.
