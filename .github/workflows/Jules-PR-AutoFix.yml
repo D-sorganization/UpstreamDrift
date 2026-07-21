@@ -317,7 +317,7 @@ jobs:
             echo ">>> Collecting changed files..."
             # Get base branch from PR info or default to main
             BASE_BRANCH=$(gh pr view "$PR_NUMBER" --json baseRefName --jq '.baseRefName' || echo "main")
-            git fetch origin "$BASE_BRANCH" --depth=1
+            git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 fetch origin "$BASE_BRANCH" --depth=1
             CHANGED_FILES=$(git diff --diff-filter=ACMRT --name-only "origin/$BASE_BRANCH" HEAD -- '*.py' | tr '\n' ' ')
             
             if [ -z "$CHANGED_FILES" ]; then

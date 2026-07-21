@@ -203,7 +203,7 @@ jobs:
               2>/dev/null; then
               echo "workflow_dispatch failed, trying empty commit method"
 
-              git fetch origin "$branch"
+              git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 fetch origin "$branch"
               git checkout "$branch"
 
               # Configure git identity for commit

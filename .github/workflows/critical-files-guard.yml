@@ -93,7 +93,7 @@ jobs:
           echo "- Checking for deletion attempts in this PR..."
 
           # Get list of deleted files in this PR
-          git fetch origin ${{ github.base_ref }} --depth=1
+          git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 fetch origin ${{ github.base_ref }} --depth=1
           DELETED=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | grep "^D" | awk '{print $2}')
 
           CRITICAL_FILES="AGENTS.md README.md CHANGELOG.md LICENSE pyproject.toml conftest.py launch_golf_suite.py start_api_server.py"

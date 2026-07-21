@@ -81,7 +81,7 @@ jobs:
       - name: Prepare assessment branch
         run: |
           BRANCH_NAME="docs/assessment-reports"
-          git fetch origin main
+          git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 fetch origin main
           git checkout -B "$BRANCH_NAME" origin/main
           echo "ASSESSMENT_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
 

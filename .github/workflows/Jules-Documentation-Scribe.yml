@@ -107,7 +107,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           BRANCH: ${{ steps.branch.outputs.name }}
         run: |
-          git fetch origin $BRANCH
+          git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 fetch origin $BRANCH
 
           # Check if the Jules branch has any actual changes compared to where we started
           if git diff --quiet HEAD..origin/$BRANCH; then
