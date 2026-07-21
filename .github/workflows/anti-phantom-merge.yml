@@ -47,6 +47,11 @@ jobs:
     runs-on: d-sorg-fleet-docker
     if: github.event.pull_request.base.ref == 'main'
     steps:
+      - name: Set git config to workaround HTTP/2 fetch issues
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - name: Check out PR head with bounded history
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -55,8 +60,8 @@ jobs:
 
       - name: Fetch base branch
         run: |
-          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1 || true
-          git fetch origin "${{ github.event.pull_request.base.sha }}" || true
+          git -c http.version=HTTP/1.1 fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1 || true
+          git -c http.version=HTTP/1.1 fetch origin "${{ github.event.pull_request.base.sha }}" || true
 
       - name: Check admin override label
         id: override
@@ -165,9 +170,9 @@ jobs:
             echo "::notice::0 changed files reported; waiting 10s and retrying (attempt $((RETRIES+1))/3)"
             sleep 10
             # Re-fetch base + head in case refs propagated since the initial fetch.
-            git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=50 || true
-            git fetch origin "$BASE_SHA" || true
-            git fetch origin "$HEAD_SHA" || true
+            git -c http.version=HTTP/1.1 fetch origin "${{ github.event.pull_request.base.ref }}" --depth=50 || true
+            git -c http.version=HTTP/1.1 fetch origin "$BASE_SHA" || true
+            git -c http.version=HTTP/1.1 fetch origin "$HEAD_SHA" || true
             # Cross-check via the API as well.
             API_STATS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json additions,deletions,changedFiles --jq '[.changedFiles, .additions, .deletions] | @tsv' 2>/dev/null || echo '0	0	0')
             read -r API_FILES API_ADDS API_DELS <<< "$API_STATS"
