@@ -36,6 +36,12 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install workflow parser dependency
         shell: bash
@@ -63,6 +69,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run GitHub Actions pinning guard
         shell: bash
@@ -85,6 +97,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run workflow inventory guard
         shell: bash
@@ -107,6 +125,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run URDF layering guard
         shell: bash
@@ -155,6 +179,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -446,6 +476,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -674,6 +710,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
         with:
@@ -822,6 +864,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install System Dependencies
         run: |
@@ -988,6 +1036,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1059,6 +1113,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1125,6 +1185,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Check for core test relevant changes
         id: core-test-changes
@@ -1626,6 +1692,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1698,6 +1770,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1789,6 +1867,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Checkout Tools Hub
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -1908,6 +1992,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Check for frontend changes
         id: frontend-changes
@@ -1980,6 +2070,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
       - uses: matlab-actions/run-command@bcd446a219949c24051c1d04a4b4e0274c42f23b
@@ -2012,6 +2108,12 @@ jobs:
             fi
           fi
 
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -2077,6 +2179,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -2339,6 +2447,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -2469,6 +2583,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 60
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
