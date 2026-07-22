@@ -55,7 +55,7 @@ jobs:
       - name: Check out PR head with bounded history
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 50
+          fetch-depth: 10
           fetch-tags: false
           show-progress: false
           ref: ${{ github.event.pull_request.head.sha }}
@@ -176,7 +176,7 @@ jobs:
             # Re-fetch base + head in case refs propagated since the initial fetch.
             git config --global http.version HTTP/1.1
             git config --global http.postBuffer 524288000
-            git -c http.version=HTTP/1.1 fetch origin "${{ github.event.pull_request.base.ref }}" --depth=50 || true
+            git -c http.version=HTTP/1.1 fetch origin "${{ github.event.pull_request.base.ref }}" --depth=10 || true
             git -c http.version=HTTP/1.1 fetch origin "$BASE_SHA" || true
             git -c http.version=HTTP/1.1 fetch origin "$HEAD_SHA" || true
             # Cross-check via the API as well.
