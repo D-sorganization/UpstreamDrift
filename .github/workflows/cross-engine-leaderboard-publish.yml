@@ -159,11 +159,11 @@ jobs:
       - name: Upload leaderboard JSON artifact
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        continue-on-error: true
         with:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
           if-no-files-found: ignore
-        continue-on-error: true
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
