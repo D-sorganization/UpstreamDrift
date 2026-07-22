@@ -244,11 +244,6 @@ jobs:
 
       - name: Checkout PR Branch
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           ref: ${{ steps.branch.outputs.branch }}

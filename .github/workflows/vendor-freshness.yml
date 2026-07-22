@@ -47,11 +47,6 @@ jobs:
 
     steps:
       - name: Checkout repository
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           submodules: false
@@ -112,11 +107,6 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout repository with submodules
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           submodules: recursive
