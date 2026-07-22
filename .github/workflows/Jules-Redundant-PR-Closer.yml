@@ -58,6 +58,10 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     steps:
+      - name: Force HTTP/1.1 and increase postBuffer to fix checkout timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
       - name: Generate Jules app token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
