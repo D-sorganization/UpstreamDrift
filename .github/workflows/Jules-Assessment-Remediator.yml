@@ -89,6 +89,11 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
+      - name: Configure Git to avoid timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 

@@ -261,4 +261,4 @@ jobs:
           name: golf-modeling-suite-${{ matrix.artifact_name }}
           path: |
             ui/src-tauri/target/release/bundle/**/*
-          if-no-files-found: warn
+          if-no-files-found: ignore

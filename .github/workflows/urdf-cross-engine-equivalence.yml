@@ -155,7 +155,7 @@ jobs:
           path: |
             reports/urdf_cross_engine.json
             test-results/urdf-cross-engine-equivalence-junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Summarize results
         if: always()

@@ -221,7 +221,7 @@ jobs:
           path: |
             output/cross_engine_equivalence/**
             test-results/cross-engine-equivalence-junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Summarize results
         if: always()
@@ -327,4 +327,4 @@ jobs:
         with:
           name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
           path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
