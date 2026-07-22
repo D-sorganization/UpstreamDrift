@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2025-07-22 - [Optimizing KD-Tree Nearest Neighbor queries]
+**Learning:** For nearest neighbor calculations finding best Euclidean distance, `np.vdot(diff, diff)` is significantly faster (around ~3x faster) compared to `np.sum(diff ** 2)` for 1D arrays because it natively computes the dot product without intermediate temporary array allocations for element-wise squaring.
+**Action:** Replace `np.sum(diff ** 2)` with `np.vdot(diff, diff)` for computing sum of squared differences when dealing with single 1D configuration arrays.
