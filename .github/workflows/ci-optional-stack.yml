@@ -429,6 +429,7 @@ jobs:
         with:
           name: optional-stack-test-logs-${{ matrix.python }}
           path: |
+          if-no-files-found: ignore
             /tmp/api-test-results.txt
             /tmp/pinocchio-test-results.txt
             /tmp/unit-test-results.txt

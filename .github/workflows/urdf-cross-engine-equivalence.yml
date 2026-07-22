@@ -57,6 +57,11 @@ jobs:
 
     steps:
       - name: Checkout repository
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -155,7 +160,7 @@ jobs:
           path: |
             reports/urdf_cross_engine.json
             test-results/urdf-cross-engine-equivalence-junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Summarize results
         if: always()

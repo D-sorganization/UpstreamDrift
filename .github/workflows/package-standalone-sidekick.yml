@@ -100,6 +100,7 @@ jobs:
         with:
           name: sidekick-dist
           path: dist/
+          if-no-files-found: ignore
 
   smoke-test-wheel:
     name: Smoke-test wheel (Python ${{ matrix.python }})
@@ -112,6 +113,11 @@ jobs:
         python: ["3.11", "3.12"]
 
     steps:
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'

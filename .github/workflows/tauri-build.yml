@@ -172,6 +172,11 @@ jobs:
     env:
       WINDOWS_TAURI_RELEASE_ENABLED: ${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}
     steps:
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Setup Node.js
@@ -266,4 +271,4 @@ jobs:
           name: golf-modeling-suite-${{ matrix.artifact_name }}
           path: |
             ui/src-tauri/target/release/bundle/**/*
-          if-no-files-found: warn
+          if-no-files-found: ignore

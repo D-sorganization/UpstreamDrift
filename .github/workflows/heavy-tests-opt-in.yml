@@ -81,6 +81,11 @@ jobs:
 
       - name: Checkout repository
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -224,6 +229,7 @@ jobs:
         with:
           name: heavy-test-results-UpstreamDrift-${{ matrix.engine }}-${{ github.run_id }}
           path: |
+          if-no-files-found: ignore
             heavy_test_results_${{ matrix.engine }}.xml
             heavy_test_output_${{ matrix.engine }}.log
             heavy_coverage_${{ matrix.engine }}.xml

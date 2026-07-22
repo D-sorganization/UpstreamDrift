@@ -51,5 +51,6 @@ jobs:
         with:
           name: osv-triage
           path: |
+          if-no-files-found: ignore
             osv-results.json
             osv-triage.jsonl

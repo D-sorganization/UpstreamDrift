@@ -157,5 +157,5 @@ jobs:
             soak_artifacts/realtime_soak_summary.json
             soak_artifacts/soak_output.log
             soak_artifacts/soak_junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
           retention-days: 30

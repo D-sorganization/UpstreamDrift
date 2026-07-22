@@ -74,6 +74,11 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout repository
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0 # Full history for git analysis
@@ -202,6 +207,7 @@ jobs:
         with:
           name: assessment-reports
           path: |
+          if-no-files-found: ignore
             docs/assessments/Assessment_*_Results_*.md
             docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md
             assessment_summary.json
@@ -264,6 +270,11 @@ jobs:
 
     steps:
       - name: Checkout repository
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -454,6 +465,11 @@ jobs:
 
     steps:
       - name: Checkout repository
+      - name: Increase Git buffers to prevent fetch-pack timeouts
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Download assessment summary
