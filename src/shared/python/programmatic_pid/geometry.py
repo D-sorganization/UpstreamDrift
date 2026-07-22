@@ -92,7 +92,7 @@ def text_box(
 
 def distance(a: tuple[float, float], b: tuple[float, float]) -> float:
     """Euclidean distance between two points."""
-    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+    return math.hypot(a[0] - b[0], a[1] - b[1])
 
 
 def dedupe_points(points: Sequence[tuple[float, float]]) -> list[tuple[float, float]]:

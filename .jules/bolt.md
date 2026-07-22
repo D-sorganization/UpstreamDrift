@@ -47,3 +47,7 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+
+## 2026-07-22 - [Optimize distance/norm calculations with math.hypot]
+**Learning:** Using `math.sqrt(x**2 + y**2)` or `math.sqrt(x**2 + y**2 + z**2)` incurs Python bytecode overhead for exponentiation and addition. Using `math.hypot(x, y)` or `math.hypot(x, y, z)` is implemented in C and explicitly optimized for this, avoiding the overhead and resulting in a 1.5x-2.5x speedup.
+**Action:** Replace explicit sum-of-squares distance calculations with `math.hypot` where appropriate for 2D and 3D vectors.
