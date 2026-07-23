@@ -48,6 +48,6 @@
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
 
-## 2025-07-22 - [Optimizing KD-Tree Nearest Neighbor queries]
-**Learning:** For nearest neighbor calculations finding best Euclidean distance, `np.vdot(diff, diff)` is significantly faster (around ~3x faster) compared to `np.sum(diff ** 2)` for 1D arrays because it natively computes the dot product without intermediate temporary array allocations for element-wise squaring.
-**Action:** Replace `np.sum(diff ** 2)` with `np.vdot(diff, diff)` for computing sum of squared differences when dealing with single 1D configuration arrays.
+## 2026-07-23 - np.vdot for sum of squares
+**Learning:** `np.vdot(x, x)` flattens the input arrays. It should only be used as a drop-in replacement for `np.sum(x ** 2)` on strictly 1D arrays or when computing the global sum of squares for a multi-dimensional array. When using it, never put the operation itself (e.g. `A - B`) directly into the arguments of `np.vdot(A-B, A-B)` because this will compute `A-B` twice. Instead, assign `diff = A - B` then `np.vdot(diff, diff)`.
+**Action:** Replace `np.sum(diff ** 2)` with `diff = A - B; np.vdot(diff, diff)` for 1D arrays or global sum of squares to avoid intermediate array allocations.
