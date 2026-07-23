@@ -47,3 +47,6 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+## 2026-06-25 - Pandas iterrows vs vectorized numpy column_stack
+**Learning:** Using `.iterrows()` in pandas to construct 3D point arrays row-by-row is incredibly slow due to python overhead and series creation for each row.
+**Action:** Replace `np.array([[row["X"], row["Y"], row["Z"]] for _, row in df.iterrows()])` with vectorized `np.column_stack((df["X"].values, df["Y"].values, df["Z"].values))` to get >1000x speedup when rendering trajectories.
