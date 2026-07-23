@@ -72,10 +72,6 @@ jobs:
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
-      - name: Force HTTP/1.1 and increase postBuffer to fix checkout timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
       - name: Set runner
         id: check
         run: |
@@ -225,7 +221,7 @@ jobs:
           path: |
             output/cross_engine_equivalence/**
             test-results/cross-engine-equivalence-junit.xml
-          if-no-files-found: ignore
+          if-no-files-found: warn
 
       - name: Summarize results
         if: always()
@@ -331,4 +327,4 @@ jobs:
         with:
           name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
           path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
-          if-no-files-found: ignore
+          if-no-files-found: warn

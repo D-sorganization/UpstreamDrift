@@ -36,10 +36,6 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
-      - name: Force HTTP/1.1 and increase postBuffer to fix checkout timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install workflow parser dependency
         shell: bash
@@ -1600,7 +1596,7 @@ jobs:
         with:
           name: performance-baseline
           path: tests/benchmarks/baseline.json
-          if-no-files-found: ignore
+          if-no-files-found: warn
 
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
         env:

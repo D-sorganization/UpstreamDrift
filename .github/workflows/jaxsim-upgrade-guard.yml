@@ -38,11 +38,6 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Force HTTP/1.1 and increase postBuffer to fix checkout timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
@@ -104,4 +99,4 @@ jobs:
           path: |
             output/jaxsim_upgrade_guard/**
             test-results/jaxsim-upgrade-guard-junit.xml
-          if-no-files-found: ignore
+          if-no-files-found: warn

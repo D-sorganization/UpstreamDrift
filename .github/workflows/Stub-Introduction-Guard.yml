@@ -32,11 +32,6 @@ jobs:
     timeout-minutes: 30
     runs-on: d-sorg-fleet-docker
     steps:
-      - name: Force HTTP/1.1 and increase postBuffer to fix checkout timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-
       - name: Check out PR head
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
