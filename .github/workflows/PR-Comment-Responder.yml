@@ -94,6 +94,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         if: steps.filter.outputs.is_bot != 'true' && steps.pr_state.outputs.should_skip != 'true'

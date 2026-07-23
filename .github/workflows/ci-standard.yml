@@ -40,6 +40,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install workflow parser dependency
@@ -72,6 +74,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run GitHub Actions pinning guard
@@ -99,6 +103,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run workflow inventory guard
@@ -126,6 +132,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Run URDF layering guard
@@ -182,6 +190,10 @@ jobs:
           git config --global http.version HTTP/1.1
 
           git config --global http.postBuffer 1048576000
+
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
 
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -484,6 +496,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -721,6 +737,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
@@ -874,6 +894,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install System Dependencies
@@ -1049,6 +1071,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -1129,6 +1155,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -1200,6 +1230,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Check for core test relevant changes
@@ -1710,6 +1742,10 @@ jobs:
 
           git config --global http.postBuffer 1048576000
 
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
+
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -1790,6 +1826,10 @@ jobs:
           git config --global http.version HTTP/1.1
 
           git config --global http.postBuffer 1048576000
+
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
 
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -1887,6 +1927,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Checkout Tools Hub
@@ -2011,6 +2053,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Check for frontend changes
@@ -2088,6 +2132,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
@@ -2128,6 +2174,10 @@ jobs:
           git config --global http.version HTTP/1.1
 
           git config --global http.postBuffer 1048576000
+
+          git config --global http.lowSpeedLimit 1000
+
+          git config --global http.lowSpeedTime 600
 
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -2199,6 +2249,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -2466,6 +2518,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -2601,6 +2655,8 @@ jobs:
         run: |
           git config --global http.version HTTP/1.1
           git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 600
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
