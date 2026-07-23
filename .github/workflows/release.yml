@@ -38,13 +38,6 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-          git config --global http.lowSpeedLimit 1000
-          git config --global http.lowSpeedTime 600
-
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
@@ -107,7 +100,6 @@ jobs:
         with:
           name: dist
           path: dist/
-          if-no-files-found: ignore
 
   smoke-python-wheel:
     timeout-minutes: 30
@@ -122,13 +114,6 @@ jobs:
           - { runner: d-sorg-fleet-docker, python: "3.13" }
     runs-on: ${{ matrix.runner }}
     steps:
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-          git config --global http.lowSpeedLimit 1000
-          git config --global http.lowSpeedTime 600
-
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -188,13 +173,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-          git config --global http.lowSpeedLimit 1000
-          git config --global http.lowSpeedTime 600
-
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c

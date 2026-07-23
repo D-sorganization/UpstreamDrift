@@ -202,7 +202,6 @@ jobs:
         with:
           name: assessment-reports
           path: |
-          if-no-files-found: ignore
             docs/assessments/Assessment_*_Results_*.md
             docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md
             assessment_summary.json

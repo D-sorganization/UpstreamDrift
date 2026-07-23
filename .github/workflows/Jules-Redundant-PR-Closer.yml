@@ -66,19 +66,6 @@ jobs:
           private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-
-        run: |
-
-          git config --global http.version HTTP/1.1
-
-          git config --global http.postBuffer 1048576000
-
-          git config --global http.lowSpeedLimit 1000
-
-          git config --global http.lowSpeedTime 600
-
-
       - name: Checkout Repository_Management (for scripts)
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

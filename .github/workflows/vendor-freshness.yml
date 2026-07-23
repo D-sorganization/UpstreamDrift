@@ -93,7 +93,6 @@ jobs:
         with:
           name: vendor-freshness-report
           path: vendor_status.json
-          if-no-files-found: ignore
           retention-days: 7
 
   bump-submodule:

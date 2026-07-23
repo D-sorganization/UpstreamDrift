@@ -71,13 +71,6 @@ jobs:
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
-      - name: Increase Git buffers to prevent fetch-pack timeouts
-        run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 1048576000
-          git config --global http.lowSpeedLimit 1000
-          git config --global http.lowSpeedTime 600
-
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           token: ${{ github.token }}

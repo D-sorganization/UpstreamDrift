@@ -140,7 +140,6 @@ jobs:
         with:
           name: cross-engine-test-results
           path: test-results/
-          if-no-files-found: ignore
 
       - name: Upload coverage
         if: always()
@@ -148,7 +147,6 @@ jobs:
         with:
           name: cross-engine-coverage
           path: coverage/
-          if-no-files-found: ignore
 
       - name: Summarize validation results
         id: summarize
