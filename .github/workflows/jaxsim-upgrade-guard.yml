@@ -104,4 +104,4 @@ jobs:
           path: |
             output/jaxsim_upgrade_guard/**
             test-results/jaxsim-upgrade-guard-junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
