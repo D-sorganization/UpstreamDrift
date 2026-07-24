@@ -4,7 +4,8 @@ import math
 
 import numpy as np
 
-from ._primitive_shapes import Capsule, Sphere
+from ._convex_distance import convex_signed_distance
+from ._primitive_shapes import Box, Capsule, Sphere
 from ._primitives_base import GeometricPrimitive
 
 
@@ -43,9 +44,15 @@ def compute_primitive_distance(
         return d, pa, pb
     if isinstance(prim_a, Capsule) and isinstance(prim_b, Capsule):
         return _capsule_capsule_distance(prim_a, prim_b)
+    if isinstance(prim_a, Sphere) and isinstance(prim_b, Box):
+        return _sphere_box_distance(prim_a, prim_b)
+    if isinstance(prim_a, Box) and isinstance(prim_b, Sphere):
+        d, pb, pa = _sphere_box_distance(prim_b, prim_a)
+        return d, pa, pb
 
-    # Fallback: GJK-based distance (simplified)
-    return _gjk_distance(prim_a, prim_b)
+    # General convex case: GJK for separation, support-function minimisation
+    # for penetration depth.  See ``_convex_distance`` for the guarantees.
+    return convex_signed_distance(prim_a, prim_b)
 
 
 def _sphere_sphere_distance(
@@ -179,85 +186,66 @@ def _closest_points_segments(
     return a0 + s * d1, b0 + t * d2
 
 
-def _gjk_distance(  # noqa: C901
-    prim_a: GeometricPrimitive,
-    prim_b: GeometricPrimitive,
-    max_iterations: int = 32,
+def _sphere_box_distance(
+    sphere: Sphere,
+    box: Box,
 ) -> tuple[float, np.ndarray, np.ndarray]:
-    """GJK-based distance computation (simplified).
+    """Exact signed distance between a sphere and an oriented box.
 
-    This is a simplified implementation. For production use,
-    consider using a proper GJK library.
+    Uses the closed-form box signed distance field evaluated at the sphere
+    centre, which is exact both outside (positive) and inside (negative) the
+    box:
+
+        q = |R^T (p - c)| - h
+        sdf(p) = ||max(q, 0)|| + min(max(q_x, q_y, q_z), 0)
+
+    Design by Contract:
+        Postconditions:
+            - distance < 0 iff the sphere overlaps the box
+            - |distance| is the exact separation / penetration depth
+
+    Args:
+        sphere: Sphere primitive.
+        box: Box primitive.
+
+    Returns:
+        Tuple of (signed_distance, point_on_sphere, point_on_box).
     """
-    # Initial direction from A to B
-    if prim_a is None:
-        raise ValueError("prim_a must be provided")
-    direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(
-        np.array([-1, 0, 0])
-    )
-    direction_norm = math.hypot(direction[0], direction[1], direction[2])
-    if direction_norm < 1e-10:
-        direction = np.array([1.0, 0.0, 0.0])
+    if sphere is None:
+        raise ValueError("sphere must be provided")
+    if box is None:
+        raise ValueError("box must be provided")
+
+    local = box.rotation.T @ (sphere.center - box.center)
+    half = box.half_extents
+    q = np.abs(local) - half
+
+    outside = np.maximum(q, 0.0)
+    outside_dist = float(math.hypot(outside[0], outside[1], outside[2]))
+    inside_dist = float(min(float(np.max(q)), 0.0))
+    box_sdf = outside_dist + inside_dist
+    distance = float(box_sdf - sphere.radius)
+
+    if outside_dist > 1e-12:
+        # Sphere centre is outside the box: nearest surface point is the
+        # componentwise clamp of the centre into the box.
+        local_closest = np.clip(local, -half, half)
+        point_box = box.rotation @ local_closest + box.center
+        direction = point_box - sphere.center
+        norm = float(math.hypot(direction[0], direction[1], direction[2]))
+        unit = direction / norm if norm > 1e-12 else np.array([1.0, 0.0, 0.0])
     else:
-        direction = direction / direction_norm
+        # Sphere centre is inside the box: nearest surface point lies on the
+        # face whose slab the centre is closest to.
+        axis = int(np.argmax(q))
+        sign = 1.0 if local[axis] >= 0.0 else -1.0
+        local_closest = local.copy()
+        local_closest[axis] = sign * half[axis]
+        point_box = box.rotation @ local_closest + box.center
+        unit = box.rotation @ (sign * np.eye(3)[axis])
 
-    # Simplex vertices
-    simplex: list[np.ndarray] = []
-
-    for _ in range(max_iterations):
-        # Support point in Minkowski difference
-        support_a = prim_a.compute_support(direction)
-        support_b = prim_b.compute_support(-direction)
-        support = support_a - support_b
-
-        # Check if we've passed the origin
-        # Origin not contained, compute distance
-        if np.dot(support, direction) < 0 and len(simplex) == 0:
-            # Return distance between supports
-            diff = support_b - support_a
-            dist = float(math.hypot(diff[0], diff[1], diff[2]))
-            return dist, support_a, support_b
-
-        simplex.append(support)
-
-        # Update simplex and direction
-        if len(simplex) == 1:
-            direction = -simplex[0]
-            norm = math.hypot(direction[0], direction[1], direction[2])
-            if norm < 1e-10:
-                # Origin at support point (collision)
-                return 0.0, support_a, support_b
-            direction = direction / norm
-        elif len(simplex) == 2:
-            # Line case
-            ab = simplex[1] - simplex[0]
-            ao = -simplex[0]
-            t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
-            t = np.clip(t, 0.0, 1.0)
-            closest = simplex[0] + t * ab
-            dist = float(math.hypot(closest[0], closest[1], closest[2]))
-            if dist < 1e-6:
-                # Origin very close to simplex (collision)
-                return 0.0, support_a, support_b
-            direction = -closest / dist
-        else:
-            # For simplicity, just use last two points
-            simplex = simplex[-2:]
-            ab = simplex[1] - simplex[0]
-            ao = -simplex[0]
-            t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
-            t = np.clip(t, 0.0, 1.0)
-            closest = simplex[0] + t * ab
-            dist = float(math.hypot(closest[0], closest[1], closest[2]))
-            if dist < 1e-6:
-                return 0.0, support_a, support_b
-            direction = -closest / dist
-
-    # Max iterations reached, estimate distance
-    support_a = prim_a.compute_support(direction)
-    support_b = prim_b.compute_support(-direction)
-    diff = support_b - support_a
-    return float(math.hypot(diff[0], diff[1], diff[2])), support_a, support_b
+    point_sphere = sphere.center + sphere.radius * unit
+    return distance, point_sphere, point_box
 
 
 def check_primitive_collision(

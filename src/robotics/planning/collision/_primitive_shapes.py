@@ -53,6 +53,23 @@ class Sphere(GeometricPrimitive):
             return self.center.copy()
         return self.center + self.radius * direction / norm
 
+    def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
+        """Vectorised support mapping (see base class)."""
+        directions = _as_direction_batch(directions)
+        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        unit = np.divide(
+            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
+        )
+        return self.center + self.radius * unit
+
+
+def _as_direction_batch(directions: np.ndarray) -> np.ndarray:
+    """Validate and normalise the dtype of a batch of directions."""
+    directions = np.asarray(directions, dtype=np.float64)
+    if directions.ndim != 2 or directions.shape[1] != 3:
+        raise ValueError("directions must have shape (n, 3)")
+    return directions
+
 
 @dataclass
 class Box(GeometricPrimitive):
@@ -132,6 +149,16 @@ class Box(GeometricPrimitive):
         )
         # Transform back to world
         return self.rotation @ local_support + self.center
+
+    def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
+        """Vectorised support mapping (see base class)."""
+        directions = _as_direction_batch(directions)
+        local_dir = directions @ self.rotation
+        local_support = np.sign(local_dir) * self.half_extents
+        local_support = np.where(
+            np.abs(local_dir) < 1e-10, self.half_extents, local_support
+        )
+        return local_support @ self.rotation.T + self.center
 
 
 @dataclass
@@ -225,6 +252,21 @@ class Capsule(GeometricPrimitive):
         if np.dot(d, self.point_b - self.point_a) >= 0:
             return self.point_b + self.radius * d
         return self.point_a + self.radius * d
+
+    def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
+        """Vectorised support mapping (see base class)."""
+        directions = _as_direction_batch(directions)
+        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        degenerate = (norms < 1e-10).ravel()
+        unit = np.divide(
+            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
+        )
+        toward_b = unit @ (self.point_b - self.point_a) >= 0
+        base = np.where(toward_b[:, None], self.point_b, self.point_a)
+        result = base + self.radius * unit
+        if np.any(degenerate):
+            result[degenerate] = self.point_a
+        return result
 
 
 @dataclass
@@ -338,6 +380,32 @@ class Cylinder(GeometricPrimitive):
 
         return axis_support
 
+    def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
+        """Vectorised support mapping (see base class)."""
+        directions = _as_direction_batch(directions)
+        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        degenerate = (norms < 1e-10).ravel()
+        unit = np.divide(
+            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
+        )
+
+        along = unit @ self.axis
+        d_perp = unit - along[:, None] * self.axis
+        sign = np.where(along >= 0.0, 1.0, -1.0)
+        axis_support = self.center + (sign * self.half_height)[:, None] * self.axis
+
+        perp_norm = np.linalg.norm(d_perp, axis=1, keepdims=True)
+        radial = np.divide(
+            self.radius * d_perp,
+            perp_norm,
+            out=np.zeros_like(d_perp),
+            where=perp_norm > 1e-10,
+        )
+        result = axis_support + radial
+        if np.any(degenerate):
+            result[degenerate] = self.center
+        return result
+
 
 @dataclass
 class ConvexHull(GeometricPrimitive):
@@ -402,3 +470,9 @@ class ConvexHull(GeometricPrimitive):
         dots = self.vertices @ direction
         idx = np.argmax(dots)
         return self.vertices[idx].copy()
+
+    def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
+        """Vectorised support mapping (see base class)."""
+        directions = _as_direction_batch(directions)
+        dots = self.vertices @ directions.T
+        return self.vertices[np.argmax(dots, axis=0)]
