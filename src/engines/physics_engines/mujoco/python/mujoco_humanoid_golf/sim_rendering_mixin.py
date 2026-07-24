@@ -189,80 +189,82 @@ class SimRenderingMixin:
         y_offset = 30
 
         if getattr(self, "show_live_euler", False):
-            # Convert rotation matrix to xyz euler
-            sy = np.sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0])
-            singular = sy < 1e-6
-            if not singular:
-                x_e = np.arctan2(mat[2, 1], mat[2, 2])
-                y_e = np.arctan2(-mat[2, 0], sy)
-                z_e = np.arctan2(mat[1, 0], mat[0, 0])
-            else:
-                x_e = np.arctan2(-mat[1, 2], mat[1, 1])
-                y_e = np.arctan2(-mat[2, 0], sy)
-                z_e = 0
-            msg = (
-                f"Euler (xyz): [{np.rad2deg(x_e):.1f}, "
-                f"{np.rad2deg(y_e):.1f}, {np.rad2deg(z_e):.1f}] deg"
-            )
-            cv2.putText(
-                img,
-                msg,
-                (x + 10, y + y_offset),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.4,
-                (0, 255, 255),
-                1,
-            )
+            self._draw_live_euler_overlay(cv2, img, mat, (x + 10, y + y_offset))
             y_offset += 15
 
         if getattr(self, "show_live_quat", False):
-            msg = (
-                f"Quat (w,x,y,z): [{quat[0]:.2f}, "
-                f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"  # noqa: E501
-            )
-            cv2.putText(
-                img,
-                msg,
-                (x + 10, y + y_offset),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.4,
-                (255, 255, 0),
-                1,
-            )
+            self._draw_live_quat_overlay(cv2, img, quat, (x + 10, y + y_offset))
             y_offset += 15
 
         if getattr(self, "show_live_screw", False):
-            # Compute rigorous instantaneous screw axis per Guideline C3
-            try:
-                from .screw_kinematics import ScrewKinematicsAnalyzer
-
-                analyzer = ScrewKinematicsAnalyzer(self.model)
-                twist = analyzer.compute_twist(self.data.qpos, self.data.qvel, body_id)
-                screw = analyzer.compute_screw_axis(twist)
-
-                # Visualize screw axis line
-                start_pt, end_pt = analyzer.visualize_screw_axis(screw, length=0.5)
-
-                start_px = self._world_to_screen(start_pt)
-                end_px = self._world_to_screen(end_pt)
-
-                if start_px and end_px:
-                    cv2.line(img, start_px, end_px, (255, 0, 255), 2)
-                    # Add direction arrow pointer
-                    cv2.circle(img, end_px, 3, (255, 0, 255), -1)
-
-                cv2.putText(
-                    img,
-                    f"ISA Pitch: {screw.pitch:.3f} m/rad",
-                    (x + 10, y + y_offset),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.4,
-                    (255, 0, 255),
-                    1,
-                )
-            except Exception as exc:  # noqa: BLE001
-                logger.debug("Overlay text render skipped: %s", exc)
+            self._draw_live_screw_overlay(cv2, img, body_id, (x + 10, y + y_offset))
         return img
+
+    def _draw_live_euler_overlay(
+        self: Any,
+        cv2: Any,
+        img: np.ndarray,
+        mat: np.ndarray,
+        origin: tuple[int, int],
+    ) -> None:
+        sy = np.sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0])
+        singular = sy < 1e-6
+        if not singular:
+            x_e = np.arctan2(mat[2, 1], mat[2, 2])
+            y_e = np.arctan2(-mat[2, 0], sy)
+            z_e = np.arctan2(mat[1, 0], mat[0, 0])
+        else:
+            x_e = np.arctan2(-mat[1, 2], mat[1, 1])
+            y_e = np.arctan2(-mat[2, 0], sy)
+            z_e = 0
+
+        msg = (
+            f"Euler (xyz): [{np.rad2deg(x_e):.1f}, "
+            f"{np.rad2deg(y_e):.1f}, {np.rad2deg(z_e):.1f}] deg"
+        )
+        cv2.putText(img, msg, origin, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
+
+    def _draw_live_quat_overlay(
+        self: Any,
+        cv2: Any,
+        img: np.ndarray,
+        quat: np.ndarray,
+        origin: tuple[int, int],
+    ) -> None:
+        msg = (
+            f"Quat (w,x,y,z): [{quat[0]:.2f}, "
+            f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"
+        )
+        cv2.putText(img, msg, origin, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
+
+    def _draw_live_screw_overlay(
+        self: Any,
+        cv2: Any,
+        img: np.ndarray,
+        body_id: int,
+        origin: tuple[int, int],
+    ) -> None:
+        try:
+            from .screw_kinematics import ScrewKinematicsAnalyzer
+
+            analyzer = ScrewKinematicsAnalyzer(self.model)
+            twist = analyzer.compute_twist(self.data.qpos, self.data.qvel, body_id)
+            screw = analyzer.compute_screw_axis(twist)
+
+            start_pt, end_pt = analyzer.visualize_screw_axis(screw, length=0.5)
+            start_px = self._world_to_screen(start_pt)
+            end_px = self._world_to_screen(end_pt)
+
+            if start_px and end_px:
+                cv2.line(img, start_px, end_px, (255, 0, 255), 2)
+                cv2.circle(img, end_px, 3, (255, 0, 255), -1)
+
+            msg = f"ISA Pitch: {screw.pitch:.3f} m/rad"
+            cv2.putText(
+                img, msg, origin, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 255), 1
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Overlay text render skipped: %s", exc)
 
     def _update_background_colors(self: Any) -> None:
         if self.scene is not None:
@@ -564,6 +566,7 @@ class SimRenderingMixin:
         up_world = np.array([0, 0, 1])
         right = np.cross(up_world, forward)
         import math
+
         # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for 3D vecs
         right = right / (math.hypot(right[0], right[1], right[2]) + 1e-8)
         up = np.cross(forward, right)

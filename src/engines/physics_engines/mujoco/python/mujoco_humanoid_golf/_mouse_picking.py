@@ -42,6 +42,7 @@ class MousePickingRay:
         up_world = np.array([0, 0, 1])
         right = np.cross(up_world, forward)
         import math
+
         # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for 3D vecs
         right = right / (math.hypot(right[0], right[1], right[2]) + 1e-8)
         up = np.cross(forward, right)
