@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.466                                            |
-| **Last Spec Update**    | 2026-06-21                                         |
+| **Spec Version**        | 1.0.467                                            |
+| **Last Spec Update**    | 2026-07-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -71,7 +71,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
-- **2026-06-21** - Hardened the simulation WebSocket and Data Explorer API
+- **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
   non-positive speed factors and shares duration/timestep bounds with
   `SimulationRequest`, simulation stats access is centralized behind one
@@ -1642,8 +1642,7 @@ overlapping fixture names in nested conftests.
 | mypy       | 1.7+    | Static type checking                                                               | Yes       |
 | pytest     | 7.0+    | Testing framework                                                                  | Yes       |
 | pytest-cov | 4.0+    | Coverage measurement                                                               | Yes       |
-| bandit     | 1.7+    | Security
-- Fixed timing attack vulnerability in API key verification. scanning                                                                  | Yes       |
+| bandit     | 1.7+    | Security scanning                                                                  | Yes       |
 | hypothesis | 6.0+    | Property-based testing                                                             | No        |
 
 ### Design Principles
@@ -1711,8 +1710,7 @@ Beyond standard tools, CI enforces custom checks:
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
-- **Security
-- Fixed timing attack vulnerability in API key verification. Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
+- **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Pull requests and ordinary pushes with a concrete diff base run baseline mypy only on changed `src/` Python files so legacy type drift does not block unrelated work; scheduled/manual full-src mypy still runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics during explicit full-audit lanes.
@@ -1770,8 +1768,7 @@ Beyond standard tools, CI enforces custom checks:
 | pyarrow    | 14.0+   | Parquet IO test coverage for compact swing dataset paths                           |
 | ruff       | latest  | Linting and formatting                                                             |
 | mypy       | 1.7+    | Type checking                                                                      |
-| bandit     | 1.7+    | Security
-- Fixed timing attack vulnerability in API key verification. scanning                                                                  |
+| bandit     | 1.7+    | Security scanning                                                                  |
 | black      | 23.0+   | Code formatter                                                                     |
 
 ### Fleet Dependencies
@@ -1864,6 +1861,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
+| 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-06-20 | 1.0.465 | Added isolated transition hazard-rule coverage for issue #7715. The MDP transition tests now pin hazard penalties and DbC guard behavior directly so policy updates cannot bypass invalid-state validation. |
 | 2026-06-20 | 1.0.465 | Hoisted OpenSim Manager/Integrator construction out of the perturbation per-step loop for issue #7713, preserving analyzer behavior while avoiding repeated runtime setup on every simulated step. |
@@ -1889,6 +1888,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-18 | 1.0.446 | Optimized allocation hot paths for issue #7559. `MuJoCoPerturbationAnalyzer._simulate()` now builds a padded descending-power coefficient matrix once, evaluates every actuator each step with a vectorized Horner pass into a preallocated control buffer, and preserves per-actuator `np.polyval(coeffs[j][::-1], t)` parity for ragged, empty, and over-count coefficient lists. `PolynomialProfile` now caches its `np.poly1d` polynomial and derivative once, and the triple-pendulum hardcoded dynamics helpers accept packed theta/omega/parameter tuples instead of 16-19 scalar arguments. Focused MuJoCo and pendulum unit coverage locks parity. |
 | 2026-06-18 | 1.0.445 | Gated Windows Tauri release packaging behind `TAURI_WINDOWS_RELEASE_ENABLED=true` because the current self-hosted Windows runner blocks Cargo build-script executables with Application Control (`os error 4551`). Linux Tauri release packaging and the Tauri Rust/TypeScript check remain enforced, and `tests/ci/test_ci_infrastructure.py` now pins the repo-variable opt-in plus diagnostic notice contract. |
 | 2026-06-18 | 1.0.444 | Restored the final Tauri Build release contract for issue #7652. `ui/src-tauri/Cargo.lock` now resolves Rust `tauri` to the same locked major/minor as `@tauri-apps/api`, `.github/workflows/tauri-build.yml` installs `libdbus-1-dev` for the updated Linux Rust graph, and `tests/ci/test_ci_infrastructure.py` now parses lockfiles/workflow metadata to fail fast when a future dependency update would make `tauri-action` reject release builds for Rust/npm Tauri minor drift or miss required native Linux headers. |
+| 2026-07-19 | 1.0.444 | Bolt performance optimization (#7099). `src/unreal_integration/skeleton_mapper.py` now uses `math.hypot` instead of `np.linalg.norm` to avoid dispatch and intermediate allocations, resulting in a ~6x speedup. |
 | 2026-06-18 | 1.0.443 | Restored the main-side Tauri Build release lane for issue #7652. `ui/package.json` now exposes the `tauri` script entrypoint required by `tauri-action`'s default `npm run tauri build` invocation, and `.github/workflows/tauri-build.yml` now separates build matrix runner labels from artifact names while using a PowerShell `rustup` setup path for the Windows self-hosted leg to avoid the bash path failure seen in run `27732025577`. |
 | 2026-06-18 | 1.0.442 | Restored the Nightly Cross-Engine Validation workflow for issue #7646. The scheduled job now runs `tests/integration/test_cross_engine_validation.py`, `tests/unit/test_cross_engine_validator.py`, and `tests/integration/cross_engine/test_conformance_harness.py` against `src.shared.python.engine_core.cross_engine_validator`, preserving the 75% coverage threshold with real validator/conformance tests and marking zero collected tests as a failure in the summary output. |
 | 2026-06-18 | 1.0.441 | Restored current-main CI Standard after #7645. Strict API mypy now mirrors the baseline mypy push contract by checking only changed `src/api` Python files when `github.event.before` is available while preserving full strict API audits for scheduled/manual runs. The benchmark regression helper now keeps the 5x multiplier but applies a 10 microsecond absolute threshold floor for tiny hot paths, preventing sub-microsecond runner jitter from failing the 3.11 performance lane. |
@@ -2014,8 +2014,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-10 | 1.0.270 | Docker dependency-audit hardening for #7160 follow-up CI. Pinned Docker builder/runtime pip installs to `26.1.2`, declared patched runtime floors for `Mako>=1.3.12` and `PyJWT>=2.13.0`, aligned `requirements.lock`, and updated the direct dependency license ledger so in-image `pip-audit` resolves patched packages. |
 | 2026-06-10 | 1.0.269 | Python-version coherence hardening for #7160. Raised the live package/support floor to Python 3.11, removed the unsupported Python 3.10 classifier and standard CI matrix lane, kept Python 3.11/3.12 in the standard test matrix, and documented that the Docker image plus `requirements.lock` are generated on Python 3.12. Added `scripts/ci/check_python_version_coherence.py` and `tests/ci/test_python_version_coherence.py` to enforce agreement across `pyproject.toml`, `install.sh`, `requirements.lock`, `Dockerfile`, `.github/workflows/ci-standard.yml`, mypy target version, and public docs. |
 | 2026-06-10 | 1.0.268 | Finished a deferred sub-defect of the pytest-gating policy issue #7158 (D2 marker discipline). Added `tests/support/suite_markers.py` (`SUITE_MARKERS`, `suite_markers_enforced`, `find_unmarked`, `item_has_suite_marker`) and wired a `pytest_collection_modifyitems` + `pytest_terminal_summary` hook in `tests/conftest.py` that, in REPORT-ONLY mode (the repo's ratchet pattern), counts collected tests carrying none of the recognized suite markers and surfaces the baseline without failing collection. Enforcement (missing-marker = collection error) is opt-in via `UD_ENFORCE_SUITE_MARKERS=1` for a follow-up once the unmarked baseline is driven to zero. Unit coverage in `tests/unit/test_suite_marker_enforcement_7158.py`. The remaining #7158 sub-defects (D3 coverage-omit retune) and #7155 sub-defects (deleting the autouse `_protect_engine_modules` and function-scoping `mock_mujoco_dependencies`, both gated on the issue's 5/5 `-n auto` stability evidence) stay deferred for cause and are tracked on those issues. |
-| 2026-06-10 | 1.0.267 | Security
-- Fixed timing attack vulnerability in API key verification. hardening of remote model downloads (#7183, #7184, #7185, #7186). Added shared helpers `download_to_file` (bounded-timeout streaming download; `DOWNLOAD_TIMEOUT_SECONDS=30`) and `safe_extract_zip` (Zip-Slip member-path validation) to `src/shared/python/security/security_utils.py`. `GitHubRepository.download_archive` now extracts via `safe_extract_zip`, downloads with a timeout, and unlinks its `delete=False` temp file on every path (#7183 Zip Slip + temp leak). All `urlretrieve`/`urlopen` call sites in `standard_models.py`, the `model_generation/library/` repository/loader modules, and `tools/model_explorer/model_library.py` now use a 30s timeout (#7184). `StandardModelManager.download_standard_humanoid` now parses the URDF for mesh-filename entries and downloads the real meshes, returning `False` (no silent empty-STL stubs) unless the dev-only `allow_stub_meshes=True` is passed (#7186). `Jules-Issue-Mention-Handler.yml` and `PR-Comment-Responder.yml` route attacker-controllable issue/comment title/body/login values through `env:` indirection instead of splicing into `run:` bodies (#7185 Actions expression injection). Regression tests added in `tests/unit/test_shared_security_utils.py` (zip-slip + timeout) and `tests/unit/config/test_standard_models.py` (real-mesh success vs loud failure). |
+| 2026-06-10 | 1.0.267 | Security hardening of remote model downloads (#7183, #7184, #7185, #7186). Added shared helpers `download_to_file` (bounded-timeout streaming download; `DOWNLOAD_TIMEOUT_SECONDS=30`) and `safe_extract_zip` (Zip-Slip member-path validation) to `src/shared/python/security/security_utils.py`. `GitHubRepository.download_archive` now extracts via `safe_extract_zip`, downloads with a timeout, and unlinks its `delete=False` temp file on every path (#7183 Zip Slip + temp leak). All `urlretrieve`/`urlopen` call sites in `standard_models.py`, the `model_generation/library/` repository/loader modules, and `tools/model_explorer/model_library.py` now use a 30s timeout (#7184). `StandardModelManager.download_standard_humanoid` now parses the URDF for mesh-filename entries and downloads the real meshes, returning `False` (no silent empty-STL stubs) unless the dev-only `allow_stub_meshes=True` is passed (#7186). `Jules-Issue-Mention-Handler.yml` and `PR-Comment-Responder.yml` route attacker-controllable issue/comment title/body/login values through `env:` indirection instead of splicing into `run:` bodies (#7185 Actions expression injection). Regression tests added in `tests/unit/test_shared_security_utils.py` (zip-slip + timeout) and `tests/unit/config/test_standard_models.py` (real-mesh success vs loud failure). |
 | 2026-06-09 | 1.0.265 | Architecture budget CI gate for #7131/#7133. Added `scripts/ci/check_architecture_budget.py` plus `scripts/config/architecture_budget.json` to ratchet changed production Python files against a 100-line function budget and 8-effective-parameter callable budget, excluding tests/vendor and requiring owned, linked exceptions for any temporary budget breach. Wired the gate into `.github/workflows/ci-standard.yml` and added focused TDD coverage for long-function detection, parameter counting, receiver-parameter exclusion, exception handling, and test-path skips. |
 | 2026-06-02 | 1.0.260 | Golf visualizer camera-basis norm optimization (#7101). `GolfVisualizerWidget` now uses fixed-arity `math.hypot` for the known 3D forward and right camera basis vectors instead of `np.linalg.norm`, avoiding NumPy reduction overhead while preserving the existing fallback behavior for degenerate vectors. |
 | 2026-06-02 | 1.0.258 | Bolt small-vector norm optimization (#7098). `src/shared/python/physics/ball_simulator.py` now uses fixed-arity `math.hypot` for scalar relative-velocity and Magnus cross-product magnitudes in `_calculate_forces_single`; `src/shared/python/physics/flight_models.py` uses `math.hypot` for Waterloo/Penner spin-vector magnitude and for MacDonald-Hanzely/constant-coefficient spin-axis normalization, computing each spin norm once before normalization; and `src/shared/python/physics/swing_ball_flight_pipeline.py` uses `math.hypot` for launch speed, horizontal launch speed, and angular-velocity spin-rate derivation. This is a pure performance cleanup for known 2D/3D vectors, preserving behavior while avoiding NumPy reduction allocation overhead in scalar hot paths. |
@@ -2286,11 +2285,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('...i,...i->...', ...))` in chain_forces.py and test_swingset_chain_models.py for improved performance.
 
 ### Module Map Changelog
-- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
-- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
-- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
-- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
-- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
+
 - Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
 
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
@@ -2299,9 +2294,17 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
 
-### 2026-06-21
+### 2026-07-15
 
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
+- **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
+- Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
+- Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+
+### 2026-06-23
+
+- **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.

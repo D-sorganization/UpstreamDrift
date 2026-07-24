@@ -342,6 +342,7 @@ class ModelGenerationAPI(
         if not self._api_key:
             return None  # No API key configured, skip auth
         import secrets
+
         provided_key = request.headers.get("X-API-Key")
         if not provided_key or not secrets.compare_digest(provided_key, self._api_key):
             return APIResponse.error("Unauthorized: invalid or missing API key", 401)

@@ -169,7 +169,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -460,7 +460,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -689,7 +689,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
 
@@ -859,7 +859,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1000,7 +1000,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1071,7 +1071,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.12"
           cache: "pip"
@@ -1189,7 +1189,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
@@ -1638,7 +1638,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1710,7 +1710,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -1840,7 +1840,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -2024,7 +2024,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -2161,7 +2161,7 @@ jobs:
           fi
       - name: Set up Python (for PyO3 builds)
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.12"
           cache: "pip"
@@ -2197,7 +2197,7 @@ jobs:
 
       - name: Cache Cargo registry and build
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ${{ env.CARGO_HOME }}/registry
@@ -2380,7 +2380,7 @@ jobs:
           fi
       - name: Setup Python
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -2396,7 +2396,7 @@ jobs:
 
       - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ~/.cargo/registry
@@ -2596,7 +2596,7 @@ jobs:
 
       # Pin Python 3.12 (pyo3 0.24 supports up to 3.13; 3.12 is the safe
       # middle of its range, matching rust-quality-gate). See issue #5221.
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         with:
           python-version: "3.12"
@@ -2630,7 +2630,7 @@ jobs:
 
       - name: Cache Cargo registry and build
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ${{ env.CARGO_HOME }}/registry
