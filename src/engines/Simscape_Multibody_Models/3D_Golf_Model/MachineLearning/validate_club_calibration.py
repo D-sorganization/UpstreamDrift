@@ -136,7 +136,8 @@ def _vector_metrics(
         return {"samples": 0}
 
     residual = simulated_values - target_values
-    rmse_axis = np.sqrt(np.mean(residual**2, axis=0))
+    # ⚡ Bolt: np.einsum avoids array allocation compared to np.mean(x**2, axis=0)
+    rmse_axis = np.sqrt(np.einsum("ij,ij->j", residual, residual) / residual.shape[0])
     # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     vector_error = np.sqrt(np.einsum("ij,ij->i", residual, residual))
     target_span = np.ptp(target_values, axis=0)
@@ -150,15 +151,20 @@ def _vector_metrics(
         normalizer = 1.0
 
     anisotropy = float(np.max(rmse_axis) / max(float(np.min(rmse_axis)), EPSILON))
+
+    # ⚡ Bolt: np.vdot avoids array allocation compared to np.mean(x**2)
+    v_sz = vector_error.size
+    vector_rmse_val = float(np.sqrt(np.vdot(vector_error, vector_error) / v_sz))
+
     return {
         "samples": int(len(target_values)),
         "rmse_axis": rmse_axis.tolist(),
         "mae_axis": np.mean(np.abs(residual), axis=0).tolist(),
         "max_abs_axis": np.max(np.abs(residual), axis=0).tolist(),
-        "vector_rmse": float(np.sqrt(np.mean(vector_error**2))),
+        "vector_rmse": vector_rmse_val,
         "vector_mae": float(np.mean(vector_error)),
         "vector_max_abs": float(np.max(vector_error)),
-        "normalized_vector_rmse": float(np.sqrt(np.mean(vector_error**2)) / normalizer),
+        "normalized_vector_rmse": vector_rmse_val / normalizer,
         "normalizer": normalizer,
         "residual_anisotropy": anisotropy,
     }

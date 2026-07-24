@@ -129,7 +129,8 @@ def _vector_metrics(
         return {}
 
     error = predicted_values - target_values
-    rmse_axis = np.sqrt(np.mean(error**2, axis=0))
+    # ⚡ Bolt: np.einsum avoids array allocation compared to np.mean(x**2, axis=0)
+    rmse_axis = np.sqrt(np.einsum("ij,ij->j", error, error) / error.shape[0])
     mae_axis = np.mean(np.abs(error), axis=0)
     max_axis = np.max(np.abs(error), axis=0)
     # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
@@ -144,15 +145,19 @@ def _vector_metrics(
     if denom < EFFORT_SCALE_EPS:
         denom = 1.0
 
+    # ⚡ Bolt: np.vdot avoids array allocation compared to np.mean(x**2)
+    v_sz = vector_error.size
+    vector_rmse_val = float(np.sqrt(np.vdot(vector_error, vector_error) / v_sz))
+
     return {
         "samples": int(len(target_values)),
         "rmse_axis": rmse_axis.tolist(),
         "mae_axis": mae_axis.tolist(),
         "max_abs_axis": max_axis.tolist(),
-        "vector_rmse": float(np.sqrt(np.mean(vector_error**2))),
+        "vector_rmse": vector_rmse_val,
         "vector_mae": float(np.mean(vector_error)),
         "vector_max_abs": float(np.max(vector_error)),
-        "normalized_vector_rmse": float(np.sqrt(np.mean(vector_error**2)) / denom),
+        "normalized_vector_rmse": vector_rmse_val / denom,
         "normalizer": denom,
     }
 
