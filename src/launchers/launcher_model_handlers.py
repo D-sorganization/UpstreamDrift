@@ -144,6 +144,32 @@ class ScriptHandler:
         """Check if this handler supports the model type."""
         return model_type.lower() in self.model_types
 
+    def resolve_script(self, model: Any, repo_path: Path) -> Path:
+        """Resolve the script to run for ``model``.
+
+        ``models.yaml`` is the source of truth for a tile's entry point; the
+        hard-coded ``script_path`` in the handler table is only a fallback for
+        model types with no declared ``path``. Preferring the table silently
+        overrode ``models.yaml`` and pointed the Pinocchio, OpenSim and
+        MyoSuite tiles at files that do not exist (issue #8030).
+        """
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        declared = getattr(model, "path", None) if model is not None else None
+        if declared:
+            try:
+                return resolve_model_artifact_path(model, repo_path)
+            except (ValueError, OSError) as exc:
+                logger.warning(
+                    "ScriptHandler: could not resolve declared path %r for %r "
+                    "(%s); falling back to %s",
+                    declared,
+                    getattr(model, "id", "unknown"),
+                    exc,
+                    self._script_path,
+                )
+        return repo_path / self._script_path
+
     def launch(
         self,
         model: Any,
@@ -153,7 +179,7 @@ class ScriptHandler:
         """Launch the script."""
         if repo_path is None:
             raise ValueError("repo_path must be provided")
-        script_path = repo_path / self._script_path
+        script_path = self.resolve_script(model, repo_path)
         cwd = repo_path / self._cwd_path if self._cwd_path else repo_path
 
         process = process_manager.launch_script(
@@ -168,7 +194,7 @@ class ScriptHandler:
         """Try to load the script as a module and get its dockable UI widget."""
         if repo_path is None:
             return None
-        script_path = repo_path / self._script_path
+        script_path = self.resolve_script(model, repo_path)
         if not script_path.exists():
             return None
 
@@ -187,9 +213,7 @@ class ScriptHandler:
                     sys.path.insert(0, str(p))
 
             module_name = (
-                self._script_path.replace("/", "_")
-                .replace("\\", "_")
-                .replace(".py", "")
+                str(script_path).replace("/", "_").replace("\\", "_").replace(".py", "")
             )
             spec = importlib.util.spec_from_file_location(module_name, str(script_path))
             if spec and spec.loader:
@@ -736,6 +760,53 @@ class DocumentHandler:
         return None
 
 
+class PhysicsInformedHandler:
+    """Handler for the ``physics_informed`` (PINN) tiles.
+
+    The physics-informed models in
+    ``src/shared/python/physics_informed/`` are a **library-only** feature
+    (epic #5419): ``PhysicsMode`` + ``create_model`` are importable, but no
+    interactive front-end has been built yet. Before issue #7984 no handler
+    was registered for ``type: physics_informed`` at all, so clicking either
+    tile produced a generic "Unknown launch type" toast that read like a
+    configuration typo. Reporting the real reason — and the real dependency
+    state — is the honest failure this replaces it with.
+    """
+
+    MODEL_TYPES = {"physics_informed"}
+    PACKAGE = "src/shared/python/physics_informed"
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def status_message(self, model: Any) -> str:
+        """Return a user-facing explanation of why this tile cannot launch."""
+        mode = getattr(model, "mode", None) or "unknown"
+        name = getattr(model, "name", None) or getattr(model, "id", "unknown")
+        return (
+            f"{name} (mode={mode}) has no interactive UI yet. The physics-informed "
+            f"models are available as a library only ({self.PACKAGE}/); see epic "
+            "#5419. Tracking issue for a launcher front-end: #7984."
+        )
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Report the missing front-end instead of failing silently."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        logger.error("PhysicsInformedHandler: %s", self.status_message(model))
+        return False
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """No dockable UI exists for physics-informed models yet."""
+        return None
+
+
 class ApiBackedHandler:
     """Handler for API-backed tiles that do not launch local processes directly."""
 
@@ -785,24 +856,29 @@ _MODULE_HANDLERS = [
     ),
 ]
 
+# NOTE (#8030): ``script_path`` here is only the fallback used when a model
+# declares no ``path``. ``models.yaml`` wins — see ``ScriptHandler.resolve_script``.
+# These fallbacks were pointing at files that have never existed
+# (``pinocchio_golf/main.py``, ``opensim_golf.py``, and a whole ``myosim/``
+# directory), which silently killed the Pinocchio/OpenSim/MyoSuite tiles.
 _SCRIPT_HANDLERS = [
     ScriptHandler(
         model_types={"pinocchio", "pinocchio_golf"},
-        script_path="src/engines/physics_engines/pinocchio/python/pinocchio_golf/main.py",
+        script_path="src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
         display_name="Pinocchio Golf Model",
         cwd_path="src/engines/physics_engines/pinocchio/python",
     ),
     ScriptHandler(
         model_types={"opensim", "opensim_golf"},
-        script_path="src/engines/physics_engines/opensim/python/opensim_golf.py",
+        script_path="src/engines/physics_engines/opensim/python/opensim_gui.py",
         display_name="OpenSim Golf Model",
         cwd_path="src/engines/physics_engines/opensim/python",
     ),
     ScriptHandler(
         model_types={"myosim", "myosim_golf", "musculoskeletal"},
-        script_path="src/engines/physics_engines/myosim/python/main.py",
-        display_name="MyoSim Golf Model",
-        cwd_path="src/engines/physics_engines/myosim/python",
+        script_path="src/engines/physics_engines/myosuite/python/gui.py",
+        display_name="MyoSuite Golf Model",
+        cwd_path="src/engines/physics_engines/myosuite/python",
     ),
     ScriptHandler(
         model_types={"openpose", "pose_estimation"},
@@ -848,6 +924,7 @@ class ModelHandlerRegistry:
             MatlabFileHandler(),
             SharedRepoHandler(),
             DocumentHandler(),
+            PhysicsInformedHandler(),
             ApiBackedHandler(),
         ]
 
