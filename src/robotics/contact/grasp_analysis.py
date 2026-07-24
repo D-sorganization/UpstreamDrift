@@ -90,19 +90,37 @@ def _skew_symmetric(v: NDArray[np.float64]) -> NDArray[np.float64]:
     )
 
 
+#: Margins at or below this are treated as "no force closure".
+FORCE_CLOSURE_TOL = 1e-9
+
+
 def check_force_closure(
     contacts: list[ContactState],
     num_cone_faces: int = 8,
 ) -> tuple[bool, float]:
     """Check if grasp has force closure.
 
-    A grasp has force closure if it can resist arbitrary wrenches.
-    This is checked by verifying the origin is strictly inside
-    the convex hull of the grasp wrench space.
+    A grasp has force closure if it can resist arbitrary wrenches, i.e. if the
+    origin lies **strictly inside** the convex hull of the grasp wrench space.
+    Two conditions are required and both are checked here:
+
+    1. the wrench generators must have rank 6 (otherwise the grasp cannot
+       resist wrenches in the missing direction at all), and
+    2. the origin must be in the *interior* of their convex hull, not merely a
+       member of it - membership alone is satisfied by every grasp whose
+       generators span a proper subspace.
+
+    The returned margin is the Ferrari-Canny epsilon metric: the radius of the
+    largest ball centred on the origin contained in the grasp wrench hull,
+    i.e. the distance from the origin to the nearest hull facet.  It is
+    strictly positive exactly when the grasp has force closure and is 0.0
+    otherwise, so candidate grasps can be ranked by it.
 
     Design by Contract:
         Preconditions:
             - len(contacts) >= 2
+        Postconditions:
+            - has_force_closure is True iff margin > 0
 
     Args:
         contacts: List of contact states with friction.
@@ -125,12 +143,13 @@ def check_force_closure(
         # Not enough generators to span wrench space
         return False, 0.0
 
-    # Check if origin is inside convex hull of generators
-    # Using the criterion: origin inside iff we can find positive weights
-    # summing to 1 that give zero wrench
-    has_closure, margin = _check_origin_in_hull(wrench_generators)
+    if np.linalg.matrix_rank(wrench_generators) < 6:
+        # The generators lie in a proper subspace of R^6: there is a wrench
+        # direction no contact force can resist.  The origin is in their hull
+        # but only on its (relative) boundary, so this is not force closure.
+        return False, 0.0
 
-    return has_closure, margin
+    return _grasp_wrench_margin(wrench_generators)
 
 
 def _build_wrench_generators(
@@ -176,76 +195,72 @@ def _build_wrench_generators(
     return np.column_stack(all_generators)
 
 
-def _check_origin_in_hull(
+def _grasp_wrench_margin(
     generators: NDArray[np.float64],
 ) -> tuple[bool, float]:
-    """Check if origin is inside convex hull of generators.
+    """Ferrari-Canny epsilon: radius of the largest origin-centred ball in the hull.
 
-    Uses linear programming: minimize c such that
-        sum(alpha_i * g_i) = 0
-        sum(alpha_i) = 1
-        alpha_i >= 0
-
-    If feasible, origin is inside the hull.
+    The convex hull of the wrench generators is computed in R^6; the epsilon
+    metric is then the smallest distance from the origin to a hull facet.  A
+    non-positive value means the origin is on or outside the boundary, i.e.
+    there is no force closure.
 
     Args:
-        generators: Wrench generators (6, n_generators).
+        generators: Wrench generators (6, n_generators), rank 6.
 
     Returns:
-        Tuple of (inside, margin).
+        Tuple of (has_force_closure, margin).
     """
     try:
-        from scipy.optimize import linprog
-    except ImportError:
-        # Fallback: simple heuristic check
-        return _heuristic_closure_check(generators)
-
-    n_gen = generators.shape[1]
-
-    # LP: find alpha >= 0, sum(alpha) = 1, G @ alpha = 0
-    # We minimize a dummy objective
-    c = np.zeros(n_gen)
-
-    # Equality constraints: G @ alpha = 0, sum(alpha) = 1
-    A_eq = np.vstack([generators, np.ones((1, n_gen))])
-    b_eq = np.zeros(7)
-    b_eq[-1] = 1.0
-
-    # Bounds: alpha >= 0
-    bounds = [(0, None) for _ in range(n_gen)]
+        from scipy.spatial import ConvexHull, QhullError
+    except ImportError:  # pragma: no cover - scipy is a hard dependency in CI
+        return _sampled_closure_check(generators)
 
     try:
-        result = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method="highs")
+        hull = ConvexHull(generators.T)
+    except QhullError:
+        # Degenerate hull (numerically rank-deficient): fall back to sampling,
+        # which is conservative because it only ever reports a smaller margin.
+        return _sampled_closure_check(generators)
 
-        if result.success:
-            # Compute quality margin as minimum weight
-            margin = float(np.min(result.x))
-            return True, margin
+    normals = hull.equations[:, :-1]
+    offsets = hull.equations[:, -1]
+    # Interior points satisfy normal @ x + offset < 0, so the signed distance
+    # from the origin to each facet is -offset / ||normal||.
+    distances = -offsets / np.linalg.norm(normals, axis=1)
+    margin = float(np.min(distances))
+
+    if margin <= FORCE_CLOSURE_TOL:
         return False, 0.0
-    except (ValueError, TypeError, RuntimeError):
-        return _heuristic_closure_check(generators)
+    return True, margin
 
 
-def _heuristic_closure_check(
+def _sampled_closure_check(
     generators: NDArray[np.float64],
+    n_directions: int = 4096,
 ) -> tuple[bool, float]:
-    """Heuristic check for force closure.
+    """Approximate epsilon metric without scipy.
 
-    Uses SVD to check if wrench space spans R^6.
+    ``min_{||d||=1} max_i <g_i, d>`` is exactly the distance from the origin to
+    the hull boundary.  Minimising over a finite direction sample gives an
+    upper bound on that distance, so the result is only approximate; it is used
+    solely when scipy (and therefore Qhull) is unavailable.
 
     Args:
         generators: Wrench generators (6, n_generators).
+        n_directions: Number of random unit directions to probe.
 
     Returns:
-        Tuple of (likely_closure, heuristic_quality).
+        Tuple of (likely_closure, approximate margin).
     """
-    # Check if generators span R^6
-    U, s, Vh = np.linalg.svd(generators)
+    rng = np.random.default_rng(0)
+    directions = rng.normal(size=(n_directions, generators.shape[0]))
+    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+    margin = float(np.min(np.max(directions @ generators, axis=1)))
 
-    if len(s) >= 6 and s[5] > 1e-6:
-        # Full rank - likely has force closure
-        return True, float(s[5])
-    return False, 0.0
+    if margin <= FORCE_CLOSURE_TOL:
+        return False, 0.0
+    return True, margin
 
 
 def compute_grasp_quality(
