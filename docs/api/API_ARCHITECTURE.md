@@ -364,6 +364,6 @@ src/api/
 ## See Also
 
 - [Quick Start Guide](../user_guide/getting_started.md)
-- [Engine Selection Guide](../engine_selection_guide.md)
+- [Engine Selection Guide](../engines/engine_selection_guide.md)
 - [Development Guide](DEVELOPMENT.md)
 - [Contracts Guide](../development/design_by_contract.md)

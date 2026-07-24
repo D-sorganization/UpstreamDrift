@@ -16,5 +16,5 @@ This directory contains technical documentation about engines, implementation st
 ## Related Documentation
 
 - [../engines/](../engines/) - Individual engine documentation (MuJoCo, Drake, Pinocchio, etc.)
-- [../engine_selection_guide.md](../engine_selection_guide.md) - Guide for choosing the right engine
-- [../engine_capabilities.md](../engine_capabilities.md) - Comparison of engine capabilities
+- [../engine_selection_guide.md](../engines/engine_selection_guide.md) - Guide for choosing the right engine
+- [../engine_capabilities.md](../engines/engine_capabilities.md) - Comparison of engine capabilities
