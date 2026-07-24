@@ -47,3 +47,6 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
+## 2024-05-25 - math.sqrt(np.dot) vs math.hypot for N-dimensional safety
+**Learning:** While `math.hypot(v[0], v[1], v[2])` is extremely fast for explicit 3D arrays, using it in generic utility functions (like `_angle_between(v1, v2)`) that accept N-dimensional arrays causes `IndexError` when passed a 2D array. `math.sqrt(np.dot(v, v))` handles any array length safely and still provides ~2x speedup over `np.linalg.norm`.
+**Action:** Use `math.sqrt(np.dot(v, v))` instead of `math.hypot` with explicit indices when the input array dimension is variable or not explicitly guarded. Use `math.hypot` only when slicing explicitly (e.g. `v[:2]`).
