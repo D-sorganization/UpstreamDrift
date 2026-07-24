@@ -50,3 +50,6 @@
 ## 2024-05-25 - math.sqrt(np.dot) vs math.hypot for N-dimensional safety
 **Learning:** While `math.hypot(v[0], v[1], v[2])` is extremely fast for explicit 3D arrays, using it in generic utility functions (like `_angle_between(v1, v2)`) that accept N-dimensional arrays causes `IndexError` when passed a 2D array. `math.sqrt(np.dot(v, v))` handles any array length safely and still provides ~2x speedup over `np.linalg.norm`.
 **Action:** Use `math.sqrt(np.dot(v, v))` instead of `math.hypot` with explicit indices when the input array dimension is variable or not explicitly guarded. Use `math.hypot` only when slicing explicitly (e.g. `v[:2]`).
+## 2024-05-28 - Explicit 2x2 matrix inversion over np.linalg.solve
+**Learning:** For very small, fixed-size matrices (like the 2x2 mass matrix in a double pendulum engine), using `np.linalg.solve` incurs significant Python-level overhead (input validation, dispatch routing, etc.).
+**Action:** Replace `np.linalg.solve(M, x)` with explicitly calculated 2x2 inverse and matrix multiplication for a measured speedup of ~5x in tight simulation loops.

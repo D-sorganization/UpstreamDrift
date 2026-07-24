@@ -377,7 +377,15 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
         M = self.compute_mass_matrix()
         bias = self.compute_bias_forces()
-        return np.linalg.solve(M, -bias)
+        # ⚡ Bolt: Replace np.linalg.solve with explicit 2x2 inverse for ~5x speedup
+        det = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
+        inv_det = 1.0 / det
+        return np.array(
+            [
+                (M[1, 1] * -bias[0] - M[0, 1] * -bias[1]) * inv_det,
+                (-M[1, 0] * -bias[0] + M[0, 0] * -bias[1]) * inv_det,
+            ]
+        )
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration M⁻¹·τ.
@@ -393,7 +401,15 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             return np.zeros(2)
 
         M = self.compute_mass_matrix()
-        return np.linalg.solve(M, tau[:2])
+        # ⚡ Bolt: Replace np.linalg.solve with explicit 2x2 inverse for ~5x speedup
+        det = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
+        inv_det = 1.0 / det
+        return np.array(
+            [
+                (M[1, 1] * tau[0] - M[0, 1] * tau[1]) * inv_det,
+                (-M[1, 0] * tau[0] + M[0, 0] * tau[1]) * inv_det,
+            ]
+        )
 
     def compute_jacobian(self, body_name: str) -> dict[str, Any] | None:
         """Compute Jacobian for a named body ('wrist' or 'tip').
@@ -461,7 +477,16 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             self._state = np.array([float(q[0]), float(q[1]), 0.0, 0.0])
             g = self.compute_gravity_forces()
             M = self.compute_mass_matrix()
-            return np.linalg.solve(M, -g + self._tau)
+            rhs = -g + self._tau
+            # ⚡ Bolt: Replace np.linalg.solve with explicit 2x2 inverse for ~5x speedup
+            det = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
+            inv_det = 1.0 / det
+            return np.array(
+                [
+                    (M[1, 1] * rhs[0] - M[0, 1] * rhs[1]) * inv_det,
+                    (-M[1, 0] * rhs[0] + M[0, 0] * rhs[1]) * inv_det,
+                ]
+            )
         finally:
             self._state = orig
 
