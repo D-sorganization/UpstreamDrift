@@ -375,4 +375,4 @@ If the simulation becomes unstable:
 
 - [Tutorial 3: Engine Comparison](03_engine_comparison.md) - Run the same simulation across multiple engines
 - [Tutorial 4: Video Analysis](04_video_analysis.md) - Extract poses from video and map to simulation
-- [API Reference](../../api/physics_engine.md) - Complete PhysicsEngine interface documentation
+- [Engine APIs](../../api/engines.md) - Per-engine implementation entry points

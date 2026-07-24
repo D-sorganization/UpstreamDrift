@@ -212,5 +212,5 @@ export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 ## See Also
 
 - [Main README](../README.md)
-- [Docker Setup](deployment/docker.md)
-- [API Documentation](api/README.md)
+- [Docker Setup](DOCKER_SETUP.md)
+- [API Documentation](../api/README.md)

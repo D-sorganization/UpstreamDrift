@@ -108,6 +108,6 @@ Focus areas:
 
 ## References
 
-- [TEST_AUDIT_REPORT.md](../TEST_AUDIT_REPORT.md)
+- [TEST_AUDIT_REPORT.md](../development/TEST_AUDIT_REPORT.md)
 - pyproject.toml `[tool.pytest.ini_options]`
 - pyproject.toml `[tool.coverage.*]`

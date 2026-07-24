@@ -31,7 +31,7 @@ launcher window.
 In the launcher, find the **Pose Studio** tile. Right-click it and
 pick **Launch in Tab**. The studio appears in the central tab area.
 
-![Pose Studio open in a tab](../../images/launcher/pose_studio_tab.png)
+> **Screenshot pending:** Pose Studio open in a tab — capture to `../../images/launcher/pose_studio_tab.png` and restore the image here.
 
 > _Screenshot placeholder — populate after first successful build._
 
@@ -43,7 +43,7 @@ Right-click and pick **Launch in Dock**. A dock panel appears on the
 side; the demo widget says "Last update: (waiting…)" until the first
 pose arrives.
 
-![Pose Subscriber demo docked beside Pose Studio](../../images/launcher/pose_subscriber_dock.png)
+> **Screenshot pending:** Pose Subscriber demo docked beside Pose Studio — capture to `../../images/launcher/pose_subscriber_dock.png` and restore the image here.
 
 > _Screenshot placeholder — populate after first successful build._
 

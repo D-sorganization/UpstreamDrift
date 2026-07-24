@@ -16,7 +16,7 @@ The E2E pipeline consists of:
 
 To run the E2E tests, you need:
 
-- **Test Data**: Download the `golf_test_data.zip` (see [Data Setup](../development/data_setup.md)).
+- **Test Data**: Download the `golf_test_data.zip` (see [Getting Started](../user_guide/getting_started.md)).
 - **Physics Engine**: At least one engine (MuJoCo recommended) installed.
 - **Assets**: URDF models in `shared/models/`.
 
