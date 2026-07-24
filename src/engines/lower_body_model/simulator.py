@@ -676,7 +676,9 @@ class LowerBodySimulator:
             l_err = l_target - self.data.site_xpos[l_foot_id]
             err = np.concatenate((r_err, l_err))
 
-            if np.linalg.norm(err) < tol:
+            if (
+                math.sqrt(np.dot(err, err)) < tol
+            ):  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
                 # Success: lock the new configuration as the stability target.
                 self.qpos_target = self.data.qpos.copy()
                 return True
