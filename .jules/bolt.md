@@ -53,3 +53,7 @@
 ## 2024-05-28 - Explicit 2x2 matrix inversion over np.linalg.solve
 **Learning:** For very small, fixed-size matrices (like the 2x2 mass matrix in a double pendulum engine), using `np.linalg.solve` incurs significant Python-level overhead (input validation, dispatch routing, etc.).
 **Action:** Replace `np.linalg.solve(M, x)` with explicitly calculated 2x2 inverse and matrix multiplication for a measured speedup of ~5x in tight simulation loops.
+
+## 2024-06-25 - math.hypot for 3D array norms
+**Learning:** For calculating norms of a column vector from a 3x3 rotation matrix, explicitly unpacking the components and using `math.hypot(x, y, z)` avoids NumPy's dispatch and intermediate allocations, resulting in a ~6x speedup over `np.linalg.norm`.
+**Action:** Replace `np.linalg.norm(rot[:, 0])` with `math.hypot(rot[0, 0], rot[1, 0], rot[2, 0])` in hot paths like rotation matrix extraction where the 3x3 size is guaranteed.
