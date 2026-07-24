@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import tempfile
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # noqa: S314
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
