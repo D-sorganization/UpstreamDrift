@@ -268,10 +268,34 @@ def test_process_console(launcher) -> None:
     assert "test message" in launcher._console_text.toPlainText()
 
 
-@patch("src.launchers.launcher_ui_setup.QTimer.singleShot")
-def test_on_process_output(mock_timer, launcher) -> None:
-    launcher._on_process_output("engine", "test")
-    mock_timer.assert_called_once()
+def test_on_process_output_uses_queued_relay(launcher) -> None:
+    """#8003: output is handed off via a queued signal, not QTimer.singleShot.
+
+    ``QTimer.singleShot`` schedules onto the *calling* thread's event loop;
+    ProcessManager's stdout readers are plain ``threading.Thread`` workers with
+    no event loop, so the console never received anything.
+    """
+    from PyQt6.QtCore import QCoreApplication
+    from PyQt6.QtWidgets import QTabWidget
+
+    from src.launchers.launcher_ui_setup import ProcessOutputRelay
+
+    tabs = QTabWidget()
+    tabs.detached_tabs = {}
+    launcher.workspace_tabs = tabs
+    launcher._action_console = MagicMock()
+    launcher.btn_console = MagicMock()
+    launcher._setup_process_console()
+
+    relay = launcher.manager._ensure_console_relay()
+    assert isinstance(relay, ProcessOutputRelay)
+
+    launcher._on_process_output("engine", "queued message")
+    # Nothing is delivered synchronously — the connection is queued.
+    assert "queued message" not in launcher._console_text.toPlainText()
+
+    QCoreApplication.processEvents()
+    assert "queued message" in launcher._console_text.toPlainText()
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", False)
