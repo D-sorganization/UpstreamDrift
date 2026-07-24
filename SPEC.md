@@ -2292,6 +2292,9 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
 
+### 2026-07-25
+- **Performance:** Replaced `np.mean(x**2)` with `np.vdot(x, x) / x.size` and `np.mean(x**2, axis=0)` with `np.einsum('ij,ij->j', x, x) / x.shape[0]` in ML validation and torque smoothing scripts to avoid intermediate array allocations during RMSE calculations.
+
 ### 2026-07-15
 
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
