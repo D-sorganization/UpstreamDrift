@@ -38,7 +38,7 @@ conda activate upstream-drift
 ### Verify Installation
 
 \`\`\`bash
-python scripts/verify_installation.py
+python scripts/ci/verify_installation.py
 \`\`\`
 
 Expected output:
