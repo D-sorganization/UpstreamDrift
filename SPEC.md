@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.466                                            |
-| **Last Spec Update**    | 2026-06-21                                         |
+| **Spec Version**        | 1.0.467                                            |
+| **Last Spec Update**    | 2026-07-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -71,7 +71,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
-- **2026-06-21** - Hardened the simulation WebSocket and Data Explorer API
+- **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
   non-positive speed factors and shares duration/timestep bounds with
   `SimulationRequest`, simulation stats access is centralized behind one
@@ -1861,6 +1861,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
+| 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-06-20 | 1.0.465 | Added isolated transition hazard-rule coverage for issue #7715. The MDP transition tests now pin hazard penalties and DbC guard behavior directly so policy updates cannot bypass invalid-state validation. |
 | 2026-06-20 | 1.0.465 | Hoisted OpenSim Manager/Integrator construction out of the perturbation per-step loop for issue #7713, preserving analyzer behavior while avoiding repeated runtime setup on every simulated step. |
@@ -1886,6 +1888,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-18 | 1.0.446 | Optimized allocation hot paths for issue #7559. `MuJoCoPerturbationAnalyzer._simulate()` now builds a padded descending-power coefficient matrix once, evaluates every actuator each step with a vectorized Horner pass into a preallocated control buffer, and preserves per-actuator `np.polyval(coeffs[j][::-1], t)` parity for ragged, empty, and over-count coefficient lists. `PolynomialProfile` now caches its `np.poly1d` polynomial and derivative once, and the triple-pendulum hardcoded dynamics helpers accept packed theta/omega/parameter tuples instead of 16-19 scalar arguments. Focused MuJoCo and pendulum unit coverage locks parity. |
 | 2026-06-18 | 1.0.445 | Gated Windows Tauri release packaging behind `TAURI_WINDOWS_RELEASE_ENABLED=true` because the current self-hosted Windows runner blocks Cargo build-script executables with Application Control (`os error 4551`). Linux Tauri release packaging and the Tauri Rust/TypeScript check remain enforced, and `tests/ci/test_ci_infrastructure.py` now pins the repo-variable opt-in plus diagnostic notice contract. |
 | 2026-06-18 | 1.0.444 | Restored the final Tauri Build release contract for issue #7652. `ui/src-tauri/Cargo.lock` now resolves Rust `tauri` to the same locked major/minor as `@tauri-apps/api`, `.github/workflows/tauri-build.yml` installs `libdbus-1-dev` for the updated Linux Rust graph, and `tests/ci/test_ci_infrastructure.py` now parses lockfiles/workflow metadata to fail fast when a future dependency update would make `tauri-action` reject release builds for Rust/npm Tauri minor drift or miss required native Linux headers. |
+| 2026-07-19 | 1.0.444 | Bolt performance optimization (#7099). `src/unreal_integration/skeleton_mapper.py` now uses `math.hypot` instead of `np.linalg.norm` to avoid dispatch and intermediate allocations, resulting in a ~6x speedup. |
 | 2026-06-18 | 1.0.443 | Restored the main-side Tauri Build release lane for issue #7652. `ui/package.json` now exposes the `tauri` script entrypoint required by `tauri-action`'s default `npm run tauri build` invocation, and `.github/workflows/tauri-build.yml` now separates build matrix runner labels from artifact names while using a PowerShell `rustup` setup path for the Windows self-hosted leg to avoid the bash path failure seen in run `27732025577`. |
 | 2026-06-18 | 1.0.442 | Restored the Nightly Cross-Engine Validation workflow for issue #7646. The scheduled job now runs `tests/integration/test_cross_engine_validation.py`, `tests/unit/test_cross_engine_validator.py`, and `tests/integration/cross_engine/test_conformance_harness.py` against `src.shared.python.engine_core.cross_engine_validator`, preserving the 75% coverage threshold with real validator/conformance tests and marking zero collected tests as a failure in the summary output. |
 | 2026-06-18 | 1.0.441 | Restored current-main CI Standard after #7645. Strict API mypy now mirrors the baseline mypy push contract by checking only changed `src/api` Python files when `github.event.before` is available while preserving full strict API audits for scheduled/manual runs. The benchmark regression helper now keeps the 5x multiplier but applies a 10 microsecond absolute threshold floor for tiny hot paths, preventing sub-microsecond runner jitter from failing the 3.11 performance lane. |
@@ -2289,9 +2292,15 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
 
-### 2026-06-21
+### 2026-07-15
 
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
+- Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
+- Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+### 2026-06-23
+
+- **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.

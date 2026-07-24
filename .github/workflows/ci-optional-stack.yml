@@ -137,7 +137,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: ${{ matrix.python }}
 
@@ -147,7 +147,7 @@ jobs:
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Cache pip wheels
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pip
           key: pip-optstack-${{ runner.os }}-py${{ matrix.python }}-${{ hashFiles('pyproject.toml', 'requirements*.txt') }}

@@ -98,6 +98,21 @@ class TestAddSecurityHeaders:
             result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
         )
 
+    async def test_adds_content_security_policy(
+        self, mock_request, mock_response
+    ) -> None:
+        """Test adding Content-Security-Policy header."""
+        from src.api.middleware.security_headers import add_security_headers
+
+        async def call_next(request: MagicMock) -> MagicMock:
+            return mock_response
+
+        result = await add_security_headers(mock_request, call_next)
+        assert (
+            result.headers.get("Content-Security-Policy")
+            == "default-src 'self' 'unsafe-inline' cdn.jsdelivr.net fastly.jsdelivr.net"
+        )
+
     async def test_adds_hsts_for_https(self, mock_request, mock_response) -> None:
         """Test adding HSTS header for HTTPS requests."""
         from src.api.middleware.security_headers import add_security_headers
@@ -151,6 +166,10 @@ class TestAddSecurityHeadersToResponse:
         assert result.headers.get("X-XSS-Protection") == "1; mode=block"
         assert (
             result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        )
+        assert (
+            result.headers.get("Content-Security-Policy")
+            == "default-src 'self' 'unsafe-inline' cdn.jsdelivr.net fastly.jsdelivr.net"
         )
 
 
