@@ -546,7 +546,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
-    "parity: cross-implementation parity and contract checks that should stay targetable as a CI lane",
+    "parity: cross-implementation parity and contract checks (engine-vs-engine and Python-vs-Rust equivalence); run in a dedicated parity CI lane",
     "e2e: full-stack smoke tests; nightly + release gate only",
     "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
@@ -578,7 +578,6 @@ markers = [
     "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
     "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
     "scientific: marks tests that verify numerical accuracy of physics/biomechanics computations against known reference data",
-    "parity: marks engine-vs-engine and Python-vs-Rust equivalence tests; run in a dedicated parity CI job",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)
