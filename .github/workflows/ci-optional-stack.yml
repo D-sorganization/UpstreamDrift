@@ -83,6 +83,12 @@ jobs:
               rm -rf .git
             fi
           fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 30
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Reject Raw Merge Conflict Markers
         run: |
