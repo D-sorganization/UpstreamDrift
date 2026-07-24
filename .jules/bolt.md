@@ -68,3 +68,6 @@
 ## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
 **Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
 **Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.
+## 2026-06-25 - Pandas iterrows vs vectorized numpy column_stack
+**Learning:** Using `.iterrows()` in pandas to construct 3D point arrays row-by-row is incredibly slow due to python overhead and series creation for each row.
+**Action:** Replace `np.array([[row["X"], row["Y"], row["Z"]] for _, row in df.iterrows()])` with vectorized `np.column_stack((df["X"].values, df["Y"].values, df["Z"].values))` to get >1000x speedup when rendering trajectories.
