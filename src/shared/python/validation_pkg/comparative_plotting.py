@@ -5,11 +5,17 @@ Visualizes the differences between two swings using overlays and difference plot
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+
+if TYPE_CHECKING:
+    # matplotlib is only referenced in annotations here, and `from __future__
+    # import annotations` above keeps those unevaluated. Importing it eagerly
+    # dragged the whole plotting stack into `import src.api.local_server` via
+    # validation_pkg/__init__.py, breaking core (no-extras) installs (#8032).
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 from src.shared.python.validation_pkg.comparative_analysis import (
     ComparativeSwingAnalyzer,
