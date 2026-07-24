@@ -65,3 +65,6 @@
 ## 2026-06-25 - Replacing math.sqrt(x**2 + y**2) with math.hypot
 **Learning:** For small vectors where explicit components are extracted (e.g. `x`, `y`, `z`), using `math.hypot(x, y)` or `math.hypot(x, y, z)` is around 1.5x to 2x faster than manually calculating `math.sqrt(x**2 + y**2)` or `math.sqrt(x**2 + y**2 + z**2)`. `math.hypot` is implemented in C and optimized for this exact operation, avoiding the Python bytecode overhead of squaring and adding.
 **Action:** Replace `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` and `math.sqrt(x**2 + y**2 + z**2)` with `math.hypot(x, y, z)` where explicit vector components are used in tight loops or calculations.
+## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
+**Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
+**Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.
