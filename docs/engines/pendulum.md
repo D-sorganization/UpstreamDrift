@@ -12,4 +12,4 @@ Simplified pendulum models (Double Pendulum) used for teaching the fundamental p
 
 ## Usage
 
-Located in `engines/pendulum_models/`.
+Located in `src/engines/pendulum_models/`.
