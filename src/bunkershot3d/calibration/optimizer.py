@@ -9,6 +9,17 @@ from typing import Any
 class CalibrationOptimizer:
     """Optimizes backend contact model parameters to match macroscopic targets."""
 
+    #: Physically admissible ranges for (friction, restitution).
+    #: ``optimize()`` hands these to the solver, which is the ONLY place the
+    #: range is enforced. ``_objective`` deliberately does NOT clip: issue #6644
+    #: F5 removed an internal clip because it created flat plateaus that stalled
+    #: ``differential_evolution`` and let ``res.x`` sit outside the physical
+    #: range while being silently re-clipped. See #8038.
+    BOUNDS: tuple[tuple[float, float], tuple[float, float]] = (
+        (0.01, 1.0),
+        (0.01, 1.0),
+    )
+
     def __init__(self, experiment: "Any") -> None:  # type: ignore
         """
         Initialize with an experiment instance.
@@ -19,12 +30,32 @@ class CalibrationOptimizer:
         self.experiment = experiment
 
     def _objective(self, x: np.ndarray) -> float:
-        """Objective function to minimize."""
-        friction, restitution = x[0], x[1]
+        """Objective function to minimize.
+
+        Preconditions:
+            - ``x`` provides at least two parameters (friction, restitution).
+
+        Postconditions:
+            - Parameters are forwarded to the experiment UNMODIFIED.
+
+        The range is enforced by the ``bounds`` argument in :meth:`optimize`,
+        not here. Clipping inside the objective was removed by #6644 F5: it is
+        invisible to ``differential_evolution``, so it creates flat plateaus
+        that stall the search and lets the returned ``res.x`` sit outside the
+        physical range. Callers invoking ``_objective`` directly are responsible
+        for supplying values within :attr:`BOUNDS`.
+        """
+        if x is None or len(x) < 2:
+            raise ValueError(
+                "x must provide two parameters (friction, restitution), "
+                f"got {0 if x is None else len(x)}"
+            )
+        friction = float(x[0])
+        restitution = float(x[1])
 
         params = {
-            "friction_coefficient": float(friction),
-            "restitution_coefficient": float(restitution),
+            "friction_coefficient": friction,
+            "restitution_coefficient": restitution,
         }
 
         # This handles both AngleOfRepose (returns float) and DrainedShearCell (returns tuple)
@@ -45,7 +76,7 @@ class CalibrationOptimizer:
     def optimize(self) -> dict[str, float]:
         from scipy.optimize import differential_evolution
 
-        bounds = [(0.01, 1.0), (0.01, 1.0)]
+        bounds = [tuple(bound) for bound in self.BOUNDS]
 
         # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
         res = differential_evolution(
