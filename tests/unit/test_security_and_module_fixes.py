@@ -11,6 +11,7 @@ Covers issues:
 from __future__ import annotations
 
 import importlib
+import os
 import types
 from unittest.mock import patch
 
@@ -62,11 +63,50 @@ class TestSecretKeyFallback:
         importlib.reload(sec_mod)
 
     def test_production_env_without_secret_key_raises_runtime_error(self) -> None:
-        """In production env, missing SECRET_KEY must raise RuntimeError."""
-        # We cannot reload the module in the same process without risk,
-        # so we test the logic directly: the module raises RuntimeError on import
-        # when ENVIRONMENT=production and no key is set.
-        # Covered by test_production_missing_key_logic below.
+        """In production env, missing SECRET_KEY must raise RuntimeError.
+
+        This test had an empty body and could not fail (#8035); the comment
+        claimed a reload was unsafe, but the sibling
+        `test_secret_key_env_var_is_used_when_set` already reloads this exact
+        module. It now actually exercises the module-level guard in
+        `src/api/auth/security.py` and restores the module afterwards.
+        """
+        from src.api.auth import security as sec_mod
+
+        env_without_keys = {
+            key: value
+            for key, value in os.environ.items()
+            if key not in {"GOLF_API_SECRET_KEY", "SECRET_KEY"}
+        }
+        env_without_keys["ENVIRONMENT"] = "production"
+
+        try:
+            with (
+                patch.dict("os.environ", env_without_keys, clear=True),
+                pytest.raises(RuntimeError, match="SECRET_KEY is not configured"),
+            ):
+                importlib.reload(sec_mod)
+        finally:
+            # Leave the module in a usable state for the rest of the session.
+            importlib.reload(sec_mod)
+
+    def test_production_env_with_short_secret_key_raises_runtime_error(self) -> None:
+        """Production also rejects a key shorter than 32 characters."""
+        from src.api.auth import security as sec_mod
+
+        env = dict(os.environ)
+        env.pop("SECRET_KEY", None)
+        env["ENVIRONMENT"] = "production"
+        env["GOLF_API_SECRET_KEY"] = "too-short"
+
+        try:
+            with (
+                patch.dict("os.environ", env, clear=True),
+                pytest.raises(RuntimeError, match="at least 32 characters"),
+            ):
+                importlib.reload(sec_mod)
+        finally:
+            importlib.reload(sec_mod)
 
     def test_production_missing_key_logic(self) -> None:
         """Validate production-safety logic directly without reloading the module."""
