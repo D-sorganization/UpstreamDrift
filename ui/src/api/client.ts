@@ -1,7 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { getApiBase } from './backend';
 import { apiFetch } from './fetch';
-import { withLauncherWebSocketToken } from './websocketToken';
+import {
+  ensureLauncherCapabilityToken,
+  getLauncherCapabilityToken,
+  withLauncherWebSocketToken,
+} from './websocketToken';
 import { logger } from '../utils/logger';
 import type { EngineListResponse, EngineStatusResponse } from './generated/types';
 
@@ -81,6 +85,24 @@ export function useSimulation(engineType: string) {
   const wsRef = useRef<WebSocket | null>(null);
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  // #8077: guards the one-shot re-handshake after a launcher-guard rejection.
+  const guardRetryUsedRef = useRef(false);
+  // Latest connect() config, so the retry can replay the same run.
+  const lastConfigRef = useRef<SimulationConfig>({});
+  // Stable indirection so onclose can call connect() without a cyclic dep.
+  const connectRef = useRef<(config?: SimulationConfig) => void>(() => {});
+
+  // #8077: the backend's local-mode guard (`enforce_local_websocket_guard`)
+  // closes the socket with 1008 unless the launcher capability token issued by
+  // /api/launcher/manifest is supplied. That token used to be populated only as
+  // a side effect of the Dashboard's `useLauncherManifest` hook, so opening
+  // /simulation directly — or arriving there after a failed manifest fetch —
+  // meant Start reported "Connection lost — restart required" immediately.
+  // Prefetching at mount removes the ordering dependency; the 1008 retry in
+  // onclose below closes the remaining race.
+  useEffect(() => {
+    void ensureLauncherCapabilityToken();
+  }, []);
 
   const connect = useCallback((config: SimulationConfig = {}) => {
     // Unmount guard at function entry (issue #7166): a connect() raced with
@@ -95,6 +117,7 @@ export function useSimulation(engineType: string) {
     }
 
     setConnectionStatus('connecting');
+    lastConfigRef.current = config;
 
     // Build WS URL: use the API base to handle Tauri vs. browser mode (issue #6637)
     const apiBase = getApiBase();
@@ -109,10 +132,16 @@ export function useSimulation(engineType: string) {
       wsUrl = `${protocol}//${host}/api/ws/simulate/${engineType}`;
     }
 
+    // Recorded before the socket opens so onclose can distinguish "the guard
+    // rejected us because we had no token" from a genuine transport failure.
+    const hadTokenAtConnect = getLauncherCapabilityToken() !== null;
+    let handshakeCompleted = false;
+
     const ws = new WebSocket(withLauncherWebSocketToken(wsUrl));
     wsRef.current = ws;
 
     ws.onopen = () => {
+      handshakeCompleted = true;
       if (!isMountedRef.current) return;
 
       setConnectionStatus('connected');
@@ -172,6 +201,18 @@ export function useSimulation(engineType: string) {
       }
     };
 
+    // Terminal failure state, shared by the unclean-drop path and by a
+    // launcher-guard retry that could not obtain a token. Never leaves the UI
+    // sitting on 'connecting' — an indefinite spinner is its own defect.
+    const markConnectionLost = (reason: string) => {
+      if (!isMountedRef.current) return;
+      logger.warn(reason);
+      setConnectionStatus('lost');
+      setWsError(
+        'Connection lost — the simulation cannot resume. Restart to run again.',
+      );
+    };
+
     ws.onclose = (event) => {
       if (!isMountedRef.current) return;
 
@@ -180,6 +221,37 @@ export function useSimulation(engineType: string) {
       // Clean close (code 1000) or user-initiated stop — nothing to recover.
       if (event.wasClean || event.code === 1000) {
         setConnectionStatus('disconnected');
+        return;
+      }
+
+      // #8077: the socket died before the handshake ever completed, and we had
+      // no launcher capability token to offer. That is exactly what the
+      // backend's local guard does — it rejects the upgrade (the browser
+      // surfaces this as a failed handshake, not a 1008 close frame), so there
+      // is nothing to "reconnect" to and no run in progress.
+      //
+      // This does NOT weaken the #6896 guarantee below: `handshakeCompleted`
+      // is false, so onopen never ran, so no frames were ever received and
+      // none can be discarded. Retry is one-shot and only when a token
+      // actually arrives, so a genuinely unreachable server still falls
+      // through to the 'lost' state rather than looping.
+      if (!handshakeCompleted && !hadTokenAtConnect && !guardRetryUsedRef.current) {
+        guardRetryUsedRef.current = true;
+        void ensureLauncherCapabilityToken().then((token) => {
+          if (!isMountedRef.current) return;
+          if (!token) {
+            markConnectionLost(
+              'WebSocket handshake failed and no launcher capability token ' +
+                'could be obtained from /api/launcher/manifest.',
+            );
+            return;
+          }
+          logger.warn(
+            'WebSocket handshake was rejected without a launcher capability ' +
+              'token; retrying once with the token from /api/launcher/manifest.',
+          );
+          connectRef.current(lastConfigRef.current);
+        });
         return;
       }
 
@@ -196,18 +268,21 @@ export function useSimulation(engineType: string) {
       // last frame's time, mark the connection 'lost', and require an explicit
       // user restart (calling start()) to begin a new run. This guarantees we
       // never reset frames/time without user action.
-      logger.warn(
+      markConnectionLost(
         'WebSocket closed unexpectedly. Connection lost — an explicit restart ' +
           'is required (the simulation cannot resume from where it stopped).',
-      );
-      setConnectionStatus('lost');
-      setWsError(
-        'Connection lost — the simulation cannot resume. Restart to run again.',
       );
     };
   }, [engineType]);
 
+  // Keep the indirection used by the #8077 retry pointed at the live callback.
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
+
   const start = useCallback((config: SimulationConfig = {}) => {
+    // A new user-initiated run gets a fresh retry budget.
+    guardRetryUsedRef.current = false;
     // Explicit user restart: open a fresh connection. onopen clears the
     // timeline, which is the only place frames are reset (#6896).
     connect(config);
