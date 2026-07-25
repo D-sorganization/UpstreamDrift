@@ -484,11 +484,21 @@ describe('useSimulation hook', () => {
         await Promise.resolve();
       });
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/simulation/speed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ speed_factor: 2.5 }),
-      });
+      // `signal` is asserted separately: every apiFetch call now carries a
+      // timeout AbortSignal (#8080), and an exact-object match on the init
+      // would couple this test to that unrelated detail.
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/simulation/speed',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ speed_factor: 2.5 }),
+        }),
+      );
+      const speedCall = vi
+        .mocked(global.fetch)
+        .mock.calls.find(([url]) => url === '/api/simulation/speed');
+      expect((speedCall?.[1] as RequestInit).signal).toBeInstanceOf(AbortSignal);
       expect(ws.sentMessages).toHaveLength(1);
       expect(JSON.parse(ws.sentMessages[0]).action).toBe('start');
     });
