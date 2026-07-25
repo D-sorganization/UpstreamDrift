@@ -211,6 +211,12 @@ class MediaPipeGUI(QMainWindow):
     def run_analysis(self) -> None:
         """Start the MediaPipe analysis in a background thread."""
         if not self._video_path:
+            message = "Select a video file before running MediaPipe analysis."
+            self.progress.setValue(0)
+            self.log(f"ERROR: {message}")
+            self.btn_run.setEnabled(True)
+            self.btn_load.setEnabled(True)
+            QMessageBox.warning(self, "Video Required", message)
             return
 
         self.btn_run.setEnabled(False)

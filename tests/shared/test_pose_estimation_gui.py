@@ -164,6 +164,30 @@ class TestMediaPipeGUIProperties:
         assert "Mocking the process for now" not in source
         assert "update_progress" not in source  # Old mock method removed
 
+    def test_run_analysis_without_video_warns_and_recovers(self, qapp) -> None:  # noqa: ARG002
+        """Run Analysis must explain a missing video instead of doing nothing."""
+        from PyQt6.QtWidgets import QMessageBox
+
+        from src.shared.python.pose_estimation.mediapipe_gui import MediaPipeGUI
+
+        gui = MediaPipeGUI()
+        gui.btn_run.setEnabled(True)
+
+        try:
+            with patch.object(QMessageBox, "warning") as mock_warning:
+                gui.run_analysis()
+
+            mock_warning.assert_called_once()
+            assert gui.progress.value() == 0
+            assert gui.btn_run.isEnabled()
+            assert gui.btn_load.isEnabled()
+            assert (
+                "Select a video file before running MediaPipe analysis."
+                in gui.log_area.toPlainText()
+            )
+        finally:
+            gui.close()
+
 
 class TestOpenPoseGUIProperties:
     """Tests for OpenPose GUI class properties."""

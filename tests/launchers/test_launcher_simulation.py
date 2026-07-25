@@ -585,7 +585,19 @@ def test_launch_matlab_app(mock_popen, launcher) -> None:
     mock_popen.side_effect = FileNotFoundError("test")
     launcher._launch_matlab_app(model)
     launcher.show_toast.assert_called_with(
-        "MATLAB executable not found in PATH.", "error"
+        "MATLAB executable not found in PATH. Install MATLAB/Simulink or add matlab to PATH.",
+        "error",
+    )
+
+    from src.shared.python.security.secure_subprocess import SecureSubprocessError
+
+    mock_popen.side_effect = SecureSubprocessError(
+        "Subprocess launch failed: [WinError 2] The system cannot find the file specified: 'matlab'"
+    )
+    launcher._launch_matlab_app(model)
+    launcher.show_toast.assert_called_with(
+        "MATLAB executable not found in PATH. Install MATLAB/Simulink or add matlab to PATH.",
+        "error",
     )
 
 

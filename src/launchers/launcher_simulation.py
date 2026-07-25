@@ -33,7 +33,10 @@ from src.launchers.launcher_model_sources import (
 )
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.secure_subprocess import secure_popen
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
 from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
@@ -1101,8 +1104,15 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.running_processes[app.id] = process
             self.show_toast(f"{app.name} launch initiated.", "success")
 
-        except FileNotFoundError:
-            self.show_toast("MATLAB executable not found in PATH.", "error")
+        except (FileNotFoundError, SecureSubprocessError) as e:
+            if isinstance(e, SecureSubprocessError) and "matlab" not in str(e).lower():
+                logger.error("Failed to launch MATLAB app: %s", e)
+                self.show_toast(f"Launch failed: {e}", "error")
+                return
+            self.show_toast(
+                "MATLAB executable not found in PATH. Install MATLAB/Simulink or add matlab to PATH.",
+                "error",
+            )
         except (PermissionError, OSError) as e:
             logger.error(f"Failed to launch MATLAB app: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
