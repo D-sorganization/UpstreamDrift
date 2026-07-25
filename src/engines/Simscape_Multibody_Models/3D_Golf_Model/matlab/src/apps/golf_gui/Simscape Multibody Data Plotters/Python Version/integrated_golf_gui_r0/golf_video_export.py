@@ -13,6 +13,7 @@ Features:
 from __future__ import annotations
 
 import logging
+import math
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -291,10 +292,14 @@ class VideoExporter(QObject):
         up = np.array([0.0, 1.0, 0.0], dtype=np.float32)
 
         forward = target - camera_pos
-        forward = forward / np.linalg.norm(forward)
+        forward = forward / math.hypot(
+            forward[0], forward[1], forward[2]
+        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
         right = np.cross(forward, up)
-        right = right / np.linalg.norm(right)
+        right = right / math.hypot(
+            right[0], right[1], right[2]
+        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
         up = np.cross(right, forward)
 

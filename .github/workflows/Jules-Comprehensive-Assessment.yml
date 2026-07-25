@@ -73,7 +73,7 @@ jobs:
             echo "Running directly on host. Sharing tool cache."
           fi
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -160,7 +160,7 @@ jobs:
       # Commit Data for Agent Context
       # ---------------------------------------------------------
       - name: Commit Assessment Data
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
           commit_message: "docs(assessment): pre-assessment data collection"
           branch: "automation/assessment-${{ steps.date.outputs.date }}"

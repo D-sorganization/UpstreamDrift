@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+import math
+
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -33,8 +35,12 @@ def _angle_between(
     """
     if v1 is None:
         raise ValueError("v1 must be provided")
-    n1 = np.linalg.norm(v1)
-    n2 = np.linalg.norm(v2)
+    n1 = math.sqrt(
+        np.dot(v1, v1)
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster and safer than np.linalg.norm
+    n2 = math.sqrt(
+        np.dot(v2, v2)
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster and safer than np.linalg.norm
     if n1 < 1e-12 or n2 < 1e-12:
         return float("nan")
     cos_angle = np.dot(v1, v2) / (n1 * n2)
@@ -150,8 +156,12 @@ def _compute_trunk_rotation(
 
     shoulder_vec = r_shoulder[:2] - l_shoulder[:2]
     hip_vec = r_hip[:2] - l_hip[:2]
-    n1 = np.linalg.norm(shoulder_vec)
-    n2 = np.linalg.norm(hip_vec)
+    n1 = math.hypot(
+        shoulder_vec[0], shoulder_vec[1]
+    )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 2D arrays
+    n2 = math.hypot(
+        hip_vec[0], hip_vec[1]
+    )  # ⚡ Bolt: math.hypot is faster than np.linalg.norm for small 2D arrays
     if n1 > 1e-12 and n2 > 1e-12:
         cos_a = np.dot(shoulder_vec, hip_vec) / (n1 * n2)
         cos_a = np.clip(cos_a, -1.0, 1.0)

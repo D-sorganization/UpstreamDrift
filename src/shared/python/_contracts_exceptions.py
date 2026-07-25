@@ -11,7 +11,17 @@ logger = logging.getLogger(__name__)
 
 
 class ContractViolationError(AssertionError, ValueError):
-    """Base exception for contract violations."""
+    """Base exception for contract violations.
+
+    The constructor validates its own arguments: a contract violation reported
+    without a condition type or message is not diagnosable, and silently
+    accepting ``None`` produces misleading detail strings such as
+    ``"[DbC None] None"``. Subclasses supply ``condition_type`` themselves and
+    forward ``message``, so both checks live here.
+
+    Raises:
+        ValueError: If ``condition_type`` or ``message`` is missing or blank.
+    """
 
     def __init__(
         self,
@@ -19,6 +29,15 @@ class ContractViolationError(AssertionError, ValueError):
         message: str,
         value=None,
     ) -> None:
+        if not isinstance(condition_type, str) or not condition_type.strip():
+            raise ValueError(
+                "condition_type must be provided as a non-empty string "
+                f"(got: {condition_type!r})"
+            )
+        if not isinstance(message, str) or not message.strip():
+            raise ValueError(
+                f"message must be provided as a non-empty string (got: {message!r})"
+            )
         self.condition_type = condition_type
         self.message = message
         self.value = value
@@ -77,7 +96,14 @@ def _handle_violation(
 ) -> None:
     level = _ContractState.level
     if level == ContractLevel.ENFORCE:
-        exc_cls = _VIOLATION_CLASSES.get(condition_type, ContractViolationError)
+        exc_cls = _VIOLATION_CLASSES.get(condition_type)
+        if exc_cls is None:
+            # Unknown condition type: fall back to the base class. It takes
+            # condition_type as its first argument, unlike the subclasses, so
+            # it must be constructed explicitly — passing (message, value)
+            # here would bind message to condition_type and silently drop the
+            # message entirely.
+            raise ContractViolationError(condition_type, message, value)
         raise exc_cls(message, value)
     if level == ContractLevel.WARN:
         detail = f"[DbC {condition_type}] {message}"
