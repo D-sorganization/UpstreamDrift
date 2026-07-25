@@ -20,6 +20,8 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
+from src.launchers.launcher_package_mains import resolve_package_main_module
+from src.launchers.launcher_provider_asset_handler import ProviderModelAssetHandler
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -260,6 +262,24 @@ class SpecialAppHandler:
             logger.warning("SpecialAppHandler: script not found: %s", script_path)
             return False
 
+        # A package entry point must be run as ``python -m pkg`` so its relative
+        # imports resolve; running it as a bare script exits instantly (#8065,
+        # #8069, #8086).
+        module_name = resolve_package_main_module(script_path, repo_path)
+        if module_name is not None:
+            logger.info(
+                "SpecialAppHandler: launching %s as module %s (package main)",
+                model_name,
+                module_name,
+            )
+            process = process_manager.launch_module(
+                name=model_name,
+                module_name=module_name,
+                cwd=get_model_working_directory(model, repo_path),
+                extra_python_paths=get_model_python_paths(model, repo_path),
+            )
+            return process is not None
+
         process = process_manager.launch_script(
             name=model_name,
             script_path=script_path,
@@ -319,8 +339,27 @@ class SpecialAppHandler:
         if not script_path.exists():
             return None
 
+        import importlib
         import importlib.util
         import sys
+
+        package_main = resolve_package_main_module(script_path, repo_path)
+        if package_main is not None:
+            # Importing by dotted name gives the module a real parent package,
+            # so its relative imports resolve (#8065, #8086). Failures here are
+            # reported, not swallowed at debug level, so the launcher can show
+            # an actionable message instead of silently falling through.
+            try:
+                module = importlib.import_module(f"{package_main}.__main__")
+            except Exception:
+                logger.exception(
+                    "Failed to import package main %s for dockable UI", package_main
+                )
+                return None
+            factory = getattr(module, "get_dockable_ui", None)
+            if callable(factory):
+                return factory()
+            return None
 
         original_sys_path = sys.path.copy()
         success = False
@@ -849,6 +888,9 @@ class ModelHandlerRegistry:
             SharedRepoHandler(),
             DocumentHandler(),
             ApiBackedHandler(),
+            # Provider-supplied model assets (mjcf/urdf/osim/sdformat) — must be
+            # last so a more specific application handler always wins (#8087).
+            ProviderModelAssetHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:

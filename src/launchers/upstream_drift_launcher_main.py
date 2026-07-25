@@ -37,26 +37,53 @@ def _write_crash_traceback(err_msg: str) -> None:
         pass
 
 
+def _launcher_is_alive() -> bool:
+    """Return True when a visible top-level launcher window still exists.
+
+    A live window means the user has somewhere to go back to, so a failure that
+    escaped a Qt slot can be contained instead of terminating the process.
+    """
+    app = QApplication.instance()
+    if app is None:
+        return False
+    try:
+        return any(
+            widget.isVisible() and widget.isWindow()
+            for widget in QApplication.topLevelWidgets()
+        )
+    except RuntimeError:
+        # Qt objects torn down underneath us — treat as not alive.
+        return False
+
+
 def _install_exception_hook() -> None:
     def excepthook(
         exc_type: type[BaseException],
         exc_value: BaseException,
         exc_tb: TracebackType | None,
     ) -> None:
+        from src.launchers.launcher_crash_policy import classify_crash
         from src.launchers.launcher_dialogs import CriticalErrorDialog
 
         err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
         _write_crash_traceback(err_msg)
 
-        if exc_type is not SystemExit:
+        action = classify_crash(exc_type, launcher_is_alive=_launcher_is_alive())
+        if action.quit_application:
+            logger.error("Unhandled exception, terminating launcher:\n%s", err_msg)
+        else:
+            logger.error("Contained unhandled exception:\n%s", err_msg)
+
+        if action.show_dialog:
             dialog = CriticalErrorDialog(
-                title="Application Crash",
-                message="UpstreamDrift has encountered an unexpected error and must close.",
+                title=action.title,
+                message=action.message,
                 detail_text=err_msg,
             )
             dialog.exec()
 
-        QApplication.quit()
+        if action.quit_application:
+            QApplication.quit()
 
     sys.excepthook = excepthook
 

@@ -293,9 +293,13 @@ def test_launch_simulation(launcher) -> None:
         patch.object(launcher, "_try_launch_docker", return_value=False),
         patch.object(launcher, "_check_local_dependencies", return_value=True),
         patch.object(launcher, "_execute_local_launch", side_effect=ValueError("Test")),
+        patch.object(SimulationManager, "_open_launch_failure_dialog") as mock_dialog,
     ):
         launcher.launch_simulation()
-        launcher.show_toast.assert_called_with("Launch Failed: Test", "error")
+        # The toast no longer leaks the raw exception text; the actionable
+        # explanation goes into a non-blocking dialog instead (#8066).
+        launcher.show_toast.assert_called_with("M1 could not be started", "error")
+        assert "Test" in mock_dialog.call_args.args[0]
 
 
 @patch.dict("sys.modules", {"mujoco": MagicMock(), "mujoco.viewer": MagicMock()})

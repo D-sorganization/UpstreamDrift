@@ -1,6 +1,8 @@
 """Cross-engine exercise dashboard."""
 
 import sys
+
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -10,7 +12,11 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
 from src.shared.python.biomech.exercise_registry import discover_exercise
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class ExerciseDashboard(QMainWindow):
@@ -95,9 +101,51 @@ class ExerciseDashboard(QMainWindow):
                         & ~sys.modules["PyQt6.QtCore"].Qt.WindowType.Window
                     )
                 self.layout.addWidget(self._current_widget)
-        except Exception as e:  # noqa: BLE001
-            self._current_widget = QLabel(f"Error loading {name}:\n{e}")
+        except Exception as e:  # noqa: BLE001 - one dead engine must not blank the dashboard (#8068)
+            logger.exception("Failed to load %s dashboard", name)
+            self._current_widget = self._build_unavailable_panel(name, e)
             self.layout.addWidget(self._current_widget)
+
+    def _build_unavailable_panel(self, name: str, exc: BaseException) -> QWidget:
+        """Build an actionable panel for an engine that failed to load.
+
+        Args:
+            name: Engine identifier, e.g. ``"MuJoCo_Models"``.
+            exc: The exception raised while building the engine dashboard.
+
+        Returns:
+            A widget naming what is missing, how to install it, and which
+            other engines are still selectable.
+
+        Raises:
+            ValueError: If ``name`` is empty.
+        """
+        if not name or not name.strip():
+            raise ValueError("name must be a non-empty string")
+
+        from src.launchers.launcher_failure_messages import describe_launch_failure
+
+        engine_label = name.replace("_Models", "")
+        text = describe_launch_failure(
+            exc,
+            f"The {engine_label} dashboard",
+            package_hint=engine_label.lower(),
+        )
+
+        alternatives = [engine for engine in self.engines if engine != name]
+        if alternatives:
+            readable = ", ".join(e.replace("_Models", "") for e in alternatives)
+            text += f"\n\nOther engines you can select from the toolbar: {readable}."
+
+        panel = QLabel(text)
+        panel.setWordWrap(True)
+        panel.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+            | Qt.TextInteractionFlag.TextSelectableByKeyboard
+        )
+        panel.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        panel.setContentsMargins(24, 24, 24, 24)
+        return panel
 
 
 def get_dockable_ui() -> QMainWindow:

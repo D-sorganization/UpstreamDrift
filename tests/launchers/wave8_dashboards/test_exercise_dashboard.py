@@ -236,7 +236,12 @@ class TestExerciseDashboard:
         win = ExerciseDashboard("gait")
         try:
             assert isinstance(win._current_widget, QLabel)
-            assert "Error loading Drake_Models" in win._current_widget.text()
+            # The raw "Error loading <engine>" string was replaced by an
+            # actionable panel naming the engine and the recovery path (#8068).
+            text = win._current_widget.text()
+            assert "Drake" in text
+            assert "kaboom" in text
+            assert "still running" in text
             assert "kaboom" in win._current_widget.text()
         finally:
             win.close()

@@ -61,3 +61,12 @@ __all__ = [
     "main",
     "sys",
 ]
+
+
+if __name__ == "__main__":
+    # The launcher spawns this file as a script (see
+    # LauncherSimulationMixin._launch_shot_tracer). Without this guard the
+    # child process imported the module, did nothing and exited 0, so the
+    # launcher reported "Launched shot_tracer (PID: n)" and no window ever
+    # appeared (#8069).
+    main()

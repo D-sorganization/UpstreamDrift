@@ -9,7 +9,11 @@ import typing
 
 try:
     import mujoco
-except ImportError:
+except (ImportError, OSError):
+    # A broken/incompatible MuJoCo wheel raises OSError (Windows error 1114,
+    # "DLL initialization routine failed") rather than ImportError. This module
+    # is reached from the launcher's startup import chain, so an unguarded
+    # OSError here took the whole launcher down (#8084).
     mujoco = None
 
 import numpy as np

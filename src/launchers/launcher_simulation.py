@@ -27,6 +27,7 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
+from src.launchers.launcher_failure_reporting import LaunchFailureReportingMixin
 from src.launchers.launcher_model_sources import (
     get_model_source_root,
     resolve_model_artifact_path,
@@ -194,7 +195,7 @@ class DependencyProbeThread(QThread):
         self.probe_finished.emit(self._model_id, ok, error)
 
 
-class SimulationManager:
+class SimulationManager(LaunchFailureReportingMixin):
     def __init__(self, launcher):
         self.launcher = launcher
 
@@ -546,6 +547,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
             try:
                 success = handler.launch(model, REPOS_ROOT, self.process_manager)
             except Exception as e:
+                if getattr(e, "is_user_facing_message", False):
+                    # Handler already produced an actionable explanation; let
+                    # launch_simulation surface it verbatim (#8087).
+                    raise
                 logger.error(
                     "Launch exception for %s (type=%s, path=%s, handler=%s): %s",
                     model.name,
@@ -653,11 +658,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         try:
             self._execute_local_launch(model)
-        except (ValueError, RuntimeError) as e:
-            logger.error(f"Launch failed: {e}")
-            self.show_toast(f"Launch Failed: {e}", "error")
-            self.lbl_status.setText("> Ready")
-            self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
+        except Exception as e:  # noqa: BLE001 - launch must never kill the launcher (#8066)
+            self._report_contained_launch_failure(model.name, e)
 
     @precondition(
         lambda self, path: path is not None and str(path).strip() != "",
@@ -667,8 +669,14 @@ except (RuntimeError, TypeError, AttributeError) as e:
         """Launch generic MJCF file in passive viewer."""
         if path is None:
             raise ValueError("path must be provided")
-        import mujoco
-        import mujoco.viewer
+
+        try:
+            import mujoco
+            import mujoco.viewer
+        except (ImportError, OSError) as exc:
+            # A broken MuJoCo wheel raises OSError (WinError 1114), not
+            # ImportError; both must stay contained (#8084).
+            raise RuntimeError(f"MuJoCo runtime unavailable: {exc}") from exc
 
         try:
             m = mujoco.MjModel.from_xml_path(str(path))
@@ -913,6 +921,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             if not process:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("URDF Generator launched.", "success")
+            self._watch_child_process("URDF Generator", process)
             self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
 
@@ -1026,6 +1035,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             if not process:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("C3D Viewer launched.", "success")
+            self._watch_child_process("C3D Viewer", process)
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
@@ -1054,6 +1064,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             if not process:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("Shot Tracer launched.", "success")
+            self._watch_child_process("Shot Tracer", process)
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to launch Shot Tracer: {e}")

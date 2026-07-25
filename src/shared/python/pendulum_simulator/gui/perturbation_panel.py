@@ -45,7 +45,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ..pendulum_perturbation_analyzer import PendulumPerturbationAnalyzer
-from ..perturbation.config import PerturbationConfig, PerturbationSummary
+from ...perturbation.config import PerturbationConfig, PerturbationSummary
 from ..perturbation_analysis import variability_summary
 
 logger = logging.getLogger(__name__)
