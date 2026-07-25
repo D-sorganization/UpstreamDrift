@@ -71,6 +71,16 @@ dependencies = [
     "PyJWT>=2.13.0",
     "cryptography>=48.0.1",
     "email-validator>=2.0.0",
+    # Hardened XML parsing used at module load by src/api/routes/models.py, which
+    # is imported by src/api/routes/__init__.py and therefore by every API server
+    # start-up. Tiny pure-Python package; must be core, not urdf-extra-only (#8032).
+    "defusedxml>=0.7.0",
+    # Imported at module load by src/shared/python/data_io/common_utils.py and
+    # src/bunkershot3d/kinematics/trajectory.py, both of which sit on the
+    # `import src.api.local_server` chain via eager package __init__ re-exports.
+    # Too widely used at module scope to make lazy; keep it core (#8032).
+    # The `data` extra still adds pandera/pyarrow on top of it.
+    "pandas>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -104,7 +114,9 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
 
-# Data IO schema validation (issue #6568). pandas + pandera power the
+# Data IO schema validation (issue #6568). pandas moved to core dependencies
+# (#8032) — it is a module-level import on the API server's import chain — and
+# is repeated here only so the extra stays self-describing. pandera powers the
 # additive schema checks in src/shared/python/data_io/_schemas.py. These are
 # optional: the loaders import pandera lazily and degrade to structural-only
 # checks when it is absent, so this stays out of the hard core dependencies.
@@ -217,7 +229,10 @@ body-part-viz-gl = [
 all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
 [project.scripts]
-upstream-drift = "launch_golf_suite:main"
+# Point at the canonical launcher rather than the deprecated launch_golf_suite
+# shim: the shim emits a DeprecationWarning telling the user to "use the
+# upstream-drift console script", which is what they just ran (#8031).
+upstream-drift = "launch_upstream_drift:main"
 # Standalone Sidekick window / headless runner (T6 — issue #5984).
 # The canonical entry-point lives here rather than in vendor/ud-tools because
 # the standalone shell (sidekick.standalone.*) is owned by this repo.
@@ -263,8 +278,11 @@ build-backend = "hatchling.build"
 # docs/, tests/, and vendor/ are NOT listed here and are therefore excluded.
 include = [
     "src/**/*",
-    "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
+    "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py); sdist only —
+                     # the wheel gets ui/dist via build_hooks.py force_include
+                     # because `packages = ["src"]` makes this list inert (#8018).
     "launch_golf_suite.py",
+    "launch_upstream_drift.py",
     "build_hooks.py",
 ]
 exclude = [
@@ -282,8 +300,16 @@ packages = [
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/shared/python/sidekick" = "sidekick"
+# NOTE: src/shared/python/sidekick -> sidekick is force-included per file by
+# build_hooks.py. A whole-directory entry here bypasses the `exclude` patterns
+# above (hatchling never applies them to forced files) and shipped the entire
+# sidekick test suite in every wheel (#8018).
 "launch_golf_suite.py" = "launch_golf_suite.py"
+# launch_golf_suite.py does `from launch_upstream_drift import ...` at module
+# load, so shipping only the shim leaves the console script dead (#8031).
+"launch_upstream_drift.py" = "launch_upstream_drift.py"
+# NOTE: ui/dist is force-included dynamically by build_hooks.py, not here — a
+# static entry would hard-fail the build whenever the frontend is not built.
 
 
 [tool.hatch.build.hooks.custom]
