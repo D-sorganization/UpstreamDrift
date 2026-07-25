@@ -108,12 +108,26 @@
 **Learning:** Standard library `xml.etree.ElementTree` is not secure against maliciously constructed data.
 **Prevention:** Always use the `defusedxml` package, which acts as a drop-in replacement but protects against these vulnerabilities.
 
+## 2026-07-21 - [Fix API Key Timing Attack]
+
+**Vulnerability:** The API key validation in `ModelGenerationAPI._check_api_key` used a standard string comparison (`!=`), exposing the endpoint to timing attacks where an attacker could deduce the key character-by-character based on response times.
+**Learning:** Even internal or utility API endpoints must use constant-time comparison functions for secrets to prevent side-channel leaks, regardless of expected traffic volume.
+**Prevention:** Always use `secrets.compare_digest()` from the Python standard library when comparing sensitive tokens, passwords, or API keys instead of standard equality operators.
+
+## 2026-07-21 - [Mitigate Git Network Flakes in CI]
+
+**Vulnerability:** CI environments occasionally hit `curl 92 HTTP/2 stream 5 was not closed cleanly: CANCEL (err 8)` or `curl 56` errors.
+**Learning:** These intermittent failures on large checkouts are often related to git's experimental HTTP/2 support interacting poorly with specific proxies or GnuTLS versions on GitHub Actions runners.
+**Prevention:** Forcing `git config --global http.version HTTP/1.1` in a step prior to `actions/checkout` or during `fetch` resolves the instability for these large repository checkouts.
+
 ## 2026-06-26 - Insecure XML Parsing in rest_api_routes.py
 
 **Vulnerability:** Found `xml.etree.ElementTree` being used to parse potentially untrusted XML inside `src/shared/python/model_generation/api/rest_api_routes.py`.
 **Learning:** Even though `defusedxml.ElementTree` is used extensively throughout the repository to prevent XXE attacks, some isolated files still manually import `xml.etree.ElementTree`. This indicates that standard library imports can easily sneak in despite project-wide guidelines.
 **Prevention:** Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` when parsing XML, and append `# noqa: S314` to bypass static analyzer false positives.
+
 ## 2024-05-24 - Content-Security-Policy Header
+
 **Vulnerability:** Missing Content-Security-Policy (CSP) header in the FastAPI application.
 **Learning:** CSP is an important defense-in-depth layer to mitigate XSS attacks by restricting the sources from which content can be loaded. It was missing from the standard security headers middleware.
 **Prevention:** Always include a baseline CSP (like `default-src 'self'`) in the security headers middleware and test for its presence.
