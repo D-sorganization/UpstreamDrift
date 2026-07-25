@@ -165,9 +165,20 @@ class ThemeManager:
                 theme_menu.addAction(action)
                 self._theme_actions.append(action)
 
-            # Additional built-in themes beyond the core presets
+            # Additional built-in themes beyond the core presets.
+            #
+            # #8026: this used to read ``get_available_themes()``, which is
+            # ``builtins + custom themes``. The custom themes were therefore
+            # added here *and* again in the "Custom themes" block below —
+            # every custom theme appeared twice, and because each duplicate
+            # pair was pre-checked before joining the single exclusive
+            # QActionGroup, the active theme showed a checkmark on both rows.
+            custom_names = manager.get_custom_theme_names()
+            custom_lookup = set(custom_names)
             all_themes = manager.get_available_themes()
-            extra_themes = [t for t in all_themes if t not in preset_map]
+            extra_themes = [
+                t for t in all_themes if t not in preset_map and t not in custom_lookup
+            ]
             if extra_themes:
                 theme_menu.addSeparator()
                 for theme_name in extra_themes:
@@ -182,7 +193,6 @@ class ThemeManager:
                     self._theme_actions.append(action)
 
             # Custom themes
-            custom_names = manager.get_custom_theme_names()
             if custom_names:
                 theme_menu.addSeparator()
                 for cname in custom_names:
