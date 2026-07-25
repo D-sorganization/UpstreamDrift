@@ -24,6 +24,7 @@ and constraint_jacobian.
 from __future__ import annotations
 
 import logging
+import math
 
 import numpy as np
 
@@ -283,7 +284,9 @@ def constraint_violation(state: State, params: GolferParams) -> float:
     assert state is not None, "state must be provided"
     q = state[:N_DOF]
     Phi = constraint_vector(q, params)
-    return float(np.linalg.norm(Phi))
+    return math.sqrt(
+        np.vdot(Phi, Phi)
+    )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
 
 
 def project_to_constraints(
@@ -318,14 +321,19 @@ def project_to_constraints(
         q, params, max_iter, tol
     )
     if native_projection is not None:
-        residual = float(np.linalg.norm(constraint_vector(native_projection, params)))
+        cv_native = constraint_vector(native_projection, params)
+        residual = math.sqrt(
+            np.vdot(cv_native, cv_native)
+        )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
         if residual < tol:
             return native_projection
 
     q = q.copy()
     for _ in range(max_iter):
         Phi = constraint_vector(q, params)
-        if np.linalg.norm(Phi) < tol:
+        if (
+            math.sqrt(np.vdot(Phi, Phi)) < tol
+        ):  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
             return q
         Phi_q = constraint_jacobian(q, params)
         # Use pseudoinverse for robustness
@@ -334,7 +342,10 @@ def project_to_constraints(
         )
         q -= dq
 
-    residual = float(np.linalg.norm(constraint_vector(q, params)))
+    cv = constraint_vector(q, params)
+    residual = math.sqrt(
+        np.vdot(cv, cv)
+    )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
     raise RuntimeError(
         "Constraint projection did not converge "
         f"within {max_iter} iterations (residual={residual:.3e})"
@@ -358,7 +369,9 @@ def project_velocity(
     native_projection = _native_backend.golfer_project_velocity(q, qdot, params)
     if native_projection is not None:
         native_violation = constraint_jacobian(q, params) @ native_projection
-        if np.linalg.norm(native_violation) < 1e-6:
+        if (
+            math.sqrt(np.vdot(native_violation, native_violation)) < 1e-6
+        ):  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
             return native_projection
 
     Phi_q = constraint_jacobian(q, params)

@@ -2308,3 +2308,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2026-06-23
 
 - **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.
+
+## Pendulum Simulator Constraints
+The `src/shared/python/pendulum_simulator/constraint_solver.py` manages physics solver constraints. L2 norms for small vectors (like constraint residuals) are explicitly optimized using `math.sqrt(np.vdot(x, x))` instead of `np.linalg.norm` to avoid intermediate NumPy allocations and Python dispatcher overhead, taking care not to re-evaluate expensive functions like `constraint_vector()`.
