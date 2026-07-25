@@ -142,21 +142,32 @@ class DialogsManager:
             dialog = LegacyHelpDialog(self)
             dialog.exec()
 
+    #: Project Map candidates, most comprehensive first. ``docs/PROJECT_MAP.md``
+    #: has never existed at that path (issue #8014); the real documents live
+    #: under ``docs/architecture/`` and ``docs/governance/``.
+    PROJECT_MAP_CANDIDATES = (
+        Path("docs") / "architecture" / "PROJECT_MAP.md",
+        Path("docs") / "governance" / "PROJECT_MAP.md",
+    )
+
     def _open_project_map(self) -> None:
         """Open the Project Map document in the system viewer."""
-        project_map = REPOS_ROOT / "docs" / "PROJECT_MAP.md"
-        if project_map.exists():
-            from src.shared.python.ui.qt.widgets.document_reader import show_document
+        searched = [REPOS_ROOT / rel for rel in self.PROJECT_MAP_CANDIDATES]
+        for project_map in searched:
+            if project_map.exists():
+                from src.shared.python.ui.qt.widgets.document_reader import (
+                    show_document,
+                )
 
-            show_document(project_map)
-        else:
-            QMessageBox.warning(
-                self.launcher,
-                "Project Map Not Found",
-                "The Project Map file was not found at:\n"
-                f"{project_map}\n\n"
-                "Please ensure docs/PROJECT_MAP.md exists.",
-            )
+                show_document(project_map)
+                return
+
+        listed = "\n".join(str(path) for path in searched)
+        QMessageBox.warning(
+            self.launcher,
+            "Project Map Not Found",
+            f"The Project Map file was not found. Searched:\n{listed}",
+        )
 
     def _show_about_dialog(self) -> None:
         """Show the About dialog."""
