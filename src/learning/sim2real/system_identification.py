@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -12,6 +13,35 @@ if TYPE_CHECKING:
 
     from src.engines.protocols import PhysicsEngineProtocol
     from src.learning.imitation.dataset import Demonstration
+
+
+class UnsupportedParameterError(NotImplementedError):
+    """Raised when a requested parameter cannot be applied to the model.
+
+    A parameter is identifiable only when the engine exposes **both** a
+    working getter and a working setter for it. If either is missing - or
+    the setter is a deferred no-op - optimising over that parameter would
+    return the initial value dressed up as a result (issue #8011), so the
+    identifier refuses to run instead.
+    """
+
+
+#: Parameter name -> (nominal-cache key, getter name, setter name).
+#: Only parameters listed here can be identified; anything else in
+#: ``param_bounds`` has no implementation and is rejected loudly.
+_PARAM_HOOKS: dict[str, tuple[str, str, str]] = {
+    "mass_scale": ("masses", "get_link_masses", "set_link_masses"),
+    "friction_scale": (
+        "friction",
+        "get_friction_coefficients",
+        "set_friction_coefficients",
+    ),
+    "damping_scale": ("damping", "get_joint_damping", "set_joint_damping"),
+    "motor_scale": ("motor", "get_motor_strength", "set_motor_strength"),
+}
+
+#: Additive (rather than multiplicative) parameters start from 0.0.
+_ADDITIVE_PARAM_PREFIXES = ("com_offset",)
 
 
 @dataclass
@@ -58,9 +88,15 @@ class SystemIdentifier:
         self.model = model
         self.param_bounds = param_bounds or self._default_bounds()
         self._nominal_params = self._get_current_params()
+        self._supported_cache: list[str] | None = None
 
     def _default_bounds(self) -> dict[str, tuple[float, float]]:
         """Get default parameter bounds.
+
+        ``com_offset_x/y/z`` were removed in the fix for #8011: no engine
+        exposes a centre-of-mass offset hook, and ``_apply_params`` never had
+        an implementation for them, so including them only produced
+        "identified" values of 1.0 against declared bounds of +/-0.05.
 
         Returns:
             Dictionary of parameter bounds.
@@ -70,79 +106,172 @@ class SystemIdentifier:
             "friction_scale": (0.2, 3.0),
             "damping_scale": (0.5, 2.0),
             "motor_scale": (0.5, 1.5),
-            "com_offset_x": (-0.05, 0.05),
-            "com_offset_y": (-0.05, 0.05),
-            "com_offset_z": (-0.05, 0.05),
         }
 
     def _get_current_params(self) -> dict[str, Any]:
         """Get current model parameters.
 
         Returns:
-            Dictionary of current parameters.
+            Dictionary of current parameters, keyed by the nominal-cache key
+            in :data:`_PARAM_HOOKS`.
         """
-        params = {}
-
-        if hasattr(self.model, "get_link_masses"):
-            params["masses"] = self.model.get_link_masses().copy()
-
-        if hasattr(self.model, "get_joint_damping"):
-            params["damping"] = self.model.get_joint_damping().copy()
-
-        if hasattr(self.model, "get_friction_coefficients"):
-            params["friction"] = self.model.get_friction_coefficients().copy()
-
-        if hasattr(self.model, "get_motor_strength"):
-            params["motor"] = self.model.get_motor_strength().copy()
-
+        params: dict[str, Any] = {}
+        for key, getter, _setter in _PARAM_HOOKS.values():
+            fn = getattr(self.model, getter, None)
+            if fn is None:
+                continue
+            params[key] = np.asarray(fn(), dtype=float).copy()
         return params
 
-    def _apply_params(self, param_vector: NDArray[np.floating]) -> None:  # noqa: C901
-        """Apply parameter vector to model.
+    def supported_parameters(self) -> list[str]:
+        """Return the parameters this model can actually be tuned through.
+
+        A parameter qualifies only when the engine exposes a getter and a
+        setter *and* the setter demonstrably changes what the getter returns.
+        The round-trip probe is what catches deferred no-op setters such as
+        ``SimscapeAdapter.set_link_masses`` (deferred to #4006), which would
+        otherwise make the optimisation silently vacuous.
+
+        Returns:
+            Parameter names from ``param_bounds`` that can be identified,
+            in ``param_bounds`` order.
+        """
+        if self._supported_cache is not None:
+            return list(self._supported_cache)
+
+        supported: list[str] = []
+        for name in self.param_bounds:
+            hooks = _PARAM_HOOKS.get(name)
+            if hooks is None:
+                continue
+            key, getter, setter = hooks
+            if not hasattr(self.model, getter) or not hasattr(self.model, setter):
+                continue
+            if key not in self._nominal_params:
+                continue
+            if self._setter_is_effective(key, getter, setter):
+                supported.append(name)
+
+        self._supported_cache = supported
+        return list(supported)
+
+    def _setter_is_effective(self, key: str, getter: str, setter: str) -> bool:
+        """Probe whether ``setter`` measurably changes what ``getter`` returns.
 
         Args:
-            param_vector: Flattened parameter vector.
+            key: Nominal-cache key holding the untouched value.
+            getter: Name of the model's getter method.
+            setter: Name of the model's setter method.
+
+        Returns:
+            True if a perturbation round-trips; False for missing, empty or
+            no-op parameter surfaces.
+        """
+        nominal = np.asarray(self._nominal_params[key], dtype=float)
+        if nominal.size == 0:
+            return False
+        probe = nominal * 1.5 + 0.5
+        try:
+            getattr(self.model, setter)(probe)
+            observed = np.asarray(getattr(self.model, getter)(), dtype=float)
+        except (TypeError, ValueError, NotImplementedError, AttributeError):
+            return False
+        finally:
+            # Always restore the nominal value, even if the probe raised.
+            with contextlib.suppress(
+                TypeError, ValueError, NotImplementedError, AttributeError
+            ):
+                getattr(self.model, setter)(nominal.copy())
+        return bool(
+            observed.shape == probe.shape and not np.allclose(observed, nominal)
+        )
+
+    def _validate_parameters(self, param_names: list[str]) -> None:
+        """Reject parameters that cannot be applied to this model.
+
+        Args:
+            param_names: Requested parameter names.
+
+        Raises:
+            ValueError: If a name is not in ``param_bounds``.
+            UnsupportedParameterError: If a name has no working getter/setter
+                pair on the model.
+        """
+        unknown = [n for n in param_names if n not in self.param_bounds]
+        if unknown:
+            raise ValueError(
+                f"Unknown parameter(s) {unknown}; "
+                f"param_bounds declares {list(self.param_bounds)}"
+            )
+        supported = set(self.supported_parameters())
+        missing = [n for n in param_names if n not in supported]
+        if missing:
+            details = []
+            for name in missing:
+                hooks = _PARAM_HOOKS.get(name)
+                if hooks is None:
+                    details.append(f"{name}: no implementation in SystemIdentifier")
+                else:
+                    _key, getter, setter = hooks
+                    details.append(f"{name}: requires working {getter}()/{setter}()")
+            raise UnsupportedParameterError(
+                "Cannot identify parameter(s) on "
+                f"{type(self.model).__name__}: " + "; ".join(details) + ". "
+                "Identifying them would return the initial values unchanged, "
+                "so the run is refused (issue #8011)."
+            )
+
+    def _nominal_vector(self, param_names: list[str]) -> NDArray[np.floating]:
+        """Build the bound-respecting starting point for ``param_names``.
+
+        Scale parameters start at 1.0 and additive parameters at 0.0, each
+        clipped into its declared bounds so the initial point can never be
+        reported as an out-of-bounds "identified" value (issue #8011).
+        """
+        values = []
+        for name in param_names:
+            nominal = 0.0 if name.startswith(_ADDITIVE_PARAM_PREFIXES) else 1.0
+            low, high = self.param_bounds[name]
+            values.append(float(np.clip(nominal, low, high)))
+        return np.array(values, dtype=float)
+
+    def _apply_params(
+        self,
+        param_vector: NDArray[np.floating],
+        param_names: list[str] | None = None,
+    ) -> None:
+        """Apply a parameter vector to the model.
+
+        Args:
+            param_vector: Values aligned positionally with ``param_names``.
+            param_names: Names the vector refers to. Defaults to the full
+                ``param_bounds`` ordering.
+
+        Raises:
+            ValueError: If ``param_vector`` is missing or too short.
+            UnsupportedParameterError: If a name has no implementation.
         """
         if param_vector is None:
             raise ValueError("param_vector must be provided")
-        idx = 0
-        param_names = list(self.param_bounds.keys())
+        names = list(self.param_bounds) if param_names is None else list(param_names)
+        if len(param_vector) < len(names):
+            raise ValueError(
+                f"param_vector has {len(param_vector)} entries but "
+                f"{len(names)} parameters were requested"
+            )
 
-        for name in param_names:
-            if name == "mass_scale":
-                if "masses" in self._nominal_params:
-                    scale = param_vector[idx]
-                    masses = self._nominal_params["masses"] * scale
-                    if hasattr(self.model, "set_link_masses"):
-                        self.model.set_link_masses(masses)
-                idx += 1
-
-            elif name == "friction_scale":
-                if "friction" in self._nominal_params:
-                    scale = param_vector[idx]
-                    friction = self._nominal_params["friction"] * scale
-                    if hasattr(self.model, "set_friction_coefficients"):
-                        self.model.set_friction_coefficients(friction)
-                idx += 1
-
-            elif name == "damping_scale":
-                if "damping" in self._nominal_params:
-                    scale = param_vector[idx]
-                    damping = self._nominal_params["damping"] * scale
-                    if hasattr(self.model, "set_joint_damping"):
-                        self.model.set_joint_damping(damping)
-                idx += 1
-
-            elif name == "motor_scale":
-                if "motor" in self._nominal_params:
-                    scale = param_vector[idx]
-                    motor = self._nominal_params["motor"] * scale
-                    if hasattr(self.model, "set_motor_strength"):
-                        self.model.set_motor_strength(motor)
-                idx += 1
-
-            elif name.startswith("com_offset"):
-                idx += 1  # Placeholder for CoM offset handling
+        for idx, name in enumerate(names):
+            hooks = _PARAM_HOOKS.get(name)
+            if hooks is None:
+                raise UnsupportedParameterError(
+                    f"No implementation for parameter '{name}' (issue #8011)"
+                )
+            key, _getter, setter = hooks
+            if key not in self._nominal_params:
+                raise UnsupportedParameterError(
+                    f"Model exposes no nominal value for '{name}' (issue #8011)"
+                )
+            getattr(self.model, setter)(self._nominal_params[key] * param_vector[idx])
 
     def _simulate_trajectory(
         self,
@@ -180,9 +309,12 @@ class SystemIdentifier:
             if hasattr(self.model, "set_joint_torques"):
                 self.model.set_joint_torques(actions[i])
 
-            # Step simulation
-            if hasattr(self.model, "step"):
-                self.model.step(dt)
+            # Step simulation. PhysicsEngineProtocol.step() takes no timestep,
+            # but every concrete engine used here accepts one, so the call is
+            # dispatched dynamically.
+            step = getattr(self.model, "step", None)
+            if callable(step):
+                step(dt)
 
             # Record state
             if hasattr(self.model, "get_joint_positions"):
@@ -243,27 +375,40 @@ class SystemIdentifier:
 
         Args:
             trajectories: List of real robot demonstrations.
-            params_to_identify: Which parameters to identify.
+            params_to_identify: Which parameters to identify. Defaults to
+                every parameter the model actually supports.
             max_iterations: Maximum optimization iterations.
             tolerance: Convergence tolerance.
 
         Returns:
-            Identification result.
+            Identification result. ``identified_params`` is keyed by, and
+            aligned with, ``params_to_identify``.
+
+        Raises:
+            ValueError: If ``trajectories`` is missing/empty or a requested
+                parameter is not declared in ``param_bounds``.
+            UnsupportedParameterError: If the model cannot apply a requested
+                parameter (see :meth:`supported_parameters`).
         """
         if trajectories is None:
             raise ValueError("trajectories must be provided")
+        if not trajectories:
+            raise ValueError("trajectories must not be empty")
         if params_to_identify is None:
-            params_to_identify = list(self.param_bounds.keys())
+            params_to_identify = self.supported_parameters()
+            if not params_to_identify:
+                self._validate_parameters(list(self.param_bounds))
+        self._validate_parameters(params_to_identify)
 
         n_params = len(params_to_identify)
-        param_vector = np.ones(n_params)
+        param_vector = self._nominal_vector(params_to_identify)
 
         lower_bounds = np.array([self.param_bounds[p][0] for p in params_to_identify])
         upper_bounds = np.array([self.param_bounds[p][1] for p in params_to_identify])
 
         def objective(params: NDArray[np.floating]) -> float:
             """Compute total error over all trajectories."""
-            return self._evaluate_params(params, trajectories)
+            return self._evaluate_params(params, trajectories, params_to_identify)
 
         best_params = param_vector.copy()
         best_error = objective(best_params)
@@ -294,10 +439,11 @@ class SystemIdentifier:
         self,
         params: NDArray[np.floating],
         trajectories: list[Demonstration],
+        param_names: list[str] | None = None,
     ) -> float:
         if params is None:
             raise ValueError("params must be provided")
-        self._apply_params(params)
+        self._apply_params(params, param_names)
         total_error = 0.0
 
         # initial_state / real_traj / dt depend only on the (fixed) demos, not
@@ -305,6 +451,11 @@ class SystemIdentifier:
         # probe. Precompute them once per trajectory set instead of rebuilding
         # the concatenations and dt on every probe.
         prepared = self._prepared_trajectories(trajectories)
+        if not prepared:
+            raise ValueError(
+                "No demonstration carried actions; system identification needs "
+                "recorded control inputs"
+            )
         for initial_state, actions, dt, real_traj in prepared:
             sim_traj = self._simulate_trajectory(initial_state, actions, dt)
             total_error += self._compute_trajectory_error(sim_traj, real_traj)
@@ -359,15 +510,18 @@ class SystemIdentifier:
             raise ValueError("objective must be provided")
         converged = False
         _iteration = 0
+        base_deltas = (0.1, -0.1, 0.05, -0.05, 0.01, -0.01)
+        step_scale = 1.0
+        min_step_scale = 1e-2
 
         for _iteration in range(max_iterations):
             improved = False
 
             for i in range(n_params):
-                for delta in [0.1, -0.1, 0.05, -0.05, 0.01, -0.01]:
+                for base in base_deltas:
                     test_params = best_params.copy()
                     test_params[i] = np.clip(
-                        test_params[i] + delta,
+                        test_params[i] + base * step_scale,
                         lower_bounds[i],
                         upper_bounds[i],
                     )
@@ -379,6 +533,12 @@ class SystemIdentifier:
                         improved = True
 
             if not improved:
+                # Refine the step size before declaring convergence, so
+                # "converged" means "no smaller step helps either" rather than
+                # "the coarse 0.01 grid stalled" (issue #8011).
+                if step_scale > min_step_scale:
+                    step_scale *= 0.5
+                    continue
                 converged = True
                 break
 
@@ -447,14 +607,23 @@ class SystemIdentifier:
 
         Returns:
             Validation metrics.
+
+        Raises:
+            ValueError: If ``test_trajectories`` is missing, or none of the
+                demonstrations carry actions.
+            UnsupportedParameterError: If a supplied parameter has no
+                implementation on this model.
         """
-        # Apply identified parameters
+        # Apply identified parameters (only those actually supplied, so the
+        # vector cannot silently drift out of alignment - issue #8011).
         if test_trajectories is None:
             raise ValueError("test_trajectories must be provided")
+        param_names = list(identified_params)
+        self._validate_parameters(param_names)
         param_vector = np.array(
-            [identified_params.get(name, 1.0) for name in self.param_bounds],
+            [float(np.asarray(identified_params[name]).item()) for name in param_names],
         )
-        self._apply_params(param_vector)
+        self._apply_params(param_vector, param_names)
 
         # Compute errors on test set
         errors = []
@@ -482,6 +651,11 @@ class SystemIdentifier:
 
             error = self._compute_trajectory_error(sim_traj, real_traj)
             errors.append(error)
+
+        if not errors:
+            raise ValueError(
+                "No test trajectory carried actions; nothing could be validated"
+            )
 
         return {
             "mean_error": float(np.mean(errors)),
