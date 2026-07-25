@@ -27,7 +27,10 @@ from src.engines.loaders import load_matlab_3d_engine
 from src.engines.simscape import SimscapeAdapter
 from src.learning.sim2real import system_identification as sysid_mod
 from src.learning.sim2real._simscape_compat import wrap_for_system_identification
-from src.learning.sim2real.system_identification import SystemIdentifier
+from src.learning.sim2real.system_identification import (
+    SystemIdentifier,
+    UnsupportedParameterError,
+)
 from src.shared.python.engine_core.engine_registry import EngineType
 
 _MATLAB_OK = (
@@ -72,20 +75,26 @@ def test_load_simscape_for_system_identification(
     assert identifier.model is not None
 
 
-def test_system_identifier_runs_one_iteration_against_simscape(
+def test_system_identifier_refuses_deferred_simscape_setters(
     simscape_engine: SimscapeAdapter,
     synthetic_demonstration: object,
 ) -> None:
-    """A 1-iteration loop exercises every code path without exceptions."""
+    """Simscape's parameter setters are deferred no-ops (#4006), so identifying
+    against them must fail loudly rather than return the initial values as a
+    converged result (issue #8011).
+
+    When #4006 lands and ``set_link_masses`` actually mutates the model, this
+    test should be changed back to asserting a successful identification.
+    """
     identifier = SystemIdentifier(wrap_for_system_identification(simscape_engine))
-    result = identifier.identify_from_trajectories(
-        [synthetic_demonstration],  # type: ignore[list-item]
-        params_to_identify=["mass_scale"],
-        max_iterations=1,
-        tolerance=1.0,
-    )
-    assert "mass_scale" in result.identified_params
-    assert result.iterations >= 1
+    assert identifier.supported_parameters() == []
+    with pytest.raises(UnsupportedParameterError):
+        identifier.identify_from_trajectories(
+            [synthetic_demonstration],  # type: ignore[list-item]
+            params_to_identify=["mass_scale"],
+            max_iterations=1,
+            tolerance=1.0,
+        )
 
 
 def test_protocol_method_coverage_against_actual_simscape(
