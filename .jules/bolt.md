@@ -74,3 +74,7 @@
 ## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.dot) and math.hypot in Simulation Paths]
 **Learning:** `np.linalg.norm` has significant overhead for small, fixed-size arrays (like 2D/3D vectors or concatenations) in tight simulation and UI calculation paths. `math.hypot` is around ~5-6x faster for explicitly unpacked 2D/3D vectors. For small 1D vectors where unpacking is cumbersome, `math.sqrt(np.dot(err, err))` is about ~1.8x faster than `np.linalg.norm`.
 **Action:** Replaced `np.linalg.norm` with `math.hypot` for fixed-size 3D calculations (e.g. `golf_video_export.py`, `golf_gui_tabs.py`, `hip_rotation.py`) and with `math.sqrt(np.dot(err, err))` for small 1D vectors (e.g., concatenated foot error in `simulator.py`) to reduce simulation overhead.
+
+## 2026-06-26 - [Replacing np.linalg.norm with math.hypot for tuple differences]
+**Learning:** When calculating the distance between two 3D coordinate tuples, doing `np.linalg.norm(np.array(a) - np.array(b))` converts the tuples to arrays, performs array subtraction, and computes the norm. Replacing this with `math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2])` yields around a 4x speedup by completely avoiding NumPy array allocation and dispatch overhead.
+**Action:** Replace `np.linalg.norm(np.array(a) - np.array(b))` with `math.hypot` on explicitly unpacked differences for known 3D point tuples in performance sensitive UI/simulation code.

@@ -2308,3 +2308,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2026-06-23
 
 - **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.
+
+### Performance Improvements
+
+- **Performance:** Replaced `np.linalg.norm` with `math.hypot` for 3D distance calculation in `src/tools/golf_environment/gui.py` to avoid NumPy array allocation overhead.
