@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from src.deployment.realtime import ControlMode
+from src.shared.python.core.contracts.exceptions import StateError
 from src.deployment.teleoperation.devices import (
     HapticDeviceInput,
     KeyboardMouseInput,
@@ -205,41 +206,82 @@ class TestTeleoperationInterface:
 
 
 class TestInputDevices:
-    def test_spacemouse(self) -> None:
-        d = SpaceMouseInput(0)
-        d.connect()
-        d.update()
-        d.set_sensitivity(0.5)
-        assert "button_1" in d.get_buttons()
+    """Contract for the input-device stubs after #7360.
 
-    def test_vr_controller(self) -> None:
+    These tests previously asserted the pre-#7360 behaviour, where `connect()`
+    faked success and `update()` silently no-opped, so they were red on `main`
+    (#8036). The three hardware devices have no driver behind them (#8058), and
+    the honest contract is: `connect()` returns False and every state query
+    raises `StateError`. Implementing any device will fail these tests, which is
+    the intent -- they must be rewritten with the implementation.
+    """
+
+    def test_spacemouse_reports_no_hardware_and_refuses_state_queries(self) -> None:
+        d = SpaceMouseInput(0)
+
+        assert d.connect() is False
+
+        for operation in (d.update, d.get_twist, d.get_pose, d.get_buttons):
+            with pytest.raises(StateError):
+                operation()
+
+        # Pure configuration that touches no hardware is still allowed.
+        d.set_sensitivity(0.5)
+
+    def test_vr_controller_reports_no_hardware_and_refuses_state_queries(self) -> None:
         d = VRControllerInput("right", "steamvr")
-        d.connect()
-        d.update()
+
+        assert d.connect() is False
+
+        with pytest.raises(StateError):
+            d.update()
+
+        # Cached scalar accessors do not require a connection.
         assert d.get_trigger_value() == 0.0
         assert d.get_grip_value() == 0.0
 
-    def test_haptic(self) -> None:
+    def test_haptic_reports_no_hardware_and_refuses_state_queries(self) -> None:
         d = HapticDeviceInput("phantom")
-        d.connect()
-        d.update()
-        d.set_force_feedback(np.array([1, 2, 3, 0, 0, 0], dtype=float))
-        d.set_workspace_scale(0.002)
-        d.disconnect()
-        # set_force_feedback when disconnected is no-op
-        d.set_force_feedback(np.zeros(6))
 
-    def test_keyboard(self) -> None:
+        assert d.connect() is False
+
+        with pytest.raises(StateError):
+            d.update()
+
+        # Commanding force into hardware that is not there must be refused, not
+        # silently dropped -- this is a physical-safety surface.
+        with pytest.raises(StateError):
+            d.set_force_feedback(np.array([1, 2, 3, 0, 0, 0], dtype=float))
+
+        d.disconnect()
+        with pytest.raises(StateError):
+            d.set_force_feedback(np.zeros(6))
+
+        # Pure configuration is still allowed.
+        d.set_workspace_scale(0.002)
+
+    def test_keyboard_connects_and_drives_twist(self) -> None:
         d = KeyboardMouseInput()
-        d.connect()
+
+        # KeyboardMouseInput needs no hardware, so it is the one device that
+        # genuinely connects.
+        assert d.connect() is True
+
         d.set_key_state("forward", True)
         d.set_key_state("close_gripper", True)
         d.update()
-        twist = d.get_twist()
-        assert twist[0] > 0
+        assert d.get_twist()[0] > 0
+
         d.set_key_state("open_gripper", True)
         d.update()
         assert d.get_gripper_state() == 1.0
+
         d.set_key_state("unknown_key", True)  # noop
+
+    def test_keyboard_refuses_update_after_disconnect(self) -> None:
+        d = KeyboardMouseInput()
+        d.connect()
         d.disconnect()
-        d.update()
+
+        with pytest.raises(StateError):
+            d.update()
