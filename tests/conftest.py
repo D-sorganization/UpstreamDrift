@@ -229,9 +229,6 @@ class OptionalCollectionRule:
 _PROCESS_CALCULATOR_ANCHOR = "sidekick.process_calculators.acid_gas_dewpoint_calculator"
 _PROCESS_CALCULATOR_TESTS = (
     "tests/unit/process_calculators",
-    "tests/unit/injury/test_injury_risk.py",
-    "tests/unit/injury/test_joint_stress.py",
-    "tests/unit/injury/test_spinal_load_analysis.py",
     "tests/unit/sidekick/test_acid_gas_dewpoint.py",
     "tests/unit/sidekick/test_analysis_utils.py",
     "tests/unit/sidekick/test_baghouse_calculator.py",
@@ -247,20 +244,8 @@ _PROCESS_CALCULATOR_TESTS = (
     "tests/unit/sidekick/test_wgs_reactor_calculator.py",
 )
 _CALC_BACKEND_TESTS = (
-    "tests/security/test_rate_limiting.py",
     "tests/unit/calc_backend",
     "tests/unit/test_calc_backend_protocols.py",
-    "tests/unit/api/test_acid_gas_dewpoint_mocked.py",
-    "tests/unit/api/test_baghouse_mocked.py",
-    "tests/unit/api/test_financial_mocked.py",
-    "tests/unit/api/test_flare_mocked.py",
-    "tests/unit/api/test_flow_rate_api.py",
-    "tests/unit/api/test_ode_solver.py",
-    "tests/unit/api/test_pressure_drop.py",
-    "tests/unit/api/test_scrubber_mocked.py",
-    "tests/unit/api/test_syngas_water_mocked.py",
-    "tests/unit/api/test_thermal_profile.py",
-    "tests/unit/api/test_wgs_reactor_mocked.py",
 )
 _OPTIONAL_COLLECTION_RULES = (
     OptionalCollectionRule(
@@ -297,18 +282,13 @@ _OPTIONAL_COLLECTION_RULES = (
             ("src.shared.python.data_io.dataset_generator", "SimulationSample"),
         ),
     ),
-    OptionalCollectionRule(
-        path_suffixes=("tests/unit/test_c3d_export_features.py",),
-        modules=("c3d_reader",),
-    ),
-    OptionalCollectionRule(
-        path_suffixes=("tests/unit/test_setup_golf_suite.py",),
-        modules=("setup_golf_suite",),
-    ),
-    OptionalCollectionRule(
-        path_suffixes=("tests/unit/test_start_api_server.py",),
-        modules=("start_api_server",),
-    ),
+    # NOTE (#8006): rules for `c3d_reader`, `setup_golf_suite` and
+    # `start_api_server` were removed here. None of those names was importable in
+    # ANY supported configuration, so the rules were not tolerating an optional
+    # stack -- they were permanently deleting 20 tests with no skip entry and no
+    # CI signal. Do not add a rule for a module that cannot be imported by some
+    # documented extra; `tests/unit/test_optional_collection_rules.py` enforces
+    # this.
 )
 _OPTIONAL_COLLECTION_WARNED_PATHS: set[str] = set()
 _FAKE_PYQT6_GUI_TESTS = (
