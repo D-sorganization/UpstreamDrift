@@ -71,6 +71,6 @@
 ## 2026-06-25 - Pandas iterrows vs vectorized numpy column_stack
 **Learning:** Using `.iterrows()` in pandas to construct 3D point arrays row-by-row is incredibly slow due to python overhead and series creation for each row.
 **Action:** Replace `np.array([[row["X"], row["Y"], row["Z"]] for _, row in df.iterrows()])` with vectorized `np.column_stack((df["X"].values, df["Y"].values, df["Z"].values))` to get >1000x speedup when rendering trajectories.
-## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.dot) and math.hypot in Simulation Paths]
-**Learning:** `np.linalg.norm` has significant overhead for small, fixed-size arrays (like 2D/3D vectors or concatenations) in tight simulation and UI calculation paths. `math.hypot` is around ~5-6x faster for explicitly unpacked 2D/3D vectors. For small 1D vectors where unpacking is cumbersome, `math.sqrt(np.dot(err, err))` is about ~1.8x faster than `np.linalg.norm`.
-**Action:** Replaced `np.linalg.norm` with `math.hypot` for fixed-size 3D calculations (e.g. `golf_video_export.py`, `golf_gui_tabs.py`, `hip_rotation.py`) and with `math.sqrt(np.dot(err, err))` for small 1D vectors (e.g., concatenated foot error in `simulator.py`) to reduce simulation overhead.
+## 2026-07-25 - [Fast 3D Vector Norm]
+**Learning:** Explicit unpacking of vector components and using `math.hypot(x, y, z)` is significantly faster than using `np.linalg.norm(v)` for small 3D vectors due to reduced dispatch and allocation overhead.
+**Action:** When computing the Euclidean norm of small, fixed-size vectors in Python, explicitly unpack them and use `math.hypot`.
