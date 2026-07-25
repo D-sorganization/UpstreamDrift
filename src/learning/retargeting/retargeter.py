@@ -6,13 +6,27 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
+
+
+_AXIS_EPS = 1e-12
+_IK_DEFAULT_ITERATIONS = 40
+_IK_TOLERANCE = 1e-8
+_IK_GRADIENT_EPS = 1e-10
+_IK_RESTARTS = 3
+_IK_RESTART_SEED = 20250724
+_IK_POOR_FIT_RMS = 0.05
 
 
 def _squared_euclidean_error(
@@ -80,6 +94,60 @@ def _validate_position_mapping(
         raise ValueError(f"{name} must be provided")
     for joint_name, position in positions.items():
         _validate_finite_array(position, name=f"{name}[{joint_name!r}]", shape=(3,))
+
+
+def _rodrigues(axis: NDArray[np.floating], angle: float) -> NDArray[np.floating]:
+    """Rotation matrix for ``angle`` radians about ``axis`` (Rodrigues formula).
+
+    Args:
+        axis: Rotation axis; need not be normalised. A zero axis yields the
+            identity, which is the correct behaviour for a fixed joint.
+        angle: Rotation angle in radians.
+
+    Returns:
+        A 3x3 rotation matrix.
+    """
+    a = np.asarray(axis, dtype=float)
+    norm = float(np.linalg.norm(a))
+    if norm < _AXIS_EPS:
+        return np.eye(3)
+    a = a / norm
+    c, s = np.cos(angle), np.sin(angle)
+    skew = np.array(
+        [[0.0, -a[2], a[1]], [a[2], 0.0, -a[0]], [-a[1], a[0], 0.0]], dtype=float
+    )
+    return np.eye(3) + s * skew + (1.0 - c) * (skew @ skew)
+
+
+def _topological_order(parent_indices: list[int]) -> list[int]:
+    """Return joint indices ordered so every parent precedes its children.
+
+    Args:
+        parent_indices: Parent index per joint, ``-1`` for roots.
+
+    Returns:
+        A valid processing order.
+
+    Raises:
+        ValueError: If the parent relation contains a cycle.
+    """
+    children: dict[int, list[int]] = {}
+    roots: list[int] = []
+    for idx, parent in enumerate(parent_indices):
+        if parent < 0:
+            roots.append(idx)
+        else:
+            children.setdefault(parent, []).append(idx)
+
+    order: list[int] = []
+    stack = list(reversed(roots))
+    while stack:
+        idx = stack.pop()
+        order.append(idx)
+        stack.extend(reversed(children.get(idx, [])))
+    if len(order) != len(parent_indices):
+        raise ValueError("parent_indices does not describe a forest (cycle detected)")
+    return order
 
 
 def _build_end_effector_chain_indices(
@@ -396,6 +464,16 @@ class MotionRetargeter:
             id(self.source): _build_end_effector_chain_indices(self.source),
             id(self.target): _build_end_effector_chain_indices(self.target),
         }
+        self._topological_orders: dict[int, list[int]] = {
+            id(self.source): _topological_order(list(self.source.parent_indices)),
+            id(self.target): _topological_order(list(self.target.parent_indices)),
+        }
+        #: Joints left at their initial value by the most recent mocap solve
+        #: because no marker constrains them (issue #7980).
+        self.unconstrained_joints: list[str] = []
+        #: Residual of the most recent mocap IK solve (sum of squared
+        #: centred position errors, in m^2).
+        self.last_ik_residual: float = 0.0
 
     def _end_effector_chains_for(
         self,
@@ -556,28 +634,63 @@ class MotionRetargeter:
         Returns:
             Dictionary of end-effector positions.
         """
-        joint_angles = _validate_joint_angles(joint_angles, skeleton)
+        joint_positions = self.forward_kinematics(joint_angles, skeleton)
         positions: dict[str, NDArray[np.floating]] = {}
-
-        # Compute forward kinematics for each end-effector
         for ee_name, chain_indices in self._end_effector_chains_for(skeleton).items():
-            position = np.zeros(3, dtype=float)
-
-            for idx in chain_indices:
-                offset = skeleton.joint_offsets[idx]
-                angle = joint_angles[idx]
-
-                # Simplified: assume z-axis rotation
-                c, s = np.cos(angle), np.sin(angle)
-                x, y, z = position
-                position[0] = c * x - s * y + offset[0]
-                position[1] = s * x + c * y + offset[1]
-                position[2] = z + offset[2]
-
-            positions[ee_name] = position
+            positions[ee_name] = joint_positions[chain_indices[-1]].copy()
 
         _validate_position_mapping(positions, name="positions")
         return positions
+
+    def forward_kinematics(
+        self,
+        joint_angles: NDArray[np.floating],
+        skeleton: SkeletonConfig,
+    ) -> NDArray[np.floating]:
+        """Compute world positions of every joint.
+
+        Each joint rotates about its own ``skeleton.joint_axes[i]`` (issue
+        #7980 - the previous implementation hardcoded a z-axis rotation and
+        never read ``joint_axes``). Rotations compose down the chain:
+        ``R_i = R_parent @ Rot(axis_i, theta_i)`` and
+        ``p_i = p_parent + R_parent @ offset_i``.
+
+        Args:
+            joint_angles: Angle per joint, shape ``(n_joints,)``.
+            skeleton: Skeleton whose offsets and axes are used.
+
+        Returns:
+            Joint positions, shape ``(n_joints, 3)``. The root sits at the
+            origin, so the output is expressed in the skeleton's own frame.
+        """
+        angles = _validate_joint_angles(joint_angles, skeleton)
+        n_joints = skeleton.n_joints
+        positions = np.zeros((n_joints, 3), dtype=float)
+        rotations = np.zeros((n_joints, 3, 3), dtype=float)
+        axes = skeleton.joint_axes
+        assert axes is not None  # guaranteed by SkeletonConfig.__post_init__
+
+        for idx in self._topological_order_for(skeleton):
+            parent = skeleton.parent_indices[idx]
+            if parent < 0:
+                parent_rot = np.eye(3)
+                parent_pos = np.zeros(3)
+            else:
+                parent_rot = rotations[parent]
+                parent_pos = positions[parent]
+            positions[idx] = parent_pos + parent_rot @ skeleton.joint_offsets[idx]
+            rotations[idx] = parent_rot @ _rodrigues(axes[idx], float(angles[idx]))
+
+        return positions
+
+    def _topological_order_for(self, skeleton: SkeletonConfig) -> list[int]:
+        """Cache the parents-before-children traversal order per skeleton."""
+        cache_key = id(skeleton)
+        order = self._topological_orders.get(cache_key)
+        if order is None:
+            order = _topological_order(list(skeleton.parent_indices))
+            self._topological_orders[cache_key] = order
+        return order
 
     def _compute_end_effector_error(
         self,
@@ -718,14 +831,42 @@ class MotionRetargeter:
             if marker_lookup_idx is not None:
                 mapped_marker_indices.append((marker_lookup_idx, joint_name))
 
+        previous: NDArray[np.floating] | None = None
+        worst_residual = 0.0
         for t in range(n_frames):
             # Extract joint positions from markers
             joint_positions = {}
             for marker_idx, joint_name in mapped_marker_indices:
                 joint_positions[joint_name] = marker_positions[t, marker_idx]
 
-            # Convert positions to joint angles via IK
-            target_motion[t] = self._positions_to_angles(joint_positions)
+            # Convert positions to joint angles via IK, warm-started from the
+            # previous frame (mocap is continuous, and a warm start keeps the
+            # solution branch consistent frame to frame).
+            solved = self._positions_to_angles(joint_positions, initial_angles=previous)
+            target_motion[t] = solved
+            previous = solved
+            worst_residual = max(worst_residual, self.last_ik_residual)
+
+        self.last_ik_residual = worst_residual
+        n_targets = max(1, len(mapped_marker_indices))
+        rms = float(np.sqrt(worst_residual / n_targets))
+        if rms > _IK_POOR_FIT_RMS:
+            logger.warning(
+                "retarget_from_mocap: worst-frame IK fit is %.3f m RMS per marker. "
+                "The target skeleton cannot reproduce the captured pose (check "
+                "joint_axes and joint_offsets); the returned angles are the best "
+                "available fit, not an exact solution.",
+                rms,
+            )
+
+        if self.unconstrained_joints:
+            logger.warning(
+                "retarget_from_mocap: %d of %d target joints are unconstrained by "
+                "the supplied markers and were left at their initial value: %s",
+                len(self.unconstrained_joints),
+                self.target.n_joints,
+                ", ".join(self.unconstrained_joints),
+            )
 
         _validate_motion_matrix(target_motion, self.target, name="target_motion")
         return target_motion
@@ -773,49 +914,154 @@ class MotionRetargeter:
     def _positions_to_angles(
         self,
         joint_positions: dict[str, NDArray[np.floating]],
+        initial_angles: NDArray[np.floating] | None = None,
+        max_iterations: int = _IK_DEFAULT_ITERATIONS,
     ) -> NDArray[np.floating]:
-        """Convert joint positions to joint angles via IK.
+        """Solve joint angles that place the target joints at ``joint_positions``.
+
+        This is a genuine numerical IK solve (issue #7980). The objective is
+        computed on **mean-centred** point sets, so it is invariant to rigid
+        translation of the capture volume - joint angles are a property of the
+        pose, not of where the subject stands. Only joints on a chain leading
+        to a constrained joint are optimised; the rest keep their initial value
+        and are reported in :attr:`unconstrained_joints`.
 
         Args:
-            joint_positions: Dictionary of joint positions.
+            joint_positions: Target world position per target-skeleton joint.
+            initial_angles: Warm start (usually the previous frame's solution).
+            max_iterations: Maximum gradient-descent iterations.
 
         Returns:
-            Joint angles.
-        """
-        # Start with zero angles
-        _validate_position_mapping(joint_positions, name="joint_positions")
-        angles = np.zeros(self.target.n_joints)
+            Joint angles, shape ``(n_joints,)``.
 
-        # For each kinematic chain ending at a positioned joint,
-        # solve IK to find joint angles
+        Raises:
+            ValueError: If ``max_iterations`` is not positive.
+        """
+        _validate_position_mapping(joint_positions, name="joint_positions")
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be >= 1")
+
+        n_joints = self.target.n_joints
+        angles = (
+            np.zeros(n_joints)
+            if initial_angles is None
+            else _validate_joint_angles(
+                initial_angles, self.target, name="initial_angles"
+            ).copy()
+        )
+
+        indices: list[int] = []
+        targets: list[NDArray[np.floating]] = []
+        free: set[int] = set()
         for joint_name, target_pos in joint_positions.items():
             if joint_name not in self.target.joint_names:
                 continue
+            idx = self.target.get_joint_index(joint_name)
+            indices.append(idx)
+            targets.append(np.asarray(target_pos, dtype=float))
+            walker = idx
+            while walker >= 0:
+                free.add(walker)
+                walker = self.target.parent_indices[walker]
 
-            # Get kinematic chain
-            chain = self.target.get_kinematic_chain(joint_name)
+        self.unconstrained_joints = [
+            name for j, name in enumerate(self.target.joint_names) if j not in free
+        ]
+        if not indices:
+            return angles
 
-            # Simple analytical IK for 2-link chains
-            if len(chain) >= 2:
-                # Compute angle using law of cosines
-                parent_idx = self.target.get_joint_index(chain[-2])
-                joint_idx = self.target.get_joint_index(chain[-1])
+        constrained = np.array(indices, dtype=int)
+        target_points = np.asarray(targets, dtype=float)
+        target_centred = target_points - target_points.mean(axis=0)
+        free_indices = np.array(sorted(free), dtype=int)
 
-                parent_offset = np.linalg.norm(self.target.joint_offsets[parent_idx])
-                joint_offset = np.linalg.norm(self.target.joint_offsets[joint_idx])
+        def objective(candidate: NDArray[np.floating]) -> float:
+            fk = self.forward_kinematics(candidate, self.target)[constrained]
+            residual = (fk - fk.mean(axis=0)) - target_centred
+            return float(np.vdot(residual, residual))
 
-                # Distance to target
-                dist = np.linalg.norm(target_pos)
+        best_angles, best_error = self._descend(
+            angles, objective, free_indices, max_iterations
+        )
 
-                if parent_offset + joint_offset > 0:
-                    # Law of cosines for elbow angle
-                    cos_angle = (parent_offset**2 + joint_offset**2 - dist**2) / (
-                        2 * parent_offset * joint_offset + 1e-6
-                    )
-                    cos_angle = np.clip(cos_angle, -1, 1)
-                    angles[parent_idx] = np.arccos(cos_angle)
+        # A zero (or symmetric) start can be a stationary point of the
+        # objective, so a plain descent would return it unchanged. Deterministic
+        # restarts distinguish "the solver stalled" from "the pose is not
+        # reachable by this skeleton" (issue #7980).
+        rng = np.random.default_rng(_IK_RESTART_SEED)
+        for _ in range(_IK_RESTARTS):
+            if best_error < _IK_TOLERANCE:
+                break
+            perturbation = np.zeros(n_joints)
+            perturbation[free_indices] = rng.normal(0.0, 0.5, size=len(free_indices))
+            candidate, candidate_error = self._descend(
+                self._clip_to_limits(angles + perturbation),
+                objective,
+                free_indices,
+                max_iterations,
+            )
+            if candidate_error < best_error:
+                best_angles, best_error = candidate, candidate_error
 
-        return angles
+        self.last_ik_residual = best_error
+        return best_angles
+
+    def _descend(
+        self,
+        start: NDArray[np.floating],
+        objective: Callable[[NDArray[np.floating]], float],
+        free_indices: NDArray[np.integer],
+        max_iterations: int,
+    ) -> tuple[NDArray[np.floating], float]:
+        """Backtracking numerical gradient descent over ``free_indices``.
+
+        Args:
+            start: Initial angles.
+            objective: Scalar objective to minimise.
+            free_indices: Indices allowed to move.
+            max_iterations: Iteration cap.
+
+        Returns:
+            ``(angles, error)`` for the best point found.
+        """
+        angles = start.copy()
+        error = objective(angles)
+        step = 0.5
+        eps = 1e-5
+        n_joints = len(angles)
+        for _ in range(max_iterations):
+            if error < _IK_TOLERANCE or step < 1e-8:
+                break
+            gradient = np.zeros(n_joints)
+            probe = angles.copy()
+            for j in free_indices:
+                probe[j] = angles[j] + eps
+                gradient[j] = (objective(probe) - error) / eps
+                probe[j] = angles[j]
+
+            grad_norm = float(np.linalg.norm(gradient))
+            if grad_norm < _IK_GRADIENT_EPS:
+                break
+
+            candidate = self._clip_to_limits(angles - step * gradient / grad_norm)
+            candidate_error = objective(candidate)
+            if candidate_error < error:
+                angles, error = candidate, candidate_error
+                step *= 1.2
+            else:
+                step *= 0.5
+
+        return angles, error
+
+    def _clip_to_limits(self, angles: NDArray[np.floating]) -> NDArray[np.floating]:
+        """Clamp angles into the target skeleton's joint limits, if declared."""
+        if self.target.joint_limits is None:
+            return angles
+        return np.clip(
+            angles,
+            self.target.joint_limits[:, 0],
+            self.target.joint_limits[:, 1],
+        )
 
     def get_joint_mapping(self) -> dict[str, str]:
         """Get the computed joint mapping.
