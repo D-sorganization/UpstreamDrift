@@ -80,16 +80,16 @@ RUN pip install \
     structlog==25.5.0 \
     colorama==0.4.6
 
-# Shared-code runtime deps imported at module top-level by
-# src/shared/python (pandas, matplotlib, sympy) and API routes that parse
-# XML (defusedxml). These used to come from the conda base; keep them
-# explicit for the slim build so the API import chain resolves.
+# Feature dependencies for the slim build. This block no longer patches the API
+# import chain (#8032): defusedxml and pandas are now core dependencies resolved
+# from requirements.lock, and matplotlib is imported under TYPE_CHECKING only.
+# matplotlib and sympy still back real container features (plotting, symbolic
+# controls), and pandas stays pinned here to hold the container on the 2.x line.
 # Pinned versions for reproducible builds
 RUN pip install \
     "pandas==2.3.3" \
     "matplotlib==3.10.8" \
-    "sympy==1.14.0" \
-    "defusedxml==0.7.1"
+    "sympy==1.14.0"
 
 # Pinocchio via pip (binary wheels available since 2024 — no conda needed)
 # Pinned versions for reproducible builds
