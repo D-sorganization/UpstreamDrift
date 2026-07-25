@@ -1,10 +1,41 @@
+"""Tests for the API-server bootstrap script.
+
+The script lives at ``scripts/ci/start_api_server.py``. ``scripts/ci`` is not on
+the pytest ``pythonpath``, so a bare ``import start_api_server`` never resolved
+and a conftest allowlist rule silently dropped this whole file from collection
+(#8006). It is loaded by path here and registered under its own name so the
+``monkeypatch.setattr("start_api_server.X", ...)`` string targets below resolve.
+"""
+
 from __future__ import annotations
 
+import importlib.util
 import os
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import start_api_server
+import pytest
+
+pytestmark = pytest.mark.unit
+
+_SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "ci" / "start_api_server.py"
+
+
+def _load_start_api_server():
+    """Import scripts/ci/start_api_server.py as the top-level ``start_api_server``."""
+    if not _SCRIPT.is_file():
+        raise AssertionError(f"expected the bootstrap script at {_SCRIPT}")
+    spec = importlib.util.spec_from_file_location("start_api_server", _SCRIPT)
+    if spec is None or spec.loader is None:
+        raise AssertionError(f"could not build an import spec for {_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["start_api_server"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+start_api_server = _load_start_api_server()
 
 
 def test_validate_security_no_issues(monkeypatch) -> None:

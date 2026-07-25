@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import sys
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -229,15 +230,34 @@ def test_run_simulation_without_gl_still_updates_metrics(
 
 
 def test_animation_advances_index(widget: PuttingGreenWidget) -> None:
+    """`_advance_animation` must step the index and push the ball position.
+
+    This was red because `_advance_animation` returns early when `_ball_item`
+    is None, and `_ball_item` is only created on the pyqtgraph.opengl path --
+    an OPTIONAL extra (`body-part-viz-gl`) that is absent from the default
+    install. The stepping logic itself was never broken (#8039). Injecting a
+    stub ball item tests that logic in every environment instead of silently
+    depending on a GPU stack.
+    """
     widget._run_simulation()
+    ball_item = MagicMock()
+    widget._ball_item = ball_item
     widget._anim_index = 0
+
     widget._advance_animation()
+    first_index = widget._anim_index
+    assert first_index > 0, "index must advance on the first step"
+
     widget._advance_animation()
-    assert widget._anim_index > 0
+    assert widget._anim_index > first_index, "index must keep advancing"
+
+    # The ball must actually be repositioned, not just counted.
+    assert ball_item.setData.call_count == 2
 
 
 def test_animation_stops_at_end(widget: PuttingGreenWidget) -> None:
     widget._run_simulation()
+    widget._ball_item = MagicMock()
     widget._anim_index = widget._scene.trajectory_xyz.shape[0] + 5
     widget._advance_animation()
     assert not widget._anim_timer.isActive()

@@ -118,7 +118,13 @@ def test_run_simulation_updates_results_text_with_inputs(
     assert "Entry Depth:   5.0 cm" in text
     # Kinetic energy: 0.5 * 0.3 * 40^2 = 240.0
     assert "Est. Force:    240.0 N" in text
-    assert "Chrono DEM simulation mock completed." in text
+    # The tool no longer claims a completed simulation: the Chrono DEM backend
+    # is not wired, and the widget now says so honestly (#8039). If this string
+    # changes because the physics landed, the assertion must be replaced with a
+    # real result check, not just re-pinned.
+    assert "[Preview only" in text
+    assert "Chrono DEM physics not yet wired" in text
+    assert "simulation mock completed" not in text
 
 
 def test_run_simulation_kinetic_energy_formula(widget: BunkerShotWidget) -> None:

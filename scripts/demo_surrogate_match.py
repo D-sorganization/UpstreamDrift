@@ -15,7 +15,7 @@ requiring a Simulink license.  It:
 
 Usage::
 
-    cd C:/Users/diete/Repositories/UpstreamDrift
+    cd <repository root>
     python3 scripts/demo_surrogate_match.py
 
 Optional arguments::

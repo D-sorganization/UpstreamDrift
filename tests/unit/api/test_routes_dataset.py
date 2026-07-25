@@ -43,14 +43,18 @@ def client(app: FastAPI) -> TestClient:
 
 
 def test_get_plot_types(client: TestClient) -> None:
-    """Test getting plot types."""
-    # This might fail if gui_pkg isn't importable, mock if needed
-    try:
-        response = client.get("/dataset/plots/types")
-        assert response.status_code == 200
-        assert isinstance(response.json(), list)
-    except Exception:  # noqa: BLE001 - tolerate missing optional deps in test env
-        pass
+    """Test getting plot types.
+
+    The whole body used to sit in `try: ... except Exception: pass`, so this
+    test could not fail (#8035). The endpoint is served by the app fixture in
+    this module with its dependencies overridden, so there is no optional-import
+    hazard to tolerate -- it either responds correctly or the test fails.
+    """
+    response = client.get("/dataset/plots/types")
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert isinstance(payload, list)
 
 
 def test_get_export_formats(client: TestClient) -> None:
