@@ -8,6 +8,7 @@ by reloading it explicitly and inspecting its re-exports list.
 from __future__ import annotations
 
 import importlib
+import pkgutil
 
 
 def test_package_imports_cleanly() -> None:
@@ -62,18 +63,24 @@ def _parse_all_from_init() -> list[str]:
 
 def test_all_public_names_can_be_imported_from_submodules() -> None:
     """Every name in __init__'s __all__ resolves from at least one submodule."""
-    submodules = [
-        "src.shared.python.config.config_utils",
-        "src.shared.python.config.configuration_manager",
-        "src.shared.python.config.environment",
-        "src.shared.python.config.handedness_support",
-        "src.shared.python.config.model_pack_manifest",
-        "src.shared.python.config.model_registry",
-        "src.shared.python.config.model_source_providers",
-        "src.shared.python.config.provider_catalog",
-        "src.shared.python.config.standard_models",
-    ]
-    mods = [importlib.import_module(name) for name in submodules]
+    # Discover submodules instead of hardcoding them. The previous hardcoded
+    # list omitted `setup_wizard`, so `SetupValidationIssue` looked unprovided
+    # and this test was red on main even though the re-export was correct
+    # (#8038). A hardcoded list re-breaks every time a submodule is added.
+    package = importlib.import_module("src.shared.python.config")
+    submodules = sorted(
+        f"src.shared.python.config.{info.name}"
+        for info in pkgutil.iter_modules(package.__path__)
+        if not info.name.startswith("_")
+    )
+    assert submodules, "no submodules discovered under src.shared.python.config"
+
+    mods = []
+    for name in submodules:
+        try:
+            mods.append(importlib.import_module(name))
+        except ImportError:  # optional stack absent in this configuration
+            continue
     names = _parse_all_from_init()
     assert names, "Failed to parse __all__ from __init__.py"
     for name in names:
