@@ -147,7 +147,8 @@ def validate_script_path(script_path: Path, suite_root: Path) -> None:
         # Ensure script is within the suite or an explicitly trusted sibling.
         if not in_suite and not in_sibling:
             raise SecureSubprocessError(
-                f"Script path outside allowed suite/sibling directories: {abs_script}"
+                "Script path outside allowed suite/tools directories or trusted "
+                f"siblings: {abs_script}"
             )
 
         # Check if script is in allowed directory
