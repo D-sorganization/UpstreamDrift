@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.core.constants import GRAVITY
+
 from src.research.mpc.controller import (
     Constraint,
     CostFunction,
@@ -239,15 +241,36 @@ class TestCentroidalMPC:
         assert cmpc._contact_positions[0][0] == 1
 
     def test_dynamics(self, fake_engine) -> None:
+        """A truly gravity-cancelling force leaves linear momentum unchanged.
+
+        This was red on main with a 3.35e-5 residual in z (#8038). The dynamics
+        were correct: the test hardcoded `9.81` while `CentroidalMPC` uses the
+        shared `GRAVITY` constant (9.80665), so the applied force overshot by
+        `mass * 0.00335 N` and the Euler step integrated the difference:
+        `(9.81 - 9.80665) * dt = 3.35e-5`. Using the same constant as the model
+        makes the cancellation exact rather than approximate.
+        """
         cmpc = CentroidalMPC(fake_engine, horizon=2, dt=0.01, n_contacts=2)
         x = np.zeros(9)
         x[2] = 1.0  # com z
         u = np.zeros(6)
-        u[2] = 50.0 * 9.81  # gravity-cancelling normal force
+        u[2] = cmpc._mass * GRAVITY  # gravity-cancelling normal force
         x_next = cmpc._dynamics(x, u)
         assert x_next.shape == (9,)
-        # acceleration ~ 0 -> velocity ~0
-        np.testing.assert_allclose(x_next[3:6], 0.0, atol=1e-6)
+        # acceleration == 0 -> velocity unchanged (exactly, to float precision)
+        np.testing.assert_allclose(x_next[3:6], 0.0, atol=1e-12)
+
+    def test_dynamics_gravity_only_matches_analytic_free_fall(
+        self, fake_engine
+    ) -> None:
+        """With zero contact force the step must be exactly `g * dt` in z."""
+        cmpc = CentroidalMPC(fake_engine, horizon=2, dt=0.01, n_contacts=2)
+        x = np.zeros(9)
+        x[2] = 1.0
+        x_next = cmpc._dynamics(x, np.zeros(6))
+        np.testing.assert_allclose(
+            x_next[3:6], np.array([0.0, 0.0, -GRAVITY * 0.01]), atol=1e-12
+        )
 
     def test_friction_cone_constraints(self, fake_engine) -> None:
         cmpc = CentroidalMPC(fake_engine, horizon=2, n_contacts=2)
