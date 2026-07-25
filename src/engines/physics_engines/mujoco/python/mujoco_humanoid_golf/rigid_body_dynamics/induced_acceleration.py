@@ -121,6 +121,48 @@ class MuJoCoInducedAccelerationAnalyzer:
             "total": total,
         }
 
+    def _body_world_acceleration(self, body_id: int) -> np.ndarray:
+        """Return the classical world-frame linear acceleration of a body origin.
+
+        MuJoCo only fills ``data.cacc`` (and the rest of the constraint-aware
+        acceleration fields) inside :func:`mujoco.mj_rnePostConstraint`, which is
+        not part of ``mj_forward``/``mj_step``. Reading ``data.cacc`` without
+        calling it therefore yields a zero vector.
+
+        ``data.cacc`` is also a *spatial* acceleration expressed in the com-based
+        frame (world-aligned axes, origin at the subtree COM), not a body-local
+        vector, so it cannot be converted with ``xmat``. :func:`mj_objectAcceleration`
+        performs the correct ``a_O + alpha x r + omega x v_p`` transfer to the body
+        origin; its result is the *proper* (accelerometer-style) acceleration, so
+        gravity is added back to recover the coordinate acceleration.
+
+        Args:
+            body_id: MuJoCo body id.
+
+        Returns:
+            World-frame linear acceleration of the body origin [3].
+        """
+        if body_id < 0 or body_id >= self.model.nbody:
+            raise ValueError(
+                f"body_id must be in [0, {self.model.nbody}), got {body_id}"
+            )
+
+        # Populates data.cacc / data.cfrc_int / data.cfrc_ext.
+        mujoco.mj_rnePostConstraint(self.model, self.data)
+
+        spatial = np.zeros(6)
+        mujoco.mj_objectAcceleration(
+            self.model,
+            self.data,
+            mujoco.mjtObj.mjOBJ_BODY,
+            body_id,
+            spatial,
+            0,  # flg_local=0 -> world-aligned axes
+        )
+
+        # spatial = [angular(3), linear(3)]; MuJoCo reports proper acceleration.
+        return np.asarray(spatial[3:6]) + np.asarray(self.model.opt.gravity)
+
     def compute_task_space_components(
         self, body_name: str, qdd_comps: InducedAccelerationResult | None = None
     ) -> dict[str, np.ndarray] | None:
@@ -145,16 +187,14 @@ class MuJoCoInducedAccelerationAnalyzer:
         if body_id == -1:
             return None
 
-        # 1. Capture Current Dynamic State (Before any potential modification)
-        # We need this for the "Bias" term calculation.
-        # cacc: (3 rotational, 3 linear) in local body frame
-        cacc_local = self.data.cacc[body_id].copy()
-        xmat = self.data.xmat[body_id].reshape(3, 3).copy()
-
-        # 2. Get Joint Space Components
-        # If not provided, compute them (this might temp modify data, but restores it)
+        # 1. Get Joint Space Components
+        # If not provided, compute them (this might temp modify data, but restores it
+        # and leaves a consistent forward pass behind).
         if qdd_comps is None:
             qdd_comps = self.compute_components()
+
+        # 2. Capture the true world-frame linear acceleration of the body origin.
+        a_total_actual_world = self._body_world_acceleration(body_id)
 
         # 3. Get Jacobian (Linear)
         # Reshape buffers
@@ -171,10 +211,6 @@ class MuJoCoInducedAccelerationAnalyzer:
         # 5. Compute Bias (J_dot * q_dot)
         # We derive this from total acceleration.
         # a_total_actual = J * qdd_total_actual + J_dot * q_dot
-
-        # Transform actual total acceleration to World Frame
-        a_local_linear = cacc_local[3:6]
-        a_total_actual_world = xmat @ a_local_linear
 
         # qdd_total_actual should match sum(qdd_comps)
         qdd_total = qdd_comps["total"]
