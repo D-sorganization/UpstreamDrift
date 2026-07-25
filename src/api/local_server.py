@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import mimetypes
 import os
-import secrets
 import threading
 import time
 from collections.abc import Callable
@@ -63,6 +62,10 @@ from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from src.api._version import __version__  # noqa: E402
+from src.api.auth.ws_auth import (  # noqa: E402
+    install_launcher_capability_token,
+    new_launcher_csrf_token,
+)
 from src.api.debug_guard import debug_endpoints_enabled  # noqa: E402
 from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
@@ -271,7 +274,7 @@ def _load_launcher_manifest() -> dict[str, Any]:
 
 def _new_launcher_csrf_token() -> str:
     """Generate the local launcher capability token for mutating endpoints."""
-    return secrets.token_urlsafe(32)
+    return new_launcher_csrf_token()
 
 
 def _is_loopback_origin(value: str) -> bool:
@@ -504,7 +507,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
     _repo_root = Path(__file__).parent.parent.parent
     _launcher_service = LauncherService(repo_root=_repo_root)
     app.state.process_manager = _launcher_service.process_manager
-    app.state.launcher_csrf_token = _new_launcher_csrf_token()
+    install_launcher_capability_token(app)
 
     @app.get("/api/launcher/manifest")
     async def get_launcher_manifest() -> dict[str, Any]:

@@ -20,6 +20,7 @@ absent or the token is invalid the socket is closed with code 1008
 from __future__ import annotations
 
 import logging
+import secrets
 from secrets import compare_digest
 from urllib.parse import urlparse
 
@@ -35,6 +36,42 @@ logger = logging.getLogger(__name__)
 _WS_CLOSE_POLICY_VIOLATION = 1008
 _WS_TOKEN_QUERY_KEYS = ("launcher_token", "launcher_csrf_token")
 _WS_TOKEN_PROTOCOL_PREFIX = "launcher-token."
+
+
+def new_launcher_csrf_token() -> str:
+    """Mint the local launcher capability token.
+
+    Every app that serves local-mode WebSockets must publish one of these on
+    ``app.state.launcher_csrf_token``; :func:`enforce_local_websocket_guard`
+    compares the client's proof against it. An app that omits it rejects
+    *every* local WebSocket, because the empty expected token can never match
+    (issue #8075).
+    """
+    return secrets.token_urlsafe(32)
+
+
+def install_launcher_capability_token(app: object) -> str:
+    """Ensure ``app.state.launcher_csrf_token`` holds a usable token.
+
+    Idempotent: an already-provisioned token is returned unchanged so a
+    restart of one subsystem cannot invalidate proofs already handed out.
+
+    Returns:
+        The token now published on the app state.
+    """
+    if app is None:
+        raise ValueError("app must be provided")
+    state = getattr(app, "state", None)
+    if state is None:
+        raise ValueError("app must expose a Starlette-style .state")
+
+    existing = getattr(state, "launcher_csrf_token", "")
+    if isinstance(existing, str) and existing:
+        return existing
+
+    token = new_launcher_csrf_token()
+    state.launcher_csrf_token = token
+    return token
 
 
 def _is_loopback_origin(value: str) -> bool:

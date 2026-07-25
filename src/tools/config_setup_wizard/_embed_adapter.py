@@ -9,7 +9,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-__all__ = ["ConfigSetupWizardAdapter"]
+__all__ = ["ConfigSetupWizardAdapter", "get_dockable_ui"]
 
 
 class ConfigSetupWizardAdapter:
@@ -34,7 +34,12 @@ class ConfigSetupWizardAdapter:
     def create_main_widget(self, parent: Any = None) -> Any:
         """Create and return the wizard's main widget."""
 
-        from .gui import ConfigSetupWizardWidget
+        # Absolute, not relative: the launcher loads this file by path
+        # (``spec_from_file_location``) and also runs it as a script, and in
+        # both cases the module has no parent package, so ``from .gui`` died
+        # with "attempted relative import with no known parent package"
+        # (#8067). The module's other imports are already absolute.
+        from src.tools.config_setup_wizard.gui import ConfigSetupWizardWidget
 
         widget = ConfigSetupWizardWidget(parent=parent)
         self._widgets.append(widget)
@@ -58,6 +63,19 @@ class ConfigSetupWizardAdapter:
         return False
 
 
+def get_dockable_ui(parent: Any = None) -> Any:
+    """Return the wizard widget for the launcher's dockable-tile contract.
+
+    ``models.yaml`` points the Setup Wizard tile at this module, and
+    ``SpecialAppHandler.get_dockable_ui`` discovers tiles by loading their
+    target file and looking for a module-level ``get_dockable_ui``. Without
+    it the handler fell through to running this module as a *script*, which
+    only re-registers the adapter and exits -- so the launcher reported
+    "Setup Wizard Launched" while no window or tab ever appeared (#8067).
+    """
+    return ConfigSetupWizardAdapter().create_main_widget(parent)
+
+
 def _register_adapter() -> None:
     """Register this adapter when the bootstrap imports the module directly."""
 
@@ -72,3 +90,27 @@ def _register_adapter() -> None:
 
 
 _register_adapter()
+
+
+def _run_standalone() -> int:
+    """Show the wizard in its own window when this module is run as a script.
+
+    The launcher falls back to spawning the tile's target file as a
+    subprocess whenever embedding is unavailable. Without a ``__main__``
+    body that path started a process which exited instantly, and the user
+    saw a success toast with nothing behind it (#8067).
+    """
+    import sys
+
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication.instance() or QApplication(sys.argv)
+    widget = get_dockable_ui()
+    widget.setWindowTitle(ConfigSetupWizardAdapter.display_name)
+    widget.resize(*ConfigSetupWizardAdapter().embed_capabilities().min_size)
+    widget.show()
+    return int(app.exec())
+
+
+if __name__ == "__main__":
+    raise SystemExit(_run_standalone())

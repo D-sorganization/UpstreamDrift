@@ -38,6 +38,7 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 # Configure logging - use centralized logging config
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
+from .auth.ws_auth import install_launcher_capability_token
 from .config import (
     get_allowed_hosts,
     get_cors_origins,
@@ -301,6 +302,17 @@ app.add_middleware(
     # SECURITY: Restrict headers - do NOT use "*"
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
+
+# Local launcher capability token.
+#
+# ``enforce_local_websocket_guard`` compares each local-mode WebSocket's proof
+# against ``app.state.launcher_csrf_token``. Only ``local_server.py`` used to
+# publish one, so the app the desktop launcher actually runs
+# (``python -m src.api.server``) left it unset -- and an unset expected token
+# can never match. Every local WebSocket was refused with a 1008 close, which
+# the Sidekick chat dock surfaced as a permanent
+# "Disconnected - retrying in 3s..." (issue #8075).
+install_launcher_capability_token(app)
 
 # Rate limiting
 app.state.limiter = limiter
