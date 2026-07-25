@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
+from src.launchers.launcher_model_handlers import SpecialAppHandler
 from src.shared.python.config.setup_wizard import (
     SetupValidationIssue,
     SetupWizardViewModel,
@@ -15,6 +18,7 @@ from src.shared.python.launcher_embed import (
     EmbeddableTool,
 )
 from src.tools.config_setup_wizard._embed_adapter import ConfigSetupWizardAdapter
+from src.tools.config_setup_wizard.gui import ConfigSetupWizardWidget
 
 pytestmark = [pytest.mark.unit]
 
@@ -167,3 +171,22 @@ def test_embed_adapter_is_headless_protocol_compliant() -> None:
 
 def test_embed_adapter_registers_on_import() -> None:
     assert "config_setup_wizard" in EMBEDDABLE_TOOL_REGISTRY
+
+
+def test_launcher_opens_registered_setup_wizard_instead_of_adapter_script(
+    qapp, tmp_path
+) -> None:
+    """The manifest tile must create a usable embedded wizard, not exit cleanly."""
+    model = SimpleNamespace(
+        id="config_setup_wizard",
+        name="Setup Wizard",
+        path="src/tools/config_setup_wizard/_embed_adapter.py",
+        type="special_app",
+    )
+
+    widget = SpecialAppHandler().get_dockable_ui(model, repo_path=tmp_path)
+
+    assert isinstance(widget, ConfigSetupWizardWidget)
+    assert widget._status.text().endswith("needs fixes")
+    assert "Fix:" in widget._output.toPlainText()
+    widget.deleteLater()

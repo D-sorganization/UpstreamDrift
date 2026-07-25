@@ -25,11 +25,29 @@ from src.config.launcher_manifest_loader import (
     LauncherManifest,
     WebLaunchContract,
 )
+from src.shared.python.config.model_registry import ModelRegistry
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 APP_TSX = REPO_ROOT / "ui" / "src" / "App.tsx"
 
 pytestmark = pytest.mark.parity
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_MODELS_YAML = _REPO_ROOT / "src" / "config" / "models.yaml"
+_MANIFEST_JSON = _REPO_ROOT / "src" / "config" / "launcher_manifest.json"
+
+# ``models.yaml`` is the primary PyQt6 launch contract.  Shared tiles must
+# expose the same native launch semantics through the manifest API.
+# ``web_route`` and ``capabilities`` are deliberately excluded: they are
+# web-catalog hints with no native-launch counterpart, not replacements for
+# the native target.
+_SHARED_SEMANTIC_FIELDS = (
+    "category",
+    "status",
+    "type",
+    "path",
+    "engine_type",
+)
 
 # =============================================================================
 # Fixtures
@@ -165,6 +183,47 @@ class TestParity:
         parsed = json.loads(json_str)
         assert len(parsed["tiles"]) == len(manifest.visible_tiles), (
             "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
+        )
+
+    def test_shared_tiles_match_the_native_pyqt6_semantic_contract(self) -> None:
+        """Shared IDs retain the native category, target, and engine semantics.
+
+        ``web_route`` and capability tags intentionally remain web-only
+        catalog metadata; neither may substitute for ``path``.
+        """
+        native_by_id = {
+            model.id: model
+            for model in ModelRegistry(config_path=_MODELS_YAML).get_all_models()
+        }
+        manifest = LauncherManifest.load(
+            _MANIFEST_JSON, include_provider_tiles=False, registry_path=_MODELS_YAML
+        )
+        shared_by_id = {
+            tile.id: tile for tile in manifest.tiles if tile.id in native_by_id
+        }
+
+        mismatches: dict[str, dict[str, tuple[object, object]]] = {}
+        for tile_id, tile in shared_by_id.items():
+            native = native_by_id[tile_id]
+            native_launcher = native.launcher
+            assert native_launcher is not None
+            native_fields = {
+                "category": native_launcher.category,
+                "status": native_launcher.status,
+                "type": native.type,
+                "path": native.path,
+                "engine_type": native.engine_type,
+            }
+            field_differences = {
+                field: (native_fields[field], getattr(tile, field))
+                for field in _SHARED_SEMANTIC_FIELDS
+                if native_fields[field] != getattr(tile, field)
+            }
+            if field_differences:
+                mismatches[tile_id] = field_differences
+
+        assert not mismatches, (
+            f"Shared launcher tiles drift from the primary PyQt6 contract: {mismatches}"
         )
 
 

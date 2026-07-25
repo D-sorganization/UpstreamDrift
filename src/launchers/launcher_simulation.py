@@ -33,7 +33,10 @@ from src.launchers.launcher_model_sources import (
 )
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.secure_subprocess import secure_popen
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
 from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
@@ -1059,12 +1062,12 @@ except (RuntimeError, TypeError, AttributeError) as e:
             logger.error(f"Failed to launch Shot Tracer: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
 
-    def _launch_matlab_app(self, app: Any) -> None:
-        """Launch a MATLAB-based application with proper desktop GUI."""
+    def _launch_matlab_app(self, app: Any) -> bool:
+        """Launch a MATLAB application and report whether the launch was initiated."""
         app_path = getattr(app, "path", None)
         if not app_path:
             self.show_toast("Invalid MATLAB configuration.", "error")
-            return
+            return False
 
         self.show_toast(f"Launching MATLAB: {app.name}...", "info")
 
@@ -1100,9 +1103,22 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
             self.running_processes[app.id] = process
             self.show_toast(f"{app.name} launch initiated.", "success")
+            return True
 
         except FileNotFoundError:
             self.show_toast("MATLAB executable not found in PATH.", "error")
+            return False
+        except SecureSubprocessError as exc:
+            if isinstance(exc.__cause__, FileNotFoundError):
+                self.show_toast("MATLAB executable not found in PATH.", "error")
+                return False
+            logger.exception("Failed to launch MATLAB app")
+            self.show_toast(
+                "MATLAB could not be started. Verify its installation and PATH.",
+                "error",
+            )
+            return False
         except (PermissionError, OSError) as e:
             logger.error(f"Failed to launch MATLAB app: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
+            return False

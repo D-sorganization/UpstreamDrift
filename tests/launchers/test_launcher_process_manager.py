@@ -74,6 +74,20 @@ def test_get_subprocess_env_includes_extra_python_paths(manager):
     assert env["PYTHONPATH"].count(expected) == 1
 
 
+def test_validate_context_path_accepts_movement_optimizer_sibling(
+    tmp_path: Path,
+) -> None:
+    """Trusted provider siblings may be used as launcher subprocess cwd values."""
+    repo_root = tmp_path / "UpstreamDrift"
+    repo_root.mkdir()
+    optimizer_root = tmp_path / "Movement_Optimizer"
+    optimizer_root.mkdir()
+    (optimizer_root / "src").mkdir()
+    manager = ProcessManager(repo_root=repo_root)
+
+    assert manager._validate_context_path(optimizer_root) == optimizer_root
+
+
 @patch("src.launchers.launcher_process_manager.datetime")
 @patch("builtins.open", new_callable=mock_open)
 def test_write_log_line(mock_open_file, mock_datetime, manager) -> None:
@@ -237,6 +251,30 @@ def test_launch_module_unified(mock_secure_popen, manager) -> None:
         res = manager.launch_module("Test", "my_module", PureWindowsPath("/fake/cwd"))
         mock_secure_popen.assert_called_once()
         assert res is not None
+
+
+@patch(_SECURE_POPEN)
+def test_launch_module_preserves_sibling_python_path_with_explicit_env(
+    mock_secure_popen, manager, tmp_path: Path
+) -> None:
+    """An explicit child environment must retain a sibling package's ``src``."""
+    manager.use_separate_terminals = False
+    sibling_src = tmp_path / "Movement_Optimizer" / "src"
+
+    with patch("threading.Thread"):
+        result = manager.launch_module(
+            "Movement Optimizer",
+            "movement_optimizer",
+            PureWindowsPath("."),
+            env={"PYTHONPATH": "custom-path", "TEST_FLAG": "preserved"},
+            extra_python_paths=(sibling_src,),
+        )
+
+    assert result is not None
+    passed_env = mock_secure_popen.call_args.kwargs["env"]
+    assert str(sibling_src) in passed_env["PYTHONPATH"]
+    assert "custom-path" in passed_env["PYTHONPATH"]
+    assert passed_env["TEST_FLAG"] == "preserved"
 
 
 @patch(_SECURE_POPEN, side_effect=OSError("Boom"))

@@ -46,6 +46,10 @@ def main() -> None:
     _load_gui_module().main()
 
 
+if __name__ == "__main__":
+    main()
+
+
 __all__ = [
     "MultiModelShotTracerWidget",
     "MultiModelShotTracerWindow",

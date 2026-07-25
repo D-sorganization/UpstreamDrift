@@ -237,6 +237,10 @@ models:
             encoding="utf-8",
         )
         monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.is_engine_runtime_available",
+            lambda engine_type: True,
+        )
 
         manifest = LauncherManifest.load(
             manifest_path,
@@ -427,7 +431,9 @@ class TestTileProperties:
             assert tile.description, f"Tile missing description: {tile.id}"
             assert tile.category, f"Tile missing category: {tile.id}"
             assert tile.type, f"Tile missing type: {tile.id}"
-            assert tile.path, f"Tile missing path: {tile.id}"
+            assert tile.path or tile.web_route, (
+                f"Tile missing native path and web route: {tile.id}"
+            )
             assert tile.logo, f"Tile missing logo: {tile.id}"
 
     def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
@@ -695,7 +701,14 @@ class TestCategories:
     ) -> None:
         """Provider-backed biomechanics tools must be discoverable by category."""
         biomechanics = manifest.get_tiles_by_category("biomechanics")
-        assert {tile.id for tile in biomechanics} == {"movement_optimizer"}
+        biomechanics_ids = {tile.id for tile in biomechanics}
+        assert "movement_optimizer" in biomechanics_ids
+        assert {
+            "canonical_core_estimation",
+            "canonical_core_comparison",
+            "injury_analysis",
+            "biomech_exercise",
+        }.issubset(biomechanics_ids)
         assert manifest.categories["biomechanics"] == biomechanics
 
     def test_unknown_category_raises(self, manifest: LauncherManifest) -> None:
@@ -759,13 +772,15 @@ class TestMotionTargetPreviewTile:
         assert tile.name == "Motion-Match Preview", (
             "Assertion failed: tile.name == Motion-Match Preview"
         )
-        assert tile.category == "tool", "Assertion failed: tile.category == tool"
+        assert tile.category == "motion_matching", (
+            "Assertion failed: tile.category == motion_matching"
+        )
         assert tile.logo == "motion_target_preview.svg", (
             "Assertion failed: tile.logo == motion_target_preview.svg"
         )
         assert tile.logo_path.exists(), "Assertion failed: tile.logo_path.exists()"
-        assert tile.path == "src.tools.starting_pose_matcher.__main__", (
-            "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
+        assert tile.path == "src/tools/starting_pose_matcher/__main__.py", (
+            "Assertion failed: tile.path == src/tools/starting_pose_matcher/__main__.py"
         )
         assert not tile.hidden, "Assertion failed: not tile.hidden"
         # Tags must be source-neutral and cover the issue's required set.

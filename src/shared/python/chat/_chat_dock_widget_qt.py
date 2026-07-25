@@ -758,7 +758,10 @@ class ChatDockWidget(QDockWidget):
         self._memory_panel_window = panel
 
     def _on_disconnected(self) -> None:
-        self._status_label.setText("Disconnected - retrying in 3s...")
+        self._status_label.setText(
+            "Sidekick API unavailable — retrying in 3s. "
+            "Start the local API server or set UD_CHAT_WS_URL."
+        )
         self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
         self._is_streaming = False
         self._send_btn.setEnabled(True)
