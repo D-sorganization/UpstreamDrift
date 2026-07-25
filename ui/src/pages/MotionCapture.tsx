@@ -12,6 +12,15 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { apiFetch, apiFetchForm } from '@/api/fetch';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 
+/**
+ * Load state for the capture-source catalogue (issue #8080).
+ *
+ * `ready` with an empty `sources` array is a real, renderable outcome — the
+ * backend can legitimately report no configured sources — and must not be
+ * confused with `loading`.
+ */
+export type SourcesStatus = 'loading' | 'ready' | 'error';
+
 /** Capture source from the API. See issues #1206, #7454 */
 export interface CaptureSource {
   id: string;
@@ -202,6 +211,10 @@ export function MotionCapturePage() {
   // Source list and selection are driven entirely by GET /capture/sources —
   // no hardcoded source list or default (issue #7454).
   const [sources, setSources] = useState<CaptureSource[]>([]);
+  // #8080: an empty source list is no longer overloaded to mean "still
+  // loading". These three states are rendered distinctly.
+  const [sourcesStatus, setSourcesStatus] = useState<SourcesStatus>('loading');
+  const [sourcesError, setSourcesError] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<string>('');
   const [joints, setJoints] = useState<JointData[]>([]);
   const [recordings, setRecordings] = useState<RecordingInfo[]>([]);
@@ -214,22 +227,45 @@ export function MotionCapturePage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch available sources; default-select the first available one
-  useEffect(() => {
-    async function fetchSources() {
-      try {
-        const data = await apiFetch<CaptureSource[]>('/api/tools/motion-capture/sources');
-        setSources(data);
-        const firstAvailable = data.find((s) => s.available);
-        if (firstAvailable) {
-          setSelectedSource((prev) => prev || firstAvailable.type);
-        }
-      } catch {
-        // API may not be available
+  // Fetch available sources; default-select the first available one.
+  //
+  // #8080: this used to swallow every failure into an empty `sources` array,
+  // and the sidebar rendered "Loading sources..." whenever that array was
+  // empty. A refused connection, a 404, a malformed body, and a genuinely
+  // empty catalogue were therefore indistinguishable — all three showed a
+  // spinner that never resolved and offered no retry. The request also had no
+  // timeout, so a hung API left the promise pending forever.
+  //
+  // The load now drives an explicit state machine (loading | ready | error)
+  // with a retry action, and each terminal state renders differently.
+  const loadSources = useCallback(async () => {
+    setSourcesStatus('loading');
+    setSourcesError(null);
+    try {
+      const data = await apiFetch<CaptureSource[]>(
+        '/api/tools/motion-capture/sources',
+      );
+      if (!Array.isArray(data)) {
+        throw new Error('Capture-source response was not a list');
       }
+      setSources(data);
+      setSourcesStatus('ready');
+      const firstAvailable = data.find((s) => s.available);
+      if (firstAvailable) {
+        setSelectedSource((prev) => prev || firstAvailable.type);
+      }
+    } catch (err) {
+      setSources([]);
+      setSourcesStatus('error');
+      setSourcesError(
+        err instanceof Error ? err.message : 'Failed to load capture sources',
+      );
     }
-    fetchSources();
   }, []);
+
+  useEffect(() => {
+    void loadSources();
+  }, [loadSources]);
 
   // Fetch skeleton template when source changes (joint sets come from the
   // backend — never hardcoded in the UI; issue #7454)
@@ -455,9 +491,54 @@ export function MotionCapturePage() {
             </button>
           ))}
 
-          {sources.length === 0 && (
-            <div className="text-xs text-gray-400 italic text-center py-2">
+          {/* #8080: three distinct terminal states, never an endless spinner. */}
+          {sourcesStatus === 'loading' && (
+            <div
+              className="text-xs text-gray-400 italic text-center py-2"
+              data-testid="sources-loading"
+            >
               Loading sources...
+            </div>
+          )}
+
+          {sourcesStatus === 'error' && (
+            <div
+              className="space-y-2 rounded border border-red-500/40 bg-red-950/30 p-2.5"
+              data-testid="sources-error"
+              role="alert"
+            >
+              <div className="text-xs font-medium text-red-300">
+                Capture sources unavailable
+              </div>
+              <div className="text-xs text-red-200/80 break-words">
+                {sourcesError ?? 'The motion-capture service did not respond.'}
+              </div>
+              <div className="text-xs text-gray-400">
+                Check that the API server is running, then retry.
+              </div>
+              <button
+                type="button"
+                data-testid="sources-retry"
+                onClick={() => void loadSources()}
+                className="w-full rounded bg-red-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-red-500"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {sourcesStatus === 'ready' && sources.length === 0 && (
+            <div
+              className="space-y-1 rounded border border-gray-700 bg-gray-800/50 p-2.5"
+              data-testid="sources-empty"
+            >
+              <div className="text-xs font-medium text-gray-300">
+                No capture sources configured
+              </div>
+              <div className="text-xs text-gray-400">
+                The service reported an empty catalogue. Install a capture
+                backend (MediaPipe, OpenPose) or upload a C3D recording.
+              </div>
             </div>
           )}
         </div>
