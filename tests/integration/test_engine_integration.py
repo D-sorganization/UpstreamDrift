@@ -89,28 +89,37 @@ class TestEngineIntegration:
             "Assertion failed: len(manager.probes) >= len(EngineType) - 3"
         )
 
-        # Run probes and check consistency
+        # Run probes and check consistency.
+        #
+        # These assertions used to live inside `try: ... except Exception: pass`,
+        # which made every one of them unfailable (#8035). A probe is allowed to
+        # report that its engine is missing -- that is what `is_available()` is
+        # for -- but it is NOT allowed to raise, and its answer must agree with
+        # the manager. Both are now enforced.
+        available_engines = manager.get_available_engines()
         for engine_type, probe in manager.probes.items():
-            # Probe should return consistent data structure
             try:
                 probe_result = probe.is_available()  # type: ignore[attr-defined]
+            except Exception as exc:  # noqa: BLE001 - probe contract is "never raise"
+                raise AssertionError(
+                    f"probe for {engine_type} raised {type(exc).__name__}: {exc}. "
+                    "A probe must report unavailability by returning a falsy "
+                    "value, not by raising."
+                ) from exc
 
-                # Result should be a dict or have expected attributes
-                assert isinstance(probe_result, dict | bool | type(None)), (
-                    "Assertion failed: isinstance(probe_result, dict | bool | type(None))"
+            assert isinstance(probe_result, dict | bool | type(None)), (
+                f"probe for {engine_type} returned {type(probe_result).__name__}; "
+                "expected dict, bool or None"
+            )
+
+            # If the probe says available, the manager must not call it UNAVAILABLE.
+            if probe_result and engine_type in available_engines:
+                assert (
+                    manager.get_engine_status(engine_type) != EngineStatus.UNAVAILABLE
+                ), (
+                    f"{engine_type} probe reports available and it is in "
+                    "get_available_engines(), but get_engine_status() says UNAVAILABLE"
                 )
-
-                # If probe says available, engine should be in available list
-                available_engines = manager.get_available_engines()
-                if probe_result and engine_type in available_engines:
-                    # Consistency check: status should not be UNAVAILABLE
-                    assert (
-                        manager.get_engine_status(engine_type)
-                        != EngineStatus.UNAVAILABLE
-                    )
-            except Exception as e:  # noqa: BLE001, F841
-                # Some probes may fail if dependencies missing - that's expected
-                pass
 
         # Validate we have at least one engine available in the test environment
         available = manager.get_available_engines()
