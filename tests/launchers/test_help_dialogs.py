@@ -125,16 +125,20 @@ def test_update_context_read_error(qapp) -> None:
 
 
 def test_update_context_no_file(qapp) -> None:
-    """Test update_context when doc file does not exist."""
+    """Test update_context when no documentation file exists.
+
+    #7986: ``_get_doc_file`` now returns ``None`` unless the file actually
+    exists (it used to hand back paths that had never been created), and the
+    fallback message names the locations searched instead of a bare
+    "No specific documentation available".
+    """
     dock = ContextHelpDock()
 
-    mock_path = MagicMock()
-    mock_path.exists.return_value = False
-
-    with patch.object(dock, "_get_doc_file", return_value=mock_path):
+    with patch.object(dock, "_get_doc_file", return_value=None):
         dock.update_context("missing_id")
-        assert "missing_id" in dock.text_area.toPlainText()
-        assert "No specific documentation available" in dock.text_area.toPlainText()
+        text = dock.text_area.toPlainText()
+        assert "missing_id" in text
+        assert "no documentation" in text.lower()
 
 
 def test_get_doc_file(qapp) -> None:
@@ -145,5 +149,7 @@ def test_get_doc_file(qapp) -> None:
     assert "drake.md" in str(dock._get_doc_file("drake_model"))
     assert "pinocchio.md" in str(dock._get_doc_file("pinocchio_model"))
     assert "matlab.md" in str(dock._get_doc_file("matlab_model"))
-    assert "urdf_generator" in str(dock._get_doc_file("urdf_model"))
+    # #7986: tools/urdf_generator/README.md has never existed; the URDF
+    # subsystem boundary doc is the real reference.
+    assert "URDF" in str(dock._get_doc_file("urdf_model"))
     assert dock._get_doc_file("unknown_model") is None

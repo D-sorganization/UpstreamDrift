@@ -168,87 +168,133 @@ class ContextHelpDock(QDockWidget):
         """Update help content based on selected model."""
         if not model_id:
             self.text_area.setMarkdown(
-                "### Context Aware Help\n\nSelect a model to view its documentation and quick start guide."
+                "### Context Aware Help\n\nSelect a model to view its "
+                "documentation and quick start guide."
             )
             return
 
-        # Map ID to doc file
         doc_file = self._get_doc_file(model_id)
-        if doc_file and doc_file.exists():
+        if doc_file is not None:
             try:
-                content = doc_file.read_text(encoding="utf-8")
-                self.text_area.setMarkdown(content)
+                self.text_area.setMarkdown(doc_file.read_text(encoding="utf-8"))
             except (RuntimeError, ValueError, OSError) as e:
                 self.text_area.setText(f"Failed to load documentation: {e}")
-        else:
-            self.text_area.setMarkdown(
-                f"### {model_id}\n\nNo specific documentation available."
-            )
+            return
 
-    def _get_doc_file(self, model_id: str) -> Path | None:
+        self.text_area.setMarkdown(self._no_documentation_markdown(model_id))
+
+    def _no_documentation_markdown(self, model_id: str) -> str:
+        """Explain *why* there is no help, naming the locations searched.
+
+        The dock used to claim "No specific documentation available" for 11 of
+        the 22 mapped tiles while pointing at doc files that had never been
+        written (issue #7986). Naming the searched paths makes the gap
+        actionable instead of looking like a lookup miss.
+        """
+        candidates = self._doc_candidates(model_id)
+        lines = [f"### {model_id}", ""]
+        if candidates:
+            lines.append(
+                "No documentation file has been written for this tile yet. "
+                "The following locations were searched:"
+            )
+            lines.append("")
+            lines.extend(f"- `{self._relative_to_repo(p)}`" for p in candidates)
+        else:
+            lines.append(
+                "This tile has no documentation mapping yet — no help file is "
+                "associated with it."
+            )
+        lines.append("")
+        lines.append(
+            "General documentation: `docs/user_guide/user_manual.md`, "
+            "`docs/architecture/PROJECT_MAP.md`, `docs/troubleshooting/FAQ.md`."
+        )
+        return "\n".join(lines)
+
+    @staticmethod
+    def _relative_to_repo(path: Path) -> str:
+        """Render *path* relative to the repo root when it lives inside it."""
+        try:
+            return path.relative_to(REPOS_ROOT).as_posix()
+        except ValueError:
+            return str(path)
+
+    def _doc_candidates(self, model_id: str) -> list[Path]:
+        """Return every documentation path that could serve ``model_id``.
+
+        Candidates are ordered most-specific first and are **not** filtered by
+        existence — :meth:`_get_doc_file` does that, and
+        :meth:`_no_documentation_markdown` needs the full list to report what
+        was searched.
+        """
         if model_id is None:
             raise ValueError("model_id must be provided")
-        docs_dir = REPOS_ROOT / "docs" / "engines"
-        docs_user = REPOS_ROOT / "docs" / "user_guide"
 
-        # Physics Engines
-        if "mujoco" in model_id:
-            return docs_dir / "mujoco.md"
-        if "drake" in model_id:
-            return docs_dir / "drake.md"
-        if "pinocchio" in model_id:
-            return docs_dir / "pinocchio.md"
-        if "opensim" in model_id:
-            return docs_dir / "opensim.md"
-        if "myosim" in model_id or "myosuite" in model_id:
-            return docs_dir / "myosim.md"
-        if "matlab" in model_id:
-            return docs_dir / "matlab.md"
-        if "simscape" in model_id:
-            return docs_dir / "simscape.md"
+        lowered = model_id.lower()
+        docs = REPOS_ROOT / "docs"
+        docs_engines = docs / "engines"
+        docs_tutorials = docs / "tutorials" / "content"
 
-        # Tools and Applications
-        if "urdf" in model_id:
-            return REPOS_ROOT / "tools" / "urdf_generator" / "README.md"
-        if "c3d" in model_id or "motion_capture" in model_id:
-            return docs_user / "motion_pipeline" / "compat.md"
-        if "openpose" in model_id:
-            return docs_dir / "openpose.md"
-        if "mediapipe" in model_id:
-            return docs_user / "tools" / "mediapipe.md"
-        if "model_explorer" in model_id:
-            return docs_user / "tools" / "model_explorer.md"
-        if "data_explorer" in model_id:
-            return docs_user / "tools" / "data_explorer.md"
-        if "data_processor" in model_id:
-            return docs_user / "tools" / "data_processor.md"
-        if "video_analyzer" in model_id:
-            return docs_user / "tools" / "video_analyzer.md"
-        if "putting_green" in model_id or "pendulum_putter" in model_id:
-            return docs_user / "models" / "pendulum_putter.md"
-        if "project_map" in model_id:
-            return REPOS_ROOT / "docs" / "project_map.md"
-        if "movement_optimizer" in model_id:
-            return REPOS_ROOT / "Movement_Optimizer" / "README.md"
-        if "shot_tracer" in model_id:
-            return REPOS_ROOT / "tools" / "shot_tracer" / "README.md"
+        # (id fragments, candidate docs). First matching rule wins.
+        rules: tuple[tuple[tuple[str, ...], tuple[Path, ...]], ...] = (
+            (("mujoco",), (docs_engines / "mujoco.md",)),
+            (("drake",), (docs_engines / "drake.md",)),
+            (("pinocchio",), (docs_engines / "pinocchio.md",)),
+            (("opensim",), (docs_engines / "opensim.md",)),
+            (("myosim", "myosuite"), (docs_engines / "myosim.md",)),
+            (("matlab",), (docs_engines / "matlab.md",)),
+            (("simscape",), (docs_engines / "simscape.md",)),
+            (("urdf",), (docs / "architecture" / "URDF_SUBSYSTEM_BOUNDARY.md",)),
+            (
+                ("c3d", "motion_capture"),
+                (
+                    docs / "motion_pipeline" / "compat.md",
+                    docs / "help" / "motion_capture.md",
+                ),
+            ),
+            (("openpose",), (docs_engines / "openpose.md",)),
+            (
+                ("mediapipe", "video_analyzer", "video_processor", "shot_tracer"),
+                (docs_tutorials / "04_video_analysis.md",),
+            ),
+            (
+                ("model_explorer",),
+                (REPOS_ROOT / "src" / "tools" / "model_explorer" / "README.md",),
+            ),
+            (
+                ("data_explorer", "data_processor"),
+                (docs / "user_guide" / "user_manual.md",),
+            ),
+            (("putting_green", "pendulum_putter"), (docs_engines / "pendulum.md",)),
+            (
+                ("project_map",),
+                (
+                    docs / "architecture" / "PROJECT_MAP.md",
+                    docs / "governance" / "PROJECT_MAP.md",
+                ),
+            ),
+            (
+                ("movement_optimizer",),
+                (REPOS_ROOT.parent / "Movement_Optimizer" / "README.md",),
+            ),
+        )
 
-        # Fallback: Try to find engine-specific README files
-        engine_dirs = {
-            "mujoco": REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco",
-            "drake": REPOS_ROOT / "src" / "engines" / "physics_engines" / "drake",
-            "pinocchio": REPOS_ROOT
-            / "src"
-            / "engines"
-            / "physics_engines"
-            / "pinocchio",
-            "opensim": REPOS_ROOT / "src" / "engines" / "physics_engines" / "opensim",
-            "myosuite": REPOS_ROOT / "src" / "engines" / "physics_engines" / "myosuite",
-        }
-        for engine, base_dir in engine_dirs.items():
-            if engine in model_id.lower():
-                readme = base_dir / "README.md"
-                if readme.exists():
-                    return readme
+        for fragments, candidates in rules:
+            if any(fragment in lowered for fragment in fragments):
+                return list(candidates)
 
+        # Fallback: engine-specific README files.
+        engines_root = REPOS_ROOT / "src" / "engines" / "physics_engines"
+        for engine in ("mujoco", "drake", "pinocchio", "opensim", "myosuite"):
+            if engine in lowered:
+                return [engines_root / engine / "README.md"]
+
+        return []
+
+    def _get_doc_file(self, model_id: str) -> Path | None:
+        """Return the first documentation file that actually exists."""
+        for candidate in self._doc_candidates(model_id):
+            if candidate.exists():
+                return candidate
         return None
