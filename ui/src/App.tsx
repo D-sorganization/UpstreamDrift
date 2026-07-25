@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { RouteTitle } from './utils/RouteTitle';
 import { ToastProvider } from './components/ui/Toast';
