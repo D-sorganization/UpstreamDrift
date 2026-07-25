@@ -342,7 +342,7 @@ UpstreamDrift provides comprehensive analysis tools for simulation data.
         "title": "Project Map",
         "short": "Complete map of all features and modules in UpstreamDrift",
         "description": """
-The Project Map (docs/PROJECT_MAP.md) is a comprehensive reference for every
+The Project Map (docs/architecture/PROJECT_MAP.md) is a comprehensive reference for every
 feature, module, and tool in the UpstreamDrift Golf Modeling Suite.
 
 **What it covers:**
@@ -363,7 +363,7 @@ feature, module, and tool in the UpstreamDrift Golf Modeling Suite.
 
 **Access:**
 - Help menu > Project Map (opens the document)
-- Directly at: docs/PROJECT_MAP.md
+- Directly at: docs/architecture/PROJECT_MAP.md (governance summary: docs/governance/PROJECT_MAP.md)
 """,
         "tips": [
             "Use the Project Map to discover hidden features not in the launcher",
