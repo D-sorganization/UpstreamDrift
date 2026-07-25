@@ -10,6 +10,7 @@ import so the suite runs fast and deterministic.
 from __future__ import annotations
 
 import os
+import math
 import sys
 import types
 from unittest.mock import MagicMock, patch
@@ -66,14 +67,18 @@ def _patch_physics(trajectory):
             _FakeSim.last_call = (launch, max_time, dt)
             return trajectory
 
-    class _FakeLaunchConditions:
-        def __init__(self, velocity, launch_angle, spin_rate):
-            self.velocity = velocity
-            self.launch_angle = launch_angle
-            self.spin_rate = spin_rate
+    # Use the REAL LaunchConditions and fake only the (heavy) solver.
+    #
+    # The previous hand-rolled `_FakeLaunchConditions` had no `from_user_units`
+    # classmethod, which production has called since #8039 was filed. Every
+    # simulation path therefore died in the widget's generic error handler and
+    # all four tests below asserted against an exception message. A stand-in
+    # that has to track a real constructor is exactly the thing that goes stale;
+    # the real dataclass is cheap and cannot drift.
+    from src.shared.python.physics.ball_launch_conditions import LaunchConditions
 
     sim_mod.BallFlightSimulator = _FakeSim
-    cond_mod.LaunchConditions = _FakeLaunchConditions
+    cond_mod.LaunchConditions = LaunchConditions
     return (
         patch.dict(
             sys.modules,
@@ -83,7 +88,7 @@ def _patch_physics(trajectory):
             },
         ),
         _FakeSim,
-        _FakeLaunchConditions,
+        LaunchConditions,
     )
 
 
@@ -191,12 +196,14 @@ def test_run_simulation_renders_results_for_valid_trajectory(
     assert "4.50" in text
     # Points count
     assert "Points:      4" in text
-    # Verify LaunchConditions was built with correct mph->m/s conversion
+    # Verify LaunchConditions was built with correct unit conversions.
+    # These now assert against the real dataclass contract documented on
+    # LaunchConditions: velocity in m/s, launch_angle in RADIANS, spin_rate in
+    # RPM (from_user_units passes RPM through unchanged).
     launch = fake_sim.last_call[0]
     assert launch.velocity == pytest.approx(150.0 * 0.44704)
-    assert launch.launch_angle == pytest.approx(12.0)
-    expected_spin = 3000.0 / 60.0 * 2 * np.pi
-    assert launch.spin_rate == pytest.approx(expected_spin)
+    assert launch.launch_angle == pytest.approx(math.radians(12.0))
+    assert launch.spin_rate == pytest.approx(3000.0)
     # max_time + dt forwarded
     assert fake_sim.last_call[1] == pytest.approx(10.0)
     assert fake_sim.last_call[2] == pytest.approx(0.01)
@@ -225,6 +232,16 @@ def test_run_simulation_handles_import_error(widget: BallFlightWidget) -> None:
 
 
 def test_run_simulation_handles_generic_exception(widget: BallFlightWidget) -> None:
+    """The widget must surface an unexpected solver failure verbatim.
+
+    This previously failed because a *different* exception (missing
+    `from_user_units` on the launch-conditions stand-in) was raised before the
+    solver was ever reached -- so the error-reporting path this test exists to
+    cover had no coverage at all (#8039). The real LaunchConditions is used, so
+    "boom" is now the only thing that can go wrong.
+    """
+    from src.shared.python.physics.ball_launch_conditions import LaunchConditions
+
     sim_mod = types.ModuleType("src.shared.python.physics.ball_simulator")
     cond_mod = types.ModuleType("src.shared.python.physics.ball_launch_conditions")
 
@@ -233,7 +250,7 @@ def test_run_simulation_handles_generic_exception(widget: BallFlightWidget) -> N
             raise RuntimeError("boom")
 
     sim_mod.BallFlightSimulator = _Boom
-    cond_mod.LaunchConditions = lambda **kw: MagicMock(**kw)
+    cond_mod.LaunchConditions = LaunchConditions
     with patch.dict(
         sys.modules,
         {
@@ -242,8 +259,12 @@ def test_run_simulation_handles_generic_exception(widget: BallFlightWidget) -> N
         },
     ):
         widget._run_simulation()
-    assert "Simulation error" in widget._results_text.toPlainText()
-    assert "boom" in widget._results_text.toPlainText()
+    text = widget._results_text.toPlainText()
+    assert "Simulation error" in text
+    assert "boom" in text
+    assert "from_user_units" not in text, (
+        "the launch-conditions stand-in broke before the solver was reached"
+    )
 
 
 def test_run_simulation_replaces_existing_plot_item(widget: BallFlightWidget) -> None:
