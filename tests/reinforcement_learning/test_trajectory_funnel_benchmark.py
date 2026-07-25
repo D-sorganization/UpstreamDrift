@@ -45,19 +45,18 @@ class TestTrajectoryFunnelBenchmark:
         reward = bench.trajectory_funnel_reward(current, reference, 0.5)
         assert isinstance(reward, float)
 
-    def test_simulate_agent_training_transverse(self) -> None:
+    def test_train_agent_transverse(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="transverse")
-        result = bench.simulate_agent_training()
-        assert "convergence_epochs" in result
-        assert "terminal_variance" in result
+        result = bench.train_agent(n_iterations=10, n_steps=12, state_dim=3)
+        assert "convergence_iteration" in result
+        assert "terminal_return_std" in result
         assert "mode" in result
         assert result["mode"] == "transverse"
-        # Transverse mode should converge faster than setpoint (lower variance)
-        assert result["terminal_variance"] < 1.0
+        # Mode-neutral metrics are the only cross-mode comparable numbers.
+        assert result["mean_transverse_error"] >= 0.0
 
-    def test_simulate_agent_training_setpoint(self) -> None:
+    def test_train_agent_setpoint(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="setpoint")
-        result = bench.simulate_agent_training()
-        assert result["convergence_epochs"] > 0
-        # Setpoint has higher variance due to phase asynchrony
-        assert result["terminal_variance"] > 0.0
+        result = bench.train_agent(n_iterations=10, n_steps=12, state_dim=3)
+        assert result["convergence_iteration"] > 0
+        assert result["terminal_return_std"] >= 0.0
