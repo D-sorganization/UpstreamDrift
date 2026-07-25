@@ -18,7 +18,24 @@ npm install
 npm run dev
 ```
 
-The Vite dev server listens on port `5180` by default. The browser UI expects the API server to be reachable on the same machine, and the WebSocket clients in `ui/src/api/client.ts` connect through `/api/ws/simulate/{engineType}`.
+The Vite dev server listens on port `5180` by default and proxies `/api` and
+`/api/ws` to the API on port `8000` — the same port documented above,
+`launch_upstream_drift.py --port` defaults to, and `BACKEND_PORT` in
+`ui/src/api/backend.ts` declares. Previously the proxy pointed at `8001`, so
+following these instructions left the dashboard on
+`HTTP 500 — /api/launcher/manifest` (issue #8076).
+
+If you deliberately run the API on another port, start Vite with a matching
+override rather than editing the config:
+
+```bash
+VITE_API_PORT=8001 npm run dev
+```
+
+The proxy table lives in `ui/src/config/devProxy.ts` and is covered by
+`ui/src/test/vite-proxy-contract.test.ts`.
+
+The browser UI expects the API server to be reachable on the same machine, and the WebSocket clients in `ui/src/api/client.ts` connect through `/api/ws/simulate/{engineType}`.
 
 ## Architecture at a glance
 
