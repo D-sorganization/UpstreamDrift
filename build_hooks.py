@@ -61,6 +61,68 @@ class UIBuildHook(BuildHookInterface):
 
     _npm_error_message = _subprocess_error_message
 
+    def _register_ui_bundle(self, version: str, build_data: dict) -> None:
+        """Force-include the built UI bundle in the wheel payload.
+
+        ``[tool.hatch.build] include``/``artifacts`` are inert for the wheel
+        target because ``packages = ["src"]`` narrows the file selection to the
+        ``src`` tree, so the compiled frontend never shipped (issue #8018).
+        Registering it here rather than in a static ``force-include`` table
+        keeps the ``SKIP_UI_BUILD`` escape hatch working: when the bundle is
+        genuinely absent the wheel is simply built without it instead of the
+        build hard-failing on a missing force-include source.
+
+        ``ui/dist`` is placed at the install root so it matches
+        ``_resolve_ui_dist_path()`` in ``src/api/local_server.py``, which looks
+        three parents up from ``src/api/local_server.py``.
+        """
+        if version == "editable":
+            # An editable install resolves ui/dist straight out of the checkout,
+            # so copying it into site-packages would only create a stale mirror.
+            return
+        dist_dir = self._dist_dir
+        if not dist_dir.is_dir():
+            logger.warning("No UI bundle at %s; wheel will ship without it", dist_dir)
+            return
+        force_include = build_data.setdefault("force_include", {})
+        force_include[str(dist_dir)] = "ui/dist"
+
+    @property
+    def _sidekick_dir(self) -> Path:
+        """Source directory of the shared Sidekick package."""
+        return Path(self.root) / "src" / "shared" / "python" / "sidekick"
+
+    @staticmethod
+    def _is_test_artifact(relative: Path) -> bool:
+        """Return True for files that must never ship in a wheel."""
+        parts = relative.parts
+        if "__pycache__" in parts or "tests" in parts:
+            return True
+        return relative.name.startswith("test_") and relative.suffix == ".py"
+
+    def _register_sidekick_package(self, build_data: dict) -> None:
+        """Force-include the Sidekick package without its test suite.
+
+        Hatchling's ``recurse_forced_files`` never consults ``include_path``,
+        so a whole-directory ``force-include`` entry is immune to the
+        ``exclude`` patterns in ``[tool.hatch.build]`` — which is why the wheel
+        shipped the entire ``sidekick`` test suite (issue #8018). Enumerating
+        the tree here lets the same relocation happen file by file with the
+        test artefacts filtered out.
+        """
+        source_root = self._sidekick_dir
+        if not source_root.is_dir():
+            logger.warning("Sidekick package not found at %s", source_root)
+            return
+        force_include = build_data.setdefault("force_include", {})
+        for path in sorted(source_root.rglob("*")):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(source_root)
+            if self._is_test_artifact(relative):
+                continue
+            force_include[str(path)] = "/".join(("sidekick", *relative.parts))
+
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
         if not version:
@@ -68,6 +130,12 @@ class UIBuildHook(BuildHookInterface):
         if build_data is None:
             raise ValueError("Build data dictionary must be provided")
 
+        self._ensure_ui_bundle(version)
+        self._register_ui_bundle(version, build_data)
+        self._register_sidekick_package(build_data)
+
+    def _ensure_ui_bundle(self, version: str) -> None:
+        """Build (or validate the presence of) the compiled frontend bundle."""
         dist_dir = self._dist_dir
 
         hook_config = self.config
