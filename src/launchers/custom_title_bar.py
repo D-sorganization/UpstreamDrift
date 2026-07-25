@@ -151,12 +151,15 @@ class CustomTitleBar(QWidget):
         layout.addWidget(self.icon_label)
         self.icon_label.installEventFilter(self)
 
-        try:
-            from src.shared.python.core.version import __version__
+        # Same resolution chain as Help > About and GET /api/v1/about, so the
+        # title bar and the About dialog can never report different builds
+        # (issue #8064). A separate hardcoded fallback is exactly what caused
+        # the mismatch, so there is deliberately none here;
+        # resolve_app_version() already ends in FALLBACK_VERSION and never
+        # raises.
+        from src.shared.python.version_info import resolve_app_version
 
-            version = __version__
-        except ImportError:
-            version = "2.1.0"
+        version = resolve_app_version()
 
         self.title_label = QLabel(
             f"<b><font color='#266EC8'>Upstream</font><font color='#FF8800'>Drift</font></b> <span style='font-size: 10px; color: gray;'>v{version}</span>"
