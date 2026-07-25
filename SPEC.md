@@ -2286,6 +2286,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Module Map Changelog
 
+- Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
+
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
 
 ### Module Map
@@ -2297,11 +2299,13 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
 - **Performance:** Optimized `math.hypot(*args)` usage in `src/shared/python/physics/aerodynamics/_models.py` by replacing it with explicit component unpacking `math.hypot(args[0], args[1], args[2])` to avoid `*args` expansion overhead, achieving ~3.5x speedup.
 - **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
 - Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
 - Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
 - Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+
 ### 2026-06-23
 
 - **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.
