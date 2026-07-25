@@ -99,7 +99,11 @@ class TestMotionTargetPreviewTile:
         assert tile.name == "Motion-Match Preview", (
             "Assertion failed: tile.name == Motion-Match Preview"
         )
-        assert tile.category == "tool", "Assertion failed: tile.category == tool"
+        # Category is owned by models.yaml (src/config/launcher_parity.py);
+        # this tool is a motion-matching surface, not a generic tool (#8089).
+        assert tile.category == "motion_matching", (
+            "Assertion failed: tile.category == motion_matching"
+        )
         assert tile.logo == "motion_target_preview.svg", (
             "Assertion failed: tile.logo == motion_target_preview.svg"
         )

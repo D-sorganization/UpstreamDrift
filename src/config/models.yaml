@@ -5,7 +5,7 @@ models:
 
   - id: "mujoco_unified"
     name: "MuJoCo"
-    description: "Biomechanical golf swing analysis (humanoid + simulation)"
+    description: "Unified MuJoCo interface: Humanoid Simulation & Analytics Dashboard"
     type: "custom_humanoid"
     path: "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py"
     engine_type: "mujoco"
@@ -13,6 +13,33 @@ models:
       - "src"
       - "src/shared/python"
       - "src/engines/physics_engines/mujoco/python"
+    capabilities:
+      - "rigid_body"
+      - "contact"
+      - "tendons"
+      - "actuators"
+      - "mass_matrix"
+      - "jacobian"
+      - "force_vectors"
+      - "torque_vectors"
+      - "contact_forces"
+      - "wrench"
+      - "screw_theory"
+      - "video_export"
+      - "dataset_export"
+      - "biomechanics"
+      - "spatial_algebra"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "assets/mujoco.png"
@@ -21,10 +48,29 @@ models:
 
   - id: "drake_golf"
     name: "Drake"
-    description: "Drake robotics with MeshCat visualisation"
+    description: "Drake robotics framework with MeshCat visualization"
     type: "drake"
     path: "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
     engine_type: "drake"
+    capabilities:
+      - "rigid_body"
+      - "optimization"
+      - "contact"
+      - "mass_matrix"
+      - "jacobian"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "screw_theory"
+      - "spatial_algebra"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "assets/drake.png"
@@ -33,10 +79,25 @@ models:
 
   - id: "pinocchio_golf"
     name: "Pinocchio"
-    description: "Rigid-body dynamics with analytical derivatives"
+    description: "Pinocchio rigid body dynamics with analytical derivatives"
     type: "pinocchio"
     path: "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
     engine_type: "pinocchio"
+    capabilities:
+      - "rigid_body"
+      - "inverse_kinematics"
+      - "mass_matrix"
+      - "jacobian"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "assets/pinocchio.png"
@@ -45,10 +106,18 @@ models:
 
   - id: "opensim_golf"
     name: "OpenSim"
-    description: "Musculoskeletal modelling for biomechanics"
+    description: "OpenSim musculoskeletal modeling for biomechanics analysis"
     type: "opensim"
     path: "src/engines/physics_engines/opensim/python/opensim_gui.py"
     engine_type: "opensim"
+    capabilities:
+      - "musculoskeletal"
+      - "inverse_kinematics"
+      - "muscle_analysis"
+      - "mass_matrix"
+      - "jacobian"
+      - "biomechanics"
+      - "actuator_controls"
     launcher:
       category: "physics_engine"
       logo: "assets/opensim.png"
@@ -57,10 +126,16 @@ models:
 
   - id: "myosim_suite"
     name: "MyoSuite"
-    description: "Muscle-actuated simulation environment"
+    description: "MyoSuite muscle-actuated simulation environment"
     type: "myosim"
     path: "src/engines/physics_engines/myosuite/python/gui.py"
     engine_type: "myosuite"
+    capabilities:
+      - "musculoskeletal"
+      - "muscle_control"
+      - "neural_activation"
+      - "mass_matrix"
+      - "jacobian"
     launcher:
       category: "physics_engine"
       logo: "assets/myosim.png"
@@ -82,11 +157,15 @@ models:
   # =============================================================================
 
   - id: "golf_simulation_suite"
-    name: "Simulator"
-    description: "Complete golf simulation with ball flight physics and putting green"
+    name: "Golf Simulation Suite"
+    description: "Comprehensive golf simulation suite with parameter sweeps and batch runs"
     type: "golf_simulation"
     path: "src/tools/golf_simulation_suite/__main__.py"
     engine_type: "golf_simulation"
+    capabilities:
+      - "full_simulation"
+      - "parameter_sweep"
+      - "batch_runs"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
@@ -95,10 +174,14 @@ models:
 
   - id: "putting_green"
     name: "Putting Green"
-    description: "Realistic putting green with ball-rolling physics"
+    description: "Realistic putting green simulation with ball rolling physics"
     type: "putting_green"
     path: "src/tools/putting_green_gui/gui.py"
     engine_type: "putting_green"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
+      - "terrain"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
@@ -146,9 +229,14 @@ models:
 
   - id: "bunkershot3d"
     name: "BunkerShot3D"
-    description: "3-D Granular Bunker-Shot Simulation"
+    description: "Sand bunker shot simulation with MPM and LIGGGHTS backends"
     type: "special_app"
     path: "notebooks/bunkershot3d/phase1_mvp.py"
+    capabilities:
+      - "sand_simulation"
+      - "mpm"
+      - "liggghts"
+      - "calibration"
     launcher:
       category: "simulation"
       logo: "assets/bunkershot_icon.png"
@@ -160,6 +248,10 @@ models:
     description: "Double/triple pendulum golf swing dynamics simulator"
     type: "special_app"
     path: "src/shared/python/pendulum_simulator/__main__.py"
+    capabilities:
+      - "educational"
+      - "2dof"
+      - "pendulum"
     launcher:
       category: "simulation"
       logo: "pendulum.svg"
@@ -168,9 +260,12 @@ models:
 
   - id: "shot_tracer"
     name: "Shot Tracer"
-    description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"
+    description: "Multi-model trajectory visualization and comparison"
     type: "special_app"
     path: "src/launchers/_shot_tracer_gui.py"
+    capabilities:
+      - "trajectory_visualization"
+      - "multi_model_comparison"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
@@ -190,9 +285,14 @@ models:
 
   - id: "terrain_engine"
     name: "Terrain Engine"
-    description: "Topography presets and surface queries for terrain-aware ball physics"
+    description: "Terrain and topography configuration for surface modeling and ball physics"
     type: "special_app"
     path: "src/tools/terrain_engine/gui.py"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
+      - "topography"
+      - "terrain_query"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
@@ -244,14 +344,21 @@ models:
       default_launch: "tab"
 
   - id: "putting_green_gui"
-    name: "Putting Green"
-    description: "Interactive putting green simulator with turf physics"
+    name: "Putting Green (legacy alias)"
+    description: "Legacy alias for the putting_green tile. Hidden by default; kept for one release so saved layouts continue to resolve."
     type: "special_app"
     path: "src/tools/putting_green_gui/gui.py"
+    hidden: true
+    hidden_reason: "Duplicate of the canonical putting_green tile — same display name and same resolved artifact (src/tools/putting_green_gui/gui.py). Retained for one release so saved layouts continue to resolve; use putting_green for new launcher entries (#8090)."
+    hidden_owner: "@launcher"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
+      - "terrain"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
-      status: "ready"
+      status: "deprecated"
       default_launch: "tab"
 
   # =============================================================================
@@ -260,10 +367,16 @@ models:
 
   - id: "motion_target_preview"
     name: "Motion-Match Preview"
-    description: "Preview multi-source motion-capture targets on a shared timegrid"
+    description: "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model."
     type: "special_app"
     path: "src/tools/starting_pose_matcher/__main__.py"
     tags: ["c3d", "mocap", "club", "body", "preview"]
+    capabilities:
+      - "c3d"
+      - "mocap"
+      - "club"
+      - "body"
+      - "preview"
     launcher:
       category: "motion_matching"
       logo: "motion_target_preview.svg"
@@ -272,9 +385,13 @@ models:
 
   - id: "pose_studio"
     name: "Pose Studio"
-    description: "Cross-engine interactive pose editor"
+    description: "Interactive pose editor for joint angle manipulation and retargeting"
     type: "special_app"
     path: "src/tools/pose_studio/__main__.py"
+    capabilities:
+      - "pose_editing"
+      - "retargeting"
+      - "joint_manipulation"
     launcher:
       category: "motion_matching"
       logo: "assets/data_explorer_modern.png"
@@ -282,12 +399,18 @@ models:
 
   - id: "starting_pose_matcher"
     name: "Starting-Pose Matcher (legacy)"
-    description: "Legacy alias for motion_target_preview. Hidden by default."
+    description: "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve."
     type: "special_app"
     path: "src/tools/starting_pose_matcher/__main__.py"
     hidden: true
     hidden_reason: "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries."
     hidden_owner: "@launcher"
+    capabilities:
+      - "c3d"
+      - "mocap"
+      - "club"
+      - "body"
+      - "preview"
     launcher:
       category: "motion_matching"
       logo: "motion_target_preview.svg"
@@ -310,7 +433,7 @@ models:
 
   - id: "video_analyzer"
     name: "Video Analyzer"
-    description: "Video-based motion analysis with pose tracking"
+    description: "Video-based motion analysis with pose estimation and tracking"
     type: "special_app"
     path: "src/video_analyzer/launch_video_analyzer.py"
     provider: "tools"
@@ -319,6 +442,11 @@ models:
     python_paths:
       - "src"
       - "src/shared/python"
+    capabilities:
+      - "video_processing"
+      - "pose_estimation"
+      - "motion_tracking"
+      - "frame_analysis"
     launcher:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
@@ -327,7 +455,7 @@ models:
 
   - id: "video_processor"
     name: "Video Processor"
-    description: "Shared media processor for video conversion, frame extraction, and analysis"
+    description: "Shared Tools media processor for video conversion, frame extraction, and analysis"
     type: "special_app"
     path: "src/media_processing/video_processor/apps/web/launch_platform.py"
     provider: "tools"
@@ -336,6 +464,11 @@ models:
     python_paths:
       - "src"
       - "src/shared/python"
+    capabilities:
+      - "video_processing"
+      - "format_conversion"
+      - "frame_extraction"
+      - "media_analysis"
     launcher:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
@@ -368,9 +501,13 @@ models:
 
   - id: "model_explorer"
     name: "Model Explorer"
-    description: "Explore models and generate URDFs"
+    description: "Browse, select, and build URDF/MJCF models"
     type: "special_app"
     path: "src/tools/model_explorer/main_window.py"
+    capabilities:
+      - "model_browsing"
+      - "urdf_generation"
+      - "open_in_engine"
     launcher:
       category: "tool"
       logo: "assets/urdf_icon.png"
@@ -379,7 +516,7 @@ models:
 
   - id: "data_explorer"
     name: "Data Explorer"
-    description: "Import, filter, and visualise simulation datasets"
+    description: "Import, filter, and visualize simulation datasets"
     type: "special_app"
     path: "src/data_explorer/data_explorer_app.py"
     provider: "tools"
@@ -389,6 +526,11 @@ models:
       - "src"
       - "src/shared/python"
     embed_adapter: "src/launchers/external_tools_adapter.py::get_data_explorer_dockable_ui"
+    capabilities:
+      - "data_import"
+      - "filtering"
+      - "visualization"
+      - "export"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
@@ -397,7 +539,7 @@ models:
 
   - id: "data_processor"
     name: "Data Processor"
-    description: "Shared signal processing and time-series data analysis tool"
+    description: "Shared Tools signal processing and time-series data analysis tool"
     type: "special_app"
     path: "src/data_processing/data_processor/launch_pyqt6.py"
     provider: "tools"
@@ -408,6 +550,14 @@ models:
       - "src/shared/python"
       - "src/data_processing/data_processor/python"
     embed_adapter: "src/launchers/external_tools_adapter.py::get_data_processor_dockable_ui"
+    capabilities:
+      - "data_import"
+      - "signal_processing"
+      - "time_series"
+      - "filtering"
+      - "statistics"
+      - "export"
+      - "process_calculators"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
@@ -464,9 +614,13 @@ models:
 
   - id: "project_map"
     name: "Project Map"
-    description: "Map of every feature and module in the suite"
+    description: "Complete map of all features, modules, and hidden gems in the suite"
     type: "document"
     path: "docs/PROJECT_MAP.md"
+    capabilities:
+      - "documentation"
+      - "feature_discovery"
+      - "project_overview"
     launcher:
       category: "documentation"
       logo: "assets/project_map.png"
@@ -528,7 +682,7 @@ models:
 
   - id: "canonical_core_estimation"
     name: "Canonical-Core Estimation"
-    description: "CC-19 estimation services in the unified workspace"
+    description: "Workspace entry point for CC-19 estimation services and canonical-state fit handoff."
     type: "special_app"
     path: "src/tools/canonical_core/estimation.py"
     capabilities:
@@ -545,7 +699,7 @@ models:
 
   - id: "canonical_core_comparison"
     name: "Canonical-Core Comparison"
-    description: "CC-27 comparison services in the unified workspace"
+    description: "Workspace entry point for CC-27 comparison services and cross-engine canonical-state review."
     type: "special_app"
     path: "src/tools/canonical_core/comparison.py"
     capabilities:

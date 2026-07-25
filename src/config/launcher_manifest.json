@@ -8,7 +8,7 @@
       "description": "Browse, select, and build URDF/MJCF models",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/model_explorer/launch_model_explorer.py",
+      "path": "src/tools/model_explorer/main_window.py",
       "logo": "urdf_icon.svg",
       "status": "utility",
       "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
@@ -24,7 +24,7 @@
       "description": "Unified MuJoCo interface: Humanoid Simulation & Analytics Dashboard",
       "category": "physics_engine",
       "type": "custom_humanoid",
-      "path": "src/launchers/mujoco_dashboard.py",
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py",
       "engine_type": "mujoco",
       "logo": "mujoco_humanoid.svg",
       "status": "gui_ready",
@@ -59,7 +59,12 @@
       "order": 2,
       "web": {
         "mode": "native-window"
-      }
+      },
+      "python_paths": [
+        "src",
+        "src/shared/python",
+        "src/engines/physics_engines/mujoco/python"
+      ]
     },
     {
       "id": "drake_golf",
@@ -108,7 +113,7 @@
       "status": "gui_ready",
       "capabilities": [
         "rigid_body",
-        "inverse_kinematics",
+        "ik",
         "mass_matrix",
         "jacobian",
         "actuator_controls",
@@ -139,7 +144,7 @@
       "status": "engine_ready",
       "capabilities": [
         "musculoskeletal",
-        "inverse_kinematics",
+        "ik",
         "muscle_analysis",
         "mass_matrix",
         "jacobian",
@@ -157,7 +162,7 @@
       "description": "MyoSuite muscle-actuated simulation environment",
       "category": "physics_engine",
       "type": "myosim",
-      "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
+      "path": "src/engines/physics_engines/myosuite/python/gui.py",
       "engine_type": "myosuite",
       "logo": "myosim.svg",
       "status": "engine_ready",
@@ -179,7 +184,7 @@
       "description": "Realistic putting green simulation with ball rolling physics",
       "category": "simulation",
       "type": "putting_green",
-      "path": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "path": "src/tools/putting_green_gui/gui.py",
       "engine_type": "putting_green",
       "logo": "putting_green.svg",
       "status": "simulator",
@@ -252,7 +257,7 @@
       "id": "video_analyzer",
       "name": "Video Analyzer",
       "description": "Video-based motion analysis with pose estimation and tracking",
-      "category": "tool",
+      "category": "motion_capture",
       "type": "special_app",
       "path": "src/video_analyzer/launch_video_analyzer.py",
       "provider": "tools",
@@ -278,7 +283,7 @@
       "id": "video_processor",
       "name": "Video Processor",
       "description": "Shared Tools media processor for video conversion, frame extraction, and analysis",
-      "category": "tool",
+      "category": "motion_capture",
       "type": "special_app",
       "path": "src/media_processing/video_processor/apps/web/launch_platform.py",
       "provider": "tools",
@@ -356,8 +361,8 @@
       "id": "project_map",
       "name": "Project Map",
       "description": "Complete map of all features, modules, and hidden gems in the suite",
-      "category": "tool",
-      "type": "special_app",
+      "category": "documentation",
+      "type": "document",
       "path": "docs/PROJECT_MAP.md",
       "logo": "golf_logo.svg",
       "status": "utility",
@@ -434,7 +439,7 @@
       "id": "pose_studio",
       "name": "Pose Studio",
       "description": "Interactive pose editor for joint angle manipulation and retargeting",
-      "category": "tool",
+      "category": "motion_matching",
       "type": "special_app",
       "path": "src/tools/pose_studio/__main__.py",
       "logo": "pose_studio.svg",
@@ -458,7 +463,8 @@
       "order": 20,
       "web": {
         "mode": "native-window"
-      }
+      },
+      "engine_type": "golf_simulation"
     },
     {
       "id": "swing_optimizer",
@@ -503,9 +509,9 @@
       "id": "terrain_engine",
       "name": "Terrain Engine",
       "description": "Terrain and topography configuration for surface modeling and ball physics",
-      "category": "tool",
+      "category": "simulation",
       "type": "special_app",
-      "path": "",
+      "path": "src/tools/terrain_engine/gui.py",
       "web_route": "/tools/terrain",
       "logo": "putting_green.svg",
       "status": "gui_ready",
@@ -547,9 +553,9 @@
       "id": "bunkershot3d",
       "name": "BunkerShot3D",
       "description": "Sand bunker shot simulation with MPM and LIGGGHTS backends",
-      "category": "physics_engine",
+      "category": "simulation",
       "type": "special_app",
-      "path": "src/bunkershot3d/",
+      "path": "notebooks/bunkershot3d/phase1_mvp.py",
       "logo": "bunkershot3d.svg",
       "status": "gui_ready",
       "capabilities": ["sand_simulation", "mpm", "liggghts", "calibration"],
@@ -561,8 +567,8 @@
     {
       "id": "pendulum_simulator",
       "name": "Pendulum Simulator",
-      "description": "Educational 2-DOF pendulum models for physics learning and quick prototyping",
-      "category": "physics_engine",
+      "description": "Double/triple pendulum golf swing dynamics simulator",
+      "category": "simulation",
       "type": "special_app",
       "path": "src/shared/python/pendulum_simulator/__main__.py",
       "logo": "pendulum.svg",
@@ -727,7 +733,7 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 37,
+      "order": 39,
       "web": {
         "mode": "route",
         "route": "/tools/canonical-core/comparison"
@@ -744,7 +750,7 @@
       "logo": "data_explorer.svg",
       "status": "ready",
       "capabilities": ["swing_metrics", "biomechanics", "api"],
-      "order": 38,
+      "order": 41,
       "web": {
         "mode": "route",
         "route": "/tools/analysis"
@@ -812,7 +818,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["websocket", "realtime", "pubsub"],
-      "order": 36,
+      "order": 37,
       "web": {
         "mode": "unavailable",
         "reason": "WebSocket endpoint only; no dedicated web page yet"
@@ -829,7 +835,7 @@
       "logo": "golf_logo.svg",
       "status": "experimental",
       "capabilities": ["ai_methods", "protocol", "dispatch"],
-      "order": 37,
+      "order": 38,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -846,7 +852,7 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
-      "order": 38,
+      "order": 40,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -863,7 +869,7 @@
       "logo": "golf_logo.svg",
       "status": "external",
       "capabilities": ["streaming", "vr", "visualization"],
-      "order": 39,
+      "order": 42,
       "web": {
         "mode": "unavailable",
         "reason": "Python integration library; no dedicated web page yet"
@@ -880,7 +886,7 @@
       "logo": "drake.svg",
       "status": "experimental",
       "capabilities": ["locomotion", "contact", "planning"],
-      "order": 40,
+      "order": 43,
       "web": {
         "mode": "unavailable",
         "reason": "Python module; no dedicated web page yet"
@@ -897,7 +903,7 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["process_calculators", "engineering", "analysis"],
-      "order": 41,
+      "order": 44,
       "web": {
         "mode": "native-window"
       }
@@ -913,7 +919,7 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
-      "order": 42,
+      "order": 45,
       "web": {
         "mode": "native-window"
       }
@@ -922,7 +928,7 @@
       "id": "starting_pose_matcher",
       "name": "Starting-Pose Matcher (legacy)",
       "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
-      "category": "tool",
+      "category": "motion_matching",
       "type": "special_app",
       "path": "src.tools.starting_pose_matcher.__main__",
       "logo": "motion_target_preview.svg",
@@ -953,7 +959,7 @@
         "ztcf_zvcf",
         "hdf5_export"
       ],
-      "order": 43,
+      "order": 46,
       "web": {
         "mode": "native-window"
       }

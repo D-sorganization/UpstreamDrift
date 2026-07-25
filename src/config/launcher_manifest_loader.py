@@ -96,6 +96,51 @@ def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadat
     )
 
 
+def _derive_provider_capabilities(model: ModelConfig) -> tuple[str, ...]:
+    """Derive a conservative capability set for a provider-backed model (#8091).
+
+    External model packs (``Drake_Models``, ``MuJoCo_Models``, ``OpenSim_Models``,
+    ``Pinocchio_Models``) declare exercises but no capability tags, so their
+    tiles used to advertise ``capabilities=()`` — filtering and detail views
+    could not describe them at all.
+
+    Only facts the registry entry already carries are emitted, so the result
+    can never over-claim:
+
+    * ``model_asset`` — the tile opens a model file, not an application.
+    * the engine that can load it (``model.engine_type``).
+    * the model format (``model.type``, with any version suffix stripped:
+      ``sdformat-1.8`` -> ``sdformat``).
+    * the exercise, taken from the ``<pack>-<exercise>`` tile ID.
+
+    Args:
+        model: Provider-backed registry entry.
+
+    Returns:
+        A deduplicated, order-stable tuple of capability tags. Never empty for
+        a model that declares a type or an engine.
+    """
+    if model is None:
+        raise ValueError("model must be provided")
+
+    derived: list[str] = ["model_asset"]
+    if model.engine_type:
+        derived.append(str(model.engine_type).strip().lower())
+    if model.type:
+        derived.append(str(model.type).strip().lower().split("-", 1)[0])
+    _, separator, exercise = str(model.id).partition("-")
+    if separator and exercise.strip():
+        derived.append(f"exercise_{exercise.strip().lower()}")
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for tag in derived:
+        if tag and tag not in seen:
+            seen.add(tag)
+            unique.append(tag)
+    return tuple(unique)
+
+
 def _build_provider_tile(model: ModelConfig) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
     metadata = model.launcher or _legacy_launcher_metadata(model)
@@ -117,7 +162,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         path=model.path,
         logo=metadata.logo,
         status=status,
-        capabilities=model.capabilities,
+        capabilities=model.capabilities or _derive_provider_capabilities(model),
         order=model.order,
         engine_type=model.engine_type,
         provider=model.provider,
