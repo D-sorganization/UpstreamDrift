@@ -214,21 +214,26 @@ class TestCalibrationOptimizer:
         val = opt._objective(np.array([0.5, 0.5]))
         assert val == pytest.approx(0.0, abs=1e-9)
 
-    def test_objective_clips_out_of_bounds_inputs(self) -> None:
+    def test_objective_does_not_clip_out_of_bounds_inputs(self) -> None:
+        """#6644 F5 removed internal clipping; the raw value reaches the mock.
+
+        This assertion was stale (it still expected the pre-#6644 clipped
+        result) and had been failing on ``main``.
+        """
         exp = AngleOfReposeExperiment(backend="mock")
         opt = CalibrationOptimizer(exp)
-        # friction > 1 should be clipped to 1.0 (angle = 44)
         val = opt._objective(np.array([5.0, 5.0]))
-        # angle = 20 + 1.0 * 24 = 44; target = 32; residual^2 = 144
-        assert val == pytest.approx(144.0, abs=1e-9)
+        # angle = 20 + 5.0 * 24 = 140; target = 32; residual^2 = 108^2 = 11664
+        assert val == pytest.approx(11664.0, abs=1e-9)
 
     def test_optimize_returns_dict_with_error(self) -> None:
         exp = AngleOfReposeExperiment(backend="mock")
         opt = CalibrationOptimizer(exp)
         result = opt.optimize()
         assert "friction_coefficient" in result
-        assert "restitution_coefficient" in result
         assert "error" in result
+        # #7999: an inert parameter is no longer reported as calibrated.
+        assert "restitution_coefficient" not in result
         assert 0.01 <= result["friction_coefficient"] <= 1.0
 
 
