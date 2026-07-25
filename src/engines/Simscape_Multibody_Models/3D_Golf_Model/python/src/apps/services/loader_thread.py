@@ -1,5 +1,7 @@
 """Background worker for loading C3D files asynchronously."""
 
+import os
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 # C3DDataModel is used in type hinting potentially, but signal registration uses object
@@ -48,6 +50,12 @@ class C3DLoaderThread(QThread):
                 f"Corrupted or missing metadata:\nKey {e} not found in C3D parameters."
             )
         except ValueError as e:
-            self.failed.emit(f"Data inconsistency:\n{e}")
+            # ``load_c3d`` raises ValueError with an already user-facing
+            # message (unreadable file, unit inconsistency); pass it through
+            # verbatim instead of burying it under a generic prefix (#8073).
+            self.failed.emit(str(e))
         except (RuntimeError, OSError) as e:
-            self.failed.emit(f"Unexpected error loading file:\n{str(e)}")
+            self.failed.emit(
+                f"'{os.path.basename(self.filepath)}' could not be read as a "
+                f"C3D file.\n\nDetails: {e}"
+            )

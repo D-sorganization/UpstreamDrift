@@ -204,3 +204,41 @@ def test_build_points_dataframe_zero_frame_rate_warns(
         df = build_points_dataframe(c3d, md, "x.c3d", 1.0, True, None, None, None)
     assert "time" not in df.columns
     assert any("Frame rate is 0" in r.getMessage() for r in caplog.records)
+
+
+# ----- unit-aware range check (issue #8082) ----------------------------------
+
+
+def test_millimetre_data_without_conversion_is_not_flagged() -> None:
+    """Raw mm coordinates must be judged in metres, not compared as metres.
+
+    A ~1.05 m marker expressed as 1050 mm previously tripped the "> 10 m"
+    guard whenever ``target_units`` was ``None`` (the C3D Viewer's default),
+    which made every bundled millimetre fixture unloadable.
+    """
+    coords = np.array([[100.0, 1000.0, 0.0], [600.0, 1049.9, 250.0]])
+
+    validate_marker_positions(coords, source_units="mm", target_units=None)
+
+
+def test_metre_scale_data_still_flagged_when_unconverted() -> None:
+    """Genuinely out-of-range metre data must still raise."""
+    coords = np.array([[0.0, 0.0, 0.0], [50.0, 12.0, 3.0]])
+
+    with pytest.raises(ValueError, match="likely unit error"):
+        validate_marker_positions(coords, source_units="m", target_units=None)
+
+
+def test_millimetre_data_flagged_when_truly_out_of_range() -> None:
+    """20 m expressed in mm is still 20 m and must raise."""
+    coords = np.array([[0.0, 0.0, 0.0], [20_000.0, 100.0, 100.0]])
+
+    with pytest.raises(ValueError, match="likely unit error"):
+        validate_marker_positions(coords, source_units="mm", target_units=None)
+
+
+def test_explicit_target_units_drive_the_check() -> None:
+    """When a conversion was applied, thresholds follow ``target_units``."""
+    coords = np.array([[0.0, 0.0, 0.0], [1.05, 1.0, 0.25]])
+
+    validate_marker_positions(coords, source_units="mm", target_units="m")

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from ...utils.logging import get_logger
+from ._c3d_io import unit_scale
 from ._c3d_models import (
     BIOMECHANICAL_MARKER_MAX_M,
     BIOMECHANICAL_MARKER_MIN_M,
@@ -34,8 +35,14 @@ def validate_marker_positions(
     if coordinates.size == 0:
         return
 
-    min_pos = np.nanmin(coordinates)
-    max_pos = np.nanmax(coordinates)
+    # ``coordinates`` are expressed in ``target_units`` when a conversion was
+    # requested and in ``source_units`` otherwise. The thresholds below are in
+    # metres, so normalise first — without this a perfectly ordinary
+    # millimetre file loaded with ``target_units=None`` trips the "> 10m"
+    # guard at ~1050 (mm), which is 1.05 m (issue #8082).
+    to_meters = unit_scale(target_units or source_units, "m")
+    min_pos = np.nanmin(coordinates) * to_meters
+    max_pos = np.nanmax(coordinates) * to_meters
 
     if np.isnan(min_pos) or np.isnan(max_pos):
         logger.warning(

@@ -31,9 +31,66 @@ logger = get_logger(__name__)
 
 C3DMapping = dict[str, Any]
 
+# The C3D standard leaves ``POINT:UNITS`` optional and many writers emit the
+# parameter with an empty value list (or omit it entirely). Millimetres are the
+# format's documented default for 3D point data, so that is what we assume.
+DEFAULT_POINT_UNITS = "mm"
+
+
+def normalize_point_units(c3d_data: C3DMapping) -> C3DMapping:
+    """Ensure ``parameters.POINT.UNITS`` carries a usable value.
+
+    Real-world (and repository-bundled) C3D files are frequently written with
+    ``POINT:UNITS`` absent or present-but-empty. Consumers index
+    ``["POINT"]["UNITS"]["value"][0]`` directly, so both forms previously
+    crashed with ``KeyError``/``IndexError`` (issue #8082). This normalizer
+    fills in :data:`DEFAULT_POINT_UNITS` for both forms.
+
+    Args:
+        c3d_data: Mapping in ezc3d's shape. Mutated in place when repairs are
+            needed.
+
+    Returns:
+        The same mapping, with a non-empty ``POINT:UNITS`` value whenever a
+        ``POINT`` parameter group is present.
+
+    Postcondition:
+        If ``c3d_data["parameters"]["POINT"]`` exists, then
+        ``c3d_data["parameters"]["POINT"]["UNITS"]["value"]`` is a non-empty
+        sequence.
+    """
+    if not (c3d_data is not None):
+        raise ValueError("c3d_data must be provided")
+
+    parameters = c3d_data.get("parameters")
+    if not isinstance(parameters, dict):
+        return c3d_data
+    point_parameters = parameters.get("POINT")
+    if not isinstance(point_parameters, dict):
+        return c3d_data
+
+    units_entry = point_parameters.get("UNITS")
+    if not isinstance(units_entry, dict):
+        logger.warning("C3D POINT:UNITS missing; assuming %r.", DEFAULT_POINT_UNITS)
+        point_parameters["UNITS"] = {"value": [DEFAULT_POINT_UNITS]}
+        return c3d_data
+
+    value = units_entry.get("value")
+    if value is None or len(value) == 0:
+        logger.warning("C3D POINT:UNITS empty; assuming %r.", DEFAULT_POINT_UNITS)
+        units_entry["value"] = [DEFAULT_POINT_UNITS]
+    return c3d_data
+
 
 def load_c3d(file_path: Path) -> C3DMapping:
-    """Load the C3D file via ezc3d."""
+    """Load the C3D file via ezc3d.
+
+    Raises:
+        ImportError: If ``ezc3d`` is not installed.
+        FileNotFoundError: If ``file_path`` does not exist.
+        ValueError: If the file exists but is not a readable C3D file. The
+            message is user-facing: callers surface it verbatim in the GUI.
+    """
     if ezc3d is None:
         raise ImportError(
             "ezc3d is required for C3D file reading. "
@@ -43,7 +100,15 @@ def load_c3d(file_path: Path) -> C3DMapping:
         )
     if not file_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
-    return ezc3d.c3d(str(file_path))
+    try:
+        c3d_data = ezc3d.c3d(str(file_path))
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ValueError(
+            f"'{file_path.name}' is not a readable C3D file. "
+            "Select a binary .c3d motion-capture file exported by your capture "
+            f"system (underlying reader error: {error})."
+        ) from error
+    return normalize_point_units(cast(C3DMapping, c3d_data))
 
 
 def get_point_parameters(c3d_data: C3DMapping, file_path: Path) -> dict[str, Any]:
@@ -374,13 +439,26 @@ def _extract_plate_channels(
     return fallback_cursor, end
 
 
+def _point_units(point_parameters: dict[str, Any]) -> str:
+    """Return POINT units, falling back to the C3D default when unspecified.
+
+    ``build_metadata`` is also called with in-memory mappings that never went
+    through :func:`load_c3d`, so the absent/empty forms are tolerated here too.
+    """
+    units_value = (point_parameters.get("UNITS") or {}).get("value") or []
+    if len(units_value) == 0:
+        return DEFAULT_POINT_UNITS
+    units = str(units_value[0]).strip()
+    return units or DEFAULT_POINT_UNITS
+
+
 def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
     """Build a C3DMetadata object from loaded C3D data."""
     point_parameters = get_point_parameters(c3d_data, file_path)
     marker_labels = [label.strip() for label in point_parameters["LABELS"]["value"]]
     frame_count = int(point_parameters["FRAMES"]["value"][0])
     frame_rate = float(point_parameters["RATE"]["value"][0])
-    units = str(point_parameters["UNITS"]["value"][0])
+    units = _point_units(point_parameters)
     analog_labels, analog_rate, analog_units = get_analog_details(c3d_data)
     events = get_events(c3d_data)
     force_plates = get_force_platforms(c3d_data, len(analog_labels))

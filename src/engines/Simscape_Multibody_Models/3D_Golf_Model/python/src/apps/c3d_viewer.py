@@ -11,9 +11,11 @@ Features:
 - Consolidated loading path and MVC architecture
 """
 
+import importlib
 import os
 import sys
 import threading
+from collections.abc import Callable
 from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -41,6 +43,40 @@ from .ui.tabs.marker_plot_tab import MarkerPlotTab
 from .ui.tabs.overview_tab import OverviewTab
 from .ui.tabs.segments_tab import SegmentsTab
 from .ui.tabs.viewer_3d_tab import Viewer3DTab
+
+# The viewer runs three ways -- standalone wrapper, launcher-spawned
+# subprocess, and embedded launcher tab -- and each seeds ``sys.path``
+# differently, so the shared security helper is reachable under a different
+# dotted name in each. Trying only the bare ``shared.`` spelling raised
+# ``ModuleNotFoundError`` inside the file-open handler and took the whole
+# launcher down with it (issue #8073).
+_SECURITY_MODULE_CANDIDATES = (
+    "src.shared.python.security.security_utils",
+    "shared.python.security.security_utils",
+    # Flat root: ``src/shared/python`` itself on sys.path, which is how the
+    # standalone wrapper and the test suite reach ``sidekick``.
+    "security.security_utils",
+)
+
+
+def _resolve_validate_path() -> Callable[..., Path] | None:
+    """Return the shared ``validate_path`` helper, or ``None`` if unavailable.
+
+    Postcondition:
+        Never raises. Callers must surface a user-facing message when ``None``
+        is returned rather than letting an import error escape into Qt's
+        crash handler.
+    """
+    for module_name in _SECURITY_MODULE_CANDIDATES:
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            continue
+        validate_path = getattr(module, "validate_path", None)
+        if validate_path is not None:
+            return validate_path  # type: ignore[no-any-return]
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Embeddable Main Widget
@@ -316,10 +352,22 @@ class MainWidget(QtWidgets.QWidget):
     def load_c3d_file_from_path(self, path: str) -> None:
         """Load a C3D file from the given path."""
         # Security validation (F-004)
-        # shared module import must be available
         if not (path is not None):
             raise ValueError("path must be provided")
-        from shared.python.security.security_utils import validate_path
+
+        validate_path = _resolve_validate_path()
+        if validate_path is None:
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Cannot open C3D file",
+                "The shared path-validation module "
+                "(src/shared/python/security/security_utils.py) could not be "
+                "imported, so files cannot be opened safely.\n\n"
+                "Run the viewer from the repository checkout (or start it via "
+                "the UpstreamDrift launcher) so that the repository 'src' "
+                "directory is on PYTHONPATH, then try again.",
+            )
+            return
 
         suite_root = Path(__file__).parents[6]
         allowed = [

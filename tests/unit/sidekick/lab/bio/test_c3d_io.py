@@ -415,3 +415,77 @@ def test_load_c3d_via_patch(tmp_path: Path) -> None:
     with patch.object(io_mod.ezc3d, "c3d", return_value=fake):
         loaded = load_c3d(real_path)
     assert loaded is fake
+
+
+# ----- POINT:UNITS normalization (issue #8082) -------------------------------
+
+
+def test_normalize_point_units_fills_empty_value() -> None:
+    """An empty ``POINT:UNITS`` value list is backfilled with the C3D default."""
+    data = _synthetic_c3d_dict()
+    data["parameters"]["POINT"]["UNITS"]["value"] = []
+
+    io_mod.normalize_point_units(data)
+
+    assert data["parameters"]["POINT"]["UNITS"]["value"] == [io_mod.DEFAULT_POINT_UNITS]
+
+
+def test_normalize_point_units_creates_absent_key() -> None:
+    """A missing ``POINT:UNITS`` key is created rather than raising KeyError."""
+    data = _synthetic_c3d_dict()
+    del data["parameters"]["POINT"]["UNITS"]
+
+    io_mod.normalize_point_units(data)
+
+    assert data["parameters"]["POINT"]["UNITS"]["value"] == [io_mod.DEFAULT_POINT_UNITS]
+
+
+def test_normalize_point_units_preserves_declared_units() -> None:
+    """A file that declares its units keeps them untouched."""
+    data = _synthetic_c3d_dict(units="cm")
+
+    io_mod.normalize_point_units(data)
+
+    assert data["parameters"]["POINT"]["UNITS"]["value"] == ["cm"]
+
+
+def test_normalize_point_units_rejects_none() -> None:
+    with pytest.raises(ValueError, match="c3d_data must be provided"):
+        io_mod.normalize_point_units(None)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("mutate", ["empty", "absent"])
+def test_build_metadata_tolerates_unusable_point_units(
+    tmp_path: Path, mutate: str
+) -> None:
+    """``build_metadata`` defaults units for in-memory data (issue #8082).
+
+    The GUI reached ``build_metadata`` via ``load_c3d``, but other callers pass
+    mappings built in memory, so the read side must be tolerant too.
+    """
+    data = _synthetic_c3d_dict()
+    if mutate == "empty":
+        data["parameters"]["POINT"]["UNITS"]["value"] = []
+    else:
+        del data["parameters"]["POINT"]["UNITS"]
+
+    metadata = build_metadata(data, tmp_path / "in_memory.c3d")
+
+    assert metadata.units == io_mod.DEFAULT_POINT_UNITS
+
+
+def test_load_c3d_wraps_unreadable_file_in_value_error(tmp_path: Path) -> None:
+    """A non-C3D payload yields an actionable ValueError (issue #8073)."""
+    bogus = tmp_path / "not_c3d.c3d"
+    bogus.write_text("a,b,c\n1,2,3\n", encoding="utf-8")
+
+    with (
+        patch.object(
+            io_mod.ezc3d, "c3d", side_effect=OSError("File must be a valid c3d file")
+        ),
+        pytest.raises(ValueError) as excinfo,
+    ):
+        load_c3d(bogus)
+
+    assert "not_c3d.c3d" in str(excinfo.value)
+    assert "not a readable C3D file" in str(excinfo.value)
