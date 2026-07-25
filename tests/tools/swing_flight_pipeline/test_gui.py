@@ -237,6 +237,12 @@ def test_run_pipeline_passes_ui_parameters_to_swing_state(widget):
 
 
 def test_run_pipeline_renders_trajectory_when_glview_available(widget):
+    # The render branch imports pyqtgraph.opengl, which ships in the OPTIONAL
+    # `body-part-viz-gl` extra. Without this the ImportError is swallowed by
+    # _run_pipeline's own handler and the test failed with a confusing
+    # "Pipeline not available" message instead of skipping (#8039).
+    pytest.importorskip("pyqtgraph.opengl")
+
     fake_view = MagicMock()
     fake_view.opts = {}
     widget._gl_view = fake_view
@@ -252,6 +258,8 @@ def test_run_pipeline_renders_trajectory_when_glview_available(widget):
 
 
 def test_run_pipeline_removes_previous_plot_item(widget):
+    pytest.importorskip("pyqtgraph.opengl")
+
     fake_view = MagicMock()
     fake_view.opts = {}
     widget._gl_view = fake_view
@@ -290,7 +298,12 @@ def test_run_pipeline_handles_import_error(widget):
 
     text = widget._results_text.toPlainText()
     assert "Pipeline not available" in text
-    assert "feat/5337" in text
+    # Assert what the handler actually promises. The old assertion pinned a
+    # branch name ("feat/5337") that the message has not contained for a long
+    # time, so this test passed its first assertion and failed its second --
+    # the ImportError path was effectively unverified (#8039).
+    assert "SwingBallFlightPipeline" in text
+    assert "failed to import" in text
 
 
 def test_run_pipeline_handles_generic_exception(widget):
