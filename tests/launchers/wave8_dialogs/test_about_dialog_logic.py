@@ -184,8 +184,10 @@ class TestOpenUserGuide:
         launchers_dir.mkdir(parents=True)
         fake_file = launchers_dir / "about_dialog.py"
         fake_file.write_text("# stub")
-        (repo / "docs").mkdir()
-        manual = repo / "docs" / "USER_MANUAL.md"
+        # #8014: the bundled guide lives at docs/user_guide/user_manual.md;
+        # docs/USER_MANUAL.md has never existed.
+        (repo / "docs" / "user_guide").mkdir(parents=True)
+        manual = repo / "docs" / "user_guide" / "user_manual.md"
         manual.write_text("# manual")
 
         monkeypatch.setattr(ad, "__file__", str(fake_file))
