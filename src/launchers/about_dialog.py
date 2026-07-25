@@ -110,19 +110,27 @@ def open_issues_page() -> None:
     QDesktopServices.openUrl(QUrl(ISSUES_URL))
 
 
-def open_user_guide() -> None:
-    """Open the bundled user guide in the system browser.
+def user_guide_candidates() -> list[Path]:
+    """Return the bundled user-guide candidates, most readable first.
 
-    Looks for ``docs/user_guide/index.md`` relative to the repository
-    root. Falls back to opening the repository URL if no local copy is
-    found.
+    All three previous candidates were missing on disk — two named documents
+    that have never existed and one ``parents[3]`` variant that resolved
+    *outside* the repository entirely — so ``open_user_guide`` silently opened
+    the GitHub repo instead of the guide its tooltip promises (issue #8014).
+    ``docs/user_guide/user_manual.md`` is explicitly written to be read in the
+    built-in document reader, so it is tried first.
     """
-    candidates = [
-        Path(__file__).resolve().parents[2] / "docs" / "USER_MANUAL.md",
-        Path(__file__).resolve().parents[2] / "docs" / "user_guide" / "index.md",
-        Path(__file__).resolve().parents[3] / "docs" / "user_guide" / "index.md",
+    repo_root = Path(__file__).resolve().parents[2]
+    return [
+        repo_root / "docs" / "user_guide" / "user_manual.md",
+        repo_root / "docs" / "user_guide" / "upstream_drift_user_manual.md",
+        repo_root / "docs" / "index.md",
     ]
-    for path in candidates:
+
+
+def open_user_guide() -> None:
+    """Open the bundled user guide in the in-app document reader."""
+    for path in user_guide_candidates():
         if path.exists():
             from src.shared.python.ui.qt.widgets.document_reader import show_document
 
