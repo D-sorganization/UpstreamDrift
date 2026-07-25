@@ -45,9 +45,40 @@ class TestGracefulDegradation:
     """Test that features degrade gracefully when dependencies missing."""
 
     def test_launcher_starts_without_mujoco(self) -> None:
-        """Verify launcher can start even if MuJoCo not installed."""
-        # This would be an integration test
-        # For now, we verify the pattern exists
+        """The shared package must import with MuJoCo unavailable.
+
+        Previously this test had an empty body and could not fail (#8035). It
+        now actually blocks the import: `mujoco` is replaced with a module whose
+        import raises, and `src.shared.python` must still import cleanly. If any
+        module in that package acquires a module-level `import mujoco`, this
+        fails.
+        """
+        import builtins
+        import importlib
+
+        real_import = builtins.__import__
+
+        def _blocking_import(name, *args, **kwargs):
+            if name == "mujoco" or name.startswith("mujoco."):
+                raise ImportError("No module named 'mujoco' (simulated)")
+            return real_import(name, *args, **kwargs)
+
+        preserved = {
+            key: value
+            for key, value in sys.modules.items()
+            if key == "mujoco" or key.startswith("mujoco.")
+        }
+        for key in preserved:
+            del sys.modules[key]
+        sys.modules.pop("src.shared.python", None)
+
+        builtins.__import__ = _blocking_import
+        try:
+            module = importlib.import_module("src.shared.python")
+            assert module is not None
+        finally:
+            builtins.__import__ = real_import
+            sys.modules.update(preserved)
 
     def test_clear_error_messages(self) -> None:
         """Verify error messages are clear and helpful."""
