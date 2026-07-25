@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from importlib.util import find_spec
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
@@ -102,10 +101,6 @@ class BaseInputDevice(ABC):
                 operation=operation,
             )
 
-    def _has_any_backend(self, module_names: tuple[str, ...]) -> bool:
-        """Return whether any optional hardware backend module is importable."""
-        return any(find_spec(module_name) is not None for module_name in module_names)
-
     def get_pose(self) -> NDArray[np.floating]:
         """Get current pose."""
         self._require_connected("get_pose")
@@ -158,10 +153,18 @@ class SpaceMouseInput(BaseInputDevice):
         }
 
     def connect(self) -> bool:
-        """Connect to SpaceMouse."""
+        """Connect to SpaceMouse.
+
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("pyspacemouse", "hid") and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
+
+        Returns:
+            Always ``False``.
+        """
         self._is_connected = False
-        if not self._has_any_backend(("pyspacemouse", "hid")):
-            return False
         return False
 
     def update(self) -> None:
@@ -210,10 +213,18 @@ class VRControllerInput(BaseInputDevice):
         self._grip_value = 0.0
 
     def connect(self) -> bool:
-        """Connect to VR system."""
+        """Connect to VR system.
+
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("openvr",) and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
+
+        Returns:
+            Always ``False``.
+        """
         self._is_connected = False
-        if not self._has_any_backend(("openvr",)):
-            return False
         return False
 
     def update(self) -> None:
@@ -267,10 +278,18 @@ class HapticDeviceInput(BaseInputDevice):
         }
 
     def connect(self) -> bool:
-        """Connect to haptic device."""
+        """Connect to haptic device.
+
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("forcedimension", "dhd") and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
+
+        Returns:
+            Always ``False``.
+        """
         self._is_connected = False
-        if not self._has_any_backend(("forcedimension", "dhd")):
-            return False
         return False
 
     def update(self) -> None:
