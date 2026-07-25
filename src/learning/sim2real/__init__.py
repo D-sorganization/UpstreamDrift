@@ -13,10 +13,14 @@ from src.learning.sim2real.domain_randomization import (
     DomainRandomizationConfig,
     DomainRandomizer,
 )
-from src.learning.sim2real.system_identification import SystemIdentifier
+from src.learning.sim2real.system_identification import (
+    SystemIdentifier,
+    UnsupportedParameterError,
+)
 
 __all__ = [
     "DomainRandomizationConfig",
     "DomainRandomizer",
     "SystemIdentifier",
+    "UnsupportedParameterError",
 ]
