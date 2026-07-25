@@ -73,6 +73,11 @@ def test_startup_results_from_dict_uses_defaults() -> None:
 def test_context_help_doc_mapping_for_known_engines() -> None:
     """Context help should map known engine IDs to the expected docs paths."""
     dock = Mock(spec=ContextHelpDock)
+    # #7986: _get_doc_file now delegates to _doc_candidates; the spec'd Mock
+    # must route that call back to the real implementation.
+    dock._doc_candidates = lambda model_id: ContextHelpDock._doc_candidates(
+        dock, model_id
+    )
     mujoco_doc = ContextHelpDock._get_doc_file(dock, "mujoco_humanoid")
     drake_doc = ContextHelpDock._get_doc_file(dock, "drake_golf")
     pinocchio_doc = ContextHelpDock._get_doc_file(dock, "pinocchio_golf")
