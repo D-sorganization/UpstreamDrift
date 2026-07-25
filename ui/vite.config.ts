@@ -1,6 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import {
+  DEV_SERVER_PORT,
+  buildDevProxy,
+  resolveApiPort,
+} from './src/config/devProxy';
+
+// Port and proxy-key ordering live in `src/config/devProxy.ts` so they can be
+// regression-tested without loading esbuild. See issues #8076 and #8077.
+const API_PORT = resolveApiPort(process.env.VITE_API_PORT);
 
 export default defineConfig({
   plugins: [react()],
@@ -14,20 +23,12 @@ export default defineConfig({
   },
 
   server: {
-    port: 5180,
+    port: DEV_SERVER_PORT,
     strictPort: true,
     open: false,
-    proxy: {
-      // Proxy API requests to Docker backend during development
-      '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-      },
-      '/api/ws': {
-        target: 'ws://localhost:8001',
-        ws: true,
-      },
-    },
+    // Proxy API requests to the local Python API during development.
+    // Override the port with VITE_API_PORT when running the API elsewhere.
+    proxy: buildDevProxy(API_PORT),
   },
 
   build: {
