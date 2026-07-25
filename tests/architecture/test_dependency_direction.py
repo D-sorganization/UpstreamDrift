@@ -60,6 +60,56 @@ KNOWN_EXCEPTIONS: set[tuple[str, str]] = {
     # consider moving to launchers/ or introducing a launcher interface in api/
     ("api/services/launcher_service.py", "src.launchers.launcher_process_manager"),
     ("api/services/launcher_service.py", "src.launchers.launcher_model_handlers"),
+    # ---------------------------------------------------------------------
+    # Violations that accumulated while this whole directory was RED on main
+    # (#8034). They are recorded -- not excused -- so that NEW drift fails
+    # immediately. Tracked for removal by #8055.
+    # `test_known_exceptions_are_all_still_real` forces this list to shrink:
+    # once a violation is fixed, its entry here must be deleted.
+    # ---------------------------------------------------------------------
+    # shared/ statically importing three concrete engine backends -> #8055 (1)
+    (
+        "shared/python/analysis/cross_engine.py",
+        "src.engines.physics_engines.drake.python.drake_physics_engine",
+    ),
+    (
+        "shared/python/analysis/cross_engine.py",
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine",
+    ),
+    (
+        "shared/python/analysis/cross_engine.py",
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine",
+    ),
+    # shared/ reaching for the Simscape adapter -> #8055 (2)
+    (
+        "shared/python/motion_matching/surrogate/validate.py",
+        "src.engines.simscape._engine_pool",
+    ),
+    (
+        "shared/python/motion_matching/surrogate/validate.py",
+        "src.engines.simscape._errors",
+    ),
+    (
+        "shared/python/motion_matching/surrogate/validate.py",
+        "src.engines.simscape.adapter",
+    ),
+    (
+        "shared/python/pose_interchange/services/simscape.py",
+        "src.engines.simscape.adapter",
+    ),
+    (
+        "shared/python/simulation_backends/model_params.py",
+        "src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum",
+    ),
+    (
+        "shared/python/simulation_backends/ode_backend.py",
+        "src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum",
+    ),
+    # api/ importing launcher internals for health data -> #8055 (3)
+    ("api/routes/diagnostics.py", "src.launchers.integrations_health_data"),
+    ("api/routes/diagnostics.py", "src.launchers.launcher_diagnostics"),
+    # shared/ lazily importing an api router (function-local) -> #8055 (4)
+    ("shared/python/realtime/ws_pubsub.py", "src.api.routes.realtime"),
 }
 
 
@@ -109,6 +159,14 @@ def _extract_imports(filepath: Path) -> list[str]:
             for alias in node.names:
                 imports.append(alias.name)
         elif isinstance(node, ast.ImportFrom) and node.module:
+            # `node.level > 0` is a relative import (`from .api import X`). It can
+            # only ever resolve inside the importing package, so it can never
+            # cross a layer boundary. Treating it as absolute made
+            # `shared/python/realtime/__init__.py` and `codemap/__init__.py`
+            # look like they imported the `api/` LAYER when they were importing
+            # their own sibling `api.py` module (#8034).
+            if node.level:
+                continue
             imports.append(node.module)
     return imports
 
@@ -238,13 +296,84 @@ class TestDependencyDirection:
         )
 
     def test_all_layers_summary(self) -> None:
-        """Comprehensive check — summarize all violations for visibility."""
+        """No layering violation outside the tracked ``KNOWN_EXCEPTIONS`` set.
+
+        This used to log and assert nothing (#8035), which meant the one test
+        positioned to catch a violation in a *new* layer pair could never fail.
+        It now asserts, and covers every pair in ``FORBIDDEN_IMPORTS`` including
+        any added later that has no dedicated test above.
+        """
         violations = _collect_violations()
-        if violations:
-            logger.warning(
-                "Found %d architectural dependency violations:\n%s",
-                len(violations),
-                "\n".join(f"  - {v}" for v in violations),
+        assert violations == [], (
+            f"{len(violations)} architectural dependency violation(s) outside the "
+            "tracked KNOWN_EXCEPTIONS set. Fix the import direction; do NOT add "
+            "the entry to KNOWN_EXCEPTIONS (see #8055):\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
+
+    def test_every_forbidden_pair_has_a_dedicated_test(self) -> None:
+        """Each FORBIDDEN_IMPORTS pair must have its own named test."""
+        own_tests = {
+            name
+            for name in dir(TestDependencyDirection)
+            if name.startswith("test_") and "does_not_import" in name
+        }
+        missing = [
+            f"{src}->{dst}"
+            for src, dst in FORBIDDEN_IMPORTS
+            if f"test_{src}_does_not_import_{dst}" not in own_tests
+        ]
+        assert not missing, (
+            f"FORBIDDEN_IMPORTS pairs without a dedicated test: {missing}. "
+            "Add test_<src>_does_not_import_<dst>."
+        )
+
+
+class TestKnownExceptionsRatchet:
+    """``KNOWN_EXCEPTIONS`` must only ever shrink (#8055)."""
+
+    def test_known_exceptions_are_all_still_real(self) -> None:
+        """A fixed violation must be deleted from the allowlist, not left behind.
+
+        Without this, the allowlist becomes a graveyard and stops describing the
+        actual state of the codebase.
+        """
+        actual: set[tuple[str, str]] = set()
+        for py_file in sorted(SRC_ROOT.rglob("*.py")):
+            if "__pycache__" in str(py_file):
+                continue
+            source_layer = _get_layer(py_file)
+            if source_layer is None:
+                continue
+            relative_to_src = py_file.relative_to(SRC_ROOT).as_posix()
+            for imp in _extract_imports(py_file):
+                for src_layer, forbidden_layer in FORBIDDEN_IMPORTS:
+                    if source_layer == src_layer and _import_targets_layer(
+                        imp, forbidden_layer
+                    ):
+                        actual.add((relative_to_src, imp))
+
+        stale = sorted(KNOWN_EXCEPTIONS - actual)
+        assert not stale, (
+            "These KNOWN_EXCEPTIONS entries no longer correspond to a real "
+            "violation and must be deleted (#8055):\n"
+            + "\n".join(f"  - {path}: {imp}" for path, imp in stale)
+        )
+
+    def test_relative_imports_are_not_counted_as_layer_crossings(self) -> None:
+        """Guard the #8034 parser fix: `from .api import X` is intra-package."""
+        source = "from .api import Thing\nfrom ..api import Other\n"
+        tree = ast.parse(source)
+        relative = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.level
+        ]
+        assert len(relative) == 2, "fixture must contain two relative imports"
+
+        module = SRC_ROOT / "shared" / "python" / "realtime" / "__init__.py"
+        if module.exists():
+            assert "api" not in _extract_imports(module), (
+                "relative `from .api import ...` must not be reported as an "
+                "import of the api/ layer (#8034)"
             )
-        # This test doesn't assert — it just logs for visibility.
-        # Individual tests above catch specific violations.
