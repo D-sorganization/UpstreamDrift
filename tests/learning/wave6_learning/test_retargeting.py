@@ -189,16 +189,25 @@ class TestMotionRetargeter:
 
         out = r.retarget(motion, method="optimization")
 
+        # Golden values updated in the fix for #7980: forward kinematics now
+        # rotates about each joint's own `joint_axes` entry and applies a
+        # joint's rotation to its *descendants* (previously a leaf joint's
+        # angle moved its own position, and every axis was assumed to be z).
         np.testing.assert_allclose(
             out,
             np.array(
                 [
-                    [0.1, 0.2, -0.15370972387650733, 0.03710049359531734],
-                    [0.0, -0.25, 0.1949102252654462, -0.10825896641131856],
+                    [
+                        0.08340713355732823,
+                        0.18683814659599052,
+                        -0.1537751445489205,
+                        0.05,
+                    ],
+                    [-0.011346501679795895, -0.2563994, 0.1938440, -0.1],
                 ]
             ),
-            rtol=1e-12,
-            atol=1e-12,
+            rtol=1e-6,
+            atol=1e-6,
         )
 
     def test_fk_reuses_cached_end_effector_index_chains(self) -> None:
