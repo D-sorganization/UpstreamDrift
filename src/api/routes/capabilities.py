@@ -10,6 +10,7 @@ Endpoints
 
 ``POST /capabilities/refresh``
     Re-runs every probe and returns the new snapshot. Idempotent.
+    Auth-gated in cloud mode.
 
 ``POST /capabilities/{name}/install``
     Opt-in install of a missing feature. Refused inside non-root
@@ -17,6 +18,11 @@ Endpoints
     the caller must be authenticated when ``GOLF_AUTH_DISABLED`` is
     falsy. After a successful install the registry is refreshed
     automatically and the post-install report is returned.
+
+The ``GET`` endpoints stay unauthenticated so a client can negotiate
+capabilities before login; the two mutating ``POST`` endpoints carry
+``Depends(require_cloud_auth)`` individually because the router as a
+whole is in ``_PUBLIC_ROUTERS``.
 
 This route is auto-discovered by ``src.api.route_registry`` — no
 explicit registration in ``server.py`` is needed.
@@ -29,7 +35,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from src.api.auth.middleware import OptionalAuth
+from src.api.auth.dependencies import require_cloud_auth
 from src.shared.python.feature_registry import (
     InstallResult,
     get_registry,
@@ -114,9 +120,17 @@ def get_capability(name: str) -> FeatureReportModel:
     return _report_to_model(report)
 
 
-@router.post("/capabilities/refresh", response_model=list[FeatureReportModel])
+@router.post(
+    "/capabilities/refresh",
+    response_model=list[FeatureReportModel],
+    dependencies=[Depends(require_cloud_auth)],
+)
 def refresh_capabilities() -> list[FeatureReportModel]:
-    """Re-run every probe and return the new snapshot."""
+    """Re-run every probe and return the new snapshot.
+
+    Auth-gated in cloud mode: probing every feature is an expensive,
+    state-mutating operation (issue #7987).
+    """
     snapshot = get_registry().refresh()
     return [_report_to_model(r) for r in snapshot]
 
@@ -124,7 +138,7 @@ def refresh_capabilities() -> list[FeatureReportModel]:
 @router.post(
     "/capabilities/{name}/install",
     response_model=InstallResponse,
-    dependencies=[Depends(OptionalAuth)],
+    dependencies=[Depends(require_cloud_auth)],
 )
 def install_capability(name: str, body: InstallRequest) -> InstallResponse:
     """Install a missing feature in the active venv.
