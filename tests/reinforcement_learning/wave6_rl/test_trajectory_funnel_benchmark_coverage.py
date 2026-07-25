@@ -137,15 +137,22 @@ class TestTrajectoryFunnelReward:
         with pytest.raises(AssertionError, match="current_state must be provided"):
             self.bench.trajectory_funnel_reward(None, ref, 0.0)  # type: ignore[arg-type]
 
-    def test_phase_argument_does_not_affect_reward(self) -> None:
-        """current_phase is documented as 'allowing phase slippage' — verify
-        the implementation does not use it to alter the reward (the projection
-        finds its own closest phase)."""
+    def test_phase_argument_ignored_without_a_phase_window(self) -> None:
+        """With phase_window=None the projection is global (phase slippage)."""
         ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
         state = np.array([0.9, 0.0])
         r0 = self.bench.trajectory_funnel_reward(state, ref, 0.0)
         r1 = self.bench.trajectory_funnel_reward(state, ref, 1.0)
         assert r0 == r1
+
+    def test_phase_argument_used_when_phase_window_set(self) -> None:
+        """#7983: current_phase is no longer dead - it gates the projection."""
+        bench = TrajectoryFunnelBenchmark(mode="transverse", phase_window=0.1)
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+        state = np.array([0.9, 0.0])
+        assert bench.trajectory_funnel_reward(
+            state, ref, 0.5
+        ) != bench.trajectory_funnel_reward(state, ref, 0.0)
 
     def test_high_dim_trajectory(self) -> None:
         ref = np.zeros((10, 4))
@@ -257,73 +264,63 @@ class TestEstimateConvergence:
 # ---------------------------------------------------------------------------
 
 
-class TestSimulateAgentTraining:
+class TestTrainAgent:
+    """#7983: train_agent must run a real agent, not a noise schedule."""
+
     def test_setpoint_result_schema(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="setpoint")
-        result = bench.simulate_agent_training(n_episodes=5, n_steps=10, state_dim=3)
+        result = bench.train_agent(n_iterations=5, n_steps=10, state_dim=3)
         assert set(result.keys()) == {
-            "convergence_epochs",
-            "terminal_variance",
             "mode",
+            "convergence_iteration",
+            "terminal_return_std",
+            "initial_return",
+            "final_return",
+            "mean_transverse_error",
+            "terminal_setpoint_error",
         }
         assert result["mode"] == "setpoint"
-        assert isinstance(result["convergence_epochs"], int)
-        assert isinstance(result["terminal_variance"], float)
+        assert isinstance(result["convergence_iteration"], int)
+        assert isinstance(result["terminal_return_std"], float)
 
     def test_transverse_result_schema(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="transverse")
-        result = bench.simulate_agent_training(n_episodes=5, n_steps=10, state_dim=3)
+        result = bench.train_agent(n_iterations=5, n_steps=10, state_dim=3)
         assert result["mode"] == "transverse"
 
     def test_deterministic_repeatable(self) -> None:
-        """Seeded rng inside the method makes runs deterministic for given mode."""
+        """A fixed seed makes runs reproducible."""
         b1 = TrajectoryFunnelBenchmark(mode="setpoint")
         b2 = TrajectoryFunnelBenchmark(mode="setpoint")
-        r1 = b1.simulate_agent_training(n_episodes=5, n_steps=8, state_dim=2)
-        r2 = b2.simulate_agent_training(n_episodes=5, n_steps=8, state_dim=2)
+        r1 = b1.train_agent(n_iterations=5, n_steps=8, state_dim=2)
+        r2 = b2.train_agent(n_iterations=5, n_steps=8, state_dim=2)
         assert r1 == r2
+
+    def test_learning_curve_length_matches_iterations(self) -> None:
+        """The convergence index is an iteration index, not a step index."""
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+        result = bench.train_agent(n_iterations=7, n_steps=6, state_dim=2)
+        assert len(bench.learning_curve) == 7
+        assert 0 <= int(result["convergence_iteration"]) <= 7
 
     def test_minimal_run(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="transverse")
-        result = bench.simulate_agent_training(n_episodes=2, n_steps=3, state_dim=2)
-        assert result["convergence_epochs"] >= 0
-        assert np.isfinite(result["terminal_variance"])
-
-    def test_transverse_training_uses_batched_projection(self) -> None:
-        bench = TrajectoryFunnelBenchmark(mode="transverse")
-
-        def per_step_reward_not_expected(
-            _state: np.ndarray, _reference: np.ndarray, _phase: float
-        ) -> float:
-            raise AssertionError(
-                "transverse training should batch reference projection"
-            )
-
-        bench.trajectory_funnel_reward = per_step_reward_not_expected  # type: ignore[method-assign]
-
-        result = bench.simulate_agent_training(n_episodes=2, n_steps=4, state_dim=2)
-
-        assert result["mode"] == "transverse"
+        result = bench.train_agent(n_iterations=2, n_steps=3, state_dim=2)
+        assert result["convergence_iteration"] >= 0
+        assert np.isfinite(result["terminal_return_std"])
 
     def test_modes_produce_different_dynamics(self) -> None:
-        sp = TrajectoryFunnelBenchmark(mode="setpoint").simulate_agent_training(
-            n_episodes=10, n_steps=10, state_dim=3
-        )
-        tv = TrajectoryFunnelBenchmark(mode="transverse").simulate_agent_training(
-            n_episodes=10, n_steps=10, state_dim=3
-        )
-        # The two reward formulations are fundamentally different in magnitude
-        assert sp["terminal_variance"] != tv["terminal_variance"]
+        sp = TrajectoryFunnelBenchmark(mode="setpoint")
+        tv = TrajectoryFunnelBenchmark(mode="transverse")
+        sp.train_agent(n_iterations=10, n_steps=10, state_dim=3)
+        tv.train_agent(n_iterations=10, n_steps=10, state_dim=3)
+        assert sp.learning_curve != tv.learning_curve
 
-    def test_logger_initialized_when_no_handlers(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_logger_reports_training(self, caplog: pytest.LogCaptureFixture) -> None:
         bench = TrajectoryFunnelBenchmark(mode="transverse")
         with caplog.at_level(logging.INFO, logger=tfb_module.__name__):
-            bench.simulate_agent_training(n_episodes=2, n_steps=3, state_dim=2)
-        # At least the "Initializing" and "Training complete" messages
+            bench.train_agent(n_iterations=2, n_steps=3, state_dim=2)
         msgs = " ".join(rec.getMessage() for rec in caplog.records)
-        assert "Initializing" in msgs
         assert "Training complete" in msgs
 
 
