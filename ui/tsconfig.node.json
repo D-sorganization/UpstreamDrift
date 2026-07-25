@@ -21,5 +21,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  // `src/config/devProxy.ts` holds the dev-server proxy contract that
+  // vite.config.ts imports (issue #8076). It must be part of this project, not
+  // just the app project, or `tsc -b` reports TS6307.
+  "include": ["vite.config.ts", "src/config/devProxy.ts"]
 }
