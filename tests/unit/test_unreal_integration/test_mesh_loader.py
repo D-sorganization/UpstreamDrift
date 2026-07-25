@@ -546,10 +546,59 @@ class TestMeshLoaderGLTF:
         # Note: Full GLTF loading requires trimesh or pygltflib
         # This test validates the structure
 
+    def test_gltf_without_skeleton_reports_no_skeleton(self) -> None:
+        """A mesh with no skin data must honestly report `has_skeleton is False`."""
+        mesh = LoadedMesh(name="unskinned", vertices=[], faces=[])
+        assert mesh.skeleton is None
+        assert mesh.has_skeleton is False
+
+        # An empty skeleton is still "no skeleton" -- bone_count drives the flag.
+        mesh.skeleton = MeshSkeleton()
+        assert mesh.skeleton.bone_count == 0
+        assert mesh.has_skeleton is False
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason=(
+            "MeshLoader._load_gltf does not parse GLTF skins/joints, so "
+            "LoadedMesh.skeleton is always None. Tracked by #8057 -- remove this "
+            "marker when skin parsing lands."
+        ),
+    )
     def test_gltf_with_skeleton(self, tmp_path: Path) -> None:
-        """Test loading GLTF with skeleton."""
-        # This would test skeleton loading from GLTF
-        # Actual implementation depends on trimesh/pygltflib
+        """Loading a skinned GLTF must populate LoadedMesh.skeleton.
+
+        This test had an empty body and could not fail (#8035). It now asserts
+        the behaviour its name promises; `xfail(strict=True)` means it will fail
+        the build as soon as the feature is implemented, forcing the marker off.
+        """
+        gltf_file = tmp_path / "skinned.gltf"
+        gltf_file.write_text(
+            json.dumps(
+                {
+                    "asset": {"version": "2.0"},
+                    "scene": 0,
+                    "scenes": [{"nodes": [0]}],
+                    "nodes": [
+                        {"name": "root", "children": [1], "skin": 0, "mesh": 0},
+                        {"name": "joint_a", "children": [2]},
+                        {"name": "joint_b"},
+                    ],
+                    "skins": [{"joints": [1, 2], "skeleton": 1}],
+                    "meshes": [{"primitives": [{"attributes": {"POSITION": 0}}]}],
+                    "accessors": [],
+                    "bufferViews": [],
+                    "buffers": [],
+                }
+            )
+        )
+
+        mesh = MeshLoader().load(str(gltf_file))
+
+        assert mesh.has_skeleton, "skinned GLTF must produce a skeleton"
+        assert mesh.skeleton is not None
+        assert mesh.skeleton.bone_names == ["joint_a", "joint_b"]
+        assert mesh.skeleton.root_bone is not None
 
 
 class TestMeshLoaderContracts:

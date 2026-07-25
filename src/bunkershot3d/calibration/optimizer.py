@@ -45,6 +45,14 @@ class CalibrationOptimizer:
         bounds: Search bounds per parameter, in ``parameters`` order.
     """
 
+    #: Back-compat alias for the physically admissible friction/restitution
+    #: ranges. ``optimize()`` enforces ranges through ``self.bounds``; the
+    #: objective deliberately forwards supplied values without clipping.
+    BOUNDS: tuple[tuple[float, float], tuple[float, float]] = (
+        _DEFAULT_BOUNDS["friction_coefficient"],
+        _DEFAULT_BOUNDS["restitution_coefficient"],
+    )
+
     def __init__(self, experiment: Any) -> None:
         """Initialize with an experiment instance.
 
@@ -76,13 +84,23 @@ class CalibrationOptimizer:
 
     def _params_from_vector(self, x: np.ndarray) -> dict[str, float]:
         """Map an optimiser vector onto the experiment's keyword parameters."""
-        return {name: float(x[i]) for i, name in enumerate(self.parameters)}
+        vector = np.atleast_1d(x)
+        if len(vector) < len(self.parameters):
+            raise ValueError(
+                "x must provide values for calibrated parameters "
+                f"{self.parameters}, got {len(vector)}"
+            )
+        return {name: float(vector[i]) for i, name in enumerate(self.parameters)}
 
     def _objective(self, x: np.ndarray) -> float:
         """Squared residual between the simulated response and the target.
 
         Args:
             x: Parameter vector aligned with :attr:`parameters`.
+
+        Postconditions:
+            Parameters are forwarded to the experiment unmodified. Bounds are
+            enforced only by :meth:`optimize`, not by clipping here.
 
         Returns:
             Squared error.

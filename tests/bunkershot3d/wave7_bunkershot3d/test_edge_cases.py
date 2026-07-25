@@ -214,17 +214,33 @@ class TestCalibrationOptimizer:
         val = opt._objective(np.array([0.5, 0.5]))
         assert val == pytest.approx(0.0, abs=1e-9)
 
-    def test_objective_does_not_clip_out_of_bounds_inputs(self) -> None:
-        """#6644 F5 removed internal clipping; the raw value reaches the mock.
+    def test_objective_passes_out_of_bounds_inputs_through_unclipped(self) -> None:
+        """Out-of-bounds parameters must reach the experiment unmodified.
 
-        This assertion was stale (it still expected the pre-#6644 clipped
-        result) and had been failing on ``main``.
+        This test previously asserted the opposite (clipping to `BOUNDS`) and was
+        red on main (#8038). The internal clip was removed deliberately by #6644
+        F5: it is invisible to `differential_evolution`, creating flat plateaus
+        that stall the search and letting `res.x` sit outside the physical range
+        while being silently re-clipped. It also directly contradicted
+        `tests/bunkershot3d/test_calibration.py::
+        test_optimizer_objective_does_not_clip_internally`, so the two tests
+        could never both pass. The range is enforced by `optimize()`'s `bounds`.
         """
         exp = AngleOfReposeExperiment(backend="mock")
         opt = CalibrationOptimizer(exp)
         val = opt._objective(np.array([5.0, 5.0]))
-        # angle = 20 + 5.0 * 24 = 140; target = 32; residual^2 = 108^2 = 11664
+        # Unclipped: angle = 20 + 5.0 * 24 = 140; target = 32; residual^2 = 11664
         assert val == pytest.approx(11664.0, abs=1e-9)
+
+    def test_optimize_bounds_come_from_the_shared_constant(self) -> None:
+        """The back-compat bounds constant preserves the physical range."""
+        assert CalibrationOptimizer.BOUNDS == ((0.01, 1.0), (0.01, 1.0))
+
+    def test_objective_rejects_undersized_parameter_vector(self) -> None:
+        exp = AngleOfReposeExperiment(backend="mock")
+        opt = CalibrationOptimizer(exp)
+        with pytest.raises(ValueError, match="calibrated parameters"):
+            opt._objective(np.array([]))
 
     def test_optimize_returns_dict_with_error(self) -> None:
         exp = AngleOfReposeExperiment(backend="mock")
