@@ -35,7 +35,8 @@ Existing controls are:
 3. Repository hygiene tests for warning headers, approved shadows, and known
    Tools counterparts.
 4. A PR-diff hygiene gate that rejects every non-deletion edit to a file that
-   carried the Tools child-copy warning at the branch merge base.
+   carried the Tools child-copy warning at the branch merge base, plus every
+   newly added file that carries the warning.
 5. Startup contract tests proving that pinned vendor direct-package paths
    precede both legacy alias shims and a mutable sibling Tools checkout, and
    are installed before the first Sidekick import.

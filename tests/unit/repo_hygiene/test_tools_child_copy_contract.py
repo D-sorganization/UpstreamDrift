@@ -171,6 +171,7 @@ def test_current_branch_does_not_edit_tools_child_copies() -> None:
         relative.as_posix()
         for relative in _changed_shared_python_paths(base)
         if _base_revision_is_tools_child_copy(base, relative)
+        or _is_tools_child_copy(_SHARED_ROOT / relative)
     ]
 
     assert not offenders, (
