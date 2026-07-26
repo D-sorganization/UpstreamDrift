@@ -9,8 +9,10 @@ acceptance target for this work.
 ## Source ownership
 
 Sidekick, chat, and shared launcher components are owned by the Tools
-repository. UpstreamDrift must consume the pinned `vendor/ud-tools` revision;
-it must not repair a copied file under `src/shared/python/`.
+repository. Deployed UpstreamDrift must consume the pinned `vendor/ud-tools`
+revision; an explicitly configured development checkout must be a valid Tools
+root and remains authoritative. UpstreamDrift must not repair a copied file
+under `src/shared/python/`.
 
 The 2026-07-25 audit compared warning-headered UpstreamDrift Python files with
 the Tools revision used for verification:
@@ -41,8 +43,11 @@ Existing controls are:
    before this guard and conservatively falls back to a direct base comparison
    when shallow history cannot supply a merge base.
 5. Startup contract tests proving that pinned vendor direct-package paths
-   precede both legacy alias shims and a mutable sibling Tools checkout, and
-   are installed before the first Sidekick import.
+   precede both legacy alias shims and a mutable sibling Tools checkout, while
+   a valid `TOOLS_REPO_PATH` precedes every fallback and an invalid explicit
+   root fails closed. A direct import probe resolved
+   `sidekick.ui.tools_sidebar` from canonical Tools commit `9d95f7c2b`, not
+   from the UpstreamDrift child tree or vendor fallback.
 6. A gitlink update to the reviewed Tools revision whenever canonical Sidekick
    behavior changes.
 7. The repository shadow-module gate is evaluated against the exact pinned
@@ -69,7 +74,7 @@ Existing controls are:
 | SK-START-009 | Readiness response is returned                   | Response exposes the public instance ID and never the launcher capability                            | `test_readyz_reports_launcher_instance_without_secret`                                                                                                              | N/A                                                                                                                                                                                                     |
 | SK-START-010 | Sidebar installation is requested twice          | Existing sidebar is made visible; no duplicate splitter pane is added                                | `test_sidebar_manager_install_is_idempotent`                                                                                                                        | Automated only                                                                                                                                                                                          |
 | SK-START-011 | Vendored Tools and sibling Tools both exist      | Pinned vendor source wins                                                                            | `test_vendored_tools_precedes_mutable_sibling_checkout`, `test_vendored_direct_packages_precede_legacy_alias_shims`                                                 | **Pass** — default launch used the pinned chat implementation and connected on the exported dynamic port                                                                                                |
-| SK-START-012 | Unexpected WebSocket disconnect                  | Status names the Sidekick API and points to `UD_CHAT_WS_URL`                                         | Tools `test_close_event_disables_reconnect`                                                                                                                         | Pending                                                                                                                                                                                                 |
+| SK-START-012 | Unexpected WebSocket disconnect                  | Status names the Sidekick API and points to `UD_CHAT_WS_URL`                                         | Tools `test_close_event_disables_reconnect`                                                                                                                         | **Pass** — after the verified API pair stopped on port 22732, Chat immediately displayed the exact Sidekick/`UD_CHAT_WS_URL` guidance and returned to `Connected` within two seconds                    |
 | SK-START-013 | Host closes after Sidekick Terminal starts       | Sidebar stops its PTY, shell, bridge, API child, and launcher; unrelated services remain             | Tools `test_host_window_close_shuts_down_live_runtime`, Upstream `test_launcher_shutdown_delegates_to_sidekick_runtime_owner`                                       | **Pass** — all nine tracked launcher descendants and ports 8747/8781 exited; both port-8000 listeners remained                                                                                          |
 | SK-START-014 | User switches through every default Sidekick tab | Each tab renders without a Python crash dialog                                                       | Existing Tools sidebar/runtime tab suites                                                                                                                           | **Pass** — Chat, Files, Workspace, Terminal, Python REPL, Calculator, Data Explorer, Units, Notes, and Reporting rendered in the live sweep                                                             |
 | SK-START-015 | Connected chat sends a real prompt               | Transport accepts the request; provider failures are surfaced without crashing/disconnecting         | Tools chat protocol suites                                                                                                                                          | **Transport pass / provider blocked** — request was accepted and Chat remained connected; configured Ollama/model request timed out with an actionable provider message                                 |
@@ -144,6 +149,12 @@ Existing controls are:
 
   No process listened on 8123 or 9123.
 
+- Launched UpstreamDrift commit `c0ab9cfaf` against canonical Tools commit
+  `9d95f7c2b` and waited for Chat to reach `Connected` on isolated port 22732.
+  After verifying and stopping API PID 33316 and its worker PID 11300, Chat
+  immediately displayed the exact guidance above. The launcher created
+  replacement API PID 30244 and Chat returned to `Connected` within two
+  seconds.
 - Closed each isolated launcher through its window and verified that no tested
   launcher process or dynamic listener remained.
 
