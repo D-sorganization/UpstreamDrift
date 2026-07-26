@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess  # nosec B404 - fixed git invocation, no shell
 from pathlib import Path
@@ -77,6 +78,61 @@ def _is_tools_child_copy(path: Path) -> bool:
     return first_line == _HEADER
 
 
+def _run_git(*args: str) -> subprocess.CompletedProcess[str] | None:
+    """Run a read-only Git command from the repository root."""
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        return None
+    return subprocess.run(  # nosec B603 - fixed executable, no shell
+        [git_bin, *args],
+        cwd=str(_REPO_ROOT),
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+def _merge_base_with_main() -> str | None:
+    """Return the branch merge base used for PR ownership enforcement."""
+    result = _run_git("merge-base", "HEAD", "origin/main")
+    if result is None or result.returncode != 0:
+        return None
+    merge_base = result.stdout.strip()
+    return merge_base or None
+
+
+def _changed_shared_python_paths(base: str) -> list[Path]:
+    """Return non-deleted shared Python paths changed since ``base``."""
+    result = _run_git(
+        "diff",
+        "--name-only",
+        "--diff-filter=ACMRT",
+        f"{base}...HEAD",
+        "--",
+        "src/shared/python",
+    )
+    assert result is not None and result.returncode == 0, (
+        "Unable to inspect shared-file changes for child-copy enforcement"
+    )
+    prefix = "src/shared/python/"
+    return [
+        Path(line.removeprefix(prefix))
+        for line in result.stdout.splitlines()
+        if line.startswith(prefix) and line.endswith(".py")
+    ]
+
+
+def _base_revision_is_tools_child_copy(base: str, relative: Path) -> bool:
+    """Return whether ``relative`` carried the child-copy header at ``base``."""
+    source_path = f"src/shared/python/{relative.as_posix()}"
+    result = _run_git("show", f"{base}:{source_path}")
+    if result is None or result.returncode != 0:
+        return False
+    first_line = result.stdout.partition("\n")[0]
+    return first_line == _HEADER
+
+
 def test_tools_child_copy_headers_have_tools_counterparts() -> None:
     """Headered #7249 sync files must map to existing Tools files."""
     tools_paths = _tools_shared_paths()
@@ -99,4 +155,28 @@ def test_tools_child_copy_headers_have_tools_counterparts() -> None:
         "same-relative-path counterpart in Tools. Move canonical code to Tools "
         "before marking it as a synchronized child copy.\n\n"
         "Missing counterparts:\n  " + "\n  ".join(missing)
+    )
+
+
+def test_current_branch_does_not_edit_tools_child_copies() -> None:
+    """PRs must change canonical Tools source, not existing UD child copies."""
+    base = _merge_base_with_main()
+    if base is None:
+        assert not os.environ.get("CI"), (
+            "origin/main is required in CI for child-copy diff enforcement"
+        )
+        pytest.skip("origin/main is unavailable for child-copy diff enforcement")
+
+    offenders = [
+        relative.as_posix()
+        for relative in _changed_shared_python_paths(base)
+        if _base_revision_is_tools_child_copy(base, relative)
+    ]
+
+    assert not offenders, (
+        "This branch directly modifies Tools-owned child copies in "
+        "UpstreamDrift. Make each change in D-sorganization/Tools, merge or "
+        "pin that canonical revision, and update only vendor/ud-tools here. "
+        "Deleting a migrated child copy remains allowed.\n\n"
+        "Direct child-copy edits:\n  " + "\n  ".join(offenders)
     )

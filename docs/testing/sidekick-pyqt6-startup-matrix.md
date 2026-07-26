@@ -34,10 +34,12 @@ Existing controls are:
 2. CODEOWNERS review for `src/shared/python/`.
 3. Repository hygiene tests for warning headers, approved shadows, and known
    Tools counterparts.
-4. Startup contract tests proving that pinned vendor direct-package paths
+4. A PR-diff hygiene gate that rejects every non-deletion edit to a file that
+   carried the Tools child-copy warning at the branch merge base.
+5. Startup contract tests proving that pinned vendor direct-package paths
    precede both legacy alias shims and a mutable sibling Tools checkout, and
    are installed before the first Sidekick import.
-5. A gitlink update to the reviewed Tools revision whenever canonical Sidekick
+6. A gitlink update to the reviewed Tools revision whenever canonical Sidekick
    behavior changes.
 
 ## Acceptance matrix
@@ -56,7 +58,7 @@ Existing controls are:
 | SK-START-010 | Sidebar installation is requested twice          | Existing sidebar is made visible; no duplicate splitter pane is added                        | `test_sidebar_manager_install_is_idempotent`                                                                                      | Automated only                                                                                                                                                          |
 | SK-START-011 | Vendored Tools and sibling Tools both exist      | Pinned vendor source wins                                                                    | `test_vendored_tools_precedes_mutable_sibling_checkout`, `test_vendored_direct_packages_precede_legacy_alias_shims`               | **Pass** — default launch used the pinned chat implementation and connected on the exported dynamic port                                                                |
 | SK-START-012 | Unexpected WebSocket disconnect                  | Status names the Sidekick API and points to `UD_CHAT_WS_URL`                                 | Tools `test_close_event_disables_reconnect`                                                                                       | Pending                                                                                                                                                                 |
-| SK-START-013 | Host closes after Sidekick Terminal starts       | Sidebar stops its PTY, shell, bridge, API child, and launcher; unrelated services remain     | Tools `test_sidebar_shutdown.py`, Upstream `test_launcher_shutdown_delegates_to_sidekick_runtime_owner`                           | **Pass** — all nine tracked launcher descendants and ports 8747/8781 exited; both port-8000 listeners remained                                                          |
+| SK-START-013 | Host closes after Sidekick Terminal starts       | Sidebar stops its PTY, shell, bridge, API child, and launcher; unrelated services remain     | Tools `test_host_window_close_shuts_down_live_runtime`, Upstream `test_launcher_shutdown_delegates_to_sidekick_runtime_owner`     | **Pass** — all nine tracked launcher descendants and ports 8747/8781 exited; both port-8000 listeners remained                                                          |
 | SK-START-014 | User switches through every default Sidekick tab | Each tab renders without a Python crash dialog                                               | Existing Tools sidebar/runtime tab suites                                                                                         | **Pass** — Chat, Files, Workspace, Terminal, Python REPL, Calculator, Data Explorer, Units, Notes, and Reporting rendered in the live sweep                             |
 | SK-START-015 | Connected chat sends a real prompt               | Transport accepts the request; provider failures are surfaced without crashing/disconnecting | Tools chat protocol suites                                                                                                        | **Transport pass / provider blocked** — request was accepted and Chat remained connected; configured Ollama/model request timed out with an actionable provider message |
 
@@ -83,7 +85,7 @@ Existing controls are:
 ## 2026-07-25 computer-control result
 
 - UpstreamDrift branch: `fix/8102-sidekick-startup`.
-- Canonical Tools PR head: `a3b7de401a60c67f7a085c54ecbe21a510c8fa60`.
+- Canonical Tools PR head: `2a4300cbb1b57695ae07a8375e8796c977b2939d`.
 - Pinned Tools source was verified instead of either UpstreamDrift child copies
   or the mutable sibling Tools checkout.
 - Chat reached `Connected` on dynamic ports while unrelated port-8000
