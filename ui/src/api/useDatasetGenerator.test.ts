@@ -113,3 +113,67 @@ describe('useDatasetGenerator catalog responses', () => {
     expect(result.current.exportFormats).toEqual([exportFormat]);
   });
 });
+
+describe('dataset generation controls (issue #7981)', () => {
+  const apiFetchMock = vi.mocked(apiFetch);
+
+  const control = {
+    id: 'num_samples',
+    name: 'Num Samples',
+    type: 'range',
+    value: 10,
+    options: null,
+    min: 1,
+    max: 10000,
+    step: 1,
+  };
+
+  function mockCatalog() {
+    apiFetchMock.mockImplementation(async (path) => {
+      if (path === '/api/dataset/features') return [];
+      if (path === '/api/dataset/plots/types') return [];
+      if (path === '/api/dataset/export/formats') return [];
+      if (path === '/api/dataset/control') return { controls: [control] };
+      throw new Error(`Unexpected path: ${path}`);
+    });
+  }
+
+  beforeEach(() => {
+    apiFetchMock.mockReset();
+  });
+
+  it('loads controls from GET /api/dataset/control', async () => {
+    mockCatalog();
+    const { result } = renderHook(() => useDatasetGenerator());
+
+    await waitFor(() => {
+      expect(result.current.catalogLoading).toBe(false);
+    });
+
+    expect(result.current.controls).toEqual([control]);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('never calls the nonexistent per-control endpoint', async () => {
+    mockCatalog();
+    const { result } = renderHook(() => useDatasetGenerator());
+
+    await waitFor(() => {
+      expect(result.current.catalogLoading).toBe(false);
+    });
+
+    result.current.updateControl('num_samples', 42);
+
+    await waitFor(() => {
+      expect(result.current.controls[0].value).toBe(42);
+    });
+
+    // `/api/dataset/control/{id}` has never existed on the backend; calling it
+    // 404'd on every keystroke. The mock throws on unexpected paths, so the
+    // only accepted calls are the four catalog GETs.
+    const paths = apiFetchMock.mock.calls.map(([path]) => path);
+    expect(paths).not.toContain('/api/dataset/control/num_samples');
+    expect(paths.filter((p) => p === '/api/dataset/control')).toHaveLength(1);
+    expect(result.current.error).toBeNull();
+  });
+});

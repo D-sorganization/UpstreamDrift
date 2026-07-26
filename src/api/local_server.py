@@ -56,7 +56,7 @@ else:
 
 # NOTE: These imports are placed after env setup intentionally
 # The environment variables must be set before FastAPI initialization
-from fastapi import FastAPI, HTTPException, Request  # noqa: E402
+from fastapi import Depends, FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -71,18 +71,14 @@ from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
     get_diagnostic_endpoint_html,
 )
+from src.api.route_registry import (  # noqa: E402
+    register_routes,
+    ws_compatible_auth_dependency,
+)
 from src.api.routes import (  # noqa: E402
-    analysis,
-    analysis_plots,
-    ball_flight,
     chat_ws,
-    cross_engine,
-    diagnostics,
-    engines,
-    export,
-    motion_capture,
     observability,
-    simulation,
+    realtime,
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
@@ -219,42 +215,40 @@ def _register_api_routers(app: FastAPI) -> None:
 
     Routes are mounted at both the versioned prefix (``/api/v1/``) and the
     legacy prefix (``/api/``) to maintain backward compatibility (#2070).
-    """
-    # Versioned routes: /api/v1/... (canonical, forward-compatible)
-    app.include_router(engines.router, prefix=API_PREFIX, tags=["Engines"])
-    app.include_router(simulation.router, prefix=API_PREFIX, tags=["Simulation"])
-    app.include_router(
-        simulation_ws.router, prefix=API_PREFIX, tags=["Simulation WebSocket"]
-    )
-    app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
-    app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
-    app.include_router(
-        cross_engine.router, prefix=API_PREFIX, tags=["Cross-Engine Analysis"]
-    )
-    app.include_router(analysis_plots.router, prefix=API_PREFIX, tags=["Analysis"])
-    app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
-    app.include_router(
-        motion_capture.router, prefix=API_PREFIX, tags=["Motion Capture"]
-    )
-    app.include_router(ball_flight.router, prefix=API_PREFIX, tags=["Ball Flight"])
-    app.include_router(diagnostics.router, prefix=API_PREFIX, tags=["Diagnostics"])
 
-    # Legacy routes: /api/... (deprecated aliases for backward compatibility)
-    app.include_router(engines.router, prefix="/api", tags=["Engines"])
-    app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
-    app.include_router(
-        simulation_ws.router, prefix="/api", tags=["Simulation WebSocket"]
-    )
-    app.include_router(chat_ws.router, prefix="/api", tags=["Chat"])
-    app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
-    app.include_router(
-        cross_engine.router, prefix="/api", tags=["Cross-Engine Analysis"]
-    )
-    app.include_router(analysis_plots.router, prefix="/api", tags=["Analysis"])
-    app.include_router(export.router, prefix="/api", tags=["Export"])
-    app.include_router(motion_capture.router, prefix="/api", tags=["Motion Capture"])
-    app.include_router(ball_flight.router, prefix="/api", tags=["Ball Flight"])
-    app.include_router(diagnostics.router, prefix="/api", tags=["Diagnostics"])
+    Issue #8010: this used to hand-mount a fixed subset of routers, so the
+    packaged Tauri desktop app (which serves the React bundle from *this*
+    module) 404'd on ~100 endpoints that worked fine under ``npm run dev``
+    — dev proxies to ``src.api.server``, which mounts every discovered
+    router. The two entry points now share ``route_registry.register_routes``
+    so the desktop build can never drift behind the web build again. Auth
+    dependencies attached by the registry are no-ops here because local mode
+    sets ``GOLF_SUITE_AUTH_DISABLED``.
+
+    ``chat_ws``, ``simulation_ws`` and ``realtime`` are excluded from
+    auto-discovery (they expose WebSocket endpoints that authenticate
+    themselves) and are therefore mounted explicitly, exactly as ``server.py``
+    does.
+    """
+    for prefix in (API_PREFIX, "/api"):
+        count = register_routes(app, prefix=prefix)
+        logger.info("Registered %d route modules under %s", count, prefix or "/")
+
+        app.include_router(
+            simulation_ws.router, prefix=prefix, tags=["Simulation WebSocket"]
+        )
+        app.include_router(
+            chat_ws.router,
+            prefix=prefix,
+            tags=["Chat"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
+        )
+        app.include_router(
+            realtime.router,
+            prefix=prefix,
+            tags=["Realtime"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
+        )
 
 
 def _load_launcher_manifest() -> dict[str, Any]:
@@ -926,7 +920,22 @@ def create_local_app() -> FastAPI:
     async def shutdown_task_manager() -> None:
         await task_manager.shutdown()
 
-    # Register routes (no auth required in local mode)
+    # Desktop-specific overrides FIRST (issue #8010). FastAPI resolves
+    # first-match-wins, and the shared routers now mounted below also define
+    # ``GET /health`` (routes/core.py) and ``GET /launcher/manifest``
+    # (routes/launcher.py). The local variants are not duplicates: the local
+    # manifest carries the launcher CSRF token and native-window launch state
+    # the desktop shell requires, and the local health check reports the
+    # in-process engine manager. Registering them ahead of the routers keeps
+    # them reachable.
+
+    # Launcher endpoints (manifest, logos, launch, processes, stop)
+    _register_launcher_endpoints(app)
+
+    # Health check and diagnostic endpoints
+    _register_health_and_diagnostic_endpoints(app, engine_manager)
+
+    # Register every discovered route module (no auth required in local mode)
     _register_api_routers(app)
 
     # Store engine manager for diagnostics
@@ -938,12 +947,6 @@ def create_local_app() -> FastAPI:
         _startup_metrics["engines_loaded"],
         getattr(engine_manager, "reason", None),
     )
-
-    # Launcher endpoints (manifest, logos, launch, processes, stop)
-    _register_launcher_endpoints(app)
-
-    # Health check and diagnostic endpoints
-    _register_health_and_diagnostic_endpoints(app, engine_manager)
 
     # Serve static UI files in production
     _mount_static_files_and_spa(app)

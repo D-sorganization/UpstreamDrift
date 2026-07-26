@@ -237,22 +237,20 @@ export function useDatasetGenerator() {
     }
   }, []);
 
-  const updateControl = useCallback(
-    async (controlId: string, value: unknown) => {
-      try {
-        await apiFetch(`/api/dataset/control/${controlId}`, {
-          method: 'POST',
-          body: JSON.stringify({ value }),
-        });
-        // Refresh controls after update
-        await fetchControls();
-      } catch (err) {
-        if (isMountedRef.current)
-          setError(err instanceof Error ? err.message : 'Control update failed');
-      }
-    },
-    [fetchControls],
-  );
+  /**
+   * Issue #7981 — control values are client-side until generation.
+   *
+   * This used to POST `/api/dataset/control/{id}`, an endpoint that has never
+   * existed on the backend, so every keystroke produced a 404 and an error
+   * banner. Generation parameters are collected locally and submitted as a
+   * single body to `POST /api/dataset/generate`; there is no per-control
+   * server-side state to update.
+   */
+  const updateControl = useCallback((controlId: string, value: unknown) => {
+    setControls((prev) =>
+      prev.map((ctrl) => (ctrl.id === controlId ? { ...ctrl, value } : ctrl)),
+    );
+  }, []);
 
   /**
    * F1 — Export dataset to the chosen format.
