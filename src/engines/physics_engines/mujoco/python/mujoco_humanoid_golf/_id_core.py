@@ -208,18 +208,39 @@ class RecursiveNewtonEuler:
             qacc: Joint accelerations [nv]
 
         Returns:
-            Joint torques [nv]
+            Joint torques [nv], equal to ``M(q) qacc + C(q, qvel) qvel + g(q)``.
         """
-        # MuJoCo's internal RNE is very efficient
-        # We use MuJoCo's inverse dynamics
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
+        if qvel is None:
+            raise ValueError("qvel must be provided")
+        if qacc is None:
+            raise ValueError("qacc must be provided")
+        if len(qpos) != self.model.nq:
+            raise ValueError(
+                f"qpos must have length nq={self.model.nq}, got {len(qpos)}"
+            )
+        if len(qvel) != self.model.nv or len(qacc) != self.model.nv:
+            raise ValueError(
+                f"qvel and qacc must have length nv={self.model.nv}, "
+                f"got {len(qvel)} and {len(qacc)}"
+            )
+
         self.data.qpos[:] = qpos
         self.data.qvel[:] = qvel
+
+        # mj_rne consumes the com-based kinematics (xipos/cinert/cvel), which are
+        # only valid after a forward pass. Without this the recursion runs on stale
+        # or zeroed buffers and returns all zeros.
+        mujoco.mj_forward(self.model, self.data)
+
+        # mj_forward solves forward dynamics and overwrites data.qacc, so the
+        # requested acceleration has to be written back before the RNE pass.
         self.data.qacc[:] = qacc
 
-        # Use MuJoCo's rne function
+        # flg_acc=1 includes the M(q) * qacc term; flg_acc=0 would return only the
+        # bias force C + g and silently ignore the caller's qacc.
         result = np.zeros(self.model.nv)
-        mujoco.mj_rne(self.model, self.data, 0, result)
+        mujoco.mj_rne(self.model, self.data, 1, result)
 
         return result
