@@ -71,6 +71,7 @@ class SidekickSidebarManager:
 
     def _get_sidekick_module(self) -> Any | None:
         """Import the Sidekick sidebar module, trying multiple fallback paths."""
+        SidekickSidebarManager._install_sidekick_import_paths(self)
         try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
@@ -83,7 +84,6 @@ class SidekickSidebarManager:
         if module is not None:
             return module
 
-        SidekickSidebarManager._install_sidekick_import_paths(self)
         for module_name in (
             "shared.python.sidekick.ui.tools_sidebar",
             "sidekick.ui.tools_sidebar",
@@ -96,6 +96,12 @@ class SidekickSidebarManager:
 
     def _install_sidekick_import_paths(self) -> None:
         """Prepend sibling or vendored Tools paths for Sidekick imports."""
+        vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
+        if vendor_root.is_dir():
+            SidekickSidebarManager._prepend_sys_path(vendor_root)
+            SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
+            return
+
         sibling_tools = REPOS_ROOT.parent / "Tools"
         if sibling_tools.is_dir():
             SidekickSidebarManager._prepend_sys_path(sibling_tools / "src")
@@ -104,16 +110,22 @@ class SidekickSidebarManager:
             )
             return
 
-        vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
+        # Last-resort compatibility path for partially initialized deployments.
         SidekickSidebarManager._prepend_sys_path(vendor_root)
         SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
 
     @staticmethod
     def _prepend_sys_path(path: Any) -> None:
-        """Prepend a path string to sys.path if it is not already present."""
+        """Place a source path first even when bootstrap already added it.
+
+        The direct ``shared/python`` packages must win over legacy alias shims
+        under ``src``. Merely skipping an existing entry preserves the wrong
+        order when another bootstrapper inserted ``src`` first.
+        """
         path_text = str(path)
-        if path_text not in sys.path:
-            sys.path.insert(0, path_text)
+        while path_text in sys.path:
+            sys.path.remove(path_text)
+        sys.path.insert(0, path_text)
 
     def _create_sidekick_sidebar_widget(self, module: Any) -> Any | None:
         """Invoke the factory to create the sidekick sidebar widget."""
@@ -174,6 +186,10 @@ class SidekickSidebarManager:
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane."""
+        existing_sidebar = self.sidekick_sidebar
+        if existing_sidebar is not None:
+            existing_sidebar.setVisible(True)
+            return
         logger.info("Initializing _install_sidekick_sidebar")
         module = SidekickSidebarManager._get_sidekick_module(self)
         widget = SidekickSidebarManager._create_sidekick_sidebar_widget(self, module)

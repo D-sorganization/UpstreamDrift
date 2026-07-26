@@ -26,11 +26,13 @@ if sys.platform == "win32":
         pass
 
 import argparse
+import importlib
 import logging
 import os
 from os import environ, getcwd
 from pathlib import Path
 from sys import exit, path
+from types import ModuleType
 
 # Bootstrap import paths before any project imports. The repo root must be on
 # sys.path so `src.*` resolves; the vendored Tools tree must be on sys.path so
@@ -56,23 +58,26 @@ def _resolve_explicit_tools_root(env_value: str | None) -> Path | None:
 
 
 def _launcher_bootstrap_paths(repo_root: Path, tools_root: Path | None) -> list[str]:
-    """Build deterministic import precedence for direct launcher execution."""
+    """Build deterministic, parent-source-first import precedence."""
     paths_to_add: list[str] = []
     if tools_root is not None:
         paths_to_add.extend(
             [
-                str(tools_root / "src"),
                 str(tools_root / "src" / "shared" / "python"),
+                str(tools_root / "src"),
                 str(tools_root / "src" / "python" / "src"),
             ]
         )
 
+    vendor_src = repo_root / "vendor" / "ud-tools" / "src"
     paths_to_add.extend(
         [
+            str(vendor_src / "shared" / "python"),
+            str(vendor_src),
+            str(vendor_src / "python" / "src"),
             str(repo_root / "src" / "shared" / "python"),
             str(repo_root / "src"),
             str(repo_root),
-            str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
         ]
     )
     return paths_to_add
@@ -87,6 +92,36 @@ def _bootstrap_import_paths(paths_to_add: list[str]) -> None:
 
 _TOOLS_ROOT = _resolve_explicit_tools_root(os.environ.get("TOOLS_REPO_PATH"))
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _TOOLS_ROOT))
+_PARENT_CONTRACTS: ModuleType | None = None
+
+
+def _load_parent_contracts() -> ModuleType | None:
+    """Load the selected Tools contract before downstream aliases exist."""
+    parent_root = _TOOLS_ROOT or (_REPO_ROOT / "vendor" / "ud-tools")
+    expected_paths = {
+        (parent_root / "src" / "shared" / "python" / "contracts.py").resolve(),
+        (parent_root / "src" / "contracts.py").resolve(),
+    }
+    if not any(candidate.is_file() for candidate in expected_paths):
+        return None
+    module = importlib.import_module("contracts")
+    module_path = Path(str(getattr(module, "__file__", ""))).resolve()
+    if module_path not in expected_paths:
+        expected_text = ", ".join(str(path) for path in sorted(expected_paths))
+        raise RuntimeError(
+            "Parent Tools contract resolution failed: "
+            f"expected one of [{expected_text}], resolved {module_path}"
+        )
+    return module
+
+
+def _restore_parent_contract_aliases(parent_contracts: ModuleType | None) -> None:
+    """Restore Tools-owned legacy aliases after Upstream imports run."""
+    if parent_contracts is None:
+        return
+    sys.modules["contracts"] = parent_contracts
+    sys.modules["shared.python.contracts"] = parent_contracts
+
 
 from src.api._version import warn_if_unsupported_platform  # noqa: E402
 
@@ -234,6 +269,7 @@ def route_launch(args: argparse.Namespace) -> None:
             # Try new location first
             from src.launchers.upstream_drift_launcher import main as classic_main
 
+            _restore_parent_contract_aliases(_PARENT_CONTRACTS)
             classic_main()
         except ImportError as e:
             import traceback
@@ -262,6 +298,8 @@ def route_launch(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Main entry point for unified launcher."""
+    global _PARENT_CONTRACTS
+    _PARENT_CONTRACTS = _load_parent_contracts()
     warn_if_unsupported_platform()
     args = parse_arguments()
     route_launch(args)

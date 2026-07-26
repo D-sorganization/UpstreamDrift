@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.467                                            |
-| **Last Spec Update**    | 2026-07-15                                         |
+| **Spec Version**        | 1.0.469                                            |
+| **Last Spec Update**    | 2026-07-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-25** - Hardened classic PyQt6 Sidekick startup for #8102. The
+  launcher selects an isolated loopback port when the historical default is
+  occupied, exports one ephemeral launcher/API capability, verifies the child
+  instance through `/readyz`, installs local Sidekick tools independently of
+  Chat readiness, performs bounded child restarts, and loads the pinned Tools
+  direct-package source before legacy aliases, copied sources, or mutable
+  sibling sources. Host close also delegates to the canonical sidebar shutdown
+  contract so Terminal PTY, shell, bridge, and API child processes cannot
+  survive the launcher (#3938). The acceptance and source-ownership audit
+  matrix is in
+  `docs/testing/sidekick-pyqt6-startup-matrix.md`.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
@@ -1861,6 +1872,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-25 | 1.0.469 | Hardened classic PyQt6 Sidekick startup for #8102: isolated dynamic loopback API ports, an ephemeral launcher capability and public instance readiness identity, bounded child restarts, local-tab availability independent of Chat, parent-source-first direct package imports, and a pinned Tools revision. Host close delegates to the canonical sidebar aggregate shutdown so Terminal PTY, shell, bridge, and API processes exit cleanly (#3938). Computer-control results and source-ownership audit are recorded in `docs/testing/sidekick-pyqt6-startup-matrix.md`. |
 | 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |

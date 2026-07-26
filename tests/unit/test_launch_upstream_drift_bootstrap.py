@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+from types import ModuleType
 
 import pytest
 
@@ -20,10 +22,12 @@ def test_launcher_bootstrap_defaults_to_repo_and_vendored_tools(tmp_path: Path) 
     paths = launch_upstream_drift._launcher_bootstrap_paths(repo_root, None)
 
     assert paths == [
+        str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
+        str(repo_root / "vendor" / "ud-tools" / "src"),
+        str(repo_root / "vendor" / "ud-tools" / "src" / "python" / "src"),
         str(repo_root / "src" / "shared" / "python"),
         str(repo_root / "src"),
         str(repo_root),
-        str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
     ]
     assert str(sibling_tools / "src") not in paths
 
@@ -43,15 +47,17 @@ def test_launcher_bootstrap_honors_explicit_tools_override(tmp_path: Path) -> No
     )
 
     assert paths[:3] == [
-        str(tools_root / "src"),
         str(tools_root / "src" / "shared" / "python"),
+        str(tools_root / "src"),
         str(tools_root / "src" / "python" / "src"),
     ]
     assert paths[3:] == [
+        str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
+        str(repo_root / "vendor" / "ud-tools" / "src"),
+        str(repo_root / "vendor" / "ud-tools" / "src" / "python" / "src"),
         str(repo_root / "src" / "shared" / "python"),
         str(repo_root / "src"),
         str(repo_root),
-        str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
     ]
 
 
@@ -72,3 +78,28 @@ def test_bootstrap_import_paths_preserves_precedence(
     launch_upstream_drift._bootstrap_import_paths(["first", "second", "tail"])
 
     assert synthetic_sys_path == ["first", "second", "tail"]
+
+
+def test_parent_contract_aliases_override_downstream_compatibility_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tools imports must not resolve to a stale Upstream child contract."""
+    parent_contracts = ModuleType("contracts")
+    downstream_contracts = ModuleType("src.shared.python.contracts")
+    monkeypatch.setitem(sys.modules, "contracts", downstream_contracts)
+    monkeypatch.setitem(
+        sys.modules,
+        "shared.python.contracts",
+        downstream_contracts,
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "src.shared.python.contracts",
+        downstream_contracts,
+    )
+
+    launch_upstream_drift._restore_parent_contract_aliases(parent_contracts)
+
+    assert sys.modules["contracts"] is parent_contracts
+    assert sys.modules["shared.python.contracts"] is parent_contracts
+    assert sys.modules["src.shared.python.contracts"] is downstream_contracts
