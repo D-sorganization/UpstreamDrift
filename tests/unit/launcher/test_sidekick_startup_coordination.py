@@ -114,6 +114,59 @@ def test_vendored_tools_precedes_mutable_sibling_checkout(tmp_path) -> None:
     ]
 
 
+def test_explicit_tools_checkout_precedes_initialized_fallbacks(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An explicit parent checkout remains authoritative after installation."""
+    repo_root = tmp_path / "UpstreamDrift"
+    explicit_src = tmp_path / "CanonicalTools" / "src"
+    vendor_src = repo_root / "vendor" / "ud-tools" / "src"
+    sibling_src = tmp_path / "Tools" / "src"
+    for source_root in (explicit_src, vendor_src, sibling_src):
+        (source_root / "shared" / "python").mkdir(parents=True)
+
+    synthetic_path = [
+        str(explicit_src / "shared" / "python"),
+        str(explicit_src),
+        str(vendor_src / "shared" / "python"),
+        str(vendor_src),
+        str(sibling_src / "shared" / "python"),
+        str(sibling_src),
+        "tail",
+    ]
+    monkeypatch.setattr(sys, "path", synthetic_path)
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(explicit_src.parent))
+    manager = SidekickSidebarManager(SimpleNamespace())
+
+    with patch.object(sidebar_module, "REPOS_ROOT", repo_root):
+        manager._install_sidekick_import_paths()
+
+    assert synthetic_path[:2] == [
+        str(explicit_src / "shared" / "python"),
+        str(explicit_src),
+    ]
+
+
+def test_invalid_explicit_tools_checkout_does_not_fall_through(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A malformed explicit contract must not silently select the vendor."""
+    repo_root = tmp_path / "UpstreamDrift"
+    (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
+    invalid_tools_root = tmp_path / "InvalidTools"
+    invalid_tools_root.mkdir()
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(invalid_tools_root))
+    manager = SidekickSidebarManager(SimpleNamespace())
+
+    with (
+        patch.object(sidebar_module, "REPOS_ROOT", repo_root),
+        pytest.raises(RuntimeError, match="TOOLS_REPO_PATH"),
+    ):
+        manager._install_sidekick_import_paths()
+
+
 def test_vendored_direct_packages_precede_legacy_alias_shims(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
@@ -222,7 +275,7 @@ def test_dead_api_process_receives_bounded_restart() -> None:
         _sidekick_api_wait_started_at=None,
         _sidekick_api_restart_count=0,
         background_api_process=dead_process,
-        _launch_sidekick_background_api=MagicMock(return_value=replacement),
+        _restart_sidekick_background_api=MagicMock(return_value=replacement),
         _monitor_sidekick_api_readiness=MagicMock(),
         _report_sidekick_api_failure=MagicMock(),
     )
@@ -243,7 +296,7 @@ def test_dead_api_process_receives_bounded_restart() -> None:
 
     assert launcher._sidekick_api_restart_count == 1
     assert launcher.background_api_process is replacement
-    launcher._launch_sidekick_background_api.assert_called_once_with()
+    launcher._restart_sidekick_background_api.assert_called_once_with()
     schedule.assert_called_once()
     launcher._report_sidekick_api_failure.assert_not_called()
 
@@ -305,7 +358,7 @@ def test_child_launch_failure_exhausts_retry_budget_observably() -> None:
         _sidekick_api_monitoring=True,
         _sidekick_api_was_ready=False,
         background_api_process=dead_process,
-        _launch_sidekick_background_api=MagicMock(return_value=None),
+        _restart_sidekick_background_api=MagicMock(return_value=None),
         _monitor_sidekick_api_readiness=MagicMock(),
         _report_sidekick_api_failure=MagicMock(),
     )
@@ -332,7 +385,7 @@ def test_child_launch_failure_exhausts_retry_budget_observably() -> None:
 
     assert launcher._sidekick_api_restart_count == SIDEKICK_API_MAX_RESTARTS
     assert launcher.background_api_process is None
-    launcher._launch_sidekick_background_api.assert_called_once_with()
+    launcher._restart_sidekick_background_api.assert_called_once_with()
     schedule.assert_called_once_with(
         SIDEKICK_API_RESTART_DELAY_MS,
         launcher._monitor_sidekick_api_readiness,

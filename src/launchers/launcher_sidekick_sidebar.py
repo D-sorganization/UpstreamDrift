@@ -8,6 +8,7 @@ import contextlib
 import importlib
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
@@ -95,24 +96,37 @@ class SidekickSidebarManager:
         return None
 
     def _install_sidekick_import_paths(self) -> None:
-        """Prepend sibling or vendored Tools paths for Sidekick imports."""
+        """Prepend the configured, vendored, or sibling Tools source."""
+        configured_root = os.environ.get("TOOLS_REPO_PATH")
+        if configured_root:
+            tools_root = Path(configured_root).expanduser().resolve()
+            tools_src = tools_root / "src"
+            if not tools_root.is_dir() or not tools_src.is_dir():
+                raise RuntimeError(
+                    "TOOLS_REPO_PATH must point to a Tools checkout containing "
+                    f"a src/ directory, got: {tools_root}"
+                )
+            SidekickSidebarManager._prepend_tools_source_paths(tools_src)
+            return
+
         vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
         if vendor_root.is_dir():
-            SidekickSidebarManager._prepend_sys_path(vendor_root)
-            SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
+            SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
             return
 
         sibling_tools = REPOS_ROOT.parent / "Tools"
         if sibling_tools.is_dir():
-            SidekickSidebarManager._prepend_sys_path(sibling_tools / "src")
-            SidekickSidebarManager._prepend_sys_path(
-                sibling_tools / "src" / "shared" / "python"
-            )
+            SidekickSidebarManager._prepend_tools_source_paths(sibling_tools / "src")
             return
 
         # Last-resort compatibility path for partially initialized deployments.
-        SidekickSidebarManager._prepend_sys_path(vendor_root)
-        SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
+        SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
+
+    @staticmethod
+    def _prepend_tools_source_paths(source_root: Path) -> None:
+        """Install one selected Tools source without changing its authority."""
+        SidekickSidebarManager._prepend_sys_path(source_root)
+        SidekickSidebarManager._prepend_sys_path(source_root / "shared" / "python")
 
     @staticmethod
     def _prepend_sys_path(path: Any) -> None:

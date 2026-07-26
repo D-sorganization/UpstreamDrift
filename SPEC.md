@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.471                                            |
+| **Spec Version**        | 1.0.472                                            |
 | **Last Spec Update**    | 2026-07-26                                         |
 
 ## 2. Purpose & Mission
@@ -76,15 +76,20 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   instance through `/readyz`, installs local Sidekick tools independently of
   Chat readiness, performs bounded child restarts, and loads the pinned Tools
   direct-package source before legacy aliases, copied sources, or mutable
-  sibling sources. Host close also delegates to the canonical sidebar shutdown
-  contract so Terminal PTY, shell, bridge, and API child processes cannot
-  survive the launcher (#3938). A PR-diff hygiene contract now rejects any
-  non-deletion edit to an existing warning-headered Tools child copy and any
-  newly added child copy, requiring the canonical Tools change and reviewed
-  gitlink bump instead. The protected unit gate fetches the pull request base
-  before running that fail-closed comparison, so a shallow checkout cannot
-  silently skip or spuriously fail ownership enforcement. The acceptance and
-  source-ownership audit matrix is in
+  sibling sources. An explicit `TOOLS_REPO_PATH` is authoritative and fails
+  closed when invalid rather than silently mixing with vendored or sibling
+  sources. Each automatic restart revalidates a dynamically selected API port
+  and selects a new free loopback port when necessary while preserving the
+  launcher's capability and instance identity; explicitly configured ports
+  remain unchanged. Host close also delegates to the canonical sidebar
+  shutdown contract so Terminal PTY, shell, bridge, and API child processes
+  cannot survive the launcher (#3938). A PR-diff hygiene contract now rejects
+  any non-deletion edit to an existing warning-headered Tools child copy and
+  any newly added child copy, requiring the canonical Tools change and
+  reviewed gitlink bump instead. The protected unit gate fetches the pull
+  request base before running that fail-closed comparison, so a shallow
+  checkout cannot silently skip or spuriously fail ownership enforcement.
+  The acceptance and source-ownership audit matrix is in
   `docs/testing/sidekick-pyqt6-startup-matrix.md`.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API

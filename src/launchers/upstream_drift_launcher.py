@@ -69,6 +69,7 @@ from src.launchers.sidekick_readiness import (
 from src.launchers.sidekick_runtime import (
     SidekickRuntimeConfig,
     configure_sidekick_runtime,
+    reselect_sidekick_runtime_port,
 )
 from src.launchers.launcher_theme import ThemeManager
 from src.launchers.launcher_ui_setup import UISetupManager
@@ -436,6 +437,17 @@ class UpstreamDriftLauncher(QMainWindow):
             cwd=cwd,
         )
 
+    def _restart_sidekick_background_api(self) -> Any | None:
+        """Refresh the dynamic port contract before replacing the API child."""
+        runtime = self._sidekick_runtime_config
+        if runtime is None:
+            return None
+        self._sidekick_runtime_config = reselect_sidekick_runtime_port(
+            runtime,
+            os.environ,
+        )
+        return self._launch_sidekick_background_api()
+
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
 
@@ -653,7 +665,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 SIDEKICK_API_MAX_RESTARTS,
                 readiness_detail_for_log(readiness),
             )
-            self.background_api_process = self._launch_sidekick_background_api()
+            self.background_api_process = self._restart_sidekick_background_api()
             self._sidekick_api_wait_started_at = now
             QTimer.singleShot(
                 SIDEKICK_API_RESTART_DELAY_MS,

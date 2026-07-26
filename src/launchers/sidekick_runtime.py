@@ -81,11 +81,14 @@ class SidekickRuntimeConfig:
 
     port: int
     capability: LauncherCapability
+    port_is_explicit: bool = False
 
     def __post_init__(self) -> None:
         _validate_port(self.port)
         if not isinstance(self.capability, LauncherCapability):
             raise TypeError("capability must be a LauncherCapability")
+        if not isinstance(self.port_is_explicit, bool):
+            raise TypeError("port_is_explicit must be a boolean")
 
     @property
     def instance_id(self) -> str:
@@ -126,9 +129,41 @@ def configure_sidekick_runtime(
         explicit_port if explicit_port is not None else port_selector(DEFAULT_API_PORT)
     )
     capability = capability_factory()
-    config = SidekickRuntimeConfig(port=port, capability=capability)
+    config = SidekickRuntimeConfig(
+        port=port,
+        capability=capability,
+        port_is_explicit=explicit_port is not None,
+    )
     config.export(environ)
     return config
+
+
+def reselect_sidekick_runtime_port(
+    config: SidekickRuntimeConfig,
+    environ: MutableMapping[str, str],
+    *,
+    port_selector: PortSelector = select_loopback_port,
+) -> SidekickRuntimeConfig:
+    """Refresh a dynamic runtime port while preserving launcher identity.
+
+    Explicit user-selected ports are stable contracts and are re-exported
+    unchanged. Dynamically selected ports are checked again before each child
+    restart so an intervening bind cannot poison the bounded retry budget.
+    """
+    if not isinstance(config, SidekickRuntimeConfig):
+        raise TypeError("config must be a SidekickRuntimeConfig")
+    if environ is None:
+        raise ValueError("environ must be provided")
+    if config.port_is_explicit:
+        config.export(environ)
+        return config
+
+    refreshed = SidekickRuntimeConfig(
+        port=port_selector(config.port),
+        capability=config.capability,
+    )
+    refreshed.export(environ)
+    return refreshed
 
 
 __all__ = [
@@ -137,5 +172,6 @@ __all__ = [
     "DEFAULT_API_PORT",
     "SidekickRuntimeConfig",
     "configure_sidekick_runtime",
+    "reselect_sidekick_runtime_port",
     "select_loopback_port",
 ]
