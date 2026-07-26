@@ -285,7 +285,7 @@ def constraint_violation(state: State, params: GolferParams) -> float:
     q = state[:N_DOF]
     Phi = constraint_vector(q, params)
     # ⚡ Bolt: math.sqrt(np.vdot(Phi, Phi)) is ~3x faster than np.linalg.norm by bypassing NumPy dispatch overhead
-    return float(math.sqrt(np.vdot(Phi, Phi)))
+    return math.sqrt(np.vdot(Phi, Phi))
 
 
 def project_to_constraints(
@@ -322,7 +322,7 @@ def project_to_constraints(
     if native_projection is not None:
         # ⚡ Bolt: math.sqrt(np.vdot(..., ...)) is ~3x faster than np.linalg.norm by bypassing NumPy dispatch and array allocation overhead for sum-of-squares
         cv = constraint_vector(native_projection, params)
-        residual = float(math.sqrt(np.vdot(cv, cv)))
+        residual = math.sqrt(np.vdot(cv, cv))
         if residual < tol:
             return native_projection
 
@@ -341,7 +341,7 @@ def project_to_constraints(
 
     # ⚡ Bolt: math.sqrt(np.vdot(..., ...)) is ~3x faster than np.linalg.norm by bypassing NumPy dispatch and array allocation overhead for sum-of-squares
     cv = constraint_vector(q, params)
-    residual = float(math.sqrt(np.vdot(cv, cv)))
+    residual = math.sqrt(np.vdot(cv, cv))
     raise RuntimeError(
         "Constraint projection did not converge "
         f"within {max_iter} iterations (residual={residual:.3e})"
