@@ -301,6 +301,10 @@ class AdvancedKinematicsAnalyzer:
         if target_body_id is None:
             raise ValueError("target_body_id must be provided")
         q = self.data.qpos.copy() if q_init is None else q_init.copy()
+        if len(q) != self.model.nq:
+            raise ValueError(
+                f"q_init must have length nq={self.model.nq}, got {len(q)}"
+            )
 
         if nullspace_objective is None:
             nullspace_objective = q.copy()
@@ -352,15 +356,25 @@ class AdvancedKinematicsAnalyzer:
             # Use rtol for numerical stability (scipy >= 1.7.0)
             j_pinv = pinv(J, rtol=self.ik_damping)
             nullspace_proj = np.eye(self.model.nv) - j_pinv @ J
-            nullspace_motion = nullspace_proj @ (nullspace_objective - q)
+            # The nullspace objective lives in qpos space (nq); the projector acts
+            # on tangent space (nv). mj_differentiatePos maps the configuration
+            # difference onto the tangent manifold, which also handles quaternions.
+            posture_error = np.zeros(self.model.nv)
+            mujoco.mj_differentiatePos(
+                self.model, posture_error, 1.0, q, nullspace_objective
+            )
+            nullspace_motion = nullspace_proj @ posture_error
 
-            # Combined motion
+            # Combined motion (tangent space, length nv)
             alpha_nullspace = 0.1  # Nullspace gain
             dq = j_damped + alpha_nullspace * nullspace_motion
 
-            # Update with line search
+            # Update on the configuration manifold. qpos has length nq, which
+            # differs from nv for free (7/6) and ball (4/3) joints, so the tangent
+            # step must be applied via mj_integratePos rather than added element-wise.
             alpha = 1.0
-            q_new = q + alpha * dq
+            q_new = q.copy()
+            mujoco.mj_integratePos(self.model, q_new, alpha * dq, 1.0)
 
             # Clamp to joint limits
             q_new = self._clamp_to_joint_limits(q_new)
