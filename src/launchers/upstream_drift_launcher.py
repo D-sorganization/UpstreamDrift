@@ -115,6 +115,7 @@ assert STARTUP_TIMEOUT_SEC > 0, (
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
 SIDEKICK_API_RESTART_DELAY_MS: int = 1_000
+SIDEKICK_API_HEALTHCHECK_MS: int = 3_000
 SIDEKICK_API_MAX_RESTARTS: int = 2
 
 
@@ -380,6 +381,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self._sidekick_runtime_error = ""
         self._sidekick_api_wait_started_at: float | None = None
         self._sidekick_api_restart_count = 0
+        self._sidekick_api_monitoring = True
+        self._sidekick_api_was_ready = False
         self.layout_edit_mode = False
         self.current_filter_text = ""
         self._sidekick_needs_initial_sizing = True
@@ -597,6 +600,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _monitor_sidekick_api_readiness(self) -> None:
         """Monitor the API child without gating the local Sidekick tools."""
+        if not getattr(self, "_sidekick_api_monitoring", True):
+            return
+
         runtime = self._sidekick_runtime_config
         expected_instance_id = runtime.instance_id if runtime is not None else None
         readiness = check_sidekick_api_readiness(
@@ -607,9 +613,17 @@ class UpstreamDriftLauncher(QMainWindow):
             return
         if readiness.ready:
             self._sidekick_api_wait_started_at = None
-            logger.info("Sidekick API is ready: %s", readiness.url)
+            self._sidekick_api_restart_count = 0
+            if not getattr(self, "_sidekick_api_was_ready", False):
+                logger.info("Sidekick API is ready: %s", readiness.url)
+            self._sidekick_api_was_ready = True
+            QTimer.singleShot(
+                SIDEKICK_API_HEALTHCHECK_MS,
+                self._monitor_sidekick_api_readiness,
+            )
             return
 
+        self._sidekick_api_was_ready = False
         now = time.monotonic()
         if self._sidekick_api_wait_started_at is None:
             self._sidekick_api_wait_started_at = now
@@ -1200,6 +1214,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _stop_background_threads(self) -> None:
         """Stop background timers and threads cleanly."""
+        self._sidekick_api_monitoring = False
         if self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()

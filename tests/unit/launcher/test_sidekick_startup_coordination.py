@@ -14,7 +14,10 @@ import pytest
 
 from src.launchers import launcher_sidekick_sidebar as sidebar_module
 from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
-from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
+from src.launchers.upstream_drift_launcher import (
+    SIDEKICK_API_HEALTHCHECK_MS,
+    UpstreamDriftLauncher,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -128,19 +131,24 @@ def test_vendored_direct_packages_precede_legacy_alias_shims(
 
 
 def test_readiness_monitor_passes_current_instance_identity() -> None:
-    """A 200 from an unrelated API process cannot complete startup."""
+    """A healthy API schedules continued liveness monitoring."""
     runtime = SimpleNamespace(instance_id="current-instance")
     launcher = SimpleNamespace(
         _sidekick_runtime_config=runtime,
         _sidekick_api_wait_started_at=None,
-        _sidekick_api_restart_count=0,
+        _sidekick_api_restart_count=2,
+        _sidekick_api_monitoring=True,
         background_api_process=MagicMock(),
+        _monitor_sidekick_api_readiness=MagicMock(),
     )
     launcher.background_api_process.poll.return_value = None
 
-    with patch(
-        "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
-    ) as readiness_check:
+    with (
+        patch(
+            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
+        ) as readiness_check,
+        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
+    ):
         readiness_check.return_value = SimpleNamespace(
             ready=True,
             url="http://127.0.0.1:8123/readyz",
@@ -151,6 +159,27 @@ def test_readiness_monitor_passes_current_instance_identity() -> None:
 
     readiness_check.assert_called_once_with(expected_instance_id="current-instance")
     assert launcher._sidekick_api_wait_started_at is None
+    assert launcher._sidekick_api_restart_count == 0
+    schedule.assert_called_once_with(
+        SIDEKICK_API_HEALTHCHECK_MS,
+        launcher._monitor_sidekick_api_readiness,
+    )
+
+
+def test_closed_launcher_stops_sidekick_liveness_monitor() -> None:
+    """A queued callback must become inert once host shutdown begins."""
+    launcher = SimpleNamespace(_sidekick_api_monitoring=False)
+
+    with (
+        patch(
+            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
+        ) as readiness_check,
+        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
+    ):
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+
+    readiness_check.assert_not_called()
+    schedule.assert_not_called()
 
 
 def test_missing_runtime_contract_cannot_accept_unrelated_api() -> None:
