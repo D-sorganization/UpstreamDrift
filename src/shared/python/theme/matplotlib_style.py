@@ -20,10 +20,13 @@ Usage:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
 import cycler
 import matplotlib.pyplot as plt
+
+from src.shared.python.contracts import require
 
 from .colors import CHART_COLORS, Colors  # type: ignore[attr-defined]
 
@@ -114,6 +117,61 @@ GOLF_SUITE_STYLE = {
     "savefig.bbox": "tight",
     "savefig.pad_inches": 0.1,
 }
+
+
+def apply_plot_theme(fig: Figure, theme: Mapping[str, str]) -> None:
+    """Restyle an existing figure to match a live theme colour map.
+
+    Unlike :func:`apply_golf_suite_style`, which bakes in the static Golf Suite
+    palette, this applies a runtime theme dictionary so figures can follow
+    light/dark theme switches. Ported from the Tools canonical copy so the
+    shared Sidekick plot widgets resolve the same symbol in both repositories.
+
+    Args:
+        fig: Matplotlib Figure to style.
+        theme: Colour map with ``bg``/``group_bg``/``border``/``text``/
+            ``text_secondary`` keys. Missing keys fall back to light defaults.
+    """
+    require(fig is not None, "fig must be provided")
+    require(theme is not None, "theme must be provided")
+
+    bg = theme.get("bg", "#ffffff")
+    surface = theme.get("group_bg", "#f8f9fa")
+    border = theme.get("border", "#ced4da")
+    text_color = theme.get("text", "#212529")
+    secondary_text = theme.get("text_secondary", "#495057")
+
+    fig.set_facecolor(bg)
+
+    for ax in fig.get_axes():
+        ax.set_facecolor(surface)
+
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("bottom", "left"):
+            ax.spines[side].set_color(border)
+            ax.spines[side].set_linewidth(1.0)
+
+        ax.tick_params(colors=secondary_text, which="both", labelsize=9)
+        ax.xaxis.label.set_color(text_color)
+        ax.yaxis.label.set_color(text_color)
+        ax.title.set_color(text_color)
+
+        ax.grid(True, color=border, linestyle="-", linewidth=0.5, alpha=0.3)
+        ax.set_axisbelow(True)
+
+        legend = ax.get_legend()
+        if legend is not None:
+            frame = legend.get_frame()
+            frame.set_facecolor(surface)
+            frame.set_edgecolor(border)
+            frame.set_alpha(0.9)
+            for text in legend.get_texts():
+                text.set_color(text_color)
+
+    canvas = getattr(fig, "canvas", None)
+    if canvas is not None:
+        canvas.draw_idle()
 
 
 def apply_golf_suite_style(fig: Figure | None = None) -> None:
@@ -231,6 +289,7 @@ def style_for_export(fig: Figure, dpi: int = 200) -> None:
 __all__ = [
     "GOLF_SUITE_STYLE",
     "apply_golf_suite_style",
+    "apply_plot_theme",
     "create_styled_figure",
     "get_chart_color",
     "style_for_export",

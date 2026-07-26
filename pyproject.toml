@@ -604,7 +604,11 @@ markers = [
     "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
     "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
     "scientific: marks tests that verify numerical accuracy of physics/biomechanics computations against known reference data",
-    "parity: marks engine-vs-engine and Python-vs-Rust equivalence tests; run in a dedicated parity CI job",
+    "ui: PyQt6 widget/layout tests that assert on rendered UI structure (see docs/testing/testing-guide.md)",
+    "gui: alias of `ui` retained for the vendored Sidekick suites; prefer `ui` in new tests",
+    "contract: API/behaviour contract tests for a module's published surface",
+    "security: security-posture tests (secret scanning, auth hardening)",
+    "validates_physics: tests that check computed physics against an analytic or published ground truth",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

@@ -19,13 +19,18 @@ Usage::
 
 from __future__ import annotations
 
+import logging
 import os
+import re
 from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.shared.python.contracts import require
+
 # Default local-development origins used when CORS_ORIGINS env var is unset.
+logger = logging.getLogger(__name__)
 DEFAULT_ORIGINS: list[str] = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -33,11 +38,36 @@ DEFAULT_ORIGINS: list[str] = [
     "http://127.0.0.1:5173",
 ]
 
+DEFAULT_ALLOW_METHODS: list[str] = ["GET", "POST", "OPTIONS"]
+DEFAULT_ALLOW_HEADERS: list[str] = ["Content-Type", "Authorization"]
+
+
+def _validate_origin(origin: str) -> None:
+    """Validate that an origin is a properly-formed scheme://host[:port] string.
+
+    Raises:
+        ValueError: if the origin is malformed or is the wildcard without creds.
+    """
+    origin = origin.strip()
+    if not origin:
+        raise ValueError("Origin cannot be empty")
+
+    # Simple regex: scheme://host:port, where host can be IP or domain
+    pattern = r"^https?://([a-zA-Z0-9.-]+|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})(:[0-9]+)?$"
+    if not re.match(pattern, origin):
+        raise ValueError(
+            f"Origin '{origin}' is malformed. Expected scheme://host[:port]"
+        )
+
 
 def add_cors_middleware(
     app: FastAPI,
     *,
     origins: list[str] | None = None,
+    # UD-LOCAL DIVERGENCE from the Tools canonical copy (which defaults to
+    # False): UpstreamDrift's browser clients rely on credentialed requests
+    # against the explicit DEFAULT_ORIGINS allow-list. The wildcard guard
+    # below keeps this fail-closed.
     allow_credentials: bool = True,
     allow_methods: list[str] | None = None,
     allow_headers: list[str] | None = None,
@@ -53,12 +83,25 @@ def add_cors_middleware(
     Args:
         app: The FastAPI application instance.
         origins: Explicit list of allowed origins; overridden by env var.
-        allow_credentials: Whether to allow credentials. Defaults to True.
-        allow_methods: Allowed HTTP methods. Defaults to ``["*"]``.
-        allow_headers: Allowed HTTP headers. Defaults to ``["*"]``.
+        allow_credentials: Whether to allow credentials (with validation).
+            Defaults to True in UpstreamDrift. Cannot be combined with
+            wildcard origins.
+        allow_methods: Allowed HTTP methods. Defaults to GET, POST, and OPTIONS.
+        allow_headers: Allowed HTTP headers. Defaults to Content-Type and
+            Authorization.
         **kwargs: Extra keyword arguments forwarded to ``CORSMiddleware``.
+
+    Raises:
+        ValueError: if origins are malformed or if wildcard is combined with creds.
     """
+    require(isinstance(app, FastAPI), "app must be a FastAPI instance")
+    require(
+        origins is None
+        or (isinstance(origins, list) and all(isinstance(o, str) for o in origins)),
+        "origins must be a list of strings or None",
+    )
     env_origins = os.environ.get("CORS_ORIGINS")
+
     resolved_origins: list[str]
     if env_origins:
         resolved_origins = [o.strip() for o in env_origins.split(",") if o.strip()]
@@ -67,16 +110,29 @@ def add_cors_middleware(
     else:
         resolved_origins = DEFAULT_ORIGINS
 
+    # Validate that wildcard is not combined with credentials
     if allow_credentials and "*" in resolved_origins:
         raise ValueError(
-            "CORS_ORIGINS must not contain '*' when credentials are enabled (fail-closed)"
+            "Cannot use allow_credentials=True with wildcard origin '*' "
+            "(CORS spec violation and security risk). Either remove '*' from "
+            "CORS_ORIGINS or set allow_credentials=False."
         )
+
+    # Validate each origin is well-formed (skip validation for "*" since it's valid)
+    for origin in resolved_origins:
+        if origin != "*":
+            _validate_origin(origin)
+
+    logger.warning(
+        f"CORS configured with origins: {resolved_origins}, "
+        f"allow_credentials={allow_credentials}"
+    )
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=resolved_origins,
         allow_credentials=allow_credentials,
-        allow_methods=allow_methods or ["*"],
-        allow_headers=allow_headers or ["*"],
+        allow_methods=allow_methods or DEFAULT_ALLOW_METHODS,
+        allow_headers=allow_headers or DEFAULT_ALLOW_HEADERS,
         **kwargs,
     )
