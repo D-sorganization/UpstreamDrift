@@ -353,6 +353,91 @@ async def import_swing_capture(
     )
 
 
+class DatasetControl(BaseModel):
+    """A single dataset-generation parameter, described for the UI.
+
+    Mirrors the ``DatasetControl`` interface in
+    ``ui/src/api/useDatasetGenerator.ts``.
+    """
+
+    id: str = Field(..., description="Field name on DatasetGenerationRequest")
+    name: str = Field(..., description="Human-readable label")
+    type: str = Field(..., description="Widget type: select, range, or text")
+    value: Any = Field(..., description="Default value")
+    options: list[str] | None = Field(None, description="Choices for select")
+    min: float | None = Field(None, description="Minimum for range widgets")
+    max: float | None = Field(None, description="Maximum for range widgets")
+    step: float | None = Field(None, description="Step for range widgets")
+
+
+class DatasetControlListResponse(BaseModel):
+    """Response for the dataset generation control catalog."""
+
+    controls: list[DatasetControl]
+
+
+# Widget hints for the generation parameters. Keyed by
+# ``DatasetGenerationRequest`` field name so the payload the UI POSTs back to
+# ``/dataset/generate`` uses exactly the field names the model validates.
+_CONTROL_WIDGETS: dict[str, dict[str, Any]] = {
+    "num_samples": {"type": "range", "min": 1, "max": 10000, "step": 1},
+    "duration": {"type": "range", "min": 0.1, "max": 60, "step": 0.1},
+    "timestep": {"type": "range", "min": 0.0001, "max": 0.1, "step": 0.0001},
+    "seed": {"type": "text"},
+    "vary_positions": {"type": "select", "options": ["true", "false"]},
+    "vary_velocities": {"type": "select", "options": ["true", "false"]},
+    "record_mass_matrix": {"type": "select", "options": ["true", "false"]},
+    "record_dynamics": {"type": "select", "options": ["true", "false"]},
+    "record_drift_control": {"type": "select", "options": ["true", "false"]},
+    "export_format": {
+        "type": "select",
+        "options": ["hdf5", "sqlite", "csv", "mat", "json", "c3d"],
+    },
+    "output_path": {"type": "text"},
+}
+
+
+def _humanize(field_name: str) -> str:
+    """Turn ``num_samples`` into ``Num Samples`` for the control label."""
+    return " ".join(part.capitalize() for part in field_name.split("_"))
+
+
+@router.get("/control", response_model=DatasetControlListResponse)
+async def get_dataset_controls() -> DatasetControlListResponse:
+    """List the dataset-generation parameters as UI control descriptors.
+
+    Issue #7981: the Dataset Generator page fetched ``/api/dataset/control``
+    on mount, but no such endpoint existed (only ``/control/state``,
+    ``/control/configure`` and ``/control/strategies``, which describe the
+    *engine* control interface, not generation parameters), so every page load
+    produced a 404 and the panel rendered "No controls available".
+
+    Descriptors are derived from :class:`DatasetGenerationRequest` so the ids
+    are exactly the field names ``POST /dataset/generate`` validates and the
+    two cannot drift apart. This is a static catalog — no engine required.
+
+    Returns:
+        The generation control catalog.
+    """
+    controls: list[DatasetControl] = []
+    for field_name, field in DatasetGenerationRequest.model_fields.items():
+        widget = _CONTROL_WIDGETS.get(field_name, {"type": "text"})
+        default = field.default
+        controls.append(
+            DatasetControl(
+                id=field_name,
+                name=_humanize(field_name),
+                type=str(widget["type"]),
+                value=str(default).lower() if isinstance(default, bool) else default,
+                options=widget.get("options"),
+                min=widget.get("min"),
+                max=widget.get("max"),
+                step=widget.get("step"),
+            )
+        )
+    return DatasetControlListResponse(controls=controls)
+
+
 @router.get("/control/state")
 async def get_control_state(
     engine_manager: EngineManager = Depends(get_engine_manager),
