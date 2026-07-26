@@ -662,6 +662,35 @@ export interface DataExportRequest {
 }
 
 /**
+ * A single dataset-generation parameter, described for the UI. Mirrors the ``DatasetControl`` interface in ``ui/src/api/useDatasetGenerator.ts``.
+ */
+export interface DatasetControl {
+  /** Field name on DatasetGenerationRequest */
+  id: string;
+  /** Human-readable label */
+  name: string;
+  /** Widget type: select, range, or text */
+  type: string;
+  /** Default value */
+  value: unknown;
+  /** Choices for select */
+  options?: string[] | null;
+  /** Minimum for range widgets */
+  min?: number | null;
+  /** Maximum for range widgets */
+  max?: number | null;
+  /** Step for range widgets */
+  step?: number | null;
+}
+
+/**
+ * Response for the dataset generation control catalog.
+ */
+export interface DatasetControlListResponse {
+  controls: DatasetControl[];
+}
+
+/**
  * Request to filter dataset rows.
  */
 export interface DatasetFilterRequest {
