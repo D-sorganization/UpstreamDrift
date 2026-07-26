@@ -17,6 +17,9 @@ def mock_model():
     model = MagicMock(spec=mujoco.MjModel)
     model.nv = 3
     model.nu = 2
+    model.nbody = 10
+    model.opt = MagicMock()
+    model.opt.gravity = np.array([0.0, 0.0, -9.81])
     return model
 
 
@@ -30,13 +33,11 @@ def mock_data():
     data.qfrc_actuator = np.array([5.0, 6.0, 7.0])
     data.qfrc_constraint = np.array([1.0, 1.0, 1.0])
     data.qM = np.ones(10)
+    # Deliberately left zero: production code must NOT read data.cacc directly
+    # (MuJoCo only fills it inside mj_rnePostConstraint) — see #8008.
     data.cacc = np.zeros((10, 6))
-    data.cacc[5] = np.array([0, 0, 0, 10, 20, 30])  # Local acc for body 5
-
-    # 3x3 identity for body 5 xmat
-    xmat = np.eye(3).flatten()
     data.xmat = np.zeros((10, 9))
-    data.xmat[5] = xmat
+    data.xmat[5] = np.eye(3).flatten()
 
     return data
 
@@ -76,12 +77,19 @@ def test_compute_components(
     assert result["total"].shape == (3,)
 
 
+@patch("mujoco.mj_objectAcceleration")
+@patch("mujoco.mj_rnePostConstraint")
 @patch("mujoco.mj_name2id")
 @patch("mujoco.mj_jacBody")
 def test_compute_task_space_components(
-    mock_jacBody, mock_name2id, mock_model, mock_data
+    mock_jacBody, mock_name2id, mock_rne_post, mock_obj_acc, mock_model, mock_data
 ):
-    """Test compute_task_space_components."""
+    """Total acceleration must come from mj_rnePostConstraint, not raw data.cacc.
+
+    Regression guard for #8008: the previous implementation read ``data.cacc``
+    (never populated outside ``mj_rnePostConstraint``) and rotated it by ``xmat``,
+    which produced an identically zero total on every real model.
+    """
     analyzer = MuJoCoInducedAccelerationAnalyzer(mock_model, mock_data)
 
     mock_name2id.return_value = 5
@@ -90,6 +98,12 @@ def test_compute_task_space_components(
         jacp[:] = np.eye(3)
 
     mock_jacBody.side_effect = side_effect_jac
+
+    def side_effect_obj_acc(m, d, objtype, objid, res, flg_local):
+        # MuJoCo reports [angular(3), linear(3)] proper acceleration.
+        res[:] = np.array([0.0, 0.0, 0.0, 10.0, 20.0, 30.0])
+
+    mock_obj_acc.side_effect = side_effect_obj_acc
 
     qdd_comps = {
         "gravity": np.array([0.1, 0.2, 0.3]),
@@ -105,12 +119,24 @@ def test_compute_task_space_components(
         mock_model, mujoco.mjtObj.mjOBJ_BODY, "test_body"
     )
     mock_jacBody.assert_called_once()
+    # cacc is meaningless unless this is called first.
+    mock_rne_post.assert_called_once_with(mock_model, mock_data)
+    # World-aligned axes, not body-local.
+    assert mock_obj_acc.call_args.args[-1] == 0
 
     assert result is not None
     assert "gravity" in result
     assert "total" in result
-    # Total actual world should be [10, 20, 30] from cacc[5][3:6]
-    np.testing.assert_array_equal(result["total"], np.array([10.0, 20.0, 30.0]))
+    # Proper acceleration [10, 20, 30] plus gravity [0, 0, -9.81].
+    np.testing.assert_allclose(result["total"], np.array([10.0, 20.0, 20.19]))
+    # The four components must reconstruct the total exactly.
+    np.testing.assert_allclose(
+        result["gravity"]
+        + result["velocity"]
+        + result["control"]
+        + result["constraint"],
+        result["total"],
+    )
 
 
 @patch("mujoco.mj_name2id")
