@@ -397,14 +397,14 @@ class TestActuatorEndpoints:
     """Test actuator control endpoints (require loaded engine)."""
 
     def test_get_actuators_no_engine_returns_400(self, client) -> None:
-        """GET /simulation/actuators returns 400 when no engine loaded."""
-        resp = client.get("/simulation/actuators")
+        """GET /simulation/control/actuators returns 400 when no engine loaded."""
+        resp = client.get("/simulation/control/actuators")
         # Should be 400 since no engine is loaded
         assert resp.status_code == 400
 
     def test_post_actuators_no_engine_returns_400(self, client) -> None:
-        """POST /simulation/actuators returns 400 when no engine loaded."""
-        resp = client.post("/simulation/actuators", json={"strategy": "pd"})
+        """POST /simulation/control/actuators returns 400 when no engine loaded."""
+        resp = client.post("/simulation/control/actuators", json={"strategy": "pd"})
         assert resp.status_code == 400
 
 
@@ -412,8 +412,8 @@ class TestForceEndpoints:
     """Test force/torque query endpoints."""
 
     def test_get_forces_no_engine_returns_400(self, client) -> None:
-        """GET /simulation/forces returns 400 when no engine loaded."""
-        resp = client.get("/simulation/forces")
+        """GET /simulation/control/forces returns 400 when no engine loaded."""
+        resp = client.get("/simulation/control/forces")
         assert resp.status_code == 400
 
 
