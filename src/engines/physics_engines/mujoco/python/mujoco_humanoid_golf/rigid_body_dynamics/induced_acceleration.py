@@ -27,10 +27,21 @@ class MuJoCoInducedAccelerationAnalyzer:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
+        # Hold the option struct directly so callers never have to reach
+        # through ``model.opt.<field>`` (Law of Demeter).
+        self._model_opt = model.opt
 
         # Pre-allocate Jacobian buffers
         self._jacp = np.zeros((3, self.model.nv))
         self._jacr = np.zeros((3, self.model.nv))
+
+    def _gravity(self) -> np.ndarray:
+        """Return the model's world-frame gravity vector [3].
+
+        Delegating accessor so callers do not reach through
+        ``model.opt.gravity`` (Law of Demeter).
+        """
+        return np.asarray(self._model_opt.gravity)
 
     def compute_components(
         self, tau_app: np.ndarray | None = None
@@ -161,7 +172,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         )
 
         # spatial = [angular(3), linear(3)]; MuJoCo reports proper acceleration.
-        return np.asarray(spatial[3:6]) + np.asarray(self.model.opt.gravity)
+        return np.asarray(spatial[3:6]) + self._gravity()
 
     def compute_task_space_components(
         self, body_name: str, qdd_comps: InducedAccelerationResult | None = None
