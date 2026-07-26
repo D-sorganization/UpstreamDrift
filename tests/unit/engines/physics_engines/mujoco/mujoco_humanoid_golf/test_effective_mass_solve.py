@@ -7,15 +7,32 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._kfa_effective_mass import (
-    _KFAEffectiveMassMixin,
-)
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.jacobian_utils import (
     compute_effective_mass_value,
 )
 from src.shared.python.core.numerical_constants import EPSILON_SINGULARITY_DETECTION
 
 pytestmark = pytest.mark.unit
+
+
+def _analyzer_helper(
+    direction: np.ndarray, jacp: np.ndarray, mass_matrix: np.ndarray
+) -> float:
+    """Call the analyzer's delegating helper without constructing a MuJoCo model.
+
+    The second call site used to be ``_KFAEffectiveMassMixin``, which lived in a
+    module permanently shadowed by the ``kinematic_forces`` package and therefore
+    never executed (#8021). The live delegate is on ``KinematicForceAnalyzer``.
+    """
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces.analyzer import (
+        KinematicForceAnalyzer,
+    )
+
+    return float(
+        KinematicForceAnalyzer._compute_effective_mass_value(
+            None, direction, jacp, mass_matrix
+        )
+    )
 
 
 def _sample_inputs() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -60,9 +77,9 @@ def test_effective_mass_helpers_match_legacy_inverse_formula() -> None:
     assert compute_effective_mass_value(direction, jacp, mass_matrix) == pytest.approx(
         expected, rel=1e-12, abs=1e-12
     )
-    assert _KFAEffectiveMassMixin()._compute_effective_mass_value(
-        direction, jacp, mass_matrix
-    ) == pytest.approx(expected, rel=1e-12, abs=1e-12)
+    assert _analyzer_helper(direction, jacp, mass_matrix) == pytest.approx(
+        expected, rel=1e-12, abs=1e-12
+    )
 
 
 def test_effective_mass_helpers_solve_without_forming_inverse() -> None:
@@ -71,13 +88,11 @@ def test_effective_mass_helpers_solve_without_forming_inverse() -> None:
 
     with patch("numpy.linalg.inv", side_effect=AssertionError("no inverse")):
         standalone = compute_effective_mass_value(direction, jacp, mass_matrix)
-        mixin = _KFAEffectiveMassMixin()._compute_effective_mass_value(
-            direction, jacp, mass_matrix
-        )
+        via_analyzer = _analyzer_helper(direction, jacp, mass_matrix)
 
     expected = _legacy_inverse_effective_mass(direction, jacp, mass_matrix)
     assert standalone == pytest.approx(expected, rel=1e-12, abs=1e-12)
-    assert mixin == pytest.approx(expected, rel=1e-12, abs=1e-12)
+    assert via_analyzer == pytest.approx(expected, rel=1e-12, abs=1e-12)
 
 
 def test_effective_mass_helper_rejects_dimension_mismatch() -> None:
