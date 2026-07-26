@@ -177,10 +177,20 @@ def _get_features_registry(
 
 # ──────────────────────────────────────────────────────────────
 #  Actuator Control (See issue #1209)
+#
+#  Path note (issue #7998): these endpoints live under
+#  ``/simulation/control/...`` — NOT ``/simulation/actuators`` /
+#  ``/simulation/forces``. Those bare paths belong to
+#  ``actuator_controls.py`` (the panel descriptor API the React
+#  ``ActuatorPanel`` consumes) and ``force_overlays.py`` (the 3D overlay
+#  vectors ``ForceOverlayPanel`` consumes). physics.py used to declare the
+#  same paths and, being registered first, shadowed both — the UI received a
+#  ``ActuatorStateResponse``/``ForceVectorResponse`` shape it does not
+#  understand and crashed into the root ErrorBoundary.
 # ──────────────────────────────────────────────────────────────
 
 
-@router.post("/simulation/actuators", response_model=ActuatorStateResponse)
+@router.post("/simulation/control/actuators", response_model=ActuatorStateResponse)
 @handle_api_errors
 async def update_actuators(
     request: ActuatorUpdateRequest,
@@ -241,7 +251,7 @@ async def update_actuators(
         ) from exc
 
 
-@router.get("/simulation/actuators", response_model=ActuatorStateResponse)
+@router.get("/simulation/control/actuators", response_model=ActuatorStateResponse)
 @handle_api_errors
 async def get_actuator_state(
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -273,7 +283,7 @@ async def get_actuator_state(
 # ──────────────────────────────────────────────────────────────
 
 
-@router.get("/simulation/forces", response_model=ForceVectorResponse)
+@router.get("/simulation/control/forces", response_model=ForceVectorResponse)
 @handle_api_errors
 async def get_forces(
     engine_manager: EngineManager = Depends(get_engine_manager),
