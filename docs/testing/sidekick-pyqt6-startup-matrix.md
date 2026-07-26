@@ -42,6 +42,14 @@ Existing controls are:
    are installed before the first Sidekick import.
 6. A gitlink update to the reviewed Tools revision whenever canonical Sidekick
    behavior changes.
+7. The repository shadow-module gate is evaluated against the exact pinned
+   Tools tree. The new direct-package surface exposed 12 pre-existing
+   UpstreamDrift shadows (`calc_backend`, `compatibility.py`, `config`,
+   `deprecation.py`, `file_watcher`, `logging_pkg`, `programmatic_pid`,
+   `reporting`, `rotation_transforms`, `safe_pandas_eval.py`, `scripting`, and
+   `sidekick`). They are classified under migration issue #5623 with an
+   enforced 2026-12-31 sunset instead of being silently accepted. Sidekick
+   runtime imports still resolve from the pinned Tools direct package first.
 
 ## Acceptance matrix
 
@@ -113,6 +121,11 @@ Existing controls are:
   instance identity, and returned Chat to `Connected`. Closing the host then
   removed the replacement child and both dynamic listeners while the unrelated
   port-8000 service remained active.
+- Initializing the new Tools gitlink made the broader repository shadow gate
+  detect 12 previously unclassified overlaps, including `sidekick`. The
+  migration allow-list now records each under #5623 with a mandatory sunset;
+  the guard passes against the exact pinned parent tree and will fail again if
+  another unclassified shadow appears.
 
 ## Required automated command
 
