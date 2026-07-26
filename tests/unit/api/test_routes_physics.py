@@ -98,7 +98,7 @@ def client(app: FastAPI) -> TestClient:
 
 def test_get_forces(client: TestClient) -> None:
     """Test getting forces."""
-    response = client.get("/simulation/forces")
+    response = client.get("/simulation/control/forces")
     assert response.status_code == 200
     data = response.json()
     assert data["sim_time"] == 1.0
