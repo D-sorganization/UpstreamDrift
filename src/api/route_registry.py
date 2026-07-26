@@ -72,8 +72,14 @@ _OPTIONAL_MODULES: frozenset[str] = frozenset(
 
 # Explicit registration order matching the original server.py.
 # This is critical because some modules define overlapping route paths
-# (e.g. /simulation/actuators in both physics.py and actuator_controls.py)
 # and FastAPI uses first-match-wins semantics.
+#
+# Overlaps must be treated as bugs, not ordering puzzles: two handlers on the
+# same method+path means one of them is permanently unreachable and clients
+# silently get the wrong response shape (issue #7998, where physics.py shadowed
+# actuator_controls.py's /simulation/actuators and force_overlays.py's
+# /simulation/forces). ``tests/unit/api/test_route_uniqueness.py`` asserts every
+# method+path maps to exactly one handler.
 # Modules not listed here are appended alphabetically after these.
 _REGISTRATION_ORDER: tuple[str, ...] = (
     "auth",
