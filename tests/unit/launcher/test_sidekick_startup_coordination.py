@@ -16,6 +16,9 @@ from src.launchers import launcher_sidekick_sidebar as sidebar_module
 from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
 from src.launchers.upstream_drift_launcher import (
     SIDEKICK_API_HEALTHCHECK_MS,
+    SIDEKICK_API_MAX_RESTARTS,
+    SIDEKICK_API_READY_RETRY_MS,
+    SIDEKICK_API_RESTART_DELAY_MS,
     UpstreamDriftLauncher,
 )
 
@@ -243,3 +246,95 @@ def test_dead_api_process_receives_bounded_restart() -> None:
     launcher._launch_sidekick_background_api.assert_called_once_with()
     schedule.assert_called_once()
     launcher._report_sidekick_api_failure.assert_not_called()
+
+
+def test_delayed_readiness_rechecks_running_child_without_relaunch() -> None:
+    """A slow but live child gets the full readiness window."""
+    runtime = SimpleNamespace(instance_id="current-instance")
+    running_process = MagicMock()
+    running_process.poll.return_value = None
+    launcher = SimpleNamespace(
+        _sidekick_runtime_config=runtime,
+        _sidekick_api_wait_started_at=None,
+        _sidekick_api_restart_count=0,
+        _sidekick_api_monitoring=True,
+        _sidekick_api_was_ready=False,
+        background_api_process=running_process,
+        _launch_sidekick_background_api=MagicMock(),
+        _monitor_sidekick_api_readiness=MagicMock(),
+        _report_sidekick_api_failure=MagicMock(),
+    )
+
+    with (
+        patch(
+            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
+            return_value=SimpleNamespace(
+                ready=False,
+                url="http://127.0.0.1:8123/readyz",
+                status_code=None,
+                detail="connection refused",
+            ),
+        ),
+        patch(
+            "src.launchers.upstream_drift_launcher.time.monotonic",
+            return_value=10.0,
+        ),
+        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
+    ):
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+
+    assert launcher._sidekick_api_wait_started_at == 10.0
+    launcher._launch_sidekick_background_api.assert_not_called()
+    launcher._report_sidekick_api_failure.assert_not_called()
+    schedule.assert_called_once_with(
+        SIDEKICK_API_READY_RETRY_MS,
+        launcher._monitor_sidekick_api_readiness,
+    )
+
+
+def test_child_launch_failure_exhausts_retry_budget_observably() -> None:
+    """Repeated launch failure is bounded and ends in a visible report."""
+    runtime = SimpleNamespace(instance_id="current-instance")
+    dead_process = MagicMock()
+    dead_process.poll.return_value = 1
+    launcher = SimpleNamespace(
+        _sidekick_runtime_config=runtime,
+        _sidekick_runtime_error="",
+        _sidekick_api_wait_started_at=None,
+        _sidekick_api_restart_count=SIDEKICK_API_MAX_RESTARTS - 1,
+        _sidekick_api_monitoring=True,
+        _sidekick_api_was_ready=False,
+        background_api_process=dead_process,
+        _launch_sidekick_background_api=MagicMock(return_value=None),
+        _monitor_sidekick_api_readiness=MagicMock(),
+        _report_sidekick_api_failure=MagicMock(),
+    )
+    unavailable = SimpleNamespace(
+        ready=False,
+        url="http://127.0.0.1:8123/readyz",
+        status_code=None,
+        detail="child launch failed",
+    )
+
+    with (
+        patch(
+            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
+            return_value=unavailable,
+        ),
+        patch(
+            "src.launchers.upstream_drift_launcher.time.monotonic",
+            return_value=10.0,
+        ),
+        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
+    ):
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+
+    assert launcher._sidekick_api_restart_count == SIDEKICK_API_MAX_RESTARTS
+    assert launcher.background_api_process is None
+    launcher._launch_sidekick_background_api.assert_called_once_with()
+    schedule.assert_called_once_with(
+        SIDEKICK_API_RESTART_DELAY_MS,
+        launcher._monitor_sidekick_api_readiness,
+    )
+    launcher._report_sidekick_api_failure.assert_called_once_with(unavailable)
