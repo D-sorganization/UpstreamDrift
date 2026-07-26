@@ -115,6 +115,10 @@ class MotionRetargeting:
         if frame is None:
             raise ValueError("frame must be provided")
         q = q_init.copy()
+        if len(q) != self.model.nq:
+            raise ValueError(
+                f"q_init must have length nq={self.model.nq}, got {len(q)}"
+            )
 
         for _iteration in range(max_iterations):
             # Compute error for all markers
@@ -164,8 +168,11 @@ class MotionRetargeting:
 
                 dq = J.T @ np.linalg.solve(J @ J.T + damping**2 * np.eye(J.shape[0]), e)
 
-                # Update
-                q = q + 0.5 * dq  # Step size 0.5 for stability
+                # Update on the configuration manifold. dq is a tangent-space
+                # increment of length nv, while q is a qpos vector of length nq;
+                # the two differ for free (7/6) and ball (4/3) joints, and even
+                # when they match, adding to a quaternion element-wise is invalid.
+                mujoco.mj_integratePos(self.model, q, 0.5 * dq, 1.0)
 
                 # Clamp to limits
                 q = self.ik_analyzer._clamp_to_joint_limits(q)
