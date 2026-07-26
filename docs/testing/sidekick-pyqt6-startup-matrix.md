@@ -1,6 +1,7 @@
 # Sidekick PyQt6 startup test matrix
 
-Tracking: UpstreamDrift #8102, Tools #3936 and #3938, Tools PR #3937.
+Tracking: UpstreamDrift PyQt6 QA epic #8062, original Sidekick defect #8075,
+startup/recovery issue #8102, Tools #3936 and #3938, and Tools PR #3937.
 
 This matrix is for the classic PyQt6 launcher. React/Tauri is not the
 acceptance target for this work.
@@ -36,7 +37,9 @@ Existing controls are:
    Tools counterparts.
 4. A PR-diff hygiene gate that rejects every non-deletion edit to a file that
    carried the Tools child-copy warning at the branch merge base, plus every
-   newly added file that carries the warning.
+   newly added file that carries the warning. Protected CI fetches the PR base
+   before this guard and conservatively falls back to a direct base comparison
+   when shallow history cannot supply a merge base.
 5. Startup contract tests proving that pinned vendor direct-package paths
    precede both legacy alias shims and a mutable sibling Tools checkout, and
    are installed before the first Sidekick import.
@@ -137,7 +140,11 @@ python -m pytest -n 0 `
   tests/unit/api/test_chat_ws.py `
   tests/unit/launcher/test_sidekick_readiness.py `
   tests/unit/launcher/test_sidekick_runtime_startup.py `
-  tests/unit/launcher/test_sidekick_startup_coordination.py -q
+  tests/unit/launcher/test_sidekick_startup_coordination.py `
+  tests/unit/test_launch_upstream_drift_bootstrap.py `
+  tests/unit/repo_hygiene/test_tools_child_copy_contract.py `
+  tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py `
+  tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_unit_gate_fetches_pr_base_before_child_copy_guard -q
 ```
 
 No acceptance row may be marked passed solely because the launcher says

@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 | **Spec Version**        | 1.0.471                                            |
-| **Last Spec Update**    | 2026-07-25                                         |
+| **Last Spec Update**    | 2026-07-26                                         |
 
 ## 2. Purpose & Mission
 
@@ -81,7 +81,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   survive the launcher (#3938). A PR-diff hygiene contract now rejects any
   non-deletion edit to an existing warning-headered Tools child copy and any
   newly added child copy, requiring the canonical Tools change and reviewed
-  gitlink bump instead. The acceptance and source-ownership audit matrix is in
+  gitlink bump instead. The protected unit gate fetches the pull request base
+  before running that fail-closed comparison, so a shallow checkout cannot
+  silently skip or spuriously fail ownership enforcement. The acceptance and
+  source-ownership audit matrix is in
   `docs/testing/sidekick-pyqt6-startup-matrix.md`.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API

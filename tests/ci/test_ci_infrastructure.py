@@ -863,6 +863,32 @@ class TestCIEnvironmentCompatibility:
             "using serial pytest to avoid xdist worker termination" in core_step["run"]
         )
 
+    def test_unit_gate_fetches_pr_base_before_child_copy_guard(self) -> None:
+        """The unit ownership guard must have its fail-closed comparison ref."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        steps = workflow["jobs"]["unit-test-gate"]["steps"]
+        step_names = [step.get("name", "") for step in steps]
+
+        fetch_index = step_names.index("Fetch PR base for ownership guards")
+        unit_index = step_names.index("Run Green-Suite Unit Gate")
+        fetch_step = steps[fetch_index]
+
+        assert fetch_index < unit_index
+        assert fetch_step["if"] == "github.event_name == 'pull_request'"
+        assert (
+            'git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"'
+            in fetch_step["run"]
+        )
+
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:

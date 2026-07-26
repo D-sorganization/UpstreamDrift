@@ -823,6 +823,10 @@ jobs:
             fi
           fi
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Fetch PR base for ownership guards
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
       - name: Install System Dependencies
         run: |
           apt_retry() {

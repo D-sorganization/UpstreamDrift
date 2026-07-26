@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess  # nosec B404 - fixed git invocation, no shell
+import sys
 from pathlib import Path
 
 import pytest
@@ -94,12 +95,21 @@ def _run_git(*args: str) -> subprocess.CompletedProcess[str] | None:
 
 
 def _merge_base_with_main() -> str | None:
-    """Return the branch merge base used for PR ownership enforcement."""
+    """Return a comparison base available in full or shallow PR checkouts."""
     result = _run_git("merge-base", "HEAD", "origin/main")
+    if result is not None and result.returncode == 0:
+        merge_base = result.stdout.strip()
+        if merge_base:
+            return merge_base
+
+    # A depth-1 PR checkout can contain the fetched base tree while Git still
+    # treats the synthetic merge commit as a shallow boundary. A direct base
+    # comparison is conservative (it may inspect extra paths) and keeps the
+    # ownership check fail-closed without requiring full repository history.
+    result = _run_git("rev-parse", "--verify", "origin/main")
     if result is None or result.returncode != 0:
         return None
-    merge_base = result.stdout.strip()
-    return merge_base or None
+    return "origin/main"
 
 
 def _changed_shared_python_paths(base: str) -> list[Path]:
@@ -108,7 +118,7 @@ def _changed_shared_python_paths(base: str) -> list[Path]:
         "diff",
         "--name-only",
         "--diff-filter=ACMRT",
-        f"{base}...HEAD",
+        f"{base}..HEAD",
         "--",
         "src/shared/python",
     )
@@ -181,3 +191,36 @@ def test_current_branch_does_not_edit_tools_child_copies() -> None:
         "Deleting a migrated child copy remains allowed.\n\n"
         "Direct child-copy edits:\n  " + "\n  ".join(offenders)
     )
+
+
+def test_comparison_base_falls_back_to_fetched_main_ref(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A shallow PR checkout may have the base tree but no merge-base history."""
+
+    def fake_run_git(*args: str) -> subprocess.CompletedProcess[str]:
+        if args[0] == "merge-base":
+            return subprocess.CompletedProcess(args, 1, "", "shallow history")
+        if args[:2] == ("rev-parse", "--verify"):
+            return subprocess.CompletedProcess(args, 0, "abc123\n", "")
+        raise AssertionError(f"unexpected git command: {args!r}")
+
+    monkeypatch.setattr(sys.modules[__name__], "_run_git", fake_run_git)
+
+    assert _merge_base_with_main() == "origin/main"
+
+
+def test_changed_copy_scan_uses_direct_comparison_range(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The fallback ref must not trigger another implicit merge-base lookup."""
+    observed: list[tuple[str, ...]] = []
+
+    def fake_run_git(*args: str) -> subprocess.CompletedProcess[str]:
+        observed.append(args)
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(sys.modules[__name__], "_run_git", fake_run_git)
+
+    assert _changed_shared_python_paths("origin/main") == []
+    assert "origin/main..HEAD" in observed[0]
