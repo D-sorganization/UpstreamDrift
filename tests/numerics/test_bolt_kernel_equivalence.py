@@ -47,6 +47,7 @@ def _vectors(n: int, size: int, scale: float = 1.0) -> list[np.ndarray]:
 # PR #8093 / #8108 - constraint_solver: np.linalg.norm(x) -> math.sqrt(np.vdot(x, x))
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("size", [1, 2, 3, 7, 64, 1000])
 def test_norm_vs_sqrt_vdot_matches(size: int) -> None:
     for v in _vectors(25, size):
@@ -89,6 +90,7 @@ def test_norm_vs_sqrt_vdot_safe_at_realistic_physics_magnitudes() -> None:
 # PR #8095 / #8094 - 3-vectors: np.linalg.norm(v3) -> math.hypot(a, b, c)
 # ---------------------------------------------------------------------------
 
+
 def test_hypot3_matches_norm() -> None:
     for v in _vectors(200, 3):
         assert math.hypot(v[0], v[1], v[2]) == pytest.approx(
@@ -108,6 +110,7 @@ def test_hypot3_is_strictly_more_robust_than_vdot_form() -> None:
 # PR #7968 - math.hypot(*v) -> math.hypot(v[0], v[1], v[2])
 # ---------------------------------------------------------------------------
 
+
 def test_hypot_star_args_vs_explicit_is_EXACT() -> None:
     for v in _vectors(200, 3):
         assert math.hypot(*v) == math.hypot(v[0], v[1], v[2])
@@ -116,6 +119,7 @@ def test_hypot_star_args_vs_explicit_is_EXACT() -> None:
 # ---------------------------------------------------------------------------
 # PR #8107 / #8106 - rank counting: np.sum(mask) -> mask.sum()
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("size", [1, 5, 50, 500])
 def test_mask_sum_vs_np_sum_is_EXACT(size: int) -> None:
@@ -137,6 +141,7 @@ def test_mask_sum_exact_at_boundary() -> None:
 # ---------------------------------------------------------------------------
 # PR #7967 - effective sample size: 1/np.sum(w**2) -> 1/np.vdot(w, w)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("size", [2, 8, 64, 1024])
 def test_vdot_vs_sum_of_squares(size: int) -> None:
@@ -160,6 +165,7 @@ def test_effective_sample_size_reciprocal_agrees() -> None:
 # PR #7966 / #7889 - RMSE: np.sqrt(np.mean(e**2, axis=0))
 #                        -> np.sqrt(np.einsum("ij,ij->j", e, e) / e.shape[0])
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(("rows", "cols"), [(1, 1), (3, 2), (100, 3), (5000, 6)])
 def test_einsum_rmse_matches_mean_rmse(rows: int, cols: int) -> None:
@@ -188,11 +194,13 @@ def test_einsum_rmse_zero_error_is_EXACT() -> None:
 
 def test_einsum_rmse_survives_wide_dynamic_range() -> None:
     """Mixed-magnitude residuals are the realistic case for club/torque fitting."""
-    err = np.column_stack([
-        RNG.standard_normal(500) * 1e-8,
-        RNG.standard_normal(500) * 1.0,
-        RNG.standard_normal(500) * 1e6,
-    ])
+    err = np.column_stack(
+        [
+            RNG.standard_normal(500) * 1e-8,
+            RNG.standard_normal(500) * 1.0,
+            RNG.standard_normal(500) * 1e6,
+        ]
+    )
     original = np.sqrt(np.mean(err**2, axis=0))
     optimized = np.sqrt(np.einsum("ij,ij->j", err, err) / err.shape[0])
     np.testing.assert_allclose(optimized, original, rtol=REORDER_RTOL, atol=0.0)
