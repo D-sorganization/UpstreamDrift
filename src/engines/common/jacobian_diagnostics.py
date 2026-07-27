@@ -150,7 +150,9 @@ def compute_jacobian_diagnostics(
     sigma = np.linalg.svd(J, compute_uv=False)
 
     # Numerical rank
-    rank = int((sigma > rank_tol).sum())  # ⚡ Bolt: mask.sum() is ~1.8x faster than np.sum(mask)
+    rank = int(
+        (sigma > rank_tol).sum()
+    )  # ⚡ Bolt: mask.sum() is ~1.8x faster than np.sum(mask)
     nullspace_dim = n - rank
 
     # Condition number
@@ -214,7 +216,9 @@ def compute_constraint_diagnostics(
 
     # SVD for rank and nullspace
     U, sigma, Vt = np.linalg.svd(J_constraint, full_matrices=True)
-    rank = int((sigma > RANK_TOLERANCE).sum())  # ⚡ Bolt: mask.sum() is ~1.8x faster than np.sum(mask)
+    rank = int(
+        (sigma > RANK_TOLERANCE).sum()
+    )  # ⚡ Bolt: mask.sum() is ~1.8x faster than np.sum(mask)
     nullspace_dim = n_dof - rank
 
     # Nullspace basis: last (n_dof - rank) rows of Vt
