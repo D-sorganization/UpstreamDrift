@@ -78,3 +78,6 @@
 ## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
 **Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
 **Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.
+## 2026-06-25 - [Optimization] Walrus Operator with List Comprehensions for Array Norms
+**Learning:** When calculating the norm of an expression inside a loop or list comprehension (e.g., `math.sqrt(np.vdot(self._flow(perturbation, t), self._flow(perturbation, t)))`), it's important not to evaluate the expensive expression twice. We can achieve this without unrolling the comprehension by utilizing the walrus operator (`:=`) inside the comprehension. `[math.sqrt(np.vdot(res := self._flow(p, t), res)) for t in times]` is both pythonic, readable, and yields the full performance benefit of avoiding `np.linalg.norm` and avoiding evaluating the inner function twice.
+**Action:** Use the walrus operator when optimizing norms inside comprehensions where the vector is the result of a function call.
