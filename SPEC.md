@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.478                                            |
+| **Spec Version**        | 1.0.479                                            |
 | **Last Spec Update**    | 2026-07-27                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
+  validation (#8121). The parent `models.yaml` check now validates only its 46
+  directly declared tiles, while the separate runtime registry check retains
+  all 75 parent and provider models. Computer control confirmed the repaired
+  Diagnostics screen reports `Status: HEALTHY` with zero failed checks instead
+  of falsely classifying 29 provider-only models as missing.
 - **2026-07-27** - Extended the classic PyQt6 Sidekick acceptance contract for
   the selected Tools authority. The background API child now inherits the same
   validated Tools checkout as the sidebar and places its package roots before
@@ -1904,6 +1910,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
 | 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
 | 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
 | 2026-07-27 | 1.0.476 | Materialized the exact recursive `vendor/ud-tools` gitlink in the JaxSim upgrade guard before editable package installation. The workflow now satisfies the fail-closed parent-source packaging contract instead of attempting to build from a checkout missing canonical `shared`, Sidekick, Chat, utility, and contract package roots; focused CI structure coverage pins recursive checkout and disabled credential persistence. |
