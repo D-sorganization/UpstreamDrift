@@ -190,7 +190,7 @@ class LiftModel:
 
         spin_axis = spin_vector / spin_magnitude
         lift_dir = np.cross(spin_axis, velocity_vector)
-        lift_norm = float(math.hypot(*lift_dir))
+        lift_norm = float(math.hypot(lift_dir[0], lift_dir[1], lift_dir[2]))  # ⚡ Bolt: Explicit component unpacking is faster than *args expansion
 
         if lift_norm < 1e-10:
             return np.zeros_like(velocity_vector)
@@ -243,7 +243,7 @@ class MagnusModel:
         velocity_vector, spin_vector, speed, spin_magnitude = motion
 
         magnus_dir = np.cross(spin_vector, velocity_vector)
-        magnus_norm = float(math.hypot(*magnus_dir))
+        magnus_norm = float(math.hypot(magnus_dir[0], magnus_dir[1], magnus_dir[2]))  # ⚡ Bolt: Explicit component unpacking is faster than *args expansion
 
         if magnus_norm < 1e-10:
             return np.zeros_like(velocity_vector)
