@@ -151,15 +151,19 @@ def _vector_metrics(
         normalizer = 1.0
 
     anisotropy = float(np.max(rmse_axis) / max(float(np.min(rmse_axis)), EPSILON))
+    vector_rmse = float(
+        np.sqrt(np.vdot(vector_error, vector_error) / vector_error.size)
+    )
+
     return {
         "samples": int(len(target_values)),
         "rmse_axis": rmse_axis.tolist(),
         "mae_axis": np.mean(np.abs(residual), axis=0).tolist(),
         "max_abs_axis": np.max(np.abs(residual), axis=0).tolist(),
-        "vector_rmse": float(np.sqrt(np.mean(vector_error**2))),
+        "vector_rmse": vector_rmse,
         "vector_mae": float(np.mean(vector_error)),
         "vector_max_abs": float(np.max(vector_error)),
-        "normalized_vector_rmse": float(np.sqrt(np.mean(vector_error**2)) / normalizer),
+        "normalized_vector_rmse": vector_rmse / normalizer,
         "normalizer": normalizer,
         "residual_anisotropy": anisotropy,
     }
