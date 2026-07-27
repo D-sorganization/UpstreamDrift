@@ -127,7 +127,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
-          python -m pip install --ignore-installed hatchling editables
+          python -m pip install --ignore-installed pathspec hatchling editables
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
@@ -164,7 +164,7 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "pydantic==2.12.5"
 
@@ -280,7 +280,7 @@ jobs:
           set -euo pipefail
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
-          python -m pip install --ignore-installed hatchling editables
+          python -m pip install --ignore-installed pathspec hatchling editables
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python -m ensurepip --upgrade || true
           python - <<'PY'
@@ -296,7 +296,7 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "pydantic==2.12.5"
           pip uninstall -y pytest-vcr pytest-recording || true

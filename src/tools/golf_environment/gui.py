@@ -165,8 +165,11 @@ class EnvironmentRenderer(QWidget):
             self._gl_view.addItem(tee_mesh)
 
             # Fairway
-            dist = np.linalg.norm(
-                np.array(hole.pin_position) - np.array(hole.tee_position)
+            import math
+            dist = math.hypot(
+                hole.pin_position[0] - hole.tee_position[0],
+                hole.pin_position[1] - hole.tee_position[1],
+                hole.pin_position[2] - hole.tee_position[2],
             )
             fw_mesh = gl.GLMeshItem(
                 vertexes=self._create_rect(
