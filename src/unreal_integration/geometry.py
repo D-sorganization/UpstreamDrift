@@ -418,7 +418,7 @@ class Quaternion:
         Returns:
             Magnitude of quaternion.
         """
-        return math.sqrt(self.w**2 + self.x**2 + self.y**2 + self.z**2)
+        return math.hypot(self.w, self.x, self.y, self.z)
 
     def normalized(self) -> Quaternion:
         """Return normalized quaternion.
