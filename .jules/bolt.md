@@ -78,3 +78,7 @@
 ## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
 **Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
 **Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.
+
+## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.vdot) in IK Solver Paths]
+**Learning:** `np.linalg.norm` has significant overhead for small, fixed-size arrays (like 3D/6D vectors) in tight simulation calculations like IK solvers. Using `math.sqrt(np.vdot(err, err))` is about ~1.8-2x faster than `np.linalg.norm` for small 1D vectors and bypasses NumPy's internal dispatch and array allocation overhead.
+**Action:** Replaced `np.linalg.norm` with `math.sqrt(np.vdot(err, err))` for small 1D task error calculation in `_ik_solver.py` to reduce simulation IK step overhead.
