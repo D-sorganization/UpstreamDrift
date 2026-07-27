@@ -10,11 +10,11 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 from datetime import UTC
 from pathlib import Path
 from typing import Any
 
-import math
 import numpy as np
 import pandas as pd
 
@@ -137,7 +137,8 @@ def _vector_metrics(
     # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     vector_error = np.sqrt(np.einsum("ij,ij->i", error, error))
     target_span = np.ptp(target_values, axis=0)
-    denom = float(math.sqrt(np.vdot(target_span, target_span)))  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
+    # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
+    denom = float(math.sqrt(np.vdot(target_span, target_span)))
     if denom < EFFORT_SCALE_EPS:
         denom = float(
             # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
