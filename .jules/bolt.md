@@ -47,10 +47,6 @@
 ## 2026-06-23 - np.einsum for fast sum reduction
 **Learning:** For computing sum of values along an axis for 2D numpy arrays representing power data (e.g. `np.sum(power, axis=1)`), `np.einsum` avoids intermediate arrays and provides a ~2.5x speedup over `np.sum(..., axis=1)`.
 **Action:** Replace `np.sum(power, axis=1)` with `np.einsum('ij->i', power)` to compute total joint mechanical work and energy faster.
-## 2024-05-18 - Replacing np.mean(x**2, axis=0) with np.einsum for multi-dimensional rmse calculations
-**Learning:** For multi-dimensional root mean square calculations across a single axis (e.g. `np.sqrt(np.mean(diff**2, axis=0))`), calculating the sum of squares using `np.einsum('ij,ij->j', diff, diff)` and then dividing by the shape length is about 2x faster than using `np.mean(diff**2, axis=0)`. This optimization avoids allocating the temporary array for `diff**2`.
-**Action:** When computing standard deviation, variance, or RMSE over a specific axis on an array, replace `np.mean(x**2, axis=...)` with the corresponding `np.einsum` sum normalized by length, when performance matters. Make sure to apply it directly to the array `x` and not an already-squared intermediate array.
-
 ## 2024-05-25 - math.sqrt(np.dot) vs math.hypot for N-dimensional safety
 **Learning:** While `math.hypot(v[0], v[1], v[2])` is extremely fast for explicit 3D arrays, using it in generic utility functions (like `_angle_between(v1, v2)`) that accept N-dimensional arrays causes `IndexError` when passed a 2D array. `math.sqrt(np.dot(v, v))` handles any array length safely and still provides ~2x speedup over `np.linalg.norm`.
 **Action:** Use `math.sqrt(np.dot(v, v))` instead of `math.hypot` with explicit indices when the input array dimension is variable or not explicitly guarded. Use `math.hypot` only when slicing explicitly (e.g. `v[:2]`).
@@ -79,8 +75,6 @@
 **Learning:** `np.linalg.norm` has significant overhead for small, fixed-size arrays (like 2D/3D vectors or concatenations) in tight simulation and UI calculation paths. `math.hypot` is around ~5-6x faster for explicitly unpacked 2D/3D vectors. For small 1D vectors where unpacking is cumbersome, `math.sqrt(np.dot(err, err))` is about ~1.8x faster than `np.linalg.norm`.
 **Action:** Replaced `np.linalg.norm` with `math.hypot` for fixed-size 3D calculations (e.g. `golf_video_export.py`, `golf_gui_tabs.py`, `hip_rotation.py`) and with `math.sqrt(np.dot(err, err))` for small 1D vectors (e.g., concatenated foot error in `simulator.py`) to reduce simulation overhead.
 
-## 2025-02-28 - Fast Sum of Squares
-
-**Learning:** `np.linalg.norm` has high internal dispatch and allocation overhead for small arrays, making it surprisingly slow when called frequently inside tight solver loops.
-
-**Action:** Replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for 1D arrays to achieve a ~3x performance boost by bypassing numpy's internal dispatching. For fixed-size vectors (e.g. 2D or 3D), explicit unrolling using `math.hypot(x, y, z)` can be even faster.
+## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
+**Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
+**Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.

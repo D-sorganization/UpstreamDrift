@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.468                                            |
-| **Last Spec Update**    | 2026-07-25                                         |
+| **Spec Version**        | 1.0.467                                            |
+| **Last Spec Update**    | 2026-07-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,11 +70,6 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-07-25** - Optimized multi-dimensional RMSE calculations in
-  motion-matching and club-calibration paths by replacing
-  `np.mean(error**2, axis=0)` style reductions with equivalent
-  `np.einsum("ij,ij->j", error, error) / error.shape[0]` calculations, avoiding
-  temporary squared arrays while preserving axis-wise RMSE outputs.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
@@ -1866,7 +1861,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-07-25 | 1.0.468 | Optimized multi-dimensional RMSE calculations in motion-matching diagnostics, pose-estimation validation, and Simscape club-calibration workflows by replacing `np.mean(error**2, axis=0)` style reductions with equivalent `np.einsum("ij,ij->j", error, error) / error.shape[0]` calculations that avoid temporary squared arrays while preserving axis-wise RMSE outputs. |
 | 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
@@ -2300,16 +2294,14 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Updated math.hypot usage for small 1D arrays to math.sqrt(np.dot) in various places.
 
-### 2026-07-25
-- **Performance:** Replaced `np.mean(x**2)` with `np.vdot(x, x) / x.size` and `np.mean(x**2, axis=0)` with `np.einsum('ij,ij->j', x, x) / x.shape[0]` in ML validation and torque smoothing scripts to avoid intermediate array allocations during RMSE calculations.
-
 ### 2026-07-15
 
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
 
-- **Performance:** Replaced `np.sum(x**2)` with `np.vdot(x, x)` for 1D arrays in `optimization_widget.py` to avoid intermediate array allocations.
+- Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
+
 - **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
 - Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
 - Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
@@ -2318,6 +2310,3 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2026-06-23
 
 - **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.
-
-### Pendulum Constraint Solver
-- `src/shared/python/pendulum_simulator/constraint_solver.py`: Optimized constraint solver by using `math.sqrt(np.vdot(..., ...))` instead of `np.linalg.norm` for calculating sum of squares residuals, gaining roughly a ~3x speedup by avoiding intermediate array allocations and internal numpy dispatching.
