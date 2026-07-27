@@ -78,3 +78,6 @@
 ## 2024-05-18 - [Optimization] Boolean Array Reduction Speedup
 **Learning:** For boolean NumPy arrays (masks), calling `.sum()` directly on the ndarray is significantly faster than using `np.sum()`. This is because the method bypasses NumPy's internal checks for array conversion, yielding approximately a ~1.8x speedup.
 **Action:** Replace `np.sum(mask)` with `mask.sum()` when reducing boolean NumPy arrays to improve performance.
+## 2024-05-24 - [Avoid np.linalg.norm for small static vectors]
+**Learning:** Using `np.linalg.norm` for small (2D/3D) explicit vectors is disproportionately slow due to numpy dispatching overhead. When individual array elements can be accessed (e.g. `arr[0]`, `arr[1]`), `math.hypot` provides a ~5-6x speedup. However, this micro-optimization is not suitable for GUI paths since they are cold paths (run sparingly). Only employ it on tight loops.
+**Action:** When finding operations on small static vectors in hot loops, prefer explicitly unpacking into `math.hypot(x, y, z)` over `np.linalg.norm`.
