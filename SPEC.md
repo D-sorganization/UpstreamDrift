@@ -1504,9 +1504,10 @@ Engine tier metadata is declared in each in-scope engine package with
 
 **CLI Interface**:
 
-- `upstream-drift simulate --engine mujoco --model golf_swing.urdf`
-- `upstream-drift cross-validate --models model1.urdf model2.urdf`
-- `upstream-drift ik --model human.urdf --target-pose [...] --engine pinocchio`
+- `upstream-drift` launches the web UI (console script → `launch_upstream_drift:parse_arguments`/`route_launch`).
+- `upstream-drift --classic` launches the classic PyQt6 desktop launcher instead of the web UI.
+- `upstream-drift --api-only [--port 8000]` starts the FastAPI server without any UI.
+- `upstream-drift --engine mujoco [--no-browser]` launches a specific engine directly; `--engine` choices come from `EngineType`.
 - `python -m sidekick` launches the standalone Sidekick GUI scaffold with the `gui` subcommand and `chat-first` profile as the default path.
 - `python -m sidekick gui --profile calc-first --theme solarized --data-dir ./workspace` keeps GUI imports deferred until launch while resolving the standalone data directory before window creation.
 - `python -m sidekick run --calculator unit-converter --inputs ./inputs.json --output ./result.json` validates the headless calculator invocation contract up front; execution remains reserved for follow-up issue `#5982`.
@@ -1543,30 +1544,32 @@ Engine tier metadata is declared in each in-scope engine package with
 
 Configuration is managed through:
 
-- **Environment Variables**: `UPSTREAM_DRIFT_ENGINE` (default: mujoco), `UPSTREAM_DRIFT_API_PORT` (default: 8000)
-- **YAML Config Files**: `~/.upstream_drift/config.yaml` with engine-specific sections
+- **Environment Variables**: read through `src/shared/python/config/environment.py` and re-exported by `src/shared/python/config/settings.py`, which is the canonical configuration reference. Key variables: `GOLF_API_HOST` / `GOLF_API_PORT`, `GOLF_API_SECRET_KEY`, `GOLF_ADMIN_PASSWORD`, `GOLF_AUTH_DISABLED`, `DATABASE_URL`, `ENVIRONMENT`, `HEADLESS`, `LOG_LEVEL`. `.env.example` documents the deployment-facing set (`API_HOST`, `API_PORT`, …).
+- **YAML Config Files**: `src/config/interim_config.yaml` holds the declared defaults for CORS origins, trusted hosts, rate limits, quota tiers, simulation engine order, and video analysis. It documents intent and is not auto-loaded — callers that need its values load it explicitly.
 - **API Request Parameters**: Engine selection, model path, solver options passed as JSON
-- **GUI Settings**: Stored in `~/.upstream_drift/gui_settings.json` (viewport, window size, recent files)
 - **Launcher Manifest**: `src/config/launcher_manifest.json` declares discoverable and hidden launcher surfaces, including shared Tools-hosted video/data utilities exposed to UpstreamDrift.
 - **Theme API Settings**: `src/api/routes/theme.py` and `ui/src/api/themeClient.ts` expose launcher theme metadata to the desktop/web UI without duplicating theme lists in the frontend.
 - **Web Settings**: `src/api/routes/settings.py` persists the validated web preferences document (`WebSettings`: appearance, notifications, simulation defaults) to `~/.upstreamdrift/web_settings.json` (override: `UPSTREAMDRIFT_WEB_SETTINGS_PATH`); `ui/src/pages/Settings.tsx` + `ui/src/api/settingsClient.ts` consume it with localStorage as cache only (#7457).
 
-Example config.yaml:
+Excerpt from `src/config/interim_config.yaml`:
 
 ```yaml
-default_engine: mujoco
-api:
-  host: 0.0.0.0
+# Server Configuration
+server:
+  # Use 127.0.0.1 (localhost) by default for security
+  # Set to 0.0.0.0 in Docker or when external access is explicitly needed
+  host: "127.0.0.1"
   port: 8000
-engines:
-  mujoco:
-    model_path: /path/to/models
-    timestep: 0.001
-  drake:
-    use_simulator: true
-visualization:
-  default_camera: third_person
-  background_color: [0.1, 0.1, 0.1, 1.0]
+  reload: true # Auto-reload on code changes (development)
+  log_level: "info"
+
+# Database Configuration
+database:
+  url: "sqlite:///./golf_modeling_suite.db"
+  echo: false # Set to true for SQL debugging
+  pool_size: 5
+  max_overflow: 10
+```
 
 ## 7. Testing Specification
 
@@ -1591,13 +1594,13 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | --------------------------- | --------------------------- | ------------------- | ----------------------------------- |
 | Unit                        | `tests/unit/`               | pytest              | `@pytest.mark.unit`                 |
 | Integration                 | `tests/integration/`        | pytest              | `@pytest.mark.integration`          |
-| Acceptance                  | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`           |
-| Cross-Engine                | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`         |
+| Acceptance                  | `tests/acceptance/`         | pytest              | selected by path (no dedicated marker) |
+| Cross-Engine                | `tests/cross_engine/`       | pytest              | `@pytest.mark.gate` + `requires_<engine>` |
 | Physics Validation          | `tests/analytical/`, `tests/integration/conservation_laws/` | pytest              | `@pytest.mark.unit` / `@pytest.mark.integration` |
 | Golf Source Contracts       | `tests/unit/shared_python/` | pytest              | source-map contract tests           |
 | Dependency Source Contracts | `tests/unit/scripts/`       | pytest              | generated dependency contract tests |
 | Benchmarks                  | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`            |
-| Property-Based              | `tests/unit/`               | hypothesis + pytest | `@pytest.mark.property`             |
+| Property-Based              | `tests/unit/`               | hypothesis + pytest | `@hypothesis.given` (no dedicated marker) |
 
 Issue #3841 moved stable flat tests and the launcher `src/**/tests` package into
 topic directories under `tests/`, documented the fixture scopes in
@@ -1609,7 +1612,7 @@ overlapping fixture names in nested conftests.
 
 | Scope                   | Minimum | Current          | Enforced By                                 |
 | ----------------------- | ------- | ---------------- | ------------------------------------------- |
-| Overall                 | 55%     | CI baseline      | `pyproject.toml` and `ci-standard.yml`      |
+| Overall                 | 75%     | CI baseline      | `pyproject.toml` and `ci-standard.yml`      |
 | API routes              | 30%     | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
 | Data I/O                | 30%     | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
 | Execution/checkpointing | 30%     | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
@@ -1647,7 +1650,7 @@ overlapping fixture names in nested conftests.
 
 ### Design Principles
 
-- **TDD**: Unit tests written before implementation; the current global coverage floor is 55%, with per-package production ratchets tracked toward higher thresholds (85% for API routes/engine adapters, 70% for shared utilities).
+- **TDD**: Unit tests written before implementation; the current global coverage floor is 75%, with per-package production ratchets tracked toward higher thresholds (85% for API routes/engine adapters, 70% for shared utilities).
 - **Design by Contract (DbC)**: Explicit preconditions and postconditions in engine adapters
 - **DRY**: Cross-engine utilities in `src/shared/` prevent code duplication
 - **Orthogonality**: Engines are loosely coupled; each can be used independently
@@ -1795,13 +1798,17 @@ python -m pip install -e ".[dev]"  # Include dev dependencies
 # For desktop app: cargo install tauri-cli
 
 # Running the FastAPI Server
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn src.api.server:app --host 127.0.0.1 --port 8000 --reload
+# ...or, equivalently, through the launcher:
+upstream-drift --api-only --port 8000
 
 # Running the PyQt6 GUI
-python -m src.launchers.gui_launcher
+upstream-drift --classic
+# ...or directly:
+python launch_upstream_drift.py --classic
 
 # Running the CLI
-upstream-drift simulate --engine mujoco --model shared/models/golf_swing.urdf
+upstream-drift --engine mujoco --no-browser
 python -m sidekick
 python -m sidekick run --calculator unit-converter --inputs ./inputs.json
 
@@ -1812,7 +1819,8 @@ cd ui && npm install && npm run tauri build
 # Running Tests
 pytest tests/unit/ -v
 pytest tests/integration/ -v
-pytest tests/ --cov=src --cov-fail-under=55
+pytest tests/ --cov=src --cov-fail-under=75
+```
 
 ### Build Artifacts
 
