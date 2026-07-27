@@ -889,6 +889,92 @@ class TestCIEnvironmentCompatibility:
             in fetch_step["run"]
         )
 
+    def test_unit_gate_sparse_checks_out_pinned_tools_for_ownership_guard(self) -> None:
+        """The guard must inspect the exact Tools pin without materializing all Tools."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        steps = workflow["jobs"]["unit-test-gate"]["steps"]
+        step_names = [step.get("name", "") for step in steps]
+
+        resolve_index = step_names.index("Resolve pinned Tools ownership revision")
+        checkout_index = step_names.index("Checkout pinned Tools ownership source")
+        verify_index = step_names.index("Verify pinned Tools ownership source")
+        unit_index = step_names.index("Run Green-Suite Unit Gate")
+        resolve_step = steps[resolve_index]
+        checkout_step = steps[checkout_index]
+        verify_step = steps[verify_index]
+
+        assert resolve_index < checkout_index < verify_index < unit_index
+        assert resolve_step["id"] == "tools-ownership-pin"
+        assert "git ls-tree HEAD vendor/ud-tools" in resolve_step["run"]
+        assert checkout_step["uses"].startswith("actions/checkout@")
+        assert checkout_step["with"]["repository"] == "D-sorganization/Tools"
+        assert (
+            checkout_step["with"]["ref"]
+            == "${{ steps.tools-ownership-pin.outputs.sha }}"
+        )
+        assert checkout_step["with"]["path"] == "vendor/ud-tools"
+        assert checkout_step["with"]["fetch-depth"] == 1
+        assert checkout_step["with"]["sparse-checkout"].strip() == "src/shared/python"
+        assert checkout_step["with"]["persist-credentials"] is False
+        assert "git -C vendor/ud-tools rev-parse HEAD" in verify_step["run"]
+        assert '"${{ steps.tools-ownership-pin.outputs.sha }}"' in verify_step["run"]
+
+    def test_release_builds_wheel_from_exact_tools_submodule(self) -> None:
+        """Releases must not build an unverifiable wheel from an unpacked sdist."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        steps = workflow["jobs"]["build"]["steps"]
+        checkout = next(
+            step
+            for step in steps
+            if str(step.get("uses", "")).startswith("actions/checkout@")
+        )
+        build = next(step for step in steps if step.get("name") == "Build package")
+        smoke_job = workflow["jobs"]["smoke-python-wheel"]
+        smoke_checkout = next(
+            step
+            for step in smoke_job["steps"]
+            if str(step.get("uses", "")).startswith("actions/checkout@")
+        )
+        smoke = next(
+            step
+            for step in smoke_job["steps"]
+            if step.get("name") == "Run Python wheel smoke tests"
+        )
+
+        assert checkout["with"]["submodules"] == "recursive"
+        assert checkout["with"]["persist-credentials"] is False
+        assert workflow["jobs"]["build"]["outputs"]["wheel_filename"] == (
+            "${{ steps.build-wheel.outputs.wheel_filename }}"
+        )
+        assert build["id"] == "build-wheel"
+        assert "rm -rf dist" in build["run"]
+        assert "python3 -m build --wheel" in build["run"]
+        assert 'test "${#wheels[@]}" -eq 1' in build["run"]
+        assert "wheel_filename=$(basename" in build["run"]
+        assert smoke_checkout["with"]["submodules"] == "recursive"
+        assert smoke_checkout["with"]["persist-credentials"] is False
+        assert smoke["env"]["UPSTREAM_DRIFT_WHEEL"] == (
+            "dist/${{ needs.build.outputs.wheel_filename }}"
+        )
+
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
     ) -> None:

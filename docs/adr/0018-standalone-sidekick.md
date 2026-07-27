@@ -23,14 +23,27 @@ The standalone build must:
 
 ## Decision
 
+### 2026-07-26 ownership amendment
+
+The original physical ownership split below caused the standalone shell and
+shared library to drift. `sidekick.__main__`, `sidekick.standalone.*`, and
+`sidekick.persistence.*` are now canonical Tools modules under the exact
+`vendor/ud-tools` gitlink. UpstreamDrift continues to expose the `sidekick`
+console script, owns product packaging and launcher integration, and may add
+only exact UpstreamDrift extensions classified by the file-level ownership
+manifest. Source startup uses a manifest-gated import finder rather than
+widening canonical package paths, and fails closed if the selected Tools
+runtime is incomplete or an extension is unclassified, unresolved, or gains a
+parent counterpart.
+
 ### Packaging (T6 / T7)
 
 Add a `sidekick = "sidekick.__main__:main"` console script to the
 **repo-root `pyproject.toml`**. The canonical library package
-(`sidekick.*`) continues to live in `vendor/ud-tools/`; the standalone shell
-(`sidekick.standalone.*`) lives here. This separation avoids shipping vendor
-content in the wheel and keeps `vendor/ud-tools/` as the source-of-truth for
-shared utilities.
+and standalone shell (`sidekick.*`) live in `vendor/ud-tools/`.
+`build_hooks.py` assembles the exact pinned parent sources with classified
+UpstreamDrift-only extensions into the product wheel; the vendor repository
+itself is not shipped.
 
 A `sidekick.spec` PyInstaller spec produces a one-file binary excluding heavy
 physics engines (`pybullet`, `mujoco`, `pydrake`) and ML training frameworks.
@@ -89,9 +102,10 @@ and emits JSON outputs without any GUI or display dependency.
 2. **Tauri/Electron wrapper** — rejected for v1; adds Node.js/Rust build
    complexity and a much larger binary. Revisit when the UI needs richer
    web-native interactivity.
-3. **vendor/ud-tools as the console-script home** — rejected; the standalone
-   shell window is UpstreamDrift-specific and should not pollute the shared
-   library package.
+3. **A copied UpstreamDrift standalone implementation** — superseded by the
+   ownership amendment because it allowed embedded and standalone behavior to
+   diverge. Tools now owns the reusable shell; UpstreamDrift owns only product
+   exposure, host integration, and explicitly classified extensions.
 
 ## Consequences
 
@@ -101,8 +115,8 @@ and emits JSON outputs without any GUI or display dependency.
   - The headless `sidekick run` interface enables scripting and CI use.
 - Negative:
   - Binary size budget (250 MB) adds a CI gate to every release.
-  - `sidekick.standalone.*` is UpstreamDrift-only; cross-project sharing
-    requires extracting it to `vendor/ud-tools/` later.
+  - UpstreamDrift releases must initialize and verify the exact Tools gitlink
+    before source, wheel, or binary packaging can succeed.
 - Follow-ups:
   - Code signing / notarisation (#TBD).
   - Auto-update mechanism (#TBD).

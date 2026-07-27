@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
 
 import pytest
 
 ROOT = Path(__file__).parent.parent.parent.parent
 SPEC_PATH = ROOT / "sidekick.spec"
+BUILD_SCRIPT = ROOT / "scripts" / "packaging" / "build_sidekick_binary.py"
 
 
 @pytest.fixture(scope="module")
@@ -16,15 +19,37 @@ def spec_source() -> str:
     return SPEC_PATH.read_text(encoding="utf-8")
 
 
+@pytest.fixture(scope="module")
+def build_script_module() -> ModuleType:
+    spec = importlib.util.spec_from_file_location(
+        "test_build_sidekick_binary_module",
+        BUILD_SCRIPT,
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 # ---------------------------------------------------------------------------
 # T7-contract-1: entry-point is correct
 # ---------------------------------------------------------------------------
 
 
 def test_spec_entrypoint(spec_source: str) -> None:
-    assert "sidekick.__main__" in spec_source or "__main__.py" in spec_source, (
-        "spec must reference sidekick/__main__.py as the entry point"
-    )
+    assert 'root / "vendor" / "ud-tools" / "src" / "shared" / "python"' in (spec_source)
+    assert 'canonical_tools_python / "sidekick" / "__main__.py"' in spec_source
+    assert 'local_python / "sidekick" / "__main__.py"' not in spec_source
+
+
+def test_canonical_tools_path_precedes_local_extensions(spec_source: str) -> None:
+    """PyInstaller must resolve parent-owned modules before UD extensions."""
+    pathex_start = spec_source.index("pathex=[")
+    pathex_end = spec_source.index("],", pathex_start)
+    pathex = spec_source[pathex_start:pathex_end]
+
+    assert pathex.index("canonical_tools_python") < pathex.index("local_python")
 
 
 # ---------------------------------------------------------------------------
@@ -104,12 +129,142 @@ def test_release_workflow_triggers(spec_source: str) -> None:
     assert "sidekick-v" in content, "workflow must trigger on sidekick-v* tags"
 
 
-def test_release_workflow_matrix(spec_source: str) -> None:
+def test_build_script_rejects_a_non_native_platform_target(spec_source: str) -> None:
+    """The wrapper must fail rather than mislabel a host-native executable."""
+    script = ROOT / "scripts" / "packaging" / "build_sidekick_binary.py"
+    content = script.read_text(encoding="utf-8")
+
+    assert "--expected-platform" in content
+    assert "requested platform" in content.lower()
+
+
+def test_build_script_fails_before_building_for_platform_mismatch(
+    build_script_module: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Platform validation is executable behavior, not only workflow metadata."""
+    spec_file = tmp_path / "sidekick.spec"
+    entrypoint = tmp_path / "__main__.py"
+    spec_file.touch()
+    entrypoint.touch()
+    args = SimpleNamespace(
+        expected_platform="windows",
+        max_mb=250,
+        output_dir=str(tmp_path / "dist"),
+    )
+
+    monkeypatch.setattr(build_script_module, "SPEC_FILE", spec_file)
+    monkeypatch.setattr(
+        build_script_module,
+        "CANONICAL_SIDEKICK_ENTRYPOINT",
+        entrypoint,
+    )
+    monkeypatch.setattr(build_script_module, "_parse_args", lambda: args)
+    monkeypatch.setattr(
+        build_script_module,
+        "_native_platform_name",
+        lambda: "linux",
+    )
+
+    def fail_if_called(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("PyInstaller must not run for a platform mismatch")
+
+    monkeypatch.setattr(build_script_module.subprocess, "run", fail_if_called)
+
+    assert build_script_module.main() == 1
+    assert "does not match native build platform" in capsys.readouterr().err
+
+
+def test_build_script_requires_canonical_tools_entrypoint(
+    build_script_module: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An uninitialized or stale Tools checkout must fail before PyInstaller."""
+    spec_file = tmp_path / "sidekick.spec"
+    spec_file.touch()
+    args = SimpleNamespace(
+        expected_platform="linux",
+        max_mb=250,
+        output_dir=str(tmp_path / "dist"),
+    )
+
+    monkeypatch.setattr(build_script_module, "SPEC_FILE", spec_file)
+    monkeypatch.setattr(
+        build_script_module,
+        "CANONICAL_SIDEKICK_ENTRYPOINT",
+        tmp_path / "missing" / "__main__.py",
+    )
+    monkeypatch.setattr(build_script_module, "_parse_args", lambda: args)
+
+    assert build_script_module.main() == 1
+    assert "initialize the pinned vendor/ud-tools submodule" in (
+        capsys.readouterr().err
+    )
+
+
+def test_build_script_accepts_matching_native_platform(
+    build_script_module: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A valid native build must verify the exact expected output artifact."""
+    spec_file = tmp_path / "sidekick.spec"
+    entrypoint = tmp_path / "__main__.py"
+    output_dir = tmp_path / "dist"
+    spec_file.touch()
+    entrypoint.touch()
+    args = SimpleNamespace(
+        expected_platform="linux",
+        max_mb=1,
+        output_dir=str(output_dir),
+    )
+
+    monkeypatch.setattr(build_script_module, "SPEC_FILE", spec_file)
+    monkeypatch.setattr(
+        build_script_module,
+        "CANONICAL_SIDEKICK_ENTRYPOINT",
+        entrypoint,
+    )
+    monkeypatch.setattr(build_script_module, "_parse_args", lambda: args)
+    monkeypatch.setattr(
+        build_script_module,
+        "_native_platform_name",
+        lambda: "linux",
+    )
+    monkeypatch.setattr(build_script_module, "_binary_name", lambda: "sidekick")
+
+    def successful_build(
+        command: list[str],
+        *,
+        env: dict[str, str],
+        check: bool,
+    ) -> SimpleNamespace:
+        assert command[-1] == str(spec_file)
+        assert command[command.index("--distpath") + 1] == str(output_dir)
+        assert env["SKIP_UI_BUILD"] == "1"
+        assert check is False
+        output_dir.mkdir()
+        (output_dir / "sidekick").write_bytes(b"native binary")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(build_script_module.subprocess, "run", successful_build)
+
+    assert build_script_module.main() == 0
+    assert (output_dir / "sidekick").read_bytes() == b"native binary"
+
+
+def test_release_workflow_does_not_fake_cross_platform_matrix(
+    spec_source: str,
+) -> None:
     wf = ROOT / ".github" / "workflows" / "release-sidekick-binary.yml"
     if not wf.exists():
         pytest.skip("workflow file absent")
     content = wf.read_text(encoding="utf-8")
-    # Matrix labels (not OS runner names — repo policy requires d-sorg-fleet)
-    assert "linux" in content, "matrix must include a linux build target"
-    assert "macos" in content, "matrix must include a macos build target"
-    assert "windows" in content, "matrix must include a windows build target"
+    assert "Build binary (Linux)" in content
+    assert "sidekick-linux" in content
+    assert "sidekick-macos" not in content
+    assert "sidekick-windows" not in content

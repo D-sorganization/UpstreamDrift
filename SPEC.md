@@ -84,11 +84,24 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   remain unchanged. Host close also delegates to the canonical sidebar
   shutdown contract so Terminal PTY, shell, bridge, and API child processes
   cannot survive the launcher (#3938). A PR-diff hygiene contract now rejects
-  any non-deletion edit to an existing warning-headered Tools child copy and
-  any newly added child copy, requiring the canonical Tools change and
-  reviewed gitlink bump instead. The protected unit gate fetches the pull
-  request base before running that fail-closed comparison, so a shallow
-  checkout cannot silently skip or spuriously fail ownership enforcement.
+  any non-deletion edit to a Python path owned by the exact pinned Tools
+  gitlink, regardless of warning header or shadow allow-list, while retaining
+  the original base/current warning-header checks. The protected unit gate
+  fetches the pull request base and sparse-checks out only the pinned Tools
+  `src/shared/python` inventory before running the fail-closed comparison.
+  Sidekick/chat paths without a same-relative Tools source require file-level
+  owner state, rationale, tracking issue, and unexpired review date in
+  `scripts/config/shared_python_ownership_exceptions.yaml`.
+  Release-wheel assembly verifies the exact Tools gitlink and installs the
+  parent-owned shared package graph plus its Chat/Sidekick compatibility
+  aliases, utilities, and DbC contracts. The canonical alias finder coalesces
+  direct, `shared.python`, and legacy `src.shared.python` spellings to prevent
+  installed applications from executing stale nested child copies; only
+  non-conflicting Upstream-owned extensions supplement the parent graph. Tagged
+  releases initialize the exact Tools submodule and build a wheel directly
+  from that verified checkout rather than rebuilding an unverifiable wheel
+  from an unpacked source archive. Clean installed-wheel probes verify module
+  identity, dependency closure, and byte-level source fidelity.
   The acceptance and source-ownership audit matrix is in
   `docs/testing/sidekick-pyqt6-startup-matrix.md`.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
@@ -1882,6 +1895,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-26 | 1.0.473 | Published the canonical Tools Sidekick runtime candidate and removed 14 parent-backed or obsolete Upstream child copies, including the stale default-tab composition. Source startup now exposes only 33 manifest-classified Upstream production extensions through the exact-module overlay; the misplaced force-plate test moved out of the shipped package. Embedded and standalone profile stores now prove direct public-API interoperability against one versioned artifact, and the parent wheel installs both `python -m sidekick` and the `sidekick` console command. Final protected merge, gitlink repin, artifact gates, and computer-controlled PyQt6 acceptance remain required. |
+| 2026-07-26 | 1.0.472 | Extended the #8102 parent-source contract through the installed-wheel boundary. Wheel assembly now verifies and packages the exact pinned Tools shared graph, release CI initializes that exact gitlink and builds the wheel directly instead of round-tripping through an unverifiable sdist, and clean-install smoke coverage requires direct, `shared.python`, and legacy `src.shared.python` Chat/Sidekick imports to share one parent-owned identity. The exact candidate also executes `python -m sidekick --help`; final acceptance remains gated on the protected Tools merge and final gitlink repin. |
 | 2026-07-25 | 1.0.471 | Reconciled the pinned Tools direct-package expansion with UpstreamDrift's shadow-module ownership gate. Twelve pre-existing overlaps newly visible at the #8102 Tools revision, including `sidekick`, are explicitly classified under migration issue #5623 with an enforced 2026-12-31 sunset; new unclassified shadows still fail CI, and runtime Sidekick imports continue to prefer the pinned parent source. |
 | 2026-07-25 | 1.0.470 | Extended the #8102 classic PyQt6 Sidekick recovery contract beyond initial startup. A bounded liveness monitor now continues after the first successful readiness response, resets its restart budget after each healthy period, recreates a dead API child after a post-connect outage, and becomes inert when launcher shutdown begins. SK-START-016 records the fault-injection procedure and regression evidence. |
 | 2026-07-25 | 1.0.469 | Hardened classic PyQt6 Sidekick startup for #8102: isolated dynamic loopback API ports, an ephemeral launcher capability and public instance readiness identity, bounded child restarts, local-tab availability independent of Chat, parent-source-first direct package imports, and a pinned Tools revision. Host close delegates to the canonical sidebar aggregate shutdown so Terminal PTY, shell, bridge, and API processes exit cleanly (#3938). A PR-diff hygiene gate rejects direct edits to existing warning-headered Tools child copies and newly added child copies while allowing deletion after migration. Computer-control results and source-ownership audit are recorded in `docs/testing/sidekick-pyqt6-startup-matrix.md`. |

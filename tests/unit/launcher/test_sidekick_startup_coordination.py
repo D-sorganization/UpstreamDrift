@@ -6,6 +6,11 @@ guard against duplicate sidebar creation during readiness retries.
 
 from __future__ import annotations
 
+import importlib
+import json
+import os
+from pathlib import Path
+import subprocess  # nosec B404 - fixed interpreter and local test script
 import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -23,6 +28,99 @@ from src.launchers.upstream_drift_launcher import (
 )
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
+
+def test_sidebar_uses_canonical_tools_repo_path_resolver() -> None:
+    """Deferred sidebar startup must reuse the direct bootstrap contract."""
+    resolver_module = importlib.import_module("src.launchers.tools_repo_path")
+
+    assert (
+        sidebar_module.resolve_explicit_tools_root
+        is resolver_module.resolve_explicit_tools_root
+    )
+
+
+def test_direct_launcher_imports_critical_sidekick_modules_from_pinned_tools() -> None:
+    """Production bootstrap must never resolve critical modules from child copies."""
+    repo_root = Path(__file__).resolve().parents[3]
+    vendor_python = (
+        repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"
+    ).resolve()
+    module_names = (
+        "chat.chat_dock_widget",
+        "chat._chat_dock_widget_qt",
+        "sidekick.ui.tools_sidebar",
+    )
+    script = "\n".join(
+        [
+            "import importlib, json",
+            "import launch_upstream_drift",
+            f"names = {module_names!r}",
+            "print(json.dumps({name: importlib.import_module(name).__file__ for name in names}))",
+        ]
+    )
+    env = os.environ.copy()
+    env.pop("TOOLS_REPO_PATH", None)
+    env.pop("PYTHONPATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    env["QT_QPA_PLATFORM"] = "offscreen"
+
+    result = subprocess.run(  # nosec B603 - fixed interpreter and local script
+        [sys.executable, "-c", script],
+        cwd=repo_root,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr
+    resolved = json.loads(result.stdout.strip().splitlines()[-1])
+    assert set(resolved) == set(module_names)
+    for module_name, module_file in resolved.items():
+        path = Path(module_file).resolve()
+        assert path.is_relative_to(vendor_python), (
+            f"{module_name} resolved from {path}, expected pinned Tools under "
+            f"{vendor_python}"
+        )
+
+
+def test_pinned_chat_never_forwards_launcher_token_to_remote_peer() -> None:
+    """The consumed Tools pin must keep host capabilities on loopback only."""
+    repo_root = Path(__file__).resolve().parents[3]
+    script = "\n".join(
+        [
+            "from urllib.parse import parse_qsl, urlsplit",
+            "import launch_upstream_drift",
+            "from chat.chat_dock_widget import _build_native_websocket_url",
+            "url = _build_native_websocket_url(",
+            "    'wss://chat.example', '/ws/session', 'ephemeral-test-token'",
+            ")",
+            "query = dict(parse_qsl(urlsplit(url).query))",
+            "assert 'launcher_token' not in query",
+            "assert 'ephemeral-test-token' not in url",
+        ]
+    )
+    env = os.environ.copy()
+    env.pop("TOOLS_REPO_PATH", None)
+    env.pop("PYTHONPATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+
+    result = subprocess.run(  # nosec B603 - fixed interpreter and local script
+        [sys.executable, "-c", script],
+        cwd=repo_root,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, (
+        "Pinned Tools forwarded a launcher capability to a non-loopback "
+        f"WebSocket peer:\n{result.stderr}"
+    )
 
 
 def test_deferred_install_does_not_gate_local_sidebar_on_api() -> None:
@@ -88,8 +186,12 @@ def test_sidekick_import_paths_are_installed_before_first_import() -> None:
     assert order == ["paths", "import"]
 
 
-def test_vendored_tools_precedes_mutable_sibling_checkout(tmp_path) -> None:
+def test_vendored_tools_precedes_mutable_sibling_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """A pinned vendor source wins over an arbitrary dirty sibling worktree."""
+    monkeypatch.delenv("TOOLS_REPO_PATH", raising=False)
     repo_root = tmp_path / "UpstreamDrift"
     vendor_src = repo_root / "vendor" / "ud-tools" / "src"
     sibling_src = tmp_path / "Tools" / "src"
@@ -148,6 +250,31 @@ def test_explicit_tools_checkout_precedes_initialized_fallbacks(
     ]
 
 
+def test_selected_parent_source_activates_manifest_gated_extensions(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The same selected Tools authority must configure extension loading."""
+    repo_root = tmp_path / "UpstreamDrift"
+    tools_root = tmp_path / "CanonicalTools"
+    (repo_root / "src/shared/python").mkdir(parents=True)
+    (tools_root / "src/shared/python").mkdir(parents=True)
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(tools_root))
+    manager = SidekickSidebarManager(SimpleNamespace())
+
+    with (
+        patch.object(sidebar_module, "REPOS_ROOT", repo_root),
+        patch.object(
+            SidekickSidebarManager,
+            "_prepend_tools_source_paths",
+        ),
+        patch.object(sidebar_module, "_activate_source_extensions") as activate,
+    ):
+        manager._install_sidekick_import_paths()
+
+    activate.assert_called_once_with(tools_root / "src")
+
+
 def test_invalid_explicit_tools_checkout_does_not_fall_through(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
@@ -162,9 +289,14 @@ def test_invalid_explicit_tools_checkout_does_not_fall_through(
 
     with (
         patch.object(sidebar_module, "REPOS_ROOT", repo_root),
-        pytest.raises(RuntimeError, match="TOOLS_REPO_PATH"),
+        pytest.raises(RuntimeError) as error,
     ):
         manager._install_sidekick_import_paths()
+
+    assert str(error.value) == (
+        "TOOLS_REPO_PATH must point to a Tools checkout containing a src/ "
+        f"directory, got: {invalid_tools_root.resolve()}"
+    )
 
 
 def test_vendored_direct_packages_precede_legacy_alias_shims(
@@ -172,6 +304,7 @@ def test_vendored_direct_packages_precede_legacy_alias_shims(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Cached bootstrap paths must be repositioned, not merely left in place."""
+    monkeypatch.delenv("TOOLS_REPO_PATH", raising=False)
     repo_root = tmp_path / "UpstreamDrift"
     vendor_src = repo_root / "vendor" / "ud-tools" / "src"
     vendor_python = vendor_src / "shared" / "python"

@@ -27,12 +27,12 @@ from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
-from src.api.auth.ws_auth import resolve_ws_user
-from src.shared.python.chat.websocket_protocol import (
+from chat.websocket_protocol import (
     ChatWebSocketState,
     DisconnectLogConfig,
     run_chat_websocket_protocol,
 )
+from src.api.auth.ws_auth import resolve_ws_user
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 

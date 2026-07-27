@@ -1,16 +1,22 @@
 name: Package Standalone Sidekick
 
-# Runs on every PR that touches sidekick/standalone or pyproject.toml (T6).
-# Builds an sdist + wheel, uploads as artifacts, and smoke-tests the wheel.
+# Builds an sdist + wheel from the exact pinned Tools source, uploads both
+# artifacts, and smoke-tests the one wheel selected by the build job.
 
 on:
   pull_request:
     paths:
-      - "src/shared/python/sidekick/standalone/**"
-      - "src/shared/python/sidekick/__main__.py"
+      - "vendor/ud-tools"
+      - "src/shared/python/sidekick/**"
+      - "src/__init__.py"
+      - "src/launchers/sidekick_extension_overlay.py"
+      - "launch_upstream_drift.py"
+      - "build_hooks.py"
+      - "scripts/config/shared_python_ownership_exceptions.yaml"
       - "pyproject.toml"
       - "sidekick.spec"
       - "scripts/packaging/build_sidekick_binary.py"
+      - ".github/workflows/package-standalone-sidekick.yml"
   workflow_dispatch:
 
 concurrency:
@@ -27,9 +33,13 @@ jobs:
     timeout-minutes: 15
     outputs:
       wheel-size-kb: ${{ steps.size.outputs.kb }}
+      wheel_filename: ${{ steps.build-dist.outputs.wheel_filename }}
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          submodules: recursive
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -62,28 +72,43 @@ jobs:
           python-version: "3.11"
 
       - name: Purge pip cache
-        run: python -m pip cache purge || true
+        run: python3 -m pip cache purge
       - name: Install build tools
         run: |
           python3 -m pip install build
 
       - name: Build sdist + wheel
-        run: python3 -m build --outdir dist/
+        id: build-dist
+        shell: bash
+        run: |
+          rm -rf dist
+          python3 -m build --outdir dist/
+          mapfile -t wheels < <(
+            find dist -maxdepth 1 -type f -name 'upstream_drift-*.whl' -print
+          )
+          if ! test "${#wheels[@]}" -eq 1; then
+            echo "::error::Expected exactly one upstream_drift wheel; found ${#wheels[@]}"
+            printf '  %s\n' "${wheels[@]}"
+            exit 1
+          fi
+          wheel_filename=$(basename "${wheels[0]}")
+          echo "wheel_filename=$wheel_filename" >> "$GITHUB_OUTPUT"
+          echo "UPSTREAM_DRIFT_WHEEL=${wheels[0]}" >> "$GITHUB_ENV"
 
       - name: Record wheel size
         id: size
         shell: bash
         run: |
-          whl=$(ls dist/*.whl | head -1)
-          kb=$(du -k "$whl" | cut -f1)
-          echo "Wheel: $whl  Size: ${kb} kB"
+          kb=$(du -k "$UPSTREAM_DRIFT_WHEEL" | cut -f1)
+          echo "Wheel: $UPSTREAM_DRIFT_WHEEL  Size: ${kb} kB"
           echo "kb=${kb}" >> "$GITHUB_OUTPUT"
           echo "### Wheel size: ${kb} kB" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Assert wheel does not contain tests/ docs/ vendor/
         shell: bash
         run: |
-          python3 -m zipfile -l dist/*.whl | awk '{print $NF}' > wheel_contents.txt
+          python3 -m zipfile -l "$UPSTREAM_DRIFT_WHEEL" \
+            | awk '{print $NF}' > wheel_contents.txt
           if grep -E '^(tests/|docs/|vendor/)' wheel_contents.txt; then
             echo "::error::Wheel contains tests/, docs/, or vendor/ content"
             exit 1
@@ -108,6 +133,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          submodules: recursive
+          persist-credentials: false
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -124,7 +152,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Purge pip cache
-        run: python -m pip cache purge || true
+        run: python3 -m pip cache purge
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: sidekick-dist
@@ -132,9 +160,11 @@ jobs:
 
       - name: Install wheel in clean venv
         shell: bash
+        env:
+          UPSTREAM_DRIFT_WHEEL: dist/${{ needs.build-wheel.outputs.wheel_filename }}
         run: |
           python3 -m venv .smoke-venv
-          .smoke-venv/bin/pip install dist/*.whl
+          .smoke-venv/bin/pip install "$UPSTREAM_DRIFT_WHEEL"
 
       - name: sidekick --help
         shell: bash

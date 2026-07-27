@@ -293,7 +293,6 @@ src/shared/python/programmatic_pid/cli.py	layer.dxf.name.lower	2
 src/shared/python/sg_optimizer/mdp/value_iteration.py	self.profile.clubs.get	1
 src/shared/python/sidekick/agent/action_audit.py	self._path.parent.mkdir	1
 src/shared/python/sidekick/process_calculators/wgs_reactor_calculator.py	self.engine.catalysts.keys	1
-src/shared/python/sidekick/standalone/session_store.py	self._path.parent.mkdir	1
 src/shared/python/sidekick/ui/design_tokens.py	current_dir.parent.parent.parent	1
 src/shared/python/sidekick/ui/tools_sidebar/calculator_runtime.py	self._workspace_controller.settings.default_directory	1
 src/shared/python/sidekick/ui/tools_sidebar/data_explorer_tab.py	self._preview.format.upper	1

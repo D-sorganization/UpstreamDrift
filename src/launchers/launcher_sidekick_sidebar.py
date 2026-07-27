@@ -13,6 +13,39 @@ from typing import Any
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
+from src.launchers.sidekick_extension_overlay import (
+    ManifestGatedSidekickFinder,
+    install_manifest_gated_sidekick_extensions,
+    validate_parent_sidekick_runtime,
+)
+from src.launchers.tools_repo_path import resolve_explicit_tools_root
+
+_SOURCE_EXTENSION_FINDER: ManifestGatedSidekickFinder | None = None
+_SOURCE_EXTENSION_PARENT: Path | None = None
+
+
+def _activate_source_extensions(tools_source_root: Path) -> None:
+    """Install the exact-module overlay for an UpstreamDrift source checkout."""
+    global _SOURCE_EXTENSION_FINDER, _SOURCE_EXTENSION_PARENT
+    manifest = REPOS_ROOT / "scripts/config/shared_python_ownership_exceptions.yaml"
+    local_python = REPOS_ROOT / "src/shared/python"
+    if not manifest.is_file() or not local_python.is_dir():
+        return
+
+    parent_python = (tools_source_root / "shared/python").resolve()
+    if _SOURCE_EXTENSION_FINDER is not None:
+        if parent_python != _SOURCE_EXTENSION_PARENT:
+            raise RuntimeError(
+                "Sidekick parent authority cannot change after extension loading"
+            )
+        return
+    validate_parent_sidekick_runtime(parent_python)
+    _SOURCE_EXTENSION_FINDER = install_manifest_gated_sidekick_extensions(
+        local_python_root=local_python,
+        parent_python_root=parent_python,
+        manifest_path=manifest,
+    )
+    _SOURCE_EXTENSION_PARENT = parent_python
 
 
 class SidekickSidebarManager:
@@ -97,30 +130,27 @@ class SidekickSidebarManager:
 
     def _install_sidekick_import_paths(self) -> None:
         """Prepend the configured, vendored, or sibling Tools source."""
-        configured_root = os.environ.get("TOOLS_REPO_PATH")
-        if configured_root:
-            tools_root = Path(configured_root).expanduser().resolve()
-            tools_src = tools_root / "src"
-            if not tools_root.is_dir() or not tools_src.is_dir():
-                raise RuntimeError(
-                    "TOOLS_REPO_PATH must point to a Tools checkout containing "
-                    f"a src/ directory, got: {tools_root}"
-                )
-            SidekickSidebarManager._prepend_tools_source_paths(tools_src)
+        tools_root = resolve_explicit_tools_root(os.environ.get("TOOLS_REPO_PATH"))
+        if tools_root is not None:
+            SidekickSidebarManager._prepend_tools_source_paths(tools_root / "src")
+            _activate_source_extensions(tools_root / "src")
             return
 
         vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
         if vendor_root.is_dir():
             SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
+            _activate_source_extensions(vendor_root)
             return
 
         sibling_tools = REPOS_ROOT.parent / "Tools"
         if sibling_tools.is_dir():
             SidekickSidebarManager._prepend_tools_source_paths(sibling_tools / "src")
+            _activate_source_extensions(sibling_tools / "src")
             return
 
         # Last-resort compatibility path for partially initialized deployments.
         SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
+        _activate_source_extensions(vendor_root)
 
     @staticmethod
     def _prepend_tools_source_paths(source_root: Path) -> None:

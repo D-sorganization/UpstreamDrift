@@ -102,6 +102,20 @@ def _router_factory_entrypoint() -> _Entrypoint:
     return route.endpoint
 
 
+def _assert_session_info_and_events(
+    sent: list[dict[str, Any]],
+    expected_events: list[dict[str, Any]],
+) -> None:
+    """Validate the shared session contract while allowing declared extensions."""
+    session_info, *events = sent
+    assert session_info["type"] == "session_info"
+    assert session_info["session_id"] == "session-1"
+    assert set(session_info) <= {"type", "session_id", "capabilities"}
+    if "capabilities" in session_info:
+        assert session_info["capabilities"] == {"terminal_runtime": False}
+    assert events == expected_events
+
+
 @pytest.fixture(
     params=[
         pytest.param(api_chat_ws.chat_stream, id="api_route"),
@@ -138,18 +152,20 @@ async def test_core_protocol_success_path_matches_entrypoints(
     await entrypoint(websocket, "session-1")
 
     assert websocket.accepted is True
-    assert websocket.sent == [
-        {"type": "session_info", "session_id": "session-1"},
-        {"type": "chunk", "content": "dict-chunk"},
-        {"type": "chunk", "content": "text-chunk"},
-        {"type": "complete", "session_id": "session-1"},
-        {
-            "type": "history",
-            "messages": [{"role": "user", "content": "history:session-1"}],
-        },
-        {"type": "session_created", "session_id": "new-1"},
-        {"type": "error", "detail": "Unknown action: unknown_action"},
-    ]
+    _assert_session_info_and_events(
+        websocket.sent,
+        [
+            {"type": "chunk", "content": "dict-chunk"},
+            {"type": "chunk", "content": "text-chunk"},
+            {"type": "complete", "session_id": "session-1"},
+            {
+                "type": "history",
+                "messages": [{"role": "user", "content": "history:session-1"}],
+            },
+            {"type": "session_created", "session_id": "new-1"},
+            {"type": "error", "detail": "Unknown action: unknown_action"},
+        ],
+    )
     assert service.added == [("session-1", "hello", "desktop")]
 
 
@@ -167,14 +183,16 @@ async def test_add_user_error_matches_entrypoints_and_socket_survives(
 
     await entrypoint(websocket, "session-1")
 
-    assert websocket.sent == [
-        {"type": "session_info", "session_id": "session-1"},
-        {"type": "error", "detail": "cannot add"},
-        {
-            "type": "history",
-            "messages": [{"role": "user", "content": "history:session-1"}],
-        },
-    ]
+    _assert_session_info_and_events(
+        websocket.sent,
+        [
+            {"type": "error", "detail": "cannot add"},
+            {
+                "type": "history",
+                "messages": [{"role": "user", "content": "history:session-1"}],
+            },
+        ],
+    )
 
 
 async def test_connection_error_is_sanitized_for_both_entrypoints(
@@ -185,13 +203,21 @@ async def test_connection_error_is_sanitized_for_both_entrypoints(
 
     await entrypoint(websocket, "session-1")
 
-    assert websocket.sent == [
-        {"type": "session_info", "session_id": "session-1"},
-        {"type": "error", "detail": "Connection error"},
-    ]
+    _assert_session_info_and_events(
+        websocket.sent,
+        [{"type": "error", "detail": "Connection error"}],
+    )
 
 
 def test_protocol_loop_lives_only_in_shared_helper() -> None:
     assert "while True:" not in Path(api_chat_ws.__file__).read_text()
     assert "while True:" not in Path(shared_router_factory.__file__).read_text()
     assert Path(shared_protocol.__file__).read_text().count("while True:") == 1
+
+
+def test_api_route_imports_parent_owned_protocol_surface() -> None:
+    """The Upstream route must depend on the canonical Tools package name."""
+    source = Path(api_chat_ws.__file__).read_text(encoding="utf-8")
+
+    assert "from chat.websocket_protocol import (" in source
+    assert "from src.shared.python.chat.websocket_protocol import (" not in source
