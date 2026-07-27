@@ -107,6 +107,11 @@ class SidekickSidebarManager:
         """Import the Sidekick sidebar module, trying multiple fallback paths."""
         SidekickSidebarManager._install_sidekick_import_paths(self)
         try:
+            return importlib.import_module("sidekick.ui.tools_sidebar.api")
+        except ImportError:
+            pass
+
+        try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
             )

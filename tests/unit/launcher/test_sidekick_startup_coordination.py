@@ -164,10 +164,11 @@ def test_launcher_shutdown_delegates_to_sidekick_runtime_owner() -> None:
     sidebar.shutdown.assert_called_once_with()
 
 
-def test_sidekick_import_paths_are_installed_before_first_import() -> None:
-    """The local child copy must not win before canonical paths are available."""
+def test_sidekick_import_paths_precede_canonical_api_import() -> None:
+    """Startup must import the canonical API without lazy package lookup."""
     manager = SidekickSidebarManager(SimpleNamespace())
     order: list[str] = []
+    canonical_api = object()
 
     with (
         patch.object(
@@ -178,12 +179,21 @@ def test_sidekick_import_paths_are_installed_before_first_import() -> None:
         patch(
             "src.shared.python.gui_launcher.tools_sidebar_integration."
             "_import_sidebar_module",
-            side_effect=lambda: order.append("import") or object(),
+            side_effect=AssertionError("canonical API import must win"),
+        ),
+        patch(
+            "src.launchers.launcher_sidekick_sidebar.importlib.import_module",
+            side_effect=lambda name: (
+                order.append(name) or canonical_api
+                if name == "sidekick.ui.tools_sidebar.api"
+                else None
+            ),
         ),
     ):
-        manager._get_sidekick_module()
+        module = manager._get_sidekick_module()
 
-    assert order == ["paths", "import"]
+    assert module is canonical_api
+    assert order == ["paths", "sidekick.ui.tools_sidebar.api"]
 
 
 def test_vendored_tools_precedes_mutable_sibling_checkout(

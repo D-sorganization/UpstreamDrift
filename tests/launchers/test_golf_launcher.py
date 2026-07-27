@@ -2,6 +2,7 @@
 
 import contextlib  # noqa: E402
 from collections.abc import Generator  # noqa: E402
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -41,6 +42,31 @@ def test_onboarding_is_skipped_in_non_interactive_runs(monkeypatch) -> None:
         UpstreamDriftLauncher._show_onboarding_if_needed(MagicMock())
 
     mock_show.assert_not_called()
+
+
+def test_init_managers_installs_sidekick_extensions_before_tool_bootstrap() -> None:
+    launcher = MagicMock()
+    order: list[str] = []
+    launcher.ui_setup_manager._setup_process_console.return_value = None
+    launcher.ui_setup_manager._on_process_output = MagicMock()
+    launcher.ui_setup_manager.update_running_processes_ui = MagicMock()
+    launcher.sidekick_sidebar_manager._install_sidekick_import_paths.side_effect = (
+        lambda: order.append("extensions")
+    )
+
+    with (
+        patch("src.launchers.upstream_drift_launcher.ProcessManager") as process_cls,
+        patch("src.launchers.upstream_drift_launcher.ModelHandlerRegistry"),
+        patch("src.launchers.upstream_drift_launcher.DockerLauncher"),
+        patch(
+            "src.launchers.upstream_drift_launcher.bootstrap_embeddable_tools",
+            side_effect=lambda: order.append("bootstrap"),
+        ),
+    ):
+        process_cls.return_value.running_processes = {}
+        UpstreamDriftLauncher._init_managers(launcher)
+
+    assert order[:2] == ["extensions", "bootstrap"]
 
 
 def test_init_without_results(qapp) -> None:
@@ -276,6 +302,25 @@ def test_update_launch_button(qapp) -> None:
         launcher.update_launch_button("M1")
         assert launcher.btn_launch.isEnabled()
         assert "Launch M1 >" in launcher.btn_launch.text()
+
+
+def test_update_launch_button_tolerates_theme_without_success_hover() -> None:
+    launcher = SimpleNamespace(
+        selected_model="sidekick",
+        btn_launch=MagicMock(),
+        orchestrator=SimpleNamespace(docker_available=True),
+        _get_model=MagicMock(return_value=SimpleNamespace(requires_docker=False)),
+    )
+    colors = SimpleNamespace(success="#30d158")
+
+    with patch(
+        "src.shared.python.theme.get_current_colors",
+        return_value=colors,
+    ):
+        UpstreamDriftLauncher.update_launch_button(launcher, "Sidekick")
+
+    stylesheet = launcher.btn_launch.setStyleSheet.call_args.args[0]
+    assert "background-color: #30d158;" in stylesheet
 
 
 @patch("src.launchers.upstream_drift_launcher._lazy_load_engine_manager")

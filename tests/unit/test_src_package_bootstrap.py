@@ -1,4 +1,5 @@
 import builtins
+import importlib
 import runpy
 import sys
 from pathlib import Path
@@ -23,11 +24,18 @@ def test_src_package_installs_parent_shared_import_aliases(
     monkeypatch.setitem(sys.modules, "shared", shared)
     monkeypatch.setitem(sys.modules, "shared.python", shared_python)
     monkeypatch.setitem(sys.modules, "shared.python.import_aliases", aliases)
+    real_import_module = importlib.import_module
+
+    def track_downstream_namespace(name: str, package: str | None = None):
+        calls.append(f"loaded:{name}")
+        return real_import_module(name, package)
+
+    monkeypatch.setattr(importlib, "import_module", track_downstream_namespace)
 
     repo_root = Path(__file__).resolve().parents[2]
     module_globals = runpy.run_path(str(repo_root / "src" / "__init__.py"))
 
-    assert calls == ["installed"]
+    assert calls == ["loaded:src.shared.python", "installed"]
     assert module_globals["_PARENT_SHARED_ALIASES_INSTALLED"] is True
 
 

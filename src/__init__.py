@@ -1,5 +1,6 @@
 """Golf Modeling Suite source package."""
 
+import importlib
 import sys
 from collections.abc import Mapping, Sequence
 from types import ModuleType
@@ -12,6 +13,11 @@ _CANONICAL_ALIAS_MODULES = frozenset(
         "shared.python.import_aliases",
     }
 )
+
+
+def _load_downstream_shared_namespaces() -> None:
+    """Attach the real downstream parents before Tools aliases add children."""
+    importlib.import_module("src.shared.python")
 
 
 def _restore_import_state(
@@ -42,6 +48,7 @@ def _install_parent_shared_aliases() -> bool:
         raise
 
     try:
+        _load_downstream_shared_namespaces()
         install_shared_import_aliases()
     except Exception:
         _restore_import_state(previous_modules, previous_meta_path)

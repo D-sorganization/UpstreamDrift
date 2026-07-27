@@ -41,6 +41,10 @@ def test_spec_entrypoint(spec_source: str) -> None:
     assert 'root / "vendor" / "ud-tools" / "src" / "shared" / "python"' in (spec_source)
     assert 'canonical_tools_python / "sidekick" / "__main__.py"' in spec_source
     assert 'local_python / "sidekick" / "__main__.py"' not in spec_source
+    assert "[str(binary_entrypoint)]" in spec_source
+    adapter = ROOT / "scripts" / "packaging" / "sidekick_binary_entrypoint.py"
+    assert adapter.is_file()
+    assert "from sidekick.__main__ import main" in adapter.read_text(encoding="utf-8")
 
 
 def test_canonical_tools_path_precedes_local_extensions(spec_source: str) -> None:
@@ -50,6 +54,28 @@ def test_canonical_tools_path_precedes_local_extensions(spec_source: str) -> Non
     pathex = spec_source[pathex_start:pathex_end]
 
     assert pathex.index("canonical_tools_python") < pathex.index("local_python")
+    assert pathex.index("canonical_tools_python") < pathex.index("canonical_tools_src")
+    assert pathex.index("canonical_tools_src") < pathex.index("local_python")
+
+
+def test_spec_bootstraps_canonical_tools_for_hidden_import_discovery(
+    spec_source: str,
+) -> None:
+    """Spec evaluation must expose the canonical package to PyInstaller hooks."""
+    bootstrap = spec_source.index("sys.path.insert(0, str(canonical_tools_python))")
+    analysis = spec_source.index("a = Analysis")
+
+    assert bootstrap < analysis
+
+
+def test_windows_icon_is_a_pinned_tools_asset(spec_source: str) -> None:
+    """Windows builds must reference an icon that exists in a clean checkout."""
+    expected_icon = ROOT / "vendor" / "ud-tools" / "assets" / "tools_icon_hq.ico"
+
+    assert expected_icon.is_file()
+    assert (
+        'root / "vendor" / "ud-tools" / "assets" / "tools_icon_hq.ico"' in spec_source
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +99,8 @@ def test_required_package_included(spec_source: str, pkg: str) -> None:
 
 
 EXCLUDED_PACKAGES = ["pybullet", "mujoco", "pydrake"]
+EXCLUDED_QT_BINDINGS = ["PyQt5", "PySide2", "PySide6"]
+EXCLUDED_NONRUNTIME_PACKAGES = ["docutils", "sklearn", "sphinx"]
 
 
 @pytest.mark.parametrize("pkg", EXCLUDED_PACKAGES)
@@ -85,6 +113,24 @@ def test_excluded_package_excluded(spec_source: str, pkg: str) -> None:
     assert (
         "excludes" in spec_source.lower() or "exclude_binaries" in spec_source.lower()
     ), f"'{pkg}' appears in spec but there is no excludes section"
+
+
+@pytest.mark.parametrize("pkg", EXCLUDED_QT_BINDINGS)
+def test_noncanonical_qt_bindings_are_excluded(spec_source: str, pkg: str) -> None:
+    """The PyQt6 artifact must not let optional imports collect another binding."""
+    excludes_start = spec_source.index("excludes=[")
+    excludes_end = spec_source.index("],", excludes_start)
+
+    assert f'"{pkg}"' in spec_source[excludes_start:excludes_end]
+
+
+@pytest.mark.parametrize("pkg", EXCLUDED_NONRUNTIME_PACKAGES)
+def test_nonruntime_packages_are_excluded(spec_source: str, pkg: str) -> None:
+    """Documentation and ML-analysis stacks are outside Sidekick's contract."""
+    excludes_start = spec_source.index("excludes=[")
+    excludes_end = spec_source.index("],", excludes_start)
+
+    assert f'"{pkg}"' in spec_source[excludes_start:excludes_end]
 
 
 # ---------------------------------------------------------------------------

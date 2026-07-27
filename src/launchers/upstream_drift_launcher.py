@@ -410,6 +410,10 @@ class UpstreamDriftLauncher(QMainWindow):
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
         self.running_processes = self.process_manager.running_processes
 
+        # Activate approved Upstream-owned extensions before adapters import
+        # canonical Tools packages during registry bootstrap.
+        self.sidekick_sidebar_manager._install_sidekick_import_paths()
+
         # Bootstrap embeddable tools registry (fixes #5049)
         # This ensures EMBEDDABLE_TOOL_REGISTRY is populated before any
         # context menus or embedded host widgets are created
@@ -1060,6 +1064,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
+        success_hover = getattr(c, "success_hover", c.success)
         self.btn_launch.setStyleSheet(f"""
             QPushButton {{
                 background-color: {c.success};
@@ -1068,7 +1073,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {c.success_hover};
+                background-color: {success_hover};
             }}
             """)
 
