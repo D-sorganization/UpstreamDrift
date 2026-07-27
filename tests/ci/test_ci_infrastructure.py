@@ -367,12 +367,25 @@ class TestCIEnvironmentCompatibility:
         self,
     ) -> None:
         """JaxSim bumps must be deliberate and guarded by parity checks."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
         workflow = (
             REPO_ROOT / ".github" / "workflows" / "jaxsim-upgrade-guard.yml"
         ).read_text(encoding="utf-8")
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        workflow_data = yaml.safe_load(workflow)
+        checkout = next(
+            step
+            for step in workflow_data["jobs"]["jaxsim-upgrade-guard"]["steps"]
+            if str(step.get("uses", "")).startswith("actions/checkout@")
+        )
 
         assert 'jaxsim = ["jaxsim==0.9.0"]' in pyproject
+        assert checkout["with"]["submodules"] == "recursive"
+        assert checkout["with"]["persist-credentials"] is False
         assert 'pip install -e ".[dev,jaxsim]"' in workflow
         assert 'expected = "0.9.0"' in workflow
         assert "tests/motion_matching/test_cross_engine_equivalence.py" in workflow
