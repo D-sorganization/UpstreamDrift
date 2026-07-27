@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import math
 import numpy as np
 import pandas as pd
 
@@ -140,7 +141,7 @@ def _vector_metrics(
     # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     vector_error = np.sqrt(np.einsum("ij,ij->i", residual, residual))
     target_span = np.ptp(target_values, axis=0)
-    normalizer = float(np.linalg.norm(target_span))
+    normalizer = float(math.sqrt(np.vdot(target_span, target_span)))  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
     if normalizer < EPSILON:
         normalizer = float(
             # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
