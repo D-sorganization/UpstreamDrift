@@ -206,7 +206,8 @@ def polynomial_residual_diagnostic(
     fitted = np.polyval(coefficients, time)
     residual = smoothed - fitted
     max_abs = float(np.max(np.abs(residual)))
-    rmse = float(np.sqrt(np.mean(residual**2)))
+    # ⚡ Bolt: np.vdot avoids intermediate array allocation compared to np.mean(x**2)
+    rmse = float(np.sqrt(np.vdot(residual, residual) / residual.size))
     exceeds = max_abs > threshold
     if exceeds:
         LOGGER.warning(
