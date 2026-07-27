@@ -71,6 +71,7 @@ from src.launchers.sidekick_runtime import (
     configure_sidekick_runtime,
     reselect_sidekick_runtime_port,
 )
+from src.launchers.tools_repo_path import resolve_tools_source_root
 from src.launchers.launcher_theme import ThemeManager
 from src.launchers.launcher_ui_setup import UISetupManager
 
@@ -435,10 +436,18 @@ class UpstreamDriftLauncher(QMainWindow):
             if (REPOS_ROOT / "UpstreamDrift").exists()
             else REPOS_ROOT
         )
+        tools_source = resolve_tools_source_root(
+            REPOS_ROOT,
+            os.environ.get("TOOLS_REPO_PATH"),
+        )
         return self.process_manager.launch_module(
             name="background_api_server",
             module_name="src.api.server",
             cwd=cwd,
+            extra_python_paths=(
+                tools_source / "shared" / "python",
+                tools_source,
+            ),
         )
 
     def _restart_sidekick_background_api(self) -> Any | None:

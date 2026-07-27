@@ -32,4 +32,30 @@ def resolve_explicit_tools_root(env_value: str | None) -> Path | None:
     return tools_root
 
 
-__all__ = ["resolve_explicit_tools_root"]
+def resolve_tools_source_root(repo_root: Path, env_value: str | None) -> Path:
+    """Select the Tools ``src`` authority used by launcher processes.
+
+    An explicit checkout is validated before any fallback is considered.
+    Otherwise the pinned vendor wins over a mutable sibling checkout.
+    """
+    if not isinstance(repo_root, Path):
+        raise TypeError("repo_root must be a pathlib.Path")
+
+    explicit_root = resolve_explicit_tools_root(env_value)
+    if explicit_root is not None:
+        return explicit_root / "src"
+
+    vendor_source = repo_root / "vendor" / "ud-tools" / "src"
+    if vendor_source.is_dir():
+        return vendor_source
+
+    sibling_root = repo_root.parent / "Tools"
+    if sibling_root.is_dir():
+        return sibling_root / "src"
+
+    # Match the existing last-resort import contract. The missing path is
+    # harmless in PYTHONPATH and produces the normal import error downstream.
+    return vendor_source
+
+
+__all__ = ["resolve_explicit_tools_root", "resolve_tools_source_root"]

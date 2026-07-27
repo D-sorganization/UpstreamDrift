@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.477                                            |
+| **Spec Version**        | 1.0.478                                            |
 | **Last Spec Update**    | 2026-07-27                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-27** - Extended the classic PyQt6 Sidekick acceptance contract for
+  the selected Tools authority. The background API child now inherits the same
+  validated Tools checkout as the sidebar and places its package roots before
+  UpstreamDrift's partial shared packages, preventing
+  `chat.websocket_protocol` import failures (#8120). The matrix
+  also records the Tools #3950 warnings-as-errors Units regression and its
+  verified `100 °C` to `212 °F` retest. A complete API-tree fault injection
+  confirmed dynamic-port recovery, Chat reconnection, and close-time descendant
+  cleanup without disturbing an unrelated port-8000 process.
 - **2026-07-25** - Hardened classic PyQt6 Sidekick startup for #8102. The
   launcher selects an isolated loopback port when the historical default is
   occupied, exports one ephemeral launcher/API capability, verifies the child
@@ -1895,6 +1904,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
 | 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
 | 2026-07-27 | 1.0.476 | Materialized the exact recursive `vendor/ud-tools` gitlink in the JaxSim upgrade guard before editable package installation. The workflow now satisfies the fail-closed parent-source packaging contract instead of attempting to build from a checkout missing canonical `shared`, Sidekick, Chat, utility, and contract package roots; focused CI structure coverage pins recursive checkout and disabled credential persistence. |
 | 2026-07-27 | 1.0.475 | Completed the first post-repin artifact and computer-control sweep for standalone Sidekick. Clean-wheel alias smoke and the native Windows WGS calculator binary pass. Classic PyQt6 startup now activates manifest-approved Upstream extensions before adapter bootstrap, imports the canonical Tools sidebar API without lazy alias warnings, routes the Sidekick tile to the existing Chat sidebar, and tolerates fleet themes without a `success_hover` token. Computer control verified Calculator `2 + 2 = 4` and hide/reopen-through-tile behavior against Tools #3944 candidate `f075ff713`; the exact protected Tools merge, final gitlink repin, and no-substitution rerun remain required. |

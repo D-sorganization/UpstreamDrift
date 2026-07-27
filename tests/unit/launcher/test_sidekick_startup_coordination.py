@@ -30,13 +30,13 @@ from src.launchers.upstream_drift_launcher import (
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
-def test_sidebar_uses_canonical_tools_repo_path_resolver() -> None:
+def test_sidebar_uses_canonical_tools_source_resolver() -> None:
     """Deferred sidebar startup must reuse the direct bootstrap contract."""
     resolver_module = importlib.import_module("src.launchers.tools_repo_path")
 
     assert (
-        sidebar_module.resolve_explicit_tools_root
-        is resolver_module.resolve_explicit_tools_root
+        sidebar_module.resolve_tools_source_root
+        is resolver_module.resolve_tools_source_root
     )
 
 
@@ -120,6 +120,40 @@ def test_pinned_chat_never_forwards_launcher_token_to_remote_peer() -> None:
     assert result.returncode == 0, (
         "Pinned Tools forwarded a launcher capability to a non-loopback "
         f"WebSocket peer:\n{result.stderr}"
+    )
+
+
+def test_background_api_child_uses_explicit_tools_package_roots(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The API child must inherit the same authoritative Tools checkout."""
+    repo_root = tmp_path / "UpstreamDrift"
+    tools_root = tmp_path / "CanonicalTools"
+    tools_source = tools_root / "src"
+    (repo_root / "src").mkdir(parents=True)
+    (tools_source / "shared" / "python").mkdir(parents=True)
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(tools_root))
+    process = object()
+    process_manager = MagicMock()
+    process_manager.launch_module.return_value = process
+    launcher = SimpleNamespace(process_manager=process_manager)
+
+    with patch(
+        "src.launchers.upstream_drift_launcher.REPOS_ROOT",
+        repo_root,
+    ):
+        result = UpstreamDriftLauncher._launch_sidekick_background_api(launcher)
+
+    assert result is process
+    process_manager.launch_module.assert_called_once_with(
+        name="background_api_server",
+        module_name="src.api.server",
+        cwd=repo_root,
+        extra_python_paths=(
+            tools_source / "shared" / "python",
+            tools_source,
+        ),
     )
 
 

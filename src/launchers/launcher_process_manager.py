@@ -257,6 +257,19 @@ class ProcessManager:
         existing_path = env.get("PYTHONPATH", "")
         separator = ";" if os.name == "nt" else ":"
         current_paths = existing_path.split(separator) if existing_path else []
+        priority_paths: list[str] = []
+        for path in extra_python_paths:
+            path_text = str(path)
+            if path_text not in priority_paths:
+                priority_paths.append(path_text)
+
+        # Explicit provider roots are authoritative. Reposition them even if
+        # inherited PYTHONPATH already contains the same entries later.
+        if priority_paths:
+            current_paths = [
+                path for path in current_paths if path not in priority_paths
+            ]
+            existing_path = separator.join(current_paths)
 
         shared_python = str(self.repo_root / "src" / "shared" / "python")
         mujoco_python = str(
@@ -277,18 +290,13 @@ class ProcessManager:
 
         # repo_root and src are always added (required for imports).
         # Optional extras are only added when the directory exists.
-        paths_to_add = []
+        paths_to_add = list(priority_paths)
         for p in [repo_root_str, src_dir]:
-            if p not in current_paths:
+            if p not in current_paths and p not in paths_to_add:
                 paths_to_add.append(p)
         for p in [shared_python, mujoco_python, conda_sp]:
             if p not in current_paths and os.path.isdir(p):
                 paths_to_add.append(p)
-        for p_path in extra_python_paths:
-            p = str(p_path)
-            if p not in current_paths and p not in paths_to_add:
-                paths_to_add.append(p)
-
         if paths_to_add:
             new_paths = separator.join(paths_to_add)
             env["PYTHONPATH"] = (

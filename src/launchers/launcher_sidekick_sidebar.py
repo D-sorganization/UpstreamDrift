@@ -18,7 +18,7 @@ from src.launchers.sidekick_extension_overlay import (
     install_manifest_gated_sidekick_extensions,
     validate_parent_sidekick_runtime,
 )
-from src.launchers.tools_repo_path import resolve_explicit_tools_root
+from src.launchers.tools_repo_path import resolve_tools_source_root
 
 _SOURCE_EXTENSION_FINDER: ManifestGatedSidekickFinder | None = None
 _SOURCE_EXTENSION_PARENT: Path | None = None
@@ -135,27 +135,12 @@ class SidekickSidebarManager:
 
     def _install_sidekick_import_paths(self) -> None:
         """Prepend the configured, vendored, or sibling Tools source."""
-        tools_root = resolve_explicit_tools_root(os.environ.get("TOOLS_REPO_PATH"))
-        if tools_root is not None:
-            SidekickSidebarManager._prepend_tools_source_paths(tools_root / "src")
-            _activate_source_extensions(tools_root / "src")
-            return
-
-        vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
-        if vendor_root.is_dir():
-            SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
-            _activate_source_extensions(vendor_root)
-            return
-
-        sibling_tools = REPOS_ROOT.parent / "Tools"
-        if sibling_tools.is_dir():
-            SidekickSidebarManager._prepend_tools_source_paths(sibling_tools / "src")
-            _activate_source_extensions(sibling_tools / "src")
-            return
-
-        # Last-resort compatibility path for partially initialized deployments.
-        SidekickSidebarManager._prepend_tools_source_paths(vendor_root)
-        _activate_source_extensions(vendor_root)
+        source_root = resolve_tools_source_root(
+            REPOS_ROOT,
+            os.environ.get("TOOLS_REPO_PATH"),
+        )
+        SidekickSidebarManager._prepend_tools_source_paths(source_root)
+        _activate_source_extensions(source_root)
 
     @staticmethod
     def _prepend_tools_source_paths(source_root: Path) -> None:

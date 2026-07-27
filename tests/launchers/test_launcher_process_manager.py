@@ -74,6 +74,19 @@ def test_get_subprocess_env_includes_extra_python_paths(manager):
     assert env["PYTHONPATH"].count(expected) == 1
 
 
+def test_get_subprocess_env_prioritizes_selected_provider_paths(manager) -> None:
+    """Explicit provider packages must win over partial host-owned copies."""
+    provider_python = Path("/canonical/tools/src/shared/python")
+
+    with patch("os.path.isdir", return_value=True):
+        env = manager.get_subprocess_env((provider_python,))
+
+    paths = env["PYTHONPATH"].split(os.pathsep)
+    assert paths.index(str(provider_python)) < paths.index(
+        str(manager.repo_root / "src" / "shared" / "python")
+    )
+
+
 @patch("src.launchers.launcher_process_manager.datetime")
 @patch("builtins.open", new_callable=mock_open)
 def test_write_log_line(mock_open_file, mock_datetime, manager) -> None:
