@@ -2318,3 +2318,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### 2026-06-23
 
 - **Performance:** Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for N-dimensional arrays and `math.hypot` for explicitly sliced 2D arrays in `src/shared/python/pose_estimation/joint_angle_utils.py` to avoid NumPy array allocation and function dispatch overhead.
+- Rebuilt PR #7902 as a focused Quaternion magnitude optimization: the Unreal
+  geometry bridge now uses `math.hypot` without carrying forward unrelated
+  branch history.
