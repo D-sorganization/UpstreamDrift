@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.467                                            |
-| **Last Spec Update**    | 2026-07-15                                         |
+| **Spec Version**        | 1.0.468                                            |
+| **Last Spec Update**    | 2026-07-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-25** - Optimized multi-dimensional RMSE calculations in
+  motion-matching and club-calibration paths by replacing
+  `np.mean(error**2, axis=0)` style reductions with equivalent
+  `np.einsum("ij,ij->j", error, error) / error.shape[0]` calculations, avoiding
+  temporary squared arrays while preserving axis-wise RMSE outputs.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
@@ -1861,6 +1866,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-25 | 1.0.468 | Optimized multi-dimensional RMSE calculations in motion-matching diagnostics, pose-estimation validation, and Simscape club-calibration workflows by replacing `np.mean(error**2, axis=0)` style reductions with equivalent `np.einsum("ij,ij->j", error, error) / error.shape[0]` calculations that avoid temporary squared arrays while preserving axis-wise RMSE outputs. |
 | 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
