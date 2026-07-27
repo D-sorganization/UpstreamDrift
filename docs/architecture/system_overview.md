@@ -108,7 +108,7 @@ The system supports multiple deployment modes:
 
 ## 5. Related Documentation
 
-- [Engine Selection Guide](../engine_selection_guide.md)
-- [Engine Capabilities](../engine_capabilities.md)
-- [Fleet Architecture](../../../Linux_Tools/Tools/docs/architecture/FLEET_ARCHITECTURE.md)
+- [Engine Selection Guide](../engines/engine_selection_guide.md)
+- [Engine Capabilities](../engines/engine_capabilities.md)
+- [Fleet Architecture](https://github.com/D-sorganization/Tools/blob/main/docs/architecture/FLEET_ARCHITECTURE.md) (lives in the sibling `Tools` repository)
 - [Contributing Guide](../development/contributing.md)

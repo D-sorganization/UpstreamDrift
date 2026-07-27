@@ -143,7 +143,7 @@ pytest tests/integration/cross_engine/ -v
 ```
 
 For known differences between engines, see
-[Troubleshooting: Cross-Engine Deviations](troubleshooting/cross_engine_deviations.md).
+[Troubleshooting: Cross-Engine Deviations](../troubleshooting/cross_engine_deviations.md).
 
 ## Installing Multiple Engines
 
@@ -160,4 +160,4 @@ pip install -e ".[mujoco,drake,pinocchio]"
 ```
 
 For engines that require conda (OpenSim), see
-[Installation Guide](troubleshooting/installation.md).
+[Installation Guide](../troubleshooting/installation.md).

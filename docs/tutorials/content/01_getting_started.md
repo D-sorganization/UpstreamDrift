@@ -102,8 +102,8 @@ Click **Export Data** → Choose **CSV** format.
 
 ## Next Steps
 
-- [Tutorial 2: Loading C3D Motion Capture Data](02_c3d_data.md)
-- [Tutorial 3: Parameter Sweep Analysis](03_parameter_sweeps.md)
+- [Tutorial 2: Your First Simulation](02_first_simulation.md)
+- [Tutorial 3: Engine Comparison](03_engine_comparison.md)
 
 ## Troubleshooting
 

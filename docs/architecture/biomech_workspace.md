@@ -1,6 +1,6 @@
 # Biomech Workspace Setup
 
-> Companion to [`docs/adr/0014-shared-biomech-models.md`](adr/0014-shared-biomech-models.md).
+> Companion to [`docs/adr/0014-shared-biomech-models.md`](../adr/0014-shared-biomech-models.md).
 > Closes the user-facing portion of
 > [UpstreamDrift#5184](https://github.com/D-sorganization/UpstreamDrift/issues/5184).
 
@@ -115,9 +115,9 @@ python3 -m src.launchers.launcher_diagnostics
 
 ## See also
 
-- [Motion Pipeline guide](motion_pipeline/README.md) — downstream
+- [Motion Pipeline guide](../motion_pipeline/README.md) — downstream
   consumer of the resolved models.
-- [ADR-0014](adr/0014-shared-biomech-models.md) — the convention and
+- [ADR-0014](../adr/0014-shared-biomech-models.md) — the convention and
   four-tier resolution order.
-- [`CLAUDE.md` → Cross-Repo Dependencies](../CLAUDE.md) — the
+- [`CLAUDE.md` → Cross-Repo Dependencies](../../CLAUDE.md) — the
   established `Tools` precedent this builds on.
