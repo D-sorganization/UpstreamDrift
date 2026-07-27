@@ -2300,6 +2300,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
+- **Performance:** Replaced `np.sum(x**2)` with `np.vdot(x, x)` for 1D arrays in `optimization_widget.py` to avoid intermediate array allocations.
 - **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
 - Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
 - Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
