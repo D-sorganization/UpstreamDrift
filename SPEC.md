@@ -2323,3 +2323,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Rebuilt PR #7902 as a focused Quaternion magnitude optimization: the Unreal
   geometry bridge now uses `math.hypot` without carrying forward unrelated
   branch history.
+- Rebuilt PR #7966 from current main, retaining only the remaining allocation-free
+  vector RMSE calculations after the axis RMSE and torque-diagnostic optimizations
+  had already landed.

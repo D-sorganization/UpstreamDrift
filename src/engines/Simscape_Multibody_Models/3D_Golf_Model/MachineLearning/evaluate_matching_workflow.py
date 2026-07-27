@@ -145,15 +145,19 @@ def _vector_metrics(
     if denom < EFFORT_SCALE_EPS:
         denom = 1.0
 
+    vector_rmse = float(
+        np.sqrt(np.vdot(vector_error, vector_error) / vector_error.size)
+    )
+
     return {
         "samples": int(len(target_values)),
         "rmse_axis": rmse_axis.tolist(),
         "mae_axis": mae_axis.tolist(),
         "max_abs_axis": max_axis.tolist(),
-        "vector_rmse": float(np.sqrt(np.mean(vector_error**2))),
+        "vector_rmse": vector_rmse,
         "vector_mae": float(np.mean(vector_error)),
         "vector_max_abs": float(np.max(vector_error)),
-        "normalized_vector_rmse": float(np.sqrt(np.mean(vector_error**2)) / denom),
+        "normalized_vector_rmse": vector_rmse / denom,
         "normalizer": denom,
     }
 
