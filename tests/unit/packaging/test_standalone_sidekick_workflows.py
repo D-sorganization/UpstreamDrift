@@ -27,10 +27,12 @@ def _checkout_steps(workflow: dict) -> list[dict]:
 
 
 def test_package_workflow_builds_distribution_with_ui_bundle_enabled() -> None:
-    """Distribution builds must let the hatch hook create the UI bundle."""
+    """Wheel builds must use the checkout that owns the pinned Tools tree."""
     content = PACKAGE_WORKFLOW.read_text(encoding="utf-8")
 
-    assert "python3 -m build --outdir dist/" in content
+    assert "python3 -m build --sdist --outdir dist/" in content
+    assert "python3 -m build --wheel --outdir dist/" in content
+    assert "python3 -m build --outdir dist/" not in content
     assert "SKIP_UI_BUILD" not in content
 
 

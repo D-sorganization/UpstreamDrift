@@ -82,7 +82,8 @@ jobs:
         shell: bash
         run: |
           rm -rf dist
-          python3 -m build --outdir dist/
+          python3 -m build --sdist --outdir dist/
+          python3 -m build --wheel --outdir dist/
           mapfile -t wheels < <(
             find dist -maxdepth 1 -type f -name 'upstream_drift-*.whl' -print
           )
