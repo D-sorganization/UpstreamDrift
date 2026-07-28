@@ -245,9 +245,12 @@ models:
 
   - id: "putting_green_gui"
     name: "Putting Green"
-    description: "Interactive putting green simulator with turf physics"
+    description: "Legacy alias for the canonical putting_green launcher tile."
     type: "special_app"
     path: "src/tools/putting_green_gui/gui.py"
+    hidden: true
+    hidden_reason: "Legacy alias retained so saved layouts continue to resolve; use putting_green for new launcher entries."
+    hidden_owner: "@launcher"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
@@ -512,7 +515,7 @@ models:
     name: "Movement Optimizer"
     description: "Cross-engine trajectory optimization"
     type: "special_app"
-    source_root: "Movement_Optimizer"
+    source_root: "../Movement_Optimizer"
     path: "src/movement_optimizer/__main__.py"
     python_paths:
       - "src"

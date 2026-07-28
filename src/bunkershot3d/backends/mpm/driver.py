@@ -9,7 +9,7 @@ import typing
 
 try:
     import mujoco
-except ImportError:
+except (ImportError, OSError):
     mujoco = None
 
 import numpy as np

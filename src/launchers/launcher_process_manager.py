@@ -305,6 +305,25 @@ class ProcessManager:
 
         return env
 
+    def _merge_explicit_env_python_paths(
+        self,
+        env: dict[str, str],
+        extra_python_paths: tuple[Path, ...],
+    ) -> dict[str, str]:
+        """Copy an explicit launch environment and retain model import paths.
+
+        Callers may provide an environment for a child process while also
+        declaring source-local import roots in ``python_paths``.  Preserve both:
+        a supplied ``env`` must not bypass the package roots required by a
+        ``python -m`` entry point in a trusted sibling repository.
+        """
+        process_env = env.copy()
+        process_env["PYTHONPATH"] = self._merge_python_paths(
+            process_env.get("PYTHONPATH", ""),
+            tuple(str(path) for path in extra_python_paths),
+        )
+        return process_env
+
     def _validate_context_path(self, context_path: Path) -> Path:
         """Validate subprocess working directory against allowlist (issue #2715).
 
@@ -341,22 +360,22 @@ class ProcessManager:
         if repo_root_exists and repo_root_resolved is not None:
             candidate_resolved = _normalize(resolved)
 
-            # Find sibling Tools repository for security validations
+            # Trusted provider siblings may host launcher-managed utilities.
             from src.shared.python.security.secure_subprocess import (
-                _find_tools_repo_for_security,
+                _trusted_sibling_roots_for_security,
             )
 
-            tools_repo = _find_tools_repo_for_security(self.repo_root)
-            tools_repo_resolved = (
-                _normalize(tools_repo) if tools_repo is not None else None
+            sibling_roots = _trusted_sibling_roots_for_security(self.repo_root)
+            sibling_roots_resolved = tuple(
+                _normalize(sibling_root) for sibling_root in sibling_roots
             )
 
             if not (
                 _is_within(candidate_resolved, repo_root_resolved)
                 or _is_within(candidate_resolved, temp_root_resolved)
-                or (
-                    tools_repo_resolved is not None
-                    and _is_within(candidate_resolved, tools_repo_resolved)
+                or any(
+                    _is_within(candidate_resolved, sibling_root)
+                    for sibling_root in sibling_roots_resolved
                 )
             ):
                 raise ValueError(
@@ -491,7 +510,11 @@ class ProcessManager:
             The process object if successful, None otherwise.
         """
         try:
-            process_env = env or self.get_subprocess_env(extra_python_paths)
+            process_env = (
+                self._merge_explicit_env_python_paths(env, extra_python_paths)
+                if env is not None
+                else self.get_subprocess_env(extra_python_paths)
+            )
 
             # Validate script path to prevent path-traversal / injection.
             validate_script_path(script_path, self.repo_root)
@@ -595,7 +618,11 @@ class ProcessManager:
             The process object if successful, None otherwise.
         """
         try:
-            process_env = env or self.get_subprocess_env(extra_python_paths)
+            process_env = (
+                self._merge_explicit_env_python_paths(env, extra_python_paths)
+                if env is not None
+                else self.get_subprocess_env(extra_python_paths)
+            )
 
             # Validate working directory (issue #2715: reject paths outside repo)
             cwd = self._validate_context_path(cwd)

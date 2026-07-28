@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from PyQt6.QtWidgets import QPushButton, QWidget
+from PyQt6.QtWidgets import QDialog, QPushButton, QWidget
 
 
 class _StubParent(QWidget):
@@ -69,4 +69,18 @@ def test_dialog_buttons_route_through_launch_model(qapp) -> None:
             btn.click()
             break
     parent._launch_matlab_app.assert_called_once()
+    dlg.deleteLater()
+
+
+def test_dialog_stays_open_when_matlab_launch_fails(qapp) -> None:
+    """A dependency failure leaves the chooser available for recovery."""
+    parent = _StubParent()
+    parent._launch_matlab_app.return_value = False
+    dlg = matlab_suite_dialog.MatlabSuiteDialog(parent)
+    dlg.show()
+
+    dlg.launch_model(matlab_suite_dialog.MATLAB_MODELS[0])
+
+    assert dlg.isVisible()
+    assert dlg.result() == QDialog.DialogCode.Rejected
     dlg.deleteLater()

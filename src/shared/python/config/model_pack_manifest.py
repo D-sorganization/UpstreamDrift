@@ -32,6 +32,14 @@ _CAPABILITY_ALIASES = {
 _MODEL_PACK_V1_SCHEMA = "model_pack/v1"
 
 
+def _default_provider_exercise_capabilities(
+    engine: str,
+    exercise_id: str,
+) -> list[str]:
+    """Return only the factual filter tags implied by a v1 exercise entry."""
+    return ["biomechanics", engine, exercise_id]
+
+
 def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
     """Normalize a provider ``schema: model_pack/v1`` manifest to strict shape.
 
@@ -95,6 +103,12 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
                 path_norm = path.replace("\\", "/").lstrip("/")
                 if models_root_norm and not path_norm.startswith(models_root_norm):
                     path = f"{models_root_norm}/{path_norm}"
+            capabilities = exercise.get("capabilities")
+            if capabilities is None:
+                capabilities = _default_provider_exercise_capabilities(
+                    engine,
+                    exercise_id,
+                )
             models.append(
                 {
                     "id": f"{prefix}-{exercise_id}",
@@ -105,9 +119,10 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
                     "type": exercise.get("type", fmt or engine or "model"),
                     "path": path,
                     "engine_type": engine or None,
+                    "capabilities": capabilities,
                     **{
                         key: exercise[key]
-                        for key in ("launcher", "identity", "capabilities", "tags")
+                        for key in ("launcher", "identity", "tags")
                         if key in exercise
                     },
                 }

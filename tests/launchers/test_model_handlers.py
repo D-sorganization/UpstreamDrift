@@ -8,14 +8,20 @@ from __future__ import annotations  # noqa: E402
 
 from dataclasses import dataclass  # noqa: E402
 from pathlib import Path  # noqa: E402
-from unittest.mock import MagicMock  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from src.launchers.launcher_model_handlers import (  # noqa: E402
     ModelHandlerRegistry,
     PuttingGreenHandler,
     SpecialAppHandler,
+    _package_main_module_name,
 )
+from src.launchers.launcher_process_manager import ProcessManager  # noqa: E402
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # =============================================================================
 # Test Fixtures
@@ -30,6 +36,9 @@ class MockModel:
     name: str
     path: str
     type: str
+    source_root: str | None = None
+    working_dir: str | None = None
+    python_paths: tuple[str, ...] = ()
 
 
 @pytest.fixture
@@ -54,6 +63,89 @@ def process_manager() -> MagicMock:
     pm.launch_script.return_value = MagicMock()
     pm.launch_module.return_value = MagicMock()
     return pm
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("model_path", "expected_module"),
+    [
+        ("src/tools/canonical_core/__main__.py", "src.tools.canonical_core"),
+        (
+            "src/tools/golf_simulation_suite/__main__.py",
+            "src.tools.golf_simulation_suite",
+        ),
+        ("src/tools/pose_studio/__main__.py", "src.tools.pose_studio"),
+        (
+            "src/tools/pose_subscriber_demo/__main__.py",
+            "src.tools.pose_subscriber_demo",
+        ),
+        ("src/tools/sg_optimizer/__main__.py", "src.tools.sg_optimizer"),
+        (
+            "src/tools/simulation_backends_launcher/__main__.py",
+            "src.tools.simulation_backends_launcher",
+        ),
+        (
+            "src/tools/starting_pose_matcher/__main__.py",
+            "src.tools.starting_pose_matcher",
+        ),
+        (
+            "src/tools/training_controller/__main__.py",
+            "src.tools.training_controller",
+        ),
+    ],
+)
+def test_package_main_preserves_local_source_namespace(
+    model_path: str, expected_module: str
+) -> None:
+    """Local package tiles must remain under ``src`` on the launch path."""
+    assert (
+        _package_main_module_name(
+            model_path,
+            source_root=REPO_ROOT,
+            launcher_root=REPO_ROOT,
+        )
+        == expected_module
+    )
+
+
+@pytest.mark.unit
+def test_local_tool_package_mains_resolve_with_launcher_pythonpath() -> None:
+    """The launcher PYTHONPATH resolves local tool entry points, not root ``tools``.
+
+    ``ProcessManager`` deliberately puts the repository root before ``src``.
+    The repository also has a root-level ``tools`` package, so local package
+    tiles have to use their fully qualified ``src.tools`` module names.
+    """
+    model_paths = sorted(REPO_ROOT.glob("src/tools/**/__main__.py"))
+    module_names = [
+        _package_main_module_name(
+            path.relative_to(REPO_ROOT).as_posix(),
+            source_root=REPO_ROOT,
+            launcher_root=REPO_ROOT,
+        )
+        for path in model_paths
+    ]
+    assert all(module_names)
+
+    environment = ProcessManager(REPO_ROOT).get_subprocess_env()
+    probe = (
+        "import importlib.util, sys; "
+        f"modules = {module_names!r}; "
+        "missing = [name for name in modules "
+        "if importlib.util.find_spec(name) is None]; "
+        "sys.exit(f'Unresolvable launcher modules: {missing}' if missing else 0)"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", probe],
+        cwd=REPO_ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 # =============================================================================
@@ -118,6 +210,86 @@ class TestSpecialAppHandler:
 
         assert result is False
         process_manager.launch_script.assert_not_called()
+
+    def test_launches_package_main_module_for_sibling_tool(
+        self, tmp_path: Path, process_manager: MagicMock
+    ) -> None:
+        """Package entry points must use ``python -m`` so relative imports work."""
+        repo_path = tmp_path / "UpstreamDrift"
+        repo_path.mkdir()
+        optimizer_root = tmp_path / "Movement_Optimizer"
+        script_path = optimizer_root / "src" / "movement_optimizer" / "__main__.py"
+        script_path.parent.mkdir(parents=True)
+        script_path.write_text("pass\n", encoding="utf-8")
+        model = MockModel(
+            id="movement_optimizer",
+            name="Movement Optimizer",
+            path="src/movement_optimizer/__main__.py",
+            type="special_app",
+            source_root="../Movement_Optimizer",
+            python_paths=("src",),
+        )
+
+        assert SpecialAppHandler().launch(model, repo_path, process_manager) is True
+
+        process_manager.launch_module.assert_called_once_with(
+            name="Movement Optimizer",
+            module_name="movement_optimizer",
+            cwd=optimizer_root.resolve(),
+            extra_python_paths=((optimizer_root / "src").resolve(),),
+        )
+        process_manager.launch_script.assert_not_called()
+
+    def test_dockable_probe_does_not_import_package_main_entrypoint(
+        self, tmp_path: Path
+    ) -> None:
+        """A package ``__main__`` must not be executed in the launcher process."""
+        repo_path = tmp_path / "UpstreamDrift"
+        repo_path.mkdir()
+        optimizer_root = tmp_path / "Movement_Optimizer"
+        entrypoint = optimizer_root / "src" / "movement_optimizer" / "__main__.py"
+        entrypoint.parent.mkdir(parents=True)
+        marker = tmp_path / "entrypoint-imported"
+        entrypoint.write_text(
+            "from pathlib import Path\n"
+            f"Path({str(marker)!r}).touch()\n"
+            "raise SystemExit(1)\n",
+            encoding="utf-8",
+        )
+        model = MockModel(
+            id="movement_optimizer",
+            name="Movement Optimizer",
+            path="src/movement_optimizer/__main__.py",
+            type="special_app",
+            source_root="../Movement_Optimizer",
+            python_paths=("src",),
+        )
+
+        assert SpecialAppHandler().get_dockable_ui(model, repo_path) is None
+        assert not marker.exists()
+
+    def test_dockable_probe_uses_registered_embeddable_tool(
+        self, tmp_path: Path
+    ) -> None:
+        """A registered tool opens in the launcher instead of running its adapter."""
+        model = MockModel(
+            id="config_setup_wizard",
+            name="Setup Wizard",
+            path="src/tools/config_setup_wizard/_embed_adapter.py",
+            type="special_app",
+        )
+        widget = object()
+        tool = MagicMock()
+        tool.create_main_widget.return_value = widget
+
+        with patch(
+            "src.shared.python.launcher_embed.registry.get_embeddable_tool",
+            return_value=tool,
+        ):
+            result = SpecialAppHandler().get_dockable_ui(model, tmp_path)
+
+        assert result is widget
+        tool.create_main_widget.assert_called_once_with()
 
 
 # =============================================================================

@@ -38,8 +38,15 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.479                                            |
-| **Last Spec Update**    | 2026-07-27                                         |
+
+<<<<<<< HEAD
+| **Spec Version** | 1.0.479 |
+| **Last Spec Update** | 2026-07-27 |
+=======
+| **Spec Version** | 1.0.468 |
+| **Last Spec Update** | 2026-07-25 |
+
+> > > > > > > origin/codex/pyqt6-launcher-functional-qa
 
 ## 2. Purpose & Mission
 
@@ -1929,6 +1936,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-07-25 | 1.0.471 | Reconciled the pinned Tools direct-package expansion with UpstreamDrift's shadow-module ownership gate. Twelve pre-existing overlaps newly visible at the #8102 Tools revision, including `sidekick`, are explicitly classified under migration issue #5623 with an enforced 2026-12-31 sunset; new unclassified shadows still fail CI, and runtime Sidekick imports continue to prefer the pinned parent source. |
 | 2026-07-25 | 1.0.470 | Extended the #8102 classic PyQt6 Sidekick recovery contract beyond initial startup. A bounded liveness monitor now continues after the first successful readiness response, resets its restart budget after each healthy period, recreates a dead API child after a post-connect outage, and becomes inert when launcher shutdown begins. SK-START-016 records the fault-injection procedure and regression evidence. |
 | 2026-07-25 | 1.0.469 | Hardened classic PyQt6 Sidekick startup for #8102: isolated dynamic loopback API ports, an ephemeral launcher capability and public instance readiness identity, bounded child restarts, local-tab availability independent of Chat, parent-source-first direct package imports, and a pinned Tools revision. Host close delegates to the canonical sidebar aggregate shutdown so Terminal PTY, shell, bridge, and API processes exit cleanly (#3938). A PR-diff hygiene gate rejects direct edits to existing warning-headered Tools child copies and newly added child copies while allowing deletion after migration. Computer-control results and source-ownership audit are recorded in `docs/testing/sidekick-pyqt6-startup-matrix.md`. |
+| 2026-07-25 | 1.0.468 | Completed the PyQt6 launcher functional-QA repair wave. In particular, the native C3D viewer now normalizes an absent optional `POINT:UNITS` parameter to millimetres before metadata parsing, so valid captures from emitters that omit the parameter load with the documented motion-pipeline default. |
 | 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
