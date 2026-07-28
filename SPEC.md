@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened URDF model parsing so visual-less topology links
+  participate in root-link detection and joint endpoints must reference
+  declared links before the API returns model data. Renderable geometry remains
+  limited to links with visual elements, but the kinematic root now reflects the
+  declared URDF topology (#8257).
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
