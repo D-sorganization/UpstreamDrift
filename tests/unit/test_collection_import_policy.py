@@ -47,7 +47,7 @@ def test_stale_root_script_tests_are_ignored_when_module_missing(monkeypatch) ->
     monkeypatch.setattr(collection_policy, "_module_available", lambda module: False)
 
     should_ignore = collection_policy._should_ignore_optional_collection_path(
-        Path("tests/unit/test_setup_golf_suite.py")
+        Path("tests/unit/test_calc_backend_protocols.py")
     )
 
     assert should_ignore is True
@@ -74,7 +74,7 @@ def test_pytest_ignore_collect_warns_once_for_optional_stack_skip(
         collection_policy, "_symbol_available", lambda module, symbol: False
     )
     monkeypatch.setattr(collection_policy, "_OPTIONAL_COLLECTION_WARNED_PATHS", set())
-    target = Path("tests/unit/test_setup_golf_suite.py")
+    target = Path("tests/unit/test_calc_backend_protocols.py")
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
@@ -85,5 +85,7 @@ def test_pytest_ignore_collect_warns_once_for_optional_stack_skip(
     assert second is True
     assert len(caught) == 1
     assert "Skipping optional test collection" in str(caught[0].message)
-    assert "tests/unit/test_setup_golf_suite.py" in str(caught[0].message)
-    assert "setup_golf_suite" in str(caught[0].message)
+    assert "tests/unit/test_calc_backend_protocols.py" in str(caught[0].message)
+    assert "src.shared.python.calc_backend.contracts.acid_gas_dewpoint" in str(
+        caught[0].message
+    )

@@ -8,8 +8,6 @@ src/api/routes/data_explorer.py	_dataset_storage.db_path.parent.exists	1
 src/api/routes/data_explorer.py	_dataset_storage.db_path.parent.resolve	1
 src/api/routes/data_explorer.py	self._local.conn.execute	1
 src/api/routes/terrain.py	terrain.default_type.name.lower	1
-src/api/task_manager_durable.py	self._local.conn.execute	2
-src/api/task_manager_durable.py	self._local.conn.row_factory	1
 src/bunkershot3d/backends/mpm/driver.py	self.model.opt.timestep	1
 src/bunkershot3d/kinematics/coupling.py	self.params.lower_segment.length_m	2
 src/bunkershot3d/kinematics/coupling.py	self.params.upper_segment.length_m	2
