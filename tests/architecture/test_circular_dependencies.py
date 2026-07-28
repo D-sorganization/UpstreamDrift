@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ast
 import importlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -102,6 +103,52 @@ class TestApiDoesNotImportLaunchers:
                 )
         finally:
             sys.modules.update(saved)
+
+    def test_launcher_service_import_does_not_import_sibling_services(self) -> None:
+        """LauncherService import must not load unrelated optional services."""
+        saved = {
+            name: sys.modules.pop(name)
+            for name in list(sys.modules)
+            if name.startswith("src.api.services")
+        }
+        forbidden = {
+            "src.api.services.analysis_service",
+            "src.api.services.chat_service",
+            "src.api.services.simulation_service",
+        }
+        try:
+            mod = importlib.import_module("src.api.services.launcher_service")
+            assert hasattr(mod, "LauncherService")
+            loaded = forbidden.intersection(sys.modules)
+            assert not loaded, f"launcher_service import loaded {sorted(loaded)}"
+        finally:
+            sys.modules.update(saved)
+
+    def test_launcher_service_clean_subprocess_import_is_narrow(self) -> None:
+        """Clean interpreter import should not rely on pytest import side effects."""
+        repo_root = Path(__file__).resolve().parents[2]
+        code = (
+            "import importlib, sys\n"
+            "importlib.import_module('src.api.services.launcher_service')\n"
+            "forbidden = {\n"
+            "    'src.api.services.analysis_service',\n"
+            "    'src.api.services.chat_service',\n"
+            "    'src.api.services.simulation_service',\n"
+            "}\n"
+            "loaded = sorted(forbidden.intersection(sys.modules))\n"
+            "if loaded:\n"
+            "    raise SystemExit('loaded forbidden services: ' + ', '.join(loaded))\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        assert result.returncode == 0, result.stderr or result.stdout
 
 
 # ---------------------------------------------------------------------------
