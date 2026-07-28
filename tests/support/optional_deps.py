@@ -31,6 +31,7 @@ from typing import Any
 import pytest
 
 __all__ = [
+    "importorskip_optional",
     "missing_is_optional",
     "scoped_import_with_optional_mocks",
     "skip_unless_optional",
@@ -69,6 +70,38 @@ def skip_unless_optional(exc: ImportError, allowed: Iterable[str]) -> None:
             allow_module_level=True,
         )
     # Not optional → a real bug. Caller re-raises.
+
+
+def importorskip_optional(
+    modname: str,
+    *,
+    allowed_oserror_modules: Iterable[str],
+    minversion: str | None = None,
+    reason: str | None = None,
+    **kwargs: Any,
+) -> Any:
+    """Import or skip an explicit optional module, including allowlisted OSErrors.
+
+    Unlike a global ``pytest.importorskip`` monkeypatch, this helper scopes
+    Windows DLL-load tolerance to the call site and the named optional module.
+    OSError for any non-allowlisted module re-raises as a real test failure.
+    """
+    try:
+        return pytest.importorskip(
+            modname,
+            minversion=minversion,
+            reason=reason,
+            **kwargs,
+        )
+    except OSError as exc:
+        top_level = modname.split(".", 1)[0]
+        allowed = {name.split(".", 1)[0] for name in allowed_oserror_modules}
+        if top_level in allowed:
+            pytest.skip(
+                f"optional dependency unavailable due to OSError: {modname}: {exc}",
+                allow_module_level=True,
+            )
+        raise
 
 
 @contextmanager

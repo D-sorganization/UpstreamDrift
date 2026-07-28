@@ -8,6 +8,7 @@ from types import ModuleType
 import pytest
 
 from tests.support.optional_deps import (
+    importorskip_optional,
     missing_is_optional,
     scoped_import_with_optional_mocks,
     skip_unless_optional,
@@ -67,3 +68,23 @@ def test_scoped_import_with_optional_mocks_restores_modules() -> None:
 
     assert sys.modules.get(dependency_name) is before_dependency
     assert sys.modules.get(target_name) is before_target
+
+
+def test_importorskip_optional_skips_allowlisted_oserror(monkeypatch) -> None:
+    def raise_oserror(*_args, **_kwargs):
+        raise OSError("[WinError 126] DLL load failed")
+
+    monkeypatch.setattr(pytest, "importorskip", raise_oserror)
+
+    with pytest.raises(pytest.skip.Exception):
+        importorskip_optional("mujoco", allowed_oserror_modules={"mujoco"})
+
+
+def test_importorskip_optional_reraises_unallowlisted_oserror(monkeypatch) -> None:
+    def raise_oserror(*_args, **_kwargs):
+        raise OSError("[WinError 126] DLL load failed")
+
+    monkeypatch.setattr(pytest, "importorskip", raise_oserror)
+
+    with pytest.raises(OSError, match="DLL load failed"):
+        importorskip_optional("src.bad_import", allowed_oserror_modules={"mujoco"})
