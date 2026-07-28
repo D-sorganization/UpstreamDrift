@@ -726,6 +726,9 @@ jobs:
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
+      - name: Agent Governance Consistency Check
+        run: python3 scripts/check_agent_governance_consistency.py
+
       - name: Security Workflow Silent-Failure Guard
         run: python3 scripts/check_workflows_no_silent_failures.py
 

@@ -2,8 +2,10 @@
 
 ## Safety
 
-1. All AI work on `staging` branch. Never commit directly to `main`.
-2. PRs target `staging`. No auto-merge. Human approval required.
+1. All AI work uses `main`-based topic branches. Never commit directly to `main`.
+2. PRs target `main`. Auto-merge may be enabled only after required checks pass.
+   Human approval is still required for destructive, release-impacting, or
+   security-impacting changes.
 3. No destructive git history operations.
 4. No secret commits (.env, API keys, credentials).
 
