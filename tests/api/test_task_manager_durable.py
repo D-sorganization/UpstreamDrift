@@ -51,6 +51,19 @@ def _wait_until_task_missing(
     return backend.get_task(task_id) is None
 
 
+def _terminal_snapshot(record: TaskRecord) -> dict[str, object]:
+    return {
+        "status": record.status,
+        "progress": record.progress,
+        "result": record.result,
+        "error": record.error,
+        "completed_at": record.completed_at,
+        "heartbeat_at": record.heartbeat_at,
+        "worker_id": record.worker_id,
+        "retry_count": record.retry_count,
+    }
+
+
 class TestSQLiteBackend:
     """Test the SQLite storage backend."""
 
@@ -233,6 +246,25 @@ class TestSQLiteBackend:
         assert backend._connections == set()
         backend.close()
 
+    def test_release_task_rejects_terminal_records(self, sqlite_backend: SQLiteBackend):
+        """Backend retry release must not requeue terminal records (#8235)."""
+        record = TaskRecord(
+            task_id="terminal-release",
+            status=TaskStatus.COMPLETED.value,
+            result={"ok": True},
+            progress=100.0,
+            completed_at=time.time(),
+        )
+        sqlite_backend.create_task(record)
+        before = sqlite_backend.get_task(record.task_id)
+        assert before is not None
+
+        assert sqlite_backend.release_task(record.task_id) is False
+
+        after = sqlite_backend.get_task(record.task_id)
+        assert after is not None
+        assert _terminal_snapshot(after) == _terminal_snapshot(before)
+
 
 class TestDurableTaskManager:
     """Test the durable task manager orchestrator."""
@@ -388,9 +420,47 @@ class TestDurableTaskManager:
         assert task is not None
         assert task.status == TaskStatus.CANCELLED.value
 
-        # Cannot cancel completed task
-        task_manager.mark_completed(task_id, {"res": "ok"})
+        # Terminal tasks cannot be mutated after cancellation.
+        assert task_manager.mark_completed(task_id, {"res": "ok"}) is False
         assert task_manager.cancel_task(task_id) is False
+        task = task_manager.get_task(task_id)
+        assert task is not None
+        assert task.status == TaskStatus.CANCELLED.value
+
+    @pytest.mark.parametrize(
+        "terminal_state",
+        [
+            TaskStatus.CANCELLED,
+            TaskStatus.COMPLETED,
+            TaskStatus.FAILED,
+        ],
+    )
+    def test_terminal_tasks_reject_public_mutations(
+        self, task_manager: DurableTaskManager, terminal_state: TaskStatus
+    ):
+        """Regression #8235: terminal durable tasks are immutable."""
+        task_id = task_manager.create_task()
+        if terminal_state is TaskStatus.CANCELLED:
+            assert task_manager.cancel_task(task_id) is True
+        elif terminal_state is TaskStatus.COMPLETED:
+            assert task_manager.mark_completed(task_id, {"result": "done"}) is True
+        else:
+            assert task_manager.mark_failed(task_id, "original error") is True
+
+        terminal = task_manager.get_task(task_id)
+        assert terminal is not None
+        before = _terminal_snapshot(terminal)
+
+        assert task_manager.update_progress(task_id, 42.0) is False
+        assert task_manager.heartbeat(task_id) is False
+        assert task_manager.mark_completed(task_id, {"result": "rewritten"}) is False
+        assert task_manager.mark_failed(task_id, "rewritten error") is False
+        assert task_manager.release_task(task_id) is False
+        assert task_manager.cancel_task(task_id) is False
+
+        after = task_manager.get_task(task_id)
+        assert after is not None
+        assert _terminal_snapshot(after) == before
 
     def test_find_stalled_tasks(self, task_manager: DurableTaskManager):
         """Test stalled task integration."""

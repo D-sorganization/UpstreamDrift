@@ -46,6 +46,15 @@ class TaskStatus(enum.Enum):
     CANCELLED = "cancelled"
 
 
+TERMINAL_TASK_STATUSES = frozenset(
+    {
+        TaskStatus.COMPLETED.value,
+        TaskStatus.FAILED.value,
+        TaskStatus.CANCELLED.value,
+    }
+)
+
+
 @dataclass
 class TaskRecord:
     """Complete task record with all metadata for durability and replay.
@@ -97,6 +106,11 @@ class TaskRecord:
     priority: int = 0
 
 
+def _is_terminal(record: TaskRecord) -> bool:
+    """Return True when a task record is in an immutable terminal state."""
+    return record.status in TERMINAL_TASK_STATUSES
+
+
 class StorageBackend(Protocol):
     """Protocol for task storage backends."""
 
@@ -140,7 +154,7 @@ class StorageBackend(Protocol):
         """Acquire a pending task for processing (claim ownership)."""
         ...
 
-    def release_task(self, task_id: str) -> None:
+    def release_task(self, task_id: str) -> bool:
         """Release a task back to pending (for retry)."""
         ...
 
@@ -535,10 +549,10 @@ class SQLiteBackend:
                 )
             return None
 
-    def release_task(self, task_id: str) -> None:
+    def release_task(self, task_id: str) -> bool:
         """Release a task back to pending (for retry)."""
         with self._lock, self._transaction() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE tasks SET
                     status = 'pending',
@@ -546,10 +560,11 @@ class SQLiteBackend:
                     retry_count = retry_count + 1,
                     heartbeat_at = ?,
                     updated_at = ?
-                WHERE task_id = ?
+                WHERE task_id = ? AND status = 'running'
             """,
                 (time.time(), time.time(), task_id),
             )
+            return cursor.rowcount > 0
 
     def cleanup(self) -> int:
         """Clean up expired tasks, return count deleted."""
@@ -743,6 +758,8 @@ class DurableTaskManager:
         record = self.backend.get_task(task_id)
         if not record:
             return False
+        if _is_terminal(record):
+            return False
 
         record.progress = min(max(progress, 0.0), 100.0)
         record.heartbeat_at = time.time()
@@ -761,6 +778,8 @@ class DurableTaskManager:
         record = self.backend.get_task(task_id)
         if not record:
             return False
+        if _is_terminal(record):
+            return False
 
         record.heartbeat_at = time.time()
         self.backend.update_task(record)
@@ -778,6 +797,8 @@ class DurableTaskManager:
         """
         record = self.backend.get_task(task_id)
         if not record:
+            return False
+        if _is_terminal(record):
             return False
 
         record.status = TaskStatus.COMPLETED.value
@@ -801,6 +822,8 @@ class DurableTaskManager:
         """
         record = self.backend.get_task(task_id)
         if not record:
+            return False
+        if _is_terminal(record):
             return False
 
         record.status = TaskStatus.FAILED.value
@@ -849,6 +872,8 @@ class DurableTaskManager:
         record = self.backend.get_task(task_id)
         if not record:
             return False
+        if _is_terminal(record):
+            return False
 
         if record.retry_count >= record.max_retries:
             logger.warning(
@@ -856,7 +881,8 @@ class DurableTaskManager:
             )
             return False
 
-        self.backend.release_task(task_id)
+        if not self.backend.release_task(task_id):
+            return False
         logger.info(
             "Released task %s for retry (attempt %d/%d)",
             task_id,
