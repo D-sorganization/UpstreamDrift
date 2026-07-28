@@ -6,7 +6,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import PeakInfo
-from src.shared.python.core.contracts import ensure
+from src.shared.python.core.contracts import ensure, require
 
 
 class SwingMetricsMixin:
@@ -168,13 +168,21 @@ class SwingMetricsMixin:
         if x_factor is None:
             return None
 
+        dt = float(self.dt)
+        require(np.isfinite(dt) and dt > 0.0, "dt must be finite and positive", dt)
+
         # Calculate derivative (finite difference)
-        x_factor_velocity = np.gradient(x_factor, self.dt)
+        x_factor_velocity = np.asarray(np.gradient(x_factor, dt), dtype=float)
         peak_stretch_rate = float(np.max(np.abs(x_factor_velocity)))
 
         ensure(
-            peak_stretch_rate >= 0,
-            "peak stretch rate must be non-negative",
+            np.all(np.isfinite(x_factor_velocity)),
+            "x-factor stretch rate must be finite",
+            x_factor_velocity,
+        )
+        ensure(
+            np.isfinite(peak_stretch_rate) and peak_stretch_rate >= 0,
+            "peak stretch rate must be finite and non-negative",
             peak_stretch_rate,
         )
 

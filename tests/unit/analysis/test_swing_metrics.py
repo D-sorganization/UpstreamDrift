@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
+from src.shared.python.core.contracts import ContractViolationError
 from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
+
+pytestmark = pytest.mark.unit
 
 
 def _make_instance(n_samples: int = 100, n_joints: int = 3) -> SwingMetricsMixin:
@@ -128,3 +132,11 @@ class TestComputeXFactorStretch:
         obj = _make_instance(n_joints=2)
         result = obj.compute_x_factor_stretch(0, 5)
         assert result is None
+
+    @pytest.mark.parametrize("dt", [0.0, -0.1, float("nan"), float("inf")])
+    def test_invalid_dt_violates_stretch_precondition(self, dt: float) -> None:
+        obj = _make_instance(n_joints=3)
+        obj.dt = dt
+
+        with pytest.raises(ContractViolationError, match="dt"):
+            obj.compute_x_factor_stretch(0, 1)
