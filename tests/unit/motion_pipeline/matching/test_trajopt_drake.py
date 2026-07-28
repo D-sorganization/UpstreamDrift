@@ -16,18 +16,10 @@ def test_drake_trajopt_solver_constructs() -> None:
     assert DrakeTrajoptMatchingSolver() is not None
 
 
-def test_drake_trajopt_match_returns_placeholder_failure() -> None:
-    s = DrakeTrajoptMatchingSolver()
-    ref = make_pendulum_reference_trajectory(num_frames=5)
-    rig = make_simple_rig(num_joints=1)
-    result = s.match(ref, rig)
-    assert isinstance(result, MotionMatchingResult)
-    assert result.success is False
-    assert result.metadata.get("backend") == "drake_trajopt"
-    assert result.metadata.get("status") == "not_implemented"
-    assert result.metadata.get("production_ready") is False
-
-
+@pytest.mark.xfail(
+    reason="Drake trajectory optimization matching is not implemented yet; see #8131",
+    strict=True,
+)
 def test_drake_trajopt_with_pydrake() -> None:
     pytest.importorskip("pydrake")
     s = DrakeTrajoptMatchingSolver()
@@ -35,3 +27,7 @@ def test_drake_trajopt_with_pydrake() -> None:
     rig = make_simple_rig(num_joints=1)
     result = s.match(ref, rig)
     assert isinstance(result, MotionMatchingResult)
+    assert result.success is True
+    assert result.tracked_trajectory is not None
+    assert result.fit_metrics
+    assert result.metadata.get("production_ready") is True

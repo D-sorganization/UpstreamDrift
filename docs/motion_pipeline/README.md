@@ -31,17 +31,22 @@ If selected without a real dynamics model, the API returns a 400-class
 configuration error instead of reporting placeholder zero torques as a
 successful solve.
 
+The production motion-matching factory currently exposes only implemented
+solver surfaces. OpenSim CMC, OpenSim RRA, and Drake trajectory optimization
+remain experimental backend-development classes until they produce real solves;
+they are not available through the default factory path.
+
 ---
 
 ## When to Choose Each Engine
 
-| Use Case                                                 | Recommended Engine | Why                                           |
-| -------------------------------------------------------- | ------------------ | --------------------------------------------- |
-| **Contact-rich dynamics** (ground reaction, ball impact) | MuJoCo             | Best contact handling, day-to-day development |
-| **Trajectory optimization** (finding optimal swing)      | Drake              | Built-in trajopt solvers, system analysis     |
-| **Fast IK solutions** (real-time retargeting)            | Pinocchio          | Optimized rigid-body algorithms               |
-| **Biomechanics validation**                              | OpenSim            | Gold-standard musculoskeletal models          |
-| **Muscle dynamics**                                      | MyoSuite           | Detailed muscle activation modeling           |
+| Use Case                                                 | Recommended Engine | Why                                                                      |
+| -------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| **Contact-rich dynamics** (ground reaction, ball impact) | MuJoCo             | Best contact handling, day-to-day development                            |
+| **Trajectory optimization** (finding optimal swing)      | Drake              | Engine capability; motion-matching trajopt is not production-exposed yet |
+| **Fast IK solutions** (real-time retargeting)            | Pinocchio          | Optimized rigid-body algorithms                                          |
+| **Biomechanics validation**                              | OpenSim            | Gold-standard musculoskeletal models                                     |
+| **Muscle dynamics**                                      | MyoSuite           | Detailed muscle activation modeling                                      |
 
 ---
 
