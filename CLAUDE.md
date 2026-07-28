@@ -183,7 +183,7 @@ If you genuinely need to break one of these rules, add `# noqa: <CODE> - <reason
 
 ## Cross-Repo Dependencies
 
-- **Tools integration surface:** shared Python utilities are vendored in `vendor/ud-tools/`, and optional editable sibling wiring lives behind `scripts/setup_tools_workspace.sh` plus the pytest `--tools-mode` fixtures in `tests/conftest.py`.
+- **Tools integration surface:** shared Python utilities are vendored in `vendor/ud-tools/`, and optional editable sibling wiring lives behind `scripts/setup_tools_workspace.sh` plus the pytest `--tools-mode` fixtures in `tests/conftest.py`. Use `--tools-mode vendored` for the pinned submodule, `--tools-mode editable` for `TOOLS_REPO_PATH`/`TOOLS_REPO_ROOT`, `_tools_dep`, or `../Tools`, and `--tools-mode local` only when intentionally exercising UpstreamDrift child copies first.
 - Breaking changes to Tools public API require a coordinated PR here.
 - Gasification_Model also depends on Tools — avoid transitive breakage.
 
