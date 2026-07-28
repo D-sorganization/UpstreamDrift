@@ -9,6 +9,7 @@ import yaml  # noqa: E402
 from src.launchers.launcher_diagnostics import (  # noqa: E402
     DiagnosticResult,
     LauncherDiagnostics,
+    build_report,
     reset_layout_config,
     run_cli_diagnostics,
 )
@@ -129,6 +130,59 @@ def test_check_models_yaml_missing_models_key(mock_exists) -> None:
     assert "missing 'models'" in res.message
 
 
+@pytest.mark.parametrize(
+    ("models", "message_fragment", "details"),
+    [
+        ("bad-models", "models must be a list", {"models_type": "str"}),
+        (
+            ["bad-entry"],
+            "models[0] must be a mapping",
+            {"malformed_model": {"index": 0, "actual_type": "str"}},
+        ),
+        (
+            [{}],
+            "models[0].id must be a string",
+            {
+                "malformed_model": {
+                    "index": 0,
+                    "field": "id",
+                    "actual_type": "NoneType",
+                }
+            },
+        ),
+        (
+            [{"id": 123}],
+            "models[0].id must be a string",
+            {
+                "malformed_model": {
+                    "index": 0,
+                    "field": "id",
+                    "actual_type": "int",
+                }
+            },
+        ),
+    ],
+)
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_rejects_malformed_model_entries(
+    mock_exists,
+    models,
+    message_fragment,
+    details,
+) -> None:
+    diag = LauncherDiagnostics()
+    data = {"models": models}
+
+    with patch("builtins.open", mock_open(read_data=yaml.dump(data))):
+        res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "fail"
+    assert message_fragment in res.message
+    for key, expected_value in details.items():
+        assert res.details[key] == expected_value
+
+
 @patch("pathlib.Path.exists", return_value=True)
 def test_check_models_yaml_incomplete(mock_exists) -> None:
     diag = LauncherDiagnostics()
@@ -141,6 +195,28 @@ def test_check_models_yaml_incomplete(mock_exists) -> None:
     assert res.name == "models_yaml"
     assert res.status == "fail"
     assert "Missing" in res.message
+
+
+def test_build_report_counts_info_statuses() -> None:
+    report = build_report(
+        [
+            DiagnosticResult("python_environment", "pass", "ok"),
+            DiagnosticResult("tools_sidebar", "info", "optional unavailable"),
+        ],
+        expected_tiles=0,
+    )
+
+    summary = report["summary"]
+    assert summary["total_checks"] == 2
+    assert summary["passed"] == 1
+    assert summary["failed"] == 0
+    assert summary["warnings"] == 0
+    assert summary["infos"] == 1
+    assert (
+        summary["passed"] + summary["failed"] + summary["warnings"] + summary["infos"]
+        == summary["total_checks"]
+    )
+    assert any("informational" in rec.lower() for rec in report["recommendations"])
 
 
 @patch("src.shared.python.config.model_registry.ModelRegistry")

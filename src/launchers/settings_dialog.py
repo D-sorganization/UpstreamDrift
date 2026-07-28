@@ -1266,7 +1266,8 @@ class SettingsWidget(QWidget):
         passed = summary.get("passed", 0)
         failed = summary.get("failed", 0)
         warnings = summary.get("warnings", 0)
-        total = summary.get("total_checks", passed + failed + warnings)
+        infos = summary.get("infos", 0)
+        total = summary.get("total_checks", passed + failed + warnings + infos)
 
         status_color = "#2da44e" if status == "HEALTHY" else "#d29922"
         return f"""
@@ -1275,7 +1276,8 @@ class SettingsWidget(QWidget):
             <p><b>{total} checks:</b>
                 <span style="color:#2da44e;">{passed} passed</span>,
                 <span style="color:#f85149;">{failed} failed</span>,
-                <span style="color:#d29922;">{warnings} warnings</span>
+                <span style="color:#d29922;">{warnings} warnings</span>,
+                <span style="color:#58a6ff;">{infos} info</span>
             </p>
         </div>
         """

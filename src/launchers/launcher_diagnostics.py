@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -87,6 +88,34 @@ def _read_manifest_schema(manifest_path: Path | None) -> str | None:
     return None
 
 
+def _load_local_model_ids(models_yaml_path: Path | None = None) -> list[str]:
+    """Return model IDs declared directly in ``src/config/models.yaml``."""
+    path = models_yaml_path or REPOS_ROOT / "src" / "config" / "models.yaml"
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError:
+        return []
+
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if not isinstance(data, Mapping):
+        return []
+
+    models = data.get("models")
+    if not isinstance(models, list):
+        return []
+
+    ids: list[str] = []
+    for model in models:
+        if isinstance(model, Mapping):
+            model_id = model.get("id")
+            if isinstance(model_id, str) and model_id:
+                ids.append(model_id)
+    return ids
+
+
 #: Ordered probe categories shared by the desktop diagnostics dialog and the
 #: web API (``GET /api/v1/diagnostics/full``). Parity contract (issue #7458):
 #: both UIs derive their category set from this single enumeration. Each entry
@@ -111,7 +140,7 @@ class DiagnosticResult:
     """Result of a diagnostic check."""
 
     name: str
-    status: str  # "pass", "fail", "warning"
+    status: str  # "pass", "fail", "warning", "info"
     message: str
     details: dict[str, Any] = field(default_factory=dict)
     duration_ms: float = 0.0
@@ -130,15 +159,9 @@ class DiagnosticResult:
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
-    # Expected tile model IDs - dynamically loaded from models.yaml (issue #5476)
-    EXPECTED_TILE_IDS: list[str] = []
-    try:
-        from src.shared.python.config.model_registry import ModelRegistry
-
-        _registry = ModelRegistry()
-        EXPECTED_TILE_IDS = [m.id for m in _registry.get_all_models()]
-    except (ImportError, ValueError, OSError):
-        pass
+    # Expected tile model IDs - dynamically loaded from local models.yaml (issue #5476).
+    # Do not use ModelRegistry here: it expands external provider model packs.
+    EXPECTED_TILE_IDS: list[str] = _load_local_model_ids()
 
     # Expected tile names
     EXPECTED_TILE_NAMES = {
@@ -299,8 +322,51 @@ class LauncherDiagnostics:
     ) -> DiagnosticResult:
         if models is None:
             raise ValueError("models must be provided")
+        if not isinstance(models, list):
+            details["models_type"] = type(models).__name__
+            return DiagnosticResult(
+                name="models_yaml",
+                status="fail",
+                message=f"models must be a list, got {type(models).__name__}",
+                details=details,
+                duration_ms=0,
+            )
+
         details["model_count"] = len(models)
-        details["model_ids"] = [m.get("id", "unknown") for m in models]
+        model_ids: list[str] = []
+        for index, model in enumerate(models):
+            if not isinstance(model, Mapping):
+                details["malformed_model"] = {
+                    "index": index,
+                    "actual_type": type(model).__name__,
+                }
+                return DiagnosticResult(
+                    name="models_yaml",
+                    status="fail",
+                    message=(
+                        f"models[{index}] must be a mapping, got {type(model).__name__}"
+                    ),
+                    details=details,
+                    duration_ms=0,
+                )
+
+            model_id = model.get("id")
+            if not isinstance(model_id, str) or not model_id:
+                details["malformed_model"] = {
+                    "index": index,
+                    "field": "id",
+                    "actual_type": type(model_id).__name__,
+                }
+                return DiagnosticResult(
+                    name="models_yaml",
+                    status="fail",
+                    message=f"models[{index}].id must be a string",
+                    details=details,
+                    duration_ms=0,
+                )
+            model_ids.append(model_id)
+
+        details["model_ids"] = model_ids
 
         found_ids = set(details["model_ids"])
         expected_ids = set(self.EXPECTED_TILE_IDS)
@@ -534,10 +600,13 @@ class LauncherDiagnostics:
         }
 
         if not LAYOUT_CONFIG_FILE.exists():
+            expected_tiles = len(self.EXPECTED_TILE_IDS)
             result = DiagnosticResult(
                 name="layout_config",
                 status="pass",
-                message="No saved layout (will use defaults with 17 tiles)",
+                message=(
+                    f"No saved layout (will use defaults with {expected_tiles} tiles)"
+                ),
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
@@ -1108,6 +1177,7 @@ def build_report(
     passed = sum(1 for r in results if r.status == "pass")
     failed = sum(1 for r in results if r.status == "fail")
     warnings = sum(1 for r in results if r.status == "warning")
+    infos = sum(1 for r in results if r.status == "info")
 
     return {
         "summary": {
@@ -1115,6 +1185,7 @@ def build_report(
             "passed": passed,
             "failed": failed,
             "warnings": warnings,
+            "infos": infos,
             "status": "healthy" if failed == 0 else "degraded",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "expected_tiles": expected_tiles,
@@ -1135,7 +1206,8 @@ def generate_recommendations(  # noqa: C901
         if result.status == "fail":
             if result.name == "models_yaml":
                 recommendations.append(
-                    "CRITICAL: Ensure src/config/models.yaml exists and contains all 17 model definitions"
+                    "CRITICAL: Ensure src/config/models.yaml exists "
+                    "and contains the canonical local model definitions"
                 )
             elif result.name == "model_registry":
                 recommendations.append(
@@ -1157,7 +1229,9 @@ def generate_recommendations(  # noqa: C901
                 details = result.details
                 if details.get("missing_from_saved"):
                     recommendations.append(
-                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
+                        "LIKELY CAUSE: Saved layout is missing tiles. "
+                        f"Delete {LAYOUT_CONFIG_FILE} to reset to defaults "
+                        "with all expected tiles"
                     )
             elif result.name == "asset_files":
                 recommendations.append("Some tile icons may not display correctly")
@@ -1183,6 +1257,10 @@ def generate_recommendations(  # noqa: C901
                     recommendations.append(
                         "A newer version of ud-tools is available. Run 'Sync Shared Tools' in Settings to update"
                     )
+        elif result.status == "info":
+            recommendations.append(
+                f"Informational diagnostic: {result.name} - {result.message}"
+            )
 
     if not recommendations:
         recommendations.append("All systems operational - no issues detected")
@@ -1201,7 +1279,10 @@ def reset_layout_config() -> bool:
         if backup_path is not None:
             logger.info("Backed up existing config to %s", backup_path)
 
-        logger.info("Layout config reset - launcher will use defaults (17 tiles)")
+        logger.info(
+            "Layout config reset - launcher will use defaults (%s tiles)",
+            len(LauncherDiagnostics.EXPECTED_TILE_IDS),
+        )
         return True
     except (RuntimeError, ValueError, OSError):
         logger.exception("Failed to reset layout config")
