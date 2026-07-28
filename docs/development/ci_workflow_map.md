@@ -66,7 +66,6 @@ PR-quality signal.
 | `nightly-cross-engine.yml`    | Scheduled cross-engine physics validation.                                           |
 | `stale-cleanup.yml`           | Stale issue and PR maintenance.                                                      |
 | `vendor-freshness.yml`        | Vendored submodule freshness checks and optional bumping.                            |
-| `Bot-CI-Trigger.yml`          | Scheduled/manual CI retrigger support for bot-authored PRs.                          |
 | `Jules-Comment-Processor.yml` | Scheduled or dispatched review-comment processing.                                   |
 | `Jules-PR-Cleanup.yml`        | Scheduled or dispatched PR cleanup.                                                  |
 | `Jules-PR-Compiler.yml`       | Scheduled or dispatched PR consolidation.                                            |
@@ -81,6 +80,7 @@ ordinary PR review.
 | Workflow file                    | Purpose                                                          |
 | -------------------------------- | ---------------------------------------------------------------- |
 | `auto-update-prs.yml`            | Rebase/update open PRs after `main` changes.                     |
+| `Bot-CI-Trigger.yml`             | Bounded single-PR CI retrigger support for bot-authored PRs.     |
 | `pr-auto-labeler.yml`            | Applies scope and size labels to PRs.                            |
 | `PR-Comment-Responder.yml`       | Collects PR comments for downstream processing.                  |
 | `Comment-to-Issue-Converter.yml` | Converts actionable review comments into issues.                 |
