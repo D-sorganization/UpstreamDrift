@@ -28,7 +28,13 @@ from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger as get_module_logger
 
-from ..dependencies import get_logger, get_task_manager, get_video_pipeline
+from ..dependencies import (
+    VideoPipelineFactory,
+    get_logger,
+    get_task_manager,
+    get_video_pipeline,
+    get_video_pipeline_factory,
+)
 from ..models.responses import VideoAnalysisResponse
 
 if TYPE_CHECKING:
@@ -38,44 +44,6 @@ router = APIRouter()
 logger = get_module_logger(__name__)
 VIDEO_UPLOAD_MAX_BYTES = 100 * 1024 * 1024
 VIDEO_SIGNATURE_READ_BYTES = 32
-
-
-def _load_video_pipeline_classes() -> tuple[type, type]:
-    """Lazily import the video pose pipeline classes.
-
-    The pipeline transitively requires ``cv2`` (and ``mediapipe``). In the slim
-    runtime image these are intentionally absent to keep the image small
-    (see issue #2809). Importing them eagerly at module load time caused the
-    entire route module to be skipped during route discovery, which produced
-    404s on ``/api/v1/video/*`` instead of a meaningful error.
-
-    By deferring the import to request time we can keep the route registered
-    and return a 503 with a clear message when the optional dependencies are
-    not installed.
-
-    Returns:
-        ``(VideoPosePipeline, VideoProcessingConfig)`` classes.
-
-    Raises:
-        HTTPException: 503 when optional video dependencies are missing.
-    """
-    try:
-        from src.shared.python.gui_pkg.video_pose_pipeline import (
-            VideoPosePipeline,
-            VideoProcessingConfig,
-        )
-    except ImportError as exc:  # pragma: no cover - exercised only in slim image
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "Video analysis is unavailable in this runtime image: optional "
-                "dependency missing ("
-                f"{exc.name or exc}"
-                "). Install the 'video' extras (opencv-python, mediapipe) or "
-                "use the video-enabled runtime image."
-            ),
-        ) from exc
-    return VideoPosePipeline, VideoProcessingConfig
 
 
 def _looks_like_supported_video_bytes(header: bytes) -> bool:
@@ -168,14 +136,7 @@ async def analyze_video(
             max_bytes=VIDEO_UPLOAD_MAX_BYTES,
         )
 
-        video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
-        config = video_config_cls(
-            estimator_type=estimator_type,
-            min_confidence=min_confidence,
-            enable_temporal_smoothing=enable_smoothing,
-        )
-        pipeline = video_pipeline_cls(config)
-        result = pipeline.process_video(temp_path)
+        result = video_pipeline.process_video(temp_path)
 
         response = VideoAnalysisResponse(
             filename=file.filename or "unknown",
@@ -220,7 +181,7 @@ async def analyze_video(
 # fmt: off
 @router.post("/analyze/video/async")
 @precondition(  # fmt: skip
-    lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, task_manager=None: (
+    lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, pipeline_factory=None, task_manager=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -234,6 +195,7 @@ async def analyze_video_async(
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
     video_pipeline: VideoPosePipeline = Depends(get_video_pipeline),
+    pipeline_factory: VideoPipelineFactory = Depends(get_video_pipeline_factory),
     task_manager: Any = Depends(get_task_manager),
 ) -> dict[str, str]:
     """Start asynchronous video analysis.
@@ -244,6 +206,7 @@ async def analyze_video_async(
         estimator_type: Pose estimation backend.
         min_confidence: Minimum confidence threshold.
         video_pipeline: Injected video pipeline (validates initialization).
+        pipeline_factory: Injected factory for request-scoped background pipelines.
         task_manager: Injected task manager for tracking.
 
     Returns:
@@ -314,6 +277,7 @@ async def analyze_video_async(
         estimator_type,
         min_confidence,
         input_hash,
+        pipeline_factory,
         task_manager,
     )
 
@@ -327,6 +291,7 @@ async def _process_video_background(
     estimator_type: str,
     min_confidence: float,
     input_hash: str,
+    pipeline_factory: VideoPipelineFactory,
     task_manager: Any,
 ) -> None:
     """Background task for video processing.
@@ -341,6 +306,7 @@ async def _process_video_background(
         estimator_type: Pose estimation backend.
         min_confidence: Minimum confidence threshold.
         input_hash: Hash of input video for reproducibility.
+        pipeline_factory: Factory for request-scoped video pipelines.
         task_manager: Task manager for status updates.
     """
     try:
@@ -357,11 +323,7 @@ async def _process_video_background(
             },
         )
 
-        video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
-        config = video_config_cls(
-            estimator_type=estimator_type, min_confidence=min_confidence
-        )
-        pipeline = video_pipeline_cls(config)
+        pipeline = pipeline_factory(estimator_type, min_confidence, True)
 
         result = await asyncio.to_thread(pipeline.process_video, video_path)
 

@@ -10,7 +10,7 @@ The contract these tests lock in:
 1. ``src.api.routes.video`` imports successfully even when ``cv2`` is absent
    at the point of route discovery (no top-level dependency on the pipeline).
 2. A router is registered on the module so route discovery picks it up.
-3. ``_load_video_pipeline_classes`` converts ImportError into a 503
+3. ``dependencies._load_video_pipeline_classes`` converts ImportError into a 503
    ``HTTPException`` with a clear, actionable message.
 """
 
@@ -51,7 +51,7 @@ def test_video_route_module_imports_without_cv2() -> None:
 
 def test_load_video_pipeline_classes_raises_503_on_missing_dep() -> None:
     """Missing cv2/mediapipe must surface as 503, not a bare ImportError."""
-    from src.api.routes import video as video_module
+    from src.api import dependencies
 
     # Drop the cached pipeline module so the guarded import re-runs with the
     # shimmed ``cv2`` and raises ImportError inside the helper.
@@ -60,7 +60,7 @@ def test_load_video_pipeline_classes_raises_503_on_missing_dep() -> None:
         mock.patch.dict(sys.modules, {"cv2": None}),
         pytest.raises(HTTPException) as excinfo,
     ):
-        video_module._load_video_pipeline_classes()
+        dependencies._load_video_pipeline_classes()
 
     assert excinfo.value.status_code == 503
     assert "Video analysis is unavailable" in excinfo.value.detail
