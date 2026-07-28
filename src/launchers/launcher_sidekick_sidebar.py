@@ -8,10 +8,44 @@ import contextlib
 import importlib
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
+from src.launchers.sidekick_extension_overlay import (
+    ManifestGatedSidekickFinder,
+    install_manifest_gated_sidekick_extensions,
+    validate_parent_sidekick_runtime,
+)
+from src.launchers.tools_repo_path import resolve_tools_source_root
+
+_SOURCE_EXTENSION_FINDER: ManifestGatedSidekickFinder | None = None
+_SOURCE_EXTENSION_PARENT: Path | None = None
+
+
+def _activate_source_extensions(tools_source_root: Path) -> None:
+    """Install the exact-module overlay for an UpstreamDrift source checkout."""
+    global _SOURCE_EXTENSION_FINDER, _SOURCE_EXTENSION_PARENT
+    manifest = REPOS_ROOT / "scripts/config/shared_python_ownership_exceptions.yaml"
+    local_python = REPOS_ROOT / "src/shared/python"
+    if not manifest.is_file() or not local_python.is_dir():
+        return
+
+    parent_python = (tools_source_root / "shared/python").resolve()
+    if _SOURCE_EXTENSION_FINDER is not None:
+        if parent_python != _SOURCE_EXTENSION_PARENT:
+            raise RuntimeError(
+                "Sidekick parent authority cannot change after extension loading"
+            )
+        return
+    validate_parent_sidekick_runtime(parent_python)
+    _SOURCE_EXTENSION_FINDER = install_manifest_gated_sidekick_extensions(
+        local_python_root=local_python,
+        parent_python_root=parent_python,
+        manifest_path=manifest,
+    )
+    _SOURCE_EXTENSION_PARENT = parent_python
 
 
 class SidekickSidebarManager:
@@ -71,6 +105,12 @@ class SidekickSidebarManager:
 
     def _get_sidekick_module(self) -> Any | None:
         """Import the Sidekick sidebar module, trying multiple fallback paths."""
+        SidekickSidebarManager._install_sidekick_import_paths(self)
+        try:
+            return importlib.import_module("sidekick.ui.tools_sidebar.api")
+        except ImportError:
+            pass
+
         try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
@@ -83,7 +123,6 @@ class SidekickSidebarManager:
         if module is not None:
             return module
 
-        SidekickSidebarManager._install_sidekick_import_paths(self)
         for module_name in (
             "shared.python.sidekick.ui.tools_sidebar",
             "sidekick.ui.tools_sidebar",
@@ -95,25 +134,32 @@ class SidekickSidebarManager:
         return None
 
     def _install_sidekick_import_paths(self) -> None:
-        """Prepend sibling or vendored Tools paths for Sidekick imports."""
-        sibling_tools = REPOS_ROOT.parent / "Tools"
-        if sibling_tools.is_dir():
-            SidekickSidebarManager._prepend_sys_path(sibling_tools / "src")
-            SidekickSidebarManager._prepend_sys_path(
-                sibling_tools / "src" / "shared" / "python"
-            )
-            return
+        """Prepend the configured, vendored, or sibling Tools source."""
+        source_root = resolve_tools_source_root(
+            REPOS_ROOT,
+            os.environ.get("TOOLS_REPO_PATH"),
+        )
+        SidekickSidebarManager._prepend_tools_source_paths(source_root)
+        _activate_source_extensions(source_root)
 
-        vendor_root = REPOS_ROOT / "vendor" / "ud-tools" / "src"
-        SidekickSidebarManager._prepend_sys_path(vendor_root)
-        SidekickSidebarManager._prepend_sys_path(vendor_root / "shared" / "python")
+    @staticmethod
+    def _prepend_tools_source_paths(source_root: Path) -> None:
+        """Install one selected Tools source without changing its authority."""
+        SidekickSidebarManager._prepend_sys_path(source_root)
+        SidekickSidebarManager._prepend_sys_path(source_root / "shared" / "python")
 
     @staticmethod
     def _prepend_sys_path(path: Any) -> None:
-        """Prepend a path string to sys.path if it is not already present."""
+        """Place a source path first even when bootstrap already added it.
+
+        The direct ``shared/python`` packages must win over legacy alias shims
+        under ``src``. Merely skipping an existing entry preserves the wrong
+        order when another bootstrapper inserted ``src`` first.
+        """
         path_text = str(path)
-        if path_text not in sys.path:
-            sys.path.insert(0, path_text)
+        while path_text in sys.path:
+            sys.path.remove(path_text)
+        sys.path.insert(0, path_text)
 
     def _create_sidekick_sidebar_widget(self, module: Any) -> Any | None:
         """Invoke the factory to create the sidekick sidebar widget."""
@@ -174,6 +220,10 @@ class SidekickSidebarManager:
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane."""
+        existing_sidebar = self.sidekick_sidebar
+        if existing_sidebar is not None:
+            existing_sidebar.setVisible(True)
+            return
         logger.info("Initializing _install_sidekick_sidebar")
         module = SidekickSidebarManager._get_sidekick_module(self)
         widget = SidekickSidebarManager._create_sidekick_sidebar_widget(self, module)

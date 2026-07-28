@@ -464,3 +464,170 @@ class TestSwingRecorder:
         assert "club_head_position_y" in export_dict
         assert "club_head_position_z" in export_dict
         assert len(export_dict["club_head_position_x"]) == 2
+
+
+class TestBiomechanicsPhysicsRegressions:
+    """Numeric regressions for #8001, #7991, #7974 and #7975.
+
+    Each of these defects produced finite, plausible-looking values, so the
+    assertions here are against independently derived ground truth rather than
+    shape/finiteness checks.
+    """
+
+    @staticmethod
+    def _settle(model, data, steps: int = 4000) -> None:
+        for _ in range(steps):
+            mujoco.mj_step(model, data)
+        mujoco.mj_forward(model, data)
+
+    def test_energies_are_not_swapped_and_ignore_energy_flag(self) -> None:
+        """#8001: data.energy is [potential, kinetic] and must be populated."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81"/>
+          <worldbody>
+            <body name="arm" pos="0 0 2">
+              <joint name="h" type="hinge" axis="0 1 0"/>
+              <geom type="sphere" size="0.1" mass="10"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        data = mujoco.MjData(model)
+        # The bundled golf models do not enable mjENBL_ENERGY either.
+        assert not (model.opt.enableflags & int(mujoco.mjtEnableBit.mjENBL_ENERGY))
+
+        analyzer = BiomechanicalAnalyzer(model, data)
+        mujoco.mj_forward(model, data)
+
+        ke, pe, te = analyzer.compute_energies()
+        # A body at rest 2 m up: KE = 0, PE = m*g*h = 10 * 9.81 * 2.
+        assert ke == pytest.approx(0.0, abs=1e-9)
+        assert pe == pytest.approx(196.2, abs=1e-6)
+        assert te == pytest.approx(196.2, abs=1e-6)
+
+        data.qvel[0] = 5.0
+        mujoco.mj_forward(model, data)
+        ke, pe, _ = analyzer.compute_energies()
+
+        m_full = np.zeros((model.nv, model.nv))
+        mujoco.mj_fullM(model, m_full, data.qM)
+        assert ke == pytest.approx(0.5 * data.qvel @ m_full @ data.qvel, abs=1e-9)
+        assert pe == pytest.approx(196.2, abs=1e-6)
+
+    def test_ground_reaction_forces_are_world_frame_and_point_up(self) -> None:
+        """#7991: GRF must be rotated to world frame with the correct sign."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81"/>
+          <worldbody>
+            <geom name="floor" type="plane" size="5 5 0.1"/>
+            <body name="left_foot" pos="-0.3 0 0.1">
+              <freejoint/>
+              <geom name="lfg" type="box" size="0.1 0.05 0.1" mass="35"/>
+            </body>
+            <body name="right_foot" pos="0.3 0 0.1">
+              <freejoint/>
+              <geom name="rfg" type="box" size="0.1 0.05 0.1" mass="35"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        data = mujoco.MjData(model)
+        self._settle(model, data)
+
+        analyzer = BiomechanicalAnalyzer(model, data)
+        left, right = analyzer.get_ground_reaction_forces()
+        assert left is not None and right is not None
+
+        # Ground truth: MuJoCo's own external-wrench accounting.
+        mujoco.mj_rnePostConstraint(model, data)
+        left_truth = np.array(data.cfrc_ext[analyzer.left_foot_id][3:6])
+        right_truth = np.array(data.cfrc_ext[analyzer.right_foot_id][3:6])
+
+        np.testing.assert_allclose(left, left_truth, atol=1e-6)
+        np.testing.assert_allclose(right, right_truth, atol=1e-6)
+        # 35 kg per foot -> +343.35 N straight up, nothing in the X channel.
+        np.testing.assert_allclose(left, [0.0, 0.0, 35 * 9.81], atol=1e-2)
+        np.testing.assert_allclose(right, [0.0, 0.0, 35 * 9.81], atol=1e-2)
+
+    def test_actuator_powers_index_qvel_by_dof_address(self) -> None:
+        """#7974: actuator_trnid is a joint id; qvel is indexed by DOF address."""
+        xml = """
+        <mujoco>
+          <worldbody>
+            <body name="root" pos="0 0 1">
+              <freejoint/>
+              <geom type="sphere" size="0.1" mass="1"/>
+              <body name="link" pos="0.2 0 0">
+                <joint name="j" type="hinge" axis="0 1 0"/>
+                <geom type="capsule" fromto="0 0 0 0.3 0 0" size="0.02" mass="1"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j" name="m"/></actuator>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        data = mujoco.MjData(model)
+        # A free root joint shifts DOF addresses away from joint ids.
+        assert model.njnt == 2 and model.nv == 7
+        assert model.jnt_dofadr[model.actuator_trnid[0, 0]] == 6
+
+        data.qvel[:] = np.arange(model.nv) + 1.0
+        data.actuator_force[:] = 2.0
+
+        analyzer = BiomechanicalAnalyzer(model, data)
+        powers = analyzer.get_actuator_powers()
+
+        # qvel[6] == 7.0 (correct) vs qvel[1] == 2.0 (joint-id indexing).
+        assert powers[0] == pytest.approx(2.0 * 7.0)
+
+    def test_club_head_acceleration_is_finite_difference_of_velocity(self) -> None:
+        """#7975: prev_time was consumed by compute_joint_accelerations."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81" timestep="0.002"/>
+          <worldbody>
+            <body name="shaft" pos="0 0 1">
+              <joint name="j" type="hinge" axis="0 1 0"/>
+              <geom type="capsule" fromto="0 0 0 0 0 -0.5" size="0.02" mass="0.3"/>
+              <body name="club_head" pos="0 0 -0.5">
+                <geom type="sphere" size="0.04" mass="0.2"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j" name="m"/></actuator>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        data = mujoco.MjData(model)
+        analyzer = BiomechanicalAnalyzer(model, data)
+        data.ctrl[0] = 2.0
+
+        prev_vel = None
+        prev_time = None
+        seen_non_none = 0
+        for frame in range(5):
+            for _ in range(20):
+                mujoco.mj_step(model, data)
+            state = analyzer.extract_full_state(compute_advanced_metrics=False)
+
+            if frame == 0:
+                assert state.club_head_acceleration is None
+            else:
+                assert state.club_head_acceleration is not None
+                expected = (state.club_head_velocity - prev_vel) / (
+                    state.time - prev_time
+                )
+                np.testing.assert_allclose(
+                    state.club_head_acceleration, expected, atol=1e-9
+                )
+                seen_non_none += 1
+
+            prev_vel = state.club_head_velocity.copy()
+            prev_time = state.time
+
+        assert seen_non_none == 4

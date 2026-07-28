@@ -1,6 +1,7 @@
 from PyQt6.QtCore import Qt, QPointF
 from PyQt6.QtGui import QMouseEvent
 from unittest.mock import MagicMock
+from src.launchers import about_dialog
 from src.launchers.custom_title_bar import CustomTitleBar
 
 
@@ -24,6 +25,15 @@ def test_custom_title_bar_signals(qapp):
 
     title_bar._close_window()
     close_mock.assert_called_once()
+
+
+def test_custom_title_bar_uses_about_dialog_version(qapp, monkeypatch):
+    """The title bar must display the same release version as Help > About."""
+    monkeypatch.setattr(about_dialog, "_resolve_app_version", lambda: "7.2.3")
+
+    title_bar = CustomTitleBar()
+
+    assert "v7.2.3" in title_bar.title_label.text()
 
 
 def test_custom_title_bar_mouse_events(qapp):

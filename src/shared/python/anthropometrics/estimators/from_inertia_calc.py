@@ -56,10 +56,10 @@ from model_generation.inertia.primitives import (
     ellipsoid_inertia as _primitive_ellipsoid_inertia,
 )
 
-from anthropometrics.segment_properties import SegmentProperties
+from ..segment_properties import SegmentProperties
 
 if TYPE_CHECKING:
-    from anthropometrics._types import FloatArray
+    from .._types import FloatArray
 
 
 # --------------------------------------------------------------------------- #

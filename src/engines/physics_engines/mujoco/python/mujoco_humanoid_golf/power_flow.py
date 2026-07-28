@@ -40,7 +40,10 @@ class PowerFlowResult:
         total_mechanical_energy: Sum of KE + PE (Joules)
         power_in: Power input from actuators (Watts)
         power_dissipation: Power dissipated by damping (Watts)
-        energy_conservation_residual: |dE/dt - P_in + P_diss| for validation
+        energy_conservation_residual: |dE/dt - P_in + P_diss| for validation,
+            where P_in is the *total* joint power ``tau . qvel`` (not the
+            positive-only ``power_in`` field) and dE/dt is derived from the
+            equations of motion. ~0 for a self-consistent (qacc, tau) pair.
     """
 
     joint_powers: np.ndarray
@@ -162,12 +165,24 @@ class PowerFlowAnalyzer:
     def _compute_segment_energies(
         self, qvel: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Per-body kinetic and gravitational potential energy.
+
+        Both halves are evaluated at the body centre of mass, and the
+        rotational term is contracted in the body's *inertial* frame because
+        ``model.body(i).inertia`` is the diagonal principal inertia expressed
+        in that frame while ``mj_jacBodyCom`` returns a world-frame angular
+        Jacobian. Summed over bodies these reproduce ``mjData.energy``
+        (``mj_energyPos`` / ``mj_energyVel``) exactly for gravity-only models.
+        """
         if qvel is None:
             raise ValueError("qvel must be provided")
         import mujoco
 
         segment_ke = np.zeros(self.model.nbody)
         segment_pe = np.zeros(self.model.nbody)
+
+        # Full gravity vector: do not assume it points along -Z.
+        gravity = np.asarray(self.model.opt.gravity, dtype=np.float64)
 
         for i in range(self.model.nbody):
             body = self.model.body(i)
@@ -177,22 +192,54 @@ class PowerFlowAnalyzer:
             mujoco.mj_jacBodyCom(self.model, self._data, jacp, jacr, i)
 
             com_vel = jacp @ qvel
-            ang_vel = jacr @ qvel
+            ang_vel_world = jacr @ qvel
 
             mass = body.mass[0]
-            inertia = body.inertia
+            inertia = np.asarray(body.inertia, dtype=np.float64)
+
+            # R maps inertial-frame -> world, so R.T maps world -> inertial.
+            rot = np.asarray(self._data.ximat[i], dtype=np.float64).reshape(3, 3)
+            ang_vel_body = rot.T @ ang_vel_world
 
             ke_linear = 0.5 * mass * np.dot(com_vel, com_vel)
             # ⚡ Bolt: np.vdot avoids temporary allocations for element-wise squares
-            ke_rotational = 0.5 * np.vdot(inertia, ang_vel * ang_vel)
+            ke_rotational = 0.5 * np.vdot(inertia, ang_vel_body * ang_vel_body)
             segment_ke[i] = ke_linear + ke_rotational
 
-            com_pos_world = self._data.xpos[i]
-            height = com_pos_world[2]
-            g = abs(self.model.opt.gravity[2])
-            segment_pe[i] = mass * g * height
+            # xipos is the body COM; xpos is the body frame origin.
+            com_pos_world = np.asarray(self._data.xipos[i], dtype=np.float64)
+            segment_pe[i] = -mass * float(np.dot(gravity, com_pos_world))
 
         return segment_ke, segment_pe
+
+    def _compute_energy_conservation_residual(
+        self,
+        qvel: np.ndarray,
+        qacc: np.ndarray,
+        tau: np.ndarray,
+        power_dissipation: float,
+    ) -> float:
+        """Residual ``|dE/dt - P_in + P_diss|`` for the supplied state.
+
+        ``dE/dt`` is obtained from the equations of motion rather than by
+        finite-differencing: with ``M(q) qacc + c(q, qvel) = tau_total`` and the
+        skew-symmetry identity ``0.5 v' Mdot v = v' C v``, the mechanical energy
+        rate is ``qvel . (M qacc + qfrc_bias)``. ``P_in`` is the total joint
+        power ``tau . qvel`` of the supplied (actuator) torques, so the residual
+        measures how much power the supplied ``qacc`` implies that the supplied
+        ``tau`` minus damping does not account for. It is ~0 for a consistent
+        ``(qacc, tau)`` pair and grows with any inconsistency, unmodelled
+        constraint work, or non-gravitational potential.
+        """
+        import mujoco
+
+        qm_full = np.zeros((self.model.nv, self.model.nv))
+        mujoco.mj_fullM(self.model, qm_full, self._data.qM)
+        de_dt = float(qvel @ (qm_full @ np.asarray(qacc, dtype=np.float64)))
+        de_dt += float(qvel @ np.asarray(self._data.qfrc_bias, dtype=np.float64))
+
+        power_joint_total = float(np.dot(tau, qvel))
+        return abs(de_dt - power_joint_total + power_dissipation)
 
     def _compute_power_dissipation(self, qvel: np.ndarray) -> float:
         if qvel is None:
@@ -259,6 +306,9 @@ class PowerFlowAnalyzer:
 
         power_in = float(np.sum(np.maximum(joint_powers, 0)))
         power_diss = self._compute_power_dissipation(qvel)
+        residual = self._compute_energy_conservation_residual(
+            qvel, qacc, tau, float(power_diss)
+        )
 
         return PowerFlowResult(
             joint_powers=joint_powers,
@@ -270,7 +320,7 @@ class PowerFlowAnalyzer:
             total_mechanical_energy=total_me,
             power_in=power_in,
             power_dissipation=float(power_diss),
-            energy_conservation_residual=0.0,
+            energy_conservation_residual=residual,
         )
 
     @precondition(

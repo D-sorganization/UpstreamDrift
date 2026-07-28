@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -35,7 +36,43 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-for _p in (REPO_ROOT, REPO_ROOT / "src", REPO_ROOT / "src" / "shared" / "python"):
+
+def _tools_source_root(repo_root: Path, env_value: str | None) -> Path:
+    """Resolve the Tools source tree used for shared Sidekick imports."""
+    if env_value:
+        tools_root = Path(env_value).expanduser().resolve()
+        tools_src = tools_root / "src"
+        if not tools_src.is_dir():
+            raise RuntimeError(
+                "TOOLS_REPO_PATH must point to a Tools checkout containing "
+                f"a src/ directory, got: {tools_root}"
+            )
+        return tools_src
+
+    vendor_src = repo_root / "vendor" / "ud-tools" / "src"
+    if vendor_src.is_dir():
+        return vendor_src
+
+    sibling_src = repo_root.parent / "Tools" / "src"
+    if sibling_src.is_dir():
+        return sibling_src
+
+    return vendor_src
+
+
+def _bootstrap_paths(repo_root: Path, env_value: str | None) -> tuple[Path, ...]:
+    """Return import roots needed before route modules are imported."""
+    tools_src = _tools_source_root(repo_root, env_value)
+    return (
+        tools_src / "shared" / "python",
+        tools_src,
+        repo_root,
+        repo_root / "src",
+        repo_root / "src" / "shared" / "python",
+    )
+
+
+for _p in reversed(_bootstrap_paths(REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 

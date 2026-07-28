@@ -104,3 +104,93 @@ def test_rpc_parse_error(client: TestClient) -> None:
     data = response.json()
     assert "error" in data
     assert data["error"]["code"] == -32700  # Parse error
+
+
+# ---------------------------------------------------------------------------
+# JSON-RPC 2.0 notifications (issue #8004)
+#
+# A notification is a request with no ``id``. The spec requires the server to
+# return *nothing*. ``handle_rpc`` used to call
+# ``make_response(result=None, request_id=None)``, which trips that function's
+# own "result or error must be provided" precondition and escaped as a 500.
+# ---------------------------------------------------------------------------
+
+
+def test_rpc_notification_returns_no_content(client: TestClient) -> None:
+    """A single notification must produce an empty 204, never a 500."""
+    response = client.post("/aip/rpc", json={"jsonrpc": "2.0", "method": "model.list"})
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+def test_rpc_notification_for_unknown_method_is_silent(client: TestClient) -> None:
+    """Error paths must stay silent for notifications too."""
+    response = client.post(
+        "/aip/rpc", json={"jsonrpc": "2.0", "method": "does.not.exist"}
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+def test_rpc_notification_with_invalid_params_is_silent(client: TestClient) -> None:
+    """Invalid params on a notification must not produce a response body."""
+    response = client.post(
+        "/aip/rpc",
+        json={"jsonrpc": "2.0", "method": "model.list", "params": "not-a-container"},
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+def test_rpc_batch_of_only_notifications_returns_no_content(
+    client: TestClient,
+) -> None:
+    """An all-notification batch must return nothing, not a -32600 error."""
+    response = client.post(
+        "/aip/rpc",
+        json=[
+            {"jsonrpc": "2.0", "method": "model.list"},
+            {"jsonrpc": "2.0", "method": "system.ping"},
+        ],
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+def test_rpc_mixed_batch_returns_only_id_bearing_responses(
+    client: TestClient,
+) -> None:
+    """Only the entries carrying an ``id`` may appear in the batch response."""
+    response = client.post(
+        "/aip/rpc",
+        json=[
+            {"jsonrpc": "2.0", "method": "model.list"},
+            {"jsonrpc": "2.0", "method": "model.list", "id": 7},
+            {"jsonrpc": "2.0", "method": "system.ping"},
+        ],
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["id"] == 7
+
+
+def test_rpc_malformed_request_without_id_still_reports_an_error(
+    client: TestClient,
+) -> None:
+    """A request too malformed to be a notification must still be reported.
+
+    A bad ``jsonrpc`` version cannot be treated as a well-formed notification,
+    so the server answers with an ``id: null`` error object as the spec allows.
+    """
+    response = client.post("/aip/rpc", json={"jsonrpc": "1.0", "method": "model.list"})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["error"]["code"] == -32600

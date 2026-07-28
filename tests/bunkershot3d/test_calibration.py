@@ -71,6 +71,8 @@ def test_optimizer_objective_does_not_clip_internally() -> None:
     received = {}
     exp = MagicMock()
     exp.target_angle = 30.0
+    # #7999: the optimizer only searches parameters the experiment declares.
+    exp.calibrated_parameters = ("friction_coefficient", "restitution_coefficient")
     exp.run_simulation.side_effect = lambda params: received.update(params) or 28.0
 
     opt = CalibrationOptimizer(exp)

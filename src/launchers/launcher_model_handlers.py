@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from src.launchers.launcher_model_sources import (
+    get_model_source_root,
     get_model_python_paths,
     get_model_working_directory,
     resolve_model_artifact_path,
@@ -26,6 +27,38 @@ if TYPE_CHECKING:
     from src.launchers.launcher_process_manager import ProcessManager
 
 logger = get_logger(__name__)
+
+
+def _package_main_module_name(
+    model_path: str,
+    *,
+    source_root: Path,
+    launcher_root: Path,
+) -> str | None:
+    """Return the importable module for a package ``__main__`` launcher path.
+
+    Local ``src/tools`` tiles need the ``src`` package prefix because the
+    launcher places the repository root before ``repo/src`` on ``PYTHONPATH``
+    and the repository root has another ``tools`` package.  Other packages
+    retain their established ``repo/src`` import style.  Sibling providers
+    expose their own ``src`` directory as an extra Python path, so their
+    package modules deliberately omit that prefix.
+    """
+    normalized_path = model_path.replace("\\", "/")
+    if not normalized_path.startswith("src/") or not normalized_path.endswith(
+        "/__main__.py"
+    ):
+        return None
+    module_parts = normalized_path.removesuffix("/__main__.py").split("/")
+    is_local_tool_package = (
+        source_root.resolve() == launcher_root.resolve()
+        and module_parts[:2] == ["src", "tools"]
+    )
+    if not is_local_tool_package:
+        module_parts = module_parts[1:]
+    if not module_parts or not all(part.isidentifier() for part in module_parts):
+        return None
+    return ".".join(module_parts)
 
 
 class ModelHandler(Protocol):
@@ -144,6 +177,32 @@ class ScriptHandler:
         """Check if this handler supports the model type."""
         return model_type.lower() in self.model_types
 
+    def resolve_script(self, model: Any, repo_path: Path) -> Path:
+        """Resolve the script to run for ``model``.
+
+        ``models.yaml`` is the source of truth for a tile's entry point; the
+        hard-coded ``script_path`` in the handler table is only a fallback for
+        model types with no declared ``path``. Preferring the table silently
+        overrode ``models.yaml`` and pointed the Pinocchio, OpenSim and
+        MyoSuite tiles at files that do not exist (issue #8030).
+        """
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        declared = getattr(model, "path", None) if model is not None else None
+        if declared:
+            try:
+                return resolve_model_artifact_path(model, repo_path)
+            except (ValueError, OSError) as exc:
+                logger.warning(
+                    "ScriptHandler: could not resolve declared path %r for %r "
+                    "(%s); falling back to %s",
+                    declared,
+                    getattr(model, "id", "unknown"),
+                    exc,
+                    self._script_path,
+                )
+        return repo_path / self._script_path
+
     def launch(
         self,
         model: Any,
@@ -153,7 +212,7 @@ class ScriptHandler:
         """Launch the script."""
         if repo_path is None:
             raise ValueError("repo_path must be provided")
-        script_path = repo_path / self._script_path
+        script_path = self.resolve_script(model, repo_path)
         cwd = repo_path / self._cwd_path if self._cwd_path else repo_path
 
         process = process_manager.launch_script(
@@ -168,7 +227,7 @@ class ScriptHandler:
         """Try to load the script as a module and get its dockable UI widget."""
         if repo_path is None:
             return None
-        script_path = repo_path / self._script_path
+        script_path = self.resolve_script(model, repo_path)
         if not script_path.exists():
             return None
 
@@ -187,9 +246,7 @@ class ScriptHandler:
                     sys.path.insert(0, str(p))
 
             module_name = (
-                self._script_path.replace("/", "_")
-                .replace("\\", "_")
-                .replace(".py", "")
+                str(script_path).replace("/", "_").replace("\\", "_").replace(".py", "")
             )
             spec = importlib.util.spec_from_file_location(module_name, str(script_path))
             if spec and spec.loader:
@@ -216,8 +273,8 @@ class SpecialAppHandler:
     data_explorer, and any future tool/utility tiles.
 
     Design by Contract:
-        Precondition: model.path must be a valid relative path to a Python script
-        Postcondition: script is launched as a subprocess
+    Precondition: model.path must be a valid relative path to a Python entry point
+    Postcondition: the entry point is launched as a subprocess
     """
 
     MODEL_TYPES = {"special_app"}
@@ -260,18 +317,41 @@ class SpecialAppHandler:
             logger.warning("SpecialAppHandler: script not found: %s", script_path)
             return False
 
-        process = process_manager.launch_script(
-            name=model_name,
-            script_path=script_path,
-            cwd=get_model_working_directory(model, repo_path),
-            extra_python_paths=get_model_python_paths(model, repo_path),
+        working_directory = get_model_working_directory(model, repo_path)
+        python_paths = get_model_python_paths(model, repo_path)
+        package_module = _package_main_module_name(
+            model_path,
+            source_root=get_model_source_root(model, repo_path),
+            launcher_root=repo_path,
         )
+        if package_module is not None:
+            process = process_manager.launch_module(
+                name=model_name,
+                module_name=package_module,
+                cwd=working_directory,
+                extra_python_paths=python_paths,
+            )
+        else:
+            process = process_manager.launch_script(
+                name=model_name,
+                script_path=script_path,
+                cwd=working_directory,
+                extra_python_paths=python_paths,
+            )
         return process is not None
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the special app script and get its dockable UI widget."""
         if repo_path is None:
             return None
+
+        tool_id = getattr(model, "id", "")
+        if isinstance(tool_id, str) and tool_id:
+            from src.shared.python.launcher_embed.registry import get_embeddable_tool
+
+            tool = get_embeddable_tool(tool_id)
+            if tool is not None:
+                return tool.create_main_widget()
 
         embed_adapter = getattr(model, "embed_adapter", None)
         if embed_adapter and "::" in embed_adapter:
@@ -313,6 +393,14 @@ class SpecialAppHandler:
 
         model_path = getattr(model, "path", None) or ""
         if not model_path:
+            return None
+
+        # A conventional package entry point executes its CLI dispatcher when
+        # imported with the ``__main__`` module name.  The launcher must never
+        # probe it for an embeddable widget in-process: doing so can call
+        # ``sys.exit()`` and take down the launcher before the subprocess
+        # launch path runs.  Such apps are launched by ``launch()`` instead.
+        if Path(model_path).name == "__main__.py":
             return None
 
         script_path = resolve_model_artifact_path(model, repo_path)
@@ -491,6 +579,81 @@ class BiomechExerciseHandler:
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """BiomechExercise handler does not provide a dockable UI widget."""
+        return None
+
+
+class ProviderExerciseHandler:
+    """Launch a provider exercise card through the contained dashboard.
+
+    Provider model-pack entries identify an exercise *directory* containing
+    model-builder source.  A directory cannot be passed to the generic local
+    file launch flow.  Route each supported interchange format to the shared
+    exercise dashboard and preselect the engine that owns that format.
+    """
+
+    _PREFERRED_ENGINE_BY_MODEL_TYPE = {
+        "mjcf": "MuJoCo_Models",
+        "sdformat-1.8": "Drake_Models",
+        "urdf": "Pinocchio_Models",
+        "osim": "OpenSim_Models",
+    }
+    MODEL_TYPES = set(_PREFERRED_ENGINE_BY_MODEL_TYPE)
+
+    def can_handle(self, model_type: str) -> bool:
+        """Return whether the model format is a provider exercise format."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Launch the model's exercise in the engine-aware dashboard."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+
+        model_type = getattr(model, "type", None)
+        if not isinstance(model_type, str):
+            logger.error("ProviderExerciseHandler: model type is missing")
+            return False
+        preferred_engine = self._PREFERRED_ENGINE_BY_MODEL_TYPE.get(model_type.lower())
+        if preferred_engine is None:
+            logger.error(
+                "ProviderExerciseHandler: unsupported model type %s", model_type
+            )
+            return False
+
+        model_path = getattr(model, "path", None)
+        if not isinstance(model_path, str) or not model_path.strip():
+            logger.error(
+                "ProviderExerciseHandler: model '%s' has no exercise path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+        exercise_name = Path(model_path).name
+        if not exercise_name or exercise_name in {".", ".."}:
+            logger.error(
+                "ProviderExerciseHandler: invalid exercise path %s", model_path
+            )
+            return False
+
+        env = process_manager.get_subprocess_env(
+            get_model_python_paths(model, repo_path)
+        )
+        env["BIOMECH_EXERCISE"] = exercise_name
+        env["BIOMECH_ENGINE"] = preferred_engine
+        process = process_manager.launch_script(
+            name=getattr(model, "name", f"Biomechanics Exercise: {exercise_name}"),
+            script_path=repo_path / "src" / "launchers" / "exercise_dashboard.py",
+            cwd=repo_path,
+            env=env,
+            extra_python_paths=get_model_python_paths(model, repo_path),
+        )
+        return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Provider exercise dashboards launch in their own process."""
         return None
 
 
@@ -736,6 +899,53 @@ class DocumentHandler:
         return None
 
 
+class PhysicsInformedHandler:
+    """Handler for the ``physics_informed`` (PINN) tiles.
+
+    The physics-informed models in
+    ``src/shared/python/physics_informed/`` are a **library-only** feature
+    (epic #5419): ``PhysicsMode`` + ``create_model`` are importable, but no
+    interactive front-end has been built yet. Before issue #7984 no handler
+    was registered for ``type: physics_informed`` at all, so clicking either
+    tile produced a generic "Unknown launch type" toast that read like a
+    configuration typo. Reporting the real reason — and the real dependency
+    state — is the honest failure this replaces it with.
+    """
+
+    MODEL_TYPES = {"physics_informed"}
+    PACKAGE = "src/shared/python/physics_informed"
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def status_message(self, model: Any) -> str:
+        """Return a user-facing explanation of why this tile cannot launch."""
+        mode = getattr(model, "mode", None) or "unknown"
+        name = getattr(model, "name", None) or getattr(model, "id", "unknown")
+        return (
+            f"{name} (mode={mode}) has no interactive UI yet. The physics-informed "
+            f"models are available as a library only ({self.PACKAGE}/); see epic "
+            "#5419. Tracking issue for a launcher front-end: #7984."
+        )
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Report the missing front-end instead of failing silently."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        logger.error("PhysicsInformedHandler: %s", self.status_message(model))
+        return False
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """No dockable UI exists for physics-informed models yet."""
+        return None
+
+
 class ApiBackedHandler:
     """Handler for API-backed tiles that do not launch local processes directly."""
 
@@ -785,24 +995,29 @@ _MODULE_HANDLERS = [
     ),
 ]
 
+# NOTE (#8030): ``script_path`` here is only the fallback used when a model
+# declares no ``path``. ``models.yaml`` wins — see ``ScriptHandler.resolve_script``.
+# These fallbacks were pointing at files that have never existed
+# (``pinocchio_golf/main.py``, ``opensim_golf.py``, and a whole ``myosim/``
+# directory), which silently killed the Pinocchio/OpenSim/MyoSuite tiles.
 _SCRIPT_HANDLERS = [
     ScriptHandler(
         model_types={"pinocchio", "pinocchio_golf"},
-        script_path="src/engines/physics_engines/pinocchio/python/pinocchio_golf/main.py",
+        script_path="src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
         display_name="Pinocchio Golf Model",
         cwd_path="src/engines/physics_engines/pinocchio/python",
     ),
     ScriptHandler(
         model_types={"opensim", "opensim_golf"},
-        script_path="src/engines/physics_engines/opensim/python/opensim_golf.py",
+        script_path="src/engines/physics_engines/opensim/python/opensim_gui.py",
         display_name="OpenSim Golf Model",
         cwd_path="src/engines/physics_engines/opensim/python",
     ),
     ScriptHandler(
         model_types={"myosim", "myosim_golf", "musculoskeletal"},
-        script_path="src/engines/physics_engines/myosim/python/main.py",
-        display_name="MyoSim Golf Model",
-        cwd_path="src/engines/physics_engines/myosim/python",
+        script_path="src/engines/physics_engines/myosuite/python/gui.py",
+        display_name="MyoSuite Golf Model",
+        cwd_path="src/engines/physics_engines/myosuite/python",
     ),
     ScriptHandler(
         model_types={"openpose", "pose_estimation"},
@@ -844,10 +1059,12 @@ class ModelHandlerRegistry:
             SpecialAppHandler(),
             PuttingGreenHandler(),
             BiomechExerciseHandler(),
+            ProviderExerciseHandler(),
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
             SharedRepoHandler(),
             DocumentHandler(),
+            PhysicsInformedHandler(),
             ApiBackedHandler(),
         ]
 

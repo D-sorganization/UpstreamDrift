@@ -174,6 +174,15 @@ async def dispatch(  # noqa: C901
             request_id=request_id,
         )
 
+    # Notifications (no id) never get a response — not even an error one.
+    # This check precedes handler lookup and parameter validation so that
+    # "Method not found" / "Invalid params" are suppressed too, per the
+    # JSON-RPC 2.0 spec (issue #8004). Structurally invalid requests
+    # (bad version, missing method) are still reported above, because a
+    # malformed request cannot be identified as a notification.
+    if request_id is None:
+        return None
+
     # Look up handler
     handler = registry.get_method(method_name)
     if handler is None:
@@ -229,9 +238,5 @@ async def dispatch(  # noqa: C901
             ),
             request_id=request_id,
         )
-
-    # Notifications (no id) don't get a response
-    if request_id is None:
-        return None
 
     return make_response(result=result, request_id=request_id)

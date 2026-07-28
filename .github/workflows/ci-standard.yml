@@ -806,6 +806,32 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch PR base for ownership guards
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+      - name: Resolve pinned Tools ownership revision
+        id: tools-ownership-pin
+        shell: bash
+        run: |
+          tools_sha=$(git ls-tree HEAD vendor/ud-tools | awk '{print $3}')
+          test -n "$tools_sha"
+          echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
+      - name: Checkout pinned Tools ownership source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: D-sorganization/Tools
+          ref: ${{ steps.tools-ownership-pin.outputs.sha }}
+          path: vendor/ud-tools
+          fetch-depth: 1
+          sparse-checkout: |
+            src/shared/python
+          persist-credentials: false
+      - name: Verify pinned Tools ownership source
+        shell: bash
+        run: |
+          actual_tools_sha=$(git -C vendor/ud-tools rev-parse HEAD)
+          test "$actual_tools_sha" = "${{ steps.tools-ownership-pin.outputs.sha }}"
       - name: Install System Dependencies
         run: |
           apt_retry() {

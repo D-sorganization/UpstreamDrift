@@ -489,9 +489,8 @@ class TestExerciseTabHelpers:
         assert xmax == pytest.approx(0.9)
 
     def test_render_analysis_plots_calls_renderers(self, tab) -> None:  # type: ignore[no-untyped-def]
-        from conftest import make_test_result
-
         from movement_optimizer.gui import exercise_tab
+        from movement_optimizer.tests._helpers import make_test_result
 
         result = make_test_result()
         body = BodyModel(75.0, 1.75)

@@ -126,10 +126,10 @@ class MatlabSuiteWidget(QWidget):
             layout.addWidget(close_btn)
 
     def launch_model(self, model_data: dict[str, str]) -> None:
-        """Launch the selected model."""
+        """Launch the selected model, retaining this chooser on failure."""
         model_obj = MockModelConfig(model_data)
-        self.parent_launcher._launch_matlab_app(model_obj)
-        if self.parent_dialog is not None:
+        launched = self.parent_launcher._launch_matlab_app(model_obj)
+        if launched and self.parent_dialog is not None:
             self.parent_dialog.accept()
 
 
