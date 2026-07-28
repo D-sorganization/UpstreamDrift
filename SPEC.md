@@ -70,17 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Extended the shared frontend API timeout contract to
+  multipart uploads. `apiFetchForm()` now composes caller cancellation with the
+  default deadline, normalizes timeout/abort errors like JSON requests, and
+  shares HTTP error extraction with `apiFetch()` so upload panels cannot remain
+  indefinitely loading on stalled backend responses (#8248).
 - **2026-07-28** - Hardened putting-green ball-roll physics contracts so invalid
   ball mass/radius, unknown integrators, non-positive or non-finite timesteps,
   and invalid simulation horizons fail fast with `ValueError` instead of silent
   non-physical integration (#8250).
-- **2026-07-28** - Replaced the Bot CI trigger workflow's backlog-scanning
-  recovery path for issue #8240. The workflow is now bounded to a single PR from
-  either a bot-authored pull request event or explicit `workflow_dispatch`
-  `pr_number`, inspects expected CI checks through REST for that PR head SHA,
-  dispatches `ci-standard.yml` through REST, fails loudly on trigger errors,
-  and no longer uses scheduled PR discovery, GraphQL-backed `gh pr checks`, or
-  empty commits to mutate PR branches.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
