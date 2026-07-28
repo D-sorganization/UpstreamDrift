@@ -1,96 +1,185 @@
-"""
-Optimization loop for calibrating backend parameters to bulk properties.
+"""Optimization loop for calibrating backend parameters to bulk properties.
+
+Issue #7999: the optimizer used to search a fixed two-dimensional space
+``[friction, restitution]`` even though no experiment reads
+``restitution_coefficient``. The objective was exactly flat in that dimension,
+so ``differential_evolution`` returned whichever member of its random
+population happened to survive - and that number was written to disk as a
+physical material property, differing between backends for no physical reason.
+
+The optimizer now searches only the parameters the experiment declares in
+``calibrated_parameters``, and verifies before optimising that each declared
+parameter actually changes the objective.
 """
 
-import numpy as np
+from __future__ import annotations
+
 from typing import Any
+
+import numpy as np
+
+#: Default search space when an experiment does not declare its own.
+_DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
+    "friction_coefficient": (0.01, 1.0),
+    "restitution_coefficient": (0.01, 1.0),
+}
+_DEFAULT_PARAMETERS: tuple[str, ...] = ("friction_coefficient",)
+#: Objective change below this counts as "the parameter has no effect".
+_SENSITIVITY_TOLERANCE = 1e-12
+
+
+class InertParameterError(ValueError):
+    """Raised when a declared parameter does not affect the objective.
+
+    Optimising such a parameter cannot identify it: the returned value is a
+    property of the optimiser's random population, not of the material.
+    """
 
 
 class CalibrationOptimizer:
-    """Optimizes backend contact model parameters to match macroscopic targets."""
+    """Optimizes backend contact model parameters to match macroscopic targets.
 
-    #: Physically admissible ranges for (friction, restitution).
-    #: ``optimize()`` hands these to the solver, which is the ONLY place the
-    #: range is enforced. ``_objective`` deliberately does NOT clip: issue #6644
-    #: F5 removed an internal clip because it created flat plateaus that stalled
-    #: ``differential_evolution`` and let ``res.x`` sit outside the physical
-    #: range while being silently re-clipped. See #8038.
+    Attributes:
+        experiment: Experiment exposing ``run_simulation`` and a target.
+        parameters: Names of the parameters being calibrated.
+        bounds: Search bounds per parameter, in ``parameters`` order.
+    """
+
+    #: Back-compat alias for the physically admissible friction/restitution
+    #: ranges. ``optimize()`` enforces ranges through ``self.bounds``; the
+    #: objective deliberately forwards supplied values without clipping.
     BOUNDS: tuple[tuple[float, float], tuple[float, float]] = (
-        (0.01, 1.0),
-        (0.01, 1.0),
+        _DEFAULT_BOUNDS["friction_coefficient"],
+        _DEFAULT_BOUNDS["restitution_coefficient"],
     )
 
-    def __init__(self, experiment: "Any") -> None:  # type: ignore
+    def __init__(self, experiment: Any) -> None:
+        """Initialize with an experiment instance.
+
+        The experiment must provide:
+
+        - ``target_angle`` or ``target_phi_peak``/``target_phi_res``;
+        - ``run_simulation(params: dict) -> float | tuple[float, float]``;
+        - optionally ``calibrated_parameters`` and ``parameter_bounds``.
+
+        Args:
+            experiment: The experiment to calibrate against.
+
+        Raises:
+            ValueError: If ``experiment`` is None or declares no parameters.
         """
-        Initialize with an experiment instance.
-        The experiment must have:
-        - `target_angle` or `target_phi_peak`
-        - `run_simulation(params: dict) -> float`
-        """
+        if experiment is None:
+            raise ValueError("experiment must be provided")
         self.experiment = experiment
+        self.parameters: tuple[str, ...] = tuple(
+            getattr(experiment, "calibrated_parameters", _DEFAULT_PARAMETERS)
+        )
+        if not self.parameters:
+            raise ValueError("experiment declares no calibrated_parameters")
+        declared_bounds = getattr(experiment, "parameter_bounds", {})
+        self.bounds: list[tuple[float, float]] = [
+            tuple(declared_bounds.get(name, _DEFAULT_BOUNDS.get(name, (0.01, 1.0))))  # type: ignore[misc]
+            for name in self.parameters
+        ]
+
+    def _params_from_vector(self, x: np.ndarray) -> dict[str, float]:
+        """Map an optimiser vector onto the experiment's keyword parameters."""
+        vector = np.atleast_1d(x)
+        if len(vector) < len(self.parameters):
+            raise ValueError(
+                "x must provide values for calibrated parameters "
+                f"{self.parameters}, got {len(vector)}"
+            )
+        return {name: float(vector[i]) for i, name in enumerate(self.parameters)}
 
     def _objective(self, x: np.ndarray) -> float:
-        """Objective function to minimize.
+        """Squared residual between the simulated response and the target.
 
-        Preconditions:
-            - ``x`` provides at least two parameters (friction, restitution).
+        Args:
+            x: Parameter vector aligned with :attr:`parameters`.
 
         Postconditions:
-            - Parameters are forwarded to the experiment UNMODIFIED.
+            Parameters are forwarded to the experiment unmodified. Bounds are
+            enforced only by :meth:`optimize`, not by clipping here.
 
-        The range is enforced by the ``bounds`` argument in :meth:`optimize`,
-        not here. Clipping inside the objective was removed by #6644 F5: it is
-        invisible to ``differential_evolution``, so it creates flat plateaus
-        that stall the search and lets the returned ``res.x`` sit outside the
-        physical range. Callers invoking ``_objective`` directly are responsible
-        for supplying values within :attr:`BOUNDS`.
+        Returns:
+            Squared error.
+
+        Raises:
+            ValueError: If the experiment declares no recognised target.
         """
-        if x is None or len(x) < 2:
-            raise ValueError(
-                "x must provide two parameters (friction, restitution), "
-                f"got {0 if x is None else len(x)}"
-            )
-        friction = float(x[0])
-        restitution = float(x[1])
-
-        params = {
-            "friction_coefficient": friction,
-            "restitution_coefficient": restitution,
-        }
-
-        # This handles both AngleOfRepose (returns float) and DrainedShearCell (returns tuple)
+        params = self._params_from_vector(np.atleast_1d(x))
         result = self.experiment.run_simulation(params)
 
         if hasattr(self.experiment, "target_angle"):
-            target = self.experiment.target_angle
-            return (result - target) ** 2
+            return float((result - self.experiment.target_angle) ** 2)
 
         if hasattr(self.experiment, "target_phi_peak"):
-            target_peak = self.experiment.target_phi_peak
-            target_res = self.experiment.target_phi_res
             phi_peak, phi_res = result
-            return (phi_peak - target_peak) ** 2 + (phi_res - target_res) ** 2
+            return float(
+                (phi_peak - self.experiment.target_phi_peak) ** 2
+                + (phi_res - self.experiment.target_phi_res) ** 2
+            )
 
         raise ValueError("Experiment does not define known target properties.")
 
+    def check_sensitivity(self) -> dict[str, float]:
+        """Measure how much each declared parameter moves the objective.
+
+        Returns:
+            Mapping of parameter name to the absolute objective change observed
+            when the parameter is swept across its bounds with the others held
+            at their midpoint.
+
+        Raises:
+            InertParameterError: If any declared parameter has no effect.
+        """
+        midpoint = np.array([(lo + hi) / 2.0 for lo, hi in self.bounds])
+        sensitivities: dict[str, float] = {}
+        inert: list[str] = []
+        for i, name in enumerate(self.parameters):
+            low = midpoint.copy()
+            high = midpoint.copy()
+            low[i], high[i] = self.bounds[i]
+            delta = abs(self._objective(high) - self._objective(low))
+            sensitivities[name] = delta
+            if delta <= _SENSITIVITY_TOLERANCE:
+                inert.append(name)
+
+        if inert:
+            raise InertParameterError(
+                f"{type(self.experiment).__name__} objective is flat in "
+                f"{inert}; optimising over it would return optimiser noise, "
+                "not a measurement (issue #7999). Remove it from "
+                "calibrated_parameters or make the experiment read it."
+            )
+        return sensitivities
+
     def optimize(self) -> dict[str, float]:
+        """Run global optimisation over the declared parameters.
+
+        Returns:
+            The identified parameter values plus the final ``error``. Only
+            parameters the objective actually depends on appear.
+
+        Raises:
+            InertParameterError: If a declared parameter has no effect.
+        """
         from scipy.optimize import differential_evolution
 
-        bounds = [tuple(bound) for bound in self.BOUNDS]
+        self.check_sensitivity()
 
-        # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
+        # differential_evolution is a stochastic population-based method
+        # suitable for noisy granular simulations.
         res = differential_evolution(
             self._objective,
-            bounds,  # type: ignore[arg-type]
+            self.bounds,  # type: ignore[arg-type]
             strategy="best1bin",
             maxiter=50,
             popsize=5,
             tol=0.01,
         )
 
-        best_fric, best_rest = res.x
-        return {
-            "friction_coefficient": float(best_fric),
-            "restitution_coefficient": float(best_rest),
-            "error": float(res.fun),
-        }
+        identified = self._params_from_vector(np.atleast_1d(res.x))
+        identified["error"] = float(res.fun)
+        return identified
