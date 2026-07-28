@@ -31,28 +31,19 @@ import types as _types
 import importlib as _early_importlib
 from pathlib import Path as _Path
 
+_repo_root = _Path(__file__).resolve().parents[1]
+_local_path = str((_repo_root / "src" / "shared" / "python").resolve())
 _tools_path = str(
-    (
-        _Path(__file__).resolve().parents[1]
-        / "vendor"
-        / "ud-tools"
-        / "src"
-        / "shared"
-        / "python"
-    ).resolve()
+    (_repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python").resolve()
 )
-if _tools_path not in _sys.path:
-    _sys.path.insert(0, _tools_path)
-
-for _pkg in ("chat", "sidekick", "ai"):
-    _pkg_mod = _sys.modules.get(_pkg)
-    _v_path = str(_Path(_tools_path) / _pkg)
-    if (
-        _pkg_mod is not None
-        and hasattr(_pkg_mod, "__path__")
-        and _v_path not in _pkg_mod.__path__
-    ):
-        _pkg_mod.__path__.append(_v_path)
+if _local_path not in _sys.path:
+    _sys.path.insert(0, _local_path)
+_tools_python_src = str(
+    (_repo_root / "vendor" / "ud-tools" / "src" / "python" / "src").resolve()
+)
+for p in (_tools_path, _tools_python_src):
+    if p not in _sys.path:
+        _sys.path.append(p)
 
 
 def _ensure_importable_package(module_name: str, package_path: str) -> None:
@@ -540,6 +531,8 @@ def biomech_mode(request: pytest.FixtureRequest) -> str:
 
 def pytest_configure(config: pytest.Config) -> None:
     """Dynamically adjust system path based on selected Tools mode."""
+    import importlib
+
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
     local_path = str((root_dir / "src/shared/python").resolve())
@@ -585,7 +578,28 @@ def pytest_configure(config: pytest.Config) -> None:
     else:
         # Force local shared codebase to have precedence
         sys.path.insert(0, local_path)
-        sys.path.append(vendored_path)
+        for parent_path in parent_paths:
+            if parent_path not in sys.path:
+                sys.path.append(parent_path)
+
+    for _pkg, _sub in (
+        ("chat", "src/shared/python/chat"),
+        ("sidekick", "src/shared/python/sidekick"),
+        ("ai", "src/shared/python/ai"),
+        ("theme", "src/shared/python/theme"),
+        ("logging_pkg", "src/shared/python/logging_pkg"),
+        ("data_processing", "src/shared/python/data_processing"),
+        ("humanoid_character_builder", "src/shared/python/humanoid_character_builder"),
+        ("utils", "src/python/src/utils"),
+    ):
+        _v_path = str((tools_root / _sub).resolve())
+        if os.path.exists(_v_path):
+            try:
+                _pkg_mod = importlib.import_module(_pkg)
+                if hasattr(_pkg_mod, "__path__") and _v_path not in _pkg_mod.__path__:
+                    _pkg_mod.__path__.append(_v_path)
+            except (AttributeError, ImportError):
+                pass
 
     # Prevent dual-loading of shared contracts and training modules under different path aliases.
     # With both '.' and 'src/shared/python' in sys.path, contracts/training can be
@@ -593,8 +607,6 @@ def pytest_configure(config: pytest.Config) -> None:
     # 'contracts'/'training', creating two distinct class objects that break pytest and type checks.
     # Pre-load via the canonical path and alias all alternate module names.
     try:
-        import importlib
-
         canonical_name = (
             "shared.python.contracts" if parent_mode else "src.shared.python.contracts"
         )
@@ -609,6 +621,23 @@ def pytest_configure(config: pytest.Config) -> None:
         )
         for alias in contract_aliases:
             sys.modules[alias] = canonical_mod
+
+        try:
+            sk_mod = importlib.import_module("sidekick")
+            sys.modules["src.shared.python.sidekick"] = sk_mod
+            sys.modules["shared.python.sidekick"] = sk_mod
+        except (AttributeError, ImportError):
+            pass
+
+        try:
+            th_mod = importlib.import_module("theme")
+            sys.modules["src.shared.python.theme"] = th_mod
+            sys.modules["shared.python.theme"] = th_mod
+            v_theme = str((tools_root / "src/shared/python/theme").resolve())
+            if hasattr(th_mod, "__path__") and v_theme not in th_mod.__path__:
+                th_mod.__path__.append(v_theme)
+        except (AttributeError, ImportError):
+            pass
 
         # Alias training and all of its submodules recursively
         training_dir = root_dir / "src/shared/python/training"

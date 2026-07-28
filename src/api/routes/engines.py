@@ -36,6 +36,23 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
 
+def _sanitize_for_json(obj: Any) -> Any:
+    """Recursively convert numpy arrays and other non-JSON types to native Python."""
+    import numpy as np
+
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
+
+
 # Capability levels that may appear in a CapabilityLevelResponse.
 # See src/shared/python/engine_core/capabilities.py::CapabilityLevel.
 _VALID_CAPABILITY_LEVELS: frozenset[str] = frozenset({"full", "partial", "none"})

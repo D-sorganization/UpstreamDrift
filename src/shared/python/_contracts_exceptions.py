@@ -62,10 +62,14 @@ class PostconditionError(ContractViolationError):
 
 
 class InvariantError(ContractViolationError):
-    """Raised when a class or loop invariant is violated."""
+    """Raised when a class invariant is violated."""
 
     def __init__(self, message: str, value=None) -> None:
         super().__init__("invariant", message, value)
+
+
+class StateError(RuntimeError):
+    """Raised when an object or component is in an invalid state for an operation."""
 
 
 class ContractEvaluationError(ContractViolationError):
