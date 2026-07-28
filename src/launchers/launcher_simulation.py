@@ -1061,6 +1061,25 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
     def _launch_shot_tracer(self) -> None:
         """Launch the Shot Tracer ball flight visualization."""
+        if hasattr(self, "dock_widget_as_tab"):
+            try:
+                from src.launchers import _shot_tracer_gui
+
+                ui_widget = _shot_tracer_gui.get_dockable_ui()
+                if ui_widget is None:
+                    raise RuntimeError("Shot Tracer UI factory returned no widget")
+                self.dock_widget_as_tab(ui_widget, "Shot Tracer")
+                self.show_toast("Shot Tracer loaded as tab.", "success")
+                self.lbl_status.setText("> Shot Tracer Running")
+                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                return
+            except (ImportError, OSError, RuntimeError, ValueError) as e:
+                logger.exception("Failed to load Shot Tracer UI")
+                self.show_toast(f"Shot Tracer unavailable: {e}", "error")
+                self.lbl_status.setText("! Launch Error")
+                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+                return
+
         shot_tracer_script = REPOS_ROOT / "src" / "launchers" / "shot_tracer.py"
 
         if not shot_tracer_script.exists():
