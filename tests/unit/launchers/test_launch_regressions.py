@@ -437,3 +437,41 @@ class TestProcessImmediateDeathDetection:
             calls = [str(c) for c in mock_emit.call_args_list]
             exit_logged = any("exited with code" in c for c in calls)
             assert exit_logged, f"Expected exit code in output, got: {calls}"
+
+    def test_launch_module_confirm_startup_rejects_fast_exit(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Issue #8065: package app startup failure must not look launched."""
+        from src.launchers.launcher_process_manager import ProcessManager
+
+        mod_dir = tmp_path / "failing_mod"
+        mod_dir.mkdir()
+        (mod_dir / "__main__.py").write_text(
+            "import sys; print('startup failed', file=sys.stderr); sys.exit(2)\n",
+            encoding="utf-8",
+        )
+
+        pm = ProcessManager(REPO_ROOT)
+        with (
+            patch(
+                "src.launchers.launcher_process_manager.secure_popen",
+                side_effect=lambda cmd, cwd=None, suite_root=None, **kw: __import__(
+                    "subprocess"
+                ).Popen(cmd, cwd=str(cwd) if cwd else None, **kw),
+            ),
+            patch.object(pm, "_emit_output") as mock_emit,
+        ):
+            process = pm.launch_module(
+                "test_bad_mod",
+                "failing_mod",
+                tmp_path,
+                confirm_startup=True,
+                startup_timeout_seconds=2.0,
+            )
+
+        assert process is None
+        assert "test_bad_mod" not in pm.running_processes
+        calls = [str(c) for c in mock_emit.call_args_list]
+        assert any("startup failed" in c for c in calls)
+        assert any("exited with code 2" in c for c in calls)

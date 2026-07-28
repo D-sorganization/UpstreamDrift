@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 OutputCallback = Callable[[str, str], None]  # (engine_name, line) -> None
+STARTUP_FAILURE_GRACE_SECONDS = 0.5
 
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
@@ -460,6 +461,30 @@ class ProcessManager:
         t.start()
         self._output_threads[name] = t
 
+    def _process_survives_startup(
+        self,
+        name: str,
+        process: subprocess.Popen[bytes],
+        startup_timeout_seconds: float,
+    ) -> bool:
+        """Return whether ``process`` stays alive through the startup grace."""
+        if startup_timeout_seconds < 0:
+            raise ValueError("startup_timeout_seconds must be non-negative")
+        if startup_timeout_seconds == 0:
+            return True
+
+        try:
+            return_code = process.wait(timeout=startup_timeout_seconds)
+        except subprocess.TimeoutExpired:
+            return True
+        except (OSError, ValueError) as exc:
+            logger.debug("Could not confirm startup state for %s: %s", name, exc)
+            return True
+
+        logger.error("%s exited during startup with code %s", name, return_code)
+        self._stream_output(name, process)
+        return False
+
     def _stream_output(self, name: str, process: subprocess.Popen[bytes]) -> None:
         """Read stdout/stderr from *process* and emit lines until EOF.
 
@@ -494,6 +519,8 @@ class ProcessManager:
         env: dict[str, str] | None = None,
         extra_python_paths: tuple[Path, ...] = (),
         keep_terminal_open: bool = False,
+        confirm_startup: bool = False,
+        startup_timeout_seconds: float = STARTUP_FAILURE_GRACE_SECONDS,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python script as a subprocess.
 
@@ -568,6 +595,16 @@ class ProcessManager:
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                     preexec_fn=_preexec_fn,
                 )
+            _assign_to_job(process)
+
+            if confirm_startup and not self._process_survives_startup(
+                name,
+                process,
+                startup_timeout_seconds,
+            ):
+                return None
+
+            if not self.use_separate_terminals:
                 # Stream output in a background thread
                 t = threading.Thread(
                     target=self._stream_output,
@@ -576,8 +613,6 @@ class ProcessManager:
                 )
                 t.start()
                 self._output_threads[name] = t
-
-            _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
             self._add_to_running_processes(name, process)
@@ -602,6 +637,8 @@ class ProcessManager:
         env: dict[str, str] | None = None,
         extra_python_paths: tuple[Path, ...] = (),
         keep_terminal_open: bool = False,
+        confirm_startup: bool = False,
+        startup_timeout_seconds: float = STARTUP_FAILURE_GRACE_SECONDS,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python module as a subprocess.
 
@@ -701,6 +738,16 @@ class ProcessManager:
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                     preexec_fn=_preexec_fn,
                 )
+            _assign_to_job(process)
+
+            if confirm_startup and not self._process_survives_startup(
+                name,
+                process,
+                startup_timeout_seconds,
+            ):
+                return None
+
+            if not self.use_separate_terminals:
                 t = threading.Thread(
                     target=self._stream_output,
                     args=(name, process),
@@ -708,8 +755,6 @@ class ProcessManager:
                 )
                 t.start()
                 self._output_threads[name] = t
-
-            _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
             self._add_to_running_processes(name, process)
