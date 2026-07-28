@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Restored the `upstream_drift_tools` alias-removal hygiene
+  contract for #8206. The remaining executable test helper now clears only
+  canonical Sidekick/shared modules, and repo-owned contributor docs describe
+  the old alias as removed from UpstreamDrift instead of an active local shim.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

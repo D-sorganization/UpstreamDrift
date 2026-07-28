@@ -56,14 +56,11 @@ def _clear_sidekick_modules(monkeypatch: pytest.MonkeyPatch) -> None:
             "shared",
             "sidekick",
             "src.shared",
-            "upstream_drift_tools",
         } or name.startswith(
             (
                 "shared.python",
                 "sidekick.",
                 "src.shared.python.sidekick",
-                "src.shared.python.upstream_drift_tools",
-                "upstream_drift_tools.",
             )
         ):
             monkeypatch.delitem(sys.modules, name, raising=False)

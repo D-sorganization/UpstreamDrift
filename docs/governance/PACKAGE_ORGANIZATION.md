@@ -46,7 +46,7 @@ first checking which package should own it long-term.
 | `biomech` / `biomechanics`                               | `biomechanics` holds muscle/dynamics code; `biomech` holds exercise schemas. Needs merge decision.                                                                       |
 | `plot_engine` / `plot_style` / `plot_theme` / `plotting` | Four packages covering rendering backends, color channels, theme management, and animation. `plot_theme` likely belongs in `sidekick.theme`.                             |
 | `data_processing` / `data_processor`                     | `data_processing` is the UI-agnostic extraction (issue #407); `data_processor` is the Rust bulk-I/O engine (issue #2989). Different concerns, confusingly similar names. |
-| `upstream_drift` / `upstream_drift_tools`                | `upstream_drift_tools` is a **deprecated alias** (see below). `upstream_drift` is a separate package — do not conflate them.                                             |
+| `upstream_drift` / historical tools alias                | The old tools alias package has been removed from UpstreamDrift. `upstream_drift` is a separate package — do not conflate them.                                          |
 
 ---
 
@@ -65,21 +65,19 @@ until explicitly documented otherwise.
 
 ---
 
-## `upstream_drift_tools` — deprecated, do not use
+## Historical tools alias — removed, do not use
 
-`src/shared/python/upstream_drift_tools/` is a **compatibility shim** created
-during the `upstream_drift_tools` → `sidekick` rename (issues #5619, #5623).
+UpstreamDrift no longer carries the old alias package that preceded
+`sidekick` (issues #5619, #5623, #6564).
 
-- It re-exports every public symbol from `sidekick`.
-- It emits a `DeprecationWarning` on first import.
-- It will be **removed** in a future major release.
 - The hygiene test `tests/unit/repo_hygiene/test_no_deprecated_imports.py`
-  enforces that no `src/` or `tests/` file imports `upstream_drift_tools`.
+  enforces that no Python file under `src/` or `tests/` imports the old alias
+  and that the deleted package directory does not return.
 
 **Migration:**
 
 ```python
-# Before (deprecated)
+# Before (removed)
 from upstream_drift_tools.theme import CatppuccinTheme
 
 # After (correct)
