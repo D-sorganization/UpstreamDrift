@@ -20,6 +20,14 @@ from typing import Any, Protocol
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics._terrain_physics import (
+    _ensure_finite_vector3,
+    _validate_nonnegative_scalar,
+    _validate_positive_scalar,
+    _validate_vector3,
+    _validate_xy,
+    _validate_xyz,
+)
 from src.shared.python.physics.terrain import Terrain, TerrainType
 from src.shared.python.physics.terrain_engine import (
     CompressibleTurfModel,
@@ -114,8 +122,7 @@ class TerrainMixin:
         Returns:
             Ground height (meters), or 0.0 if no terrain
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return 0.0
 
@@ -131,8 +138,7 @@ class TerrainMixin:
         Returns:
             Unit normal vector (3,)
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return np.array([0.0, 0.0, 1.0])
 
@@ -151,8 +157,7 @@ class TerrainMixin:
         Returns:
             Terrain type at the position
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return TerrainType.FAIRWAY
 
@@ -168,8 +173,7 @@ class TerrainMixin:
         Returns:
             Friction coefficient
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return 0.5
 
@@ -186,8 +190,7 @@ class TerrainMixin:
         Returns:
             Coefficient of restitution
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return 0.6
 
@@ -217,8 +220,11 @@ class TerrainMixin:
         Returns:
             Contact force vector (3,) [N]
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
+        velocity = (
+            _validate_vector3("velocity", velocity) if velocity is not None else None
+        )
         if not self._terrain_enabled or self._terrain is None:
             return np.zeros(3)
 
@@ -251,8 +257,9 @@ class TerrainMixin:
         Returns:
             Friction force vector (3,) [N]
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
+        velocity = _validate_vector3("velocity", velocity)
         if not self._terrain_enabled or self._contact_model is None:
             return np.zeros(3)
 
@@ -276,8 +283,8 @@ class TerrainMixin:
         Returns:
             True if in contact with terrain
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
         if self._terrain is None or self._contact_model is None:
             return False
 
@@ -299,8 +306,8 @@ class TerrainMixin:
         Returns:
             Dictionary with lie quality metrics
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
+        ball_radius = _validate_nonnegative_scalar("ball_radius", ball_radius)
         if self._turf_model is None:
             return {
                 "lie_type": "unknown",
@@ -325,8 +332,7 @@ class TerrainMixin:
         Returns:
             Dictionary with friction, restitution, stiffness, damping
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
         if self._terrain is None:
             return {
                 "friction": 0.5,
@@ -411,8 +417,9 @@ class TerrainAwareSimulation:
         Returns:
             Total force vector (3,) [N]
         """
-        if position is None:
-            raise ValueError("position must be provided")
+        position = _validate_vector3("position", position)
+        velocity = _validate_vector3("velocity", velocity)
+        radius = _validate_nonnegative_scalar("radius", radius)
         x, y, z = position
 
         # Contact force (normal)
@@ -430,7 +437,7 @@ class TerrainAwareSimulation:
             x, y, z, radius, velocity
         )
 
-        return contact_force + friction_force
+        return _ensure_finite_vector3("terrain_force", contact_force + friction_force)
 
     def simulate_ball_landing(
         self,
@@ -452,8 +459,10 @@ class TerrainAwareSimulation:
         Returns:
             Dictionary with landing results
         """
-        if impact_position is None:
-            raise ValueError("impact_position must be provided")
+        impact_position = _validate_vector3("impact_position", impact_position)
+        impact_velocity = _validate_vector3("impact_velocity", impact_velocity)
+        ball_mass = _validate_positive_scalar("ball_mass", ball_mass)
+        ball_radius = _validate_nonnegative_scalar("ball_radius", ball_radius)
         x, y, z = impact_position
 
         # Get terrain properties

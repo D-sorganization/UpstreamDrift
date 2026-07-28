@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from src.shared.python.physics.terrain import ElevationMap, Terrain, TerrainType
 from src.shared.python.physics.terrain_mixin import TerrainMixin
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Minimal concrete class implementing TerrainMixin
@@ -104,6 +107,11 @@ class TestTerrainMixinQueries:
         tt = mixin.get_terrain_type(0.0, 0.0)
         assert isinstance(tt, TerrainType)
 
+    def test_get_ground_height_rejects_non_finite_coordinate(self) -> None:
+        mixin = _SimpleMixin()
+        with pytest.raises(ValueError, match="finite"):
+            mixin.get_ground_height(0.0, np.nan)
+
 
 # ---------------------------------------------------------------------------
 # get_terrain_friction / get_terrain_restitution
@@ -125,3 +133,29 @@ class TestTerrainMixinFriction:
         mixin = self._mixin_with_terrain()
         r = mixin.get_terrain_restitution(0.0, 0.0)
         assert 0.0 <= r <= 1.0
+
+
+class TestTerrainMixinContracts:
+    def test_contact_force_rejects_negative_radius_before_disabled_fallback(
+        self,
+    ) -> None:
+        mixin = _SimpleMixin()
+        mixin.enable_terrain(False)
+
+        with pytest.raises(ValueError, match="radius"):
+            mixin.compute_terrain_contact_force(0.0, 0.0, 0.0, radius=-0.1)
+
+    def test_friction_force_rejects_malformed_velocity_before_disabled_fallback(
+        self,
+    ) -> None:
+        mixin = _SimpleMixin()
+        mixin.enable_terrain(False)
+
+        with pytest.raises(ValueError, match="velocity"):
+            mixin.compute_terrain_friction_force(
+                0.0,
+                0.0,
+                0.0,
+                radius=0.0,
+                velocity=np.array([1.0, 0.0]),
+            )

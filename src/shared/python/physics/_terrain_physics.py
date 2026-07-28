@@ -20,6 +20,70 @@ def _magnitude(vec: np.ndarray) -> float:
     return math.sqrt(float(np.dot(arr, arr)))
 
 
+def _validate_finite_scalar(name: str, value: float) -> float:
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a finite scalar") from exc
+    if not math.isfinite(scalar):
+        raise ValueError(f"{name} must be finite")
+    return scalar
+
+
+def _validate_nonnegative_scalar(name: str, value: float) -> float:
+    scalar = _validate_finite_scalar(name, value)
+    if scalar < 0.0:
+        raise ValueError(f"{name} must be non-negative")
+    return scalar
+
+
+def _validate_positive_scalar(name: str, value: float) -> float:
+    scalar = _validate_finite_scalar(name, value)
+    if scalar <= 0.0:
+        raise ValueError(f"{name} must be positive")
+    return scalar
+
+
+def _validate_xy(x: float, y: float) -> tuple[float, float]:
+    return _validate_finite_scalar("x", x), _validate_finite_scalar("y", y)
+
+
+def _validate_xyz(x: float, y: float, z: float) -> tuple[float, float, float]:
+    return (
+        _validate_finite_scalar("x", x),
+        _validate_finite_scalar("y", y),
+        _validate_finite_scalar("z", z),
+    )
+
+
+def _validate_vector3(name: str, value: np.ndarray) -> np.ndarray:
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+    try:
+        vector = np.asarray(value, dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a finite 3-vector") from exc
+    if vector.shape != (3,):
+        raise ValueError(f"{name} must be a finite 3-vector")
+    if not np.all(np.isfinite(vector)):
+        raise ValueError(f"{name} must be finite")
+    return vector
+
+
+def _ensure_finite_vector3(name: str, value: np.ndarray) -> np.ndarray:
+    vector = _validate_vector3(name, value)
+    return vector
+
+
+def _ensure_finite_energy_payload(payload: dict[str, float]) -> dict[str, float]:
+    for name, value in payload.items():
+        if not math.isfinite(float(value)):
+            raise ValueError(f"{name} must be finite")
+    return payload
+
+
 # Energy-absorption blend weights (#7055).
 #
 # The fraction of normal-impact kinetic energy absorbed by turf is modelled as
@@ -85,8 +149,8 @@ class TerrainContactModel:
         Returns:
             True if in contact
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
 
@@ -110,8 +174,8 @@ class TerrainContactModel:
         Returns:
             Penetration depth (positive when penetrating, meters)
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
 
@@ -139,8 +203,11 @@ class TerrainContactModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
+        velocity_vector = (
+            _validate_vector3("velocity", velocity) if velocity is not None else None
+        )
         penetration = self.compute_penetration(x, y, z, radius)
 
         if penetration <= 0:
@@ -159,9 +226,9 @@ class TerrainContactModel:
 
         # Damping force (if velocity provided)
         damping_force = 0.0
-        if velocity is not None:
+        if velocity_vector is not None:
             # Velocity component in normal direction
-            v_normal = np.dot(velocity, normal)
+            v_normal = np.dot(velocity_vector, normal)
             # Only damp if moving into surface
             if v_normal < 0:
                 damping_force = -damping * v_normal
@@ -170,7 +237,7 @@ class TerrainContactModel:
         force_magnitude = spring_force + damping_force
 
         # Force acts in normal direction
-        return force_magnitude * normal
+        return _ensure_finite_vector3("contact_force", force_magnitude * normal)
 
     def compute_friction_force(
         self,
@@ -196,11 +263,15 @@ class TerrainContactModel:
         Returns:
             Friction force vector (3,) [N]
         """
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
+        velocity = _validate_vector3("velocity", velocity)
+
         # Get normal force if not provided
-        if x is None:
-            raise ValueError("x must be provided")
         if normal_force is None:
             normal_force = self.compute_contact_force(x, y, z, radius, velocity)
+        else:
+            normal_force = _validate_vector3("normal_force", normal_force)
 
         normal_force_magnitude = _magnitude(normal_force)
         if normal_force_magnitude < 1e-6:
@@ -226,7 +297,9 @@ class TerrainContactModel:
         # Direction opposes motion
         friction_direction = -v_tangent / v_tangent_magnitude
 
-        return friction_magnitude * friction_direction
+        return _ensure_finite_vector3(
+            "friction_force", friction_magnitude * friction_direction
+        )
 
 
 @dataclass
@@ -268,8 +341,8 @@ class CompressibleTurfModel:
             Dictionary with compression_depth, effective_stiffness,
             max_compression, and compression_ratio
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
         material = self.terrain.get_material(x, y)
         ground_height = self.terrain.get_elevation(x, y)
 
@@ -326,8 +399,11 @@ class CompressibleTurfModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y, z = _validate_xyz(x, y, z)
+        radius = _validate_nonnegative_scalar("radius", radius)
+        velocity_vector = (
+            _validate_vector3("velocity", velocity) if velocity is not None else None
+        )
         material = self.terrain.get_material(x, y)
         state = self.get_compression_state(x, y, z, radius)
 
@@ -343,8 +419,8 @@ class CompressibleTurfModel:
 
         # Damping force
         damping_force = 0.0
-        if velocity is not None:
-            v_normal = np.dot(velocity, normal)
+        if velocity_vector is not None:
+            v_normal = np.dot(velocity_vector, normal)
             # Damping increases with compression (energy absorption)
             effective_damping = (
                 self.base_damping
@@ -368,7 +444,7 @@ class CompressibleTurfModel:
             )
             force_magnitude += grass_resistance
 
-        return force_magnitude * normal
+        return _ensure_finite_vector3("contact_force", force_magnitude * normal)
 
     def compute_lie_quality(
         self,
@@ -390,8 +466,8 @@ class CompressibleTurfModel:
             Dictionary with lie_type, sitting_depth, grass_interference,
             and playability_factor
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
+        ball_radius = _validate_nonnegative_scalar("ball_radius", ball_radius)
         material = self.terrain.get_material(x, y)
         terrain_type = self.terrain.get_terrain_type(x, y)
 
@@ -465,8 +541,10 @@ class CompressibleTurfModel:
             Dictionary with kinetic_energy, absorbed_energy,
             remaining_energy, and energy_absorption_ratio
         """
-        if x is None:
-            raise ValueError("x must be provided")
+        x, y = _validate_xy(x, y)
+        impact_velocity = _validate_vector3("impact_velocity", impact_velocity)
+        mass = _validate_positive_scalar("mass", mass)
+        _validate_nonnegative_scalar("radius", radius)
         material = self.terrain.get_material(x, y)
         normal = self.terrain.get_normal(x, y)
 
@@ -495,11 +573,13 @@ class CompressibleTurfModel:
 
         remaining_energy = kinetic_energy - absorbed_energy
 
-        return {
-            "kinetic_energy": float(kinetic_energy),
-            "absorbed_energy": float(absorbed_energy),
-            "remaining_energy": float(max(0.0, remaining_energy)),
-            "energy_absorption_ratio": float(
-                absorbed_energy / kinetic_energy if kinetic_energy > 0 else 0.0
-            ),
-        }
+        return _ensure_finite_energy_payload(
+            {
+                "kinetic_energy": float(kinetic_energy),
+                "absorbed_energy": float(absorbed_energy),
+                "remaining_energy": float(max(0.0, remaining_energy)),
+                "energy_absorption_ratio": float(
+                    absorbed_energy / kinetic_energy if kinetic_energy > 0 else 0.0
+                ),
+            }
+        )

@@ -314,6 +314,17 @@ class TestContactModelPenetration:
         assert model.is_in_contact(5.0, 5.0, z=-0.1) is True
         assert model.is_in_contact(5.0, 5.0, z=0.5) is False
 
+    @pytest.mark.parametrize(
+        ("x", "y", "z"),
+        [(float("nan"), 5.0, 0.0), (5.0, float("inf"), 0.0), (5.0, 5.0, -np.inf)],
+    )
+    def test_penetration_rejects_non_finite_coordinates(
+        self, x: float, y: float, z: float
+    ) -> None:
+        model = TerrainContactModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="finite"):
+            model.compute_penetration(x, y, z)
+
 
 class TestContactForce:
     def test_no_force_without_penetration(self) -> None:
@@ -334,6 +345,22 @@ class TestContactForce:
         assert force[0] == pytest.approx(0.0, abs=1e-6)
         assert force[1] == pytest.approx(0.0, abs=1e-6)
         assert force[2] > 0.0
+
+    def test_contact_force_rejects_negative_radius(self) -> None:
+        model = TerrainContactModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="radius"):
+            model.compute_contact_force(5.0, 5.0, z=-0.1, radius=-0.5)
+
+    @pytest.mark.parametrize(
+        "velocity",
+        [np.array([0.0, 0.0]), np.array([0.0, 0.0, np.nan])],
+    )
+    def test_contact_force_rejects_malformed_velocity(
+        self, velocity: np.ndarray
+    ) -> None:
+        model = TerrainContactModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="velocity"):
+            model.compute_contact_force(5.0, 5.0, z=-0.1, velocity=velocity)
 
 
 class TestFrictionForce:
@@ -386,6 +413,29 @@ class TestFrictionForce:
         )
         assert np.allclose(friction, np.zeros(3))
 
+    def test_friction_rejects_malformed_velocity(self) -> None:
+        model = TerrainContactModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="velocity"):
+            model.compute_friction_force(
+                5.0,
+                5.0,
+                z=-0.1,
+                radius=0.0,
+                velocity=np.array([2.0, 0.0, 0.0, 0.0]),
+            )
+
+    def test_friction_rejects_malformed_normal_force(self) -> None:
+        model = TerrainContactModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="normal_force"):
+            model.compute_friction_force(
+                5.0,
+                5.0,
+                z=-0.1,
+                radius=0.0,
+                velocity=np.array([2.0, 0.0, 0.0]),
+                normal_force=np.array([0.0, 0.0, np.inf]),
+            )
+
 
 class TestCompressibleTurf:
     def test_lie_quality_keys_and_ranges(self) -> None:
@@ -437,3 +487,22 @@ class TestCompressibleTurf:
         # Huge penetration is clamped to the material's max compression depth.
         assert state["compression_depth"] <= state["max_compression"] + 1e-9
         assert 0.0 <= state["compression_ratio"] <= 1.0
+
+    def test_energy_absorption_rejects_negative_mass(self) -> None:
+        model = CompressibleTurfModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="mass"):
+            model.compute_energy_absorption(
+                5.0,
+                5.0,
+                impact_velocity=np.array([10.0, 0.0, -5.0]),
+                mass=-1.0,
+            )
+
+    def test_energy_absorption_rejects_malformed_impact_velocity(self) -> None:
+        model = CompressibleTurfModel(terrain=_green_terrain())
+        with pytest.raises(ValueError, match="impact_velocity"):
+            model.compute_energy_absorption(
+                5.0,
+                5.0,
+                impact_velocity=np.array([10.0, 0.0]),
+            )
