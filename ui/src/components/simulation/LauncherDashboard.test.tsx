@@ -16,7 +16,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent, within } from '@testing-library/dom';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { LauncherDashboard } from './LauncherDashboard';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 

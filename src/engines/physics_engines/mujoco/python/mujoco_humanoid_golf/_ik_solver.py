@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import mujoco
 import numpy as np
 
@@ -108,7 +110,8 @@ class IKSolverMixin:
                 maintain_orientation,
             )
 
-            if np.linalg.norm(task_error) < self.ik_tolerance:
+            # ⚡ Bolt: math.sqrt(np.vdot) beats np.linalg.norm on small 1D arrays
+            if math.sqrt(np.vdot(task_error, task_error)) < self.ik_tolerance:
                 return True
 
             J_damped = self._compute_ik_step(

@@ -16,5 +16,5 @@ Start with:
 - **[Simscape Multibody](simscape.md)**: High-fidelity biomechanical modeling using MATLAB/Simulink.
 - **[Pendulum Models](pendulum.md)**: Simplified 2D models for fundamental swing mechanics.
 - **[OpenSim](opensim.md)**: Experimental biomechanics integration.
-- **[MyoSim](myosim.md)**: Experimental muscle-modeling integration.
+- **[MyoSim / MyoSuite](myosim.md)**: Muscle-modeling integration (engine id `myosim`, implemented by MyoSuite).
 - **[OpenPose](openpose.md)**: Computer vision pipeline for extracting kinematics from video.

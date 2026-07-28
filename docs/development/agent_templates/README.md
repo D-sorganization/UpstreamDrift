@@ -203,7 +203,7 @@ For complex tasks, combine multiple agents:
 - [Development Guide](../README.md) - General development workflow
 - [Contributing Guide](../contributing.md) - Contribution standards
 - [AI Agents Overview](../AGENTS.md) - AI agent system overview
-- [Testing Guide](../../testing-guide.md) - Quality assurance practices
+- [Testing Guide](../../testing/testing-guide.md) - Quality assurance practices
 
 ## Questions?
 

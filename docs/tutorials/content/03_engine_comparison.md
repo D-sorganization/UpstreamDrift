@@ -446,5 +446,5 @@ Some engines use body-fixed vs. world-fixed frames. The suite normalizes these, 
 - [Tutorial 4: Video Analysis](04_video_analysis.md) - Extract poses from video
 - [Tutorial 5: Same Swing in Three Engines](05_same_swing_three_engines.md) -
   Compare one swing across MuJoCo, Pinocchio, and JaxSim-compatible paths
-- [API Reference: CrossEngineValidator](../../api/cross_engine_validator.md)
-- [Guideline P3: Tolerance Specifications](../../guidelines/P3_tolerances.md)
+- CrossEngineValidator API — `src/shared/python/engine_core/cross_engine_validator.py`
+- [Cross-Engine Deviations](../../troubleshooting/cross_engine_deviations.md) - Tolerances and known divergences
