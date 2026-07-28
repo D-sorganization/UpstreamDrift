@@ -104,6 +104,10 @@ class StorageBackend(Protocol):
         """Create a new task record."""
         ...
 
+    def create_or_get_task(self, record: TaskRecord) -> TaskRecord:
+        """Atomically create a task or return the existing task for its run_id."""
+        ...
+
     def get_task(self, task_id: str) -> TaskRecord | None:
         """Retrieve a task by ID."""
         ...
@@ -182,21 +186,29 @@ class SQLiteBackend:
 
         self.db_path = Path(db_path)
         self._local = threading.local()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
+        self._connections: set[sqlite3.Connection] = set()
         self._init_db()
 
     def _get_conn(self) -> sqlite3.Connection:
         """Get thread-local database connection."""
-        if not hasattr(self._local, "conn") or self._local.conn is None:
-            self._local.conn = sqlite3.connect(
+        conn = getattr(self._local, "conn", None)
+        if conn is None or conn not in self._connections:
+            conn = sqlite3.connect(
                 str(self.db_path),
                 timeout=30.0,
                 isolation_level=None,  # Autocommit mode
+                # Backend methods serialize access with _lock; cross-thread close
+                # is required to release worker-created connections on shutdown.
+                check_same_thread=False,
             )
-            self._local.conn.row_factory = sqlite3.Row
-            self._local.conn.execute("PRAGMA journal_mode=WAL")
-            self._local.conn.execute("PRAGMA busy_timeout=30000")
-        return cast(sqlite3.Connection, getattr(self._local, "conn", None))
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA busy_timeout=30000")
+            self._local.conn = conn
+            with self._lock:
+                self._connections.add(conn)
+        return cast(sqlite3.Connection, conn)
 
     @contextmanager
     def _transaction(self) -> Generator[sqlite3.Connection, None, None]:
@@ -332,6 +344,41 @@ class SQLiteBackend:
             """,
                 self._record_to_values(record),
             )
+
+    def create_or_get_task(self, record: TaskRecord) -> TaskRecord:
+        """Atomically create a task or return the existing task for ``run_id``.
+
+        Only run_id conflicts are treated as idempotent success. A task_id
+        collision without a matching run_id remains an integrity failure.
+        """
+        if record.run_id is None:
+            self.create_task(record)
+            return record
+
+        with self._lock, self._transaction() as conn:
+            cursor = conn.execute(
+                """
+                INSERT OR IGNORE INTO tasks (
+                    task_id, run_id, status, task_type, input_data,
+                    config_hash, code_version, progress, result, error,
+                    created_at, updated_at, heartbeat_at, started_at, completed_at,
+                    worker_id, retry_count, max_retries, ttl_seconds,
+                    retention_seconds, priority
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                self._record_to_values(record),
+            )
+            if cursor.rowcount == 1:
+                return record
+
+            existing = conn.execute(
+                "SELECT * FROM tasks WHERE run_id = ?", (record.run_id,)
+            ).fetchone()
+            if existing is None:
+                raise sqlite3.IntegrityError(
+                    f"Task id collision while creating task {record.task_id!r}"
+                )
+            return self._row_to_record(existing)
 
     def get_task(self, task_id: str) -> TaskRecord | None:
         """Retrieve a task by ID."""
@@ -515,12 +562,13 @@ class SQLiteBackend:
         return count
 
     def close(self) -> None:
-        """Close the thread-local SQLite connection for the current thread."""
+        """Close all SQLite connections opened by this backend."""
         with self._lock:
-            conn = getattr(self._local, "conn", None)
-            if conn is None:
-                return
-            conn.close()
+            connections = tuple(self._connections)
+            self._connections.clear()
+            for conn in connections:
+                with suppress(sqlite3.Error):
+                    conn.close()
             self._local.conn = None
 
 
@@ -643,15 +691,6 @@ class DurableTaskManager:
             If run_id is provided and a task with that run_id exists,
             returns the existing task_id instead of creating a new one.
         """
-        # Check idempotency
-        if run_id:
-            existing = self.backend.find_by_run_id(run_id)
-            if existing:
-                logger.debug(
-                    "Found existing task for run_id %s: %s", run_id, existing.task_id
-                )
-                return existing.task_id
-
         # Generate task ID and config hash
         task_id = str(uuid.uuid4())
         config_hash = hashlib.sha256(
@@ -675,7 +714,13 @@ class DurableTaskManager:
             max_retries=max_retries,
         )
 
-        self.backend.create_task(record)
+        created = self.backend.create_or_get_task(record)
+        if created.task_id != task_id:
+            logger.debug(
+                "Found existing task for run_id %s: %s", run_id, created.task_id
+            )
+            return created.task_id
+
         logger.info(
             "Created task %s (type=%s, priority=%d)", task_id, task_type, priority
         )

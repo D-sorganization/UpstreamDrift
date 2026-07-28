@@ -1,7 +1,10 @@
 """Tests for the durable task manager."""
 
 import asyncio
+import sqlite3
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -210,6 +213,26 @@ class TestSQLiteBackend:
         assert "ttl-expired" in expired_ids
         assert "retention-expired" in expired_ids
 
+    def test_close_closes_worker_thread_connections(self, tmp_path: Path) -> None:
+        """Owner-thread close must release connections opened by worker threads."""
+        db_path = tmp_path / "tasks.db"
+        backend = SQLiteBackend(db_path=db_path)
+
+        def worker() -> sqlite3.Connection:
+            backend.create_task(TaskRecord(task_id="worker-task"))
+            return backend._get_conn()
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            worker_conn = pool.submit(worker).result(timeout=5)
+
+            backend.close()
+
+            with pytest.raises(sqlite3.ProgrammingError, match="closed database"):
+                pool.submit(lambda: worker_conn.execute("SELECT 1")).result(timeout=5)
+
+        assert backend._connections == set()
+        backend.close()
+
 
 class TestDurableTaskManager:
     """Test the durable task manager orchestrator."""
@@ -241,6 +264,45 @@ class TestDurableTaskManager:
         )
 
         assert task_id1 == task_id2
+
+    def test_create_task_run_id_is_atomic_under_race(self, tmp_path: Path) -> None:
+        """Concurrent same-run_id creates return one task id without IntegrityError."""
+
+        class RacingBackend(SQLiteBackend):
+            def __init__(self, db_path: Path) -> None:
+                super().__init__(db_path=db_path)
+                self._race_barrier = threading.Barrier(2)
+
+            def find_by_run_id(self, run_id: str) -> TaskRecord | None:
+                found = super().find_by_run_id(run_id)
+                if found is None:
+                    self._race_barrier.wait(timeout=5)
+                return found
+
+        backend = RacingBackend(tmp_path / "tasks.db")
+        manager = DurableTaskManager(backend=backend, auto_cleanup=False)
+        try:
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                futures = [
+                    pool.submit(
+                        manager.create_task,
+                        task_type="simulation",
+                        input_data={"index": index},
+                        run_id="same-run",
+                    )
+                    for index in range(2)
+                ]
+                task_ids = [future.result(timeout=5) for future in futures]
+
+            assert task_ids[0] == task_ids[1]
+            task = manager.get_task(task_ids[0])
+            assert task is not None
+            assert task.run_id == "same-run"
+            existing = backend.find_by_run_id("same-run")
+            assert existing is not None
+            assert existing.task_id == task_ids[0]
+        finally:
+            asyncio.run(manager.shutdown())
 
     def test_acquire_and_release_task(self, task_manager: DurableTaskManager):
         """Test acquiring a task for a worker and releasing it."""
