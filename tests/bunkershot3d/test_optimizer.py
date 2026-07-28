@@ -15,8 +15,10 @@ def test_angle_of_repose_optimization() -> None:
     best_params = optimizer.optimize()
 
     assert "friction_coefficient" in best_params
-    assert "restitution_coefficient" in best_params
     assert "error" in best_params
+    # #7999: restitution is not read by any experiment, so it is no longer
+    # optimised over and must not be reported as if it had been measured.
+    assert "restitution_coefficient" not in best_params
 
     assert np.isclose(best_params["friction_coefficient"], 0.5, atol=0.05)
 
