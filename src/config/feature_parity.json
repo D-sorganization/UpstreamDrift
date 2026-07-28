@@ -81,7 +81,7 @@
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
       "pyqt": "src/tools/canonical_core/estimation.py",
-      "api": null,
+      "api": "src/api/routes/canonical_core.py",
       "web": "ui/src/pages/CanonicalCoreShell.tsx",
       "status": "parity",
       "tiles": ["canonical_core_estimation", "canonical_core_comparison"]

@@ -134,6 +134,26 @@ class TestReferencedPathsExist:
         ]
         assert not offenders, f"Paths must be repo-relative with '/': {offenders}"
 
+    def test_parity_web_api_clients_reference_api_surface(
+        self, registry: FeatureParityRegistry
+    ) -> None:
+        """Parity web entries that call backend routes must track an API file."""
+        offenders = []
+        for entry in registry.entries:
+            if entry.status != "parity" or entry.api or not entry.web:
+                continue
+            web_path = REPO_ROOT / entry.web
+            if not web_path.exists():
+                continue
+            source = web_path.read_text(encoding="utf-8")
+            if "apiFetch(" in source or "apiFetch<" in source or "/api/" in source:
+                offenders.append(f"{entry.feature_id}: {entry.web}")
+
+        assert not offenders, (
+            "Parity entries whose web implementation calls /api routes must "
+            f"reference the owning API path in feature_parity.json: {offenders}"
+        )
+
 
 # =============================================================================
 # 4. CI gate: every launcher-manifest tile id has a registry entry
