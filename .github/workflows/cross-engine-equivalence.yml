@@ -240,6 +240,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Resolve pinned Tools ownership revision
+        id: tools-ownership-pin
+        shell: bash
+        run: |
+          tools_sha=$(git ls-tree HEAD vendor/ud-tools | awk '{print $3}')
+          test -n "$tools_sha"
+          echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout pinned Tools ownership source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: D-sorganization/Tools
+          ref: ${{ steps.tools-ownership-pin.outputs.sha }}
+          path: vendor/ud-tools
+          fetch-depth: 1
+          sparse-checkout: |
+            src/shared
+            src/sidekick
+            src/chat
+            src/python/src/utils
+            src/contracts.py
+          persist-credentials: false
+
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
