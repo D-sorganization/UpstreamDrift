@@ -14,6 +14,7 @@ import json
 import os
 import re
 import shutil
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +40,19 @@ _KNOWN_API_PROVIDERS: tuple[tuple[str, str], ...] = (
 
 #: Default path for MCP server configuration.
 _MCP_CONFIG_PATH = Path.home() / ".upstreamdrift" / "mcp_servers.json"
+
+
+def _mcp_config_error(now: datetime, message: str) -> list[IntegrationRecord]:
+    return [
+        IntegrationRecord(
+            kind="mcp",
+            name="mcp_servers.json",
+            status="error",
+            last_checked=now,
+            last_error=message,
+        )
+    ]
+
 
 # ---------------------------------------------------------------------------
 # Data types
@@ -191,7 +205,23 @@ def aggregate_mcp_servers() -> list[IntegrationRecord]:
             )
         ]
 
-    servers: list[dict] = data if isinstance(data, list) else data.get("servers", [])
+    if isinstance(data, list):
+        servers = data
+    elif isinstance(data, Mapping):
+        servers = data.get("servers", [])
+    else:
+        return _mcp_config_error(
+            now,
+            "Unsupported top-level JSON shape in mcp_servers.json: "
+            f"expected object or list, got {type(data).__name__}",
+        )
+
+    if not isinstance(servers, list):
+        return _mcp_config_error(
+            now,
+            "Unsupported servers value in mcp_servers.json: "
+            f"expected list, got {type(servers).__name__}",
+        )
     if not servers:
         return [
             IntegrationRecord(
@@ -350,8 +380,12 @@ def copy_diagnostics(records: list[IntegrationRecord]) -> str:
         checked = (
             rec.last_checked.strftime("%Y-%m-%d %H:%M:%S") if rec.last_checked else "—"
         )
-        # Scrub detail; never include last_error values that might contain key hints
-        notes = _scrub(rec.detail) if rec.detail else ""
+        note_parts = []
+        if rec.detail:
+            note_parts.append(_scrub(rec.detail))
+        if rec.last_error:
+            note_parts.append(f"error: {_scrub(rec.last_error)}")
+        notes = "; ".join(note_parts)
         lines.append(
             f"| {rec.kind} | {rec.name} | {rec.status} | {checked} | {notes} |"
         )
