@@ -415,19 +415,21 @@ class WorkflowEngine:
 
         skipped = self._check_step_condition(step, execution, start_time)
         if skipped is not None:
-            if execution.current_step_index >= len(workflow.steps):
-                execution.status = StepStatus.COMPLETED
-                logger.info(
-                    "Workflow completed (final step skipped): %s", execution.workflow_id
-                )
+            self._mark_completed_if_past_end(
+                execution,
+                workflow,
+                "Workflow completed (final step skipped): %s",
+            )
             return skipped
 
-        tool_result, failure = self._execute_step_tool(step, execution, start_time)
+        tool_result, failure = self._execute_step_tool(
+            step, execution, workflow, start_time
+        )
         if failure is not None:
             return failure
 
         validation_failure = self._validate_step_result(
-            step, execution, tool_result, start_time
+            step, execution, workflow, tool_result, start_time
         )
         if validation_failure is not None:
             return validation_failure
@@ -468,6 +470,7 @@ class WorkflowEngine:
         self,
         step: WorkflowStep,
         execution: WorkflowExecution,
+        workflow: Workflow,
         start_time: float,
     ) -> tuple[ToolResult | None, StepResult | None]:
         if step is None:
@@ -492,7 +495,7 @@ class WorkflowEngine:
                     duration=time.perf_counter() - start_time,
                 )
                 execution.step_results.append(result)
-                return None, self._handle_failure(execution, step, result)
+                return None, self._handle_failure(execution, step, result, workflow)
 
             if not tool_result.success:
                 result = StepResult(
@@ -502,7 +505,7 @@ class WorkflowEngine:
                     duration=time.perf_counter() - start_time,
                 )
                 execution.step_results.append(result)
-                return None, self._handle_failure(execution, step, result)
+                return None, self._handle_failure(execution, step, result, workflow)
 
         return tool_result, None
 
@@ -510,6 +513,7 @@ class WorkflowEngine:
         self,
         step: WorkflowStep,
         execution: WorkflowExecution,
+        workflow: Workflow,
         tool_result: ToolResult | None,
         start_time: float,
     ) -> StepResult | None:
@@ -533,9 +537,28 @@ class WorkflowEngine:
                         duration=time.perf_counter() - start_time,
                     )
                     execution.step_results.append(result)
-                    return self._handle_failure(execution, step, result)
+                    return self._handle_failure(execution, step, result, workflow)
             except (RuntimeError, ValueError, OSError) as e:
-                logger.warning("Validation failed for step %s: %s", step.id, e)
+                message = f"Validation failed for step {step.id}: {e}"
+                logger.warning(
+                    "Validation failed for step %s: %s",
+                    step.id,
+                    e,
+                )
+                validation = ValidationResult(
+                    passed=False,
+                    message=message,
+                    details={"exception_type": type(e).__name__},
+                )
+                result = StepResult(
+                    step_id=step.id,
+                    status=StepStatus.FAILED,
+                    error=message,
+                    validation=validation,
+                    duration=time.perf_counter() - start_time,
+                )
+                execution.step_results.append(result)
+                return self._handle_failure(execution, step, result, workflow)
         return None
 
     def _finalize_step_success(
@@ -565,17 +588,30 @@ class WorkflowEngine:
 
         execution.current_step_index += 1
 
-        if execution.current_step_index >= len(workflow.steps):
-            execution.status = StepStatus.COMPLETED
-            logger.info("Workflow completed: %s", execution.workflow_id)
+        self._mark_completed_if_past_end(
+            execution,
+            workflow,
+            "Workflow completed: %s",
+        )
 
         return result
+
+    def _mark_completed_if_past_end(
+        self,
+        execution: WorkflowExecution,
+        workflow: Workflow,
+        message: str,
+    ) -> None:
+        if execution.current_step_index >= len(workflow.steps):
+            execution.status = StepStatus.COMPLETED
+            logger.info(message, execution.workflow_id)
 
     def _handle_failure(
         self,
         execution: WorkflowExecution,
         step: WorkflowStep,
         result: StepResult,
+        workflow: Workflow,
     ) -> StepResult:
         """Handle a step failure based on recovery strategy.
 
@@ -601,6 +637,11 @@ class WorkflowEngine:
         elif step.on_failure == RecoveryStrategy.SKIP:
             result.status = StepStatus.SKIPPED
             execution.current_step_index += 1
+            self._mark_completed_if_past_end(
+                execution,
+                workflow,
+                "Workflow completed (final failed step skipped): %s",
+            )
             logger.warning("Skipped failed step: %s", step.id)
         # For RETRY, ASK_USER, FALLBACK - return result for caller to handle
 
