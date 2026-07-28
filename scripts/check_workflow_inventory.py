@@ -4,14 +4,16 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
+import re
 import sys
 from pathlib import Path
 
 WORKFLOW_GLOB_PATTERNS = ("*.yml", "*.yaml")
-# Bumped 2026-05-23 to 85 to accommodate sidekick standalone packaging workflows
-# (package-standalone-sidekick, release-sidekick-binary).
-# The 25-workflow consolidation target remains; see issue #3835.
-DEFAULT_MAX_ACTIVE_WORKFLOWS = 85
+# No-growth budgets documented in .github/WORKFLOWS.md. The 25-workflow
+# consolidation target remains; see issues #3835 and #8207.
+DEFAULT_MAX_ACTIVE_WORKFLOWS = 83
+DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS = 33
 AGENT_CONFIG_ROOTS = (".claude", ".gaai", ".agent", ".kiro", ".jules")
 INVENTORY_PATH = Path(".github/WORKFLOWS.md")
 AGENT_GOVERNANCE_PATH = Path("docs/development/agents/migration.md")
@@ -23,6 +25,26 @@ AGENT_BUDGET_CONTRACT_TERMS = (
     "Audit artifact",
     "Human approval",
 )
+WORKFLOW_BUDGET_RE = re.compile(
+    r"no-growth cap at\s+(?P<active>\d+)\s+active workflows and\s+"
+    r"(?P<pr>\d+)\s+PR-triggered workflows\..*?"
+    r"target for issue #3835 remains\s+(?P<target>\d+)\s+active workflows",
+    re.IGNORECASE | re.DOTALL,
+)
+PR_TRIGGER_EVENTS = frozenset({"pull_request", "pull_request_target"})
+
+
+@dataclass(frozen=True)
+class WorkflowBudget:
+    """Documented workflow count budgets.
+
+    Postcondition: all values are positive or zero integers suitable for
+    no-growth guard comparisons.
+    """
+
+    max_active_workflows: int
+    max_pr_triggered_workflows: int
+    consolidation_target: int
 
 
 def iter_active_workflows(workflow_dir: Path) -> list[Path]:
@@ -64,6 +86,24 @@ def parse_inventory_table(path: Path) -> dict[str, list[str]]:
     return rows
 
 
+def parse_workflow_budgets(path: Path) -> WorkflowBudget:
+    """Return workflow budgets documented in `.github/WORKFLOWS.md`."""
+    if not path.exists():
+        raise FileNotFoundError(f"workflow inventory does not exist: {path}")
+
+    match = WORKFLOW_BUDGET_RE.search(path.read_text(encoding="utf-8"))
+    if match is None:
+        raise ValueError(
+            f"{INVENTORY_PATH.as_posix()} is missing workflow no-growth budgets"
+        )
+
+    return WorkflowBudget(
+        max_active_workflows=int(match.group("active")),
+        max_pr_triggered_workflows=int(match.group("pr")),
+        consolidation_target=int(match.group("target")),
+    )
+
+
 def parse_documented_agent_roots(path: Path) -> set[str]:
     """Return agent config roots documented in the migration inventory.
 
@@ -91,14 +131,17 @@ def parse_documented_agent_roots(path: Path) -> set[str]:
 def audit_workflow_inventory(
     repo_root: Path,
     max_active_workflows: int,
+    max_pr_triggered_workflows: int,
 ) -> list[str]:
     """Audit active workflow files against `.github/WORKFLOWS.md`.
 
     Postcondition: every active workflow has exactly one inventory row, every
-    row points at an active workflow, and the active count does not exceed cap.
+    row points at an active workflow, and workflow counts do not exceed caps.
     """
     if max_active_workflows < 1:
         raise ValueError("max_active_workflows must be greater than zero")
+    if max_pr_triggered_workflows < 0:
+        raise ValueError("max_pr_triggered_workflows must not be negative")
 
     workflow_dir = repo_root / ".github" / "workflows"
     workflow_files = iter_active_workflows(workflow_dir)
@@ -111,10 +154,43 @@ def audit_workflow_inventory(
             f"{max_active_workflows}"
         )
 
+    pr_triggered_workflows = [
+        path
+        for path in workflow_files
+        if parse_workflow_triggers(path) & PR_TRIGGER_EVENTS
+    ]
+    if len(pr_triggered_workflows) > max_pr_triggered_workflows:
+        findings.append(
+            f"PR-triggered workflow count {len(pr_triggered_workflows)} exceeds "
+            f"cap {max_pr_triggered_workflows}"
+        )
+
     try:
-        inventory_rows = parse_inventory_table(repo_root / INVENTORY_PATH)
+        inventory_path = repo_root / INVENTORY_PATH
+        inventory_rows = parse_inventory_table(inventory_path)
+        documented_budget = parse_workflow_budgets(inventory_path)
     except FileNotFoundError as exc:
         return [str(exc)]
+    except ValueError as exc:
+        return [str(exc)]
+
+    if documented_budget.max_active_workflows != DEFAULT_MAX_ACTIVE_WORKFLOWS:
+        findings.append(
+            f"{INVENTORY_PATH.as_posix()} documents max_active_workflows "
+            f"{documented_budget.max_active_workflows} but "
+            "scripts/check_workflow_inventory.py defaults to "
+            f"{DEFAULT_MAX_ACTIVE_WORKFLOWS}"
+        )
+    if (
+        documented_budget.max_pr_triggered_workflows
+        != DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS
+    ):
+        findings.append(
+            f"{INVENTORY_PATH.as_posix()} documents max_pr_triggered_workflows "
+            f"{documented_budget.max_pr_triggered_workflows} but "
+            "scripts/check_workflow_inventory.py defaults to "
+            f"{DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS}"
+        )
 
     for workflow_name in sorted(workflow_names):
         if workflow_name not in inventory_rows:
@@ -129,6 +205,32 @@ def audit_workflow_inventory(
             )
 
     return findings
+
+
+def parse_workflow_triggers(workflow_file: Path) -> set[str]:
+    """Return top-level GitHub Actions event names declared by a workflow."""
+    lines = workflow_file.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(lines):
+        if not _is_on_key(line):
+            continue
+
+        inline_value = line.split(":", 1)[1].strip()
+        if inline_value:
+            return _parse_inline_triggers(inline_value)
+
+        triggers: set[str] = set()
+        for child_line in lines[index + 1 :]:
+            if not child_line.strip() or child_line.lstrip().startswith("#"):
+                continue
+            indent = len(child_line) - len(child_line.lstrip(" "))
+            if indent == 0:
+                break
+            if indent == 2:
+                trigger = child_line.strip().split(":", 1)[0].strip("- \"'")
+                if trigger:
+                    triggers.add(trigger)
+        return triggers
+    return set()
 
 
 def audit_permissions(repo_root: Path) -> list[str]:
@@ -201,6 +303,7 @@ def audit_agent_budget_contract(repo_root: Path) -> list[str]:
 def audit_repository(
     repo_root: Path,
     max_active_workflows: int = DEFAULT_MAX_ACTIVE_WORKFLOWS,
+    max_pr_triggered_workflows: int = DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS,
 ) -> list[str]:
     """Audit workflow and agent ownership inventory for the repository."""
     if not repo_root.exists():
@@ -209,7 +312,13 @@ def audit_repository(
         raise NotADirectoryError(f"repository root is not a directory: {repo_root}")
 
     findings: list[str] = []
-    findings.extend(audit_workflow_inventory(repo_root, max_active_workflows))
+    findings.extend(
+        audit_workflow_inventory(
+            repo_root,
+            max_active_workflows,
+            max_pr_triggered_workflows,
+        )
+    )
     findings.extend(audit_permissions(repo_root))
     findings.extend(audit_agent_config_roots(repo_root))
     findings.extend(audit_agent_budget_contract(repo_root))
@@ -224,6 +333,22 @@ def _permissions_block_is_empty(lines: list[str], line_number: int) -> bool:
             continue
         return not line.startswith(" ")
     return True
+
+
+def _is_on_key(line: str) -> bool:
+    stripped = line.strip()
+    return line == stripped and stripped.split(":", 1)[0].strip("\"'") == "on"
+
+
+def _parse_inline_triggers(value: str) -> set[str]:
+    trimmed = value.strip()
+    if trimmed.startswith("[") and trimmed.endswith("]"):
+        return {
+            item.strip().strip("\"'")
+            for item in trimmed.strip("[]").split(",")
+            if item.strip()
+        }
+    return {trimmed.strip("\"'")}
 
 
 def _normalize_agent_root(root_name: str) -> str:
@@ -251,6 +376,15 @@ def build_parser() -> argparse.ArgumentParser:
             ".github/workflows."
         ),
     )
+    parser.add_argument(
+        "--max-pr-triggered-workflows",
+        type=int,
+        default=DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS,
+        help=(
+            "Maximum active workflow YAML files allowed to trigger on "
+            "pull_request or pull_request_target."
+        ),
+    )
     return parser
 
 
@@ -260,6 +394,7 @@ def main(argv: list[str] | None = None) -> int:
     findings = audit_repository(
         args.repo_root.resolve(),
         max_active_workflows=args.max_active_workflows,
+        max_pr_triggered_workflows=args.max_pr_triggered_workflows,
     )
     if findings:
         for finding in findings:

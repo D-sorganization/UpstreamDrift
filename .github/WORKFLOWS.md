@@ -2,9 +2,9 @@
 
 This inventory is the ownership ledger for active GitHub Actions workflows.
 
-The current durable guardrail is a no-growth cap at 78 active workflows. The
-consolidation target for issue #3835 remains 25 active workflows or fewer after
-owners validate low-risk removals.
+The current durable guardrail is a no-growth cap at 83 active workflows and 33
+PR-triggered workflows. The consolidation target for issue #3835 remains 25
+active workflows or fewer after owners validate low-risk removals.
 
 ## Security Audit: `pull_request_target` Workflows (issue #5915)
 
