@@ -19,7 +19,7 @@ Design by Contract:
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -131,6 +131,29 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         hidden=model.hidden,
         hidden_reason=model.hidden_reason,
         hidden_owner=model.hidden_owner,
+    )
+
+
+def _with_native_pyqt6_semantics(
+    tile: LauncherTile, model: ModelConfig | None
+) -> LauncherTile:
+    """Derive shared tile semantics from the primary PyQt6 registry entry.
+
+    ``models.yaml`` owns the category, launch target, engine identity, and
+    status used by the native launcher.  The shared manifest keeps web-only
+    navigation such as ``web_route`` and capability tags used by the web
+    catalog; neither substitutes for the native launch contract.
+    """
+    if model is None or model.launcher is None:
+        return tile
+
+    return replace(
+        tile,
+        category=model.launcher.category,
+        status=model.launcher.status,
+        type=model.type,
+        path=model.path,
+        engine_type=model.engine_type,
     )
 
 
@@ -461,10 +484,16 @@ class LauncherManifest:
             raise ValueError("Manifest 'tiles' must be a list")
 
         tiles = [LauncherTile.from_dict(t) for t in tiles_raw]
+        registry = ModelRegistry(config_path=registry_path or REGISTRY_PATH)
+        native_models = {model.id: model for model in registry.get_all_models()}
+        tiles = [
+            _with_native_pyqt6_semantics(tile, native_models.get(tile.id))
+            for tile in tiles
+        ]
         if include_provider_tiles:
             tiles.extend(
                 cls._load_provider_tiles(
-                    registry_path=registry_path or REGISTRY_PATH,
+                    registry=registry,
                     existing_ids={tile.id for tile in tiles},
                 )
             )
@@ -497,14 +526,17 @@ class LauncherManifest:
     @staticmethod
     def _load_provider_tiles(
         *,
-        registry_path: Path,
         existing_ids: set[str],
+        registry: ModelRegistry | None = None,
+        registry_path: Path | None = None,
     ) -> list[LauncherTile]:
         """Load dynamic provider-backed tiles from the shared model registry."""
-        if not registry_path.exists():
-            return []
+        if registry is None:
+            resolved_registry_path = registry_path or REGISTRY_PATH
+            if not resolved_registry_path.exists():
+                return []
+            registry = ModelRegistry(config_path=resolved_registry_path)
 
-        registry = ModelRegistry(config_path=registry_path)
         provider_tiles: list[LauncherTile] = []
 
         for model in registry.get_all_models():

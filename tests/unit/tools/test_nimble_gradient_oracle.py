@@ -10,7 +10,7 @@ try:
 except ImportError:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib
 
-from tools.offline_validation.nimble_gradient_oracle import (
+from src.tools.offline_validation.nimble_gradient_oracle import (
     GradientOracleUnavailable,
     GradientTolerance,
     NIMBLEPHYSICS_PIN,

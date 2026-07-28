@@ -6,7 +6,7 @@ and golfer_*.py into generic N-DOF functions.
 
 Design by Contract
 ------------------
-- All public functions validate inputs with assertions.
+- Public functions validate inputs with explicit exceptions.
 - Array shapes are checked to prevent silent broadcasting bugs.
 """
 
@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
+
+from .validation import require, require_non_negative, require_shape
 
 # ---------------------------------------------------------------------------
 # Generic kinetic energy (works for any DOF count)
@@ -41,11 +43,11 @@ def kinetic_energy_from_M(M: np.ndarray, qdot: np.ndarray) -> float:
         Result is finite and >= 0 (up to floating-point noise).
     """
     n = qdot.shape[0]
-    assert M.shape == (n, n), f"M shape {M.shape} vs qdot shape {qdot.shape}"
-    assert np.all(np.isfinite(M)), "Mass matrix has non-finite values"
-    assert np.all(np.isfinite(qdot)), "Velocity has non-finite values"
+    require(M.shape == (n, n), f"M shape {M.shape} vs qdot shape {qdot.shape}")
+    require(bool(np.all(np.isfinite(M))), "Mass matrix has non-finite values")
+    require(bool(np.all(np.isfinite(qdot))), "Velocity has non-finite values")
     T = float(0.5 * qdot @ M @ qdot)
-    assert np.isfinite(T), f"Kinetic energy is non-finite: {T}"
+    require(bool(np.isfinite(T)), f"Kinetic energy is non-finite: {T}")
     return T
 
 
@@ -60,8 +62,8 @@ def total_energy_from_parts(kinetic: float, potential: float) -> float:
     Pre: both finite.
     Post: result finite.
     """
-    assert np.isfinite(kinetic), f"Kinetic energy non-finite: {kinetic}"
-    assert np.isfinite(potential), f"Potential energy non-finite: {potential}"
+    require(bool(np.isfinite(kinetic)), f"Kinetic energy non-finite: {kinetic}")
+    require(bool(np.isfinite(potential)), f"Potential energy non-finite: {potential}")
     return kinetic + potential
 
 
@@ -89,17 +91,21 @@ def friction_torque_ndof(
     Post: opposes motion direction element-wise.
     """
     n = qdot.shape[0]
-    assert viscous_coeffs.shape == (n,), (
-        f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}"
+    require(
+        viscous_coeffs.shape == (n,),
+        f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}",
     )
-    assert np.all(np.isfinite(qdot)), "qdot has non-finite values"
+    require(bool(np.all(np.isfinite(qdot))), "qdot has non-finite values")
 
     tau: npt.NDArray[np.float64] = np.asarray(-viscous_coeffs * qdot, dtype=np.float64)
     if coulomb_coeffs is not None:
-        assert coulomb_coeffs.shape == (n,)
+        require(
+            coulomb_coeffs.shape == (n,),
+            f"coulomb shape {coulomb_coeffs.shape} vs qdot {qdot.shape}",
+        )
         tau -= coulomb_coeffs * np.sign(qdot)
 
-    assert np.all(np.isfinite(tau)), f"Friction torque non-finite: {tau}"
+    require(bool(np.all(np.isfinite(tau))), f"Friction torque non-finite: {tau}")
     return tau
 
 
@@ -120,8 +126,8 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
     Post: |result[i]| <= limits[i].
     """
     n = tau.shape[0]
-    assert limits.shape == (n,), f"limits shape {limits.shape} vs tau {tau.shape}"
-    assert np.all(limits > 0), "Torque limits must be positive"
+    require(limits.shape == (n,), f"limits shape {limits.shape} vs tau {tau.shape}")
+    require(bool(np.all(limits > 0)), "Torque limits must be positive")
     result: npt.NDArray[np.float64] = np.asarray(
         np.clip(tau, -limits, limits), dtype=np.float64
     )
@@ -164,8 +170,9 @@ def chain_positions(
     convention y-up (positive cosine), matching the existing physics modules.
     """
     n = absolute_angles.shape[0]
-    assert lengths.shape == (n,), (
-        f"lengths {lengths.shape} vs angles {absolute_angles.shape}"
+    require(
+        lengths.shape == (n,),
+        f"lengths {lengths.shape} vs angles {absolute_angles.shape}",
     )
 
     positions = np.zeros((n, 2))
@@ -207,8 +214,9 @@ def potential_energy_chain(
     Post: result finite.
     """
     n = absolute_angles.shape[0]
-    assert lengths.shape == (n,) and masses.shape == (n,)
-    assert g >= 0, f"g must be non-negative, got {g}"
+    require_shape("lengths", lengths, (n,))
+    require_shape("masses", masses, (n,))
+    require_non_negative("g", g)
 
     # Cumulative mass from tip backwards: mass_below[i] = sum(masses[i:])
     # Each segment i contributes: -mass_below_i * g * L_i * cos(angle_i)
@@ -219,7 +227,7 @@ def potential_energy_chain(
         mass_below = float(np.sum(masses[i:]))
         V -= mass_below * g * lengths[i] * np.cos(absolute_angles[i])
 
-    assert np.isfinite(V), f"Potential energy non-finite: {V}"
+    require(bool(np.isfinite(V)), f"Potential energy non-finite: {V}")
     return V
 
 

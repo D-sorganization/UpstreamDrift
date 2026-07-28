@@ -7,14 +7,13 @@ import threading
 from dataclasses import dataclass
 from typing import ClassVar
 
-from conftest import make_test_result
-
 from movement_optimizer.gui.exercise_state import ExerciseRuntimeState
 from movement_optimizer.gui.session_state import (
     collect_results,
     collect_slider_values,
     restore_slider_values,
 )
+from movement_optimizer.tests._helpers import make_test_result
 
 
 @dataclass

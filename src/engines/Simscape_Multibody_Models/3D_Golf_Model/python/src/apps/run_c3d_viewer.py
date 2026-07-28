@@ -11,6 +11,7 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 _REPO_ROOT = _HERE.parents[6]
 _REPO_SRC = _REPO_ROOT / "src"
+_SHARED_PYTHON_ROOT = _REPO_SRC / "shared" / "python"
 _VIEWER_MODULE = (
     "src.engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
 )
@@ -18,7 +19,7 @@ _VIEWER_MODULE = (
 
 def _ensure_import_paths() -> None:
     """Expose repo packages for script-mode execution without package pivoting."""
-    for path in (str(_REPO_ROOT), str(_REPO_SRC)):
+    for path in (str(_REPO_ROOT), str(_REPO_SRC), str(_SHARED_PYTHON_ROOT)):
         if path not in sys.path:
             sys.path.insert(0, path)
 

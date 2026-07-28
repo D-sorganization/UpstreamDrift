@@ -40,6 +40,18 @@ from src.shared.python.theme.style_constants import Styles
 logger = logging.getLogger(__name__)
 
 
+def _validate_video_path(video_path: str) -> str:
+    """Return a non-blank video path suitable for starting analysis.
+
+    A blank path cannot be handed to OpenCV or MediaPipe meaningfully.  Reject
+    it before starting a worker so the GUI does not remain at 0% with no
+    explanation.
+    """
+    if not isinstance(video_path, str) or not video_path.strip():
+        raise ValueError("Select a video file before running analysis.")
+    return video_path.strip()
+
+
 class _AnalysisWorker(QThread):
     """Background worker for running MediaPipe analysis.
 
@@ -57,10 +69,8 @@ class _AnalysisWorker(QThread):
         config: dict[str, Any],
         parent: QThread | None = None,
     ) -> None:
-        if video_path is None:
-            raise ValueError("video_path must be provided")
         super().__init__(parent)
-        self._video_path = video_path
+        self._video_path = _validate_video_path(video_path)
         self._config = config
 
     def run(self) -> None:
@@ -210,7 +220,12 @@ class MediaPipeGUI(QMainWindow):
 
     def run_analysis(self) -> None:
         """Start the MediaPipe analysis in a background thread."""
-        if not self._video_path:
+        try:
+            video_path = _validate_video_path(self._video_path)
+        except ValueError as error:
+            message = str(error)
+            self.log(f"ERROR: {message}")
+            QMessageBox.warning(self, "Video required", message)
             return
 
         self.btn_run.setEnabled(False)
@@ -221,7 +236,7 @@ class MediaPipeGUI(QMainWindow):
         self.log(f"Configuration: {config}")
         self.log("Starting MediaPipe analysis...")
 
-        self._worker = _AnalysisWorker(self._video_path, config)
+        self._worker = _AnalysisWorker(video_path, config)
         self._worker.progress.connect(self._on_progress)
         self._worker.finished.connect(self._on_finished)
         self._worker.error.connect(self._on_error)

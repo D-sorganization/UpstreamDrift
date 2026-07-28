@@ -50,6 +50,23 @@ def test_readyz_success(client: TestClient) -> None:
     assert data["engines_available"] == 2
 
 
+def test_readyz_reports_launcher_instance_without_secret(
+    app: FastAPI,
+    client: TestClient,
+) -> None:
+    """Readiness identifies the API child but never returns its capability."""
+    app.state.sidekick_instance_id = "instance-1"
+    app.state.launcher_csrf_token = "secret-token"
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["sidekick_instance_id"] == "instance-1"
+    assert "secret-token" not in response.text
+    assert "launcher_csrf_token" not in body
+
+
 def test_readyz_not_ready(app: FastAPI) -> None:
     """Test readyz endpoint when missing dependencies."""
     delattr(app.state, "task_manager")

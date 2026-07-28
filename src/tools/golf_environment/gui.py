@@ -166,6 +166,7 @@ class EnvironmentRenderer(QWidget):
 
             # Fairway
             import math
+
             dist = math.hypot(
                 hole.pin_position[0] - hole.tee_position[0],
                 hole.pin_position[1] - hole.tee_position[1],

@@ -52,13 +52,13 @@ class TestTrajectoryResultMixin:
 
     def test_validate_wrong_state_width_raises(self) -> None:
         result = _ConcreteResult(n=10, state_width=4)
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             result._validate_trajectory(6)
 
     def test_validate_non_finite_states_raises(self) -> None:
         result = _ConcreteResult(n=5, state_width=4)
         result.states[2, 1] = np.nan
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             result._validate_trajectory(4)
 
     def test_validate_strictly_increasing_time(self) -> None:
@@ -69,7 +69,7 @@ class TestTrajectoryResultMixin:
     def test_validate_non_monotone_time_raises(self) -> None:
         result = _ConcreteResult(n=5, state_width=4)
         result.t = np.array([0.0, 0.5, 0.3, 0.8, 1.0])  # not increasing
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             result._validate_trajectory(4)
 
     def test_check_idx_valid(self) -> None:
@@ -79,12 +79,12 @@ class TestTrajectoryResultMixin:
 
     def test_check_idx_negative_raises(self) -> None:
         result = _ConcreteResult(n=5)
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             result._check_idx(-1)
 
     def test_check_idx_out_of_range_raises(self) -> None:
         result = _ConcreteResult(n=5)
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             result._check_idx(5)
 
     def test_all_positions_length(self) -> None:
@@ -126,7 +126,7 @@ class TestTrajectoryResultMixin:
         )  # should not raise
 
     def test_assert_energy_finite_nan_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             TrajectoryResultMixin._assert_energy_finite(
                 {"kinetic": float("nan"), "potential": 2.0}, idx=0
             )

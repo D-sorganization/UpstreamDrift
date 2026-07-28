@@ -51,15 +51,15 @@ class TestIntegrateOde:
         np.testing.assert_allclose(states[:, 0], np.cos(t), atol=0.02)
 
     def test_simulation_core_invalid_t_end_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             integrate_ode(_linear_decay, np.array([1.0]), -1.0, dt=0.01)
 
     def test_non_finite_initial_state_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             integrate_ode(_linear_decay, np.array([np.inf]), 1.0, dt=0.01)
 
     def test_dt_larger_than_t_end_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             integrate_ode(_linear_decay, np.array([1.0]), 0.5, dt=1.0)
 
     def test_all_states_finite(self) -> None:

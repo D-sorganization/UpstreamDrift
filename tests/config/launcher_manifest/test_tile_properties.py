@@ -14,6 +14,7 @@ Test Categories:
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,25 @@ from src.config.launcher_manifest_loader import (
     LauncherManifest,
     LauncherTile,
 )
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_MATLAB_SUITE_DIALOG = _REPO_ROOT / "src" / "launchers" / "matlab_suite_dialog.py"
+
+
+def _matlab_suite_models() -> list[dict[str, str]]:
+    """Read the PyQt6 MATLAB chooser entries without importing PyQt6."""
+    source_tree = ast.parse(_MATLAB_SUITE_DIALOG.read_text(encoding="utf-8"))
+    assignment = next(
+        node
+        for node in source_tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "MATLAB_MODELS"
+            for target in node.targets
+        )
+    )
+    return ast.literal_eval(assignment.value)
+
 
 # =============================================================================
 # Fixtures
@@ -80,8 +100,30 @@ class TestTileProperties:
             assert tile.description, f"Tile missing description: {tile.id}"
             assert tile.category, f"Tile missing category: {tile.id}"
             assert tile.type, f"Tile missing type: {tile.id}"
-            assert tile.path, f"Tile missing path: {tile.id}"
+            assert tile.path or tile.web_route, (
+                f"Tile missing native path and web route: {tile.id}"
+            )
             assert tile.logo, f"Tile missing logo: {tile.id}"
+
+    def test_dataset_generator_web_tile_has_a_pyqt6_matlab_target(
+        self, manifest: LauncherManifest
+    ) -> None:
+        """Dataset Generator stays available from the native MATLAB chooser.
+
+        The shared manifest intentionally has no local path for this web-catalog
+        tile.  The primary PyQt6 launcher exposes the MATLAB implementation from
+        its Simscape chooser instead.
+        """
+        tile = manifest.get_tile("dataset_generator")
+        assert tile is not None, "Dataset Generator must remain in the manifest"
+        assert not tile.path
+        assert tile.web_route == "/tools/dataset"
+
+        dataset_generator = next(
+            model for model in _matlab_suite_models() if model["id"] == tile.id
+        )
+        assert dataset_generator["type"] == "matlab_file"
+        assert (_REPO_ROOT / dataset_generator["path"]).is_file()
 
     def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
         """Category must be one of the allowed values."""

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from src.shared.python.core.contracts import precondition
 
@@ -69,7 +69,9 @@ async def get_capabilities() -> AIPHandshakeResponse:
     )
 
 
-@router.post("/aip/rpc")
+# response_model=None: the handler returns either a JSON-RPC object/array or a
+# bare 204 Response for notifications, which FastAPI cannot infer (#8004).
+@router.post("/aip/rpc", response_model=None)
 @precondition(
     lambda request, engine_manager=None, logger=None: request is not None,
     "RPC request must not be None",
@@ -78,7 +80,7 @@ async def handle_rpc(
     request: Request,
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
-) -> dict[str, Any] | list[dict[str, Any]]:
+) -> dict[str, Any] | list[dict[str, Any]] | Response:
     """Handle a JSON-RPC 2.0 request or batch request.
 
     Accepts single requests or arrays of requests (batch mode).
@@ -90,7 +92,9 @@ async def handle_rpc(
         logger: Injected logger.
 
     Returns:
-        JSON-RPC response(s).
+        JSON-RPC response(s), or a bare ``204 No Content`` response when the
+        payload contained only notifications (JSON-RPC 2.0 requires that a
+        notification produce no response body).
     """
     # Parse request body
     if not (request is not None):
@@ -132,10 +136,11 @@ async def handle_rpc(
             if result is not None:  # Notifications return None
                 responses.append(result)
 
-        return responses or make_response(
-            error=make_error(INVALID_REQUEST, "All requests were notifications"),
-            request_id=None,
-        )
+        if not responses:
+            # Batch of nothing but notifications: the spec requires the
+            # server to return nothing at all (issue #8004).
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return responses
 
     # Handle single request
     if not isinstance(body, dict):
@@ -146,11 +151,10 @@ async def handle_rpc(
 
     result = await dispatch(_registry, body, context)
     if result is None:
-        # Notification: return empty 204
-        return make_response(
-            result=None,
-            request_id=None,
-        )
+        # Notification: JSON-RPC 2.0 mandates no response body at all.
+        # ``make_response(result=None, request_id=None)`` used to be called
+        # here and tripped its own precondition, surfacing as a 500 (#8004).
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     return result
 
