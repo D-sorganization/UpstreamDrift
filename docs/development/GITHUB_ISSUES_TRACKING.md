@@ -365,7 +365,7 @@ gh issue create --title "audit(api): Ensure all error paths use structured error
 
 ### Related Documentation
 
-- [API Architecture](api/API_ARCHITECTURE.md)
-- [Development Guide](api/DEVELOPMENT.md)
-- [Design by Contract](development/design_by_contract.md)
-- [Architecture Review](assessments/API_ARCHITECTURE_REVIEW_2026-01-30.md)
+- [API Architecture](../api/API_ARCHITECTURE.md)
+- [Development Guide](../api/DEVELOPMENT.md)
+- [Design by Contract](design_by_contract.md)
+- [API Design Assessment](../assessments/Assessment_J_API_Design.md)

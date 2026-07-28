@@ -78,7 +78,9 @@ Drake and Pinocchio use **torque-based actuation models** that don't have equiva
 
 ```python
 # Run biomechanics analysis in MuJoCo
-from engines.physics_engines.myosuite import MyoSuitePhysicsEngine
+from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+    MyoSuitePhysicsEngine,
+)
 
 engine = MyoSuitePhysicsEngine()
 engine.load_from_path("myoElbowPose1D6MRandom-v0")

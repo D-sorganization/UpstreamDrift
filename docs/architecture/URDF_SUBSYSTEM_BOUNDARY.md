@@ -123,4 +123,4 @@ Current source code already points in the accepted direction:
 - [ADR-0020](../adr/0020-canonical-urdf-subsystem.md)
 - [Character Builder Quickstart](../user_guide/character_builder_quickstart.md)
 - [Character Presets Reference](../user_guide/character_presets.md)
-- [Model Generation API](../../src/shared/python/model_generation/README.md)
+- Model Generation API — `src/shared/python/model_generation/api/` (no standalone README; read the package docstrings)
