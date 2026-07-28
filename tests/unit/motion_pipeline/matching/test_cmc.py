@@ -15,20 +15,10 @@ def test_cmc_solver_constructs_without_opensim() -> None:
     assert s is not None
 
 
-def test_cmc_solver_match_returns_placeholder_failure() -> None:
-    """Placeholder CMC reports success=False with a clear message."""
-    s = CMCMatchingSolver()
-    ref = make_pendulum_reference_trajectory(num_frames=5)
-    rig = make_simple_rig(num_joints=1)
-    result = s.match(ref, rig)
-    assert isinstance(result, MotionMatchingResult)
-    assert result.success is False
-    assert "CMC" in (result.message or "")
-    assert result.metadata.get("backend") == "cmc"
-    assert result.metadata.get("status") == "not_implemented"
-    assert result.metadata.get("production_ready") is False
-
-
+@pytest.mark.xfail(
+    reason="CMC muscle redundancy solve is not implemented yet; see #8131",
+    strict=True,
+)
 def test_cmc_solver_with_opensim() -> None:
     pytest.importorskip("opensim")
     s = CMCMatchingSolver()
@@ -36,3 +26,9 @@ def test_cmc_solver_with_opensim() -> None:
     rig = make_simple_rig(num_joints=1)
     result = s.match(ref, rig)
     assert isinstance(result, MotionMatchingResult)
+    assert result.success is True
+    assert (
+        result.activation_trajectory is not None or result.torque_trajectory is not None
+    )
+    assert result.fit_metrics
+    assert result.metadata.get("production_ready") is True

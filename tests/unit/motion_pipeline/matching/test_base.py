@@ -19,7 +19,9 @@ from src.shared.python.motion_pipeline.matching.base import (
     MatchingBackendType,
     MotionMatchingRequest,
     MotionMatchingResult,
+    is_production_matching_backend,
     make_matching_solver,
+    production_matching_backends,
 )
 from src.shared.python.motion_pipeline.matching.inverse_dyn_pinocchio import (
     PinocchioInverseDynMatchingSolver,
@@ -113,14 +115,54 @@ def test_make_matching_solver_unknown_backend_raises() -> None:
 @pytest.mark.parametrize(
     "backend",
     [
+        MatchingBackendType.TORQUE_MUJOCO,
+        MatchingBackendType.INVERSE_DYN_PINOCCHIO,
+    ],
+)
+def test_make_matching_solver_returns_protocol_for_production_backends(
+    backend: MatchingBackendType,
+) -> None:
+    solver = make_matching_solver(backend)
+    assert hasattr(solver, "match")
+
+
+def test_production_matching_backends_exclude_unimplemented_placeholders() -> None:
+    assert production_matching_backends() == {
+        MatchingBackendType.TORQUE_MUJOCO,
+        MatchingBackendType.INVERSE_DYN_PINOCCHIO,
+    }
+    assert is_production_matching_backend(MatchingBackendType.CMC) is False
+    assert is_production_matching_backend("rra") is False
+    assert is_production_matching_backend(MatchingBackendType.TRAJOPT_DRAKE) is False
+
+
+@pytest.mark.parametrize(
+    "backend",
+    [
         MatchingBackendType.CMC,
         MatchingBackendType.RRA,
         MatchingBackendType.TRAJOPT_DRAKE,
-        MatchingBackendType.TORQUE_MUJOCO,
     ],
 )
-def test_make_matching_solver_returns_protocol(backend: MatchingBackendType) -> None:
-    solver = make_matching_solver(backend)
+def test_make_matching_solver_rejects_unimplemented_backends_by_default(
+    backend: MatchingBackendType,
+) -> None:
+    with pytest.raises(ValueError, match="not production-ready"):
+        make_matching_solver(backend)
+
+
+@pytest.mark.parametrize(
+    "backend",
+    [
+        MatchingBackendType.CMC,
+        MatchingBackendType.RRA,
+        MatchingBackendType.TRAJOPT_DRAKE,
+    ],
+)
+def test_make_matching_solver_requires_explicit_experimental_opt_in(
+    backend: MatchingBackendType,
+) -> None:
+    solver = make_matching_solver(backend, allow_experimental=True)
     assert hasattr(solver, "match")
 
 

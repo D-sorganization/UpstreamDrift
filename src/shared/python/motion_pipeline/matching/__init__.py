@@ -11,7 +11,9 @@ from .base import (
     MotionMatchingRequest,
     MotionMatchingResult,
     MotionMatchingSolver,
+    is_production_matching_backend,
     make_matching_solver,
+    production_matching_backends,
 )
 from .contact import (
     ContactModel,
@@ -35,6 +37,8 @@ __all__ = [
     "CostWeights",
     "make_matching_solver",
     "MatchingBackendType",
+    "is_production_matching_backend",
+    "production_matching_backends",
     # costs
     "joint_tracking_cost",
     "marker_tracking_cost",
