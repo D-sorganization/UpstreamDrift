@@ -20,6 +20,7 @@ Design-by-contract:
 
 from __future__ import annotations
 
+import os
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,7 @@ import yaml
 
 # Repo root is three parents up: tests/unit/repo_hygiene/<this file>
 _REPO_ROOT = Path(__file__).resolve().parents[3]
+pytestmark = pytest.mark.unit
 _VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 _UD_SHARED = _REPO_ROOT / "src" / "shared" / "python"
 _ALLOW_LIST_PATH = _REPO_ROOT / "scripts" / "config" / "shadow_modules.yaml"
@@ -61,6 +63,20 @@ def _module_names(root: Path) -> set[str]:
         if entry.is_dir() or (entry.is_file() and entry.suffix == ".py"):
             names.add(entry.name)
     return names
+
+
+def _tools_shared_root() -> Path | None:
+    """Return the Tools shared-python root from the vendor tree or explicit checkout."""
+    if _VENDOR_SHARED.is_dir():
+        return _VENDOR_SHARED
+
+    tools_repo = os.environ.get("TOOLS_REPO_PATH")
+    if tools_repo:
+        candidate = Path(tools_repo) / "src" / "shared" / "python"
+        if candidate.is_dir():
+            return candidate
+
+    return None
 
 
 def _load_allow_list() -> dict[str, dict[str, Any]]:
@@ -160,6 +176,32 @@ def test_allow_list_is_well_formed() -> None:
 
 
 @pytest.mark.unit
+def test_data_processor_shadow_has_issue_specific_classification() -> None:
+    """Regression #8205: data_processor must not rely on umbrella shadow metadata."""
+    metadata = _load_allow_list()["data_processor"]
+
+    assert metadata["tracking_issue"] == 8205
+    assert metadata["owner"] == "upstreamdrift"
+    assert "Rust bulk-I/O engine" in metadata["reason"]
+
+
+@pytest.mark.unit
+def test_tools_shared_root_uses_explicit_tools_checkout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Local shadow checks may use TOOLS_REPO_PATH when the submodule is absent."""
+    tools_shared = tmp_path / "Tools" / "src" / "shared" / "python"
+    tools_shared.mkdir(parents=True)
+
+    import tests.unit.repo_hygiene.test_no_shadow_of_tools_shared as _mod
+
+    monkeypatch.setattr(_mod, "_VENDOR_SHARED", tmp_path / "missing-vendor")
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(tmp_path / "Tools"))
+
+    assert _mod._tools_shared_root() == tools_shared
+
+
+@pytest.mark.unit
 def test_no_unapproved_shadows_of_tools_shared() -> None:
     """Fail if any UD module shadows a Tools-shared module without approval.
 
@@ -167,13 +209,15 @@ def test_no_unapproved_shadows_of_tools_shared() -> None:
     that exists under both ``vendor/ud-tools/src/shared/python/`` and
     ``src/shared/python/`` with the same name.
     """
-    if not _VENDOR_SHARED.is_dir():
+    tools_shared = _tools_shared_root()
+    if tools_shared is None:
         pytest.skip(
-            f"Vendored Tools tree is unavailable at {_VENDOR_SHARED}; "
-            "run `git submodule update --init` for the full shadow check."
+            f"Tools shared tree is unavailable at {_VENDOR_SHARED}; "
+            "run `git submodule update --init` or set TOOLS_REPO_PATH for "
+            "the full shadow check."
         )
 
-    vendor_names = _module_names(_VENDOR_SHARED)
+    vendor_names = _module_names(tools_shared)
     ud_names = _module_names(_UD_SHARED)
     allowed = set(_load_allow_list().keys())
 

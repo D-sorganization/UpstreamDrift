@@ -8,13 +8,36 @@ directory must no longer exist anywhere in the tree.
 Issue: #5619, #6564
 """
 
+import ast
 import pathlib
 
+import pytest
+
 REPO_ROOT = pathlib.Path(__file__).parents[3]
+pytestmark = pytest.mark.unit
 
 DEPRECATED_PACKAGE_DIR = (
     REPO_ROOT / "src" / "shared" / "python" / "upstream_drift_tools"
 )
+DEPRECATED_PACKAGE_NAME = "upstream_drift_tools"
+
+
+def _is_deprecated_module(module_name: str | None) -> bool:
+    return module_name == DEPRECATED_PACKAGE_NAME or bool(
+        module_name and module_name.startswith(f"{DEPRECATED_PACKAGE_NAME}.")
+    )
+
+
+def _has_deprecated_import(content: str) -> bool:
+    tree = ast.parse(content)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import) and any(
+            _is_deprecated_module(alias.name) for alias in node.names
+        ):
+            return True
+        if isinstance(node, ast.ImportFrom) and _is_deprecated_module(node.module):
+            return True
+    return False
 
 
 def _find_deprecated_imports(directory: str, ignore_self: bool = False) -> list[str]:
@@ -25,13 +48,25 @@ def _find_deprecated_imports(directory: str, ignore_self: bool = False) -> list[
             continue
         try:
             content = py_file.read_text(encoding="utf-8")
-            if "upstream_drift_tools" in content:
+            if _has_deprecated_import(content):
                 found_files.append(
                     str(py_file.relative_to(REPO_ROOT)).replace("\\", "/")
                 )
-        except UnicodeDecodeError:
+        except (SyntaxError, UnicodeDecodeError):
             pass
     return found_files
+
+
+def test_deprecated_import_detection_ignores_literal_strings():
+    content = 'MODULE = "upstream_drift_tools"\n'
+
+    assert not _has_deprecated_import(content)
+
+
+def test_deprecated_import_detection_flags_import_statements():
+    assert _has_deprecated_import("import upstream_drift_tools\n")
+    assert _has_deprecated_import("import upstream_drift_tools.theme\n")
+    assert _has_deprecated_import("from upstream_drift_tools.theme import Colors\n")
 
 
 def test_no_upstream_drift_tools_imports_in_src():
