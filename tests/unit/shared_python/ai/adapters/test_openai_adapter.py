@@ -31,6 +31,11 @@ from src.shared.python.ai.types import (  # noqa: E402
 )
 
 
+@pytest.fixture(autouse=True)
+def reset_openai_mock() -> None:
+    openai_mock.reset_mock(return_value=True, side_effect=True)
+
+
 @pytest.fixture
 def adapter() -> OpenAIAdapter:
     """Provide a configured OpenAIAdapter."""

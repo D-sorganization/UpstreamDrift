@@ -33,6 +33,11 @@ from src.shared.python.ai.types import (  # noqa: E402
 )
 
 
+@pytest.fixture(autouse=True)
+def reset_anthropic_mock() -> None:
+    anthropic_mock.reset_mock(return_value=True, side_effect=True)
+
+
 @pytest.fixture
 def adapter() -> AnthropicAdapter:
     """Provide a configured AnthropicAdapter."""

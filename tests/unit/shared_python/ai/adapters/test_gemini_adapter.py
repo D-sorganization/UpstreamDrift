@@ -17,7 +17,7 @@ import pytest  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def reset_mocks() -> None:
-    sys.modules["google.generativeai"].reset_mock()
+    sys.modules["google.generativeai"].reset_mock(return_value=True, side_effect=True)
 
 
 @pytest.fixture(autouse=True)

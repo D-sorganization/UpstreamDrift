@@ -34,7 +34,7 @@ import pytest  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def reset_mocks() -> None:
-    sys.modules["httpx"].reset_mock()
+    sys.modules["httpx"].reset_mock(return_value=True, side_effect=True)
 
 
 from src.shared.python.ai.adapters.base import ToolDeclaration  # noqa: E402
