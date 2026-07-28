@@ -41,6 +41,27 @@ CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
 
 
+def _load_parent_model_ids(models_yaml_path: Path) -> list[str]:
+    """Load model IDs declared directly by the parent models.yaml manifest."""
+    try:
+        import yaml
+    except ImportError:
+        return []
+
+    try:
+        data = yaml.safe_load(models_yaml_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return []
+
+    if not isinstance(data, dict) or not isinstance(data.get("models"), list):
+        return []
+    return [
+        model["id"]
+        for model in data["models"]
+        if isinstance(model, dict) and isinstance(model.get("id"), str)
+    ]
+
+
 def _run_git_cmd(cmd: list[str], cwd: Path | None = None) -> str:
     """Run a git command and return stripped stdout.
 
@@ -129,6 +150,11 @@ class DiagnosticResult:
 
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
+
+    # Parent-manifest IDs exclude models discovered from installed providers.
+    PARENT_MANIFEST_TILE_IDS = _load_parent_model_ids(
+        REPOS_ROOT / "src" / "config" / "models.yaml"
+    )
 
     # Expected tile model IDs - dynamically loaded from models.yaml (issue #5476)
     EXPECTED_TILE_IDS: list[str] = []
@@ -303,7 +329,7 @@ class LauncherDiagnostics:
         details["model_ids"] = [m.get("id", "unknown") for m in models]
 
         found_ids = set(details["model_ids"])
-        expected_ids = set(self.EXPECTED_TILE_IDS)
+        expected_ids = set(self.PARENT_MANIFEST_TILE_IDS)
         missing_ids = expected_ids - found_ids
         extra_ids = found_ids - expected_ids
 

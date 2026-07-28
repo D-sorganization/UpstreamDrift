@@ -99,8 +99,8 @@ def __getattr__(name: str) -> Any:
 
     # 3. Versioning is a sibling module; expose it as an attribute too so that
     #    ``import src.api; src.api.versioning`` works without SQLAlchemy.
-    if name == "versioning":
-        return importlib.import_module("src.api.versioning")
+    if name in ("versioning", "local_server"):
+        return importlib.import_module(f"src.api.{name}")
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

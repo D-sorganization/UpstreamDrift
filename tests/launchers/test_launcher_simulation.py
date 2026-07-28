@@ -134,6 +134,15 @@ def test_try_launch_special_app(launcher) -> None:
     assert launcher._try_launch_special_app("library_tool") is True
     launcher._open_library_tab.assert_called_once()
 
+    launcher._install_sidekick_sidebar = MagicMock()
+    launcher._toggle_sidekick = MagicMock()
+    launcher.open_sidekick_tab = MagicMock()
+    launcher.sidekick_sidebar = None
+    assert launcher._try_launch_special_app("sidekick") is True
+    launcher._install_sidekick_sidebar.assert_called_once()
+    launcher._toggle_sidekick.assert_called_once_with(True)
+    launcher.open_sidekick_tab.assert_called_once_with("chat")
+
     assert launcher._try_launch_special_app("normal_model") is False
 
 
@@ -584,6 +593,29 @@ def test_launch_matlab_app(mock_popen, launcher) -> None:
     # Missing mathlab not found error
     mock_popen.side_effect = FileNotFoundError("test")
     launcher._launch_matlab_app(model)
+    launcher.show_toast.assert_called_with(
+        "MATLAB executable not found in PATH.", "error"
+    )
+
+
+@patch("src.launchers.launcher_simulation.secure_popen")
+def test_launch_matlab_app_contains_wrapped_missing_executable_error(
+    mock_popen, launcher
+) -> None:
+    """A missing MATLAB executable must not propagate out of the launcher."""
+    from src.shared.python.security.secure_subprocess import SecureSubprocessError
+
+    model = DummyModel("simscape_2d", "Simscape 2D", "matlab_app", path="test.slx")
+    missing_executable = FileNotFoundError(
+        2, "The system cannot find the file specified"
+    )
+    mock_popen.side_effect = SecureSubprocessError(
+        f"Subprocess launch failed: {missing_executable}"
+    )
+    mock_popen.side_effect.__cause__ = missing_executable
+
+    assert launcher._launch_matlab_app(model) is False
+
     launcher.show_toast.assert_called_with(
         "MATLAB executable not found in PATH.", "error"
     )

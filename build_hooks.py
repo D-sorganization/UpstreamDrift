@@ -19,6 +19,7 @@ Hatch configuration (pyproject.toml)::
 """
 
 import logging
+import re
 import subprocess
 import sys
 from os import environ
@@ -27,6 +28,25 @@ from pathlib import Path
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 logger = logging.getLogger(__name__)
+
+_TOOLS_DIRECTORY_DESTINATIONS = {
+    "shared": "shared",
+    "sidekick": "sidekick",
+    "chat": "chat",
+    "python/src/utils": "utils",
+}
+_TOOLS_FILE_DESTINATIONS = {"contracts.py": "contracts.py"}
+_UPSTREAM_EXTENSION_PACKAGES = ("sidekick", "chat")
+_TOOLS_PROVENANCE_PATHS = (
+    "src/shared",
+    "src/sidekick",
+    "src/chat",
+    "src/python/src/utils",
+    "src/contracts.py",
+)
+_OWNERSHIP_MANIFEST_RELATIVE = Path(
+    "scripts/config/shared_python_ownership_exceptions.yaml"
+)
 
 
 def _env_flag(name: str) -> bool:
@@ -87,41 +107,247 @@ class UIBuildHook(BuildHookInterface):
         force_include = build_data.setdefault("force_include", {})
         force_include[str(dist_dir)] = "ui/dist"
 
-    @property
-    def _sidekick_dir(self) -> Path:
-        """Source directory of the shared Sidekick package."""
-        return Path(self.root) / "src" / "shared" / "python" / "sidekick"
-
     @staticmethod
     def _is_test_artifact(relative: Path) -> bool:
         """Return True for files that must never ship in a wheel."""
         parts = relative.parts
-        if "__pycache__" in parts or "tests" in parts:
+        if any(part in {"__pycache__", ".pytest_cache", "tests"} for part in parts):
             return True
-        return relative.name.startswith("test_") and relative.suffix == ".py"
+        if relative.suffix in {".pyc", ".pyo"}:
+            return True
+        return relative.name == "conftest.py" or (
+            relative.name.startswith("test_") and relative.suffix == ".py"
+        )
 
-    def _register_sidekick_package(self, build_data: dict) -> None:
-        """Force-include the Sidekick package without its test suite.
+    @property
+    def _canonical_tools_src_root(self) -> Path:
+        """Return the pinned Tools source root used as wheel authority."""
+        return Path(self.root) / "vendor" / "ud-tools" / "src"
 
-        Hatchling's ``recurse_forced_files`` never consults ``include_path``,
-        so a whole-directory ``force-include`` entry is immune to the
-        ``exclude`` patterns in ``[tool.hatch.build]`` — which is why the wheel
-        shipped the entire ``sidekick`` test suite (issue #8018). Enumerating
-        the tree here lets the same relocation happen file by file with the
-        test artefacts filtered out.
+    @property
+    def _local_tools_python_root(self) -> Path:
+        """Return the Upstream tree containing classified local extensions."""
+        return Path(self.root) / "src" / "shared" / "python"
+
+    @property
+    def _ownership_manifest_path(self) -> Path:
+        """Return the file-level ownership manifest for local extensions."""
+        return Path(self.root) / _OWNERSHIP_MANIFEST_RELATIVE
+
+    @staticmethod
+    def _validated_git_sha(value: str) -> str:
+        """Return a normalized Git object ID or reject malformed metadata."""
+        normalized = value.strip().lower()
+        valid_length = len(normalized) in {40, 64}
+        valid_characters = all(
+            character in "0123456789abcdef" for character in normalized
+        )
+        if not valid_length or not valid_characters:
+            raise ValueError("Malformed Git object ID")
+        return normalized
+
+    def _validate_pinned_tools_checkout(self, version: str) -> bool:
+        """Verify that the checked-out Tools commit matches the gitlink.
+
+        Returns ``False`` only for an editable, non-CI build whose Git metadata
+        is unavailable. An explicit mismatch is always fatal.
         """
-        source_root = self._sidekick_dir
-        if not source_root.is_dir():
-            logger.warning("Sidekick package not found at %s", source_root)
+        root = str(Path(self.root))
+        subprocess_contract = {
+            "cwd": root,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+        try:
+            gitlink_result = subprocess.run(
+                ["git", "ls-tree", "HEAD", "--", "vendor/ud-tools"],
+                **subprocess_contract,
+            )
+            checkout_result = subprocess.run(
+                ["git", "-C", "vendor/ud-tools", "rev-parse", "HEAD"],
+                **subprocess_contract,
+            )
+            gitlink_fields = gitlink_result.stdout.strip().split(maxsplit=3)
+            if (
+                len(gitlink_fields) < 3
+                or gitlink_fields[0] != "160000"
+                or gitlink_fields[1] != "commit"
+            ):
+                raise ValueError("Malformed Tools gitlink metadata")
+            expected_sha = self._validated_git_sha(gitlink_fields[2])
+            actual_sha = self._validated_git_sha(checkout_result.stdout)
+        except (
+            OSError,
+            subprocess.CalledProcessError,
+            ValueError,
+            TypeError,
+            AttributeError,
+        ):
+            message = "Pinned Tools checkout git metadata unavailable"
+            if version != "editable" or _env_flag("CI"):
+                raise RuntimeError(message) from None
+            logger.warning("%s; skipping editable force-includes", message)
+            return False
+
+        if actual_sha != expected_sha:
+            raise RuntimeError(
+                "Pinned Tools checkout does not match superproject gitlink"
+            )
+        dirty_result = subprocess.run(
+            [
+                "git",
+                "-C",
+                "vendor/ud-tools",
+                "status",
+                "--porcelain=v1",
+                "--untracked-files=all",
+                "--",
+                *_TOOLS_PROVENANCE_PATHS,
+            ],
+            **subprocess_contract,
+        )
+        if dirty_result.stdout.strip():
+            raise RuntimeError("Pinned Tools package sources are not clean")
+        return True
+
+    def _extension_owners(self) -> dict[Path, str]:
+        """Return local extension ownership decisions or fail closed.
+
+        Hatch build isolation supplies Hatchling and the standard library, not
+        PyYAML. The parser below intentionally accepts only this repository's
+        constrained ``paths -> owner`` manifest shape.
+        """
+        try:
+            lines = self._ownership_manifest_path.read_text(
+                encoding="utf-8"
+            ).splitlines()
+        except OSError as error:
+            raise RuntimeError(
+                "Shared Python ownership manifest is unavailable"
+            ) from error
+
+        owners: dict[Path, str] = {}
+        current_path: Path | None = None
+        saw_paths = False
+        for line in lines:
+            if line == "paths:":
+                saw_paths = True
+                continue
+            if not saw_paths or not line or line.lstrip().startswith("#"):
+                continue
+            path_match = re.fullmatch(r"  ([^:\s][^:]*\.py):", line)
+            if path_match is not None:
+                current_path = Path(path_match.group(1))
+                if current_path in owners:
+                    raise RuntimeError("Shared Python ownership manifest is malformed")
+                owners[current_path] = ""
+                continue
+            owner_match = re.fullmatch(r"    owner: (UpstreamDrift|Unresolved)", line)
+            if owner_match is not None:
+                if current_path is None:
+                    raise RuntimeError("Shared Python ownership manifest is malformed")
+                owners[current_path] = owner_match.group(1)
+
+        if not saw_paths or not owners or any(not owner for owner in owners.values()):
+            raise RuntimeError("Shared Python ownership manifest is malformed")
+        return owners
+
+    def _register_tools_packages(self, version: str, build_data: dict) -> None:
+        """Register canonical Tools packages plus non-conflicting extensions.
+
+        The pinned Tools submodule is authoritative for every same-relative
+        file. Upstream-owned files supplement a package only when the canonical
+        package has no counterpart. Test artifacts from either tree never
+        enter the wheel.
+
+        Release and CI builds require both canonical package roots. Editable
+        local installs may proceed without forced copies because imports
+        resolve directly from their checkout.
+        """
+        if not version:
+            raise ValueError("Version parameter must not be empty")
+        if build_data is None:
+            raise ValueError("Build data dictionary must be provided")
+
+        canonical_src = self._canonical_tools_src_root
+        canonical_directories = {
+            source_name: canonical_src / source_name
+            for source_name in _TOOLS_DIRECTORY_DESTINATIONS
+        }
+        missing = [
+            source_name
+            for source_name, source_root in canonical_directories.items()
+            if not source_root.is_dir()
+        ]
+        missing.extend(
+            source_name
+            for source_name in _TOOLS_FILE_DESTINATIONS
+            if not (canonical_src / source_name).is_file()
+        )
+        if missing:
+            message = (
+                "Pinned Tools package roots are required for release/CI builds; "
+                f"missing: {', '.join(missing)}"
+            )
+            if version != "editable" or _env_flag("CI"):
+                raise RuntimeError(message)
+            logger.warning("%s; skipping editable force-includes", message)
             return
+
+        if not self._validate_pinned_tools_checkout(version):
+            return
+
         force_include = build_data.setdefault("force_include", {})
-        for path in sorted(source_root.rglob("*")):
-            if not path.is_file():
+        for source_name, canonical_root in canonical_directories.items():
+            destination_root = _TOOLS_DIRECTORY_DESTINATIONS[source_name]
+            for path in sorted(canonical_root.rglob("*")):
+                if not path.is_file():
+                    continue
+                relative = path.relative_to(canonical_root)
+                if not self._is_test_artifact(relative):
+                    force_include[str(path)] = "/".join(
+                        (destination_root, *relative.parts)
+                    )
+
+        for source_name, destination in _TOOLS_FILE_DESTINATIONS.items():
+            force_include[str(canonical_src / source_name)] = destination
+
+        canonical_python = canonical_src / "shared" / "python"
+        local_python = self._local_tools_python_root
+        extension_owners = self._extension_owners()
+        for package_name in _UPSTREAM_EXTENSION_PACKAGES:
+            canonical_root = canonical_python / package_name
+            canonical_files = {
+                path.relative_to(canonical_root)
+                for path in canonical_root.rglob("*")
+                if path.is_file()
+            }
+            local_root = local_python / package_name
+            if not local_root.is_dir():
                 continue
-            relative = path.relative_to(source_root)
-            if self._is_test_artifact(relative):
-                continue
-            force_include[str(path)] = "/".join(("sidekick", *relative.parts))
+            for path in sorted(local_root.rglob("*")):
+                if not path.is_file():
+                    continue
+                relative = path.relative_to(local_root)
+                if (
+                    relative.suffix != ".py"
+                    or relative in canonical_files
+                    or self._is_test_artifact(relative)
+                ):
+                    continue
+                extension_path = Path(package_name) / relative
+                owner = extension_owners.get(extension_path)
+                if owner is None:
+                    raise RuntimeError(
+                        "Local shared extension lacks ownership classification: "
+                        f"{extension_path.as_posix()}"
+                    )
+                if owner != "UpstreamDrift":
+                    continue
+                force_include[str(path)] = "/".join(
+                    ("shared", "python", package_name, *relative.parts)
+                )
 
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
@@ -132,7 +358,7 @@ class UIBuildHook(BuildHookInterface):
 
         self._ensure_ui_bundle(version)
         self._register_ui_bundle(version, build_data)
-        self._register_sidekick_package(build_data)
+        self._register_tools_packages(version, build_data)
 
     def _ensure_ui_bundle(self, version: str) -> None:
         """Build (or validate the presence of) the compiled frontend bundle."""

@@ -6,6 +6,8 @@ from typing import Any
 
 import numpy as np
 
+from .validation import require
+
 
 class TrajectoryResultMixin:
     """Reusable DbC helpers for trajectory result containers."""
@@ -18,32 +20,46 @@ class TrajectoryResultMixin:
         return len(self.t)
 
     def _validate_trajectory(self, expected_state_width: int) -> None:
-        assert self.t.ndim == 1, f"t must be 1D, got shape {self.t.shape}"
-        assert self.states.ndim == 2, (
-            f"states must be 2D, got shape {self.states.shape}"
+        require(self.t.ndim == 1, f"t must be 1D, got shape {self.t.shape}")
+        require(
+            self.states.ndim == 2,
+            f"states must be 2D, got shape {self.states.shape}",
         )
-        assert self.t.size >= 1, "Trajectory must contain at least one time sample"
-        assert self.states.shape[0] == self.t.size, (
-            "states row count must match the number of time samples"
+        require(self.t.size >= 1, "Trajectory must contain at least one time sample")
+        require(
+            self.states.shape[0] == self.t.size,
+            "states row count must match the number of time samples",
         )
-        assert self.states.shape[1] == expected_state_width, (
-            f"states must have width {expected_state_width}, got {self.states.shape[1]}"
+        require(
+            self.states.shape[1] == expected_state_width,
+            f"states must have width {expected_state_width}, got {self.states.shape[1]}",
         )
-        assert np.all(np.isfinite(self.t)), "Time vector must be finite"
-        assert np.all(np.isfinite(self.states)), "State trajectory must be finite"
+        require(bool(np.all(np.isfinite(self.t))), "Time vector must be finite")
+        require(
+            bool(np.all(np.isfinite(self.states))), "State trajectory must be finite"
+        )
         if self.t.size > 1:
-            assert np.all(np.diff(self.t) > 0), (
-                "Time vector must be strictly increasing"
+            require(
+                bool(np.all(np.diff(self.t) > 0)),
+                "Time vector must be strictly increasing",
             )
 
     def _check_idx(self, idx: int) -> None:
-        assert 0 <= idx < self.n_steps, f"Index {idx} out of range [0, {self.n_steps})"
+        require(idx is not None, "idx must be provided")
+        require(
+            isinstance(idx, int | np.integer),
+            f"idx must be an integer, got {type(idx).__name__}",
+        )
+        require(
+            0 <= idx < self.n_steps, f"Index {idx} out of range [0, {self.n_steps})"
+        )
 
     @staticmethod
     def _assert_energy_finite(result: dict, idx: int) -> None:
         """Shared postcondition: all energy components must be finite."""
-        assert all(np.isfinite(v) for v in result.values()), (
-            f"Non-finite energy at idx={idx}: {result}"
+        require(
+            all(np.isfinite(v) for v in result.values()),
+            f"Non-finite energy at idx={idx}: {result}",
         )
 
     def total_torques_at(self, idx: int) -> np.ndarray:
@@ -53,7 +69,6 @@ class TrajectoryResultMixin:
         apply torque clamping (e.g. double-pendulum with TorqueClamp) must
         override this method.
         """
-        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         torque_func = self.torque_func  # type: ignore[attr-defined]
         tau_drive = np.array(torque_func(self.t[idx]))

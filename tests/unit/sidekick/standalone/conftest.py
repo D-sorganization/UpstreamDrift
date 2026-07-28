@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import os
+import importlib
 import sys
 import types
 from pathlib import Path
+
+import pytest
 
 
 def _ensure_numpy_stub() -> None:
@@ -31,37 +35,74 @@ def _ensure_numpy_stub() -> None:
     sys.modules["numpy._core"] = types.ModuleType("numpy._core")
 
 
-_ensure_numpy_stub()
-
-
-def pytest_configure(config: object) -> None:
-    """Ensure src/shared/python precedes src/ so core.contracts resolves correctly.
-
-    The project conftest adjusts sys.path when vendor/ud-tools is present.
-    In bare checkout environments (no submodule init) it exits early, leaving
-    src/ ahead of src/shared/python/ so src/core/ shadows src/shared/python/core/.
-    This hook is a targeted fix limited to the standalone test directory.
-    """
+def _install_canonical_tools_paths() -> None:
+    """Force standalone behavior tests through the selected canonical Tools."""
     root = Path(__file__).resolve().parents[4]
-    shared_python = str((root / "src" / "shared" / "python").resolve())
-    src_dir = str((root / "src").resolve())
+    tools_root = Path(
+        os.environ.get("TOOLS_REPO_PATH", root / "vendor/ud-tools")
+    ).resolve()
+    canonical_paths = (
+        tools_root / "src/shared/python",
+        tools_root / "src",
+        tools_root / "src/python/src",
+    )
+    missing = [path for path in canonical_paths if not path.is_dir()]
+    if missing:
+        raise RuntimeError(f"canonical Tools test paths are missing: {missing}")
 
-    resolved_paths = [str(Path(p).resolve()) for p in sys.path]
+    canonical_text = [str(path.resolve()) for path in canonical_paths]
+    local_shared = str((root / "src/shared/python").resolve())
+    rejected = {local_shared.casefold(), *(path.casefold() for path in canonical_text)}
+    sys.path[:] = [
+        entry
+        for entry in sys.path
+        if str(Path(entry).resolve()).casefold() not in rejected
+    ]
+    for entry in reversed(canonical_text):
+        sys.path.insert(0, entry)
 
-    # Insert shared/python if missing
-    if shared_python not in resolved_paths:
-        sys.path.insert(0, shared_python)
-        return
-
-    # Move shared/python before src/ if src/ precedes it
-    try:
-        sp_idx = resolved_paths.index(shared_python)
-        src_idx = resolved_paths.index(src_dir)
-        if src_idx < sp_idx:
-            original = next(
-                p for p in sys.path if str(Path(p).resolve()) == shared_python
+    shared_paths = {
+        "shared": tools_root / "src/shared",
+        "shared.python": tools_root / "src/shared/python",
+    }
+    for name, package_path in shared_paths.items():
+        module = sys.modules.get(name)
+        if module is not None:
+            module.__path__ = [str(package_path.resolve())]  # type: ignore[attr-defined]
+    for name in tuple(sys.modules):
+        if (
+            name == "sidekick"
+            or name.startswith(
+                (
+                    "sidekick.",
+                    "shared.python.sidekick",
+                    "src.shared.python.sidekick",
+                )
             )
-            sys.path.remove(original)
-            sys.path.insert(src_idx, original)
-    except (ValueError, StopIteration):
-        pass
+            or name
+            in {
+                "shared.python.contracts",
+                "shared.python.import_aliases",
+                "src.shared.python.import_aliases",
+            }
+        ):
+            sys.modules.pop(name, None)
+    importlib.invalidate_caches()
+    parent_contracts = importlib.import_module("shared.python.contracts")
+    contract_origin = Path(parent_contracts.__file__).resolve()
+    if not contract_origin.is_relative_to(tools_root):
+        raise RuntimeError(
+            f"canonical Tools contracts did not resolve: {contract_origin}"
+        )
+    sys.modules["contracts"] = parent_contracts
+
+
+_ensure_numpy_stub()
+_install_canonical_tools_paths()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_configure(config: pytest.Config) -> None:
+    """Reassert parent precedence after the repository-wide path hook."""
+    del config
+    _install_canonical_tools_paths()

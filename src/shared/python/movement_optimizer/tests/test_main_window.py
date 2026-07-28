@@ -37,7 +37,7 @@ pytestmark = pytest.mark.skipif(not _QT_AVAILABLE, reason="Qt not available")
 
 def _make_result(cost: float = 42.0, success: bool = True) -> Any:
     """Create a minimal OptimizationResult for testing."""
-    from conftest import make_test_result
+    from movement_optimizer.tests._helpers import make_test_result
 
     r = make_test_result(cost=cost)
     r.success = success

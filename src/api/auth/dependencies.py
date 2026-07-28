@@ -5,12 +5,13 @@ from typing import TypeVar
 
 from src.api.utils.datetime_compat import UTC
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from src.api.database import get_db
+from src.shared.python.config.environment import is_auth_disabled
 
 from .models import APIKey, User, UserRole
 from .security import (
@@ -207,6 +208,55 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
         return current_user
 
     return role_dependency
+
+
+async def authenticate_bearer_request(request: Request, db: Session) -> User:
+    """Resolve the caller from the raw ``Authorization: Bearer`` header.
+
+    Used by dependencies that receive the raw :class:`~fastapi.Request` rather
+    than FastAPI-parsed ``HTTPAuthorizationCredentials`` (router-level
+    dependencies, quota dependencies, WebSocket-compatible dependencies).
+
+    Preconditions:
+        ``request`` and ``db`` must not be ``None``.
+
+    Raises:
+        HTTPException: 401 when the header is missing, malformed, or the
+            credentials do not resolve to an active user.
+    """
+    if request is None:
+        raise ValueError("request must be provided")
+    if db is None:
+        raise ValueError("db must be provided")
+
+    authorization = request.headers.get("Authorization")
+    if not authorization:
+        raise _unauthorized("Not authenticated")
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise _unauthorized("Invalid authentication credentials")
+
+    credentials = HTTPAuthorizationCredentials(scheme=scheme, credentials=token)
+    return await get_current_user_flexible(credentials=credentials, db=db)
+
+
+async def require_cloud_auth(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Require a valid bearer token in cloud mode; no-op in local mode.
+
+    Attach with ``dependencies=[Depends(require_cloud_auth)]``. Note the
+    *call*: passing an un-instantiated class or an un-called function to
+    ``Depends`` silently disables the check (issue #7987).
+
+    Postcondition: in cloud mode this either returns an authenticated
+    :class:`User` or raises 401 — it never returns ``None``.
+    """
+    if is_auth_disabled():
+        return None
+    return await authenticate_bearer_request(request, db)
 
 
 def _usage_quota_exceeded(current_user: User, resource_type: str) -> HTTPException:

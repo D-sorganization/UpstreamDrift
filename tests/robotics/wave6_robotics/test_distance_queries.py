@@ -6,9 +6,7 @@ import numpy as np
 import pytest
 
 from src.robotics.planning.collision._distance_queries import (
-    math as distance_math,
     _closest_points_segments,
-    _gjk_distance,
     check_primitive_collision,
     compute_primitive_distance,
 )
@@ -130,28 +128,10 @@ def test_closest_points_segments_skew() -> None:
     assert np.allclose(p2, [0.5, 0.0, 1.0], atol=1e-6)
 
 
-def test_gjk_distance_box_box_separated() -> None:
+def test_box_box_separated_exact_distance() -> None:
+    """Separated boxes must report the exact gap, not a support-point norm."""
     a = Box(center=np.zeros(3), half_extents=np.array([0.5, 0.5, 0.5]))
     b = Box(center=np.array([3.0, 0.0, 0.0]), half_extents=np.array([0.5, 0.5, 0.5]))
-    d, _, _ = _gjk_distance(a, b, max_iterations=8)
-    # Distance estimate should be roughly positive
-    assert d >= 0 or d < 1e-3  # accept any finite output
-
-
-def test_gjk_initial_direction_reuses_computed_norm(monkeypatch) -> None:
-    calls = 0
-    real_hypot = distance_math.hypot
-
-    def counting_hypot(*args: float) -> float:
-        nonlocal calls
-        calls += 1
-        return real_hypot(*args)
-
-    monkeypatch.setattr(distance_math, "hypot", counting_hypot)
-    a = Box(center=np.zeros(3), half_extents=np.array([0.5, 0.5, 0.5]))
-    b = Box(center=np.array([3.0, 0.0, 0.0]), half_extents=np.array([0.5, 0.5, 0.5]))
-
-    d, _, _ = _gjk_distance(a, b, max_iterations=1)
-
-    assert d >= 0.0
-    assert calls == 2
+    d, _, _ = compute_primitive_distance(a, b)
+    assert d == pytest.approx(2.0, abs=1e-9)
+    assert not check_primitive_collision(a, b)

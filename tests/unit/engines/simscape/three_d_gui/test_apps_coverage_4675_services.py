@@ -120,6 +120,17 @@ def test_c3d_loader_file_not_found():
         load_c3d_file("/nonexistent/path/foo.c3d")
 
 
+def test_c3d_loader_defaults_absent_point_units_to_millimetres():
+    """An absent POINT:UNITS parameter must not reach metadata parsing."""
+    from src.apps.services.c3d_loader import _default_missing_point_units  # type: ignore
+
+    c3d_data = {"parameters": {"POINT": {}}}
+
+    _default_missing_point_units(c3d_data)
+
+    assert c3d_data["parameters"]["POINT"]["UNITS"]["value"] == ["mm"]
+
+
 def test_c3d_loader_build_helpers(monkeypatch, tmp_path):
     """Drive load_c3d_file with a stubbed C3DDataReader."""
     import pandas as pd
@@ -128,6 +139,7 @@ def test_c3d_loader_build_helpers(monkeypatch, tmp_path):
 
     fake_path = tmp_path / "fake.c3d"
     fake_path.write_bytes(b"\x00")
+    c3d_payload = {"parameters": {"POINT": {}}}
 
     class _Meta:
         frame_rate = 100.0
@@ -150,9 +162,10 @@ def test_c3d_loader_build_helpers(monkeypatch, tmp_path):
             pass
 
         def get_metadata(self):
+            assert c3d_payload["parameters"]["POINT"]["UNITS"]["value"] == ["mm"]
             return _Meta()
 
-        def points_dataframe(self, include_time=False):
+        def points_dataframe(self, include_time=False, target_units=None):
             return pd.DataFrame(
                 {
                     "marker": ["A", "A", "B", "B"],
@@ -172,7 +185,7 @@ def test_c3d_loader_build_helpers(monkeypatch, tmp_path):
             )
 
         def _load(self):
-            return {"parameters": {"POINT": {"UNITS": "m"}}}
+            return c3d_payload
 
     monkeypatch.setattr(c3d_loader, "C3DDataReader", _Reader)
     model = c3d_loader.load_c3d_file(str(fake_path))
@@ -182,7 +195,7 @@ def test_c3d_loader_build_helpers(monkeypatch, tmp_path):
     assert model.analog["EMG"].unit == "V"
     assert model.point_rate == 100.0
     assert model.events[0].label == "Top"
-    assert model.raw_parameters == {"POINT": {"UNITS": "m"}}
+    assert model.raw_parameters == {"POINT": {"UNITS": {"value": ["mm"]}}}
 
 
 def test_c3d_loader_raw_params_failure_branch(monkeypatch, tmp_path):
@@ -211,7 +224,7 @@ def test_c3d_loader_raw_params_failure_branch(monkeypatch, tmp_path):
         def get_metadata(self):
             return _Meta()
 
-        def points_dataframe(self, include_time=False):
+        def points_dataframe(self, include_time=False, target_units=None):
             return pd.DataFrame(
                 {"marker": [], "x": [], "y": [], "z": [], "residual": []}
             )
@@ -358,6 +371,71 @@ def test_loader_thread_emits_failed_for_various_exceptions(qapp, monkeypatch, tm
         loop.exec()
         th.wait(2000)
         assert fragment in captured.get("m", ""), (fragment, captured)
+
+
+def test_loader_thread_reports_invalid_csv_without_terminating(qapp):
+    """A non-C3D input must leave the viewer usable with an actionable error."""
+    from PyQt6.QtCore import QEventLoop, QTimer
+
+    from src.apps.services.loader_thread import C3DLoaderThread  # type: ignore
+
+    fixture = (
+        Path(__file__).resolve().parents[5]
+        / "tests"
+        / "data"
+        / "motion_pipeline"
+        / "golden"
+        / "sample.csv"
+    )
+    assert fixture.is_file()
+
+    thread = C3DLoaderThread(str(fixture))
+    received: dict[str, str] = {}
+    loop = QEventLoop()
+    thread.failed.connect(lambda message: received.setdefault("message", message))
+    thread.failed.connect(lambda _: loop.quit())
+    thread.loaded.connect(lambda _: loop.quit())
+    QTimer.singleShot(5000, loop.quit)
+
+    thread.start()
+    loop.exec()
+    assert thread.wait(2000)
+    assert "Unexpected error loading file" in received.get("message", "")
+
+
+def test_loader_thread_loads_golden_c3d_fixture(qapp):
+    """The bundled, valid C3D fixture must load without crashing the worker."""
+    pytest.importorskip("ezc3d")
+    from PyQt6.QtCore import QEventLoop, QTimer
+
+    from src.apps.services.loader_thread import C3DLoaderThread  # type: ignore
+
+    fixture = (
+        Path(__file__).resolve().parents[5]
+        / "tests"
+        / "data"
+        / "motion_pipeline"
+        / "golden"
+        / "sample.c3d"
+    )
+    assert fixture.is_file()
+
+    thread = C3DLoaderThread(str(fixture))
+    received: dict[str, object] = {}
+    loop = QEventLoop()
+    thread.loaded.connect(lambda model: received.setdefault("model", model))
+    thread.loaded.connect(lambda _: loop.quit())
+    thread.failed.connect(lambda _: loop.quit())
+    QTimer.singleShot(5000, loop.quit)
+
+    thread.start()
+    loop.exec()
+    assert thread.wait(2000)
+    model = received.get("model")
+    assert model is not None
+    assert len(model.markers) == 6
+    assert model.point_rate == pytest.approx(60.0)
+    assert model.markers["M1"].position[0, 0] == pytest.approx(0.1)
 
 
 # --------------------------------------------------------------------------

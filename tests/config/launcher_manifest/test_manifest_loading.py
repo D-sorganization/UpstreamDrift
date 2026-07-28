@@ -234,6 +234,10 @@ models:
             encoding="utf-8",
         )
         monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.is_engine_runtime_available",
+            lambda engine_type: True,
+        )
 
         manifest = LauncherManifest.load(
             manifest_path,

@@ -611,7 +611,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             # frame rows: normal, tangent1, tangent2
             contact_frame = self.data.contact[i].frame.reshape(3, 3)
 
-            # Force exerted BY geom2 ON geom1
+            # Force exerted ON geom2's body (see below), rotated to world.
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
@@ -622,13 +622,16 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             geom1_body = self.model.geom_bodyid[contact.geom1]
             geom2_body = self.model.geom_bodyid[contact.geom2]
 
-            # mj_contactForce returns the force exerted BY geom2 ON geom1.
-            if geom2_body == 0:
-                # World is geom2. Force ON system (geom1) is +f_world.
+            # mj_contactForce returns the wrench acting ON geom2's body. This
+            # is MuJoCo's own accounting in mj_rnePostConstraint, which adds
+            # the contact wrench to cfrc_ext[body2] and subtracts it from
+            # cfrc_ext[body1]. Note MuJoCo's collision table orders geoms by
+            # type, so a floor plane is always geom1.
+            if geom1_body == 0 and geom2_body != 0:
+                # World is geom1; the system is geom2 and receives +f_world.
                 total_force += f_world
-            elif geom1_body == 0:
-                # World is geom1. Force ON world is +f_world.
-                # Force ON system (geom2) is therefore -f_world.
+            elif geom2_body == 0 and geom1_body != 0:
+                # World is geom2; the system is geom1 and receives -f_world.
                 total_force -= f_world
 
         return total_force

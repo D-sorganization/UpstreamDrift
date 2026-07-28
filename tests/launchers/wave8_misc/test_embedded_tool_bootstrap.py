@@ -13,6 +13,7 @@ registry. These tests verify:
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -67,6 +68,110 @@ def _make_filtered_import(decide):
         return _REAL_IMPORT(name, globals, locals, fromlist, level)
 
     return _filtered
+
+
+def _make_tools_checkout(parent: Path, name: str) -> Path:
+    tools_root = parent / name
+    (tools_root / "src" / "shared" / "python").mkdir(parents=True)
+    (tools_root / "src" / "python" / "src").mkdir(parents=True)
+    return tools_root
+
+
+def _make_repo_root(parent: Path) -> Path:
+    repo_root = parent / "UpstreamDrift"
+    (repo_root / "src" / "shared" / "python").mkdir(parents=True)
+    return repo_root
+
+
+def test_bootstrap_paths_prefer_explicit_tools_checkout(tmp_path) -> None:
+    repo_root = _make_repo_root(tmp_path)
+    explicit = _make_tools_checkout(tmp_path, "CanonicalTools")
+    _make_tools_checkout(repo_root / "vendor", "ud-tools")
+    _make_tools_checkout(tmp_path, "Tools")
+
+    paths = bootstrap._bootstrap_python_paths(repo_root, str(explicit))
+
+    assert paths[:3] == [
+        str(explicit / "src"),
+        str(explicit / "src" / "shared" / "python"),
+        str(explicit / "src" / "python" / "src"),
+    ]
+
+
+def test_bootstrap_paths_prefer_vendor_over_sibling(tmp_path) -> None:
+    repo_root = _make_repo_root(tmp_path)
+    vendor = _make_tools_checkout(repo_root / "vendor", "ud-tools")
+    _make_tools_checkout(tmp_path, "Tools")
+
+    paths = bootstrap._bootstrap_python_paths(repo_root, None)
+
+    assert paths[0] == str(vendor / "src")
+
+
+def test_bootstrap_paths_fall_back_to_sibling_without_vendor(tmp_path) -> None:
+    repo_root = _make_repo_root(tmp_path)
+    sibling = _make_tools_checkout(tmp_path, "Tools")
+
+    paths = bootstrap._bootstrap_python_paths(repo_root, None)
+
+    assert paths[0] == str(sibling / "src")
+
+
+def test_bootstrap_paths_reject_invalid_explicit_checkout(tmp_path) -> None:
+    repo_root = _make_repo_root(tmp_path)
+    _make_tools_checkout(repo_root / "vendor", "ud-tools")
+    invalid = tmp_path / "missing-tools"
+
+    with pytest.raises(RuntimeError, match="TOOLS_REPO_PATH"):
+        bootstrap._bootstrap_python_paths(repo_root, str(invalid))
+
+
+def test_prepend_python_paths_repositions_existing_entries(monkeypatch) -> None:
+    monkeypatch.setattr(sys, "path", ["keep", "b", "a", "b", "tail"])
+
+    bootstrap._prepend_python_paths(["a", "b"])
+
+    assert sys.path[:2] == ["a", "b"]
+    assert sys.path.count("a") == 1
+    assert sys.path.count("b") == 1
+    assert "keep" in sys.path[2:]
+
+
+def test_bootstrap_respects_explicit_tools_env_over_stale_paths(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    repo_root = _make_repo_root(tmp_path)
+    explicit = _make_tools_checkout(tmp_path, "CanonicalTools")
+    vendor = _make_tools_checkout(repo_root / "vendor", "ud-tools")
+    sibling = _make_tools_checkout(tmp_path, "Tools")
+    original_path = list(sys.path)
+
+    def _noop(name):
+        raise ImportError("noop")
+
+    try:
+        sys.path[:] = [
+            str(sibling / "src"),
+            str(vendor / "src"),
+            *original_path,
+        ]
+        monkeypatch.setattr(bootstrap, "REPO_ROOT", repo_root)
+        monkeypatch.setenv("TOOLS_REPO_PATH", str(explicit))
+
+        with patch.object(_builtins, "__import__", _make_filtered_import(_noop)):
+            bootstrap.bootstrap_embeddable_tools()
+
+        assert sys.path[:3] == [
+            str(explicit / "src"),
+            str(explicit / "src" / "shared" / "python"),
+            str(explicit / "src" / "python" / "src"),
+        ]
+        assert sys.path.index(str(explicit / "src")) < sys.path.index(
+            str(sibling / "src")
+        )
+    finally:
+        sys.path[:] = original_path
 
 
 def test_bootstrap_handles_import_errors() -> None:

@@ -116,6 +116,26 @@ class TestExerciseDashboard:
         finally:
             win.close()
 
+    def test_preferred_engine_is_selected_for_provider_launch(
+        self, qapp, patched_child_dashboards, monkeypatch
+    ) -> None:
+        """Provider tiles open their declared engine instead of a generic first choice."""
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models", "Drake_Models"],
+        )
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("bench_press", preferred_engine="Drake_Models")
+        try:
+            assert win.engine_selector.currentText() == "Drake_Models"
+            patched_child_dashboards["DrakeDashboard"].assert_called_once_with(
+                exercise_filter="bench_press"
+            )
+            patched_child_dashboards["MuJoCoDashboard"].assert_not_called()
+        finally:
+            win.close()
+
     def test_swap_to_drake(self, qapp, patched_child_dashboards, monkeypatch) -> None:
         monkeypatch.setattr(
             "src.launchers.exercise_dashboard.discover_exercise",
@@ -238,6 +258,40 @@ class TestExerciseDashboard:
             assert isinstance(win._current_widget, QLabel)
             assert "Error loading Drake_Models" in win._current_widget.text()
             assert "kaboom" in win._current_widget.text()
+        finally:
+            win.close()
+
+    def test_mujoco_dll_failure_offers_recoverable_engine_guidance(
+        self, qapp, monkeypatch
+    ) -> None:
+        """A native MuJoCo failure must not leave the exercise view blank."""
+        import src.launchers.mujoco_dashboard as mujoco_mod
+
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        monkeypatch.setattr(
+            mujoco_mod,
+            "MuJoCoDashboard",
+            MagicMock(
+                side_effect=OSError(
+                    1114, "A dynamic link library (DLL) initialization routine failed"
+                )
+            ),
+        )
+        from PyQt6.QtWidgets import QLabel
+
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("gait")
+        try:
+            assert isinstance(win._current_widget, QLabel)
+            message = win._current_widget.text()
+            assert "MuJoCo is unavailable" in message
+            assert "Choose JaxSim_Models" in message
+            assert "DLL" in message
+            assert win.engine_selector.findText("JaxSim_Models") >= 0
         finally:
             win.close()
 
