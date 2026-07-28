@@ -20,6 +20,11 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
     _package_main_module_name,
 )
 from src.launchers.launcher_process_manager import ProcessManager  # noqa: E402
+from src.shared.python.launcher_embed import (  # noqa: E402
+    EmbedCapabilities,
+    register_embeddable_tool,
+    unregister_embeddable_tool,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -289,7 +294,49 @@ class TestSpecialAppHandler:
             result = SpecialAppHandler().get_dockable_ui(model, tmp_path)
 
         assert result is widget
-        tool.create_main_widget.assert_called_once_with()
+        tool.create_main_widget.assert_called_once_with(None)
+
+    def test_registered_embeddable_tool_receives_parent_argument(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Special-app docking must honor the EmbeddableTool parent contract."""
+
+        class ParentRecordingTool:
+            tool_id = "registered_parent_tool"
+
+            def __init__(self) -> None:
+                self.parent_seen = object()
+                self.widget = object()
+
+            def embed_capabilities(self) -> EmbedCapabilities:
+                return EmbedCapabilities(supports_embedded=True)
+
+            def create_main_widget(self, parent: object | None) -> object:
+                self.parent_seen = parent
+                return self.widget
+
+            def cleanup(self) -> None:
+                pass
+
+            def is_dirty(self) -> bool:
+                return False
+
+        model = MockModel(
+            id="registered_parent_tool",
+            name="Registered Parent Tool",
+            path="src/tools/registered_parent_tool/gui.py",
+            type="special_app",
+        )
+        tool = ParentRecordingTool()
+        register_embeddable_tool(tool)
+        try:
+            result = SpecialAppHandler().get_dockable_ui(model, tmp_path)
+        finally:
+            unregister_embeddable_tool(tool.tool_id)
+
+        assert result is tool.widget
+        assert tool.parent_seen is None
 
 
 # =============================================================================
