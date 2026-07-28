@@ -7,12 +7,13 @@ it, and asserts the standard postconditions on the final
 
 This test is deliberately defensive about optional backends: it uses
 ``pytest.importorskip`` for each physics engine and ``xfail`` for known
-in-flight gaps (orchestrator wiring bugs tracked on issues #4647-#4650).
+in-flight gaps.
 """
 
 from __future__ import annotations
 
 import math
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -225,19 +226,11 @@ MATCHING_BACKENDS = ("mujoco", "drake", "pinocchio")
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "Orchestrator wiring tracked on #4647/#4648/#4649: "
-        "load_source / apply_preprocessing / default skeleton missing on main."
-    ),
-)
 def test_orchestrator_full_run_on_synthetic_marker_trajectory() -> None:
     """The orchestrator should run end-to-end on a passthrough MarkerTrajectory.
 
-    Marked xfail until the in-flight bug-fix PRs land; once they do, this test
-    becomes a strict regression gate. The assertions cover the full
-    :class:`MotionMatchingResult` invariant set defined by the epic.
+    The assertions cover the full :class:`MotionMatchingResult` invariant set
+    defined by the epic.
     """
     from src.shared.python.motion_pipeline.contracts import MotionMatchingResult
     from src.shared.python.motion_pipeline.orchestrator import (
@@ -246,11 +239,13 @@ def test_orchestrator_full_run_on_synthetic_marker_trajectory() -> None:
         PipelineConfig,
     )
 
-    traj = _build_synthetic_marker_trajectory()
+    traj = _build_synthetic_marker_trajectory().model_copy(
+        update={"skeleton": _build_simple_skeleton()}
+    )
 
     config = PipelineConfig(
         adapter=AdapterOverride(format="passthrough"),
-        ik_backend="mujoco",
+        ik_backend="geometric",
         matching_backend="mujoco",
     )
     pipeline = MotionPipeline(config)
@@ -268,7 +263,7 @@ def test_orchestrator_full_run_on_synthetic_marker_trajectory() -> None:
 
     # Timestamps strictly monotonic
     timestamps = [f.timestamp for f in matched.trajectory.frames]
-    assert all(t1 < t2 for t1, t2 in zip(timestamps, timestamps[1:], strict=True))
+    assert all(t1 < t2 for t1, t2 in pairwise(timestamps))
 
     # Tracking residuals finite + bounded
     for metric, value in (result.error_metrics or {}).items():
