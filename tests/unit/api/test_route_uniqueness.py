@@ -20,6 +20,7 @@ the failure mode cannot recur silently.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 import pytest
@@ -27,6 +28,14 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from src.api.route_registry import discover_routes, register_routes
+
+
+_ROUTE_PARAMETER_RE = re.compile(r"\{[^}/]+\}")
+
+
+def _normalize_route_path(path: str) -> str:
+    """Treat routes that differ only by parameter names as the same path shape."""
+    return _ROUTE_PARAMETER_RE.sub("{}", path)
 
 
 def _route_table(app: FastAPI) -> dict[tuple[str, str], list[str]]:
@@ -40,7 +49,9 @@ def _route_table(app: FastAPI) -> dict[tuple[str, str], list[str]]:
                 continue
             endpoint = route.endpoint
             qualname = getattr(endpoint, "__qualname__", str(endpoint))
-            table[(method, route.path)].append(f"{endpoint.__module__}.{qualname}")
+            table[(method, _normalize_route_path(route.path))].append(
+                f"{endpoint.__module__}.{qualname}"
+            )
     return table
 
 
@@ -51,7 +62,9 @@ def _reachable_endpoints(app: FastAPI) -> set[int]:
         if not isinstance(route, APIRoute):
             continue
         for method in route.methods or ():
-            seen.setdefault((method, route.path), id(route.endpoint))
+            seen.setdefault(
+                (method, _normalize_route_path(route.path)), id(route.endpoint)
+            )
     return set(seen.values())
 
 
@@ -78,6 +91,13 @@ def test_no_duplicate_method_path_pairs(registered_app: FastAPI) -> None:
             for (method, path), handlers in sorted(duplicates.items())
         )
     )
+
+
+def test_route_path_normalization_ignores_parameter_names() -> None:
+    """Same-shape parameterized routes must be treated as duplicate paths."""
+    assert _normalize_route_path(
+        "/engines/{engine_name}/load"
+    ) == _normalize_route_path("/engines/{engine_type}/load")
 
 
 @pytest.mark.parametrize(
