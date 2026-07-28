@@ -14,6 +14,12 @@
       "expires_on": "2026-08-01"
     },
     {
+      "path": "docs/testing/functional-test-plan.md",
+      "owner": "@docs-team",
+      "reason": "Functional QA matrix consolidation introduced a release-facing manual test plan above the documentation budget; split by surface area before the exception expires.",
+      "expires_on": "2026-08-15"
+    },
+    {
       "path": "SPEC.md",
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs.",
