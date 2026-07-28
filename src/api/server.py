@@ -47,6 +47,7 @@ from .config import (
 )
 from .auth.launcher_capability import install_launcher_capability
 from .database import init_db
+from .dependencies import make_video_pipeline
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
 from .rate_limit import limiter
@@ -196,6 +197,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize video pipeline with default config
         video_pipeline = _init_video_pipeline()
         fastapi_app.state.video_pipeline = video_pipeline
+        fastapi_app.state.video_pipeline_factory = make_video_pipeline
 
         # Initialize chat service wired to app state (issues #5470, #7453):
         # the provider fills the shared ChatAppContext schema from this
