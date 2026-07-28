@@ -226,6 +226,41 @@ def test_collect_all_integrations_returns_list() -> None:
     assert kinds == {"cli", "api", "mcp"}
 
 
+def test_aggregate_mcp_servers_reports_unsupported_json_shape(tmp_path) -> None:
+    """Valid JSON with the wrong top-level type must become an MCP error row."""
+    from src.launchers import integrations_health_data as data
+
+    config = tmp_path / "mcp_servers.json"
+    config.write_text('"not-an-object"', encoding="utf-8")
+
+    with patch.object(data, "_MCP_CONFIG_PATH", config):
+        records = data.aggregate_mcp_servers()
+
+    assert len(records) == 1
+    record = records[0]
+    assert record.kind == "mcp"
+    assert record.name == "mcp_servers.json"
+    assert record.status == "error"
+    assert record.last_error is not None
+    assert "top-level" in record.last_error
+
+
+def test_collect_all_preserves_mcp_record_for_unsupported_json_shape(tmp_path) -> None:
+    """A malformed MCP config must not disappear behind collect_all's safety net."""
+    from src.launchers import integrations_health_data as data
+
+    config = tmp_path / "mcp_servers.json"
+    config.write_text("123", encoding="utf-8")
+
+    with patch.object(data, "_MCP_CONFIG_PATH", config):
+        records = data.collect_all()
+
+    mcp_records = [record for record in records if record.kind == "mcp"]
+    assert mcp_records
+    assert mcp_records[0].status == "error"
+    assert mcp_records[0].name == "mcp_servers.json"
+
+
 # ---------------------------------------------------------------------------
 # 9. DbC — copy_diagnostics raises TypeError for non-list input
 # ---------------------------------------------------------------------------

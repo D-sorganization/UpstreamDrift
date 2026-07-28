@@ -160,6 +160,28 @@ class TestIntegrationsHealthEndpoint:
         )
         assert anthropic["status"] == "configured"
 
+    def test_malformed_mcp_config_remains_visible(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path
+    ) -> None:
+        config = tmp_path / "mcp_servers.json"
+        config.write_text('"not-an-object"', encoding="utf-8")
+        monkeypatch.setattr(integrations_health_data, "_MCP_CONFIG_PATH", config)
+
+        response = _client().get("/api/v1/integrations/health")
+
+        assert response.status_code == 200
+        body = response.json()
+        mcp_records = [
+            record
+            for record in body["records"]
+            if record["kind"] == "mcp" and record["name"] == "mcp_servers.json"
+        ]
+        assert mcp_records
+        assert mcp_records[0]["status"] == "error"
+        assert "top-level" in mcp_records[0]["last_error"]
+        assert "mcp_servers.json" in body["markdown"]
+        assert "top-level" in body["markdown"]
+
     def test_hidden_in_production(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(diagnostics_routes, "is_production", lambda: True)
         assert _client().get("/api/v1/integrations/health").status_code == 404
