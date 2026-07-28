@@ -112,19 +112,6 @@ jobs:
         shell: bash
         run: python3 scripts/ci/check_urdf_layering.py
 
-  # -- Dispatcher: route to self-hosted if available --------------------------
-  pick-runner:
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
-    outputs:
-      runner: ${{ steps.check.outputs.runner }}
-    steps:
-      - name: Set runner
-        id: check
-        run: |
-          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
   # single flaky step no longer masks unrelated failures. The required branch-
@@ -138,8 +125,7 @@ jobs:
   # ---------------------------------------------------------------------------
   code-quality:
     name: code-quality
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 45
     steps:
       - name: Clean corrupt git objects
@@ -429,8 +415,7 @@ jobs:
   # longer blocks lint/type/structural gates.
   security-scans:
     name: security-scans
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     steps:
       - name: Clean corrupt git objects
@@ -657,8 +642,7 @@ jobs:
   # keeps this job fast and independent of the heavier code-quality job.
   repo-structure-gates:
     name: repo-structure-gates
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -806,8 +790,7 @@ jobs:
   # stacks are covered by their own provisioned lanes.
   unit-test-gate:
     name: unit-test-gate
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     steps:
       - name: Clean corrupt git objects
@@ -997,8 +980,7 @@ jobs:
           echo "All quality-gate jobs succeeded."
 
   core-only-install:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -1068,8 +1050,7 @@ jobs:
 
   dependency-consistency:
     name: dependency-consistency
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -1131,8 +1112,7 @@ jobs:
           python -m pip_audit -r requirements.lock
 
   tests:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
     strategy:
       fail-fast: false
@@ -1634,9 +1614,8 @@ jobs:
           files: coverage.xml
 
   parity-smoke:
-    needs: pick-runner
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -1692,8 +1671,7 @@ jobs:
             --tb=short
 
   alembic-postgres-round-trip:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 45
     services:
       postgres:
@@ -1799,8 +1777,7 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -1914,8 +1891,7 @@ jobs:
             -v --tb=short
 
   frontend-tests:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 20
     defaults:
       run:
@@ -1988,8 +1964,7 @@ jobs:
   # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
   # =============================================================================
   matlab-tests:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
@@ -2020,8 +1995,7 @@ jobs:
   # No Arduino components in this project - disabled.
   # =============================================================================
   arduino-build:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     if: false # DISABLED - No Arduino components in this project
     steps:
@@ -2074,7 +2048,6 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
-    needs: pick-runner
     strategy:
       fail-fast: false
       matrix:
@@ -2472,7 +2445,6 @@ jobs:
   # ----------------------------------------------------------------------
   rust-wheel-parity:
     name: rust-wheel-parity
-    needs: pick-runner
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     env:

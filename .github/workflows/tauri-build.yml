@@ -43,23 +43,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
-  pick-runner:
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
-    outputs:
-      runner: ${{ steps.check.outputs.runner }}
-    steps:
-      - name: Set runner
-        id: check
-        run: |
-          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   check:
-    needs: pick-runner
     name: Check (Rust + TypeScript)
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-tauri-check
@@ -154,10 +140,10 @@ jobs:
             os: linux
             runner: d-sorg-fleet-docker
             target: x86_64-unknown-linux-gnu
-          # Windows leg removed: org has no compatible `[self-hosted, Windows]`
-          # runner for this Tauri packaging job, so the matrix entry queued
-          # indefinitely before step-level gates could run. Re-add only after
-          # Windows runner capacity exists and Cargo build scripts are allowed.
+          # Windows leg removed: org currently has no online
+          # `[self-hosted, Windows]` runner capacity, so this matrix entry
+          # queued indefinitely before step-level gates could skip packaging.
+          # Re-add only after a documented Windows runner is available.
           # macOS leg removed: org has no `[self-hosted, macOS]` runners. Jobs
           # with this label queued indefinitely. Re-add when macOS runner
           # capacity is provisioned and macOS becomes an active deliverable.

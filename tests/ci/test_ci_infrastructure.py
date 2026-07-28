@@ -577,6 +577,12 @@ class TestCIEnvironmentCompatibility:
             assert "platform" not in entry
             assert isinstance(entry["artifact_name"], str)
             assert entry["os"] == "linux"
+            assert entry["runner"] == "d-sorg-fleet-docker"
+        assert "runner: [self-hosted, Windows]" not in workflow_text
+        assert (
+            "Re-add only after a documented Windows runner is available."
+            in workflow_text
+        )
 
         upload = next(
             step
