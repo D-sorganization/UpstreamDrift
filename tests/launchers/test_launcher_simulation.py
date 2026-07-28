@@ -556,6 +556,38 @@ def test_launch_shot_tracer(launcher) -> None:
         launcher.show_toast.assert_called_with("Shot Tracer script not found.", "error")
 
 
+@pytest.mark.unit
+def test_launch_shot_tracer_prefers_registered_dockable_ui(launcher) -> None:
+    ui_widget = MagicMock()
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch(
+        "src.launchers._shot_tracer_gui.get_dockable_ui", return_value=ui_widget
+    ):
+        launcher._launch_shot_tracer()
+
+    launcher.dock_widget_as_tab.assert_called_once_with(ui_widget, "Shot Tracer")
+    launcher.process_manager.launch_script.assert_not_called()
+    launcher.show_toast.assert_called_with("Shot Tracer loaded as tab.", "success")
+
+
+@pytest.mark.unit
+def test_launch_shot_tracer_reports_embedded_ui_failure(launcher) -> None:
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch(
+        "src.launchers._shot_tracer_gui.get_dockable_ui",
+        side_effect=RuntimeError("missing OpenGL support"),
+    ):
+        launcher._launch_shot_tracer()
+
+    launcher.dock_widget_as_tab.assert_not_called()
+    launcher.process_manager.launch_script.assert_not_called()
+    launcher.show_toast.assert_called_once_with(
+        "Shot Tracer unavailable: missing OpenGL support", "error"
+    )
+
+
 @patch("src.launchers.launcher_simulation.secure_popen")
 def test_launch_matlab_app(mock_popen, launcher) -> None:
     model = DummyModel("m2", "M2", "matlab_app", path="test.slx")
