@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -158,6 +159,16 @@ def test_embed_adapter_create_main_widget_lazy_imports():
         w = a.create_main_widget(parent="P")
     assert w is fake_widget
     assert a._widgets == [fake_widget]
+
+
+def test_motion_match_preview_gui_imports_without_short_shared_alias():
+    """The GUI import path must not depend on the stale ``shared.python`` alias."""
+    sys.modules.pop("shared", None)
+    sys.modules.pop("shared.python", None)
+
+    module = importlib.import_module("src.tools.starting_pose_matcher.gui_main_widget")
+
+    assert hasattr(module, "MainWidget")
 
 
 # ---------------------------------------------------------------------------
