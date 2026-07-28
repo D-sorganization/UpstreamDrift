@@ -27,7 +27,7 @@ from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
-from chat.websocket_protocol import (
+from src.shared.python.chat.websocket_protocol import (
     ChatWebSocketState,
     DisconnectLogConfig,
     run_chat_websocket_protocol,

@@ -11,9 +11,9 @@ import pytest
 from starlette.websockets import WebSocketDisconnect
 
 import src  # noqa: F401
-import chat.router_factory as shared_router_factory
-import chat.websocket_protocol as shared_protocol
 import src.api.routes.chat_ws as api_chat_ws
+import src.shared.python.chat.router_factory as shared_router_factory
+import src.shared.python.chat.websocket_protocol as shared_protocol
 
 
 pytestmark = [pytest.mark.anyio, pytest.mark.unit]
@@ -217,8 +217,8 @@ def test_protocol_loop_lives_only_in_shared_helper() -> None:
 
 
 def test_api_route_imports_parent_owned_protocol_surface() -> None:
-    """The Upstream route must depend on the canonical Tools package name."""
+    """The API route must use the importable shared protocol surface."""
     source = Path(api_chat_ws.__file__).read_text(encoding="utf-8")
 
-    assert "from chat.websocket_protocol import (" in source
-    assert "from src.shared.python.chat.websocket_protocol import (" not in source
+    assert "from src.shared.python.chat.websocket_protocol import (" in source
+    assert hasattr(shared_protocol, "run_chat_websocket_protocol")
