@@ -237,6 +237,7 @@ class TestSpecialAppHandler:
             module_name="movement_optimizer",
             cwd=optimizer_root.resolve(),
             extra_python_paths=((optimizer_root / "src").resolve(),),
+            confirm_startup=True,
         )
         process_manager.launch_script.assert_not_called()
 

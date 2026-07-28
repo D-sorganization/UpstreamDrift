@@ -64,5 +64,6 @@ def test_pose_studio_uses_a_child_package_module(
         module_name="src.tools.pose_studio",
         cwd=tmp_path.resolve(),
         extra_python_paths=(),
+        confirm_startup=True,
     )
     process_manager.launch_script.assert_not_called()

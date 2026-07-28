@@ -330,6 +330,7 @@ class SpecialAppHandler:
                 module_name=package_module,
                 cwd=working_directory,
                 extra_python_paths=python_paths,
+                confirm_startup=True,
             )
         else:
             process = process_manager.launch_script(

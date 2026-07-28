@@ -69,5 +69,38 @@ def test_pendulum_tile_uses_module_launch_not_script_launch(tmp_path: Path) -> N
         module_name="shared.python.pendulum_simulator",
         cwd=tmp_path,
         extra_python_paths=(),
+        confirm_startup=True,
+    )
+    process_manager.launch_script.assert_not_called()
+
+
+@pytest.mark.unit
+def test_pendulum_tile_reports_fast_module_startup_failure(tmp_path: Path) -> None:
+    """A child process that dies during startup must not produce a success toast."""
+    entrypoint = (
+        tmp_path / "src" / "shared" / "python" / "pendulum_simulator" / "__main__.py"
+    )
+    entrypoint.parent.mkdir(parents=True)
+    entrypoint.write_text("raise SystemExit(1)\n", encoding="utf-8")
+    model = SimpleNamespace(
+        id="pendulum_simulator",
+        name="Pendulum Simulator",
+        path="src/shared/python/pendulum_simulator/__main__.py",
+        type="special_app",
+        source_root=None,
+        working_dir=None,
+        python_paths=(),
+    )
+    process_manager = MagicMock()
+    process_manager.launch_module.return_value = None
+
+    assert SpecialAppHandler().launch(model, tmp_path, process_manager) is False
+
+    process_manager.launch_module.assert_called_once_with(
+        name="Pendulum Simulator",
+        module_name="shared.python.pendulum_simulator",
+        cwd=tmp_path,
+        extra_python_paths=(),
+        confirm_startup=True,
     )
     process_manager.launch_script.assert_not_called()
