@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from typing import Any
+
 import pytest
 
 fastapi_testclient = pytest.importorskip("fastapi.testclient")
 from fastapi.testclient import TestClient  # noqa: E402
 
+from src.shared.python.motion_pipeline import api as api_module  # noqa: E402
 from src.shared.python.motion_pipeline.api import (  # noqa: E402
     PipelineRequest,
     PipelineResponse,
@@ -17,6 +21,20 @@ from src.shared.python.motion_pipeline.api import (  # noqa: E402
 @pytest.fixture
 def client() -> TestClient:
     return TestClient(create_app())
+
+
+@pytest.fixture
+def force_api_temp_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    real_named_temporary_file = api_module.tempfile.NamedTemporaryFile
+
+    def named_temporary_file_in_tmp_path(*args: Any, **kwargs: Any) -> Any:
+        kwargs.setdefault("dir", tmp_path)
+        return real_named_temporary_file(*args, **kwargs)
+
+    monkeypatch.setattr(
+        api_module.tempfile, "NamedTemporaryFile", named_temporary_file_in_tmp_path
+    )
+    return tmp_path
 
 
 def test_health_endpoint(client: TestClient) -> None:
@@ -145,3 +163,53 @@ def test_run_config_malformed_json_returns_422(client: TestClient) -> None:
         data={"config": "{not valid json"},
     )
     assert r.status_code == 422
+
+
+def test_run_pipeline_cleans_upload_temp_file_on_invalid_input(
+    client: TestClient,
+    force_api_temp_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured_paths: list[Path] = []
+
+    def fail_run(_pipeline: object, source_path: Path) -> None:
+        captured_paths.append(source_path)
+        raise ValueError("boom")
+
+    monkeypatch.setattr(api_module.MotionPipeline, "run", fail_run)
+
+    r = client.post(
+        "/api/v1/motion-pipeline/run",
+        files={"file": ("x.c3d", b"\x00" * 8, "application/octet-stream")},
+        data={"source_format": "c3d"},
+    )
+
+    assert r.status_code == 400
+    assert captured_paths
+    assert not captured_paths[0].exists()
+    assert list(force_api_temp_dir.iterdir()) == []
+
+
+def test_run_config_cleans_upload_temp_file_on_pipeline_runtime_error(
+    client: TestClient,
+    force_api_temp_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured_paths: list[Path] = []
+
+    def fail_run(_pipeline: object, source_path: Path) -> None:
+        captured_paths.append(source_path)
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(api_module.MotionPipeline, "run", fail_run)
+
+    r = client.post(
+        "/api/v1/motion-pipeline/run-config",
+        files={"file": ("x.c3d", b"\x00" * 8, "application/octet-stream")},
+        data={"config": '{"source_format": "c3d"}'},
+    )
+
+    assert r.status_code == 500
+    assert captured_paths
+    assert not captured_paths[0].exists()
+    assert list(force_api_temp_dir.iterdir()) == []

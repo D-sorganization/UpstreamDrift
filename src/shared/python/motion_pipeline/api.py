@@ -172,6 +172,21 @@ def _validate_source_format(source_format: str) -> None:
         )
 
 
+def _cleanup_temp_upload(tmp_path: Path | None, request_id: str) -> None:
+    """Best-effort removal for persisted upload files."""
+    if tmp_path is None:
+        return
+    try:
+        tmp_path.unlink(missing_ok=True)
+    except OSError:
+        logger.warning(
+            "Request %s: failed to remove temporary upload %s",
+            request_id,
+            tmp_path,
+            exc_info=True,
+        )
+
+
 def create_app() -> FastAPI:
     """
     Create FastAPI application with motion pipeline endpoints.
@@ -247,8 +262,9 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
         # auto-detected (issue #6930).
         _validate_source_format(source_format)
 
-        # Save uploaded file temporarily
+        tmp_path: Path | None = None
         try:
+            # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(
                 delete=False, suffix=Path(file.filename).suffix
             ) as tmp:
@@ -282,9 +298,6 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
             result = pipeline.run(tmp_path)
             audit_log = pipeline.get_audit_log()
 
-            # Clean up temp file
-            tmp_path.unlink(missing_ok=True)
-
             logger.info(
                 f"Request {request_id}: Pipeline completed success={result.success}"
             )
@@ -303,6 +316,8 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             ) from e
+        finally:
+            _cleanup_temp_upload(tmp_path, request_id)
 
     @app.post(
         "/api/v1/motion-pipeline/run-config",
@@ -344,6 +359,7 @@ Accepts JSON config body plus file upload.
         # Reject an unknown source_format up front (issue #6930).
         _validate_source_format(parsed_config.source_format)
 
+        tmp_path: Path | None = None
         try:
             # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(
@@ -361,8 +377,6 @@ Accepts JSON config body plus file upload.
             result = pipeline.run(tmp_path)
             audit_log = pipeline.get_audit_log()
 
-            tmp_path.unlink(missing_ok=True)
-
             return PipelineResponse.from_result(result, audit_log)
 
         except ValueError as e:
@@ -375,6 +389,8 @@ Accepts JSON config body plus file upload.
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             ) from e
+        finally:
+            _cleanup_temp_upload(tmp_path, request_id)
 
     return app
 
