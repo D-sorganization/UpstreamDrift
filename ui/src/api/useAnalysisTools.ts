@@ -11,7 +11,7 @@
  *  - POST /api/analysis/export     -> streamed CSV/JSON file download
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { apiFetch } from './fetch';
 import { getApiBase } from './backend';
 
@@ -63,6 +63,13 @@ export function useAnalysisTools() {
   const [loadState, setLoadState] = useState<AnalysisLoadState>('idle');
   const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const fetchMetrics = useCallback(async () => {
     setLoadState('loading');
