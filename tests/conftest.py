@@ -488,26 +488,41 @@ def pytest_configure(config: pytest.Config) -> None:
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
     local_path = str((root_dir / "src/shared/python").resolve())
+    explicit_tools = os.environ.get("TOOLS_REPO_PATH")
+    tools_root = Path(explicit_tools or root_dir / "vendor/ud-tools").resolve()
+    parent_paths = [
+        str((tools_root / "src/shared/python").resolve()),
+        str((tools_root / "src").resolve()),
+        str((tools_root / "src/python/src").resolve()),
+    ]
     vendored_path = str((root_dir / "vendor/ud-tools/src/shared/python").resolve())
 
     # Only process if directories actually exist
-    if not os.path.exists(local_path) or not os.path.exists(vendored_path):
+    if not os.path.exists(local_path) or not all(
+        os.path.exists(path) for path in parent_paths
+    ):
         return
 
     # Clean existing occurrences to enforce determinism (case-insensitive on Windows)
+    controlled_paths = {
+        local_path.casefold(),
+        vendored_path.casefold(),
+        *(path.casefold() for path in parent_paths),
+    }
     clean_path = []
     for p in sys.path:
         try:
-            resolved_p = str(Path(p).resolve()).lower()
-            if resolved_p not in (local_path.lower(), vendored_path.lower()):
+            resolved_p = str(Path(p).resolve()).casefold()
+            if resolved_p not in controlled_paths:
                 clean_path.append(p)
         except Exception as e:  # noqa: BLE001, F841
             clean_path.append(p)
     sys.path = clean_path
 
-    if mode == "vendored":
-        # Force vendored tools to have precedence
-        sys.path.insert(0, vendored_path)
+    parent_mode = explicit_tools is not None or mode == "vendored"
+    if parent_mode:
+        for path in reversed(parent_paths):
+            sys.path.insert(0, path)
         sys.path.append(local_path)
     else:
         # Force local shared codebase to have precedence
@@ -522,12 +537,19 @@ def pytest_configure(config: pytest.Config) -> None:
     try:
         import importlib
 
-        canonical_name = "src.shared.python.contracts"
+        canonical_name = (
+            "shared.python.contracts" if parent_mode else "src.shared.python.contracts"
+        )
+        if parent_mode:
+            sys.modules.pop("shared.python.contracts", None)
         canonical_mod = importlib.import_module(canonical_name)
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
-        for alias in ("contracts", "shared.python.contracts"):
+        contract_aliases = (
+            ("contracts",) if parent_mode else ("contracts", "shared.python.contracts")
+        )
+        for alias in contract_aliases:
             sys.modules[alias] = canonical_mod
 
         # Alias training and all of its submodules recursively

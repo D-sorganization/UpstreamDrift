@@ -134,6 +134,15 @@ def test_try_launch_special_app(launcher) -> None:
     assert launcher._try_launch_special_app("library_tool") is True
     launcher._open_library_tab.assert_called_once()
 
+    launcher._install_sidekick_sidebar = MagicMock()
+    launcher._toggle_sidekick = MagicMock()
+    launcher.open_sidekick_tab = MagicMock()
+    launcher.sidekick_sidebar = None
+    assert launcher._try_launch_special_app("sidekick") is True
+    launcher._install_sidekick_sidebar.assert_called_once()
+    launcher._toggle_sidekick.assert_called_once_with(True)
+    launcher.open_sidekick_tab.assert_called_once_with("chat")
+
     assert launcher._try_launch_special_app("normal_model") is False
 
 

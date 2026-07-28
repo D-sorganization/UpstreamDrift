@@ -403,6 +403,12 @@ except (RuntimeError, TypeError, AttributeError) as e:
             if hasattr(self, "_open_library_tab"):
                 self._open_library_tab()
             return True
+        if model_id == "sidekick":
+            if getattr(self, "sidekick_sidebar", None) is None:
+                self._install_sidekick_sidebar()
+            self._toggle_sidekick(True)
+            self.open_sidekick_tab("chat")
+            return True
         return False
 
     def _try_launch_docker(self, model: Any) -> bool:

@@ -37,10 +37,14 @@ jobs:
       contents: read
       id-token: write
       attestations: write
+    outputs:
+      wheel_filename: ${{ steps.build-wheel.outputs.wheel_filename }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -76,7 +80,16 @@ jobs:
           python -m ensurepip --upgrade || true
           python3 -m pip install build twine pip-audit
       - name: Build package
-        run: python3 -m build
+        id: build-wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          python3 -m build --wheel
+          shopt -s nullglob
+          wheels=(dist/upstream_drift-*.whl)
+          test "${#wheels[@]}" -eq 1
+          echo "wheel_filename=$(basename "${wheels[0]}")" >> "$GITHUB_OUTPUT"
       - name: Generate SBOM
         shell: bash
         run: |
@@ -115,6 +128,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+          persist-credentials: false
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -140,6 +156,8 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install pytest
       - name: Run Python wheel smoke tests
+        env:
+          UPSTREAM_DRIFT_WHEEL: dist/${{ needs.build.outputs.wheel_filename }}
         run: python -m pytest tests/smoke/python_wheel
 
   publish-pypi:

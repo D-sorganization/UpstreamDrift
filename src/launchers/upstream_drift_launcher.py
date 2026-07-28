@@ -66,6 +66,12 @@ from src.launchers.sidekick_readiness import (
     check_sidekick_api_readiness,
     readiness_detail_for_log,
 )
+from src.launchers.sidekick_runtime import (
+    SidekickRuntimeConfig,
+    configure_sidekick_runtime,
+    reselect_sidekick_runtime_port,
+)
+from src.launchers.tools_repo_path import resolve_tools_source_root
 from src.launchers.launcher_theme import ThemeManager
 from src.launchers.launcher_ui_setup import UISetupManager
 
@@ -110,6 +116,9 @@ assert STARTUP_TIMEOUT_SEC > 0, (
 
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
+SIDEKICK_API_RESTART_DELAY_MS: int = 1_000
+SIDEKICK_API_HEALTHCHECK_MS: int = 3_000
+SIDEKICK_API_MAX_RESTARTS: int = 2
 
 
 class UpstreamDriftLauncher(QMainWindow):
@@ -370,7 +379,12 @@ class UpstreamDriftLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []
         self.background_api_process: Any | None = None
+        self._sidekick_runtime_config: SidekickRuntimeConfig | None = None
+        self._sidekick_runtime_error = ""
         self._sidekick_api_wait_started_at: float | None = None
+        self._sidekick_api_restart_count = 0
+        self._sidekick_api_monitoring = True
+        self._sidekick_api_was_ready = False
         self.layout_edit_mode = False
         self.current_filter_text = ""
         self._sidekick_needs_initial_sizing = True
@@ -397,24 +411,55 @@ class UpstreamDriftLauncher(QMainWindow):
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
         self.running_processes = self.process_manager.running_processes
 
+        # Activate approved Upstream-owned extensions before adapters import
+        # canonical Tools packages during registry bootstrap.
+        self.sidekick_sidebar_manager._install_sidekick_import_paths()
+
         # Bootstrap embeddable tools registry (fixes #5049)
         # This ensures EMBEDDABLE_TOOL_REGISTRY is populated before any
         # context menus or embedded host widgets are created
         bootstrap_embeddable_tools()
 
-        # Start the background API server so the Sidekick Chat UI can connect
+        if "PYTEST_CURRENT_TEST" not in os.environ:
+            try:
+                self._sidekick_runtime_config = configure_sidekick_runtime(os.environ)
+            except (TypeError, ValueError) as exc:
+                self._sidekick_runtime_error = str(exc)
+                logger.error("Sidekick runtime configuration failed: %s", exc)
+            else:
+                self.background_api_process = self._launch_sidekick_background_api()
+
+    def _launch_sidekick_background_api(self) -> Any | None:
+        """Launch the API child using the already-exported runtime contract."""
         cwd = (
             REPOS_ROOT / "UpstreamDrift"
             if (REPOS_ROOT / "UpstreamDrift").exists()
             else REPOS_ROOT
         )
+        tools_source = resolve_tools_source_root(
+            REPOS_ROOT,
+            os.environ.get("TOOLS_REPO_PATH"),
+        )
+        return self.process_manager.launch_module(
+            name="background_api_server",
+            module_name="src.api.server",
+            cwd=cwd,
+            extra_python_paths=(
+                tools_source / "shared" / "python",
+                tools_source,
+            ),
+        )
 
-        if "PYTEST_CURRENT_TEST" not in os.environ:
-            self.background_api_process = self.process_manager.launch_module(
-                name="background_api_server",
-                module_name="src.api.server",
-                cwd=cwd,
-            )
+    def _restart_sidekick_background_api(self) -> Any | None:
+        """Refresh the dynamic port contract before replacing the API child."""
+        runtime = self._sidekick_runtime_config
+        if runtime is None:
+            return None
+        self._sidekick_runtime_config = reselect_sidekick_runtime_port(
+            runtime,
+            os.environ,
+        )
+        return self._launch_sidekick_background_api()
 
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
@@ -573,19 +618,37 @@ class UpstreamDriftLauncher(QMainWindow):
         _QTimer.singleShot(100, self._show_onboarding_if_needed)
 
     def _install_sidekick_sidebar_deferred(self) -> None:
-        """Deferred Sidekick installation to prevent startup freeze."""
-        if not self._sidekick_api_ready_for_sidebar():
-            return
+        """Install local tools immediately and monitor Chat independently."""
         self._install_sidekick_sidebar()
         self._seed_sidekick_workspace()
+        self._monitor_sidekick_api_readiness()
 
-    def _sidekick_api_ready_for_sidebar(self) -> bool:
-        """Gate Sidekick chat/sidebar installation on API readiness."""
-        readiness = check_sidekick_api_readiness()
+    def _monitor_sidekick_api_readiness(self) -> None:
+        """Monitor the API child without gating the local Sidekick tools."""
+        if not getattr(self, "_sidekick_api_monitoring", True):
+            return
+
+        runtime = self._sidekick_runtime_config
+        expected_instance_id = runtime.instance_id if runtime is not None else None
+        readiness = check_sidekick_api_readiness(
+            expected_instance_id=expected_instance_id
+        )
+        if runtime is None:
+            self._report_sidekick_api_failure(readiness)
+            return
         if readiness.ready:
             self._sidekick_api_wait_started_at = None
-            return True
+            self._sidekick_api_restart_count = 0
+            if not getattr(self, "_sidekick_api_was_ready", False):
+                logger.info("Sidekick API is ready: %s", readiness.url)
+            self._sidekick_api_was_ready = True
+            QTimer.singleShot(
+                SIDEKICK_API_HEALTHCHECK_MS,
+                self._monitor_sidekick_api_readiness,
+            )
+            return
 
+        self._sidekick_api_was_ready = False
         now = time.monotonic()
         if self._sidekick_api_wait_started_at is None:
             self._sidekick_api_wait_started_at = now
@@ -595,26 +658,54 @@ class UpstreamDriftLauncher(QMainWindow):
         process_running = process is not None and process.poll() is None
         if elapsed < SIDEKICK_API_READY_TIMEOUT_SEC and process_running:
             logger.info(
-                "Waiting for Sidekick API readiness before installing sidebar: %s",
+                "Waiting for Sidekick Chat API readiness: %s",
                 readiness_detail_for_log(readiness),
             )
             QTimer.singleShot(
-                SIDEKICK_API_READY_RETRY_MS, self._install_sidekick_sidebar_deferred
+                SIDEKICK_API_READY_RETRY_MS, self._monitor_sidekick_api_readiness
             )
-            return False
+            return
 
+        if (
+            not process_running
+            and self._sidekick_runtime_config is not None
+            and self._sidekick_api_restart_count < SIDEKICK_API_MAX_RESTARTS
+        ):
+            self._sidekick_api_restart_count += 1
+            logger.warning(
+                "Restarting failed Sidekick API child (%s/%s): %s",
+                self._sidekick_api_restart_count,
+                SIDEKICK_API_MAX_RESTARTS,
+                readiness_detail_for_log(readiness),
+            )
+            self.background_api_process = self._restart_sidekick_background_api()
+            self._sidekick_api_wait_started_at = now
+            QTimer.singleShot(
+                SIDEKICK_API_RESTART_DELAY_MS,
+                self._monitor_sidekick_api_readiness,
+            )
+            return
+
+        self._report_sidekick_api_failure(readiness)
+
+    def _report_sidekick_api_failure(self, readiness: Any) -> None:
+        """Surface a terminal API startup failure while keeping tools usable."""
         logger.warning(
-            "Sidekick sidebar not installed because API readiness failed: %s",
+            "Sidekick Chat remains degraded after API startup failed: %s",
             readiness_detail_for_log(readiness),
         )
         show_toast = getattr(self, "show_toast", None)
         if callable(show_toast):
+            configuration_detail = (
+                f" Configuration error: {self._sidekick_runtime_error}"
+                if self._sidekick_runtime_error
+                else ""
+            )
             show_toast(
-                "Sidekick chat is waiting on the background API. "
-                f"Readiness check failed at {readiness.url}.",
+                "Sidekick tools are available, but Chat could not connect to "
+                f"its local API at {readiness.url}.{configuration_detail}",
                 "warning",
             )
-        return False
 
     def _seed_sidekick_workspace(self) -> None:
         """Push launcher state into any active Sidekick workspace registry.
@@ -982,6 +1073,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
+        success_hover = getattr(c, "success_hover", c.success)
         self.btn_launch.setStyleSheet(f"""
             QPushButton {{
                 background-color: {c.success};
@@ -990,7 +1082,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {c.success_hover};
+                background-color: {success_hover};
             }}
             """)
 
@@ -1162,6 +1254,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _stop_background_threads(self) -> None:
         """Stop background timers and threads cleanly."""
+        self._sidekick_api_monitoring = False
         if self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()
@@ -1185,6 +1278,13 @@ class UpstreamDriftLauncher(QMainWindow):
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Failed to terminate {key}: {e}")
 
+    def _shutdown_sidekick_sidebar(self) -> None:
+        """Stop Sidekick-owned runtimes before the host window disappears."""
+        sidebar = getattr(self, "sidekick_sidebar", None)
+        shutdown = getattr(sidebar, "shutdown", None)
+        if callable(shutdown):
+            shutdown()
+
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout and cleanup."""
         if not self._confirm_exit_if_running_processes(event):
@@ -1193,6 +1293,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self._save_layout()
         self._save_settings_on_close()
         self._stop_background_threads()
+        self._shutdown_sidekick_sidebar()
         self._terminate_all_processes()
 
         super().closeEvent(event)

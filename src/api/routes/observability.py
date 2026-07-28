@@ -60,6 +60,14 @@ def _readiness_from_state(state: Any) -> Readiness:
     )
 
 
+def _sidekick_identity(state: Any) -> dict[str, str]:
+    """Return the public launcher identity, never its capability token."""
+    instance_id = getattr(state, "sidekick_instance_id", "")
+    if not isinstance(instance_id, str) or not instance_id:
+        return {}
+    return {"sidekick_instance_id": instance_id}
+
+
 def _metric_help(name: str, description: str, metric_type: str) -> list[str]:
     """Return Prometheus HELP and TYPE lines for one metric."""
     return [f"# HELP {name} {description}", f"# TYPE {name} {metric_type}"]
@@ -125,11 +133,14 @@ async def healthz() -> dict[str, str]:
 @router.get("/readyz", response_model=None)
 async def readyz(request: Request) -> dict[str, Any] | JSONResponse:
     """Return readiness after required startup warmup dependencies exist."""
-    readiness = _readiness_from_state(request.app.state)
+    state = request.app.state
+    readiness = _readiness_from_state(state)
+    sidekick_identity = _sidekick_identity(state)
     if readiness.ready:
         return {
             "status": "ready",
             "engines_available": readiness.engines_available,
+            **sidekick_identity,
         }
     return JSONResponse(
         status_code=503,
@@ -137,6 +148,7 @@ async def readyz(request: Request) -> dict[str, Any] | JSONResponse:
             "status": "not_ready",
             "missing": list(readiness.missing),
             "engines_available": readiness.engines_available,
+            **sidekick_identity,
         },
     )
 

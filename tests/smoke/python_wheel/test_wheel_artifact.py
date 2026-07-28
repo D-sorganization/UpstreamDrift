@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import subprocess
 import sys
 import venv
@@ -11,15 +14,31 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).parents[3]
-DIST_DIR = REPO_ROOT / "dist"
+_WHEEL_ENV = "UPSTREAM_DRIFT_WHEEL"
 pytestmark = pytest.mark.smoke
 
 
-def _latest_wheel() -> Path:
-    wheels = sorted(DIST_DIR.glob("upstream_drift-*.whl"))
-    if not wheels:
-        raise AssertionError("Build the wheel first: python -m build --wheel")
-    return wheels[-1]
+def _wheel_artifact() -> Path:
+    """Return the explicit wheel produced by this workflow's build job."""
+    raw_path = os.environ.get(_WHEEL_ENV)
+    if not raw_path:
+        raise AssertionError(
+            f"{_WHEEL_ENV} must name the wheel built for this smoke job"
+        )
+    wheel_path = Path(raw_path).expanduser().resolve()
+    if not wheel_path.is_file() or wheel_path.suffix != ".whl":
+        raise AssertionError(f"{_WHEEL_ENV} is not a wheel artifact: {wheel_path}")
+    return wheel_path
+
+
+def test_wheel_artifact_requires_explicit_build_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Smoke tests must not select a stale wheel by filename ordering."""
+    monkeypatch.delenv(_WHEEL_ENV, raising=False)
+
+    with pytest.raises(AssertionError, match=_WHEEL_ENV):
+        _wheel_artifact()
 
 
 def _venv_python(tmp_path: Path) -> Path:
@@ -38,11 +57,14 @@ def _console_script(python_bin: Path) -> Path:
     return python_bin.parent / "upstream-drift"
 
 
-def _install_wheel(python_bin: Path) -> None:
-    """Install the latest built wheel into the target interpreter."""
-    wheel_path = _latest_wheel()
+def _install_wheel(python_bin: Path, *, extra: str | None = None) -> None:
+    """Install this workflow's explicit wheel into the target interpreter."""
+    wheel_path = _wheel_artifact()
+    requirement = str(wheel_path)
+    if extra is not None:
+        requirement = f"{requirement}[{extra}]"
     subprocess.run(
-        [str(python_bin), "-m", "pip", "install", str(wheel_path)],
+        [str(python_bin), "-m", "pip", "install", requirement],
         check=True,
     )
 
@@ -82,7 +104,7 @@ def test_api_server_imports_from_core_only_install(tmp_path: Path) -> None:
 
 def test_wheel_contains_ui_bundle() -> None:
     """The compiled frontend must ship inside the wheel (#8018)."""
-    with zipfile.ZipFile(_latest_wheel()) as wheel:
+    with zipfile.ZipFile(_wheel_artifact()) as wheel:
         names = wheel.namelist()
     assert "ui/dist/index.html" in names, (
         "wheel is missing the compiled UI bundle; "
@@ -92,7 +114,7 @@ def test_wheel_contains_ui_bundle() -> None:
 
 def test_wheel_excludes_sidekick_tests() -> None:
     """Test suites must not ship inside the wheel (#8018)."""
-    with zipfile.ZipFile(_latest_wheel()) as wheel:
+    with zipfile.ZipFile(_wheel_artifact()) as wheel:
         names = wheel.namelist()
     shipped_tests = [
         name
@@ -116,3 +138,107 @@ def test_console_script_help_runs_from_installed_wheel(tmp_path: Path) -> None:
         capture_output=True,
         text=True,
     )
+
+
+def test_sidekick_uses_one_parent_owned_alias_graph(tmp_path: Path) -> None:
+    """Direct and legacy Sidekick/Chat imports must share canonical identities."""
+    python_bin = _venv_python(tmp_path)
+    _install_wheel(python_bin, extra="gui-tools")
+    probe = """
+import src
+import chat.chat_dock_widget as direct_chat
+import shared.python.chat.chat_dock_widget as canonical_chat
+import src.shared.python.chat.chat_dock_widget as legacy_chat
+import sidekick.ui.tools_sidebar.sidebar as direct_sidebar
+import shared.python.sidekick.ui.tools_sidebar.sidebar as canonical_sidebar
+import src.shared.python.sidekick.ui.tools_sidebar.sidebar as legacy_sidebar
+import sidekick.standalone.runner
+import shared.python.chat_contracts.conversation
+import shared.python.notes
+import shared.python.theme
+import utils.logging_utils
+
+assert src._PARENT_SHARED_ALIASES_INSTALLED is True
+assert direct_chat is canonical_chat is legacy_chat
+assert direct_sidebar is canonical_sidebar is legacy_sidebar
+"""
+    subprocess.run(
+        [str(python_bin), "-c", probe],
+        check=True,
+        cwd=str(tmp_path),
+    )
+    subprocess.run(
+        [str(python_bin), "-m", "sidekick", "--help"],
+        check=True,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+    )
+
+
+def _pinned_tools_blob(relative: str) -> bytes:
+    """Read expected bytes directly from the exact superproject gitlink."""
+    gitlink = subprocess.run(  # nosec B603 - fixed local Git command
+        ["git", "ls-tree", "HEAD", "--", "vendor/ud-tools"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    fields = gitlink.stdout.strip().split(maxsplit=3)
+    assert len(fields) >= 3 and fields[:2] == ["160000", "commit"]
+    blob = subprocess.run(  # nosec B603 - fixed local Git command
+        ["git", "-C", "vendor/ud-tools", "show", f"{fields[2]}:{relative}"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+    )
+    return blob.stdout
+
+
+def test_critical_tools_modules_match_exact_pinned_blobs(tmp_path: Path) -> None:
+    """Installed critical modules must originate byte-for-byte from Tools."""
+    python_bin = _venv_python(tmp_path)
+    _install_wheel(python_bin, extra="gui-tools")
+    module_paths = {
+        "chat.chat_dock_widget": "src/shared/python/chat/chat_dock_widget.py",
+        "sidekick.ui.tools_sidebar.sidebar": (
+            "src/shared/python/sidekick/ui/tools_sidebar/sidebar.py"
+        ),
+    }
+    probe = "\n".join(
+        (
+            """
+import hashlib
+import importlib
+import json
+from pathlib import Path
+
+""",
+            f"modules = {json.dumps(tuple(module_paths))}",
+            """
+print(json.dumps({
+    name: {
+        "origin": str(Path(module.__file__).resolve()),
+        "sha256": hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest(),
+    }
+    for name in modules
+    for module in [importlib.import_module(name)]
+}))
+""",
+        )
+    )
+    result = subprocess.run(  # nosec B603 - fixed venv interpreter and probe
+        [str(python_bin), "-c", probe],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+    )
+    installed = json.loads(result.stdout)
+
+    for module_name, relative in module_paths.items():
+        expected_digest = hashlib.sha256(_pinned_tools_blob(relative)).hexdigest()
+        origin = Path(installed[module_name]["origin"])
+        assert "site-packages" in origin.parts
+        assert installed[module_name]["sha256"] == expected_digest
