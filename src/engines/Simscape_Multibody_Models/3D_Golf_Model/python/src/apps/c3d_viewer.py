@@ -319,7 +319,7 @@ class MainWidget(QtWidgets.QWidget):
         # shared module import must be available
         if not (path is not None):
             raise ValueError("path must be provided")
-        from shared.python.security.security_utils import validate_path
+        from src.shared.python.security.security_utils import validate_path
 
         suite_root = Path(__file__).parents[6]
         allowed = [

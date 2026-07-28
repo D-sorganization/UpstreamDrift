@@ -103,6 +103,49 @@ def test_create_main_widget_returns_qwidget(qapp, adapter) -> None:
 
 
 @pytest.mark.unit
+def test_load_c3d_file_uses_canonical_security_import(
+    qapp, tmp_path, monkeypatch
+) -> None:
+    """Loading a local C3D path must not use the stale ``shared.python`` import."""
+    c3d_mod = importlib.import_module(f"{_APPS_PKG_NAME}.c3d_viewer")
+    c3d_path = tmp_path / "sample.c3d"
+    c3d_path.write_bytes(b"not a real c3d; loader is stubbed")
+    started_paths: list[str] = []
+    warnings: list[str] = []
+
+    class _Signal:
+        def connect(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+    class _FakeLoaderThread:
+        def __init__(self, path: str) -> None:
+            self.path = path
+            self.loaded = _Signal()
+            self.failed = _Signal()
+            self.finished = _Signal()
+
+        def start(self) -> None:
+            started_paths.append(self.path)
+
+    monkeypatch.setattr(c3d_mod, "C3DLoaderThread", _FakeLoaderThread)
+    monkeypatch.setattr(
+        c3d_mod.QtWidgets.QMessageBox,
+        "warning",
+        lambda *_args: warnings.append(str(_args[-1])),
+    )
+
+    widget = c3d_mod.MainWidget()
+    try:
+        widget.load_c3d_file_from_path(str(c3d_path))
+    finally:
+        c3d_mod.QtWidgets.QApplication.restoreOverrideCursor()
+        widget.deleteLater()
+
+    assert warnings == []
+    assert started_paths == [str(c3d_path.resolve())]
+
+
+@pytest.mark.unit
 def test_cleanup_closes_all_matplotlib_figures(adapter) -> None:
     """``cleanup`` releases every open matplotlib figure."""
     import matplotlib

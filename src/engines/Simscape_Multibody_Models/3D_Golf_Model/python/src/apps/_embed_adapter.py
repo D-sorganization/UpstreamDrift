@@ -52,6 +52,7 @@ class _C3DViewerEmbedAdapter:
             import matplotlib.pyplot as plt
 
             if not hasattr(self, "_widget") or self._widget is None:
+                plt.close("all")
                 return
 
             w = self._widget
