@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch, DEFAULT_TIMEOUT_MS } from './fetch';
+import { apiFetch, apiFetchForm, DEFAULT_TIMEOUT_MS } from './fetch';
 
 function jsonResponse(body: unknown): Response {
   return {
@@ -124,5 +124,39 @@ describe('apiFetch timeout (#8080)', () => {
       } as unknown as Response),
     );
     await expect(apiFetch('/api/bad')).rejects.toThrow('Method Not Allowed');
+  });
+});
+
+describe('apiFetchForm timeout (#8144)', () => {
+  it('passes an AbortSignal by default so uploads cannot hang forever', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiFetchForm('/api/upload', new FormData());
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('rejects with a recognisable timed-out message', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new DOMException('timeout', 'TimeoutError')),
+    );
+
+    await expect(
+      apiFetchForm('/api/upload', new FormData(), { timeoutMs: 250 }),
+    ).rejects.toThrow(/250ms/);
+  });
+
+  it('does not set a JSON content type for multipart bodies', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiFetchForm('/api/upload', new FormData());
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init.body).toBeInstanceOf(FormData);
+    expect(init.headers).toBeUndefined();
   });
 });
