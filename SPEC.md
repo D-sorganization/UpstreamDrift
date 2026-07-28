@@ -70,15 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened URDF model parsing so visual-less topology links
+  participate in root-link detection and joint endpoints must reference
+  declared links before the API returns model data. Renderable geometry remains
+  limited to links with visual elements, but the kinematic root now reflects the
+  declared URDF topology (#8257).
 - **2026-07-28** - Extended the shared frontend API timeout contract to
   multipart uploads. `apiFetchForm()` now composes caller cancellation with the
   default deadline, normalizes timeout/abort errors like JSON requests, and
   shares HTTP error extraction with `apiFetch()` so upload panels cannot remain
   indefinitely loading on stalled backend responses (#8248).
-- **2026-07-28** - Hardened putting-green ball-roll physics contracts so invalid
-  ball mass/radius, unknown integrators, non-positive or non-finite timesteps,
-  and invalid simulation horizons fail fast with `ValueError` instead of silent
-  non-physical integration (#8250).
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

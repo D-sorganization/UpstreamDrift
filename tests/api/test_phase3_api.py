@@ -592,6 +592,58 @@ class TestURDFParser:
         </robot>"""
         result = _parse_urdf(urdf)
         assert result.joints[0].joint_type == "fixed"
+        assert result.root_link == "world"
+        assert [link.link_name for link in result.links] == ["base"]
+
+    def test_parse_visual_less_intermediate_link_keeps_topology_root(self) -> None:
+        """Visual-less topology links still participate in root detection."""
+        from src.api.routes.models import _parse_urdf
+
+        urdf = """<robot name="visual_child_test">
+          <link name="world"/>
+          <link name="mount"/>
+          <link name="sensor">
+            <visual>
+              <geometry><sphere radius="0.05"/></geometry>
+            </visual>
+          </link>
+          <joint name="world_to_mount" type="fixed">
+            <parent link="world"/>
+            <child link="mount"/>
+          </joint>
+          <joint name="mount_to_sensor" type="fixed">
+            <parent link="mount"/>
+            <child link="sensor"/>
+          </joint>
+        </robot>"""
+
+        result = _parse_urdf(urdf)
+
+        assert result.root_link == "world"
+        assert [link.link_name for link in result.links] == ["sensor"]
+        assert [(joint.parent_link, joint.child_link) for joint in result.joints] == [
+            ("world", "mount"),
+            ("mount", "sensor"),
+        ]
+
+    def test_parse_joint_rejects_links_not_declared_in_topology(self) -> None:
+        """Every parsed joint endpoint must reference a declared URDF link."""
+        from src.api.routes.models import _parse_urdf
+
+        urdf = """<robot name="dangling_joint_test">
+          <link name="base">
+            <visual>
+              <geometry><box size="1 1 1"/></geometry>
+            </visual>
+          </link>
+          <joint name="missing_child" type="fixed">
+            <parent link="base"/>
+            <child link="ghost"/>
+          </joint>
+        </robot>"""
+
+        with pytest.raises(ValueError, match="ghost"):
+            _parse_urdf(urdf)
 
     def test_parse_invalid_xml(self) -> None:
         """Invalid XML raises ValueError."""

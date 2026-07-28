@@ -329,6 +329,13 @@ def _parse_urdf_links(
     return links
 
 
+def _parse_urdf_link_names(root: Any) -> list[str]:
+    """Parse all declared URDF link names, including visual-less topology nodes."""
+    if root is None:
+        raise ValueError("root must be provided")
+    return [link_elem.get("name", "unnamed") for link_elem in root.findall("link")]
+
+
 def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
     """Parse a single URDF <joint> element into a joint descriptor.
 
@@ -397,25 +404,43 @@ def _parse_urdf_joints(root: Any) -> tuple[list[URDFJointDescriptor], set[str]]:
     return joints, child_links
 
 
-def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str:
+def _validate_urdf_joint_links(
+    joints: list[URDFJointDescriptor], declared_link_names: set[str]
+) -> None:
+    """Ensure every joint endpoint references a declared URDF link."""
+    if joints is None:
+        raise ValueError("joints must be provided")
+    if declared_link_names is None:
+        raise ValueError("declared_link_names must be provided")
+    for joint in joints:
+        missing = [
+            link_name
+            for link_name in (joint.parent_link, joint.child_link)
+            if link_name not in declared_link_names
+        ]
+        if missing:
+            missing_list = ", ".join(missing)
+            raise ValueError(
+                f"Joint {joint.name!r} references undeclared link(s): {missing_list}"
+            )
+
+
+def _find_root_link(link_names: list[str], child_links: set[str]) -> str:
     """Identify the root link (not a child of any joint).
 
     Args:
-        links: Parsed link geometry descriptors.
+        link_names: All declared URDF link names, including visual-less links.
         child_links: Set of link names that appear as children in joints.
 
     Returns:
         Name of the root link, or "base" if none can be determined.
     """
-    if links is None:
-        raise ValueError("links must be provided")
-    all_link_names = {link.link_name for link in links}
-    root_candidates = all_link_names - child_links
-    return (
-        next(iter(root_candidates))
-        if root_candidates
-        else (links[0].link_name if links else "base")
-    )
+    if link_names is None:
+        raise ValueError("link_names must be provided")
+    for link_name in link_names:
+        if link_name not in child_links:
+            return link_name
+    return link_names[0] if link_names else "base"
 
 
 def _parse_urdf(urdf_content: str) -> URDFModelResponse:
@@ -443,9 +468,11 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
 
     model_name = root.get("name", "unknown")
     materials = _parse_urdf_materials(root)
+    link_names = _parse_urdf_link_names(root)
     links = _parse_urdf_links(root, materials)
     joints, child_links = _parse_urdf_joints(root)
-    root_link = _find_root_link(links, child_links)
+    _validate_urdf_joint_links(joints, set(link_names))
+    root_link = _find_root_link(link_names, child_links)
 
     return URDFModelResponse(
         model_name=model_name,
