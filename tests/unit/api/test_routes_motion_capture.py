@@ -26,6 +26,7 @@ def app() -> FastAPI:
     # Clear state before each test
     _sessions.clear()
     _recordings.clear()
+    mc._session_state["counter"] = 0
     return test_app
 
 
@@ -83,6 +84,58 @@ def test_capture_session_flow(
     frame_resp = client.get(f"/tools/motion-capture/frame/{rec_name}/0")
     assert frame_resp.status_code == 200
     assert frame_resp.json()["frame_index"] == 0
+
+
+def test_stopped_sessions_are_pruned_when_session_bound_is_reached(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Stopped sessions cannot accumulate without bound in process memory."""
+    monkeypatch.setattr(mc, "_source_availability", lambda _sid: (True, None))
+    monkeypatch.setattr(mc, "MAX_CAPTURE_SESSIONS", 1)
+
+    first = client.post(
+        "/tools/motion-capture/session/start",
+        json={"source_type": "mediapipe", "frame_rate": 30.0},
+    ).json()["session_id"]
+    stop_resp = client.post(f"/tools/motion-capture/session/{first}/stop")
+    assert stop_resp.status_code == 200
+
+    second_resp = client.post(
+        "/tools/motion-capture/session/start",
+        json={"source_type": "mediapipe", "frame_rate": 30.0},
+    )
+
+    assert second_resp.status_code == 200
+    second = second_resp.json()["session_id"]
+    assert first not in _sessions
+    assert second in _sessions
+
+
+def test_recordings_are_pruned_to_configured_bound(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Old recordings are pruned before listing so memory has a hard ceiling."""
+    now = mc._now()
+    _recordings["old"] = {
+        "source_type": "mediapipe",
+        "frame_rate": 30.0,
+        "frames": [],
+        "created_at": now,
+        "last_accessed_at": now,
+    }
+    _recordings["new"] = {
+        "source_type": "mediapipe",
+        "frame_rate": 30.0,
+        "frames": [],
+        "created_at": now + 1.0,
+        "last_accessed_at": now + 1.0,
+    }
+    monkeypatch.setattr(mc, "MAX_CAPTURE_RECORDINGS", 1)
+    response = client.get("/tools/motion-capture/recordings")
+
+    assert response.status_code == 200
+    assert [recording["name"] for recording in response.json()] == ["new"]
+    assert set(_recordings) == {"new"}
 
 
 def test_sources_report_honest_availability(client: TestClient) -> None:
