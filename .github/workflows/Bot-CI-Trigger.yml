@@ -1,44 +1,38 @@
 name: Bot CI Trigger
 
-# This workflow ensures CI runs on bot-created PRs and commits.
+# Bounded CI recovery for bot-authored PRs.
 #
-# Problem: GitHub Actions using GITHUB_TOKEN don't trigger new workflow runs
-# to prevent infinite loops. This means bot PRs don't get CI checks.
-#
-# Solution: This workflow:
-# 1. Detects bot PRs that haven't had CI run
-# 2. Re-triggers CI using workflow_dispatch or by adding an empty commit
-# 3. Has loop prevention to avoid infinite runs
-#
-# IMPORTANT: For this to work properly, set up a BOT_PAT secret with a
-# Personal Access Token that has 'repo' and 'workflow' permissions.
+# GitHub suppresses many workflow runs created by GITHUB_TOKEN writes. This
+# workflow provides a narrow recovery path: inspect one PR head commit with
+# REST, then dispatch the standard CI workflow for that PR branch when the
+# expected checks are absent or a maintainer explicitly forces a retrigger.
 
 on:
-  # Run when PRs are opened or synchronized
   pull_request:
     types: [opened, synchronize, reopened]
-
-  # Also run on a schedule to catch any missed PRs
-  schedule:
-    - cron: "0 0 * * 0,4" # Every 2 hours (reduced from 15 min for cost control)
 
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "PR number to trigger CI for (optional)"
-        required: false
+        description: "PR number to trigger CI for"
+        required: true
       force:
-        description: "Force trigger even if checks exist"
+        description: "Trigger even if expected checks already exist"
         required: false
         type: boolean
         default: false
 
+permissions:
+  actions: write
+  checks: read
+  contents: read
+  pull-requests: read
+
 concurrency:
-  group: bot-ci-trigger-${{ github.event.pull_request.number || github.run_id }}
+  group: bot-ci-trigger-${{ github.event.pull_request.number || inputs.pr_number || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
@@ -47,22 +41,21 @@ jobs:
     steps:
       - name: Set runner
         id: check
+        shell: bash
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
   check-and-trigger:
-    timeout-minutes: 30
+    timeout-minutes: 10
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    continue-on-error: true
     env:
-      BOT_PAT_TOKEN: ${{ secrets.BOT_PAT }}
-      RUNNER_CHECK_TOKEN_VALUE: ${{ secrets.RUNNER_CHECK_TOKEN }}
-      DEFAULT_GITHUB_TOKEN: ${{ github.token }}
-    # Only run for bot-authored PRs or scheduled/manual runs
+      GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN || github.token }}
+      FORCE: ${{ inputs.force || 'false' }}
+      INPUT_PR: ${{ inputs.pr_number || '' }}
     if: |
-      github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
        (contains(github.event.pull_request.user.login, 'bot') ||
@@ -71,171 +64,105 @@ jobs:
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          token: ${{ github.token }}
-          fetch-depth: 5
-
-      - name: Check Loop Prevention
-        id: loop-check
-        run: |
-          # Check recent commits for loop indicators
-          loop_count=0
-          while IFS= read -r msg; do
-            if [[ "$msg" == *"[skip ci]"* ]] || [[ "$msg" == *"[ci skip]"* ]]; then
-              continue
-            fi
-            if [[ "$msg" == *"trigger-ci"* ]] || [[ "$msg" == *"bot-ci-trigger"* ]]; then
-              ((loop_count++))
-            fi
-          done < <(git log --format="%s" -n 5)
-
-          if [ $loop_count -ge 3 ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "::warning::Loop prevention: $loop_count CI trigger commits detected"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Find Bot PRs Without CI
-        id: find-prs
-        if: steps.loop-check.outputs.skip != 'true'
+      - name: Resolve target PR
+        id: target
+        shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-          INPUT_PR: ${{ inputs.pr_number }}
-          FORCE: ${{ inputs.force }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PR: ${{ github.event.pull_request.number || '' }}
+          EVENT_HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+          EVENT_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || '' }}
         run: |
-          prs_to_trigger=""
+          set -euo pipefail
 
-          if [ -n "$INPUT_PR" ]; then
-            # Manual trigger for specific PR
-            prs_to_trigger="$INPUT_PR"
-          elif [ "${{ github.event_name }}" == "pull_request" ]; then
-            # PR event - check this specific PR
-            PR_NUMBER="${{ github.event.pull_request.number }}"
+          TARGET_PR="$INPUT_PR"
+          HEAD_REF="$EVENT_HEAD_REF"
+          HEAD_SHA="$EVENT_HEAD_SHA"
+          HEAD_REPO="$EVENT_HEAD_REPO"
+          PR_STATE="open"
 
-            # Check if CI has already run
-            checks=$(gh pr checks "$PR_NUMBER" || echo "")
-
-            if [ -z "$checks" ] || [ "$FORCE" == "true" ]; then
-              prs_to_trigger="$PR_NUMBER"
-            else
-              # Check if quality-gate or ci-standard passed/ran
-              if ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
-                prs_to_trigger="$PR_NUMBER"
-              fi
-            fi
-          else
-            # Scheduled run - find all bot PRs without checks
-            bot_prs=$(gh pr list --author "github-actions[bot]" --state open --json number,author --jq '.[].number' || echo "")
-
-            for pr in $bot_prs; do
-              checks=$(gh pr checks "$pr" || echo "")
-              if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
-                prs_to_trigger="$prs_to_trigger $pr"
-              fi
-            done
-
-            # Also check PRs from other bot-like authors
-            for author in "dependabot[bot]" "renovate[bot]" "claude[bot]" "google-labs-jules[bot]"; do
-              more_prs=$(gh pr list --author "$author" --state open --json number --jq '.[].number' || echo "")
-              for pr in $more_prs; do
-                checks=$(gh pr checks "$pr" || echo "")
-                if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard)"; then
-                  prs_to_trigger="$prs_to_trigger $pr"
-                fi
-              done
-            done
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            TARGET_PR="$EVENT_PR"
+          elif [[ ! "$TARGET_PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::workflow_dispatch requires a numeric pr_number input."
+            exit 1
           fi
 
-          # Trim whitespace and remove duplicates
-          prs_to_trigger=$(echo "$prs_to_trigger" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
-
-          echo "PRs to trigger: $prs_to_trigger"
-          echo "prs=$prs_to_trigger" >> $GITHUB_OUTPUT
-
-          if [ -z "$prs_to_trigger" ]; then
-            echo "No PRs need CI triggering"
+          if [ -z "$HEAD_REF" ] || [ -z "$HEAD_SHA" ] || [ -z "$HEAD_REPO" ]; then
+            pr_fields=$(
+              gh api "repos/$GITHUB_REPOSITORY/pulls/$TARGET_PR" \
+                --jq '[.head.ref, .head.sha, .head.repo.full_name, .state] | @tsv'
+            )
+            IFS=$'\t' read -r HEAD_REF HEAD_SHA HEAD_REPO PR_STATE <<< "$pr_fields"
           fi
 
-      - name: Validate bot trigger token
-        id: token-check
-        if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != ''
-        run: |
-          for candidate in BOT_PAT_TOKEN RUNNER_CHECK_TOKEN_VALUE DEFAULT_GITHUB_TOKEN; do
-            token="${!candidate:-}"
-            if [ -z "$token" ]; then
-              continue
-            fi
+          if [ "$PR_STATE" != "open" ]; then
+            echo "::error::PR #$TARGET_PR is $PR_STATE; refusing to trigger CI."
+            exit 1
+          fi
 
-            if GH_TOKEN="$token" gh auth status >/dev/null 2>&1 &&
-               GH_TOKEN="$token" gh api graphql -f query='{ viewer { login } }' >/dev/null 2>&1; then
-              echo "::add-mask::$token"
-              echo "BOT_TRIGGER_TOKEN=$token" >> "$GITHUB_ENV"
-              echo "can_trigger=true" >> "$GITHUB_OUTPUT"
-              echo "token_source=$candidate" >> "$GITHUB_OUTPUT"
-              echo "Using authenticated CI trigger token from $candidate"
-              exit 0
-            fi
+          if [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::PR #$TARGET_PR comes from $HEAD_REPO; workflow_dispatch can only target branches in $GITHUB_REPOSITORY."
+            exit 1
+          fi
 
-            echo "::warning::Bot trigger token candidate $candidate is unavailable or invalid; trying next candidate."
-          done
+          {
+            echo "pr=$TARGET_PR"
+            echo "head_ref=$HEAD_REF"
+            echo "head_sha=$HEAD_SHA"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "can_trigger=false" >> "$GITHUB_OUTPUT"
-          echo "::warning::Bot trigger token is unavailable or invalid; skipping authenticated CI trigger."
-
-      - name: Trigger CI for PRs
-        if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != '' && steps.token-check.outputs.can_trigger == 'true'
+      - name: Inspect current CI checks
+        id: checks
+        shell: bash
         env:
-          GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
+          HEAD_SHA: ${{ steps.target.outputs.head_sha }}
         run: |
-          for pr in ${{ steps.find-prs.outputs.prs }}; do
-            echo "Triggering CI for PR #$pr"
-            branch=$(gh pr view "$pr" --json headRefName --jq '.headRefName') || {
-              echo "::warning::Cannot resolve head branch for PR #$pr; skipping."
-              continue
-            }
+          set -euo pipefail
 
-            # Method 1: Try to trigger workflow_dispatch on ci-standard
-            # Method 2: If workflow_dispatch fails, add empty commit to trigger
-            if ! gh workflow run ci-standard.yml \
-              --ref "$branch" \
-              2>/dev/null; then
-              echo "workflow_dispatch failed, trying empty commit method"
+          if [ "$FORCE" = "true" ]; then
+            echo "should_trigger=true" >> "$GITHUB_OUTPUT"
+            echo "reason=forced" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-              git fetch origin "$branch"
-              git checkout "$branch"
+          check_names=$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs?per_page=100" \
+              --jq '.check_runs[].name'
+          )
 
-              # Configure git identity for commit
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              # Create empty commit with special marker
-              git commit --allow-empty -m "chore: trigger CI checks [bot-ci-trigger]
+          if echo "$check_names" | grep -qE '^(quality-gate|ci-standard|CI Standard)$'; then
+            echo "should_trigger=false" >> "$GITHUB_OUTPUT"
+            echo "reason=expected-check-present" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_trigger=true" >> "$GITHUB_OUTPUT"
+            echo "reason=expected-check-missing" >> "$GITHUB_OUTPUT"
+          fi
 
-              This empty commit triggers CI for bot-created PR.
-              Loop prevention marker: $(date +%s)"
+      - name: Trigger CI
+        if: steps.checks.outputs.should_trigger == 'true'
+        shell: bash
+        env:
+          HEAD_REF: ${{ steps.target.outputs.head_ref }}
+        run: |
+          set -euo pipefail
 
-              git push origin "$branch"
-            fi
-
-            echo "CI triggered for PR #$pr"
-
-            # Small delay between PRs
-            sleep 5
-          done
+          gh api \
+            --method POST \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/ci-standard.yml/dispatches" \
+            -f "ref=$HEAD_REF"
 
       - name: Summary
         if: always()
+        shell: bash
         run: |
-          echo "## Bot CI Trigger Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.loop-check.outputs.skip }}" == "true" ]; then
-            echo "**Skipped**: Loop prevention triggered" >> $GITHUB_STEP_SUMMARY
-          elif [ -z "${{ steps.find-prs.outputs.prs }}" ]; then
-            echo "**No action needed**: All bot PRs have CI checks" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.token-check.outputs.can_trigger }}" != "true" ]; then
-            echo "**Detected PRs**: ${{ steps.find-prs.outputs.prs }} (CI trigger skipped: bot token unavailable or invalid)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**Triggered CI for PRs**: ${{ steps.find-prs.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Bot CI Trigger Summary"
+            echo ""
+            echo "- PR: #${{ steps.target.outputs.pr || inputs.pr_number }}"
+            echo "- Triggered: ${{ steps.checks.outputs.should_trigger || 'false' }}"
+            echo "- Reason: ${{ steps.checks.outputs.reason || 'not-evaluated' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

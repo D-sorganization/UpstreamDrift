@@ -39,14 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-<<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
-=======
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 
 ## 2. Purpose & Mission
 
@@ -77,6 +71,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Replaced the Bot CI trigger workflow's backlog-scanning
+  recovery path for issue #8240. The workflow is now bounded to a single PR from
+  either a bot-authored pull request event or explicit `workflow_dispatch`
+  `pr_number`, inspects expected CI checks through REST for that PR head SHA,
+  dispatches `ci-standard.yml` through REST, fails loudly on trigger errors,
+  and no longer uses scheduled PR discovery, GraphQL-backed `gh pr checks`, or
+  empty commits to mutate PR branches.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
@@ -2151,7 +2152,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-05-27 | 1.0.197 | perf: replace qvel**2 with qvel*qvel in MuJoCo power flow (`power_flow.py`). |
 | 2026-05-26 | 1.0.194 | Folded remaining API/security/realtime/logging PR scope into the post-#6181 consolidation branch: `FitResult` now exposes explicit `fit_succeeded` and `solver_status` fields, the `.gitignore` secrets guard has an importable CI helper plus tests, and logging redaction preserves delimiters while redacting quoted, JSON, and comma-containing secret values. |
 | 2026-05-26 | 1.0.193 | Folded duplicate performance PRs into the consolidated branch: cached common factorial values in the signal toolkit, normalized signal import arrays with `np.asarray`, preserved `body_marker` when Drake constraint penalties are added, and replaced selected temporary product reductions with `np.einsum` or `np.vdot` in motion-matching visualization, work, and energy calculations. |
-| 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
+| 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract exposed by the `sidekick` console script in `pyproject.toml` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
 | 2026-05-23 | 1.0.186 | Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`; regression coverage lives in `tests/unit/training/test_config.py`. |
 | 2026-05-31 | 1.0.192 | Added the CC-19 single-trial MAP estimator surface in `src/shared/python/estimation/`: cubic-Hermite spline trajectory coefficients with analytic derivatives, ordered shared parameter blocks with free length parameters and bounded inertia corrections, deterministic least-squares solve wiring, and focused unit coverage for objective determinism and parameter sharing. |
 | 2026-05-23 | 1.0.187 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
@@ -2162,7 +2163,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-05-22 | 1.0.182 | Documented the motion-pipeline REST contract for `POST /api/v1/motion-pipeline/run` and its preprocessing-step boolean coercion rule so `PipelineRequest` preserves Pydantic handling of `enabled` values like `"false"` when converting into `PipelineConfig`; regression coverage lives in `tests/unit/motion_pipeline/orchestrator/test_api.py`. |
 | 2026-05-24 | 1.0.188 | Deferred realtime WebSocket backend resolution until first explicit start/use and made `WSPubSub.start()` launch the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`. |
 | 2026-05-23 | 1.0.181 | Sanitized error payloads for the chat websocket connection to prevent leaks. Added standalone Sidekick foundation (CLI entry point, PyQt window shell, and session store) per epic #5979. |
-| 2026-05-22 | 1.0.181 | Added the standalone Sidekick CLI scaffold in `src/shared/python/sidekick/__main__.py` with an implicit `gui` default, closest-match suggestions for mistyped flags, early path validation for `run`, deferred GUI imports for headless parsing, and focused regression coverage in `tests/unit/sidekick/test_cli.py`. Tightened `scripts/ci/check_error_handling_ratchet.py` so the `asyncio.gather(...)` anti-pattern scan now balances multiline argument lists before deciding whether `return_exceptions=` is present, and added matching regression coverage in `tests/unit/scripts/test_error_handling_ratchet.py` for both compliant and violating multiline gather calls. |
+| 2026-05-22 | 1.0.181 | Added the standalone Sidekick CLI scaffold behind the `sidekick` console script in `pyproject.toml` with an implicit `gui` default, closest-match suggestions for mistyped flags, early path validation for `run`, deferred GUI imports for headless parsing, and focused regression coverage in `tests/unit/sidekick/test_cli.py`. Tightened `scripts/ci/check_error_handling_ratchet.py` so the `asyncio.gather(...)` anti-pattern scan now balances multiline argument lists before deciding whether `return_exceptions=` is present, and added matching regression coverage in `tests/unit/scripts/test_error_handling_ratchet.py` for both compliant and violating multiline gather calls. |
 | 2026-05-22 | 1.0.180 | Landed the pure-Python foundation for the Idiot-Proof UX epic (#5968): `src/shared/python/ux/` adds the `FieldMetadata` registry, `ProvenanceRecord`/`ProvenanceValue`, `PreflightCheck`/`Severity`/`run_preflight()`, and the `UserFacingError` envelope, all with full Design-by-Contract validation; seeded `src/shared/python/ux/config/field_metadata.yaml` and `src/shared/python/ux/config/error_messages.yaml`; added `scripts/ci/check_ux_coverage_ratchet.py` plus baseline at 714 unwrapped inputs (62 QSpinBox + 221 QDoubleSpinBox + 217 QComboBox + 70 QSlider + 94 QLineEdit + 35 `<input>` + 14 `<select>` + 1 `<textarea>`); documented the workflow in `docs/ux/field_metadata.md`; 68 unit tests in `tests/unit/ux/`. Sanitized unexpected `src/api/routes/simulation_ws.py` runtime errors before they reach WebSocket clients while preserving traceback-bearing server logs, and added direct regression coverage for the generic error payload contract. Re-baselined `scripts/config/module_size_budget_baseline.json` from 10 stale exceptions (sizes 3-5x overstated, 7 files since decomposed) down to the 3 modules that genuinely exceed 1,500 lines today, and added `validate_baseline_truthfulness` to `scripts/check_module_size_budget.py` as a CI ratchet against future fraudulent baselines. Refs #5922. |
 | 2026-05-23 | 1.0.180 | ⚡ Bolt: Optimize mechanical work metric calculations using einsum and vdot |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
