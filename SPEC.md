@@ -70,13 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Enforced X-factor timestamp invariants so invalid
+  duplicate, non-monotonic, non-finite, or length-mismatched timebases cannot
+  produce infinite stretch rates (#8238).
 - **2026-07-28** - Guarded shared GUI tests against optional PyQt submodule
   loader failures so QtSvg/QtWebSockets gaps skip cleanly instead of breaking
   collection.
-- **2026-07-28** - Hardened durable task lifecycle invariants for #8235.
-  Completed, failed, and cancelled tasks are now immutable through public
-  progress, heartbeat, completion, failure, cancellation, and retry-release
-  methods, with SQLite retry release guarded at the SQL transition boundary.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

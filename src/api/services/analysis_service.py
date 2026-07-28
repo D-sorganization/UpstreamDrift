@@ -592,6 +592,35 @@ class AnalysisService:
             return None
         return times
 
+    def _resolve_x_factor_dt(
+        self,
+        request_data: dict[str, Any],
+        trajectory_length: int,
+    ) -> float | None:
+        """Resolve a positive finite sample interval for X-factor stretch."""
+        raw_times = request_data.get("times", request_data.get("time"))
+        if raw_times is None:
+            return 1.0
+
+        try:
+            time_array = np.asarray(raw_times, dtype=float).reshape(-1)
+        except (TypeError, ValueError):
+            return None
+
+        if time_array.size != trajectory_length or not np.all(np.isfinite(time_array)):
+            return None
+
+        deltas = np.diff(time_array)
+        if deltas.size == 0 or not np.all(np.isfinite(deltas)):
+            return None
+        if not np.all(deltas > 0.0):
+            return None
+
+        dt = float(np.mean(deltas))
+        if not np.isfinite(dt) or dt <= 0.0:
+            return None
+        return dt
+
     def _compute_x_factor(
         self,
         request: AnalysisRequest,
@@ -621,12 +650,7 @@ class AnalysisService:
         if positions.ndim != 2 or positions.shape[0] < 2:
             return None
 
-        times = request_data.get("times", request_data.get("time"))
-        if times is not None:
-            time_array = np.asarray(times, dtype=float).reshape(-1)
-            dt = float(np.mean(np.diff(time_array))) if time_array.size > 1 else 1.0
-        else:
-            dt = 1.0
+        dt = self._resolve_x_factor_dt(request_data, positions.shape[0])
 
         class _SwingMetricContext(SwingMetricsMixin):
             pass
@@ -635,13 +659,18 @@ class AnalysisService:
         context.joint_positions = positions
         context.times = np.arange(positions.shape[0], dtype=float)
         context.club_head_speed = None
-        context.dt = dt
+        context.dt = dt if dt is not None else 1.0
 
         x_factor = context.compute_x_factor(int(shoulder_idx), int(hip_idx))
         if x_factor is None or x_factor.size == 0:
             return None
 
-        stretch = context.compute_x_factor_stretch(int(shoulder_idx), int(hip_idx))
+        stretch = None
+        if dt is not None:
+            stretch = context.compute_x_factor_stretch(
+                int(shoulder_idx),
+                int(hip_idx),
+            )
         payload: dict[str, Any] = {
             "values": x_factor.tolist(),
             "peak": float(np.max(np.abs(x_factor))),

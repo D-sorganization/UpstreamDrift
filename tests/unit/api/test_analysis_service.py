@@ -413,6 +413,46 @@ class TestAnalyzeSwingSequenceInternal:
         assert result["x_factor"]["peak"] == pytest.approx(60.0)
         assert result["x_factor"]["peak_stretch_rate"] == pytest.approx(600.0)
 
+    @pytest.mark.parametrize(
+        "times",
+        [
+            [0.0, 0.0],
+            [0.1, 0.0],
+            [0.0, float("nan")],
+            [0.0],
+        ],
+    )
+    async def test_swing_sequence_omits_x_factor_stretch_for_invalid_timestamps(
+        self, analysis_service, times: list[float]
+    ) -> None:
+        """Invalid timebases must not serialize infinite stretch rates."""
+        from src.api.models.requests import AnalysisRequest
+
+        class Engine:
+            pass
+
+        request = AnalysisRequest(
+            analysis_type="swing_sequence",
+            data_source="simulation",
+            parameters={},
+            data={
+                "joint_positions": [
+                    [0.0, 0.0],
+                    [np.pi / 2.0, np.pi / 6.0],
+                ],
+                "shoulder_joint_idx": 0,
+                "hip_joint_idx": 1,
+                "times": times,
+            },
+        )
+
+        result = await analysis_service._analyze_swing_sequence(request, Engine())
+
+        assert result["x_factor"]["values"] == pytest.approx([0.0, 60.0])
+        assert result["x_factor"]["peak"] == pytest.approx(60.0)
+        assert "stretch_rate" not in result["x_factor"]
+        assert "peak_stretch_rate" not in result["x_factor"]
+
 
 class TestToListHelper:
     """Tests for _to_list helper method."""
