@@ -148,7 +148,7 @@ def test_main_baseline_allows_existing_path_chain_count(
     baseline.write_text("src/app.py\tself.a.b.c.d\t1\n")
 
     assert mod.main([str(root), "--baseline", str(baseline)]) == 0
-    assert "clean no-growth scan" in capsys.readouterr().out
+    assert "clean strict-baseline scan" in capsys.readouterr().out
 
 
 def test_main_baseline_fails_when_path_chain_count_grows(
@@ -164,6 +164,31 @@ def test_main_baseline_fails_when_path_chain_count_grows(
     captured = capsys.readouterr()
     assert "new LOD chain" in captured.out
     assert "found 1 new LOD violation" in captured.err
+
+
+def test_main_baseline_fails_when_allowance_is_stale(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+    (root / "app.py").write_text("x = 1\n")
+    baseline = tmp_path / "lod_baseline.txt"
+    baseline.write_text("src/app.py\tself.a.b.c.d\t1\n")
+
+    assert mod.main([str(root), "--baseline", str(baseline)]) == 1
+    captured = capsys.readouterr()
+    assert "stale LOD baseline allowance" in captured.err
+    assert "run --write-baseline" in captured.err
+
+
+def test_main_baseline_advisory_allows_stale_allowance(tmp_path: Path) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+    (root / "app.py").write_text("x = 1\n")
+    baseline = tmp_path / "lod_baseline.txt"
+    baseline.write_text("src/app.py\tself.a.b.c.d\t1\n")
+
+    assert mod.main([str(root), "--baseline", str(baseline), "--advisory"]) == 0
 
 
 def test_write_baseline_records_counts(tmp_path: Path) -> None:

@@ -22,7 +22,8 @@ Allow-list rationale (these are library API patterns, not LOD violations):
 
 The script exits with code 0 if no violations are found, code 1 otherwise.
 When a baseline is supplied, checked-in violations are tolerated and only
-new path/chain occurrences fail the check.
+new path/chain occurrences fail the check. Stale baseline allowances also fail
+so previously removed LOD chains cannot be silently reintroduced later.
 """
 
 from __future__ import annotations
@@ -295,6 +296,14 @@ def _baseline_excess(
     return excess
 
 
+def _baseline_reductions(
+    violations: list[Violation],
+    baseline: Counter[BaselineKey],
+) -> Counter[BaselineKey]:
+    """Return baseline allowances that are larger than current findings."""
+    return baseline - _violation_counts(violations)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -345,12 +354,27 @@ def main(argv: list[str] | None = None) -> int:
         excess = _baseline_excess(violations, baseline)
         for rel_path, lineno, chain in excess:
             print(f"{rel_path}:{lineno}: new LOD chain >2 deep: {chain}")
-        if not excess:
-            reductions = sum((baseline - _violation_counts(violations)).values())
+
+        reductions = _baseline_reductions(violations, baseline)
+        if reductions:
+            for rel_path, chain in sorted(reductions):
+                print(
+                    f"{rel_path}: stale LOD baseline allowance for {chain}: "
+                    f"{reductions[(rel_path, chain)]}",
+                    file=sys.stderr,
+                )
             print(
-                f"check_lod: clean no-growth scan ({len(files)} files scanned under "
+                f"check_lod: found {sum(reductions.values())} stale baseline "
+                "allowance(s); run --write-baseline after verifying the reductions.",
+                file=sys.stderr,
+            )
+            return 0 if args.advisory else 1
+
+        if not excess:
+            print(
+                f"check_lod: clean strict-baseline scan ({len(files)} files scanned under "
                 f"{root}; {len(violations)} baseline violation occurrences; "
-                f"{reductions} reductions)"
+                "0 reductions)"
             )
             return 0
         print(

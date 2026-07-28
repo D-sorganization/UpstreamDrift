@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened the Law-of-Demeter baseline ratchet for #8218.
+  Baseline mode now fails on stale allowances as well as new deep attribute
+  chains, preserving prior LOD reductions instead of letting fixed chains be
+  reintroduced under an oversized baseline. The checked-in
+  `scripts/ci/lod_baseline.txt` was regenerated from current source and now has
+  zero stale reductions.
 - **2026-07-28** - Closed the workflow TODO-discipline gap for #8220. The
   shared TODO checker now scans `src/`, `tests/`, `scripts/`, and GitHub
   workflow YAML, including workflow comment markers and shell lines that emit
