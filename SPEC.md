@@ -70,6 +70,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Closed the workflow TODO-discipline gap for #8220. The
+  shared TODO checker now scans `src/`, `tests/`, `scripts/`, and GitHub
+  workflow YAML, including workflow comment markers and shell lines that emit
+  placeholder messages. The CI placeholder step now calls that shared checker,
+  and the nightly cross-engine workflow writes a small HTML dashboard artifact
+  from JUnit results instead of echoing an unfinished dashboard placeholder.
 - **2026-07-28** - Restored the DRY duplication gate on clean `origin/main`
   for #8210. The duplicated security-sensitive working-directory validation in
   `secure_popen` and `secure_run` now flows through one helper with regression

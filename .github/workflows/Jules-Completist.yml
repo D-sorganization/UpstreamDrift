@@ -93,7 +93,7 @@ jobs:
         run: |
           mkdir -p .jules/completist_data
 
-          # Find TODO/FIXME/XXX comments
+          # Find tracked-debt comments (#8220)
           grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
             --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
             > .jules/completist_data/todo_markers.txt 2>/dev/null || true

@@ -262,13 +262,72 @@ jobs:
       - name: Generate validation dashboard
         run: |
           if [ -f "test-results/cross-engine-junit.xml" ]; then
-            # TODO: Generate HTML dashboard showing:
-            # - Historical deviation trends (last 30 days)
-            # - Per-engine comparison matrix
-            # - Worst-case deviations by metric type
-            # - Pass/fail rate over time
-            echo "Dashboard generation placeholder"
-            # Future: Upload to GitHub Pages or artifact storage
+            python - <<'PY'
+            import html
+            import xml.etree.ElementTree as ET
+            from pathlib import Path
+
+            xml_path = Path("test-results/cross-engine-junit.xml")
+            dashboard_path = Path("test-results/dashboard/index.html")
+            dashboard_path.parent.mkdir(parents=True, exist_ok=True)
+
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            suite = root.find("testsuite") if root.tag == "testsuites" else root
+            if suite is None:
+                raise SystemExit("JUnit XML did not contain a testsuite")
+
+            tests = int(suite.attrib.get("tests", "0"))
+            failures = int(suite.attrib.get("failures", "0"))
+            errors = int(suite.attrib.get("errors", "0"))
+            skipped = int(suite.attrib.get("skipped", "0"))
+            status = "PASS" if tests > 0 and failures == 0 and errors == 0 else "FAIL"
+            rows = [
+                ("Status", status),
+                ("Tests", str(tests)),
+                ("Failures", str(failures)),
+                ("Errors", str(errors)),
+                ("Skipped", str(skipped)),
+            ]
+            body = "\n".join(
+                f"<tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
+                for label, value in rows
+            )
+            dashboard_path.write_text(
+                "\n".join(
+                    [
+                        "<!doctype html>",
+                        '<html lang="en">',
+                        "<head>",
+                        '  <meta charset="utf-8">',
+                        "  <title>Cross-Engine Validation Dashboard</title>",
+                        "  <style>",
+                        "    body { font-family: system-ui, sans-serif; margin: 2rem; }",
+                        "    table { border-collapse: collapse; }",
+                        "    th, td { border: 1px solid #ccc; padding: 0.5rem 0.75rem; }",
+                        "    th { text-align: left; background: #f6f8fa; }",
+                        "  </style>",
+                        "</head>",
+                        "<body>",
+                        "  <h1>Cross-Engine Validation Dashboard</h1>",
+                        f"  <table>{body}</table>",
+                        "</body>",
+                        "</html>",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            print(f"Wrote {dashboard_path}")
+            PY
           else
             echo "Skipping dashboard generation (no valid test results downloaded)."
           fi
+
+      - name: Upload validation dashboard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cross-engine-validation-dashboard
+          path: test-results/dashboard/
+          if-no-files-found: ignore
