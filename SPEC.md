@@ -71,6 +71,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Repaired the suite-marker ratchet for #8209. The static
+  scanner now reads pytest `testpaths`, includes colocated `src/**/tests`
+  suites, normalizes absolute and repo-relative scan roots, and refreshes the
+  committed baseline so existing unmarked tests are intentional ratchet debt.
 - **2026-07-28** - Hardened the workflow inventory guard for #8207. The
   executable no-growth contract now validates the documented 83 active-workflow
   cap, adds a separate 33 PR-triggered workflow budget, and fails if
