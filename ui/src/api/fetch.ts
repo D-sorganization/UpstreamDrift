@@ -151,15 +151,32 @@ export async function apiFetchParsed<T>(
  *
  * @param path - API path
  * @param formData - FormData payload
+ * @param init - Optional `RequestInit` options plus `timeoutMs` (#8144)
  * @returns Parsed JSON body typed as `T`
  */
-export async function apiFetchForm<T>(path: string, formData: FormData): Promise<T> {
+export async function apiFetchForm<T>(
+  path: string,
+  formData: FormData,
+  init?: ApiFetchInit,
+): Promise<T> {
   const url = `${getApiBase()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
 
   let response: Response;
   try {
-    response = await fetch(url, { method: 'POST', body: formData });
+    response = await fetch(url, {
+      ...requestInit,
+      method: 'POST',
+      body: formData,
+      signal: buildSignal(timeoutMs, requestInit.signal),
+    });
   } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
+    }
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error(`Request aborted — ${path}`);
+    }
     throw new Error(
       err instanceof Error ? err.message : `Network error for ${path}`,
     );
