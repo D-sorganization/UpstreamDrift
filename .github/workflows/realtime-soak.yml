@@ -1,18 +1,23 @@
-name: Realtime WS 24h Soak (Nightly)
+name: Realtime WS Soak
 # -----------------------------------------------------------------------------
-# 24-hour soak validation for the upstream-realtime Rust WS pub-sub.
-# Issue: #5235 (follow-up to #5214). NOT part of standard PR CI.
+# Realtime validation for the upstream-realtime Rust WS pub-sub.
+# Issue: #5235 (follow-up to #5214).
 #
-# Triggers: manual dispatch + daily 02:00 UTC schedule.
-# Runner: ubuntu-latest only (soak doesn't need cross-platform coverage).
-# Gating: the test module is skipped unless SOAK=1 is set in the env.
+# Triggers:
+#   - Daily schedule: bounded 30-minute shared-runner soak.
+#   - Manual dispatch: explicit long soak, defaulting to 24 hours.
+# Runner:
+#   - d-sorg-fleet-docker for the bounded scheduled lane.
+#   - d-sorg-fleet-soak for explicit long manual soaks.
+# Gating:
+#   - The test module is skipped unless SOAK=1 is set in the env.
 # -----------------------------------------------------------------------------
 
 on:
   workflow_dispatch:
     inputs:
       duration_sec:
-        description: "Soak duration in seconds (default 86400 = 24h)"
+        description: "Manual soak duration in seconds (default 86400 = 24h)"
         required: false
         default: "86400"
         type: string
@@ -35,27 +40,24 @@ permissions:
 concurrency:
   group: realtime-soak-${{ github.ref }}
   # Per fleet workflow-lint policy: cancel-in-progress must be true. Soaks
-  # are long; in-flight runs against an older ref can be safely cancelled
-  # when a new push lands — the scheduled cron will re-run.
+  # are long enough that in-flight runs against an older ref can be safely
+  # cancelled when a newer run starts.
   cancel-in-progress: true
 
 jobs:
-  soak:
-    name: 24h realtime soak
+  scheduled-soak:
+    name: bounded realtime soak
+    if: github.event_name == 'schedule'
     runs-on: d-sorg-fleet-docker
-    # 24 h + headroom for setup/teardown/artifact upload. GitHub-hosted
-    # runners cap at 360 minutes; the nightly run uses the d-sorg-fleet-docker
-    # runner via a separate self-hosted dispatch when available. For
-    # GitHub-hosted we cap the schedule run at 6 h via SOAK_DURATION_SEC.
-    timeout-minutes: 1500
+    timeout-minutes: 45
     env:
       SOAK: "1"
-      SOAK_DURATION_SEC: ${{ github.event.inputs.duration_sec || '86400' }}
-      SOAK_PUBLISH_HZ: ${{ github.event.inputs.publish_hz || '1000' }}
-      SOAK_SUBSCRIBERS: ${{ github.event.inputs.subscribers || '4' }}
+      SOAK_DURATION_SEC: "1800"
+      SOAK_PUBLISH_HZ: "1000"
+      SOAK_SUBSCRIBERS: "4"
       SOAK_ARTIFACT_DIR: ${{ github.workspace }}/soak_artifacts
-      # Pin the rust backend explicitly — falling back to the Python
-      # uvicorn server would invalidate the leak/latency assertions.
+      # Pin the rust backend explicitly; falling back to the Python uvicorn
+      # server would invalidate the leak/latency assertions.
       UD_REALTIME_BACKEND: "rust"
     steps:
       - name: Checkout
@@ -72,6 +74,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
           fi
+
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
@@ -80,6 +83,7 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
 
@@ -106,14 +110,14 @@ jobs:
         run: |
           python -c "import upstream_realtime; print('upstream_realtime OK:', upstream_realtime.__name__)"
 
-      - name: Run 24h soak
+      - name: Run bounded realtime soak
         id: soak
         run: |
           mkdir -p "$SOAK_ARTIFACT_DIR"
           pytest \
               -v \
               -s \
-              --timeout=0 \
+              --timeout=2400 \
               --tb=short \
               -p no:randomly \
               --junit-xml="$SOAK_ARTIFACT_DIR/soak_junit.xml" \
@@ -123,7 +127,7 @@ jobs:
       - name: Summarize soak result
         if: always()
         run: |
-          echo "## Realtime WS 24h Soak Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Realtime WS Scheduled Soak Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "* Duration: \`$SOAK_DURATION_SEC\` sec" >> "$GITHUB_STEP_SUMMARY"
           echo "* Publish rate: \`$SOAK_PUBLISH_HZ\` Hz" >> "$GITHUB_STEP_SUMMARY"
@@ -146,7 +150,121 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: realtime-soak-${{ github.run_id }}
+          name: realtime-soak-scheduled-${{ github.run_id }}
+          path: |
+            soak_artifacts/realtime_soak_samples.csv
+            soak_artifacts/realtime_soak_summary.json
+            soak_artifacts/soak_output.log
+            soak_artifacts/soak_junit.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  manual-soak:
+    name: manual realtime soak
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: d-sorg-fleet-soak
+    timeout-minutes: 1500
+    env:
+      SOAK: "1"
+      SOAK_DURATION_SEC: ${{ github.event.inputs.duration_sec || '86400' }}
+      SOAK_PUBLISH_HZ: ${{ github.event.inputs.publish_hz || '1000' }}
+      SOAK_SUBSCRIBERS: ${{ github.event.inputs.subscribers || '4' }}
+      SOAK_ARTIFACT_DIR: ${{ github.workspace }}/soak_artifacts
+      # Pin the rust backend explicitly; falling back to the Python uvicorn
+      # server would invalidate the leak/latency assertions.
+      UD_REALTIME_BACKEND: "rust"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2
+        with:
+          workspaces: |
+            .
+
+      - name: Install Python deps
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          pip install -e ".[dev]" || pip install -e .
+          python -m ensurepip --upgrade || true
+          pip install psutil maturin
+
+      - name: Build & install upstream_realtime wheel (maturin develop)
+        working-directory: rust_core/upstream-realtime
+        run: |
+          maturin develop --release
+
+      - name: Verify wheel imports
+        run: |
+          python -c "import upstream_realtime; print('upstream_realtime OK:', upstream_realtime.__name__)"
+
+      - name: Run manual realtime soak
+        id: soak
+        run: |
+          mkdir -p "$SOAK_ARTIFACT_DIR"
+          pytest \
+              -v \
+              -s \
+              --timeout=0 \
+              --tb=short \
+              -p no:randomly \
+              --junit-xml="$SOAK_ARTIFACT_DIR/soak_junit.xml" \
+              tests/soak/realtime/test_24h_soak.py \
+            | tee "$SOAK_ARTIFACT_DIR/soak_output.log"
+
+      - name: Summarize soak result
+        if: always()
+        run: |
+          echo "## Realtime WS Manual Soak Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "* Duration: \`$SOAK_DURATION_SEC\` sec" >> "$GITHUB_STEP_SUMMARY"
+          echo "* Publish rate: \`$SOAK_PUBLISH_HZ\` Hz" >> "$GITHUB_STEP_SUMMARY"
+          echo "* Subscribers: \`$SOAK_SUBSCRIBERS\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "$SOAK_ARTIFACT_DIR/realtime_soak_summary.json" ]; then
+            echo "### Summary" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat "$SOAK_ARTIFACT_DIR/realtime_soak_summary.json" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f "$SOAK_ARTIFACT_DIR/soak_output.log" ]; then
+            echo "### Tail of test output" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -60 "$SOAK_ARTIFACT_DIR/soak_output.log" >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload soak artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: realtime-soak-manual-${{ github.run_id }}
           path: |
             soak_artifacts/realtime_soak_samples.csv
             soak_artifacts/realtime_soak_summary.json

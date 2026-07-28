@@ -772,6 +772,42 @@ class TestCIEnvironmentCompatibility:
         assert job["runs-on"] == "d-sorg-fleet-docker"
         assert "paths:" not in workflow_text
 
+    def test_realtime_soak_schedule_has_bounded_shared_runner_budget(self) -> None:
+        """Daily realtime soak must not reserve the shared runner for 24 hours."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow_path = REPO_ROOT / ".github" / "workflows" / "realtime-soak.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        jobs = workflow["jobs"]
+
+        scheduled_job = jobs["scheduled-soak"]
+        manual_job = jobs["manual-soak"]
+
+        assert scheduled_job["if"] == "github.event_name == 'schedule'"
+        assert scheduled_job["runs-on"] == "d-sorg-fleet-docker"
+        assert int(scheduled_job["timeout-minutes"]) <= 60
+        assert scheduled_job["env"]["SOAK_DURATION_SEC"] == "1800"
+
+        scheduled_run = next(
+            step["run"]
+            for step in scheduled_job["steps"]
+            if step.get("name") == "Run bounded realtime soak"
+        )
+        assert "--timeout=2400" in scheduled_run
+        assert "tests/soak/realtime/test_24h_soak.py" in scheduled_run
+
+        assert manual_job["if"] == "github.event_name == 'workflow_dispatch'"
+        assert manual_job["runs-on"] == "d-sorg-fleet-soak"
+        assert int(manual_job["timeout-minutes"]) >= 1440
+        assert (
+            manual_job["env"]["SOAK_DURATION_SEC"]
+            == "${{ github.event.inputs.duration_sec || '86400' }}"
+        )
+
     def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
         """Helper checks must not cancel another PR's current check status."""
         workflows = [

@@ -3,6 +3,7 @@ self-hosted-runner:
     - d-sorg-fleet-4core
     - d-sorg-fleet
     - d-sorg-fleet-docker
+    - d-sorg-fleet-soak
     - ubuntu-latest
     - ubuntu-22.04
     - ubuntu-24.04
