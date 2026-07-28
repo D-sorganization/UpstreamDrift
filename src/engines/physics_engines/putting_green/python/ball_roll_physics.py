@@ -129,6 +129,9 @@ class BallRollPhysics:
     # Spin threshold for pure rolling determination
     SPIN_VELOCITY_RATIO_TOLERANCE = 0.05
 
+    # Supported time-integration schemes.
+    ALLOWED_INTEGRATORS = frozenset({"euler", "rk4", "verlet"})
+
     def __init__(
         self,
         turf: TurfProperties | None = None,
@@ -146,19 +149,43 @@ class BallRollPhysics:
             ball_radius: Ball radius [m]
             integrator: Integration method ("euler", "rk4", "verlet")
         """
-        if ball_mass is None:
-            raise ValueError("ball_mass must be provided")
         self.green = green
         self.turf = turf or (green.turf if green else TurfProperties())
-        self.ball_mass = ball_mass
-        self.ball_radius = ball_radius
-        self.integrator = integrator
+        self.ball_mass = self._validate_positive_finite("ball_mass", ball_mass)
+        self.ball_radius = self._validate_positive_finite("ball_radius", ball_radius)
+        self.integrator = self._validate_integrator(integrator)
 
         # Ball moment of inertia (solid sphere)
-        self._moment_of_inertia = (2.0 / 5.0) * ball_mass * ball_radius**2
+        self._moment_of_inertia = (2.0 / 5.0) * self.ball_mass * self.ball_radius**2
 
         # Previous acceleration for Verlet integration
         self._prev_acceleration: np.ndarray | None = None
+
+    @staticmethod
+    def _validate_positive_finite(name: str, value: float) -> float:
+        """Return ``value`` as float after enforcing a finite positive contract."""
+        if value is None:
+            raise ValueError(f"{name} must be provided")
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{name} must be a finite positive number") from exc
+        if not math.isfinite(numeric) or numeric <= 0.0:
+            raise ValueError(f"{name} must be a finite positive number")
+        return numeric
+
+    @classmethod
+    def _validate_integrator(cls, integrator: str) -> str:
+        """Validate the configured integration scheme name."""
+        if integrator not in cls.ALLOWED_INTEGRATORS:
+            allowed = ", ".join(sorted(cls.ALLOWED_INTEGRATORS))
+            raise ValueError(f"integrator must be one of: {allowed}")
+        return integrator
+
+    @classmethod
+    def _validate_dt(cls, dt: float) -> float:
+        """Validate a simulation timestep in seconds."""
+        return cls._validate_positive_finite("dt", dt)
 
     def determine_roll_mode(self, state: BallState) -> RollMode:
         """Determine current rolling mode from state.
@@ -415,6 +442,7 @@ class BallRollPhysics:
         """
         if state is None:
             raise ValueError("state must be provided")
+        dt = self._validate_dt(dt)
         if self.integrator == "rk4":
             return self._step_rk4(state, dt)
         if self.integrator == "verlet":
@@ -425,6 +453,7 @@ class BallRollPhysics:
         """Euler integration step."""
         if state is None:
             raise ValueError("state must be provided")
+        dt = self._validate_dt(dt)
         mode = self.determine_roll_mode(state)
 
         if mode == RollMode.STOPPED:
@@ -473,6 +502,7 @@ class BallRollPhysics:
 
         if state is None:
             raise ValueError("state must be provided")
+        dt = self._validate_dt(dt)
 
         def derivatives(
             pos: np.ndarray, vel: np.ndarray
@@ -511,6 +541,7 @@ class BallRollPhysics:
         # Current acceleration
         if state is None:
             raise ValueError("state must be provided")
+        dt = self._validate_dt(dt)
         accel = self.compute_total_acceleration(state)
 
         # Update position
@@ -557,6 +588,8 @@ class BallRollPhysics:
         """
         if initial_state is None:
             raise ValueError("initial_state must be provided")
+        max_time = self._validate_positive_finite("max_time", max_time)
+        dt = self._validate_dt(dt)
         positions = [initial_state.position.copy()]
         velocities = [initial_state.velocity.copy()]
         spins = [initial_state.spin.copy()]
