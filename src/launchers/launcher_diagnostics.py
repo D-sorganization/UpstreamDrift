@@ -109,34 +109,6 @@ def _read_manifest_schema(manifest_path: Path | None) -> str | None:
     return None
 
 
-def _load_local_model_ids(models_yaml_path: Path | None = None) -> list[str]:
-    """Return model IDs declared directly in ``src/config/models.yaml``."""
-    path = models_yaml_path or REPOS_ROOT / "src" / "config" / "models.yaml"
-    try:
-        import yaml  # type: ignore[import-untyped]
-    except ImportError:
-        return []
-
-    try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-    if not isinstance(data, Mapping):
-        return []
-
-    models = data.get("models")
-    if not isinstance(models, list):
-        return []
-
-    ids: list[str] = []
-    for model in models:
-        if isinstance(model, Mapping):
-            model_id = model.get("id")
-            if isinstance(model_id, str) and model_id:
-                ids.append(model_id)
-    return ids
-
-
 #: Ordered probe categories shared by the desktop diagnostics dialog and the
 #: web API (``GET /api/v1/diagnostics/full``). Parity contract (issue #7458):
 #: both UIs derive their category set from this single enumeration. Each entry
@@ -186,7 +158,14 @@ class LauncherDiagnostics:
     )
 
     # Expected tile model IDs - dynamically loaded from models.yaml (issue #5476)
-    EXPECTED_TILE_IDS: list[str] = PARENT_MANIFEST_TILE_IDS
+    EXPECTED_TILE_IDS: list[str] = []
+    try:
+        from src.shared.python.config.model_registry import ModelRegistry
+
+        _registry = ModelRegistry()
+        EXPECTED_TILE_IDS = [m.id for m in _registry.get_all_models()]
+    except (ImportError, ValueError, OSError):
+        pass
 
     # Expected tile names
     EXPECTED_TILE_NAMES = {

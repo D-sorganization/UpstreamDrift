@@ -123,9 +123,13 @@ class TestLauncherDiagnostics:
         """Test that expected tile IDs are defined."""
         diag = LauncherDiagnostics()
         expected_ids = diag.EXPECTED_TILE_IDS
+        local_ids = _local_model_ids()
 
-        assert len(expected_ids) == len(_local_model_ids()), (
-            "Assertion failed: expected_ids matches local models.yaml count"
+        assert set(diag.PARENT_MANIFEST_TILE_IDS) == local_ids, (
+            "Assertion failed: parent manifest IDs match local models.yaml"
+        )
+        assert set(expected_ids) >= local_ids, (
+            "Assertion failed: runtime expected IDs cover local models.yaml IDs"
         )
         assert "mujoco_unified" in expected_ids, (
             "Assertion failed: mujoco_unified in expected_ids"
