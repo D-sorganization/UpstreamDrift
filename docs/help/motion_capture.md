@@ -306,4 +306,4 @@ The system reports:
 
 ---
 
-_See also: [Full User Manual](../USER_MANUAL.md) | [Visualization](visualization.md) | [Analysis Tools](analysis_tools.md)_
+_See also: [Full User Manual](../user_guide/user_manual.md) | [Visualization](visualization.md) | [Analysis Tools](analysis_tools.md)_

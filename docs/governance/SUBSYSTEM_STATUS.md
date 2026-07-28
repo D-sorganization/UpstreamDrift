@@ -155,6 +155,6 @@ To promote a subsystem to production:
 
 ## Related Documents
 
-- [CI/CD Pipeline Documentation](../architecture/CI_CD.md)
-- [Testing Guidelines](../architecture/TESTING.md)
-- [Code Ownership](./CODE_OWNERSHIP.md)
+- [CI/CD Assessment](../assessments/Assessment_H_CI_CD.md)
+- [Testing Guidelines](../testing/testing-guide.md)
+- [Code Ownership](../../.github/CODEOWNERS)

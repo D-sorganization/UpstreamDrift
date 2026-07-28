@@ -34,5 +34,5 @@ The project has gone through several major development phases, each with dedicat
 
 - [Development Guide](../README.md) - General development workflow
 - [Contributing Guide](../contributing.md) - How to contribute code
-- [Testing Guide](../../testing-guide.md) - Testing standards and practices
+- [Testing Guide](../../testing/testing-guide.md) - Testing standards and practices
 - [Historical Records](../../historical/README.md) - Phase summaries and session notes

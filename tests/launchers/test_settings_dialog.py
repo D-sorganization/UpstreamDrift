@@ -42,8 +42,11 @@ def test_validate_tab_index() -> None:
 @pytest.fixture
 def parent_launcher(qapp) -> QWidget:
     launcher = QWidget()
-    launcher.btn_modify_layout = MagicMock()
-    launcher.btn_modify_layout.isChecked.return_value = True
+    # #8023: the layout-edit toggle is owned by the checkable
+    # ``View > Edit Layout Mode`` QAction, not a (never-created) button.
+    launcher._action_layout_mode = MagicMock()
+    launcher._action_layout_mode.isChecked.return_value = True
+    launcher._toggle_layout_mode_from_menu = MagicMock()
 
     launcher.chk_docker = MagicMock()
     launcher.chk_docker.isChecked.return_value = False
@@ -540,8 +543,11 @@ def test_launcher_ref_used_when_parent_is_none(qapp) -> None:
     """Issue #6508: when launcher kwarg is passed without parent, self._launcher
     must be used — not self.parent() — so layout and diagnostics tabs work."""
     launcher = QWidget()
-    launcher.btn_modify_layout = MagicMock()
-    launcher.btn_modify_layout.isChecked.return_value = True
+    # #8023: the layout-edit toggle is owned by the checkable
+    # ``View > Edit Layout Mode`` QAction, not a (never-created) button.
+    launcher._action_layout_mode = MagicMock()
+    launcher._action_layout_mode.isChecked.return_value = True
+    launcher._toggle_layout_mode_from_menu = MagicMock()
     launcher.chk_docker = MagicMock()
     launcher.chk_docker.isChecked.return_value = True
     launcher.chk_wsl = MagicMock()
@@ -563,8 +569,8 @@ def test_launcher_ref_used_when_parent_is_none(qapp) -> None:
 
     assert dialog.parent() is None, "Qt parent should be None in this path"
     assert dialog._launcher is launcher, "_launcher must reference the passed launcher"
-    # Layout tab sync: btn_modify_layout.isChecked was called during _setup_layout_tab
-    launcher.btn_modify_layout.isChecked.assert_called()
+    # Layout tab sync: the QAction state was read during _setup_layout_tab
+    launcher._action_layout_mode.isChecked.assert_called()
 
 
 def test_settings_dialog_tier_details(parent_launcher, qapp) -> None:

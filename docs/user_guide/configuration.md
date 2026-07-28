@@ -41,7 +41,7 @@ The registry enforces safety checks:
 
 ## Engine Configuration
 
-Each engine has its specific configuration assets located in `engines/physics_engines/<engine_name>/`.
+Each engine has its specific configuration assets located in `src/engines/physics_engines/<engine_name>/`.
 
 - **MuJoCo**: `assets/*.xml` (MJCF files)
 - **Drake**: `assets/*.sdf` or `*.urdf`

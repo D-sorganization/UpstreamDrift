@@ -332,11 +332,13 @@ def test_menu_toggles(qapp) -> None:
         launcher = UpstreamDriftLauncher()
         launcher.toggle_layout_mode = MagicMock()
         launcher.context_help = MagicMock()
-        launcher.btn_modify_layout = MagicMock()
 
+        # #8023: the menu handler must not touch the phantom
+        # ``btn_modify_layout`` attribute — dereferencing it raised
+        # AttributeError inside a Qt slot, which aborts the process.
         launcher._toggle_layout_mode_from_menu(True)
-        launcher.btn_modify_layout.setChecked.assert_called_once_with(True)
         launcher.toggle_layout_mode.assert_called_with(True)
+        assert "btn_modify_layout" not in launcher.__dict__
 
         launcher._toggle_context_help(True)
         launcher.context_help.show.assert_called_once()

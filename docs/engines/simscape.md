@@ -12,5 +12,5 @@ These models utilize MATLAB's Simscape Multibody technology to provide a block-d
 
 ## Usage
 
-Located in `engines/Simscape_Multibody_Models/`.
+Located in `src/engines/Simscape_Multibody_Models/`.
 Requires MATLAB. Run `setup_golf_suite()` in MATLAB to initialize paths.
