@@ -14,6 +14,12 @@ mock_openai_module = MagicMock()
 mock_anthropic_module = MagicMock()
 
 
+@pytest.fixture(autouse=True)
+def reset_sdk_module_mocks() -> None:
+    mock_openai_module.reset_mock(return_value=True, side_effect=True)
+    mock_anthropic_module.reset_mock(return_value=True, side_effect=True)
+
+
 @pytest.fixture
 def mock_openai_adapter() -> Generator[Any, None, None]:
     with patch.dict(sys.modules, {"openai": mock_openai_module}):
