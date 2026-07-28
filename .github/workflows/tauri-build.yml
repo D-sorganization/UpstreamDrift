@@ -154,10 +154,10 @@ jobs:
             os: linux
             runner: d-sorg-fleet-docker
             target: x86_64-unknown-linux-gnu
-          - artifact_name: windows-x64
-            os: windows
-            runner: [self-hosted, Windows]
-            target: x86_64-pc-windows-msvc
+          # Windows leg removed: org currently has no online
+          # `[self-hosted, Windows]` runner capacity, so this matrix entry
+          # queued indefinitely before step-level gates could skip packaging.
+          # Re-add only after a documented Windows runner is available.
           # macOS leg removed: org has no `[self-hosted, macOS]` runners. Jobs
           # with this label queued indefinitely. Re-add when macOS runner
           # capacity is provisioned and macOS becomes an active deliverable.

@@ -559,14 +559,17 @@ class TestCIEnvironmentCompatibility:
         assert build_job["name"] == "Build (${{ matrix.artifact_name }})"
         assert build_job["runs-on"] == "${{ matrix.runner }}"
         assert "matrix.platform" not in workflow_text
-        assert {entry["artifact_name"] for entry in matrix_entries} == {
-            "linux-x64",
-            "windows-x64",
-        }
+        assert {entry["artifact_name"] for entry in matrix_entries} == {"linux-x64"}
         for entry in matrix_entries:
             assert "platform" not in entry
             assert isinstance(entry["artifact_name"], str)
-            assert entry["os"] in {"linux", "windows"}
+            assert entry["os"] == "linux"
+            assert entry["runner"] == "d-sorg-fleet-docker"
+        assert "runner: [self-hosted, Windows]" not in workflow_text
+        assert (
+            "Re-add only after a documented Windows runner is available."
+            in workflow_text
+        )
 
         upload = next(
             step

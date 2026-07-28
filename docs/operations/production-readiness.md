@@ -45,7 +45,7 @@ repository is a development or test convenience.
 | ------------------ | --------------------------------------------- | --------- | ----------------- | --------------------- |
 | Python wheel       | Linux x86_64, macOS arm64, Windows 10+ x86_64 | 3.11-3.13 | core; +extras     | CPU                   |
 | Docker image (API) | Linux x86_64                                  | 3.11      | core+extended     | CPU; optional CUDA 12 |
-| Tauri desktop      | Linux x86_64, macOS arm64, Windows 10+ x86_64 | bundled   | core+extended     | CPU                   |
+| Tauri desktop      | Linux x86_64                                  | bundled   | core+extended     | CPU                   |
 | Rust crate         | Linux, macOS, Windows                         | n/a       | n/a               | CPU                   |
 
 Supported means a release has a green smoke test in `tests/smoke/` for the
@@ -86,8 +86,9 @@ publish steps when those release jobs are enabled.
 - Python: 3.11 and 3.12 for the published package — `requires-python = ">=3.11"`
   in `pyproject.toml` is canonical and the standard CI matrix tests 3.11 and
   3.12. Wheel smoke tests also cover 3.13 where release artifacts are built.
-- Operating systems: Linux for CI and service deployments; Windows 10+ and
-  macOS arm64/x64 for desktop artifacts when produced by the Tauri workflow.
+- Operating systems: Linux for CI, service deployments, and automatically built
+  Tauri desktop artifacts. Windows and macOS desktop artifacts are disabled in
+  the Tauri workflow until matching self-hosted runner capacity is provisioned.
 - Native engines: MuJoCo is part of the default package dependency set. Drake,
   Pinocchio, OpenSim, and MyoSuite are optional and only supported when their
   extras and platform prerequisites are installed.
