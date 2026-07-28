@@ -15,6 +15,7 @@ import importlib.util
 import logging
 import math
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -175,6 +176,87 @@ _sessions: dict[str, dict[str, Any]] = {}
 _recordings: dict[str, dict[str, Any]] = {}
 _session_state: dict[str, int] = {"counter": 0}
 
+MAX_CAPTURE_SESSIONS = 32
+MAX_CAPTURE_RECORDINGS = 16
+CAPTURE_STATE_TTL_SECONDS = 60 * 60
+
+
+def _now() -> float:
+    return time.time()
+
+
+def _entry_timestamp(entry: dict[str, Any], primary_key: str) -> float | None:
+    timestamp = entry.get(primary_key, entry.get("created_at"))
+    return float(timestamp) if timestamp is not None else None
+
+
+def _is_expired(entry: dict[str, Any], primary_key: str, now: float) -> bool:
+    timestamp = _entry_timestamp(entry, primary_key)
+    return timestamp is not None and now - timestamp > CAPTURE_STATE_TTL_SECONDS
+
+
+def _stopped_sessions_oldest_first() -> list[tuple[str, dict[str, Any]]]:
+    return sorted(
+        (
+            (session_id, session)
+            for session_id, session in _sessions.items()
+            if session.get("status") != "recording"
+        ),
+        key=lambda item: _entry_timestamp(item[1], "updated_at") or 0.0,
+    )
+
+
+def _prune_stopped_sessions() -> None:
+    stopped = _stopped_sessions_oldest_first()
+    while len(_sessions) > MAX_CAPTURE_SESSIONS and stopped:
+        session_id, _session = stopped.pop(0)
+        _sessions.pop(session_id, None)
+
+
+def _drop_oldest_stopped_session() -> bool:
+    stopped = _stopped_sessions_oldest_first()
+    if not stopped:
+        return False
+    session_id, _session = stopped[0]
+    _sessions.pop(session_id, None)
+    return True
+
+
+def _prune_recordings() -> None:
+    while len(_recordings) > MAX_CAPTURE_RECORDINGS:
+        oldest_name = min(
+            _recordings,
+            key=lambda name: (
+                _entry_timestamp(_recordings[name], "last_accessed_at") or 0.0
+            ),
+        )
+        _recordings.pop(oldest_name, None)
+
+
+def _cleanup_ephemeral_state(now: float | None = None) -> None:
+    """Bound process-local motion capture state by TTL and item count."""
+    current_time = _now() if now is None else now
+
+    expired_sessions = [
+        session_id
+        for session_id, session in _sessions.items()
+        if session.get("status") != "recording"
+        and _is_expired(session, "updated_at", current_time)
+    ]
+    for session_id in expired_sessions:
+        _sessions.pop(session_id, None)
+
+    expired_recordings = [
+        name
+        for name, recording in _recordings.items()
+        if _is_expired(recording, "last_accessed_at", current_time)
+    ]
+    for name in expired_recordings:
+        _recordings.pop(name, None)
+
+    _prune_stopped_sessions()
+    _prune_recordings()
+
 
 # ── Endpoints ──
 
@@ -264,6 +346,7 @@ async def start_capture_session(
 
     See issue #1206
     """
+    _cleanup_ephemeral_state()
     valid_sources = {"mediapipe", "openpose", "c3d"}
     if request.source_type not in valid_sources:
         raise HTTPException(
@@ -279,14 +362,28 @@ async def start_capture_session(
             detail=f"Capture source '{request.source_type}' is unavailable: {reason}",
         )
 
+    if len(_sessions) >= MAX_CAPTURE_SESSIONS:
+        _drop_oldest_stopped_session()
+    if len(_sessions) >= MAX_CAPTURE_SESSIONS:
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                "Too many active motion-capture sessions; stop an existing session "
+                "before starting another"
+            ),
+        )
+
     _session_state["counter"] += 1
     session_id = f"session_{_session_state['counter']}"
+    now = _now()
 
     _sessions[session_id] = {
         "source_type": request.source_type,
         "frame_rate": request.frame_rate,
         "status": "recording",
         "frames": [],
+        "created_at": now,
+        "updated_at": now,
     }
 
     return CaptureSessionResponse(
@@ -307,11 +404,14 @@ async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
 
     See issue #1206
     """
+    _cleanup_ephemeral_state()
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")
 
     session = _sessions[session_id]
     session["status"] = "stopped"
+    now = _now()
+    session["updated_at"] = now
 
     # Save as a recording
     recording_name = f"recording_{session_id}"
@@ -319,7 +419,10 @@ async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
         "source_type": session["source_type"],
         "frame_rate": session["frame_rate"],
         "frames": session["frames"],
+        "created_at": now,
+        "last_accessed_at": now,
     }
+    _cleanup_ephemeral_state(now)
 
     return CaptureSessionResponse(
         session_id=session_id,
@@ -335,8 +438,11 @@ async def list_recordings() -> list[RecordingInfo]:
 
     See issue #1206
     """
+    _cleanup_ephemeral_state()
     result = []
+    now = _now()
     for name, rec in _recordings.items():
+        rec["last_accessed_at"] = now
         frames = rec.get("frames", [])
         frame_rate = rec.get("frame_rate", 30.0)
         total_frames = len(frames)
@@ -364,6 +470,7 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
 
     See issue #1206
     """
+    _cleanup_ephemeral_state()
     if request.recording_name not in _recordings:
         raise HTTPException(
             status_code=404,
@@ -371,6 +478,7 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
         )
 
     recording = _recordings[request.recording_name]
+    recording["last_accessed_at"] = _now()
     total_frames = len(recording.get("frames", []))
 
     valid_actions = {"play", "pause", "stop", "seek"}
@@ -413,6 +521,7 @@ async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
 
     See issue #1206
     """
+    _cleanup_ephemeral_state()
     if recording_name not in _recordings:
         raise HTTPException(
             status_code=404,
@@ -420,6 +529,7 @@ async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
         )
 
     recording = _recordings[recording_name]
+    recording["last_accessed_at"] = _now()
     frames = recording.get("frames", [])
 
     if frame_index < 0 or frame_index >= len(frames):
@@ -454,6 +564,7 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
 
     See issue #7454
     """
+    _cleanup_ephemeral_state()
     filename = file.filename or "upload.c3d"
     if not filename.lower().endswith(".c3d"):
         raise HTTPException(
@@ -490,12 +601,16 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
 
     _session_state["counter"] += 1
     recording_name = f"c3d_{Path(filename).stem}_{_session_state['counter']}"
+    now = _now()
     _recordings[recording_name] = {
         "source_type": "c3d",
         "frame_rate": frame_rate,
         "frames": frames,
         "joint_names": marker_names,
+        "created_at": now,
+        "last_accessed_at": now,
     }
+    _cleanup_ephemeral_state(now)
 
     duration = len(frames) / frame_rate if frame_rate > 0 else 0.0
     return C3DUploadResponse(
