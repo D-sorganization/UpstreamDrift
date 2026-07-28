@@ -4,7 +4,11 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from src.api.routes import launcher as launcher_routes
 from src.api.routes.launcher import router
+from src.config.launcher_manifest_loader import LauncherManifest, LauncherTile
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -19,6 +23,43 @@ def app() -> FastAPI:
 def client(app: FastAPI) -> TestClient:
     """Create a test client."""
     return TestClient(app)
+
+
+@pytest.fixture
+def hidden_tile_manifest(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Install a manifest with one visible tile and one hidden alias."""
+    manifest = LauncherManifest(
+        version="test",
+        description="visibility fixture",
+        tiles=(
+            LauncherTile(
+                id="visible_tool",
+                name="Visible Tool",
+                description="Shown in public launcher catalog endpoints",
+                category="tool",
+                type="special_app",
+                path="src/tools/visible_tool/__main__.py",
+                logo="visible.svg",
+                status="ready",
+                order=1,
+            ),
+            LauncherTile(
+                id="hidden_alias",
+                name="Hidden Alias",
+                description="Legacy alias hidden from public launcher catalog endpoints",
+                category="tool",
+                type="special_app",
+                path="src/tools/hidden_alias/__main__.py",
+                logo="hidden.svg",
+                status="ready",
+                order=2,
+                hidden=True,
+                hidden_reason="Legacy alias",
+                hidden_owner="launcher-team",
+            ),
+        ),
+    )
+    monkeypatch.setitem(launcher_routes._launcher_state, "manifest", manifest)
 
 
 def test_get_manifest(client: TestClient) -> None:
@@ -39,6 +80,17 @@ def test_get_tiles(client: TestClient) -> None:
     assert len(data) > 0
 
 
+def test_get_tiles_excludes_hidden_entries_by_default(
+    client: TestClient, hidden_tile_manifest: None
+) -> None:
+    """Public tile listing uses the same visible-tile contract as the manifest."""
+    response = client.get("/launcher/tiles")
+    assert response.status_code == 200
+
+    tile_ids = {tile["id"] for tile in response.json()}
+    assert tile_ids == {"visible_tool"}
+
+
 def test_get_tile_found(client: TestClient) -> None:
     """Test getting a specific tile."""
     # Assuming "mujoco" or something similar exists
@@ -54,6 +106,14 @@ def test_get_tile_found(client: TestClient) -> None:
 def test_get_tile_not_found(client: TestClient) -> None:
     """Test getting a non-existent tile."""
     response = client.get("/launcher/tiles/unknown_tile_id")
+    assert response.status_code == 404
+
+
+def test_get_tile_returns_not_found_for_hidden_entries_by_default(
+    client: TestClient, hidden_tile_manifest: None
+) -> None:
+    """Hidden aliases are not addressable through the public tile detail route."""
+    response = client.get("/launcher/tiles/hidden_alias")
     assert response.status_code == 404
 
 

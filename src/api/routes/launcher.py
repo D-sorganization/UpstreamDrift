@@ -70,13 +70,13 @@ async def get_manifest() -> dict[str, Any]:
 
 @router.get("/tiles")
 async def get_tiles() -> list[dict[str, Any]]:
-    """Get all launcher tiles in display order.
+    """Get visible launcher tiles in display order.
 
     Returns:
-        List of tile dictionaries.
+        List of visible tile dictionaries.
     """
     manifest = _get_manifest()
-    return [t.to_dict() for t in manifest.tiles]
+    return [t.to_dict() for t in manifest.visible_tiles]
 
 
 @router.get("/tiles/{tile_id}")
@@ -98,7 +98,7 @@ async def get_tile(tile_id: str) -> dict[str, Any]:
     """
     manifest = _get_manifest()
     tile = manifest.get_tile(tile_id)
-    if tile is None:
+    if tile is None or tile.hidden:
         raise HTTPException(status_code=404, detail=f"Tile not found: {tile_id}")
     return tile.to_dict()
 
