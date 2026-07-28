@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QDialog  # noqa: E402
+from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager  # noqa: E402
 from src.launchers.upstream_drift_launcher import (  # noqa: E402
     UpstreamDriftLauncher,
     main,
@@ -39,7 +40,9 @@ def test_onboarding_is_skipped_in_non_interactive_runs(monkeypatch) -> None:
     with patch(
         "src.launchers.onboarding_dialog.show_onboarding_if_needed"
     ) as mock_show:
-        UpstreamDriftLauncher._show_onboarding_if_needed(MagicMock())
+        launcher = SimpleNamespace()
+        launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
+        UpstreamDriftLauncher._show_onboarding_if_needed(launcher)
 
     mock_show.assert_not_called()
 
@@ -73,10 +76,10 @@ def test_init_without_results(qapp) -> None:
     with (
         patch_launcher_ui(),
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+            "src.launchers.launcher_orchestrator._lazy_load_model_registry"
         ) as mock_reg,
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+            "src.launchers.launcher_orchestrator._lazy_load_engine_manager"
         ) as mock_eng,
     ):
         mock_reg.return_value = MagicMock()
@@ -124,7 +127,7 @@ def test_window_icon_declares_app_user_model_id(qapp) -> None:
 
 def test_init_registry_exception(qapp) -> None:
     with patch(
-        "src.launchers.upstream_drift_launcher._lazy_load_model_registry",
+        "src.launchers.launcher_orchestrator._lazy_load_model_registry",
         side_effect=ImportError("test"),
     ):
         launcher = UpstreamDriftLauncher()
@@ -133,7 +136,7 @@ def test_init_registry_exception(qapp) -> None:
 
 def test_init_engine_manager_exception(qapp) -> None:
     with patch(
-        "src.launchers.upstream_drift_launcher._lazy_load_engine_manager",
+        "src.launchers.launcher_orchestrator._lazy_load_engine_manager",
         side_effect=RuntimeError("test"),
     ):
         launcher = UpstreamDriftLauncher()
@@ -478,11 +481,11 @@ def test_close_event_excludes_background_api(mock_dialog_cls, qapp) -> None:
         assert event.isAccepted()
 
 
-@patch("src.launchers.upstream_drift_launcher.QApplication")
-@patch("src.launchers.upstream_drift_launcher.AsyncStartupWorker")
-@patch("src.launchers.upstream_drift_launcher.sys.exit")
-@patch("src.launchers.upstream_drift_launcher._install_global_ui_zoom")
-@patch("src.launchers.upstream_drift_launcher.SplashScreen")
+@patch("src.launchers.upstream_drift_launcher_main.QApplication")
+@patch("src.launchers.upstream_drift_launcher_main.AsyncStartupWorker")
+@patch("src.launchers.upstream_drift_launcher_main.sys.exit")
+@patch("src.launchers.upstream_drift_launcher_main._install_global_ui_zoom")
+@patch("src.launchers.upstream_drift_launcher_main.SplashScreen")
 @patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher")
 def test_upstream_drift_launcher_main(
     _mock_launcher,
@@ -497,8 +500,8 @@ def test_upstream_drift_launcher_main(
     mock_worker_instance = mock_worker.return_value
 
     with (
-        patch("src.launchers.upstream_drift_launcher.QIcon"),
-        patch("src.launchers.upstream_drift_launcher.ASSETS_DIR"),
+        patch("src.launchers.upstream_drift_launcher_main.QIcon"),
+        patch("src.launchers.upstream_drift_launcher_main.ASSETS_DIR"),
     ):
         main()
         mock_app.assert_called()
