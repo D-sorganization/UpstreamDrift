@@ -169,9 +169,7 @@ def compute_marker_rmse(
     diff = pred - ref
     errors = np.sqrt(np.einsum("...i,...i->...", diff, diff))  # [frames x markers]
     # ⚡ Bolt: np.einsum is ~2x faster than np.mean(..., axis=0)
-    per_marker_rmse = np.sqrt(
-        np.einsum("ij,ij->j", errors, errors) / errors.shape[0]
-    )
+    per_marker_rmse = np.sqrt(np.einsum("ij,ij->j", errors, errors) / errors.shape[0])
     # ⚡ Bolt: np.vdot is ~2x faster than np.mean(errors**2) and avoids temporary array allocations
     aggregate_rmse = float(np.sqrt(np.vdot(errors, errors) / errors.size))
 
