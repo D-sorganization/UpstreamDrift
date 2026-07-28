@@ -13,7 +13,10 @@ from pydantic import BaseModel
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
-from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import (
+    EngineType,
+    is_usable_engine_status,
+)
 from src.shared.python.engine_core.workflow_adapter import EngineWorkflowAdapter
 
 from ..auth.middleware import OptionalAuth, is_local_mode
@@ -46,7 +49,6 @@ _NON_LEVEL_METADATA_KEYS: frozenset[str] = frozenset(
         "spatial_jacobian_order",
     }
 )
-
 
 router = APIRouter()
 
@@ -89,8 +91,10 @@ async def get_engines(
 
     for engine_type in EngineType:
         status = engine_manager.get_engine_status(engine_type)
-        is_available = engine_type in available_engines
         is_loaded = current_engine == engine_type
+        is_available = engine_type in available_engines or is_usable_engine_status(
+            status
+        )
 
         engines.append(
             EngineStatusResponse(

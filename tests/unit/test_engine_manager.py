@@ -11,6 +11,7 @@ from src.shared.python.engine_core.engine_manager import (
     EngineStatus,
     EngineType,
 )
+from src.shared.python.engine_core.engine_registry import is_usable_engine_status
 from src.shared.python.core.contracts import PreconditionError
 
 
@@ -161,6 +162,21 @@ class TestEngineManager:
         manager.engine_status.clear()
         status = manager.get_engine_status(EngineType.MUJOCO)
         assert status == EngineStatus.UNAVAILABLE
+
+    def test_loaded_engines_are_available_for_use(self) -> None:
+        """Loaded engines are usable and must remain in available-engine lists."""
+        manager = object.__new__(EngineManager)
+        manager.engine_status = {
+            EngineType.MUJOCO: EngineStatus.LOADED,
+            EngineType.DRAKE: EngineStatus.AVAILABLE,
+            EngineType.PINOCCHIO: EngineStatus.UNAVAILABLE,
+            EngineType.OPENSIM: EngineStatus.ERROR,
+        }
+
+        assert manager.get_available_engines() == [
+            EngineType.MUJOCO,
+            EngineType.DRAKE,
+        ]
 
     def test_engine_manager_get_engine_info(self) -> None:
         """Test getting engine information."""
@@ -333,6 +349,14 @@ class TestEngineStatus:
 
         for status, expected_value in expected_values.items():
             assert status.value == expected_value
+
+    def test_usable_status_contract(self) -> None:
+        """Available and loaded statuses are usable; transient/error states are not."""
+        assert is_usable_engine_status(EngineStatus.AVAILABLE) is True
+        assert is_usable_engine_status(EngineStatus.LOADED) is True
+        assert is_usable_engine_status(EngineStatus.UNAVAILABLE) is False
+        assert is_usable_engine_status(EngineStatus.LOADING) is False
+        assert is_usable_engine_status(EngineStatus.ERROR) is False
 
 
 # ==============================================================================
