@@ -216,8 +216,12 @@ def test_mujoco_physics_engine_compute_jacobian(engine, mock_mj) -> None:
     mock_mj.mj_jacBody.assert_called_once()
 
 
-def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
-    """MuJoCo contact force on geom1 is already the GRF on the modeled body."""
+def test_compute_contact_forces_negates_when_system_is_geom1(engine, mock_mj):
+    """mj_contactForce acts ON geom2's body, so a geom1 system gets the negative.
+
+    Regression test for #7989: this case previously asserted the sign was
+    *preserved*, which is the inverted convention.
+    """
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ncon = 1
@@ -233,15 +237,41 @@ def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
 
     mock_mj.mj_contactForce.side_effect = set_contact_force
 
-    # Simulate world is geom2 (0) and system is geom1 (1)
+    # Simulate world is geom2 (body 0) and the system is geom1 (body 1).
     engine.model.geom_bodyid = np.array([1, 0])
     contact.geom1 = 0
     contact.geom2 = 1
 
     force = engine.compute_contact_forces()
 
-    np.testing.assert_allclose(force, np.array([735.75, 0.0, 0.0]))
+    np.testing.assert_allclose(force, np.array([-735.75, 0.0, 0.0]))
     mock_mj.mj_contactForce.assert_called_once()
+
+
+def test_compute_contact_forces_preserves_sign_when_system_is_geom2(engine, mock_mj):
+    """A floor plane is always geom1, so the system (geom2) receives +f_world."""
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
+    engine.data.ncon = 1
+
+    contact = MagicMock()
+    contact.frame = np.eye(3).reshape(-1)
+    engine.data.contact = [contact]
+
+    def set_contact_force(model, data, index, c_force):
+        del model, data, index
+        c_force[:3] = np.array([735.75, 0.0, 0.0])
+
+    mock_mj.mj_contactForce.side_effect = set_contact_force
+
+    # Floor plane is geom 0 -> world body 0; the system is geom 1 -> body 1.
+    engine.model.geom_bodyid = np.array([0, 1])
+    contact.geom1 = 0
+    contact.geom2 = 1
+
+    force = engine.compute_contact_forces()
+
+    np.testing.assert_allclose(force, np.array([735.75, 0.0, 0.0]))
 
 
 def test_compute_contact_forces_skips_non_geom_contact_ids(engine, mock_mj):
