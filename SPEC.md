@@ -70,86 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Classified the remaining Data Processor shared-code shadow
+  for #8205 with issue-specific owner, reason, and sunset metadata so the Tools
+  child-copy boundary has an explicit contract instead of an unapproved overlap.
 - **2026-07-28** - Hardened the required cross-engine JUnit gates for #8227.
   The JaxSim/Pinocchio, URDF FK, and canonical conformance workflows now reuse
   the canonical required-parity report helper and fail required CI when their
   mission-critical JUnit cases are absent, skipped-only, failed, or errored.
-- **2026-07-28** - Scoped motion-matching optional dependency OSError handling
-  for #8226. The unit motion-matching conftest no longer rewrites
-  `pytest.importorskip` process-wide;
-  `tests.support.optional_deps.importorskip_optional()` provides explicit
-  allowlisted OSError skips for call sites that need DLL-load tolerance, and a
-  repo-hygiene AST regression prevents conftests from globally patching pytest
-  import behavior again.
-- **2026-07-28** - Added a no-op pytest placeholder guard for #8228.
-  `scripts/ci/check_noop_tests.py` now walks configured pytest `testpaths` and
-  fails on collected test functions whose effective body is only `pass`, `...`,
-  or `assert True`; `ci-standard` runs the guard and focused unit tests cover
-  colocated `src/**/tests`, docstring-only placeholders, and real no-exception
-  tests with setup work. The lower-body simulator test on current main already
-  contains real deque/history and damped-least-squares IK assertions.
-- **2026-07-28** - Hardened the optional-stack Pinocchio ecosystem lane for
-  #8225. The workflow now emits a JUnit report and delegates the
-  availability/skip policy to `scripts/ci/check_optional_stack_skip_policy.py`,
-  so a provisioned Pinocchio stack fails on zero collected tests or zero
-  passing ecosystem cases instead of warning and continuing; focused unit
-  coverage pins available, unavailable, all-skipped, and pytest exit-code 5
-  behavior.
-- **2026-07-28** - Aligned repo-local agent governance on the active `main`
-  topic-branch model for #8211. `.gaai` project/core rules now match
-  `CLAUDE.md`, destructive/security/release-impacting actions keep explicit
-  human-review language, and `ci-standard` runs a dedicated governance
-  consistency guard that fails on revived staging-only policy, staging-only PR
-  filters, or agent automation based on `origin/staging`.
-- **2026-07-28** - Hardened optional-dependency mock hygiene for #8219. Unit
-  test configuration no longer installs persistent `pydrake`, `pinocchio`, or
-  `casadi` `MagicMock` modules during collection; it only resets engine
-  availability cache state around tests. The hygiene guard now scans pytest
-  collection hooks, recognizes string-form `patch.dict("sys.modules", ...)`,
-  covers Pinocchio and CasADi module names, and includes regression coverage for
-  collection-time mock pollution.
-- **2026-07-28** - Hardened the Law-of-Demeter baseline ratchet for #8218.
-  Baseline mode now fails on stale allowances as well as new deep attribute
-  chains, preserving prior LOD reductions instead of letting fixed chains be
-  reintroduced under an oversized baseline. The checked-in
-  `scripts/ci/lod_baseline.txt` was regenerated from current source and now has
-  zero stale reductions.
-- **2026-07-28** - Closed the workflow TODO-discipline gap for #8220. The
-  shared TODO checker now scans `src/`, `tests/`, `scripts/`, and GitHub
-  workflow YAML, including workflow comment markers and shell lines that emit
-  placeholder messages. The CI placeholder step now calls that shared checker,
-  and the nightly cross-engine workflow writes a small HTML dashboard artifact
-  from JUnit results instead of echoing an unfinished dashboard placeholder.
-- **2026-07-28** - Restored the DRY duplication gate on clean `origin/main`
-  for #8210. The duplicated security-sensitive working-directory validation in
-  `secure_popen` and `secure_run` now flows through one helper with regression
-  coverage for trusted sibling acceptance and outside-directory rejection, while
-  remaining current-main duplicate fingerprints are grandfathered with owned,
-  issue-linked baseline metadata so the no-growth ratchet continues to block
-  new DRY debt.
-- **2026-07-28** - Repaired the suite-marker ratchet for #8209. The static
-  scanner now reads pytest `testpaths`, includes colocated `src/**/tests`
-  suites, normalizes absolute and repo-relative scan roots, and refreshes the
-  committed baseline so existing unmarked tests are intentional ratchet debt.
-- **2026-07-28** - Hardened the workflow inventory guard for #8207. The
-  executable no-growth contract now validates the documented 83 active-workflow
-  cap, adds a separate 33 PR-triggered workflow budget, and fails if
-  `.github/WORKFLOWS.md` drifts from the script defaults.
-- **2026-07-28** - Restored the `upstream_drift_tools` alias-removal hygiene
-  contract for #8206. The remaining executable test helper now clears only
-  canonical Sidekick/shared modules, and repo-owned contributor docs describe
-  the old alias as removed from UpstreamDrift instead of an active local shim.
-- **2026-07-28** - Aligned pytest Tools resolution modes with the documented
-  editable workflow (#8204). `--tools-mode editable` now selects
-  `TOOLS_REPO_PATH`, `TOOLS_REPO_ROOT`, `_tools_dep`, or `../Tools` before
-  UpstreamDrift child copies, `--tools-mode vendored` remains the pinned
-  `vendor/ud-tools` validation lane, and `--tools-mode local` remains reserved
-  for deliberate child-copy precedence tests.
-- **2026-07-28** - Hardened biomechanics vendored snapshot provenance (#8200).
-  `scripts/update_biomech_vendor.py` now requires full commit SHA refs by
-  default, exposes `--allow-mutable-ref` for deliberate branch/tag snapshots,
-  and records the requested ref, resolved commit SHA, mutable-ref opt-in, URL,
-  URL-override state, and clean working-tree state in `VENDOR_PROVENANCE.txt`.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
