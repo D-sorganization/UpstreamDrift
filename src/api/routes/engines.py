@@ -36,23 +36,6 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
 
-def _sanitize_for_json(obj: Any) -> Any:
-    """Recursively convert numpy arrays and other non-JSON types to native Python."""
-    import numpy as np
-
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    if isinstance(obj, np.integer):
-        return int(obj)
-    if isinstance(obj, np.floating):
-        return float(obj)
-    if isinstance(obj, dict):
-        return {k: _sanitize_for_json(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [_sanitize_for_json(v) for v in obj]
-    return obj
-
-
 # Capability levels that may appear in a CapabilityLevelResponse.
 # See src/shared/python/engine_core/capabilities.py::CapabilityLevel.
 _VALID_CAPABILITY_LEVELS: frozenset[str] = frozenset({"full", "partial", "none"})
@@ -159,85 +142,41 @@ async def probe_engine(
     response_model=EngineLoadResponse,
     response_model_exclude_none=True,
 )
+@precondition(
+    lambda engine_name, model_path=None, engine_manager=None: (
+        engine_name is not None and len(engine_name.strip()) > 0
+    ),
+    "Engine type must be a non-empty string",
+)
 @handle_api_errors
-async def load_engine_lazy(
+async def load_engine(
     engine_name: str,
     model_path: str | None = None,
     engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> dict[str, Any]:
-    """Load an engine (for lazy loading UI)."""
+    """Load a physics engine, optionally loading a validated model afterward."""
     try:
-        if model_path:
-            validate_model_path(model_path)
         workflow = EngineWorkflowAdapter(engine_manager)
         result = workflow.load(engine_name)
         if not result.ok:
             raise HTTPException(
                 status_code=result.status_code, detail=result.payload["detail"]
             )
+
+        # Invalidate control-metadata caches so subsequent requests reflect the new engine.
+        clear_physics_caches()
+
+        if model_path:
+            validated_path = validate_model_path(model_path)
+            engine = engine_manager.get_active_physics_engine()
+            if engine and hasattr(engine, "load_from_path"):
+                engine.load_from_path(validated_path)
+
         return result.payload
     except HTTPException:
         raise
-    except (RuntimeError, TypeError, AttributeError) as e:
+    except (ImportError, RuntimeError, TypeError, AttributeError) as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@router.post("/engines/{engine_type}/load")
-@precondition(
-    lambda engine_type, model_path=None, engine_manager=None, _user=None: (
-        engine_type is not None and len(engine_type.strip()) > 0
-    ),
-    "Engine type must be a non-empty string",
-)
-async def load_engine(
-    engine_type: str,
-    model_path: str | None = None,
-    engine_manager: EngineManager = Depends(get_engine_manager),
-    _user: Any = Depends(OptionalAuth()),
-) -> dict[str, Any]:
-    """Load a specific physics engine with optional model."""
-    workflow = EngineWorkflowAdapter(engine_manager)
-    engine_enum = workflow.parse_engine_identifier(engine_type)
-    if engine_enum is None:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        )
-
-    try:
-        # Use switch_engine which is the public API for loading engines
-        success = engine_manager.switch_engine(engine_enum)
-        if not success:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to load engine: {engine_type}"
-            )
-
-        # Invalidate control-metadata caches so subsequent requests reflect the new engine
-        clear_physics_caches()
-
-        engine = engine_manager.get_active_physics_engine()
-
-        if model_path and engine:
-            validated_path = validate_model_path(model_path)
-            if hasattr(engine, "load_from_path"):
-                engine.load_from_path(validated_path)
-
-        state = None
-        if engine and hasattr(engine, "get_state"):
-            raw_state = engine.get_state()
-            # Convert numpy arrays to lists for JSON serialization
-            state = _sanitize_for_json(raw_state) if raw_state else None
-
-        return {
-            "status": "loaded",
-            "engine": engine_type,
-            "model": model_path,
-            "state": state,
-        }
-
-    except ImportError as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Error loading engine: {str(exc)}"
-        ) from exc
 
 
 @router.post("/engines/{engine_type}/unload")
