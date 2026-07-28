@@ -8,7 +8,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch, apiFetchBlob, apiFetchRaw, DEFAULT_TIMEOUT_MS } from './fetch';
+import {
+  apiFetch,
+  apiFetchBlob,
+  apiFetchForm,
+  apiFetchRaw,
+  DEFAULT_TIMEOUT_MS,
+} from './fetch';
 
 function jsonResponse(body: unknown): Response {
   return {
@@ -45,6 +51,17 @@ describe('apiFetch timeout (#8080)', () => {
 
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('passes an AbortSignal for multipart upload callers', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ uploaded: true }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiFetchForm('/api/upload', new FormData());
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect(init.headers).toBeUndefined();
   });
 
   it('exposes a sane default timeout', () => {
