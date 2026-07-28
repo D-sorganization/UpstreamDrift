@@ -147,6 +147,14 @@ jobs:
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/urdf-cross-engine-equivalence-junit.xml
 
+      - name: Assert URDF equivalence cases actually ran
+        if: always()
+        shell: bash
+        run: |
+          python3 scripts/ci/assert_required_parity_ran.py \
+            --junit test-results/urdf-cross-engine-equivalence-junit.xml \
+            --require-name test_cross_engine_fk_
+
       - name: Upload equivalence report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

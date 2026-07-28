@@ -207,11 +207,12 @@ jobs:
         # Even with deps present, a JUnit report of only skipped JaxSim parity
         # cases must not green this required gate. This post-pytest assertion
         # fails unless at least one JaxSim/Pinocchio parity case passed.
+        if: always()
         shell: bash
         run: |
-          python3 scripts/ci/require_junit_test_passed.py \
-            test-results/cross-engine-equivalence-junit.xml \
-            test_jaxsim_pinocchio_free_body_dynamics_terms_match
+          python3 scripts/ci/assert_required_parity_ran.py \
+            --junit test-results/cross-engine-equivalence-junit.xml \
+            --require-name test_jaxsim_pinocchio_free_body_dynamics_terms_match
 
       - name: Upload equivalence report
         if: always()
@@ -320,6 +321,14 @@ jobs:
             -m "${{ matrix.marker }}" \
             -v -rs --tb=short -p no:xvfb \
             --junitxml="test-results/canonical-conformance-${{ matrix.engine }}-junit.xml"
+
+      - name: Assert canonical conformance cases actually ran
+        if: always()
+        shell: bash
+        run: |
+          python3 scripts/ci/assert_required_parity_ran.py \
+            --junit "test-results/canonical-conformance-${{ matrix.engine }}-junit.xml" \
+            --require-name test_five_conformance_checks_pass_against_stub_adapter
 
       - name: Upload conformance report
         if: always()
