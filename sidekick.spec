@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 # PyInstaller spec for the Sidekick standalone binary.
-# Issue: #5985 (T7) — one-file binary for macOS / Linux / Windows.
+# Issue: #5985 (T7) — one-file binary built separately on each native OS.
 #
 # Build with:
 #   python scripts/packaging/build_sidekick_binary.py
@@ -13,18 +13,34 @@
 
 MAX_MB = 250
 
-import os
 import sys
 from pathlib import Path
 
 root = Path(SPECPATH)  # noqa: F821  (defined by PyInstaller)
+canonical_tools_python = (
+    root / "vendor" / "ud-tools" / "src" / "shared" / "python"
+)
+canonical_tools_src = root / "vendor" / "ud-tools" / "src"
+local_python = root / "src" / "shared" / "python"
+canonical_sidekick_entrypoint = (
+    canonical_tools_python / "sidekick" / "__main__.py"
+)
+binary_entrypoint = root / "scripts" / "packaging" / "sidekick_binary_entrypoint.py"
+sys.path.insert(0, str(canonical_tools_python))
+
+if not canonical_sidekick_entrypoint.is_file():
+    raise FileNotFoundError(
+        "Canonical Sidekick entrypoint is unavailable; initialize the pinned "
+        "vendor/ud-tools submodule recursively before building"
+    )
+if not binary_entrypoint.is_file():
+    raise FileNotFoundError(f"Sidekick binary adapter is unavailable: {binary_entrypoint}")
 
 # ---------------------------------------------------------------------------
 # Platform-specific icon
 # ---------------------------------------------------------------------------
 _icons = {
-    "darwin": str(root / "src" / "shared" / "assets" / "sidekick.icns"),
-    "win32": str(root / "src" / "shared" / "assets" / "sidekick.ico"),
+    "win32": str(root / "vendor" / "ud-tools" / "assets" / "tools_icon_hq.ico"),
 }
 icon = _icons.get(sys.platform)
 
@@ -32,9 +48,11 @@ icon = _icons.get(sys.platform)
 # Analysis
 # ---------------------------------------------------------------------------
 a = Analysis(  # noqa: F821
-    [str(root / "src" / "shared" / "python" / "sidekick" / "__main__.py")],
+    [str(binary_entrypoint)],
     pathex=[
-        str(root / "src" / "shared" / "python"),
+        str(canonical_tools_python),
+        str(canonical_tools_src),
+        str(local_python),
         str(root / "src"),
         str(root),
     ],
@@ -49,12 +67,25 @@ a = Analysis(  # noqa: F821
         "sidekick.standalone.runner",
         "sidekick.standalone.preferences",
         "sidekick.standalone.onboarding",
+        "sidekick.standalone.session_store",
+        "sidekick.standalone.window",
+        "sidekick.persistence",
+        "sidekick.persistence.schema",
+        "sidekick.persistence.state_profile",
         "sidekick.calculators",
         "sidekick.process_calculators",
         "sidekick.utils",
         "sidekick.theme",
     ],
     excludes=[
+        # PyQt6 is canonical; PyInstaller cannot freeze multiple Qt bindings.
+        "PyQt5",
+        "PySide2",
+        "PySide6",
+        # Not imported by Sidekick; avoid collecting transitive tooling hooks.
+        "docutils",
+        "sklearn",
+        "sphinx",
         # Heavy physics engines — never ship in the Sidekick binary
         "pybullet",
         "mujoco",

@@ -406,17 +406,18 @@ def test_no_duplicated_wgs_constants() -> None:
     import re
     from pathlib import Path as _Path
 
-    runner_src = _Path("src/shared/python/sidekick/standalone/runner.py").read_text(
-        encoding="utf-8"
-    )
+    tools_root = _Path(os.environ.get("TOOLS_REPO_PATH", "vendor/ud-tools")).resolve()
+    runner_src = (
+        tools_root / "src/shared/python/sidekick/standalone/runner.py"
+    ).read_text(encoding="utf-8")
     # No hard-coded WGS enthalpy/entropy literals in the headless runner.
     assert not re.search(r"-41\d{3}\.0", runner_src), (
         "runner.py re-declares a WGS ΔH literal; import the canonical constant"
     )
     assert "WGS_DELTA_H" not in runner_src or "import" in runner_src
     # Canonical home still declares them.
-    const_src = _Path(
-        "src/shared/python/sidekick/process_calculators/constants.py"
+    const_src = (
+        tools_root / "src/shared/python/sidekick/process_calculators/constants.py"
     ).read_text(encoding="utf-8")
     assert "WGS_DELTA_H" in const_src
     assert "WGS_DELTA_S" in const_src

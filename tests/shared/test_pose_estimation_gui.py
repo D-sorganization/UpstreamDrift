@@ -11,6 +11,8 @@ These tests DO NOT require mediapipe or pyopenpose to be installed.
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import patch
 
 # =============================================================================
@@ -163,6 +165,59 @@ class TestMediaPipeGUIProperties:
         source = inspect.getsource(mediapipe_gui)
         assert "Mocking the process for now" not in source
         assert "update_progress" not in source  # Old mock method removed
+
+
+class TestMediaPipeVideoInputValidation:
+    """MediaPipe analysis must reject an absent video before starting work."""
+
+    @pytest.mark.parametrize("video_path", ["", "   "])
+    def test_validation_rejects_empty_video_path(self, video_path: str) -> None:
+        """Empty paths must explain how the user can proceed."""
+        from src.shared.python.pose_estimation.mediapipe_gui import (
+            _validate_video_path,
+        )
+
+        with pytest.raises(ValueError, match="Select a video file"):
+            _validate_video_path(video_path)
+
+    def test_worker_rejects_empty_video_path(self) -> None:
+        """A worker cannot be created with an input that would never progress."""
+        from src.shared.python.pose_estimation.mediapipe_gui import _AnalysisWorker
+
+        with pytest.raises(ValueError, match="Select a video file"):
+            _AnalysisWorker("", {})
+
+    def test_gui_reports_empty_video_path_without_starting_worker(
+        self, qtbot, monkeypatch
+    ) -> None:
+        """Run must provide visible feedback rather than appearing stuck at 0%."""
+        from src.shared.python.pose_estimation.mediapipe_gui import (
+            MediaPipeGUI,
+            QMessageBox,
+        )
+
+        gui = MediaPipeGUI()
+        qtbot.addWidget(gui)
+        gui._video_path = "   "
+        gui.btn_run.setEnabled(True)
+        warnings: list[tuple[str, str]] = []
+        monkeypatch.setattr(
+            QMessageBox,
+            "warning",
+            lambda _parent, title, message: warnings.append((title, message)),
+        )
+
+        gui.run_analysis()
+
+        assert gui._worker is None
+        assert gui.progress.value() == 0
+        assert warnings == [
+            ("Video required", "Select a video file before running analysis.")
+        ]
+        assert (
+            "ERROR: Select a video file before running analysis."
+            in gui.log_area.toPlainText()
+        )
 
 
 class TestOpenPoseGUIProperties:

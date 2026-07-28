@@ -6,7 +6,7 @@
 """Shared chat WebSocket protocol loop.
 
 The application API route and the portable router factory both speak the same
-chat protocol.  Keep the handshake, core actions, streaming error handling, and
+chat protocol. Keep the handshake, core actions, streaming error handling, and
 outer transport handling here so bug fixes cannot drift between entrypoints.
 """
 
@@ -79,14 +79,7 @@ async def run_chat_websocket_protocol(
     log: logging.Logger = logger,
     disconnect_log: DisconnectLogConfig = _DEFAULT_DISCONNECT_LOG,
 ) -> None:
-    """Run the shared chat WebSocket protocol.
-
-    Route-specific behavior belongs in the injected hooks.  The protocol
-    skeleton itself intentionally lives in one place: authorization, accept,
-    session handshake, send/history/new_session, custom action dispatch,
-    unknown action responses, streaming error sanitization, and outer
-    connection/disconnect handling.
-    """
+    """Run the shared chat WebSocket protocol."""
     if websocket is None:
         raise ValueError("websocket must be provided")
 

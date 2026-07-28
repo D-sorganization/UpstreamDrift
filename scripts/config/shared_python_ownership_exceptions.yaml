@@ -1,0 +1,167 @@
+schema_version: 1
+paths:
+  sidekick/calculators/conversion/_concentration.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/conversion/_errors.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/conversion/_gas_flow.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/conversion/_heating_value.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/conversion/_performance.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/thermo/_constants.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific thermodynamic calculation implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/thermo/_models.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific thermodynamic calculation implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/thermo/_property_backends.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific thermodynamic calculation implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/calculators/thermo/_vapor_pressure.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift-specific thermodynamic calculation implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/_c3d_analog.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/_c3d_io.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/_c3d_marker_set.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/_c3d_markers.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/_c3d_models.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/lab/bio/force_plate_stitching.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift biomechanics laboratory extension with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/_acid_gas_calculator.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/_acid_gas_models.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/_acid_gas_utils.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/_acid_gas_widget.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/_syngas_compression_engine.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/_pressure_drop_helpers.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/_pressure_drop_output.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/_pressure_drop_validation.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/utils/_component_database.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/utils/_heat_capacity.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/utils/_mixture_properties.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/pressure_drop_calculator/utils/_viscosity.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift pressure-drop domain implementation with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression/__init__.py:
+    owner: UpstreamDrift
+    rationale: Package boundary for an UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression/syngas_compression_calculator.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression/syngas_compression_calculator_simple.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression_display.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression_tabs_mixin.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/syngas_compression_worker.py:
+    owner: UpstreamDrift
+    rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
+    tracking_issue: 5623
+    review_date: "2026-12-31"

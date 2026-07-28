@@ -33,6 +33,7 @@ import numpy.typing as npt
 from . import native_backend as _native_backend
 from .constants import GRAVITY_MSS
 from .physics_base import clamp_torque_ndof  # noqa: F401  (re-export, DRY)
+from .validation import require, require_non_negative, require_positive
 
 _log = logging.getLogger(__name__)
 
@@ -67,16 +68,16 @@ class PendulumParams:
     mu2: float = 0.0  # Coulomb friction at wrist (NÂ·m)
 
     def __post_init__(self) -> None:
-        assert self.m1 > 0, f"m1 must be positive, got {self.m1}"
-        assert self.m2 > 0, f"m2 must be positive, got {self.m2}"
-        assert self.L1 > 0, f"L1 must be positive, got {self.L1}"
-        assert self.L2 > 0, f"L2 must be positive, got {self.L2}"
-        assert self.mClub >= 0, f"mClub must be non-negative, got {self.mClub}"
-        assert self.g >= 0, f"g must be non-negative, got {self.g}"
-        assert self.b1 >= 0, f"b1 must be non-negative, got {self.b1}"
-        assert self.b2 >= 0, f"b2 must be non-negative, got {self.b2}"
-        assert self.mu1 >= 0, f"mu1 must be non-negative, got {self.mu1}"
-        assert self.mu2 >= 0, f"mu2 must be non-negative, got {self.mu2}"
+        require_positive("m1", self.m1)
+        require_positive("m2", self.m2)
+        require_positive("L1", self.L1)
+        require_positive("L2", self.L2)
+        require_non_negative("mClub", self.mClub)
+        require_non_negative("g", self.g)
+        require_non_negative("b1", self.b1)
+        require_non_negative("b2", self.b2)
+        require_non_negative("mu1", self.mu1)
+        require_non_negative("mu2", self.mu2)
 
 
 @dataclass(frozen=True)
@@ -102,10 +103,13 @@ class JointLimits:
     damping: float = 20.0  # NÂ·mÂ·s/rad
 
     def __post_init__(self) -> None:
-        assert self.phi_min < self.phi_max
-        assert self.theta1_min < self.theta1_max
-        assert self.stiffness > 0
-        assert self.damping >= 0
+        require(self.phi_min < self.phi_max, "phi_min must be less than phi_max")
+        require(
+            self.theta1_min < self.theta1_max,
+            "theta1_min must be less than theta1_max",
+        )
+        require_positive("stiffness", self.stiffness)
+        require_non_negative("damping", self.damping)
 
 
 @dataclass(frozen=True)
@@ -126,12 +130,8 @@ class TorqueClamp:
         # Accept negative inputs by taking abs (#1138)
         object.__setattr__(self, "max_torque1", abs(self.max_torque1))
         object.__setattr__(self, "max_torque2", abs(self.max_torque2))
-        assert self.max_torque1 > 0, (
-            f"|max_torque1| must be positive, got {self.max_torque1}"
-        )
-        assert self.max_torque2 > 0, (
-            f"|max_torque2| must be positive, got {self.max_torque2}"
-        )
+        require_positive("|max_torque1|", self.max_torque1)
+        require_positive("|max_torque2|", self.max_torque2)
 
 
 # Type aliases

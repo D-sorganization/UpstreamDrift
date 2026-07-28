@@ -126,9 +126,18 @@ class ZMPComputer(ContractChecker):
     ) -> ZMPResult:
         """Compute Zero Moment Point.
 
-        ZMP formula for flat ground:
-        x_zmp = x_com - (z_com - z_ground) * (ddx_com + dL_y / m) / (ddz_com + g)
-        y_zmp = y_com - (z_com - z_ground) * (ddy_com - dL_x / m) / (ddz_com + g)
+        Derived from the definition of the ZMP (the horizontal moment about it
+        vanishes): with ``d = c - p``, ``A = m (a_c + g z_hat)`` and
+        ``dL_c/dt + d x A = 0`` in its horizontal components,
+
+        x_zmp = x_com - z_rel * ddx_com / (ddz_com + g)
+                      - dL_y / (m * (ddz_com + g))
+        y_zmp = y_com - z_rel * ddy_com / (ddz_com + g)
+                      + dL_x / (m * (ddz_com + g))
+
+        with ``z_rel = z_com - z_ground``.  The angular-momentum term carries no
+        factor of ``z_rel``: ``ddx/(ddz+g)`` is dimensionless so multiplying it
+        by ``z_rel`` gives metres, while ``(dL_y/m)/(ddz+g)`` is already metres.
 
         Args:
             com_position: CoM position (3,). Uses engine if None.
@@ -169,15 +178,17 @@ class ZMPComputer(ContractChecker):
                 ground_height=self._ground_height,
             )
 
-        # ZMP calculation
-        # Include angular momentum contribution
+        # ZMP calculation.  The angular-momentum-rate term is NOT scaled by the
+        # CoM height: only the linear-acceleration term is (issue #8017).
         zmp_x = (
             com_position[0]
-            - z_rel * (com_acceleration[0] + angular_momentum_rate[1] / mass) / denom
+            - z_rel * com_acceleration[0] / denom
+            - angular_momentum_rate[1] / (mass * denom)
         )
         zmp_y = (
             com_position[1]
-            - z_rel * (com_acceleration[1] - angular_momentum_rate[0] / mass) / denom
+            - z_rel * com_acceleration[1] / denom
+            + angular_momentum_rate[0] / (mass * denom)
         )
         zmp_z = self._ground_height
 

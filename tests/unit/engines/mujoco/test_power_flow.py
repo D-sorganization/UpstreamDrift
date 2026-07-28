@@ -386,3 +386,178 @@ class TestPowerDissipationParity:
         model = mujoco.MjModel.from_xml_string(xml)
         analyzer = PowerFlowAnalyzer(model)
         assert analyzer._compute_power_dissipation(np.array([5.0])) == 0.0
+
+
+class TestSegmentEnergyGroundTruth:
+    """Numeric regressions for #8002.
+
+    ``mjData.energy`` (``[potential, kinetic]``, filled by ``mj_energyPos`` /
+    ``mj_energyVel``) is the ground truth for a gravity-only model.
+    """
+
+    @staticmethod
+    def _mujoco_energy(
+        model: mujoco.MjModel, qpos: np.ndarray, qvel: np.ndarray
+    ) -> tuple[float, float]:
+        data = mujoco.MjData(model)
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        mujoco.mj_forward(model, data)
+        mujoco.mj_energyPos(model, data)
+        mujoco.mj_energyVel(model, data)
+        return float(data.energy[0]), float(data.energy[1])
+
+    def test_rotational_ke_uses_body_frame_inertia(self) -> None:
+        """Spin about a body's own long axis: world-frame contraction is ~630x off."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81"/>
+          <compiler eulerseq="xyz"/>
+          <worldbody>
+            <body name="rod" pos="0 0 1.5" euler="90 0 0">
+              <joint name="spin" type="hinge" axis="0 0 1"/>
+              <geom type="capsule" fromto="0 0 -0.6 0 0 0.6" size="0.02" mass="2"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.array([0.0])
+        qvel = np.array([10.0])
+        pe_truth, ke_truth = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, np.zeros(model.nv), np.zeros(model.nv)
+        )
+
+        assert float(np.sum(result.segment_kinetic_energy)) == pytest.approx(
+            ke_truth, rel=1e-9, abs=1e-12
+        )
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9, abs=1e-12
+        )
+
+    def test_potential_energy_uses_body_com_not_frame_origin(self) -> None:
+        """Offset geoms make xipos != xpos; the xpos read was ~21% off."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81"/>
+          <worldbody>
+            <body name="upper" pos="0 0 2">
+              <joint name="j1" type="hinge" axis="0 1 0"/>
+              <geom type="box" pos="0.3 0.1 -0.2" size="0.3 0.05 0.05" mass="3"/>
+              <body name="lower" pos="0.6 0 0">
+                <joint name="j2" type="hinge" axis="0 1 0"/>
+                <geom type="box" pos="0.25 -0.15 -0.3" size="0.25 0.05 0.05" mass="2"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j1"/><motor joint="j2"/></actuator>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        pe_truth, ke_truth = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, np.zeros(model.nv), np.zeros(model.nv)
+        )
+
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9
+        )
+        assert float(np.sum(result.segment_kinetic_energy)) == pytest.approx(
+            ke_truth, rel=1e-9
+        )
+
+        # Confirm the body frame origin really is a different point.
+        data = mujoco.MjData(model)
+        data.qpos[:] = qpos
+        mujoco.mj_forward(model, data)
+        assert not np.allclose(data.xpos[1], data.xipos[1])
+
+    def test_potential_energy_honours_non_vertical_gravity(self) -> None:
+        xml = """
+        <mujoco>
+          <option gravity="3.0 0 -9.81"/>
+          <worldbody>
+            <body name="b" pos="1.0 0 2.0">
+              <joint name="j" type="hinge" axis="0 1 0"/>
+              <geom type="sphere" size="0.1" mass="4"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.zeros(model.nv)
+        qvel = np.zeros(model.nv)
+        pe_truth, _ = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(qpos, qvel, qvel, qvel)
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9
+        )
+
+
+class TestEnergyConservationResidual:
+    """#8002: the residual was hardcoded to 0.0, fabricating a clean validation."""
+
+    @staticmethod
+    def _arm_model() -> mujoco.MjModel:
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.81"/>
+          <worldbody>
+            <body name="upper" pos="0 0 2">
+              <joint name="j1" type="hinge" axis="0 1 0"/>
+              <geom type="box" pos="0.3 0.1 -0.2" size="0.3 0.05 0.05" mass="3"/>
+              <body name="lower" pos="0.6 0 0">
+                <joint name="j2" type="hinge" axis="0 1 0"/>
+                <geom type="box" pos="0.25 -0.15 -0.3" size="0.25 0.05 0.05" mass="2"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j1"/><motor joint="j2"/></actuator>
+        </mujoco>
+        """
+        return mujoco.MjModel.from_xml_string(xml)
+
+    def test_residual_is_zero_for_consistent_state(self) -> None:
+        model = self._arm_model()
+        data = mujoco.MjData(model)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = np.array([4.0, -1.5])
+        mujoco.mj_forward(model, data)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, data.qacc.copy(), data.qfrc_actuator.copy()
+        )
+        assert result.energy_conservation_residual < 1e-8
+
+    def test_residual_reports_injected_spurious_power(self) -> None:
+        model = self._arm_model()
+        data = mujoco.MjData(model)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = np.array([4.0, -1.5])
+        mujoco.mj_forward(model, data)
+
+        analyzer = PowerFlowAnalyzer(model)
+        bogus = data.qfrc_actuator.copy() + np.array([50.0, 0.0])
+        result = analyzer.compute_power_flow(qpos, qvel, data.qacc.copy(), bogus)
+
+        # The extra 50 Nm on joint 1 injects |50 * qvel[0]| W the state cannot
+        # account for.
+        assert result.energy_conservation_residual == pytest.approx(
+            abs(50.0 * qvel[0]), rel=1e-9
+        )

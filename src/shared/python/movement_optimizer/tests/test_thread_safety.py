@@ -22,10 +22,9 @@ from typing import ClassVar
 # does not actually require Qt, but importing main_window does.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from conftest import make_test_result
-
 from movement_optimizer.gui.exercise_state import ExerciseRuntimeState
 from movement_optimizer.gui.optimization_mixin import OptimizationMixin
+from movement_optimizer.tests._helpers import make_test_result
 
 
 class _ThreadSafetyHarness:

@@ -33,7 +33,10 @@ from src.launchers.launcher_model_sources import (
 )
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.secure_subprocess import secure_popen
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
 from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
@@ -256,8 +259,18 @@ class SimulationManager:
             launcher if hasattr(launcher, "thread") else None,
         )
         threads[model_id] = thread
-        thread.probe_finished.connect(self._on_dependency_probe_finished)
-        thread.finished.connect(lambda: threads.pop(model_id, None))
+
+        def handle_probe_finished(
+            finished_model_id: str, deps_ok: bool, deps_error: str
+        ) -> None:
+            try:
+                self._on_dependency_probe_finished(
+                    finished_model_id, deps_ok, deps_error
+                )
+            finally:
+                threads.pop(finished_model_id, None)
+
+        thread.probe_finished.connect(handle_probe_finished)
         thread.start()
         return True
 
@@ -402,6 +415,12 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if "library_tool" in model_id:
             if hasattr(self, "_open_library_tab"):
                 self._open_library_tab()
+            return True
+        if model_id == "sidekick":
+            if getattr(self, "sidekick_sidebar", None) is None:
+                self._install_sidekick_sidebar()
+            self._toggle_sidekick(True)
+            self.open_sidekick_tab("chat")
             return True
         return False
 
@@ -571,22 +590,31 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.lbl_status.setText(f"* {model.name} Running")
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
-                # Diagnostic: log why launch failed for debugging silent failures
-                logger.error(
-                    "Launch failed for %s (type=%s, path=%s, handler=%s)",
-                    model.name,
-                    model.type,
-                    getattr(model, "path", "N/A"),
-                    type(handler).__name__,
-                )
-                if hasattr(self, "_append_console_line"):
-                    self._append_console_line(
-                        "Launcher",
-                        f"Failed to launch {model.name} (type={model.type}, path={getattr(model, 'path', 'N/A')}). See logs above.",
+                reason = None
+                status_message = getattr(handler, "status_message", None)
+                if callable(status_message):
+                    reason_text = status_message(model)
+                    if isinstance(reason_text, str) and reason_text.strip():
+                        reason = reason_text.strip()
+
+                if reason is None:
+                    logger.error(
+                        "Launch failed for %s (type=%s, path=%s, handler=%s)",
+                        model.name,
+                        model.type,
+                        getattr(model, "path", "N/A"),
+                        type(handler).__name__,
                     )
-                self.show_toast(
-                    f"Failed to launch {model.name} — check console", "error"
-                )
+                    toast_message = f"Failed to launch {model.name} — check console"
+                    console_message = f"Failed to launch {model.name} (type={model.type}, path={getattr(model, 'path', 'N/A')}). See logs above."
+                else:
+                    logger.error("Launch unavailable for %s: %s", model.name, reason)
+                    toast_message = reason
+                    console_message = reason
+
+                if hasattr(self, "_append_console_line"):
+                    self._append_console_line("Launcher", console_message)
+                self.show_toast(toast_message, "error")
                 self.lbl_status.setText("* Launch Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
@@ -1059,12 +1087,12 @@ except (RuntimeError, TypeError, AttributeError) as e:
             logger.error(f"Failed to launch Shot Tracer: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
 
-    def _launch_matlab_app(self, app: Any) -> None:
-        """Launch a MATLAB-based application with proper desktop GUI."""
+    def _launch_matlab_app(self, app: Any) -> bool:
+        """Launch a MATLAB application and report whether the launch was initiated."""
         app_path = getattr(app, "path", None)
         if not app_path:
             self.show_toast("Invalid MATLAB configuration.", "error")
-            return
+            return False
 
         self.show_toast(f"Launching MATLAB: {app.name}...", "info")
 
@@ -1100,9 +1128,22 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
             self.running_processes[app.id] = process
             self.show_toast(f"{app.name} launch initiated.", "success")
+            return True
 
         except FileNotFoundError:
             self.show_toast("MATLAB executable not found in PATH.", "error")
+            return False
+        except SecureSubprocessError as exc:
+            if isinstance(exc.__cause__, FileNotFoundError):
+                self.show_toast("MATLAB executable not found in PATH.", "error")
+                return False
+            logger.exception("Failed to launch MATLAB app")
+            self.show_toast(
+                "MATLAB could not be started. Verify its installation and PATH.",
+                "error",
+            )
+            return False
         except (PermissionError, OSError) as e:
             logger.error(f"Failed to launch MATLAB app: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
+            return False

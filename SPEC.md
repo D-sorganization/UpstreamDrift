@@ -38,8 +38,15 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.467                                            |
-| **Last Spec Update**    | 2026-07-15                                         |
+
+<<<<<<< HEAD
+| **Spec Version** | 1.0.479 |
+| **Last Spec Update** | 2026-07-27 |
+=======
+| **Spec Version** | 1.0.468 |
+| **Last Spec Update** | 2026-07-25 |
+
+> > > > > > > origin/codex/pyqt6-launcher-functional-qa
 
 ## 2. Purpose & Mission
 
@@ -70,6 +77,55 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
+  validation (#8121). The parent `models.yaml` check now validates only its 46
+  directly declared tiles, while the separate runtime registry check retains
+  all 75 parent and provider models. Computer control confirmed the repaired
+  Diagnostics screen reports `Status: HEALTHY` with zero failed checks instead
+  of falsely classifying 29 provider-only models as missing.
+- **2026-07-27** - Extended the classic PyQt6 Sidekick acceptance contract for
+  the selected Tools authority. The background API child now inherits the same
+  validated Tools checkout as the sidebar and places its package roots before
+  UpstreamDrift's partial shared packages, preventing
+  `chat.websocket_protocol` import failures (#8120). The matrix
+  also records the Tools #3950 warnings-as-errors Units regression and its
+  verified `100 °C` to `212 °F` retest. A complete API-tree fault injection
+  confirmed dynamic-port recovery, Chat reconnection, and close-time descendant
+  cleanup without disturbing an unrelated port-8000 process.
+- **2026-07-25** - Hardened classic PyQt6 Sidekick startup for #8102. The
+  launcher selects an isolated loopback port when the historical default is
+  occupied, exports one ephemeral launcher/API capability, verifies the child
+  instance through `/readyz`, installs local Sidekick tools independently of
+  Chat readiness, performs bounded child restarts, and loads the pinned Tools
+  direct-package source before legacy aliases, copied sources, or mutable
+  sibling sources. An explicit `TOOLS_REPO_PATH` is authoritative and fails
+  closed when invalid rather than silently mixing with vendored or sibling
+  sources. Each automatic restart revalidates a dynamically selected API port
+  and selects a new free loopback port when necessary while preserving the
+  launcher's capability and instance identity; explicitly configured ports
+  remain unchanged. Host close also delegates to the canonical sidebar
+  shutdown contract so Terminal PTY, shell, bridge, and API child processes
+  cannot survive the launcher (#3938). A PR-diff hygiene contract now rejects
+  any non-deletion edit to a Python path owned by the exact pinned Tools
+  gitlink, regardless of warning header or shadow allow-list, while retaining
+  the original base/current warning-header checks. The protected unit gate
+  fetches the pull request base and sparse-checks out only the pinned Tools
+  `src/shared/python` inventory before running the fail-closed comparison.
+  Sidekick/chat paths without a same-relative Tools source require file-level
+  owner state, rationale, tracking issue, and unexpired review date in
+  `scripts/config/shared_python_ownership_exceptions.yaml`.
+  Release-wheel assembly verifies the exact Tools gitlink and installs the
+  parent-owned shared package graph plus its Chat/Sidekick compatibility
+  aliases, utilities, and DbC contracts. The canonical alias finder coalesces
+  direct, `shared.python`, and legacy `src.shared.python` spellings to prevent
+  installed applications from executing stale nested child copies; only
+  non-conflicting Upstream-owned extensions supplement the parent graph. Tagged
+  releases initialize the exact Tools submodule and build a wheel directly
+  from that verified checkout rather than rebuilding an unverifiable wheel
+  from an unpacked source archive. Clean installed-wheel probes verify module
+  identity, dependency closure, and byte-level source fidelity.
+  The acceptance and source-ownership audit matrix is in
+  `docs/testing/sidekick-pyqt6-startup-matrix.md`.
 - **2026-06-22** - Optimize Mechanical Work computations in `evaluate_matching_workflow.py`. `np.sum(..., axis=1)` calls were replaced with equivalent but more efficient `np.einsum('ij->i', ...)` calls, yielding significant performance gains during bulk evaluation.
 - **2026-07-15** - Hardened the simulation WebSocket and Data Explorer API
   routes for deferred #7740 findings: WebSocket start validation now rejects
@@ -1869,6 +1925,18 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
+| 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
+| 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
+| 2026-07-27 | 1.0.476 | Materialized the exact recursive `vendor/ud-tools` gitlink in the JaxSim upgrade guard before editable package installation. The workflow now satisfies the fail-closed parent-source packaging contract instead of attempting to build from a checkout missing canonical `shared`, Sidekick, Chat, utility, and contract package roots; focused CI structure coverage pins recursive checkout and disabled credential persistence. |
+| 2026-07-27 | 1.0.475 | Completed the first post-repin artifact and computer-control sweep for standalone Sidekick. Clean-wheel alias smoke and the native Windows WGS calculator binary pass. Classic PyQt6 startup now activates manifest-approved Upstream extensions before adapter bootstrap, imports the canonical Tools sidebar API without lazy alias warnings, routes the Sidekick tile to the existing Chat sidebar, and tolerates fleet themes without a `success_hover` token. Computer control verified Calculator `2 + 2 = 4` and hide/reopen-through-tile behavior against Tools #3944 candidate `f075ff713`; the exact protected Tools merge, final gitlink repin, and no-substitution rerun remain required. |
+| 2026-07-27 | 1.0.474 | Repinned `vendor/ud-tools` to protected Tools merge `4744422d3` from #3937 after reconciling the scheduled `main` sync with the local parent-ownership migration. The vendored source/startup/security gate passes against that exact merged source; the installed-wheel and computer-controlled PyQt6 acceptance gates remain required before #8102 is complete. |
+| 2026-07-26 | 1.0.473 | Published the canonical Tools Sidekick runtime candidate and removed 14 parent-backed or obsolete Upstream child copies, including the stale default-tab composition. Source startup now exposes only 33 manifest-classified Upstream production extensions through the exact-module overlay; the misplaced force-plate test moved out of the shipped package. Embedded and standalone profile stores now prove direct public-API interoperability against one versioned artifact, and the parent wheel installs both `python -m sidekick` and the `sidekick` console command. Final protected merge, gitlink repin, artifact gates, and computer-controlled PyQt6 acceptance remain required. |
+| 2026-07-26 | 1.0.472 | Extended the #8102 parent-source contract through the installed-wheel boundary. Wheel assembly now verifies and packages the exact pinned Tools shared graph, release CI initializes that exact gitlink and builds the wheel directly instead of round-tripping through an unverifiable sdist, and clean-install smoke coverage requires direct, `shared.python`, and legacy `src.shared.python` Chat/Sidekick imports to share one parent-owned identity. The exact candidate also executes `python -m sidekick --help`; final acceptance remains gated on the protected Tools merge and final gitlink repin. |
+| 2026-07-25 | 1.0.471 | Reconciled the pinned Tools direct-package expansion with UpstreamDrift's shadow-module ownership gate. Twelve pre-existing overlaps newly visible at the #8102 Tools revision, including `sidekick`, are explicitly classified under migration issue #5623 with an enforced 2026-12-31 sunset; new unclassified shadows still fail CI, and runtime Sidekick imports continue to prefer the pinned parent source. |
+| 2026-07-25 | 1.0.470 | Extended the #8102 classic PyQt6 Sidekick recovery contract beyond initial startup. A bounded liveness monitor now continues after the first successful readiness response, resets its restart budget after each healthy period, recreates a dead API child after a post-connect outage, and becomes inert when launcher shutdown begins. SK-START-016 records the fault-injection procedure and regression evidence. |
+| 2026-07-25 | 1.0.469 | Hardened classic PyQt6 Sidekick startup for #8102: isolated dynamic loopback API ports, an ephemeral launcher capability and public instance readiness identity, bounded child restarts, local-tab availability independent of Chat, parent-source-first direct package imports, and a pinned Tools revision. Host close delegates to the canonical sidebar aggregate shutdown so Terminal PTY, shell, bridge, and API processes exit cleanly (#3938). A PR-diff hygiene gate rejects direct edits to existing warning-headered Tools child copies and newly added child copies while allowing deletion after migration. Computer-control results and source-ownership audit are recorded in `docs/testing/sidekick-pyqt6-startup-matrix.md`. |
+| 2026-07-25 | 1.0.468 | Completed the PyQt6 launcher functional-QA repair wave. In particular, the native C3D viewer now normalizes an absent optional `POINT:UNITS` parameter to millimetres before metadata parsing, so valid captures from emitters that omit the parameter load with the documented motion-pipeline default. |
 | 2026-07-15 | 1.0.467 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |
 | 2026-07-14 | 1.0.467 | Added Content-Security-Policy (CSP) header to FastAPI security middleware for defense-in-depth against XSS. |
 | 2026-06-21 | 1.0.466 | Hardened the simulation WebSocket and Data Explorer API routes for deferred #7740 findings. WebSocket start validation now rejects non-positive speed factors and reuses `SimulationRequest` duration/timestep bounds, simulation stats access is centralized behind one helper, Data Explorer dataset lookup rejects glob metacharacters, recursive dataset listing is paginated and bounded, and the dead cache helper was removed. Focused unit-marked tests cover the new WebSocket success/error branches, filter operators, ambiguous dataset names, glob rejection, and bounded listing behavior. |

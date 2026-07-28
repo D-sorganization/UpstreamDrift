@@ -13,6 +13,7 @@ from src.launchers.launcher_layout_manager import (  # noqa: E402
     compute_centered_geometry,
 )
 from src.launchers.model_registry import ModelSpec  # noqa: E402
+from src.shared.python.config.model_registry import ModelRegistry  # noqa: E402
 
 
 @pytest.fixture
@@ -142,6 +143,29 @@ def test_load_layout_success(layout_manager) -> None:
         assert result == layout_data
         # model_order should only contain valid / available model ids
         assert layout_manager.model_order == ["model_1", "model_2"]
+
+
+def test_saved_layout_excludes_hidden_registry_alias(tmp_path: Path) -> None:
+    """A stale saved layout must not restore a hidden legacy launcher card."""
+    registry = ModelRegistry()
+    available_models = {model.id: model for model in registry.get_all_models()}
+    layout_file = tmp_path / "layout.json"
+    layout_file.write_text(
+        json.dumps({"model_order": ["putting_green_gui", "putting_green"]}),
+        encoding="utf-8",
+    )
+    manager = LayoutManager(
+        config_file=layout_file,
+        available_models=available_models,
+        get_model_func=available_models.get,
+        create_card_func=MagicMock(),
+        create_header_func=MagicMock(),
+    )
+
+    manager.load_layout()
+
+    assert "putting_green" in manager.model_order
+    assert "putting_green_gui" not in manager.model_order
 
 
 def test_load_layout_json_error(layout_manager) -> None:

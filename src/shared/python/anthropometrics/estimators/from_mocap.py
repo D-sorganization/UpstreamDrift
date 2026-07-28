@@ -25,8 +25,10 @@ import numpy as np
 # DRY: reuse the per-frame distance computation from the motion pipeline.
 # Importing the contracts here lets us construct the per-frame MarkerFrame
 # the helper expects without duplicating the Euclidean-distance kernel.
-from motion_pipeline.contracts import Marker, MarkerFrame
-from motion_pipeline.scaling.anthropometric import _compute_segment_length
+from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame
+from src.shared.python.motion_pipeline.scaling.anthropometric import (
+    _compute_segment_length,
+)
 
 __all__ = [
     "SegmentDef",

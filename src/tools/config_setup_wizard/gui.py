@@ -50,7 +50,7 @@ class ConfigSetupWizardWidget(QWidget):  # pragma: no cover - GUI smoke follows 
         validate_button.clicked.connect(self._validate_current)
         next_button.clicked.connect(self._advance)
         back_button.clicked.connect(self._retreat)
-        self._render(self._model.snapshot())
+        self._render(self._model.validate({}))
 
     def cleanup(self) -> None:
         """Release the wrapped Qt widget."""

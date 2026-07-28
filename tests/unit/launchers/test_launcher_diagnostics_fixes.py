@@ -8,8 +8,10 @@ RED → GREEN cycle:
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import pytest
 import yaml
 
 
@@ -100,6 +102,62 @@ class TestCheckModelsYamlReturnsPass:
         partial_models = [{"id": LauncherDiagnostics.EXPECTED_TILE_IDS[0]}]
         result = diag._check_models_yaml_completeness(partial_models, {})
         assert result.status == "fail"
+
+
+class TestProviderExpandedDiagnostics:
+    """#8121 — parent-manifest and runtime diagnostics have distinct scopes."""
+
+    def test_models_yaml_check_ignores_installed_provider_models(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider-expanded IDs must not be required in the parent YAML."""
+        from src.launchers.launcher_diagnostics import LauncherDiagnostics
+
+        monkeypatch.setattr(
+            LauncherDiagnostics,
+            "PARENT_MANIFEST_TILE_IDS",
+            ["parent-model"],
+        )
+        monkeypatch.setattr(
+            LauncherDiagnostics,
+            "EXPECTED_TILE_IDS",
+            ["parent-model", "provider-model"],
+        )
+        result = LauncherDiagnostics()._check_models_yaml_completeness(
+            [{"id": "parent-model"}],
+            {},
+        )
+
+        assert result.status == "pass", result.message
+        assert result.details["missing_expected_ids"] == []
+
+    def test_model_registry_check_keeps_installed_provider_models(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Runtime validation must retain provider-expanded registry coverage."""
+        from src.launchers.launcher_diagnostics import LauncherDiagnostics
+
+        monkeypatch.setattr(
+            LauncherDiagnostics,
+            "EXPECTED_TILE_IDS",
+            ["parent-model", "provider-model"],
+        )
+        registry = MagicMock()
+        registry.get_all_models.return_value = [
+            SimpleNamespace(id="parent-model", name="Parent"),
+            SimpleNamespace(id="provider-model", name="Provider"),
+        ]
+
+        with patch(
+            "src.shared.python.config.model_registry.ModelRegistry",
+            return_value=registry,
+        ):
+            result = LauncherDiagnostics().check_model_registry()
+
+        assert result.status == "pass", result.message
+        assert "provider-model" in result.details["loaded_model_ids"]
 
 
 class TestDiagnosticEmitsAppStateEvents:
