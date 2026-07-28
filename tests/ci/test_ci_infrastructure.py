@@ -360,8 +360,59 @@ class TestCIEnvironmentCompatibility:
         assert "pin>=2.6.0,<5.0.0" in workflow
         assert "scripts/ci/check_pinocchio_dynamics_api.py" in workflow
         # Post-pytest assertion that a required parity case passed (not skipped).
-        assert "scripts/ci/require_junit_test_passed.py" in workflow
-        assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
+        post_gate = workflow[
+            workflow.index("Assert JaxSim parity cases actually ran") : workflow.index(
+                "Upload equivalence report"
+            )
+        ]
+        assert "scripts/ci/assert_required_parity_ran.py" in post_gate
+        assert "--junit test-results/cross-engine-equivalence-junit.xml" in post_gate
+        assert (
+            "--require-name test_jaxsim_pinocchio_free_body_dynamics_terms_match"
+            in post_gate
+        )
+
+    def test_urdf_cross_engine_equivalence_requires_passing_junit_case(
+        self,
+    ) -> None:
+        """The URDF equivalence workflow must not pass on skipped JUnit only."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "urdf-cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "test-results/urdf-cross-engine-equivalence-junit.xml" in workflow
+        post_gate = workflow[
+            workflow.index(
+                "Assert URDF equivalence cases actually ran"
+            ) : workflow.index("Upload equivalence report")
+        ]
+        assert "scripts/ci/assert_required_parity_ran.py" in post_gate
+        assert (
+            "--junit test-results/urdf-cross-engine-equivalence-junit.xml" in post_gate
+        )
+        assert "--require-name test_cross_engine_fk_" in post_gate
+
+    def test_canonical_conformance_gate_requires_passing_junit_case(self) -> None:
+        """The canonical conformance matrix must prove a real conformance pass."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "canonical-conformance-${{ matrix.engine }}-junit.xml" in workflow
+        post_gate = workflow[
+            workflow.index(
+                "Assert canonical conformance cases actually ran"
+            ) : workflow.index("Upload conformance report")
+        ]
+        assert "scripts/ci/assert_required_parity_ran.py" in post_gate
+        assert (
+            '--junit "test-results/canonical-conformance-${{ matrix.engine }}-junit.xml"'
+            in post_gate
+        )
+        assert (
+            "--require-name test_five_conformance_checks_pass_against_stub_adapter"
+            in post_gate
+        )
 
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
         self,

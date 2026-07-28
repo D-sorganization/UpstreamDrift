@@ -38,8 +38,22 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.481                                            |
-| **Last Spec Update**    | 2026-07-28                                         |
+
+<<<<<<< HEAD
+| **Spec Version** | 1.0.481 |
+| **Last Spec Update** | 2026-07-28 |
+=======
+
+<<<<<<< HEAD
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
+=======
+
+| **Spec Version** | 1.0.468 |
+| **Last Spec Update** | 2026-07-25 |
+
+> > > > > > > origin/codex/pyqt6-launcher-functional-qa
+> > > > > > > origin/fix/8227-equivalence-junit-gates
 
 ## 2. Purpose & Mission
 
@@ -70,6 +84,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened the required cross-engine JUnit gates for #8227.
+  The JaxSim/Pinocchio, URDF FK, and canonical conformance workflows now reuse
+  the canonical required-parity report helper and fail required CI when their
+  mission-critical JUnit cases are absent, skipped-only, failed, or errored.
 - **2026-07-28** - Scoped motion-matching optional dependency OSError handling
   for #8226. The unit motion-matching conftest no longer rewrites
   `pytest.importorskip` process-wide;
