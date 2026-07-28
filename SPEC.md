@@ -38,22 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-
-<<<<<<< HEAD
-| **Spec Version** | 1.0.481 |
-| **Last Spec Update** | 2026-07-28 |
-=======
-
-<<<<<<< HEAD
-| **Spec Version** | 1.0.480 |
-| **Last Spec Update** | 2026-07-28 |
-=======
-
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
-> > > > > > > origin/fix/8227-equivalence-junit-gates
+| **Spec Version**        | 1.0.481                                            |
+| **Last Spec Update**    | 2026-07-28                                         |
 
 ## 2. Purpose & Mission
 
@@ -2013,6 +1999,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-07-28 | 1.0.481 | Aligned pytest Tools resolution modes with the documented editable workflow (#8204). `--tools-mode editable` now selects `TOOLS_REPO_PATH`, `TOOLS_REPO_ROOT`, `_tools_dep`, or `../Tools` before UpstreamDrift child copies, `--tools-mode vendored` remains the pinned `vendor/ud-tools` validation lane, and `--tools-mode local` remains reserved for deliberate child-copy precedence tests. |
+| 2026-07-28 | 1.0.480 | Hardened the required cross-engine JUnit gates for #8227. The JaxSim/Pinocchio, URDF FK, and canonical conformance workflows now reuse the canonical required-parity report helper and fail required CI when their mission-critical JUnit cases are absent, skipped-only, failed, or errored. |
 | 2026-07-28 | 1.0.480 | Scoped motion-matching optional dependency OSError handling for #8226. The unit motion-matching conftest no longer rewrites `pytest.importorskip` process-wide; `tests.support.optional_deps.importorskip_optional()` provides explicit allowlisted OSError skips for call sites that need DLL-load tolerance, and a repo-hygiene AST regression prevents conftests from globally patching pytest import behavior again. |
 | 2026-07-28 | 1.0.480 | Added a no-op pytest placeholder guard for #8228. `scripts/ci/check_noop_tests.py` now walks configured pytest `testpaths` and fails on collected test functions whose effective body is only `pass`, `...`, or `assert True`; `ci-standard` runs the guard and focused unit tests cover colocated `src/**/tests`, docstring-only placeholders, and real no-exception tests with setup work. The lower-body simulator test on current main already contains real deque/history and damped-least-squares IK assertions. |
 | 2026-07-28 | 1.0.480 | Hardened the optional-stack Pinocchio ecosystem lane for #8225. The workflow now emits a JUnit report and delegates the availability/skip policy to `scripts/ci/check_optional_stack_skip_policy.py`, so a provisioned Pinocchio stack fails on zero collected tests or zero passing ecosystem cases instead of warning and continuing; focused unit coverage pins available, unavailable, all-skipped, and pytest exit-code 5 behavior. |
