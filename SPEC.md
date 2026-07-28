@@ -40,8 +40,8 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
@@ -1925,6 +1925,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-28 | 1.0.480 | Aligned launcher tile catalog API visibility with the manifest contract so `/launcher/tiles` excludes hidden aliases by default and `/launcher/tiles/{tile_id}` returns 404 for hidden entries (#8190). |
 | 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
 | 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
 | 2026-07-27 | 1.0.477 | Made the standalone Sidekick package workflow build its sdist and wheel as separate operations. The sdist remains a published source artifact, while the wheel is now assembled directly from the recursive checkout that owns the pinned Tools gitlink instead of being rebuilt from an sdist that intentionally excludes `vendor/`; focused workflow coverage prevents a combined `python -m build` regression. |
