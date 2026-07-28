@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened optional-dependency mock hygiene for #8219. Unit
+  test configuration no longer installs persistent `pydrake`, `pinocchio`, or
+  `casadi` `MagicMock` modules during collection; it only resets engine
+  availability cache state around tests. The hygiene guard now scans pytest
+  collection hooks, recognizes string-form `patch.dict("sys.modules", ...)`,
+  covers Pinocchio and CasADi module names, and includes regression coverage for
+  collection-time mock pollution.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
