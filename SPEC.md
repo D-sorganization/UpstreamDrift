@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Extended the shared frontend API timeout contract to
+  multipart uploads. `apiFetchForm()` now composes caller cancellation with the
+  default deadline, normalizes timeout/abort errors like JSON requests, and
+  shares HTTP error extraction with `apiFetch()` so upload panels cannot remain
+  indefinitely loading on stalled backend responses (#8248).
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

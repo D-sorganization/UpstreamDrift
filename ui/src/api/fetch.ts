@@ -16,7 +16,7 @@
  *   });
  */
 
-import { getApiBase } from './backend';
+import { getApiBase } from "./backend";
 
 /**
  * Default request timeout (issue #8080).
@@ -56,10 +56,37 @@ function buildSignal(
   }
   // `AbortSignal.any` is available in every browser the app targets; fall back
   // to the timeout alone if a test environment lacks it.
-  if (typeof AbortSignal.any === 'function') {
+  if (typeof AbortSignal.any === "function") {
     return AbortSignal.any([callerSignal, timeoutSignal]);
   }
   return timeoutSignal;
+}
+
+function requestError(err: unknown, path: string, timeoutMs: number): Error {
+  if (err instanceof DOMException && err.name === "TimeoutError") {
+    return new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
+  }
+  if (err instanceof DOMException && err.name === "AbortError") {
+    return new Error(`Request aborted — ${path}`);
+  }
+  return new Error(
+    err instanceof Error ? err.message : `Network error for ${path}`,
+  );
+}
+
+async function responseError(response: Response, path: string): Promise<Error> {
+  let detail: string | undefined;
+  try {
+    const body = (await response.json()) as Record<string, unknown>;
+    if (typeof body.detail === "string") {
+      detail = body.detail;
+    }
+  } catch {
+    // Body was not valid JSON — that's fine, fall through to generic message.
+  }
+  return new Error(
+    detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`,
+  );
 }
 
 /**
@@ -80,7 +107,7 @@ export async function apiFetch<T>(
   const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
 
   const mergedInit: RequestInit = {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     ...requestInit,
     signal: buildSignal(timeoutMs, requestInit.signal),
   };
@@ -89,30 +116,11 @@ export async function apiFetch<T>(
   try {
     response = await fetch(url, mergedInit);
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'TimeoutError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
-    }
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error(`Request aborted — ${path}`);
-    }
-    // Network-level error (no response at all)
-    throw new Error(
-      err instanceof Error ? err.message : `Network error for ${path}`,
-    );
+    throw requestError(err, path, timeoutMs);
   }
 
   if (!response.ok) {
-    // Attempt to extract a FastAPI-style `detail` field
-    let detail: string | undefined;
-    try {
-      const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
-    } catch {
-      // Body was not valid JSON — that's fine, fall through to generic message
-    }
-    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
+    throw await responseError(response, path);
   }
 
   return response.json() as Promise<T>;
@@ -151,31 +159,32 @@ export async function apiFetchParsed<T>(
  *
  * @param path - API path
  * @param formData - FormData payload
+ * @param init - Optional `RequestInit` options plus `timeoutMs` (#8248)
  * @returns Parsed JSON body typed as `T`
  */
-export async function apiFetchForm<T>(path: string, formData: FormData): Promise<T> {
+export async function apiFetchForm<T>(
+  path: string,
+  formData: FormData,
+  init?: ApiFetchInit,
+): Promise<T> {
   const url = `${getApiBase()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
+  const formInit: RequestInit = {
+    ...requestInit,
+    method: "POST",
+    body: formData,
+    signal: buildSignal(timeoutMs, requestInit.signal),
+  };
 
   let response: Response;
   try {
-    response = await fetch(url, { method: 'POST', body: formData });
+    response = await fetch(url, formInit);
   } catch (err) {
-    throw new Error(
-      err instanceof Error ? err.message : `Network error for ${path}`,
-    );
+    throw requestError(err, path, timeoutMs);
   }
 
   if (!response.ok) {
-    let detail: string | undefined;
-    try {
-      const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
-    } catch {
-      // ignore
-    }
-    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
+    throw await responseError(response, path);
   }
 
   return response.json() as Promise<T>;
