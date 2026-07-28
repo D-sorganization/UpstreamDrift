@@ -7,10 +7,21 @@ RED → GREEN cycle:
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
+
+
+def _local_model_ids() -> set[str]:
+    models_yaml = Path("src/config/models.yaml")
+    data = yaml.safe_load(models_yaml.read_text(encoding="utf-8"))
+    assert isinstance(data, dict)
+    models = data["models"]
+    assert isinstance(models, list)
+    return {model["id"] for model in models}
 
 
 class TestExpectedTileIdsMatchesModelsYaml:
@@ -34,12 +45,8 @@ class TestExpectedTileIdsMatchesModelsYaml:
     def test_expected_tile_ids_contains_current_tiles(self) -> None:
         """EXPECTED_TILE_IDS must include currently-shipped tiles."""
         from src.launchers.launcher_diagnostics import LauncherDiagnostics
-        from src.shared.python.config.model_registry import ModelRegistry
-        from src.shared.python.data_io.path_utils import get_repo_root
 
-        yaml_path = get_repo_root() / "src" / "config" / "models.yaml"
-        registry = ModelRegistry(yaml_path)
-        yaml_ids = {m.id for m in registry.get_all_models()}
+        yaml_ids = _local_model_ids()
 
         missing_from_expected = yaml_ids - set(LauncherDiagnostics.EXPECTED_TILE_IDS)
         assert not missing_from_expected, (
@@ -49,12 +56,8 @@ class TestExpectedTileIdsMatchesModelsYaml:
     def test_expected_tile_ids_equals_models_yaml_ids(self) -> None:
         """EXPECTED_TILE_IDS must exactly match the set of IDs in models.yaml."""
         from src.launchers.launcher_diagnostics import LauncherDiagnostics
-        from src.shared.python.config.model_registry import ModelRegistry
-        from src.shared.python.data_io.path_utils import get_repo_root
 
-        yaml_path = get_repo_root() / "src" / "config" / "models.yaml"
-        registry = ModelRegistry(yaml_path)
-        yaml_ids = {m.id for m in registry.get_all_models()}
+        yaml_ids = _local_model_ids()
 
         assert set(LauncherDiagnostics.EXPECTED_TILE_IDS) == yaml_ids, (
             "EXPECTED_TILE_IDS does not match models.yaml. "
