@@ -343,9 +343,11 @@ repository. The widget itself lives in Tools; UpstreamDrift only owns
 the optional install path and the Sidekick design-token passthrough.
 
 - **Setup:** run `scripts/setup_tools_workspace.sh` to wire an editable
-  sibling checkout, or pass `--tools-mode editable` to pytest (see the
+  Tools checkout, then pass `--tools-mode editable` to pytest (see the
   `--tools-mode` fixture in `tests/conftest.py` and the "Cross-Repo
-  Dependencies" section of `CLAUDE.md`).
+  Dependencies" section of `CLAUDE.md`). Use `--tools-mode vendored` to
+  validate the pinned `vendor/ud-tools` submodule, and reserve
+  `--tools-mode local` for deliberate UpstreamDrift child-copy precedence tests.
 - **Detection:** `gui_launcher.is_tools_sidebar_available()` returns
   whether the shared module imports. `LauncherDiagnostics.check_tools_sidebar()`
   exposes the same probe in the diagnostic report.

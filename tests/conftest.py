@@ -477,14 +477,45 @@ def _default_biomech_mode() -> str:
     return "vendored"
 
 
+def _tools_repo_path_override() -> str | None:
+    """Return the legacy explicit Tools path override, if configured."""
+    return os.environ.get("TOOLS_REPO_PATH")
+
+
+def _editable_tools_root_override() -> str | None:
+    """Return an explicitly configured Tools checkout path, if any."""
+    return _tools_repo_path_override() or os.environ.get("TOOLS_REPO_ROOT")
+
+
+def _editable_tools_root(root_dir: Path) -> Path:
+    """Resolve the editable Tools checkout used by ``--tools-mode editable``."""
+    explicit_tools = _editable_tools_root_override()
+    candidates = [
+        Path(explicit_tools) if explicit_tools else None,
+        root_dir / "_tools_dep",
+        root_dir.parent / "Tools",
+    ]
+    for candidate in candidates:
+        if candidate is not None and candidate.is_dir():
+            return candidate.resolve()
+    raise RuntimeError(
+        "--tools-mode editable requires TOOLS_REPO_PATH, TOOLS_REPO_ROOT, "
+        "_tools_dep, or a sibling ../Tools checkout.",
+    )
+
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Add command line options for Tools vendoring resolution."""
     parser.addoption(
         "--tools-mode",
         action="store",
         default="local",
-        choices=["local", "vendored"],
-        help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
+        choices=["local", "vendored", "editable"],
+        help=(
+            "Tools resolution mode: 'local' (src/shared/python first), "
+            "'vendored' (vendor/ud-tools first), or 'editable' "
+            "(TOOLS_REPO_PATH/TOOLS_REPO_ROOT, _tools_dep, or ../Tools first)."
+        ),
     )
     parser.addoption(
         "--biomech-mode",
@@ -512,8 +543,11 @@ def pytest_configure(config: pytest.Config) -> None:
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
     local_path = str((root_dir / "src/shared/python").resolve())
-    explicit_tools = os.environ.get("TOOLS_REPO_PATH")
-    tools_root = Path(explicit_tools or root_dir / "vendor/ud-tools").resolve()
+    explicit_tools = _tools_repo_path_override()
+    if mode == "editable":
+        tools_root = _editable_tools_root(root_dir)
+    else:
+        tools_root = Path(explicit_tools or root_dir / "vendor/ud-tools").resolve()
     parent_paths = [
         str((tools_root / "src/shared/python").resolve()),
         str((tools_root / "src").resolve()),
@@ -543,10 +577,10 @@ def pytest_configure(config: pytest.Config) -> None:
             clean_path.append(p)
     sys.path = clean_path
 
-    parent_mode = explicit_tools is not None or mode == "vendored"
+    parent_mode = explicit_tools is not None or mode in {"vendored", "editable"}
     if parent_mode:
-        for path in reversed(parent_paths):
-            sys.path.insert(0, path)
+        for parent_path in reversed(parent_paths):
+            sys.path.insert(0, parent_path)
         sys.path.append(local_path)
     else:
         # Force local shared codebase to have precedence

@@ -28,6 +28,7 @@ mkdir -p "$(dirname "$tools_link")"
 ln -sfn "$tools_target" "$tools_link"
 
 echo "Linked Tools workspace: $tools_link -> $(readlink "$tools_link")"
+echo "Run pytest with --tools-mode editable to use this Tools checkout."
 
 tools_python_paths=(
   "$tools_repo_root/src/shared/python"
