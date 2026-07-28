@@ -7,7 +7,6 @@ src/api/routes/data_explorer.py	_dataset_storage._local.conn.close	1
 src/api/routes/data_explorer.py	_dataset_storage.db_path.parent.exists	1
 src/api/routes/data_explorer.py	_dataset_storage.db_path.parent.resolve	1
 src/api/routes/data_explorer.py	self._local.conn.execute	1
-src/api/routes/simulation_ws.py	websocket.app.state.engine_manager	1
 src/api/routes/terrain.py	terrain.default_type.name.lower	1
 src/api/task_manager_durable.py	self._local.conn.execute	2
 src/api/task_manager_durable.py	self._local.conn.row_factory	1
@@ -199,7 +198,6 @@ src/shared/python/biomechanics/swing_plane_visualization.py	self.current_scene.f
 src/shared/python/body_part_viz/renderers/pyqtgl_renderer.py	entry.fitted.centroid.shape	1
 src/shared/python/chat/router_factory.py	request.app.state.chat_service.get_session_history	1
 src/shared/python/chat/router_factory.py	request.app.state.chat_service.list_sessions	1
-src/shared/python/chat/router_factory.py	websocket.app.state.chat_service	1
 src/shared/python/chat/skills_manager.py	md_path.parent.name.lower	1
 src/shared/python/config/provider_catalog.py	config_dir.parent.parent.resolve	1
 src/shared/python/control_interface.py	self._state.strategy.value	1
@@ -342,9 +340,6 @@ src/tools/model_explorer/_chain_widget.py	self.tree.nodes.get	1
 src/tools/model_explorer/_chain_widget.py	self.tree.nodes.values	1
 src/tools/model_explorer/_chain_widget.py	self.tree.root.name	1
 src/tools/model_explorer/_ee_widget.py	self.library.end_effectors.get	1
-src/tools/model_explorer/_frankenstein_panels.py	self.model.joints.items	1
-src/tools/model_explorer/_frankenstein_panels.py	self.model.links.items	1
-src/tools/model_explorer/_frankenstein_panels.py	self.model.materials.items	1
 src/tools/model_explorer/_mujoco_viewer_backend.py	mujoco.mjtFrame.mjFRAME_BODY.value	1
 src/tools/model_explorer/_mujoco_viewer_backend.py	mujoco.mjtFrame.mjFRAME_NONE.value	1
 src/tools/model_explorer/_mujoco_viewer_backend.py	mujoco.mjtVisFlag.mjVIS_COM.value	1
@@ -353,15 +348,6 @@ src/tools/model_explorer/_mujoco_viewer_backend.py	mujoco.mjtVisFlag.mjVIS_CONTA
 src/tools/model_explorer/_mujoco_viewer_backend.py	mujoco.mjtVisFlag.mjVIS_JOINT.value	1
 src/tools/model_explorer/_mujoco_viewer_backend.py	self._model.vis.global_.offheight	1
 src/tools/model_explorer/_mujoco_viewer_backend.py	self._model.vis.global_.offwidth	1
-src/tools/model_explorer/frankenstein_editor/editor.py	self.left_panel.file_label.setText	3
-src/tools/model_explorer/frankenstein_editor/editor.py	self.left_panel.save_btn.setEnabled	2
-src/tools/model_explorer/frankenstein_editor/editor.py	self.left_panel.tree.currentItem	3
-src/tools/model_explorer/frankenstein_editor/editor.py	self.right_panel.file_label.setText	2
-src/tools/model_explorer/frankenstein_editor/editor.py	self.right_panel.save_btn.setEnabled	2
-src/tools/model_explorer/frankenstein_editor/editor.py	self.right_panel.tree.currentItem	2
-src/tools/model_explorer/frankenstein_editor/panel.py	self.model.joints.items	1
-src/tools/model_explorer/frankenstein_editor/panel.py	self.model.links.items	1
-src/tools/model_explorer/frankenstein_editor/panel.py	self.model.materials.items	1
 src/tools/model_explorer/mujoco_viewer.py	mujoco.mjtFrame.mjFRAME_BODY.value	1
 src/tools/model_explorer/mujoco_viewer.py	mujoco.mjtFrame.mjFRAME_NONE.value	1
 src/tools/model_explorer/mujoco_viewer.py	mujoco.mjtVisFlag.mjVIS_COM.value	1
@@ -380,15 +366,12 @@ src/tools/starting_pose_matcher/gui_playback.py	self._anim.event_source.stop	1
 src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.MjModel.from_xml_path	1
 src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.MjModel.from_xml_string	1
 src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.mjtObj.mjOBJ_BODY	1
-src/tools/training_controller/controller.py	self._scheduler.registry.has	2
-src/tools/training_controller/controller.py	self._scheduler.registry.list	1
 src/tools/training_controller/gui.py	ax.xaxis.label.set_color	1
 src/tools/training_controller/gui.py	ax.yaxis.label.set_color	1
 src/tools/training_controller/gui.py	job.config.framework.value.upper	1
 src/tools/training_controller/gui.py	job.config.hyperparameters.items	1
 src/tools/training_controller/gui.py	job.status.value.upper	1
 src/tools/training_controller/gui.py	self.controller.dataset_registry.list	2
-src/tools/training_controller/gui.py	self.controller.scheduler.registry.get	1
 src/tools/training_controller/view_model.py	job.config.framework.value	1
 src/unreal_integration/_viewer_base.py	self.backend_type.name.lower	1
 src/unreal_integration/skeleton_mapper.py	self.source_type.name.lower	1
