@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import shutil
 import subprocess
 import sys
@@ -26,6 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 logger = logging.getLogger("update_biomech_vendor")
+_FULL_COMMIT_SHA = re.compile(r"^[0-9a-fA-F]{40}$")
 
 
 KNOWN_SIBLINGS: dict[str, str] = {
@@ -45,6 +47,7 @@ class VendorOptions:
     ref: str
     url: str
     vendor_root: Path
+    allow_mutable_ref: bool = False
 
 
 def _repo_root() -> Path:
@@ -63,7 +66,18 @@ def _parse_args(argv: list[str] | None) -> VendorOptions:
     parser.add_argument(
         "--ref",
         required=True,
-        help="Git ref (tag or branch) to snapshot, e.g. v1.4.0.",
+        help=(
+            "Full 40-character commit SHA to snapshot. Branches and tags require "
+            "--allow-mutable-ref."
+        ),
+    )
+    parser.add_argument(
+        "--allow-mutable-ref",
+        action="store_true",
+        help=(
+            "Permit branch or tag refs. Provenance still records the resolved "
+            "commit SHA, but rerunning the command may snapshot different content."
+        ),
     )
     parser.add_argument(
         "--url",
@@ -88,25 +102,60 @@ def _parse_args(argv: list[str] | None) -> VendorOptions:
         ref=args.ref,
         url=url,
         vendor_root=vendor_root,
+        allow_mutable_ref=args.allow_mutable_ref,
     )
+
+
+def _is_full_commit_sha(ref: str) -> bool:
+    """Return whether ``ref`` is an immutable full commit SHA."""
+    return _FULL_COMMIT_SHA.fullmatch(ref) is not None
+
+
+def _validate_ref_policy(options: VendorOptions) -> None:
+    """Reject mutable refs unless the caller explicitly opted in."""
+    if _is_full_commit_sha(options.ref) or options.allow_mutable_ref:
+        return
+    raise ValueError(
+        "--ref must be a full 40-character commit SHA. Use --allow-mutable-ref "
+        "to snapshot a branch or tag deliberately.",
+    )
+
+
+def _run_git(checkout: Path, *args: str) -> str:
+    """Run git in ``checkout`` and return stripped stdout."""
+    result = subprocess.run(
+        ["git", *args],
+        cwd=checkout,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
 
 
 def _shallow_clone(url: str, ref: str, target: Path) -> None:
     """Shallow-clone ``url`` at ``ref`` into ``target``."""
     logger.info("Cloning %s @ %s", url, ref)
-    subprocess.run(
-        [
-            "git",
-            "clone",
-            "--depth",
-            "1",
-            "--branch",
-            ref,
-            url,
-            str(target),
-        ],
-        check=True,
-    )
+    target.mkdir(parents=True, exist_ok=False)
+    _run_git(target, "init")
+    _run_git(target, "remote", "add", "origin", url)
+    _run_git(target, "fetch", "--depth", "1", "origin", ref)
+    _run_git(target, "checkout", "--detach", "FETCH_HEAD")
+
+
+def _resolved_commit(checkout: Path) -> str:
+    """Return the exact commit checked out for the snapshot."""
+    return _run_git(checkout, "rev-parse", "HEAD")
+
+
+def _working_tree_clean(checkout: Path) -> bool:
+    """Return whether checkout has no uncommitted tracked or untracked changes."""
+    return _run_git(checkout, "status", "--porcelain") == ""
+
+
+def _uses_url_override(options: VendorOptions) -> bool:
+    """Return whether options use a non-default source URL."""
+    return options.url != KNOWN_SIBLINGS[options.repo]
 
 
 def _models_root_from_manifest(checkout: Path) -> Path | None:
@@ -169,7 +218,13 @@ def _copy_manifest(checkout: Path, destination_root: Path) -> None:
             logger.info("Copied %s", manifest_path.name)
 
 
-def _write_provenance(destination_root: Path, options: VendorOptions) -> None:
+def _write_provenance(
+    destination_root: Path,
+    options: VendorOptions,
+    *,
+    commit_sha: str,
+    working_tree_clean: bool,
+) -> None:
     """Write a small marker file documenting how the snapshot was produced."""
     marker = destination_root / "VENDOR_PROVENANCE.txt"
     marker.write_text(
@@ -177,7 +232,11 @@ def _write_provenance(destination_root: Path, options: VendorOptions) -> None:
             [
                 f"repo: {options.repo}",
                 f"ref: {options.ref}",
+                f"commit: {commit_sha}",
                 f"url: {options.url}",
+                f"url_override: {str(_uses_url_override(options)).lower()}",
+                f"mutable_ref_allowed: {str(options.allow_mutable_ref).lower()}",
+                f"working_tree_clean: {str(working_tree_clean).lower()}",
                 "produced by: scripts/update_biomech_vendor.py",
                 "",
             ]
@@ -192,10 +251,13 @@ def snapshot(options: VendorOptions) -> Path:
     Returns the destination directory containing the snapshot. The directory
     is overwritten on each invocation.
     """
+    _validate_ref_policy(options)
     destination_root = options.vendor_root / options.repo
     with tempfile.TemporaryDirectory(prefix="biomech-vendor-") as tmpdir:
         checkout = Path(tmpdir) / "checkout"
         _shallow_clone(options.url, options.ref, checkout)
+        commit_sha = _resolved_commit(checkout)
+        working_tree_clean = _working_tree_clean(checkout)
 
         models_root = _models_root_from_manifest(checkout)
         if models_root is None:
@@ -210,7 +272,12 @@ def snapshot(options: VendorOptions) -> Path:
         _copy_tree(models_root, destination_models)
         destination_root.mkdir(parents=True, exist_ok=True)
         _copy_manifest(checkout, destination_root)
-        _write_provenance(destination_root, options)
+        _write_provenance(
+            destination_root,
+            options,
+            commit_sha=commit_sha,
+            working_tree_clean=working_tree_clean,
+        )
     logger.info("Snapshot ready at %s", destination_root)
     return destination_root
 
@@ -226,6 +293,9 @@ def main(argv: list[str] | None = None) -> int:
     except FileNotFoundError as exc:
         logger.error("%s", exc)
         return 2
+    except ValueError as exc:
+        logger.error("%s", exc)
+        return 3
     return 0
 
 

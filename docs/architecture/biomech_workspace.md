@@ -61,16 +61,23 @@ python3 -c "from src.shared.python.config.model_source_providers import resolve_
 
 When no sibling checkout exists, the discovery layer falls through to
 `vendor/biomech-models/<RepoName>/`. Snapshots are produced from
-tagged releases:
+immutable commits by default:
 
 ```bash
-python3 scripts/update_biomech_vendor.py --repo MuJoCo_Models --ref v1.4.0
-python3 scripts/update_biomech_vendor.py --repo Drake_Models --ref v0.3.2
+python3 scripts/update_biomech_vendor.py --repo MuJoCo_Models --ref <40-character-commit-sha>
+python3 scripts/update_biomech_vendor.py --repo Drake_Models --ref <40-character-commit-sha>
+```
+
+Branches and tags are mutable and require an explicit opt-in:
+
+```bash
+python3 scripts/update_biomech_vendor.py --repo MuJoCo_Models --ref v1.4.0 --allow-mutable-ref
 ```
 
 Each snapshot includes the manifest file (`model_pack.yaml` or
 `tool_pack.yaml`) and a `models/` tree. A `VENDOR_PROVENANCE.txt`
-marker records the source URL and ref.
+marker records the source URL, requested ref, resolved commit SHA, mutable-ref
+opt-in state, URL-override state, and clean working-tree state.
 
 Snapshots are committed to UpstreamDrift; CI uses them and never clones
 the sibling repos at test time.

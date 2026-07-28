@@ -83,6 +83,9 @@ implemented by `_resolve_sibling()` in
    `tool_pack:resolve()` for tool packs) is called.
 3. **Vendored snapshot** at `vendor/biomech-models/<RepoName>/`,
    committed via `scripts/update_biomech_vendor.py --repo ... --ref ...`.
+   Snapshot refs are full commit SHAs by default. Branches and tags require
+   `--allow-mutable-ref`, and provenance records both the requested ref and
+   the resolved commit SHA.
 4. **Env-var override** — `<REPO>_HOME` (e.g. `MUJOCO_MODELS_HOME`) —
    for power users and ad-hoc layouts.
 
