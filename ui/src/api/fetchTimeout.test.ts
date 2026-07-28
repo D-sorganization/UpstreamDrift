@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch, DEFAULT_TIMEOUT_MS } from './fetch';
+import { apiFetch, apiFetchBlob, apiFetchRaw, DEFAULT_TIMEOUT_MS } from './fetch';
 
 function jsonResponse(body: unknown): Response {
   return {
@@ -32,6 +32,16 @@ describe('apiFetch timeout (#8080)', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await apiFetch('/api/anything');
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('passes an AbortSignal for raw response callers', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiFetchRaw('/api/export');
 
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     expect(init.signal).toBeInstanceOf(AbortSignal);
@@ -124,5 +134,21 @@ describe('apiFetch timeout (#8080)', () => {
       } as unknown as Response),
     );
     await expect(apiFetch('/api/bad')).rejects.toThrow('Method Not Allowed');
+  });
+
+  it('extracts FastAPI detail for raw and blob callers', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        json: () => Promise.resolve({ detail: 'Invalid export request' }),
+      } as unknown as Response),
+    );
+
+    await expect(apiFetchBlob('/api/export')).rejects.toThrow(
+      'Invalid export request',
+    );
   });
 });

@@ -9,7 +9,8 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { apiFetch } from './fetch';
+import { triggerBlobDownload } from './download';
+import { apiFetch, apiFetchBlob } from './fetch';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -265,29 +266,10 @@ export function useDatasetGenerator() {
     async (datasetId: string, format: string) => {
       setError(null);
       try {
-        // Use raw fetch so we can read the blob response
-        const { getApiBase } = await import('./backend');
-        const url = `${getApiBase()}/api/dataset/export/${encodeURIComponent(datasetId)}?format=${encodeURIComponent(format)}`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          let detail: string | undefined;
-          try {
-            const body = (await res.json()) as Record<string, unknown>;
-            if (typeof body.detail === 'string') detail = body.detail;
-          } catch {
-            // ignore
-          }
-          throw new Error(detail ?? `Export failed: HTTP ${res.status}`);
-        }
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = objectUrl;
-        a.download = `${datasetId}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(objectUrl);
+        const blob = await apiFetchBlob(
+          `/api/dataset/export/${encodeURIComponent(datasetId)}?format=${encodeURIComponent(format)}`,
+        );
+        triggerBlobDownload(blob, `${datasetId}.${format}`);
       } catch (err) {
         if (isMountedRef.current)
           setError(err instanceof Error ? err.message : 'Export failed');
@@ -299,14 +281,15 @@ export function useDatasetGenerator() {
   // F7: Fetch catalog data on mount, set catalogLoading=false when all done
   useEffect(() => {
     isMountedRef.current = true;
-    setCatalogLoading(true);
-    Promise.allSettled([
-      fetchFeatures(),
-      fetchPlotTypes(),
-      fetchExportFormats(),
-      fetchControls(),
-    ]).finally(() => {
-      if (isMountedRef.current) setCatalogLoading(false);
+    queueMicrotask(() => {
+      Promise.allSettled([
+        fetchFeatures(),
+        fetchPlotTypes(),
+        fetchExportFormats(),
+        fetchControls(),
+      ]).finally(() => {
+        if (isMountedRef.current) setCatalogLoading(false);
+      });
     });
     return () => {
       isMountedRef.current = false;

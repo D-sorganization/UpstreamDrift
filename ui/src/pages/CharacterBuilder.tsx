@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
-import { getApiBase } from '@/api/backend';
+import { apiFetchRaw } from '@/api/fetch';
+import { triggerBlobDownload } from '@/api/download';
 
 interface SegmentBreakdown {
   name: string;
@@ -143,9 +144,7 @@ export function CharacterBuilderPage() {
     setGenerating(true);
     setError(null);
     try {
-      // Response is URDF XML text (not JSON), so apiFetch is not suitable.
-      // Build the URL via getApiBase() to stay Tauri-safe (#6897).
-      const response = await fetch(`${getApiBase()}/api/character-builder/generate`, {
+      const response = await apiFetchRaw('/api/character-builder/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,20 +156,9 @@ export function CharacterBuilderPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate URDF: ${response.statusText}`);
-      }
-
       const text = await response.text();
       const blob = new Blob([text], { type: 'text/xml' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${buildType.toLowerCase()}_humanoid.urdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      triggerBlobDownload(blob, `${buildType.toLowerCase()}_humanoid.urdf`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {

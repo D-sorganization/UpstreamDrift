@@ -54,6 +54,7 @@ describe('ChatContextChip', () => {
     expect(chip.textContent).toContain('last run 3.0s');
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/api/chat/context'),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
   });
 

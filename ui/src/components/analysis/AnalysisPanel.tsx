@@ -20,7 +20,7 @@ import {
 } from 'recharts';
 import { Download, BarChart2, Activity, TrendingUp } from 'lucide-react';
 import { apiFetch } from '@/api/fetch';
-import { getApiBase } from '@/api/backend';
+import { downloadAnalysisExport } from '@/api/analysisExport';
 
 /** Analysis metric from the backend. */
 interface AnalysisMetric {
@@ -123,7 +123,9 @@ export function AnalysisPanel({
   // Start/stop polling when simulation runs
   useEffect(() => {
     if (isRunning) {
-      fetchStatistics();
+      queueMicrotask(() => {
+        void fetchStatistics();
+      });
       pollRef.current = setInterval(fetchStatistics, pollInterval);
     } else {
       if (pollRef.current) {
@@ -142,26 +144,7 @@ export function AnalysisPanel({
   // Export handler
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
     try {
-      // Export returns a binary blob (not JSON), so apiFetch — which parses
-      // JSON — is not suitable here. Build the URL via getApiBase() to stay
-      // Tauri-safe (#6897).
-      const response = await fetch(`${getApiBase()}/api/analysis/export`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ format, include_metrics: true, include_time_series: true }),
-      });
-      if (!response.ok) {
-        throw new Error(`Export failed: ${response.status}`);
-      }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `analysis_export.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await downloadAnalysisExport(format);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Export failed');
     }

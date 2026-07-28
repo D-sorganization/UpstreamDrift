@@ -16,7 +16,7 @@
  *   });
  */
 
-import { getApiBase } from './backend';
+import { getApiBase } from './base';
 
 /**
  * Default request timeout (issue #8080).
@@ -62,6 +62,75 @@ function buildSignal(
   return timeoutSignal;
 }
 
+function formatFetchError(
+  path: string,
+  timeoutMs: number,
+  err: unknown,
+): Error {
+  if (err instanceof DOMException && err.name === 'TimeoutError') {
+    return new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
+  }
+  if (err instanceof DOMException && err.name === 'AbortError') {
+    return new Error(`Request aborted — ${path}`);
+  }
+  return new Error(
+    err instanceof Error ? err.message : `Network error for ${path}`,
+  );
+}
+
+async function responseError(response: Response, path: string): Promise<Error> {
+  let detail: string | undefined;
+  try {
+    const body = (await response.json()) as Record<string, unknown>;
+    if (typeof body.detail === 'string') {
+      detail = body.detail;
+    }
+  } catch {
+    // Body was not valid JSON — that's fine, fall through to generic message.
+  }
+  return new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
+}
+
+/**
+ * apiFetchRaw — shared request helper for non-JSON success bodies.
+ *
+ * Use this when callers need to consume `text()`, `blob()`, or another
+ * response body type while keeping the same timeout and FastAPI error contract
+ * as `apiFetch`.
+ */
+export async function apiFetchRaw(
+  path: string,
+  init?: ApiFetchInit,
+): Promise<Response> {
+  const url = `${getApiBase()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...requestInit,
+      signal: buildSignal(timeoutMs, requestInit.signal),
+    });
+  } catch (err) {
+    throw formatFetchError(path, timeoutMs, err);
+  }
+
+  if (!response.ok) {
+    throw await responseError(response, path);
+  }
+
+  return response;
+}
+
+/** Fetch a non-JSON endpoint and return its blob body. */
+export async function apiFetchBlob(
+  path: string,
+  init?: ApiFetchInit,
+): Promise<Blob> {
+  const response = await apiFetchRaw(path, init);
+  return response.blob();
+}
+
 /**
  * apiFetch<T> — typed HTTP helper with consistent error handling.
  *
@@ -76,44 +145,10 @@ export async function apiFetch<T>(
   path: string,
   init?: ApiFetchInit,
 ): Promise<T> {
-  const url = `${getApiBase()}${path}`;
-  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
-
-  const mergedInit: RequestInit = {
+  const response = await apiFetchRaw(path, {
+    ...init,
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-    ...requestInit,
-    signal: buildSignal(timeoutMs, requestInit.signal),
-  };
-
-  let response: Response;
-  try {
-    response = await fetch(url, mergedInit);
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'TimeoutError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
-    }
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error(`Request aborted — ${path}`);
-    }
-    // Network-level error (no response at all)
-    throw new Error(
-      err instanceof Error ? err.message : `Network error for ${path}`,
-    );
-  }
-
-  if (!response.ok) {
-    // Attempt to extract a FastAPI-style `detail` field
-    let detail: string | undefined;
-    try {
-      const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
-    } catch {
-      // Body was not valid JSON — that's fine, fall through to generic message
-    }
-    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
-  }
+  });
 
   return response.json() as Promise<T>;
 }
@@ -154,29 +189,6 @@ export async function apiFetchParsed<T>(
  * @returns Parsed JSON body typed as `T`
  */
 export async function apiFetchForm<T>(path: string, formData: FormData): Promise<T> {
-  const url = `${getApiBase()}${path}`;
-
-  let response: Response;
-  try {
-    response = await fetch(url, { method: 'POST', body: formData });
-  } catch (err) {
-    throw new Error(
-      err instanceof Error ? err.message : `Network error for ${path}`,
-    );
-  }
-
-  if (!response.ok) {
-    let detail: string | undefined;
-    try {
-      const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
-    } catch {
-      // ignore
-    }
-    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
-  }
-
+  const response = await apiFetchRaw(path, { method: 'POST', body: formData });
   return response.json() as Promise<T>;
 }

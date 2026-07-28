@@ -13,7 +13,10 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { apiFetch } from './fetch';
-import { getApiBase } from './backend';
+import { downloadAnalysisExport, type ExportFormat, type ExportResult } from './analysisExport';
+
+export { EXPORT_FORMATS } from './analysisExport';
+export type { ExportFormat, ExportResult } from './analysisExport';
 
 // ── Types (matching src/api/models/responses.py) ───────────────────────
 
@@ -39,17 +42,6 @@ export interface StatisticsSummary {
   sample_count: number;
   metrics: MetricSummary[];
   time_series: Record<string, number[]> | null;
-}
-
-/** Only the formats the backend actually implements (no xlsx/pdf). */
-export type ExportFormat = 'csv' | 'json';
-
-export const EXPORT_FORMATS: readonly ExportFormat[] = ['csv', 'json'];
-
-export interface ExportResult {
-  format: ExportFormat;
-  filename: string;
-  size_bytes: number;
 }
 
 export type AnalysisLoadState = 'idle' | 'loading' | 'loaded' | 'error';
@@ -113,37 +105,9 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const response = await fetch(`${getApiBase()}/api/analysis/export`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          format,
-          include_metrics: true,
-          include_time_series: true,
-        }),
-      });
-      if (!response.ok) {
-        let detail = `Export failed: HTTP ${response.status}`;
-        try {
-          const body = (await response.json()) as Record<string, unknown>;
-          if (typeof body.detail === 'string') detail = body.detail;
-        } catch {
-          // non-JSON error body — keep generic message
-        }
-        throw new Error(detail);
-      }
-      const blob = await response.blob();
-      const filename = `analysis_export.${format}`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const result = await downloadAnalysisExport(format);
       if (isMountedRef.current) {
-        setExportResult({ format, filename, size_bytes: blob.size });
+        setExportResult(result);
         setLoadState('loaded');
       }
     } catch (err) {

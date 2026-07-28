@@ -55,6 +55,7 @@ const FALLBACK_TITLE: Record<CanonicalCoreMode, string> = {
  * @returns The validated status.
  * @throws Error when a required field is missing or mistyped.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function parseCanonicalCoreStatus(raw: unknown): CanonicalCoreStatus {
   if (typeof raw !== 'object' || raw === null) {
     throw new Error('Canonical-core status response was not an object');
@@ -109,7 +110,9 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
   }, [mode]);
 
   useEffect(() => {
-    void loadStatusReport();
+    queueMicrotask(() => {
+      void loadStatusReport();
+    });
   }, [loadStatusReport]);
 
   const title = status?.name || FALLBACK_TITLE[mode];
