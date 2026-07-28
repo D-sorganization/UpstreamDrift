@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from dataclasses import dataclass
 import re
 import sys
@@ -68,10 +69,19 @@ def parse_inventory_table(path: Path) -> dict[str, list[str]]:
 
     Postcondition: separator and header rows are ignored.
     """
+    rows: dict[str, list[str]] = {}
+    for cells in parse_inventory_rows(path):
+        first_cell = cells[0]
+        rows[first_cell] = cells
+    return rows
+
+
+def parse_inventory_rows(path: Path) -> list[list[str]]:
+    """Return all workflow inventory rows, preserving duplicate filenames."""
     if not path.exists():
         raise FileNotFoundError(f"workflow inventory does not exist: {path}")
 
-    rows: dict[str, list[str]] = {}
+    rows: list[list[str]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if not stripped.startswith("|"):
@@ -82,8 +92,14 @@ def parse_inventory_table(path: Path) -> dict[str, list[str]]:
         first_cell = cells[0]
         if first_cell in {"File", "------"} or set(first_cell) == {"-"}:
             continue
-        rows[first_cell] = cells
+        rows.append(cells)
     return rows
+
+
+def duplicate_inventory_rows(path: Path) -> dict[str, int]:
+    """Return duplicated workflow inventory filenames and occurrence counts."""
+    counts = Counter(cells[0] for cells in parse_inventory_rows(path))
+    return {name: count for name, count in counts.items() if count > 1}
 
 
 def parse_workflow_budgets(path: Path) -> WorkflowBudget:
@@ -168,6 +184,7 @@ def audit_workflow_inventory(
     try:
         inventory_path = repo_root / INVENTORY_PATH
         inventory_rows = parse_inventory_table(inventory_path)
+        duplicated_rows = duplicate_inventory_rows(inventory_path)
         documented_budget = parse_workflow_budgets(inventory_path)
     except FileNotFoundError as exc:
         return [str(exc)]
@@ -190,6 +207,12 @@ def audit_workflow_inventory(
             f"{documented_budget.max_pr_triggered_workflows} but "
             "scripts/check_workflow_inventory.py defaults to "
             f"{DEFAULT_MAX_PR_TRIGGERED_WORKFLOWS}"
+        )
+
+    for workflow_name, count in sorted(duplicated_rows.items()):
+        findings.append(
+            f"{INVENTORY_PATH.as_posix()} has duplicate workflow row: "
+            f"{workflow_name} ({count} rows)"
         )
 
     for workflow_name in sorted(workflow_names):

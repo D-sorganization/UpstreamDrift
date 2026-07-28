@@ -78,10 +78,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-07-28** - Hardened the workflow inventory guard for #8207. The
+- **2026-07-28** - Hardened the workflow inventory guard for #8207 and #8208. The
   executable no-growth contract now validates the documented 83 active-workflow
   cap, adds a separate 33 PR-triggered workflow budget, and fails if
-  `.github/WORKFLOWS.md` drifts from the script defaults.
+  `.github/WORKFLOWS.md` drifts from the script defaults or contains duplicate
+  workflow rows.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

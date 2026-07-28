@@ -123,6 +123,39 @@ def test_audit_repository_rejects_inventory_rows_for_missing_workflows(
     assert "inventory row references missing workflow: missing.yml" in findings
 
 
+def test_audit_repository_rejects_duplicate_inventory_rows(tmp_path: Path) -> None:
+    _write(tmp_path / ".github" / "workflows" / "ci.yml", _workflow())
+    _write_inventory(
+        tmp_path,
+        _inventory_row("ci.yml") + _inventory_row("ci.yml", owner="@infra"),
+    )
+    _write_agent_governance(tmp_path, "")
+
+    findings = audit_repository(tmp_path)
+
+    assert (
+        ".github/WORKFLOWS.md has duplicate workflow row: ci.yml (2 rows)" in findings
+    )
+
+
+def test_audit_repository_rejects_duplicate_rows_for_missing_workflows(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / ".github" / "workflows").mkdir(parents=True)
+    _write_inventory(
+        tmp_path,
+        _inventory_row("missing.yml") + _inventory_row("missing.yml", owner="@infra"),
+    )
+    _write_agent_governance(tmp_path, "")
+
+    findings = audit_repository(tmp_path)
+
+    assert (
+        ".github/WORKFLOWS.md has duplicate workflow row: missing.yml (2 rows)"
+    ) in findings
+    assert "inventory row references missing workflow: missing.yml" in findings
+
+
 def test_audit_repository_rejects_growth_above_configured_cap(tmp_path: Path) -> None:
     _write(tmp_path / ".github" / "workflows" / "ci.yml", _workflow())
     _write(tmp_path / ".github" / "workflows" / "extra.yml", _workflow())
