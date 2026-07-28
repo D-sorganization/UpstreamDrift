@@ -24,7 +24,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from src.shared.python.analysis.cross_engine import ENGINE_NAMES
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -60,6 +60,15 @@ class CrossEnginePerturbationConfig(BaseModel):
         default=10, ge=1, le=200, description="Number of perturbation trials"
     )
     seed: int = Field(default=42, description="Random seed for reproducibility")
+
+    @model_validator(mode="after")
+    def timing_grid_must_have_at_least_one_step(self) -> CrossEnginePerturbationConfig:
+        """Pre: service-layer config requires ``t_end > dt > 0``."""
+        if self.t_end <= self.dt:
+            raise ValueError(
+                f"t_end ({self.t_end}) must be greater than dt ({self.dt})"
+            )
+        return self
 
 
 class CrossEngineStudyRequest(BaseModel):

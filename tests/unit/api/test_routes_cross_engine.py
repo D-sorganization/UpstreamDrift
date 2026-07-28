@@ -137,6 +137,18 @@ class TestStartCrossEngineStudy:
         response = client.post("/analysis/cross-engine", json=payload)
         assert response.status_code == 422, response.text
 
+    def test_invalid_config_dt_not_less_than_t_end_rejected_before_task_creation(
+        self, client: TestClient, task_manager: TaskManager
+    ) -> None:
+        payload = {
+            "engines": ["pendulum_stub"],
+            "config": {"t_end": 0.01, "dt": 0.01},
+        }
+        response = client.post("/analysis/cross-engine", json=payload)
+        assert response.status_code == 422, response.text
+        assert "must be greater than dt" in response.text
+        assert len(task_manager) == 0
+
     def test_invalid_config_n_trials_zero_rejected(self, client: TestClient) -> None:
         payload = {"engines": ["pendulum_stub"], "config": {"n_trials": 0}}
         response = client.post("/analysis/cross-engine", json=payload)
