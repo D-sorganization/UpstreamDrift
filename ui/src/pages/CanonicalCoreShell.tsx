@@ -16,106 +16,81 @@
  * and available (the workspace, once a service exists).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { apiFetch } from '@/api/fetch';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/api/fetch";
+import {
+  CANONICAL_CORE_FALLBACK_TITLE,
+  type CanonicalCoreStatus,
+  parseCanonicalCoreStatus,
+} from "@/api/canonicalCoreStatus";
 
-type CanonicalCoreMode = 'estimation' | 'comparison';
+type CanonicalCoreMode = "estimation" | "comparison";
 
-type LoadStatus = 'loading' | 'ready' | 'error';
-
-/** Mirrors `CanonicalCoreStatus` in `src/api/routes/canonical_core.py`. */
-export interface CanonicalCoreStatus {
-  tool_id: string;
-  mode: string;
-  name: string;
-  description: string;
-  web_route: string;
-  capabilities: string[];
-  available: boolean;
-  reason: string;
-  next_step: string;
-}
+type LoadStatus = "loading" | "ready" | "error";
 
 interface CanonicalCoreShellPageProps {
   mode: CanonicalCoreMode;
 }
 
-const FALLBACK_TITLE: Record<CanonicalCoreMode, string> = {
-  estimation: 'Canonical-Core Estimation',
-  comparison: 'Canonical-Core Comparison',
-};
-
-/**
- * Validate the status payload at runtime.
- *
- * The backend ships separately from the UI, so a shape mismatch must surface
- * as the page's error state rather than as a render-time TypeError.
- *
- * @param raw - Parsed JSON body.
- * @returns The validated status.
- * @throws Error when a required field is missing or mistyped.
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export function parseCanonicalCoreStatus(raw: unknown): CanonicalCoreStatus {
-  if (typeof raw !== 'object' || raw === null) {
-    throw new Error('Canonical-core status response was not an object');
-  }
-  const body = raw as Record<string, unknown>;
-  if (typeof body.mode !== 'string' || body.mode.length === 0) {
-    throw new Error('Canonical-core status response is missing "mode"');
-  }
-  if (typeof body.available !== 'boolean') {
-    throw new Error('Canonical-core status response is missing "available"');
-  }
-  return {
-    tool_id: typeof body.tool_id === 'string' ? body.tool_id : '',
-    mode: body.mode,
-    name: typeof body.name === 'string' ? body.name : '',
-    description: typeof body.description === 'string' ? body.description : '',
-    web_route: typeof body.web_route === 'string' ? body.web_route : '',
-    capabilities: Array.isArray(body.capabilities)
-      ? body.capabilities.filter((c): c is string => typeof c === 'string')
-      : [],
-    available: body.available,
-    reason: typeof body.reason === 'string' ? body.reason : '',
-    next_step: typeof body.next_step === 'string' ? body.next_step : '',
-  };
-}
-
 export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
   const [status, setStatus] = useState<CanonicalCoreStatus | null>(null);
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>('loading');
+  const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const route = useMemo(() => `/tools/canonical-core/${mode}`, [mode]);
 
+  const fetchStatusReport = useCallback(async () => {
+    const raw = await apiFetch<unknown>(
+      `/api/tools/canonical-core/${mode}/status`,
+    );
+    return parseCanonicalCoreStatus(raw);
+  }, [mode]);
+
   const loadStatusReport = useCallback(async () => {
-    setLoadStatus('loading');
+    setLoadStatus("loading");
     setLoadError(null);
     try {
-      const raw = await apiFetch<unknown>(
-        `/api/tools/canonical-core/${mode}/status`,
-      );
-      setStatus(parseCanonicalCoreStatus(raw));
-      setLoadStatus('ready');
+      setStatus(await fetchStatusReport());
+      setLoadStatus("ready");
     } catch (err) {
       setStatus(null);
-      setLoadStatus('error');
+      setLoadStatus("error");
       setLoadError(
         err instanceof Error
           ? err.message
-          : 'Failed to reach the canonical-core service',
+          : "Failed to reach the canonical-core service",
       );
     }
-  }, [mode]);
+  }, [fetchStatusReport]);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void loadStatusReport();
-    });
-  }, [loadStatusReport]);
+    let isMounted = true;
 
-  const title = status?.name || FALLBACK_TITLE[mode];
+    async function loadInitialStatusReport() {
+      try {
+        const nextStatus = await fetchStatusReport();
+        if (!isMounted) return;
+        setStatus(nextStatus);
+        setLoadStatus("ready");
+      } catch (err) {
+        if (!isMounted) return;
+        setStatus(null);
+        setLoadStatus("error");
+        setLoadError(
+          err instanceof Error
+            ? err.message
+            : "Failed to reach the canonical-core service",
+        );
+      }
+    }
+
+    void loadInitialStatusReport();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchStatusReport]);
+
+  const title = status?.name || CANONICAL_CORE_FALLBACK_TITLE[mode];
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
@@ -132,7 +107,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
           )}
         </header>
 
-        {loadStatus === 'loading' && (
+        {loadStatus === "loading" && (
           <div
             className="rounded-md border border-gray-800 bg-gray-900 p-5 text-sm text-gray-300"
             data-testid="canonical-core-loading"
@@ -141,7 +116,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
           </div>
         )}
 
-        {loadStatus === 'error' && (
+        {loadStatus === "error" && (
           <div
             className="space-y-3 rounded-md border border-red-500/40 bg-red-950/30 p-5"
             data-testid="canonical-core-error"
@@ -151,7 +126,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
               Canonical-core service unreachable
             </h2>
             <p className="break-words text-sm leading-6 text-red-200/80">
-              {loadError ?? 'The service did not respond.'}
+              {loadError ?? "The service did not respond."}
             </p>
             <p className="text-sm leading-6 text-gray-400">
               Check that the API server is running, then retry.
@@ -167,7 +142,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
           </div>
         )}
 
-        {loadStatus === 'ready' && status && !status.available && (
+        {loadStatus === "ready" && status && !status.available && (
           <div
             className="space-y-3 rounded-md border border-amber-500/40 bg-amber-950/20 p-5"
             data-testid="canonical-core-unavailable"
@@ -189,7 +164,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
           </div>
         )}
 
-        {loadStatus === 'ready' && status?.available && (
+        {loadStatus === "ready" && status?.available && (
           <div
             className="rounded-md border border-emerald-500/40 bg-emerald-950/20 p-5"
             data-testid="canonical-core-available"
@@ -212,14 +187,19 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
             </p>
           </section>
           <section className="rounded-md border border-gray-800 bg-gray-900 p-5">
-            <h2 className="text-sm font-semibold text-gray-100">Capabilities</h2>
+            <h2 className="text-sm font-semibold text-gray-100">
+              Capabilities
+            </h2>
             {status && status.capabilities.length > 0 ? (
               <ul
                 className="mt-3 space-y-1 text-sm leading-6 text-gray-300"
                 data-testid="canonical-core-capabilities"
               >
                 {status.capabilities.map((capability) => (
-                  <li key={capability} className="font-mono text-xs text-cyan-200">
+                  <li
+                    key={capability}
+                    className="font-mono text-xs text-cyan-200"
+                  >
                     {capability}
                   </li>
                 ))}
@@ -232,7 +212,9 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
           </section>
           <section className="rounded-md border border-gray-800 bg-gray-900 p-5">
             <h2 className="text-sm font-semibold text-gray-100">Route</h2>
-            <p className="mt-3 break-words font-mono text-sm text-cyan-200">{route}</p>
+            <p className="mt-3 break-words font-mono text-sm text-cyan-200">
+              {route}
+            </p>
           </section>
         </div>
       </section>
