@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from src.shared.python.config.environment import is_production_environment
+from src.api.environment import is_production_environment
 
 _TRUTHY = {"1", "true", "yes", "on"}
 

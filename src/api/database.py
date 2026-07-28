@@ -18,8 +18,8 @@ from src.shared.python.config.environment import (
     get_database_pool_recycle,
     get_database_pool_size,
     get_database_url,
-    is_production_environment,
 )
+from src.api.environment import is_production_environment
 
 # Base imported locally in create_tables to avoid circular import
 
