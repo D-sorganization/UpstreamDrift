@@ -469,7 +469,7 @@ models:
     name: "Project Map"
     description: "Map of every feature and module in the suite"
     type: "document"
-    path: "docs/PROJECT_MAP.md"
+    path: "docs/architecture/PROJECT_MAP.md"
     launcher:
       category: "documentation"
       logo: "assets/project_map.png"
@@ -515,7 +515,9 @@ models:
     name: "Movement Optimizer"
     description: "Cross-engine trajectory optimization"
     type: "special_app"
-    source_root: "../Movement_Optimizer"
+    # Sibling checkout next to UpstreamDrift; resolved by
+    # ModelSourcePathPolicy.resolve_source_root (issue #7984).
+    source_root: "Movement_Optimizer"
     path: "src/movement_optimizer/__main__.py"
     python_paths:
       - "src"

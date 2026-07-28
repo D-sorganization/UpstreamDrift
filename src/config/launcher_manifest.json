@@ -358,7 +358,7 @@
       "description": "Complete map of all features, modules, and hidden gems in the suite",
       "category": "tool",
       "type": "special_app",
-      "path": "docs/PROJECT_MAP.md",
+      "path": "docs/architecture/PROJECT_MAP.md",
       "logo": "golf_logo.svg",
       "status": "utility",
       "capabilities": [
