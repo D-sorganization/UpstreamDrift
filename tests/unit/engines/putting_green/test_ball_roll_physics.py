@@ -18,6 +18,8 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestRollMode:
     """Tests for RollMode enumeration."""
@@ -143,6 +145,23 @@ class TestBallRollPhysics:
         assert np.isclose(physics.ball_mass, 0.04593, atol=0.001)  # kg
         assert np.isclose(physics.ball_radius, 0.02135, atol=0.001)  # m
 
+    @pytest.mark.parametrize("ball_mass", [None, 0.0, -0.1, np.nan, np.inf])
+    def test_constructor_rejects_invalid_ball_mass(self, ball_mass: float) -> None:
+        """Ball mass is a public physics precondition."""
+        with pytest.raises(ValueError, match="ball_mass"):
+            BallRollPhysics(ball_mass=ball_mass)  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize("ball_radius", [None, 0.0, -0.1, np.nan, np.inf])
+    def test_constructor_rejects_invalid_ball_radius(self, ball_radius: float) -> None:
+        """Ball radius must fail at construction, not inside numeric formulas."""
+        with pytest.raises(ValueError, match="ball_radius"):
+            BallRollPhysics(ball_radius=ball_radius)  # type: ignore[arg-type]
+
+    def test_constructor_rejects_unknown_integrator(self) -> None:
+        """Integrator names must not silently fall back to Euler."""
+        with pytest.raises(ValueError, match="integrator"):
+            BallRollPhysics(integrator="rk_4")
+
     def test_initial_roll_mode_determination(self, physics: BallRollPhysics) -> None:
         """Should determine correct initial roll mode."""
         # High spin relative to velocity = sliding
@@ -234,6 +253,22 @@ class TestBallRollPhysics:
 
         # Position should have advanced
         assert new_state.position[0] > state.position[0]
+
+    @pytest.mark.parametrize("integrator", ["euler", "rk4", "verlet"])
+    @pytest.mark.parametrize("dt", [None, 0.0, -0.1, np.nan, np.inf])
+    def test_step_rejects_invalid_dt_for_all_integrators(
+        self, integrator: str, dt: float
+    ) -> None:
+        """A public step cannot accept non-finite or non-positive timesteps."""
+        physics = BallRollPhysics(integrator=integrator)
+        state = BallState(
+            position=np.array([0.0, 0.0]),
+            velocity=np.array([1.0, 0.0]),
+            spin=np.zeros(3),
+        )
+
+        with pytest.raises(ValueError, match="dt"):
+            physics.step(state, dt=dt)  # type: ignore[arg-type]
 
     def test_ball_decelerates_to_stop(self, physics: BallRollPhysics) -> None:
         """Ball should eventually stop due to friction."""
@@ -343,6 +378,34 @@ class TestBallRollPhysics:
         initial_speed = np.linalg.norm(initial_state.velocity)
         final_speed = np.linalg.norm(final_vel)
         assert final_speed < initial_speed * 0.1
+
+    @pytest.mark.parametrize("dt", [None, 0.0, -0.1, np.nan, np.inf])
+    def test_simulate_putt_rejects_invalid_dt(
+        self, physics: BallRollPhysics, dt: float
+    ) -> None:
+        """Complete trajectory simulation enforces timestep preconditions."""
+        initial_state = BallState(
+            position=np.array([0.0, 0.0]),
+            velocity=np.array([1.0, 0.0]),
+            spin=np.zeros(3),
+        )
+
+        with pytest.raises(ValueError, match="dt"):
+            physics.simulate_putt(initial_state, dt=dt)  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize("max_time", [None, 0.0, -1.0, np.nan, np.inf])
+    def test_simulate_putt_rejects_invalid_max_time(
+        self, physics: BallRollPhysics, max_time: float
+    ) -> None:
+        """Complete trajectory simulation enforces bounded time horizons."""
+        initial_state = BallState(
+            position=np.array([0.0, 0.0]),
+            velocity=np.array([1.0, 0.0]),
+            spin=np.zeros(3),
+        )
+
+        with pytest.raises(ValueError, match="max_time"):
+            physics.simulate_putt(initial_state, max_time=max_time)  # type: ignore[arg-type]
 
     def test_simulate_with_hole(self, physics_with_green: BallRollPhysics) -> None:
         """Should detect when ball goes in hole."""
