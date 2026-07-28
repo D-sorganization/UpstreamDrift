@@ -14,7 +14,7 @@ Routine patent risk assessment update. No new critical infringements found. Prev
 - **File:** `shared/python/impact_model.py`
 - **Issue:** Use of `gear_effect_h_scale=100.0`, `gear_effect_v_scale=50.0`.
 - **Context:** These constants appear to be empirical heuristics. There is a risk they are derived from TrackMan proprietary data/models.
-- **Action:** [Issue_011](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) tracks the need to replace this heuristic with a first-principles physics model.
+- **Action:** `Issue_011` (tracker document not present in this repository) tracks the need to replace this heuristic with a first-principles physics model.
 
 ### 2. Swing Comparator Formula Update
 

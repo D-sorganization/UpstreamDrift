@@ -26,7 +26,7 @@ import {
     Wrench,
     Zap,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';

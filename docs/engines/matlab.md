@@ -18,11 +18,13 @@ To use the MATLAB engine, you must have:
 ## 📁 Directory Structure
 
 ```
-engines/physics_engines/matlab/
-├── 2d/              # 2D Planar models
-│   └── GolfSwing2D.slx
-├── 3d/              # 3D Spatial models
-└── python/          # Python bridge code
+src/engines/Simscape_Multibody_Models/
+├── 2D_Golf_Model/
+│   ├── matlab/      # 2D planar models (GolfSwing.slx, ...)
+│   └── python/      # Python bridge code
+└── 3D_Golf_Model/
+    ├── matlab/      # 3D spatial models
+    └── python/      # Python bridge code
 ```
 
 ## Integration Details

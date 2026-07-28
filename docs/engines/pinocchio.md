@@ -12,8 +12,12 @@ Pinocchio is a library for fast rigid body dynamics algorithms based on the Feat
 
 ## Usage
 
-Located in `engines/physics_engines/pinocchio/`.
+Located in `src/engines/physics_engines/pinocchio/`.
+
+The engine adapter is `PinocchioPhysicsEngine` in
+`src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py`.
+Launch the Pinocchio dashboard from the repository root:
 
 ```bash
-python engines/physics_engines/pinocchio/python/main.py
+python -m src.engines.physics_engines.pinocchio.python
 ```

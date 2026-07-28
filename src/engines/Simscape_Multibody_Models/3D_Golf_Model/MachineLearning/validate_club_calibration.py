@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -141,7 +142,8 @@ def _vector_metrics(
     # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     vector_error = np.sqrt(np.einsum("ij,ij->i", residual, residual))
     target_span = np.ptp(target_values, axis=0)
-    normalizer = float(np.linalg.norm(target_span))
+    # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
+    normalizer = float(math.sqrt(np.vdot(target_span, target_span)))
     if normalizer < EPSILON:
         normalizer = float(
             # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
@@ -151,15 +153,19 @@ def _vector_metrics(
         normalizer = 1.0
 
     anisotropy = float(np.max(rmse_axis) / max(float(np.min(rmse_axis)), EPSILON))
+    vector_rmse = float(
+        np.sqrt(np.vdot(vector_error, vector_error) / vector_error.size)
+    )
+
     return {
         "samples": int(len(target_values)),
         "rmse_axis": rmse_axis.tolist(),
         "mae_axis": np.mean(np.abs(residual), axis=0).tolist(),
         "max_abs_axis": np.max(np.abs(residual), axis=0).tolist(),
-        "vector_rmse": float(np.sqrt(np.mean(vector_error**2))),
+        "vector_rmse": vector_rmse,
         "vector_mae": float(np.mean(vector_error)),
         "vector_max_abs": float(np.max(vector_error)),
-        "normalized_vector_rmse": float(np.sqrt(np.mean(vector_error**2)) / normalizer),
+        "normalized_vector_rmse": vector_rmse / normalizer,
         "normalizer": normalizer,
         "residual_anisotropy": anisotropy,
     }
