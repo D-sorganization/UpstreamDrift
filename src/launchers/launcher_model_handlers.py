@@ -351,7 +351,7 @@ class SpecialAppHandler:
 
             tool = get_embeddable_tool(tool_id)
             if tool is not None:
-                return tool.create_main_widget()
+                return tool.create_main_widget(None)
 
         embed_adapter = getattr(model, "embed_adapter", None)
         if embed_adapter and "::" in embed_adapter:
