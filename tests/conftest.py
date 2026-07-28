@@ -29,6 +29,30 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import sys as _sys
 import types as _types
 import importlib as _early_importlib
+from pathlib import Path as _Path
+
+_tools_path = str(
+    (
+        _Path(__file__).resolve().parents[1]
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "shared"
+        / "python"
+    ).resolve()
+)
+if _tools_path not in _sys.path:
+    _sys.path.insert(0, _tools_path)
+
+for _pkg in ("chat", "sidekick", "ai"):
+    _pkg_mod = _sys.modules.get(_pkg)
+    _v_path = str(_Path(_tools_path) / _pkg)
+    if (
+        _pkg_mod is not None
+        and hasattr(_pkg_mod, "__path__")
+        and _v_path not in _pkg_mod.__path__
+    ):
+        _pkg_mod.__path__.append(_v_path)
 
 
 def _ensure_importable_package(module_name: str, package_path: str) -> None:

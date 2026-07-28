@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 from starlette.websockets import WebSocketDisconnect
 
+import src  # noqa: F401
 import chat.router_factory as shared_router_factory
 import chat.websocket_protocol as shared_protocol
 import src.api.routes.chat_ws as api_chat_ws
