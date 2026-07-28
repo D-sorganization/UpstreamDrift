@@ -535,6 +535,29 @@ def test_find_dataset_path_matches_exact_filename_only(
     assert resolved.name == "swing.csv"
 
 
+def test_find_dataset_path_uses_bounded_scan_not_rglob(
+    temp_dataset_dir, monkeypatch
+) -> None:
+    """Single-dataset resolution must share the bounded scan policy (#8172)."""
+    from pathlib import Path
+    from unittest.mock import patch
+
+    from src.api.routes.data_explorer import _find_dataset_path
+
+    output_dir = Path(temp_dataset_dir)
+    (output_dir / "swing.csv").write_text("a\n1\n", encoding="utf-8")
+
+    def fail_rglob(*_: object, **__: object) -> None:
+        raise AssertionError("_find_dataset_path must not use Path.rglob")
+
+    monkeypatch.setattr(Path, "rglob", fail_rglob)
+
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        resolved = _find_dataset_path("swing.csv")
+
+    assert resolved == output_dir / "swing.csv"
+
+
 def test_find_dataset_path_ambiguous_name_409(temp_dataset_dir) -> None:
     """Two files with the same name in different subdirs yield a 409."""
     from pathlib import Path
@@ -573,6 +596,63 @@ def test_stats_ambiguous_name_returns_409(client: TestClient, temp_dataset_dir) 
     with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
         resp = no_raise.get("/tools/data-explorer/datasets/dup.csv/stats")
     assert resp.status_code == 409
+
+
+def test_preview_returns_409_when_name_resolution_scan_is_truncated(
+    client: TestClient, temp_dataset_dir, monkeypatch
+) -> None:
+    """Preview must not trust a partial scan when uniqueness is unproven."""
+    from pathlib import Path
+    from unittest.mock import patch
+
+    import src.api.routes.data_explorer as de
+
+    output_dir = Path(temp_dataset_dir)
+    target = output_dir / "target.csv"
+    target.write_text("a\n1\n", encoding="utf-8")
+    monkeypatch.setattr(de, "MAX_DATASET_LIST_SCAN", 1)
+
+    def truncated_scan(scan_dir: Path, scan_cap: int) -> tuple[list[Path], bool]:
+        assert scan_dir == output_dir
+        assert scan_cap == 1
+        return [target], True
+
+    monkeypatch.setattr(de, "_scan_dataset_files", truncated_scan)
+
+    no_raise = TestClient(client.app, raise_server_exceptions=False)
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        resp = no_raise.get("/tools/data-explorer/datasets/target.csv/preview")
+
+    assert resp.status_code == 409
+    assert "bounded scan cap" in resp.json()["detail"]
+
+
+def test_stats_and_filter_resolve_names_with_bounded_scan(
+    client: TestClient, temp_dataset_dir, monkeypatch
+) -> None:
+    """Stats/filter should resolve on-disk names without falling back to rglob."""
+    from pathlib import Path
+    from unittest.mock import patch
+
+    output_dir = Path(temp_dataset_dir)
+    (output_dir / "values.csv").write_text("a\n1\n3\n", encoding="utf-8")
+
+    def fail_rglob(*_: object, **__: object) -> None:
+        raise AssertionError("stats/filter name resolution must not use Path.rglob")
+
+    monkeypatch.setattr(Path, "rglob", fail_rglob)
+
+    with patch("src.api.routes.data_explorer._get_output_dir", return_value=output_dir):
+        stats_resp = client.get("/tools/data-explorer/datasets/values.csv/stats")
+        filter_resp = client.post(
+            "/tools/data-explorer/datasets/values.csv/filter",
+            json={"column": "a", "operator": "gt", "value": "1"},
+        )
+
+    assert stats_resp.status_code == 200
+    assert stats_resp.json()["stats"]["a"]["max"] == 3.0
+    assert filter_resp.status_code == 200
+    assert filter_resp.json()["rows"] == [{"a": "3"}]
 
 
 # ---------------------------------------------------------------------------

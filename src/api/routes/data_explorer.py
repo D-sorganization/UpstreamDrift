@@ -592,6 +592,9 @@ def _find_dataset_path(name: str) -> Path:
     ``name`` is matched as a *literal* filename, never as a glob pattern. Names
     containing glob metacharacters (``* ? [ ]``) are rejected outright so a
     client cannot enumerate the output tree via wildcard expansion (#7740 F).
+    Resolution uses the same bounded scan policy as ``GET /datasets`` so
+    preview/stats/filter cannot recursively walk and sort the whole output tree
+    for one client-supplied filename (#8172).
     """
     if any(ch in _GLOB_METACHARACTERS for ch in name):
         raise HTTPException(
@@ -599,9 +602,21 @@ def _find_dataset_path(name: str) -> Path:
             detail="Dataset name must not contain glob metacharacters (* ? [ ])",
         )
     output_dir = _get_output_dir()
-    matches = sorted(
-        path for path in output_dir.rglob("*") if path.name == name and path.is_file()
-    )
+    matches: list[Path] = []
+    truncated = False
+    if output_dir.exists():
+        candidates, truncated = _scan_dataset_files(output_dir, MAX_DATASET_LIST_SCAN)
+        matches = [path for path in candidates if path.name == name]
+
+    if truncated:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Dataset name '{name}' could not be resolved within the bounded "
+                f"scan cap ({MAX_DATASET_LIST_SCAN} files); narrow the output "
+                "tree or use an imported dataset ID"
+            ),
+        )
     if not matches:
         raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
     if len(matches) > 1:
