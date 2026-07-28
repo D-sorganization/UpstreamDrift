@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.engines import router
 from src.api.dependencies import get_engine_manager
-from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineStatus, EngineType
 
 
 class MockEngineCapabilities:
@@ -39,22 +39,20 @@ class MockEngineManager:
         return EngineType.MUJOCO
 
     def get_engine_status(self, engine_type):
-        from enum import Enum
-
-        class Status(Enum):
-            LOADED = "loaded"
-            AVAILABLE = "available"
-            UNAVAILABLE = "unavailable"
-
         if engine_type == EngineType.MUJOCO:
-            return Status.LOADED
-        return Status.AVAILABLE
+            return EngineStatus.LOADED
+        return EngineStatus.AVAILABLE
 
     def switch_engine(self, engine_type):
         return True
 
     def get_active_physics_engine(self):
         return MockEngine()
+
+
+class LoadedOnlyEngineManager(MockEngineManager):
+    def get_available_engines(self):
+        return []
 
 
 @pytest.fixture
@@ -101,6 +99,25 @@ def test_routes_engines_surfaces_jaxsim_capabilities(client: TestClient) -> None
         "gradients",
         "parameter_sensitivity",
     ]
+
+
+def test_loaded_current_engine_is_reported_available() -> None:
+    """A loaded current engine is usable even if availability discovery is stale."""
+    test_app = FastAPI()
+    test_app.include_router(router)
+    test_app.dependency_overrides[get_engine_manager] = LoadedOnlyEngineManager
+    client = TestClient(test_app)
+
+    response = client.get("/engines")
+    assert response.status_code == 200
+
+    mujoco = next(
+        engine for engine in response.json()["engines"] if engine["name"] == "mujoco"
+    )
+    assert mujoco["status"] == "loaded"
+    assert mujoco["loaded"] is True
+    assert mujoco["available"] is True
+    assert mujoco["is_available"] is True
 
 
 def test_load_engine(client: TestClient) -> None:

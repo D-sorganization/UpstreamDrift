@@ -37,6 +37,16 @@ class EngineStatus(Enum):
     ERROR = "error"
 
 
+USABLE_ENGINE_STATUSES: frozenset[EngineStatus] = frozenset(
+    {EngineStatus.AVAILABLE, EngineStatus.LOADED}
+)
+
+
+def is_usable_engine_status(status: EngineStatus) -> bool:
+    """Return whether an engine status means callers can use the engine."""
+    return status in USABLE_ENGINE_STATUSES
+
+
 EngineFactory: TypeAlias = Callable[[], PhysicsEngine]
 
 

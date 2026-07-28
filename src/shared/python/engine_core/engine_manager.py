@@ -27,6 +27,7 @@ from .engine_registry import (
     EngineStatus,
     EngineType,
     get_registry,
+    is_usable_engine_status,
 )
 from .interfaces import PhysicsEngine
 
@@ -209,11 +210,15 @@ class EngineManager(ContractChecker):
         return self.active_physics_engine
 
     def get_available_engines(self) -> list[EngineType]:
-        """Get list of available engines."""
+        """Get list of engines that are usable by callers.
+
+        ``LOADED`` remains available-for-use: the engine passed discovery,
+        loaded successfully, and is the live backend for subsequent requests.
+        """
         return [
             engine
             for engine, status in self.engine_status.items()
-            if status == EngineStatus.AVAILABLE
+            if is_usable_engine_status(status)
         ]
 
     @precondition(
