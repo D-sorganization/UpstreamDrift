@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { ToastProvider } from '@/components/ui/Toast';
 import type { WebSettings } from '@/api/settingsClient';
 import { SETTINGS_CACHE_KEY } from '@/api/settingsClient';

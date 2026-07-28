@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { titleForPath } from './routeTitles';
 
 const APP_NAME = 'Golf Modeling Suite';

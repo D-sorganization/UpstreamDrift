@@ -57,8 +57,8 @@ The Golf Modeling Suite has **EXCEPTIONAL pose manipulation capabilities** imple
 
 **Files**:
 
-- `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/interactive_manipulation.py` (814 lines)
-- `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/manipulation_tab.py` (708 lines)
+- `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/interactive_manipulation.py` (814 lines)
+- `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/manipulation_tab.py` (708 lines)
 
 **Capabilities**:
 
@@ -154,7 +154,7 @@ Located in `AdvancedGolfAnalysisWindow` (advanced_gui.py)
 
 **Files**:
 
-- `engines/physics_engines/drake/python/src/drake_gui_app.py` (2600+ lines)
+- `src/engines/physics_engines/drake/python/src/drake_gui_app.py` (2600+ lines)
 
 **Capabilities**:
 
@@ -210,7 +210,7 @@ def _load_pose(self, pose_name):
 
 **Files**:
 
-- `engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py` (1700+ lines)
+- `src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py` (1700+ lines)
 
 **Capabilities**:
 
@@ -327,7 +327,7 @@ The `tools/urdf_generator/` provides a dedicated URDF editing GUI:
 **1. Launch Advanced GUI**:
 
 ```bash
-cd engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+cd src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
 python -m mujoco_humanoid_golf.advanced_gui
 ```
 
@@ -370,7 +370,7 @@ python -m mujoco_humanoid_golf.advanced_gui
 **1. Launch Drake GUI**:
 
 ```bash
-cd engines/physics_engines/drake/python/src
+cd src/engines/physics_engines/drake/python/src
 python drake_gui_app.py --model path/to/model.urdf
 ```
 
@@ -389,7 +389,7 @@ python drake_gui_app.py --model path/to/model.urdf
 **1. Launch Pinocchio GUI**:
 
 ```bash
-cd engines/physics_engines/pinocchio/python
+cd src/engines/physics_engines/pinocchio/python
 python pinocchio_golf/gui.py --urdf path/to/model.urdf
 ```
 
@@ -417,7 +417,9 @@ _**Best Practice**: Use MuJoCo for initial posing (drag & drop), then export joi
 
 ```python
 import mujoco
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interactive_manipulation import InteractiveManipulator
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interactive_manipulation import (
+    InteractiveManipulator,
+)
 
 # Load model
 model = mujoco.MjModel.from_xml_path("human_golf.xml")

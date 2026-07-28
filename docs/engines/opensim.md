@@ -17,12 +17,14 @@ The OpenSim implementation adheres to the `PhysicsEngine` protocol, allowing int
 
 ## Usage
 
-Located in `engines/physics_engines/opensim/`.
+Located in `src/engines/physics_engines/opensim/`.
 
 ### Python Access
 
 ```python
-from engines.physics_engines.opensim.python.opensim_physics_engine import OpenSimPhysicsEngine
+from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+    OpenSimPhysicsEngine,
+)
 
 engine = OpenSimPhysicsEngine()
 engine.load_from_path("path/to/model.osim")
@@ -35,5 +37,5 @@ engine.step(0.01)
 Launch the OpenSim-specific diagnostic GUI:
 
 ```bash
-python -m engines.physics_engines.opensim.python.opensim_gui
+python src/engines/physics_engines/opensim/python/opensim_gui.py
 ```

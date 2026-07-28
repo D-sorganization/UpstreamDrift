@@ -28,7 +28,7 @@ from a tile in the launcher.
 
 ### 1. Pick the mocap file and subject scalars
 
-![Calibration dialog — initial screen](img/calibration_dialog.png)
+> **Screenshot pending:** Calibration dialog — initial screen — capture to `img/calibration_dialog.png` and restore the image here.
 
 - **C3D file.** Click _Browse…_ and select `data/C3D_TA_Driver.c3d`
   (the bundled worked example). The dialog reads
@@ -55,7 +55,7 @@ under 100 ms for a 16-segment subject.
 
 ### 3. Inspect the segments
 
-![Segment properties panel populated](img/segment_properties_panel.png)
+> **Screenshot pending:** Segment properties panel populated — capture to `img/segment_properties_panel.png` and restore the image here.
 
 The right-hand `SegmentPropertiesPanel` displays the currently
 selected segment:

@@ -6,17 +6,17 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 
 ## Quick Navigation
 
-| I want to...            | Go to...                                               |
-| ----------------------- | ------------------------------------------------------ |
-| Get started quickly     | [Quick Start](#quick-start)                            |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)            |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)                |
-| Add a physics engine    | [Adapter Authoring Guide](adapters/authoring_guide.md) |
-| Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md)    |
-| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)           |
-| Review architecture     | [ADRs](adr/)                                           |
-| Read the specification  | [SPEC](../SPEC.md)                                     |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                    |
+| I want to...            | Go to...                                                    |
+| ----------------------- | ----------------------------------------------------------- |
+| Get started quickly     | [Quick Start](#quick-start)                                 |
+| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)                 |
+| Develop new features    | [Development Guide](api/DEVELOPMENT.md)                     |
+| Add a physics engine    | [Adapter Authoring Guide](adapters/authoring_guide.md)      |
+| Choose a physics engine | [Engine Selection Guide](engines/engine_selection_guide.md) |
+| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)                |
+| Review architecture     | [ADRs](adr/)                                                |
+| Read the specification  | [SPEC](../SPEC.md)                                          |
+| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                         |
 
 ---
 
@@ -117,7 +117,7 @@ Choose from 6+ physics engines:
 | **MyoSuite**  | 290-muscle body models           |
 | **MATLAB**    | Simscape Multibody models        |
 
-See [Engine Selection Guide](engine_selection_guide.md) for details.
+See [Engine Selection Guide](engines/engine_selection_guide.md) for details.
 
 ### Design Principles
 
@@ -276,7 +276,7 @@ repository maintenance guidance.
 
 ## Archived Documentation
 
-Historical assessments, phase plans, and old implementation reports have been moved to [archive/](archive/).
+Historical assessments, phase plans, and old implementation reports have been moved to [archive/](historical/).
 
 ---
 
