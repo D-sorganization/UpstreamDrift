@@ -30,6 +30,7 @@ from ._c3d_models import (
 logger = get_logger(__name__)
 
 C3DMapping = dict[str, Any]
+DEFAULT_POINT_UNITS = "mm"
 
 
 def load_c3d(file_path: Path) -> C3DMapping:
@@ -93,6 +94,15 @@ def get_analog_details(
         units = units[: len(labels)]
 
     return labels, analog_rate, units
+
+
+def get_point_units(point_parameters: dict[str, Any]) -> str:
+    """Return POINT units, defaulting malformed legacy C3D metadata to mm."""
+    values = point_parameters.get("UNITS", {}).get("value", [])
+    if not values:
+        return DEFAULT_POINT_UNITS
+    units = str(values[0]).strip()
+    return units or DEFAULT_POINT_UNITS
 
 
 def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
@@ -380,7 +390,7 @@ def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
     marker_labels = [label.strip() for label in point_parameters["LABELS"]["value"]]
     frame_count = int(point_parameters["FRAMES"]["value"][0])
     frame_rate = float(point_parameters["RATE"]["value"][0])
-    units = str(point_parameters["UNITS"]["value"][0])
+    units = get_point_units(point_parameters)
     analog_labels, analog_rate, analog_units = get_analog_details(c3d_data)
     events = get_events(c3d_data)
     force_plates = get_force_platforms(c3d_data, len(analog_labels))

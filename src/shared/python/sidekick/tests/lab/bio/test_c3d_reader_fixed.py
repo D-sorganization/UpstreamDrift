@@ -22,7 +22,7 @@ from sidekick.lab.bio.c3d_reader import C3DDataReader
 class TestC3DDataReader:
     @pytest.fixture
     def mock_ezc3d(self) -> Generator[MagicMock, None, None]:
-        with patch("sidekick.lab.bio.c3d_reader.ezc3d") as mock:
+        with patch("sidekick.lab.bio._c3d_io.ezc3d") as mock:
             yield mock
 
     @pytest.fixture

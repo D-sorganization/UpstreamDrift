@@ -26,6 +26,7 @@ from sidekick.lab.bio.c3d_reader import (
     C3DEvent,
     C3DMetadata,
 )
+from sidekick.lab.bio._c3d_io import build_metadata
 
 # ---------------------------------------------------------------------------
 # C3DEvent validation
@@ -87,6 +88,47 @@ class TestC3DMetadataValidation:
             events=[],
         )
         assert meta.duration == 0.0
+
+    @pytest.fixture()
+    def c3d_point_metadata(self) -> dict:
+        return {
+            "parameters": {
+                "POINT": {
+                    "LABELS": {"value": ["M1"]},
+                    "FRAMES": {"value": [10]},
+                    "RATE": {"value": [100.0]},
+                    "UNITS": {"value": ["cm"]},
+                },
+                "ANALOG": {
+                    "LABELS": {"value": []},
+                    "UNITS": {"value": []},
+                    "RATE": {"value": [0.0]},
+                },
+            },
+            "data": {
+                "analogs": np.empty((1, 0, 0)),
+            },
+        }
+
+    def test_metadata_defaults_absent_point_units_to_mm(
+        self, c3d_point_metadata: dict
+    ) -> None:
+        """C3D files without POINT:UNITS still build actionable metadata."""
+        del c3d_point_metadata["parameters"]["POINT"]["UNITS"]
+
+        metadata = build_metadata(c3d_point_metadata, Path("missing-units.c3d"))
+
+        assert metadata.units == "mm"
+
+    def test_metadata_defaults_empty_point_units_to_mm(
+        self, c3d_point_metadata: dict
+    ) -> None:
+        """Empty POINT:UNITS values use the same default as absent units."""
+        c3d_point_metadata["parameters"]["POINT"]["UNITS"]["value"] = []
+
+        metadata = build_metadata(c3d_point_metadata, Path("empty-units.c3d"))
+
+        assert metadata.units == "mm"
 
     def test_duration_correct(self) -> None:
         """Duration = frame_count / frame_rate."""
@@ -157,7 +199,7 @@ class TestAnalogEdgeCases:
 
     @pytest.fixture()
     def mock_ezc3d(self):
-        with patch("sidekick.lab.bio.c3d_reader.ezc3d") as mock:
+        with patch("sidekick.lab.bio._c3d_io.ezc3d") as mock:
             yield mock
 
     @pytest.fixture()

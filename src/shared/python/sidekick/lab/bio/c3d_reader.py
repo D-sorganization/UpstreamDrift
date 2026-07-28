@@ -72,6 +72,8 @@ class C3DDataReader:
 
     def __init__(self, file_path: Path | str) -> None:
         """Initialize the C3D data reader with a file path."""
+        if not str(file_path):
+            raise ValueError("file_path must be provided")
         self.file_path = Path(file_path)
         self._c3d_data: C3DMapping | None = None
         self._metadata: C3DMetadata | None = None
