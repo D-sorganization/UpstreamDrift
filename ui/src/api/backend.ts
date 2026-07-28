@@ -11,23 +11,10 @@
  * See issue #6637.
  */
 
-/** Single source of truth for the Python backend port (issue #6637). */
-export const BACKEND_PORT = 8000;
+import { apiFetch } from './fetch';
+import { BACKEND_PORT, isTauri } from './base';
 
-/**
- * Returns the base URL for the Python API.
- *
- * - In Tauri mode the UI and backend are on different origins, so we
- *   return `http://localhost:BACKEND_PORT`.
- * - In browser/Vite mode the dev-server proxies `/api` so we return
- *   an empty string (relative URLs work fine).
- */
-export function getApiBase(): string {
-  if (isTauri()) {
-    return `http://localhost:${BACKEND_PORT}`;
-  }
-  return '';
-}
+export { BACKEND_PORT, getApiBase, isTauri } from './base';
 
 export interface BackendStatus {
   running: boolean;
@@ -42,11 +29,6 @@ export interface DiagnosticInfo {
   python_version: string | null;
   repo_root: string | null;
   local_server_found: boolean;
-}
-
-/** Check if we are running inside a Tauri window. */
-export function isTauri(): boolean {
-  return '__TAURI_INTERNALS__' in window;
 }
 
 async function invoke<T>(cmd: string): Promise<T> {
@@ -83,15 +65,8 @@ export async function getBackendStatus(): Promise<BackendStatus> {
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
     // In browser mode, call the backend API endpoint.
-    // NOTE: cannot use apiFetch here — fetch.ts imports getApiBase from this
-    // module, so importing apiFetch back would create a circular dependency.
-    // We build the URL via getApiBase() directly to stay Tauri-safe (#6897).
     try {
-      const response = await fetch(`${getApiBase()}/api/diagnostics`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      return await response.json();
+      return await apiFetch<DiagnosticInfo>('/api/diagnostics');
     } catch (error) {
       // Fallback if backend is not available
       return {

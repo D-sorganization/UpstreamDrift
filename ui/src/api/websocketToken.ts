@@ -17,7 +17,7 @@
  * acquire the token on demand, independently of which route mounted first.
  */
 
-import { getApiBase } from './backend';
+import { apiFetch } from './fetch';
 
 const LAUNCHER_WS_TOKEN_QUERY = 'launcher_token';
 
@@ -71,13 +71,9 @@ export async function ensureLauncherCapabilityToken(): Promise<string | null> {
 
   inFlightTokenFetch = (async (): Promise<string | null> => {
     try {
-      const response = await fetch(`${getApiBase()}/api/launcher/manifest`, {
-        signal: AbortSignal.timeout(MANIFEST_TIMEOUT_MS),
+      const body = await apiFetch<Record<string, unknown>>('/api/launcher/manifest', {
+        timeoutMs: MANIFEST_TIMEOUT_MS,
       });
-      if (!response.ok) {
-        return null;
-      }
-      const body = (await response.json()) as Record<string, unknown>;
       const token = body.launcher_csrf_token;
       if (typeof token === 'string' && token.length > 0) {
         launcherCapabilityToken = token;

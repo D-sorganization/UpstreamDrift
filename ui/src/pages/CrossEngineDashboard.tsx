@@ -10,7 +10,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { getApiBase } from '@/api/backend';
+import { apiFetch } from '@/api/fetch';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -71,27 +71,15 @@ async function startStudy(
   engines: EngineName[],
   config: PerturbationConfig,
 ): Promise<string> {
-  const base = getApiBase();
-  const resp = await fetch(`${base}/api/v1/analysis/cross-engine`, {
+  const data = await apiFetch<{ task_id: string }>('/api/v1/analysis/cross-engine', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ engines, config }),
   });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`Failed to start study: ${resp.status} ${text}`);
-  }
-  const data = await resp.json();
-  return data.task_id as string;
+  return data.task_id;
 }
 
 async function pollStatus(taskId: string): Promise<{ status: string; result?: CrossEngineResult; error?: string }> {
-  const base = getApiBase();
-  const resp = await fetch(`${base}/api/v1/analysis/cross-engine/status/${taskId}`);
-  if (!resp.ok) {
-    throw new Error(`Poll failed: ${resp.status}`);
-  }
-  return resp.json();
+  return apiFetch(`/api/v1/analysis/cross-engine/status/${encodeURIComponent(taskId)}`);
 }
 
 // ---------------------------------------------------------------------------

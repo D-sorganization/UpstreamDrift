@@ -116,6 +116,7 @@ describe('CharacterBuilderPage', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: expect.any(AbortSignal),
       body: JSON.stringify({
         height_m: 1.8,
         mass_kg: 80,
