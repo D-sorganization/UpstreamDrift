@@ -117,7 +117,7 @@ async def get_full_diagnostics() -> dict[str, Any]:
         build_report,
     )
 
-    diag = LauncherDiagnostics()
+    diag = LauncherDiagnostics(capture_results=False, publish_results=False)
     outcomes = await safe_gather(
         *(_run_probe(diag, name, DiagnosticResult) for name in DIAGNOSTIC_CHECKS)
     )
@@ -135,6 +135,7 @@ async def get_full_diagnostics() -> dict[str, Any]:
         else:
             results.append(outcome)
 
+    diag.finalize_results(results, publish=True)
     return build_report(results, expected_tiles=len(diag.EXPECTED_TILE_IDS))
 
 

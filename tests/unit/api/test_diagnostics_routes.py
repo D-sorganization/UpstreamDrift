@@ -85,6 +85,45 @@ class TestFullDiagnosticsEndpoint:
         assert by_name[slow_name]["status"] == "warning"
         assert "timed out" in by_name[slow_name]["message"]
 
+    def test_timed_out_probe_cannot_publish_late_success(
+        self, stubbed_checks: None, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        slow_name = DIAGNOSTIC_CHECKS[0]
+        instances: list[LauncherDiagnostics] = []
+        published: list[tuple[str, str]] = []
+        original_init = LauncherDiagnostics.__init__
+
+        def tracking_init(self: LauncherDiagnostics, *args: Any, **kwargs: Any) -> None:
+            original_init(self, *args, **kwargs)
+            instances.append(self)
+
+        def slow_check(self: LauncherDiagnostics) -> DiagnosticResult:
+            time.sleep(0.15)
+            result = DiagnosticResult(name=slow_name, status="pass", message="late")
+            self._record_result(result)
+            return result
+
+        monkeypatch.setattr(LauncherDiagnostics, "__init__", tracking_init)
+        monkeypatch.setattr(LauncherDiagnostics, f"check_{slow_name}", slow_check)
+        monkeypatch.setattr(
+            LauncherDiagnostics,
+            "_publish_result",
+            staticmethod(lambda result: published.append((result.name, result.status))),
+        )
+        monkeypatch.setattr(diagnostics_routes, "PROBE_TIMEOUT_SECONDS", 0.05)
+
+        body = _client().get("/api/v1/diagnostics/full").json()
+        time.sleep(0.25)
+
+        by_name = {check["name"]: check for check in body["checks"]}
+        assert by_name[slow_name]["status"] == "warning"
+        assert instances
+        recorded = [(result.name, result.status) for result in instances[0].results]
+        assert (slow_name, "warning") in recorded
+        assert (slow_name, "pass") not in recorded
+        assert (slow_name, "warning") in published
+        assert (slow_name, "pass") not in published
+
     def test_hidden_in_production(
         self, stubbed_checks: None, monkeypatch: pytest.MonkeyPatch
     ) -> None:

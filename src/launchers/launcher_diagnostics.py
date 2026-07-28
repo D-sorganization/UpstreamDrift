@@ -188,10 +188,17 @@ class LauncherDiagnostics:
         "project_map": "Project Map",
     }
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        capture_results: bool = True,
+        publish_results: bool = True,
+    ) -> None:
         """Initialize diagnostics."""
         self.results: list[DiagnosticResult] = []
         self._start_time = time.time()
+        self._capture_results = capture_results
+        self._publish_results = publish_results
 
     @staticmethod
     def _push_to_ring_buffer(results: list[DiagnosticResult]) -> None:
@@ -218,13 +225,13 @@ class LauncherDiagnostics:
         except Exception:  # noqa: BLE001
             pass
 
-    def _record_result(self, result: DiagnosticResult) -> None:
-        """Append *result* to ``self.results`` and push it to the ring buffer.
+    @staticmethod
+    def _publish_result(result: DiagnosticResult) -> None:
+        """Push one diagnostic result to shared diagnostic channels.
 
         Best-effort ring-buffer write: any failure from `record_event` is
         silently swallowed so a buffer outage never breaks the diagnostic run.
         """
-        self.results.append(result)
         try:
             from src.shared.python.app_state import get_state_logger
 
@@ -253,6 +260,26 @@ class LauncherDiagnostics:
             )
         except Exception:  # noqa: BLE001
             pass
+
+    def _record_result(self, result: DiagnosticResult) -> None:
+        """Append and publish *result* according to this instance's policy."""
+        if self._capture_results:
+            self.results.append(result)
+        if self._publish_results:
+            self._publish_result(result)
+
+    def finalize_results(
+        self,
+        results: list[DiagnosticResult],
+        *,
+        publish: bool | None = None,
+    ) -> None:
+        """Replace captured results and optionally publish that final result set."""
+        self.results = list(results)
+        should_publish = self._publish_results if publish is None else publish
+        if should_publish:
+            for result in results:
+                self._publish_result(result)
 
     def run_all_checks(self) -> dict[str, Any]:
         """Run all diagnostic checks and return comprehensive report.
