@@ -153,6 +153,25 @@ class TestSecureSubprocess(unittest.TestCase):
 
         mock_popen.assert_called_once()
 
+    @patch("src.shared.python.security.secure_subprocess.subprocess.run")
+    def test_secure_run_allows_movement_optimizer_sibling(self, mock_run) -> None:
+        """secure_run shares the same trusted-sibling cwd validation as Popen."""
+        suite_root = self.suite_root / "UpstreamDrift"
+        suite_root.mkdir()
+        optimizer_root = self.suite_root / "Movement_Optimizer"
+        script_path = optimizer_root / "src" / "movement_optimizer" / "__main__.py"
+        script_path.parent.mkdir(parents=True)
+        script_path.write_text("pass\n", encoding="utf-8")
+
+        secure_run(
+            [sys.executable, str(script_path)],
+            cwd=optimizer_root,
+            suite_root=suite_root,
+            timeout=5.0,
+        )
+
+        mock_run.assert_called_once()
+
     @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
     def test_secure_popen_valid_command(self, mock_popen) -> None:
         """Test secure_popen with valid command."""
@@ -251,6 +270,14 @@ class TestSecureSubprocess(unittest.TestCase):
                 ["python", "--version"],
                 cwd=str(outside_dir),
                 suite_root=self.suite_root,
+            )
+
+        with self.assertRaises(SecureSubprocessError):
+            secure_run(
+                ["python", "--version"],
+                cwd=str(outside_dir),
+                suite_root=self.suite_root,
+                timeout=5.0,
             )
 
 

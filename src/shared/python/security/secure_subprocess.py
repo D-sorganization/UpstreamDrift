@@ -121,6 +121,26 @@ def _trusted_sibling_roots_for_security(suite_root: Path) -> tuple[Path, ...]:
     return tuple(root.resolve() for root in roots if root is not None)
 
 
+def _validate_working_directory(
+    cwd: Path | str | None,
+    suite_root: Path | None,
+) -> None:
+    """Validate that the working directory is inside an allowed root."""
+    if not cwd or suite_root is None:
+        return
+
+    cwd_path = Path(cwd).resolve()
+    suite_root_abs = suite_root.resolve()
+    allowed_roots = (
+        suite_root_abs,
+        *_trusted_sibling_roots_for_security(suite_root_abs),
+    )
+    if not any(_is_within_root(cwd_path, root) for root in allowed_roots):
+        raise SecureSubprocessError(
+            f"Working directory outside allowed suite/sibling directories: {cwd_path}"
+        )
+
+
 def validate_script_path(script_path: Path, suite_root: Path) -> None:
     """Validate that a script path is safe to execute.
 
@@ -258,21 +278,7 @@ def secure_popen(  # noqa: C901
                 # If path parsing fails, continue (might be a module name)
                 pass
 
-    # Validate working directory
-    if cwd:
-        cwd_path = Path(cwd).resolve()
-        if suite_root:
-            suite_root_abs = suite_root.resolve()
-            sibling_roots = _trusted_sibling_roots_for_security(suite_root_abs)
-            in_suite = _is_within_root(cwd_path, suite_root_abs)
-            in_sibling = any(
-                _is_within_root(cwd_path, sibling_root)
-                for sibling_root in sibling_roots
-            )
-            if not in_suite and not in_sibling:
-                raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/sibling directories: {cwd_path}"
-                )
+    _validate_working_directory(cwd, suite_root)
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
     _apply_hidden_window_default(kwargs)
@@ -337,21 +343,7 @@ def secure_run(  # noqa: C901
                 # If path parsing fails, continue (might be a module name)
                 pass
 
-    # Validate working directory
-    if cwd:
-        cwd_path = Path(cwd).resolve()
-        if suite_root:
-            suite_root_abs = suite_root.resolve()
-            sibling_roots = _trusted_sibling_roots_for_security(suite_root_abs)
-            in_suite = _is_within_root(cwd_path, suite_root_abs)
-            in_sibling = any(
-                _is_within_root(cwd_path, sibling_root)
-                for sibling_root in sibling_roots
-            )
-            if not in_suite and not in_sibling:
-                raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/sibling directories: {cwd_path}"
-                )
+    _validate_working_directory(cwd, suite_root)
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")
     _apply_hidden_window_default(kwargs)
