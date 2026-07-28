@@ -20,6 +20,8 @@ Contract locked in by these tests:
 from __future__ import annotations
 
 import importlib
+import json
+import subprocess
 import sys
 from types import ModuleType
 from unittest import mock
@@ -53,6 +55,8 @@ _SQLALCHEMY_NAMES = [
     "sqlalchemy.ext",
     "sqlalchemy.ext.declarative",
 ]
+
+pytestmark = pytest.mark.unit
 
 
 def _evict_api_modules() -> dict[str, ModuleType]:
@@ -166,6 +170,50 @@ class TestHeavySubmodulesFailGracefullyWithoutSQLAlchemy:
                 assert isinstance(services, ModuleType)
         finally:
             _restore_api_modules(saved)
+
+    def test_import_services_package_is_quiet_and_does_not_load_services(
+        self,
+    ) -> None:
+        """``import src.api.services`` must not import concrete services eagerly."""
+        code = (
+            "import json, sys\n"
+            "import src.api.services\n"
+            "loaded = sorted(k for k in sys.modules if k.startswith('src.api.services.'))\n"
+            "print(json.dumps({'loaded': loaded}))\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            check=True,
+            text=True,
+        )
+
+        assert result.stderr == ""
+        assert result.stdout.startswith("{"), result.stdout
+        data = json.loads(result.stdout)
+        assert data["loaded"] == []
+
+    def test_services_launcher_export_resolves_only_launcher_service(self) -> None:
+        """The public service export remains lazy and backwards compatible."""
+        code = (
+            "import json, sys\n"
+            "from src.api.services import LauncherService\n"
+            "loaded = sorted(k for k in sys.modules if k.startswith('src.api.services.'))\n"
+            "print(json.dumps({'name': LauncherService.__name__, 'loaded': loaded}))\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            check=True,
+            text=True,
+        )
+
+        data = json.loads(result.stdout)
+        assert result.stderr == ""
+        assert data == {
+            "name": "LauncherService",
+            "loaded": ["src.api.services.launcher_service"],
+        }
 
     def test_get_current_user_raises_without_sqlalchemy(self) -> None:
         """``src.api.get_current_user`` is re-exported from auth; must raise."""
