@@ -224,6 +224,32 @@ class MatchingBackendType(str, Enum):
     INVERSE_DYN_PINOCCHIO = "pinocchio_inverse_dyn"  # Pinocchio RNEA
 
 
+_EXPERIMENTAL_BACKEND_REASONS: dict[MatchingBackendType, str] = {
+    MatchingBackendType.CMC: "OpenSim CMC muscle redundancy solve is not implemented",
+    MatchingBackendType.RRA: "OpenSim RRA setup, execution, and residual parsing are not implemented",
+    MatchingBackendType.TRAJOPT_DRAKE: (
+        "Drake direct-collocation/contact-implicit trajectory optimization "
+        "is not implemented"
+    ),
+}
+
+
+def production_matching_backends() -> frozenset[MatchingBackendType]:
+    """Return backends the factory may expose for production solver creation."""
+    return frozenset(
+        backend
+        for backend in MatchingBackendType
+        if backend not in _EXPERIMENTAL_BACKEND_REASONS
+    )
+
+
+def is_production_matching_backend(backend: MatchingBackendType | str) -> bool:
+    """Return whether ``backend`` is production-exposed by default."""
+    if isinstance(backend, str):
+        backend = MatchingBackendType(backend.lower())
+    return backend in production_matching_backends()
+
+
 @dataclass
 class CostWeights:
     """
@@ -558,6 +584,7 @@ def make_matching_solver(
     cost_weights: CostWeights | None = None,
     *,
     urdf_path: str | None = None,
+    allow_experimental: bool = False,
 ) -> MotionMatchingSolver:
     """
     Factory function to create a motion matching solver for the specified backend.
@@ -566,6 +593,8 @@ def make_matching_solver(
         backend: Backend type (cmc, rra, drake_trajopt, mujoco_torque, pinocchio_inverse_dyn)
         cost_weights: Optional cost weights
         urdf_path: Optional production URDF path for Pinocchio inverse dynamics
+        allow_experimental: Opt in to unavailable placeholder backends for
+            solver-development tests only.
 
     Returns:
         MotionMatchingSolver instance
@@ -576,6 +605,14 @@ def make_matching_solver(
     """
     if isinstance(backend, str):
         backend = MatchingBackendType(backend.lower())
+
+    experimental_reason = _EXPERIMENTAL_BACKEND_REASONS.get(backend)
+    if experimental_reason is not None and not allow_experimental:
+        raise ValueError(
+            f"Motion matching backend '{backend.value}' is not production-ready: "
+            f"{experimental_reason}. Pass allow_experimental=True only for "
+            "backend-development tests."
+        )
 
     if backend == MatchingBackendType.CMC:
         from .cmc import CMCMatchingSolver
