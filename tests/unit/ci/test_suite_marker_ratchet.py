@@ -53,6 +53,57 @@ def test_static_scan_honors_module_class_and_function_markers(tmp_path, monkeypa
     assert mod.collect_unmarked_nodeids() == []
 
 
+def test_static_scan_uses_configured_pytest_testpaths(tmp_path, monkeypatch):
+    mod = _load_module()
+    repo_root = tmp_path
+    tests_root = repo_root / "tests"
+    colocated_root = repo_root / "src" / "pkg" / "tests"
+    tests_root.mkdir(parents=True)
+    colocated_root.mkdir(parents=True)
+    (repo_root / "pyproject.toml").write_text(
+        "\n".join(
+            [
+                "[tool.pytest.ini_options]",
+                'testpaths = ["tests", "src/pkg/tests"]',
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tests_root / "test_marked.py").write_text(
+        "import pytest\n\npytestmark = pytest.mark.unit\n\n"
+        "def test_marked():\n    pass\n",
+        encoding="utf-8",
+    )
+    (colocated_root / "test_unmarked.py").write_text(
+        "def test_colocated_needs_marker():\n    pass\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(mod, "REPO_ROOT", repo_root)
+
+    assert mod.collect_unmarked_nodeids() == [
+        "src/pkg/tests/test_unmarked.py::test_colocated_needs_marker"
+    ]
+
+
+def test_static_scan_accepts_relative_roots_from_repo_root(tmp_path, monkeypatch):
+    mod = _load_module()
+    repo_root = tmp_path
+    src_root = repo_root / "src" / "pkg" / "tests"
+    src_root.mkdir(parents=True)
+    (src_root / "test_unmarked.py").write_text(
+        "def test_relative_root_needs_marker():\n    pass\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(mod, "REPO_ROOT", repo_root)
+    monkeypatch.chdir(repo_root)
+
+    assert mod.collect_unmarked_nodeids(Path("src")) == [
+        "src/pkg/tests/test_unmarked.py::test_relative_root_needs_marker"
+    ]
+
+
 def test_ratchet_fails_for_new_unmarked_test(tmp_path, monkeypatch, capsys):
     mod = _load_module()
     repo_root = tmp_path

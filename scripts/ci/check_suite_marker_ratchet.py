@@ -25,6 +25,7 @@ import ast
 import json
 import pathlib
 import sys
+import tomllib
 from collections.abc import Iterable
 from typing import TypeGuard
 
@@ -103,7 +104,8 @@ def _is_test_class(node: ast.AST) -> TypeGuard[ast.ClassDef]:
 
 
 def _nodeid(path: pathlib.Path, *parts: str) -> str:
-    rel = path.relative_to(REPO_ROOT).as_posix()
+    resolved_path = _resolve_scan_root(path)
+    rel = resolved_path.relative_to(REPO_ROOT.resolve()).as_posix()
     return "::".join((rel, *parts))
 
 
@@ -137,19 +139,73 @@ def _unmarked_in_file(path: pathlib.Path) -> list[str]:
 
 def iter_test_files(root: pathlib.Path = TESTS_ROOT) -> Iterable[pathlib.Path]:
     seen: set[pathlib.Path] = set()
+    scan_root = _resolve_scan_root(root)
+    if not scan_root.exists():
+        return
     for pattern in TEST_FILE_GLOBS:
-        for path in root.rglob(pattern):
-            if path.is_file() and path not in seen:
-                seen.add(path)
-                yield path
+        for path in scan_root.rglob(pattern):
+            resolved_path = path.resolve()
+            if resolved_path.is_file() and resolved_path not in seen:
+                seen.add(resolved_path)
+                yield resolved_path
 
 
 def collect_unmarked_nodeids(root: pathlib.Path | None = None) -> list[str]:
-    scan_root = TESTS_ROOT if root is None else root
-    nodeids: list[str] = []
-    for path in sorted(iter_test_files(scan_root)):
-        nodeids.extend(_unmarked_in_file(path))
+    scan_roots = (
+        configured_test_roots() if root is None else (_resolve_scan_root(root),)
+    )
+    nodeids: set[str] = set()
+    for scan_root in scan_roots:
+        for path in sorted(iter_test_files(scan_root)):
+            nodeids.update(_unmarked_in_file(path))
     return sorted(normalize_nodeid(nodeid) for nodeid in nodeids)
+
+
+def configured_test_roots(
+    repo_root: pathlib.Path | None = None,
+) -> tuple[pathlib.Path, ...]:
+    """Return pytest testpaths resolved under *repo_root*.
+
+    Postcondition: returned paths are absolute so nodeid normalization is stable
+    whether callers pass absolute or repo-relative roots.
+    """
+    active_repo_root = _active_repo_root(repo_root)
+    pyproject_path = active_repo_root / "pyproject.toml"
+    if not pyproject_path.exists():
+        return (_resolve_scan_root(TESTS_ROOT, active_repo_root),)
+
+    with pyproject_path.open("rb") as fh:
+        config = tomllib.load(fh)
+    testpaths = (
+        config.get("tool", {})
+        .get("pytest", {})
+        .get("ini_options", {})
+        .get("testpaths", [])
+    )
+    if not isinstance(testpaths, list):
+        return (_resolve_scan_root(TESTS_ROOT, active_repo_root),)
+
+    roots = [
+        _resolve_scan_root(pathlib.Path(entry), active_repo_root)
+        for entry in testpaths
+        if isinstance(entry, str)
+    ]
+    return (
+        tuple(roots) if roots else (_resolve_scan_root(TESTS_ROOT, active_repo_root),)
+    )
+
+
+def _resolve_scan_root(
+    path: pathlib.Path,
+    repo_root: pathlib.Path | None = None,
+) -> pathlib.Path:
+    active_repo_root = _active_repo_root(repo_root)
+    candidate = path if path.is_absolute() else active_repo_root / path
+    return candidate.resolve()
+
+
+def _active_repo_root(repo_root: pathlib.Path | None = None) -> pathlib.Path:
+    return (REPO_ROOT if repo_root is None else repo_root).resolve()
 
 
 def _load_baseline(path: pathlib.Path | None = None) -> list[str]:
