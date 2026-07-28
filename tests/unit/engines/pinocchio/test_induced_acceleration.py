@@ -3,22 +3,31 @@
 from __future__ import annotations
 
 import importlib
+import sys
 from collections.abc import Generator
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-mock_pin = MagicMock()
-with patch.dict("sys.modules", {"pinocchio": mock_pin}):
-    induced_acceleration_mod = importlib.import_module(
-        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration"
-    )
-
-InducedAccelerationAnalyzer = (  # noqa: N816
-    induced_acceleration_mod.InducedAccelerationAnalyzer
+_MODULE_NAME = (
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration"
 )
+
+
+@pytest.fixture
+def induced_acceleration_module(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[tuple[Any, MagicMock], None, None]:
+    """Import induced acceleration with a scoped fake Pinocchio module."""
+    mock_pin = MagicMock()
+    monkeypatch.setitem(sys.modules, "pinocchio", mock_pin)
+    sys.modules.pop(_MODULE_NAME, None)
+    module = importlib.import_module(_MODULE_NAME)
+    monkeypatch.setattr(module, "pin", mock_pin)
+    yield module, mock_pin
+    sys.modules.pop(_MODULE_NAME, None)
 
 
 class TestPinocchioInducedAcceleration:
@@ -26,13 +35,13 @@ class TestPinocchioInducedAcceleration:
 
     @pytest.fixture(autouse=True)
     def reset_mocks(
-        self, monkeypatch: pytest.MonkeyPatch
+        self, induced_acceleration_module: tuple[Any, MagicMock]
     ) -> Generator[None, None, None]:
         """Reset mocks before each test."""
+        induced_acceleration_mod, mock_pin = induced_acceleration_module
         mock_pin.reset_mock()
         mock_pin.aba.side_effect = None
         mock_pin.aba.return_value = MagicMock()  # Default return
-        monkeypatch.setattr(induced_acceleration_mod, "pin", mock_pin)
         yield
 
     @pytest.fixture
@@ -50,12 +59,20 @@ class TestPinocchioInducedAcceleration:
         return MagicMock()
 
     @pytest.fixture
-    def analyzer(self, mock_model, mock_data) -> InducedAccelerationAnalyzer:
+    def analyzer(
+        self,
+        induced_acceleration_module: tuple[Any, MagicMock],
+        mock_model: MagicMock,
+        mock_data: MagicMock,
+    ) -> Any:
         """Create analyzer instance."""
-        return InducedAccelerationAnalyzer(mock_model, mock_data)
+        induced_acceleration_mod, _mock_pin = induced_acceleration_module
+        return induced_acceleration_mod.InducedAccelerationAnalyzer(
+            mock_model, mock_data
+        )
 
     def test_induced_acceleration_initialization(
-        self, analyzer, mock_model, mock_data
+        self, analyzer: Any, mock_model: MagicMock, mock_data: MagicMock
     ) -> None:
         """Test initialization."""
         assert analyzer.model == mock_model
@@ -63,8 +80,14 @@ class TestPinocchioInducedAcceleration:
         assert analyzer._temp_data is not None
         assert analyzer._temp_data != mock_data  # Should be a new instance
 
-    def test_compute_components_logic(self, analyzer, mock_model) -> None:
+    def test_compute_components_logic(
+        self,
+        induced_acceleration_module: tuple[Any, MagicMock],
+        analyzer: Any,
+        mock_model: MagicMock,
+    ) -> None:
         """Test compute_components logical flow."""
+        _induced_acceleration_mod, mock_pin = induced_acceleration_module
         q = np.array([0.0, 0.0])
         v = np.array([0.1, 0.2])
         tau = np.array([1.0, 2.0])
@@ -102,8 +125,14 @@ class TestPinocchioInducedAcceleration:
         # Verify calls were made
         assert mock_pin.aba.call_count == 3
 
-    def test_compute_specific_control(self, analyzer, mock_model) -> None:
+    def test_compute_specific_control(
+        self,
+        induced_acceleration_module: tuple[Any, MagicMock],
+        analyzer: Any,
+        mock_model: MagicMock,
+    ) -> None:
         """Test compute_specific_control."""
+        _induced_acceleration_mod, mock_pin = induced_acceleration_module
         q = np.zeros(2)
         specific_tau = np.array([5.0, 5.0])
 
@@ -125,8 +154,14 @@ class TestPinocchioInducedAcceleration:
         np.testing.assert_allclose(result, [5.0, 5.0])
         assert mock_pin.aba.call_count == 2
 
-    def test_compute_counterfactuals(self, analyzer, mock_model) -> None:
+    def test_compute_counterfactuals(
+        self,
+        induced_acceleration_module: tuple[Any, MagicMock],
+        analyzer: Any,
+        mock_model: MagicMock,
+    ) -> None:
         """Test compute_counterfactuals."""
+        _induced_acceleration_mod, mock_pin = induced_acceleration_module
         q = np.zeros(2)
         v = np.zeros(2)
 

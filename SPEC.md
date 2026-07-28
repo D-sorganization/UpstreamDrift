@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened optional-dependency mock hygiene for #8219. Unit
+  test configuration no longer installs persistent `pydrake`, `pinocchio`, or
+  `casadi` `MagicMock` modules during collection; it only resets engine
+  availability cache state around tests. The hygiene guard now scans pytest
+  collection hooks, recognizes string-form `patch.dict("sys.modules", ...)`,
+  covers Pinocchio and CasADi module names, and includes regression coverage for
+  collection-time mock pollution.
 - **2026-07-28** - Hardened the Law-of-Demeter baseline ratchet for #8218.
   Baseline mode now fails on stale allowances as well as new deep attribute
   chains, preserving prior LOD reductions instead of letting fixed chains be
