@@ -1,15 +1,15 @@
 name: Release Sidekick Binary
 
-# Produces one-file Sidekick binaries via PyInstaller.
+# Produces a native Linux one-file Sidekick binary via PyInstaller.
 # Issue: #5985 (T7).
 #
 # Triggers:
 #   - workflow_dispatch (manual)
 #   - tags matching sidekick-v*  (e.g. sidekick-v0.2.0)
 #
-# All jobs run on d-sorg-fleet-docker per the repo runner policy
-# (local-only-runner-guard.yml).  The matrix uses a label field to
-# distinguish build targets while keeping runner routing correct.
+# The fleet currently exposes a Linux Docker runner for this repository.
+# PyInstaller does not cross-compile; macOS and Windows artifacts require
+# separate native runners and must be added as distinct jobs when available.
 
 on:
   workflow_dispatch:
@@ -25,39 +25,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pick-runner:
-    name: Resolve fleet runner
+  build-linux:
+    name: Build binary (Linux)
     runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
-    outputs:
-      runner: ${{ steps.check.outputs.runner }}
-    steps:
-      - name: Set runner
-        id: check
-        run: echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-
-  build-binary:
-    name: Build binary (${{ matrix.label }})
-    needs: pick-runner
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: linux
-            artifact: sidekick-linux
-            binary: sidekick
-          - label: macos
-            artifact: sidekick-macos
-            binary: sidekick
-          - label: windows
-            artifact: sidekick-windows
-            binary: sidekick.exe
-
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+          persist-credentials: false
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -74,42 +51,42 @@ jobs:
           python-version: "3.11"
 
       - name: Purge pip cache
-        run: python -m pip cache purge || true
+        run: python3 -m pip cache purge
       - name: Install dependencies
         shell: bash
         run: |
-          python3 -m pip install pyinstaller
-          python3 -m pip install -e . --no-deps || true
+          SKIP_UI_BUILD=1 python3 -m pip install ".[gui-tools]" pyinstaller
 
       - name: Build binary
         shell: bash
         run: |
           python3 scripts/packaging/build_sidekick_binary.py \
+            --expected-platform linux \
             --max-mb 250 \
             --output-dir dist/
 
       - name: Smoke test — --help (< 5 s)
         shell: bash
-        run: timeout 5 dist/${{ matrix.binary }} --help
+        run: timeout 5 dist/sidekick --help
 
       - name: Smoke test — run
         shell: bash
         run: |
-          dist/${{ matrix.binary }} run \
+          dist/sidekick run \
             --calculator wgs_reactor \
             --inputs tests/fixtures/wgs.json
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.binary }}
+          name: sidekick-linux
+          path: dist/sidekick
           if-no-files-found: error
 
   attach-to-release:
     name: Attach binaries to GitHub Release
-    needs: [pick-runner, build-binary]
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    needs: [build-linux]
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     if: startsWith(github.ref, 'refs/tags/sidekick-v')
     permissions:

@@ -185,28 +185,38 @@ class TestMuJoCoStrict:
         sensors = engine.get_sensors()
         assert sensors["sensor_0"] == 0.123
 
-    def test_contact_forces_preserve_mujoco_grf_sign(self):
-        """MuJoCo GRF should point in the same world direction as the contact force."""
-        engine = self.MuJoCoPhysicsEngine()
-        engine.model = MagicMock()
-        engine.data = MagicMock()
-        engine.data.ncon = 1
+    def test_contact_forces_use_mujoco_grf_sign_convention(self):
+        """mj_contactForce acts ON geom2's body (#7989).
 
-        contact = MagicMock()
-        contact.frame = np.eye(3).reshape(-1)
-        contact.geom1 = 1
-        contact.geom2 = 0
-        engine.data.contact = [contact]
-        engine.model.geom_bodyid = [0, 1]
+        A floor plane always sorts to geom1, so the system is geom2 and the
+        GRF is +f_world; with the geoms swapped it is the negative. The
+        previous version of this test only covered the swapped ordering and
+        asserted the sign was preserved, locking in the inverted convention.
+        """
 
-        def side_effect_contact_force(model, data, index, c_force):
-            c_force[:3] = np.array([0.0, 0.0, 735.75])
+        def _grf(geom1: int, geom2: int, geom_bodyid: list[int]) -> np.ndarray:
+            engine = self.MuJoCoPhysicsEngine()
+            engine.model = MagicMock()
+            engine.data = MagicMock()
+            engine.data.ncon = 1
 
-        mock_mujoco.mj_contactForce.side_effect = side_effect_contact_force
+            contact = MagicMock()
+            contact.frame = np.eye(3).reshape(-1)
+            contact.geom1 = geom1
+            contact.geom2 = geom2
+            engine.data.contact = [contact]
+            engine.model.geom_bodyid = geom_bodyid
 
-        force = engine.compute_contact_forces()
+            def side_effect_contact_force(model, data, index, c_force):
+                c_force[:3] = np.array([0.0, 0.0, 735.75])
 
-        np.testing.assert_allclose(force, np.array([0.0, 0.0, 735.75]))
+            mock_mujoco.mj_contactForce.side_effect = side_effect_contact_force
+            return engine.compute_contact_forces()
+
+        # Plane is geom1 -> world body 0; system is geom2 -> body 1.
+        np.testing.assert_allclose(_grf(0, 1, [0, 1]), np.array([0.0, 0.0, 735.75]))
+        # Swapped ordering: system is geom1, so it receives the reaction.
+        np.testing.assert_allclose(_grf(1, 0, [0, 1]), np.array([0.0, 0.0, -735.75]))
 
 
 class TestOpenSimStrict:

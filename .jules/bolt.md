@@ -81,6 +81,7 @@
 ## 2024-05-24 - [Avoid np.linalg.norm for small static vectors]
 **Learning:** Using `np.linalg.norm` for small (2D/3D) explicit vectors is disproportionately slow due to numpy dispatching overhead. When individual array elements can be accessed (e.g. `arr[0]`, `arr[1]`), `math.hypot` provides a ~5-6x speedup. However, this micro-optimization is not suitable for GUI paths since they are cold paths (run sparingly). Only employ it on tight loops.
 **Action:** When finding operations on small static vectors in hot loops, prefer explicitly unpacking into `math.hypot(x, y, z)` over `np.linalg.norm`.
+
 ## 2026-06-25 - [Optimization] Walrus Operator with List Comprehensions for Array Norms
 **Learning:** When calculating the norm of an expression inside a loop or list comprehension (e.g., `math.sqrt(np.vdot(self._flow(perturbation, t), self._flow(perturbation, t)))`), it's important not to evaluate the expensive expression twice. We can achieve this without unrolling the comprehension by utilizing the walrus operator (`:=`) inside the comprehension. `[math.sqrt(np.vdot(res := self._flow(p, t), res)) for t in times]` is both pythonic, readable, and yields the full performance benefit of avoiding `np.linalg.norm` and avoiding evaluating the inner function twice.
 **Action:** Use the walrus operator when optimizing norms inside comprehensions where the vector is the result of a function call.
@@ -92,3 +93,4 @@
 ## 2025-02-20 - [Optimize np.linalg.norm inside loops using np.vdot]
 **Learning:** Inside a `for` loop in Python, using `np.linalg.norm(v)` creates temporary array objects and invokes NumPy's complex multi-dimensional dispatch logic.
 **Action:** When computing vector norms inside a hot loop (especially when dimensions are small or unknown), use `math.sqrt(np.vdot(v, v))` to bypass array allocations and obtain a ~1.5x - 2x speedup over `np.linalg.norm(v)`. This is safer than `math.hypot` when the array dimensions are dynamic.
+

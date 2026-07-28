@@ -11,12 +11,42 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from src.shared.python.biomech.exercise_registry import discover_exercise
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+
+logger = get_logger(__name__)
+
+
+def _engine_load_error_widget(name: str, error: Exception) -> QLabel:
+    """Create an actionable fallback when an optional engine cannot start."""
+    message = str(error)
+    is_mujoco_dll_failure = name == "MuJoCo_Models" and "dll" in message.lower()
+    if is_mujoco_dll_failure:
+        text = (
+            "MuJoCo is unavailable on this computer.\n\n"
+            "The Gait exercise remains open. Choose JaxSim_Models from the "
+            "Engine selector above for a dependency-light analysis view, or "
+            "repair the native MuJoCo runtime and select MuJoCo_Models to retry.\n\n"
+            f"Technical detail: {message}"
+        )
+    else:
+        text = f"Error loading {name}:\n{message}"
+
+    label = QLabel(text)
+    label.setObjectName("engine-load-error")
+    label.setWordWrap(True)
+    return label
 
 
 class ExerciseDashboard(QMainWindow):
     """Cross-engine exercise dashboard. Toolbar selects engine; body swaps dashboards."""
 
-    def __init__(self, exercise: str, parent: QWidget | None = None):
+    def __init__(
+        self,
+        exercise: str,
+        parent: QWidget | None = None,
+        preferred_engine: str | None = None,
+    ):
         super().__init__(parent)
         self.exercise = exercise
         self.setWindowTitle(f"Biomechanics Exercise: {exercise.title()}")
@@ -43,7 +73,6 @@ class ExerciseDashboard(QMainWindow):
             self.engines.append("JaxSim_Models")
 
         self.engine_selector.addItems(self.engines)
-        self.engine_selector.currentTextChanged.connect(self._on_engine_changed)
 
         self.toolbar.addWidget(QLabel(" Engine: "))
         self.toolbar.addWidget(self.engine_selector)
@@ -56,7 +85,15 @@ class ExerciseDashboard(QMainWindow):
         self._current_widget = None
 
         if self.engines:
-            self._on_engine_changed(self.engines[0])
+            initial_engine = (
+                preferred_engine
+                if preferred_engine in self.engines
+                else self.engines[0]
+            )
+            self.engine_selector.setCurrentText(initial_engine)
+            self._on_engine_changed(initial_engine)
+
+        self.engine_selector.currentTextChanged.connect(self._on_engine_changed)
 
     def _on_engine_changed(self, name: str) -> None:
         """Swap the inner widget to the engine-specific dashboard, scoped to `self.exercise`."""
@@ -95,8 +132,9 @@ class ExerciseDashboard(QMainWindow):
                         & ~sys.modules["PyQt6.QtCore"].Qt.WindowType.Window
                     )
                 self.layout.addWidget(self._current_widget)
-        except Exception as e:  # noqa: BLE001
-            self._current_widget = QLabel(f"Error loading {name}:\n{e}")
+        except Exception as error:  # noqa: BLE001 - optional engine boundary
+            logger.exception("Unable to load exercise dashboard for %s", name)
+            self._current_widget = _engine_load_error_widget(name, error)
             self.layout.addWidget(self._current_widget)
 
 
@@ -105,7 +143,10 @@ def get_dockable_ui() -> QMainWindow:
     import os
 
     exercise = os.environ.get("BIOMECH_EXERCISE", "gait")
-    return ExerciseDashboard(exercise)
+    return ExerciseDashboard(
+        exercise,
+        preferred_engine=os.environ.get("BIOMECH_ENGINE"),
+    )
 
 
 def main() -> None:
@@ -123,7 +164,10 @@ def main() -> None:
     exercise = args.exercise or os.environ.get("BIOMECH_EXERCISE", "gait")
 
     app = QApplication(sys.argv)
-    window = ExerciseDashboard(exercise)
+    window = ExerciseDashboard(
+        exercise,
+        preferred_engine=os.environ.get("BIOMECH_ENGINE"),
+    )
     window.resize(1200, 800)
     window.show()
     sys.exit(app.exec())

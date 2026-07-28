@@ -10,8 +10,12 @@ Part of EPIC #4993 (Subtask 5) - addresses review feedback from #5049.
 from __future__ import annotations
 
 import importlib.metadata
+import os
+import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src.launchers.tools_repo_path import resolve_tools_source_root
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -20,6 +24,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 EMBEDDABLE_TOOL_ENTRY_POINT_GROUP = "upstream_drift.embeddable_tools"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Tool adapter modules that self-register on import. Kept as a fallback for
 # editable installs where package metadata can lag behind the source checkout.
@@ -75,6 +80,31 @@ def _adapter_modules_for_bootstrap() -> list[str]:
     return adapter_modules
 
 
+def _bootstrap_python_paths(
+    repo_root: Path | None = None,
+    env_value: str | None = None,
+) -> list[str]:
+    """Return sys.path entries needed for launcher and Tools embeddables."""
+    root = repo_root or REPO_ROOT
+    tools_src = resolve_tools_source_root(root, env_value)
+    return [
+        str(tools_src),
+        str(tools_src / "shared" / "python"),
+        str(tools_src / "python" / "src"),
+        str(root / "src" / "shared" / "python"),
+        str(root / "src"),
+    ]
+
+
+def _prepend_python_paths(paths: list[str]) -> None:
+    """Move each path to the front once, preserving the supplied order."""
+    for path in paths:
+        while path in sys.path:
+            sys.path.remove(path)
+    for path in reversed(paths):
+        sys.path.insert(0, path)
+
+
 def bootstrap_embeddable_tools() -> list[str]:
     """Import and register all embeddable tools.
 
@@ -93,36 +123,9 @@ def bootstrap_embeddable_tools() -> list[str]:
     if _bootstrap_complete:
         return _registered_tools
 
-    # Ensure Tools repo is in sys.path so embeddable tools can be found.
-    # Prioritise sibling Tools repository if checked out, falling back to vendored ud-tools.
-    import sys
-    from pathlib import Path
-
-    repos_root = Path(__file__).resolve().parent.parent.parent
-    sibling_tools = repos_root.parent / "Tools"
-    if sibling_tools.is_dir():
-        tools_src_path = str(sibling_tools / "src")
-        tools_shared_py_path = str(sibling_tools / "src" / "shared" / "python")
-        tools_python_src_path = str(sibling_tools / "src" / "python" / "src")
-    else:
-        # Path to vendor/ud-tools/src
-        tools_src_path = str(repos_root / "vendor" / "ud-tools" / "src")
-        tools_shared_py_path = str(Path(tools_src_path) / "shared" / "python")
-        tools_python_src_path = str(Path(tools_src_path) / "python" / "src")
-
-    # Also register UpstreamDrift's shared python folder
-    ud_src_path = str(repos_root / "src")
-    ud_shared_py_path = str(repos_root / "src" / "shared" / "python")
-
-    for p in [
-        ud_src_path,
-        ud_shared_py_path,
-        tools_python_src_path,
-        tools_shared_py_path,
-        tools_src_path,
-    ]:
-        if p not in sys.path:
-            sys.path.insert(0, p)
+    _prepend_python_paths(
+        _bootstrap_python_paths(env_value=os.environ.get("TOOLS_REPO_PATH"))
+    )
 
     from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
 

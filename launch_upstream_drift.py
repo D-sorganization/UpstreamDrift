@@ -26,67 +26,120 @@ if sys.platform == "win32":
         pass
 
 import argparse
+import importlib
 import logging
 import os
 from os import environ, getcwd
 from pathlib import Path
 from sys import exit, path
+from types import ModuleType
 
-# Bootstrap import paths before any project imports. The repo root must be on
-# sys.path so `src.*` resolves; the vendored Tools tree must be on sys.path so
-# the shared Sidekick package (`upstream_drift_tools.ui.tools_sidebar`) can be
-# imported at runtime — pytest reads this from pyproject.toml, but a direct
-# `python launch_upstream_drift.py` invocation does not.
+# Bootstrap canonical parent paths before importing the Upstream-owned
+# resolver below. The resolver then validates the optional explicit checkout,
+# and the same ordered contract is reinstalled before alias retry.
 _REPO_ROOT = Path(__file__).resolve().parent
 
 
-def _resolve_explicit_tools_root(env_value: str | None) -> Path | None:
-    """Return the explicitly configured Tools checkout, if one was requested."""
-    if not env_value:
-        return None
-
-    tools_root = Path(env_value).expanduser().resolve()
-    tools_src = tools_root / "src"
-    if not tools_root.is_dir() or not tools_src.is_dir():
-        raise RuntimeError(
-            "TOOLS_REPO_PATH must point to a Tools checkout containing a src/ "
-            f"directory, got: {tools_root}"
-        )
-    return tools_root
-
-
 def _launcher_bootstrap_paths(repo_root: Path, tools_root: Path | None) -> list[str]:
-    """Build deterministic import precedence for direct launcher execution."""
+    """Build deterministic, parent-source-first import precedence."""
     paths_to_add: list[str] = []
     if tools_root is not None:
         paths_to_add.extend(
             [
-                str(tools_root / "src"),
                 str(tools_root / "src" / "shared" / "python"),
+                str(tools_root / "src"),
                 str(tools_root / "src" / "python" / "src"),
             ]
         )
 
+    vendor_src = repo_root / "vendor" / "ud-tools" / "src"
+    paths_to_add.extend(
+        [
+            str(vendor_src / "shared" / "python"),
+            str(vendor_src),
+            str(vendor_src / "python" / "src"),
+        ]
+    )
+
+    installed_tools_packages = all(
+        (repo_root / package_name).is_dir() for package_name in ("chat", "sidekick")
+    )
+    if installed_tools_packages:
+        paths_to_add.append(str(repo_root))
     paths_to_add.extend(
         [
             str(repo_root / "src" / "shared" / "python"),
             str(repo_root / "src"),
-            str(repo_root),
-            str(repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"),
         ]
     )
+    if not installed_tools_packages:
+        paths_to_add.append(str(repo_root))
     return paths_to_add
 
 
 def _bootstrap_import_paths(paths_to_add: list[str]) -> None:
     """Prepend bootstrap paths while preserving the supplied precedence order."""
     for path_entry in reversed(paths_to_add):
-        if path_entry not in path:
-            path.insert(0, path_entry)
+        while path_entry in path:
+            path.remove(path_entry)
+        path.insert(0, path_entry)
 
 
-_TOOLS_ROOT = _resolve_explicit_tools_root(os.environ.get("TOOLS_REPO_PATH"))
+_requested_tools_path = os.environ.get("TOOLS_REPO_PATH")
+_requested_tools_root = (
+    Path(_requested_tools_path).expanduser().resolve()
+    if _requested_tools_path
+    else None
+)
+_bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _requested_tools_root))
+from src.launchers.tools_repo_path import (  # noqa: E402
+    resolve_explicit_tools_root as _resolve_explicit_tools_root,
+)
+
+_TOOLS_ROOT = _resolve_explicit_tools_root(_requested_tools_path)
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _TOOLS_ROOT))
+
+
+def _retry_parent_shared_alias_installer() -> bool:
+    """Retry the source-package alias installer after canonical path bootstrap."""
+    import src
+
+    installed = src._install_parent_shared_aliases()
+    src._PARENT_SHARED_ALIASES_INSTALLED = installed
+    return installed
+
+
+_PARENT_SHARED_ALIASES_INSTALLED = _retry_parent_shared_alias_installer()
+_PARENT_CONTRACTS: ModuleType | None = None
+
+
+def _load_parent_contracts() -> ModuleType | None:
+    """Load the selected Tools contract before downstream aliases exist."""
+    parent_root = _TOOLS_ROOT or (_REPO_ROOT / "vendor" / "ud-tools")
+    expected_paths = {
+        (parent_root / "src" / "shared" / "python" / "contracts.py").resolve(),
+        (parent_root / "src" / "contracts.py").resolve(),
+    }
+    if not any(candidate.is_file() for candidate in expected_paths):
+        return None
+    module = importlib.import_module("contracts")
+    module_path = Path(str(getattr(module, "__file__", ""))).resolve()
+    if module_path not in expected_paths:
+        expected_text = ", ".join(str(path) for path in sorted(expected_paths))
+        raise RuntimeError(
+            "Parent Tools contract resolution failed: "
+            f"expected one of [{expected_text}], resolved {module_path}"
+        )
+    return module
+
+
+def _restore_parent_contract_aliases(parent_contracts: ModuleType | None) -> None:
+    """Restore Tools-owned legacy aliases after Upstream imports run."""
+    if parent_contracts is None:
+        return
+    sys.modules["contracts"] = parent_contracts
+    sys.modules["shared.python.contracts"] = parent_contracts
+
 
 from src.api._version import warn_if_unsupported_platform  # noqa: E402
 
@@ -234,6 +287,7 @@ def route_launch(args: argparse.Namespace) -> None:
             # Try new location first
             from src.launchers.upstream_drift_launcher import main as classic_main
 
+            _restore_parent_contract_aliases(_PARENT_CONTRACTS)
             classic_main()
         except ImportError as e:
             import traceback
@@ -262,6 +316,8 @@ def route_launch(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Main entry point for unified launcher."""
+    global _PARENT_CONTRACTS
+    _PARENT_CONTRACTS = _load_parent_contracts()
     warn_if_unsupported_platform()
     args = parse_arguments()
     route_launch(args)

@@ -53,13 +53,7 @@ class SecureSubprocessError(Exception):
 
 
 def _is_within_root(resolved: Path, root: Path) -> bool:
-    """Return True if *resolved* is *root* itself or a true descendant.
-
-    A plain ``str.startswith`` containment check has no separator boundary, so
-    an allowed root like ``/srv/models`` would wrongly admit the sibling
-    ``/srv/models-backup`` (prefix-collision bypass, mirrors issue #7689). Use
-    path ancestry instead so only the root and its real descendants pass.
-    """
+    """Return whether a resolved path is a root or a true descendant."""
     return resolved == root or resolved.is_relative_to(root)
 
 
@@ -70,33 +64,61 @@ def _apply_hidden_window_default(kwargs: dict[str, Any]) -> None:
     kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
 
 
-def _find_tools_repo_for_security(suite_root: Path) -> Path | None:
-    """Find sibling Tools repository path for security validations without importing launchers."""
-    env_path = os.environ.get("TOOLS_REPO_PATH")
-    if env_path and Path(env_path).is_dir():
+def _find_sibling_repo_for_security(
+    suite_root: Path,
+    *,
+    repo_names: tuple[str, ...],
+    env_var: str,
+) -> Path | None:
+    """Find a trusted sibling provider checkout without importing launchers."""
+    env_path = os.environ.get(env_var)
+    if env_path and Path(env_path).is_dir() and (Path(env_path) / "src").is_dir():
         return Path(env_path)
     p = suite_root
     for _ in range(10):
-        for candidate in (
-            p / "Tools",
-            p / "Repositories" / "Tools",
-            Path.home() / "Repositories" / "Tools",
-        ):
-            if candidate.is_dir() and (candidate / "src").is_dir():
-                try:
-                    # Skip candidate if it is nested inside our repo (e.g. the vendored copy)
-                    # to prioritize a true sibling checkout.
-                    try:
-                        if candidate.is_relative_to(suite_root):
-                            continue
-                    except (ValueError, AttributeError):
-                        if str(suite_root) in str(candidate.resolve()):
-                            continue
-                except Exception:  # noqa: BLE001
-                    pass
-                return candidate
+        for repo_name in repo_names:
+            for candidate in (
+                p / repo_name,
+                p / "Repositories" / repo_name,
+            ):
+                if candidate.is_dir() and (candidate / "src").is_dir():
+                    # Skip a nested vendored copy; only sibling checkouts are trusted.
+                    if _is_within_root(candidate, suite_root):
+                        continue
+                    return candidate
         p = p.parent
+    for repo_name in repo_names:
+        candidate = Path.home() / "Repositories" / repo_name
+        if candidate.is_dir() and (candidate / "src").is_dir():
+            return candidate
     return None
+
+
+def _find_tools_repo_for_security(suite_root: Path) -> Path | None:
+    """Find the trusted sibling Tools repository for security validations."""
+    return _find_sibling_repo_for_security(
+        suite_root,
+        repo_names=("Tools",),
+        env_var="TOOLS_REPO_PATH",
+    )
+
+
+def _find_movement_optimizer_repo_for_security(suite_root: Path) -> Path | None:
+    """Find the trusted sibling Movement-Optimizer checkout for launcher use."""
+    return _find_sibling_repo_for_security(
+        suite_root,
+        repo_names=("Movement_Optimizer", "Movement-Optimizer"),
+        env_var="MOVEMENT_OPTIMIZER_HOME",
+    )
+
+
+def _trusted_sibling_roots_for_security(suite_root: Path) -> tuple[Path, ...]:
+    """Return sibling roots that are allowed to supply launcher scripts."""
+    roots = (
+        _find_tools_repo_for_security(suite_root),
+        _find_movement_optimizer_repo_for_security(suite_root),
+    )
+    return tuple(root.resolve() for root in roots if root is not None)
 
 
 def validate_script_path(script_path: Path, suite_root: Path) -> None:
@@ -114,16 +136,19 @@ def validate_script_path(script_path: Path, suite_root: Path) -> None:
         abs_script = script_path.resolve()
         abs_suite_root = suite_root.resolve()
 
-        tools_repo = _find_tools_repo_for_security(abs_suite_root)
+        sibling_roots = _trusted_sibling_roots_for_security(abs_suite_root)
         in_suite = _is_within_root(abs_script, abs_suite_root)
-        in_tools = tools_repo is not None and _is_within_root(
-            abs_script, tools_repo.resolve()
+        sibling_root = next(
+            (root for root in sibling_roots if _is_within_root(abs_script, root)),
+            None,
         )
+        in_sibling = sibling_root is not None
 
-        # Ensure script is within suite directory or tools directory
-        if not in_suite and not in_tools:
+        # Ensure script is within the suite or an explicitly trusted sibling.
+        if not in_suite and not in_sibling:
             raise SecureSubprocessError(
-                f"Script path outside allowed suite/tools directories: {abs_script}"
+                "Script path outside allowed suite/tools directories or trusted "
+                f"siblings: {abs_script}"
             )
 
         # Check if script is in allowed directory
@@ -134,14 +159,12 @@ def validate_script_path(script_path: Path, suite_root: Path) -> None:
                 raise SecureSubprocessError(
                     f"Script in disallowed directory: {first_part}"
                 )
-        elif in_tools and tools_repo is not None:
-            # Sibling repos like Tools usually have "src" as their root dir for scripts
-            relative_path = abs_script.relative_to(tools_repo.resolve())
+        elif sibling_root is not None:
+            relative_path = abs_script.relative_to(sibling_root)
             first_part = relative_path.parts[0] if relative_path.parts else ""
-            # Allow "src" or other standard directories for sibling execution
             if first_part not in ALLOWED_SCRIPT_DIRECTORIES:
                 raise SecureSubprocessError(
-                    f"Script in disallowed directory of Tools: {first_part}"
+                    f"Script in disallowed directory of sibling provider: {first_part}"
                 )
 
         # Ensure file exists and is a file
@@ -240,14 +263,15 @@ def secure_popen(  # noqa: C901
         cwd_path = Path(cwd).resolve()
         if suite_root:
             suite_root_abs = suite_root.resolve()
-            tools_repo = _find_tools_repo_for_security(suite_root_abs)
-            in_suite = cwd_path.is_relative_to(suite_root_abs)
-            in_tools = tools_repo is not None and cwd_path.is_relative_to(
-                tools_repo.resolve()
+            sibling_roots = _trusted_sibling_roots_for_security(suite_root_abs)
+            in_suite = _is_within_root(cwd_path, suite_root_abs)
+            in_sibling = any(
+                _is_within_root(cwd_path, sibling_root)
+                for sibling_root in sibling_roots
             )
-            if not in_suite and not in_tools:
+            if not in_suite and not in_sibling:
                 raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/tools directories: {cwd_path}"
+                    f"Working directory outside allowed suite/sibling directories: {cwd_path}"
                 )
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
@@ -318,14 +342,15 @@ def secure_run(  # noqa: C901
         cwd_path = Path(cwd).resolve()
         if suite_root:
             suite_root_abs = suite_root.resolve()
-            tools_repo = _find_tools_repo_for_security(suite_root_abs)
-            in_suite = cwd_path.is_relative_to(suite_root_abs)
-            in_tools = tools_repo is not None and cwd_path.is_relative_to(
-                tools_repo.resolve()
+            sibling_roots = _trusted_sibling_roots_for_security(suite_root_abs)
+            in_suite = _is_within_root(cwd_path, suite_root_abs)
+            in_sibling = any(
+                _is_within_root(cwd_path, sibling_root)
+                for sibling_root in sibling_roots
             )
-            if not in_suite and not in_tools:
+            if not in_suite and not in_sibling:
                 raise SecureSubprocessError(
-                    f"Working directory outside allowed suite/tools directories: {cwd_path}"
+                    f"Working directory outside allowed suite/sibling directories: {cwd_path}"
                 )
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")

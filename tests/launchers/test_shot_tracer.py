@@ -1,5 +1,7 @@
 """Tests for shot_tracer."""
 
+import runpy
+from pathlib import Path
 from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
@@ -211,3 +213,16 @@ def test_shot_tracer_main(mock_exit, mock_window, mock_app) -> None:
     mock_window_instance.show.assert_called_once()
     mock_app_instance.exec.assert_called_once()
     mock_exit.assert_called_once()
+
+
+def test_shot_tracer_script_entrypoint_invokes_main(monkeypatch) -> None:
+    """The launcher facade must execute its GUI entry point as a script."""
+    from src.launchers import _shot_tracer_gui
+    from src.launchers import shot_tracer
+
+    mock_main = MagicMock()
+    monkeypatch.setattr(_shot_tracer_gui, "main", mock_main)
+
+    runpy.run_path(Path(shot_tracer.__file__), run_name="__main__")
+
+    mock_main.assert_called_once_with()

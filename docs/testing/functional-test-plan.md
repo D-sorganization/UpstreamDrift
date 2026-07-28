@@ -332,12 +332,6 @@ They are tested **parametrically**, not one row each.
 
 #### Deep-workflow groups
 
-For every `ready` item below, verify: the dashboard tile launches once; the
-target window appears without traceback; its primary visible workflow can be
-completed with bundled/disposable data; closing returns focus to the launcher.
-For `beta`/`experimental`, verify launch, honest status, safe failure, and the
-primary happy path when the dependency is present.
-
 | IDs        | Category / inventory                                                                                                                                                                                        | Primary functional assertion                                                                                   | Priority |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------- |
 | ENG-01–06  | Physics engines: MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite, Simscape                                                                                                                                      | Load known compatible model, run a short simulation or documented minimal analysis, observe result/visualizer. | P0       |

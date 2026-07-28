@@ -32,10 +32,19 @@ if _api_deps_available:
     from src.api.server import app
 
 
+import os
+from unittest.mock import patch
+
+
 @pytest.fixture(scope="module")
 def client() -> Generator[TestClient, None, None]:
     """Create test client with proper application lifespan."""
-    with TestClient(app) as c:
+    with (
+        patch.dict(
+            os.environ, {"GOLF_SUITE_MODE": "local", "GOLF_AUTH_DISABLED": "true"}
+        ),
+        TestClient(app) as c,
+    ):
         yield c
 
 

@@ -8,9 +8,9 @@ import pytest
 pytest.importorskip("openpyxl")
 
 import openpyxl
-from conftest import make_test_result
 
 from movement_optimizer.export_excel import export_to_excel
+from movement_optimizer.tests._helpers import make_test_result
 
 
 class TestExportToExcel:

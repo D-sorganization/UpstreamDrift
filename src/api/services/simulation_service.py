@@ -443,6 +443,13 @@ class SimulationService:
     ) -> None:
         """Run simulation as background task.
 
+        Invariant: on every exit path the task record is left in a terminal
+        state (``completed`` or ``failed``). Previously only four exception
+        types were handled, so anything else (``KeyError``, ``TypeError``, a
+        physics-binding exception from MuJoCo/Drake/Pinocchio/OpenSim) escaped
+        into the ASGI background runner and froze the record at ``running``
+        forever (issue #8009).
+
         Args:
             task_id: Unique task identifier
             request: Simulation request
@@ -471,7 +478,18 @@ class SimulationService:
                 )
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
+            logger.exception("Background simulation %s failed", task_id)
             active_tasks.set(task_id, {"status": "failed", "error": str(e)})
+        except Exception:  # noqa: BLE001 - background task boundary (#8009)
+            # No caller can observe this exception: BackgroundTasks swallows it
+            # after the response has been sent. Record the terminal state and
+            # log the traceback rather than leaking engine internals to the
+            # polling client.
+            logger.exception("Background simulation %s failed", task_id)
+            active_tasks.set(
+                task_id,
+                {"status": "failed", "error": "Internal simulation error"},
+            )
 
     def _extract_simulation_data(
         self, recorder: GenericPhysicsRecorder

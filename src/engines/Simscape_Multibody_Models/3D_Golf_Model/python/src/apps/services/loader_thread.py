@@ -49,5 +49,9 @@ class C3DLoaderThread(QThread):
             )
         except ValueError as e:
             self.failed.emit(f"Data inconsistency:\n{e}")
+        except (EOFError, IndexError) as e:
+            self.failed.emit(
+                f"Data inconsistency:\nC3D metadata is incomplete or malformed: {e}"
+            )
         except (RuntimeError, OSError) as e:
             self.failed.emit(f"Unexpected error loading file:\n{str(e)}")

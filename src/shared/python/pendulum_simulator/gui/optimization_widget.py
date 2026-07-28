@@ -132,7 +132,9 @@ def _cmaes_step(
     # Weights for recombination
     weights = np.log(mu + 0.5) - np.log(np.arange(1, mu + 1))
     weights = weights / np.sum(weights)
-    mu_eff = 1.0 / np.vdot(weights, weights)  # ⚡ Bolt: np.vdot is ~3x faster than np.sum(x**2) and avoids temporary array allocation
+    mu_eff = (
+        1.0 / np.vdot(weights, weights)
+    )  # ⚡ Bolt: np.vdot is ~3x faster than np.sum(x**2) and avoids temporary array allocation
 
     # Learning rates
     c_sigma = (mu_eff + 2.0) / (n + mu_eff + 5.0)

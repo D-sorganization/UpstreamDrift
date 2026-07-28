@@ -8,7 +8,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from conftest import make_test_result
 
 from movement_optimizer.config import load_app_paths
 from movement_optimizer.persistence import (
@@ -20,6 +19,7 @@ from movement_optimizer.persistence import (
     save_app_state,
     save_solution,
 )
+from movement_optimizer.tests._helpers import make_test_result
 
 
 class TestSaveSolution:

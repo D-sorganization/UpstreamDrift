@@ -31,11 +31,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from shared.python.sidekick.utils.logging import get_logger
+import logging
 
 from .._types import Sex
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 _MM_TO_M: float = 1.0e-3
 

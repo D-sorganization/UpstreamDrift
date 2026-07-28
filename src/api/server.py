@@ -19,6 +19,7 @@ API Versioning (#1488):
     compatibility.
 """
 
+import os
 import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -44,6 +45,7 @@ from .config import (
     get_server_host,
     get_server_port,
 )
+from .auth.launcher_capability import install_launcher_capability
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
@@ -284,6 +286,7 @@ app = FastAPI(
     },
     lifespan=lifespan,
 )
+install_launcher_capability(app, os.environ)
 
 # Security middleware
 allowed_hosts = get_allowed_hosts()

@@ -136,7 +136,7 @@ class TestBuildOptimizer:
 
 class TestSaveOrEmit:
     def test_writes_json_to_file(self, tmp_path: Path) -> None:
-        from conftest import make_test_result
+        from movement_optimizer.tests._helpers import make_test_result
 
         result = make_test_result(cost=5.0)
         out = tmp_path / "out.json"
@@ -146,7 +146,7 @@ class TestSaveOrEmit:
         assert written["cost"] == pytest.approx(5.0)
 
     def test_emits_summary_when_no_output(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        from conftest import make_test_result
+        from movement_optimizer.tests._helpers import make_test_result
 
         result = make_test_result(cost=7.7)
         emitted: list[dict[str, Any]] = []

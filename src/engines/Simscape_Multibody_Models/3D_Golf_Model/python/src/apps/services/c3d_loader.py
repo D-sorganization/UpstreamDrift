@@ -10,6 +10,33 @@ from ...logger_utils import log_execution_time
 from ..core.models import AnalogData, C3DDataModel, C3DEvent, MarkerData
 
 
+def _default_missing_point_units(c3d_data: dict[str, Any]) -> None:
+    """Default absent C3D point units to millimetres before metadata parsing.
+
+    C3D files emitted by ``ezc3d`` can omit ``POINT:UNITS``.  The motion
+    pipeline already treats that documented omission as millimetres; retain
+    the same interpretation in the native viewer so valid captures load.
+    """
+    try:
+        point_parameters = c3d_data["parameters"]["POINT"]
+    except (KeyError, TypeError):
+        return
+    if not isinstance(point_parameters, dict):
+        return
+    if "UNITS" not in point_parameters:
+        point_parameters["UNITS"] = {"value": ["mm"]}
+        return
+
+    units_parameter = point_parameters["UNITS"]
+    if isinstance(units_parameter, dict) and not units_parameter.get("value"):
+        # ``ezc3d`` returns fresh nested dictionaries for ``.get``. Assign
+        # through its mapping API so the reader sees the normalized value.
+        point_parameters["UNITS"] = {
+            **units_parameter,
+            "value": ["mm"],
+        }
+
+
 def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerData]:
     """Build marker data dictionary from points dataframe.
 
@@ -112,11 +139,18 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
 
     with log_execution_time(f"load_c3d_{os.path.basename(filepath)}"):
         reader = C3DDataReader(filepath)
-        metadata_obj = reader.get_metadata()
-        df_points = reader.points_dataframe(include_time=False)
-        raw_params: dict | None = None
         try:
             c3d_data = reader._load()  # noqa: SLF001 — controlled internal use
+        except (AttributeError, KeyError, TypeError):
+            c3d_data = None
+        else:
+            _default_missing_point_units(c3d_data)
+        metadata_obj = reader.get_metadata()
+        df_points = reader.points_dataframe(include_time=False, target_units="m")
+        raw_params: dict | None = None
+        try:
+            if c3d_data is None:
+                c3d_data = reader._load()  # noqa: SLF001 — controlled internal use
             raw_params = dict(c3d_data.get("parameters") or {})
         except (KeyError, AttributeError, TypeError):
             raw_params = None

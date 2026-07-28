@@ -1,6 +1,6 @@
 """Offline validation helpers that are intentionally outside runtime ``src``."""
 
-from tools.offline_validation.nimble_gradient_oracle import (
+from .nimble_gradient_oracle import (
     GradientOracleUnavailable,
     GradientTolerance,
     NIMBLEPHYSICS_PIN,

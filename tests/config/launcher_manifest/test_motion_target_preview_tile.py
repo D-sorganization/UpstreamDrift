@@ -99,13 +99,15 @@ class TestMotionTargetPreviewTile:
         assert tile.name == "Motion-Match Preview", (
             "Assertion failed: tile.name == Motion-Match Preview"
         )
-        assert tile.category == "tool", "Assertion failed: tile.category == tool"
+        assert tile.category == "motion_matching", (
+            "Shared manifest category must mirror the native PyQt registry"
+        )
         assert tile.logo == "motion_target_preview.svg", (
             "Assertion failed: tile.logo == motion_target_preview.svg"
         )
         assert tile.logo_path.exists(), "Assertion failed: tile.logo_path.exists()"
-        assert tile.path == "src.tools.starting_pose_matcher.__main__", (
-            "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
+        assert tile.path == "src/tools/starting_pose_matcher/__main__.py", (
+            "Shared manifest path must mirror the native PyQt registry"
         )
         assert not tile.hidden, "Assertion failed: not tile.hidden"
         # Tags must be source-neutral and cover the issue's required set.

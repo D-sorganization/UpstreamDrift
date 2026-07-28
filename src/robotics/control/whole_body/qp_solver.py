@@ -457,9 +457,20 @@ class ScipyQPSolver(QPSolver):
 class NullspaceQPSolver(QPSolver):
     """QP solver using nullspace projection.
 
-    Solves unconstrained QP in nullspace of equality constraints.
-    Simple and fast for small problems.
+    Solves an equality-constrained QP via its KKT system.  Variable bounds are
+    handled with a primal active-set loop that re-solves the KKT system with
+    the bound-active variables pinned, so the equality constraints stay
+    satisfied.
+
+    This solver **cannot** handle general inequality constraints
+    (``A_ineq x`` within ``[lb_ineq, ub_ineq]``).  A problem carrying them is
+    rejected with ``success=False`` rather than solved with the constraints
+    silently discarded (issue #8022).
     """
+
+    # Feasibility tolerances used to verify the returned solution.
+    _EQ_TOL = 1e-8
+    _BOUND_TOL = 1e-9
 
     def __init__(self, regularization: float = 1e-6) -> None:
         """Initialize nullspace solver.
@@ -475,19 +486,17 @@ class NullspaceQPSolver(QPSolver):
         """Always available (uses numpy only)."""
         return True
 
-    def _apply_variable_bounds(self, x: np.ndarray, problem: QPProblem) -> np.ndarray:
-        """Clamp x to variable bounds [x_lb, x_ub] if set."""
-        if problem.x_lb is not None:
-            x = np.maximum(x, problem.x_lb)
-        if problem.x_ub is not None:
-            x = np.minimum(x, problem.x_ub)
-        return x
-
     def solve(self, problem: QPProblem) -> QPSolution:
-        """Solve QP using nullspace method.
+        """Solve QP using the nullspace / KKT method.
 
-        Handles equality constraints via KKT system. Variable bounds
-        are enforced by post-solve clamping (best-effort).
+        Design by Contract:
+            Preconditions:
+                - problem is not None
+                - problem carries no inequality constraints
+            Postconditions:
+                - success=True implies A_eq @ x == b_eq to within _EQ_TOL and
+                  x_lb <= x <= x_ub; the solution is never reported successful
+                  while violating a constraint that was supplied
 
         Args:
             problem: QP problem.
@@ -501,79 +510,176 @@ class NullspaceQPSolver(QPSolver):
 
         start_time = time.perf_counter()
 
-        n = problem.n_vars
-        H = problem.H + self._reg * np.eye(n)
-        g = problem.g
-
-        if problem.A_eq is not None and problem.b_eq is not None:
-            # Solve with equality constraints using KKT
-            A = problem.A_eq
-            b = problem.b_eq
-            m = A.shape[0]
-
-            # KKT system:
-            # [H  A^T] [x]   [-g]
-            # [A  0  ] [λ] = [b ]
-            KKT = np.block(
-                [
-                    [H, A.T],
-                    [A, np.zeros((m, m))],
-                ],
+        if problem.n_ineq > 0:
+            # Silently dropping these would let the caller believe the friction
+            # cone / unilateral contact constraints were enforced.
+            return QPSolution(
+                success=False,
+                x=None,
+                status=(
+                    "NullspaceQPSolver cannot handle inequality constraints "
+                    f"({problem.n_ineq} supplied); use ScipyQPSolver"
+                ),
             )
 
-            rhs = np.concatenate([-g, b])
+        try:
+            x, dual, status = self._solve_bounded_equality_qp(problem)
+        except np.linalg.LinAlgError as e:
+            return QPSolution(
+                success=False,
+                x=None,
+                status=f"KKT system singular: {e}",
+            )
 
-            try:
-                solution = np.linalg.solve(KKT, rhs)
-                x = self._apply_variable_bounds(solution[:n], problem)
-                dual = solution[n:]
+        violation = self._feasibility_violation(x, problem)
+        if violation is not None:
+            return QPSolution(
+                success=False,
+                x=x,
+                status=f"No feasible solution: {violation}",
+                solve_time=time.perf_counter() - start_time,
+            )
 
-                cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
+        return QPSolution(
+            success=True,
+            x=x,
+            cost=float(0.5 * x @ problem.H @ x + problem.g @ x),
+            iterations=1,
+            solve_time=time.perf_counter() - start_time,
+            status=status,
+            dual_eq=dual,
+        )
 
-                solve_time = time.perf_counter() - start_time
+    def _solve_bounded_equality_qp(
+        self,
+        problem: QPProblem,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64] | None, str]:
+        """Solve the QP with equality constraints and variable bounds.
 
-                return QPSolution(
-                    success=True,
-                    x=x,
-                    cost=cost,
-                    iterations=1,
-                    solve_time=solve_time,
-                    status="KKT solved",
-                    dual_eq=dual,
-                )
+        Uses a primal active-set loop: variables that violate a bound are
+        pinned to that bound as additional equality rows and the KKT system is
+        re-solved, so the supplied equality constraints remain satisfied
+        instead of being destroyed by post-solve clamping.
 
-            except np.linalg.LinAlgError as e:
-                return QPSolution(
-                    success=False,
-                    x=None,
-                    status=f"KKT system singular: {e}",
-                )
+        Args:
+            problem: QP problem (must have no inequality constraints).
 
-        else:
-            # Unconstrained: solve H @ x = -g
-            try:
-                x = self._apply_variable_bounds(
-                    np.asarray(np.linalg.solve(H, -g), dtype=np.float64), problem
-                )
-                cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
+        Returns:
+            Tuple of (x, equality duals or None, status string).
+        """
+        n = problem.n_vars
+        pinned: dict[int, float] = {}
 
-                solve_time = time.perf_counter() - start_time
+        for _ in range(n + 1):
+            x, dual = self._solve_kkt(problem, pinned)
+            index, value = self._worst_bound_violation(x, problem, pinned)
+            if index is None or value is None:
+                status = "KKT solved" if problem.A_eq is not None else "Direct solve"
+                if pinned:
+                    status = f"{status} ({len(pinned)} bound(s) active)"
+                return x, dual, status
+            pinned[index] = value
 
-                return QPSolution(
-                    success=True,
-                    x=x,
-                    cost=cost,
-                    iterations=1,
-                    solve_time=solve_time,
-                    status="Direct solve",
-                )
+        x, dual = self._solve_kkt(problem, pinned)
+        return x, dual, "Active-set iteration limit reached"
 
-            except np.linalg.LinAlgError as e:
-                return QPSolution(
-                    success=False,
-                    x=None,
-                    status=f"System singular: {e}",
-                )
+    def _solve_kkt(
+        self,
+        problem: QPProblem,
+        pinned: dict[int, float],
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
+        """Solve the KKT system with the given variables pinned to a value."""
+        n = problem.n_vars
+        hessian = problem.H + self._reg * np.eye(n)
+
+        rows: list[NDArray[np.float64]] = []
+        values: list[float] = []
+        n_supplied_eq = 0
+        if problem.A_eq is not None and problem.b_eq is not None:
+            rows.extend(np.asarray(problem.A_eq, dtype=np.float64))
+            values.extend(np.asarray(problem.b_eq, dtype=np.float64).tolist())
+            n_supplied_eq = problem.A_eq.shape[0]
+        for index, value in pinned.items():
+            row = np.zeros(n)
+            row[index] = 1.0
+            rows.append(row)
+            values.append(value)
+
+        if not rows:
+            x = np.asarray(np.linalg.solve(hessian, -problem.g), dtype=np.float64)
+            return x, None
+
+        A = np.vstack(rows)
+        b = np.asarray(values, dtype=np.float64)
+        m = A.shape[0]
+
+        kkt = np.block([[hessian, A.T], [A, np.zeros((m, m))]])
+        rhs = np.concatenate([-problem.g, b])
+        try:
+            solution = np.linalg.solve(kkt, rhs)
+        except np.linalg.LinAlgError:
+            # Pinning bound-active variables can make the equality set
+            # inconsistent (the problem is infeasible).  Take the least-squares
+            # solution so the feasibility check can report *which* constraint
+            # cannot be met rather than a bare "singular matrix".
+            solution = np.linalg.lstsq(kkt, rhs, rcond=None)[0]
+
+        x = np.asarray(solution[:n], dtype=np.float64)
+        dual = (
+            np.asarray(solution[n : n + n_supplied_eq], dtype=np.float64)
+            if n_supplied_eq
+            else None
+        )
+        return x, dual
+
+    @staticmethod
+    def _worst_bound_violation(
+        x: NDArray[np.float64],
+        problem: QPProblem,
+        pinned: dict[int, float],
+    ) -> tuple[int | None, float | None]:
+        """Index and bound value of the largest unpinned bound violation."""
+        best_index: int | None = None
+        best_value: float | None = None
+        best_magnitude = 1e-12
+
+        for i in range(problem.n_vars):
+            if i in pinned:
+                continue
+            if problem.x_lb is not None and x[i] < problem.x_lb[i]:
+                magnitude = float(problem.x_lb[i] - x[i])
+                if magnitude > best_magnitude:
+                    best_magnitude = magnitude
+                    best_index = i
+                    best_value = float(problem.x_lb[i])
+            if problem.x_ub is not None and x[i] > problem.x_ub[i]:
+                magnitude = float(x[i] - problem.x_ub[i])
+                if magnitude > best_magnitude:
+                    best_magnitude = magnitude
+                    best_index = i
+                    best_value = float(problem.x_ub[i])
+
+        return best_index, best_value
+
+    def _feasibility_violation(
+        self,
+        x: NDArray[np.float64],
+        problem: QPProblem,
+    ) -> str | None:
+        """Describe the first constraint violation, or None if x is feasible."""
+        if problem.A_eq is not None and problem.b_eq is not None:
+            residual = float(np.max(np.abs(problem.A_eq @ x - problem.b_eq)))
+            if residual > self._EQ_TOL:
+                return f"|A_eq @ x - b_eq|_inf = {residual:.3e}"
+        if problem.x_lb is not None:
+            gap = float(np.max(problem.x_lb - x))
+            if gap > self._BOUND_TOL:
+                return f"x below x_lb by {gap:.3e}"
+        if problem.x_ub is not None:
+            gap = float(np.max(x - problem.x_ub))
+            if gap > self._BOUND_TOL:
+                return f"x above x_ub by {gap:.3e}"
+        return None
 
 
 def create_default_solver() -> QPSolver:
