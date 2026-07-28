@@ -71,5 +71,5 @@ class TestRunSimulationGolfer:
     def test_simulation_golfer_invalid_t_end_raises(self) -> None:
         params = _make_params()
         y0 = np.zeros(2 * N_DOF)
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             run_simulation(params, y0, -1.0, _zero_torque, dt=0.02)

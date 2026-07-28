@@ -23,6 +23,7 @@ import numpy.typing as npt
 
 from . import native_backend as _native_backend
 from .constants import GRAVITY_MSS
+from .validation import require_non_negative, require_positive
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -58,19 +59,19 @@ class TriplePendulumParams:
     scapula_offset_rad: float = 0.0  # angular offset of hub anchor (rad)
 
     def __post_init__(self) -> None:
-        assert self.m1 > 0, f"m1 must be positive, got {self.m1}"
-        assert self.m2 > 0, f"m2 must be positive, got {self.m2}"
-        assert self.m3 > 0, f"m3 must be positive, got {self.m3}"
-        assert self.L1 > 0, f"L1 must be positive, got {self.L1}"
-        assert self.L2 > 0, f"L2 must be positive, got {self.L2}"
-        assert self.L3 > 0, f"L3 must be positive, got {self.L3}"
-        assert self.g >= 0, f"g must be non-negative, got {self.g}"
-        assert self.b1 >= 0, f"b1 must be non-negative, got {self.b1}"
-        assert self.b2 >= 0, f"b2 must be non-negative, got {self.b2}"
-        assert self.b3 >= 0, f"b3 must be non-negative, got {self.b3}"
-        assert self.mu1 >= 0, f"mu1 must be non-negative, got {self.mu1}"
-        assert self.mu2 >= 0, f"mu2 must be non-negative, got {self.mu2}"
-        assert self.mu3 >= 0, f"mu3 must be non-negative, got {self.mu3}"
+        require_positive("m1", self.m1)
+        require_positive("m2", self.m2)
+        require_positive("m3", self.m3)
+        require_positive("L1", self.L1)
+        require_positive("L2", self.L2)
+        require_positive("L3", self.L3)
+        require_non_negative("g", self.g)
+        require_non_negative("b1", self.b1)
+        require_non_negative("b2", self.b2)
+        require_non_negative("b3", self.b3)
+        require_non_negative("mu1", self.mu1)
+        require_non_negative("mu2", self.mu2)
+        require_non_negative("mu3", self.mu3)
 
 
 # Type alias: state vector [theta1, phi1, phi2, dtheta1, dphi1, dphi2]
