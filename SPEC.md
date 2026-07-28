@@ -71,6 +71,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Hardened the workflow inventory guard for #8207. The
+  executable no-growth contract now validates the documented 83 active-workflow
+  cap, adds a separate 33 PR-triggered workflow budget, and fails if
+  `.github/WORKFLOWS.md` drifts from the script defaults.
 - **2026-07-28** - Restored the `upstream_drift_tools` alias-removal hygiene
   contract for #8206. The remaining executable test helper now clears only
   canonical Sidekick/shared modules, and repo-owned contributor docs describe
