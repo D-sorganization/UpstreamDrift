@@ -632,8 +632,11 @@ class MotionPipeline:
         data = preprocess_result.data
 
         # Stage 3: Scaling (requires skeleton)
-        # For now, use default skeleton from adapter result
-        skeleton = getattr(data, "skeleton", self._get_default_skeleton())
+        # Use an explicit sentinel so adapter-provided skeletons do not trigger
+        # the default loader/error path before getattr can return.
+        skeleton = getattr(data, "skeleton", None)
+        if skeleton is None:
+            skeleton = self._get_default_skeleton()
 
         scaling_result = self._run_scaling(data, skeleton)
         if not scaling_result.success:
@@ -677,6 +680,12 @@ class MotionPipeline:
         result = matching_result.data
         assert isinstance(result, MotionMatchingResult)
 
+        if result.matched_trajectory is not None:
+            result.matched_trajectory.source_provenance = {
+                **trajectory.source_provenance,
+                **result.matched_trajectory.source_provenance,
+            }
+
         # Add audit log to result metadata
         result.metadata["audit_log"] = self._audit_log
         result.metadata["config"] = self.config.model_dump()
@@ -701,7 +710,7 @@ class MotionPipeline:
         """Get default skeleton for pipeline."""
         # This would load a default skeleton based on config
         # For now, raise error - caller should provide skeleton
-        raise RuntimeError("No skeleton provided. Use adapter that provides one.")
+        raise InvalidInputError("No skeleton provided. Use adapter that provides one.")
 
     def get_audit_log(self) -> list[dict[str, Any]]:
         """Get audit log for provenance."""
