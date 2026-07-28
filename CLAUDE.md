@@ -199,22 +199,21 @@ next `git submodule update` or vendor bump.
 ### Package naming — sidekick is canonical
 
 `sidekick` is the canonical package name for the shared tools utility library.
-`upstream_drift_tools` is a **deprecated alias** (compat shim provided by Tools
-PR #2885 / Stage 1). New code in `src/` and `tests/` must import from `sidekick`:
+The previous `upstream_drift_tools` alias has been removed from UpstreamDrift's
+local shared tree. New code in `src/` and `tests/` must import from `sidekick`:
 
 ```python
 # Correct (Stage 2+)
 from sidekick.theme import CatppuccinTheme
 import sidekick
 
-# Deprecated — do not use in new code
+# Removed — do not use in new code
 from upstream_drift_tools.theme import CatppuccinTheme  # noqa: removed in Stage 2
 ```
 
-The compat shim in `vendor/ud-tools` keeps `upstream_drift_tools` importable
-during the transition period, but the hygiene test
-`tests/unit/repo_hygiene/test_no_deprecated_imports.py` enforces that no
-`src/` or `tests/` file uses the old name.
+The hygiene test `tests/unit/repo_hygiene/test_no_deprecated_imports.py`
+enforces that no Python file under `src/` or `tests/` uses the old name and
+that `src/shared/python/upstream_drift_tools/` stays deleted.
 
 Repository-hygiene tests at `tests/unit/repo_hygiene/` enforce this:
 
