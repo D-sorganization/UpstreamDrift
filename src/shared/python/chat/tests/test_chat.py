@@ -201,3 +201,113 @@ class TestSessionFileFunctions:
         _write_shared_session_id("roundtrip-id-999", f)
         result = _read_shared_session_id(f)
         assert result == "roundtrip-id-999"
+
+
+class TestLauncherWebSocketAuthHelpers:
+    def test_manifest_url_uses_http_origin_for_ws_server(self):
+        from chat.chat_dock_widget import _launcher_manifest_url
+
+        assert (
+            _launcher_manifest_url("ws://127.0.0.1:8000")
+            == "http://127.0.0.1:8000/api/launcher/manifest"
+        )
+        assert (
+            _launcher_manifest_url("wss://example.test")
+            == "https://example.test/api/launcher/manifest"
+        )
+
+    def test_chat_websocket_url_appends_launcher_token(self):
+        from chat.chat_dock_widget import _chat_websocket_url
+
+        url = _chat_websocket_url(
+            "ws://127.0.0.1:8000",
+            "/api/ws/chat/{session_id}",
+            "abc",
+            "tok-123",
+        )
+
+        assert url == "ws://127.0.0.1:8000/api/ws/chat/abc?launcher_token=tok-123"
+
+    def test_chat_websocket_url_preserves_existing_query(self):
+        from chat.chat_dock_widget import _chat_websocket_url
+
+        url = _chat_websocket_url(
+            "ws://127.0.0.1:8000",
+            "/api/ws/chat/{session_id}?mode=local",
+            "abc",
+            "tok-123",
+        )
+
+        assert (
+            url
+            == "ws://127.0.0.1:8000/api/ws/chat/abc?mode=local&launcher_token=tok-123"
+        )
+
+    def test_websocket_origin_matches_http_origin(self):
+        from chat.chat_dock_widget import _websocket_origin_for_server
+
+        assert _websocket_origin_for_server("ws://127.0.0.1:8000") == (
+            "http://127.0.0.1:8000"
+        )
+
+    def test_fetch_launcher_capability_token_reads_manifest(self):
+        from chat.chat_dock_widget import _fetch_launcher_capability_token
+
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_exc):
+                return False
+
+            def read(self) -> bytes:
+                return b'{"launcher_csrf_token": "tok-abc"}'
+
+        with patch("urllib.request.urlopen", return_value=Response()) as urlopen:
+            token = _fetch_launcher_capability_token("ws://127.0.0.1:8000")
+
+        assert token == "tok-abc"
+        request = urlopen.call_args.args[0]
+        assert request.full_url == "http://127.0.0.1:8000/api/launcher/manifest"
+
+    def test_fetch_launcher_capability_token_returns_none_for_missing_token(self):
+        from chat.chat_dock_widget import _fetch_launcher_capability_token
+
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_exc):
+                return False
+
+            def read(self) -> bytes:
+                return b'{"tiles": []}'
+
+        with patch("urllib.request.urlopen", return_value=Response()):
+            assert _fetch_launcher_capability_token("ws://127.0.0.1:8000") is None
+
+    def test_disconnect_status_becomes_actionable_after_repeated_failures(self):
+        from chat.chat_dock_widget import _chat_disconnect_status
+
+        assert (
+            _chat_disconnect_status(
+                2,
+                "ws://127.0.0.1:8000/api/ws/chat/new",
+                "403 Forbidden",
+            )
+            == "Disconnected - retrying in 3s..."
+        )
+
+        status = _chat_disconnect_status(
+            3,
+            "ws://127.0.0.1:8000/api/ws/chat/new",
+            "403 Forbidden",
+        )
+
+        assert "403 Forbidden" in status
+        assert "ws://127.0.0.1:8000/api/ws/chat/new" in status
+        assert "/api/launcher/manifest" in status

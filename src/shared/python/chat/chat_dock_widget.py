@@ -25,10 +25,16 @@ from __future__ import annotations
 
 import os
 import threading
+import json
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 _DEFAULT_SERVER = "ws://127.0.0.1:8000"
+_LAUNCHER_MANIFEST_PATH = "/api/launcher/manifest"
+_LAUNCHER_TOKEN_QUERY = "launcher_token"
 
 
 def _resolve_default_server() -> str:
@@ -105,6 +111,101 @@ def _write_shared_session_id(session_id: str, path: Path) -> None:
             pass
 
 
+def _http_base_for_ws_server(server_url: str) -> str:
+    """Return the HTTP(S) origin matching a ws:// or wss:// server URL."""
+    parsed = urllib.parse.urlsplit(server_url.rstrip("/"))
+    if parsed.scheme == "ws":
+        scheme = "http"
+    elif parsed.scheme == "wss":
+        scheme = "https"
+    elif parsed.scheme in {"http", "https"}:
+        scheme = parsed.scheme
+    else:
+        raise ValueError(f"Unsupported chat server URL scheme: {parsed.scheme!r}")
+    return urllib.parse.urlunsplit((scheme, parsed.netloc, "", "", ""))
+
+
+def _launcher_manifest_url(server_url: str) -> str:
+    """Return the launcher manifest URL for a chat WebSocket server."""
+    return f"{_http_base_for_ws_server(server_url)}{_LAUNCHER_MANIFEST_PATH}"
+
+
+def _websocket_origin_for_server(server_url: str) -> str:
+    """Return the loopback Origin header expected by local WS auth guards."""
+    return _http_base_for_ws_server(server_url)
+
+
+def _chat_websocket_url(
+    server_url: str,
+    ws_path_template: str,
+    session_id: str,
+    launcher_token: str | None = None,
+) -> str:
+    """Build the chat WebSocket URL, appending the launcher token when present."""
+    path = ws_path_template.replace("{session_id}", session_id)
+    url = f"{server_url.rstrip('/')}{path}"
+    if not launcher_token:
+        return url
+    parsed = urllib.parse.urlsplit(url)
+    query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    query.append((_LAUNCHER_TOKEN_QUERY, launcher_token))
+    return urllib.parse.urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            urllib.parse.urlencode(query),
+            parsed.fragment,
+        )
+    )
+
+
+def _fetch_launcher_capability_token(
+    server_url: str,
+    timeout_seconds: float = 2.0,
+) -> str | None:
+    """Fetch the launcher capability token used by local WebSocket auth."""
+    try:
+        request = urllib.request.Request(
+            _launcher_manifest_url(server_url),
+            headers={"Accept": "application/json"},
+        )
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+            if getattr(response, "status", 200) >= 400:
+                return None
+            payload = json.loads(response.read().decode("utf-8"))
+    except (
+        OSError,
+        TimeoutError,
+        ValueError,
+        json.JSONDecodeError,
+        urllib.error.URLError,
+    ):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    token = payload.get("launcher_csrf_token")
+    return token if isinstance(token, str) and token else None
+
+
+def _chat_disconnect_status(
+    failure_count: int,
+    websocket_url: str | None,
+    last_error: str | None,
+) -> str:
+    """Return the connection status text after a failed chat WS attempt."""
+    if failure_count < 3:
+        return "Disconnected - retrying in 3s..."
+    detail = (last_error or "").strip() or (
+        "launcher capability token is missing or stale"
+    )
+    target = websocket_url or "unknown WebSocket URL"
+    return (
+        "Chat unavailable: "
+        f"{detail}. URL: {target}. Check /api/launcher/manifest and retrying in 3s..."
+    )
+
+
 def _load_qt_module() -> Any:
     from . import _chat_dock_widget_qt
 
@@ -121,7 +222,12 @@ __all__ = [
     "ChatDockWidget",
     "ChatMessageBubble",
     "_DEFAULT_SERVER",
+    "_chat_disconnect_status",
+    "_chat_websocket_url",
+    "_fetch_launcher_capability_token",
+    "_launcher_manifest_url",
     "_session_file_path",
+    "_websocket_origin_for_server",
     "_read_shared_session_id",
     "_write_shared_session_id",
 ]
