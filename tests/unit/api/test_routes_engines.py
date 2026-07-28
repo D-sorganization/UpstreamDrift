@@ -1,5 +1,7 @@
 """Unit tests for the engines API route."""
 
+from pathlib import Path
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -21,17 +23,23 @@ class MockEngineCapabilities:
 
 
 class MockEngine:
-    def get_capabilities(self):
+    def __init__(self) -> None:
+        self.loaded_paths: list[str] = []
+
+    def get_capabilities(self) -> MockEngineCapabilities:
         return MockEngineCapabilities()
 
-    def load_from_path(self, path):
-        pass
+    def load_from_path(self, path: str) -> None:
+        self.loaded_paths.append(path)
 
-    def get_state(self):
+    def get_state(self) -> dict[str, float]:
         return {"time": 0.0}
 
 
 class MockEngineManager:
+    def __init__(self) -> None:
+        self.active_engine = MockEngine()
+
     def get_available_engines(self):
         return [EngineType.MUJOCO, EngineType.DRAKE, EngineType.JAXSIM]
 
@@ -54,7 +62,7 @@ class MockEngineManager:
         return True
 
     def get_active_physics_engine(self):
-        return MockEngine()
+        return self.active_engine
 
 
 @pytest.fixture
@@ -110,6 +118,27 @@ def test_load_engine(client: TestClient) -> None:
     data = response.json()
     assert data["status"] == "loaded"
     assert data["engine"] == "mujoco"
+
+
+def test_load_engine_with_model_path_loads_active_engine(
+    client: TestClient,
+    mock_engine_manager: MockEngineManager,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Loading with model_path validates then passes the path to the active engine."""
+    from src.api.utils import path_validation
+
+    model_dir = tmp_path / "models"
+    model_dir.mkdir()
+    model_path = model_dir / "model.xml"
+    model_path.write_text("<mujoco />", encoding="utf-8")
+    monkeypatch.setattr(path_validation, "ALLOWED_MODEL_DIRS", [model_dir.resolve()])
+
+    response = client.post("/engines/mujoco/load", params={"model_path": "model.xml"})
+
+    assert response.status_code == 200
+    assert mock_engine_manager.active_engine.loaded_paths == [str(model_path.resolve())]
 
 
 def test_load_unknown_engine(client: TestClient) -> None:
