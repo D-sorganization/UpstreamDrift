@@ -561,6 +561,6 @@ The changes follow Pragmatic Programmer principles (DRY, orthogonality, testabil
 
 ## References
 
-- [Pragmatic Programmer Review](../assessments/pragmatic_programmer_review.md)
+- [Pragmatic Programmer Review](../assessments/pragmatic_programmer/review.md)
 - [AGENTS.md](../../AGENTS.md) - Coding standards
-- [Context Gatherer Analysis](../assessments/context_gatherer_dry_analysis.md)
+- [Pragmatic Programmer Assessment (2026-03-12)](../assessments/pragmatic_programmer/Pragmatic_Assessment_2026-03-12.md)

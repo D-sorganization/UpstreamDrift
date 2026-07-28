@@ -12,8 +12,12 @@ MuJoCo (Multi-Joint dynamics with Contact) is a physics engine that aims to faci
 
 ## Usage
 
-Located in `engines/physics_engines/mujoco/`.
+Located in `src/engines/physics_engines/mujoco/`.
+
+The engine adapter is `MuJoCoPhysicsEngine` in
+`src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py`.
+Launch the humanoid golf GUI from the repository root:
 
 ```bash
-python engines/physics_engines/mujoco/python/main.py
+python -m src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf
 ```
