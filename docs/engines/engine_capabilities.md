@@ -6,9 +6,17 @@ This document explicitly states which features are supported by which physics en
 with known limitations, tolerance targets, and reference tests per
 `docs/assessments/project_design_guidelines.qmd` Guideline M1.
 
-**Last Updated**: January 5, 2026
+**Last Updated**: July 24, 2026
 
 **JaxSim Taxonomy Update**: May 30, 2026 (#6651)
+
+**Counterfactual / drift-control correction**: July 24, 2026 (#7996). Rows F,
+G1, G2, H1 and H2 previously marked implemented engines as ❌. Every engine
+listed implements `compute_drift_acceleration`, `compute_ztcf` and
+`compute_zvcf`, and MuJoCo, Drake and Pinocchio each ship an induced-
+acceleration analyzer with passing tests. The runtime manifest in
+`src/api/routes/launcher.py` also declares `drift_acceleration` as `FULL` for
+every engine except JaxSim.
 
 ---
 
@@ -29,11 +37,11 @@ with known limitations, tolerance targets, and reference tests per
 | **E1. Joint Forces/Torques**    | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Symbolic  | ❌      | ❌       |
 | **E2. Segment Wrenches**        | ⚠️ Partial    | ⚠️ Partial    | ⚠️ Partial    | ➖ N/A       | ❌      | ❌       |
 | **E3. Power Flow**              | ⚠️ Joint-only | ⚠️ Joint-only | ⚠️ Joint-only | ➖ N/A       | ❌      | ❌       |
-| **F. Drift-Control Decomp**     | ❌            | ❌            | ✅ Full       | ✅ Full      | ❌      | ❌       |
-| **G1. ZTCF Counterfactual**     | ❌            | ❌            | ✅ Full       | ✅ Full      | ❌      | ❌       |
-| **G2. ZVCF Counterfactual**     | ❌            | ❌            | ✅ Full       | ✅ Full      | ❌      | ❌       |
-| **H1. Induced Acceleration**    | ✅ Full       | ❌            | ❌            | ❌           | ❌      | ❌       |
-| **H2. Indexed Acceleration**    | ✅ Full       | ❌            | ❌            | ❌           | ❌      | ❌       |
+| **F. Drift-Control Decomp**     | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Full      | ✅ Full | ✅ Full  |
+| **G1. ZTCF Counterfactual**     | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Full      | ✅ Full | ✅ Full  |
+| **G2. ZVCF Counterfactual**     | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Full      | ✅ Full | ✅ Full  |
+| **H1. Induced Acceleration**    | ✅ Full       | ✅ Full       | ✅ Full       | ❌           | ❌      | ❌       |
+| **H2. Indexed Acceleration**    | ✅ Full       | ✅ Full       | ✅ Full       | ✅ Full      | ✅ Full | ✅ Full  |
 | **I1. Velocity Ellipsoids**     | ✅ Full       | ✅ Full       | ✅ Full       | ⚠️ Partial   | ❌      | ❌       |
 | **I2. Force Ellipsoids**        | ✅ Full       | ✅ Full       | ✅ Full       | ⚠️ Partial   | ❌      | ❌       |
 | **J. OpenSim Biomechanics**     | ❌            | ❌            | ❌            | ❌           | ❌ Stub | ❌       |
@@ -99,11 +107,11 @@ Cross-engine agreement expected within these tolerances:
 - Excellent contact dynamics (soft contacts)
 - Fast simulation (optimized C++ core)
 - Induced acceleration analysis (best-in-class)
+- Counterfactual analysis (ZTCF/ZVCF) and drift-control decomposition
 - Conditioning warnings (Jan 2026)
 
 **Limitations**:
 
-- **Counterfactuals**: Not implemented - use Pinocchio for drift-control analysis
 - **Screw Kinematics**: Not implemented
 - **Contact Model**: Soft contacts only, no hard constraints
 - **Integration**: Semi-implicit Euler (default) - can cause small deviations vs Drake/Pinocchio
@@ -117,12 +125,13 @@ Cross-engine agreement expected within these tolerances:
 - Excellent numerical stability (Runge-Kutta 3)
 - Rich constraint modeling
 - Strong optimization integration
+- Induced acceleration analysis (`DrakeInducedAccelerationAnalyzer`)
+- Counterfactual analysis (ZTCF/ZVCF, Guidelines G1/G2)
 - Conditioning warnings (Jan 2026)
 
 **Limitations**:
 
-- **Induced Acceleration**: Not implemented - use MuJoCo
-- **Counterfactuals**: Not implemented - use Pinocchio
+- **Screw Kinematics**: Not implemented
 - **Integration Method**: RK3 causes ~1% differences vs MuJoCo semi-implicit
 - **Setup Complexity**: More verbose API than MuJoCo
 
@@ -134,12 +143,12 @@ Cross-engine agreement expected within these tolerances:
 
 - Excellent counterfactual analysis (ZTCF/ZVCF)
 - Drift-control decomposition (state-of-the-art)
+- Induced acceleration analysis (`InducedAccelerationAnalyzer`)
 - Fastest kinematics computation
 - Strong URDF support
 
 **Limitations**:
 
-- **Induced Acceleration**: Not implemented - use MuJoCo
 - **Conditioning Warnings**: Missing (Jan 2026) - to be added
 - **Visualization**: No native viewer - use MuJoCo or Meshcat
 - **Contact Dynamics**: Basic compared to MuJoCo
@@ -164,7 +173,16 @@ Cross-engine agreement expected within these tolerances:
 
 ### OpenSim / MyoSuite
 
-**Status**: Stub only (Jan 2026)
+**Status**: Partial. The dynamics surface required by Guidelines F, G1, G2 and
+H2 is implemented — `compute_drift_acceleration`, `compute_control_acceleration`,
+`compute_gravity_forces`, `compute_ztcf` and `compute_zvcf` all exist in
+`src/engines/physics_engines/opensim/python/opensim_physics_engine.py` and
+`src/engines/physics_engines/myosuite/python/_drift_control.py`.
+
+**Still stubbed**: the muscle-specific Guideline J (OpenSim biomechanics) and
+Guideline K (MyoSuite muscle) surfaces, plus kinematic/inertial modelling and
+URDF import.
+
 **Priority**: Long-term (Guideline J/K requirements)
 **Estimated Implementation**: 12+ weeks for full integration
 

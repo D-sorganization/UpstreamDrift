@@ -31,11 +31,11 @@ This directory contains implementation plans, roadmaps, and strategic documentat
 
 ### Repository Migration
 
-- [migration_status.md](migration_status.md) - Consolidation of multiple repositories into unified suite
+- [../historical/](../historical/) - Consolidation of multiple repositories into unified suite
 
 ### Development Roadmap
 
-- [implementation_roadmap.md](implementation_roadmap.md) - Future features and milestones
+- [COMPREHENSIVE_IMPLEMENTATION_PLAN_2026.md](COMPREHENSIVE_IMPLEMENTATION_PLAN_2026.md) - Future features and milestones
 
 ## Related Documentation
 

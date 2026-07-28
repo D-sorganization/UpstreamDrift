@@ -12,8 +12,12 @@ Drake is a C++ toolbox started at MIT and now led by the Toyota Research Institu
 
 ## Usage
 
-Located in `engines/physics_engines/drake/`.
+Located in `src/engines/physics_engines/drake/`.
+
+The engine adapter is `DrakePhysicsEngine` in
+`src/engines/physics_engines/drake/python/drake_physics_engine.py`.
+Launch the Drake dashboard from the repository root:
 
 ```bash
-python -m engines.physics_engines.drake.python.main
+python -m src.engines.physics_engines.drake.python
 ```

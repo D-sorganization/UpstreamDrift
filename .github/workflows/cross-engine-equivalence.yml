@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -164,7 +164,7 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "pydantic==2.12.5"
 
@@ -251,7 +251,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -296,7 +296,7 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "pydantic==2.12.5"
           pip uninstall -y pytest-vcr pytest-recording || true

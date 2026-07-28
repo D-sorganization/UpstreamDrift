@@ -288,4 +288,4 @@ Display multiple views simultaneously:
 
 ---
 
-_See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Analysis Tools](analysis_tools.md)_
+_See also: [Full User Manual](../user_guide/user_manual.md) | [Simulation Controls](simulation_controls.md) | [Analysis Tools](analysis_tools.md)_
