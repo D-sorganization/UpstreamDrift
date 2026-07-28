@@ -135,6 +135,10 @@ async function loadEngineApi(engineName: string): Promise<EngineLoadResponse> {
   }
 }
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 // ── Initial state ─────────────────────────────────────────────────────────
 
 function createInitialEngines(): ManagedEngine[] {
@@ -246,8 +250,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
         set({ selectedEngine: engineName });
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Unknown error loading engine';
+      const message = getErrorMessage(err, 'Unknown error loading engine');
       set((state) => ({
         engines: state.engines.map((e) =>
           e.name === engineName
@@ -259,7 +262,6 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   },
 
   unloadEngine: async (engineName) => {
-    const { selectedEngine } = get();
     // Idempotence guard (#7427): ignore an unload for an engine that is not
     // loaded or already has an operation in flight.
     const current = get().engines.find((e) => e.name === engineName);
@@ -270,14 +272,29 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
     set((state) => ({
       engines: state.engines.map((e) =>
         e.name === engineName
-          ? { ...e, loadState: 'unloading' as EngineLoadState }
+          ? { ...e, loadState: 'unloading' as EngineLoadState, error: undefined }
           : e
       ),
     }));
     try {
       await apiFetch<unknown>(`/api/engines/${engineName}/unload`, { method: 'POST' });
-    } catch {
-      // Best-effort: still update client state even if backend call fails
+    } catch (err) {
+      const detail = getErrorMessage(
+        err,
+        `Unknown error unloading engine: ${engineName}`
+      );
+      set((state) => ({
+        engines: state.engines.map((e) =>
+          e.name === engineName
+            ? {
+                ...e,
+                loadState: 'error' as EngineLoadState,
+                error: `Failed to unload engine: ${engineName}: ${detail}`,
+              }
+            : e
+        ),
+      }));
+      return;
     }
     set((state) => ({
       engines: state.engines.map((e) =>
@@ -286,7 +303,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
           : e
       ),
       selectedEngine:
-        selectedEngine === engineName ? null : selectedEngine,
+        state.selectedEngine === engineName ? null : state.selectedEngine,
     }));
   },
 

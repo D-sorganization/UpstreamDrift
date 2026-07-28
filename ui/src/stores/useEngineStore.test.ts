@@ -8,12 +8,32 @@ import {
   selectEngineSupportsCapability,
 } from './useEngineStore';
 
+function setEngineLoaded(engineName: string): void {
+  useEngineStore.setState((state) => ({
+    engines: state.engines.map((e) =>
+      e.name === engineName ? { ...e, loadState: 'loaded' as const } : e
+    ),
+  }));
+}
+
+function okJson(body: unknown = {}): Response {
+  return new Response(JSON.stringify(body));
+}
+
+function errorJson(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    statusText: 'Error',
+  });
+}
+
 describe('useEngineStore', () => {
   beforeEach(() => {
     // Reset the store to initial state before each test
     act(() => {
       useEngineStore.getState().resetEngines();
     });
+    global.fetch = vi.fn(() => Promise.resolve(okJson())) as typeof fetch;
   });
 
   describe('initial state', () => {
@@ -75,12 +95,7 @@ describe('useEngineStore', () => {
 
   describe('unloadEngine', () => {
     it('sets engine to idle', async () => {
-      // Manually set an engine to loaded
-      useEngineStore.setState((state) => ({
-        engines: state.engines.map((e) =>
-          e.name === 'mujoco' ? { ...e, loadState: 'loaded' as const } : e
-        ),
-      }));
+      setEngineLoaded('mujoco');
 
       await act(async () => {
         await useEngineStore.getState().unloadEngine('mujoco');
@@ -93,11 +108,9 @@ describe('useEngineStore', () => {
     });
 
     it('clears selection if unloading the selected engine', async () => {
+      setEngineLoaded('mujoco');
       useEngineStore.setState({
         selectedEngine: 'mujoco',
-        engines: useEngineStore.getState().engines.map((e) =>
-          e.name === 'mujoco' ? { ...e, loadState: 'loaded' as const } : e
-        ),
       });
 
       await act(async () => {
@@ -108,12 +121,51 @@ describe('useEngineStore', () => {
     });
 
     it('does not clear selection if unloading a different engine', async () => {
+      setEngineLoaded('drake');
       useEngineStore.setState({ selectedEngine: 'mujoco' });
 
       await act(async () => {
         await useEngineStore.getState().unloadEngine('drake');
       });
 
+      expect(useEngineStore.getState().selectedEngine).toBe('mujoco');
+    });
+
+    it('keeps selection and surfaces error when backend unload is rejected', async () => {
+      setEngineLoaded('mujoco');
+      useEngineStore.setState({ selectedEngine: 'mujoco' });
+      global.fetch = vi.fn(() =>
+        Promise.resolve(errorJson({ detail: 'engine still busy' }, 409))
+      ) as typeof fetch;
+
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('mujoco');
+      });
+
+      const mujoco = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'mujoco');
+      expect(mujoco?.loadState).toBe('error');
+      expect(mujoco?.error).toContain('engine still busy');
+      expect(useEngineStore.getState().selectedEngine).toBe('mujoco');
+    });
+
+    it('keeps selection and surfaces error when backend unload has a network failure', async () => {
+      setEngineLoaded('mujoco');
+      useEngineStore.setState({ selectedEngine: 'mujoco' });
+      global.fetch = vi.fn(() =>
+        Promise.reject(new Error('Network error'))
+      ) as typeof fetch;
+
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('mujoco');
+      });
+
+      const mujoco = useEngineStore
+        .getState()
+        .engines.find((e) => e.name === 'mujoco');
+      expect(mujoco?.loadState).toBe('error');
+      expect(mujoco?.error).toContain('Network error');
       expect(useEngineStore.getState().selectedEngine).toBe('mujoco');
     });
 
