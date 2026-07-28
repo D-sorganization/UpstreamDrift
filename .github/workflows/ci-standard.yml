@@ -749,6 +749,9 @@ jobs:
       - name: Test Layout Guard
         run: python3 scripts/check_test_layout.py
 
+      - name: No-op Test Placeholder Guard
+        run: python3 scripts/ci/check_noop_tests.py
+
       - name: In-Tree Pytest Collection Guard
         run: python3 scripts/check_pytest_intree_testpaths.py
 
