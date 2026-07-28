@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Restored stale shared CORS and humanoid preview test
+  collectability for #8199. The CORS helper now enforces invalid-app and
+  invalid-origin preconditions before middleware registration, and the preview
+  smoke test imports `BodyParameters` from the supported public package API.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
