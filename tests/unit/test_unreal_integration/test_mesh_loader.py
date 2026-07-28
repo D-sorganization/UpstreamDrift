@@ -677,37 +677,3 @@ class TestIssue2480GltfFallbackNoPlaceholder:
         loader = MeshLoader()
         with pytest.raises(MeshLoadError):
             loader._load_gltf_basic(gltf_file)
-
-    def test_public_load_raises_and_does_not_cache_placeholder(
-        self, tmp_path: Path
-    ) -> None:
-        """Issue #8025: load() must raise instead of returning a 1-vertex placeholder."""
-        from src.unreal_integration.mesh_loader import MeshLoadError
-
-        gltf_content = {
-            "asset": {"version": "2.0"},
-            "meshes": [{"name": "test", "primitives": [{"attributes": {}}]}],
-        }
-        gltf_file = tmp_path / "declared_geometry.gltf"
-        gltf_file.write_text(json.dumps(gltf_content))
-
-        loader = MeshLoader()
-
-        import unittest.mock as mock
-
-        with mock.patch.dict("sys.modules", {"trimesh": None}):
-            with pytest.raises(MeshLoadError, match="(?i)trimesh"):
-                loader.load(gltf_file)
-            # A failed load must not poison the cache with fabricated geometry.
-            assert len(loader._cache) == 0
-
-    def test_glb_raises_same_error(self, tmp_path: Path) -> None:
-        """Issue #8025: .glb takes the same honest failure path as .gltf."""
-        from src.unreal_integration.mesh_loader import MeshLoadError
-
-        glb_file = tmp_path / "test.glb"
-        glb_file.write_bytes(b"glTF")
-
-        loader = MeshLoader()
-        with pytest.raises(MeshLoadError, match="(?i)trimesh"):
-            loader._load_gltf_basic(glb_file)

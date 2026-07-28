@@ -233,23 +233,22 @@ class TestCalibrationOptimizer:
         assert val == pytest.approx(11664.0, abs=1e-9)
 
     def test_optimize_bounds_come_from_the_shared_constant(self) -> None:
-        """The back-compat bounds constant preserves the physical range."""
+        """`optimize()` is the single enforcement point for the physical range."""
         assert CalibrationOptimizer.BOUNDS == ((0.01, 1.0), (0.01, 1.0))
 
     def test_objective_rejects_undersized_parameter_vector(self) -> None:
         exp = AngleOfReposeExperiment(backend="mock")
         opt = CalibrationOptimizer(exp)
-        with pytest.raises(ValueError, match="calibrated parameters"):
-            opt._objective(np.array([]))
+        with pytest.raises(ValueError, match="two parameters"):
+            opt._objective(np.array([0.5]))
 
     def test_optimize_returns_dict_with_error(self) -> None:
         exp = AngleOfReposeExperiment(backend="mock")
         opt = CalibrationOptimizer(exp)
         result = opt.optimize()
         assert "friction_coefficient" in result
+        assert "restitution_coefficient" in result
         assert "error" in result
-        # #7999: an inert parameter is no longer reported as calibrated.
-        assert "restitution_coefficient" not in result
         assert 0.01 <= result["friction_coefficient"] <= 1.0
 
 

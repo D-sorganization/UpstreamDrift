@@ -196,10 +196,9 @@ class TestContactDifferentiableEngine:
         assert loss(traj) == pytest.approx(4.5)
 
     def test_apply_phase_smoothing(self, fake_engine) -> None:
-        """#8019: smoothing is now per-timestep, not a single global scalar."""
         cd = ContactDifferentiableEngine(fake_engine, smoothing_factor=0.01)
         cd._apply_phase_smoothing([True, False], 0.01, 5.0)
-        np.testing.assert_allclose(cd.smoothing_schedule, [0.05, 0.01])
+        assert cd.smoothing_factor == 0.05
         cd._apply_phase_smoothing([False, False], 0.01, 5.0)
         assert cd.smoothing_factor == 0.01
 

@@ -9,10 +9,18 @@ python3 scripts/db_migrate.py upgrade head
 ```
 
 before starting the new API version. On startup with
-`UPSTREAM_DRIFT_ENV=production`, `src/api/database.py` verifies that the
+`ENVIRONMENT=production`, `src/api/database.py` verifies that the
 database `alembic_version` revision exactly matches the migration head in the
 checked-out codebase. If the version table is missing, unreadable, empty, or
 behind/ahead of the codebase, the server refuses to start.
+
+`ENVIRONMENT` is the canonical variable (the same one used by `SECURITY.md`'s
+production checklist and `src/api/auth/security.py`). The legacy
+`UPSTREAM_DRIFT_ENV` spelling is still honoured as a fallback, and the gate
+fails closed: if _either_ variable names `production`, the production path is
+taken. Previously this gate read only `UPSTREAM_DRIFT_ENV`, so a deployment
+that followed `SECURITY.md` silently ran `create_all()` and seeded a default
+admin account (issue #7994).
 
 Development and test environments may still use SQLAlchemy `create_all()` for
 local convenience. That path is not the production schema-management path.

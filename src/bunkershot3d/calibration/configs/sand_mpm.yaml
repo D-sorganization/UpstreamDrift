@@ -1,0 +1,6 @@
+sand_parameters:
+  cohesion: 0.0
+  density: 1600.0
+  friction_coefficient: 0.5
+  mean_diameter: 0.0004
+  restitution_coefficient: 0.417406711612086

@@ -131,16 +131,7 @@ def _mujoco_angle_of_repose(
 
 
 class AngleOfReposeExperiment:
-    """Simulates pouring particles from a lifted cylinder to measure pile angle.
-
-    Attributes:
-        calibrated_parameters: Parameters the pile angle actually depends on.
-            ``restitution_coefficient`` is deliberately absent - neither the
-            mock nor the MuJoCo path reads it, so optimising over it would
-            return optimiser noise (issue #7999).
-    """
-
-    calibrated_parameters: tuple[str, ...] = ("friction_coefficient",)
+    """Simulates pouring particles from a lifted cylinder to measure pile angle."""
 
     def __init__(self, backend: str = "mpm", *, use_mock: bool | None = None) -> None:
         self.backend = backend

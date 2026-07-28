@@ -18,6 +18,7 @@ from src.shared.python.config.environment import (
     get_database_pool_recycle,
     get_database_pool_size,
     get_database_url,
+    is_production_environment,
 )
 
 # Base imported locally in create_tables to avoid circular import
@@ -116,8 +117,14 @@ def _assert_alembic_head_applied() -> None:
 
 
 def _is_production_environment() -> bool:
-    """Return whether startup is running under the production DB contract."""
-    return os.getenv("UPSTREAM_DRIFT_ENV", "").strip().lower() == "production"
+    """Return whether startup is running under the production DB contract.
+
+    Delegates to the canonical resolver so this gate honours ``ENVIRONMENT``
+    (what every deployment doc instructs operators to set) as well as the
+    legacy ``UPSTREAM_DRIFT_ENV``, and fails closed if either says production
+    (issue #7994).
+    """
+    return is_production_environment()
 
 
 def get_db() -> Generator[Session, None, None]:

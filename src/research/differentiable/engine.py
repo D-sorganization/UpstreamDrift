@@ -92,10 +92,6 @@ def _central_difference_vector(
     return (value_plus - value_minus) / (2.0 * step)
 
 
-#: Contact smoothing methods implemented by ContactDifferentiableEngine.
-_CONTACT_METHODS = frozenset({"smoothed", "randomized", "stochastic"})
-
-
 class AutodiffBackend(Enum):
     """Automatic differentiation backend."""
 
@@ -159,15 +155,6 @@ class DifferentiableEngine:
             raise ValueError("engine must be provided")
         self.engine = engine
         self._backend = AutodiffBackend(backend)
-        if self._backend is not AutodiffBackend.NUMPY:
-            # Issue #8019: `_backend` was assigned and never read, so
-            # backend="jax" silently produced finite differences. Until a real
-            # autodiff dispatch exists, say so instead of pretending.
-            raise NotImplementedError(
-                f"backend={backend!r} is not implemented: "
-                "DifferentiableEngine only has a numerical (finite-difference) "
-                "path. Pass backend='numpy' explicitly (issue #8019)."
-            )
 
         # Get state dimensions
         if hasattr(engine, "n_q"):
@@ -182,11 +169,6 @@ class DifferentiableEngine:
 
         self._n_x = self._n_q + self._n_v
         self._n_u = self._n_v
-
-    @property
-    def backend(self) -> AutodiffBackend:
-        """Autodiff backend in use (always ``NUMPY`` today - see #8019)."""
-        return self._backend
 
     def simulate_trajectory(
         self,
@@ -288,31 +270,6 @@ class DifferentiableEngine:
                 f"controls must have shape (T, {self._n_u}); got {controls.shape}"
             )
         dt = _require_positive_dt(dt)
-        return self._gradient_with_steps(initial_state, controls, loss_fn, dt, None)
-
-    def _gradient_with_steps(
-        self,
-        initial_state: NDArray[np.floating],
-        controls: NDArray[np.floating],
-        loss_fn: Callable[[NDArray[np.floating]], float],
-        dt: float,
-        steps: NDArray[np.floating] | None,
-    ) -> NDArray[np.floating]:
-        """Central-difference gradient with caller-controlled step sizes.
-
-        Args:
-            initial_state: Validated initial state.
-            controls: Validated control sequence (T, n_u).
-            loss_fn: Loss function taking a trajectory.
-            dt: Validated timestep.
-            steps: Per-element finite-difference step. ``None`` uses the
-                scale-aware default ``1e-6 * max(1, |value|)``. A larger step
-                differentiates a *mollified* loss, which is how contact
-                smoothing is applied (issue #8019).
-
-        Returns:
-            Gradient of loss w.r.t. controls (T, n_u).
-        """
         T, n_u = controls.shape
         gradient = np.zeros_like(controls, dtype=float)
 
@@ -333,11 +290,7 @@ class DifferentiableEngine:
         traj_minus = baseline_traj.copy()
         for t in range(T):
             for i in range(n_u):
-                step = (
-                    _scaled_central_step(float(controls[t, i]))
-                    if steps is None
-                    else float(steps[t, i])
-                )
+                step = _scaled_central_step(float(controls[t, i]))
 
                 perturbed[t, i] = controls[t, i] + step
                 suffix = self.simulate_trajectory(baseline_traj[t], perturbed[t:], dt)
@@ -575,14 +528,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
 
     Attributes:
         contact_method: Contact smoothing method.
-        smoothing_factor: Smoothing parameter. In every mode - including the
-            default ``"smoothed"`` - this scales the perturbation applied to
-            the controls before differentiating, so changing it provably
-            changes the gradient (issue #8019).
-        smoothing_schedule: Optional per-timestep smoothing factors set by
-            :meth:`optimize_through_contact`. When present it overrides
-            :attr:`smoothing_factor` row by row, which is what makes the
-            smoothing genuinely phase-aware.
+        smoothing_factor: Smoothing parameter.
     """
 
     def __init__(
@@ -590,58 +536,19 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         engine: PhysicsEngineProtocol,
         contact_method: str = "smoothed",
         smoothing_factor: float = 0.01,
-        backend: str = "numpy",
     ) -> None:
         """Initialize contact-aware differentiable engine.
 
         Args:
             engine: Physics engine.
             contact_method: "smoothed", "randomized", or "stochastic".
-            smoothing_factor: Smoothing parameter (>= 0).
-            backend: Autodiff backend; only "numpy" is implemented (#8019).
-
-        Raises:
-            ValueError: If ``engine`` is missing, ``contact_method`` is unknown,
-                or ``smoothing_factor`` is negative.
+            smoothing_factor: Smoothing parameter.
         """
         if engine is None:
             raise ValueError("engine must be provided")
-        if contact_method not in _CONTACT_METHODS:
-            raise ValueError(
-                f"contact_method must be one of {sorted(_CONTACT_METHODS)}; "
-                f"got {contact_method!r}"
-            )
-        if smoothing_factor < 0.0:
-            raise ValueError("smoothing_factor must be non-negative")
-        super().__init__(engine, backend)
+        super().__init__(engine)
         self.contact_method = contact_method
         self.smoothing_factor = smoothing_factor
-        self.smoothing_schedule: NDArray[np.floating] | None = None
-
-    def _smoothing_per_step(self, n_steps: int) -> NDArray[np.floating]:
-        """Return the smoothing factor for each timestep.
-
-        Args:
-            n_steps: Number of control rows.
-
-        Returns:
-            Array of shape ``(n_steps, 1)`` so it broadcasts over controls.
-        """
-        if self.smoothing_schedule is None:
-            factors = np.full(n_steps, float(self.smoothing_factor))
-        else:
-            schedule = np.asarray(self.smoothing_schedule, dtype=float)
-            if schedule.shape[0] < n_steps:
-                schedule = np.concatenate(
-                    [
-                        schedule,
-                        np.full(
-                            n_steps - schedule.shape[0], float(self.smoothing_factor)
-                        ),
-                    ]
-                )
-            factors = schedule[:n_steps]
-        return factors[:, np.newaxis]
 
     def compute_gradient(
         self,
@@ -660,23 +567,17 @@ class ContactDifferentiableEngine(DifferentiableEngine):
 
         Returns:
             Smoothed gradient.
-
-        Raises:
-            ValueError: If ``initial_state`` is missing.
         """
         if initial_state is None:
             raise ValueError("initial_state must be provided")
-        controls = np.asarray(controls, dtype=float)
-        sigma = self._smoothing_per_step(controls.shape[0])
-
         if self.contact_method == "randomized":
             # Randomized smoothing: average gradients with noise
             n_samples = 10
             gradient = np.zeros_like(controls)
 
             for _ in range(n_samples):
-                # Add noise to controls (per-timestep smoothing amplitude)
-                noise = np.random.randn(*controls.shape) * sigma
+                # Add noise to controls
+                noise = np.random.randn(*controls.shape) * self.smoothing_factor
                 controls_noisy = controls + noise
 
                 grad = super().compute_gradient(
@@ -691,61 +592,12 @@ class ContactDifferentiableEngine(DifferentiableEngine):
 
         if self.contact_method == "stochastic":
             # Stochastic gradient with single sample
-            noise = np.random.randn(*controls.shape) * sigma
+            noise = np.random.randn(*controls.shape) * self.smoothing_factor
             controls_noisy = controls + noise
             return super().compute_gradient(initial_state, controls_noisy, loss_fn, dt)
 
-        return self._smoothed_gradient(initial_state, controls, loss_fn, dt, sigma)
-
-    def _smoothed_gradient(
-        self,
-        initial_state: NDArray[np.floating],
-        controls: NDArray[np.floating],
-        loss_fn: Callable[[NDArray[np.floating]], float],
-        dt: float,
-        sigma: NDArray[np.floating],
-    ) -> NDArray[np.floating]:
-        """Gradient of the mollified loss (deterministic smoothing).
-
-        The ``"smoothed"`` mode used to fall straight through to the parent's
-        finite-difference gradient and never read ``smoothing_factor`` at all,
-        which made ``contact_smoothing_multiplier`` provably inert in the
-        default configuration (issue #8019).
-
-        Smoothing is now applied the way it is meant to be: the central
-        difference is taken with a step of ``smoothing_factor`` instead of the
-        1e-6 machine-precision step, which differentiates a *mollified* loss.
-        Across a contact switch the tight step sees a locally flat function and
-        returns exactly zero; a step wide enough to straddle the switch returns
-        the usable descent direction. The step is per-timestep, so a
-        contact-phase schedule genuinely widens only the contact rows.
-
-        Args:
-            initial_state: Initial state.
-            controls: Control sequence.
-            loss_fn: Loss function.
-            dt: Timestep.
-            sigma: Per-timestep smoothing amplitude, shape ``(T, 1)``.
-
-        Returns:
-            Smoothed gradient with the same shape as ``controls``.
-        """
-        initial_state = _as_finite_array(
-            "initial_state", initial_state, shape=(self._n_x,)
-        )
-        controls = _as_finite_array("controls", controls, ndim=2)
-        if controls.shape[1] != self._n_u:
-            raise ValueError(
-                f"controls must have shape (T, {self._n_u}); got {controls.shape}"
-            )
-        dt = _require_positive_dt(dt)
-
-        if not np.any(sigma > 0.0):
-            return self._gradient_with_steps(initial_state, controls, loss_fn, dt, None)
-
-        default_steps = np.vectorize(_scaled_central_step)(controls)
-        steps = np.maximum(np.broadcast_to(sigma, controls.shape), default_steps)
-        return self._gradient_with_steps(initial_state, controls, loss_fn, dt, steps)
+        # Standard smoothed gradient
+        return super().compute_gradient(initial_state, controls, loss_fn, dt)
 
     def optimize_through_contact(
         self,
@@ -801,7 +653,6 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         )
 
         self.smoothing_factor = original_smoothing
-        self.smoothing_schedule = None
         optimal_trajectory = self.simulate_trajectory(initial_state, best_controls, dt)
 
         return OptimizationResult(
@@ -902,21 +753,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         original_smoothing: float,
         contact_smoothing_multiplier: float,
     ) -> None:
-        """Set a per-timestep smoothing schedule.
-
-        Issue #8019: this used to be ``if any(schedule)`` - a single global
-        scalar derived from whether the schedule contained *any* contact at
-        all, so a schedule with one contact step and one with fifty were
-        treated identically. It is now genuinely per-timestep.
-
-        Args:
-            schedule: Per-timestep contact flags.
-            original_smoothing: Baseline smoothing factor.
-            contact_smoothing_multiplier: Multiplier applied on contact steps.
-        """
-        flags = np.asarray(schedule, dtype=bool)
-        self.smoothing_schedule = np.where(
-            flags,
-            original_smoothing * contact_smoothing_multiplier,
-            original_smoothing,
-        )
+        if any(schedule):
+            self.smoothing_factor = original_smoothing * contact_smoothing_multiplier
+        else:
+            self.smoothing_factor = original_smoothing

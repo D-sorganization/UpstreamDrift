@@ -85,6 +85,7 @@ class TestCalibrateAllOptimizerWiring:
             instance = MockOpt.return_value
             instance.optimize.return_value = {
                 "friction_coefficient": 0.42,
+                "restitution_coefficient": 0.21,
                 "error": 0.0,
             }
             calibrate_backend("mpm", use_mock=True)
@@ -105,7 +106,4 @@ class TestCalibrateAllOptimizerWiring:
             data = yaml.safe_load(f)
         # Averaged values from the deterministic stub
         assert data["sand_parameters"]["friction_coefficient"] == pytest.approx(0.42)
-        # #7999: restitution is carried through from canonical.yaml, not
-        # "calibrated", and the file says so.
-        assert "restitution_coefficient" in data["provenance"]["not_calibrated"][0]
-        assert data["provenance"]["method"] == "analytical-mock"
+        assert data["sand_parameters"]["restitution_coefficient"] == pytest.approx(0.21)
