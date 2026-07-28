@@ -308,31 +308,17 @@ jobs:
             tests/engines/test_pinocchio_recorder.py \
             --timeout=60 \
             --timeout-method=thread \
+            --junitxml=/tmp/pinocchio-junit.xml \
             -v --tb=short \
             2>&1 | tee /tmp/pinocchio-test-results.txt
           rc=$?
           set -e
 
-          passed=$(grep -c "PASSED" /tmp/pinocchio-test-results.txt || true)
-          failed=$(grep -c "FAILED" /tmp/pinocchio-test-results.txt || true)
-          skipped=$(grep -c "SKIPPED" /tmp/pinocchio-test-results.txt || true)
-          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
-
-          if [[ "$rc" -eq 5 ]]; then
-            echo "::warning::No Pinocchio ecosystem tests were collected in the optional-stack lane."
-          elif [[ "$rc" -ne 0 ]]; then
-            echo "::error::Pinocchio ecosystem tests failed with pytest exit code $rc."
-            exit "$rc"
-          fi
-
-          # If Pinocchio IS installed but all tests were skipped, that is a
-          # regression  -  the guard conditions may no longer match the installed
-          # package API.
-          if [[ "${{ steps.pinocchio_install.outputs.available }}" == "true" ]] && \
-             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
-            echo "::warning::Pinocchio is installed but ALL pinocchio tests were skipped." \
-              "Check that skipTest() guard conditions are still valid."
-          fi
+          python3 scripts/ci/check_optional_stack_skip_policy.py \
+            --junit /tmp/pinocchio-junit.xml \
+            --available "${{ steps.pinocchio_install.outputs.available }}" \
+            --pytest-exit-code "$rc" \
+            --summary-file "$GITHUB_STEP_SUMMARY"
 
       - name: Run Unit Tests (Optional Stack)
         # Run the non-engine unit suite with optional extras present. Native

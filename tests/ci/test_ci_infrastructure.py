@@ -1186,10 +1186,6 @@ class TestCIEnvironmentCompatibility:
 
         for step_name, log_file in [
             ("Run API Tests (Optional Stack)", "/tmp/api-test-results.txt"),
-            (
-                "Run Pinocchio Ecosystem Tests (Optional Stack)",
-                "/tmp/pinocchio-test-results.txt",
-            ),
             ("Run Unit Tests (Optional Stack)", "/tmp/unit-test-results.txt"),
         ]:
             step = job[job.index(f"- name: {step_name}") :]
@@ -1222,8 +1218,18 @@ class TestCIEnvironmentCompatibility:
                 "- name: Run Pinocchio Ecosystem Tests (Optional Stack)"
             ) : job.index("- name: Run Unit Tests (Optional Stack)")
         ]
-        assert '[[ "$rc" -eq 5 ]]' in pinocchio_step
-        assert 'exit "$rc"' in pinocchio_step
+        assert "tee /tmp/pinocchio-test-results.txt || true" not in pinocchio_step
+        assert "set -o pipefail" in pinocchio_step
+        assert "rc=$?" in pinocchio_step
+        assert 'grep -c "FAILED"' not in pinocchio_step
+        assert "scripts/ci/check_optional_stack_skip_policy.py" in pinocchio_step
+        assert "--junitxml=/tmp/pinocchio-junit.xml" in pinocchio_step
+        assert "--available" in pinocchio_step
+        assert '--pytest-exit-code "$rc"' in pinocchio_step
+        assert (
+            "::warning::Pinocchio is installed but ALL pinocchio tests were skipped"
+            not in pinocchio_step
+        )
 
     def test_physics_validation_script_targets_collect_tests(self) -> None:
         """Every physics runner target must collect at least one real test."""
