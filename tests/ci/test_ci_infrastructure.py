@@ -572,14 +572,11 @@ class TestCIEnvironmentCompatibility:
         assert build_job["name"] == "Build (${{ matrix.artifact_name }})"
         assert build_job["runs-on"] == "${{ matrix.runner }}"
         assert "matrix.platform" not in workflow_text
-        assert {entry["artifact_name"] for entry in matrix_entries} == {
-            "linux-x64",
-            "windows-x64",
-        }
+        assert {entry["artifact_name"] for entry in matrix_entries} == {"linux-x64"}
         for entry in matrix_entries:
             assert "platform" not in entry
             assert isinstance(entry["artifact_name"], str)
-            assert entry["os"] in {"linux", "windows"}
+            assert entry["os"] == "linux"
 
         upload = next(
             step
@@ -590,8 +587,8 @@ class TestCIEnvironmentCompatibility:
             "golf-modeling-suite-${{ matrix.artifact_name }}"
         )
 
-    def test_tauri_windows_build_avoids_bash_rust_toolchain_action(self) -> None:
-        """Windows self-hosted build setup must avoid the bash-based Rust action."""
+    def test_tauri_build_matrix_omits_unavailable_windows_runner(self) -> None:
+        """Windows Tauri packaging must not queue on unavailable runner labels."""
         try:
             import yaml
         except ImportError:
@@ -603,86 +600,44 @@ class TestCIEnvironmentCompatibility:
             ),
         )
         build_job = workflow["jobs"]["build"]
-        steps = build_job["steps"]
-        unix_setup = next(
-            step for step in steps if step.get("name") == "Setup Rust (Unix)"
-        )
-        windows_setup = next(
-            step for step in steps if step.get("name") == "Setup Rust (Windows)"
-        )
+        matrix_entries = build_job["strategy"]["matrix"]["include"]
 
-        assert unix_setup["if"] == "matrix.os != 'windows'"
-        assert "dtolnay/rust-toolchain" in unix_setup["uses"]
-        assert windows_setup["if"] == (
-            "matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'"
-        )
-        assert windows_setup["shell"] == "pwsh"
-        assert "dtolnay/rust-toolchain" not in windows_setup.get("uses", "")
-        windows_script = windows_setup["run"]
-        assert (
-            "rustup toolchain install stable --profile minimal --target $env:RUST_TARGET"
-            in windows_script
-        )
-        assert "rustup default stable" in windows_script
-        assert "rustup target add $env:RUST_TARGET" in windows_script
-        assert "cargo --version" in windows_script
+        for entry in matrix_entries:
+            assert entry["os"] != "windows"
+            assert entry["runner"] != ["self-hosted", "Windows"]
+            assert entry["artifact_name"] != "windows-x64"
 
         cache_step = next(
-            step for step in steps if step.get("name") == "Cache Rust target (build)"
+            step
+            for step in build_job["steps"]
+            if step.get("name") == "Cache Rust target (build)"
         )
         cache_key = cache_step["with"]["key"]
         assert "${{ runner.name }}" in cache_key
         assert "${{ matrix.target }}" in cache_key
 
-    def test_tauri_windows_release_packaging_requires_policy_opt_in(self) -> None:
-        """Windows packaging needs an App-Control-compatible runner policy."""
+    def test_tauri_build_has_no_step_level_windows_runner_gate(self) -> None:
+        """Unavailable Windows packaging must be removed before runner assignment."""
         try:
             import yaml
         except ImportError:
             pytest.skip("PyYAML is required for workflow structure checks")
 
+        workflow_text = (
+            REPO_ROOT / ".github" / "workflows" / "tauri-build.yml"
+        ).read_text(encoding="utf-8")
         workflow = yaml.safe_load(
-            (REPO_ROOT / ".github" / "workflows" / "tauri-build.yml").read_text(
-                encoding="utf-8",
-            ),
+            workflow_text,
         )
         build_job = workflow["jobs"]["build"]
         steps = build_job["steps"]
-        build_enabled = (
-            "matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'"
-        )
 
-        assert (
-            build_job["env"]["WINDOWS_TAURI_RELEASE_ENABLED"]
-            == "${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}"
-        )
-
-        notice_step = next(
-            step
-            for step in steps
-            if step.get("name") == "Report Windows Tauri release disabled"
-        )
-        assert notice_step["if"] == (
-            "matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED != 'true'"
-        )
-        assert "Application Control" in notice_step["run"]
-        assert "os error 4551" in notice_step["run"]
-        assert "TAURI_WINDOWS_RELEASE_ENABLED=true" in notice_step["run"]
-
-        gated_step_names = {
-            "Setup Node.js",
-            "Cache Rust target (build)",
-            "Install frontend dependencies",
-            "Build frontend",
-            "Build Tauri app",
-            "Upload artifacts",
-        }
-        gated_steps = {
-            step["name"]: step for step in steps if step.get("name") in gated_step_names
-        }
-        assert set(gated_steps) == gated_step_names
-        for step in gated_steps.values():
-            assert step["if"] == build_enabled
+        assert "WINDOWS_TAURI_RELEASE_ENABLED" not in build_job.get("env", {})
+        assert "TAURI_WINDOWS_RELEASE_ENABLED" not in workflow_text
+        assert not re.search(r"runner:\s*\[self-hosted,\s*Windows\]", workflow_text)
+        assert "windows-x64" not in workflow_text
+        for step in steps:
+            assert "WINDOWS_TAURI_RELEASE_ENABLED" not in str(step.get("if", ""))
 
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,

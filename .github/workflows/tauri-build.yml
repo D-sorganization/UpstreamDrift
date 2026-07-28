@@ -154,23 +154,20 @@ jobs:
             os: linux
             runner: d-sorg-fleet-docker
             target: x86_64-unknown-linux-gnu
-          - artifact_name: windows-x64
-            os: windows
-            runner: [self-hosted, Windows]
-            target: x86_64-pc-windows-msvc
+          # Windows leg removed: org has no compatible `[self-hosted, Windows]`
+          # runner for this Tauri packaging job, so the matrix entry queued
+          # indefinitely before step-level gates could run. Re-add only after
+          # Windows runner capacity exists and Cargo build scripts are allowed.
           # macOS leg removed: org has no `[self-hosted, macOS]` runners. Jobs
           # with this label queued indefinitely. Re-add when macOS runner
           # capacity is provisioned and macOS becomes an active deliverable.
 
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
-    env:
-      WINDOWS_TAURI_RELEASE_ENABLED: ${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Setup Node.js
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "24"
@@ -183,41 +180,12 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Setup Rust (Windows)
-        if: matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
-        shell: pwsh
-        env:
-          RUST_TARGET: ${{ matrix.target }}
-        run: |
-          $ErrorActionPreference = "Stop"
-          $cargoBin = Join-Path $env:USERPROFILE ".cargo\bin"
-          if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
-            Invoke-WebRequest -Uri "https://win.rustup.rs" -OutFile "rustup-init.exe"
-            .\rustup-init.exe -y --default-toolchain stable --profile minimal
-            $env:PATH = "$cargoBin;$env:PATH"
-            $cargoBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          }
-          rustup toolchain install stable --profile minimal --target $env:RUST_TARGET
-          rustup default stable
-          rustup target add $env:RUST_TARGET
-          rustup --version
-          rustc --version
-          cargo --version
-
-      # Per-target Rust cache for release builds. Each platform gets its own
-      # cache so the Linux/Windows matrix legs don't trash each other.
+      # Per-target Rust cache for release builds.
       - name: Cache Rust target (build)
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2
         with:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-build-${{ runner.name }}-${{ matrix.target }}
-
-      - name: Report Windows Tauri release disabled
-        if: matrix.os == 'windows' && env.WINDOWS_TAURI_RELEASE_ENABLED != 'true'
-        shell: pwsh
-        run: |
-          Write-Host "::notice::Windows Tauri release packaging is skipped because this self-hosted Windows runner blocks Cargo build-script executables with Application Control (os error 4551). Set repository variable TAURI_WINDOWS_RELEASE_ENABLED=true only after the selected Windows runner policy allows Cargo build scripts."
 
       - name: Install Linux dependencies
         if: matrix.os == 'linux'
@@ -237,17 +205,14 @@ jobs:
           apt_retry install -y libwebkit2gtk-4.1-dev libappindicator3-dev libdbus-1-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         working-directory: ui
         run: npm ci
 
       - name: Build frontend
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         working-directory: ui
         run: npm run build
 
       - name: Build Tauri app
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5
         env:
           GITHUB_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
@@ -255,7 +220,6 @@ jobs:
           projectPath: ui
 
       - name: Upload artifacts
-        if: matrix.os != 'windows' || env.WINDOWS_TAURI_RELEASE_ENABLED == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: golf-modeling-suite-${{ matrix.artifact_name }}
