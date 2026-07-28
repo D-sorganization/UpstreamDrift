@@ -8,12 +8,13 @@ run quickly and deterministically without launching actual processes.
 from __future__ import annotations
 
 import sys
+import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.api.services.launcher_service import LauncherService
+from src.api.services.launcher_service import LauncherService, StopProcessStatus
 
 
 @pytest.fixture
@@ -177,7 +178,7 @@ class TestLauncherServiceMethods:
         ):
             result = launcher_service.stop_process("test_proc")
 
-            assert result is True
+            assert result.status is StopProcessStatus.STOPPED
             mock_module.kill_process_tree.assert_called_once_with(1234)
             assert "test_proc" not in running_processes
 
@@ -189,7 +190,7 @@ class TestLauncherServiceMethods:
 
         result = launcher_service.stop_process("non_existent_proc")
 
-        assert result is False
+        assert result.status is StopProcessStatus.NOT_FOUND
 
     def test_stop_process_empty_name(self, launcher_service: LauncherService) -> None:
         """Test stop_process with empty name raises ValueError."""
@@ -200,3 +201,75 @@ class TestLauncherServiceMethods:
         """Test stop_process with None raises ValueError."""
         with pytest.raises(ValueError, match="Process name must be a non-empty string"):
             launcher_service.stop_process(None)  # type: ignore
+
+    def test_stop_process_failed_tree_kill_keeps_live_process_tracked(
+        self, launcher_service: LauncherService
+    ) -> None:
+        """A failed tree kill must not report success for a still-running process."""
+        mock_pm = MagicMock()
+        mock_proc = MagicMock()
+        mock_proc.pid = 1234
+        mock_proc.poll.return_value = None
+        mock_proc.terminate.side_effect = OSError("access denied")
+        running_processes = {"test_proc": mock_proc}
+        mock_pm.running_processes = running_processes
+        launcher_service._process_manager = mock_pm
+
+        mock_module = MagicMock()
+        mock_module.kill_process_tree.return_value = False
+
+        with patch.dict(
+            sys.modules, {"src.shared.python.security.subprocess_utils": mock_module}
+        ):
+            result = launcher_service.stop_process("test_proc")
+
+        assert result.status is StopProcessStatus.FAILED
+        assert "test_proc" in running_processes
+        mock_proc.terminate.assert_called_once()
+
+    def test_stop_process_falls_back_to_terminate_then_kill(
+        self, launcher_service: LauncherService
+    ) -> None:
+        """When tree kill fails, bounded terminate/kill fallback can still stop it."""
+
+        class TimeoutThenKillProcess:
+            pid = 9876
+
+            def __init__(self) -> None:
+                self.terminated = False
+                self.killed = False
+                self.returncode: int | None = None
+
+            def poll(self) -> int | None:
+                return self.returncode
+
+            def terminate(self) -> None:
+                self.terminated = True
+
+            def wait(self, timeout: float | None = None) -> int:
+                if self.returncode is None:
+                    raise subprocess.TimeoutExpired("demo", timeout)
+                return self.returncode
+
+            def kill(self) -> None:
+                self.killed = True
+                self.returncode = -9
+
+        mock_pm = MagicMock()
+        proc = TimeoutThenKillProcess()
+        running_processes = {"test_proc": proc}
+        mock_pm.running_processes = running_processes
+        launcher_service._process_manager = mock_pm
+
+        mock_module = MagicMock()
+        mock_module.kill_process_tree.return_value = False
+
+        with patch.dict(
+            sys.modules, {"src.shared.python.security.subprocess_utils": mock_module}
+        ):
+            result = launcher_service.stop_process("test_proc")
+
+        assert result.status is StopProcessStatus.STOPPED
+        assert proc.terminated is True
+        assert proc.killed is True
+        assert "test_proc" not in running_processes

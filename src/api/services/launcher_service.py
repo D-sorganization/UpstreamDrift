@@ -11,6 +11,9 @@ be agnostic of the GUI launcher).
 
 from __future__ import annotations
 
+import subprocess
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +21,28 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
+STOP_PROCESS_TIMEOUT_SECONDS = 5.0
+
+
+class StopProcessStatus(str, Enum):
+    """Outcome categories for a launcher process-stop request."""
+
+    STOPPED = "stopped"
+    NOT_FOUND = "not_found"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True)
+class StopProcessResult:
+    """Structured result for stopping a launcher process."""
+
+    status: StopProcessStatus
+    name: str
+    detail: str = ""
+
+    def __bool__(self) -> bool:
+        """Preserve truthiness for legacy callers that expect a bool."""
+        return self.status is StopProcessStatus.STOPPED
 
 
 class LauncherService:
@@ -88,30 +113,50 @@ class LauncherService:
             }
         return processes
 
+    def _fallback_stop_process(self, name: str, proc: Any) -> bool:
+        """Attempt bounded terminate/kill fallback after tree-kill failure."""
+        if proc.poll() is not None:
+            return True
+        try:
+            logger.warning("[stop] Falling back to terminate() for %s", name)
+            proc.terminate()
+            try:
+                proc.wait(timeout=STOP_PROCESS_TIMEOUT_SECONDS)
+            except subprocess.TimeoutExpired:
+                logger.warning("[stop] terminate() timed out for %s; killing", name)
+                proc.kill()
+                proc.wait(timeout=STOP_PROCESS_TIMEOUT_SECONDS)
+        except (OSError, RuntimeError, subprocess.TimeoutExpired):
+            logger.exception("[stop] Failed to stop process %s", name)
+            return False
+        return proc.poll() is not None
+
     @precondition(
         lambda self, name: name is not None and len(name) > 0,
         "Process name must be a non-empty string",
     )
-    def stop_process(self, name: str) -> bool:
+    def stop_process(self, name: str) -> StopProcessResult:
         """Stop a running process by name.
 
         Args:
             name: Process name.
 
         Returns:
-            True if process was found and stopped, False if not found.
+            Structured stop outcome for API/UI status mapping.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         from src.shared.python.security.subprocess_utils import kill_process_tree
 
         running = self.process_manager.running_processes
         proc = running.get(name)
         if proc is None:
-            return False
+            return StopProcessResult(StopProcessStatus.NOT_FOUND, name)
 
         logger.info("[stop] Killing process tree for %s (pid=%s)", name, proc.pid)
-        kill_process_tree(proc.pid)
+        tree_stopped = kill_process_tree(proc.pid)
+        if not tree_stopped and not self._fallback_stop_process(name, proc):
+            detail = f"Failed to stop process: {name}"
+            logger.error("[stop] %s remains running after stop attempts", name)
+            return StopProcessResult(StopProcessStatus.FAILED, name, detail)
         del running[name]
         logger.info("[stop] Process %s stopped and removed", name)
-        return True
+        return StopProcessResult(StopProcessStatus.STOPPED, name)

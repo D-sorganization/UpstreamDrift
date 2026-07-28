@@ -493,7 +493,7 @@ def _execute_tile_launch(
 
 def _register_launcher_endpoints(app: FastAPI) -> None:
     """Register launcher manifest, logo, launch, process, and stop endpoints."""
-    from src.api.services.launcher_service import LauncherService
+    from src.api.services.launcher_service import LauncherService, StopProcessStatus
 
     _repo_root = Path(__file__).parent.parent.parent
     _launcher_service = LauncherService(repo_root=_repo_root)
@@ -571,10 +571,19 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
     ) -> dict[str, Any] | JSONResponse:
         """Stop a running engine/tool process by name."""
         _enforce_launcher_mutation_guard(request)
-        if not _launcher_service.stop_process(name):
+        stop_result = _launcher_service.stop_process(name)
+        if stop_result.status is StopProcessStatus.NOT_FOUND:
             logger.warning("[stop] Process not found: %s", name)
             return JSONResponse(
                 status_code=404, content={"detail": f"Process not found: {name}"}
+            )
+        if stop_result.status is StopProcessStatus.FAILED:
+            logger.error("[stop] Failed to stop process: %s", name)
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "detail": stop_result.detail or f"Failed to stop process: {name}"
+                },
             )
         return {"status": "stopped", "name": name}
 
