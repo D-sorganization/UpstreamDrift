@@ -14,6 +14,12 @@
       "expires_on": "2026-08-01"
     },
     {
+      "path": "docs/testing/functional-test-plan.md",
+      "owner": "@docs-team",
+      "reason": "Legacy functional test plan remains above the documentation budget while the CI runner selector cleanup PR catches up to main.",
+      "expires_on": "2026-08-01"
+    },
+    {
       "path": "SPEC.md",
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs.",
