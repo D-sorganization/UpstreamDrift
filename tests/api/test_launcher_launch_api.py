@@ -497,6 +497,24 @@ class TestStopEndpoint:
             client.post("/api/launcher/stop/Drake Golf Model")
             mock_kill.assert_called_once_with(54321)
 
+    def test_stop_failure_returns_500_and_keeps_process_tracked(self, client) -> None:
+        """A failed process stop must not be reported as a 200/stopped response."""
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
+        mock_proc.pid = 54321
+        mock_proc.poll.return_value = None
+        mock_proc.terminate.side_effect = OSError("access denied")
+        client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
+
+        with patch(
+            "src.shared.python.security.subprocess_utils.kill_process_tree",
+            return_value=False,
+        ):
+            resp = client.post("/api/launcher/stop/Drake Golf Model")
+
+        assert resp.status_code == 500
+        assert "failed to stop" in resp.json()["detail"].lower()
+        assert "Drake Golf Model" in client._mock_process_manager.running_processes
+
 
 # ── Integration: launch → list → stop cycle ──────────────────────────
 
