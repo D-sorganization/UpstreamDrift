@@ -18,24 +18,10 @@ on:
       - "scripts/ci/start_api_server.py"
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
-  pick-runner:
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
-    outputs:
-      runner: ${{ steps.check.outputs.runner }}
-    steps:
-      - name: Set runner
-        id: check
-        run: |
-          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   verify-critical-files:
     timeout-minutes: 30
-    needs: pick-runner
     name: Verify Critical Files Exist
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

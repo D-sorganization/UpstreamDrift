@@ -32,22 +32,8 @@ permissions:
   contents: read
 
 jobs:
-  pick-runner:
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
-    outputs:
-      runner: ${{ steps.check.outputs.runner }}
-    steps:
-      - name: Set runner
-        id: check
-        run: |
-          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
-
   equivalence:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
 
     strategy:
