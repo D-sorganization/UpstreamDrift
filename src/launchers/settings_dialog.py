@@ -704,9 +704,16 @@ class SettingsWidget(QWidget):
 
         # Sync with parent launcher
         launcher = self._launcher
-        if launcher and hasattr(launcher, "btn_modify_layout"):
-            self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
-            self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
+        # ``btn_modify_layout`` no longer exists (issue #8023); the checkable
+        # ``View > Edit Layout Mode`` QAction owns the layout-edit state.
+        layout_action = getattr(launcher, "_action_layout_mode", None)
+        if launcher and layout_action is not None:
+            self._btn_layout_lock.setChecked(layout_action.isChecked())
+            self._btn_edit_tiles.setEnabled(layout_action.isChecked())
+            self._btn_layout_lock.toggled.connect(layout_action.setChecked)
+            self._btn_layout_lock.toggled.connect(
+                launcher._toggle_layout_mode_from_menu
+            )
             self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
             self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
 

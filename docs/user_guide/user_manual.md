@@ -42,7 +42,7 @@ The Model Explorer allows you to visualize and edit the underlying skeletal and 
 4. Use the **Properties Panel** on the right to modify joint limits and mass properties.
 5. Click **Save Model** to persist your changes.
 
-_See also: [URDF Cross-Engine Verification Guide](engines/physics_engines/mujoco/MUJOCO_PARITY_SPEC.md)_
+_See also: [URDF Cross-Engine Verification Guide](../../src/engines/physics_engines/mujoco/MUJOCO_PARITY_SPEC.md)_
 
 ---
 
@@ -58,7 +58,7 @@ The Video Analyzer ingests raw 2D video (e.g., from a smartphone) and extracts 3
 4. Click **Process**. The application will display a progress bar.
 5. Once complete, click **Export Pose Data** to save the 3D joint trajectories as a `.json` file for use in the Biomechanics Simulation.
 
-_See also: [Motion Pipeline Readiness](integration/motion_pipeline/adversarial/READINESS.md)_
+_See also: [Motion Pipeline Readiness](../../tests/integration/motion_pipeline/adversarial/READINESS.md)_
 
 ---
 
@@ -91,7 +91,7 @@ This is the core module for running physics-based simulations of the golf swing.
 4. Click **Run Simulation**.
 5. Analyze the resulting trajectory and impact forces in the integrated data viewer.
 
-_See also: [MuJoCo Parity Spec](engines/physics_engines/mujoco/MUJOCO_PARITY_SPEC.md) | [Drake Parity Spec](engines/physics_engines/drake/DRAKE_PARITY_SPEC.md)_
+_See also: [MuJoCo Parity Spec](../../src/engines/physics_engines/mujoco/MUJOCO_PARITY_SPEC.md) | [Drake Parity Spec](../../src/engines/physics_engines/drake/DRAKE_PARITY_SPEC.md)_
 
 ---
 

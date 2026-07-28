@@ -151,6 +151,31 @@ class HelpButtonHoverFilter(QObject):
         return super().eventFilter(obj, event)
 
 
+class ProcessOutputRelay(QObject):
+    """Marshal subprocess output from reader threads onto the GUI thread.
+
+    :class:`~src.launchers.launcher_process_manager.ProcessManager` reads
+    child-process stdout on plain ``threading.Thread`` workers and invokes its
+    ``output_callback`` from there. Qt widgets may only be touched from the
+    thread that owns them, so the callback emits :attr:`line_received`; because
+    this object lives in the GUI thread and the connection is explicitly
+    ``QueuedConnection``, ``sink`` always runs on the GUI thread (issue #8003).
+    """
+
+    line_received = pyqtSignal(str, str)
+
+    def __init__(self, sink: Any, parent: QObject | None = None) -> None:
+        super().__init__(parent)
+        if sink is None:
+            raise ValueError("sink must be provided")
+        self._sink = sink
+        self.line_received.connect(self._deliver, Qt.ConnectionType.QueuedConnection)
+
+    def _deliver(self, engine_name: str, line: str) -> None:
+        """Forward one line to the console sink (GUI thread only)."""
+        self._sink(engine_name, line)
+
+
 def _build_zoom_accessible_description() -> str:
     """Describe the zoom slider using the configured tile-scale bounds."""
     minimum_pct = int(round(TILE_SCALE_MIN * 100))
@@ -206,7 +231,6 @@ class LauncherUIProtocol(Protocol):
     chk_wsl: QCheckBox
     btn_console: QToolButton
     lbl_status: QLabel
-    btn_modify_layout: QPushButton
     context_help: Any
     overlay: Any
     _action_console: QAction
@@ -1983,12 +2007,30 @@ class UISetupManager:
         toolbar.addWidget(clear_btn)
         console_layout.addLayout(toolbar)
 
+        # Built here, on the GUI thread, so the relay's thread affinity is the
+        # GUI thread and queued deliveries land there (issue #8003).
+        self._ensure_console_relay()
+
+    def _ensure_console_relay(self) -> ProcessOutputRelay:
+        """Return the relay marshalling reader-thread output onto the GUI thread."""
+        relay = getattr(self, "_console_relay", None)
+        if relay is None:
+            relay = ProcessOutputRelay(self._append_console_line, self.launcher)
+            self._console_relay = relay
+        return relay
+
     def _on_process_output(self, engine_name: str, line: str) -> None:
-        """Receive a line of output from a subprocess (thread-safe)."""
-        QTimer.singleShot(
-            0,
-            lambda: self._append_console_line(engine_name, line),
-        )
+        """Receive a line of output from a subprocess (thread-safe).
+
+        Called from :class:`ProcessManager`'s plain ``threading.Thread`` stdout
+        readers. ``QTimer.singleShot`` used to be used here, but a bare
+        ``singleShot`` schedules onto the *calling* thread's event loop — the
+        reader threads have none, so the callback never fired and the Process
+        Output console stayed empty (issue #8003). Emitting a signal into a
+        GUI-thread-affine QObject with a queued connection is the correct
+        cross-thread hand-off.
+        """
+        self._ensure_console_relay().line_received.emit(engine_name, line)
 
     def _append_console_line(self, engine_name: str, line: str) -> None:
         """Append a formatted line to the console widget (GUI thread only)."""

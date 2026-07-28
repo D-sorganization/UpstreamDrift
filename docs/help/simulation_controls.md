@@ -214,4 +214,4 @@ Load a pre-computed trajectory:
 
 ---
 
-_See also: [Full User Manual](../USER_MANUAL.md) | [Engine Selection](engine_selection.md) | [Visualization](visualization.md)_
+_See also: [Full User Manual](../user_guide/user_manual.md) | [Engine Selection](engine_selection.md) | [Visualization](visualization.md)_

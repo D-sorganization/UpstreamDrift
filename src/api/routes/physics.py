@@ -418,8 +418,9 @@ async def get_metrics(
             import numpy as np
 
             torques = ctrl.current_torques
-            peak_torque = float(np.max(np.abs(torques)))
-            total_torque_magnitude = float(np.sum(np.abs(torques)))
+            abs_torques = np.abs(torques)
+            peak_torque = float(np.max(abs_torques))
+            total_torque_magnitude = float(np.sum(abs_torques))
 
         return BiomechanicsMetricsResponse(
             sim_time=sim_time,
