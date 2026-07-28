@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from src.shared.python.core.contracts.exceptions import StateError
+from shared.python.contracts import StateError
 from sidekick.persistence.schema import ProfilePayload
 from sidekick.standalone import session_store as session_store_module
 from sidekick.standalone.session_store import StandaloneSessionStore

@@ -53,6 +53,42 @@ def test_check_sidekick_api_readiness_reports_ready(monkeypatch) -> None:
     assert _FakeHttpConnection.requests == [("GET", "/readyz")]
 
 
+def test_check_sidekick_api_readiness_requires_matching_instance(monkeypatch) -> None:
+    """A stale API on the configured port cannot satisfy launcher readiness."""
+    monkeypatch.setenv("API_HOST", "127.0.0.1")
+    monkeypatch.setenv("API_PORT", "8123")
+    monkeypatch.setattr(readiness, "HTTPConnection", _FakeHttpConnection)
+    _FakeHttpConnection.status = 200
+    _FakeHttpConnection.body = (
+        b'{"status":"ready","sidekick_instance_id":"stale-instance"}'
+    )
+
+    result = readiness.check_sidekick_api_readiness(
+        expected_instance_id="current-instance"
+    )
+
+    assert result.ready is False
+    assert result.status_code == 200
+    assert "instance" in result.detail.lower()
+
+
+def test_check_sidekick_api_readiness_accepts_matching_instance(monkeypatch) -> None:
+    """The launcher accepts only the API child carrying its public nonce."""
+    monkeypatch.setenv("API_HOST", "127.0.0.1")
+    monkeypatch.setenv("API_PORT", "8123")
+    monkeypatch.setattr(readiness, "HTTPConnection", _FakeHttpConnection)
+    _FakeHttpConnection.status = 200
+    _FakeHttpConnection.body = (
+        b'{"status":"ready","sidekick_instance_id":"current-instance"}'
+    )
+
+    result = readiness.check_sidekick_api_readiness(
+        expected_instance_id="current-instance"
+    )
+
+    assert result.ready is True
+
+
 def test_check_sidekick_api_readiness_reports_not_ready(monkeypatch) -> None:
     monkeypatch.setenv("API_HOST", "127.0.0.1")
     monkeypatch.setenv("API_PORT", "8123")

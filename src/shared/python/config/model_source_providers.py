@@ -122,8 +122,27 @@ class ModelSourcePathPolicy:
 
         root_path = Path(declared_root)
         if not root_path.is_absolute():
-            root_path = self.default_root / root_path
+            root_path = self._resolve_relative_source_root(root_path)
         return self._canonicalize(root_path, field_name="source_root")
+
+    def _resolve_relative_source_root(self, declared: Path) -> Path:
+        """Resolve a relative ``source_root`` against the repo, then its siblings.
+
+        A declared root such as ``Movement_Optimizer`` names a *sibling
+        checkout*, not a directory inside UpstreamDrift. Resolving it only
+        against ``default_root`` produced
+        ``<UpstreamDrift>/Movement_Optimizer/...``, which never exists, so the
+        Movement Optimizer tile could not launch (issue #7984). The sibling
+        directory (``default_root.parent``) is already an approved root, so
+        falling back to it is safe.
+        """
+        in_repo = self.default_root / declared
+        if in_repo.exists():
+            return in_repo
+        sibling = self.default_root.parent / declared
+        if sibling.exists():
+            return sibling
+        return in_repo
 
     def resolve_path(
         self,

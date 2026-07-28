@@ -91,3 +91,111 @@ async def test_event_loop_stays_responsive_during_simulation() -> None:
 
     release.set()
     await sim_task
+
+
+# ---------------------------------------------------------------------------
+# Background task terminal-state invariant (issue #8009)
+#
+# ``run_simulation_background`` only handled
+# ``(GolfSuiteError, ValueError, RuntimeError, OSError)``. Anything else — a
+# ``KeyError`` from result unpacking, a physics-binding exception from
+# MuJoCo/Drake/Pinocchio/OpenSim — escaped into the ASGI background runner,
+# which swallows it after the response has already been sent. The record was
+# left frozen at ``{"status": "running"}`` and, because TaskManager refreshes
+# the TTL on every read, a polling client pinned the dead task indefinitely.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "exception",
+    [
+        KeyError("engine returned an unexpected key"),
+        TypeError("bad argument from bindings"),
+        AttributeError("missing attribute"),
+        IndexError("out of range"),
+    ],
+    ids=["KeyError", "TypeError", "AttributeError", "IndexError"],
+)
+async def test_background_task_is_marked_failed_for_unlisted_exceptions(
+    exception: Exception,
+) -> None:
+    """Every exception type must leave the task in a terminal state."""
+    from src.api.task_manager import TaskManager
+
+    service = SimulationService(engine_manager=MagicMock())
+    tasks = TaskManager()
+
+    async def _boom(_request: Any) -> Any:
+        raise exception
+
+    service.run_simulation = _boom  # type: ignore[method-assign]
+
+    await service.run_simulation_background("task-1", _make_request(), tasks)
+
+    state = tasks.get("task-1")
+    assert state is not None
+    assert state["status"] == "failed", (
+        f"{type(exception).__name__} left the task at "
+        f"{state['status']!r}; a background task must always reach a "
+        "terminal state"
+    )
+    assert "error" in state
+
+
+async def test_background_task_does_not_leak_engine_internals() -> None:
+    """The recorded error for an unexpected type must be a generic message."""
+    from src.api.task_manager import TaskManager
+
+    service = SimulationService(engine_manager=MagicMock())
+    tasks = TaskManager()
+
+    async def _boom(_request: Any) -> Any:
+        raise KeyError("/absolute/internal/path/secret.xml")
+
+    service.run_simulation = _boom  # type: ignore[method-assign]
+
+    await service.run_simulation_background("task-2", _make_request(), tasks)
+
+    state = tasks.get("task-2")
+    assert state["status"] == "failed"
+    assert "secret.xml" not in state["error"]
+
+
+async def test_background_task_still_records_known_exception_messages() -> None:
+    """Expected error types keep their existing, informative message."""
+    from src.api.task_manager import TaskManager
+
+    service = SimulationService(engine_manager=MagicMock())
+    tasks = TaskManager()
+
+    async def _boom(_request: Any) -> Any:
+        raise ValueError("timestep must be positive")
+
+    service.run_simulation = _boom  # type: ignore[method-assign]
+
+    await service.run_simulation_background("task-3", _make_request(), tasks)
+
+    state = tasks.get("task-3")
+    assert state["status"] == "failed"
+    assert state["error"] == "timestep must be positive"
+
+
+async def test_background_task_marks_success() -> None:
+    """The happy path still records ``completed``."""
+    from src.api.task_manager import TaskManager
+
+    service = SimulationService(engine_manager=MagicMock())
+    tasks = TaskManager()
+
+    result = MagicMock()
+    result.success = True
+    result.model_dump.return_value = {"frames": 1}
+
+    async def _ok(_request: Any) -> Any:
+        return result
+
+    service.run_simulation = _ok  # type: ignore[method-assign]
+
+    await service.run_simulation_background("task-4", _make_request(), tasks)
+
+    assert tasks.get("task-4")["status"] == "completed"

@@ -19,20 +19,20 @@ Design by Contract:
 
 from __future__ import annotations
 
+import contextlib
 import importlib
 import pkgutil
-from collections.abc import Callable
+from collections.abc import AsyncGenerator, Callable
 from typing import TYPE_CHECKING
 
-from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from src.api.auth.dependencies import (
     CheckSimulationQuota,
     CheckVideoQuota,
+    authenticate_bearer_request,
     check_usage_quota,
-    get_current_user_flexible,
 )
 from src.api.auth.models import User
 from src.api.database import get_db
@@ -113,43 +113,53 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
 
 
 async def _current_user_from_bearer_header(request: Request, db: Session) -> User:
-    authorization = request.headers.get("Authorization")
-    if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    """Resolve the caller from the raw ``Authorization`` header.
 
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    credentials = HTTPAuthorizationCredentials(scheme=scheme, credentials=token)
-    return await get_current_user_flexible(credentials=credentials, db=db)
+    Thin delegate to :func:`src.api.auth.dependencies.authenticate_bearer_request`
+    so router-level auth and per-endpoint auth share one implementation.
+    """
+    return await authenticate_bearer_request(request, db)
 
 
 def _request_time_quota_dependency(
     resource_type: str,
     enforced_dependency: Callable[..., object],
 ) -> Callable[..., object]:
+    """Build a router-level dependency that authenticates *and* consumes quota.
+
+    ``check_usage_quota`` returns a **generator** dependency: merely calling it
+    constructs a generator object whose body never runs, so the quota was never
+    consumed and the 429 path was unreachable (issue #7969). This wrapper is an
+    async generator itself, so FastAPI drives it like any ``yield`` dependency,
+    and it explicitly steps the inner generator — including the post-yield
+    cleanup and the refund-on-failure ``throw`` path.
+
+    Postcondition: in cloud mode ``usage_tracker.consume_quota`` has been called
+    exactly once before the endpoint body runs.
+    """
     quota_dependency = check_usage_quota(resource_type)
 
     async def dependency(
         request: Request,
         db: Session = Depends(get_db),
-    ) -> User | None:
+    ) -> AsyncGenerator[User | None, None]:
         if is_auth_disabled():
-            return None
+            yield None
+            return
 
         current_user = await _current_user_from_bearer_header(request, db)
-        # Pre-existing pass-through of the quota generator as the dependency
-        # value; this PR only reordered router registration in this file.
-        return quota_dependency(current_user, db)  # type: ignore[return-value]
+        generator = quota_dependency(current_user, db)
+        # Drives consume_quota(); raises HTTP 429 when the quota is exhausted.
+        user = next(generator)
+        try:
+            yield user
+        except Exception as exc:  # noqa: BLE001 - hand off to the refund path
+            with contextlib.suppress(StopIteration):
+                generator.throw(exc)
+            raise
+        else:
+            with contextlib.suppress(StopIteration):
+                next(generator)
 
     dependency.enforced_dependency = enforced_dependency  # type: ignore[attr-defined]
     return dependency

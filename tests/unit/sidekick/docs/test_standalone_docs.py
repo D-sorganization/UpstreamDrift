@@ -17,10 +17,14 @@ ROOT = Path(__file__).parent.parent.parent.parent.parent
 STANDALONE_DOC = ROOT / "docs" / "sidekick" / "standalone.md"
 FIXTURES_WGS = ROOT / "tests" / "fixtures" / "wgs.json"
 
-# Ensure the subprocess can import sidekick from the source tree.
+TOOLS_ROOT = Path(os.environ.get("TOOLS_REPO_PATH", ROOT / "vendor/ud-tools")).resolve()
+
+# Ensure the subprocess imports the canonical Tools package before product code.
 _PYTHONPATH_EXTRA = os.pathsep.join(
     [
-        str(ROOT / "src" / "shared" / "python"),
+        str(TOOLS_ROOT / "src/shared/python"),
+        str(TOOLS_ROOT / "src"),
+        str(TOOLS_ROOT / "src/python/src"),
         str(ROOT / "src"),
         str(ROOT),
     ]
@@ -71,11 +75,8 @@ def test_standalone_doc_has_two_layouts() -> None:
 @pytest.mark.headless_safe
 def test_sidekick_help_exits_zero() -> None:
     """The 'sidekick --help' example in the docs actually works."""
-    main_py = ROOT / "src" / "shared" / "python" / "sidekick" / "__main__.py"
-    if not main_py.exists():
-        pytest.skip(
-            "sidekick/__main__.py not present in this branch (T6 not yet merged)"
-        )
+    main_py = TOOLS_ROOT / "src/shared/python/sidekick/__main__.py"
+    assert main_py.is_file(), f"canonical Sidekick CLI is missing: {main_py}"
 
     result = subprocess.run(
         [sys.executable, "-m", "sidekick", "--help"],
@@ -91,11 +92,8 @@ def test_sidekick_help_exits_zero() -> None:
 @pytest.mark.headless_safe
 def test_sidekick_run_wgs_exits_zero(tmp_path: Path) -> None:
     """The 'sidekick run --calculator wgs_reactor' example in the docs works."""
-    main_py = ROOT / "src" / "shared" / "python" / "sidekick" / "__main__.py"
-    if not main_py.exists():
-        pytest.skip(
-            "sidekick/__main__.py not present in this branch (T6 not yet merged)"
-        )
+    main_py = TOOLS_ROOT / "src/shared/python/sidekick/__main__.py"
+    assert main_py.is_file(), f"canonical Sidekick CLI is missing: {main_py}"
     if not FIXTURES_WGS.exists():
         pytest.skip("wgs.json fixture not found — run from full repo")
 

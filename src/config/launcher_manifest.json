@@ -358,7 +358,7 @@
       "description": "Complete map of all features, modules, and hidden gems in the suite",
       "category": "tool",
       "type": "special_app",
-      "path": "docs/PROJECT_MAP.md",
+      "path": "docs/architecture/PROJECT_MAP.md",
       "logo": "golf_logo.svg",
       "status": "utility",
       "capabilities": [
@@ -703,7 +703,7 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 36,
+      "order": 32,
       "web": {
         "mode": "route",
         "route": "/tools/canonical-core/estimation"
@@ -727,7 +727,7 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 37,
+      "order": 33,
       "web": {
         "mode": "route",
         "route": "/tools/canonical-core/comparison"
@@ -744,7 +744,7 @@
       "logo": "data_explorer.svg",
       "status": "ready",
       "capabilities": ["swing_metrics", "biomechanics", "api"],
-      "order": 38,
+      "order": 34,
       "web": {
         "mode": "route",
         "route": "/tools/analysis"
@@ -761,7 +761,7 @@
       "logo": "c3d_icon.svg",
       "status": "experimental",
       "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
-      "order": 33,
+      "order": 35,
       "web": {
         "mode": "unavailable",
         "reason": "REST API service; no dedicated web page yet"
@@ -778,7 +778,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["perturbation", "robustness", "cross_engine"],
-      "order": 34,
+      "order": 36,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -795,7 +795,7 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
-      "order": 35,
+      "order": 37,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -812,7 +812,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["websocket", "realtime", "pubsub"],
-      "order": 36,
+      "order": 38,
       "web": {
         "mode": "unavailable",
         "reason": "WebSocket endpoint only; no dedicated web page yet"
@@ -829,7 +829,7 @@
       "logo": "golf_logo.svg",
       "status": "experimental",
       "capabilities": ["ai_methods", "protocol", "dispatch"],
-      "order": 37,
+      "order": 39,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -846,7 +846,7 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
-      "order": 38,
+      "order": 40,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -863,7 +863,7 @@
       "logo": "golf_logo.svg",
       "status": "external",
       "capabilities": ["streaming", "vr", "visualization"],
-      "order": 39,
+      "order": 41,
       "web": {
         "mode": "unavailable",
         "reason": "Python integration library; no dedicated web page yet"
@@ -880,7 +880,7 @@
       "logo": "drake.svg",
       "status": "experimental",
       "capabilities": ["locomotion", "contact", "planning"],
-      "order": 40,
+      "order": 42,
       "web": {
         "mode": "unavailable",
         "reason": "Python module; no dedicated web page yet"
@@ -897,7 +897,7 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["process_calculators", "engineering", "analysis"],
-      "order": 41,
+      "order": 43,
       "web": {
         "mode": "native-window"
       }
@@ -913,7 +913,7 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
-      "order": 42,
+      "order": 44,
       "web": {
         "mode": "native-window"
       }
@@ -953,7 +953,7 @@
         "ztcf_zvcf",
         "hdf5_export"
       ],
-      "order": 43,
+      "order": 45,
       "web": {
         "mode": "native-window"
       }

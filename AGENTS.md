@@ -423,7 +423,7 @@ than wiring a one-off `ai.tools.*` module.
 
 **If you need a standalone Sidekick app, use `sidekick.standalone.*`; do not
 write a new shell.** The standalone package
-([`src/shared/python/sidekick/standalone/`](src/shared/python/sidekick/standalone/))
+([`vendor/ud-tools/src/shared/python/sidekick/standalone/`](vendor/ud-tools/src/shared/python/sidekick/standalone/))
 provides:
 
 - `sidekick.standalone.runner` — headless `sidekick run --calculator <name>`
@@ -433,6 +433,14 @@ provides:
 - `sidekick.standalone.onboarding` — first-run sentinel + 3-step state machine.
 - `sidekick.standalone.session_store` — `InMemorySessionStore` (tests) and
   `FileSessionStore` (production).
+
+These modules are canonically owned by Tools. Never recreate or edit them under
+`src/shared/python/sidekick/`; make changes in Tools, merge them, and repin the
+exact `vendor/ud-tools` gitlink. UpstreamDrift-only Sidekick extensions must be
+classified in
+[`scripts/config/shared_python_ownership_exceptions.yaml`](scripts/config/shared_python_ownership_exceptions.yaml);
+startup exposes only those exact module names and fails closed on unclassified,
+unresolved, or newly conflicting files.
 
 See [`docs/sidekick/standalone.md`](docs/sidekick/standalone.md) for the user-
 facing guide and [ADR-0018](docs/adr/0018-standalone-sidekick.md) for design

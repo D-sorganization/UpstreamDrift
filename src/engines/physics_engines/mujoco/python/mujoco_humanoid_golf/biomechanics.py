@@ -47,8 +47,12 @@ class BiomechanicalAnalyzer:
         self.model = model
         self.data = data
 
-        # Previous club velocity for acceleration calculation
+        # Previous club velocity (and its timestamp) for acceleration
+        # calculation. The timestamp must NOT be shared with ``prev_time``,
+        # which ``compute_joint_accelerations`` advances before the club
+        # difference is taken (#7975).
         self._prev_club_vel: np.ndarray | None = None
+        self._prev_club_time: float = 0.0
 
         # Find important body IDs
         self.club_head_id = self._find_body_id("club_head")
@@ -242,12 +246,17 @@ class BiomechanicalAnalyzer:
     ) -> tuple[np.ndarray | None, np.ndarray | None]:
         """Get ground reaction forces for left and right feet.
 
+        ``mj_contactForce`` writes the wrench in the *contact* frame
+        (``[normal, tangent1, tangent2, ...]``) acting on ``geom2``'s body, so
+        the linear part is rotated into world coordinates and negated when the
+        foot is ``geom1``. Summing raw contact-frame vectors across contacts is
+        not a valid vector sum; only the world-frame vectors may be added.
+
         Returns:
-            Tuple of (left_foot_force [3], right_foot_force [3])
+            Tuple of (left_foot_force [3], right_foot_force [3]) in world frame
             Returns (None, None) if feet not found or no contacts
         """
-        left_force = None
-        right_force = None
+        accum: dict[str, np.ndarray] = {}
 
         # Sum up contact forces for each foot
         for i in range(self.data.ncon):
@@ -256,32 +265,40 @@ class BiomechanicalAnalyzer:
             # Get the geom IDs involved in this contact
             geom1 = contact.geom1
             geom2 = contact.geom2
+            if geom1 < 0 or geom2 < 0:
+                continue
 
             # Check which body each geom belongs to
             body1 = self.model.geom_bodyid[geom1]
             body2 = self.model.geom_bodyid[geom2]
 
-            # Compute contact force
+            # Compute contact force and rotate it into the world frame.
+            # contact.frame rows are (normal, tangent1, tangent2) in world
+            # coordinates, so frame.T maps contact -> world.
             c_array = np.zeros(6, dtype=np.float64)
             mujoco.mj_contactForce(self.model, self.data, i, c_array)
-            contact_force = c_array[:3]  # First 3 components are force
+            frame = np.asarray(contact.frame, dtype=np.float64).reshape(3, 3)
+            f_world = frame.T @ c_array[:3]
 
-            # Assign to appropriate foot
-            if self.left_foot_id is not None and (self.left_foot_id in (body1, body2)):
-                if left_force is None:
-                    left_force = contact_force.copy()
+            # mj_contactForce returns the wrench acting ON geom2's body.
+            for foot_id, key in (
+                (self.left_foot_id, "left"),
+                (self.right_foot_id, "right"),
+            ):
+                if foot_id is None:
+                    continue
+                if foot_id == body2:
+                    signed = f_world
+                elif foot_id == body1:
+                    signed = -f_world
                 else:
-                    left_force += contact_force
-
-            if self.right_foot_id is not None and (
-                self.right_foot_id in (body1, body2)
-            ):  # noqa: E501
-                if right_force is None:
-                    right_force = contact_force.copy()
+                    continue
+                if key in accum:
+                    accum[key] += signed
                 else:
-                    right_force += contact_force
+                    accum[key] = signed.copy()
 
-        return left_force, right_force
+        return accum.get("left"), accum.get("right")
 
     def get_center_of_mass(self) -> tuple[np.ndarray, np.ndarray]:
         """Get center of mass position and velocity.
@@ -297,11 +314,22 @@ class BiomechanicalAnalyzer:
     def compute_energies(self) -> tuple[float, float, float]:
         """Compute kinetic, potential, and total energy.
 
+        ``mjData.energy`` is ordered ``[potential, kinetic]`` (see
+        ``verification.py`` and ``perturbation/analyzer.py``, which already use
+        that order). MuJoCo only fills it during ``mj_forward`` when
+        ``mjENBL_ENERGY`` is set in ``model.opt.enableflags``; none of the
+        bundled golf models enable it, so the values are refreshed explicitly
+        here via ``mj_energyPos`` / ``mj_energyVel`` rather than relying on a
+        flag the caller may not have set.
+
         Returns:
             Tuple of (kinetic_energy [J], potential_energy [J], total_energy [J])
         """
-        ke = float(self.data.energy[0])  # Kinetic energy
-        pe = float(self.data.energy[1])  # Potential energy
+        mujoco.mj_energyPos(self.model, self.data)
+        mujoco.mj_energyVel(self.model, self.data)
+
+        pe = float(self.data.energy[0])  # MuJoCo order is [potential, kinetic]
+        ke = float(self.data.energy[1])
         total = ke + pe
         return ke, pe, total
 
@@ -312,12 +340,27 @@ class BiomechanicalAnalyzer:
             Array of actuator powers [W]
         """
         powers = np.zeros(self.model.nu)
+        joint_trn = int(mujoco.mjtTrn.mjTRN_JOINT)
+        joint_in_parent_trn = int(mujoco.mjtTrn.mjTRN_JOINTINPARENT)
         for i in range(self.model.nu):
-            joint_id = self.model.actuator_trnid[i, 0]
-            actuator_force = self.data.actuator_force[i]
-            if joint_id >= 0 and joint_id < self.model.nv:
-                joint_velocity = self.data.qvel[joint_id]
-                powers[i] = actuator_force * joint_velocity
+            # Only joint transmissions map onto a single scalar DOF velocity.
+            if int(self.model.actuator_trntype[i]) not in (
+                joint_trn,
+                joint_in_parent_trn,
+            ):
+                continue
+
+            joint_id = int(self.model.actuator_trnid[i, 0])
+            if joint_id < 0 or joint_id >= self.model.njnt:
+                continue
+
+            # actuator_trnid holds a JOINT id; qvel is indexed by DOF address.
+            # The two coincide only when every preceding joint is 1-DOF.
+            dof_index = int(self.model.jnt_dofadr[joint_id])
+            if dof_index < 0 or dof_index >= self.model.nv:
+                continue
+
+            powers[i] = self.data.actuator_force[i] * self.data.qvel[dof_index]
         return powers
 
     def _compute_advanced_induced_metrics(
@@ -388,11 +431,12 @@ class BiomechanicalAnalyzer:
 
         club_acc = None
         if club_vel is not None and self._prev_club_vel is not None:
-            dt = self.data.time - self.prev_time
+            dt = self.data.time - self._prev_club_time
             if dt > 0:
                 club_acc = (club_vel - self._prev_club_vel) / dt
         if club_vel is not None:
             self._prev_club_vel = club_vel.copy()
+            self._prev_club_time = float(self.data.time)
 
         induced: dict = {}
         club_induced = None

@@ -134,6 +134,16 @@ class LayoutManager:
 
         self.launch_stats[model_id]["last_launched"] = datetime.now().isoformat()
 
+    def _is_visible_model(self, model_id: str) -> bool:
+        """Return whether a known model is eligible for a launcher card.
+
+        Hidden aliases remain registered so historical references can resolve,
+        but they must never be restored from a saved layout or rendered in the
+        PyQt6 grid.
+        """
+        model = self.available_models.get(model_id)
+        return model is not None and getattr(model, "hidden", False) is not True
+
     def initialize_model_order(self, default_ids: list[str] | None = None) -> None:
         """Set a sensible default grid ordering.
 
@@ -160,13 +170,13 @@ class LayoutManager:
                 "library_tool",
             ]
             for model_id, model in self.available_models.items():
-                is_hidden = getattr(model, "hidden", False)
+                is_hidden = getattr(model, "hidden", False) is True
                 if not is_hidden and model_id not in default_ids:
                     default_ids.append(model_id)
 
         # Filter to available models
         available_ids = [
-            model_id for model_id in default_ids if model_id in self.available_models
+            model_id for model_id in default_ids if self._is_visible_model(model_id)
         ]
         missing_ids = [
             model_id
@@ -230,11 +240,11 @@ class LayoutManager:
             saved_order = [
                 model_id
                 for model_id in layout_data.get("model_order", [])
-                if model_id in self.available_models or model_id == "library_tool"
+                if self._is_visible_model(model_id)
             ]
             if saved_order:
                 for model_id, model in self.available_models.items():
-                    is_hidden = getattr(model, "hidden", False)
+                    is_hidden = getattr(model, "hidden", False) is True
                     if not is_hidden and model_id not in saved_order:
                         saved_order.append(model_id)
                 self.model_order = saved_order
@@ -304,12 +314,14 @@ class LayoutManager:
         if selected_ids is None:
             raise ValueError("selected_ids must be provided")
         ordered_selection = [
-            model_id for model_id in self.model_order if model_id in selected_ids
+            model_id
+            for model_id in self.model_order
+            if model_id in selected_ids and self._is_visible_model(model_id)
         ]
 
         # Append newly selected models
         for model_id in selected_ids:
-            if model_id not in ordered_selection and model_id in self.available_models:
+            if model_id not in ordered_selection and self._is_visible_model(model_id):
                 ordered_selection.append(model_id)
 
         self.model_order = ordered_selection
@@ -488,7 +500,7 @@ class LayoutManager:
         filtered = []
         for model_id in source_list:
             model = self._get_model(model_id)
-            if not model:
+            if not model or getattr(model, "hidden", False) is True:
                 continue
 
             if (

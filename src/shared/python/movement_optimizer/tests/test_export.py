@@ -146,7 +146,7 @@ class TestExportExcel:
     """Tests for export_to_excel (issue #411)."""
 
     def _make_result(self):
-        from conftest import make_test_result
+        from movement_optimizer.tests._helpers import make_test_result
 
         return make_test_result()
 

@@ -152,11 +152,11 @@ class CustomTitleBar(QWidget):
         self.icon_label.installEventFilter(self)
 
         try:
-            from src.shared.python.core.version import __version__
+            from src.launchers.about_dialog import _resolve_app_version
 
-            version = __version__
+            version = _resolve_app_version()
         except ImportError:
-            version = "2.1.0"
+            version = "1.0.0-beta"
 
         self.title_label = QLabel(
             f"<b><font color='#266EC8'>Upstream</font><font color='#FF8800'>Drift</font></b> <span style='font-size: 10px; color: gray;'>v{version}</span>"

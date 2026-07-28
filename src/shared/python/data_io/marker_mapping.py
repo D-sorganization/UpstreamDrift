@@ -284,7 +284,9 @@ class MarkerToModelMapper:
             max_error=max_err,
             outlier_indices=outlier_idx,
             fit_quality=fit_quality,
-            num_markers_used=int(inlier_mask.sum()),  # ⚡ Bolt: mask.sum() avoids array-conversion overhead
+            num_markers_used=int(
+                inlier_mask.sum()
+            ),  # ⚡ Bolt: mask.sum() avoids array-conversion overhead
             condition_number=cond,
         )
 

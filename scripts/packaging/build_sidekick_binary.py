@@ -3,7 +3,8 @@
 
 Usage
 -----
-    python scripts/packaging/build_sidekick_binary.py [--max-mb N] [--output-dir DIR]
+    python scripts/packaging/build_sidekick_binary.py \
+        [--expected-platform PLATFORM] [--max-mb N] [--output-dir DIR]
 
 The script:
 1. Runs PyInstaller with ``sidekick.spec``.
@@ -31,7 +32,23 @@ import sys
 from pathlib import Path
 
 MAX_MB_DEFAULT = 250
-SPEC_FILE = Path(__file__).parent.parent.parent / "sidekick.spec"
+REPOSITORY_ROOT = Path(__file__).parent.parent.parent
+SPEC_FILE = REPOSITORY_ROOT / "sidekick.spec"
+CANONICAL_SIDEKICK_ENTRYPOINT = (
+    REPOSITORY_ROOT
+    / "vendor"
+    / "ud-tools"
+    / "src"
+    / "shared"
+    / "python"
+    / "sidekick"
+    / "__main__.py"
+)
+NATIVE_PLATFORM_NAMES = {
+    "darwin": "macos",
+    "linux": "linux",
+    "win32": "windows",
+}
 
 
 def _parse_args() -> argparse.Namespace:
@@ -51,6 +68,14 @@ def _parse_args() -> argparse.Namespace:
         metavar="DIR",
         help="Directory where PyInstaller writes the binary (default: dist)",
     )
+    p.add_argument(
+        "--expected-platform",
+        choices=sorted(NATIVE_PLATFORM_NAMES.values()),
+        help=(
+            "Fail unless this host natively builds the requested platform "
+            "(PyInstaller does not cross-compile)"
+        ),
+    )
     return p.parse_args()
 
 
@@ -58,11 +83,46 @@ def _binary_name() -> str:
     return "sidekick.exe" if sys.platform == "win32" else "sidekick"
 
 
+def _native_platform_name() -> str:
+    """Return the release platform produced by this Python interpreter."""
+    try:
+        return NATIVE_PLATFORM_NAMES[sys.platform]
+    except KeyError as error:
+        raise RuntimeError(f"Unsupported build platform: {sys.platform}") from error
+
+
 def main() -> int:
     args = _parse_args()
 
-    assert SPEC_FILE.exists(), f"sidekick.spec not found at {SPEC_FILE}"
-    assert args.max_mb > 0, f"--max-mb must be positive, got {args.max_mb}"
+    if not SPEC_FILE.is_file():
+        print(f"::error::sidekick.spec not found at {SPEC_FILE}", file=sys.stderr)
+        return 1
+    if not CANONICAL_SIDEKICK_ENTRYPOINT.is_file():
+        print(
+            "::error::Canonical Sidekick entrypoint is unavailable; initialize "
+            "the pinned vendor/ud-tools submodule recursively",
+            file=sys.stderr,
+        )
+        return 1
+    if args.max_mb <= 0:
+        print(
+            f"::error::--max-mb must be positive, got {args.max_mb}",
+            file=sys.stderr,
+        )
+        return 1
+
+    try:
+        native_platform = _native_platform_name()
+    except RuntimeError as error:
+        print(f"::error::{error}", file=sys.stderr)
+        return 1
+    if args.expected_platform is not None and args.expected_platform != native_platform:
+        print(
+            f"::error::Requested platform {args.expected_platform!r} does not "
+            f"match native build platform {native_platform!r}",
+            file=sys.stderr,
+        )
+        return 1
 
     env = {**os.environ, "SKIP_UI_BUILD": "1"}
 

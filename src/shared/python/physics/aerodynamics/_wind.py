@@ -166,7 +166,9 @@ class WindModel:
             base_dir = self.config.direction
             random_perturb = self._rng.standard_normal(3) * 0.3
             gust_dir = base_dir + random_perturb
-            gust_dir = gust_dir / (math.hypot(gust_dir[0], gust_dir[1], gust_dir[2]) + 1e-10)  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+            gust_dir = (
+                gust_dir / (math.hypot(gust_dir[0], gust_dir[1], gust_dir[2]) + 1e-10)
+            )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
             gust = WindGust(
                 start_time=t,

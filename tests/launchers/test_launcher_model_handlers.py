@@ -18,6 +18,7 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
     ModelHandler,
     ModelHandlerRegistry,
     ModuleHandler,
+    ProviderExerciseHandler,
     PuttingGreenHandler,
     ScriptHandler,
     SpecialAppHandler,
@@ -354,6 +355,51 @@ class TestBiomechExerciseHandler:
         assert res is False
 
 
+class TestProviderExerciseHandler:
+    """Tests for provider-model tiles that represent exercise directories."""
+
+    @pytest.mark.parametrize(
+        ("model_type", "engine"),
+        [
+            ("mjcf", "MuJoCo_Models"),
+            ("sdformat-1.8", "Drake_Models"),
+            ("urdf", "Pinocchio_Models"),
+            ("osim", "OpenSim_Models"),
+        ],
+    )
+    def test_launch_routes_provider_directory_to_matching_engine_dashboard(
+        self, model_type: str, engine: str
+    ) -> None:
+        """Provider directories launch a contained exercise dashboard, never a directory."""
+
+        class ProviderModel:
+            id = "provider-bench_press"
+            name = "Bench Press"
+            path = "src/provider_models/exercises/bench_press"
+            type = model_type
+
+        manager = MagicMock()
+        manager.get_subprocess_env.return_value = {}
+        manager.launch_script.return_value = "process"
+
+        result = ProviderExerciseHandler().launch(
+            ProviderModel(), Path("/repo"), manager
+        )
+
+        assert result is True
+        manager.launch_script.assert_called_once_with(
+            name="Bench Press",
+            script_path=Path("/repo") / "src" / "launchers" / "exercise_dashboard.py",
+            cwd=Path("/repo"),
+            env={
+                "BIOMECH_EXERCISE": "bench_press",
+                "BIOMECH_ENGINE": engine,
+            },
+            extra_python_paths=(),
+        )
+        manager.launch_module.assert_not_called()
+
+
 class TestGolfSimulationSuiteHandler:
     """Tests for GolfSimulationSuiteHandler."""
 
@@ -435,6 +481,50 @@ class TestManifestTileHandlerRegistration:
             assert handler.can_handle(tile.type) is True, (
                 f"Handler {type(handler).__name__}.can_handle({tile.type!r}) "
                 f"returned False for tile {tile.id!r}"
+            )
+
+    def test_visible_provider_exercise_tiles_have_contained_handlers(
+        self, manifest: LauncherManifest, registry: ModelHandlerRegistry
+    ) -> None:
+        """Every visible provider exercise card uses the dashboard launch path.
+
+        Model-pack entries point at exercise directories containing model builders,
+        not executable scripts.  They must never fall through to generic file
+        launch handling.
+        """
+        provider_tiles = [
+            tile
+            for tile in manifest.visible_tiles
+            if tile.provider and tile.type in ProviderExerciseHandler.MODEL_TYPES
+        ]
+        if not provider_tiles:
+            return
+        assert {
+            tile.type for tile in provider_tiles
+        } == ProviderExerciseHandler.MODEL_TYPES
+        for tile in provider_tiles:
+            assert tile.capabilities, (
+                f"Provider exercise tile {tile.id!r} must declare filterable "
+                "capabilities."
+            )
+            assert tile.engine_type in tile.capabilities
+            assert Path(tile.path).name in tile.capabilities
+            handler = registry.get_handler(tile.type)
+            assert isinstance(handler, ProviderExerciseHandler)
+            manager = MagicMock()
+            manager.get_subprocess_env.return_value = {}
+            manager.launch_script.return_value = "process"
+
+            assert handler.launch(tile, Path("/repo"), manager) is True
+
+            launch_kwargs = manager.launch_script.call_args.kwargs
+            assert launch_kwargs["script_path"] == (
+                Path("/repo") / "src" / "launchers" / "exercise_dashboard.py"
+            )
+            assert launch_kwargs["env"]["BIOMECH_EXERCISE"] == Path(tile.path).name
+            assert (
+                launch_kwargs["env"]["BIOMECH_ENGINE"]
+                == (ProviderExerciseHandler._PREFERRED_ENGINE_BY_MODEL_TYPE[tile.type])
             )
 
     def test_manifest_static_tile_names_have_model_images(self) -> None:
