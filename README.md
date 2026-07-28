@@ -116,7 +116,7 @@ git lfs install && git lfs pull
 pip install -e ".[dev]"
 
 # Verify installation
-python scripts/verify_installation.py
+python scripts/ci/verify_installation.py
 ```
 
 **Conda convenience wrapper**

@@ -50,7 +50,7 @@ You should still launch in a **new window** when:
 - You're running a CLI / batch / external program (those route
   through `LaunchMode.EXTERNAL`).
 
-![Launcher with embedded view enabled](../../assets/launcher/embedded_view_overview.png)
+> **Screenshot pending:** Launcher with embedded view enabled — capture to `../../assets/launcher/embedded_view_overview.png` and restore the image here.
 
 ---
 
@@ -67,9 +67,9 @@ the tool's declared capabilities:
 | **Launch in Tab**        | Tool implements `EmbeddableTool`.                        | Adds a tab to the embedded host's central tab area.                      |
 | **Launch in Dock**       | Tool implements `EmbeddableTool` and didn't refuse dock. | Adds a `QDockWidget` to the embedded host (right side by default).       |
 
-The mapping from menu choice to dispatcher behaviour lives in
-`resolve_launch_mode()` in
-[`src/launchers/launch_routing.py`](../../../src/launchers/launch_routing.py).
+The mapping from menu choice to dispatcher behaviour lives in the
+embedded host,
+[`src/launchers/embedded_host.py`](../../../src/launchers/embedded_host.py).
 If you ask for **Launch in Tab** on a tool that doesn't support
 embedding (legacy dashboards, tools that need their own
 `QApplication`) the launcher logs a warning and silently falls back
@@ -77,7 +77,7 @@ to **Launch in New Window** — you'll see your tool open as a
 top-level window and a one-line entry in the launcher diagnostic
 log.
 
-![Right-click context menu on a launcher tile](../../assets/launcher/embedded_view_context_menu.png)
+> **Screenshot pending:** Right-click context menu on a launcher tile — capture to `../../assets/launcher/embedded_view_context_menu.png` and restore the image here.
 
 ---
 

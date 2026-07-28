@@ -38,6 +38,8 @@ dependencies:
       - PyJWT>=2.13.0
       - cryptography>=48.0.1
       - email-validator>=2.0.0
+      - defusedxml>=0.7.0
+      - pandas>=2.0.0
       - pytest>=9.0.3
       - pytest-cov>=4.0.0
       - pytest-mock>=3.0.0
@@ -47,9 +49,7 @@ dependencies:
       - ruff>=0.15.10
       - mypy>=1.20.1
       - build
-      - pandas>=2.0.0
       - pyarrow>=14.0.0
-      - defusedxml>=0.7.0
       - matplotlib>=3.10.8
       - anyio>=4.0.0
       - pytest-anyio>=0.0.0

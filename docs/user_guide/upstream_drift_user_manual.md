@@ -1505,7 +1505,7 @@ After installation, run the verification script to confirm that all core
 dependencies are available and functional:
 
 ```bash
-python scripts/verify_installation.py
+python scripts/ci/verify_installation.py
 ```
 
 This script checks:

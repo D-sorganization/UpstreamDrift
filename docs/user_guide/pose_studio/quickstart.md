@@ -52,7 +52,7 @@ for which engines are real on your machine.
 
 <!-- TODO: screenshot capture pending; placeholder OK -->
 
-![Engine picker](../../assets/pose_studio/01_engine_picker.png)
+> **Screenshot pending:** Engine picker — capture to `../../assets/pose_studio/01_engine_picker.png` and restore the image here.
 
 The top-left **Engine picker** combo lists every engine in
 `KINEMATICS_SERVICE_REGISTRY` (`drake`, `mujoco`, `pinocchio`,
@@ -74,7 +74,7 @@ new engine's adapter.
 
 <!-- TODO: screenshot capture pending; placeholder OK -->
 
-![Joint sliders + 3D view](../../assets/pose_studio/02_joint_panel.png)
+> **Screenshot pending:** Joint sliders + 3D view — capture to `../../assets/pose_studio/02_joint_panel.png` and restore the image here.
 
 The left dock is an accordion of per-joint sliders grouped by body
 region (pelvis, spine, shoulders, elbows, wrists). The right dock is
@@ -98,7 +98,7 @@ the live 3D skeleton view rendered by matplotlib's QtAgg backend.
 
 <!-- TODO: screenshot capture pending; placeholder OK -->
 
-![Save dialog](../../assets/pose_studio/03_save_dialog.png)
+> **Screenshot pending:** Save dialog — capture to `../../assets/pose_studio/03_save_dialog.png` and restore the image here.
 
 `File → Save initial state…` writes an engine-native file via
 `pose_io.save_initial_state`. The format is selected by the engine

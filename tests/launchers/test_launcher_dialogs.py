@@ -55,7 +55,6 @@ class DummyLauncher(QMainWindow):
         self.btn_ai = MagicMock()
         self.content_splitter = MagicMock()
         self.ai_panel = MagicMock()
-        self.btn_modify_layout = MagicMock()
         self.btn_customize_tiles = MagicMock()
         self.layout_manager = MagicMock()
         self.chk_wsl = MagicMock()
