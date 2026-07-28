@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import pytest
-from conftest import make_test_result
 
 from movement_optimizer.observability import InMemoryMetrics, MetricSample, metrics
+from movement_optimizer.tests._helpers import make_test_result
 from movement_optimizer.trajectory import SolutionCache
 
 

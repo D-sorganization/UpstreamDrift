@@ -9,7 +9,6 @@ from typing import Any, ClassVar
 
 import numpy as np
 import pytest
-from conftest import make_test_result
 
 from movement_optimizer import cli
 from movement_optimizer.cli import (
@@ -18,6 +17,7 @@ from movement_optimizer.cli import (
     _result_to_full_dict,
     _result_to_summary,
 )
+from movement_optimizer.tests._helpers import make_test_result
 
 
 class TestCLIParser:
