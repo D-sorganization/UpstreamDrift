@@ -85,7 +85,7 @@ class EngineWorkflowAdapter:
         """Load a named engine through EngineManager."""
         if engine_name is None:
             raise ValueError("engine_name must be provided")
-        engine_type = self.resolve_engine(engine_name)
+        engine_type = self.parse_engine_identifier(engine_name)
         if engine_type is None:
             return EngineWorkflowResult(
                 ok=False,
