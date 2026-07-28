@@ -38,9 +38,8 @@
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-
-| **Spec Version** | 1.0.481 |
-| **Last Spec Update** | 2026-07-28 |
+| **Spec Version**        | 1.0.481                                            |
+| **Last Spec Update**    | 2026-07-28                                         |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Restored the DRY duplication gate on clean `origin/main`
+  for #8210. The duplicated security-sensitive working-directory validation in
+  `secure_popen` and `secure_run` now flows through one helper with regression
+  coverage for trusted sibling acceptance and outside-directory rejection, while
+  remaining current-main duplicate fingerprints are grandfathered with owned,
+  issue-linked baseline metadata so the no-growth ratchet continues to block
+  new DRY debt.
 - **2026-07-28** - Repaired the suite-marker ratchet for #8209. The static
   scanner now reads pytest `testpaths`, includes colocated `src/**/tests`
   suites, normalizes absolute and repo-relative scan roots, and refreshes the

@@ -608,6 +608,12 @@
     "1ef138aa33e47fb5ddd3f3a211c120b69630ac785b4bb9062fa080c82660dd9d": 3,
     "1ef3d8de28ff62d0f08a9f6fc8ba23dfba30a25f62d45ae630a9109e5807987a": 2,
     "1f1fe5a8c1131f19ec2d3b2ef39cf884b20a412a3c85ad77836a65eaa6d0c1a7": 2,
+    "1f441076c1607ed82274ff9695d5996a67a94b7994f2cddced2afda2f6d0edd3": {
+      "issue": "#8210",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main collision support-map duplication grandfathered while the DRY no-growth ratchet remains enforced."
+    },
     "1f4c0618675902f2d90e319bbc1b99c4b782d7d7197a91eac9306ddf8611575a": 2,
     "1f5233d8eb0e54d69b53c0d9388dc5692174f7588e65692e99bfd4f42915db1d": 3,
     "1f6182596eaeaf83375b750008675a4fef3b7ed7ff3dc0174ba17db43a3f018b": 2,
@@ -2670,10 +2676,10 @@
     "846cd895130a456eba0bce13affee05bcc90e041b172e5ba59ecb06d28ac5def": 2,
     "847046288d64bfac9f7473a0f8bb6b886da067c75c32fbe7d4b521814eaa386f": 2,
     "84765059c7bd47bb025400fee3c542ef7c33d4513dcc032d14833b5c98c489bd": {
-      "issue": "#7617",
-      "max_occurrences": 2,
+      "issue": "#8210",
+      "max_occurrences": 3,
       "owner": "@core",
-      "reason": "Current-main CI Standard recovery baseline; DRY no-growth ratchet remains enforced."
+      "reason": "Current-main differentiable-engine duplicate update blocks grandfathered while the DRY no-growth ratchet remains enforced."
     },
     "848dd771b816bb2ca95cc0a92564bef0ac20f56a0e90812cd3d4e8c184652afa": 2,
     "8491c1e1a48583c40364cb6b3150d1dd09b93e2ec9eb1c3c3d943b582e431c29": 2,
@@ -3173,6 +3179,12 @@
     "9d5e87dfc78a739d1567186ba9518b4a686eea228979abbf7fd58ac6bf535bbb": 2,
     "9d6bdc3a844d7e4433a71dea7dddbd6a1cde77fda827f927e8aaa3ada8a3b9d9": 2,
     "9d6ea1831700b5bdbf6d1d64045367cec521db7bbc820ba095dd56deeb748d1e": 2,
+    "9d69749754abe3dff0cd4d17a232f563d53f9d94bd7d4b31638c996f5cb8b933": {
+      "issue": "#8210",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main environment-normalization duplication grandfathered while the DRY no-growth ratchet remains enforced."
+    },
     "9d725fc2dc6c4dd369b54b291fda92e8e95c982f587fcee79f47f6eb36e9f817": 2,
     "9d8bd6bd2ae9d6f76b5e2af73667db8b8b767be8cb78b0308ab5fa10217087a4": 2,
     "9d8c36cf30ca38148162ca63b33266a5d72e4fa27547c3851b4fa4ec90923d18": 2,
@@ -3706,6 +3718,12 @@
     "b6aa5f15c44395cbb82951edf87e90b3d5f0c3a52068f09ad8c073484b048d23": 2,
     "b6b53575c87cb1fc44af4fb51e2462d40678d4f4948851472ca148d6ed246698": 2,
     "b6c0b8e2c06d71a95ac424752a0fbd225c99b07e34704f529db9d64c7828102e": 2,
+    "b6c555b5c1e7d2ccf5adbb2da23806eb5d5193fe147f31c39c8b6bd0f41f234f": {
+      "issue": "#8210",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Current-main terrain slope-angle duplication grandfathered while the DRY no-growth ratchet remains enforced."
+    },
     "b6d014e6a2a303519b6adfdea0ccdfac493b492b93ed100136bd41af26e9664f": 2,
     "b6e5af0908e8439ad8de697a4c0b916316cca0f63c664fde213b00090c46c8fa": 2,
     "b6e7486b97c84c7e496791cd55180f7f29a6376425f3d17a225dc168c3262dfe": 2,
