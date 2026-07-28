@@ -78,6 +78,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
