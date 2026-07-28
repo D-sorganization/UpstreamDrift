@@ -314,6 +314,10 @@ class UpstreamDriftLauncher(QMainWindow):
         """Expose the Sidekick sidebar installer on the launcher class."""
         return self.sidekick_sidebar_manager._install_sidekick_sidebar()
 
+    def _show_onboarding_if_needed(self) -> None:
+        """Expose the onboarding hook scheduled during launcher startup."""
+        return self.sidekick_sidebar_manager._show_onboarding_if_needed()
+
     def _on_windows_mode_changed(self, state: int) -> None:
         """Expose the Windows-mode checkbox handler on the launcher class."""
         return self.dialogs_manager._on_windows_mode_changed(state)
