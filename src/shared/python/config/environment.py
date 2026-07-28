@@ -290,16 +290,23 @@ def get_env_list(
     return items
 
 
-# Environment-name variables, in precedence order. ``UPSTREAM_DRIFT_ENV`` is
-# the legacy spelling used by the database/debug gates; it is accepted as a
-# fallback so both spellings converge on one predicate (issue #7994).
-_ENVIRONMENT_VARS: tuple[str, ...] = ("ENVIRONMENT", "UPSTREAM_DRIFT_ENV")
+@functools.cache
+def get_environment() -> str:
+    """Get the current deployment environment.
 
+    Reads from ENVIRONMENT env var, defaulting to "development".
 
-def _normalize_environment(value: str) -> str:
-    """Normalize a raw environment name to its canonical form."""
-    env = value.strip().lower()
+    Returns:
+        One of: "development", "staging", "production" (normalized to lowercase).
 
+    Example:
+        >>> env = get_environment()
+        >>> if env == "production":
+        ...     # Enable production settings
+    """
+    env = os.environ.get("ENVIRONMENT", "development").lower()
+
+    # Normalize common variants
     if env in ("dev", "local"):
         return "development"
     if env in ("stage", "test", "testing"):
@@ -310,69 +317,13 @@ def _normalize_environment(value: str) -> str:
     return env
 
 
-def resolve_environment() -> str:
-    """Resolve the deployment environment name without caching.
-
-    Reads ``ENVIRONMENT`` first, falling back to the legacy
-    ``UPSTREAM_DRIFT_ENV``. **Fails closed**: if *either* variable names
-    production, the result is ``"production"`` even when the other names a
-    weaker environment, so a half-configured deploy never loses a production
-    guard (issue #7994).
-
-    Returns:
-        One of: "development", "staging", "production" (normalized to lowercase),
-        or any other explicitly configured name.
-    """
-    values = [
-        _normalize_environment(raw)
-        for var in _ENVIRONMENT_VARS
-        if (raw := os.environ.get(var, "")).strip()
-    ]
-
-    if any(value == "production" for value in values):
-        return "production"
-
-    return values[0] if values else "development"
-
-
-@functools.cache
-def get_environment() -> str:
-    """Get the current deployment environment (cached).
-
-    Reads from the ENVIRONMENT env var (falling back to UPSTREAM_DRIFT_ENV),
-    defaulting to "development".
-
-    Returns:
-        One of: "development", "staging", "production" (normalized to lowercase).
-
-    Example:
-        >>> env = get_environment()
-        >>> if env == "production":
-        ...     # Enable production settings
-    """
-    return resolve_environment()
-
-
 def is_production() -> bool:
-    """Check if running in production environment (cached).
+    """Check if running in production environment.
 
     Returns:
-        True if the resolved environment is "production".
+        True if ENVIRONMENT is "production".
     """
     return get_environment() == "production"
-
-
-def is_production_environment() -> bool:
-    """Check if running in production, re-reading the environment each call.
-
-    Startup gates (database migration checks, debug-endpoint registration) use
-    this rather than :func:`is_production` because they run before/around
-    process configuration and must not be pinned by ``functools.cache``.
-
-    Returns:
-        True if the resolved environment is "production".
-    """
-    return resolve_environment() == "production"
 
 
 def is_development() -> bool:

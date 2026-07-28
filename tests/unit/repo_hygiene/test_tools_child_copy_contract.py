@@ -73,6 +73,8 @@ def _tools_shared_paths() -> set[str] | None:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=30,
         )
         if result.returncode != 0:
@@ -119,6 +121,8 @@ def _run_git(*args: str) -> subprocess.CompletedProcess[str] | None:
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
     )
 
