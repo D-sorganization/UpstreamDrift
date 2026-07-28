@@ -17,7 +17,7 @@ python3 --version
 
 No. You can install only the engines you need. MuJoCo is the recommended
 default. The suite degrades gracefully when engines are missing. See the
-[Engine Selection Guide](../engine_selection_guide.md) to choose.
+[Engine Selection Guide](../engines/engine_selection_guide.md) to choose.
 
 ### Q: How do I install in development mode?
 
@@ -40,7 +40,7 @@ The engine is not installed in your current environment. Solutions:
 ### Q: Which engine should I start with?
 
 MuJoCo. It has the easiest installation, best documentation, and covers the
-widest range of use cases. See the [Engine Selection Guide](../engine_selection_guide.md).
+widest range of use cases. See the [Engine Selection Guide](../engines/engine_selection_guide.md).
 
 ### Q: Can I run simulations without any physics engine?
 

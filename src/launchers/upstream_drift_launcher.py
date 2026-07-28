@@ -1047,18 +1047,32 @@ class UpstreamDriftLauncher(QMainWindow):
     # -- Menu toggle handlers --
 
     def _toggle_layout_mode_from_menu(self, checked: bool) -> None:
-        """Toggle layout edit mode from menu action."""
-        if True:
-            self.btn_modify_layout.setChecked(checked)
+        """Toggle layout edit mode from the ``View > Edit Layout Mode`` action.
+
+        The checkable ``_action_layout_mode`` QAction is the sole owner of this
+        toggle's state; ``toggle_layout_mode`` keeps it in sync. A vestigial
+        ``btn_modify_layout`` toolbar button used to mirror the state, but it
+        has not been created by the UI setup for a long time — dereferencing it
+        raised ``AttributeError`` inside a Qt slot, which PyQt turns into a hard
+        abort (``0xC0000409``). See issue #8023.
+        """
         self.ui_setup_manager.toggle_layout_mode(checked)
 
     def _toggle_context_help(self, checked: bool) -> None:
-        """Toggle the context help panel visibility."""
-        if True:
-            if checked:
-                self.context_help.show()
-            else:
-                self.context_help.hide()
+        """Toggle the context help panel visibility.
+
+        Guarded because ``context_help`` is only created by
+        ``UISetupManager._setup_context_help``; a launcher built without the
+        full UI must not abort the process here (issue #8023).
+        """
+        context_help = getattr(self, "context_help", None)
+        if context_help is None:
+            logger.warning("Context help panel is not available; ignoring toggle.")
+            return
+        if checked:
+            context_help.show()
+        else:
+            context_help.hide()
 
     # -- Cleanup --
 

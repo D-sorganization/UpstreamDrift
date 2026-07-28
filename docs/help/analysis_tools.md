@@ -365,4 +365,4 @@ def my_plot(data, ax):
 
 ---
 
-_See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)_
+_See also: [Full User Manual](../user_guide/user_manual.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)_

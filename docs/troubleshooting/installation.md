@@ -271,10 +271,11 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-Save as `scripts/verify_installation.py` and run:
+An equivalent script already ships with the repository at
+`scripts/ci/verify_installation.py`; run it directly:
 
 ```bash
-python scripts/verify_installation.py
+python scripts/ci/verify_installation.py
 ```
 
 ---

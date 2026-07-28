@@ -522,7 +522,7 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- [API Reference: VideoPosePipeline](../../api/video_pose_pipeline.md)
-- [API Reference: MarkerToModelMapper](../../api/marker_mapping.md)
-- [Guideline A2: Marker Mapping Protocol](../../guidelines/A2_marker_mapping.md)
-- [Example: Multi-View Reconstruction](../examples/multi_view_reconstruction.md)
+- VideoPosePipeline API — `src/shared/python/gui_pkg/video_pose_pipeline.py`
+- Marker mapping API — `src/shared/python/data_io/marker_mapping.py` and `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- [Motion Pipeline Guide](../../motion_pipeline/README.md) - Mocap input through to tracked motion
+- [Motion Capture Formats](../../motion_pipeline/formats.md) - Supported formats and quirks
