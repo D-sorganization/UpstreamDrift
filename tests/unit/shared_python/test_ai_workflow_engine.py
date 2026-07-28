@@ -439,6 +439,56 @@ class TestExecuteNextStep:
         result = engine.execute_next_step(exe)
         assert result.status == StepStatus.SKIPPED
 
+    def test_final_validation_failure_skip_completes_execution(
+        self, engine: WorkflowEngine, context: ConversationContext
+    ) -> None:
+        wf = Workflow(id="wf-final-skip", name="WF", description="D")
+        wf.add_step(
+            WorkflowStep(
+                id="s1",
+                name="S1",
+                description="D",
+                validation=lambda _: ValidationResult(passed=False, message="Bad"),
+                on_failure=RecoveryStrategy.SKIP,
+            )
+        )
+        engine.register_workflow(wf)
+        exe = engine.start_workflow("wf-final-skip", context)
+        result = engine.execute_next_step(exe)
+        progress = engine.get_progress(exe)
+
+        assert result.status == StepStatus.SKIPPED
+        assert exe.current_step_index == len(wf.steps)
+        assert engine.is_complete(exe)
+        assert exe.status == StepStatus.COMPLETED
+        assert progress["status"] == StepStatus.COMPLETED.name
+
+    def test_validation_exception_aborts_workflow(
+        self, engine: WorkflowEngine, context: ConversationContext
+    ) -> None:
+        def raise_validation_error(_result: object) -> ValidationResult:
+            raise ValueError("bad validation")
+
+        wf = Workflow(id="wf-validation-exception", name="WF", description="D")
+        wf.add_step(
+            WorkflowStep(
+                id="s1",
+                name="S1",
+                description="D",
+                validation=raise_validation_error,
+                on_failure=RecoveryStrategy.ABORT,
+            )
+        )
+        engine.register_workflow(wf)
+        exe = engine.start_workflow("wf-validation-exception", context)
+        result = engine.execute_next_step(exe)
+
+        assert result.status == StepStatus.FAILED
+        assert result.validation is not None
+        assert result.validation.passed is False
+        assert "bad validation" in (result.error or "")
+        assert exe.status == StepStatus.FAILED
+
 
 # ---------------------------------------------------------------------------
 # WorkflowEngine — get_progress
