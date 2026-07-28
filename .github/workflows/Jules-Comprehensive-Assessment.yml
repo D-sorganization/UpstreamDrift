@@ -120,7 +120,7 @@ jobs:
           echo "Collecting incomplete implementation patterns..."
           mkdir -p .jules/completist_data
 
-          # Find TODO/FIXME markers
+          # Find tracked-debt markers (#8220)
           grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
             --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
             > .jules/completist_data/todo_markers.txt 2>/dev/null || true

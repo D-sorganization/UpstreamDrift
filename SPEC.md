@@ -40,9 +40,10 @@
 | **Current Version**     | 2.1.1                                              |
 
 <<<<<<< HEAD
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-07-28 |
 =======
+
 | **Spec Version** | 1.0.468 |
 | **Last Spec Update** | 2026-07-25 |
 
@@ -77,6 +78,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-07-28** - Closed the workflow TODO-discipline gap for #8220. The
+  shared TODO checker now scans `src/`, `tests/`, `scripts/`, and GitHub
+  workflow YAML, including workflow comment markers and shell lines that emit
+  placeholder messages. The CI placeholder step now calls that shared checker,
+  and the nightly cross-engine workflow writes a small HTML dashboard artifact
+  from JUnit results instead of echoing an unfinished dashboard placeholder.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains

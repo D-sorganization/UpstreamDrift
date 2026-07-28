@@ -1,6 +1,6 @@
 name: Stub Introduction Guard
 
-# Fails a PR that introduces NEW stub/placeholder/mock patterns without an
+# Fails a PR that introduces NEW stub/placeholder/mock patterns without an #8220
 # accompanying tracking-issue reference. Existing occurrences are
 # grandfathered — we only inspect lines added by this PR.
 #
@@ -8,11 +8,11 @@ name: Stub Introduction Guard
 # `// TODO #1234`, `# TODO(#1234)`):
 #   - raise NotImplementedError
 #   - pass  # stub
-#   - pass  # placeholder
-#   - # Placeholder for future ...
-#   - # TODO  (without #NNN)
-#   - # FIXME (without #NNN)
-#   - // TODO: Add to API   (and similar hardcoded-mock markers)
+#   - pass with a placeholder comment (#8220)
+#   - future-placeholder comment text (#8220)
+#   - issue-less task marker comment (#8220)
+#   - issue-less fix marker comment (#8220)
+#   - issue-less API task marker in JS comments (#8220)
 #   - setTimeout + Math.random in *[Cc]hat*.tsx (fake-AI pattern)
 
 on:

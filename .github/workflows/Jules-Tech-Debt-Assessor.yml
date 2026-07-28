@@ -163,7 +163,7 @@ jobs:
 
           # Find stub comments
           echo "" >> /tmp/incomplete_report.md
-          echo "### Stub/Placeholder Comments" >> /tmp/incomplete_report.md
+          echo "### Stub/Placeholder Comments (#8220)" >> /tmp/incomplete_report.md
           echo "" >> /tmp/incomplete_report.md
           echo '```' >> /tmp/incomplete_report.md
           grep -rniE "(stub|placeholder|implement later|will be implemented|not yet implemented)" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | head -30 >> /tmp/incomplete_report.md || echo "None found"

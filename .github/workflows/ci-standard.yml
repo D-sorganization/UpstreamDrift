@@ -780,21 +780,10 @@ jobs:
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
 
-      # Placeholder detection is blocking. Issue-linked TODO markers are allowed
-      # because they already have a tracked owner and follow-up path.
+      # Placeholder detection is blocking (#8220). Issue-linked TODO markers
+      # are allowed because they already have a tracked owner and follow-up path.
       - name: Verify No Placeholders
-        shell: bash
-        run: |
-          violations=$(
-            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" \) -prune -o -type f -name "*.py" -print0 \
-              | xargs -0 grep -nE "TODO|FIXME" \
-              | grep -vE "TODO(\(#?[0-9]+|:.*#[0-9]+)" || true
-          )
-          if [ -n "$violations" ]; then
-            echo "$violations"
-            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
-            exit 1
-          fi
+        run: python3 scripts/ci/check_todo_discipline.py
 
   # Green-suite unit gate (issue #7042). Runs the full collection of
   # dependency-light `unit` tests and FAILS the build on ANY non-skip failure.
