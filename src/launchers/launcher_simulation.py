@@ -570,33 +570,36 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.show_toast(f"{model.name} Launched", "success")
                 self.lbl_status.setText(f"* {model.name} Running")
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-            elif hasattr(handler, "status_message"):
-                # The handler knows exactly why this tile cannot launch; say so
-                # instead of the generic "check console" message (issue #7984).
-                reason = handler.status_message(model)
-                logger.error("Launch unavailable for %s: %s", model.name, reason)
-                if hasattr(self, "_append_console_line"):
-                    self._append_console_line("Launcher", reason)
-                self.show_toast(reason, "warning")
-                self.lbl_status.setText("* Not Available")
-                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
             else:
+                reason = None
+                status_message = getattr(handler, "status_message", None)
+                if callable(status_message):
+                    reason_text = status_message(model)
+                    if isinstance(reason_text, str) and reason_text.strip():
+                        reason = reason_text.strip()
+
                 # Diagnostic: log why launch failed for debugging silent failures
-                logger.error(
-                    "Launch failed for %s (type=%s, path=%s, handler=%s)",
-                    model.name,
-                    model.type,
-                    getattr(model, "path", "N/A"),
-                    type(handler).__name__,
-                )
+                if reason is None:
+                    logger.error(
+                        "Launch failed for %s (type=%s, path=%s, handler=%s)",
+                        model.name,
+                        model.type,
+                        getattr(model, "path", "N/A"),
+                        type(handler).__name__,
+                    )
+                    toast_message = f"Failed to launch {model.name} — check console"
+                    console_message = f"Failed to launch {model.name} (type={model.type}, path={getattr(model, 'path', 'N/A')}). See logs above."
+                else:
+                    logger.error("Launch unavailable for %s: %s", model.name, reason)
+                    toast_message = reason
+                    console_message = reason
+
                 if hasattr(self, "_append_console_line"):
                     self._append_console_line(
                         "Launcher",
-                        f"Failed to launch {model.name} (type={model.type}, path={getattr(model, 'path', 'N/A')}). See logs above.",
+                        console_message,
                     )
-                self.show_toast(
-                    f"Failed to launch {model.name} — check console", "error"
-                )
+                self.show_toast(toast_message, "error")
                 self.lbl_status.setText("* Launch Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
