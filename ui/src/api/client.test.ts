@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { fetchEngines, useSimulation } from './client';
+import { setLauncherCapabilityToken } from './websocketToken';
 
 /**
  * Tests for the API client module (#8247).
@@ -73,9 +74,45 @@ describe('fetchEngines', () => {
   });
 });
 
+class MockWebSocket {
+  static instances: MockWebSocket[] = [];
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSING = 2;
+  static CLOSED = 3;
+
+  readyState = 0;
+  onopen: ((ev?: unknown) => void) | null = null;
+  onclose: ((ev?: unknown) => void) | null = null;
+  onmessage: ((ev?: unknown) => void) | null = null;
+  onerror: ((ev?: unknown) => void) | null = null;
+
+  constructor(public url: string) {
+    MockWebSocket.instances.push(this);
+  }
+
+  simulateOpen() {
+    this.readyState = 1;
+    if (this.onopen) this.onopen();
+  }
+
+  send() {}
+  close(code?: number) {
+    this.readyState = 3;
+    if (this.onclose) this.onclose({ wasClean: code === 1000, code: code || 1000 });
+  }
+
+  static getLastInstance() {
+    return MockWebSocket.instances[MockWebSocket.instances.length - 1];
+  }
+}
+
 describe('useSimulation lifecycle and commands (#8247)', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    setLauncherCapabilityToken('test-token');
+    MockWebSocket.instances = [];
+    vi.stubGlobal('WebSocket', MockWebSocket);
   });
 
   afterEach(() => {
@@ -94,17 +131,16 @@ describe('useSimulation lifecycle and commands (#8247)', () => {
   it('handles pause and resume commands when connected', async () => {
     const { result } = renderHook(() => useSimulation('mujoco'));
 
-    await act(async () => {
+    act(() => {
       result.current.start({});
-      await new Promise((r) => setTimeout(r, 1));
     });
 
-    // Ensure readyState is OPEN for mock socket if needed
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const activeWs = (result as any).current?.wsRef?.current;
-    if (activeWs) {
-      Object.defineProperty(activeWs, 'readyState', { value: 1, writable: true });
-    }
+    const ws = MockWebSocket.getLastInstance();
+    expect(ws).toBeDefined();
+
+    act(() => {
+      ws.simulateOpen();
+    });
 
     expect(result.current.connectionStatus).toBe('connected');
     expect(result.current.isRunning).toBe(true);
@@ -158,9 +194,13 @@ describe('useSimulation lifecycle and commands (#8247)', () => {
   it('resets connectionStatus on unmount', async () => {
     const { result, unmount } = renderHook(() => useSimulation('mujoco'));
 
-    await act(async () => {
+    act(() => {
       result.current.start({});
-      await new Promise((r) => setTimeout(r, 1));
+    });
+
+    const ws = MockWebSocket.getLastInstance();
+    act(() => {
+      ws.simulateOpen();
     });
     expect(result.current.connectionStatus).toBe('connected');
 

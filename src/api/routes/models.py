@@ -338,6 +338,7 @@ def _parse_urdf_links(
                     origin=[0.0, 0.0, 0.0],
                     rotation=[0.0, 0.0, 0.0],
                     color=[0.0, 0.0, 0.0, 0.0],
+                    mesh_path=None,
                 )
             )
     return links
