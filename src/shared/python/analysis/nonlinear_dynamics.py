@@ -334,7 +334,7 @@ class NonlinearDynamicsMixin:
         c_r = []
 
         for r in radii:
-            count = (dists < r).sum()  # ⚡ Bolt: ndarray.sum() is ~1.8x faster than np.sum() for boolean arrays
+            count = (dists < r).sum()
             c_r.append(count / len(dists))
 
         log_r = np.log(radii)
