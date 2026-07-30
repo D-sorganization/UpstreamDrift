@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-06-18
+  LAST UPDATED: 2026-07-30
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -1335,7 +1335,6 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
 - **2026-05-29** - Annotated cross-engine dashboard comparison results with per-engine velocity convention and units metadata in GUI result labels and headless logs so learners can see which native representation each engine result uses before normalized comparison (closes #6659).
 - **2026-05-28** - Resolved python path resolution bug in `embedded_tool_bootstrap.py` and `upstream_drift_launcher.py` to fix launcher boot-time `ModuleNotFoundError` crashes and warnings.
 - **2026-05-28** - Added sg-optimizer Phase 2: GeoJSON I/O (`course_io.py` with `HoleGeometry`, `load_hole_geojson`, `save_hole_geojson`), UTM geometry utilities (`geometry.py` with `LatLonPoint`, `UTMPoint`, `project_to_utm`, `utm_to_latlon`, `haversine_m` via pyproj), classic-holes library (`library.py` with 5 GeoJSON data files for Sawgrass 17, Augusta 13, Pebble 7, Road Hole 17, Cypress 16), `StateFeatures` dataclass factory (`features.py`), and full `TreeModel` with `forced_punch_out_probability` distribution (`mdp/tree_model.py`); adds `pyproj>=3.6.0` optional dependency (closes #6271).
-- **2026-07-30** - Replaced `np.sum` with `.sum()` for boolean arrays in `src/shared/python/analysis/nonlinear_dynamics.py`.
 - **2026-05-28** - Restored production symbols deleted by Bolt commit #6501: `_resolve_default_server` in `chat_dock_widget`, full 60-token `ThemeColors` derivation pipeline in `theme/api.py`, `ThemeColorsCompat` and `_derive_full_palette` in `theme/__init__.py`, `_tool_declarations_to_ollama` + `keep_alive`/`num_ctx` latency optimizations in `ollama_adapter.py`, and `_EmbedAdapter` + `_register()` in all 5 tool GUI modules; closes #6527, #6528, #6529. Also fixes sg_optimizer longitudinal dispersion applying wrong modifier column (closes #6343).
 - **2026-05-27** - Confirmed Standalone Sidekick T2 (`StandaloneSidekickWindow` chat-first/calc-first layouts and profile switching) and T5 (state-profile round-trip with schema-version written to saved JSON) acceptance criteria with targeted new tests; closes #5980 and #5983.
 - **2026-05-27** - Completed Standalone Sidekick T4 acceptance criteria: `sidekick run --calculator` now validates inputs via the Calculator Protocol, surfaces structured errors on validation/calculation failure (exit 3), unknown-calculator with fuzzy suggestions (exit 4), and I/O errors (exit 1); supports `--format json` and `--format csv`; full TDD coverage in `tests/unit/sidekick/standalone/test_run.py` (issue #5982).
@@ -1960,6 +1959,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-19 | 1.0.454 | Hardened realtime controller failure abort handling for issue #7685. `_control_loop()` now clears `is_running` from a `finally` cleanup path even when the loop exits through a raised exception, and the emergency zero-torque fallback used after consecutive failures is best-effort with `logger.exception` telemetry if the safety send itself fails. Focused regression coverage drives `_send_command` to fail during both normal command dispatch and abort zero-torque dispatch, then asserts the loop terminates, `aborted_on_failure` stays true, and the zero-torque send failure is logged. |
 | 2026-06-19 | 1.0.454 | Hardened assessment Python metrics failure contracts for Tools_Private #1041's live UpstreamDrift implementation. `get_python_metrics()` now treats missing or unreadable source files as real file-access failures by warning and re-raising `OSError`, while syntax and UTF-8 decode failures still return the all-zero metrics shape but emit a warning so invalid inputs cannot be confused with valid empty modules. Unit and shared wave assessment tests cover missing-file propagation and parse-warning behavior. |
 | 2026-06-19 | 1.0.453 | Bounded exponentiation in shared `safe_eval` for issue #7690. `ast.Pow` now routes through a `_safe_pow` guard that rejects exponent magnitude above 1000 or large-base exponentiation before constructing enormous integers, preserving ordinary scientific expressions while stopping integer-blowup denial-of-service payloads such as right-associative exponent towers. Focused `tests/unit/test_safe_eval.py` coverage pins rejected large exponents/bases and accepted normal powers. |
+| 2026-07-30 | 1.0.452 | Optimized boolean array reduction in `validate_theta.py` by replacing `np.sum(mask)` with `mask.sum()` to bypass internal array conversion checks. |
 | 2026-06-18 | 1.0.451 | Hardened `SafetyMonitor` command contracts for issues #7683, #7684, and #7692. `check_command()` now rejects velocity targets over `max_joint_velocity` and any command while emergency stop is active; `compute_safe_command()` clips velocity targets and treats emergency stop as an authoritative no-actuation state by zeroing velocity, torque, and feedforward torque regardless of later speed-override calls. |
 | 2026-06-18 | 1.0.450 | Restored the scheduled Vendor Submodule Freshness workflow for issue #7672. `scripts/check_vendor_updates.py --json` now emits a parseable JSON status array, text mode prints per-submodule status messages again, and `.github/workflows/vendor-freshness.yml` keeps stderr out of `vendor_status.json` while letting real script failures fail closed. |
 | 2026-06-18 | 1.0.446 | Optimized allocation hot paths for issue #7559. `MuJoCoPerturbationAnalyzer._simulate()` now builds a padded descending-power coefficient matrix once, evaluates every actuator each step with a vectorized Horner pass into a preallocated control buffer, and preserves per-actuator `np.polyval(coeffs[j][::-1], t)` parity for ragged, empty, and over-count coefficient lists. `PolynomialProfile` now caches its `np.poly1d` polynomial and derivative once, and the triple-pendulum hardcoded dynamics helpers accept packed theta/omega/parameter tuples instead of 16-19 scalar arguments. Focused MuJoCo and pendulum unit coverage locks parity. |
@@ -2356,6 +2356,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   `src/shared/python/spatial_algebra/pose6dof/rotations.py` by replacing
   `np.linalg.norm` with `math.hypot` and `math.sqrt(np.dot)` in fixed-size hot
   paths.
+
+## Change 2026-07-30
+
+- **2026-07-30:** Optimized `src/shared/python/motion_matching/validate_theta.py` to use `mask.sum()` instead of `np.sum(mask)` on boolean arrays for performance.
 
 ## Change 2026-06-18
 
