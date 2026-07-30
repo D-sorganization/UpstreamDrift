@@ -33,8 +33,9 @@ Usage:
     panel.model_selected.connect(on_select)
 """
 
+from typing import Any
+
 from .auto_complete import AutoCompleteLineEdit
-from .hover_copy_browser import HoverCopyTextBrowser
 from .loading_button import IconLoadingButton, LoadingButton, LoadingSpinner
 from .preferences_dialog import PreferencesDialog, UserPreferences
 from .recent_models import RecentModelItem, RecentModelsPanel
@@ -80,3 +81,12 @@ __all__ = [
     "RecentModelItem",
     "RecentModelsPanel",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    """Load optional QtSvg-backed widgets only when callers ask for them."""
+    if name == "HoverCopyTextBrowser":
+        from .hover_copy_browser import HoverCopyTextBrowser
+
+        return HoverCopyTextBrowser
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

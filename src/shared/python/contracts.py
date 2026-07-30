@@ -70,6 +70,7 @@ from src.shared.python._contracts_exceptions import (
     InvariantError,
     PostconditionError,
     PreconditionError,
+    StateError,
     _handle_violation,
 )
 from src.shared.python._contracts_invariant_mixin import (
@@ -113,6 +114,7 @@ __all__ = [
     "InvariantError",
     "PostconditionError",
     "PreconditionError",
+    "StateError",
     "_VIOLATION_CLASSES",
     "_ContractState",
     "_check_class_invariant",

@@ -2,12 +2,7 @@ import os
 from typing import Any
 
 import pytest
-from cors import (
-    DEFAULT_ALLOW_HEADERS,
-    DEFAULT_ALLOW_METHODS,
-    DEFAULT_ORIGINS,
-    add_cors_middleware,
-)
+from cors import DEFAULT_ORIGINS, add_cors_middleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,6 +12,8 @@ from src.shared.python.contracts import (
     get_contract_level,
     set_contract_level,
 )
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -51,8 +48,8 @@ def test_add_cors_middleware_default(clean_env) -> Any:
     add_cors_middleware(app)
     kwargs = get_cors_kwargs(app)
     assert kwargs["allow_origins"] == DEFAULT_ORIGINS
-    assert kwargs["allow_methods"] == DEFAULT_ALLOW_METHODS
-    assert kwargs["allow_headers"] == DEFAULT_ALLOW_HEADERS
+    assert kwargs["allow_methods"] == ["*"]
+    assert kwargs["allow_headers"] == ["*"]
     assert kwargs["allow_credentials"] is True
 
 

@@ -9,6 +9,22 @@ Modules:
     c3d_reader: C3D motion capture file reader with event and metadata parsing
 """
 
+from pathlib import Path
+
+_vendor_bio = (
+    Path(__file__).resolve().parents[5]
+    / "vendor"
+    / "ud-tools"
+    / "src"
+    / "shared"
+    / "python"
+    / "sidekick"
+    / "lab"
+    / "bio"
+)
+if _vendor_bio.is_dir() and str(_vendor_bio) not in __path__:
+    __path__.append(str(_vendor_bio))
+
 from .c3d_reader import C3DDataReader, C3DEvent, C3DMetadata
 
 __all__ = [

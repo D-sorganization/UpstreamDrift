@@ -19,6 +19,20 @@ Subpackages (import by domain):
     utils                 - Logging, paths, state management, physical constants
 """
 
+from pathlib import Path
+
+_vendor_sidekick = (
+    Path(__file__).resolve().parents[3]
+    / "vendor"
+    / "ud-tools"
+    / "src"
+    / "shared"
+    / "python"
+    / "sidekick"
+)
+if _vendor_sidekick.is_dir() and str(_vendor_sidekick) not in __path__:
+    __path__.append(str(_vendor_sidekick))
+
 from .protocols import (
     CalculationResult,
     Calculator,

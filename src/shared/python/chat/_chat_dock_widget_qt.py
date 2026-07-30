@@ -38,6 +38,7 @@ from typing import Any, cast
 
 from PyQt6.QtCore import Qt, QTimer, QUrl, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtNetwork import QNetworkRequest
 from PyQt6.QtWebSockets import QWebSocket
 from PyQt6.QtWidgets import (
     QApplication,
@@ -61,8 +62,12 @@ from ._theme_protocol import ThemeProviderProtocol, _DefaultDarkTheme
 from ._workspace_protocol import WorkspaceContextProtocol, WorkspaceVariableInfo
 from .chat_dock_widget import (
     _DEFAULT_SERVER,
+    _chat_disconnect_status,
+    _chat_websocket_url,
+    _fetch_launcher_capability_token,
     _read_shared_session_id,
     _session_file_path,
+    _websocket_origin_for_server,
     _write_shared_session_id,
 )
 from .cli_provider_availability import list_available_cli_providers
@@ -331,6 +336,9 @@ class ChatDockWidget(QDockWidget):
         self._voice_manager = VoiceInputManager()
         self._terminal_start_pending = False
         self._socket: QWebSocket | None = None
+        self._connection_failures = 0
+        self._last_connection_error: str | None = None
+        self._last_connection_url: str | None = None
         self._session_file = _session_file_path(app_name)
         # Tools issue #2872: conversation-management state.
         self._loaded_context_sessions: list[str] = []
@@ -696,14 +704,31 @@ class ChatDockWidget(QDockWidget):
         self._socket.connected.connect(self._on_connected)
         self._socket.disconnected.connect(self._on_disconnected)
         self._socket.textMessageReceived.connect(self._on_message)
+        self._socket.errorOccurred.connect(self._on_socket_error)
 
         sid = ChatDockWidget._get_shared_session_id() or "new"
-        path = self._ws_path_template.replace("{session_id}", sid)
-        url = QUrl(f"{self._server_url}{path}")
+        token = _fetch_launcher_capability_token(self._server_url)
+        url_text = _chat_websocket_url(
+            self._server_url,
+            self._ws_path_template,
+            sid,
+            token,
+        )
+        self._last_connection_url = url_text
+        if token is None:
+            self._last_connection_error = "launcher capability token was unavailable"
+        url = QUrl(url_text)
+        request = QNetworkRequest(url)
+        request.setRawHeader(
+            b"Origin",
+            _websocket_origin_for_server(self._server_url).encode("utf-8"),
+        )
         self._status_label.setText("Connecting...")
-        self._socket.open(url)
+        self._socket.open(request)
 
     def _on_connected(self) -> None:
+        self._connection_failures = 0
+        self._last_connection_error = None
         self._status_label.setText("Connected")
         self._status_label.setStyleSheet("color: #3fb950; font-size: 10px;")
         self.refresh_models()
@@ -757,8 +782,19 @@ class ChatDockWidget(QDockWidget):
         panel.show()
         self._memory_panel_window = panel
 
+    def _on_socket_error(self, _error: object) -> None:
+        if self._socket is not None:
+            self._last_connection_error = self._socket.errorString()
+
     def _on_disconnected(self) -> None:
-        self._status_label.setText("Disconnected - retrying in 3s...")
+        self._connection_failures += 1
+        self._status_label.setText(
+            _chat_disconnect_status(
+                self._connection_failures,
+                self._last_connection_url,
+                self._last_connection_error,
+            )
+        )
         self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
         self._is_streaming = False
         self._send_btn.setEnabled(True)
