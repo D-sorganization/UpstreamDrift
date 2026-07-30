@@ -176,16 +176,6 @@ def test_allow_list_is_well_formed() -> None:
 
 
 @pytest.mark.unit
-def test_data_processor_shadow_has_issue_specific_classification() -> None:
-    """Regression #8205: data_processor must not rely on umbrella shadow metadata."""
-    metadata = _load_allow_list()["data_processor"]
-
-    assert metadata["tracking_issue"] == 8205
-    assert metadata["owner"] == "upstreamdrift"
-    assert "Rust bulk-I/O engine" in metadata["reason"]
-
-
-@pytest.mark.unit
 def test_tools_shared_root_uses_explicit_tools_checkout(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

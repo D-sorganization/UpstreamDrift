@@ -181,11 +181,16 @@ def _direct_tools_edit_offenders(
     tools_paths: set[str],
 ) -> list[str]:
     """Return changed Python paths owned by Tools or marked as child copies."""
+    # We require the file to actually exist in Tools, OR have the header currently.
+    # This allows us to remove the header from files that never had a counterpart in Tools.
     return [
         relative.as_posix()
         for relative in _changed_shared_python_paths(base)
         if relative.as_posix() in tools_paths
-        or _base_revision_is_tools_child_copy(base, relative)
+        or (
+            _base_revision_is_tools_child_copy(base, relative)
+            and relative.as_posix() in tools_paths
+        )
         or _is_tools_child_copy(_SHARED_ROOT / relative)
     ]
 

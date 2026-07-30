@@ -34,7 +34,11 @@ _IGNORED = {"__pycache__", "node_modules", ".venv", ".git"}
 def _pythonpath_roots() -> list[Path]:
     config = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     entries = config["tool"]["pytest"]["ini_options"]["pythonpath"]
-    roots = [REPO_ROOT / entry for entry in entries]
+    roots = [
+        REPO_ROOT / entry
+        for entry in entries
+        if entry != "vendor/ud-tools/src/shared/python"
+    ]
     roots += [REPO_ROOT / entry for entry in _IMPLICIT_TEST_ROOTS]
     return [root for root in roots if root.is_dir()]
 

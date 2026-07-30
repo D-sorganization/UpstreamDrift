@@ -82,6 +82,8 @@ def parse_inventory_table(path: Path) -> dict[str, list[str]]:
         first_cell = cells[0]
         if first_cell in {"File", "------"} or set(first_cell) == {"-"}:
             continue
+        if first_cell in rows:
+            raise ValueError(f"duplicate inventory row for workflow: {first_cell}")
         rows[first_cell] = cells
     return rows
 
@@ -163,6 +165,32 @@ def audit_workflow_inventory(
         findings.append(
             f"PR-triggered workflow count {len(pr_triggered_workflows)} exceeds "
             f"cap {max_pr_triggered_workflows}"
+        )
+
+    try:
+        inventory_path = repo_root / INVENTORY_PATH
+        inventory_rows = parse_inventory_table(inventory_path)
+        documented_budget = parse_workflow_budgets(inventory_path)
+    except FileNotFoundError as exc:
+        return [str(exc)]
+    except ValueError as exc:
+        return [str(exc)]
+
+    if (
+        len(workflow_files) < max_active_workflows
+        and len(workflow_files) >= documented_budget.consolidation_target
+    ):
+        findings.append(
+            f"active workflow count {len(workflow_files)} is below cap "
+            f"{max_active_workflows}. Shrink the cap to {len(workflow_files)} "
+            "in WORKFLOWS.md and check_workflow_inventory.py to prevent regression."
+        )
+
+    if len(pr_triggered_workflows) < max_pr_triggered_workflows:
+        findings.append(
+            f"PR-triggered workflow count {len(pr_triggered_workflows)} is below cap "
+            f"{max_pr_triggered_workflows}. Shrink the cap to {len(pr_triggered_workflows)} "
+            "in WORKFLOWS.md and check_workflow_inventory.py to prevent regression."
         )
 
     try:

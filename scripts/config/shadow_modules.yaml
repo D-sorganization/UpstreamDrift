@@ -40,11 +40,7 @@ shadows:
   data_processing:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  data_processor:
-    tracking_issue: 8205
-    owner: upstreamdrift
-    reason: "Rust bulk-I/O engine child copy retained for the Data Processor launcher while Tools remains canonical."
-    sunset_date: "2026-12-31"
+
   deprecation.py:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
