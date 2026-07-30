@@ -132,6 +132,11 @@ jobs:
                   continue
               if fpath.endswith("AGENTS.md") or fpath.endswith("CLAUDE.md"):
                   continue
+              if fpath.endswith("tests/unit/scripts/test_todo_discipline.py"):
+                  # This file's fixtures intentionally contain literal
+                  # stub/TODO pattern strings to test the discipline
+                  # checker itself (scripts/ci/check_todo_discipline.py).
+                  continue
 
               for lineno, text in lines:
                   for label, pat, _ in STUB_PATTERNS:
