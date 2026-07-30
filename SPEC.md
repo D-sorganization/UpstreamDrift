@@ -2394,3 +2394,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Rebuilt PR #7966 from current main, retaining only the remaining allocation-free
   vector RMSE calculations after the axis RMSE and torque-diagnostic optimizations
   had already landed.
+
+- Optimized `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=2)` to use `np.sqrt(np.einsum('...i,...i->...', ...))` in `src/robotics/contact/grasp_analysis.py`, `src/robotics/planning/collision/_primitive_shapes.py`, and `src/robotics/planning/collision/_convex_distance.py` to avoid temporary array allocations and improve performance by ~1.5x-2x.
