@@ -2,18 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
-try:
-    from PyQt6.QtCore import Qt
-    from PyQt6.QtGui import QKeyEvent
-    from PyQt6.QtWidgets import QApplication
-except (ImportError, OSError) as exc:
-    pytest.skip(f"PyQt6 widgets not loadable: {exc}", allow_module_level=True)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeyEvent
+from PyQt6.QtWidgets import QApplication
 
 from src.shared.python.ui.auto_complete import AutoCompleteLineEdit
-
-pytestmark = pytest.mark.unit
 
 
 def get_app():

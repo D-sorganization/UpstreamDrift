@@ -39,20 +39,6 @@ Usage:
     bg_color = colors["bg"]
 """
 
-from pathlib import Path
-
-_vendor_theme = (
-    Path(__file__).resolve().parents[3]
-    / "vendor"
-    / "ud-tools"
-    / "src"
-    / "shared"
-    / "python"
-    / "theme"
-)
-if _vendor_theme.is_dir() and str(_vendor_theme) not in __path__:
-    __path__.append(str(_vendor_theme))
-
 from typing import Any
 
 from types import SimpleNamespace as _NS

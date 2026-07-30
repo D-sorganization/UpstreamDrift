@@ -11,11 +11,6 @@ on demand so non-GUI hosts can still use persistence and workspace contracts.
 
 from __future__ import annotations
 
-try:
-    from . import default_tabs
-except ImportError:
-    default_tabs = None
-
 from .calculator_assist import (
     CALCULATOR_HELP,
     CalculatorPredictiveText,

@@ -24,7 +24,6 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.shared.python.contracts import PreconditionError
 
 # Default local-development origins used when CORS_ORIGINS env var is unset.
 DEFAULT_ORIGINS: list[str] = [
@@ -59,14 +58,6 @@ def add_cors_middleware(
         allow_headers: Allowed HTTP headers. Defaults to ``["*"]``.
         **kwargs: Extra keyword arguments forwarded to ``CORSMiddleware``.
     """
-    if not isinstance(app, FastAPI):
-        raise PreconditionError("app must be a FastAPI instance")
-    if origins is not None and (
-        not isinstance(origins, list)
-        or any(not isinstance(origin, str) for origin in origins)
-    ):
-        raise PreconditionError("origins must be a list of strings")
-
     env_origins = os.environ.get("CORS_ORIGINS")
     resolved_origins: list[str]
     if env_origins:

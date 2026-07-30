@@ -21,9 +21,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -151,47 +149,10 @@ class TestWorkspaceContextProtocol:
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 
-_SHARED_PYTHON_ROOT = Path(__file__).resolve().parents[2]
-
-
-def _chat_qt_module_loadable() -> tuple[bool, str]:
-    env = os.environ.copy()
-    existing_pythonpath = env.get("PYTHONPATH")
-    env["PYTHONPATH"] = str(_SHARED_PYTHON_ROOT)
-    if existing_pythonpath:
-        env["PYTHONPATH"] += os.pathsep + existing_pythonpath
-
-    result = subprocess.run(  # noqa: S603 - module name is test-controlled.
-        [sys.executable, "-c", "from chat import _chat_dock_widget_qt"],
-        check=False,
-        capture_output=True,
-        env=env,
-        text=True,
-        timeout=10,
-    )
-    output = (result.stderr or result.stdout).strip()
-    return result.returncode == 0, output
-
-
 @pytest.fixture(scope="module")
 def qapp() -> Any:
-    if (
-        sys.platform == "win32"
-        and os.environ.get("UPSTREAMDRIFT_ENABLE_WINDOWS_QT_CHAT_TESTS") != "1"
-    ):
-        pytest.skip(
-            "QtWebSockets can emit Windows loader diagnostics under pytest; "
-            "set UPSTREAMDRIFT_ENABLE_WINDOWS_QT_CHAT_TESTS=1 to opt in."
-        )
-
-    try:
-        from PyQt6.QtWidgets import QApplication
-    except (ImportError, OSError) as exc:
-        pytest.skip(f"PyQt6 QtWidgets not loadable: {exc}")
-
-    chat_qt_ok, reason = _chat_qt_module_loadable()
-    if not chat_qt_ok:
-        pytest.skip(f"chat Qt dock not loadable: {reason}")
+    pytest.importorskip("PyQt6")
+    from PyQt6.QtWidgets import QApplication
 
     app = QApplication.instance() or QApplication(sys.argv)
     return app
@@ -199,10 +160,7 @@ def qapp() -> Any:
 
 @pytest.fixture
 def chat_module(qapp: Any) -> Any:
-    try:
-        from chat import _chat_dock_widget_qt
-    except (ImportError, OSError) as exc:
-        pytest.skip(f"chat Qt dock not loadable: {exc}")
+    from chat import _chat_dock_widget_qt
 
     return _chat_dock_widget_qt
 

@@ -117,8 +117,7 @@ def solve_equation(request: SymbolicSolveRequest) -> SymbolicSolveResponse:
     """Solve a symbolic equation for a specified variable."""
     if not SYMPY_AVAILABLE:
         return SymbolicSolveResponse(
-            available=False,
-            error="SymPy is not available. Install with: pip install sympy",
+            error="SymPy is not available. Install with: pip install sympy"
         )
 
     try:
@@ -166,8 +165,7 @@ def compute_derivative(
     """Compute the symbolic derivative of an expression."""
     if not SYMPY_AVAILABLE:
         return SymbolicDerivativeResponse(
-            available=False,
-            error="SymPy is not available. Install with: pip install sympy",
+            error="SymPy is not available. Install with: pip install sympy"
         )
 
     try:
@@ -188,8 +186,7 @@ def simplify_expression(request: SymbolicSimplifyRequest) -> SymbolicSimplifyRes
     """Simplify a symbolic expression."""
     if not SYMPY_AVAILABLE:
         return SymbolicSimplifyResponse(
-            available=False,
-            error="SymPy is not available. Install with: pip install sympy",
+            error="SymPy is not available. Install with: pip install sympy"
         )
 
     try:
