@@ -66,13 +66,13 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadInitialStatusReport() {
-      try {
-        const nextStatus = await fetchStatusReport();
+    fetchStatusReport()
+      .then((nextStatus) => {
         if (!isMounted) return;
         setStatus(nextStatus);
         setLoadStatus("ready");
-      } catch (err) {
+      })
+      .catch((err) => {
         if (!isMounted) return;
         setStatus(null);
         setLoadStatus("error");
@@ -81,10 +81,8 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
             ? err.message
             : "Failed to reach the canonical-core service",
         );
-      }
-    }
+      });
 
-    void loadInitialStatusReport();
     return () => {
       isMounted = false;
     };
@@ -221,5 +219,3 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
     </main>
   );
 }
-
-export default CanonicalCoreShellPage;

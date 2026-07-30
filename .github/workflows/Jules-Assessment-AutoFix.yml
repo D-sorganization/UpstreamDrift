@@ -72,6 +72,9 @@ jobs:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    outputs:
+      assessment_score: ${{ steps.analyze.outputs.score }}
+      critical_issues: ${{ steps.analyze.outputs.critical_issues }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

@@ -164,8 +164,8 @@ class BallRollPhysics:
     @staticmethod
     def _validate_positive_finite(name: str, value: float) -> float:
         """Return ``value`` as float after enforcing a finite positive contract."""
-        if value is None:
-            raise ValueError(f"{name} must be provided")
+        if value is None or isinstance(value, bool):
+            raise ValueError(f"{name} must be a finite positive number")
         try:
             numeric = float(value)
         except (TypeError, ValueError) as exc:
@@ -338,6 +338,7 @@ class BallRollPhysics:
         """
         if state is None:
             raise ValueError("state must be provided")
+        dt = self._validate_dt(dt)
         speed = state.speed
 
         if mode == RollMode.STOPPED:

@@ -145,13 +145,17 @@ class TestBallRollPhysics:
         assert np.isclose(physics.ball_mass, 0.04593, atol=0.001)  # kg
         assert np.isclose(physics.ball_radius, 0.02135, atol=0.001)  # m
 
-    @pytest.mark.parametrize("ball_mass", [None, 0.0, -0.1, np.nan, np.inf])
+    @pytest.mark.parametrize(
+        "ball_mass", [None, 0.0, -0.1, np.nan, np.inf, True, False]
+    )
     def test_constructor_rejects_invalid_ball_mass(self, ball_mass: float) -> None:
         """Ball mass is a public physics precondition."""
         with pytest.raises(ValueError, match="ball_mass"):
             BallRollPhysics(ball_mass=ball_mass)  # type: ignore[arg-type]
 
-    @pytest.mark.parametrize("ball_radius", [None, 0.0, -0.1, np.nan, np.inf])
+    @pytest.mark.parametrize(
+        "ball_radius", [None, 0.0, -0.1, np.nan, np.inf, True, False]
+    )
     def test_constructor_rejects_invalid_ball_radius(self, ball_radius: float) -> None:
         """Ball radius must fail at construction, not inside numeric formulas."""
         with pytest.raises(ValueError, match="ball_radius"):
@@ -296,6 +300,7 @@ class TestBallRollPhysics:
             SlopeRegion,
         )
 
+        assert physics_with_green.green is not None
         physics_with_green.green.add_slope_region(
             SlopeRegion(
                 center=np.array([10.0, 10.0]),
@@ -409,6 +414,7 @@ class TestBallRollPhysics:
 
     def test_simulate_with_hole(self, physics_with_green: BallRollPhysics) -> None:
         """Should detect when ball goes in hole."""
+        assert physics_with_green.green is not None
         physics_with_green.green.set_hole_position(np.array([15.0, 10.0]))
 
         # Putt straight at hole

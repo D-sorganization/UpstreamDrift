@@ -132,11 +132,12 @@ jobs:
         if: steps.find.outputs.superseded_count != '0'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
+          COMMIT_MSG_RAW: ${{ github.event.head_commit.message }}
         run: |
           echo "Closing superseded Jules PRs..."
 
           COMMIT_SHA="${{ github.sha }}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_MSG="$COMMIT_MSG_RAW"
 
           # Truncate commit message for display
           COMMIT_MSG_SHORT=$(echo "$COMMIT_MSG" | head -n1 | cut -c1-60)
