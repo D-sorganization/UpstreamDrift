@@ -15,7 +15,7 @@ import * as THREE from 'three';
 /** Geometry descriptor from the backend URDF parser. */
 export interface URDFLinkGeometry {
   link_name: string;
-  geometry_type: 'box' | 'cylinder' | 'sphere' | 'mesh';
+  geometry_type: 'box' | 'cylinder' | 'sphere' | 'mesh' | 'none';
   dimensions: Record<string, number>;
   origin: [number, number, number];
   rotation: [number, number, number];
@@ -92,6 +92,7 @@ function LinkMesh({
   );
 
   const geometry = useMemo(() => {
+    if (link.geometry_type === 'none') return null;
     const dims = link.dimensions;
     switch (link.geometry_type) {
       case 'box':
@@ -122,6 +123,10 @@ function LinkMesh({
         return <sphereGeometry args={[0.02, 8, 8]} />;
     }
   }, [link.geometry_type, link.dimensions]);
+
+  if (link.geometry_type === 'none' || !geometry) {
+    return null;
+  }
 
   return (
     <mesh position={position} rotation={rotation} name={link.link_name} onClick={onClick}>

@@ -171,6 +171,21 @@ class SwingMetricsMixin:
         dt = float(self.dt)
         require(np.isfinite(dt) and dt > 0.0, "dt must be finite and positive", dt)
 
+        if hasattr(self, "times") and self.times is not None:
+            times = np.asarray(self.times, dtype=float)
+            require(np.all(np.isfinite(times)), "times must be finite", times)
+            require(
+                np.all(times >= 0.0),
+                "times must be non-negative positive timestamps",
+                times,
+            )
+            if len(times) > 1:
+                require(
+                    bool(np.all(np.diff(times) > 0.0)),
+                    "times must be monotonically increasing positive timestamps",
+                    times,
+                )
+
         # Calculate derivative (finite difference)
         x_factor_velocity = np.asarray(np.gradient(x_factor, dt), dtype=float)
         peak_stretch_rate = float(np.max(np.abs(x_factor_velocity)))

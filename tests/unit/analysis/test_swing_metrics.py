@@ -140,3 +140,15 @@ class TestComputeXFactorStretch:
 
         with pytest.raises(ContractViolationError, match="dt"):
             obj.compute_x_factor_stretch(0, 1)
+
+    def test_negative_timestamps_violates_precondition(self) -> None:
+        obj = _make_instance(n_joints=3)
+        obj.times = np.array([-1.0, 0.0, 1.0])
+        with pytest.raises(ContractViolationError, match="times"):
+            obj.compute_x_factor_stretch(0, 1)
+
+    def test_non_monotonic_timestamps_violates_precondition(self) -> None:
+        obj = _make_instance(n_joints=3)
+        obj.times = np.array([0.0, 0.5, 0.3, 0.8])
+        with pytest.raises(ContractViolationError, match="times"):
+            obj.compute_x_factor_stretch(0, 1)

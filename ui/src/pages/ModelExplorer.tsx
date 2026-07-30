@@ -12,6 +12,7 @@ import {
   swapSubtrees,
   mergeTrees,
   computeTreeDiff,
+  treeToURDFModel,
 } from '@/utils/frankensteinTree';
 
 interface ModelEntry {
@@ -73,6 +74,18 @@ export function ModelExplorerPage() {
     ? (targetModelName || sourceModelName)
     : selectedModelName;
   const { model: urdfModel } = useURDFModel(activePreviewModel);
+
+  // Frankenstein edits dynamically reconstruct the URDFModel from tree state so the 3D preview updates (#8259)
+  const frankensteinURDFModel = useMemo(() => {
+    if (!frankensteinMode) return null;
+    const activeTreeNodes = targetTree.length > 0 ? targetTree : sourceTree;
+    if (activeTreeNodes.length === 0) return null;
+    return treeToURDFModel(activeTreeNodes, activePreviewModel || 'frankenstein');
+  }, [frankensteinMode, targetTree, sourceTree, activePreviewModel]);
+
+  const activeModelToRender = frankensteinMode
+    ? (frankensteinURDFModel || urdfModel)
+    : urdfModel;
 
   // Fetch available models
   useEffect(() => {
@@ -446,7 +459,7 @@ export function ModelExplorerPage() {
 
       {/* Main 3D View */}
       <ModelPreviewViewport
-        urdfModel={urdfModel}
+        urdfModel={activeModelToRender}
         jointValues={jointValues}
         activePreviewModel={activePreviewModel}
       />

@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-gate:
-    name: quality-gate
+  lod-quality-gate:
+    name: lod-quality-gate
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:

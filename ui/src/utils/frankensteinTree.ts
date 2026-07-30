@@ -1,3 +1,5 @@
+import type { URDFModel, URDFLinkGeometry, URDFJointDescriptor } from '@/components/visualization/URDFViewer';
+
 export interface URDFTreeNode {
   id: string;
   name: string;
@@ -350,3 +352,101 @@ export function computeTreeDiff(
 
   return { added, removed, modified };
 }
+
+/**
+ * Converts a Frankenstein tree node array into a URDFModel structure suitable for
+ * 3D canvas preview rendering in URDFViewer.
+ */
+export function treeToURDFModel(
+  treeNodes: URDFTreeNode[],
+  modelName: string = 'frankenstein',
+): URDFModel {
+  const links: URDFLinkGeometry[] = [];
+  const joints: URDFJointDescriptor[] = [];
+  const childLinks = new Set<string>();
+
+  const parseVec3 = (val: unknown, fallback: [number, number, number]): [number, number, number] => {
+    if (Array.isArray(val) && val.length === 3) {
+      return [Number(val[0]), Number(val[1]), Number(val[2])];
+    }
+    if (typeof val === 'string') {
+      const parts = val.trim().split(/\s+/).map(Number);
+      if (parts.length === 3 && !parts.some(isNaN)) {
+        return [parts[0], parts[1], parts[2]];
+      }
+    }
+    return fallback;
+  };
+
+  for (const node of treeNodes) {
+    if (node.node_type === 'link' || node.node_type === 'root') {
+      const geomType = (node.properties.geometry_type as URDFLinkGeometry['geometry_type']) || 'box';
+      const dims: Record<string, number> = {};
+      if (node.properties.dimensions && typeof node.properties.dimensions === 'object') {
+        Object.assign(dims, node.properties.dimensions);
+      } else {
+        if ('size' in node.properties && typeof node.properties.size === 'string') {
+          const parts = node.properties.size.split(/\s+/).map(Number);
+          dims.width = parts[0] ?? 0.1;
+          dims.height = parts[1] ?? 0.1;
+          dims.depth = parts[2] ?? 0.1;
+        } else {
+          if ('width' in node.properties) dims.width = Number(node.properties.width);
+          if ('height' in node.properties) dims.height = Number(node.properties.height);
+          if ('depth' in node.properties) dims.depth = Number(node.properties.depth);
+          if ('radius' in node.properties) dims.radius = Number(node.properties.radius);
+          if ('length' in node.properties) dims.length = Number(node.properties.length);
+        }
+      }
+
+      links.push({
+        link_name: node.name,
+        geometry_type: geomType,
+        dimensions: dims,
+        origin: parseVec3(node.properties.origin ?? node.properties.xyz, [0, 0, 0]),
+        rotation: parseVec3(node.properties.rotation ?? node.properties.rpy, [0, 0, 0]),
+        color: (node.properties.color as [number, number, number, number]) || [0.5, 0.5, 0.5, 1.0],
+        mesh_path: typeof node.properties.mesh_path === 'string' ? node.properties.mesh_path : null,
+      });
+    } else if (node.node_type === 'joint') {
+      const parentLink = String(node.properties.parent_link || '');
+      const childLink = String(node.properties.child_link || '');
+      if (childLink) {
+        childLinks.add(childLink);
+      }
+
+      joints.push({
+        name: node.name,
+        joint_type: (node.properties.joint_type as URDFJointDescriptor['joint_type']) || 'fixed',
+        parent_link: parentLink,
+        child_link: childLink,
+        origin: parseVec3(node.properties.xyz ?? node.properties.origin, [0, 0, 0]),
+        rotation: parseVec3(node.properties.rpy ?? node.properties.rotation, [0, 0, 0]),
+        axis: parseVec3(node.properties.axis, [0, 0, 1]),
+        lower_limit: typeof node.properties.lower === 'number' ? node.properties.lower : null,
+        upper_limit: typeof node.properties.upper === 'number' ? node.properties.upper : null,
+      });
+    }
+  }
+
+  let rootLink = 'base';
+  const rootNode = treeNodes.find((n) => n.node_type === 'root');
+  if (rootNode) {
+    rootLink = rootNode.name;
+  } else {
+    const unparentedLink = links.find((l) => !childLinks.has(l.link_name));
+    if (unparentedLink) {
+      rootLink = unparentedLink.link_name;
+    } else if (links.length > 0) {
+      rootLink = links[0].link_name;
+    }
+  }
+
+  return {
+    model_name: modelName,
+    links,
+    joints,
+    root_link: rootLink,
+  };
+}
+

@@ -406,6 +406,17 @@ class SQLiteBackend:
         """Update an existing task record."""
         record.updated_at = time.time()
         with self._lock, self._transaction() as conn:
+            row = conn.execute(
+                "SELECT status FROM tasks WHERE task_id = ?", (record.task_id,)
+            ).fetchone()
+            if (
+                row
+                and row["status"] in TERMINAL_TASK_STATUSES
+                and record.status != row["status"]
+            ):
+                raise ValueError(
+                    f"Cannot transition task {record.task_id} out of terminal state {row['status']!r} to {record.status!r}"
+                )
             conn.execute(
                 """
                 UPDATE tasks SET

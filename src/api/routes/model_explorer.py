@@ -48,7 +48,7 @@ def _find_project_root() -> Path:
 
 def _parse_urdf_link_nodes(
     root: ElementTree.Element,
-) -> tuple[list[URDFTreeNode], set[str]]:
+) -> tuple[list[URDFTreeNode], list[str]]:
     """Parse link elements into tree nodes.
 
     Args:
@@ -58,11 +58,12 @@ def _parse_urdf_link_nodes(
         Tuple of (link_nodes, link_names).
     """
     nodes: list[URDFTreeNode] = []
-    link_names: set[str] = set()
+    link_names: list[str] = []
 
     for link_elem in root.findall("link"):
         link_name = link_elem.get("name", "unnamed")
-        link_names.add(link_name)
+        if link_name not in link_names:
+            link_names.append(link_name)
 
         properties: dict[str, Any] = {"type": "link"}
 
@@ -221,12 +222,11 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
     nodes, link_names = _parse_urdf_link_nodes(root)
     joint_count, child_links = _parse_urdf_joint_nodes(root, nodes)
 
-    # Find root link (not a child of any joint)
-    root_links = link_names - child_links
+    # Find root link (not a child of any joint, preserving declaration order)
+    child_links_set = set(child_links)
+    root_links = [name for name in link_names if name not in child_links_set]
     root_link_name = (
-        next(iter(root_links))
-        if root_links
-        else (next(iter(link_names)) if link_names else "base")
+        root_links[0] if root_links else (link_names[0] if link_names else "base")
     )
 
     # Mark root node

@@ -173,7 +173,7 @@ export async function apiFetch<T>(
 export async function apiFetchParsed<T>(
   path: string,
   parse: (raw: unknown) => T,
-  init?: RequestInit,
+  init?: ApiFetchInit,
 ): Promise<T> {
   const raw = await apiFetch<unknown>(path, init);
   return parse(raw);

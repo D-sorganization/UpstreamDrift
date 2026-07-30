@@ -66,6 +66,22 @@ def test_passing_required_case_succeeds(tmp_path: Path) -> None:
     assert main(["--junit", str(junit), "--require-name", _REQUIRED]) == 0
 
 
+def test_partial_failure_fails(tmp_path: Path) -> None:
+    junit = tmp_path / "junit.xml"
+    _write_junit(
+        junit,
+        body=(
+            f'<testcase classname="tests.cross_engine.test_jaxsim_vs_pinocchio" '
+            f'name="{_REQUIRED}[case0]"/>'
+            f'<testcase classname="tests.cross_engine.test_jaxsim_vs_pinocchio" '
+            f'name="{_REQUIRED}[case1]"><failure message="mismatch"/></testcase>'
+        ),
+    )
+    with pytest.raises(ParityGateError):
+        assert_parity_ran(junit, (_REQUIRED,))
+    assert main(["--junit", str(junit), "--require-name", _REQUIRED]) == 1
+
+
 def test_absent_required_case_fails(tmp_path: Path) -> None:
     junit = tmp_path / "junit.xml"
     _write_junit(

@@ -126,11 +126,11 @@ class ElevationMap:
 
     def _check_bounds(self, x: float, y: float) -> None:
         """Check if coordinates are within bounds."""
-        if x < self.origin_x or x > self.origin_x + self.width:
+        if x < self.origin_x or x >= self.origin_x + self.width:
             raise ValueError(
                 f"X coordinate {x} out of bounds [{self.origin_x}, {self.origin_x + self.width}]"
             )
-        if y < self.origin_y or y > self.origin_y + self.length:
+        if y < self.origin_y or y >= self.origin_y + self.length:
             raise ValueError(
                 f"Y coordinate {y} out of bounds [{self.origin_y}, {self.origin_y + self.length}]"
             )

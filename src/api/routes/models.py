@@ -11,6 +11,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
@@ -112,6 +113,8 @@ def _parse_vec3(text: str, element: str) -> list[float]:
         raise ValueError(
             f"URDF {element} must have 3 components, got {len(values)}: {text!r}"
         )
+    if any(math.isnan(v) or math.isinf(v) for v in values):
+        raise ValueError(f"URDF {element} must contain finite numbers, got {text!r}")
     return values
 
 
@@ -326,6 +329,17 @@ def _parse_urdf_links(
                     **geom_data,
                 )
             )
+        else:
+            links.append(
+                URDFLinkGeometry(
+                    link_name=link_name,
+                    geometry_type="none",
+                    dimensions={},
+                    origin=[0.0, 0.0, 0.0],
+                    rotation=[0.0, 0.0, 0.0],
+                    color=[0.0, 0.0, 0.0, 0.0],
+                )
+            )
     return links
 
 
@@ -365,6 +379,11 @@ def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
     axis_elem = joint_elem.find("axis")
     if axis_elem is not None:
         axis = _parse_vec3(axis_elem.get("xyz", _DEFAULT_AXIS), "joint axis xyz")
+        axis_norm = math.sqrt(sum(c * c for c in axis))
+        if axis_norm < 1e-9:
+            raise ValueError(
+                f"Joint {joint_name!r} axis cannot be zero vector: {axis!r}"
+            )
 
     lower_limit = None
     upper_limit = None

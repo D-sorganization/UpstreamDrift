@@ -9,6 +9,7 @@ vi.mock('@react-three/fiber', () => ({
       {children}
     </div>
   ),
+  useFrame: vi.fn(),
 }));
 
 // Mock react-three/drei

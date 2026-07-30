@@ -45,6 +45,10 @@ class TerrainPatch:
                 "restitution": self.material.restitution,
                 "hardness": self.material.hardness,
                 "grass_height_m": self.material.grass_height_m,
+                "compressibility": self.material.compressibility,
+                "compression_damping": self.material.compression_damping,
+                "turf_density": self.material.turf_density,
+                "moisture_content": self.material.moisture_content,
             }
         return result
 
@@ -165,7 +169,15 @@ class TerrainRegion:
             result["material"] = {
                 "name": self.material.name,
                 "friction": self.material.friction_coefficient,
+                "friction_coefficient": self.material.friction_coefficient,
+                "rolling_resistance": self.material.rolling_resistance,
                 "restitution": self.material.restitution,
+                "hardness": self.material.hardness,
+                "grass_height_m": self.material.grass_height_m,
+                "compressibility": self.material.compressibility,
+                "compression_damping": self.material.compression_damping,
+                "turf_density": self.material.turf_density,
+                "moisture_content": self.material.moisture_content,
             }
         return result
 
@@ -176,12 +188,12 @@ class TerrainRegion:
             raise ValueError("data must be provided")
         material = None
         if "material" in data:
-            mat = data["material"]
-            material = SurfaceMaterial(
-                name=mat["name"],
-                friction_coefficient=mat["friction"],
-                restitution=mat["restitution"],
-            )
+            mat = dict(data["material"])
+            if "friction" in mat and "friction_coefficient" not in mat:
+                mat["friction_coefficient"] = mat.pop("friction")
+            elif "friction" in mat:
+                mat.pop("friction")
+            material = SurfaceMaterial(**mat)
         return cls(
             terrain_type=TerrainType[data["terrain_type"].upper()],
             shape_type=data["shape_type"],

@@ -31,8 +31,8 @@ permissions:
   contents: read
 
 jobs:
-  quality-gate:
-    name: quality-gate
+  docs-quality-gate:
+    name: docs-quality-gate
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:

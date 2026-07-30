@@ -72,6 +72,14 @@ def _validate_vector3(name: str, value: np.ndarray) -> np.ndarray:
     return vector
 
 
+def _validate_normal_vector(name: str, normal: np.ndarray) -> np.ndarray:
+    vector = _validate_vector3(name, normal)
+    norm_mag = _magnitude(vector)
+    if norm_mag <= 1e-12 or not math.isfinite(norm_mag):
+        raise ValueError(f"{name} must be a non-zero finite 3-vector")
+    return vector / norm_mag
+
+
 def _ensure_finite_vector3(name: str, value: np.ndarray) -> np.ndarray:
     vector = _validate_vector3(name, value)
     return vector
@@ -214,7 +222,7 @@ class TerrainContactModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.get_normal(x, y)
+        normal = _validate_normal_vector("normal", self.terrain.get_normal(x, y))
 
         # Get terrain-specific stiffness from material
         contact_params = self.terrain.get_contact_params(x, y)
@@ -278,7 +286,7 @@ class TerrainContactModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.get_normal(x, y)
+        normal = _validate_normal_vector("normal", self.terrain.get_normal(x, y))
 
         # Get tangential velocity (perpendicular to normal)
         v_normal_component = np.dot(velocity, normal) * normal
@@ -412,7 +420,7 @@ class CompressibleTurfModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.get_normal(x, y)
+        normal = _validate_normal_vector("normal", self.terrain.get_normal(x, y))
 
         # Spring force with effective stiffness
         spring_force = state["effective_stiffness"] * compression
@@ -546,7 +554,7 @@ class CompressibleTurfModel:
         mass = _validate_positive_scalar("mass", mass)
         _validate_nonnegative_scalar("radius", radius)
         material = self.terrain.get_material(x, y)
-        normal = self.terrain.get_normal(x, y)
+        normal = _validate_normal_vector("normal", self.terrain.get_normal(x, y))
 
         # Kinetic energy
         speed = _magnitude(impact_velocity)

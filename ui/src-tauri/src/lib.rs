@@ -150,7 +150,7 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
 /// Kill the managed backend child if one is running. Shared by the
 /// `stop_backend` command and the window-close / app-exit shutdown hooks
 /// (issue #7436) so the Python process never outlives the app.
-fn kill_backend(process: &BackendProcess) {
+fn kill_backend(process: &BackendProcess) -> Result<(), String> {
     // Lock defensively: a poisoned mutex must not prevent shutdown.
     let mut guard = match process.0.lock() {
         Ok(g) => g,
@@ -158,16 +158,31 @@ fn kill_backend(process: &BackendProcess) {
     };
     if let Some(mut child) = guard.take() {
         let pid = child.id();
-        let _ = child.kill();
+        if let Err(e) = child.kill() {
+            // Check if process is still alive despite kill error
+            if child.try_wait().ok().flatten().is_none() {
+                // Put back in guard since termination failed
+                *guard = Some(child);
+                return Err(format!("Failed to kill backend process {}: {}", pid, e));
+            }
+        }
         let _ = child.wait();
         log::info!("Backend server stopped (pid {})", pid);
     }
+    Ok(())
 }
 
 /// Stop the Python backend server.
 #[tauri::command]
 fn stop_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
-    kill_backend(&state);
+    if let Err(err) = kill_backend(&state) {
+        return Ok(BackendStatus {
+            running: true,
+            pid: None,
+            port: BACKEND_PORT,
+            error: Some(err),
+        });
+    }
 
     Ok(BackendStatus {
         running: false,
@@ -280,7 +295,7 @@ pub fn run() {
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::Destroyed = event {
                 if let Some(process) = window.app_handle().try_state::<BackendProcess>() {
-                    kill_backend(&process);
+                    let _ = kill_backend(&process);
                 }
             }
         })
@@ -298,7 +313,7 @@ pub fn run() {
         .run(|app_handle, event| {
             if let tauri::RunEvent::ExitRequested { .. } = event {
                 if let Some(process) = app_handle.try_state::<BackendProcess>() {
-                    kill_backend(&process);
+                    let _ = kill_backend(&process);
                 }
             }
         });

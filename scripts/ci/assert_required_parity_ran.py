@@ -76,17 +76,24 @@ def summarize_required_cases(
 
 
 def assert_parity_ran(junit_path: Path, required: tuple[str, ...]) -> dict[str, int]:
-    """Assert at least one required parity case passed.
+    """Assert at least one required parity case passed and none failed or errored.
 
     Raises
     ------
     ParityGateError
-        When no matching case passed (all skipped/failed/errored/absent).
+        When no matching case passed or when any matching case failed/errored.
     """
     if not required:
         raise ValueError("at least one --require-name token must be provided")
 
     counts = summarize_required_cases(junit_path, required)
+    if counts["failed"] > 0 or counts["error"] > 0:
+        raise ParityGateError(
+            "Required parity assertions failed or errored. "
+            f"Matched {counts['matched']} case(s) for {list(required)}: "
+            f"passed={counts['passed']} skipped={counts['skipped']} "
+            f"failed={counts['failed']} error={counts['error']}."
+        )
     if counts["passed"] < 1:
         raise ParityGateError(
             "Required parity assertions did not run. "

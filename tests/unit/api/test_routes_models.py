@@ -183,3 +183,55 @@ def test_parse_urdf_rejects_empty_or_short_vectors(urdf: str, message: str) -> N
     """URDF vector attributes must have their exact component counts."""
     with pytest.raises(ValueError, match=message):
         _parse_urdf(urdf)
+
+
+def test_parse_urdf_rejects_zero_joint_axis() -> None:
+    """URDF joint axis cannot be a zero vector (#8258)."""
+    urdf = """<robot name="zero_axis">
+      <link name="base"/>
+      <link name="tip"/>
+      <joint name="j1" type="revolute">
+        <parent link="base"/>
+        <child link="tip"/>
+        <axis xyz="0 0 0"/>
+      </joint>
+    </robot>"""
+    with pytest.raises(ValueError, match="zero vector"):
+        _parse_urdf(urdf)
+
+
+def test_parse_urdf_rejects_non_finite_vector() -> None:
+    """URDF vectors must contain finite float numbers (#8258)."""
+    urdf = """<robot name="nan_xyz">
+      <link name="base"/>
+      <link name="tip"/>
+      <joint name="j1" type="revolute">
+        <parent link="base"/>
+        <child link="tip"/>
+        <axis xyz="nan 0 1"/>
+      </joint>
+    </robot>"""
+    with pytest.raises(ValueError, match="finite numbers"):
+        _parse_urdf(urdf)
+
+
+def test_parse_urdf_preserves_visualless_root_link() -> None:
+    """URDF parser preserves visual-less root links and reports correct root_link (#8257)."""
+    urdf = """<robot name="visualless_root">
+      <link name="world"/>
+      <link name="arm">
+        <visual>
+          <geometry><box size="1 1 1"/></geometry>
+        </visual>
+      </link>
+      <joint name="world_joint" type="fixed">
+        <parent link="world"/>
+        <child link="arm"/>
+      </joint>
+    </robot>"""
+    parsed = _parse_urdf(urdf)
+    assert parsed.root_link == "world"
+    link_names = [lnk.link_name for lnk in parsed.links]
+    assert "world" in link_names
+    world_link = next(lnk for lnk in parsed.links if lnk.link_name == "world")
+    assert world_link.geometry_type == "none"
