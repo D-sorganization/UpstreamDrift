@@ -68,6 +68,8 @@ def test_client_with_manually_blank_token_is_not_logged_in(
     client.token = ""
 
     assert not client.is_logged_in
+
+
 def test_logout(temp_cache_dir: Path) -> None:
     """Test logout clears token and deletes file."""
     cache_dir = temp_cache_dir / ".golf-suite"
