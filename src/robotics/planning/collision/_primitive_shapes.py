@@ -57,7 +57,7 @@ class Sphere(GeometricPrimitive):
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
+        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
         )
@@ -258,7 +258,7 @@ class Capsule(GeometricPrimitive):
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
+        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
         degenerate = (norms < 1e-10).ravel()
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
@@ -386,7 +386,7 @@ class Cylinder(GeometricPrimitive):
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
+        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
         degenerate = (norms < 1e-10).ravel()
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
@@ -398,7 +398,7 @@ class Cylinder(GeometricPrimitive):
         axis_support = self.center + (sign * self.half_height)[:, None] * self.axis
 
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        perp_norm = np.sqrt(np.einsum("...i,...i->...", d_perp, d_perp))[..., None]
+        perp_norm = np.sqrt(np.einsum('...i,...i->...', d_perp, d_perp))[..., None]
         radial = np.divide(
             self.radius * d_perp,
             perp_norm,

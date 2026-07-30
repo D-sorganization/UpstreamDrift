@@ -296,10 +296,10 @@ def _orthonormal_bases(directions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
     first = np.cross(directions, reference)
     # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-    first /= np.sqrt(np.einsum("...i,...i->...", first, first))[..., None]
+    first /= np.sqrt(np.einsum('...i,...i->...', first, first))[..., None]
     second = np.cross(directions, first)
     # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-    second /= np.sqrt(np.einsum("...i,...i->...", second, second))[..., None]
+    second /= np.sqrt(np.einsum('...i,...i->...', second, second))[..., None]
     return first, second
 
 
@@ -338,9 +338,7 @@ def _penetration_depth(
         offsets = np.stack([axis_u, -axis_u, axis_v, -axis_v], axis=1)
         candidates = directions[:, None, :] + steps[:, None, None] * offsets
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        candidates /= np.sqrt(np.einsum("...i,...i->...", candidates, candidates))[
-            ..., None
-        ]
+        candidates /= np.sqrt(np.einsum('...i,...i->...', candidates, candidates))[..., None]
 
         candidate_values = _support_widths(
             prim_a, prim_b, candidates.reshape(-1, 3)
