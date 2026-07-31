@@ -56,7 +56,11 @@ class Sphere(GeometricPrimitive):
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
-        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        norms = np.sqrt(
+            np.einsum("...i,...i->...", directions, directions)
+        )[
+            ..., None
+        ]  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
         )
@@ -256,7 +260,11 @@ class Capsule(GeometricPrimitive):
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
-        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        norms = np.sqrt(
+            np.einsum("...i,...i->...", directions, directions)
+        )[
+            ..., None
+        ]  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         degenerate = (norms < 1e-10).ravel()
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
@@ -383,7 +391,11 @@ class Cylinder(GeometricPrimitive):
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
-        norms = np.linalg.norm(directions, axis=1, keepdims=True)
+        norms = np.sqrt(
+            np.einsum("...i,...i->...", directions, directions)
+        )[
+            ..., None
+        ]  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         degenerate = (norms < 1e-10).ravel()
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
@@ -394,7 +406,11 @@ class Cylinder(GeometricPrimitive):
         sign = np.where(along >= 0.0, 1.0, -1.0)
         axis_support = self.center + (sign * self.half_height)[:, None] * self.axis
 
-        perp_norm = np.linalg.norm(d_perp, axis=1, keepdims=True)
+        perp_norm = np.sqrt(
+            np.einsum("...i,...i->...", d_perp, d_perp)
+        )[
+            ..., None
+        ]  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         radial = np.divide(
             self.radius * d_perp,
             perp_norm,
