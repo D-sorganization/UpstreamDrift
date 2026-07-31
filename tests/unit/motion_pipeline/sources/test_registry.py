@@ -20,7 +20,6 @@ from src.shared.python.motion_pipeline.sources.base import (
     UnsupportedFormatError,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

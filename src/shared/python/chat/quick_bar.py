@@ -103,7 +103,7 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
     def __init__(
         self,
         app_context: str = "assistant",
-        server_url: str = "ws://127.0.0.1:8000",
+        server_url: str | None = None,
         theme_provider: ThemeProviderProtocol | None = None,
         parent: QWidget | None = None,
     ) -> None:
@@ -112,6 +112,10 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self.setObjectName("QuickBarChatWidget")
 
         self._app_context = app_context
+        if server_url is None:
+            from .chat_dock_widget import _resolve_default_server
+
+            server_url = _resolve_default_server()
         self._server_url = server_url.rstrip("/")
         self._socket: QWebSocket | None = None
         self._is_waiting = False
@@ -367,7 +371,7 @@ class ChatLauncherMixin:
         self,
         app_context: str = "assistant",
         app_name: str = "shared",
-        server_url: str = "ws://127.0.0.1:8000",
+        server_url: str | None = None,
         auto_show_dock: bool = False,
         theme_provider: ThemeProviderProtocol | None = None,
     ) -> None:
@@ -422,7 +426,7 @@ class ChatLauncherMixin:
         self,
         app_context: str,
         app_name: str,
-        server_url: str,
+        server_url: str | None,
     ) -> None:
         """Show or hide the full chat dock widget."""
         if self._chat_dock is not None:

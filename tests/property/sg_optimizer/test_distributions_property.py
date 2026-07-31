@@ -12,7 +12,6 @@ from src.shared.python.sg_optimizer.shot_model.distributions import (
     TiltedBivariateGaussian,
 )
 
-
 sigma = st.floats(min_value=0.1, max_value=50.0, allow_nan=False, allow_infinity=False)
 rho = st.floats(min_value=-0.95, max_value=0.95, allow_nan=False, allow_infinity=False)
 bias = st.floats(min_value=-20.0, max_value=20.0, allow_nan=False, allow_infinity=False)

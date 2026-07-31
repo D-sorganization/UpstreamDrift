@@ -132,6 +132,7 @@ def test_root_tools_package_collision_is_gone() -> None:
         "./tools must not be a regular package -- it shadows ./src/tools and "
         "makes every src/tools submodule unimportable (#7995)."
     )
-    assert _KNOWN_COLLISIONS.get("tools") == ("src", "src/shared/python"), (
-        "The 'tools' collision changed shape; re-verify #7995 has not regressed."
-    )
+    assert _KNOWN_COLLISIONS.get("tools") == (
+        "src",
+        "src/shared/python",
+    ), "The 'tools' collision changed shape; re-verify #7995 has not regressed."

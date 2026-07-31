@@ -97,8 +97,9 @@ class TestSubscriberRegistryPerSocketLock:
         await asyncio.gather(_publish(1), _publish(2))
 
         # With the per-socket lock the sends must be sequential (not interleaved).
-        assert send_order == [1, 2] or send_order == [2, 1], (
-            f"Sends were not serialized: {send_order}"
-        )
+        assert send_order == [1, 2] or send_order == [
+            2,
+            1,
+        ], f"Sends were not serialized: {send_order}"
         # Key property: no entry appears twice (no duplicate send).
         assert len(set(send_order)) == 2, "Each payload must be sent exactly once"

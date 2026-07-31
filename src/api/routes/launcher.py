@@ -76,7 +76,7 @@ async def get_tiles() -> list[dict[str, Any]]:
         List of tile dictionaries.
     """
     manifest = _get_manifest()
-    return [t.to_dict() for t in manifest.tiles]
+    return [t.to_dict() for t in manifest.tiles if not t.hidden]
 
 
 @router.get("/tiles/{tile_id}")

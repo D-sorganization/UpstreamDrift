@@ -19,7 +19,6 @@ from src.shared.python.security.secure_subprocess import (
     validate_script_path,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

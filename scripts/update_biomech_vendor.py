@@ -169,14 +169,26 @@ def _copy_manifest(checkout: Path, destination_root: Path) -> None:
             logger.info("Copied %s", manifest_path.name)
 
 
-def _write_provenance(destination_root: Path, options: VendorOptions) -> None:
+def _write_provenance(
+    checkout: Path, destination_root: Path, options: VendorOptions
+) -> None:
     """Write a small marker file documenting how the snapshot was produced."""
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=str(checkout),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    commit_sha = result.stdout.strip()
+
     marker = destination_root / "VENDOR_PROVENANCE.txt"
     marker.write_text(
         "\n".join(
             [
                 f"repo: {options.repo}",
                 f"ref: {options.ref}",
+                f"commit: {commit_sha}",
                 f"url: {options.url}",
                 "produced by: scripts/update_biomech_vendor.py",
                 "",
@@ -210,7 +222,7 @@ def snapshot(options: VendorOptions) -> Path:
         _copy_tree(models_root, destination_models)
         destination_root.mkdir(parents=True, exist_ok=True)
         _copy_manifest(checkout, destination_root)
-        _write_provenance(destination_root, options)
+        _write_provenance(checkout, destination_root, options)
     logger.info("Snapshot ready at %s", destination_root)
     return destination_root
 

@@ -45,7 +45,7 @@ class TestAirProperties:
         assert high.density < sea_level.density
         assert high.temperature < sea_level.temperature
 
-    @pytest.mark.parametrize("altitude_m", [-1.0, 11000.1])
+    @pytest.mark.parametrize("altitude_m", [-500.1, 9000.1])
     def test_from_altitude_rejects_outside_troposphere_range(
         self, altitude_m: float
     ) -> None:
@@ -113,8 +113,10 @@ class TestAerodynamicsCalculator:
 
     def test_drag_increases_with_speed(self, aero: AerodynamicsCalculator) -> None:
         """Test drag increases with speed (quadratic)."""
-        v_slow = np.array([20.0, 0.0, 0.0])
-        v_fast = np.array([40.0, 0.0, 0.0])
+        # Test in the laminar region (v < 15 m/s) to avoid the drag crisis
+        # where the drag coefficient drops significantly and breaks the simple quadratic.
+        v_slow = np.array([5.0, 0.0, 0.0])
+        v_fast = np.array([10.0, 0.0, 0.0])
 
         drag_slow = np.linalg.norm(aero.compute_drag(v_slow))
         drag_fast = np.linalg.norm(aero.compute_drag(v_fast))

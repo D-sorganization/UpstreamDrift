@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import unittest
 
-
 logger = logging.getLogger(__name__)
 
 model_paths = [

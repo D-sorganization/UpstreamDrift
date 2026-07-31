@@ -91,8 +91,15 @@ try:
     _pyqt6_qtcore = importlib.import_module("PyQt6.QtCore")
     _pyqt6_qtgui = importlib.import_module("PyQt6.QtGui")
     _pyqt6_qtwidgets = importlib.import_module("PyQt6.QtWidgets")
+    _pyqt6_qtwebenginewidgets = importlib.import_module("PyQt6.QtWebEngineWidgets")
     _has_pyqt6 = all(
-        module is not None for module in (_pyqt6_qtcore, _pyqt6_qtgui, _pyqt6_qtwidgets)
+        module is not None
+        for module in (
+            _pyqt6_qtcore,
+            _pyqt6_qtgui,
+            _pyqt6_qtwidgets,
+            _pyqt6_qtwebenginewidgets,
+        )
     )
 except (AttributeError, ImportError):
     _has_pyqt6 = False
@@ -482,9 +489,9 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--tools-mode",
         action="store",
-        default="local",
-        choices=["local", "vendored"],
-        help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
+        default="editable",
+        choices=["editable", "vendored"],
+        help="Tools resolution mode: 'editable' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
     )
     parser.addoption(
         "--biomech-mode",

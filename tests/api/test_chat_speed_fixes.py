@@ -29,7 +29,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Invariant 5 — Tool-declaration converter wire format
 # ---------------------------------------------------------------------------

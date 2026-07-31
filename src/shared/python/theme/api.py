@@ -195,9 +195,9 @@ class ThemeColors(BaseModel):
             "tick_color": self.label,
             "grid_line": _cd.adjust(self.border, 0.7 if is_dark else 1.2),
             "shadow_light": "rgba(0, 0, 0, 0.15)" if is_dark else "rgba(0, 0, 0, 0.08)",
-            "shadow_medium": "rgba(0, 0, 0, 0.25)"
-            if is_dark
-            else "rgba(0, 0, 0, 0.12)",
+            "shadow_medium": (
+                "rgba(0, 0, 0, 0.25)" if is_dark else "rgba(0, 0, 0, 0.12)"
+            ),
             "shadow_heavy": "rgba(0, 0, 0, 0.40)" if is_dark else "rgba(0, 0, 0, 0.20)",
         }
         for key, val in defaults.items():

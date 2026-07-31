@@ -14,7 +14,6 @@ from src.deployment.safety.collision import (
     ObstacleType,
 )
 
-
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]

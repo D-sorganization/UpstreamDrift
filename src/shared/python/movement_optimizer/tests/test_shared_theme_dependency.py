@@ -34,7 +34,15 @@ def test_shared_theme_public_surface_is_importable() -> None:
     # The themes we map onto must exist with the keys the Palette consumes.
     assert "Dark" in BUILTIN_THEMES
     assert "Light" in BUILTIN_THEMES
-    required = {"bg", "group_bg", "input_bg", "text", "text_secondary", "accent", "button_hover"}
+    required = {
+        "bg",
+        "group_bg",
+        "input_bg",
+        "text",
+        "text_secondary",
+        "accent",
+        "button_hover",
+    }
     assert required.issubset(set(THEME_COLOR_KEYS))
     assert required.issubset(set(BUILTIN_THEMES["Dark"]))
 

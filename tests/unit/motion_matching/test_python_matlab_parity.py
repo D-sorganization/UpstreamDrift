@@ -30,7 +30,6 @@ from src.shared.python.motion_matching import (
 )
 from src.shared.python.motion_matching.cost import compute_total_work
 
-
 # Spec'd numeric tolerance for cross-language parity (issue #4095).
 PARITY_RMSE_TOL = 1.0e-6
 

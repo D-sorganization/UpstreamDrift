@@ -6,7 +6,11 @@ import ast
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PYTHON_SOURCES = (PROJECT_ROOT / "scripts", PROJECT_ROOT / "src", PROJECT_ROOT / "tests")
+PYTHON_SOURCES = (
+    PROJECT_ROOT / "scripts",
+    PROJECT_ROOT / "src",
+    PROJECT_ROOT / "tests",
+)
 
 
 def _subprocess_calls(tree: ast.AST) -> list[ast.Call]:

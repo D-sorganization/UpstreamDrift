@@ -540,7 +540,9 @@ class LauncherManifest:
         provider_tiles: list[LauncherTile] = []
 
         for model in registry.get_all_models():
-            if model.id in existing_ids or not _has_provider_metadata(model):
+            if model.id in existing_ids or (
+                model.hidden and not _has_provider_metadata(model)
+            ):
                 continue
             provider_tiles.append(_build_provider_tile(model))
 

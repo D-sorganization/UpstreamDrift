@@ -304,14 +304,9 @@ class APIDiagnostics:
         """Check CORS configuration."""
         start = time.time()
 
-        expected_origins = [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://localhost:8080",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:8080",
-        ]
+        from src.api.config import DEFAULT_CORS_ORIGINS
+
+        expected_origins = DEFAULT_CORS_ORIGINS
 
         details: dict[str, Any] = {
             "expected_origins": expected_origins,

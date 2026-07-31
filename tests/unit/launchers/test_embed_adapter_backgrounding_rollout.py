@@ -253,7 +253,9 @@ def test_pose_subscriber_adapter_can_pause_one_widget(qapp) -> None:  # noqa: AN
     assert dock_stub.resume_calls == 0
 
 
-def test_pose_subscriber_widget_pause_releases_subscription(qapp) -> None:  # noqa: ANN001
+def test_pose_subscriber_widget_pause_releases_subscription(
+    qapp,
+) -> None:  # noqa: ANN001
     """The real widget drops and re-acquires its subscription."""
     _skip_if_qt_is_mocked(qapp)
     pytest.importorskip("matplotlib")
@@ -358,7 +360,9 @@ class _SelectiveLifecycleAdapter:
         widget.resume()
 
 
-def test_host_background_reopen_popout_dockback_round_trip(qapp) -> None:  # noqa: ANN001
+def test_host_background_reopen_popout_dockback_round_trip(
+    qapp,
+) -> None:  # noqa: ANN001
     """open -> background -> reopen -> pop out -> dock back keeps state."""
     _skip_if_qt_is_mocked(qapp)
     adapter = _RealLikeAdapter()

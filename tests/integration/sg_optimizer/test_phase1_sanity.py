@@ -42,7 +42,6 @@ from src.shared.python.sg_optimizer.shot_model.putting import (
     leave_distance_distribution,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BASELINE = REPO_ROOT / "data" / "sg_optimizer" / "baselines" / "pga_tour.yaml"
 

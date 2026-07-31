@@ -50,7 +50,6 @@ from src.shared.python.sg_optimizer.shot_model.player_profile import (
     PlayerProfile,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BASELINE = REPO_ROOT / "data" / "sg_optimizer" / "baselines" / "pga_tour.yaml"
 
@@ -82,14 +81,17 @@ def _simple_par3(trees: bool = False) -> tuple[SyntheticHole, list]:
     ]
     if trees:
         features.append(RectFeature("trees", 50.0, 90.0, 10.0, 25.0))
-    return SyntheticHole(
-        name="test_par3",
-        par=3,
-        tee=(0.0, 0.0),
-        pin=(120.0, 0.0),
-        bbox=(-15.0, 140.0, -25.0, 25.0),
-        features=tuple(features),
-    ), features
+    return (
+        SyntheticHole(
+            name="test_par3",
+            par=3,
+            tee=(0.0, 0.0),
+            pin=(120.0, 0.0),
+            bbox=(-15.0, 140.0, -25.0, 25.0),
+            features=tuple(features),
+        ),
+        features,
+    )
 
 
 def test_tree_model_punch_out_probability_in_trees():

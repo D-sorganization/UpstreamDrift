@@ -2,5 +2,3 @@
 # This file is a child copy that shadows or shares code with the Tools repository.
 # Canonical changes must be made in the Tools repository under src/shared/python/
 # and synchronized back to UpstreamDrift. Direct edits here risk being lost.
-
-

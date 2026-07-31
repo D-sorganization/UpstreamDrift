@@ -73,29 +73,35 @@ class AirProperties:
         Returns:
             AirProperties at the specified altitude
         """
-        # International Standard Atmosphere model
         if altitude_m is None:
             raise ValueError("altitude_m must be provided")
         if not isinstance(altitude_m, (int, float)):
             raise TypeError("altitude_m must be a number")
-        if (
-            altitude_m < MIN_VALID_ALTITUDE_M
-            or altitude_m > MAX_VALID_TROPOSPHERE_ALTITUDE_M
-        ):
+
+        from src.shared.python.physics.atmosphere import (
+            air_density,
+            ISA_T0_K,
+            ISA_P0_PA,
+            ISA_LAPSE_RATE_K_PER_M,
+            ISA_GRAVITY_M_S2,
+            DRY_AIR_R_SPECIFIC_J_KG_K,
+            MIN_VALID_ALTITUDE_M,
+            MAX_VALID_ALTITUDE_M,
+        )
+
+        if altitude_m < MIN_VALID_ALTITUDE_M or altitude_m > MAX_VALID_ALTITUDE_M:
             raise ValueError(
                 f"altitude_m={altitude_m} outside ISA troposphere range "
-                f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_TROPOSPHERE_ALTITUDE_M}] m"
+                f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_ALTITUDE_M}] m"
             )
-        T0 = 288.15  # K
-        P0 = 101325.0  # Pa
-        L = 0.0065  # Temperature lapse rate [K/m]
-        g = STANDARD_GRAVITY
-        M = 0.0289644  # Molar mass of air [kg/mol]
-        R = 8.31447  # Universal gas constant [J/(mol·K)]
 
-        T = T0 - L * altitude_m
-        P = P0 * (T / T0) ** (g * M / (R * L))
-        rho = P * M / (R * T)
+        rho = air_density(altitude_m)
+
+        T = ISA_T0_K - ISA_LAPSE_RATE_K_PER_M * altitude_m
+        exponent = ISA_GRAVITY_M_S2 / (
+            DRY_AIR_R_SPECIFIC_J_KG_K * ISA_LAPSE_RATE_K_PER_M
+        )
+        P = ISA_P0_PA * (T / ISA_T0_K) ** exponent
 
         return cls(
             density=rho,
@@ -326,15 +332,9 @@ class AerodynamicsCalculator:
         # Reynolds number
         Re = self.air.density * speed * (2 * self.ball.radius) / self.air.viscosity
 
-        # Golf ball Cd variation with Re (empirical fit)
-        # Below critical Re (~8e4): higher drag (laminar)
-        # Above critical Re: lower drag (turbulent, dimple effect)
-        if Re < 8e4:
-            return 0.5  # Laminar flow
-        if Re < 2e5:
-            # Transition region
-            return 0.5 - 0.25 * (Re - 8e4) / (2e5 - 8e4)
-        return self.ball.drag_coefficient  # Fully turbulent
+        from src.shared.python.physics.atmosphere import cd_dimpled_sphere
+
+        return cd_dimpled_sphere(Re, base_cd=self.ball.drag_coefficient)
 
     def _compute_lift_coefficient(self, spin_ratio: float) -> float:
         """Compute lift coefficient based on spin ratio.

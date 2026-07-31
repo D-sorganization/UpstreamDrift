@@ -121,6 +121,7 @@ __all__ = [
     "ChatDockWidget",
     "ChatMessageBubble",
     "_DEFAULT_SERVER",
+    "_resolve_default_server",
     "_session_file_path",
     "_read_shared_session_id",
     "_write_shared_session_id",

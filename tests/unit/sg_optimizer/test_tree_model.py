@@ -6,7 +6,6 @@ import pytest
 
 from src.shared.python.sg_optimizer.mdp.tree_model import TreeModel
 
-
 # ---------------------------------------------------------------------------
 # Construction
 # ---------------------------------------------------------------------------

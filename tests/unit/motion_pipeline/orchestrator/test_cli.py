@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 _MODULE = "src.shared.python.motion_pipeline.orchestrator"
 
 
