@@ -73,7 +73,7 @@ def create_simple_pendulum_mujoco() -> tuple[Any, Any]:
     xml = """
     <mujoco model="pendulum">
         <compiler angle="radian" autolimits="true"/>
-        <option gravity="0 0 -9.81" integrator="RK4" timestep="0.001"/>
+        <option gravity="0 0 -9.80665" integrator="RK4" timestep="0.001"/>
 
         <default>
             <joint damping="0.0" frictionloss="0.0"/>

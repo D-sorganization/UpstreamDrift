@@ -86,7 +86,7 @@ class IMUSensor:
         >>> config = IMUSensorConfig(sensor_id="body_imu")
         >>> imu = IMUSensor(config)
         >>> reading = imu.read(
-        ...     linear_accel=np.array([0, 0, 9.81]),
+        ...     linear_accel=np.array([0, 0, 9.80665]),
         ...     angular_vel=np.array([0, 0, 0.1]),
         ...     timestamp=0.001,
         ... )

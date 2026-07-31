@@ -190,7 +190,7 @@ class ReportingMixin:
             return np.array([]), np.array([])
 
         try:
-            from shared.python.signal_toolkit import (
+            from src.shared.python.signal_toolkit import (
                 signal_processing,  # type: ignore[attr-defined]
             )
 
@@ -218,7 +218,7 @@ class ReportingMixin:
             return 0.0
 
         try:
-            from shared.python.signal_toolkit import (
+            from src.shared.python.signal_toolkit import (
                 signal_processing,  # type: ignore[attr-defined]
             )
 
@@ -356,7 +356,7 @@ class ReportingMixin:
             return None
 
         try:
-            from shared.python.signal_toolkit import (
+            from src.shared.python.signal_toolkit import (
                 signal_processing,  # type: ignore[attr-defined]
             )
 

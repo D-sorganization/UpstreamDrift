@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 from src.learning.imitation import Demonstration
 
-
 _TEST_RNG_SEED = 0
 
 

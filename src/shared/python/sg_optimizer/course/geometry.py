@@ -13,7 +13,6 @@ from pyproj import CRS, Transformer
 
 from src.shared.python.contracts import require
 
-
 # ---------------------------------------------------------------------------
 # Data types
 # ---------------------------------------------------------------------------

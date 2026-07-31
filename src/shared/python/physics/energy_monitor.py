@@ -24,7 +24,7 @@ from src.shared.python.core.error_utils import SimulationError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.engine_core.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 

@@ -213,14 +213,14 @@ jobs:
           PY
 
       - name: Send notification on ERROR
-        if: steps.summarize.outputs.has_failures == 'true'
+        if: failure() || steps.summarize.outputs.has_failures == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         with:
           script: |
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '- Nightly Cross-Engine Validation FAILED',
+              title: 'Nightly Cross-Engine Validation FAILED',
               body: `## Critical Cross-Engine Deviation Detected
 
               The nightly cross-engine validation failed or reported errors.
@@ -241,7 +241,7 @@ jobs:
               This issue will auto-close if next nightly run passes.
 
               Guideline P3 Compliance: **VIOLATION**`,
-              labels: ['bug', 'cross-engine', 'ci-failure', 'priority-high']
+              labels: ['bug', 'cross-engine', 'ci/cd', 'priority:high']
             })
 
   publish-dashboard:

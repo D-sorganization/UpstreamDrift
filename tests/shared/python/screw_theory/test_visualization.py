@@ -113,7 +113,7 @@ class TestPlotScrewAxis3D:
         # Use a very small length — arrow computation should still be safe
         plot_screw_axis_3d(ax, rotation_screw, length=1e-12)
         # Should not raise; quiver may or may not be called depending on norm guard
-        assert True  # Confirms no exception
+        ax.plot.assert_called_once()
 
     def test_assert_screw_not_none(self) -> None:
         """plot_screw_axis_3d raises ValueError when screw is None."""

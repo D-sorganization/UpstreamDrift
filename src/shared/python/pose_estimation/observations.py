@@ -128,9 +128,9 @@ class CameraIntrinsics:
         distortion = payload.get("distortion")
         return cls(
             matrix=np.asarray(payload["matrix"], dtype=float),
-            distortion=None
-            if distortion is None
-            else np.asarray(distortion, dtype=float),
+            distortion=(
+                None if distortion is None else np.asarray(distortion, dtype=float)
+            ),
         )
 
 

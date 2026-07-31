@@ -238,7 +238,7 @@ def test_pinocchio_physics_engine_compute_ztcf(engine: Any) -> None:
     with patch(
         "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
     ) as mock_pin:
-        mock_pin.aba.return_value = np.array([9.8, 4.9])
+        mock_pin.aba.return_value = np.array([9.80665, 4.9])
         a_ztcf = engine.compute_ztcf(q, v)
         mock_pin.aba.assert_called_once()
-        np.testing.assert_array_equal(a_ztcf, np.array([9.8, 4.9]))
+        np.testing.assert_array_equal(a_ztcf, np.array([9.80665, 4.9]))

@@ -17,11 +17,15 @@ from collections.abc import Mapping
 from typing import Any
 
 try:
-    from shared.python.theme import BUILTIN_THEMES as _SHARED_THEMES
-    from shared.python.theme import ThemedWindowMixin as _SharedThemedWindowMixin
-    from shared.python.theme import get_theme_manager as _shared_get_theme_manager
-    from shared.python.theme.matplotlib_style import apply_plot_theme as _shared_apply_plot_theme
-    from shared.python.theme.matplotlib_style import get_chart_color as _shared_get_chart_color
+    from src.shared.python.theme import BUILTIN_THEMES as _SHARED_THEMES
+    from src.shared.python.theme import ThemedWindowMixin as _SharedThemedWindowMixin
+    from src.shared.python.theme import get_theme_manager as _shared_get_theme_manager
+    from src.shared.python.theme.matplotlib_style import (
+        apply_plot_theme as _shared_apply_plot_theme,
+    )
+    from src.shared.python.theme.matplotlib_style import (
+        get_chart_color as _shared_get_chart_color,
+    )
 
     SHARED_THEME_AVAILABLE = True
     BUILTIN_THEMES: Mapping[str, Mapping[str, str]] = _SHARED_THEMES

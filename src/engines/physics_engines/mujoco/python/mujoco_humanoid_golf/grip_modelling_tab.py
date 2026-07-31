@@ -43,7 +43,7 @@ from .sim_widget import MuJoCoSimWidget
 logger = get_logger(__name__)
 
 # Approximate weight of a golf club used as the external load in the static
-# equilibrium check. A driver masses roughly 0.31 kg (0.31 * 9.81 ~= 3.0 N);
+# equilibrium check. A driver masses roughly 0.31 kg (0.31 * 9.80665 ~= 3.0 N);
 # this is the load the grip must support. Sourced here as a named constant
 # instead of an unexplained literal at the call site.
 CLUB_WEIGHT_N = 3.0
@@ -314,9 +314,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
         self.rebuild_synergy_controls()
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if i is None:
             raise ValueError("i must be provided")

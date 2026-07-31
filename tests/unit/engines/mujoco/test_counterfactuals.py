@@ -15,7 +15,7 @@ def simple_pendulum_model() -> mujoco.MjModel:
     """Create simple pendulum for testing."""
     xml = """
     <mujoco>
-        <option gravity="0 0 -9.81" timestep="0.01"/>
+        <option gravity="0 0 -9.80665" timestep="0.01"/>
         <worldbody>
             <body name="pendulum" pos="0 0 0">
                 <joint name="hinge" type="hinge" axis="0 1 0" damping="0.0"/>

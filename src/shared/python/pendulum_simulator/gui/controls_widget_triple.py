@@ -28,7 +28,7 @@ from .controls_widget_base import ControlsWidgetBase
 from .torque_preview_widget import TorquePreviewWidget
 
 try:
-    from shared.python.sidekick.ui.widgets.unit_aware_input import UnitAwareInput
+    from src.shared.python.sidekick.ui.widgets.unit_aware_input import UnitAwareInput
 
     _HAS_UAI = True
 except ImportError:

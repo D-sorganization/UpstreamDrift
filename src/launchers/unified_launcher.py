@@ -127,7 +127,7 @@ class UnifiedLauncher:
         try:
             from src.shared.python.engine_core.engine_manager import EngineManager
         except ImportError:
-            from shared.python.engine_core.engine_manager import (
+            from src.shared.python.engine_core.engine_manager import (
                 EngineManager,  # type: ignore[no-redef]
             )
 
@@ -150,7 +150,7 @@ class UnifiedLauncher:
         try:
             from src.shared.python import SUITE_ROOT
         except ImportError:
-            from shared.python import SUITE_ROOT  # type: ignore[no-redef]
+            from src.shared.python import SUITE_ROOT  # type: ignore[no-redef]
 
         logger.info("Suite root: %s", SUITE_ROOT)
 
@@ -201,13 +201,13 @@ class UnifiedLauncher:
 
         # 2. Try shared.python.__version__
         try:
-            import shared.python as _shared  # type: ignore[import-untyped]
+            import src.shared.python as _shared  # type: ignore[import-untyped]
 
             v = getattr(_shared, "__version__", None)
             if v and not callable(v):
                 return str(v)
         except Exception as e:  # noqa: BLE001
-            logger.debug("Could not read version from shared.python: %s", e)
+            logger.debug("Could not read version from src.shared.python: %s", e)
 
         # 3. Read directly from pyproject.toml (development / editable installs)
         # Only attempt when metadata machinery is functioning (not broken import)

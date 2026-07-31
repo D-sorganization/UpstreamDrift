@@ -19,6 +19,7 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 # ---------------------------------------------------------------------------
 # Patch broken transitive imports before any test module is collected.
 # Other agents are refactoring src.shared.python.data_io and
@@ -30,6 +31,7 @@ import sys as _sys
 import types as _types
 import importlib as _early_importlib
 from pathlib import Path as _Path
+import contextlib
 
 _tools_path = str(
     (
@@ -41,10 +43,27 @@ _tools_path = str(
         / "python"
     ).resolve()
 )
-if _tools_path not in _sys.path:
-    _sys.path.insert(0, _tools_path)
+_tools_src_path = str(
+    (_Path(__file__).resolve().parents[1] / "vendor" / "ud-tools" / "src").resolve()
+)
+_python_src_path = str(
+    (
+        _Path(__file__).resolve().parents[1]
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "python"
+        / "src"
+    ).resolve()
+)
+for _p in (_python_src_path, _tools_src_path, _tools_path):
+    if _p in _sys.path:
+        _sys.path.remove(_p)
+    _sys.path.insert(0, _p)
 
 for _pkg in ("chat", "sidekick", "ai"):
+    with contextlib.suppress(ImportError):
+        __import__(_pkg)
     _pkg_mod = _sys.modules.get(_pkg)
     _v_path = str(_Path(_tools_path) / _pkg)
     if (
@@ -211,6 +230,16 @@ if not _has_pyqt6:
     sys.modules["PyQt6.QtGui"] = pyqt_mock.QtGui
     sys.modules["PyQt6.QtWidgets"] = pyqt_mock.QtWidgets
     sys.modules["PyQt6.QtWebEngineWidgets"] = pyqt_mock.QtWebEngineWidgets
+
+
+@pytest.fixture(autouse=True)
+def _prevent_repo_root_io(monkeypatch, tmp_path):
+    """Prevent tests from polluting the repository root with logs or databases.
+
+    Issue #7935: test execution should not generate files like base.csv,
+    golf_modeling_suite.db, or logs/errors_*.log in the repository root.
+    """
+    monkeypatch.chdir(tmp_path)
 
 
 @pytest.fixture(autouse=True)
@@ -550,8 +579,9 @@ def pytest_configure(config: pytest.Config) -> None:
         sys.path.append(local_path)
     else:
         # Force local shared codebase to have precedence
+        for path in reversed(parent_paths):
+            sys.path.insert(0, path)
         sys.path.insert(0, local_path)
-        sys.path.append(vendored_path)
 
     # Prevent dual-loading of shared contracts and training modules under different path aliases.
     # With both '.' and 'src/shared/python' in sys.path, contracts/training can be

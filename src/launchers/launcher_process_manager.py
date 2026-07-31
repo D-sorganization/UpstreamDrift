@@ -77,9 +77,9 @@ if sys.platform == "win32":
             _job,
             win32job.JobObjectExtendedLimitInformation,
         )
-        _info["BasicLimitInformation"][
-            "LimitFlags"
-        ] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        _info["BasicLimitInformation"]["LimitFlags"] = (
+            win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        )
         win32job.SetInformationJobObject(
             _job,
             win32job.JobObjectExtendedLimitInformation,
@@ -302,6 +302,10 @@ class ProcessManager:
             env["PYTHONPATH"] = (
                 f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
             )
+
+        # Fix for MuJoCo DLL loading issue on Windows with Python 3.13
+        if "MUJOCO_PLUGIN_PATH" not in env:
+            env["MUJOCO_PLUGIN_PATH"] = ""
 
         return env
 

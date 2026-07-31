@@ -21,7 +21,7 @@ import numpy as np
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.engine_core.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 
@@ -138,7 +138,7 @@ def get_jacobian_conditioning(
         Condition number κ
 
     Example:
-        >>> from shared.python.manipulability import get_jacobian_conditioning
+        >>> from src.shared.python.manipulability import get_jacobian_conditioning
         >>> kappa = get_jacobian_conditioning(mujoco_engine, "clubhead")
         >>> print(f"Clubhead Jacobian condition: {kappa:.2e}")
     """

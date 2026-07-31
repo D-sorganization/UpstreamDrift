@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 try:
-    from shared.python.core import setup_logging
+    from src.shared.python.core import setup_logging
 except ImportError as e:
     raise ImportError(
         "Failed to import shared modules. Ensure shared.python is in PYTHONPATH."
@@ -33,7 +33,7 @@ DEFAULT_JOINT_LIMIT_RAD: float = float(np.pi)
 IMPACT_FRACTION: float = 0.9
 
 #: Standard gravity (m/s^2) for the ballistic carry-distance estimate (#7052).
-_GRAVITY_M_S2: float = 9.81
+_GRAVITY_M_S2: float = 9.80665
 
 
 @dataclass
@@ -296,9 +296,7 @@ class DrakeMotionOptimizer:
                             "type": "ineq",
                             "fun": lambda x, c=con: (
                                 c.upper_bound
-                                - c.constraint_function(
-                                    x.reshape(traj_shape)
-                                )  # noqa: E501
+                                - c.constraint_function(x.reshape(traj_shape))  # noqa: E501
                             ),
                         }
                     )

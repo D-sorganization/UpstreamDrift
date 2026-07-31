@@ -11,7 +11,7 @@ Provides a centralized settings interface for user preferences including:
 - Performance (GPU acceleration, cache settings)
 
 Usage:
-    from shared.python.ui.preferences_dialog import PreferencesDialog
+    from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
     dialog = PreferencesDialog(parent_window)
     if dialog.exec() == QDialog.DialogCode.Accepted:

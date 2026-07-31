@@ -21,7 +21,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelli
 # MuJoCo contact whose body attribution we can assert on.
 _HAND_CONTACT_XML = """
 <mujoco>
-  <option gravity="0 0 -9.81"/>
+  <option gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="hand_palm" pos="0 0 0.04">
       <freejoint/>
@@ -35,7 +35,7 @@ _HAND_CONTACT_XML = """
 # A scene with no hand/finger body names: contacts must be filtered out.
 _NO_HAND_XML = """
 <mujoco>
-  <option gravity="0 0 -9.81"/>
+  <option gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="block" pos="0 0 0.04">
       <freejoint/>

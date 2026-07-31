@@ -123,7 +123,7 @@ def test_check_banned_patterns_dbc_non_path() -> None:
 
 
 def test_check_magic_numbers() -> None:
-    lines = ["x = 3.141 * r", "y = 9.8 * m", "z = 6.67 * x"]
+    lines = ["x = 3.141 * r", "y = 9.80665 * m", "z = 6.67 * x"]
     issues = check_magic_numbers(lines, Path("test_file.py"))
     assert len(issues) == 3
 
@@ -143,7 +143,7 @@ def test_check_magic_numbers_skips_quality_scripts() -> None:
 
 
 def test_check_magic_numbers_gravity() -> None:
-    lines = ["g = 9.81"]
+    lines = ["g = 9.80665"]
     issues = check_magic_numbers(lines, Path("physics.py"))
     assert any("GRAVITY" in i[1] for i in issues)
 

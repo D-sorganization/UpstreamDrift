@@ -40,7 +40,7 @@ if not binary_entrypoint.is_file():
 # Platform-specific icon
 # ---------------------------------------------------------------------------
 _icons = {
-    "win32": str(root / "vendor" / "ud-tools" / "assets" / "tools_icon_hq.ico"),
+    "win32": str(root / "src" / "launchers" / "assets" / "golf_suite_unified.ico"),
 }
 icon = _icons.get(sys.platform)
 

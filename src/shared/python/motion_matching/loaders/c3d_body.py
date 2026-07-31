@@ -116,7 +116,7 @@ def _sha256_of(path: Path) -> str:
 
 def _import_c3d_reader_class():
     """Import :class:`C3DDataReader` from the canonical bio module."""
-    from shared.python.sidekick.lab.bio.c3d_reader import (
+    from src.shared.python.sidekick.lab.bio.c3d_reader import (
         C3DDataReader,
     )
 

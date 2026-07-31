@@ -32,7 +32,7 @@ logger = get_logger(__name__)
 # Center of mass: L/2 = 0.5m from pivot
 SIMPLE_PENDULUM_XML = """
 <mujoco model="simple_pendulum_conservative">
-  <option gravity="0 0 -9.81" timestep="0.0005" integrator="RK4"/>
+  <option gravity="0 0 -9.80665" timestep="0.0005" integrator="RK4"/>
   <compiler angle="radian" inertiafromgeom="false"/>
 
   <worldbody>
@@ -52,7 +52,7 @@ SIMPLE_PENDULUM_XML = """
 # Actuated version for work-energy tests
 ACTUATED_PENDULUM_XML = """
 <mujoco model="actuated_pendulum">
-  <option gravity="0 0 -9.81" timestep="0.0005" integrator="RK4"/>
+  <option gravity="0 0 -9.80665" timestep="0.0005" integrator="RK4"/>
   <compiler angle="radian" inertiafromgeom="false"/>
 
   <worldbody>

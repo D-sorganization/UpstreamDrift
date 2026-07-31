@@ -26,7 +26,9 @@ _SIZE = 120
 _MID = _SIZE // 2
 
 
-def _flipping_projector(scale: float = 20.0) -> Callable[[tuple[float, float]], QPointF]:
+def _flipping_projector(
+    scale: float = 20.0,
+) -> Callable[[tuple[float, float]], QPointF]:
     # Mimics the canvas projector's Y handling: larger world-y -> smaller screen-y.
     def _project(point: tuple[float, float]) -> QPointF:
         x, y = point

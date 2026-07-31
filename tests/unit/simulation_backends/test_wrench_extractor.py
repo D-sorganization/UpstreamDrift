@@ -123,7 +123,7 @@ def test_trace_with_wrench_trace_persists_cc4_wrench_field() -> None:
 def test_static_support_known_case_matches_body_weight() -> None:
     time = _time()
     body_mass_kg = 80.0
-    gravity = 9.81
+    gravity = 9.80665
 
     wrench_trace = static_support_wrench_trace(
         time,

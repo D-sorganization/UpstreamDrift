@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 from src.launchers.launcher_model_handlers import SpecialAppHandler
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 

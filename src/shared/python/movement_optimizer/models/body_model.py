@@ -107,7 +107,7 @@ class BodyModel:
 
         self.body_mass = body_mass
         self.height = height
-        self.g = 9.81
+        self.g = 9.80665
         self.abduction_angle = abduction_angle
         self.arm_angle = arm_angle
         self.squat_bar_depth = squat_bar_depth

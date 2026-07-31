@@ -119,7 +119,7 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
-        spin_axis = np.cross(tangent_dir, n)
+        spin_axis = np.cross(n, tangent_dir)
         # Rolling cap relative to contact-point speed (pre-existing spin reduces sliding).
         omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
         v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))

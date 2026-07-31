@@ -13,7 +13,6 @@ from src.engines.physics_engines.pinocchio.python.pinocchio_golf import (
     simulate_with_coefficients as facade,
 )
 
-
 pytestmark = [pytest.mark.unit]
 
 

@@ -25,7 +25,7 @@ def simple_pendulum_model() -> mujoco.MjModel:
     """Create simple pendulum for testing."""
     xml = """
     <mujoco>
-        <option gravity="0 0 -9.81" timestep="0.01"/>
+        <option gravity="0 0 -9.80665" timestep="0.01"/>
         <worldbody>
             <body name="pendulum" pos="0 0 0">
                 <joint name="hinge" type="hinge" axis="0 1 0" damping="0.1"/>
@@ -411,7 +411,7 @@ class TestSegmentEnergyGroundTruth:
         """Spin about a body's own long axis: world-frame contraction is ~630x off."""
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81"/>
+          <option gravity="0 0 -9.80665"/>
           <compiler eulerseq="xyz"/>
           <worldbody>
             <body name="rod" pos="0 0 1.5" euler="90 0 0">
@@ -442,7 +442,7 @@ class TestSegmentEnergyGroundTruth:
         """Offset geoms make xipos != xpos; the xpos read was ~21% off."""
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81"/>
+          <option gravity="0 0 -9.80665"/>
           <worldbody>
             <body name="upper" pos="0 0 2">
               <joint name="j1" type="hinge" axis="0 1 0"/>
@@ -482,7 +482,7 @@ class TestSegmentEnergyGroundTruth:
     def test_potential_energy_honours_non_vertical_gravity(self) -> None:
         xml = """
         <mujoco>
-          <option gravity="3.0 0 -9.81"/>
+          <option gravity="3.0 0 -9.80665"/>
           <worldbody>
             <body name="b" pos="1.0 0 2.0">
               <joint name="j" type="hinge" axis="0 1 0"/>
@@ -510,7 +510,7 @@ class TestEnergyConservationResidual:
     def _arm_model() -> mujoco.MjModel:
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81"/>
+          <option gravity="0 0 -9.80665"/>
           <worldbody>
             <body name="upper" pos="0 0 2">
               <joint name="j1" type="hinge" axis="0 1 0"/>

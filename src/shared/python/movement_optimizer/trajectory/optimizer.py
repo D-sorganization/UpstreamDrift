@@ -129,7 +129,12 @@ class TrajectoryOptimizer:
         self.n_dof = n_dof
         self.body, self.dynamics = body, dynamics
         self.exercise_type, self.bar_mass = exercise_type, bar_mass
-        self.q_start, self.q_end, self.q_bounds, self.q_via = q_start, q_end, q_bounds, q_via
+        self.q_start, self.q_end, self.q_bounds, self.q_via = (
+            q_start,
+            q_end,
+            q_bounds,
+            q_via,
+        )
         self.duration, self.n_waypoints, self.n_eval = duration, n_waypoints, n_eval
         self.progress_cb, self.n_starts = progress_cb, n_starts
         self.cancel_event = cancel_event or threading.Event()

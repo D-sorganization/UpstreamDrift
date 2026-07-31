@@ -16,7 +16,7 @@ The workflow engine ensures that users can complete complex analyses
 without expert knowledge, while learning along the way.
 
 Example:
-    >>> from shared.python.ai.workflow_engine import WorkflowEngine, Workflow
+    >>> from src.shared.python.ai.workflow_engine import WorkflowEngine, Workflow
     >>> engine = WorkflowEngine(tool_registry)
     >>> result = engine.execute_workflow("first_analysis", context)
 """

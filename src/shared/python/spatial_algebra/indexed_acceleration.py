@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from shared.python.engine_core.interfaces import PhysicsEngine  # noqa: F401
+    from src.shared.python.engine_core.interfaces import PhysicsEngine  # noqa: F401
 
 
 @dataclass

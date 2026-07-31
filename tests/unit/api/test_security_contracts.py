@@ -15,7 +15,6 @@ from src.shared.python._contracts_level import (
     set_contract_level,
 )
 
-
 pytestmark = pytest.mark.unit
 
 # All tests require GOLF_API_SECRET_KEY to be set

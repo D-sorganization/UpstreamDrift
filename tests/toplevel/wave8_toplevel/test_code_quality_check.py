@@ -131,7 +131,7 @@ class TestCheckMagicNumbers:
         assert any("math.pi" in m for _, m, _ in issues)
 
     def test_detects_gravity(self, py_file: Path) -> None:
-        issues = cqc.check_magic_numbers(["g = 9.81"], py_file)
+        issues = cqc.check_magic_numbers(["g = 9.80665"], py_file)
         assert any("GRAVITY" in m for _, m, _ in issues)
 
     def test_detects_gravitational(self, py_file: Path) -> None:

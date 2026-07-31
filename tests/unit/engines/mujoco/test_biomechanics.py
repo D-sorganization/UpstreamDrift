@@ -484,7 +484,7 @@ class TestBiomechanicsPhysicsRegressions:
         """#8001: data.energy is [potential, kinetic] and must be populated."""
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81"/>
+          <option gravity="0 0 -9.80665"/>
           <worldbody>
             <body name="arm" pos="0 0 2">
               <joint name="h" type="hinge" axis="0 1 0"/>
@@ -502,7 +502,7 @@ class TestBiomechanicsPhysicsRegressions:
         mujoco.mj_forward(model, data)
 
         ke, pe, te = analyzer.compute_energies()
-        # A body at rest 2 m up: KE = 0, PE = m*g*h = 10 * 9.81 * 2.
+        # A body at rest 2 m up: KE = 0, PE = m*g*h = 10 * 9.80665 * 2.
         assert ke == pytest.approx(0.0, abs=1e-9)
         assert pe == pytest.approx(196.2, abs=1e-6)
         assert te == pytest.approx(196.2, abs=1e-6)
@@ -520,7 +520,7 @@ class TestBiomechanicsPhysicsRegressions:
         """#7991: GRF must be rotated to world frame with the correct sign."""
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81"/>
+          <option gravity="0 0 -9.80665"/>
           <worldbody>
             <geom name="floor" type="plane" size="5 5 0.1"/>
             <body name="left_foot" pos="-0.3 0 0.1">
@@ -550,8 +550,8 @@ class TestBiomechanicsPhysicsRegressions:
         np.testing.assert_allclose(left, left_truth, atol=1e-6)
         np.testing.assert_allclose(right, right_truth, atol=1e-6)
         # 35 kg per foot -> +343.35 N straight up, nothing in the X channel.
-        np.testing.assert_allclose(left, [0.0, 0.0, 35 * 9.81], atol=1e-2)
-        np.testing.assert_allclose(right, [0.0, 0.0, 35 * 9.81], atol=1e-2)
+        np.testing.assert_allclose(left, [0.0, 0.0, 35 * 9.80665], atol=1e-2)
+        np.testing.assert_allclose(right, [0.0, 0.0, 35 * 9.80665], atol=1e-2)
 
     def test_actuator_powers_index_qvel_by_dof_address(self) -> None:
         """#7974: actuator_trnid is a joint id; qvel is indexed by DOF address."""
@@ -589,7 +589,7 @@ class TestBiomechanicsPhysicsRegressions:
         """#7975: prev_time was consumed by compute_joint_accelerations."""
         xml = """
         <mujoco>
-          <option gravity="0 0 -9.81" timestep="0.002"/>
+          <option gravity="0 0 -9.80665" timestep="0.002"/>
           <worldbody>
             <body name="shaft" pos="0 0 1">
               <joint name="j" type="hinge" axis="0 1 0"/>

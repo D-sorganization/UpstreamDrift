@@ -95,14 +95,14 @@ def _apply_stylesheet(app: QApplication) -> None:
 
 def _apply_optional_ui_themes(app: QApplication) -> None:
     try:
-        from shared.python.plot_theme import apply_plot_theme
+        from src.shared.python.plot_theme import apply_plot_theme
 
         apply_plot_theme(settings_app="UpstreamDrift")
     except ImportError:
         logger.debug("Plot theme module not available")
 
     try:
-        from shared.python.theme.zoom import install_application_zoom
+        from src.shared.python.theme.zoom import install_application_zoom
 
         install_application_zoom(app)
     except ImportError as exc:

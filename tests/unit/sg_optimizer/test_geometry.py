@@ -12,7 +12,6 @@ from src.shared.python.sg_optimizer.course.geometry import (
     utm_to_latlon,
 )
 
-
 # ---------------------------------------------------------------------------
 # LatLonPoint / UTMPoint construction
 # ---------------------------------------------------------------------------

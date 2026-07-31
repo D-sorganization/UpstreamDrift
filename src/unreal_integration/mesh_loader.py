@@ -696,15 +696,82 @@ class MeshLoader:
 
             faces = [MeshFace(indices=face) for face in mesh_data.faces]
 
+            skeleton = self._extract_gltf_skeleton(path)
+
             return LoadedMesh(
                 name=path.stem,
                 vertices=vertices,
                 faces=faces,
+                skeleton=skeleton,
             )
 
         except ImportError:
             # Fallback: basic GLTF JSON parsing
             return self._load_gltf_basic(path)
+
+    def _extract_gltf_skeleton(self, path: Path) -> MeshSkeleton | None:
+        import json
+        import struct
+
+        try:
+            with open(path, "rb") as f:
+                magic = f.read(4)
+                if magic == b"glTF":
+                    f.read(8)
+                    chunk_len = struct.unpack("<I", f.read(4))[0]
+                    chunk_type = f.read(4)
+                    if chunk_type != b"JSON":
+                        return None
+                    data = json.loads(f.read(chunk_len).decode("utf-8"))
+                else:
+                    with open(path, encoding="utf-8") as text_f:
+                        data = json.load(text_f)
+
+            if "nodes" not in data or "skins" not in data:
+                return None
+            skins = data["skins"]
+            if not skins:
+                return None
+
+            nodes = data["nodes"]
+            skin = skins[0]
+            joints = skin.get("joints", [])
+            if not joints:
+                return None
+
+            parents = {}
+            for i, node in enumerate(nodes):
+                for child_idx in node.get("children", []):
+                    parents[child_idx] = i
+
+            skeleton = MeshSkeleton()
+            for i, joint_node_idx in enumerate(joints):
+                if joint_node_idx >= len(nodes):
+                    continue
+                node = nodes[joint_node_idx]
+                name = node.get("name", f"joint_{i}")
+
+                parent_node_idx = parents.get(joint_node_idx, -1)
+                parent_index = -1
+                if parent_node_idx in joints:
+                    parent_index = joints.index(parent_node_idx)
+
+                transform = np.eye(4)
+                if "matrix" in node:
+                    transform = np.array(node["matrix"]).reshape(4, 4).T
+
+                bone = MeshBone(
+                    name=name,
+                    index=i,
+                    parent_index=parent_index,
+                    local_transform=transform,
+                )
+                skeleton.bones.append(bone)
+
+            return skeleton if skeleton.bones else None
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Failed to extract GLTF skeleton: {e}")
+            return None
 
     def _load_gltf_basic(self, path: Path) -> LoadedMesh:
         """Reject GLTF/GLB loading when trimesh is unavailable.

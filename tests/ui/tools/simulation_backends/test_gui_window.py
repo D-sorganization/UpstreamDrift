@@ -107,7 +107,9 @@ def test_export_button_without_trace_sets_status(qapp) -> None:  # noqa: ANN001
     assert "export" in widget.status_label.text().lower()
 
 
-def test_selecting_mjwarp_marks_unavailable_and_rollout_fails(qapp) -> None:  # noqa: ANN001
+def test_selecting_mjwarp_marks_unavailable_and_rollout_fails(
+    qapp,
+) -> None:  # noqa: ANN001
     from src.tools.simulation_backends_launcher import gui
 
     widget = gui.MainWidget()

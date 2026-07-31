@@ -90,6 +90,9 @@ jobs:
 
       - name: Install Python deps
         run: |
+          python -m venv .venv
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
+          export PATH="$PWD/.venv/bin:$PATH"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true

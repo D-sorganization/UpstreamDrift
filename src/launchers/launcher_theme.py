@@ -43,21 +43,17 @@ class ThemeManager:
             colors = manager.get_current_colors()
 
             # Map extended color names to actual theme keys with fallbacks
-            bg_elevated = colors.get(
-                "bg_elevated", colors.get("group_bg", "#2D2D2D")
-            )  # noqa: F841
+            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))  # noqa: F841
             border_default = colors.get(  # noqa: F841
                 "border_default", colors.get("border", "#555555")
             )
-            bg_highlight = colors.get(
-                "bg_highlight", colors.get("input_bg", "#3D3D3D")
-            )  # noqa: F841
-            border_strong = colors.get(
-                "border_strong", colors.get("focus", "#0078D4")
-            )  # noqa: F841
+            colors.get("bg_highlight", colors.get("input_bg", "#3D3D3D"))  # noqa: F841
+            colors.get("border_strong", colors.get("focus", "#0078D4"))  # noqa: F841
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
-            self.setStyleSheet(manager.get_current_stylesheet() + f"""
+            self.setStyleSheet(
+                manager.get_current_stylesheet()
+                + f"""
                 QMainWindow {{ background-color: {bg_elevated}; }}
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
@@ -67,7 +63,8 @@ class ThemeManager:
                 QLabel#CardDescription {{
                     color: {text_sec};
                 }}
-            """)
+            """
+            )
         except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(

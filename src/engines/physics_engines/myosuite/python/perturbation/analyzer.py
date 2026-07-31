@@ -69,7 +69,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 _MINIMAL_MJCF: str = """<mujoco model="minimal_myo_arm">
-  <option timestep="0.005" gravity="0 0 -9.81"/>
+  <option timestep="0.005" gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="upper_arm" pos="0 0 1">
       <joint name="shoulder" type="hinge" axis="0 1 0"/>

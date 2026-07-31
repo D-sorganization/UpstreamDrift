@@ -43,7 +43,7 @@ class MPMDriver:
 
         xml = f"""
         <mujoco model="bunkershot">
-            <option timestep="0.001" gravity="0 0 -9.81" />
+            <option timestep="0.001" gravity="0 0 -9.80665" />
             <worldbody>
                 <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
                 <!-- Container -->

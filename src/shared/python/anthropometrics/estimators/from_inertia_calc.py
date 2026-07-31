@@ -49,10 +49,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from model_generation.inertia.primitives import (
+from src.shared.python.model_generation.inertia.primitives import (
     cylinder_inertia as _primitive_cylinder_inertia,
 )
-from model_generation.inertia.primitives import (
+from src.shared.python.model_generation.inertia.primitives import (
     ellipsoid_inertia as _primitive_ellipsoid_inertia,
 )
 

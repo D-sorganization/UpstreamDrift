@@ -11,9 +11,9 @@ Closes issue #4138.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
-import math
 import numpy as np  # noqa: TID253
 
 # Guard pinocchio import — heavy optional dependency.

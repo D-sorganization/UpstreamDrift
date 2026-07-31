@@ -9,7 +9,6 @@ import pytest
 
 from src.shared.python.cors import DEFAULT_ORIGINS, add_cors_middleware
 
-
 pytestmark = pytest.mark.unit
 
 

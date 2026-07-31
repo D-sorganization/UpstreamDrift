@@ -96,7 +96,7 @@ class TestBiomechanicalDataAssignment:
         np.testing.assert_array_equal(bd.com_position, com)
 
     def test_induced_accelerations_set(self) -> None:
-        iaccels = {"gravity": np.array([0.0, 0.0, -9.81])}
+        iaccels = {"gravity": np.array([0.0, 0.0, -9.80665])}
         bd = BiomechanicalData(induced_accelerations=iaccels)
         assert "gravity" in bd.induced_accelerations
 

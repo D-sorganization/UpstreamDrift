@@ -43,7 +43,7 @@ def generate_portfolio_demo_output(output_path: Path | None = None) -> None:
         cl2=0.0,
     )
     env = EnvironmentalConditions(
-        gravity=9.81,
+        gravity=9.80665,
         air_density=1.225,
     )
 
@@ -98,7 +98,7 @@ def generate_portfolio_demo_output(output_path: Path | None = None) -> None:
         {
             "quantity": "gravity",
             "category": "assumption",
-            "value": "9.81",
+            "value": "9.80665",
             "unit": "m/s^2",
             "source": "default simulation environment",
         },

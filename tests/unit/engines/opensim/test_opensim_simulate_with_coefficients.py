@@ -14,7 +14,6 @@ from src.engines.physics_engines.opensim.python.opensim_golf import (
     simulate_with_coefficients as facade,
 )
 
-
 pytestmark = [pytest.mark.unit]
 
 
