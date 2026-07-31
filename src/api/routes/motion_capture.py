@@ -174,6 +174,7 @@ _OPENPOSE_SKELETON: list[dict[str, Any]] = [
 _sessions: dict[str, dict[str, Any]] = {}
 _recordings: dict[str, dict[str, Any]] = {}
 _session_state: dict[str, int] = {"counter": 0}
+_MAX_CACHE_SIZE = 50
 
 
 # ── Endpoints ──
@@ -288,6 +289,8 @@ async def start_capture_session(
         "status": "recording",
         "frames": [],
     }
+    if len(_sessions) > _MAX_CACHE_SIZE:
+        _sessions.pop(next(iter(_sessions)))
 
     return CaptureSessionResponse(
         session_id=session_id,
@@ -320,6 +323,8 @@ async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
         "frame_rate": session["frame_rate"],
         "frames": session["frames"],
     }
+    if len(_recordings) > _MAX_CACHE_SIZE:
+        _recordings.pop(next(iter(_recordings)))
 
     return CaptureSessionResponse(
         session_id=session_id,
@@ -496,6 +501,8 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
         "frames": frames,
         "joint_names": marker_names,
     }
+    if len(_recordings) > _MAX_CACHE_SIZE:
+        _recordings.pop(next(iter(_recordings)))
 
     duration = len(frames) / frame_rate if frame_rate > 0 else 0.0
     return C3DUploadResponse(

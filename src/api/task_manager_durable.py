@@ -183,6 +183,7 @@ class SQLiteBackend:
         self.db_path = Path(db_path)
         self._local = threading.local()
         self._lock = threading.Lock()
+        self._connections: set[sqlite3.Connection] = set()
         self._init_db()
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -196,6 +197,8 @@ class SQLiteBackend:
             self._local.conn.row_factory = sqlite3.Row
             self._local.conn.execute("PRAGMA journal_mode=WAL")
             self._local.conn.execute("PRAGMA busy_timeout=30000")
+            with self._lock:
+                self._connections.add(self._local.conn)
         return cast(sqlite3.Connection, getattr(self._local, "conn", None))
 
     @contextmanager
@@ -515,12 +518,12 @@ class SQLiteBackend:
         return count
 
     def close(self) -> None:
-        """Close the thread-local SQLite connection for the current thread."""
+        """Close all SQLite connections for all threads."""
         with self._lock:
-            conn = getattr(self._local, "conn", None)
-            if conn is None:
-                return
-            conn.close()
+            for conn in self._connections:
+                with suppress(sqlite3.Error):
+                    conn.close()
+            self._connections.clear()
             self._local.conn = None
 
 
@@ -675,7 +678,20 @@ class DurableTaskManager:
             max_retries=max_retries,
         )
 
-        self.backend.create_task(record)
+        try:
+            self.backend.create_task(record)
+        except sqlite3.IntegrityError:
+            if run_id:
+                existing = self.backend.find_by_run_id(run_id)
+                if existing:
+                    logger.debug(
+                        "Task id collision while creating task %s, returning existing %s",
+                        task_id,
+                        existing.task_id,
+                    )
+                    return existing.task_id
+            raise
+
         logger.info(
             "Created task %s (type=%s, priority=%d)", task_id, task_type, priority
         )

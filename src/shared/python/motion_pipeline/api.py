@@ -249,6 +249,7 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
 
         # Save uploaded file temporarily
         try:
+            tmp_path = None
             with tempfile.NamedTemporaryFile(
                 delete=False, suffix=Path(file.filename).suffix
             ) as tmp:
@@ -256,34 +257,36 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
                 tmp.write(content)
                 tmp_path = Path(tmp.name)
 
-            # Configure pipeline
-            config = PipelineConfig(
-                adapter=AdapterOverride(format=source_format),
-                ik_backend=ik_backend,
-                matching_backend=matching_backend,
-                matching_model_urdf=matching_model_urdf,
-            )
-
-            # Create and run pipeline
-            pipeline = MotionPipeline(config)
-
-            # Add logging hook
-            def log_hook(payload) -> None:
-                logger.info(
-                    f"Request {request_id}: Stage {payload.stage.value} completed"
+            try:
+                # Configure pipeline
+                config = PipelineConfig(
+                    adapter=AdapterOverride(format=source_format),
+                    ik_backend=ik_backend,
+                    matching_backend=matching_backend,
+                    matching_model_urdf=matching_model_urdf,
                 )
 
-            from .orchestrator import Stage
+                # Create and run pipeline
+                pipeline = MotionPipeline(config)
 
-            for stage in Stage:
-                pipeline.add_hook(stage, log_hook)
+                # Add logging hook
+                def log_hook(payload) -> None:
+                    logger.info(
+                        f"Request {request_id}: Stage {payload.stage.value} completed"
+                    )
 
-            # Run pipeline
-            result = pipeline.run(tmp_path)
-            audit_log = pipeline.get_audit_log()
+                from .orchestrator import Stage
 
-            # Clean up temp file
-            tmp_path.unlink(missing_ok=True)
+                for stage in Stage:
+                    pipeline.add_hook(stage, log_hook)
+
+                # Run pipeline
+                result = pipeline.run(tmp_path)
+                audit_log = pipeline.get_audit_log()
+            finally:
+                # Clean up temp file
+                if tmp_path:
+                    tmp_path.unlink(missing_ok=True)
 
             logger.info(
                 f"Request {request_id}: Pipeline completed success={result.success}"
@@ -345,6 +348,7 @@ Accepts JSON config body plus file upload.
         _validate_source_format(parsed_config.source_format)
 
         try:
+            tmp_path = None
             # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -354,14 +358,16 @@ Accepts JSON config body plus file upload.
                 tmp.write(content)
                 tmp_path = Path(tmp.name)
 
-            # Convert config and run pipeline
-            pipeline_config = parsed_config.to_pipeline_config()
-            pipeline = MotionPipeline(pipeline_config)
+            try:
+                # Convert config and run pipeline
+                pipeline_config = parsed_config.to_pipeline_config()
+                pipeline = MotionPipeline(pipeline_config)
 
-            result = pipeline.run(tmp_path)
-            audit_log = pipeline.get_audit_log()
-
-            tmp_path.unlink(missing_ok=True)
+                result = pipeline.run(tmp_path)
+                audit_log = pipeline.get_audit_log()
+            finally:
+                if tmp_path:
+                    tmp_path.unlink(missing_ok=True)
 
             return PipelineResponse.from_result(result, audit_log)
 

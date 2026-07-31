@@ -89,8 +89,8 @@ async def get_engines(
 
     for engine_type in EngineType:
         status = engine_manager.get_engine_status(engine_type)
-        is_available = engine_type in available_engines
         is_loaded = current_engine == engine_type
+        is_available = is_loaded or (engine_type in available_engines)
 
         engines.append(
             EngineStatusResponse(
