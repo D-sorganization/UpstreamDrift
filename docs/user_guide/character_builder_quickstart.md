@@ -191,6 +191,18 @@ params = BodyParameters(height_m=1.75)
 result = builder.build(params, generate_meshes=True)
 ```
 
+## CLI Usage
+
+The Character Builder includes a command-line interface for quick generation without writing Python code:
+
+```bash
+# List available presets
+python -m src.shared.python.humanoid_character_builder presets list
+
+# Build a character using a preset
+python -m src.shared.python.humanoid_character_builder build --preset athletic --output my_character.urdf
+```
+
 ## API Reference
 
 ### quick_urdf()

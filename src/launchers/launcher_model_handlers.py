@@ -637,10 +637,19 @@ class ProviderExerciseHandler:
                 getattr(model, "id", "unknown"),
             )
             return False
-        exercise_name = Path(model_path).name
-        if not exercise_name or exercise_name in {".", ".."}:
+
+        try:
+            resolved_dir = resolve_model_artifact_path(model, repo_path)
+            if not resolved_dir.is_dir():
+                logger.error(
+                    "ProviderExerciseHandler: model path is not a directory: %s",
+                    resolved_dir,
+                )
+                return False
+            exercise_name = resolved_dir.name
+        except (ValueError, OSError) as exc:
             logger.error(
-                "ProviderExerciseHandler: invalid exercise path %s", model_path
+                "ProviderExerciseHandler: invalid exercise path %s: %s", model_path, exc
             )
             return False
 
