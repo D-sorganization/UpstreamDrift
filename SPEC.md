@@ -39,14 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-<<<<<<< HEAD
 | **Spec Version** | 1.0.479 |
 | **Last Spec Update** | 2026-07-27 |
-=======
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
 
 ## 2. Purpose & Mission
 
@@ -1335,7 +1329,6 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
 - **2026-05-29** - Annotated cross-engine dashboard comparison results with per-engine velocity convention and units metadata in GUI result labels and headless logs so learners can see which native representation each engine result uses before normalized comparison (closes #6659).
 - **2026-05-28** - Resolved python path resolution bug in `embedded_tool_bootstrap.py` and `upstream_drift_launcher.py` to fix launcher boot-time `ModuleNotFoundError` crashes and warnings.
 - **2026-05-28** - Added sg-optimizer Phase 2: GeoJSON I/O (`course_io.py` with `HoleGeometry`, `load_hole_geojson`, `save_hole_geojson`), UTM geometry utilities (`geometry.py` with `LatLonPoint`, `UTMPoint`, `project_to_utm`, `utm_to_latlon`, `haversine_m` via pyproj), classic-holes library (`library.py` with 5 GeoJSON data files for Sawgrass 17, Augusta 13, Pebble 7, Road Hole 17, Cypress 16), `StateFeatures` dataclass factory (`features.py`), and full `TreeModel` with `forced_punch_out_probability` distribution (`mdp/tree_model.py`); adds `pyproj>=3.6.0` optional dependency (closes #6271).
-- **2026-07-30** - Replaced `np.sum` with `.sum()` for boolean arrays in `src/shared/python/analysis/nonlinear_dynamics.py`.
 - **2026-05-28** - Restored production symbols deleted by Bolt commit #6501: `_resolve_default_server` in `chat_dock_widget`, full 60-token `ThemeColors` derivation pipeline in `theme/api.py`, `ThemeColorsCompat` and `_derive_full_palette` in `theme/__init__.py`, `_tool_declarations_to_ollama` + `keep_alive`/`num_ctx` latency optimizations in `ollama_adapter.py`, and `_EmbedAdapter` + `_register()` in all 5 tool GUI modules; closes #6527, #6528, #6529. Also fixes sg_optimizer longitudinal dispersion applying wrong modifier column (closes #6343).
 - **2026-05-27** - Confirmed Standalone Sidekick T2 (`StandaloneSidekickWindow` chat-first/calc-first layouts and profile switching) and T5 (state-profile round-trip with schema-version written to saved JSON) acceptance criteria with targeted new tests; closes #5980 and #5983.
 - **2026-05-27** - Completed Standalone Sidekick T4 acceptance criteria: `sidekick run --calculator` now validates inputs via the Calculator Protocol, surfaces structured errors on validation/calculation failure (exit 3), unknown-calculator with fuzzy suggestions (exit 4), and I/O errors (exit 1); supports `--format json` and `--format csv`; full TDD coverage in `tests/unit/sidekick/standalone/test_run.py` (issue #5982).
@@ -2395,10 +2388,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Rebuilt PR #7966 from current main, retaining only the remaining allocation-free
   vector RMSE calculations after the axis RMSE and torque-diagnostic optimizations
   had already landed.
-
-
-## Refactoring & Optimization Notes
-- `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
 
 
 ## Refactoring & Optimization Notes
