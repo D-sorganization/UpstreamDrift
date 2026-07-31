@@ -49,6 +49,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -138,3 +139,4 @@ jobs:
         with:
           name: cross-engine-leaderboard
           path: motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
+          if-no-files-found: ignore

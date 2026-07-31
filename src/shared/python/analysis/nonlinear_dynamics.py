@@ -334,7 +334,7 @@ class NonlinearDynamicsMixin:
         c_r = []
 
         for r in radii:
-            count = (dists < r).sum()
+            count = np.sum(dists < r)
             c_r.append(count / len(dists))
 
         log_r = np.log(radii)
