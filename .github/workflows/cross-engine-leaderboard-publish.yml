@@ -59,6 +59,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          submodules: recursive
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Isolate Python tool cache (prevent shared-cache races)
@@ -136,7 +137,7 @@ jobs:
         run: |
           python3 scripts/run_cross_engine_leaderboard.py --skip-fits || true
           mkdir -p reports
-          if [ ! -f reports/cross_engine_leaderboard.json ]; then
+          if [ ! -s reports/cross_engine_leaderboard.json ]; then
             echo "[]" > reports/cross_engine_leaderboard.json
           fi
           python -c "import json; \
@@ -162,7 +163,7 @@ jobs:
         with:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

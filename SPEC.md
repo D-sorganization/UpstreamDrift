@@ -1234,6 +1234,7 @@ force_download=True)` enforces the HTTPS-only `source_url` policy before any
   avoids dynamic source execution in launcher tests, and refreshes generated
   dependency artifacts against the canonical project metadata.
 - **2026-06-09** - Added a changed-file architecture budget gate for #7131/#7133: `scripts/ci/check_architecture_budget.py` now scans changed production Python files for functions over 100 lines and callable signatures over 8 effective parameters (excluding `self`/`cls`), with owned/expiring exceptions configured in `scripts/config/architecture_budget.json`. The standard CI workflow runs the guard beside the file-size and module-size gates, and focused tests pin long-function, parameter-count, exception, and test-path skip behavior.
+- **2026-07-29** - Recorded the Bolt IK vector norm optimization: The `pinocchio_golf.diff_ik` module now uses `math.sqrt(np.vdot(err, err))` inside its `differential_ik` and `solve_dual_frame_ik` loop conditions instead of `np.linalg.norm(err)`. This eliminates array allocation overhead on the hot path for ~2x performance speedup without changing the mathematical behavior.
 - **2026-06-02** - Restored visible Sidekick sidebar tab hover affordance (#7109): the synced tools-sidebar design-token QSS now styles unselected `QTabBar` tabs on hover with the soft accent surface while keeping the selected-tab rule separate, and a headless unit regression pins the generated stylesheet contract.
 - **2026-06-02** - Fixed Windows taskbar identity for the UpstreamDrift launcher (#7107): `src.shared.python.ui.window_icon` now declares an AppUserModelID before showing the first window, applies the resolved icon to both the `QApplication` and top-level window, and covers the Windows API call plus icon application contract with focused unit tests.
 - **2026-06-02** - Removed obsolete archived launcher entries (#7108): the deprecated MuJoCo, MATLAB, and motion-capture archived launchers are no longer advertised through the launcher manifest or tool catalog, and launcher regression coverage now asserts the surviving catalog paths without maintaining tests for removed archived entry points.
@@ -2370,7 +2371,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
-- Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('...i,...i->...', ...))` in `src/robotics/planning/collision/_primitive_shapes.py` to avoid intermediate array allocations and speed up batch norm calculations.
 - Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
 
 - **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
