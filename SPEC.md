@@ -39,14 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-<<<<<<< HEAD
 | **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
-=======
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
+| **Last Spec Update** | 2026-07-30 |
 
 ## 2. Purpose & Mission
 
@@ -2381,7 +2375,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
-- Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('...i,...i->...', ...))` in `src/robotics/planning/collision/_primitive_shapes.py` to avoid intermediate array allocations and speed up batch norm calculations.
 - Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
 
 - **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
