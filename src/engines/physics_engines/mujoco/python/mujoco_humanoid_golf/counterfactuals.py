@@ -130,9 +130,11 @@ class CounterfactualAnalyzer:
         # 1. Compute OBSERVED acceleration (with control)
         if qpos is None:
             raise ValueError("qpos must be provided")
+        if len(ctrl) != self.model.nu:
+            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
         self._data_observed.qpos[:] = qpos
         self._data_observed.qvel[:] = qvel
-        self._data_observed.ctrl[: len(ctrl)] = ctrl
+        self._data_observed.ctrl[:] = ctrl
 
         mujoco.mj_forward(self.model, self._data_observed)
 
