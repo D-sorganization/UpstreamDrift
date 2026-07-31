@@ -111,7 +111,7 @@ class LauncherService:
             return False
 
         logger.info("[stop] Killing process tree for %s (pid=%s)", name, proc.pid)
-        kill_process_tree(proc.pid)
+        success = kill_process_tree(proc.pid)
         del running[name]
         logger.info("[stop] Process %s stopped and removed", name)
-        return True
+        return success
