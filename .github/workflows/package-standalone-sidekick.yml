@@ -36,6 +36,10 @@ jobs:
       wheel_filename: ${{ steps.build-dist.outputs.wheel_filename }}
 
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: recursive
@@ -133,6 +137,10 @@ jobs:
         python: ["3.11", "3.12"]
 
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: recursive

@@ -44,6 +44,10 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with: { node-version: "24" }

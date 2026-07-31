@@ -66,6 +66,10 @@ jobs:
       should_consolidate: ${{ steps.list.outputs.should_consolidate }}
       pr_list: ${{ steps.list.outputs.prs }}
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
@@ -102,6 +106,10 @@ jobs:
     if: needs.discover.outputs.should_consolidate == 'true' && inputs.dry_run != 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0

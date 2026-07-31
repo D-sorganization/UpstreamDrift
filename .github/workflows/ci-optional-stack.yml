@@ -89,6 +89,10 @@ jobs:
           git config --global http.postBuffer 1048576000
           git config --global http.lowSpeedLimit 1000
           git config --global http.lowSpeedTime 30
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Reject Raw Merge Conflict Markers
         run: |

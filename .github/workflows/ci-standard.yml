@@ -36,6 +36,10 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Install workflow parser dependency
         shell: bash
@@ -63,6 +67,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Run GitHub Actions pinning guard
         shell: bash
@@ -85,6 +93,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Run workflow inventory guard
         shell: bash
@@ -107,6 +119,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Run URDF layering guard
         shell: bash
@@ -155,6 +171,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
@@ -446,6 +466,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
@@ -674,6 +698,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
         with:
@@ -822,6 +850,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Fetch PR base for ownership guards
         if: github.event_name == 'pull_request'
@@ -835,6 +867,10 @@ jobs:
           test -n "$tools_sha"
           echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
       - name: Checkout pinned Tools ownership source
+        - name: Git Network Config (Fix timeouts)
+          run: |
+            git config --global http.version HTTP/1.1
+            git config --global http.postBuffer 1048576000
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: D-sorganization/Tools
@@ -1014,6 +1050,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1085,6 +1125,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1151,6 +1195,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Check for core test relevant changes
         id: core-test-changes
@@ -1652,6 +1700,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1724,6 +1776,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -1815,8 +1871,16 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Checkout Tools Hub
+        - name: Git Network Config (Fix timeouts)
+          run: |
+            git config --global http.version HTTP/1.1
+            git config --global http.postBuffer 1048576000
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: ${{ vars.TOOLS_REPOSITORY || format('{0}/Tools', github.repository_owner) }}
@@ -1934,6 +1998,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Check for frontend changes
         id: frontend-changes
@@ -2006,6 +2074,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
       - uses: matlab-actions/run-command@bcd446a219949c24051c1d04a4b4e0274c42f23b
@@ -2038,6 +2110,10 @@ jobs:
             fi
           fi
 
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -2103,6 +2179,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
@@ -2365,6 +2445,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
@@ -2495,6 +2579,10 @@ jobs:
               rm -rf .git
             fi
           fi
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0

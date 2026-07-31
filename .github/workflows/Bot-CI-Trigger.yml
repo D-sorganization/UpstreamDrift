@@ -71,6 +71,10 @@ jobs:
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
+      - - name: Git Network Config (Fix timeouts)
+      -   run: |
+      -     git config --global http.version HTTP/1.1
+      -     git config --global http.postBuffer 1048576000
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           token: ${{ github.token }}
