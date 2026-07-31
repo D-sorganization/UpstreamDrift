@@ -29,7 +29,9 @@ class _WheelBlockFilter(QObject):
     _MAX_FONT_PT = 40
     _default_font_pt: int | None = None
 
-    def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:  # noqa: N802
+    def eventFilter(
+        self, obj: QObject | None, event: QEvent | None
+    ) -> bool:  # noqa: N802
         if event is not None and event.type() == QEvent.Type.Wheel:
             wheel: QWheelEvent = event  # type: ignore[assignment]
             # Ctrl+Wheel → font zoom

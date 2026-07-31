@@ -158,7 +158,9 @@ def download_to_file(
     req = urllib.request.Request(validated_url)
     # The request URL has already passed validate_url_scheme above.
     with (
-        urllib.request.urlopen(req, timeout=timeout) as response,  # noqa: S310  # nosec B310
+        urllib.request.urlopen(
+            req, timeout=timeout
+        ) as response,  # noqa: S310  # nosec B310
         open(dest_path, "wb") as out,
     ):
         shutil.copyfileobj(response, out)

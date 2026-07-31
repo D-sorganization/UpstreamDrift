@@ -152,9 +152,9 @@ class TestRecovery:
         )
         result = fit_mod.fit_swing_pinocchio(target, opts)
 
-        assert result.solver_status == "success" or result.final_cost < 1e-6, (
-            f"LM failed to converge: cost={result.final_cost:.3e}, msg={result.message!r}"
-        )
+        assert (
+            result.solver_status == "success" or result.final_cost < 1e-6
+        ), f"LM failed to converge: cost={result.final_cost:.3e}, msg={result.message!r}"
         # Relative recovery on the truth.
         denom = max(float(np.linalg.norm(theta_truth)), 1e-12)
         rel_err = float(np.linalg.norm(result.theta_optimal - theta_truth) / denom)

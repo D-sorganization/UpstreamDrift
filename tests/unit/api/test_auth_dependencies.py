@@ -46,9 +46,9 @@ class TestAPIKeyOrmFieldAlignment:
         )
         source = dep_file.read_text(encoding="utf-8")
         # After fix: the filter references key_prefix, not prefix_hash
-        assert "key_prefix" in source, (
-            "dependencies.py must filter on APIKey.key_prefix"
-        )
+        assert (
+            "key_prefix" in source
+        ), "dependencies.py must filter on APIKey.key_prefix"
 
     def test_dependency_does_not_reference_apikey_prefix_hash(self) -> None:
         """No ORM attribute access APIKey.prefix_hash — that column does not exist."""

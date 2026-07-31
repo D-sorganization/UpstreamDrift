@@ -90,9 +90,9 @@ def test_no_internal_module_leakage() -> None:
     # what matters is that __all__ is the authoritative surface.
     assert set(training.__all__) <= set(dir(training))
     # Be permissive about sub-module names but check __all__ stays clean:
-    assert set(training.__all__) == EXPECTED_PUBLIC_NAMES, (
-        f"unexpected surface differences: {leaks}"
-    )
+    assert (
+        set(training.__all__) == EXPECTED_PUBLIC_NAMES
+    ), f"unexpected surface differences: {leaks}"
 
 
 def test_training_error_is_root_of_hierarchy() -> None:
@@ -105,6 +105,6 @@ def test_training_error_is_root_of_hierarchy() -> None:
         "TrainingConfigError",
     ):
         cls = getattr(training, name)
-        assert issubclass(cls, training.TrainingError), (
-            f"{name} does not derive from TrainingError"
-        )
+        assert issubclass(
+            cls, training.TrainingError
+        ), f"{name} does not derive from TrainingError"

@@ -116,7 +116,9 @@ def test_discovery_helpers_extract_metadata_and_walk_fake_package(
         ),
     )
 
-    walked = list(discovery._walk_package("sidekick.calculators", "calculator"))  # noqa: SLF001
+    walked = list(
+        discovery._walk_package("sidekick.calculators", "calculator")
+    )  # noqa: SLF001
 
     assert walked[0].feature_id == "calculator.fake_module"
     assert walked[0].title == "Fake Module"
@@ -133,7 +135,9 @@ def test_workflow_and_importability_discovery(monkeypatch: pytest.MonkeyPatch) -
     workflows = discovery._discover_workflows()  # noqa: SLF001
 
     assert workflows[0].feature_id == "workflow.build"
-    assert discovery._discover_theme()[0].feature_id == "theme.sidekick_tokens"  # noqa: SLF001
+    assert (
+        discovery._discover_theme()[0].feature_id == "theme.sidekick_tokens"
+    )  # noqa: SLF001
     assert tuple(src.__name__ for src in discovery.discover_sources()) == (
         "_discover_calculators",
         "_discover_process_calculators",

@@ -57,12 +57,12 @@ def _assert_button_has_icon(button) -> None:
         "IconColorizer fallback path was hit"
     )
     pix = icon.pixmap(QSize(22, 22))
-    assert not pix.isNull(), (
-        f"button {button.accessibleName()!r} renders a null 22x22 pixmap"
-    )
-    assert pix.width() > 0 and pix.height() > 0, (
-        f"button {button.accessibleName()!r} renders a zero-sized pixmap"
-    )
+    assert (
+        not pix.isNull()
+    ), f"button {button.accessibleName()!r} renders a null 22x22 pixmap"
+    assert (
+        pix.width() > 0 and pix.height() > 0
+    ), f"button {button.accessibleName()!r} renders a zero-sized pixmap"
 
 
 class TestSidebarIcons:
@@ -71,9 +71,9 @@ class TestSidebarIcons:
     @pytest.mark.parametrize("label", _REQUIRED_BUTTON_LABELS)
     def test_button_has_non_null_icon(self, ui_setup, label) -> None:
         buttons = _find_sidebar_buttons(ui_setup)
-        assert label in buttons, (
-            f"sidebar is missing the {label!r} button — check _setup_global_sidebar()"
-        )
+        assert (
+            label in buttons
+        ), f"sidebar is missing the {label!r} button — check _setup_global_sidebar()"
         _assert_button_has_icon(buttons[label])
 
     def test_no_button_falls_back_to_text_without_icon(self, ui_setup) -> None:
@@ -88,6 +88,6 @@ class TestSidebarIcons:
         """
         buttons = _find_sidebar_buttons(ui_setup)
         for label, btn in buttons.items():
-            assert not btn.icon().isNull(), (
-                f"button {label!r} fell back to text-only — icon is null"
-            )
+            assert (
+                not btn.icon().isNull()
+            ), f"button {label!r} fell back to text-only — icon is null"

@@ -50,9 +50,9 @@ def openapi_schema(generator: ModuleType) -> dict:
 
 
 def test_generated_types_file_exists() -> None:
-    assert GENERATED_PATH.exists(), (
-        f"{GENERATED_PATH} is missing - run: python scripts/generate_ui_api_types.py"
-    )
+    assert (
+        GENERATED_PATH.exists()
+    ), f"{GENERATED_PATH} is missing - run: python scripts/generate_ui_api_types.py"
 
 
 def test_generated_types_are_fresh(generator: ModuleType, openapi_schema: dict) -> None:

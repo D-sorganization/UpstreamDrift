@@ -116,7 +116,9 @@ class _StdoutProgressSink:
         # the framed JSON directly and flush so the parent observes the
         # line immediately.
         with self._lock:
-            self._stream.write(line)  # noqa: T201 - wire-protocol stdout, not user print
+            self._stream.write(
+                line
+            )  # noqa: T201 - wire-protocol stdout, not user print
             self._stream.flush()
 
 

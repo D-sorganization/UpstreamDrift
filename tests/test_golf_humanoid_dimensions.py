@@ -211,9 +211,9 @@ def test_inertia_segment_has_required_fields(inertia: dict, segment: str) -> Non
     assert all(len(row) == 3 for row in inertia_tensor)
     # Diagonal should be non-negative.
     for i in range(3):
-        assert inertia_tensor[i][i] >= 0.0, (
-            f"{segment} I[{i}][{i}] must be >= 0, got {inertia_tensor[i][i]}"
-        )
+        assert (
+            inertia_tensor[i][i] >= 0.0
+        ), f"{segment} I[{i}][{i}] must be >= 0, got {inertia_tensor[i][i]}"
 
 
 @pytest.mark.unit
@@ -249,21 +249,21 @@ def test_topology_joint_dof_sum_matches_total(topology: dict) -> None:
 def test_topology_bodies_and_joints_are_consistent(topology: dict) -> None:
     body_names = {b["name"] for b in topology["bodies"]}
     for joint in topology["joints"]:
-        assert joint["parent"] in body_names, (
-            f"joint {joint['name']} references unknown parent {joint['parent']}"
-        )
-        assert joint["child"] in body_names, (
-            f"joint {joint['name']} references unknown child {joint['child']}"
-        )
+        assert (
+            joint["parent"] in body_names
+        ), f"joint {joint['name']} references unknown parent {joint['parent']}"
+        assert (
+            joint["child"] in body_names
+        ), f"joint {joint['name']} references unknown child {joint['child']}"
 
 
 @pytest.mark.unit
 def test_topology_joint_types_are_valid(topology: dict) -> None:
     valid_types = {"floating", "universal", "revolute", "gimbal", "welded"}
     for joint in topology["joints"]:
-        assert joint["type"] in valid_types, (
-            f"unknown joint type {joint['type']!r} on {joint['name']}"
-        )
+        assert (
+            joint["type"] in valid_types
+        ), f"unknown joint type {joint['type']!r} on {joint['name']}"
 
 
 @pytest.mark.unit
@@ -288,9 +288,9 @@ def test_dimensions_and_inertia_agree_on_arm_lengths(
     com_x = inertia["LeftUpperArm"]["com_offset_m"][0]
     half_length = upper_arm_length_m / 2.0
     # Allow ±10 % slack — the Simscape COM is exactly halfway for cylinders.
-    assert abs(abs(com_x) - half_length) <= 0.10 * half_length, (
-        f"LeftUpperArm COM_x={com_x} does not match half-length {half_length}"
-    )
+    assert (
+        abs(abs(com_x) - half_length) <= 0.10 * half_length
+    ), f"LeftUpperArm COM_x={com_x} does not match half-length {half_length}"
 
 
 @pytest.mark.unit
@@ -301,6 +301,6 @@ def test_topology_segment_inertia_refs_resolve(inertia: dict, topology: dict) ->
         ref = body.get("inertia_ref")
         if ref is None:
             continue
-        assert ref in inertia_keys, (
-            f"body {body['name']} references unknown inertia segment {ref}"
-        )
+        assert (
+            ref in inertia_keys
+        ), f"body {body['name']} references unknown inertia segment {ref}"

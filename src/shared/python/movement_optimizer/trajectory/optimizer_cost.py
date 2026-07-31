@@ -111,7 +111,9 @@ def compute_endpoint_damping_cost(
     return weight * float(cost) * dt
 
 
-def compute_balance_cost(com_x: NDArray, center: float, dt: float, weight: float) -> float:
+def compute_balance_cost(
+    com_x: NDArray, center: float, dt: float, weight: float
+) -> float:
     """Soft centering preference — penalise COM deviation from the inner BOS center.
 
     Preconditions:

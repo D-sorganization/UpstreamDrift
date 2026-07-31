@@ -66,9 +66,9 @@ class TestKinematicForcesFileSizes:
     @pytest.mark.unit
     def test_data_module_loc(self) -> None:
         loc = _count_lines(KF_PKG / "types.py") + _count_lines(KF_PKG / "export.py")
-        assert loc <= LOC_BUDGET_DATA, (
-            f"kinematic_forces data modules have {loc} LOC; budget {LOC_BUDGET_DATA}"
-        )
+        assert (
+            loc <= LOC_BUDGET_DATA
+        ), f"kinematic_forces data modules have {loc} LOC; budget {LOC_BUDGET_DATA}"
 
 
 @pytest.mark.skipif(not _mujoco_available, reason="mujoco not installed")

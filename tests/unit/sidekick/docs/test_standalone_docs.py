@@ -46,9 +46,9 @@ def _env_with_pythonpath() -> dict:
 
 
 def test_standalone_doc_exists() -> None:
-    assert STANDALONE_DOC.exists(), (
-        f"docs/sidekick/standalone.md not found at {STANDALONE_DOC}"
-    )
+    assert (
+        STANDALONE_DOC.exists()
+    ), f"docs/sidekick/standalone.md not found at {STANDALONE_DOC}"
 
 
 def test_standalone_doc_has_install_section() -> None:
@@ -84,9 +84,9 @@ def test_sidekick_help_exits_zero() -> None:
         cwd=str(ROOT),
         env=_env_with_pythonpath(),
     )
-    assert result.returncode == 0, (
-        f"'python -m sidekick --help' failed:\n{result.stderr.decode()}"
-    )
+    assert (
+        result.returncode == 0
+    ), f"'python -m sidekick --help' failed:\n{result.stderr.decode()}"
 
 
 @pytest.mark.headless_safe

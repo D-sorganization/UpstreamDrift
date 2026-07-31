@@ -81,12 +81,12 @@ def test_optimizer_objective_does_not_clip_internally() -> None:
     opt._objective(x)
 
     # Without internal clipping, the experiment receives the raw 0.005 / 0.003 values
-    assert abs(received["friction_coefficient"] - 0.005) < 1e-9, (
-        f"Expected 0.005 passed through; got {received['friction_coefficient']}"
-    )
-    assert abs(received["restitution_coefficient"] - 0.003) < 1e-9, (
-        f"Expected 0.003 passed through; got {received['restitution_coefficient']}"
-    )
+    assert (
+        abs(received["friction_coefficient"] - 0.005) < 1e-9
+    ), f"Expected 0.005 passed through; got {received['friction_coefficient']}"
+    assert (
+        abs(received["restitution_coefficient"] - 0.003) < 1e-9
+    ), f"Expected 0.003 passed through; got {received['restitution_coefficient']}"
 
 
 def test_optimizer_converges_without_clip() -> None:

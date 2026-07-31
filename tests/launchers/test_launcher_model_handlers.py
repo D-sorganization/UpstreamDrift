@@ -522,9 +522,8 @@ class TestManifestTileHandlerRegistration:
                 Path("/repo") / "src" / "launchers" / "exercise_dashboard.py"
             )
             assert launch_kwargs["env"]["BIOMECH_EXERCISE"] == Path(tile.path).name
-            assert (
-                launch_kwargs["env"]["BIOMECH_ENGINE"]
-                == (ProviderExerciseHandler._PREFERRED_ENGINE_BY_MODEL_TYPE[tile.type])
+            assert launch_kwargs["env"]["BIOMECH_ENGINE"] == (
+                ProviderExerciseHandler._PREFERRED_ENGINE_BY_MODEL_TYPE[tile.type]
             )
 
     def test_manifest_static_tile_names_have_model_images(self) -> None:

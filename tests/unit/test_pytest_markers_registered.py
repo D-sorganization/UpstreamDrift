@@ -100,9 +100,9 @@ def test_registered_marker_names_are_unique() -> None:
         for entry in config["tool"]["pytest"]["ini_options"]["markers"]
     ]
     duplicates = sorted({name for name in declared if declared.count(name) > 1})
-    assert not duplicates, (
-        f"duplicate marker declarations in pyproject.toml: {duplicates}"
-    )
+    assert (
+        not duplicates
+    ), f"duplicate marker declarations in pyproject.toml: {duplicates}"
 
 
 def test_every_used_marker_is_registered() -> None:

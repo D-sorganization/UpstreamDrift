@@ -73,7 +73,9 @@ class TestGaitAnalyzer:
         assert result["walking_speed_m_s"] == pytest.approx(0.7, rel=1e-6)
         assert result["cycle_duration_s"] == pytest.approx(1.0, rel=1e-6)
         assert 0.0 < result["stance_phase_pct"] < 100.0
-        assert result["stance_phase_pct"] + result["swing_phase_pct"] == pytest.approx(100.0)
+        assert result["stance_phase_pct"] + result["swing_phase_pct"] == pytest.approx(
+            100.0
+        )
 
     def test_symmetry_index_identical(self, default_body: BodyModel) -> None:
         analyzer = GaitAnalyzer(default_body)

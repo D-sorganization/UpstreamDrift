@@ -100,9 +100,9 @@ def test_list_models_enumerates_full_registry(client: TestClient) -> None:
     assert response.status_code == 200
     models = response.json()["models"]
     keys = [m["key"] for m in models]
-    assert keys == [mt.value for mt in FlightModelType], (
-        "GET /models must enumerate the same registry the desktop tracer uses"
-    )
+    assert keys == [
+        mt.value for mt in FlightModelType
+    ], "GET /models must enumerate the same registry the desktop tracer uses"
     for model in models:
         assert model["name"]
         assert model["description"]
@@ -200,9 +200,9 @@ def test_trajectory_is_structurally_sound(
 
     times = [sample["time_s"] for sample in trajectory]
     assert times == sorted(times), "time must be monotonically non-decreasing"
-    assert all(b > a for a, b in zip(times, times[1:], strict=False)), (
-        "time must be strictly increasing"
-    )
+    assert all(
+        b > a for a, b in zip(times, times[1:], strict=False)
+    ), "time must be strictly increasing"
 
     for sample in trajectory:
         values = [sample["time_s"], *sample["position_m"], *sample["velocity_mps"]]

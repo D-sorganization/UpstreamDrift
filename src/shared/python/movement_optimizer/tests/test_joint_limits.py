@@ -115,7 +115,9 @@ class TestJointAngleLimits:
     def test_bench_press_limits(self) -> None:
         """Bench press joints should have their own limits."""
         q = np.array([np.radians(100), 0.0, np.radians(20)])
-        q_clamped = clamp_joint_angles(q, BENCH_PRESS_JOINT_LIMITS, BENCH_PRESS_JOINT_NAMES)
+        q_clamped = clamp_joint_angles(
+            q, BENCH_PRESS_JOINT_LIMITS, BENCH_PRESS_JOINT_NAMES
+        )
         for i, name in enumerate(BENCH_PRESS_JOINT_NAMES):
             lo, hi = BENCH_PRESS_JOINT_LIMITS[name]
             assert lo - 1e-10 <= q_clamped[i] <= hi + 1e-10
@@ -296,7 +298,9 @@ class TestJointTorqueSet:
         with pytest.raises(ValueError, match="Unknown joint"):
             default_torque_set.set_max_torque("nonexistent", 100.0)
 
-    def test_set_negative_torque_raises(self, default_torque_set: JointTorqueSet) -> None:
+    def test_set_negative_torque_raises(
+        self, default_torque_set: JointTorqueSet
+    ) -> None:
         with pytest.raises(ValueError, match="tau_max"):
             default_torque_set.set_max_torque("knee", -10.0)
 
@@ -307,7 +311,9 @@ class TestJointTorqueSet:
         assert result.shape == (3,)
         assert np.all(result > 0)
 
-    def test_available_torques_batch_shape(self, default_torque_set: JointTorqueSet) -> None:
+    def test_available_torques_batch_shape(
+        self, default_torque_set: JointTorqueSet
+    ) -> None:
         n = 10
         q = np.tile([0.0, -0.5, 0.5], (n, 1))
         qd = np.zeros((n, 3))
@@ -341,7 +347,9 @@ class TestJointTorqueSet:
         torques = np.ones((n, 3)) * 10.0
         torques[3, 1] = 500.0  # knee at step 3
 
-        time_idx, joint_name, peak_util = default_torque_set.find_sticking_point(q, qd, torques)
+        time_idx, joint_name, peak_util = default_torque_set.find_sticking_point(
+            q, qd, torques
+        )
         assert time_idx == 3
         assert joint_name == "knee"
         assert peak_util > 1.0  # should be overloaded

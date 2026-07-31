@@ -112,9 +112,9 @@ class TestPSAModelBaseCase:
 
     def test_mass_balance(self, base_results) -> None:
         """Test mass balance closure."""
-        assert abs(base_results.mass_balance_error) < 1e-10, (
-            f"Mass balance error too large: {base_results.mass_balance_error}"
-        )
+        assert (
+            abs(base_results.mass_balance_error) < 1e-10
+        ), f"Mass balance error too large: {base_results.mass_balance_error}"
 
     def test_s2_tail_h2_pct(self, base_results) -> None:
         """Test S2 tail H2 percentage matches Excel."""
@@ -468,9 +468,9 @@ class TestPSAModelConsistency:
                 - results.flows.s2_tail_vent[i]
                 - results.flows.net_product[i]
             )
-            assert abs(balance) < 1e-10, (
-                f"Mass balance error for {results.component_names[i]}: {balance}"
-            )
+            assert (
+                abs(balance) < 1e-10
+            ), f"Mass balance error for {results.component_names[i]}: {balance}"
 
     def test_mixed_feed_balance(self) -> None:
         """Test mixed feed balance."""

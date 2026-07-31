@@ -84,9 +84,9 @@ def test_all_public_names_can_be_imported_from_submodules() -> None:
     names = _parse_all_from_init()
     assert names, "Failed to parse __all__ from __init__.py"
     for name in names:
-        assert any(hasattr(m, name) for m in mods), (
-            f"{name} from __all__ is not provided by any submodule"
-        )
+        assert any(
+            hasattr(m, name) for m in mods
+        ), f"{name} from __all__ is not provided by any submodule"
 
 
 def test_dataclasses_are_importable() -> None:

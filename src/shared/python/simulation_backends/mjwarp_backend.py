@@ -393,7 +393,9 @@ class MJWarpBackend:
             "use the mujoco backend for M(q)/bias"
         )
 
-    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:  # noqa: ARG002 - interface
+    def bias_forces(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> np.ndarray:  # noqa: ARG002 - interface
         """Not supported by MJWarp; use the ``mujoco`` backend.
 
         Raises:

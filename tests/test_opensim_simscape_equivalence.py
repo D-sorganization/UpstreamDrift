@@ -305,8 +305,8 @@ def test_simscape_reference_fixture_is_well_formed() -> None:
         q = fixture[f"{pose}_grip_quat"]
         assert q.shape == (4,)
         norm = float(np.linalg.norm(q))
-        assert abs(norm - 1.0) < 1e-3, (
-            f"{pose} grip-quat is not unit-norm (|q|={norm:.4f})"
-        )
+        assert (
+            abs(norm - 1.0) < 1e-3
+        ), f"{pose} grip-quat is not unit-norm (|q|={norm:.4f})"
     assert int(fixture["impact_idx"]) >= 0
     assert int(fixture["top_idx"]) >= 0

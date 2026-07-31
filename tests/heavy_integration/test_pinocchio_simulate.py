@@ -198,9 +198,9 @@ class TestEnergyConservationFreeFall:
             assert np.max(np.abs(total - ref)) < 1e-9
         else:
             rel_drift = np.max(np.abs(total - ref)) / abs(ref)
-            assert rel_drift < 5e-2, (
-                f"energy drift {rel_drift:.4f} exceeds 5% over {opts.t_final}s"
-            )
+            assert (
+                rel_drift < 5e-2
+            ), f"energy drift {rel_drift:.4f} exceeds 5% over {opts.t_final}s"
 
 
 class TestPerformanceBudget:

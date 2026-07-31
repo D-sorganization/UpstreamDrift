@@ -128,9 +128,9 @@ def test_cross_engine_drift_acceleration_agrees(
     reference = accelerations[names[0]]
     for name in names[1:]:
         qacc = accelerations[name]
-        assert qacc.shape == reference.shape, (
-            f"DOF mismatch: {name} {qacc.shape} vs {names[0]} {reference.shape}"
-        )
+        assert (
+            qacc.shape == reference.shape
+        ), f"DOF mismatch: {name} {qacc.shape} vs {names[0]} {reference.shape}"
         residual = float(np.max(np.abs(qacc - reference)))
         assert residual < ACCELERATION_AGREEMENT_TOL_RAD_S2, (
             f"Cross-engine drift acceleration disagreement between "

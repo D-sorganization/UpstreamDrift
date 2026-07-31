@@ -685,7 +685,9 @@ class ModelLibrary:
             "sibling": sibling,
         }
 
-    def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:  # noqa: C901
+    def get_model_info(
+        self, category: str, model_key: str
+    ) -> dict[str, Any] | None:  # noqa: C901
         """Get information about a specific model.
 
         Args:

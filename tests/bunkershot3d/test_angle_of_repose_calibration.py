@@ -67,9 +67,9 @@ class TestMockFormula:
         for friction in [0.0, 0.3, 0.5, 0.9]:
             exp = AngleOfReposeExperiment(backend="mock")
             angle = exp.run_simulation({"friction_coefficient": friction})
-            assert 0.0 <= angle < 90.0, (
-                f"Angle {angle} out of physical range for mu={friction}"
-            )
+            assert (
+                0.0 <= angle < 90.0
+            ), f"Angle {angle} out of physical range for mu={friction}"
 
     def test_use_mock_override_forces_mock_path(self) -> None:
         """use_mock=True forces mock path regardless of backend string."""
@@ -133,6 +133,6 @@ class TestMujocoPhysicalBounds:
         from bunkershot3d.calibration.angle_of_repose import _mujoco_angle_of_repose
 
         angle = _mujoco_angle_of_repose(friction=0.5, n_grains=80, settle_steps=1500)
-        assert 5.0 <= angle <= 50.0, (
-            f"Angle {angle:.1f} out of physical range [5, 50] deg"
-        )
+        assert (
+            5.0 <= angle <= 50.0
+        ), f"Angle {angle:.1f} out of physical range [5, 50] deg"

@@ -220,9 +220,9 @@ def test_export_bytes_match_desktop_export_path(client: TestClient, tmp_path) ->
         response = client.get(f"/recordings/{rec_id}/export?format={fmt}")
         assert response.status_code == 200, response.text
         desktop_bytes = desktop_base.with_suffix(ext).read_bytes()
-        assert response.content == desktop_bytes, (
-            f"{fmt} export differs between API and desktop call path"
-        )
+        assert (
+            response.content == desktop_bytes
+        ), f"{fmt} export differs between API and desktop call path"
 
 
 def test_export_artifact_is_cached(client: TestClient, store: RecordingStore) -> None:

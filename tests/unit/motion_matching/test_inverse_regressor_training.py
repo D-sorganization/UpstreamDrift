@@ -131,9 +131,9 @@ def test_inverse_regressor_training_three_epoch_run_reduces_val_loss(
     assert len(result.history) == 8
     first = result.history[0].val_loss
     last = result.history[-1].val_loss
-    assert last < first * 0.9, (
-        f"val_loss did not reduce by >=10%: {first:.4g} -> {last:.4g}"
-    )
+    assert (
+        last < first * 0.9
+    ), f"val_loss did not reduce by >=10%: {first:.4g} -> {last:.4g}"
     assert result.checkpoint_path.exists()
     metrics_file = result.output_dir / "metrics.json"
     assert metrics_file.exists()

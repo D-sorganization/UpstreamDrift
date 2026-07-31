@@ -108,9 +108,9 @@ class TestStandaloneSidebarReuse:
             assert isinstance(available, list)
             assert isinstance(visible, list)
             # Every visible tab must be a known/available tab.
-            assert set(visible).issubset(set(available)), (
-                f"visible tabs {visible} not a subset of available {available}"
-            )
+            assert set(visible).issubset(
+                set(available)
+            ), f"visible tabs {visible} not a subset of available {available}"
         finally:
             win.close()
 
@@ -152,9 +152,9 @@ class TestExpectedTabsPresent:
         try:
             available = sidebar.available_tab_ids()
             for tab_id in expected:
-                assert tab_id in available, (
-                    f"expected tab {tab_id!r} missing from {available}"
-                )
+                assert (
+                    tab_id in available
+                ), f"expected tab {tab_id!r} missing from {available}"
         finally:
             sidebar.deleteLater()
 

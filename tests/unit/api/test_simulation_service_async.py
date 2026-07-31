@@ -53,9 +53,9 @@ async def test_run_simulation_offloads_to_thread() -> None:
 
     await service.run_simulation(_make_request())
 
-    assert worker_thread["id"] != loop_thread, (
-        "simulation must execute in a worker thread, not the event loop"
-    )
+    assert (
+        worker_thread["id"] != loop_thread
+    ), "simulation must execute in a worker thread, not the event loop"
 
 
 async def test_event_loop_stays_responsive_during_simulation() -> None:

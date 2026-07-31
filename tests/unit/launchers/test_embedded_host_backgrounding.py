@@ -152,7 +152,9 @@ def _clean_registry():
 # ----------------------------------------------------------------------
 
 
-def test_background_close_stashes_and_pauses(host, _clean_registry) -> None:  # noqa: ANN001
+def test_background_close_stashes_and_pauses(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LifecycleTool("bg_tool")
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -166,7 +168,9 @@ def test_background_close_stashes_and_pauses(host, _clean_registry) -> None:  # 
     assert "bg_tool" not in host.active_tool_ids()
 
 
-def test_reopen_resurfaces_stashed_widget_and_resumes(host, _clean_registry) -> None:  # noqa: ANN001
+def test_reopen_resurfaces_stashed_widget_and_resumes(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LifecycleTool("bg_tool")
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -197,7 +201,9 @@ def test_destroy_close_calls_cleanup(host, _clean_registry) -> None:  # noqa: AN
     assert "destroy_tool" not in host.active_tool_ids()
 
 
-def test_cannot_background_tool_gets_legacy_cleanup(host, _clean_registry) -> None:  # noqa: ANN001
+def test_cannot_background_tool_gets_legacy_cleanup(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LifecycleTool("no_bg_tool", can_bg=False)
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -212,7 +218,9 @@ def test_cannot_background_tool_gets_legacy_cleanup(host, _clean_registry) -> No
     assert host.backgrounded_tools() == set()
 
 
-def test_legacy_tool_without_hooks_backgrounds(host, _clean_registry) -> None:  # noqa: ANN001
+def test_legacy_tool_without_hooks_backgrounds(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LegacyTool("legacy_tool")
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -230,7 +238,9 @@ def test_legacy_tool_without_hooks_backgrounds(host, _clean_registry) -> None:  
 # ----------------------------------------------------------------------
 
 
-def test_pop_out_reparents_into_top_level_window(host, _clean_registry) -> None:  # noqa: ANN001
+def test_pop_out_reparents_into_top_level_window(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LifecycleTool("pop_tool")
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -268,7 +278,9 @@ def test_dock_back_returns_widget_to_tab(host, _clean_registry) -> None:  # noqa
     assert tool.create_calls == 1
 
 
-def test_reopen_popped_out_tool_docks_it_back(host, _clean_registry) -> None:  # noqa: ANN001
+def test_reopen_popped_out_tool_docks_it_back(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool = _LifecycleTool("pop_tool")
     _register(tool)
     _clean_registry.append(tool.tool_id)
@@ -309,7 +321,9 @@ def test_dock_back_unknown_tool_returns_minus_one(host) -> None:  # noqa: ANN001
 # ----------------------------------------------------------------------
 
 
-def test_backgrounded_tools_tracks_multiple(host, _clean_registry) -> None:  # noqa: ANN001
+def test_backgrounded_tools_tracks_multiple(
+    host, _clean_registry
+) -> None:  # noqa: ANN001
     tool_a = _LifecycleTool("a")
     tool_b = _LifecycleTool("b")
     for tool in (tool_a, tool_b):

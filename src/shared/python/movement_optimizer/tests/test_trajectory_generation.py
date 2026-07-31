@@ -96,7 +96,9 @@ class TestSplines:
         splines = opt.build_splines(wp.flatten())
         q, _, _, _ = opt.eval_trajectory(splines)
         mid = len(q) // 2
-        assert q[mid, 1] < np.radians(-60), "Thigh should flex significantly at midpoint"
+        assert q[mid, 1] < np.radians(
+            -60
+        ), "Thigh should flex significantly at midpoint"
 
 
 # ==============================================================
@@ -158,7 +160,9 @@ class TestCostTerms:
         opt, body, _, _, _ = squat_optimizer
         center = body.inner_center
         com_x = np.full(20, center)
-        cost = compute_balance_cost(com_x, opt.inner_center, opt.dt, opt.balance_center_weight)
+        cost = compute_balance_cost(
+            com_x, opt.inner_center, opt.dt, opt.balance_center_weight
+        )
         # Should be zero since COM == center
         assert cost < 1e-10
 
@@ -194,7 +198,9 @@ class TestCostTerms:
             + compute_endpoint_damping_cost(
                 qd, qdd, opt.dt, opt.endpoint_weight, opt._n_damp, opt._damp_weights
             )
-            + compute_balance_cost(com_x, opt.inner_center, opt.dt, opt.balance_center_weight)
+            + compute_balance_cost(
+                com_x, opt.inner_center, opt.dt, opt.balance_center_weight
+            )
         )
         computed = opt._compute_cost(x)
         np.testing.assert_allclose(computed, total, rtol=1e-10)

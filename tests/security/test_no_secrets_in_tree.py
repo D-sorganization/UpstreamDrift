@@ -44,6 +44,6 @@ def test_no_secrets_in_tree() -> None:
         timeout=300,
     )
 
-    assert result.returncode == 0, (
-        f"Trivy secret scan detected potential secrets:\n{result.stdout}\n{result.stderr}"
-    )
+    assert (
+        result.returncode == 0
+    ), f"Trivy secret scan detected potential secrets:\n{result.stdout}\n{result.stderr}"

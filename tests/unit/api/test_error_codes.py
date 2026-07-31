@@ -18,9 +18,9 @@ class TestErrorCategoryContract:
         from src.api.utils.error_codes import ErrorCategory
 
         for category in ErrorCategory:
-            assert isinstance(category.value, str), (
-                "Assertion failed: isinstance(category.value, str)"
-            )
+            assert isinstance(
+                category.value, str
+            ), "Assertion failed: isinstance(category.value, str)"
             assert (
                 len(category.value) == 3
             )  # 3-letter category codes, "Assertion failed: len(category.value) == 3  # 3-letter category codes"
@@ -30,9 +30,9 @@ class TestErrorCategoryContract:
         from src.api.utils.error_codes import ErrorCategory
 
         values = [c.value for c in ErrorCategory]
-        assert len(values) == len(set(values)), (
-            "Assertion failed: len(values) == len(set(values))"
-        )
+        assert len(values) == len(
+            set(values)
+        ), "Assertion failed: len(values) == len(set(values))"
 
 
 class TestErrorCodeContract:
@@ -54,9 +54,9 @@ class TestErrorCodeContract:
         from src.api.utils.error_codes import ErrorCode
 
         values = [c.value for c in ErrorCode]
-        assert len(values) == len(set(values)), (
-            "Assertion failed: len(values) == len(set(values))"
-        )
+        assert len(values) == len(
+            set(values)
+        ), "Assertion failed: len(values) == len(set(values))"
 
     def test_all_codes_have_metadata(self) -> None:
         """Postcondition: Every error code must have metadata defined."""
@@ -65,9 +65,9 @@ class TestErrorCodeContract:
         for code in ErrorCode:
             assert code in ERROR_METADATA, f"Missing metadata for {code}"
             metadata = ERROR_METADATA[code]
-            assert "status_code" in metadata, (
-                "Assertion failed: status_code in metadata"
-            )
+            assert (
+                "status_code" in metadata
+            ), "Assertion failed: status_code in metadata"
             assert "message" in metadata, "Assertion failed: message in metadata"
             assert "category" in metadata, "Assertion failed: category in metadata"
 
@@ -94,9 +94,9 @@ class TestErrorMetadata:
 
         for code, metadata in ERROR_METADATA.items():
             status = metadata.get("status_code")
-            assert status in valid_status_codes, (
-                f"Invalid status code {status} for {code}"
-            )
+            assert (
+                status in valid_status_codes
+            ), f"Invalid status code {status} for {code}"
 
     def test_messages_are_non_empty_strings(self) -> None:
         """Test that all messages are non-empty strings."""
@@ -104,9 +104,9 @@ class TestErrorMetadata:
 
         for metadata in ERROR_METADATA.values():
             message = metadata.get("message")
-            assert isinstance(message, str), (
-                "Assertion failed: isinstance(message, str)"
-            )
+            assert isinstance(
+                message, str
+            ), "Assertion failed: isinstance(message, str)"
             assert len(message) > 0, "Assertion failed: len(message) > 0"
 
     def test_categories_match_code_prefix(self) -> None:
@@ -131,9 +131,9 @@ class TestErrorMetadata:
             expected_category = code_to_category.get(code_prefix)
 
             if expected_category:
-                assert metadata.get("category") == expected_category, (
-                    f"Category mismatch for {code}"
-                )
+                assert (
+                    metadata.get("category") == expected_category
+                ), f"Category mismatch for {code}"
 
 
 class TestAPIErrorContract:
@@ -144,9 +144,9 @@ class TestAPIErrorContract:
         from src.api.utils.error_codes import APIError, ErrorCode
 
         result = APIError.from_code(ErrorCode.INTERNAL_ERROR)
-        assert isinstance(result, APIError), (
-            "Assertion failed: isinstance(result, APIError)"
-        )
+        assert isinstance(
+            result, APIError
+        ), "Assertion failed: isinstance(result, APIError)"
 
     def test_error_codes_to_dict_returns_dict(self) -> None:
         """Postcondition: to_dict returns a dictionary."""
@@ -165,9 +165,9 @@ class TestAPIErrorContract:
 
         assert "error" in result, "Assertion failed: error in result"
         assert "code" in result["error"], "Assertion failed: code in result[error]"
-        assert "message" in result["error"], (
-            "Assertion failed: message in result[error]"
-        )
+        assert (
+            "message" in result["error"]
+        ), "Assertion failed: message in result[error]"
 
 
 class TestAPIError:
@@ -181,9 +181,7 @@ class TestAPIError:
 
         assert (
             "engine" in error.message.lower() or "not found" in error.message.lower()
-        ), (
-            "Assertion failed: engine in error.message.lower() or not found in error.message.lower()"
-        )
+        ), "Assertion failed: engine in error.message.lower() or not found in error.message.lower()"
 
     def test_from_code_accepts_custom_message(self) -> None:
         """Test that from_code accepts custom message."""
@@ -192,9 +190,9 @@ class TestAPIError:
         custom_message = "Custom error message"
         error = APIError.from_code(ErrorCode.INTERNAL_ERROR, message=custom_message)
 
-        assert error.message == custom_message, (
-            "Assertion failed: error.message == custom_message"
-        )
+        assert (
+            error.message == custom_message
+        ), "Assertion failed: error.message == custom_message"
 
     def test_from_code_accepts_details(self) -> None:
         """Test that from_code accepts additional details."""
@@ -213,9 +211,9 @@ class TestAPIError:
         error = APIError.from_code(ErrorCode.VALIDATION_MISSING_FIELD, details=details)
         result = error.to_dict()
 
-        assert result["error"]["details"] == details, (
-            "Assertion failed: result[error][details] == details"
-        )
+        assert (
+            result["error"]["details"] == details
+        ), "Assertion failed: result[error][details] == details"
 
     def test_to_dict_omits_details_when_empty(self) -> None:
         """Test that to_dict omits details when empty."""
@@ -224,9 +222,9 @@ class TestAPIError:
         error = APIError.from_code(ErrorCode.INTERNAL_ERROR)
         result = error.to_dict()
 
-        assert "details" not in result["error"], (
-            "Assertion failed: details not in result[error]"
-        )
+        assert (
+            "details" not in result["error"]
+        ), "Assertion failed: details not in result[error]"
 
     def test_to_dict_includes_request_id_when_set(self) -> None:
         """Test that to_dict includes request_id when present."""
@@ -239,9 +237,9 @@ class TestAPIError:
         )
         result = error.to_dict()
 
-        assert result["error"]["request_id"] == "req_abc123", (
-            "Assertion failed: result[error][request_id] == req_abc123"
-        )
+        assert (
+            result["error"]["request_id"] == "req_abc123"
+        ), "Assertion failed: result[error][request_id] == req_abc123"
 
     def test_to_dict_omits_request_id_when_empty(self) -> None:
         """Test that to_dict omits request_id when empty."""
@@ -257,9 +255,9 @@ class TestAPIError:
                 request_id="",
             )
             result = error.to_dict()
-            assert "request_id" not in result["error"], (
-                "Assertion failed: request_id not in result[error]"
-            )
+            assert (
+                "request_id" not in result["error"]
+            ), "Assertion failed: request_id not in result[error]"
 
     def test_to_response_returns_json_response(self) -> None:
         """Test that to_response returns a JSONResponse."""
@@ -269,9 +267,9 @@ class TestAPIError:
         error = APIError.from_code(ErrorCode.VALIDATION_FAILED)
         response = error.to_response()
 
-        assert isinstance(response, JSONResponse), (
-            "Assertion failed: isinstance(response, JSONResponse)"
-        )
+        assert isinstance(
+            response, JSONResponse
+        ), "Assertion failed: isinstance(response, JSONResponse)"
 
     def test_to_response_uses_correct_status_code(self) -> None:
         """Test that to_response uses the correct status code."""
@@ -289,9 +287,9 @@ class TestAPIError:
         for code, expected_status in test_cases:
             error = APIError.from_code(code)
             response = error.to_response()
-            assert response.status_code == expected_status, (
-                "Assertion failed: response.status_code == expected_status"
-            )
+            assert (
+                response.status_code == expected_status
+            ), "Assertion failed: response.status_code == expected_status"
 
     def test_post_init_injects_trace_context(self) -> None:
         """Test that __post_init__ injects trace context."""
@@ -315,12 +313,12 @@ class TestAPIError:
                 code=ErrorCode.INTERNAL_ERROR,
                 message="Test",
             )
-            assert error.request_id == "req_test123", (
-                "Assertion failed: error.request_id == req_test123"
-            )
-            assert error.correlation_id == "cor_test456", (
-                "Assertion failed: error.correlation_id == cor_test456"
-            )
+            assert (
+                error.request_id == "req_test123"
+            ), "Assertion failed: error.request_id == req_test123"
+            assert (
+                error.correlation_id == "cor_test456"
+            ), "Assertion failed: error.correlation_id == cor_test456"
 
 
 class TestAPIExceptionContract:
@@ -331,9 +329,9 @@ class TestAPIExceptionContract:
         from src.api.utils.error_codes import APIException, ErrorCode
 
         exc = APIException(ErrorCode.INTERNAL_ERROR)
-        assert isinstance(exc, HTTPException), (
-            "Assertion failed: isinstance(exc, HTTPException)"
-        )
+        assert isinstance(
+            exc, HTTPException
+        ), "Assertion failed: isinstance(exc, HTTPException)"
 
     def test_has_error_attribute(self) -> None:
         """Postcondition: APIException has error attribute."""
@@ -359,9 +357,9 @@ class TestAPIException:
 
         for code, expected_status in test_cases:
             exc = APIException(code)
-            assert exc.status_code == expected_status, (
-                "Assertion failed: exc.status_code == expected_status"
-            )
+            assert (
+                exc.status_code == expected_status
+            ), "Assertion failed: exc.status_code == expected_status"
 
     def test_detail_is_structured(self) -> None:
         """Test that detail is a structured error dict."""
@@ -369,13 +367,13 @@ class TestAPIException:
 
         exc = APIException(ErrorCode.ENGINE_LOAD_FAILED)
 
-        assert isinstance(exc.detail, dict), (
-            "Assertion failed: isinstance(exc.detail, dict)"
-        )
+        assert isinstance(
+            exc.detail, dict
+        ), "Assertion failed: isinstance(exc.detail, dict)"
         assert "error" in exc.detail, "Assertion failed: error in exc.detail"
-        assert "code" in exc.detail["error"], (
-            "Assertion failed: code in exc.detail[error]"
-        )
+        assert (
+            "code" in exc.detail["error"]
+        ), "Assertion failed: code in exc.detail[error]"
 
     def test_custom_message_used(self) -> None:
         """Test that custom message is used when provided."""
@@ -384,9 +382,9 @@ class TestAPIException:
         custom = "Custom error message"
         exc = APIException(ErrorCode.INTERNAL_ERROR, message=custom)
 
-        assert exc.error.message == custom, (
-            "Assertion failed: exc.error.message == custom"
-        )
+        assert (
+            exc.error.message == custom
+        ), "Assertion failed: exc.error.message == custom"
 
     def test_details_included(self) -> None:
         """Test that details are included in error."""
@@ -395,9 +393,9 @@ class TestAPIException:
         details = {"engine": "drake", "model": "arm.urdf"}
         exc = APIException(ErrorCode.SIMULATION_FAILED, details=details)
 
-        assert exc.error.details == details, (
-            "Assertion failed: exc.error.details == details"
-        )
+        assert (
+            exc.error.details == details
+        ), "Assertion failed: exc.error.details == details"
 
 
 class TestRaiseApiErrorContract:
@@ -421,9 +419,9 @@ class TestRaiseApiError:
         with pytest.raises(APIException) as exc_info:
             raise_api_error(ErrorCode.ENGINE_NOT_AVAILABLE)
 
-        assert exc_info.value.error.code == ErrorCode.ENGINE_NOT_AVAILABLE, (
-            "Assertion failed: exc_info.value.error.code == ErrorCode.ENGINE_NOT_AVAILABLE"
-        )
+        assert (
+            exc_info.value.error.code == ErrorCode.ENGINE_NOT_AVAILABLE
+        ), "Assertion failed: exc_info.value.error.code == ErrorCode.ENGINE_NOT_AVAILABLE"
 
     def test_raises_with_custom_message(self) -> None:
         """Test that raise_api_error uses custom message."""
@@ -433,9 +431,9 @@ class TestRaiseApiError:
         with pytest.raises(APIException) as exc_info:
             raise_api_error(ErrorCode.ENGINE_INITIALIZATION_FAILED, message=custom)
 
-        assert exc_info.value.error.message == custom, (
-            "Assertion failed: exc_info.value.error.message == custom"
-        )
+        assert (
+            exc_info.value.error.message == custom
+        ), "Assertion failed: exc_info.value.error.message == custom"
 
     def test_raises_with_kwargs_as_details(self) -> None:
         """Test that raise_api_error passes kwargs as details."""
@@ -450,15 +448,15 @@ class TestRaiseApiError:
             )
 
         details = exc_info.value.error.details
-        assert details["timestep"] == -0.001, (
-            "Assertion failed: details[timestep] == -0.001"
-        )
-        assert details["field"] == "timestep", (
-            "Assertion failed: details[field] == timestep"
-        )
-        assert details["reason"] == "must be positive", (
-            "Assertion failed: details[reason] == must be positive"
-        )
+        assert (
+            details["timestep"] == -0.001
+        ), "Assertion failed: details[timestep] == -0.001"
+        assert (
+            details["field"] == "timestep"
+        ), "Assertion failed: details[field] == timestep"
+        assert (
+            details["reason"] == "must be positive"
+        ), "Assertion failed: details[reason] == must be positive"
 
     def test_no_details_when_no_kwargs(self) -> None:
         """Test that no details when no kwargs provided."""
@@ -467,9 +465,9 @@ class TestRaiseApiError:
         with pytest.raises(APIException) as exc_info:
             raise_api_error(ErrorCode.INTERNAL_ERROR)
 
-        assert exc_info.value.error.details == {}, (
-            "Assertion failed: exc_info.value.error.details == {}"
-        )
+        assert (
+            exc_info.value.error.details == {}
+        ), "Assertion failed: exc_info.value.error.details == {}"
 
 
 class TestAllExports:

@@ -65,7 +65,9 @@ def test_on_cancelled_resets_state(window) -> None:
 
 def test_on_err_with_structured_and_plain_errors(window) -> None:
     window._opt_running = True
-    window._on_err(OptimizationError("boom", error_code="OPT_X", suggestion="try again"))
+    window._on_err(
+        OptimizationError("boom", error_code="OPT_X", suggestion="try again")
+    )
     assert "OPT_X" in window.status_label.text()
     window._on_err("plain failure")
     assert "plain failure" in window.status_label.text()
@@ -95,7 +97,9 @@ def test_on_done_success_and_warning_paths(window) -> None:
 
 def test_finish_or_chain_advances_then_chain(window, monkeypatch) -> None:
     calls: list[tuple[int, list[int] | None]] = []
-    monkeypatch.setattr(window, "_run_exercise", lambda idx, rest=None: calls.append((idx, rest)))
+    monkeypatch.setattr(
+        window, "_run_exercise", lambda idx, rest=None: calls.append((idx, rest))
+    )
     window._finish_or_chain([1, 2], "msg")
     assert calls == [(1, [2])]
 

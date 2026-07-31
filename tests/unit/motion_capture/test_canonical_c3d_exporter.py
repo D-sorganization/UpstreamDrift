@@ -202,9 +202,9 @@ class TestArchitectureOutputOnly:
         found = self._scan_source_for_exporter_import(
             "src/shared/python/simulation_backends/protocol.py"
         )
-        assert not found, (
-            "protocol imports canonical_c3d_exporter — c3d must remain OUTPUT-ONLY"
-        )
+        assert (
+            not found
+        ), "protocol imports canonical_c3d_exporter — c3d must remain OUTPUT-ONLY"
 
     def test_pose_interchange_canonical_does_not_import_exporter(self) -> None:
         found = self._scan_source_for_exporter_import(

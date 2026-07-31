@@ -124,9 +124,10 @@ def test_no_god_classes_in_monitored_files() -> None:
                     "Refactor or add to KNOWN_CLASSES with justification (GH1692)."
                 )
 
-    assert not violations, (
-        "God class ceiling exceeded in monitored files:\n"
-        + "\n".join(f"  - {v}" for v in violations)
+    assert (
+        not violations
+    ), "God class ceiling exceeded in monitored files:\n" + "\n".join(
+        f"  - {v}" for v in violations
     )
 
 
@@ -148,9 +149,9 @@ def test_calculator_state_mixin_reduced() -> None:
     )
 
     # Also verify sub-mixins exist and are bounded
-    assert "_SplitterStateMixin" in counts, (
-        "_SplitterStateMixin sub-mixin missing from calculator_state_mixin.py"
-    )
-    assert "_ClipboardMixin" in counts, (
-        "_ClipboardMixin sub-mixin missing from calculator_state_mixin.py"
-    )
+    assert (
+        "_SplitterStateMixin" in counts
+    ), "_SplitterStateMixin sub-mixin missing from calculator_state_mixin.py"
+    assert (
+        "_ClipboardMixin" in counts
+    ), "_ClipboardMixin sub-mixin missing from calculator_state_mixin.py"

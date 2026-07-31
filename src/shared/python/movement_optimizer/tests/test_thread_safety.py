@@ -224,9 +224,9 @@ class TestReentrantLockNoDeadlock:
         t.start()
         t.join(timeout=2.0)
 
-        assert not t.is_alive(), (
-            "Re-entrant lock acquisition deadlocked -- _opt_lock must be an RLock"
-        )
+        assert (
+            not t.is_alive()
+        ), "Re-entrant lock acquisition deadlocked -- _opt_lock must be an RLock"
         assert not errors, f"Runner raised: {errors!r}"
         assert completed.is_set()
         assert harness.exercise_states[0].anim_frame == 7

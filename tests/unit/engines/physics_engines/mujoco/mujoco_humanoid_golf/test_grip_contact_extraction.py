@@ -126,9 +126,9 @@ def test_extract_hand_contacts_velocity_is_not_fabricated_zero() -> None:
     tab = _bare_tab()
     _, _, _, velocities, _ = tab._extract_hand_contacts(model, data)
     assert velocities, "expected at least one captured hand contact"
-    assert any(not np.allclose(v, 0.0) for v in velocities), (
-        "relative contact velocity should be non-zero, not fabricated"
-    )
+    assert any(
+        not np.allclose(v, 0.0) for v in velocities
+    ), "relative contact velocity should be non-zero, not fabricated"
     # The imposed slide is along +x; the x-component must carry it.
     assert any(abs(np.asarray(v)[0]) > 1e-3 for v in velocities)
 

@@ -71,9 +71,9 @@ class TestScriptHandlerPaths:
         assert isinstance(handler, ScriptHandler)
 
         resolved = handler.resolve_script(model, REPO_ROOT)
-        assert resolved == resolve_model_artifact_path(model, REPO_ROOT), (
-            "ScriptHandler must not override the models.yaml path"
-        )
+        assert resolved == resolve_model_artifact_path(
+            model, REPO_ROOT
+        ), "ScriptHandler must not override the models.yaml path"
         assert resolved.is_file(), f"{model_id} resolves to a missing file: {resolved}"
 
     def test_fallback_used_when_model_declares_no_path(self) -> None:

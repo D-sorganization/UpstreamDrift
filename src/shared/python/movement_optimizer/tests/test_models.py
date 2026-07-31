@@ -59,9 +59,9 @@ class TestBodyModel:
     def test_mass_fractions_sum_to_one(self) -> None:
         """MASS_FRAC values must sum to exactly 1.0 (issue #125)."""
         total = sum(MASS_FRAC.values())
-        assert total == pytest.approx(1.0, abs=1e-9), (
-            f"MASS_FRAC values sum to {total}, expected 1.0"
-        )
+        assert total == pytest.approx(
+            1.0, abs=1e-9
+        ), f"MASS_FRAC values sum to {total}, expected 1.0"
 
     def test_mass_fractions_sum(self, default_body: BodyModel) -> None:
         total = default_body.m_feet + default_body.m_squat.sum()
@@ -84,7 +84,9 @@ class TestBodyModel:
         b = default_body
         full_span = b.toe_x - b.heel_x
         inner_span = b.inner_toe - b.inner_heel
-        np.testing.assert_allclose(inner_span / full_span, BOS_INNER_FRACTION, atol=1e-10)
+        np.testing.assert_allclose(
+            inner_span / full_span, BOS_INNER_FRACTION, atol=1e-10
+        )
 
     def test_inner_center_between_bounds(self, default_body: BodyModel) -> None:
         b = default_body
@@ -213,7 +215,9 @@ class TestBarAndCOM:
         bp = dyn.bar_position(qs, "deadlift")
         assert bp[1] < fk["shoulder"][1]
 
-    def test_deadlift_start_bar_near_ground(self, deadlift_dynamics, default_body) -> None:
+    def test_deadlift_start_bar_near_ground(
+        self, deadlift_dynamics, default_body
+    ) -> None:
         dyn, qs, _, _ = deadlift_dynamics
         bp = dyn.bar_position(qs, "deadlift")
         assert abs(bp[1] - PLATE_RADIUS_STD_M) < 0.15
@@ -237,7 +241,9 @@ class TestBatchMethods:
         qd = np.random.default_rng(43).normal(0, 0.5, (n, 3))
         qdd = np.random.default_rng(44).normal(0, 1.0, (n, 3))
 
-        loop_torques = np.array([dyn.inverse_dynamics(q[i], qd[i], qdd[i]) for i in range(n)])
+        loop_torques = np.array(
+            [dyn.inverse_dynamics(q[i], qd[i], qdd[i]) for i in range(n)]
+        )
         batch_torques = dyn.inverse_dynamics_batch(q, qd, qdd)
         np.testing.assert_allclose(batch_torques, loop_torques, rtol=1e-10)
 
@@ -280,12 +286,12 @@ class TestExerciseConfigs:
         com_start = dyn.com_position(qs, "squat", 60.0)[0]
         com_end = dyn.com_position(qe, "squat", 60.0)[0]
         b = default_body
-        assert b.inner_heel <= com_start <= b.inner_toe, (
-            f"Start COM {com_start:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
-        )
-        assert b.inner_heel <= com_end <= b.inner_toe, (
-            f"End COM {com_end:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
-        )
+        assert (
+            b.inner_heel <= com_start <= b.inner_toe
+        ), f"Start COM {com_start:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
+        assert (
+            b.inner_heel <= com_end <= b.inner_toe
+        ), f"End COM {com_end:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
 
     def test_full_squat_via_com_in_inner_bos(self, default_body) -> None:
         """Via-point should have COM in the inner 60% zone."""
@@ -294,9 +300,9 @@ class TestExerciseConfigs:
         dyn, _, _, _, q_via = make_full_squat_config(default_body, 60.0)
         com_via = dyn.com_position(q_via, "full_squat", 60.0)[0]
         b = default_body
-        assert b.inner_heel <= com_via <= b.inner_toe, (
-            f"Via COM {com_via:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
-        )
+        assert (
+            b.inner_heel <= com_via <= b.inner_toe
+        ), f"Via COM {com_via:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
 
     def test_deadlift_endpoints_com_in_inner_bos(self, default_body) -> None:
         """Deadlift start and end should have COM in the inner 60% zone."""
@@ -306,12 +312,12 @@ class TestExerciseConfigs:
         com_start = dyn.com_position(qs, "deadlift", 60.0)[0]
         com_end = dyn.com_position(qe, "deadlift", 60.0)[0]
         b = default_body
-        assert b.inner_heel <= com_start <= b.inner_toe, (
-            f"Start COM {com_start:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
-        )
-        assert b.inner_heel <= com_end <= b.inner_toe, (
-            f"End COM {com_end:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
-        )
+        assert (
+            b.inner_heel <= com_start <= b.inner_toe
+        ), f"Start COM {com_start:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
+        assert (
+            b.inner_heel <= com_end <= b.inner_toe
+        ), f"End COM {com_end:.4f} outside inner BOS [{b.inner_heel:.4f}, {b.inner_toe:.4f}]"
 
 
 class TestLegAbductionCorrection:
@@ -343,8 +349,12 @@ class TestLegAbductionCorrection:
         """FK shoulder height at standing decreases with abduction."""
         body_0 = BodyModel(75.0, 1.75, abduction_angle=0.0)
         body_30 = BodyModel(75.0, 1.75, abduction_angle=30.0)
-        dyn_0 = LagrangianDynamics(body_0, body_0.m_squat.copy(), body_0.I_squat.copy(), 0.0)
-        dyn_30 = LagrangianDynamics(body_30, body_30.m_squat.copy(), body_30.I_squat.copy(), 0.0)
+        dyn_0 = LagrangianDynamics(
+            body_0, body_0.m_squat.copy(), body_0.I_squat.copy(), 0.0
+        )
+        dyn_30 = LagrangianDynamics(
+            body_30, body_30.m_squat.copy(), body_30.I_squat.copy(), 0.0
+        )
         fk_0 = dyn_0.forward_kinematics(np.zeros(3))
         fk_30 = dyn_30.forward_kinematics(np.zeros(3))
         # With abduction, projected leg lengths are shorter, so shoulder is lower
@@ -354,8 +364,12 @@ class TestLegAbductionCorrection:
         """COM y-position decreases with abduction at standing."""
         body_0 = BodyModel(75.0, 1.75, abduction_angle=0.0)
         body_30 = BodyModel(75.0, 1.75, abduction_angle=30.0)
-        dyn_0 = LagrangianDynamics(body_0, body_0.m_squat.copy(), body_0.I_squat.copy(), 0.0)
-        dyn_30 = LagrangianDynamics(body_30, body_30.m_squat.copy(), body_30.I_squat.copy(), 0.0)
+        dyn_0 = LagrangianDynamics(
+            body_0, body_0.m_squat.copy(), body_0.I_squat.copy(), 0.0
+        )
+        dyn_30 = LagrangianDynamics(
+            body_30, body_30.m_squat.copy(), body_30.I_squat.copy(), 0.0
+        )
         com_0 = dyn_0.com_position(np.zeros(3), "squat", 0.0)
         com_30 = dyn_30.com_position(np.zeros(3), "squat", 0.0)
         assert com_30[1] < com_0[1]

@@ -244,9 +244,9 @@ def test_c3d_parser_at_least_10x_faster(synthetic_c3d: Path) -> None:
         f"\nC3D parser 10k × 32: rust={rust_dt * 1000:.1f}ms, "
         f"ezc3d+pyloop={py_dt * 1000:.1f}ms, speedup={speedup:.1f}×"
     )
-    assert speedup >= 10.0, (
-        f"Rust parser only {speedup:.1f}× faster (need ≥10× per issue #5213)"
-    )
+    assert (
+        speedup >= 10.0
+    ), f"Rust parser only {speedup:.1f}× faster (need ≥10× per issue #5213)"
 
 
 def test_c3d_facade_no_regression(synthetic_c3d: Path) -> None:
@@ -363,9 +363,9 @@ def test_trc_parser_at_least_10x_faster(synthetic_trc: Path) -> None:
         f"\nTRC parser 10k × 32: rust={rust_dt * 1000:.1f}ms, "
         f"pyloop={py_dt * 1000:.1f}ms, speedup={speedup:.1f}×"
     )
-    assert speedup >= 10.0, (
-        f"Rust TRC parser only {speedup:.1f}× faster (need ≥10× per issue #5213)"
-    )
+    assert (
+        speedup >= 10.0
+    ), f"Rust TRC parser only {speedup:.1f}× faster (need ≥10× per issue #5213)"
 
 
 def test_trc_facade_no_regression(synthetic_trc: Path) -> None:

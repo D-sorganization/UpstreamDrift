@@ -433,9 +433,9 @@ class TestDurableTaskManagerAutoCleanupFallback:
             assert backend.get_task("expired-task") is not None
 
             # Wait up to 3 s for the daemon thread's first cleanup sweep
-            assert _wait_until_task_missing(backend, "expired-task", 3.0), (
-                "Daemon cleanup thread did not delete the expired task within 3 s"
-            )
+            assert _wait_until_task_missing(
+                backend, "expired-task", 3.0
+            ), "Daemon cleanup thread did not delete the expired task within 3 s"
         finally:
             asyncio.run(manager.shutdown())
 
@@ -458,8 +458,8 @@ class TestDurableTaskManagerAutoCleanupFallback:
             backend=backend, auto_cleanup=True, cleanup_interval=60
         )
         try:
-            assert _wait_until_task_missing(backend, "startup-expired-task", 3.0), (
-                "Daemon cleanup waited for the full interval before its first sweep"
-            )
+            assert _wait_until_task_missing(
+                backend, "startup-expired-task", 3.0
+            ), "Daemon cleanup waited for the full interval before its first sweep"
         finally:
             asyncio.run(manager.shutdown())

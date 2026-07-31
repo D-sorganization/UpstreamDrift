@@ -35,9 +35,9 @@ def test_calc_backend_resolves_to_vendor():
     import calc_backend
 
     assert calc_backend.__path__ is not None
-    assert any(str(_VENDOR_PYTHON) in p for p in calc_backend.__path__), (
-        "calc_backend should resolve its submodules from the vendored module"
-    )
+    assert any(
+        str(_VENDOR_PYTHON) in p for p in calc_backend.__path__
+    ), "calc_backend should resolve its submodules from the vendored module"
 
 
 def test_signal_toolkit_resolves_to_vendor():
@@ -45,9 +45,9 @@ def test_signal_toolkit_resolves_to_vendor():
     import signal_toolkit
 
     assert signal_toolkit.__path__ is not None
-    assert any(str(_VENDOR_PYTHON) in p for p in signal_toolkit.__path__), (
-        "signal_toolkit should resolve its submodules from the vendored module"
-    )
+    assert any(
+        str(_VENDOR_PYTHON) in p for p in signal_toolkit.__path__
+    ), "signal_toolkit should resolve its submodules from the vendored module"
 
 
 def test_sidekick_resolves_locally():
@@ -55,9 +55,9 @@ def test_sidekick_resolves_locally():
     import sidekick
 
     assert sidekick.__file__ is not None
-    assert str(_LOCAL_PYTHON) in sidekick.__file__, (
-        "sidekick should resolve to the local module"
-    )
+    assert (
+        str(_LOCAL_PYTHON) in sidekick.__file__
+    ), "sidekick should resolve to the local module"
 
 
 def test_forbidden_shadowing():

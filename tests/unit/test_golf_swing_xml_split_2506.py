@@ -40,30 +40,30 @@ class TestGolfSwingXmlFileSizes:
     @pytest.mark.unit
     def test_golf_swing_xml_split_2506_coordinator_loc(self) -> None:
         loc = _count_lines(XML_DIR / "golf_swing_models_xml.py")
-        assert loc <= LOC_BUDGET, (
-            f"golf_swing_models_xml.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"golf_swing_models_xml.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_upper_body_loc(self) -> None:
         loc = _count_lines(XML_DIR / "_golf_swing_upper_body_xml.py")
-        assert loc <= LOC_BUDGET, (
-            f"_golf_swing_upper_body_xml.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_golf_swing_upper_body_xml.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_full_body_loc(self) -> None:
         loc = _count_lines(XML_DIR / "_golf_swing_full_body_xml.py")
-        assert loc <= LOC_BUDGET, (
-            f"_golf_swing_full_body_xml.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_golf_swing_full_body_xml.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_advanced_loc(self) -> None:
         loc = _count_lines(XML_DIR / "_golf_swing_advanced_xml.py")
-        assert loc <= LOC_BUDGET, (
-            f"_golf_swing_advanced_xml.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_golf_swing_advanced_xml.py has {loc} LOC; budget {LOC_BUDGET}"
 
 
 class TestGolfSwingXmlPublicAPI:

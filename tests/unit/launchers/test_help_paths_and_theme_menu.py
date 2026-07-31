@@ -39,9 +39,9 @@ class TestUserGuidePaths:
         """The old ``parents[3]`` candidate resolved outside the checkout."""
         repo_root = Path(about_dialog.__file__).resolve().parents[2]
         for candidate in about_dialog.user_guide_candidates():
-            assert repo_root in candidate.parents, (
-                f"{candidate} escapes the repository root {repo_root} — #8014"
-            )
+            assert (
+                repo_root in candidate.parents
+            ), f"{candidate} escapes the repository root {repo_root} — #8014"
 
 
 class TestProjectMapPaths:
@@ -59,9 +59,9 @@ class TestProjectMapPaths:
         text = entry["description"] + "\n".join(entry["tips"])
         assert "docs/PROJECT_MAP.md" not in text.replace(
             "docs/architecture/PROJECT_MAP.md", ""
-        ).replace("docs/governance/PROJECT_MAP.md", ""), (
-            "help_content still advertises the nonexistent docs/PROJECT_MAP.md"
-        )
+        ).replace(
+            "docs/governance/PROJECT_MAP.md", ""
+        ), "help_content still advertises the nonexistent docs/PROJECT_MAP.md"
 
 
 class TestContextHelpDocResolution:
@@ -95,9 +95,9 @@ class TestContextHelpDocResolution:
         dock = help_dialogs.ContextHelpDock()
         try:
             path = dock._get_doc_file(model_id)
-            assert path is not None and path.exists(), (
-                f"{model_id} still has no resolvable documentation"
-            )
+            assert (
+                path is not None and path.exists()
+            ), f"{model_id} still has no resolvable documentation"
         finally:
             dock.deleteLater()
 
@@ -146,9 +146,9 @@ class TestThemeMenuHasNoDuplicates:
             for t in manager.get_available_themes()
             if t not in presets and t not in custom
         ]
-        assert not (set(extra) & custom), (
-            "extra-themes section still overlaps the custom-themes section"
-        )
+        assert not (
+            set(extra) & custom
+        ), "extra-themes section still overlaps the custom-themes section"
 
     def test_source_filters_custom_names_out_of_extras(self) -> None:
         from src.launchers import launcher_theme

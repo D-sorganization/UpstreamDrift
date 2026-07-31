@@ -303,8 +303,8 @@ class TestPinocchioContactInvariants:
 
         e1 = energy(q, v)
         # Semi-implicit Euler conserves energy to O(dt) over this short window.
-        assert abs(e1 - e0) < 1e-2 * abs(e0) + 1e-4, (
-            f"free-fall energy drifted: e0={e0:.6f} e1={e1:.6f}"
-        )
+        assert (
+            abs(e1 - e0) < 1e-2 * abs(e0) + 1e-4
+        ), f"free-fall energy drifted: e0={e0:.6f} e1={e1:.6f}"
         # And the ball actually fell (sanity that dynamics ran).
         assert q[2] < _DROP_HEIGHT_M + _BALL_RADIUS_M

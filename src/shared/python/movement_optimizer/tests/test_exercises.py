@@ -85,7 +85,9 @@ class TestJerkConfig:
     def test_jerk_end_overhead(self, default_body: BodyModel) -> None:
         dyn, _qs, qe, _qb, _q_via = make_jerk_config(default_body, 60.0)
         # End: torso near vertical (bar overhead)
-        assert abs(qe[2]) < np.radians(10), "Jerk end: torso must be near vertical (overhead)"
+        assert abs(qe[2]) < np.radians(
+            10
+        ), "Jerk end: torso must be near vertical (overhead)"
         # Shoulder should be near standing height (overhead lockout)
         fk = dyn.forward_kinematics(qe)
         shoulder_h = fk["shoulder"][1]
@@ -115,11 +117,15 @@ class TestSnatchConfig:
     def test_snatch_end_overhead(self, default_body: BodyModel) -> None:
         dyn, _qs, qe, _qb, _q_via = make_snatch_config(default_body, 60.0)
         # End: torso near vertical (bar overhead)
-        assert abs(qe[2]) < np.radians(10), "Snatch end: torso must be near vertical (overhead)"
+        assert abs(qe[2]) < np.radians(
+            10
+        ), "Snatch end: torso must be near vertical (overhead)"
         fk = dyn.forward_kinematics(qe)
         shoulder_h = fk["shoulder"][1]
         total_h = default_body.L.sum()
-        assert shoulder_h > total_h * 0.90, "Snatch end: shoulder must be high (overhead)"
+        assert (
+            shoulder_h > total_h * 0.90
+        ), "Snatch end: shoulder must be high (overhead)"
 
     def test_snatch_has_via_points(self, default_body: BodyModel) -> None:
         _dyn, _qs, _qe, _qb, q_via = make_snatch_config(default_body, 60.0)
@@ -131,7 +137,9 @@ class TestSnatchConfig:
         assert q_via[1] < np.radians(-60), "Snatch via: should be deep squat"
         # Torso relatively upright for overhead position
         # balance_pose may adjust the torso angle to maintain COM balance
-        assert abs(q_via[2]) < np.radians(80), "Snatch via: torso should be reasonably upright"
+        assert abs(q_via[2]) < np.radians(
+            80
+        ), "Snatch via: torso should be reasonably upright"
 
 
 # ------------------------------------------------------------------
@@ -179,7 +187,9 @@ class TestBenchPressConfig:
             n_waypoints=8,
         )
         constraints = opt._build_constraints()
-        assert len(constraints) == 1, "Bench press should keep only the joint-limit constraint"
+        assert (
+            len(constraints) == 1
+        ), "Bench press should keep only the joint-limit constraint"
         assert constraints[0]["fun"] is joint_limit_constraint_values
 
 
@@ -208,8 +218,12 @@ class TestAllEndpointsBalanced:
 
     def test_clean_endpoints_balanced(self, default_body: BodyModel) -> None:
         dyn, qs, qe, _qb, _q_via = make_clean_config(default_body, 60.0)
-        self._check_com_in_inner_bos(default_body, dyn, qs, "deadlift", 60.0, "clean start")
-        self._check_com_in_inner_bos(default_body, dyn, qe, "deadlift", 60.0, "clean end")
+        self._check_com_in_inner_bos(
+            default_body, dyn, qs, "deadlift", 60.0, "clean start"
+        )
+        self._check_com_in_inner_bos(
+            default_body, dyn, qe, "deadlift", 60.0, "clean end"
+        )
 
     def test_jerk_endpoints_balanced(self, default_body: BodyModel) -> None:
         dyn, qs, qe, _qb, _q_via = make_jerk_config(default_body, 60.0)
@@ -218,5 +232,7 @@ class TestAllEndpointsBalanced:
 
     def test_snatch_endpoints_balanced(self, default_body: BodyModel) -> None:
         dyn, qs, qe, _qb, _q_via = make_snatch_config(default_body, 60.0)
-        self._check_com_in_inner_bos(default_body, dyn, qs, "deadlift", 60.0, "snatch start")
+        self._check_com_in_inner_bos(
+            default_body, dyn, qs, "deadlift", 60.0, "snatch start"
+        )
         self._check_com_in_inner_bos(default_body, dyn, qe, "squat", 60.0, "snatch end")

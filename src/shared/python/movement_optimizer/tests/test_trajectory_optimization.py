@@ -51,15 +51,17 @@ class TestOptimization:
         opt, _, _, _, _ = squat_optimizer
         wp = opt._initial_guess()
         cost = opt._compute_cost(wp.flatten())
-        assert cost < float("inf"), "Precondition violated: initial objective is not finite"
+        assert cost < float(
+            "inf"
+        ), "Precondition violated: initial objective is not finite"
 
     def test_postcondition_kkt_within_tol(self, squat_optimizer) -> None:
         opt, _, _, _, _ = squat_optimizer
         # We assume the optimization result includes 'success' which means KKT conditions are within tolerance
         result = opt.optimize()
-        assert result.success, (
-            "Postcondition violated: optimization did not satisfy KKT within tolerance"
-        )
+        assert (
+            result.success
+        ), "Postcondition violated: optimization did not satisfy KKT within tolerance"
 
     def test_cost_decreases(self) -> None:
         """With enough waypoints, optimization should reduce cost."""
@@ -134,12 +136,12 @@ class TestOptimization:
         )
         result = opt.optimize()
         com_x = result.com[:, 0]
-        assert np.all(com_x >= body.inner_heel - 0.01), (
-            f"COM below inner_heel: min={com_x.min():.4f}, bound={body.inner_heel:.4f}"
-        )
-        assert np.all(com_x <= body.inner_toe + 0.01), (
-            f"COM above inner_toe: max={com_x.max():.4f}, bound={body.inner_toe:.4f}"
-        )
+        assert np.all(
+            com_x >= body.inner_heel - 0.01
+        ), f"COM below inner_heel: min={com_x.min():.4f}, bound={body.inner_heel:.4f}"
+        assert np.all(
+            com_x <= body.inner_toe + 0.01
+        ), f"COM above inner_toe: max={com_x.max():.4f}, bound={body.inner_toe:.4f}"
         assert result.success, "Optimization should report success with COM in bounds"
 
 

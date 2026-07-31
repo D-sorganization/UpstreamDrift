@@ -225,7 +225,7 @@ def test_standalone_saved_profile_carries_schema_version(
     standalone_store.save_profile("ac3_check", wrap_state(state.to_dict()))
     path = embedded_store.profiles_dir / "ac3_check.json"
     raw = json.loads(path.read_text(encoding="utf-8"))
-    assert PROFILE_SCHEMA_VERSION_KEY in raw, (
-        "standalone-saved profile is missing schema_version"
-    )
+    assert (
+        PROFILE_SCHEMA_VERSION_KEY in raw
+    ), "standalone-saved profile is missing schema_version"
     assert raw[PROFILE_SCHEMA_VERSION_KEY] == PROFILE_SCHEMA_VERSION

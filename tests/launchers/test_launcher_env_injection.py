@@ -29,9 +29,9 @@ class TestGolfSuiteLauncherPythonpath:
         )
         src_text = launcher_src.read_text(encoding="utf-8")
         # The Popen call in _launch_script must pass env=
-        assert "env=" in src_text, (
-            "subprocess.Popen(...) in _launch_script must pass env= to inject PYTHONPATH"
-        )
+        assert (
+            "env=" in src_text
+        ), "subprocess.Popen(...) in _launch_script must pass env= to inject PYTHONPATH"
 
 
 class TestProcessManagerWslConfig:
@@ -47,9 +47,9 @@ class TestProcessManagerWslConfig:
         with patch.dict(os.environ, {"WSL_DISTRO": "MyDistro"}, clear=False):
             mgr = self._make_manager()
             distro = mgr._get_wsl_distro()
-            assert distro == "MyDistro", (
-                f"Expected distro 'MyDistro' from env, got '{distro}'"
-            )
+            assert (
+                distro == "MyDistro"
+            ), f"Expected distro 'MyDistro' from env, got '{distro}'"
 
     def test_wsl_distro_defaults_to_fallback_when_unset(self) -> None:
         """WSL distro must have a safe fallback when WSL_DISTRO is not set."""
@@ -57,9 +57,9 @@ class TestProcessManagerWslConfig:
             os.environ.pop("WSL_DISTRO", None)
             mgr = self._make_manager()
             distro = mgr._get_wsl_distro()
-            assert isinstance(distro, str) and len(distro) > 0, (
-                "_get_wsl_distro must return a non-empty string fallback"
-            )
+            assert (
+                isinstance(distro, str) and len(distro) > 0
+            ), "_get_wsl_distro must return a non-empty string fallback"
 
     def test_wsl_project_dir_reads_from_env(self) -> None:
         """WSL project dir must be read from WSL_PROJECT_DIR env var."""

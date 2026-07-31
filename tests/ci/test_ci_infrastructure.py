@@ -1627,9 +1627,9 @@ class TestPyprojectTomlConsistency:
 
         deps = data["project"]["dependencies"]
         # Check that structlog is in the dependencies
-        assert any("structlog" in dep for dep in deps), (
-            "structlog must be in core dependencies"
-        )
+        assert any(
+            "structlog" in dep for dep in deps
+        ), "structlog must be in core dependencies"
 
     def test_api_runtime_dependencies_are_core_and_locked(self) -> None:
         """API auth/database imports must not require the dev extra."""

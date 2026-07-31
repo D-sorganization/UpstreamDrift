@@ -32,9 +32,9 @@ gen = _load()
 
 
 def test_register_exists() -> None:
-    assert _REGISTER.exists(), (
-        "docs/development/monolith_refactor_register.md must exist (issue #7131)"
-    )
+    assert (
+        _REGISTER.exists()
+    ), "docs/development/monolith_refactor_register.md must exist (issue #7131)"
 
 
 def test_register_is_in_sync() -> None:

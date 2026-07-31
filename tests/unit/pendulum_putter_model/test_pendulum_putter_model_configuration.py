@@ -42,12 +42,12 @@ class TestPendulumPutterModelConfiguration:
         short_result = short_builder.build()
         long_result = long_builder.build()
 
-        assert short_result.solver_status == "success", (
-            "Assertion failed: short_result.solver_status == success"
-        )
-        assert long_result.solver_status == "success", (
-            "Assertion failed: long_result.solver_status == success"
-        )
+        assert (
+            short_result.solver_status == "success"
+        ), "Assertion failed: short_result.solver_status == success"
+        assert (
+            long_result.solver_status == "success"
+        ), "Assertion failed: long_result.solver_status == success"
 
         # Verify different configurations
         short_arm = short_result.get_link("pendulum_arm")
@@ -65,9 +65,9 @@ class TestPendulumPutterModelConfiguration:
         builder = PendulumPutterModelBuilder(shoulder_height_m=1.0)
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            "Assertion failed: result.solver_status == success"
-        )
+        assert (
+            result.solver_status == "success"
+        ), "Assertion failed: result.solver_status == success"
 
     def test_can_set_pendulum_damping(self) -> None:
         """Should be able to configure pendulum damping."""
@@ -79,9 +79,9 @@ class TestPendulumPutterModelConfiguration:
         result = builder.build()
 
         joint = result.get_joint("pendulum_joint")
-        assert joint.dynamics.damping == pytest.approx(0.1), (
-            "Assertion failed: joint.dynamics.damping == pytest.approx(0.1)"
-        )
+        assert joint.dynamics.damping == pytest.approx(
+            0.1
+        ), "Assertion failed: joint.dynamics.damping == pytest.approx(0.1)"
 
 
 if __name__ == "__main__":

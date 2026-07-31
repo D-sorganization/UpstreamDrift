@@ -1091,12 +1091,12 @@ class SettingsWidget(QWidget):
         scroll.setWidget(container)
 
         # DbC postconditions
-        assert scroll.widget() is container, (
-            "Postcondition: scroll area must wrap the configuration container"
-        )
-        assert container.layout() is not None, (
-            "Postcondition: configuration container must have an active layout"
-        )
+        assert (
+            scroll.widget() is container
+        ), "Postcondition: scroll area must wrap the configuration container"
+        assert (
+            container.layout() is not None
+        ), "Postcondition: configuration container must have an active layout"
 
         return scroll
 

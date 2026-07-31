@@ -375,9 +375,9 @@ class JointLimitsNDOF:
         assert self.angle_min.ndim == 1, "angle_min must be 1D"
         assert self.angle_max.ndim == 1, "angle_max must be 1D"
         assert self.angle_min.shape == self.angle_max.shape, "Shape mismatch"
-        assert np.all(self.angle_min < self.angle_max), (
-            "min must be < max for all joints"
-        )
+        assert np.all(
+            self.angle_min < self.angle_max
+        ), "min must be < max for all joints"
         assert self.stiffness > 0, f"stiffness must be positive, got {self.stiffness}"
         assert self.damping >= 0, f"damping must be non-negative, got {self.damping}"
 

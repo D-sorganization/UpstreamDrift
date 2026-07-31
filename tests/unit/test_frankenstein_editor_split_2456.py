@@ -38,23 +38,23 @@ class TestFrankensteinEditorFileSizes:
     @pytest.mark.unit
     def test_frankenstein_editor_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(EDITOR_COORDINATOR)
-        assert loc <= LOC_BUDGET, (
-            f"{EDITOR_COORDINATOR.name} has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"{EDITOR_COORDINATOR.name} has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_model_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "_frankenstein_model.py")
-        assert loc <= LOC_BUDGET, (
-            f"_frankenstein_model.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_frankenstein_model.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_panels_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "_frankenstein_panels.py")
-        assert loc <= LOC_BUDGET, (
-            f"_frankenstein_panels.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_frankenstein_panels.py has {loc} LOC; budget {LOC_BUDGET}"
 
 
 class TestFrankensteinEditorPublicAPI:

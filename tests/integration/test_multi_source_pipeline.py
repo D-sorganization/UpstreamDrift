@@ -74,9 +74,9 @@ def _impact_clubhead_speed(target) -> float:
 
 def _validate_grid_and_quat(target) -> None:
     """Common timegrid + quaternion-unit-norm assertions."""
-    assert target.time.shape == (EXPECTED_N_FRAMES,), (
-        f"expected {EXPECTED_N_FRAMES} samples, got {target.time.shape}"
-    )
+    assert target.time.shape == (
+        EXPECTED_N_FRAMES,
+    ), f"expected {EXPECTED_N_FRAMES} samples, got {target.time.shape}"
     assert float(target.time[0]) == 0.0
     assert int(target.impact_idx) == EXPECTED_IMPACT_IDX
     np.testing.assert_allclose(np.diff(target.time), EXPECTED_DT, rtol=0.0, atol=1.0e-9)
@@ -163,9 +163,9 @@ def test_mat_club_pipeline_grid_and_kinematics(filename: str, path: Path) -> Non
 def _assert_snapshot_close(actual: np.ndarray, expected_list: list, name: str) -> None:
     """Compare a fresh array against a JSON-loaded reference."""
     expected = np.asarray(expected_list, dtype=np.float64)
-    assert actual.shape == expected.shape, (
-        f"{name}: shape {actual.shape} != snapshot shape {expected.shape}"
-    )
+    assert (
+        actual.shape == expected.shape
+    ), f"{name}: shape {actual.shape} != snapshot shape {expected.shape}"
     np.testing.assert_allclose(
         actual,
         expected,

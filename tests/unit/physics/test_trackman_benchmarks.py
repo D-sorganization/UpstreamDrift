@@ -82,9 +82,9 @@ def _registry_result(
     )
 
 
-def _simulator_factories() -> list[
-    tuple[str, Callable[[], BallFlightSimulator | EnhancedBallFlightSimulator]]
-]:
+def _simulator_factories() -> (
+    list[tuple[str, Callable[[], BallFlightSimulator | EnhancedBallFlightSimulator]]]
+):
     factories: list[
         tuple[str, Callable[[], BallFlightSimulator | EnhancedBallFlightSimulator]]
     ] = [("enhanced", EnhancedBallFlightSimulator)]
@@ -102,12 +102,12 @@ def test_driver_trackman_window(
     carry_yd = analysis["carry_distance"] / YARDS_TO_METERS
 
     assert 238.0 <= carry_yd <= 290.0, f"{name} carry={carry_yd:.1f} yd"
-    assert 25.0 <= analysis["max_height"] <= 40.0, (
-        f"{name} apex={analysis['max_height']:.1f} m"
-    )
-    assert 5.5 <= analysis["flight_time"] <= 7.5, (
-        f"{name} time={analysis['flight_time']:.2f} s"
-    )
+    assert (
+        25.0 <= analysis["max_height"] <= 40.0
+    ), f"{name} apex={analysis['max_height']:.1f} m"
+    assert (
+        5.5 <= analysis["flight_time"] <= 7.5
+    ), f"{name} time={analysis['flight_time']:.2f} s"
 
 
 @pytest.mark.parametrize(("name", "factory"), _simulator_factories())
@@ -119,9 +119,9 @@ def test_iron_trackman_window(
     carry_yd = analysis["carry_distance"] / YARDS_TO_METERS
 
     assert 148.0 <= carry_yd <= 182.0, f"{name} carry={carry_yd:.1f} yd"
-    assert 24.0 <= analysis["max_height"] <= 38.0, (
-        f"{name} apex={analysis['max_height']:.1f} m"
-    )
+    assert (
+        24.0 <= analysis["max_height"] <= 38.0
+    ), f"{name} apex={analysis['max_height']:.1f} m"
 
 
 @pytest.mark.skipif(
@@ -170,9 +170,9 @@ def test_registered_flight_models_match_trackman_carry_band(
         result = _registry_result(model_type, launch)
         carry_yd = result.carry_distance / YARDS_TO_METERS
         carries.append(carry_yd)
-        assert carry_window_yd[0] <= carry_yd <= carry_window_yd[1], (
-            f"{model_type.value} {shot} carry={carry_yd:.1f} yd"
-        )
+        assert (
+            carry_window_yd[0] <= carry_yd <= carry_window_yd[1]
+        ), f"{model_type.value} {shot} carry={carry_yd:.1f} yd"
         assert result.max_height > 0.0
         assert result.flight_time > 0.0
 

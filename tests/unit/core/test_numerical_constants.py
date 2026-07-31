@@ -87,6 +87,6 @@ class TestHumanBodyConstants:
             if isinstance(val, (int, float)):
                 assert val > 0.0, f"Ratio for '{key}' should be positive"
             elif isinstance(val, (list, tuple)):
-                assert all(v > 0.0 for v in val), (
-                    f"All ratios for '{key}' should be positive"
-                )
+                assert all(
+                    v > 0.0 for v in val
+                ), f"All ratios for '{key}' should be positive"

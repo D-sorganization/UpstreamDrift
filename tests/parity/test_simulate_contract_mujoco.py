@@ -112,9 +112,9 @@ def test_zero_theta_runs_and_is_nontrivial() -> None:
     assert np.all(np.isfinite(out.qd))
     # Non-triviality: at least one joint must move from its rest position
     # under the unactuated upper-body's own weight + the club mass.
-    assert not np.allclose(out.q[-1], out.q[0]), (
-        "zero-torque rollout did not move at all — model may be over-constrained"
-    )
+    assert not np.allclose(
+        out.q[-1], out.q[0]
+    ), "zero-torque rollout did not move at all — model may be over-constrained"
 
 
 # --------------------------------------------------------------------------- #

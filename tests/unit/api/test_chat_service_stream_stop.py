@@ -86,9 +86,9 @@ def test_stream_stop_event_halts_worker_on_disconnect(tmp_path) -> None:
     asyncio.run(_drive())
 
     # The adapter generator must have been abandoned (its finally ran).
-    assert adapter.stopped_iterating.wait(timeout=5.0), (
-        "adapter stream was never cancelled -- worker kept pulling"
-    )
+    assert adapter.stopped_iterating.wait(
+        timeout=5.0
+    ), "adapter stream was never cancelled -- worker kept pulling"
 
     # No leaked worker thread: the daemon worker must have exited.
     deadline = time.monotonic() + 5.0

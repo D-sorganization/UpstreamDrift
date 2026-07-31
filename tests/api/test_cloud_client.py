@@ -140,9 +140,9 @@ def test_save_token_fixes_permissions_on_existing_dir(temp_cache_dir: Path) -> N
         asyncio.run(client.login("test@example.com", "password"))
 
     dir_mode = oct(os.stat(config_dir).st_mode)[-3:]
-    assert dir_mode == "700", (
-        f"pre-existing dir should be tightened to 700, got {dir_mode}"
-    )
+    assert (
+        dir_mode == "700"
+    ), f"pre-existing dir should be tightened to 700, got {dir_mode}"
 
 
 @pytest.mark.asyncio

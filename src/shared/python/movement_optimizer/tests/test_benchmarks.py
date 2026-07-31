@@ -73,8 +73,12 @@ class TestInverseDynamicsBenchmark:
         for _ in range(10):
             dyn.inverse_dynamics(q, qd, qdd)
 
-        per_call_ms = _measure_ms(lambda: dyn.inverse_dynamics(q, qd, qdd), iterations=1000)
-        assert per_call_ms < 2.0, f"Single ID call took {per_call_ms:.3f}ms median (limit: 2ms)"
+        per_call_ms = _measure_ms(
+            lambda: dyn.inverse_dynamics(q, qd, qdd), iterations=1000
+        )
+        assert (
+            per_call_ms < 2.0
+        ), f"Single ID call took {per_call_ms:.3f}ms median (limit: 2ms)"
 
     def test_batch_inverse_dynamics_speed(self, default_body: BodyModel):
         """Batch inverse dynamics (100 timesteps) should complete in < 50ms (median).
@@ -94,8 +98,12 @@ class TestInverseDynamicsBenchmark:
         for _ in range(5):
             dyn.inverse_dynamics_batch(q, qd, qdd)
 
-        per_call_ms = _measure_ms(lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=100)
-        assert per_call_ms < 50.0, f"Batch ID (N=100) took {per_call_ms:.3f}ms median (limit: 50ms)"
+        per_call_ms = _measure_ms(
+            lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=100
+        )
+        assert (
+            per_call_ms < 50.0
+        ), f"Batch ID (N=100) took {per_call_ms:.3f}ms median (limit: 50ms)"
 
 
 class TestMassMatrixBenchmark:
@@ -109,7 +117,9 @@ class TestMassMatrixBenchmark:
             dyn.mass_matrix(q)
 
         per_call_ms = _measure_ms(lambda: dyn.mass_matrix(q), iterations=1000)
-        assert per_call_ms < 1.0, f"Mass matrix took {per_call_ms:.3f}ms median (limit: 1ms)"
+        assert (
+            per_call_ms < 1.0
+        ), f"Mass matrix took {per_call_ms:.3f}ms median (limit: 1ms)"
 
 
 class TestForwardKinematicsBenchmark:
@@ -134,7 +144,9 @@ class TestBodyModelBenchmark:
             BodyModel(75.0, 1.75)
 
         per_call_ms = _measure_ms(lambda: BodyModel(75.0, 1.75), iterations=1000)
-        assert per_call_ms < 2.0, f"BodyModel init took {per_call_ms:.3f}ms median (limit: 2ms)"
+        assert (
+            per_call_ms < 2.0
+        ), f"BodyModel init took {per_call_ms:.3f}ms median (limit: 2ms)"
 
 
 # ===========================================================================
@@ -207,9 +219,13 @@ class TestBatchDynamicsScaling:
         for _ in range(5):
             dyn.inverse_dynamics_batch(q, qd, qdd)
 
-        per_call_ms = _measure_ms(lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=200)
+        per_call_ms = _measure_ms(
+            lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=200
+        )
         logger.info("batch ID (N=%d) median %.4f ms", n, per_call_ms)
-        assert per_call_ms < 25.0, f"Batch ID (N={n}) took {per_call_ms:.3f}ms median (limit: 25ms)"
+        assert (
+            per_call_ms < 25.0
+        ), f"Batch ID (N={n}) took {per_call_ms:.3f}ms median (limit: 25ms)"
 
     def test_batch_id_scales_subquadratic(self, default_body: BodyModel):
         """Doubling N should not multiply batch-ID time by more than 4x.
@@ -226,7 +242,9 @@ class TestBatchDynamicsScaling:
             qdd = rng.uniform(-5.0, 5.0, (n, 3))
             for _ in range(5):
                 dyn.inverse_dynamics_batch(q, qd, qdd)
-            return _measure_ms(lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=200)
+            return _measure_ms(
+                lambda: dyn.inverse_dynamics_batch(q, qd, qdd), iterations=200
+            )
 
         t_small = time_batch(50)
         t_large = time_batch(200)
@@ -257,7 +275,9 @@ class TestOptimizerCostHotPath:
 
         per_call_ms = _measure_ms(lambda: opt._compute_cost(x0), iterations=200)
         logger.info("_compute_cost (n_eval=20) median %.4f ms", per_call_ms)
-        assert per_call_ms < 5.0, f"_compute_cost took {per_call_ms:.3f}ms median (limit: 5ms)"
+        assert (
+            per_call_ms < 5.0
+        ), f"_compute_cost took {per_call_ms:.3f}ms median (limit: 5ms)"
 
 
 class TestEndToEndOptimizer:
@@ -274,7 +294,9 @@ class TestEndToEndOptimizer:
         opt = _make_squat_optimizer(default_body, n_eval=20, n_starts=2)
         elapsed = _best_of(lambda: opt.optimize(), trials=2)
         logger.info("end-to-end optimize (n_eval=20, n_starts=2) %.3f s", elapsed)
-        assert elapsed < 10.0, f"Optimizer took {elapsed:.2f}s for a small problem (limit: 10s)"
+        assert (
+            elapsed < 10.0
+        ), f"Optimizer took {elapsed:.2f}s for a small problem (limit: 10s)"
 
 
 class TestOptimizerScaling:
@@ -303,7 +325,9 @@ class TestOptimizerScaling:
 
         t_small = run_at(10)
         t_large = run_at(20)
-        logger.info("optimizer scaling: n_eval=10 %.3fs, n_eval=20 %.3fs", t_small, t_large)
+        logger.info(
+            "optimizer scaling: n_eval=10 %.3fs, n_eval=20 %.3fs", t_small, t_large
+        )
         # Floor plus absolute cap prevent division blow-up when both runs are
         # very fast (sub-second) and scheduler noise dominates the ratio.
         baseline = max(t_small, 0.05)
@@ -346,7 +370,9 @@ class TestSolutionCacheBenchmark:
         )
         per_hit_s = per_hit_ms / 1000.0
         ratio = t_miss / per_hit_s if per_hit_s > 0 else float("inf")
-        logger.info("cache miss %.4fs vs hit %.6fs (ratio %.0fx)", t_miss, per_hit_s, ratio)
+        logger.info(
+            "cache miss %.4fs vs hit %.6fs (ratio %.0fx)", t_miss, per_hit_s, ratio
+        )
 
         # Absolute upper bound on a single hit lookup so we catch the case
         # where a hit becomes unexpectedly expensive (e.g. deep copy added

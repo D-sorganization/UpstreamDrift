@@ -49,16 +49,16 @@ def _canonical_environment() -> dict[str, str]:
 
 def test_sidekick_script_declared(pyproject: dict) -> None:
     scripts = pyproject.get("project", {}).get("scripts", {})
-    assert "sidekick" in scripts, (
-        "sidekick console script missing from [project.scripts]"
-    )
+    assert (
+        "sidekick" in scripts
+    ), "sidekick console script missing from [project.scripts]"
 
 
 def test_sidekick_script_points_to_main(pyproject: dict) -> None:
     scripts = pyproject["project"]["scripts"]
-    assert scripts["sidekick"] == "sidekick.__main__:main", (
-        f"Expected 'sidekick.__main__:main', got '{scripts['sidekick']}'"
-    )
+    assert (
+        scripts["sidekick"] == "sidekick.__main__:main"
+    ), f"Expected 'sidekick.__main__:main', got '{scripts['sidekick']}'"
 
 
 # ---------------------------------------------------------------------------
@@ -132,15 +132,15 @@ def test_hatch_build_excludes_docs(pyproject: dict) -> None:
         pyproject.get("tool", {}).get("hatch", {}).get("build", {}).get("include", [])
     )
     for path in includes:
-        assert "docs/" not in path, (
-            f"docs/ should not be an explicit wheel include: {path}"
-        )
-        assert "tests/" not in path, (
-            f"tests/ should not be an explicit wheel include: {path}"
-        )
-        assert "vendor/" not in path, (
-            f"vendor/ should not be an explicit wheel include: {path}"
-        )
+        assert (
+            "docs/" not in path
+        ), f"docs/ should not be an explicit wheel include: {path}"
+        assert (
+            "tests/" not in path
+        ), f"tests/ should not be an explicit wheel include: {path}"
+        assert (
+            "vendor/" not in path
+        ), f"vendor/ should not be an explicit wheel include: {path}"
 
 
 # ---------------------------------------------------------------------------

@@ -93,9 +93,9 @@ def test_classic_mdp_runs(slug: str):
     assert result.iterations > 0
 
     # delta should be finite (not NaN — could be > tol if max_iter hit).
-    assert math.isfinite(result.delta), (
-        f"{slug}: solver delta is not finite: {result.delta}"
-    )
+    assert math.isfinite(
+        result.delta
+    ), f"{slug}: solver delta is not finite: {result.delta}"
 
 
 @pytest.mark.integration
@@ -112,9 +112,9 @@ def test_classic_expected_strokes_finite_and_positive(slug: str):
 def test_classic_optimal_action_is_valid_club(slug: str):
     """Optimal tee action must be one of the clubs in the action set."""
     _, _, tee_action, _ = _fast_solve(slug)
-    assert tee_action.club in _FAST_CLUBS, (
-        f"optimal club {tee_action.club!r} not in action set {_FAST_CLUBS}"
-    )
+    assert (
+        tee_action.club in _FAST_CLUBS
+    ), f"optimal club {tee_action.club!r} not in action set {_FAST_CLUBS}"
 
 
 @pytest.mark.integration
@@ -125,9 +125,9 @@ def test_classic_optimal_aim_angle_bounded(slug: str):
 
     _, _, tee_action, _ = _fast_solve(slug)
     aim_deg = _math.degrees(tee_action.aim_angle_rad)
-    assert -20.0 <= aim_deg <= 20.0, (
-        f"{slug}: aim angle {aim_deg:.1f}° outside expected range"
-    )
+    assert (
+        -20.0 <= aim_deg <= 20.0
+    ), f"{slug}: aim angle {aim_deg:.1f}° outside expected range"
 
 
 # ---------------------------------------------------------------------------
@@ -146,9 +146,9 @@ def test_sawgrass_17_par3_expected_strokes_near_par():
     """
     _, _, _, expected = _fast_solve("sawgrass_17")
     # With a coarse fast solve, just check finite and positive.
-    assert math.isfinite(expected), (
-        f"sawgrass_17 expected strokes is not finite: {expected}"
-    )
+    assert math.isfinite(
+        expected
+    ), f"sawgrass_17 expected strokes is not finite: {expected}"
     assert expected > 0.0, f"sawgrass_17 expected strokes not positive: {expected}"
 
 
@@ -162,6 +162,6 @@ def test_augusta_13_harder_than_sawgrass_17():
     """A par-5 hole should require more expected strokes than a par-3 hole."""
     _, _, _, par5_exp = _fast_solve("augusta_13")
     _, _, _, par3_exp = _fast_solve("sawgrass_17")
-    assert par5_exp > par3_exp, (
-        f"Par 5 ({par5_exp:.2f}) not harder than par 3 ({par3_exp:.2f})"
-    )
+    assert (
+        par5_exp > par3_exp
+    ), f"Par 5 ({par5_exp:.2f}) not harder than par 3 ({par3_exp:.2f})"

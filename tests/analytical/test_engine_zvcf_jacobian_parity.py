@@ -88,9 +88,9 @@ def test_drake_zvcf_honours_nonzero_actuation() -> None:
     a_ctrl = np.atleast_1d(engine.compute_zvcf(q))
 
     # The two ZVCFs must differ (the fix is live, not tau=0 hardcoded).
-    assert not np.allclose(a_zero, a_ctrl), (
-        "ZVCF ignored the applied actuation — the tau=0 hardcode regressed."
-    )
+    assert not np.allclose(
+        a_zero, a_ctrl
+    ), "ZVCF ignored the applied actuation — the tau=0 hardcode regressed."
 
     # Quantitative identity: delta_a == M^-1 (B u).
     m_mat = np.atleast_2d(engine.compute_mass_matrix())

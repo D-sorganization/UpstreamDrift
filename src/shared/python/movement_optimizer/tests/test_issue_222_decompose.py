@@ -145,7 +145,9 @@ class TestSaveOrEmit:
         assert written["exercise"] == "squat"
         assert written["cost"] == pytest.approx(5.0)
 
-    def test_emits_summary_when_no_output(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_emits_summary_when_no_output(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         from movement_optimizer.tests._helpers import make_test_result
 
         result = make_test_result(cost=7.7)
@@ -204,7 +206,9 @@ class TestBatchInertiaTorques:
         d01 = q[:, 0] - q[:, 1]
         d02 = q[:, 0] - q[:, 2]
         d12 = q[:, 1] - q[:, 2]
-        tau_inertia = dyn._batch_inertia_torques(qdd, np.cos(d01), np.cos(d02), np.cos(d12))
+        tau_inertia = dyn._batch_inertia_torques(
+            qdd, np.cos(d01), np.cos(d02), np.cos(d12)
+        )
         tau_gravity = dyn._batch_gravity_torques(q)
         tau_total = tau_inertia + tau_gravity
         tau_ref = dyn.inverse_dynamics_batch(q, qd, qdd)

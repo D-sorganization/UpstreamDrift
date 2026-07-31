@@ -142,9 +142,9 @@ class TestSplitterRatio:
         total = sum(sizes)
         assert total > 0
         chat_ratio = sizes[0] / total
-        assert abs(chat_ratio - 0.6) < 0.05, (
-            f"chat-first: expected ~0.60 left ratio, got {chat_ratio:.3f}"
-        )
+        assert (
+            abs(chat_ratio - 0.6) < 0.05
+        ), f"chat-first: expected ~0.60 left ratio, got {chat_ratio:.3f}"
         win.close()
 
     def test_calc_first_ratio(self, app: Any, session_store: Any) -> None:
@@ -158,9 +158,9 @@ class TestSplitterRatio:
         total = sum(sizes)
         assert total > 0
         sidebar_ratio = sizes[0] / total
-        assert abs(sidebar_ratio - 0.6) < 0.05, (
-            f"calc-first: expected ~0.60 left ratio, got {sidebar_ratio:.3f}"
-        )
+        assert (
+            abs(sidebar_ratio - 0.6) < 0.05
+        ), f"calc-first: expected ~0.60 left ratio, got {sidebar_ratio:.3f}"
         win.close()
 
 
@@ -349,9 +349,9 @@ class TestStandaloneDunderAll:
         assert isinstance(module.__all__, list)
         assert module.__all__, f"{module_name}.__all__ is empty"
         for name in module.__all__:
-            assert hasattr(module, name), (
-                f"{module_name}.__all__ lists {name!r} which is not defined"
-            )
+            assert hasattr(
+                module, name
+            ), f"{module_name}.__all__ lists {name!r} which is not defined"
 
 
 class TestProfileSwitch:

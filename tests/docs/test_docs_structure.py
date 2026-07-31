@@ -25,9 +25,9 @@ _ALLOWED_ROOT_MD = {"README.md", "index.md"}
 def test_no_loose_markdown_at_docs_root() -> None:
     """All *.md files except README.md and index.md must live in a subdir."""
     loose = sorted(p.name for p in _DOCS.glob("*.md") if p.name not in _ALLOWED_ROOT_MD)
-    assert not loose, (
-        f"Loose .md files found in docs/ root; move each to a subdir: {loose}"
-    )
+    assert (
+        not loose
+    ), f"Loose .md files found in docs/ root; move each to a subdir: {loose}"
 
 
 def test_examples_index_references_existing_pages() -> None:

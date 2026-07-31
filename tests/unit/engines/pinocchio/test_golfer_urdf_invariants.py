@@ -49,9 +49,9 @@ def _joint_by_name(root: ET.Element, name: str) -> ET.Element | None:
 
 class TestMidHandsLinkPresent:
     def test_mid_hands_link_exists(self, golfer_root) -> None:
-        assert "mid_hands" in _link_names(golfer_root), (
-            "`mid_hands` virtual link missing from golfer.urdf"
-        )
+        assert "mid_hands" in _link_names(
+            golfer_root
+        ), "`mid_hands` virtual link missing from golfer.urdf"
 
     def test_mid_hands_parent_is_thorax3(self, golfer_root) -> None:
         joint = _joint_by_name(golfer_root, "thorax3_to_mid_hands")
@@ -77,9 +77,9 @@ class TestMidHandsLinkPresent:
 class TestClubWeldedToMidHands:
     def test_mid_hands_to_club_shaft_joint(self, golfer_root) -> None:
         joint = _joint_by_name(golfer_root, "mid_hands_to_club_shaft")
-        assert joint is not None, (
-            "Club must be welded to mid_hands; mid_hands_to_club_shaft missing"
-        )
+        assert (
+            joint is not None
+        ), "Club must be welded to mid_hands; mid_hands_to_club_shaft missing"
         assert joint.attrib["type"] == "fixed"
         assert joint.find("parent").attrib["link"] == "mid_hands"
         assert joint.find("child").attrib["link"] == "club_shaft"

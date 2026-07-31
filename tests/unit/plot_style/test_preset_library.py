@@ -76,9 +76,9 @@ def test_each_preset_has_curated_entries() -> None:
     for preset_name in BUILTIN_PRESET_NAMES:
         entries = library[preset_name].entries
         names = {entry.name for entry in entries}
-        assert expected_names <= names, (
-            f"preset {preset_name!r} missing entries: {expected_names - names}"
-        )
+        assert (
+            expected_names <= names
+        ), f"preset {preset_name!r} missing entries: {expected_names - names}"
 
 
 # ---------- Lookup errors ---------------------------------------------------

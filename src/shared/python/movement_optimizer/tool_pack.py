@@ -42,7 +42,9 @@ def _load_manifest_text() -> str:
         repo_manifest = parent / _MANIFEST_FILENAME
         if repo_manifest.is_file():
             return repo_manifest.read_text(encoding="utf-8")
-    raise FileNotFoundError(f"{_MANIFEST_FILENAME} not found alongside movement_optimizer.")
+    raise FileNotFoundError(
+        f"{_MANIFEST_FILENAME} not found alongside movement_optimizer."
+    )
 
 
 def manifest() -> dict[str, Any]:

@@ -179,9 +179,9 @@ def test_pose_studio_publish_arrives(
     finally:
         subscription.unsubscribe()
 
-    assert got, (
-        f"pose/canonical payload did not arrive within {ARRIVAL_TIMEOUT_S:.1f}s ceiling"
-    )
+    assert (
+        got
+    ), f"pose/canonical payload did not arrive within {ARRIVAL_TIMEOUT_S:.1f}s ceiling"
     assert len(received) >= 1
     payload = received[0]
     assert isinstance(payload, dict)

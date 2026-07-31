@@ -262,9 +262,9 @@ def test_run_simulation_handles_generic_exception(widget: BallFlightWidget) -> N
     text = widget._results_text.toPlainText()
     assert "Simulation error" in text
     assert "boom" in text
-    assert "from_user_units" not in text, (
-        "the launch-conditions stand-in broke before the solver was reached"
-    )
+    assert (
+        "from_user_units" not in text
+    ), "the launch-conditions stand-in broke before the solver was reached"
 
 
 def test_run_simulation_replaces_existing_plot_item(widget: BallFlightWidget) -> None:

@@ -139,9 +139,9 @@ def test_nonruntime_packages_are_excluded(spec_source: str, pkg: str) -> None:
 
 
 def test_size_budget_declared(spec_source: str) -> None:
-    assert "MAX_MB" in spec_source or "max_mb" in spec_source or "250" in spec_source, (
-        "spec or build script must declare the 250 MB size budget"
-    )
+    assert (
+        "MAX_MB" in spec_source or "max_mb" in spec_source or "250" in spec_source
+    ), "spec or build script must declare the 250 MB size budget"
 
 
 # ---------------------------------------------------------------------------
@@ -169,9 +169,9 @@ def test_release_workflow_triggers(spec_source: str) -> None:
     if not wf.exists():
         pytest.skip("workflow file absent")
     content = wf.read_text(encoding="utf-8")
-    assert "workflow_dispatch" in content, (
-        "workflow must support workflow_dispatch trigger"
-    )
+    assert (
+        "workflow_dispatch" in content
+    ), "workflow must support workflow_dispatch trigger"
     assert "sidekick-v" in content, "workflow must trigger on sidekick-v* tags"
 
 

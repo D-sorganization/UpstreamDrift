@@ -79,6 +79,6 @@ def test_probe_does_not_inject_mock_modules() -> None:
         is_engine_available(engine)
 
     new_mocks = mock_keys() - before_mocks
-    assert not new_mocks, (
-        f"probing injected Mock modules into sys.modules: {sorted(new_mocks)}"
-    )
+    assert (
+        not new_mocks
+    ), f"probing injected Mock modules into sys.modules: {sorted(new_mocks)}"

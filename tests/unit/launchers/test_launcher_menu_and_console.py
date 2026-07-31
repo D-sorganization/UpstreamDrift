@@ -95,9 +95,9 @@ class TestProcessOutputRelay:
         import inspect
 
         source = inspect.getsource(UISetupManager._on_process_output)
-        assert "singleShot(" not in source, (
-            "QTimer.singleShot cannot marshal from a non-Qt reader thread — #8003"
-        )
+        assert (
+            "singleShot(" not in source
+        ), "QTimer.singleShot cannot marshal from a non-Qt reader thread — #8003"
 
     def test_relay_delivers_lines_emitted_from_a_worker_thread(
         self, qapp_or_skip
@@ -123,9 +123,9 @@ class TestProcessOutputRelay:
         QTimer.singleShot(200, app.quit)
         app.exec()
 
-        assert received == [("demo", "hello from the reader thread", gui_thread_id)], (
-            "line must be delivered exactly once, on the GUI thread"
-        )
+        assert received == [
+            ("demo", "hello from the reader thread", gui_thread_id)
+        ], "line must be delivered exactly once, on the GUI thread"
 
     def test_ui_setup_manager_emits_through_the_relay(self, qapp_or_skip) -> None:
         """``_on_process_output`` routes through the queued relay."""

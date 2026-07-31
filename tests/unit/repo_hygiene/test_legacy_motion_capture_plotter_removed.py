@@ -62,9 +62,9 @@ def test_no_src_reference_resolves_legacy_path() -> None:
             continue
         if any(needle in content for needle in _DELETED_BASENAMES):
             offenders.append(str(py_file.relative_to(REPO_ROOT)).replace("\\", "/"))
-    assert not offenders, (
-        f"src/ files still reference the deleted legacy monolith path: {offenders}"
-    )
+    assert (
+        not offenders
+    ), f"src/ files still reference the deleted legacy monolith path: {offenders}"
 
 
 def test_budgets_no_longer_list_legacy_monoliths() -> None:

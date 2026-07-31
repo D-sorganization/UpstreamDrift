@@ -53,9 +53,9 @@ def test_norm_vs_sqrt_vdot_matches(size: int) -> None:
     for v in _vectors(25, size):
         original = float(np.linalg.norm(v))
         optimized = math.sqrt(np.vdot(v, v))
-        assert optimized == pytest.approx(original, rel=REORDER_RTOL), (
-            f"size={size} original={original!r} optimized={optimized!r}"
-        )
+        assert optimized == pytest.approx(
+            original, rel=REORDER_RTOL
+        ), f"size={size} original={original!r} optimized={optimized!r}"
 
 
 def test_norm_vs_sqrt_vdot_overflow_behaviour_is_identical() -> None:

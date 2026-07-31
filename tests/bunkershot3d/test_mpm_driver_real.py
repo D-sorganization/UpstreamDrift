@@ -153,6 +153,6 @@ def test_grain_placement_is_reproducible(dummy_config: Path) -> None:
     driver = MPMDriver(dummy_config)
     xml1 = driver._generate_xml()
     xml2 = driver._generate_xml()
-    assert xml1 == xml2, (
-        "Grain placement is non-deterministic — use a seeded RNG (np.random.default_rng)"
-    )
+    assert (
+        xml1 == xml2
+    ), "Grain placement is non-deterministic — use a seeded RNG (np.random.default_rng)"

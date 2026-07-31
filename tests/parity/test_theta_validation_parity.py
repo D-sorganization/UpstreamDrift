@@ -147,9 +147,9 @@ def _expect_value_error(sim_fn: Any, theta: Any, *, pattern: str) -> None:
     try:
         sim_fn(theta)
     except ValueError as exc:
-        assert re.search(pattern, str(exc)), (
-            f"engine raised ValueError but message {str(exc)!r} did not match {pattern!r}"
-        )
+        assert re.search(
+            pattern, str(exc)
+        ), f"engine raised ValueError but message {str(exc)!r} did not match {pattern!r}"
         return
     except (ImportError, ModuleNotFoundError, FileNotFoundError) as exc:
         pytest.skip(f"engine binding unavailable: {exc}")

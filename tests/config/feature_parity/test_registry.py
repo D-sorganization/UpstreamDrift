@@ -100,9 +100,9 @@ class TestGapEntriesHaveIssues:
             for e in registry.exemptions
             if e.pending_decision and "#7460" not in (e.reason or "")
         ]
-        assert not offenders, (
-            f"pending_decision exemptions must cite #7460 in reason: {offenders}"
-        )
+        assert (
+            not offenders
+        ), f"pending_decision exemptions must cite #7460 in reason: {offenders}"
 
 
 # =============================================================================

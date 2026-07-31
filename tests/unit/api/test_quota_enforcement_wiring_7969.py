@@ -107,9 +107,9 @@ def test_exhausted_quota_returns_429(quota_app: Any, resource_type: str) -> None
 
     response = client.post("/guarded")
 
-    assert response.status_code == 429, (
-        "the documented 'Usage quota exceeded' response is unreachable"
-    )
+    assert (
+        response.status_code == 429
+    ), "the documented 'Usage quota exceeded' response is unreachable"
     assert "quota exceeded" in response.json()["detail"].lower()
 
 
@@ -129,9 +129,9 @@ def test_quota_is_refunded_when_the_endpoint_fails(
 
     assert response.status_code == 500
     assert tracker.consume_quota.call_count == 1
-    assert tracker.refund_quota.call_count == 1, (
-        "a failed protected operation must refund the consumed quota unit"
-    )
+    assert (
+        tracker.refund_quota.call_count == 1
+    ), "a failed protected operation must refund the consumed quota unit"
 
 
 def test_auth_disabled_mode_skips_quota_entirely(

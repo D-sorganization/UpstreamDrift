@@ -32,7 +32,9 @@ def test_action_handlers_connect_and_emit(sidebar) -> None:
         "compare_trials_requested",
         "clear_comparison_requested",
     ]
-    sidebar.connect_action_handlers({name: (lambda n=name: fired.append(n)) for name in names})
+    sidebar.connect_action_handlers(
+        {name: (lambda n=name: fired.append(n)) for name in names}
+    )
     for name in names:
         getattr(sidebar, name).emit()
     assert set(fired) == set(names)

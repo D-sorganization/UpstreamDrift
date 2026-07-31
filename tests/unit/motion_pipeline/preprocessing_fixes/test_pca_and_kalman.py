@@ -117,9 +117,9 @@ def test_pca_gap_fill_recovers_occluded_marker():
         # X is the dynamic axis -> compare against truth with 5% tolerance
         true_x = truth[i, 3, 0]
         # Use absolute envelope so values near zero do not blow up the ratio
-        assert abs(m.x - true_x) <= max(0.05 * abs(true_x), 0.1), (
-            f"frame {i}: got {m.x}, expected ~{true_x}"
-        )
+        assert abs(m.x - true_x) <= max(
+            0.05 * abs(true_x), 0.1
+        ), f"frame {i}: got {m.x}, expected ~{true_x}"
         assert np.isfinite(m.x) and np.isfinite(m.y) and np.isfinite(m.z)
 
 
@@ -181,9 +181,9 @@ def test_kalman_filter_reduces_mse_on_noisy_sinusoid():
     out_x = np.array([f.markers["M0"].x for f in filtered.frames])
 
     # Postcondition: filtering must actually change the signal
-    assert not np.allclose(out_x, noisy), (
-        "Kalman dispatch returned input unchanged — silent stub regression"
-    )
+    assert not np.allclose(
+        out_x, noisy
+    ), "Kalman dispatch returned input unchanged — silent stub regression"
 
     raw_mse = float(np.mean((noisy - truth) ** 2))
     kf_mse = float(np.mean((out_x - truth) ** 2))

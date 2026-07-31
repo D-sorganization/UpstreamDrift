@@ -113,7 +113,9 @@ def run_parallel_starts(
         optimizer work performed by each submitted start.
     """
     with ThreadPoolExecutor(max_workers=n_workers) as pool:
-        pending: set[Future] = {pool.submit(run_single_fn, seed) for seed in range(n_starts)}
+        pending: set[Future] = {
+            pool.submit(run_single_fn, seed) for seed in range(n_starts)
+        }
         return collect_future_results(pending, cancel_check, record_progress)
 
 

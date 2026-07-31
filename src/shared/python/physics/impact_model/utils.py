@@ -9,7 +9,6 @@ from src.shared.python.core.physics_constants import (
 
 from .types import ImpactParameters, PostImpactState, PreImpactState
 
-
 # fmt: off
 @precondition(  # fmt: skip
     lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=350.0, v_scale=150.0: (

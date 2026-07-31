@@ -93,7 +93,9 @@ def test_open_file_failure(empty_widget) -> None:
 
 
 def test_open_file_cancel(empty_widget) -> None:
-    with patch("PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("", "")):  # noqa: SIM117
+    with patch(
+        "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("", "")
+    ):  # noqa: SIM117
         with patch.object(empty_widget.engine, "load_file") as mock_load:
             empty_widget.open_file()
             mock_load.assert_not_called()

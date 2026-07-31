@@ -62,7 +62,9 @@ class TestImportResultFromJson:
         path = tmp_path / "legacy.json"
         path.write_text(json.dumps(data), encoding="utf-8")
 
-        with caplog.at_level(logging.WARNING, logger="movement_optimizer.import_results"):
+        with caplog.at_level(
+            logging.WARNING, logger="movement_optimizer.import_results"
+        ):
             result = import_result_from_json(path)
 
         assert result["cost"] == 99.0

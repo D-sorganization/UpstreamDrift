@@ -109,7 +109,9 @@ def test_chain_simulation_damps_energy() -> None:
     assert rollout.frame_count() == 25
     assert rollout.positions.shape == (25, 7, 2)
     assert np.all(np.isfinite(rollout.energy_j))
-    assert total_energy(config, rollout.states[-1]) == pytest.approx(rollout.energy_j[-1])
+    assert total_energy(config, rollout.states[-1]) == pytest.approx(
+        rollout.energy_j[-1]
+    )
     diffs = np.diff(rollout.positions, axis=1)
     link_lengths = np.sqrt(
         np.einsum("...i,...i->...", diffs, diffs)
@@ -143,13 +145,15 @@ def test_chain_single_segment_gravity_matches_slender_rod_pendulum() -> None:
     )
     angle = 0.2
     dt_s = 1e-4
-    state = ChainState(np.asarray([angle], dtype=np.float64), np.zeros(1, dtype=np.float64))
+    state = ChainState(
+        np.asarray([angle], dtype=np.float64), np.zeros(1, dtype=np.float64)
+    )
 
     stepped = step_chain(config, state, dt_s=dt_s)
 
-    expected_acceleration = -(3.0 * config.gravity_m_s2 / (2.0 * config.segment_length_m)) * np.sin(
-        angle
-    )
+    expected_acceleration = -(
+        3.0 * config.gravity_m_s2 / (2.0 * config.segment_length_m)
+    ) * np.sin(angle)
     observed_acceleration = stepped.angular_velocities_rad_s[0] / dt_s
     assert observed_acceleration == pytest.approx(expected_acceleration, rel=0.02)
 
@@ -165,13 +169,17 @@ def test_chain_tip_kick_velocities_increase_toward_tip() -> None:
 def test_chain_random_wadded_start_is_deterministic_and_validated() -> None:
     config = ChainConfig(segment_count=5)
 
-    first = random_wadded_chain_state(config, angle_span_rad=np.pi, velocity_span_rad_s=0.4, seed=7)
+    first = random_wadded_chain_state(
+        config, angle_span_rad=np.pi, velocity_span_rad_s=0.4, seed=7
+    )
     second = random_wadded_chain_state(
         config, angle_span_rad=np.pi, velocity_span_rad_s=0.4, seed=7
     )
 
     np.testing.assert_allclose(first.angles_rad, second.angles_rad)
-    np.testing.assert_allclose(first.angular_velocities_rad_s, second.angular_velocities_rad_s)
+    np.testing.assert_allclose(
+        first.angular_velocities_rad_s, second.angular_velocities_rad_s
+    )
     assert first.angles_rad.shape == (5,)
     assert np.max(np.abs(first.angles_rad)) <= np.pi
     with pytest.raises(ValueError, match="angle_span_rad"):
@@ -200,7 +208,9 @@ def test_chain_simulation_validates_rollout_inputs() -> None:
     with pytest.raises(ValueError, match="dt_s"):
         step_chain(config, initial, dt_s=0.0)
     with pytest.raises(ValueError, match="incompatible"):
-        simulate_chain(config, initial, steps=2, dt_s=0.01, torque_history_nm=np.zeros((2, 2)))
+        simulate_chain(
+            config, initial, steps=2, dt_s=0.01, torque_history_nm=np.zeros((2, 2))
+        )
 
 
 def test_swingset_snapshot_models_body_chain_and_mass() -> None:
@@ -244,7 +254,9 @@ def test_swingset_elbow_branch_does_not_mirror_when_control_crosses_zero() -> No
         elbow = snapshot.points["elbow"]
         hand_delta = hand - shoulder
         elbow_delta = elbow - shoulder
-        branch_signs.append(float(hand_delta[0] * elbow_delta[1] - hand_delta[1] * elbow_delta[0]))
+        branch_signs.append(
+            float(hand_delta[0] * elbow_delta[1] - hand_delta[1] * elbow_delta[0])
+        )
         elbow_points.append(elbow)
 
     # The elbow must never mirror to the far branch as the requested flexion
@@ -252,7 +264,9 @@ def test_swingset_elbow_branch_does_not_mirror_when_control_crosses_zero() -> No
     assert min(branch_signs) > 0.0
     # No discontinuous jump (a mirror flip would be a large step); the elbow
     # moves smoothly across the swept range.
-    max_step = max(float(np.linalg.norm(end - start)) for start, end in pairwise(elbow_points))
+    max_step = max(
+        float(np.linalg.norm(end - start)) for start, end in pairwise(elbow_points)
+    )
     assert max_step < 0.1
 
 
@@ -429,7 +443,9 @@ def test_cyclic_policy_controls_match_callback_policy() -> None:
 def test_swingset_cyclic_policy_search_selects_height_objective() -> None:
     result = optimize_cyclic_policy(SwingSetConfig(), steps=40, dt_s=0.02)
 
-    assert result.objective_height_m == pytest.approx(result.rollout.metrics.max_height_gain_m)
+    assert result.objective_height_m == pytest.approx(
+        result.rollout.metrics.max_height_gain_m
+    )
     assert result.objective_height_m > 0.0
     assert result.parameters.frequency_hz > 0.0
 
@@ -457,7 +473,9 @@ def test_swingset_policy_search_reports_progress_and_uses_cycles() -> None:
         cycles=2.0,
         dt_s=0.02,
         search_space=search_space,
-        progress_callback=lambda done, total, score, _params: progress.append((done, total, score)),
+        progress_callback=lambda done, total, score, _params: progress.append(
+            (done, total, score)
+        ),
     )
 
     assert result.evaluated_candidates == 4
@@ -508,7 +526,9 @@ def test_swingset_joint_torque_estimator_validates_control_history() -> None:
 def test_swingset_rollout_validates_inputs() -> None:
     config = SwingSetConfig()
     with pytest.raises(ValueError, match="steps"):
-        simulate_swingset(config, SwingSetState.rest(), 0, 0.02, heuristic_pumping_policy)
+        simulate_swingset(
+            config, SwingSetState.rest(), 0, 0.02, heuristic_pumping_policy
+        )
     with pytest.raises(ValueError, match="dt_s"):
         step_swingset(config, SwingSetState.rest(), SwingControlAction(), dt_s=0.0)
     with pytest.raises(ValueError, match="steps"):
@@ -539,7 +559,9 @@ def test_iterative_optimizer_is_deterministic() -> None:
     first = optimize_cyclic_policy_iterative(config, steps=40, budget=60, seed=7)
     second = optimize_cyclic_policy_iterative(config, steps=40, budget=60, seed=7)
     assert first.objective_height_m == pytest.approx(second.objective_height_m)
-    assert first.parameters.frequency_hz == pytest.approx(second.parameters.frequency_hz)
+    assert first.parameters.frequency_hz == pytest.approx(
+        second.parameters.frequency_hz
+    )
     assert first.parameters.phase_rad == pytest.approx(second.parameters.phase_rad)
     assert len(first.trace) == len(second.trace)
 
@@ -554,7 +576,9 @@ def test_iterative_optimizer_honors_budget(budget: int) -> None:
 
 def test_iterative_optimizer_matches_or_beats_grid() -> None:
     config = SwingSetConfig()
-    grid = optimize_cyclic_policy(config, steps=80, search_space=CyclicPolicySearchSpace())
+    grid = optimize_cyclic_policy(
+        config, steps=80, search_space=CyclicPolicySearchSpace()
+    )
     iterative = optimize_cyclic_policy_iterative(config, steps=80, budget=400, seed=0)
     assert iterative.objective_height_m >= grid.objective_height_m - 0.05
 
@@ -573,7 +597,9 @@ def test_iterative_optimizer_progress_callback_contract() -> None:
     config = SwingSetConfig()
     calls: list[tuple[int, int, float]] = []
 
-    def _record(completed: int, total: int, best: float, params: CyclicPolicyParameters) -> None:
+    def _record(
+        completed: int, total: int, best: float, params: CyclicPolicyParameters
+    ) -> None:
         calls.append((completed, total, best))
         assert isinstance(params, CyclicPolicyParameters)
 

@@ -56,6 +56,6 @@ def test_every_error_field_id_exists_in_registry():
     for err in catalog:
         if err.field_id is None:
             continue
-        assert err.field_id in registry, (
-            f"error {err.code!r} references unknown field {err.field_id!r}"
-        )
+        assert (
+            err.field_id in registry
+        ), f"error {err.code!r} references unknown field {err.field_id!r}"

@@ -102,9 +102,9 @@ class TestBuckEquation:
         default vapor pressure +15% at 25°C and +43% at 100°C.
         """
         p = engine._buck_equation(temp_c)
-        assert p == pytest.approx(expected_pa, rel=0.005), (
-            f"Buck at {temp_c}°C = {p:.1f} Pa, expected ~{expected_pa} Pa"
-        )
+        assert p == pytest.approx(
+            expected_pa, rel=0.005
+        ), f"Buck at {temp_c}°C = {p:.1f} Pa, expected ~{expected_pa} Pa"
 
 
 # ---------------------------------------------------------------------------

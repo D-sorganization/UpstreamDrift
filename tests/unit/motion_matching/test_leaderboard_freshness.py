@@ -55,9 +55,9 @@ def test_leaderboard_meta_schema():
     assert isinstance(sha, str)
     assert sha.strip(), "git_head must not be empty"
     assert len(sha) >= 7
-    assert all(c in "0123456789abcdef" for c in sha.lower()), (
-        f"git_head {sha!r} should be hex"
-    )
+    assert all(
+        c in "0123456789abcdef" for c in sha.lower()
+    ), f"git_head {sha!r} should be hex"
 
 
 def _is_shallow_repo() -> bool:

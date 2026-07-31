@@ -72,9 +72,9 @@ def test_satisfies_every_sub_protocol(adapter: SimscapeAdapter) -> None:
         Recordable,
         Checkpointable,
     ):
-        assert isinstance(adapter, proto), (
-            f"SimscapeAdapter does not satisfy {proto.__name__}"
-        )
+        assert isinstance(
+            adapter, proto
+        ), f"SimscapeAdapter does not satisfy {proto.__name__}"
 
 
 # ---------------------------------------------------------------------------

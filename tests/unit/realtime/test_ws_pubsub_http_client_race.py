@@ -90,9 +90,9 @@ class TestWSPubSubHttpClientRace:
 
     def test_http_client_lock_attribute_exists(self) -> None:
         """WSPubSub must expose _http_client_lock as a threading.Lock."""
-        assert hasattr(ws_mod.WSPubSub, "_http_client_lock"), (
-            "WSPubSub must have a class-level _http_client_lock"
-        )
-        assert isinstance(ws_mod.WSPubSub._http_client_lock, type(threading.Lock())), (
-            "_http_client_lock must be a threading.Lock instance"
-        )
+        assert hasattr(
+            ws_mod.WSPubSub, "_http_client_lock"
+        ), "WSPubSub must have a class-level _http_client_lock"
+        assert isinstance(
+            ws_mod.WSPubSub._http_client_lock, type(threading.Lock())
+        ), "_http_client_lock must be a threading.Lock instance"

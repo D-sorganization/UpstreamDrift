@@ -76,9 +76,9 @@ def test_every_data_c3d_loads_at_human_scale(c3d_path: Path) -> None:
     # against a small tolerance below the declared marker count.
     max_markers = max(len(f.markers) for f in trajectory.frames)
     if expected_markers is not None:
-        assert expected_markers - 3 <= max_markers <= expected_markers, (
-            f"{c3d_path.name}: expected ~{expected_markers} markers, got {max_markers}"
-        )
+        assert (
+            expected_markers - 3 <= max_markers <= expected_markers
+        ), f"{c3d_path.name}: expected ~{expected_markers} markers, got {max_markers}"
     else:
         assert max_markers > 0
 

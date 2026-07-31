@@ -123,9 +123,9 @@ def test_main_layout_is_splitter_with_handle(qapp, monkeypatch):
     launcher.init_ui()
 
     # Verify QSplitter was instantiated
-    assert created_instances, (
-        "A QSplitter must be used for the main layout to allow sidebar resizing"
-    )
+    assert (
+        created_instances
+    ), "A QSplitter must be used for the main layout to allow sidebar resizing"
 
     # Verify configuration on the created instance
     inst = created_instances[0]

@@ -68,9 +68,9 @@ def test_every_guarded_path_exists() -> None:
         for suffix in rule.path_suffixes
         if not (REPO_ROOT / suffix).exists()
     ]
-    assert not missing, (
-        f"Optional-collection rules reference paths that no longer exist: {missing}"
-    )
+    assert (
+        not missing
+    ), f"Optional-collection rules reference paths that no longer exist: {missing}"
 
 
 @pytest.mark.parametrize(

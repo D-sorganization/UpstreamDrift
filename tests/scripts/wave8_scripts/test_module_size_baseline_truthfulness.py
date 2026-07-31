@@ -71,9 +71,9 @@ def test_every_exception_path_resolves(baseline: dict) -> None:
         for exc in baseline.get("exceptions", [])
         if not (REPO_ROOT / exc["path"]).is_file()
     ]
-    assert not missing, (
-        "Exceptions reference files that do not exist:\n  " + "\n  ".join(missing)
-    )
+    assert (
+        not missing
+    ), "Exceptions reference files that do not exist:\n  " + "\n  ".join(missing)
 
 
 def test_no_exception_for_file_under_budget(baseline: dict, budget: int) -> None:

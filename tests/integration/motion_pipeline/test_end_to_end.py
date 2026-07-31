@@ -90,12 +90,12 @@ def assert_motion_matching_result_invariants(result: Any) -> None:
     # Provenance metadata must be present
     assert "source_format" in result.metadata, "metadata must contain source_format"
     assert "ik_backend" in result.metadata, "metadata must contain ik_backend"
-    assert "matching_backend" in result.metadata, (
-        "metadata must contain matching_backend"
-    )
-    assert "processed_at" in result.metadata, (
-        "metadata must contain processed_at timestamp"
-    )
+    assert (
+        "matching_backend" in result.metadata
+    ), "metadata must contain matching_backend"
+    assert (
+        "processed_at" in result.metadata
+    ), "metadata must contain processed_at timestamp"
 
 
 def compute_rmse(actual: np.ndarray, expected: np.ndarray) -> float:
@@ -197,7 +197,8 @@ def test_motion_pipeline_no_direct_engine_imports() -> None:
             if pattern in content:
                 forbidden_imports.append(f"{mod_name}: {pattern}")
 
-    assert not forbidden_imports, (
-        "Found forbidden engine imports in motion_pipeline:\n"
-        + "\n".join(forbidden_imports)
+    assert (
+        not forbidden_imports
+    ), "Found forbidden engine imports in motion_pipeline:\n" + "\n".join(
+        forbidden_imports
     )

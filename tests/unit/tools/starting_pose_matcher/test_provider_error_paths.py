@@ -184,6 +184,6 @@ def test_provider_vocabulary_is_complete(module_name: str):
         getattr(mod, name) for name in dir(mod) if name.startswith("MATCHER_TO_")
     )
     for vocab in REQUIRED_VOCAB:
-        assert vocab in matcher_to_engine, (
-            f"{module_name}: missing vocabulary mapping for {vocab}"
-        )
+        assert (
+            vocab in matcher_to_engine
+        ), f"{module_name}: missing vocabulary mapping for {vocab}"

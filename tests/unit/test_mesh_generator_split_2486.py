@@ -45,30 +45,30 @@ class TestMeshGeneratorFileSizes:
     @pytest.mark.unit
     def test_mesh_generator_split_2486_coordinator_loc(self) -> None:
         loc = _count_lines(GENERATORS_DIR / "mesh_generator.py")
-        assert loc <= LOC_BUDGET_COORDINATOR, (
-            f"mesh_generator.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
-        )
+        assert (
+            loc <= LOC_BUDGET_COORDINATOR
+        ), f"mesh_generator.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
 
     @pytest.mark.unit
     def test_types_loc(self) -> None:
         loc = _count_lines(GENERATORS_DIR / "_mesh_types.py")
-        assert loc <= LOC_BUDGET_TYPES, (
-            f"_mesh_types.py has {loc} LOC; budget {LOC_BUDGET_TYPES}"
-        )
+        assert (
+            loc <= LOC_BUDGET_TYPES
+        ), f"_mesh_types.py has {loc} LOC; budget {LOC_BUDGET_TYPES}"
 
     @pytest.mark.unit
     def test_primitives_loc(self) -> None:
         loc = _count_lines(GENERATORS_DIR / "_mesh_primitives.py")
-        assert loc <= LOC_BUDGET_PRIMITIVES, (
-            f"_mesh_primitives.py has {loc} LOC; budget {LOC_BUDGET_PRIMITIVES}"
-        )
+        assert (
+            loc <= LOC_BUDGET_PRIMITIVES
+        ), f"_mesh_primitives.py has {loc} LOC; budget {LOC_BUDGET_PRIMITIVES}"
 
     @pytest.mark.unit
     def test_smplx_loc(self) -> None:
         loc = _count_lines(GENERATORS_DIR / "_mesh_smplx.py")
-        assert loc <= LOC_BUDGET_SMPLX, (
-            f"_mesh_smplx.py has {loc} LOC; budget {LOC_BUDGET_SMPLX}"
-        )
+        assert (
+            loc <= LOC_BUDGET_SMPLX
+        ), f"_mesh_smplx.py has {loc} LOC; budget {LOC_BUDGET_SMPLX}"
 
 
 _smplx_available = importlib.util.find_spec("smplx") is not None

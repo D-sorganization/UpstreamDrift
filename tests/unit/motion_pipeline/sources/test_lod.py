@@ -59,9 +59,9 @@ def test_no_forbidden_imports(path: Path) -> None:
     mods = _imported_modules(path)
     for m in mods:
         for forbidden in FORBIDDEN_PREFIXES:
-            assert not m.startswith(forbidden), (
-                f"{path.name} imports {m!r}; forbidden prefix {forbidden!r}"
-            )
+            assert not m.startswith(
+                forbidden
+            ), f"{path.name} imports {m!r}; forbidden prefix {forbidden!r}"
 
 
 @pytest.mark.parametrize("path", _adapter_files(), ids=lambda p: p.name)
@@ -69,6 +69,6 @@ def test_first_party_imports_are_allowlisted(path: Path) -> None:
     mods = _imported_modules(path)
     for m in mods:
         if m.startswith("src."):
-            assert any(m.startswith(p) for p in ALLOWED_FIRST_PARTY), (
-                f"{path.name} imports {m!r}, which is not in the LoD allowlist."
-            )
+            assert any(
+                m.startswith(p) for p in ALLOWED_FIRST_PARTY
+            ), f"{path.name} imports {m!r}, which is not in the LoD allowlist."

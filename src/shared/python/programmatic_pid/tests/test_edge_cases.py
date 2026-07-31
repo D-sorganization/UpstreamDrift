@@ -123,7 +123,9 @@ class TestValidateSpecWithJsonschema:
             "Schema violation: missing field"
         )
 
-        with patch.object(_val, "_load_schema", return_value=mock_schema):  # noqa: SIM117
+        with patch.object(
+            _val, "_load_schema", return_value=mock_schema
+        ):  # noqa: SIM117
             with patch.dict("sys.modules", {"jsonschema": mock_jsonschema}):
                 with pytest.raises(SpecValidationError, match="Schema violation"):
                     validate_spec(valid_spec)
@@ -141,7 +143,9 @@ class TestValidateSpecWithJsonschema:
         mock_jsonschema = MagicMock()
         mock_jsonschema.validate.side_effect = ImportError("no jsonschema")
 
-        with patch.object(_val, "_load_schema", return_value=mock_schema):  # noqa: SIM117
+        with patch.object(
+            _val, "_load_schema", return_value=mock_schema
+        ):  # noqa: SIM117
             with patch.dict("sys.modules", {"jsonschema": mock_jsonschema}):
                 # Should not raise due to ImportError
                 validate_spec(valid_spec)  # should pass (no errors in valid_spec)

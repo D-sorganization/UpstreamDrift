@@ -68,9 +68,9 @@ class TestConvexHullParity:
 
         # Coplanar / numerical edge cases can shift either implementation
         # by a single vertex. Allow ±1 slack as the issue spec requested.
-        assert abs(rust_vertex_count - scipy_vertex_count) <= 1, (
-            f"vertex count mismatch: rust={rust_vertex_count} scipy={scipy_vertex_count}"
-        )
+        assert (
+            abs(rust_vertex_count - scipy_vertex_count) <= 1
+        ), f"vertex count mismatch: rust={rust_vertex_count} scipy={scipy_vertex_count}"
 
         assert rust_result.volume == pytest.approx(scipy_hull.volume, rel=1e-3)
 

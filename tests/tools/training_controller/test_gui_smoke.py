@@ -206,9 +206,9 @@ def test_gui_does_not_reach_through_scheduler_registry() -> None:
         "gui.py reaches through Scheduler's private registry (LoD violation); "
         "use TrainingDashboardController.get_job() instead"
     )
-    assert ".controller.scheduler.get(" not in gui_source, (
-        "gui.py should not reach through controller.scheduler to look up jobs"
-    )
-    assert ".controller.get_job(" in gui_source, (
-        "gui.py should look up jobs via the dashboard controller facade"
-    )
+    assert (
+        ".controller.scheduler.get(" not in gui_source
+    ), "gui.py should not reach through controller.scheduler to look up jobs"
+    assert (
+        ".controller.get_job(" in gui_source
+    ), "gui.py should look up jobs via the dashboard controller facade"

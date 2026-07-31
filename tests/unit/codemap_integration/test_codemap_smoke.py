@@ -43,8 +43,7 @@ def tiny_repo(tmp_path: Path) -> Path:
                 """A canary class our chat test searches for."""
 
                 def render(self) -> None: ...
-            ''').strip()
-        + "\n",
+            ''').strip() + "\n",
         encoding="utf-8",
     )
     (tmp_path / "pkg" / "beta.py").write_text(
@@ -55,8 +54,7 @@ def tiny_repo(tmp_path: Path) -> Path:
 
             def use_widget() -> str:
                 return widget_factory("beta")
-            ''').strip()
-        + "\n",
+            ''').strip() + "\n",
         encoding="utf-8",
     )
     return tmp_path

@@ -118,9 +118,9 @@ class TestCanTransition:
     def test_terminal_states_have_no_outgoing_edges(self) -> None:
         for terminal in TERMINAL_STATUSES:
             for other in TrainingStatus:
-                assert can_transition(terminal, other) is False, (
-                    f"{terminal} should have no outgoing edge to {other}"
-                )
+                assert (
+                    can_transition(terminal, other) is False
+                ), f"{terminal} should have no outgoing edge to {other}"
 
     def test_type_errors_for_non_enum_inputs(self) -> None:
         with pytest.raises(TypeError):

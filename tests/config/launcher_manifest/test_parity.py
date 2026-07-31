@@ -168,12 +168,12 @@ class TestParity:
             tile = manifest.get_tile(tile_id)
             assert tile is not None, f"Missing shared Tools tile: {tile_id}"
             assert tile.provider == "tools", f"{tile_id} must declare Tools as provider"
-            assert tile.source_root == "../Tools", (
-                f"{tile_id} must resolve from the sibling Tools repo"
-            )
-            assert not tile.path.startswith("src/tools/"), (
-                f"{tile_id} must not point at UpstreamDrift-local tool source"
-            )
+            assert (
+                tile.source_root == "../Tools"
+            ), f"{tile_id} must resolve from the sibling Tools repo"
+            assert not tile.path.startswith(
+                "src/tools/"
+            ), f"{tile_id} must not point at UpstreamDrift-local tool source"
 
     def test_manifest_serializes_for_api(self, manifest: LauncherManifest) -> None:
         """Manifest can be serialized to JSON for the API endpoint."""
@@ -181,9 +181,9 @@ class TestParity:
         # Should be JSON-serializable
         json_str = json.dumps(data)
         parsed = json.loads(json_str)
-        assert len(parsed["tiles"]) == len(manifest.visible_tiles), (
-            "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
-        )
+        assert len(parsed["tiles"]) == len(
+            manifest.visible_tiles
+        ), "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
 
     def test_shared_tiles_match_the_native_pyqt6_semantic_contract(self) -> None:
         """Shared IDs retain the native category, target, and engine semantics.
@@ -222,9 +222,9 @@ class TestParity:
             if field_differences:
                 mismatches[tile_id] = field_differences
 
-        assert not mismatches, (
-            f"Shared launcher tiles drift from the primary PyQt6 contract: {mismatches}"
-        )
+        assert (
+            not mismatches
+        ), f"Shared launcher tiles drift from the primary PyQt6 contract: {mismatches}"
 
 
 # =============================================================================
@@ -277,9 +277,9 @@ class TestWebReachabilityContract:
         for tile in _raw_manifest_tiles():
             web = tile["web"]
             if web["mode"] == "route":
-                assert web.get("route", "").startswith("/"), (
-                    f"Tile '{tile['id']}' route must start with '/': {web!r}"
-                )
+                assert web.get("route", "").startswith(
+                    "/"
+                ), f"Tile '{tile['id']}' route must start with '/': {web!r}"
 
     def test_route_mode_routes_exist_in_react_router(self) -> None:
         """Every route-mode route resolves to a route in ui/src/App.tsx."""
@@ -316,9 +316,9 @@ class TestWebReachabilityContract:
         for tile in _raw_manifest_tiles():
             web = tile["web"]
             if web["mode"] == "unavailable":
-                assert isinstance(web.get("reason"), str) and web["reason"].strip(), (
-                    f"Tile '{tile['id']}' unavailable mode requires a reason"
-                )
+                assert (
+                    isinstance(web.get("reason"), str) and web["reason"].strip()
+                ), f"Tile '{tile['id']}' unavailable mode requires a reason"
 
 
 class TestWebLaunchContractValidation:
