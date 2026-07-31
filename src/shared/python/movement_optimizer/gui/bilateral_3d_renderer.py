@@ -65,7 +65,9 @@ def draw_bilateral_3d_pose(
     # Ground plane hint: a thin disc at z=0.
     theta = np.linspace(0.0, 2.0 * np.pi, 40)
     r = max(0.6, 0.75 * (model.stance_width_m + 0.5))
-    ax.plot(r * np.cos(theta), r * np.sin(theta), 0.0, color=Palette.FG_DIM, lw=1, alpha=0.3)
+    ax.plot(
+        r * np.cos(theta), r * np.sin(theta), 0.0, color=Palette.FG_DIM, lw=1, alpha=0.3
+    )
 
     # Reasonable default view.
     total_h = model.L_shin + model.L_thigh + model.L_torso

@@ -67,9 +67,9 @@ def make_two_link_trajectory(n_frames: int = 8, fps: float = 60.0) -> JointTraje
     )
 
 
-def make_fixture_cameras() -> tuple[
-    tuple[str, CameraIntrinsics, CameraExtrinsics], ...
-]:
+def make_fixture_cameras() -> (
+    tuple[tuple[str, CameraIntrinsics, CameraExtrinsics], ...]
+):
     """Return two calibrated pinhole cameras looking along positive depth.
 
     ``cam1`` is rotated by a proper −15-degree rotation about the Y axis

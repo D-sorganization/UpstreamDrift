@@ -72,12 +72,18 @@ def _parse_root(source: str | Path | ET.Element) -> ET.Element:
         path = Path(source)
     except (TypeError, ValueError):
         # Not path-like; treat as raw XML text.
-        return DefusedET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
+        return DefusedET.fromstring(
+            str(source)
+        )  # nosec B314 — URDF XML from trusted file paths
     if path.exists():
         # For existing files, surface real parse/I/O failures directly.
-        return DefusedET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
+        return DefusedET.parse(
+            path
+        ).getroot()  # nosec B314 — URDF XML from trusted file paths
     # Fall back to treating the argument as raw XML text.
-    return DefusedET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
+    return DefusedET.fromstring(
+        str(source)
+    )  # nosec B314 — URDF XML from trusted file paths
 
 
 def _collect_joint_names(root: ET.Element) -> set[str]:

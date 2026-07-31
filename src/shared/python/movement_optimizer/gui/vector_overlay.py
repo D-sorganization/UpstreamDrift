@@ -98,7 +98,9 @@ def auto_scale_factor(arrows: Sequence[ForceArrow], target_world_len: float) -> 
     return target_world_len / largest
 
 
-def _draw_arrowhead(painter: QPainter, tail: QPointF, tip: QPointF, head_px: float) -> None:
+def _draw_arrowhead(
+    painter: QPainter, tail: QPointF, tip: QPointF, head_px: float
+) -> None:
     dx = tip.x() - tail.x()
     dy = tip.y() - tail.y()
     length = math.hypot(dx, dy)
@@ -219,6 +221,8 @@ def draw_overlay_scene(
     if scene.arrows:
         draw_force_arrows(painter, projector, scene.arrows, scale=arrow_scale)
     if scene.torque_arcs:
-        draw_torque_arcs(painter, projector, scene.torque_arcs, reference_nm=torque_reference_nm)
+        draw_torque_arcs(
+            painter, projector, scene.torque_arcs, reference_nm=torque_reference_nm
+        )
     if scene.com_markers:
         draw_com_markers(painter, projector, scene.com_markers)

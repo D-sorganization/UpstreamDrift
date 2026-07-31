@@ -314,7 +314,9 @@ class GripModellingTab(QtWidgets.QWidget):
 
         self.rebuild_synergy_controls()
 
-    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(
+        self, i: int, model: mujoco.MjModel
+    ) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if i is None:
             raise ValueError("i must be provided")

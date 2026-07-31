@@ -168,7 +168,9 @@ class PolicyTraceCanvas(QWidget):
         return {
             "score_m": _trace_series(samples, lambda sample: sample.score_m),
             "best_score_m": _trace_series(samples, lambda sample: sample.best_score_m),
-            "frequency_hz": _trace_series(samples, lambda sample: sample.parameters.frequency_hz),
+            "frequency_hz": _trace_series(
+                samples, lambda sample: sample.parameters.frequency_hz
+            ),
             "hip_rate_amplitude_rad_s": _trace_series(
                 samples, lambda sample: sample.parameters.hip_rate_amplitude_rad_s
             ),
@@ -178,7 +180,9 @@ class PolicyTraceCanvas(QWidget):
             "knee_rate_ratio": _trace_series(
                 samples, lambda sample: sample.parameters.knee_rate_ratio
             ),
-            "phase_rad": _trace_series(samples, lambda sample: sample.parameters.phase_rad),
+            "phase_rad": _trace_series(
+                samples, lambda sample: sample.parameters.phase_rad
+            ),
         }
 
 

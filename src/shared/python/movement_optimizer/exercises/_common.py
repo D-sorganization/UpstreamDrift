@@ -24,7 +24,9 @@ def balance_config_pose(
     adjust_joint: int,
 ) -> NDArray:
     """Balance a raw pose using the shared planar balance helper."""
-    return balance_pose(dynamics, raw_pose, exercise_type, bar_mass, adjust_joint=adjust_joint)
+    return balance_pose(
+        dynamics, raw_pose, exercise_type, bar_mass, adjust_joint=adjust_joint
+    )
 
 
 def default_bounds_deg(

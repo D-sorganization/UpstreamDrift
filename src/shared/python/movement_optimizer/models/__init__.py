@@ -72,7 +72,9 @@ from .swingset import constrain_swing_pose as constrain_swing_pose
 from .swingset import cyclic_policy_controls as cyclic_policy_controls
 from .swingset import estimate_swingset_joint_torques as estimate_swingset_joint_torques
 from .swingset import optimize_cyclic_policy as optimize_cyclic_policy
-from .swingset import optimize_cyclic_policy_iterative as optimize_cyclic_policy_iterative
+from .swingset import (
+    optimize_cyclic_policy_iterative as optimize_cyclic_policy_iterative,
+)
 from .swingset import simulate_swingset as simulate_swingset
 from .swingset import simulate_swingset_controls as simulate_swingset_controls
 from .swingset_forces import SwingForceField as SwingForceField

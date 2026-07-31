@@ -47,7 +47,9 @@ class NumericControl(QWidget):
         self.slider.setRange(0, self._steps)
         self.slider.setTracking(False)
         self.slider.setMinimumHeight(28)
-        self.slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.slider.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
         self.edit = QLineEdit()
         self.edit.setFixedWidth(88)
         self.edit.setMinimumHeight(28)
@@ -89,7 +91,11 @@ class NumericControl(QWidget):
             self.slider.blockSignals(True)
             self.slider.setValue(slider_value)
             self.slider.blockSignals(False)
-        text = f"{int(self._value)}" if self._integer else f"{self._value:.{self._decimals}f}"
+        text = (
+            f"{int(self._value)}"
+            if self._integer
+            else f"{self._value:.{self._decimals}f}"
+        )
         if self.edit.text() != text:
             self.edit.setText(text)
 

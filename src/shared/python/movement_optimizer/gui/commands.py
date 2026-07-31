@@ -63,7 +63,9 @@ class UndoStack:
         cmd.execute()
         self._undo.append(cmd)
         self._redo.clear()
-        logger.debug("UndoStack: pushed %s (depth=%d)", type(cmd).__name__, len(self._undo))
+        logger.debug(
+            "UndoStack: pushed %s (depth=%d)", type(cmd).__name__, len(self._undo)
+        )
 
     def record_executed(self, cmd: Command) -> None:
         """Record an already-applied command without calling ``execute``.
@@ -73,7 +75,9 @@ class UndoStack:
         """
         self._undo.append(cmd)
         self._redo.clear()
-        logger.debug("UndoStack: recorded %s (depth=%d)", type(cmd).__name__, len(self._undo))
+        logger.debug(
+            "UndoStack: recorded %s (depth=%d)", type(cmd).__name__, len(self._undo)
+        )
 
     def undo(self) -> bool:
         """Undo the most recently executed command.
@@ -87,7 +91,9 @@ class UndoStack:
         cmd = self._undo.pop()
         cmd.undo()
         self._redo.append(cmd)
-        logger.debug("UndoStack: undid %s (remaining=%d)", type(cmd).__name__, len(self._undo))
+        logger.debug(
+            "UndoStack: undid %s (remaining=%d)", type(cmd).__name__, len(self._undo)
+        )
         return True
 
     def redo(self) -> bool:
@@ -102,7 +108,9 @@ class UndoStack:
         cmd = self._redo.pop()
         cmd.execute()
         self._undo.append(cmd)
-        logger.debug("UndoStack: redid %s (depth=%d)", type(cmd).__name__, len(self._undo))
+        logger.debug(
+            "UndoStack: redid %s (depth=%d)", type(cmd).__name__, len(self._undo)
+        )
         return True
 
     def clear(self) -> None:

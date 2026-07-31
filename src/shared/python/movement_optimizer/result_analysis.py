@@ -80,7 +80,9 @@ class ResultAnalyzer:
         """Return result-driven recommendations for the exported report."""
         recommendations: list[str] = []
         if not self.result.success:
-            recommendations.append("Review optimization settings; the solver did not converge.")
+            recommendations.append(
+                "Review optimization settings; the solver did not converge."
+            )
         if self.result.n_joint_limit_violations > 0:
             recommendations.append(
                 "Review joint limits; the trajectory exceeded configured bounds."
@@ -96,10 +98,14 @@ class ResultAnalyzer:
         ]
         if high_torque_joints:
             joined = ", ".join(high_torque_joints)
-            recommendations.append(f"Review load selection; peak torque is high at: {joined}.")
+            recommendations.append(
+                f"Review load selection; peak torque is high at: {joined}."
+            )
 
         if not recommendations:
-            recommendations.append("No immediate issues detected in the exported result.")
+            recommendations.append(
+                "No immediate issues detected in the exported result."
+            )
         return recommendations
 
     def com_range_cm(self) -> float:

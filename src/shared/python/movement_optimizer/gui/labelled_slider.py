@@ -41,7 +41,9 @@ class LabelledSlider(QWidget):
         row = QHBoxLayout()
         self.name_label = QLabel(label)
         self.val_label = QLabel(self._fmt(default))
-        self.val_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.val_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
         row.addWidget(self.name_label)
         row.addStretch()
         row.addWidget(self.val_label)
@@ -56,7 +58,11 @@ class LabelledSlider(QWidget):
         suppress_wheel_events(self.slider)
         layout.addWidget(self.slider)
 
-        _tip = tooltip if tooltip else f"{label} ({lo:.{decimals}f}-{hi:.{decimals}f} {unit})"
+        _tip = (
+            tooltip
+            if tooltip
+            else f"{label} ({lo:.{decimals}f}-{hi:.{decimals}f} {unit})"
+        )
         self.slider.setToolTip(_tip)
         self.name_label.setToolTip(_tip)
 

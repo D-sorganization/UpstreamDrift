@@ -23,7 +23,9 @@ from ..models import BodyModel, LagrangianDynamics
 logger = logging.getLogger(__name__)
 
 
-def _sts_via_points(q_start: NDArray, q_end: NDArray) -> list[tuple[float, float, float, float]]:
+def _sts_via_points(
+    q_start: NDArray, q_end: NDArray
+) -> list[tuple[float, float, float, float]]:
     """Via-points for sit-to-stand motion."""
     return [
         (0.00, float(q_start[0]), float(q_start[1]), float(q_start[2])),  # seated

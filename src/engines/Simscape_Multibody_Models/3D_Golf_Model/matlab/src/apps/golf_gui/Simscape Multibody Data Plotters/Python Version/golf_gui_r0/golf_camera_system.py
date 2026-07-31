@@ -302,7 +302,9 @@ class CameraController(QObject):
         if position is None:
             raise ValueError("position must be provided")
         offset = position - self.current_state.target
-        distance = math.hypot(offset[0], offset[1], offset[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        distance = math.hypot(
+            offset[0], offset[1], offset[2]
+        )  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
         if distance < 1e-6:
             return (
@@ -324,11 +326,15 @@ class CameraController(QObject):
         if eye is None:
             raise ValueError("eye must be provided")
         f = target - eye
-        f_norm = math.hypot(f[0], f[1], f[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        f_norm = math.hypot(
+            f[0], f[1], f[2]
+        )  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
         f = f / f_norm if f_norm > 1e-06 else np.array([0, 0, -1], dtype=np.float32)
 
         s = np.cross(f, up)
-        s_norm = math.hypot(s[0], s[1], s[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        s_norm = math.hypot(
+            s[0], s[1], s[2]
+        )  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
         s = s / s_norm if s_norm > 1e-06 else np.array([1, 0, 0], dtype=np.float32)
 
         u = np.cross(s, f)
@@ -395,10 +401,14 @@ class CameraController(QObject):
         """Return camera right/up axes for target-plane pan movement."""
         eye = self._spherical_to_cartesian()
         forward = self.current_state.target - eye
-        forward = forward / math.hypot(forward[0], forward[1], forward[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        forward = forward / math.hypot(
+            forward[0], forward[1], forward[2]
+        )  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
         right = np.cross(forward, self.current_state.up)
-        right = right / math.hypot(right[0], right[1], right[2])  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        right = right / math.hypot(
+            right[0], right[1], right[2]
+        )  # noqa: E501 ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
 
         return right, np.cross(right, forward)
 
@@ -467,7 +477,9 @@ class CameraController(QObject):
             )
             self.velocity_zoom *= self.inertia_damping
 
-        if math.hypot(self.velocity_pan[0], self.velocity_pan[1]) > 0.001:  # noqa: E501 ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
+        if (
+            math.hypot(self.velocity_pan[0], self.velocity_pan[1]) > 0.001
+        ):  # noqa: E501 ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
             right, up = self._camera_pan_axes()
             pan_offset = right * self.velocity_pan[0] + up * self.velocity_pan[1]
             self.current_state.target += pan_offset
@@ -478,7 +490,9 @@ class CameraController(QObject):
             abs(self.velocity_azimuth)
             + abs(self.velocity_elevation)
             + abs(self.velocity_zoom)
-            + math.hypot(self.velocity_pan[0], self.velocity_pan[1])  # noqa: E501 ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
+            + math.hypot(
+                self.velocity_pan[0], self.velocity_pan[1]
+            )  # noqa: E501 ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
         )
 
         if total_velocity > 0.01:

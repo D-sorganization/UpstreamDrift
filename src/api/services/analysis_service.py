@@ -544,9 +544,9 @@ class AnalysisService:
             if peak.speed_gain is not None:
                 sequence[f"{peak.name}_peak"]["speed_gain"] = peak.speed_gain
             if peak.deceleration_rate is not None:
-                sequence[f"{peak.name}_peak"]["deceleration_rate"] = (
-                    peak.deceleration_rate
-                )
+                sequence[f"{peak.name}_peak"][
+                    "deceleration_rate"
+                ] = peak.deceleration_rate
 
         result["kinematic_sequence"] = sequence
         metadata["kinematic_sequence"] = "computed"

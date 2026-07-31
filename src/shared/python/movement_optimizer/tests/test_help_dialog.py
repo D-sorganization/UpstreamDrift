@@ -16,9 +16,13 @@ def test_help_center_exposes_required_offline_topics(qapp) -> None:
 
     assert len(HELP_TOPICS) >= 5
     assert dialog.tabs.count() >= 5
-    assert {"getting_started", "parameters", "results", "troubleshooting", "glossary"} <= set(
-        HELP_TOPICS
-    )
+    assert {
+        "getting_started",
+        "parameters",
+        "results",
+        "troubleshooting",
+        "glossary",
+    } <= set(HELP_TOPICS)
 
 
 def test_help_center_can_select_each_topic(qapp) -> None:
@@ -34,10 +38,15 @@ def test_help_center_contains_glossary_terms(qapp) -> None:
 
     assert len(GLOSSARY) >= 7
     assert {"COM", "BOS", "Torque", "ROM"} <= set(GLOSSARY)
-    assert dialog.tabs.tabText(dialog.tabs.currentIndex()) == HELP_TOPICS["glossary"].title
+    assert (
+        dialog.tabs.tabText(dialog.tabs.currentIndex()) == HELP_TOPICS["glossary"].title
+    )
 
 
 def test_parameter_help_dialog_opens_parameter_topic(qapp) -> None:
     dialog = ParameterHelpDialog()
 
-    assert dialog.tabs.tabText(dialog.tabs.currentIndex()) == HELP_TOPICS["parameters"].title
+    assert (
+        dialog.tabs.tabText(dialog.tabs.currentIndex())
+        == HELP_TOPICS["parameters"].title
+    )

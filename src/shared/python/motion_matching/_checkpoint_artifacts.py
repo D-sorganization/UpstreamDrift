@@ -6,7 +6,6 @@ import pickle
 from pathlib import Path
 from typing import Any
 
-
 SURROGATE_CHECKPOINT_REQUIRED_KEYS = (
     "model_state_dict",
     "input_columns",

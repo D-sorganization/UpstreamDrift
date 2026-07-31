@@ -119,10 +119,22 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
             tooltip="Number of links in the chain.",
         )
         self._add_control(
-            form, "length", "Link length m", 0.03, 1.0, 0.18, tooltip="Length of each chain link."
+            form,
+            "length",
+            "Link length m",
+            0.03,
+            1.0,
+            0.18,
+            tooltip="Length of each chain link.",
         )
         self._add_control(
-            form, "mass", "Link mass kg", 0.01, 4.0, 0.12, tooltip="Mass of each chain link."
+            form,
+            "mass",
+            "Link mass kg",
+            0.01,
+            4.0,
+            0.12,
+            tooltip="Mass of each chain link.",
         )
         self._add_control(
             form,
@@ -238,7 +250,9 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
         form.addRow("Segment angles", self.angle_edit)
         control_layout.addWidget(controls)
         # The chain tab draws no articulated rider, so omit that layer.
-        control_layout.addWidget(self._build_layers_group(["grid", "chain", "markers", "forces"]))
+        control_layout.addWidget(
+            self._build_layers_group(["grid", "chain", "markers", "forces"])
+        )
         control_layout.addWidget(self._build_force_group())
         row = QHBoxLayout()
         simulate_button = QPushButton("Simulate Whip")
@@ -248,7 +262,9 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
         )
         simulate_button.clicked.connect(self._simulate)
         randomize_button = QPushButton("Randomize Start")
-        randomize_button.setToolTip("Set a random 'wadded' starting configuration (seeded).")
+        randomize_button.setToolTip(
+            "Set a random 'wadded' starting configuration (seeded)."
+        )
         randomize_button.clicked.connect(self._randomize_wadded_start)
         self.play_button = QPushButton("Play")
         self.play_button.setToolTip("Play or pause the simulated whip animation.")
@@ -319,18 +335,24 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
     def _state(self) -> ChainState:
         config = self._config()
         angles = (
-            initial_catenary_angles(config.segment_count, self._angle_to_rad(self._value("sag")))
+            initial_catenary_angles(
+                config.segment_count, self._angle_to_rad(self._value("sag"))
+            )
             if self.tie_segments.isChecked()
             else self._typed_angles(config.segment_count)
         )
-        velocities = initial_tip_kick_velocities(config.segment_count, self._value("kick"))
+        velocities = initial_tip_kick_velocities(
+            config.segment_count, self._value("kick")
+        )
         return ChainState(angles, velocities)
 
     def _typed_angles(self, segment_count: int) -> np.ndarray:
         raw = self.angle_edit.text().strip()
         if not raw:
             return np.zeros(segment_count, dtype=np.float64)
-        values = np.asarray([float(part.strip()) for part in raw.split(",")], dtype=np.float64)
+        values = np.asarray(
+            [float(part.strip()) for part in raw.split(",")], dtype=np.float64
+        )
         if values.size != segment_count:
             raise ValueError(f"Expected {segment_count} segment angles")
         return np.deg2rad(values) if self.use_degrees.isChecked() else values
@@ -347,14 +369,20 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
             seed=int(self._value("random_seed")),
         )
         self.tie_segments.setChecked(False)
-        values = np.rad2deg(state.angles_rad) if self.use_degrees.isChecked() else state.angles_rad
+        values = (
+            np.rad2deg(state.angles_rad)
+            if self.use_degrees.isChecked()
+            else state.angles_rad
+        )
         self.angle_edit.setText(", ".join(f"{value:.4f}" for value in values))
         self._refresh()
 
     def _refresh_angle_placeholder(self) -> None:
         unit = "degrees" if self.use_degrees.isChecked() else "radians"
         self._controls["sag"].set_value(20.0 if self.use_degrees.isChecked() else 0.35)
-        self._controls["random_span"].set_value(180.0 if self.use_degrees.isChecked() else np.pi)
+        self._controls["random_span"].set_value(
+            180.0 if self.use_degrees.isChecked() else np.pi
+        )
         self.angle_edit.setPlaceholderText(f"comma-separated {unit}, one per segment")
 
     def _value(self, key: str) -> float:
@@ -417,7 +445,9 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
     def _populate_analysis_panel(self) -> None:
         if self._rollout is None:
             return
-        self._force_fields = chain_force_fields(self._config(), self._rollout, self._dt_s)
+        self._force_fields = chain_force_fields(
+            self._config(), self._rollout, self._dt_s
+        )
         history = chain_force_history(self._config(), self._rollout, self._dt_s)
         time_s = history.time_s
         count = len(time_s)
@@ -460,7 +490,9 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
         if not 0 <= self._frame_index < frame_count:
             raise RuntimeError("DbC Blocked: frame index is outside the rollout")
         if self._force_fields is None or len(self._force_fields) != frame_count:
-            self._force_fields = chain_force_fields(self._config(), self._rollout, self._dt_s)
+            self._force_fields = chain_force_fields(
+                self._config(), self._rollout, self._dt_s
+            )
         force_fields = self._force_fields
         if force_fields is None:
             raise RuntimeError("DbC Blocked: force-field cache was not initialized")

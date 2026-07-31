@@ -69,21 +69,17 @@ class MPMDriver:
             px = rng.uniform(-lx / 2 + r, lx / 2 - r)
             py = rng.uniform(-ly / 2 + r, ly / 2 - r)
             pz = rng.uniform(r, lz - r)
-            parts.append(
-                f"""
+            parts.append(f"""
                 <body name="g{i}" pos="{px} {py} {pz}">
                     <freejoint/>
                     <geom type="sphere" size="{r}" rgba="0.9 0.8 0.5 1"/>
                 </body>
-            """
-            )
+            """)
 
-        parts.append(
-            """
+        parts.append("""
             </worldbody>
         </mujoco>
-        """
-        )
+        """)
         return "".join(parts)
 
     def setup(self) -> None:

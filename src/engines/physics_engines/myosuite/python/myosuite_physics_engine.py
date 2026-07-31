@@ -20,7 +20,9 @@ from __future__ import annotations
 
 # Path: src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py -> need 6 parents
 from src.engines.tiers import warn_if_experimental
-from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine  # noqa: E402
+from src.shared.python.engine_core.base_physics_engine import (
+    BasePhysicsEngine,
+)  # noqa: E402
 from src.shared.python.engine_core.capabilities import (  # noqa: E402
     CapabilityLevel,
     EngineCapabilities,

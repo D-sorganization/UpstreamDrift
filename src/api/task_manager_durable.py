@@ -175,7 +175,9 @@ class SQLiteBackend:
             # predictable secrets.
             artifact_dir = os.environ.get(
                 "ARTIFACT_DIR",
-                os.path.join("/tmp", "upstream_drift_artifacts"),  # nosec B108  # noqa: S108
+                os.path.join(
+                    "/tmp", "upstream_drift_artifacts"
+                ),  # nosec B108  # noqa: S108
             )
             os.makedirs(artifact_dir, exist_ok=True)
             db_path = os.path.join(artifact_dir, "tasks.db")

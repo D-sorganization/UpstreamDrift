@@ -66,7 +66,9 @@ class HillTorqueModel:
             raise ValueError("q must not contain NaN values")
         return np.exp(-(((q_arr - self.q_optimal) / self.angle_width) ** 2))
 
-    def torque_velocity_factor(self, qd: float | NDArray, torque_sign: float = -1.0) -> NDArray:
+    def torque_velocity_factor(
+        self, qd: float | NDArray, torque_sign: float = -1.0
+    ) -> NDArray:
         """Hill-type force-velocity scaling factor.
 
         Branch selection is based on whether the muscle is shortening
@@ -97,7 +99,9 @@ class HillTorqueModel:
 
     def available_torque(self, q: float | NDArray, qd: float | NDArray) -> NDArray:
         """Maximum torque the joint can produce at given angle and velocity."""
-        return self.tau_max * self.torque_angle_factor(q) * self.torque_velocity_factor(qd)
+        return (
+            self.tau_max * self.torque_angle_factor(q) * self.torque_velocity_factor(qd)
+        )
 
 
 class JointTorqueSet:
@@ -152,10 +156,14 @@ class JointTorqueSet:
         """Compute available torque at each joint for N poses."""
         result = np.empty((q.shape[0], len(self.joint_names)))
         for index, name in enumerate(self.joint_names):
-            result[:, index] = self._models[name].available_torque(q[:, index], qd[:, index])
+            result[:, index] = self._models[name].available_torque(
+                q[:, index], qd[:, index]
+            )
         return result
 
-    def torque_utilization(self, q: NDArray, qd: NDArray, required_torques: NDArray) -> NDArray:
+    def torque_utilization(
+        self, q: NDArray, qd: NDArray, required_torques: NDArray
+    ) -> NDArray:
         """Ratio of required torque to available torque."""
         available = self.available_torques_batch(q, qd)
         safe_available = np.maximum(available, 1e-10)

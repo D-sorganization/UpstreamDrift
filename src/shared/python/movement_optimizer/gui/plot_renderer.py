@@ -17,7 +17,9 @@ from ..trajectory import OptimizationResult
 _JOINT_COLORS = tuple(get_chart_color(i) for i in range(len(SWING_POLICY_JOINT_NAMES)))
 
 
-def plot_angles(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS) -> None:
+def plot_angles(
+    ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS
+) -> None:
     n_dof = min(r.q.shape[1], len(labels))
     for j in range(n_dof):
         ax.plot(
@@ -38,7 +40,9 @@ def plot_angles(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABE
     )
 
 
-def plot_torques(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS) -> None:
+def plot_torques(
+    ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS
+) -> None:
     n_dof = min(r.torques.shape[1], len(labels))
     for j in range(n_dof):
         ax.plot(
@@ -60,7 +64,9 @@ def plot_torques(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LAB
     )
 
 
-def plot_power(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS) -> None:
+def plot_power(
+    ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABELS
+) -> None:
     n_dof = min(r.power.shape[1], len(labels))
     for j in range(n_dof):
         ax.plot(
@@ -72,7 +78,9 @@ def plot_power(ax: Any, r: OptimizationResult, labels: tuple = Palette.SEG_LABEL
         )
     ax.plot(
         r.t,
-        np.einsum("ij->i", r.power),  # ⚡ Bolt: np.einsum is ~2.5x faster than np.sum(..., axis=1)
+        np.einsum(
+            "ij->i", r.power
+        ),  # ⚡ Bolt: np.einsum is ~2.5x faster than np.sum(..., axis=1)
         "--",
         color=Palette.FG,
         lw=2,
@@ -251,7 +259,9 @@ def plot_spine_loads(
 # ---------------------------------------------------------------------------
 
 
-def _style_timeseries_axis(ax: Any, ylabel: str, title: str, *, legend_fontsize: int = 7) -> None:
+def _style_timeseries_axis(
+    ax: Any, ylabel: str, title: str, *, legend_fontsize: int = 7
+) -> None:
     """Apply the shared axis labels, title, and legend styling (DRY)."""
     ax.set_xlabel("Time (s)", color=Palette.FG_DIM, fontsize=8)
     ax.set_ylabel(ylabel, color=Palette.FG_DIM, fontsize=8)

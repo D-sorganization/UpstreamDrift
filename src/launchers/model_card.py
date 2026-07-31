@@ -351,12 +351,12 @@ class DraggableModelCard(QFrame):
                 x_pos = self.width() - btn_w - margin
 
                 # DbC assertions
-                assert y_pos >= 0, (
-                    "Calculated y position of launch button must be non-negative"
-                )
-                assert x_pos >= 0, (
-                    "Calculated x position of launch button must be non-negative"
-                )
+                assert (
+                    y_pos >= 0
+                ), "Calculated y position of launch button must be non-negative"
+                assert (
+                    x_pos >= 0
+                ), "Calculated x position of launch button must be non-negative"
 
                 btn.move(x_pos, y_pos)
 
@@ -372,12 +372,12 @@ class DraggableModelCard(QFrame):
                 x_pos = self.width() - fav_w - margin
 
                 # DbC assertions
-                assert y_pos >= 0, (
-                    "Calculated y position of favorite button must be non-negative"
-                )
-                assert x_pos >= 0, (
-                    "Calculated x position of favorite button must be non-negative"
-                )
+                assert (
+                    y_pos >= 0
+                ), "Calculated y position of favorite button must be non-negative"
+                assert (
+                    x_pos >= 0
+                ), "Calculated x position of favorite button must be non-negative"
 
                 fav_btn.move(x_pos, y_pos)
 
@@ -400,12 +400,12 @@ class DraggableModelCard(QFrame):
                     x_pos = self.width() - info_w - margin
 
                 # DbC assertions
-                assert y_pos >= 0, (
-                    "Calculated y position of info button must be non-negative"
-                )
-                assert x_pos >= 0, (
-                    "Calculated x position of info button must be non-negative"
-                )
+                assert (
+                    y_pos >= 0
+                ), "Calculated y position of info button must be non-negative"
+                assert (
+                    x_pos >= 0
+                ), "Calculated x position of info button must be non-negative"
 
                 info_btn.move(x_pos, y_pos)
 

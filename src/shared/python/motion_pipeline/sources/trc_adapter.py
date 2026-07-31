@@ -160,8 +160,8 @@ class TRCAdapter(MocapSourceAdapter):
             except AdapterContractError:
                 pass
             except (
-                Exception  # noqa: BLE001 - fall back to Python parser on any Rust failure
-            ):  # pragma: no cover - Rust parser disagreement
+                Exception
+            ):  # noqa: BLE001 - fall back to Python parser on any Rust failure  # pragma: no cover - Rust parser disagreement
                 # Fall back to the canonical Python parser if anything goes
                 # wrong; the contract is byte-identical output, not "Rust wins".
                 pass

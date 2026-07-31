@@ -147,7 +147,9 @@ class GaitAnalyzer:
             "cycle_duration_s": duration,
         }
 
-    def compute_symmetry_index(self, left_angles: NDArray, right_angles: NDArray) -> float:
+    def compute_symmetry_index(
+        self, left_angles: NDArray, right_angles: NDArray
+    ) -> float:
         """Robinson symmetry index: SI = |L-R| / max(L,R) * 100.
 
         Preconditions:

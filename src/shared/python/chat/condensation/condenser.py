@@ -79,9 +79,9 @@ class Condenser:
             preserved_anchors=_count_anchors(condensed),
         )
 
-        assert result.condensed_message_count >= 1, (
-            "Condenser postcondition violated: must preserve at least one message"
-        )
+        assert (
+            result.condensed_message_count >= 1
+        ), "Condenser postcondition violated: must preserve at least one message"
         return result
 
     def condense_to_session(

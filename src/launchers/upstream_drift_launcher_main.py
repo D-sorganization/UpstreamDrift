@@ -19,7 +19,6 @@ from src.launchers.ui_components import (
 )
 from src.shared.python.ui import resolve_icon_path, set_app_user_model_id
 
-
 _APP_USER_MODEL_ID = "D-sorganization.UpstreamDrift"
 
 

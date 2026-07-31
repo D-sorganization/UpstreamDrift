@@ -121,7 +121,9 @@ def swing_force_fields(
         torque_index = min(frame_index, torques.shape[0] - 1)
         chain_tension = mass * accelerations[frame_index] - gravity_vec
         joint_points = {
-            joint: np.asarray(snapshot.points[_JOINT_POINT_KEYS[joint]], dtype=np.float64)
+            joint: np.asarray(
+                snapshot.points[_JOINT_POINT_KEYS[joint]], dtype=np.float64
+            )
             for joint in SWING_POLICY_JOINT_NAMES
         }
         fields.append(

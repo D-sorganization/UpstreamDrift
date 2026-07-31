@@ -222,7 +222,9 @@ class OptimizationMixin:
             validation_err = ValidationError(
                 f"Invalid parameters: {exc}",
                 error_code="VALIDATION_ERROR",
-                suggestion=("Check that all body and exercise parameters are within valid ranges."),
+                suggestion=(
+                    "Check that all body and exercise parameters are within valid ranges."
+                ),
             )
             self._sig_error.emit(validation_err)
         except (RuntimeError, OSError) as exc:
@@ -274,7 +276,9 @@ class OptimizationMixin:
             tab.draw_anim_frame(0, result, dyn, body, etype)
             elapsed = result.elapsed_s
             t_str = (
-                f"{elapsed:.1f}s" if elapsed < 60 else f"{int(elapsed // 60)}m {elapsed % 60:.0f}s"
+                f"{elapsed:.1f}s"
+                if elapsed < 60
+                else f"{int(elapsed // 60)}m {elapsed % 60:.0f}s"
             )
             self.sidebar.set_progress_done(t_str, result.n_evals)
             self._enable_post_run_buttons()
@@ -300,7 +304,9 @@ class OptimizationMixin:
         """Enable export/save/compare buttons after a successful optimization run."""
         self.sidebar.enable_post_run_buttons()
 
-    def _finish_or_chain(self: MainWindow, then_chain: list[int] | None, status_msg: str) -> None:
+    def _finish_or_chain(
+        self: MainWindow, then_chain: list[int] | None, status_msg: str
+    ) -> None:
         """Either chain to the next exercise or finalize the run."""
         if then_chain:
             next_idx = then_chain[0]
@@ -341,7 +347,9 @@ class OptimizationMixin:
                 f"  COM sway: {r.com_horizontal_range_cm:.1f} cm\n"
                 f"  Balance: {balance_ok}"
             )
-        self.sidebar.set_result_label(f"{name} results:\n{joint_lines}\n  Work: {work:>6.0f} J")
+        self.sidebar.set_result_label(
+            f"{name} results:\n{joint_lines}\n  Work: {work:>6.0f} J"
+        )
 
     def _on_err(self: MainWindow, err: object) -> None:
         """Handle optimizer errors (called from main thread via signal)."""

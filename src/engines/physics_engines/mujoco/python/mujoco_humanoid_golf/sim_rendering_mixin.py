@@ -158,7 +158,9 @@ class SimRenderingMixin:
 
         self.label.setPixmap(pixmap)
 
-    def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_live_kinematics_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         if rgb is None:
             raise ValueError("rgb must be provided")
         if self.model is None or self.data is None:
@@ -287,7 +289,9 @@ class SimRenderingMixin:
             self._update_background_colors()
             self._render_once()
 
-    def _add_force_torque_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_force_torque_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         """Overlay torque/force/accel vectors using screen-space arrows."""
         if rgb is None:
             raise ValueError("rgb must be provided")
@@ -410,7 +414,9 @@ class SimRenderingMixin:
             arrow_end = body_pos + joint_force * self.force_scale
             draw_arrow_func(body_pos, arrow_end, (0, 255, 255))
 
-    def _draw_induced_vectors(self: Any, draw_arrow_func: Callable) -> None:  # noqa: C901
+    def _draw_induced_vectors(
+        self: Any, draw_arrow_func: Callable
+    ) -> None:  # noqa: C901
         """Draw Induced Acceleration vectors (Magenta)."""
         if draw_arrow_func is None:
             raise ValueError("draw_arrow_func must be provided")
@@ -589,7 +595,9 @@ class SimRenderingMixin:
 
         return None
 
-    def _add_swing_plane_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_swing_plane_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         """Overlay club trajectory and swing plane normal onto the pixel frame."""
         if rgb is None:
             raise ValueError("rgb must be provided")
@@ -642,7 +650,9 @@ class SimRenderingMixin:
 
         return img
 
-    def _add_frame_and_com_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
+    def _add_frame_and_com_overlays(
+        self: Any, rgb: np.ndarray
+    ) -> np.ndarray:  # noqa: C901
         if rgb is None:
             raise ValueError("rgb must be provided")
         cv2 = get_cv2()

@@ -1378,12 +1378,12 @@ class ChatDockWidget(QDockWidget):
             self._sync_ai_dropdowns()
 
         # Invariant check (cheap; cost is the snapshot comparison).
-        assert self._message_history is history_before, (
-            "switch_provider invariant: _message_history must remain the same list"
-        )
-        assert self._message_history == snapshot_before, (
-            "switch_provider invariant: _message_history contents must not change"
-        )
+        assert (
+            self._message_history is history_before
+        ), "switch_provider invariant: _message_history must remain the same list"
+        assert (
+            self._message_history == snapshot_before
+        ), "switch_provider invariant: _message_history contents must not change"
 
     def _populate_shell_combo(self) -> None:
         self._shell_combo.clear()

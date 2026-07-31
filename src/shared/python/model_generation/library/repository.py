@@ -291,7 +291,9 @@ class GitHubRepository(Repository):
         for attempt in range(max_retries + 1):
             try:
                 req = self._build_api_request(url)
-                with urllib.request.urlopen(req, timeout=timeout) as response:  # nosec B310 - GitHub API request via _build_api_request
+                with urllib.request.urlopen(
+                    req, timeout=timeout
+                ) as response:  # nosec B310 - GitHub API request via _build_api_request
                     data = json.loads(response.read().decode())
                     # Extract next page URL from Link header
                     next_url = self._parse_link_header(response)

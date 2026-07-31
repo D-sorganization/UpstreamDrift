@@ -240,13 +240,21 @@ class FileOperationsMixin:
         if not path:
             return
         try:
-            mass = getattr(body, "body_mass", None)  # BodyModel uses body_mass, not mass
+            mass = getattr(
+                body, "body_mass", None
+            )  # BodyModel uses body_mass, not mass
             height = getattr(body, "height", None)
             export_to_excel(
-                r, path, exercise_name=exercise_name, body_mass_kg=mass, body_height_m=height
+                r,
+                path,
+                exercise_name=exercise_name,
+                body_mass_kg=mass,
+                body_height_m=height,
             )
             self.status_label.setText(f"Exported: {os.path.basename(path)}")
-            QMessageBox.information(self, "Exported", f"Excel workbook saved to:\n{path}")
+            QMessageBox.information(
+                self, "Exported", f"Excel workbook saved to:\n{path}"
+            )
         except ImportError as e:
             QMessageBox.critical(self, "Missing Dependency", str(e))
         except (OSError, ValueError, RuntimeError) as e:

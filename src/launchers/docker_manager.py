@@ -62,7 +62,6 @@ from src.shared.python.security.secure_subprocess import (  # noqa: E402
 )
 from src.shared.python.security.subprocess_utils import kill_process_tree  # noqa: E402
 
-
 DOCKER_BUILD_TIMEOUT_SECONDS = 3600.0
 DOCKER_BUILD_WAIT_POLL_SECONDS = 0.1
 DOCKER_BUILD_STDOUT_JOIN_TIMEOUT_SECONDS = 5.0
@@ -479,7 +478,9 @@ class DockerLauncher:
 
         # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
-            cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
+            cmd.extend(
+                ["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"]
+            )  # nosec: Docker container networking requires 0.0.0.0
 
         # Working Directory
         work_dir = (

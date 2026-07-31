@@ -69,14 +69,21 @@ class LagrangianKinematicsMixin:
         c3x = hip_x + d[2] * sq[:, 2]
 
         total_mass = b.body_mass + bar_mass
-        numerator = b.m_feet * b.foot_com_x + self.m[0] * c1x + self.m[1] * c2x + self.m[2] * c3x
+        numerator = (
+            b.m_feet * b.foot_com_x
+            + self.m[0] * c1x
+            + self.m[1] * c2x
+            + self.m[2] * c3x
+        )
 
         if exercise_type in ("squat", "full_squat"):
             if hasattr(b, "squat_bar_depth") and (
                 b.squat_bar_depth != 0.0 or b.squat_bar_height != 0.0
             ):
                 bar_x = (
-                    shoulder_x - b.squat_bar_height * sq[:, 2] - b.squat_bar_depth * np.cos(q[:, 2])
+                    shoulder_x
+                    - b.squat_bar_height * sq[:, 2]
+                    - b.squat_bar_depth * np.cos(q[:, 2])
                 )
             else:
                 bar_x = shoulder_x
@@ -207,8 +214,18 @@ class LagrangianKinematicsMixin:
 
         total_mass = b.body_mass + bar_mass
 
-        num_x = b.m_feet * b.foot_com_x + self.m[0] * c1_x + self.m[1] * c2_x + self.m[2] * c3_x
-        num_y = b.m_feet * b.foot_com_y + self.m[0] * c1_y + self.m[1] * c2_y + self.m[2] * c3_y
+        num_x = (
+            b.m_feet * b.foot_com_x
+            + self.m[0] * c1_x
+            + self.m[1] * c2_x
+            + self.m[2] * c3_x
+        )
+        num_y = (
+            b.m_feet * b.foot_com_y
+            + self.m[0] * c1_y
+            + self.m[1] * c2_y
+            + self.m[2] * c3_y
+        )
 
         if exercise_type in ("squat", "full_squat"):
             bar_pos = self.bar_position(q, exercise_type)
