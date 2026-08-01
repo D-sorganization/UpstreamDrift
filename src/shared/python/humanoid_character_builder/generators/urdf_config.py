@@ -25,7 +25,7 @@ class URDFGeneratorConfig:
     """Configuration for URDF generation."""
 
     # Inertia calculation mode
-    inertia_mode: InertiaMode = InertiaMode.PRIMITIVE
+    inertia_mode: InertiaMode = InertiaMode.PRIMITIVE_APPROXIMATION
 
     # Density for uniform density calculation (kg/m^3)
     default_density: float = 1050.0

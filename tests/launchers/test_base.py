@@ -204,6 +204,7 @@ def test_run_launcher() -> None:
         patch("src.launchers.base.QApplication") as mock_qapp1,
         patch("launchers.base.QApplication", create=True) as mock_qapp2,
         patch("PyQt6.QtWidgets.QApplication.exec", return_value=0),
+        patch.object(DummyLauncher, "__init__", return_value=None),
         patch.object(DummyLauncher, "init_ui"),
         patch.object(DummyLauncher, "center_window"),
         patch.object(DummyLauncher, "show"),

@@ -9,6 +9,8 @@ from src.shared.python.humanoid_character_builder.interfaces.api import (
     CharacterBuildResult,
     ExportOptions,
     SegmentMeshInfo,
+    quick_build,
+    quick_urdf,
 )
 
 __all__ = [
@@ -16,4 +18,6 @@ __all__ = [
     "CharacterBuildResult",
     "SegmentMeshInfo",
     "ExportOptions",
+    "quick_build",
+    "quick_urdf",
 ]

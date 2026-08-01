@@ -56,22 +56,53 @@ _python_src_path = str(
         / "src"
     ).resolve()
 )
-for _p in (_python_src_path, _tools_src_path, _tools_path):
+_updrift_src = str((_Path(__file__).resolve().parents[1] / "src").resolve())
+if _updrift_src in _sys.path:
+    _sys.path.remove(_updrift_src)
+_sys.path.insert(0, _updrift_src)
+
+# Strip out Gasification_Model paths to prevent generic top-level package collisions (e.g. 'utils')
+_sys.path = [p for p in _sys.path if "Gasification_Model" not in p]
+
+for _p in reversed((_python_src_path, _tools_src_path, _tools_path)):
     if _p in _sys.path:
         _sys.path.remove(_p)
-    _sys.path.insert(0, _p)
+    _sys.path.insert(1, _p)
 
-for _pkg in ("chat", "sidekick", "ai"):
+_updrift_shared_python = str(
+    (_Path(__file__).resolve().parents[1] / "src" / "shared" / "python").resolve()
+)
+if _updrift_shared_python in _sys.path:
+    _sys.path.remove(_updrift_shared_python)
+_sys.path.insert(1, _updrift_shared_python)
+
+
+for _pkg in ("chat", "sidekick", "ai", "shared.python", "src.shared.python"):
     with contextlib.suppress(ImportError):
-        __import__(_pkg)
-    _pkg_mod = _sys.modules.get(_pkg)
-    _v_path = str(_Path(_tools_path) / _pkg)
-    if (
-        _pkg_mod is not None
-        and hasattr(_pkg_mod, "__path__")
-        and _v_path not in _pkg_mod.__path__
-    ):
-        _pkg_mod.__path__.append(_v_path)
+        if _pkg == "shared.python" or _pkg == "src.shared.python":
+            __import__("shared.python")
+            _pkg_mod = _sys.modules.get(_pkg)
+            _v_path = str(_Path(_tools_path))
+            _local_path = str(
+                _Path(__file__).resolve().parents[1] / "src" / "shared" / "python"
+            )
+        else:
+            __import__(_pkg)
+            _pkg_mod = _sys.modules.get(_pkg)
+            _v_path = str(_Path(_tools_path) / _pkg)
+            _local_path = str(
+                _Path(__file__).resolve().parents[1]
+                / "src"
+                / "shared"
+                / "python"
+                / _pkg
+            )
+
+        if _pkg_mod is not None and hasattr(_pkg_mod, "__path__"):
+            if _local_path not in _pkg_mod.__path__:
+                _pkg_mod.__path__.insert(0, _local_path)
+            if _v_path not in _pkg_mod.__path__:
+                _pkg_mod.__path__.append(_v_path)
 
 
 def _ensure_importable_package(module_name: str, package_path: str) -> None:

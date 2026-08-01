@@ -129,11 +129,11 @@ class HumanoidModel:
     """Representation of the complete humanoid model."""
 
     @precondition(
-        lambda links, joints: len(links) > 0,
+        lambda self, links, joints: len(links) > 0,
         "Model must have at least one link",
     )
     @precondition(
-        lambda links, joints, root_link_name: root_link_name in links,
+        lambda self, links, joints, root_link_name: root_link_name in links,
         "Root link must exist in links",
     )
     def __init__(

@@ -25,10 +25,19 @@ Preferred imports:
     from shared.python.plot_theme import apply_plot_theme
 """
 
+from pathlib import Path
+
+SUITE_ROOT = Path(__file__).resolve().parents[3]
+
 from . import ai as ai
+from . import cli_utils as cli_utils
 
 __all__ = [
+    "SUITE_ROOT",
+    "apply_plot_theme",
+    "get_logger",
     "ai",
+    "cli_utils",
     "chat",
     "humanoid_character_builder",
     "model_generation",
