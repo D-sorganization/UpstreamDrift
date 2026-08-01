@@ -13,8 +13,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from enum import Enum
-
+from enum import Enum`n`nfrom model_generation.inertia.primitives import (`n    box_inertia,`n    cylinder_inertia,`n    ellipsoid_inertia,`n    sphere_inertia,`n)`n
 from src.shared.python.humanoid_character_builder.mesh.inertia_calculator import (
     InertiaMode,
     InertiaResult,
