@@ -18,10 +18,10 @@ class StateProfileMixin:
     _state: Any
 
     def snapshot_state(self) -> Any:
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #8322
 
     def apply_state(self, state: Any) -> None:
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #8322
 
     def save_state_profile(
         self,
