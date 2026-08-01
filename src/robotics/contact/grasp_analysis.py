@@ -255,7 +255,8 @@ def _sampled_closure_check(
     """
     rng = np.random.default_rng(0)
     directions = rng.normal(size=(n_directions, generators.shape[0]))
-    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    directions /= np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
     margin = float(np.min(np.max(directions @ generators, axis=1)))
 
     if margin <= FORCE_CLOSURE_TOL:

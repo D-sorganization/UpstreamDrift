@@ -295,9 +295,11 @@ def _orthonormal_bases(directions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         np.array([1.0, 0.0, 0.0]),
     )
     first = np.cross(directions, reference)
-    first /= np.linalg.norm(first, axis=1, keepdims=True)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    first /= np.sqrt(np.einsum('...i,...i->...', first, first))[..., None]
     second = np.cross(directions, first)
-    second /= np.linalg.norm(second, axis=1, keepdims=True)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    second /= np.sqrt(np.einsum('...i,...i->...', second, second))[..., None]
     return first, second
 
 
