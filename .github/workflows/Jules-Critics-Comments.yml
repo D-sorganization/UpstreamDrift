@@ -107,7 +107,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m ensurepip --upgrade || true
-          pip install -r requirements.txt
+          pip install -r requirements.lock
           npm install -g @google/jules
 
       - name: Initialize Review Tracking

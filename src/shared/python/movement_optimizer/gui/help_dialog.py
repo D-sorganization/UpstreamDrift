@@ -161,9 +161,7 @@ class HelpCenterDialog(QDialog):
         ),
     }
 
-    def __init__(
-        self, parent: QWidget | None = None, initial_topic: str = "parameters"
-    ) -> None:
+    def __init__(self, parent: QWidget | None = None, initial_topic: str = "parameters") -> None:
         super().__init__(parent)
         self.setWindowTitle("Movement Optimizer Help")
         self.setMinimumWidth(680)
@@ -177,9 +175,7 @@ class HelpCenterDialog(QDialog):
         outer.setContentsMargins(12, 12, 12, 12)
         outer.setSpacing(8)
 
-        header = QLabel(
-            "Offline help for setup, parameters, results, troubleshooting, and terms."
-        )
+        header = QLabel("Offline help for setup, parameters, results, troubleshooting, and terms.")
         header.setWordWrap(True)
         outer.addWidget(header)
 
@@ -222,9 +218,7 @@ class HelpCenterDialog(QDialog):
             lbl = QLabel(f"<b>{heading}</b>")
             grid.addWidget(lbl, 0, col)
 
-        for row, (name, (desc, unit, rng)) in enumerate(
-            self.PARAMETERS.items(), start=1
-        ):
+        for row, (name, (desc, unit, rng)) in enumerate(self.PARAMETERS.items(), start=1):
             name_lbl = QLabel(name)
             name_lbl.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -233,14 +227,10 @@ class HelpCenterDialog(QDialog):
             desc_lbl.setAlignment(Qt.AlignmentFlag.AlignTop)
 
             unit_lbl = QLabel(unit)
-            unit_lbl.setAlignment(
-                Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter
-            )
+            unit_lbl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
             rng_lbl = QLabel(rng)
-            rng_lbl.setAlignment(
-                Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter
-            )
+            rng_lbl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
             grid.addWidget(name_lbl, row, 0)
             grid.addWidget(desc_lbl, row, 1)

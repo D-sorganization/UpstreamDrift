@@ -187,9 +187,7 @@ HILL_MAX_ECCENTRIC_RATIO: float = 1.4
 # ~7 mm for a 1.75 m person — effectively a grip-only link.
 WRIST_SEGMENT_FRAC: float = 0.01
 
-BENCH_UPPER_ARM_FRAC: float = (
-    0.56  # shoulder to elbow (anatomical ~48% + shoulder width)
-)
+BENCH_UPPER_ARM_FRAC: float = 0.56  # shoulder to elbow (anatomical ~48% + shoulder width)
 BENCH_FOREARM_FRAC: float = 0.44  # elbow to wrist (Winter 2009: ~44% of arm length)
 
 BENCH_PRESS_JOINT_LIMITS: dict[str, tuple[float, float]] = {

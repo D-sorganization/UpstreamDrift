@@ -95,7 +95,7 @@ jobs:
                [[ "$file" == Cargo.toml ]] || \
                [[ "$file" == CMakeLists.txt ]] || \
                [[ "$file" == package.json ]] || \
-               [[ "$file" == requirements.txt ]]; then
+               [[ "$file" == requirements.lock ]]; then
               SOURCE_CHANGED=true
             fi
           done <<< "$CHANGED_FILES"

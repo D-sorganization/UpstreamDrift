@@ -82,9 +82,7 @@ class MainWindow(
     # Signals for thread-safe GUI updates from the optimizer worker.
     # Using signals instead of QTimer.singleShot is the Qt-correct way
     # to communicate from a background thread to the main thread.
-    _sig_done = pyqtSignal(
-        int, object, object, float, object
-    )  # idx, result, body, bar, then_chain
+    _sig_done = pyqtSignal(int, object, object, float, object)  # idx, result, body, bar, then_chain
     _sig_cancelled = pyqtSignal()
     _sig_error = pyqtSignal(object)  # MovementOptimizerError or str
     _sig_progress = pyqtSignal(object)  # ProgressReport
@@ -106,9 +104,7 @@ class MainWindow(
         self.setMinimumSize(800, 600)
         self.resize(1100, 700)
 
-        self.exercise_states = [
-            ExerciseRuntimeState() for _name, _etype in self.EXERCISE_CONFIGS
-        ]
+        self.exercise_states = [ExerciseRuntimeState() for _name, _etype in self.EXERCISE_CONFIGS]
         self.is_playing = False
         self.anim_timer = QTimer(self)
         self.anim_timer.timeout.connect(self._anim_step)
@@ -377,9 +373,7 @@ class MainWindow(
         for name in slider_names:
             labelled = getattr(self.sidebar, name, None)
             if labelled is None:
-                logger.warning(
-                    "_connect_slider_undo: sidebar has no attribute %r", name
-                )
+                logger.warning("_connect_slider_undo: sidebar has no attribute %r", name)
                 continue
             raw = labelled.slider
 
@@ -442,18 +436,14 @@ class MainWindow(
             self._motion_tab_button_states.clear()
         else:
             if not self._motion_tab_button_states:
-                self._motion_tab_button_states = {
-                    button: button.isEnabled() for button in buttons
-                }
+                self._motion_tab_button_states = {button: button.isEnabled() for button in buttons}
             for button in buttons:
                 button.setEnabled(False)
         self.controls.setEnabled(True)
         if enabled:
             self.status_label.setText("Ready")
         else:
-            self.status_label.setText(
-                "Analysis tabs use local and bottom playback controls."
-            )
+            self.status_label.setText("Analysis tabs use local and bottom playback controls.")
         self._sync_right_sidebar_toggle()
 
     def _active_analysis_tab(self) -> Any | None:

@@ -91,9 +91,7 @@ class TestAnimRenderer:
         mock_ax.clear.assert_called_once()
         mock_ax.set_title.assert_called_once()
 
-    def test_draw_anim_frame_bench_press(
-        self, mock_ax, mock_dynamics, dummy_result, body
-    ):
+    def test_draw_anim_frame_bench_press(self, mock_ax, mock_dynamics, dummy_result, body):
         draw_anim_frame(
             mock_ax,
             5,

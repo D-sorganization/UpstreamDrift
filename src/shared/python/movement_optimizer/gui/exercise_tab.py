@@ -145,11 +145,7 @@ class ExerciseTab(QWidget):
             if k != "anim":
                 self.axes[k].clear()
                 style_axis(self.axes[k])
-        labels = (
-            Palette.BENCH_LABELS
-            if exercise_type == "bench_press"
-            else Palette.SEG_LABELS
-        )
+        labels = Palette.BENCH_LABELS if exercise_type == "bench_press" else Palette.SEG_LABELS
         self._render_analysis_plots(result, body, bar_mass, labels)
         self.fig.suptitle(
             f"{self.name}  |  {body.body_mass:.0f} kg body, {bar_mass:.0f} kg barbell",

@@ -26,16 +26,12 @@ class PlaybackControls(QWidget):
 
         self.btn_rewind = QPushButton("Rewind")
         self.btn_rewind.setAccessibleName("Rewind to start")
-        self.btn_rewind.setAccessibleDescription(
-            "Move the animation to the first frame."
-        )
+        self.btn_rewind.setAccessibleDescription("Move the animation to the first frame.")
         self.btn_rewind.setToolTip("Rewind to start (Home)")
 
         self.btn_back = QPushButton("Back")
         self.btn_back.setAccessibleName("Step backward one frame")
-        self.btn_back.setAccessibleDescription(
-            "Move the animation backward by one frame."
-        )
+        self.btn_back.setAccessibleDescription("Move the animation backward by one frame.")
         self.btn_back.setToolTip("Step backward one frame")
 
         self.btn_play = QPushButton("Play")
@@ -68,9 +64,7 @@ class PlaybackControls(QWidget):
         self.speed_slider.setRange(1, 30)
         self.speed_slider.setValue(10)
         self.speed_slider.setFixedWidth(100)
-        self.speed_slider.valueChanged.connect(
-            lambda v: self.speed_changed.emit(v / 10.0)
-        )
+        self.speed_slider.valueChanged.connect(lambda v: self.speed_changed.emit(v / 10.0))
         suppress_wheel_events(self.speed_slider)
         layout.addWidget(self.speed_slider)
 
@@ -82,9 +76,7 @@ class PlaybackControls(QWidget):
         self.frame_label = QLabel("")
         layout.addWidget(self.frame_label)
 
-    def connect_action_handlers(
-        self, handlers: Mapping[str, Callable[..., None]]
-    ) -> None:
+    def connect_action_handlers(self, handlers: Mapping[str, Callable[..., None]]) -> None:
         """Connect playback signals to handlers supplied by the owning window."""
         self.play_toggled.connect(handlers["play_toggled"])
         self.step_fwd.connect(handlers["step_fwd"])
@@ -117,9 +109,7 @@ class PlaybackControls(QWidget):
         """Display the current playback speed multiplier."""
         self.speed_label.setText(f"{speed:.1f}x")
 
-    def set_playback_status(
-        self, current_frame: int, total_frames: int, speed: float
-    ) -> None:
+    def set_playback_status(self, current_frame: int, total_frames: int, speed: float) -> None:
         """Update the frame and speed labels together."""
         self.set_frame_position(current_frame, total_frames)
         self.set_speed_multiplier_text(speed)

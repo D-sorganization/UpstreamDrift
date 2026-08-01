@@ -42,9 +42,7 @@ def collect_slider_values(sidebar: ParameterSidebar) -> dict[str, float]:
     }
 
 
-def restore_slider_values(
-    sidebar: ParameterSidebar, slider_values: dict[str, float]
-) -> None:
+def restore_slider_values(sidebar: ParameterSidebar, slider_values: dict[str, float]) -> None:
     """Apply persisted slider values to the GUI sidebar."""
     slider_map = {
         "body_mass": sidebar.mass_slider,

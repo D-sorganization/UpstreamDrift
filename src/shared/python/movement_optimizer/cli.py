@@ -56,17 +56,13 @@ def _add_body_args(parser: argparse.ArgumentParser) -> None:
         "--body-mass",
         type=float,
         default=75.0,
-        help=(
-            f"Body mass in kg (range {BODY_MASS_RANGE[0]}-{BODY_MASS_RANGE[1]}, default: 75.0)."
-        ),
+        help=(f"Body mass in kg (range {BODY_MASS_RANGE[0]}-{BODY_MASS_RANGE[1]}, default: 75.0)."),
     )
     parser.add_argument(
         "--height",
         type=float,
         default=1.75,
-        help=(
-            f"Height in metres (range {HEIGHT_RANGE[0]}-{HEIGHT_RANGE[1]}, default: 1.75)."
-        ),
+        help=(f"Height in metres (range {HEIGHT_RANGE[0]}-{HEIGHT_RANGE[1]}, default: 1.75)."),
     )
     parser.add_argument(
         "--bar-mass",
@@ -103,9 +99,7 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="Path to save results as JSON. If omitted, prints summary to stdout.",
     )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose logging."
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -269,9 +263,7 @@ def _build_optimizer(
     return opt, dyn
 
 
-def _save_or_emit(
-    result: OptimizationResult, exercise: str, output: str | None
-) -> None:
+def _save_or_emit(result: OptimizationResult, exercise: str, output: str | None) -> None:
     """Write result to file or emit summary to stdout.
 
     Args:
@@ -287,9 +279,7 @@ def _save_or_emit(
         _emit_cli_summary(_result_to_summary(result, exercise))
 
 
-def _validate_cli_args(
-    parser: argparse.ArgumentParser, args: argparse.Namespace
-) -> None:
+def _validate_cli_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
     """Reject invalid numeric CLI arguments via parser.error.
 
     Delegates to :func:`movement_optimizer.validation.validate_all` so the
@@ -348,13 +338,9 @@ def main(argv: list[str] | None = None) -> int:
     _configure_logging(args.verbose)
     body = BodyModel(body_mass=args.body_mass, height=args.height)
     duration = _resolve_duration(args.exercise, args.duration)
-    _log_optimization_start(
-        args.exercise, args.body_mass, args.height, args.bar_mass, duration
-    )
+    _log_optimization_start(args.exercise, args.body_mass, args.height, args.bar_mass, duration)
     t_start = time.perf_counter()
-    opt, _dyn = _build_optimizer(
-        body, args.exercise, args.bar_mass, duration, args.smoothness
-    )
+    opt, _dyn = _build_optimizer(body, args.exercise, args.bar_mass, duration, args.smoothness)
     result = opt.optimize()
     _log_optimization_done(time.perf_counter() - t_start, result.cost, result.success)
     _save_or_emit(result, args.exercise, args.output)

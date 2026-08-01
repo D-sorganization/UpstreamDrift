@@ -375,9 +375,7 @@ class LagrangianDynamics(LagrangianKinematicsMixin, PhysicsBackend):
             supine=self.supine,
         )
 
-    def _numpy_inverse_dynamics_batch(
-        self, q: NDArray, qd: NDArray, qdd: NDArray
-    ) -> NDArray:
+    def _numpy_inverse_dynamics_batch(self, q: NDArray, qd: NDArray, qdd: NDArray) -> NDArray:
         """NumPy fallback — delegates to :func:`lagrangian_batch.numpy_inverse_dynamics_batch`."""
         return numpy_inverse_dynamics_batch(
             q,
@@ -411,9 +409,7 @@ class LagrangianDynamics(LagrangianKinematicsMixin, PhysicsBackend):
             Rust and NumPy paths have the same asymptotic complexity.
         """
         self._require_finite_batch_inputs(q, qd, qdd)
-        self._check_coriolis_slow_assumption(
-            float(np.max(np.abs(qd))) if qd.size else 0.0
-        )
+        self._check_coriolis_slow_assumption(float(np.max(np.abs(qd))) if qd.size else 0.0)
         try:
             from movement_optimizer_core import inverse_dynamics_batch_rs  # type: ignore[import-not-found]  # noqa: I001
 

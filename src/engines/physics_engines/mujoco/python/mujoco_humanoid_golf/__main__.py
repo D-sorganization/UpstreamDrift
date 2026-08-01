@@ -264,9 +264,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Add stretch at the end
         self.actuator_layout.addStretch(1)
 
-    def _group_actuators(
-        self, actuator_names: list[str]
-    ) -> dict[str, list[str]]:  # noqa: C901
+    def _group_actuators(self, actuator_names: list[str]) -> dict[str, list[str]]:  # noqa: C901
         """Group actuators by body part for organized display."""
         if actuator_names is None:
             raise ValueError("actuator_names must be provided")

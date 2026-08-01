@@ -110,9 +110,9 @@ __all__ = [
 # registry imports while still surfacing a true hang (e.g. crashed worker
 # thread) before the user concludes the app is broken.  See issue #5490.
 STARTUP_TIMEOUT_SEC: int = 30
-assert (
-    STARTUP_TIMEOUT_SEC > 0
-), "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+assert STARTUP_TIMEOUT_SEC > 0, (
+    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+)
 
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500

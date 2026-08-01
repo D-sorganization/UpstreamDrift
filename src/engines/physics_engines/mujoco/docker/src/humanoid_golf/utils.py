@@ -99,9 +99,7 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
     return mjcf.from_xml_string(xml_string, assets=assets)
 
 
-def _scale_model_positions(
-    root: mjcf.RootElement, height_scale: float
-) -> None:  # noqa: C901
+def _scale_model_positions(root: mjcf.RootElement, height_scale: float) -> None:  # noqa: C901
     if root is None:
         raise ValueError("root must be provided")
     for body in root.find_all("body"):
@@ -344,9 +342,7 @@ def _attach_club(
             equality.add("connect", site1="lhand_grip_site", site2="club_grip_site")
 
 
-def customize_visuals(
-    physics: mjcf.Physics, config: dict | None = None
-) -> None:  # noqa: C901
+def customize_visuals(physics: mjcf.Physics, config: dict | None = None) -> None:  # noqa: C901
     """Apply colors and visual tweaks."""
     # Defaults
     if physics is None:

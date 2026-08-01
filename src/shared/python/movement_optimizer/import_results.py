@@ -49,16 +49,12 @@ def import_result_from_json(path: str | Path) -> dict:
         raise ValueError(f"Invalid JSON in result file {path}: {exc}") from exc
 
     if not isinstance(data, dict):
-        raise ValueError(
-            f"Invalid result file: expected JSON object, got {type(data).__name__}"
-        )
+        raise ValueError(f"Invalid result file: expected JSON object, got {type(data).__name__}")
 
     version = data.get("format_version")
     if version is None:
         # Legacy file without version -- try to load with a warning.
-        logger.warning(
-            "Result file %s has no format_version; attempting legacy load", path
-        )
+        logger.warning("Result file %s has no format_version; attempting legacy load", path)
     elif version != EXPORT_FORMAT_VERSION:
         raise ValueError(
             f"Incompatible format_version '{version}' in {path}; expected '{EXPORT_FORMAT_VERSION}'"

@@ -319,9 +319,7 @@ def export_to_matlab(
             logger.error(f"Failed to export to MATLAB: {outcome.error}")
         return _return_export_result(outcome, return_outcome)
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to MATLAB: {e}")
         outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
         return _return_export_result(outcome, return_outcome)
@@ -376,9 +374,7 @@ def export_to_hdf5(
             logger.error(f"Failed to export to HDF5: {outcome.error}")
         return _return_export_result(outcome, return_outcome)
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to HDF5: {e}")
         outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
         return _return_export_result(outcome, return_outcome)

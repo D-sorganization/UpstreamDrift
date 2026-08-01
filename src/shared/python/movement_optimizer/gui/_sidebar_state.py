@@ -24,13 +24,9 @@ logger = logging.getLogger(__name__)
 
 def show_optimizing(sidebar) -> None:
     sidebar.opt_btn.setEnabled(False)
-    sidebar.opt_btn.setToolTip(
-        "Optimization currently in progress. Please wait or cancel."
-    )
+    sidebar.opt_btn.setToolTip("Optimization currently in progress. Please wait or cancel.")
     sidebar.both_btn.setEnabled(False)
-    sidebar.both_btn.setToolTip(
-        "Optimization currently in progress. Please wait or cancel."
-    )
+    sidebar.both_btn.setToolTip("Optimization currently in progress. Please wait or cancel.")
     sidebar.cancel_btn.setVisible(True)
     sidebar.cancel_btn.setToolTip("Cancel the currently running optimization (Esc)")
     sidebar.stall_label.setVisible(False)
@@ -65,16 +61,10 @@ def update_progress(sidebar, report: ProgressReport) -> None:
     phase = "Converging" if n_evals > PROGRESS_PHASE_BOUNDARY_EVALS else "Exploring"
     sidebar.prog_label.setText(f"{phase}...")
     sidebar.iter_label.setText(f"Evaluations: {report.iteration}")
-    sidebar.cost_label.setText(
-        f"Cost: {report.cost:.1f}  (best: {report.best_cost:.1f})"
-    )
+    sidebar.cost_label.setText(f"Cost: {report.cost:.1f}  (best: {report.best_cost:.1f})")
     sidebar.improve_label.setText(f"Improvement: {report.improvement_pct:+.3f}%")
     elapsed = report.elapsed_s
-    time_str = (
-        f"{elapsed:.1f}s"
-        if elapsed < 60
-        else f"{int(elapsed // 60)}m {elapsed % 60:.0f}s"
-    )
+    time_str = f"{elapsed:.1f}s" if elapsed < 60 else f"{int(elapsed // 60)}m {elapsed % 60:.0f}s"
     sidebar.elapsed_label.setText(f"Elapsed: {time_str}")
 
     if report.is_stalled:

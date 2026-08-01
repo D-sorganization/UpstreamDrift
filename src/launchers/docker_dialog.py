@@ -150,12 +150,12 @@ class EnvironmentDialog(QDialog):
         scroll.setWidget(container)
 
         # DbC postconditions
-        assert (
-            scroll.widget() is container
-        ), "Postcondition: scroll area must wrap the build container"
-        assert (
-            container.layout() is not None
-        ), "Postcondition: build container must have an active layout"
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the build container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: build container must have an active layout"
+        )
 
         tab_build_layout.addWidget(scroll)
         tabs.addTab(tab_build, "Build Docker")

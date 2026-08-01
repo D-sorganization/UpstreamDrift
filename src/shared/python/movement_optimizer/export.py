@@ -114,9 +114,7 @@ def export_animation_gif(
     # matplotlib stubs type AbstractMovieWriter narrowly; PillowWriter is
     # compatible at runtime.
     anim.save(str(safe_path), writer=cast(Any, writer))
-    logger.info(
-        "Exported GIF animation to %s (%d frames, %d fps)", safe_path, n_frames, fps
-    )
+    logger.info("Exported GIF animation to %s (%d frames, %d fps)", safe_path, n_frames, fps)
 
 
 def export_plots_png(

@@ -109,9 +109,7 @@ class ParameterSidebar(QScrollArea):
         """Return True if the 3D model is selected."""
         return self.model_combo.currentIndex() == 1
 
-    def connect_action_handlers(
-        self, handlers: Mapping[str, Callable[..., None]]
-    ) -> None:
+    def connect_action_handlers(self, handlers: Mapping[str, Callable[..., None]]) -> None:
         """Connect sidebar action signals to handlers supplied by the main window."""
         self.optimize_current.connect(handlers["optimize_current"])
         self.optimize_both.connect(handlers["optimize_both"])
@@ -131,12 +129,8 @@ class ParameterSidebar(QScrollArea):
         _st.show_optimizing(self)
         self.cancel_btn.setEnabled(True)
         self.cancel_btn.setToolTip("Cancel the currently running optimization (Esc)")
-        self.opt_btn.setToolTip(
-            "Optimization currently in progress. Please wait or cancel."
-        )
-        self.both_btn.setToolTip(
-            "Optimization currently in progress. Please wait or cancel."
-        )
+        self.opt_btn.setToolTip("Optimization currently in progress. Please wait or cancel.")
+        self.both_btn.setToolTip("Optimization currently in progress. Please wait or cancel.")
 
     def show_idle(self) -> None:
         _st.show_idle(self)
@@ -239,9 +233,7 @@ class ParameterSidebar(QScrollArea):
         """Enable or disable the clear comparison action."""
         self.clear_compare_btn.setEnabled(available)
         if available:
-            self.clear_compare_btn.setToolTip(
-                "Clear all trials currently saved for comparison"
-            )
+            self.clear_compare_btn.setToolTip("Clear all trials currently saved for comparison")
         else:
             self.clear_compare_btn.setToolTip("No trials currently saved to clear")
 
@@ -249,13 +241,9 @@ class ParameterSidebar(QScrollArea):
         """Enable or disable the cancellation action."""
         self.cancel_btn.setEnabled(available)
         if not available:
-            self.cancel_btn.setToolTip(
-                "Cancellation already requested, shutting down safely..."
-            )
+            self.cancel_btn.setToolTip("Cancellation already requested, shutting down safely...")
         else:
-            self.cancel_btn.setToolTip(
-                "Cancel the currently running optimization (Esc)"
-            )
+            self.cancel_btn.setToolTip("Cancel the currently running optimization (Esc)")
 
     def set_cancelling(self) -> None:
         """Immediately reflect cancellation in the UI and flush pending events.
@@ -271,7 +259,5 @@ class ParameterSidebar(QScrollArea):
         self.both_btn.setEnabled(False)
         self.cancel_btn.setEnabled(False)
         self.cancel_btn.setText("Canceling…")
-        self.cancel_btn.setToolTip(
-            "Cancellation already requested, shutting down safely..."
-        )
+        self.cancel_btn.setToolTip("Cancellation already requested, shutting down safely...")
         QApplication.processEvents()

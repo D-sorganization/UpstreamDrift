@@ -60,9 +60,7 @@ class ChainForceHistory:
 
 def _gravity_vector(config: ChainConfig) -> FloatArray:
     """Per-link weight vector (points toward +y, the model's downward axis)."""
-    return np.asarray(
-        [0.0, config.link_mass_kg * config.gravity_m_s2], dtype=np.float64
-    )
+    return np.asarray([0.0, config.link_mass_kg * config.gravity_m_s2], dtype=np.float64)
 
 
 def _midpoint_velocities(config: ChainConfig, rollout: ChainRollout) -> FloatArray:
@@ -74,9 +72,7 @@ def _midpoint_velocities(config: ChainConfig, rollout: ChainRollout) -> FloatArr
     return np.stack(per_state)
 
 
-def link_accelerations(
-    config: ChainConfig, rollout: ChainRollout, dt_s: float
-) -> FloatArray:
+def link_accelerations(config: ChainConfig, rollout: ChainRollout, dt_s: float) -> FloatArray:
     """Return ``(T, N, 2)`` link-midpoint linear accelerations via finite difference.
 
     Preconditions:

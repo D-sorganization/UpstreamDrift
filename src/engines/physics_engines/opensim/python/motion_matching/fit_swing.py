@@ -344,7 +344,7 @@ def fit_swing_opensim(
     # within floating-point tolerance.
     assert result.history, "FitResult.history must not be empty"
     assert np.isfinite(result.final_cost), "FitResult.cost must be finite"
-    assert result.theta_optimal.shape == (
-        d,
-    ), f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
+    assert result.theta_optimal.shape == (d,), (
+        f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
+    )
     return result

@@ -111,9 +111,7 @@ def balance_pose(
     return q
 
 
-def _standing_balanced(
-    dyn: _DynamicsWithBody, bar_mass: float, exercise_type: str
-) -> NDArray:
+def _standing_balanced(dyn: _DynamicsWithBody, bar_mass: float, exercise_type: str) -> NDArray:
     """Find a near-standing pose with COM at inner BOS center.
 
     Adjusts shin angle (joint 0) to shift COM forward over mid-foot.

@@ -232,9 +232,7 @@ class BodyRenderer:
     HEAD_RADIUS = 0.10  # metres
 
     @classmethod
-    def draw_segments(
-        cls, ax: Axes, joints: dict[str, NDArray], body_height: float = 1.75
-    ) -> None:
+    def draw_segments(cls, ax: Axes, joints: dict[str, NDArray], body_height: float = 1.75) -> None:
         pts = [joints["ankle"], joints["knee"], joints["hip"], joints["shoulder"]]
         for k in range(3):
             ax.plot(

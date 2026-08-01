@@ -63,9 +63,7 @@ class TestTPose:
         assert fk["left_ankle"][2] == pytest.approx(0.0)
         assert fk["right_ankle"][2] == pytest.approx(0.0)
 
-    def test_t_pose_shoulder_height_equals_sum_of_segments(
-        self, model: Bilateral3DModel
-    ) -> None:
+    def test_t_pose_shoulder_height_equals_sum_of_segments(self, model: Bilateral3DModel) -> None:
         fk = model.forward_kinematics(model.t_pose())
         expected_height = model.L_shin + model.L_thigh + model.L_torso
         assert fk["shoulder"][2] == pytest.approx(expected_height)
@@ -87,9 +85,7 @@ class TestTPose:
 class TestKneeFlexion:
     """Flexing only the knee should produce a known-position check."""
 
-    def test_90deg_knee_flex_drops_hip_by_thigh_length(
-        self, model: Bilateral3DModel
-    ) -> None:
+    def test_90deg_knee_flex_drops_hip_by_thigh_length(self, model: Bilateral3DModel) -> None:
         # Flex the left knee 90deg forward: ankle stays, shin stays vertical,
         # thigh now horizontal (pointing +x).  So left_hip should be at
         # (L_thigh, +half_w, L_shin) -- the thigh rotated from "up" to "forward".
@@ -105,9 +101,7 @@ class TestKneeFlexion:
         np.testing.assert_allclose(fk["left_hip"], expected, atol=1e-10)
 
         # Right hip untouched
-        expected_right = np.array(
-            [0.0, -0.5 * model.stance_width_m, model.L_shin + model.L_thigh]
-        )
+        expected_right = np.array([0.0, -0.5 * model.stance_width_m, model.L_shin + model.L_thigh])
         np.testing.assert_allclose(fk["right_hip"], expected_right, atol=1e-10)
 
 
@@ -148,17 +142,13 @@ class TestSagittal2DParity:
 
 
 class TestInputValidation:
-    def test_forward_kinematics_rejects_raw_tuple(
-        self, model: Bilateral3DModel
-    ) -> None:
+    def test_forward_kinematics_rejects_raw_tuple(self, model: Bilateral3DModel) -> None:
         with pytest.raises(TypeError, match="Bilateral3DPose"):
             model.forward_kinematics((0.0, 0.0, 0.0))  # type: ignore[arg-type]
 
 
 class TestSegmentPairs:
-    def test_segment_pairs_reference_valid_joints(
-        self, model: Bilateral3DModel
-    ) -> None:
+    def test_segment_pairs_reference_valid_joints(self, model: Bilateral3DModel) -> None:
         fk = model.forward_kinematics(model.t_pose())
         for a, b in model.segment_pairs():
             assert a in fk, f"unknown joint {a}"

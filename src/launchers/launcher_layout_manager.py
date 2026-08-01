@@ -71,9 +71,7 @@ def _view_mode_from_string(name: str | None) -> ViewMode:
     except KeyError:
         logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
         mode = ViewMode.LIST_LARGE
-    assert isinstance(
-        mode, ViewMode
-    ), (  # DbC postcondition
+    assert isinstance(mode, ViewMode), (  # DbC postcondition
         f"_view_mode_from_string postcondition violated: got {mode!r}"
     )
     return mode

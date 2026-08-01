@@ -47,9 +47,9 @@ class TrajectoryFunnelBenchmark:
             "transverse",
             "setpoint",
         ], "Mode must be 'transverse' or 'setpoint'"
-        assert (
-            phase_window is None or 0.0 < phase_window <= 1.0
-        ), "phase_window must be None or in (0, 1]"
+        assert phase_window is None or 0.0 < phase_window <= 1.0, (
+            "phase_window must be None or in (0, 1]"
+        )
         self.mode = mode
         self.phase_window = phase_window
         self.learning_curve: list[float] = []
@@ -120,9 +120,9 @@ class TrajectoryFunnelBenchmark:
         assert states.ndim == 2, "current_states must be a 2D array"
         assert reference.ndim == 2, "reference_trajectory must be a 2D array"
         assert len(reference) > 0, "reference_trajectory must not be empty"
-        assert (
-            states.shape[1] == reference.shape[1]
-        ), "current_states and reference_trajectory state dimensions must match"
+        assert states.shape[1] == reference.shape[1], (
+            "current_states and reference_trajectory state dimensions must match"
+        )
         assert np.all(np.isfinite(states)), "current_states must be finite"
         assert np.all(np.isfinite(reference)), "reference_trajectory must be finite"
 
@@ -189,9 +189,9 @@ class TrajectoryFunnelBenchmark:
             return 0, float("inf")
 
         assert window_size > 0, "window_size must be positive"
-        assert threshold >= 0.0 and np.isfinite(
-            threshold
-        ), "threshold must be finite and non-negative"
+        assert threshold >= 0.0 and np.isfinite(threshold), (
+            "threshold must be finite and non-negative"
+        )
         rewards = np.asarray(reward_trajectory, dtype=np.float64)
         assert np.all(np.isfinite(rewards)), "reward_trajectory must be finite"
 
