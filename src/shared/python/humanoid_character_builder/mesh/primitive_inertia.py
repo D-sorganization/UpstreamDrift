@@ -146,7 +146,7 @@ class PrimitiveInertiaCalculator:
         # I = (2/5) * m * r^2 for all axes
         if mass is None:
             raise ValueError("mass must be provided")
-        i_sphere = 0.4 * mass * radius**2
+        i_sphere = sphere_inertia(mass, radius)["ixx"]
         volume = (4.0 / 3.0) * math.pi * radius**3
 
         return InertiaResult(
