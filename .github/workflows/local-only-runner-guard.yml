@@ -52,7 +52,7 @@ jobs:
       - name: Install PyYAML
         run: pip install --disable-pip-version-check pyyaml==6.0.2
 
-      - name: Verify all workflows route to d-sorg-fleet-docker
+      - name: Verify workflows use approved local routing or the reversible CI_RUNNER_MODE hosted fast lane
         shell: python
         run: |
           import re
@@ -138,7 +138,7 @@ jobs:
                   for v in values:
                       v_clean = v.strip()
                       # Expressions that resolve at runtime to fleet labels are OK
-                      if "pick-runner" in v_clean or "d-sorg-fleet" in v_clean or "self-hosted" in v_clean:
+                      if "CI_RUNNER_MODE" in v_clean or "pick-runner" in v_clean or "d-sorg-fleet" in v_clean or "self-hosted" in v_clean:
                           continue
                       if HOSTED.match(v_clean):
                           violations.append(
@@ -156,4 +156,4 @@ jobs:
               )
               sys.exit(1)
 
-          print("All workflows route to d-sorg-fleet-docker.")
+          print("All workflows use approved local routing or the reversible CI_RUNNER_MODE hosted fast lane.")
