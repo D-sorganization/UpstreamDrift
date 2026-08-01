@@ -94,3 +94,7 @@
 **Learning:** Inside a `for` loop in Python, using `np.linalg.norm(v)` creates temporary array objects and invokes NumPy's complex multi-dimensional dispatch logic.
 **Action:** When computing vector norms inside a hot loop (especially when dimensions are small or unknown), use `math.sqrt(np.vdot(v, v))` to bypass array allocations and obtain a ~1.5x - 2x speedup over `np.linalg.norm(v)`. This is safer than `math.hypot` when the array dimensions are dynamic.
 
+
+## 2023-10-27 - [Batched Vector Norms Overhead]
+**Learning:** In NumPy, computing `np.linalg.norm(arr, axis=1)` for small-dimensional batched vectors incurs significant intermediate array allocation and function dispatch overhead.
+**Action:** Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))[..., None]` to safely compute sum of squares along the last axis without intermediate allocations, offering a significant performance speedup for robotics collision and grasp analysis loops.
