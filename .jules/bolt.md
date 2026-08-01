@@ -102,3 +102,7 @@
 ## 2023-10-27 - [SPEC.md merge conflict CI failure]
 **Learning:** If the CI check suite detects raw git merge conflict markers (e.g. `<<<<<<< HEAD`), the job will fail.
 **Action:** When working on files that may have been updated upstream (like `SPEC.md`), ensure that git merge conflict markers are resolved manually using a simple python regex or string replace script and properly staged.
+
+## 2023-10-27 - [Network Timeout CI Failure]
+**Learning:** Adding `http.lowSpeedLimit` and `http.lowSpeedTime` can cause git checkout to fail with `curl 28 Operation too slow` if the network temporarily drops below the threshold.
+**Action:** Remove these configurations to prevent artificial timeout failures.
