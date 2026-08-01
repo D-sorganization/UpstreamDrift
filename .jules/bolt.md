@@ -98,3 +98,7 @@
 ## 2023-10-27 - [Batched Vector Norms Overhead]
 **Learning:** In NumPy, computing `np.linalg.norm(arr, axis=1)` for small-dimensional batched vectors incurs significant intermediate array allocation and function dispatch overhead.
 **Action:** Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))[..., None]` to safely compute sum of squares along the last axis without intermediate allocations, offering a significant performance speedup for robotics collision and grasp analysis loops.
+
+## 2023-10-27 - [SPEC.md merge conflict CI failure]
+**Learning:** If the CI check suite detects raw git merge conflict markers (e.g. `<<<<<<< HEAD`), the job will fail.
+**Action:** When working on files that may have been updated upstream (like `SPEC.md`), ensure that git merge conflict markers are resolved manually using a simple python regex or string replace script and properly staged.

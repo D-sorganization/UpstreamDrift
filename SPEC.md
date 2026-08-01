@@ -39,14 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-<<<<<<< HEAD
 | **Spec Version** | 1.0.479 |
 | **Last Spec Update** | 2026-07-27 |
-=======
-| **Spec Version** | 1.0.468 |
-| **Last Spec Update** | 2026-07-25 |
-
-> > > > > > > origin/codex/pyqt6-launcher-functional-qa
 
 ## 2. Purpose & Mission
 
