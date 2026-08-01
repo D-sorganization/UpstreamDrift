@@ -100,7 +100,7 @@
 **Action:** Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))[..., None]` to safely compute sum of squares along the last axis without intermediate allocations, offering a significant performance speedup for robotics collision and grasp analysis loops.
 
 ## 2023-10-27 - [SPEC.md merge conflict CI failure]
-**Learning:** If the CI check suite detects raw git merge conflict markers (e.g. `<<<<<<< HEAD`), the job will fail.
+**Learning:** If the CI check suite detects raw git merge conflict markers (e.g. `conflict markers`), the job will fail.
 **Action:** When working on files that may have been updated upstream (like `SPEC.md`), ensure that git merge conflict markers are resolved manually using a simple python regex or string replace script and properly staged.
 
 ## 2023-10-27 - [Network Timeout CI Failure]
