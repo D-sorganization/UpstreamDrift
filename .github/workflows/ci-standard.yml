@@ -33,7 +33,7 @@ permissions:
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -48,7 +48,7 @@ jobs:
 
   pinned-actions:
     name: Enforce action SHA pinning
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -70,7 +70,7 @@ jobs:
 
   workflow-inventory:
     name: Enforce workflow inventory
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -92,7 +92,7 @@ jobs:
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
