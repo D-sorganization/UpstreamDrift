@@ -18,6 +18,12 @@
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs.",
       "expires_on": "2026-08-01"
+    },
+    {
+      "path": "docs/testing/functional-test-plan.md",
+      "owner": "@docs-team",
+      "reason": "Existing monolithic functional test plan staged for decomposition.",
+      "expires_on": "2026-09-30"
     }
   ]
 }
