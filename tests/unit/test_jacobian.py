@@ -68,7 +68,7 @@ SIMPLE_ARM_URDF = """<?xml version="1.0"?>
 # Simple MJCF equivalent for MuJoCo tests
 SIMPLE_ARM_MJCF = """
 <mujoco model="simple_arm">
-  <option gravity="0 0 -9.81" timestep="0.002"/>
+  <option gravity="0 0 -9.80665" timestep="0.002"/>
   <compiler angle="radian"/>
 
   <worldbody>

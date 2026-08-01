@@ -179,7 +179,7 @@ class TestAssertPhysicsState:
         assert_physics_state([0, 1, 2], [3, 4, 5])
 
     def test_valid_with_acceleration(self) -> None:
-        assert_physics_state([0, 0, 0], [1, 1, 1], [9.8, 0, 0])
+        assert_physics_state([0, 0, 0], [1, 1, 1], [9.80665, 0, 0])
 
     def test_mismatched_lengths(self) -> None:
         with pytest.raises(ValueError, match="same length"):

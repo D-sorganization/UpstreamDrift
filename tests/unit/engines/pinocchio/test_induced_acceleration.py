@@ -112,7 +112,7 @@ class TestPinocchioInducedAcceleration:
         ) -> np.ndarray:
             """Return gravity or gravity+torque acceleration."""
             if np.array_equal(tau_arg, np.zeros(2)):
-                return np.array([-9.8, 0])  # Gravity accel
+                return np.array([-9.80665, 0])  # Gravity accel
             return np.array([-4.8, 5.0])  # Gravity + Specific Torque Accel
 
         mock_pin.aba.side_effect = aba_side_effect
@@ -120,7 +120,7 @@ class TestPinocchioInducedAcceleration:
         result = analyzer.compute_specific_control(q, specific_tau)
 
         # result = (a_tau_G) - (a_G)
-        # [-4.8, 5.0] - [-9.8, 0] = [5.0, 5.0]
+        # [-4.8, 5.0] - [-9.80665, 0] = [5.0, 5.0]
 
         np.testing.assert_allclose(result, [5.0, 5.0])
         assert mock_pin.aba.call_count == 2

@@ -149,15 +149,17 @@ class TestDrakeInducedAccelerationAnalyzer:
         plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
         plant.num_velocities.return_value = 2
         plant.MakeMultibodyForces.return_value = MagicMock()
-        plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.81])
+        plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.80665])
         plant.CalcInverseDynamics.return_value = np.array([0.1, 0.2])
 
         result = analyzer.compute_components(context)
 
-        # gravity accel = M^-1 @ tau_g = [0, -9.81]
-        np.testing.assert_array_almost_equal(result["gravity"], np.array([0.0, -9.81]))
+        # gravity accel = M^-1 @ tau_g = [0, -9.80665]
+        np.testing.assert_array_almost_equal(
+            result["gravity"], np.array([0.0, -9.80665])
+        )
         # velocity accel = M^-1 @ (-(bias + tau_g))
-        expected_v = -(np.array([0.1, 0.2]) + np.array([0.0, -9.81]))
+        expected_v = -(np.array([0.1, 0.2]) + np.array([0.0, -9.80665]))
         np.testing.assert_array_almost_equal(result["velocity"], expected_v)
         # total = gravity + velocity
         np.testing.assert_array_almost_equal(
@@ -188,7 +190,7 @@ class TestDrakeInducedAccelerationAnalyzer:
         plant.num_velocities.return_value = 2
         plant.MakeMultibodyForces.return_value = MagicMock()
         plant.CalcInverseDynamics.return_value = np.array([0.5, 1.0])
-        plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.81])
+        plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.80665])
 
         result = analyzer.compute_counterfactuals(context)
 
@@ -201,7 +203,7 @@ class TestDrakeInducedAccelerationAnalyzer:
         )
         # zvcf_torque = -tau_g
         np.testing.assert_array_almost_equal(
-            result["zvcf_torque"], np.array([0.0, 9.81])
+            result["zvcf_torque"], np.array([0.0, 9.80665])
         )
 
     def test_compute_specific_control_singular_mass_uses_pinv(self) -> None:

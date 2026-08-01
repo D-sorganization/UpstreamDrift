@@ -40,7 +40,7 @@ class TestTriplePendulumParams:
 
     def test_physics_triple_default_gravity(self) -> None:
         p = _make_params()
-        assert p.g == pytest.approx(9.81)
+        assert p.g == pytest.approx(9.80665)
 
 
 class TestMassMatrix:

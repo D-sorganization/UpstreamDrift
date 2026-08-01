@@ -4,7 +4,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from src.shared.python.contracts import (
+from contracts import (
     ContractChecker,
     ContractLevel,
     ContractViolationError,
@@ -208,9 +208,7 @@ class TestDecorators:
             func(-1)
 
         # when condition evaluation fails with TypeError (requires 2 args, gets 1)
-        # The two-arg lambda is intentionally malformed to exercise the
-        # evaluation-error path, hence the type: ignore.
-        @postcondition(lambda r, extras: True)  # type: ignore[arg-type, misc]
+        @postcondition(lambda r, extras: True)
         def func2(x) -> Any:
             return x
 
@@ -222,9 +220,8 @@ class TestDecorators:
     def test_postcondition_decorator_type_error_warn(self) -> Any:
         set_contract_level(ContractLevel.WARN)
 
-        # Should gracefully return function result. The two-arg lambda is
-        # intentionally malformed to exercise the evaluation-error path.
-        @postcondition(lambda r, extras: True)  # type: ignore[arg-type, misc]
+        # Should gracefully return function result
+        @postcondition(lambda r, extras: True)
         def func(x) -> Any:
             return x
 

@@ -1,0 +1,128 @@
+...........ssssssssssssss...F..................sssss.FF................. [  0%]
+............................ssssssssssssssssssssssssssssssssssssssssssss [  0%]
+..................................F.......F............................. [  0%]
+..........................ssFs.........................................x [  0%]
+.F...............FF....FF.F............................................. [  1%]
+........................................................................ [  1%]
+........................................................................ [  1%]
+........................................................................ [  1%]
+........................................................................ [  1%]
+........................................................................ [  2%]
+..........................................................ss.ss......... [  2%]
+..............................................FFFF...................... [  2%]
+.................s........................F............................. [  2%]
+.....ss...F............................................................. [  2%]
+........................................s............................... [  3%]
+..........F..........................F.................................. [  3%]
+...............................F...........F............................ [  3%]
+.........................F.........F.................................... [  3%]
+......................................FF............F......sss.ss....... [  3%]
+............ssssss...................................................... [  4%]
+................FF...................................................... [  4%]
+........................................................................ [  4%]
+....................................F..FF..F.F...........F.............. [  4%]
+.........F.......F...................................................... [  5%]
+........................................................................ [  5%]
+F....................................................................... [  5%]
+.................................................FF..................... [  5%]
+............................F..F........................................ [  5%]
+...............FFFFFFFFFFFFFFFFFFFFFFFF................................. [  6%]
+..................F...........................s......................... [  6%]
+......................................................................ss [  6%]
+s..........................FFF.FF....................................... [  6%]
+..................................................................F..... [  6%]
+..................................ssssssssssss.......................... [  7%]
+........................................................................ [  7%]
+..sss.......................Fx.......................................... [  7%]
+........................................................................ [  7%]
+..........................................F...............x............. [  7%]
+.................................................F...................... [  8%]
+......................................F.ssssssssssssssssss..sss......sss [  8%]
+s.s............F............x......................F.................... [  8%]
+................Essss....FFsssssssssss.............................FFFF. [  8%]
+.F...........................FFFFFF..sss.........F........s............. [  9%]
+........................................................................ [  9%]
+...........FFFFF...............................................+++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~ Stack of Thread-208 (_stream_to_queue) (53252) ~~~~~~~~~~~~~~~~
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\diete\Repositories\UpstreamDrift\src\api\services\chat_service.py", line 366, in _stream_to_queue
+    for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
+  File "C:\Users\diete\Repositories\UpstreamDrift\tests\api\test_chat_connectivity.py", line 219, in stream_response
+    threading.Event().wait()  # block forever
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 629, in wait
+    signaled = self._cond.wait(timeout)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 327, in wait
+    waiter.acquire()
+~~~~~~~~~~~~~~~~~~~~~~~~ Stack of MainThread (148376) ~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Scripts\pytest.exe\__main__.py", line 7, in <module>
+    sys.exit(console_main())
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\main.py", line 318, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\main.py", line 372, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\main.py", line 396, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 137, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 244, in call_and_report
+    call = CallInfo.from_call(
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 353, in from_call
+    result: TResult | None = func()
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 245, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\runner.py", line 179, in pytest_runtest_call
+    item.runtest()
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\python.py", line 1720, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\python.py", line 166, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "C:\Users\diete\Repositories\UpstreamDrift\tests\launchers\test_base.py", line 214, in test_run_launcher
+    res = run_launcher(DummyLauncher)
+  File "C:\Users\diete\Repositories\UpstreamDrift\src\launchers\base.py", line 380, in run_launcher
+    return app.exec()
++++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++

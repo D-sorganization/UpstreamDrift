@@ -61,6 +61,16 @@ class CrossEnginePerturbationConfig(BaseModel):
     )
     seed: int = Field(default=42, description="Random seed for reproducibility")
 
+    from pydantic import model_validator
+
+    @model_validator(mode="after")
+    def validate_dt_lt_t_end(self) -> CrossEnginePerturbationConfig:
+        if self.dt >= self.t_end:
+            raise ValueError(
+                f"dt ({self.dt}) must be strictly less than t_end ({self.t_end})"
+            )
+        return self
+
 
 class CrossEngineStudyRequest(BaseModel):
     """Request body for POST /analysis/cross-engine."""

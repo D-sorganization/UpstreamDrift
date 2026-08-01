@@ -213,7 +213,7 @@ class TestComputeZTCFForces:
             joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
             segment_masses=np.array([1.0, 1.0]),
             segment_lengths=np.array([1.0, 1.0]),
-            gravity_acceleration=9.81,
+            gravity_acceleration=9.80665,
         )
         assert isinstance(result, ZTCFResult)
         assert result.n_joints == 2
@@ -237,12 +237,12 @@ class TestComputeZTCFForces:
         result = compute_ztcf_forces(
             mass_matrix=np.eye(2),
             coriolis_vector=np.array([0.5, 0.3]),
-            gravity_vector=np.array([9.81, 4.9]),
+            gravity_vector=np.array([9.80665, 4.9]),
             friction_vector=np.array([0.1, 0.1]),
             joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
             segment_masses=np.array([5.0, 3.0]),
             segment_lengths=np.array([0.4, 0.35]),
-            gravity_acceleration=9.81,
+            gravity_acceleration=9.80665,
         )
         assert np.all(np.isfinite(result.joint_forces))
         assert np.all(np.isfinite(result.joint_accelerations))
@@ -260,7 +260,7 @@ class TestComputeZTCFForces:
         """
         m = 2.5  # [kg]
         length = 0.9  # [m]
-        g = 9.81  # [m/s^2]
+        g = 9.80665  # [m/s^2]
         theta = np.radians(theta_deg)
 
         # 1-DOF generalized dynamics for the pendulum about the pivot.

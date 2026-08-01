@@ -290,7 +290,7 @@ class TestDatasetExporter:
                 time=0.0,
                 positions=np.array([1.0]),
                 velocities=np.array([0.0]),
-                accelerations=np.array([9.81]),
+                accelerations=np.array([9.80665]),
             )
         )
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -222,6 +222,19 @@ def humid_air_density(
             f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_ALTITUDE_M}] metres"
         )
 
+    if not isinstance(temperature_c, (int, float)) or isinstance(temperature_c, bool):
+        raise TypeError("temperature_c must be a real number")
+    if math.isnan(temperature_c) or math.isinf(temperature_c):
+        raise ValueError("temperature_c must be finite")
+    if (
+        temperature_c < MIN_VALID_TEMPERATURE_C
+        or temperature_c > MAX_VALID_TEMPERATURE_C
+    ):
+        raise ValueError(
+            f"temperature_c={temperature_c} is outside the supported range "
+            f"[{MIN_VALID_TEMPERATURE_C}, {MAX_VALID_TEMPERATURE_C}] C"
+        )
+
     p0 = ISA_P0_PA if pressure_pa is None else float(pressure_pa)
     if p0 <= 0:
         raise ValueError("pressure_pa must be positive when provided")

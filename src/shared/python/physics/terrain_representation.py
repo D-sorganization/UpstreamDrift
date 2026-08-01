@@ -39,7 +39,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-from model_generation.core.constants import GRAVITY_M_S2
+from src.shared.python.model_generation.core.constants import GRAVITY_M_S2
 
 logger = get_logger(__name__)
 
@@ -671,6 +671,10 @@ class TerrainPatch:
                 "restitution": self.material.restitution,
                 "hardness": self.material.hardness,
                 "grass_height_m": self.material.grass_height_m,
+                "compressibility": self.material.compressibility,
+                "compression_damping": self.material.compression_damping,
+                "turf_density": self.material.turf_density,
+                "moisture_content": self.material.moisture_content,
             }
         return result
 

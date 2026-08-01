@@ -7,8 +7,10 @@ from __future__ import annotations
 
 import logging
 
-from model_generation.converters.simscape.mdl_parser import SimscapeModel
-from model_generation.core.types import (
+from src.shared.python.model_generation.converters.simscape.mdl_parser import (
+    SimscapeModel,
+)
+from src.shared.python.model_generation.core.types import (
     Geometry,
     Inertia,
     Joint,

@@ -576,9 +576,9 @@ class ModelPackEntry:
             hidden_owner=(
                 hidden_owner.strip() if isinstance(hidden_owner, str) else None
             ),
-            embed_adapter=embed_adapter.strip()
-            if isinstance(embed_adapter, str)
-            else None,
+            embed_adapter=(
+                embed_adapter.strip() if isinstance(embed_adapter, str) else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:

@@ -82,7 +82,12 @@ def test_chain_force_field_shapes_and_gravity() -> None:
     config, rollout = _make_rollout()
     field = chain_force_field(config, rollout, _DT, frame_index=2)
     assert isinstance(field, ChainForceField)
-    for array in (field.midpoints_m, field.gravity_n, field.tension_n, field.net_force_n):
+    for array in (
+        field.midpoints_m,
+        field.gravity_n,
+        field.tension_n,
+        field.net_force_n,
+    ):
         assert array.shape == (_SEGMENTS, 2)
         assert np.all(np.isfinite(array))
     expected = config.link_mass_kg * config.gravity_m_s2

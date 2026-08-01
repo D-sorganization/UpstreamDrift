@@ -228,12 +228,11 @@ with open("spec.yml", "w") as f:
 ### Step 2: Validate
 
 ```python
-import logging
 from programmatic_pid import validate_spec_json
 issues = validate_spec_json(spec)
 if issues:
     for issue in issues:
-        logging.warning(f"  [{issue['severity']}] {issue['path']}: {issue['message']}")
+        print(f"  [{issue['severity']}] {issue['path']}: {issue['message']}")
     # Fix the issues and re-validate
 ```
 

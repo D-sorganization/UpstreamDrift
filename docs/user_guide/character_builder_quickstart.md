@@ -39,7 +39,7 @@ For detailed character creation from MakeHuman models:
 The fastest way to generate a URDF:
 
 ```python
-from humanoid_character_builder import quick_urdf
+from src.shared.python.humanoid_character_builder import quick_urdf
 
 # Generate URDF with default parameters
 urdf_xml = quick_urdf(height_m=1.75, mass_kg=75.0)
@@ -56,7 +56,7 @@ print("URDF generated successfully!")
 ### Basic Parameters
 
 ```python
-from humanoid_character_builder import BodyParameters, CharacterBuilder
+from src.shared.python.humanoid_character_builder import BodyParameters, CharacterBuilder
 
 # Create custom body parameters
 params = BodyParameters(
@@ -77,7 +77,7 @@ result.export_urdf("./output/my_character")
 ### Body Segment Customization
 
 ```python
-from humanoid_character_builder import BodyParameters
+from src.shared.python.humanoid_character_builder import BodyParameters
 
 params = BodyParameters(
     height_m=1.75,
@@ -93,7 +93,7 @@ params = BodyParameters(
 ### Using Presets
 
 ```python
-from humanoid_character_builder import CharacterBuilder
+from src.shared.python.humanoid_character_builder import CharacterBuilder
 
 builder = CharacterBuilder()
 
@@ -181,72 +181,6 @@ pin.updateFramePlacements(model, data)
 print("Hand position:", data.oMf[model.getFrameId("hand_r")].translation)
 ```
 
-## Where to Go Next
-
-### Frankenstein Editor
-
-Combine body parts from different sources:
-
-```python
-from humanoid_character_builder.frankenstein import FrankensteinEditor
-
-editor = FrankensteinEditor()
-editor.add_source("torso", "athlete_torso.urdf")
-editor.add_source("legs", "dancer_legs.urdf")
-merged = editor.merge()
-merged.export_urdf("./merged_character")
-```
-
-### Simscape Converter
-
-Convert URDF to Simscape Multibody:
-
-```python
-from humanoid_character_builder.converters import urdf_to_simscape
-
-urdf_to_simscape(
-    "my_humanoid.urdf",
-    output_dir="./simscape_model",
-)
-```
-
-### GUI Editor
-
-Launch the interactive character editor:
-
-```bash
-python -m humanoid_character_builder.gui
-```
-
-Or programmatically:
-
-```python
-from humanoid_character_builder.gui import CharacterEditorGUI
-
-editor = CharacterEditorGUI()
-editor.show()
-```
-
-## Troubleshooting
-
-### URDF Validation Errors
-
-```python
-from humanoid_character_builder import CharacterBuilder
-from humanoid_character_builder.validation import validate_urdf
-
-builder = CharacterBuilder()
-params = BodyParameters(height_m=1.75, mass_kg=75.0)
-urdf_xml = builder.generate_urdf(params)
-
-# Validate
-errors = validate_urdf(urdf_xml)
-if errors:
-    print("Validation errors:", errors)
-```
-
-### Mesh Generation Issues
-
 ```python
 from humanoid_character_builder import CharacterBuilder, BodyParameters
 from humanoid_character_builder.generators import MeshGeneratorBackend
@@ -255,6 +189,18 @@ from humanoid_character_builder.generators import MeshGeneratorBackend
 builder = CharacterBuilder(mesh_backend=MeshGeneratorBackend.PRIMITIVE)
 params = BodyParameters(height_m=1.75)
 result = builder.build(params, generate_meshes=True)
+```
+
+## CLI Usage
+
+The Character Builder includes a command-line interface for quick generation without writing Python code:
+
+```bash
+# List available presets
+python -m src.shared.python.humanoid_character_builder presets list
+
+# Build a character using a preset
+python -m src.shared.python.humanoid_character_builder build --preset athletic --output my_character.urdf
 ```
 
 ## API Reference

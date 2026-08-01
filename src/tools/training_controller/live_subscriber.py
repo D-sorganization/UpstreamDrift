@@ -25,7 +25,6 @@ from src.shared.python.training.persistence import training_metric_from_dict
 from src.shared.python.training.metrics import TrainingMetric
 from src.shared.python.training.runtime.progress_sinks import training_channel_for
 
-
 __all__ = [
     "MetricCallback",
     "StatusCallback",

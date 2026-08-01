@@ -24,7 +24,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engi
 # A named 2-DOF planar double pendulum under gravity.
 _MJCF = """
 <mujoco model="double_pendulum_test">
-  <option gravity="0 0 -9.81"/>
+  <option gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="upper" pos="0 0 0">
       <joint name="j1" type="hinge" axis="0 1 0"/>

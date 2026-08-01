@@ -244,10 +244,10 @@ class TestCentroidalMPC:
         """A truly gravity-cancelling force leaves linear momentum unchanged.
 
         This was red on main with a 3.35e-5 residual in z (#8038). The dynamics
-        were correct: the test hardcoded `9.81` while `CentroidalMPC` uses the
+        were correct: the test hardcoded `9.80665` while `CentroidalMPC` uses the
         shared `GRAVITY` constant (9.80665), so the applied force overshot by
         `mass * 0.00335 N` and the Euler step integrated the difference:
-        `(9.81 - 9.80665) * dt = 3.35e-5`. Using the same constant as the model
+        `(9.80665 - 9.80665) * dt = 3.35e-5`. Using the same constant as the model
         makes the cancellation exact rather than approximate.
         """
         cmpc = CentroidalMPC(fake_engine, horizon=2, dt=0.01, n_contacts=2)

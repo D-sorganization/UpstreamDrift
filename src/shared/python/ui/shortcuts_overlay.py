@@ -9,7 +9,7 @@ Displays a modal overlay showing all available keyboard shortcuts
 when the user presses Ctrl+? or F1.
 
 Usage:
-    from shared.python.ui.shortcuts_overlay import ShortcutsOverlay
+    from src.shared.python.ui.shortcuts_overlay import ShortcutsOverlay
 
     # Create and show
     overlay = ShortcutsOverlay(parent_window)

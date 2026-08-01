@@ -83,7 +83,7 @@ class SimOptions:
             ``0 < dt <= t_final``.
         integrator: Integrator scheme. Only ``"rk4"`` is implemented.
         gravity: World gravity vector (m/s^2). ``None`` -> Pinocchio
-            default (``[0, 0, -9.81]``). Pass ``np.zeros(3)`` for the
+            default (``[0, 0, -9.80665]``). Pass ``np.zeros(3)`` for the
             energy-conservation test.
         urdf_path: Override the cached URDF location. ``None`` uses the
             packaged ``golfer.urdf``.

@@ -15,7 +15,6 @@ import src.api.routes.chat_ws as api_chat_ws
 import src.shared.python.chat.router_factory as shared_router_factory
 import src.shared.python.chat.websocket_protocol as shared_protocol
 
-
 pytestmark = [pytest.mark.anyio, pytest.mark.unit]
 
 _Entrypoint = Callable[[Any, str], Awaitable[None]]

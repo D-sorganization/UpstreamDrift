@@ -122,7 +122,9 @@ class AerodynamicsEngine:
             drag = self._drag.calculate(rel_velocity, self._current_air_density)
 
         if self.config.is_magnus_active():
-            magnus = self._lift.calculate(rel_velocity, spin, self._current_air_density)
+            magnus = self._magnus.calculate(
+                rel_velocity, spin, self._current_air_density
+            )
 
         total = drag + magnus
 

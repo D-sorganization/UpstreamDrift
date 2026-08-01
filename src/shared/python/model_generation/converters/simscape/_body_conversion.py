@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import math
 
-from model_generation.converters.simscape.mdl_parser import (
+from src.shared.python.model_generation.converters.simscape.mdl_parser import (
     SimscapeBlock,
     SimscapeBlockType,
 )
-from model_generation.core.types import (
+from src.shared.python.model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,

@@ -40,7 +40,6 @@ from src.tools.training_controller.view_model import (
     ResourceSnapshot,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

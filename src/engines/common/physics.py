@@ -39,7 +39,7 @@ from src.shared.python.core.physics_constants import (
 # ─── Physical Constants ────────────────────────────────────────────────
 # Single source of truth for gravity magnitude (#6638 F5): both the ISA model
 # and the gravity vector now use the canonical GRAVITY_FLOAT (== GRAVITY_M_S2,
-# 9.80665), eliminating the previous ~0.05 m/s^2 drift from a local 9.81.
+# 9.80665), eliminating the previous ~0.05 m/s^2 drift from a local 9.80665.
 STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
 GRAVITY_APPROX: float = GRAVITY_FLOAT  # m/s² — alias for backward compat
 GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -STANDARD_GRAVITY])
@@ -414,7 +414,7 @@ class BallPhysics:
         Args:
             ball: Ball properties
             air: Air properties
-            gravity: Gravity vector [m/s²] (default: [0, 0, -9.81])
+            gravity: Gravity vector [m/s²] (default: [0, 0, -9.80665])
         """
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)

@@ -139,4 +139,3 @@ jobs:
         with:
           name: cross-engine-leaderboard
           path: motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
-          if-no-files-found: ignore

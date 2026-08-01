@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # ── Ensure shared/python (Tools/src/shared/python) is on sys.path ──────
 # signal_toolkit needs two path entries:
 #   1. shared/python   — so `import signal_toolkit` works
-#   2. src/            — so `from shared.python.safe_eval import ...` works
+#   2. src/            — so `from src.shared.python.safe_eval import ...` works
 #                        (signal_toolkit uses this internally)
 _this_file = Path(__file__).resolve()
 

@@ -21,7 +21,6 @@ from src.shared.python.signal_toolkit.calculus import (
 )
 from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 
-
 pytestmark = pytest.mark.unit
 
 

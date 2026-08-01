@@ -1,1 +1,1 @@
-"""Unit tests for shared python modules."""
+# Tests for shared python utilities

@@ -16,7 +16,7 @@ The workflow engine ensures that users can complete complex analyses
 without expert knowledge, while learning along the way.
 
 Example:
-    >>> from shared.python.ai.workflow_engine import WorkflowEngine, Workflow
+    >>> from src.shared.python.ai.workflow_engine import WorkflowEngine, Workflow
     >>> engine = WorkflowEngine(tool_registry)
     >>> result = engine.execute_workflow("first_analysis", context)
 """
@@ -535,7 +535,15 @@ class WorkflowEngine:
                     execution.step_results.append(result)
                     return self._handle_failure(execution, step, result)
             except (RuntimeError, ValueError, OSError) as e:
-                logger.warning("Validation failed for step %s: %s", step.id, e)
+                logger.warning("Validation exception for step %s: %s", step.id, e)
+                result = StepResult(
+                    step_id=step.id,
+                    status=StepStatus.FAILED,
+                    error=f"Validation exception: {e}",
+                    duration=time.perf_counter() - start_time,
+                )
+                execution.step_results.append(result)
+                return self._handle_failure(execution, step, result)
         return None
 
     def _finalize_step_success(
@@ -602,6 +610,16 @@ class WorkflowEngine:
             result.status = StepStatus.SKIPPED
             execution.current_step_index += 1
             logger.warning("Skipped failed step: %s", step.id)
+
+        workflow = self.get_workflow(execution.workflow_id)
+        if (
+            workflow
+            and execution.current_step_index >= len(workflow.steps)
+            and execution.status == StepStatus.RUNNING
+        ):
+            execution.status = StepStatus.FAILED
+            logger.error("Workflow failed at final step: %s", execution.workflow_id)
+
         # For RETRY, ASK_USER, FALLBACK - return result for caller to handle
 
         return result

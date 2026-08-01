@@ -33,7 +33,7 @@ except ImportError:
 # Import color scheme from unified theme system
 # This ensures consistent colors across all visualizations
 try:
-    from shared.python.theme.colors import CHART_COLORS, DEFAULT_COLORS
+    from src.shared.python.theme.colors import CHART_COLORS, DEFAULT_COLORS
 except ImportError:
     # Fallback for when theme module is not available
     DEFAULT_COLORS = {

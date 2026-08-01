@@ -62,7 +62,7 @@ class TestSimOptions:
         assert opts.simulation_time_s == pytest.approx(0.3)
         assert opts.sample_rate_hz == pytest.approx(1000.0)
         assert opts.time_step_s == pytest.approx(1.0e-3)
-        assert opts.gravity == (0.0, 0.0, -9.81)
+        assert opts.gravity == (0.0, 0.0, -9.80665)
         assert opts.urdf_path is None
         assert opts.grip_body_name == "club_grip"
         assert opts.clubhead_body_name == "clubhead"

@@ -13,9 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import defusedxml.ElementTree as DefusedET
-from model_generation.canonical_model import CanonicalModel
-from model_generation.converters.urdf_parser import ParsedModel
-from model_generation.core.types import (
+from src.shared.python.model_generation.canonical_model import CanonicalModel
+from src.shared.python.model_generation.converters.urdf_parser import ParsedModel
+from src.shared.python.model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,

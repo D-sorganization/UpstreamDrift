@@ -61,12 +61,12 @@ class TestIntegratorConfig:
         config = create_integrator_config(dt=0.01, max_steps=500)
         assert config is not None
 
-    def test_fallback_returns_dict(self, force_fallback: None) -> None:
-        """Forced fallback returns a dict with the expected key/values."""
+    def test_fallback_returns_dataclass(self, force_fallback: None) -> None:
+        """Forced fallback returns a dataclass with the expected attributes."""
         config = create_integrator_config(dt=0.005, max_steps=1000)
-        assert isinstance(config, dict)
-        assert config["dt"] == 0.005
-        assert config["max_steps"] == 1000
+        assert hasattr(config, "dt")
+        assert config.dt == 0.005
+        assert config.max_steps == 1000
 
 
 class TestContactParameters:
@@ -82,12 +82,12 @@ class TestContactParameters:
         params = create_contact_parameters(cor=0.6, friction=0.3)
         assert params is not None
 
-    def test_fallback_returns_dict(self, force_fallback: None) -> None:
-        """Forced fallback returns a dict with the expected key/values."""
+    def test_fallback_returns_dataclass(self, force_fallback: None) -> None:
+        """Forced fallback returns a dataclass with the expected attributes."""
         params = create_contact_parameters(cor=0.75, friction=0.2)
-        assert isinstance(params, dict)
-        assert params["cor"] == 0.75
-        assert params["friction"] == 0.2
+        assert hasattr(params, "cor")
+        assert params.cor == 0.75
+        assert params.friction == 0.2
 
 
 class TestAirPropertiesPreconditions:
@@ -136,21 +136,13 @@ class TestFallbackMath:
     def test_ball_fallback_area_is_pi_r_squared(self, force_fallback: None) -> None:
         radius = 0.025
         props = create_ball_properties(mass=0.05, radius=radius)
-        assert isinstance(props, dict)
-        assert set(props) == {
-            "mass",
-            "radius",
-            "area",
-            "drag_coefficient",
-            "spin_decay_rate",
-        }
-        assert props["area"] == pytest.approx(math.pi * radius**2)
+        assert hasattr(props, "area")
+        assert props.area == pytest.approx(math.pi * radius**2)
 
-    def test_air_fallback_dict_shape(self, force_fallback: None) -> None:
+    def test_air_fallback_shape(self, force_fallback: None) -> None:
         props = create_air_properties(density=1.2, viscosity=2e-5, temperature=300.0)
-        assert isinstance(props, dict)
-        assert set(props) == {"density", "viscosity", "temperature", "pressure"}
-        assert props["density"] == 1.2
+        assert hasattr(props, "density")
+        assert props.density == 1.2
 
 
 class TestKernelDiagnostics:

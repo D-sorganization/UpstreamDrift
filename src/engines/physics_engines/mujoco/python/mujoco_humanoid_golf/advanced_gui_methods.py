@@ -132,8 +132,8 @@ class AdvancedGuiMethodsMixin:
         from PyQt6 import QtWidgets
 
         try:
-            from shared.python.plotting import GolfSwingPlotter
-            from shared.python.validation_pkg.statistical_analysis import (
+            from src.shared.python.plotting import GolfSwingPlotter
+            from src.shared.python.validation_pkg.statistical_analysis import (
                 StatisticalAnalyzer,
             )
         except ImportError:
@@ -375,7 +375,7 @@ class AdvancedGuiMethodsMixin:
         layout.addWidget(canvas)
 
         try:
-            from shared.python.biomechanics.kinematic_sequence import (
+            from src.shared.python.biomechanics.kinematic_sequence import (
                 KinematicSequenceAnalyzer,
             )
 

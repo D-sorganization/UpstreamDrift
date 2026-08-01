@@ -12,10 +12,17 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from movement_optimizer.models import BodyModel, make_bench_press_config, make_squat_config
+from movement_optimizer.models import (
+    BodyModel,
+    make_bench_press_config,
+    make_squat_config,
+)
 from movement_optimizer.trajectory import TrajectoryOptimizer
 from movement_optimizer.trajectory.optimizer_bench import compute_bench_bar_cost
-from movement_optimizer.trajectory.optimizer_spline import build_splines, eval_trajectory
+from movement_optimizer.trajectory.optimizer_spline import (
+    build_splines,
+    eval_trajectory,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures

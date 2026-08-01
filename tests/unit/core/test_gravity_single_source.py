@@ -1,6 +1,6 @@
 """Regression test for the single gravity source of truth (issue #6638 F5).
 
-Previously ``constants.GRAVITY = 9.81`` drifted ~0.05 m/s^2 from the canonical
+Previously ``constants.GRAVITY = 9.80665`` drifted ~0.05 m/s^2 from the canonical
 ``GRAVITY_M_S2`` (~9.80665), so cross-engine results diverged depending on which
 symbol a call site happened to import. All gravity magnitudes must now resolve
 to the single canonical value.
@@ -20,9 +20,9 @@ def test_constants_gravity_matches_canonical() -> None:
 
     assert pytest.approx(float(GRAVITY_M_S2)) == GRAVITY
     assert pytest.approx(GRAVITY_FLOAT) == GRAVITY
-    # Must be NIST standard gravity, not the 9.81 approximation.
+    # Must be NIST standard gravity, not the 9.80665 approximation.
     assert pytest.approx(9.80665, abs=1e-5) == GRAVITY
-    assert pytest.approx(9.81, abs=1e-6) != GRAVITY
+    assert pytest.approx(9.80665, abs=1e-6) != GRAVITY
 
 
 def test_common_physics_gravity_is_consistent() -> None:

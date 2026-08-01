@@ -46,7 +46,8 @@ def test_spacemouse_input() -> None:
     """Test SpaceMouseInput."""
     mouse = SpaceMouseInput(device_index=0)
     assert not mouse.is_connected
-    assert not mouse.connect()
+    with pytest.raises(NotImplementedError, match="Hardware driver not implemented"):
+        mouse.connect()
     assert not mouse.is_connected
     with pytest.raises(StateError, match="not connected"):
         mouse.update()
@@ -59,7 +60,8 @@ def test_spacemouse_input() -> None:
 def test_vr_controller_input() -> None:
     """Test VRControllerInput."""
     vr = VRControllerInput(hand="right")
-    assert not vr.connect()
+    with pytest.raises(NotImplementedError, match="Hardware driver not implemented"):
+        vr.connect()
     assert not vr.is_connected
     with pytest.raises(StateError, match="not connected"):
         vr.update()
@@ -72,7 +74,8 @@ def test_vr_controller_input() -> None:
 def test_haptic_device_input() -> None:
     """Test HapticDeviceInput."""
     haptic = HapticDeviceInput()
-    assert not haptic.connect()
+    with pytest.raises(NotImplementedError, match="Hardware driver not implemented"):
+        haptic.connect()
     assert not haptic.is_connected
     with pytest.raises(StateError, match="not connected"):
         haptic.update()

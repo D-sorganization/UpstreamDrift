@@ -271,9 +271,9 @@ class TestSurfaceMaterialValidation:
 
 class TestGravityOnSlope:
     def test_flat_slope_all_perpendicular(self) -> None:
-        g_par, g_perp = tr.compute_gravity_on_slope(0.0, gravity=9.81)
+        g_par, g_perp = tr.compute_gravity_on_slope(0.0, gravity=9.80665)
         assert g_par == pytest.approx(0.0, abs=1e-9)
-        assert g_perp == pytest.approx(9.81)
+        assert g_perp == pytest.approx(9.80665)
 
     def test_thirty_degree_components(self) -> None:
         g_par, g_perp = tr.compute_gravity_on_slope(30.0, gravity=10.0)

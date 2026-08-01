@@ -557,14 +557,6 @@ class TestMeshLoaderGLTF:
         assert mesh.skeleton.bone_count == 0
         assert mesh.has_skeleton is False
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "MeshLoader._load_gltf does not parse GLTF skins/joints, so "
-            "LoadedMesh.skeleton is always None. Tracked by #8057 -- remove this "
-            "marker when skin parsing lands."
-        ),
-    )
     def test_gltf_with_skeleton(self, tmp_path: Path) -> None:
         """Loading a skinned GLTF must populate LoadedMesh.skeleton.
 
@@ -573,25 +565,37 @@ class TestMeshLoaderGLTF:
         the build as soon as the feature is implemented, forcing the marker off.
         """
         gltf_file = tmp_path / "skinned.gltf"
-        gltf_file.write_text(
-            json.dumps(
+        gltf_content = {
+            "asset": {"version": "2.0"},
+            "scene": 0,
+            "scenes": [{"nodes": [0]}],
+            "nodes": [
+                {"name": "root", "children": [1], "skin": 0, "mesh": 0},
+                {"name": "joint_a", "children": [2]},
+                {"name": "joint_b"},
+            ],
+            "skins": [{"joints": [1, 2], "skeleton": 1}],
+            "meshes": [{"primitives": [{"attributes": {"POSITION": 0}}]}],
+            "accessors": [
                 {
-                    "asset": {"version": "2.0"},
-                    "scene": 0,
-                    "scenes": [{"nodes": [0]}],
-                    "nodes": [
-                        {"name": "root", "children": [1], "skin": 0, "mesh": 0},
-                        {"name": "joint_a", "children": [2]},
-                        {"name": "joint_b"},
-                    ],
-                    "skins": [{"joints": [1, 2], "skeleton": 1}],
-                    "meshes": [{"primitives": [{"attributes": {"POSITION": 0}}]}],
-                    "accessors": [],
-                    "bufferViews": [],
-                    "buffers": [],
+                    "bufferView": 0,
+                    "componentType": 5126,
+                    "count": 3,
+                    "type": "VEC3",
+                    "max": [1.0, 1.0, 0.0],
+                    "min": [0.0, 0.0, 0.0],
                 }
-            )
-        )
+            ],
+            "bufferViews": [{"buffer": 0, "byteOffset": 0, "byteLength": 36}],
+            "buffers": [{"uri": "skinned.bin", "byteLength": 36}],
+        }
+        gltf_file.write_text(json.dumps(gltf_content))
+
+        import struct
+
+        vertices = struct.pack("<9f", 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0)
+        bin_file = tmp_path / "skinned.bin"
+        bin_file.write_bytes(vertices)
 
         mesh = MeshLoader().load(str(gltf_file))
 

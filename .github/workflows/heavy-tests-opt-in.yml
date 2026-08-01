@@ -124,7 +124,7 @@ jobs:
           python -m ensurepip --upgrade || true
           if [ -f pyproject.toml ]; then pip install -e ".[dev,test]" || pip install -e .; fi
           python -m ensurepip --upgrade || true
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.lock ]; then pip install -r requirements.lock; fi
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "pydantic==2.12.5"
           python -m ensurepip --upgrade || true

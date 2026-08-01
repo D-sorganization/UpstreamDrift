@@ -26,8 +26,8 @@ from __future__ import annotations
 
 import logging
 
-from model_generation.core.constants import INTERMEDIATE_LINK_MASS
-from model_generation.core.types import (
+from src.shared.python.model_generation.core.constants import INTERMEDIATE_LINK_MASS
+from src.shared.python.model_generation.core.types import (
     Inertia,
     Joint,
     JointLimits,

@@ -6,6 +6,5 @@ for the optimized analytical RNE methods implemented in Phase 1.
 
 import unittest
 
-
 if __name__ == "__main__":
     unittest.main()

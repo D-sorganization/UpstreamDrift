@@ -9,7 +9,7 @@ import json
 import logging
 from typing import Any
 
-from model_generation.library._model_types import (
+from src.shared.python.model_generation.library._model_types import (
     LibraryConfig,
     ModelEntry,
     ModelFormat,

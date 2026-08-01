@@ -599,9 +599,8 @@ def _find_dataset_path(name: str) -> Path:
             detail="Dataset name must not contain glob metacharacters (* ? [ ])",
         )
     output_dir = _get_output_dir()
-    matches = sorted(
-        path for path in output_dir.rglob("*") if path.name == name and path.is_file()
-    )
+    collected, _ = _scan_dataset_files(output_dir, MAX_DATASET_LIST_SCAN)
+    matches = [path for path in collected if path.name == name]
     if not matches:
         raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
     if len(matches) > 1:

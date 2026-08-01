@@ -249,10 +249,10 @@ class TestForceVector:
         fv = ForceVector(
             origin=Vector3(x=0.0, y=1.0, z=0.0),
             direction=Vector3(x=0.0, y=-1.0, z=0.0),
-            magnitude=9.81,
+            magnitude=9.80665,
             force_type="gravity",
         )
-        assert fv.magnitude == 9.81
+        assert fv.magnitude == 9.80665
         assert fv.force_type == "gravity"
 
     def test_force_vector_endpoint(self) -> None:
@@ -272,11 +272,11 @@ class TestForceVector:
         fv = ForceVector(
             origin=Vector3(x=0.0, y=1.0, z=0.0),
             direction=Vector3(x=0.0, y=-1.0, z=0.0),
-            magnitude=9.81,
+            magnitude=9.80665,
             force_type="gravity",
         )
         d = fv.to_dict()
-        assert d["magnitude"] == 9.81
+        assert d["magnitude"] == 9.80665
         assert d["force_type"] == "gravity"
 
     def test_torque_vector(self) -> None:
@@ -453,7 +453,7 @@ class TestUnrealDataFrame:
                 ForceVector(
                     origin=Vector3.zero(),
                     direction=Vector3(x=0.0, y=-1.0, z=0.0),
-                    magnitude=9.81,
+                    magnitude=9.80665,
                     force_type="gravity",
                 ),
             ],

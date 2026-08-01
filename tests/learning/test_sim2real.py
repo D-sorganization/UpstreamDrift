@@ -13,7 +13,7 @@ class MockEngine:
         self._damping = np.ones(10) * 0.1
         self._friction = np.ones(10) * 0.5
         self._motor_strength = np.ones(10)
-        self._gravity = np.array([0, 0, -9.81])
+        self._gravity = np.array([0, 0, -9.80665])
         self._q = np.zeros(10)
         self._v = np.zeros(10)
 

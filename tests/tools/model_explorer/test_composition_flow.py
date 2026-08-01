@@ -104,8 +104,7 @@ def test_composed_model_exports_mjcf_preview() -> None:
 
 
 def test_export_refuses_validation_errors_without_force() -> None:
-    cyclic = _model(
-        """<robot name="bad">
+    cyclic = _model("""<robot name="bad">
           <link name="base"/>
           <link name="arm"/>
           <joint name="base_to_arm" type="fixed">
@@ -116,8 +115,7 @@ def test_export_refuses_validation_errors_without_force() -> None:
             <parent link="arm"/>
             <child link="base"/>
           </joint>
-        </robot>"""
-    )
+        </robot>""")
 
     with pytest.raises(CompositionFlowError, match="validation errors"):
         CompositionFlowController().export_model(cyclic, export_format="urdf")

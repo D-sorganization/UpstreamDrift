@@ -38,7 +38,7 @@ pytestmark = pytest.mark.integration
 _BALL_MASS_KG = 0.045  # golf ball
 _BALL_RADIUS_M = 0.02135
 _DROP_HEIGHT_M = 0.10  # release the ball 10 cm above the plane
-_GRAVITY = 9.81
+_GRAVITY = 9.80665
 
 # A penalty-based (MuJoCo) contact allows visible penetration; a rigid/
 # constraint model permits far less. Encoding the documented qualitative
