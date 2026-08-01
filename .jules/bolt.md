@@ -106,3 +106,7 @@
 ## 2023-10-27 - [Network Timeout CI Failure]
 **Learning:** Adding `http.lowSpeedLimit` and `http.lowSpeedTime` can cause git checkout to fail with `curl 28 Operation too slow` if the network temporarily drops below the threshold.
 **Action:** Remove these configurations to prevent artificial timeout failures.
+
+## 2023-10-27 - [Self-hosted Runner Git Config State]
+**Learning:** Self-hosted runners persist `~/.gitconfig` across jobs. If a previous job sets `git config --global http.lowSpeedLimit`, removing that line from the workflow YAML does not unset it on the runner, leading to persistent timeout failures.
+**Action:** When fixing bad global git config settings on persistent runners, explicitly override them (e.g. `http.lowSpeedLimit 0`) or use `--unset` instead of merely deleting the line.
