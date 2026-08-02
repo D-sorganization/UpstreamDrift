@@ -98,3 +98,6 @@
 ## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.vdot) in diff IK loops]
 **Learning:** `np.linalg.norm` has significant overhead for small, 6D twist error arrays evaluated within the core tight loop of iterative differential inverse kinematics (e.g., `pinocchio_golf/diff_ik.py`).
 **Action:** Replaced `np.linalg.norm(err)` with `math.sqrt(np.vdot(err, err))` to bypass array allocation and NumPy dispatch overhead, achieving a measured ~1.8x reduction in error norm calculation time.
+## 2024-05-24 - [Avoid np.linalg.norm for small static vectors]
+**Learning:** Appending long inline comments (e.g. `# ⚡ Bolt: ...`) to every modified line degrades code readability and explicitly violates the boundary "Don't sacrifice readability for micro-optimizations".
+**Action:** When implementing micro-optimizations, do not append repetitive or overly long inline comments that clutter the production code. Keep any context or explanations within the PR description or commit message instead.
