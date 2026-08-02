@@ -174,7 +174,7 @@ fix             ins all insert/pack seed 5330 distributiontemplate pdd1 \\
                     particles_in_region {gp.count}
 
 # ── Gravity + integrator ─────────────────────────────────────────────────────
-fix             grav all gravity 9.81 vector 0.0 0.0 -1.0
+fix             grav all gravity 9.80665 vector 0.0 0.0 -1.0
 fix             integ all nve/sphere
 
 # ── Timestep ─────────────────────────────────────────────────────────────────

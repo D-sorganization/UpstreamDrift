@@ -20,7 +20,7 @@ from __future__ import annotations
 #: Used as the default ``g`` parameter in physics engines and GUI panels.
 #: This is the conventional standard value, not the precise value at any
 #: particular latitude.
-GRAVITY_MSS: float = 9.81
+GRAVITY_MSS: float = 9.80665
 
 #: Standard acceleration of gravity (m/s²) — exact SI definition.
 #: Used for unit conversions (e.g. kgf → N) where the precise value matters.

@@ -26,8 +26,7 @@ def _load_module() -> ModuleType:
 
 def _write_coverage_xml(path: Path, body: str) -> None:
     path.write_text(
-        dedent(
-            f"""\
+        dedent(f"""\
             <?xml version="1.0" ?>
             <coverage version="7.0">
               <packages>
@@ -38,8 +37,7 @@ def _write_coverage_xml(path: Path, body: str) -> None:
                 </package>
               </packages>
             </coverage>
-            """
-        ).lstrip(),
+            """).lstrip(),
         encoding="utf-8",
     )
 

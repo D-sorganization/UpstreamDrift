@@ -112,7 +112,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          pip install -r requirements.txt
+          pip install -r requirements.lock
           python -m ensurepip --upgrade || true
           pip install ruff mypy pytest pytest-cov pip-audit bandit
 
@@ -295,7 +295,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          pip install -r requirements.txt
+          pip install -r requirements.lock
           python -m ensurepip --upgrade || true
           pip install ruff mypy pip-tools
 
@@ -333,9 +333,9 @@ jobs:
           echo "=== Running Dependency Fixes ==="
           CHANGES_BEFORE=$(git status --porcelain | wc -l)
 
-          # Generate lock file if requirements.txt exists
-          if [ -f requirements.txt ]; then
-            pip-compile requirements.txt -o requirements-lock.txt
+          # Generate lock file if requirements.lock exists
+          if [ -f requirements.lock ]; then
+            pip-compile requirements.lock -o requirements-lock.txt
           fi
 
           CHANGES_AFTER=$(git status --porcelain | wc -l)

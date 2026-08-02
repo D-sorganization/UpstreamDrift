@@ -90,10 +90,10 @@ def _make_trajectory(n_points: int = 10) -> list[TrajectoryPoint]:
     for i in range(n_points):
         t = i * 0.5
         x = 50.0 * t
-        z = max(0.0, 20.0 * t - 9.81 * t**2 / 2)
+        z = max(0.0, 20.0 * t - 9.80665 * t**2 / 2)
         pos = np.array([x, 0.0, z])
-        vel = np.array([50.0, 0.0, 20.0 - 9.81 * t])
-        acc = np.array([0.0, 0.0, -9.81])
+        vel = np.array([50.0, 0.0, 20.0 - 9.80665 * t])
+        acc = np.array([0.0, 0.0, -9.80665])
         points.append(
             TrajectoryPoint(
                 time=t,

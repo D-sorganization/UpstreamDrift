@@ -19,7 +19,6 @@ from src.shared.python.motion_pipeline.preprocessing.resample import resample
 
 from ._local_fixtures import make_keypoint_sequence, make_marker_trajectory
 
-
 _FINITE_COORD = st.floats(
     min_value=-100.0,
     max_value=100.0,

@@ -192,7 +192,7 @@ class TestForceAccumulator:
 
     def test_add_force_default_zero_torque(self) -> None:
         acc = ForceAccumulator(nv=2)
-        acc.add_force("g", np.array([0.0, 0.0, -9.81]))
+        acc.add_force("g", np.array([0.0, 0.0, -9.80665]))
         sources = acc.get_forces_by_source()
         assert "g" in sources
         np.testing.assert_array_equal(sources["g"].torque, np.zeros(3))

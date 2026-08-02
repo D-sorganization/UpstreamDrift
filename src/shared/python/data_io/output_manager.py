@@ -22,8 +22,8 @@ Implementation is split across submodules for maintainability (#2486):
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from concurrent.futures import Future
+from collections.abc import Callable, Iterator
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -74,7 +74,7 @@ class OutputManager:
     """
 
     @classmethod
-    def _get_io_executor(cls):
+    def _get_io_executor(cls) -> ThreadPoolExecutor:
         """Get or create the shared I/O executor."""
         return get_io_executor()
 
@@ -363,7 +363,7 @@ class OutputManager:
 
     # Kept for backward compatibility — thin delegation to _path_utils
     @staticmethod
-    def _fast_dir_scan(directory: Path, max_depth: int = 10):
+    def _fast_dir_scan(directory: Path, max_depth: int = 10) -> Iterator[Path]:
         """Fast directory scanning. Delegates to _path_utils.fast_dir_scan."""
         return fast_dir_scan(directory, max_depth)
 

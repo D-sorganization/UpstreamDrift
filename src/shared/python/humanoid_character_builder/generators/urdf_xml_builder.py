@@ -20,8 +20,8 @@ import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
 from humanoid_character_builder.generators.urdf_geometry import add_geometry_element
 
-from model_generation.builders.urdf_writer import URDFWriter
-from model_generation.core.types import (
+from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
+from src.shared.python.model_generation.core.types import (
     Geometry,
     Inertia,
     Joint,

@@ -51,7 +51,7 @@ def build_lower_body_xml(
     xml = f"""
     <mujoco model="lower_body_model">
         <compiler angle="degree" coordinate="local"/>
-        <option gravity="0 0 -9.81" timestep="0.005"/>
+        <option gravity="0 0 -9.80665" timestep="0.005"/>
         <size njmax="500" nconmax="100"/>
         <asset>
             <material name="matplane" reflectance="0.3" specular="1" shininess="1" rgba="0.8 0.9 0.8 1"/>

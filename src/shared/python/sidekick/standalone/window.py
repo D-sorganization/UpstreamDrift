@@ -1,0 +1,396 @@
+"""StandaloneSidekickWindow — standalone QMainWindow shell — T2 (#5980).
+
+Hosts AIAssistantPanel and UnifiedToolsSidebar in a two-pane splitter
+layout.  Profile ``chat-first`` puts chat at 60 % left, sidebar at 40 %
+right.  Profile ``calc-first`` reverses the ratio.
+
+If a panel fails to construct (e.g. chat service unreachable), an inline
+placeholder label is shown instead of crashing.
+
+The module depends only on ``sidekick.*`` and
+``ai.gui.assistant_panel.AIAssistantPanel`` — never on ``src.launchers.*``.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QCloseEvent, QShowEvent
+from PyQt6.QtWidgets import (
+    QInputDialog,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QSplitter,
+    QWidget,
+)
+from sidekick.persistence.schema import ProfilePayload
+
+logger = logging.getLogger(__name__)
+
+__all__ = ["StandaloneSidekickConfig", "StandaloneSidekickWindow"]
+
+# Profile payload keys (DRY: declared once, used by save + load).
+_PROFILE_KEY = "profile"
+_THEME_KEY = "theme_name"
+# Default profile name used by the menu slots when prompting is unavailable.
+_DEFAULT_PROFILE_NAME = "default"
+
+_VALID_PROFILES = frozenset({"chat-first", "calc-first"})
+_PANEL_FALLBACK_ERRORS = (
+    ImportError,
+    RuntimeError,
+    AttributeError,
+    TypeError,
+    ValueError,
+)
+
+# Documented splitter ratio: primary pane gets this fraction of the total width.
+_PRIMARY_RATIO = 0.60
+
+
+@dataclass(frozen=True)
+class StandaloneSidekickConfig:
+    """Frozen configuration for StandaloneSidekickWindow.
+
+    Attributes:
+        profile: Layout profile (``'chat-first'`` or ``'calc-first'``).
+        theme_name: Optional theme name; ``None`` uses the default theme.
+        session_store: StandaloneSessionStore instance for profile persistence.
+        host_action_port: Optional HostActionPort for T5 embedded/standalone
+            round-trip; ``None`` disables the integration.
+    """
+
+    profile: str
+    theme_name: str | None
+    session_store: Any
+    host_action_port: Any = field(default=None)
+
+    def __post_init__(self) -> None:
+        if self.profile not in _VALID_PROFILES:
+            raise ValueError(
+                f"Invalid profile {self.profile!r}. "
+                f"Allowed values: {sorted(_VALID_PROFILES)}"
+            )
+
+
+class StandaloneSidekickWindow(QMainWindow):
+    """Standalone Sidekick application window.
+
+    Args:
+        config: Frozen window configuration.
+
+    Postconditions after ``__init__``:
+        ``self.windowTitle() == "Sidekick"``
+    """
+
+    def __init__(self, config: StandaloneSidekickConfig) -> None:
+        if not isinstance(config, StandaloneSidekickConfig):
+            raise TypeError(
+                f"config must be StandaloneSidekickConfig, "
+                f"got {type(config).__name__!r}"
+            )
+        super().__init__()
+        self._config = config
+        self._layout_applied = False
+
+        self._build_central_widget()
+        self._install_menu_bar()
+        self.setWindowTitle("Sidekick")
+
+    # ---- public accessors ------------------------------------------------
+
+    def splitter_handle_positions(self) -> list[int]:
+        """Return splitter panel widths ``[left_px, right_px]``.
+
+        Used by tests to verify the layout ratio.
+        """
+        return list(self._splitter.sizes())
+
+    def panel_for(self, profile: str) -> QWidget:
+        """Return the primary content widget for the given profile name.
+
+        Raises:
+            ValueError: If ``profile`` is not a known profile name.
+        """
+        if profile == "chat-first":
+            return self._chat_panel
+        if profile == "calc-first":
+            return self._sidebar_panel
+        raise ValueError(f"Unknown profile: {profile!r}")
+
+    def sidebar(self) -> QWidget:
+        """Return the sidebar (UnifiedToolsSidebar or placeholder) widget."""
+        return self._sidebar_panel
+
+    def active_profile(self) -> str:
+        """Return the layout profile currently applied to the window."""
+        return self._config.profile
+
+    def active_theme(self) -> str | None:
+        """Return the theme name currently applied (``None`` if default)."""
+        return self._config.theme_name
+
+    def host_action_port(self) -> Any:
+        """Return the injected ``HostActionPort`` (or ``None``).
+
+        Exposes the configured port for embedded/standalone round-trip
+        callers (T5) so the value is consumed rather than dead state.
+        """
+        return self._config.host_action_port
+
+    # ---- Profile persistence (#7068) -------------------------------------
+
+    def save_profile_to_store(self, name: str = _DEFAULT_PROFILE_NAME) -> None:
+        """Persist the current layout + theme under profile *name*.
+
+        Precondition: the configured ``session_store`` exposes
+        ``save_profile(name, ProfilePayload)``.
+
+        Raises:
+            RuntimeError: if no capable session store is configured.
+        """
+        store = self._config.session_store
+        if store is None or not hasattr(store, "save_profile"):
+            raise RuntimeError("no session store configured for save_profile")
+        payload = ProfilePayload(
+            data={
+                _PROFILE_KEY: self._config.profile,
+                _THEME_KEY: self._config.theme_name,
+            }
+        )
+        store.save_profile(name, payload)
+        logger.info("Saved standalone profile %r", name)
+
+    def load_profile_from_store(self, name: str = _DEFAULT_PROFILE_NAME) -> None:
+        """Restore the layout + theme stored under profile *name*.
+
+        Raises:
+            KeyError: if *name* is not present in the store.
+            RuntimeError: if no capable session store is configured.
+        """
+        store = self._config.session_store
+        if store is None or not hasattr(store, "load_profile"):
+            raise RuntimeError("no session store configured for load_profile")
+        payload = store.load_profile(name)  # may raise KeyError
+        data = payload.data if isinstance(payload, ProfilePayload) else dict(payload)
+        theme_name = data.get(_THEME_KEY)
+        profile = data.get(_PROFILE_KEY, self._config.profile)
+        self._apply_theme(theme_name)
+        # Fold the restored theme into the config first; _switch_profile
+        # rebuilds the config carrying whatever theme_name is current, so
+        # this single update covers both the changed- and unchanged-profile
+        # cases (DRY — no duplicated config rebuild).
+        self._config = StandaloneSidekickConfig(
+            profile=self._config.profile,
+            theme_name=theme_name,
+            session_store=self._config.session_store,
+            host_action_port=self._config.host_action_port,
+        )
+        if profile in _VALID_PROFILES and profile != self._config.profile:
+            self._switch_profile(profile)
+        logger.info("Loaded standalone profile %r", name)
+
+    # ---- Qt overrides ----------------------------------------------------
+
+    def showEvent(self, event: QShowEvent | None) -> None:
+        super().showEvent(event)
+        if not self._layout_applied:
+            self._apply_ratio()
+            self._layout_applied = True
+
+    def closeEvent(self, event: QCloseEvent | None) -> None:
+        self._flush_session()
+        super().closeEvent(event)
+
+    # ---- internals -------------------------------------------------------
+
+    def _build_central_widget(self) -> None:
+        self._chat_panel = self._create_chat_panel()
+        self._sidebar_panel = self._create_sidebar_panel()
+
+        self._splitter = QSplitter(Qt.Orientation.Horizontal)
+        if self._config.profile == "chat-first":
+            self._splitter.addWidget(self._chat_panel)
+            self._splitter.addWidget(self._sidebar_panel)
+        else:  # calc-first
+            self._splitter.addWidget(self._sidebar_panel)
+            self._splitter.addWidget(self._chat_panel)
+
+        # Initial sizes based on the nominal 1280 px width so that
+        # splitter_handle_positions() is meaningful before the first showEvent.
+        self._set_splitter_sizes(1280)
+        self.setCentralWidget(self._splitter)
+
+    def _apply_ratio(self) -> None:
+        """Recalculate splitter sizes based on the actual window width."""
+        total = self._splitter.width()
+        if total > 0:
+            self._set_splitter_sizes(total)
+
+    def _set_splitter_sizes(self, total: int) -> None:
+        left = int(total * _PRIMARY_RATIO)
+        right = total - left
+        self._splitter.setSizes([left, right])
+
+    def _create_chat_panel(self) -> QWidget:
+        try:
+            from ai.gui.assistant_panel import AIAssistantPanel
+
+            return _require_widget(AIAssistantPanel(), "AIAssistantPanel")
+        except _PANEL_FALLBACK_ERRORS:
+            logger.exception("Could not construct AIAssistantPanel; using placeholder")
+            return _placeholder("Chat (unavailable)")
+
+    def _create_sidebar_panel(self) -> QWidget:
+        try:
+            from sidekick.ui.tools_sidebar.sidebar import UnifiedToolsSidebar
+
+            return _require_widget(UnifiedToolsSidebar(), "UnifiedToolsSidebar")
+        except _PANEL_FALLBACK_ERRORS:
+            logger.exception(
+                "Could not construct UnifiedToolsSidebar; using placeholder"
+            )
+            return _placeholder("Sidebar (unavailable)")
+
+    def _install_menu_bar(self) -> None:
+        bar = self.menuBar()
+        assert bar is not None
+
+        file_menu = bar.addMenu("&File")
+        assert file_menu is not None
+        file_menu.addAction(_action("Save profile", self, self._on_save_profile))
+        file_menu.addAction(_action("Load profile", self, self._on_load_profile))
+        file_menu.addSeparator()
+        file_menu.addAction(_action("Quit", self, self.close))
+
+        view_menu = bar.addMenu("&View")
+        assert view_menu is not None
+        view_menu.addAction(
+            _action(
+                "Chat-first layout", self, lambda: self._switch_profile("chat-first")
+            )
+        )
+        view_menu.addAction(
+            _action(
+                "Calc-first layout", self, lambda: self._switch_profile("calc-first")
+            )
+        )
+        view_menu.addSeparator()
+        view_menu.addAction(_action("Toggle sidebar", self, self._toggle_sidebar))
+
+        help_menu = bar.addMenu("&Help")
+        assert help_menu is not None
+        help_menu.addAction(_action("About Sidekick", self, self._on_about))
+
+    def _flush_session(self) -> None:
+        try:
+            store = self._config.session_store
+            if store is not None and hasattr(store, "set_last_profile"):
+                store.set_last_profile(self._config.profile)
+        except (OSError, RuntimeError, TypeError, ValueError):
+            logger.exception("Failed to flush session on close")
+
+    def _on_save_profile(self) -> None:
+        name = _prompt_profile_name(self, "Save profile", "Profile name:")
+        if not name:
+            return
+        try:
+            self.save_profile_to_store(name)
+        except (RuntimeError, OSError, ValueError, TypeError):
+            logger.exception("Save profile failed")
+            QMessageBox.warning(self, "Save profile", "Could not save the profile.")
+
+    def _on_load_profile(self) -> None:
+        name = _prompt_profile_name(self, "Load profile", "Profile name:")
+        if not name:
+            return
+        try:
+            self.load_profile_from_store(name)
+        except KeyError:
+            QMessageBox.warning(self, "Load profile", f"No profile named {name!r}.")
+        except (RuntimeError, OSError, ValueError, TypeError):
+            logger.exception("Load profile failed")
+            QMessageBox.warning(self, "Load profile", "Could not load the profile.")
+
+    def _apply_theme(self, theme_name: str | None) -> None:
+        """Apply *theme_name* to the running application, if a theme manager
+        is available. Headless-safe: a missing theme backend is a no-op."""
+        if not theme_name:
+            return
+        try:
+            from shared.python.theme.integration import get_theme_manager
+
+            get_theme_manager().set_theme(theme_name)
+        except (ImportError, AttributeError, RuntimeError, ValueError):
+            logger.debug("Theme backend unavailable; skipping apply of %r", theme_name)
+
+    def _switch_profile(self, profile: str) -> None:
+        if profile not in _VALID_PROFILES:
+            raise ValueError(f"Unknown profile: {profile!r}")
+
+        if profile == self._config.profile:
+            return
+
+        logger.info("Switching profile to %r", profile)
+
+        # Determine logical order based on profile
+        if profile == "chat-first":
+            primary = self._chat_panel
+            secondary = self._sidebar_panel
+        else:
+            primary = self._sidebar_panel
+            secondary = self._chat_panel
+
+        # Reorder widgets in the splitter
+        # QSplitter.insertWidget will move an existing widget to the new index
+        self._splitter.insertWidget(0, primary)
+        self._splitter.insertWidget(1, secondary)
+
+        # Re-apply the config to store new profile
+        self._config = StandaloneSidekickConfig(
+            profile=profile,
+            theme_name=self._config.theme_name,
+            session_store=self._config.session_store,
+            host_action_port=self._config.host_action_port,
+        )
+
+        # Update layout sizes based on new ratio logic
+        self._apply_ratio()
+
+    def _toggle_sidebar(self) -> None:
+        self._sidebar_panel.setVisible(not self._sidebar_panel.isVisible())
+
+    def _on_about(self) -> None:
+        QMessageBox.about(self, "About Sidekick", "Sidekick — standalone edition.")
+
+
+def _placeholder(label: str) -> QWidget:
+    w = QLabel(label)
+    w.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    return w
+
+
+def _require_widget(candidate: Any, component_name: str) -> QWidget:
+    if not isinstance(candidate, QWidget):
+        raise TypeError(f"{component_name} must construct a QWidget")
+    return candidate
+
+
+def _action(text: str, parent: QWidget, slot: Any) -> QAction:
+    act = QAction(text, parent)
+    act.triggered.connect(slot)
+    return act
+
+
+def _prompt_profile_name(parent: QWidget, title: str, label: str) -> str | None:
+    """Prompt for a profile name. Returns the trimmed name or ``None`` if the
+    user cancelled or entered only whitespace. Patched in headless tests."""
+    text, ok = QInputDialog.getText(parent, title, label)
+    if not ok:
+        return None
+    name = text.strip()
+    return name or None

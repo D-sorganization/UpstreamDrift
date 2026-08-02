@@ -243,7 +243,11 @@ class FileOperationsMixin:
             mass = getattr(body, "body_mass", None)  # BodyModel uses body_mass, not mass
             height = getattr(body, "height", None)
             export_to_excel(
-                r, path, exercise_name=exercise_name, body_mass_kg=mass, body_height_m=height
+                r,
+                path,
+                exercise_name=exercise_name,
+                body_mass_kg=mass,
+                body_height_m=height,
             )
             self.status_label.setText(f"Exported: {os.path.basename(path)}")
             QMessageBox.information(self, "Exported", f"Excel workbook saved to:\n{path}")

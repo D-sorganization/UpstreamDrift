@@ -1108,9 +1108,11 @@ class AnalysisOrchestrator:
             metadata={
                 "chart": "dashboard",
                 "panels": panels,
-                "message": "No data available"
-                if all(p["series"] == [] for p in panels)
-                else "",
+                "message": (
+                    "No data available"
+                    if all(p["series"] == [] for p in panels)
+                    else ""
+                ),
             },
         )
 

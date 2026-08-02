@@ -95,7 +95,7 @@ class VideoPosePipeline:
         """Load the specified pose estimator."""
         try:
             if self.config.estimator_type == "mediapipe":
-                from shared.python.pose_estimation.mediapipe_estimator import (
+                from src.shared.python.pose_estimation.mediapipe_estimator import (
                     MediaPipeEstimator,
                 )
 
@@ -105,7 +105,7 @@ class VideoPosePipeline:
                     enable_temporal_smoothing=self.config.enable_temporal_smoothing,
                 )
             elif self.config.estimator_type == "openpose":
-                from shared.python.pose_estimation.openpose_estimator import (
+                from src.shared.python.pose_estimation.openpose_estimator import (
                     OpenPoseEstimator,
                 )
 

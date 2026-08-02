@@ -27,7 +27,6 @@ from src.shared.python.motion_pipeline.sources.base import (
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
 from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 
-
 _SESSION_METADATA_FILENAMES = (
     "sessionMetadata.json",
     "session_metadata.json",

@@ -9,7 +9,7 @@ Provides a button that shows a loading spinner and disables interaction
 during async operations.
 
 Usage:
-    from shared.python.ui.loading_button import LoadingButton
+    from src.shared.python.ui.loading_button import LoadingButton
 
     btn = LoadingButton("Launch Model")
     btn.clicked.connect(on_click)

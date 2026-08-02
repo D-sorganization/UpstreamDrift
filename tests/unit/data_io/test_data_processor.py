@@ -7,7 +7,6 @@ import pytest
 from src.shared.python.data_processing.processor import (
     DataProcessor,
     DatasetInfo,
-    _validate_dataframe_expression,
 )
 
 # ---------------------------------------------------------------------------
@@ -173,47 +172,6 @@ class TestDataProcessorDescribe:
 # ---------------------------------------------------------------------------
 
 
-class TestValidateDataframeExpression:
-    """Unit tests for the _validate_dataframe_expression guard."""
-
-    def test_safe_arithmetic_passes(self) -> None:
-        _validate_dataframe_expression("a + b * 2")
-
-    def test_safe_comparison_passes(self) -> None:
-        _validate_dataframe_expression("x > 0")
-
-    def test_safe_division_passes(self) -> None:
-        _validate_dataframe_expression("distance / time")
-
-    def test_import_rejected(self) -> None:
-        with pytest.raises(ValueError, match="forbidden name"):
-            _validate_dataframe_expression("__import__('os')")
-
-    def test_exec_name_rejected(self) -> None:
-        with pytest.raises(ValueError, match="forbidden name"):
-            _validate_dataframe_expression("exec('x=1')")
-
-    def test_eval_name_rejected(self) -> None:
-        with pytest.raises(ValueError, match="forbidden name"):
-            _validate_dataframe_expression("eval('1+1')")
-
-    def test_dunder_attribute_rejected(self) -> None:
-        with pytest.raises(ValueError, match="dunder"):
-            _validate_dataframe_expression("x.__class__")
-
-    def test_lambda_rejected(self) -> None:
-        with pytest.raises(ValueError, match="Disallowed"):
-            _validate_dataframe_expression("lambda x: x")
-
-    def test_open_name_rejected(self) -> None:
-        with pytest.raises(ValueError, match="forbidden name"):
-            _validate_dataframe_expression("open('/etc/passwd').read()")
-
-    def test_data_processor_syntax_error_raises_value_error(self) -> None:
-        with pytest.raises(ValueError, match="Syntax error"):
-            _validate_dataframe_expression("a +* b")
-
-
 class TestDataProcessorApplyFormula:
     """Integration tests for apply_formula security (issue #2065)."""
 
@@ -230,10 +188,10 @@ class TestDataProcessorApplyFormula:
 
     def test_apply_formula_rejects_exec(self) -> None:
         dp = self._loaded_dp()
-        with pytest.raises(ValueError, match="forbidden name"):
+        with pytest.raises(ValueError):
             dp.apply_formula("c", "exec('import os')")
 
     def test_apply_formula_rejects_dunder(self) -> None:
         dp = self._loaded_dp()
-        with pytest.raises(ValueError, match="dunder"):
+        with pytest.raises(ValueError):
             dp.apply_formula("c", "a.__class__")

@@ -43,6 +43,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.config.configuration_manager import ConfigurationManager
+from src.shared.python.config.standard_models import StandardModelManager
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.interfaces import RecorderInterface
 from src.shared.python.logging_pkg.logging_config import (
@@ -226,6 +227,20 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
         # State
         self.config_manager = ConfigurationManager(self.config_path)
         self.config = self.config_manager.load()
+
+        # Ensure default engine/model roots (Issue #7941)
+        if "engine_root" not in self.config:
+            self.config["engine_root"] = str(self.repo_path)
+        if "model_root" not in self.config:
+            self.config["model_root"] = str(PROJECT_ROOT / "src" / "shared" / "urdf")
+        self.config_manager.save(self.config)
+
+        # Ensure standard humanoid is downloaded
+        try:
+            StandardModelManager().get_standard_humanoid_path()
+        except Exception as e:
+            logger.error(f"Failed to download or locate standard humanoid: {e}")
+
         self.simulation_thread: ProcessWorker | None = None
         self.recorder = RemoteRecorder()
 

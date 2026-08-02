@@ -107,12 +107,12 @@ class TestDatasetRecord:
             time=1.5,
             positions=np.array([1.0]),
             velocities=np.array([0.5]),
-            accelerations=np.array([-9.81]),
+            accelerations=np.array([-9.80665]),
             forces=np.array([10.0]),
             metadata={"engine": "MuJoCo"},
         )
         assert rec.time == 1.5
-        np.testing.assert_array_equal(rec.accelerations, np.array([-9.81]))
+        np.testing.assert_array_equal(rec.accelerations, np.array([-9.80665]))
         assert rec.metadata["engine"] == "MuJoCo"
 
 
@@ -131,7 +131,7 @@ class TestDatasetExporter:
                 time=t,
                 q=np.array([0.1 * i, -0.05 * i]),
                 v=np.array([1.0 - 0.1 * i, 0.5 + 0.05 * i]),
-                qacc=np.array([-9.81 * np.sin(0.1 * i), -4.9 * np.sin(0.05 * i)]),
+                qacc=np.array([-9.80665 * np.sin(0.1 * i), -4.9 * np.sin(0.05 * i)]),
             )
         return exporter
 

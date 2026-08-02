@@ -24,7 +24,9 @@ from movement_optimizer.trajectory import (
     build_splines,
     eval_trajectory,
 )
-from movement_optimizer.trajectory.optimizer_constraints import joint_limit_constraint_values
+from movement_optimizer.trajectory.optimizer_constraints import (
+    joint_limit_constraint_values,
+)
 from movement_optimizer.trajectory.optimizer_cost import (
     compute_torque_cost,
     compute_torque_rate_cost,

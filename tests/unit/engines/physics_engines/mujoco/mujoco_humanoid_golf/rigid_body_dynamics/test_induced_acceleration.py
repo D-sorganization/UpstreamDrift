@@ -19,7 +19,7 @@ def mock_model():
     model.nu = 2
     model.nbody = 10
     model.opt = MagicMock()
-    model.opt.gravity = np.array([0.0, 0.0, -9.81])
+    model.opt.gravity = np.array([0.0, 0.0, -9.80665])
     return model
 
 
@@ -127,7 +127,7 @@ def test_compute_task_space_components(
     assert result is not None
     assert "gravity" in result
     assert "total" in result
-    # Proper acceleration [10, 20, 30] plus gravity [0, 0, -9.81].
+    # Proper acceleration [10, 20, 30] plus gravity [0, 0, -9.80665].
     np.testing.assert_allclose(result["total"], np.array([10.0, 20.0, 20.19]))
     # The four components must reconstruct the total exactly.
     np.testing.assert_allclose(

@@ -21,7 +21,7 @@ import numpy as np  # noqa: E402 (after importorskip guard)
 
 _MINIMAL_XML = """
 <mujoco model="test_pendulum">
-  <option timestep="0.01" gravity="0 0 -9.81"/>
+  <option timestep="0.01" gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="link1" pos="0 0 0.5">
       <joint name="hinge" type="hinge" axis="0 1 0"/>

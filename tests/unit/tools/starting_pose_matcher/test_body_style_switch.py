@@ -73,7 +73,10 @@ def c3d_body_target():
         pytest.skip(f"C3D fixture not present: {C3D_PATH}")
     from src.shared.python.motion_matching.load_body_target import load_body_target
 
-    return load_body_target(str(C3D_PATH))
+    try:
+        return load_body_target(str(C3D_PATH))
+    except ImportError as e:
+        pytest.skip(f"Skipping because dependency is missing: {e}")
 
 
 def _synthetic_body_with_pig_pair(n_frames: int = 16) -> SimpleNamespace:

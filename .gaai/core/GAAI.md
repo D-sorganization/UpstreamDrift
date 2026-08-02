@@ -87,10 +87,10 @@ Welcome. This is the `.gaai/` folder — the GAAI framework living inside your p
 
 ## Branch Model & Automation
 
-AI agents work exclusively on the **`staging`** branch. Promotion to `production` is a human action via GitHub PR.
+AI agents work exclusively on the **`main`** branch. Promotion to `production` is a human action via GitHub PR.
 
 ```
-staging  ←── AI works here
+main  ←── AI works here
    │  PR (human review)
 production  ←── Deploy via GitHub Actions
 ```
@@ -98,7 +98,7 @@ production  ←── Deploy via GitHub Actions
 The **Delivery Daemon** automates delivery end-to-end:
 
 - Polls the backlog for `refined` stories
-- Marks them `in_progress` on staging (cross-device coordination via git push)
+- Marks them `in_progress` on main (cross-device coordination via git push)
 - Launches AI agent sessions in isolated worktrees
 - Parallel execution (default: 3 concurrent slots, configurable via `--max-concurrent`)
 - Monitors session health via heartbeat and `--max-turns` safety limits

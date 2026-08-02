@@ -9,7 +9,7 @@ Orchestrates sub-widgets, manages simulation lifecycle, drives animation.
 
 New in UI/UX upgrade:
 - QSettings persistence for window geometry + splitters
-- Gravity toggle wired to g=0/9.81 in params builders
+- Gravity toggle wired to g=0/9.80665 in params builders
 - Menu bar: View → Themes (fleet ThemeManager) + quick-switch submenu
 - Current dark style preserved as "Pendulum Dark" fallback
 """

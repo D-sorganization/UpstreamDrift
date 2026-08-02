@@ -42,7 +42,11 @@ try:  # pragma: no cover - pipeline imports engine adapters
     from .pipeline import run_pipeline as run_pipeline
 except ModuleNotFoundError:  # pragma: no cover
     run_pipeline = None  # type: ignore[assignment]
-from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body  # noqa: F401
+from .readers import (
+    C3DSubjectMetadata,
+    read_c3d_subject_metadata,
+    read_mjcf_body,
+)  # noqa: F401
 from .segment_properties import SegmentProperties  # noqa: F401
 from .writers import write_mjcf_body  # noqa: F401
 

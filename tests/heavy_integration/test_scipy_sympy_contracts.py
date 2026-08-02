@@ -30,7 +30,7 @@ class TestSciPyContracts:
         from scipy.integrate import solve_ivp
 
         # Simple pendulum: theta'' = -g/L * sin(theta)
-        g, L = 9.81, 1.0
+        g, L = 9.80665, 1.0
 
         def pendulum(t: float, y: np.ndarray) -> np.ndarray:
             return np.array([y[1], -g / L * np.sin(y[0])])

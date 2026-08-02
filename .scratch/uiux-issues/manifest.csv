@@ -1,0 +1,29 @@
+file|title|labels
+01-responsive-shell.md|[UI/UX P1] Fixed-width sidebars break every multi-panel page below ~1024px — adopt a shared responsive WorkspaceShell|bug,javascript,priority:high
+02-min-h-0-canvas.md|[UI/UX P1] 3D viewport flex containers missing min-h-0/min-w-0 — canvas overflows or squashes adjacent panels|bug,javascript,priority:high
+03-aspect-square-overflow.md|[UI/UX P2] aspect-square viewports with fixed max-width overflow narrow windows (PuttingGreen, MotionCapture)|bug,javascript,priority:medium
+04-frankenstein-sidebar.md|[UI/UX P2] ModelExplorer Frankenstein mode w-[42rem] sidebar crushes the 3D viewport at ≤1280px|bug,javascript,priority:medium
+05-layout-polish.md|[UI/UX P2] Layout polish batch: hardcoded plot height, clipped ModelExplorer tree scroll, DiagnosticsPanel z-index, grid density, dead App.css|bug,javascript,priority:medium
+06-ui-primitives.md|[UI/UX P1] No shared Button/Input/Select primitives — paddings, radii, and focus rings diverge across the app|enhancement,javascript,priority:high
+07-color-system.md|[UI/UX P1] Color system fragmented: slate-vs-gray mix, three competing primary accents, inconsistent semantic status colors|bug,javascript,priority:high
+08-typography.md|[UI/UX P2] No typography scale: heading sizes/weights and label styles inconsistent across pages|enhancement,javascript,priority:medium
+09-theming-tokens.md|[UI/UX P2] No theming infrastructure: hardcoded dark colors, no design tokens, no darkMode config|enhancement,javascript,priority:low
+10-parameter-reset.md|[UI/UX P1] Simulation parameters silently reset to defaults on navigation — ParameterPanel clobbers the store on mount|bug,javascript,priority:high
+11-slider-debounce.md|[UI/UX P2] Speed slider fires an API call per drag tick; ActuatorSlider debounce hides send failures|bug,javascript,priority:medium
+12-chat-bugs.md|[UI/UX P2] Chat: retry can drop attachments; reconnect leaves the streaming indicator stuck|bug,javascript,priority:medium
+13-engine-load-ux.md|[UI/UX P2] Engine load/unload hardening: double-click duplicate requests, stale auto-select, no unload confirmation|bug,javascript,priority:medium
+14-toast-hardening.md|[UI/UX P2] Toasts stack without bound, no dedup, errors not announced assertively|bug,javascript,priority:medium
+15-polynomial-empty.md|[UI/UX P2] PolynomialGeneratorPanel allows submitting an empty/NaN coefficient list|bug,javascript,priority:low
+16-router-404-scroll.md|[UI/UX P0] Router has no 404 catch-all — unknown paths render a blank page; no scroll reset on navigation|bug,javascript,priority:high
+17-branding-titles.md|[UI/UX P0] App branding broken: window title is "ui", favicon is the Vite logo, no per-route document.title|bug,javascript,priority:high
+18-code-splitting.md|[UI/UX P1] No route-level code splitting — three.js ships in the initial bundle for every page|enhancement,javascript,performance,priority:high
+19-error-isolation.md|[UI/UX P2] Single app-wide ErrorBoundary bricks navigation on any page crash; unguarded console logging in production|enhancement,javascript,priority:medium
+20-connection-status.md|[UI/UX P2] Stale "connection lost" status persists across navigation and new runs|bug,javascript,priority:medium
+21-tauri-backend-lifecycle.md|[UI/UX P2] Tauri: Python backend not stopped on window close — orphaned process blocks relaunch|bug,priority:medium
+22-zustand-dup.md|[UI/UX P2] Duplicate zustand v4+v5 bundled via tunnel-rat|technical-debt,javascript,priority:low
+23-modal-a11y.md|[A11y P1] Modals not keyboard accessible: TreeDiffModal lacks dialog semantics/Escape/focus management; HelpPanel lacks focus trap|bug,javascript,priority:high
+24-contrast.md|[A11y P1] WCAG contrast failures: text-gray-500 helper text and gray-on-gray disabled states (~2–2.8:1)|bug,javascript,priority:high
+25-accessible-names.md|[A11y P2] Accessible-name batch: icon-only buttons, unannounced spinners, unlabeled tree items and emoji|bug,javascript,priority:medium
+26-structural-a11y.md|[A11y P2] Structural a11y: no skip link, skipped heading ranks, animations not gated on prefers-reduced-motion|enhancement,javascript,priority:medium
+27-helpfulfield.md|[A11y P2] HelpfulField range violations fire a callback but show no visible/programmatic error|bug,javascript,priority:medium
+28-ux-affordances.md|[UI/UX P2] Affordances: disabled buttons without reasons, undiscoverable keyboard shortcuts, no undo in Frankenstein mode|enhancement,javascript,priority:low

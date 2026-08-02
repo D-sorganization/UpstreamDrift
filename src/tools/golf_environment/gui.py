@@ -268,7 +268,7 @@ class EnvironmentWindow(QMainWindow):
         t = np.linspace(0, 5, 100)
         x = 50 * t
         y = np.zeros_like(t)
-        z = 25 * t - 0.5 * 9.81 * t**2
+        z = 25 * t - 0.5 * 9.80665 * t**2
         mask = z >= 0
         self.renderer.add_trajectory(np.column_stack((x[mask], y[mask], z[mask])))
 

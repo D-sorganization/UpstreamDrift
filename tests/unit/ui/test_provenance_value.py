@@ -85,14 +85,14 @@ def test_label_not_linked_for_constant(qt_app) -> None:
     from src.shared.python.ui.provenance_value import ProvenanceValueLabel
 
     record = ProvenanceRecord(
-        formula="constant 9.81",
+        formula="constant 9.80665",
         inputs=(),
         source="internal:g",
         computed_at=datetime(2026, 5, 30, tzinfo=timezone.utc),
         engine="mujoco",
         run_id="static",
     )
-    pv = ProvenanceValue(value=9.81, record=record, display_units="m/s^2")
+    pv = ProvenanceValue(value=9.80665, record=record, display_units="m/s^2")
     widget = ProvenanceValueLabel(pv)
     assert widget.is_linked() is False
 

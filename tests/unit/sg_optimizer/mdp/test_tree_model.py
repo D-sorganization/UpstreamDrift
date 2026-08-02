@@ -11,7 +11,6 @@ import pytest
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.mdp.tree_model import TreeModel
 
-
 # ---------------------------------------------------------------------------
 # Contract checks
 # ---------------------------------------------------------------------------

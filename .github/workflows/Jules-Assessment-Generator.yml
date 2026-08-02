@@ -86,7 +86,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m ensurepip --upgrade || true
-          pip install -r requirements.txt
+          pip install -r requirements.lock
           sudo apt-get install -y jq
 
       - name: Archive Existing Assessments

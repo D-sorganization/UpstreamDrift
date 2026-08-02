@@ -266,20 +266,8 @@ export function useDatasetGenerator() {
       setError(null);
       try {
         // Use raw fetch so we can read the blob response
-        const { getApiBase } = await import('./backend');
-        const url = `${getApiBase()}/api/dataset/export/${encodeURIComponent(datasetId)}?format=${encodeURIComponent(format)}`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          let detail: string | undefined;
-          try {
-            const body = (await res.json()) as Record<string, unknown>;
-            if (typeof body.detail === 'string') detail = body.detail;
-          } catch {
-            // ignore
-          }
-          throw new Error(detail ?? `Export failed: HTTP ${res.status}`);
-        }
-        const blob = await res.blob();
+        const { apiFetchBlob } = await import('./fetch');
+        const blob = await apiFetchBlob(`/api/dataset/export/${encodeURIComponent(datasetId)}?format=${encodeURIComponent(format)}`);
         const objectUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = objectUrl;

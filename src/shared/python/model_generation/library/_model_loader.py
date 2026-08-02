@@ -8,8 +8,11 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from model_generation.converters.urdf_parser import ParsedModel, URDFParser
-from model_generation.library._model_types import (
+from src.shared.python.model_generation.converters.urdf_parser import (
+    ParsedModel,
+    URDFParser,
+)
+from src.shared.python.model_generation.library._model_types import (
     LibraryConfig,
     ModelEntry,
     ModelFormat,

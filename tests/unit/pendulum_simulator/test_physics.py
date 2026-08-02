@@ -41,7 +41,7 @@ class TestPendulumParams:
 
     def test_physics_default_gravity(self) -> None:
         p = _make_params()
-        assert p.g == pytest.approx(9.81)
+        assert p.g == pytest.approx(9.80665)
 
     def test_default_mclub_zero(self) -> None:
         p = _make_params()
@@ -58,7 +58,7 @@ class TestPendulumParams:
         assert p.mu2 == pytest.approx(0.0)
 
     def test_physics_custom_params(self) -> None:
-        p = PendulumParams(m1=1.0, m2=0.2, L1=1.0, L2=0.5, mClub=0.1, g=9.81)
+        p = PendulumParams(m1=1.0, m2=0.2, L1=1.0, L2=0.5, mClub=0.1, g=9.80665)
         assert p.mClub == pytest.approx(0.1)
 
     def test_physics_negative_mass_raises(self) -> None:

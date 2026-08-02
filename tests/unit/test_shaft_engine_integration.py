@@ -7,7 +7,6 @@ Refactored to use shared engine availability module (DRY principle).
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     pass
 

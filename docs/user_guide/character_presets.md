@@ -49,7 +49,7 @@ Character presets provide pre-configured anthropometric parameters for quickly c
 ### Python API
 
 ```python
-from humanoid_character_builder.presets.loader import load_body_preset, get_preset_info
+from src.shared.python.humanoid_character_builder.presets.loader import load_body_preset, get_preset_info
 
 # Load a preset
 body_params = load_body_preset("athletic")
@@ -61,16 +61,6 @@ print(info["citation"])
 
 # Override specific parameters
 body_params = load_body_preset("athletic", height_m=1.85, mass_kg=85.0)
-```
-
-### CLI
-
-```bash
-# Build a character using a preset
-python -m humanoid_character_builder build --preset athletic --output my_character.urdf
-
-# List available presets
-python -m humanoid_character_builder presets list
 ```
 
 ## Anthropometric Sources
@@ -121,8 +111,8 @@ The character builder supports three somatotype build categories:
 You can create custom presets by saving `BodyParameters` to a YAML or JSON file:
 
 ```python
-from humanoid_character_builder.presets.loader import save_preset_to_file
-from humanoid_character_builder.core.body_parameters import BodyParameters, BuildType, GenderModel
+from src.shared.python.humanoid_character_builder.presets.loader import save_preset_to_file
+from src.shared.python.humanoid_character_builder.core.body_parameters import BodyParameters, BuildType, GenderModel
 
 params = BodyParameters(
     name="custom_athlete",

@@ -747,6 +747,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
             # Compute forward dynamics with zero velocity
             mujoco.mj_forward(self.model, self.data)
+            self.data.qvel[:] = 0  # #7979
 
             # Extract acceleration
             a_zvcf = self.data.qacc.copy()

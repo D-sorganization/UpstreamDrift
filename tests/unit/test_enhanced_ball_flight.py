@@ -530,7 +530,7 @@ class TestPhysicsValidation:
         traj = sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
 
         # In vacuum at 45 degrees, range = v^2/g
-        expected_range = (50.0**2) / 9.81
+        expected_range = (50.0**2) / 9.80665
         actual_range = sim.calculate_carry_distance(traj)
 
         # Should be close (within 1%)

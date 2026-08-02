@@ -14,7 +14,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
 
-
 EXPECTED_BINDINGS: dict[str, tuple[str, ...]] = {
     "upstream_physics": (
         "IntegratorConfig",

@@ -382,7 +382,7 @@ class TestGRFMetricsMixin:
         N = 50
         cop = np.zeros((N, 3))
         forces = np.zeros((N, 3))
-        forces[:, 2] = 980.0  # 100kg * 9.8 m/s^2 vertical force
+        forces[:, 2] = 980.0  # 100kg * 9.80665 m/s^2 vertical force
         forces[25, 0] = 100.0  # Lateral shear at midpoint
         host = GRFHost(cop_position=cop, ground_forces=forces, dt=0.01)
         metrics = host.compute_grf_metrics()

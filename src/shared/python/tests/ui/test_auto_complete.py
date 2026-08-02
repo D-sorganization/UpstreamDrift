@@ -15,7 +15,7 @@ def get_app():
 
 def test_auto_complete_line_edit_initialization() -> None:
     """Test that AutoCompleteLineEdit initializes correctly with words."""
-    app = get_app()  # noqa: F841
+    get_app()
     words = ["gravity", "velocity", "acceleration"]
     widget = AutoCompleteLineEdit(words=words)
     assert widget.completer_words == words
@@ -24,7 +24,7 @@ def test_auto_complete_line_edit_initialization() -> None:
 
 def test_auto_complete_set_completion_words() -> None:
     """Test dynamically updating the completion words."""
-    app = get_app()  # noqa: F841
+    get_app()
     widget = AutoCompleteLineEdit()
     assert widget.completer_words == []
 
@@ -34,7 +34,7 @@ def test_auto_complete_set_completion_words() -> None:
 
 def test_auto_complete_add_completion_words() -> None:
     """Test adding words to the completion dictionary."""
-    app = get_app()  # noqa: F841
+    get_app()
     widget = AutoCompleteLineEdit(words=["gravity"])
     widget.add_completion_words(["mass"])
 
@@ -45,7 +45,7 @@ def test_auto_complete_add_completion_words() -> None:
 
 def test_auto_complete_tab_key() -> None:
     """Test that the Tab key accepts the current completion."""
-    app = get_app()  # noqa: F841
+    get_app()
     widget = AutoCompleteLineEdit(words=["acceleration"])
     widget.setText("acc")
 

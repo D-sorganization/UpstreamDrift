@@ -9,7 +9,7 @@ Phase 2: engine contract definition and Python wrapper with pandas fallback.
 
 Public API::
 
-    from shared.python.data_processor import rust_engine
+    from src.shared.python.data_processor import rust_engine
 
     info   = rust_engine.inspect("data.csv")
     df     = rust_engine.preview("data.csv", nrows=100)

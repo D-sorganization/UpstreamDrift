@@ -25,9 +25,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-linux:
-    name: Build binary (Linux)
-    runs-on: d-sorg-fleet-docker
+  build:
+    name: Build binary (${{ matrix.os }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: d-sorg-fleet-docker
+          - os: windows
+            runner: windows-latest
+          - os: macos
+            runner: macos-latest
     timeout-minutes: 30
 
     steps:
@@ -61,31 +71,40 @@ jobs:
         shell: bash
         run: |
           python3 scripts/packaging/build_sidekick_binary.py \
-            --expected-platform linux \
+            --expected-platform ${{ matrix.os }} \
             --max-mb 250 \
             --output-dir dist/
 
       - name: Smoke test — --help (< 5 s)
         shell: bash
-        run: timeout 5 dist/sidekick --help
+        run: |
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            timeout 5 dist/sidekick.exe --help
+          else
+            timeout 5 dist/sidekick --help
+          fi
 
       - name: Smoke test — run
         shell: bash
         run: |
-          dist/sidekick run \
-            --calculator wgs_reactor \
-            --inputs tests/fixtures/wgs.json
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            dist/sidekick.exe run --calculator wgs_reactor --inputs tests/fixtures/wgs.json
+          else
+            dist/sidekick run --calculator wgs_reactor --inputs tests/fixtures/wgs.json
+          fi
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: sidekick-linux
-          path: dist/sidekick
-          if-no-files-found: error
+          name: sidekick-${{ matrix.os }}
+          path: |
+            dist/sidekick
+            dist/sidekick.exe
+          if-no-files-found: ignore
 
   attach-to-release:
     name: Attach binaries to GitHub Release
-    needs: [build-linux]
+    needs: [build]
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 10
     if: startsWith(github.ref, 'refs/tags/sidekick-v')

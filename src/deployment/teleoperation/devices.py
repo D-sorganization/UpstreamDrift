@@ -155,17 +155,12 @@ class SpaceMouseInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to SpaceMouse.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
-        honest answer is always "not connected" (#7360). The previous body
-        probed for ("pyspacemouse", "hid") and then returned ``False`` on
-        both arms of the branch, which made the stub look conditionally
-        functional -- installing the backend changed nothing. Tracked by #8058.
+        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
 
-        Returns:
-            Always ``False``.
+        Raises:
+            NotImplementedError: Always raised since hardware backend is missing.
         """
-        self._is_connected = False
-        return False
+        raise NotImplementedError("Hardware driver not implemented (#8058).")
 
     def update(self) -> None:
         """Update SpaceMouse state."""
@@ -215,17 +210,12 @@ class VRControllerInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to VR system.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
-        honest answer is always "not connected" (#7360). The previous body
-        probed for ("openvr",) and then returned ``False`` on
-        both arms of the branch, which made the stub look conditionally
-        functional -- installing the backend changed nothing. Tracked by #8058.
+        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
 
-        Returns:
-            Always ``False``.
+        Raises:
+            NotImplementedError: Always raised since hardware backend is missing.
         """
-        self._is_connected = False
-        return False
+        raise NotImplementedError("Hardware driver not implemented (#8058).")
 
     def update(self) -> None:
         """Update VR controller state."""
@@ -280,17 +270,12 @@ class HapticDeviceInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to haptic device.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
-        honest answer is always "not connected" (#7360). The previous body
-        probed for ("forcedimension", "dhd") and then returned ``False`` on
-        both arms of the branch, which made the stub look conditionally
-        functional -- installing the backend changed nothing. Tracked by #8058.
+        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
 
-        Returns:
-            Always ``False``.
+        Raises:
+            NotImplementedError: Always raised since hardware backend is missing.
         """
-        self._is_connected = False
-        return False
+        raise NotImplementedError("Hardware driver not implemented (#8058).")
 
     def update(self) -> None:
         """Update haptic device state."""

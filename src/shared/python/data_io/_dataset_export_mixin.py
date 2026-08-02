@@ -8,14 +8,15 @@ from __future__ import annotations
 import json
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .dataset_generator import SimulationSample, TrainingDataset
+if TYPE_CHECKING:
+    from .dataset_generator import SimulationSample, TrainingDataset
 
 logger = get_logger(__name__)
 

@@ -137,7 +137,7 @@ jobs:
         run: |
           python3 scripts/run_cross_engine_leaderboard.py --skip-fits || true
           mkdir -p reports
-          if [ ! -s reports/cross_engine_leaderboard.json ]; then
+          if [ ! -f reports/cross_engine_leaderboard.json ]; then
             echo "[]" > reports/cross_engine_leaderboard.json
           fi
           python -c "import json; \
@@ -163,7 +163,7 @@ jobs:
         with:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
-          if-no-files-found: ignore
+          if-no-files-found: warn
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

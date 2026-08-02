@@ -21,7 +21,6 @@ from src.tools.training_controller.live_subscriber import (
     TrainingJobLiveSubscriber,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -16,6 +16,7 @@ Principles:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 from src.shared.python.core.physics_constants import (
@@ -51,6 +52,38 @@ def is_rust_available() -> bool:
     return _RUST_AVAILABLE
 
 
+# ── Fallback Types ────────────────────────────────────────────────────────────
+
+
+@dataclass
+class IntegratorConfigFallback:
+    dt: float
+    max_steps: int
+
+
+@dataclass
+class ContactParametersFallback:
+    cor: float
+    friction: float
+
+
+@dataclass
+class AirPropertiesFallback:
+    density: float
+    viscosity: float
+    temperature: float
+    pressure: float
+
+
+@dataclass
+class BallPropertiesFallback:
+    mass: float
+    radius: float
+    area: float
+    drag_coefficient: float
+    spin_decay_rate: float
+
+
 # ── Integrator Config ─────────────────────────────────────────────────────────
 
 
@@ -66,9 +99,13 @@ def create_integrator_config(dt: float = 0.001, max_steps: int = 10000) -> Any:
     """
     if dt is None:
         raise ValueError("dt must be provided")
+    if dt <= 0:
+        raise ValueError("dt must be positive")
+    if max_steps <= 0:
+        raise ValueError("max_steps must be positive")
     if _RUST_AVAILABLE:
         return _rust.IntegratorConfig(dt=dt, max_steps=max_steps)
-    return {"dt": dt, "max_steps": max_steps}
+    return IntegratorConfigFallback(dt=dt, max_steps=max_steps)
 
 
 # ── Contact Parameters ────────────────────────────────────────────────────────
@@ -86,9 +123,13 @@ def create_contact_parameters(cor: float = 0.82, friction: float = 0.4) -> Any:
     """
     if cor is None:
         raise ValueError("cor must be provided")
+    if cor < 0 or cor > 1:
+        raise ValueError("cor must be between 0 and 1")
+    if friction < 0:
+        raise ValueError("friction must be non-negative")
     if _RUST_AVAILABLE:
         return _rust.ContactParameters(cor=cor, friction=friction)
-    return {"cor": cor, "friction": friction}
+    return ContactParametersFallback(cor=cor, friction=friction)
 
 
 # ── Vector Math (delegates to Rust Vector3 when available) ────────────────────
@@ -152,6 +193,8 @@ def create_air_properties(
         raise ValueError("viscosity must be positive")
     if temperature <= 0:
         raise ValueError("temperature must be positive (Kelvin)")
+    if pressure <= 0:
+        raise ValueError("pressure must be positive")
     if _RUST_AVAILABLE:
         return _rust.AirProperties(
             density=density,
@@ -159,12 +202,12 @@ def create_air_properties(
             temperature=temperature,
             pressure=pressure,
         )
-    return {
-        "density": density,
-        "viscosity": viscosity,
-        "temperature": temperature,
-        "pressure": pressure,
-    }
+    return AirPropertiesFallback(
+        density=density,
+        viscosity=viscosity,
+        temperature=temperature,
+        pressure=pressure,
+    )
 
 
 def create_ball_properties(
@@ -195,6 +238,10 @@ def create_ball_properties(
         raise ValueError("mass must be positive")
     if radius <= 0:
         raise ValueError("radius must be positive")
+    if drag_coefficient < 0:
+        raise ValueError("drag_coefficient must be non-negative")
+    if spin_decay_rate < 0:
+        raise ValueError("spin_decay_rate must be non-negative")
     import math
 
     if _RUST_AVAILABLE:
@@ -204,13 +251,13 @@ def create_ball_properties(
             drag_coefficient=drag_coefficient,
             spin_decay_rate=spin_decay_rate,
         )
-    return {
-        "mass": mass,
-        "radius": radius,
-        "area": math.pi * radius**2,
-        "drag_coefficient": drag_coefficient,
-        "spin_decay_rate": spin_decay_rate,
-    }
+    return BallPropertiesFallback(
+        mass=mass,
+        radius=radius,
+        area=math.pi * radius**2,
+        drag_coefficient=drag_coefficient,
+        spin_decay_rate=spin_decay_rate,
+    )
 
 
 # ── Deprecation Helpers ───────────────────────────────────────────────────────

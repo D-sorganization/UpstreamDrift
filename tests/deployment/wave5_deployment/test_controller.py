@@ -21,7 +21,6 @@ from src.deployment.realtime.state import (
     RobotState,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

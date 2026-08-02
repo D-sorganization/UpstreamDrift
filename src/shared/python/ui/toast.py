@@ -9,7 +9,7 @@ Provides non-blocking, auto-dismissing notifications that appear
 at the bottom-right of the application window.
 
 Usage:
-    from shared.python.ui.toast import ToastManager, ToastType
+    from src.shared.python.ui.toast import ToastManager, ToastType
 
     # Create manager attached to main window
     toast_manager = ToastManager(main_window)

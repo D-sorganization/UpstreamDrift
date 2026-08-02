@@ -92,7 +92,11 @@ class TestExportToExcel:
         path = tmp_path / "meta.xlsx"
 
         export_to_excel(
-            result, path, exercise_name="Deadlift", body_mass_kg=80.0, body_height_m=1.82
+            result,
+            path,
+            exercise_name="Deadlift",
+            body_mass_kg=80.0,
+            body_height_m=1.82,
         )
 
         wb = openpyxl.load_workbook(str(path))

@@ -123,21 +123,14 @@ class PowerFlowAnalyzer:
 
         self._data = mujoco.MjData(model)
 
-        # Cache per-joint damping/dof-address once, so the per-step power
-        # dissipation loop does not rebuild a `model.jnt(i)` view for every
-        # joint on every call. Only joints with positive damping and an in-range
-        # dof address contribute, exactly as the original scalar loop.
-        njnt = int(model.njnt)
+        # Cache per-DOF damping/dof-address once, so the per-step power
+        # dissipation loop does not rebuild arrays on every call.
+        # Only DOFs with positive damping contribute.
         nv = int(model.nv)
-        damping = np.empty(njnt, dtype=np.float64)
-        dofadr = np.empty(njnt, dtype=np.int64)
-        for i in range(njnt):
-            joint = model.jnt(i)
-            damping[i] = float(joint.damping[0])
-            dofadr[i] = int(joint.dofadr[0])
-        active = (damping > 0) & (dofadr < nv) & (dofadr >= 0)
-        self._diss_damping = damping[active]
-        self._diss_dofadr = dofadr[active]
+        dof_damping = np.asarray(model.dof_damping, dtype=np.float64)
+        active = dof_damping > 0
+        self._diss_damping = dof_damping[active]
+        self._diss_dofadr = np.arange(nv, dtype=np.int64)[active]
 
     def _compute_work_decomposition(
         self,
@@ -452,15 +445,13 @@ class PowerFlowAnalyzer:
             raise ValueError("body_id must be provided")
         power_from_parent = 0.0
         power_generation = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            if joint.bodyid[0] == body_id:
-                v_start = joint.dofadr[0]
-                if v_start < self.model.nv:
-                    joint_power = tau[v_start] * qvel[v_start]
-                    power_from_parent = joint_power
-                    if abs(tau[v_start]) > 1e-6:
-                        power_generation = joint_power
+        for i in range(self.model.nv):
+            j = self.model.dof_jntid[i]
+            if self.model.jnt_bodyid[j] == body_id:
+                joint_power = tau[i] * qvel[i]
+                power_from_parent += joint_power
+                if abs(tau[i]) > 1e-6:
+                    power_generation += joint_power
         return power_from_parent, power_generation
 
     def _compute_child_joint_power(
@@ -479,15 +470,13 @@ class PowerFlowAnalyzer:
         if body_id is None:
             raise ValueError("body_id must be provided")
         power_to_children = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            child_body_id = joint.bodyid[0]
+        for i in range(self.model.nv):
+            j = self.model.dof_jntid[i]
+            child_body_id = self.model.jnt_bodyid[j]
             if child_body_id > 0:
-                child_parent_id = self.model.body(child_body_id).parentid[0]
+                child_parent_id = self.model.body_parentid[child_body_id]
                 if child_parent_id == body_id:
-                    v_start = joint.dofadr[0]
-                    if v_start < self.model.nv:
-                        power_to_children += tau[v_start] * qvel[v_start]
+                    power_to_children += tau[i] * qvel[i]
         return power_to_children
 
     def _compute_joint_dissipation(self, body_id: int, qvel: np.ndarray) -> float:
@@ -503,13 +492,10 @@ class PowerFlowAnalyzer:
         if body_id is None:
             raise ValueError("body_id must be provided")
         power_diss = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            if joint.bodyid[0] == body_id and joint.damping[0] > 0:
-                v_start = joint.dofadr[0]
-                if v_start < self.model.nv:
-                    # perf: qvel*qvel avoids ** 2 overhead
-                    power_diss += joint.damping[0] * (qvel[v_start] * qvel[v_start])
+        for i in range(self.model.nv):
+            j = self.model.dof_jntid[i]
+            if self.model.jnt_bodyid[j] == body_id and self.model.dof_damping[i] > 0:
+                power_diss += self.model.dof_damping[i] * (qvel[i] * qvel[i])
         return power_diss
 
     @precondition(

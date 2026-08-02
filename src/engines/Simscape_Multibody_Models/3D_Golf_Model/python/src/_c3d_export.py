@@ -5,7 +5,7 @@ Export helpers (``export_dataframe``, ``unit_scale``, ``sanitize_for_csv``,
 ``src/shared/python/sidekick/lab/bio/_c3d_io.py`` (issue #4484).
 """
 
-from shared.python.sidekick.lab.bio._c3d_io import (  # noqa: F401
+from src.shared.python.sidekick.lab.bio._c3d_io import (  # noqa: F401
     export_dataframe,
     sanitize_for_csv,
     unit_scale,

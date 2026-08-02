@@ -24,7 +24,6 @@ from src.unreal_integration.golf_state import (
 )
 from src.unreal_integration.skeleton import ForceVector, JointState
 
-
 pytestmark = pytest.mark.unit
 
 # ---------- JointState ----------
@@ -109,10 +108,10 @@ class TestForceVector:
         fv = ForceVector(
             origin=Vector3(0, 1, 0),
             direction=Vector3(0, -1, 0),
-            magnitude=9.81,
+            magnitude=9.80665,
             force_type="gravity",
         )
-        assert fv.magnitude == 9.81
+        assert fv.magnitude == 9.80665
         assert fv.force_type == "gravity"
 
     def test_endpoint(self) -> None:
@@ -191,7 +190,7 @@ class TestClubState:
         cs = ClubState(
             head_position=Vector3(1, 2, 3),
             head_velocity=Vector3(4, 5, 6),
-            head_acceleration=Vector3(0, 0, -9.81),
+            head_acceleration=Vector3(0, 0, -9.80665),
             shaft_flex=[0.0, 0.1, 0.2],
             face_angle=2.0,
             loft_angle=10.0,
@@ -201,7 +200,7 @@ class TestClubState:
         cs2 = ClubState.from_dict(cs.to_dict())
         assert cs2.face_angle == 2.0
         assert cs2.shaft_flex == [0.0, 0.1, 0.2]
-        assert cs2.head_acceleration == Vector3(0, 0, -9.81)
+        assert cs2.head_acceleration == Vector3(0, 0, -9.80665)
 
 
 # ---------- SwingMetrics ----------

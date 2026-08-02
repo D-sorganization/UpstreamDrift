@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.data_explorer import router
 
-
 pytestmark = pytest.mark.unit
 
 

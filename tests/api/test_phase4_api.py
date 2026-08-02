@@ -102,12 +102,12 @@ class TestForceVector3DContract:
             force_type="gravity",
             origin=[0.0, 0.5, 0.0],
             direction=[0.0, -1.0, 0.0],
-            magnitude=9.81,
+            magnitude=9.80665,
             color=[0.0, 0.0, 1.0, 0.8],
-            label="9.81 N",
+            label="9.80665 N",
         )
         assert vec.color == [0.0, 0.0, 1.0, 0.8]
-        assert vec.label == "9.81 N"
+        assert vec.label == "9.80665 N"
 
 
 class TestForceOverlayResponseContract:
@@ -139,7 +139,7 @@ class TestForceOverlayResponseContract:
                 force_type="gravity",
                 origin=[0.0, 0.5, 0.0],
                 direction=[0.0, -1.0, 0.0],
-                magnitude=9.81,
+                magnitude=9.80665,
             ),
         ]
         resp = ForceOverlayResponse(

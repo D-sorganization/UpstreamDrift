@@ -7,14 +7,18 @@ from types import ModuleType
 from unittest.mock import MagicMock
 
 
-def _mock_pyqt6() -> None:
+import pytest
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _mock_pyqt6():
     """Inject mock PyQt6 modules so plotting imports don't crash.
 
     This is only needed because PyQt6 DLLs may be broken in headless
     CI or when the Qt binaries are incomplete.  The plotting renderers
     themselves only use matplotlib (not Qt).
     """
-    for mod_name in [
+    mocked_modules = [
         "PyQt6",
         "PyQt6.QtWidgets",
         "PyQt6.QtCore",
@@ -23,9 +27,17 @@ def _mock_pyqt6() -> None:
         "src.shared.python.ui.qt",
         "src.shared.python.ui.qt.plotting",
         "src.shared.python.ui.loading_button",
-    ]:
-        if mod_name not in sys.modules:
-            sys.modules[mod_name] = MagicMock(spec=ModuleType)
+    ]
+    saved = {}
+    for mod_name in mocked_modules:
+        if mod_name in sys.modules:
+            saved[mod_name] = sys.modules[mod_name]
+        sys.modules[mod_name] = MagicMock(spec=ModuleType)
 
+    yield
 
-_mock_pyqt6()
+    for mod_name in mocked_modules:
+        if mod_name in saved:
+            sys.modules[mod_name] = saved[mod_name]
+        else:
+            sys.modules.pop(mod_name, None)
