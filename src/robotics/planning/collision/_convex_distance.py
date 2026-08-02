@@ -337,7 +337,7 @@ def _penetration_depth(
         axis_u, axis_v = _orthonormal_bases(directions)
         offsets = np.stack([axis_u, -axis_u, axis_v, -axis_v], axis=1)
         candidates = directions[:, None, :] + steps[:, None, None] * offsets
-        candidates /= np.linalg.norm(candidates, axis=2, keepdims=True)
+        candidates /= np.sqrt(np.einsum('...i,...i->...', candidates, candidates))[..., None]
 
         candidate_values = _support_widths(
             prim_a, prim_b, candidates.reshape(-1, 3)
