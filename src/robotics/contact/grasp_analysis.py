@@ -227,7 +227,8 @@ def _grasp_wrench_margin(
     offsets = hull.equations[:, -1]
     # Interior points satisfy normal @ x + offset < 0, so the signed distance
     # from the origin to each facet is -offset / ||normal||.
-    distances = -offsets / np.linalg.norm(normals, axis=1)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    distances = -offsets / np.sqrt(np.einsum('ij,ij->i', normals, normals))
     margin = float(np.min(distances))
 
     if margin <= FORCE_CLOSURE_TOL:
