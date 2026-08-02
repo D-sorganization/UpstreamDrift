@@ -44,7 +44,7 @@ jobs:
   guard:
     timeout-minutes: 30
     name: phantom-guard
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     if: github.event.pull_request.base.ref == 'main'
     steps:
       - name: Configure Git to use HTTP/1.1
