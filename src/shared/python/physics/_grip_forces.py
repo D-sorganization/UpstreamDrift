@@ -83,7 +83,7 @@ def compute_pressure_visualization(
     else:
         normalized_pressures = np.zeros(n_contacts)
 
-    grip_axis = grip_axis / math.hypot(grip_axis[0], grip_axis[1], grip_axis[2])
+    grip_axis = grip_axis / math.hypot(grip_axis[0], grip_axis[1], grip_axis[2])  # ⚡ Bolt: math.hypot avoids NumPy overhead
     relative_pos = positions - grip_center
 
     grip_axis_positions = np.dot(relative_pos, grip_axis)
@@ -92,7 +92,7 @@ def compute_pressure_visualization(
         perp1 = np.cross(grip_axis, np.array([0, 0, 1]))
     else:
         perp1 = np.cross(grip_axis, np.array([1, 0, 0]))
-    perp1 = perp1 / math.hypot(perp1[0], perp1[1], perp1[2])
+    perp1 = perp1 / math.hypot(perp1[0], perp1[1], perp1[2])  # ⚡ Bolt: math.hypot avoids NumPy overhead
     perp2 = np.cross(grip_axis, perp1)
 
     x_proj = np.dot(relative_pos, perp1)

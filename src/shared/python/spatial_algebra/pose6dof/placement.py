@@ -69,13 +69,13 @@ class EntityPlacement:
             up = np.asarray(up, dtype=np.float64)
 
         forward = target - self.pose.position
-        forward_norm = math.hypot(forward[0], forward[1], forward[2])
+        forward_norm = math.hypot(forward[0], forward[1], forward[2])  # ⚡ Bolt: math.hypot avoids NumPy overhead
         if forward_norm < 1e-10:
             return
         forward = forward / forward_norm
 
         right = np.cross(forward, up)
-        right_norm = math.hypot(right[0], right[1], right[2])
+        right_norm = math.hypot(right[0], right[1], right[2])  # ⚡ Bolt: math.hypot avoids NumPy overhead
         if right_norm < 1e-10:
             right = np.array([0, 1, 0], dtype=np.float64)
         else:
