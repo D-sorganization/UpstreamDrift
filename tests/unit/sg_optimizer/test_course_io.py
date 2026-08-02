@@ -14,7 +14,6 @@ from src.shared.python.sg_optimizer.course.course_io import (
 )
 from src.shared.python.sg_optimizer.course.geometry import LatLonPoint
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

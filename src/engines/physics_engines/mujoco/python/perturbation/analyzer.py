@@ -58,7 +58,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 _MINIMAL_MJCF: str = """<mujoco model="minimal_pendulum">
-  <option timestep="0.005" gravity="0 0 -9.81"/>
+  <option timestep="0.005" gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="link1" pos="0 0 1">
       <joint name="j1" type="hinge" axis="0 1 0"/>

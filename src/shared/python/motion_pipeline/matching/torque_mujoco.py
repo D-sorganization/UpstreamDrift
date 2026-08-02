@@ -134,7 +134,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             [
                 '<mujoco model="motion_pipeline_generated">',
                 '  <compiler angle="radian" />',
-                '  <option gravity="0 0 -9.81" />',
+                '  <option gravity="0 0 -9.80665" />',
                 "  <worldbody>",
                 *worldbody,
                 "  </worldbody>",

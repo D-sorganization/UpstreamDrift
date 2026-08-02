@@ -22,7 +22,7 @@ class DynamicsMixin:
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         if not self.sim:
-            return np.array([])
+            raise RuntimeError("Engine must be initialized to compute mass matrix")
 
         try:
             import mujoco
@@ -46,16 +46,20 @@ class DynamicsMixin:
 
         except ImportError as e:
             logger.error("Failed to compute mass matrix: %s", e)
-            return np.array([])
+            raise RuntimeError(
+                "Engine must be initialized to compute mass matrix"
+            ) from e
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
-        if self.sim:
-            return np.array(self.sim.data.qfrc_bias)
-        return np.array([])
+        if not self.sim:
+            raise RuntimeError("Engine must be initialized to compute bias forces")
+        return np.array(self.sim.data.qfrc_bias)
 
     def compute_gravity_forces(self) -> np.ndarray:
+        if not self.sim:
+            raise RuntimeError("Engine must be initialized to compute gravity forces")
         return np.array([])
 
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
@@ -64,7 +68,7 @@ class DynamicsMixin:
         if qacc is None:
             raise ValueError("qacc must be provided")
         if not self.sim:
-            return np.array([])
+            raise RuntimeError("Engine must be initialized to compute inverse dynamics")
 
         try:
             import mujoco
@@ -75,7 +79,9 @@ class DynamicsMixin:
 
         except ImportError as e:
             logger.error("Failed to compute inverse dynamics: %s", e)
-            return np.array([])
+            raise RuntimeError(
+                "Engine must be initialized to compute inverse dynamics"
+            ) from e
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         if body_name is None:

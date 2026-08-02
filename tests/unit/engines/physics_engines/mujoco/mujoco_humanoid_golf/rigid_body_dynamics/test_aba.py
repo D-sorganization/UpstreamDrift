@@ -40,7 +40,7 @@ def test_aba_1dof_with_gravity():
         "jtype": ["Rz"],  # pure rotation
         "Xtree": [np.eye(6)],
         "I": [np.eye(6)],  # Unit inertia
-        "gravity": np.array([0, 0, 0, 0, 0, -9.81]),
+        "gravity": np.array([0, 0, 0, 0, 0, -9.80665]),
     }
     q = np.array([0.0])
     qd = np.array([0.0])

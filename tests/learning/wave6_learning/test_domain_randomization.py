@@ -19,7 +19,7 @@ class FakeEngine:
         self.damping = np.ones(n) * 0.1
         self.friction = np.ones(n) * 0.5
         self.motor_strength = np.ones(n) * 2.0
-        self.gravity = np.array([0.0, 0.0, -9.81])
+        self.gravity = np.array([0.0, 0.0, -9.80665])
         self.actuator_gains = np.ones(n)
 
     def get_link_masses(self) -> np.ndarray:

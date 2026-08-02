@@ -11,7 +11,7 @@ from cors import (
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.shared.python.contracts import (
+from contracts import (
     ContractLevel,
     PreconditionError,
     get_contract_level,
@@ -35,7 +35,7 @@ def clean_env() -> Any:
 def get_cors_origins(app: FastAPI) -> list[str]:
     for middleware in app.user_middleware:
         if middleware.cls == CORSMiddleware:
-            return middleware.kwargs.get("allow_origins", [])  # type: ignore[return-value]
+            return middleware.kwargs.get("allow_origins", [])
     return []
 
 

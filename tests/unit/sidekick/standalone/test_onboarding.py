@@ -16,7 +16,6 @@ from sidekick.standalone.onboarding import (
     StandaloneOnboarding,
 )
 
-
 # ---------------------------------------------------------------------------
 # T8-AC-2: sentinel controls whether onboarding runs
 # ---------------------------------------------------------------------------

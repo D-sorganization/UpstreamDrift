@@ -485,7 +485,7 @@ class TestIssue2472DatasetGeneratorInvariants:
         engine = MockPhysicsEngine(num_joints=4)
         engine.load_from_string("<mock/>")
 
-        expected_pe = 9.81
+        expected_pe = 9.80665
         engine.compute_potential_energy = lambda: expected_pe
 
         gen = DatasetGenerator(engine)

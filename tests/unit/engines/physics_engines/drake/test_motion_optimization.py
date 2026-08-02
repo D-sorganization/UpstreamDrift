@@ -270,9 +270,9 @@ class TestDrakeMotionOptimizerOptimization:
         cost_fn = optimizer.objectives[0].cost_function
         assert cost_fn(initial_trajectory) == 0.0
         # A trajectory whose final segment launches up and forward yields a
-        # positive carry → negative cost. launch = [1, 0, 1] → 2*1*1/9.81.
+        # positive carry → negative cost. launch = [1, 0, 1] → 2*1*1/9.80665.
         ballistic = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 0.0, 1.0]])
-        assert cost_fn(ballistic) == pytest.approx(-2.0 / 9.81)
+        assert cost_fn(ballistic) == pytest.approx(-2.0 / 9.80665)
 
     @patch.object(DrakeMotionOptimizer, "optimize_trajectory")
     def test_optimize_for_accuracy(

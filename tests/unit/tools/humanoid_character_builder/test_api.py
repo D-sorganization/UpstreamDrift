@@ -34,7 +34,7 @@ class TestCharacterBuilder:
 
         result = builder.build(params, generate_meshes=False)
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
         assert len(result.segments) > 0
 
@@ -48,7 +48,7 @@ class TestCharacterBuilder:
 
         result = builder.build(params, generate_meshes=False)
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.params.height_m == 1.85
 
     def test_generate_urdf(self) -> None:
@@ -215,27 +215,27 @@ class TestQuickFunctions:
     def test_quick_build_default(self) -> None:
         result = quick_build()
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.params.height_m == 1.75
         assert result.params.mass_kg == 75.0
 
     def test_quick_build_custom(self) -> None:
         result = quick_build(height_m=1.85, mass_kg=85.0)
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.params.height_m == 1.85
 
     def test_quick_build_with_preset(self) -> None:
         result = quick_build(preset="athletic")
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.params.muscularity > 0.5
 
     def test_quick_build_with_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             result = quick_build(output_dir=tmpdir)
 
-            assert result.solver_status == "success"
+            assert result.success
             assert (Path(tmpdir) / "humanoid.urdf").exists()
 
     def test_quick_urdf_default(self) -> None:

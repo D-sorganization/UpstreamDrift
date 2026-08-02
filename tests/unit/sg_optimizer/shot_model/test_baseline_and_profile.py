@@ -15,7 +15,6 @@ from src.shared.python.sg_optimizer.shot_model.player_profile import (
     PuttingSkill,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[4]
 PGA_TOUR_YAML = REPO_ROOT / "data" / "sg_optimizer" / "baselines" / "pga_tour.yaml"
 

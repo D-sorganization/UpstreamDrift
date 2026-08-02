@@ -21,7 +21,7 @@ pytestmark = [
 
 TWO_LINK_XML = """
 <mujoco>
-  <option gravity="0 0 -9.81"/>
+  <option gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="l1" pos="0 0 1">
       <joint name="j1" type="hinge" axis="1 0 0"/>
@@ -44,7 +44,7 @@ TWO_LINK_XML = """
 
 FLOATING_BASE_XML = """
 <mujoco>
-  <option gravity="0 0 -9.81"/>
+  <option gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="root" pos="0 0 1">
       <freejoint/>

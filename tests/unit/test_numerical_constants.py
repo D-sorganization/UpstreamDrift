@@ -47,7 +47,7 @@ class TestNumericalConstants:
 
     def test_physical_constants(self) -> None:
         """Verify standard physical constants."""
-        # Gravity should be roughly 9.81
+        # Gravity should be roughly 9.80665
         assert 9.78 <= GRAVITY_STANDARD <= 9.83
 
         # Body mass range

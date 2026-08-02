@@ -21,7 +21,6 @@ from src.shared.python.simulation_backends.jaxsim_urdf_sdf_gate import (
 )
 from src.shared.python.simulation_backends import jaxsim_urdf_sdf_gate as gate
 
-
 _URDF = """\
 <robot name="sample">
   <link name="base">

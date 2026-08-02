@@ -180,7 +180,10 @@ class Bilateral3DModel:
         """
         # Performance optimization: Skip intermediate array allocation
         return np.array(
-            [origin_xz[0] + length * np.sin(angle), origin_xz[1] + length * np.cos(angle)]
+            [
+                origin_xz[0] + length * np.sin(angle),
+                origin_xz[1] + length * np.cos(angle),
+            ]
         )
 
     def forward_kinematics(self, pose: Bilateral3DPose) -> dict[str, NDArray]:

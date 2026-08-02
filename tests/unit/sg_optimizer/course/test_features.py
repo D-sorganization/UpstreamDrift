@@ -18,7 +18,6 @@ from src.shared.python.sg_optimizer.course.rasterize import (
 )
 from src.shared.python.sg_optimizer.mdp.state import State
 
-
 # ---------------------------------------------------------------------------
 # Contract checks
 # ---------------------------------------------------------------------------

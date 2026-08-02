@@ -264,3 +264,8 @@ Open an issue in `Repository_Management`. If you must bypass once to land an urg
 Branch protection requires the CI `quality-gate` check on every PR. That check runs the same lint, format, type, and security gates as the hooks. `--no-verify` only delays feedback — it cannot land code that would have failed the hook.
 
 For the canonical hook contract, see [`Repository_Management/docs/FLEET_HOOK_STANDARDS.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/FLEET_HOOK_STANDARDS.md).
+
+## Where to edit
+
+- **Tools (chat/sidekick/shared)**: Edit in the upstream Tools repository. Do NOT edit in \endor/ud-tools\ or shadow it in \src/shared/python/\.
+- **UpstreamDrift core**: Edit in \src/\.

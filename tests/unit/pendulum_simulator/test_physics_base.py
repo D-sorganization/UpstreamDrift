@@ -95,5 +95,5 @@ class TestPotentialEnergyChain:
         lengths = np.array([1.0, 1.0])
         masses = np.array([1.0, 1.0])
         q = np.array([0.0, 0.0])  # hanging straight down
-        pe = potential_energy_chain(q, lengths, masses, g=9.81)
+        pe = potential_energy_chain(q, lengths, masses, g=9.80665)
         assert isinstance(float(pe), float)

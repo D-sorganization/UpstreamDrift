@@ -34,7 +34,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from ..core.physics_constants import GRAVITY_M_S2
 
 if TYPE_CHECKING:
-    from shared.python.engine_core.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 

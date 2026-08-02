@@ -55,8 +55,8 @@ def compute_gear_effect_spin(
 
     # Gear effect spin rate (empirical relationship)
     # Higher offset = more spin, proportional to speed
-    horizontal_spin = gear_factor * h_offset * speed * h_scale  # [rad/s]
-    vertical_spin = -gear_factor * v_offset * speed * v_scale  # [rad/s]
+    horizontal_spin = -gear_factor * h_offset * speed * h_scale  # [rad/s]
+    vertical_spin = gear_factor * v_offset * speed * v_scale  # [rad/s]
 
     # Convert to 3D spin vector
     # Assuming clubface normal is approximately in X direction

@@ -41,7 +41,7 @@ def main() -> None:
         cl2=0.0,
     )
     env = EnvironmentalConditions(
-        gravity=9.81,
+        gravity=9.80665,
         air_density=1.225,  # kg/m³ at sea level
     )
 

@@ -8,7 +8,7 @@
 Provides a collapsible panel showing recently used models for quick access.
 
 Usage:
-    from shared.python.ui.recent_models import RecentModelsPanel
+    from src.shared.python.ui.recent_models import RecentModelsPanel
 
     panel = RecentModelsPanel()
     panel.model_selected.connect(on_model_selected)

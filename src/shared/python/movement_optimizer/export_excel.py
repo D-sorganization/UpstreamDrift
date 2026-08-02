@@ -67,7 +67,14 @@ def _write_summary_sheet(
     ws.append([])  # blank separator
 
     joint_labels = ["Ankle (joint 1)", "Knee (joint 2)", "Hip (joint 3)"]
-    ws.append(["Joint torque statistics", "Peak |tau| (N*m)", "Mean |tau| (N*m)", "RMS tau (N*m)"])
+    ws.append(
+        [
+            "Joint torque statistics",
+            "Peak |tau| (N*m)",
+            "Mean |tau| (N*m)",
+            "RMS tau (N*m)",
+        ]
+    )
     n_dof = result.torques.shape[1]
     for j in range(n_dof):
         col = result.torques[:, j]

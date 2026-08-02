@@ -575,7 +575,7 @@ class TestTerrainPhysicsIntegration:
 
         # 30 degree slope
         slope_angle_deg = 30.0
-        gravity = 9.81
+        gravity = 9.80665
 
         g_parallel, g_perpendicular = compute_gravity_on_slope(slope_angle_deg, gravity)
 

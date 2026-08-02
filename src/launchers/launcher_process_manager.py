@@ -303,6 +303,10 @@ class ProcessManager:
                 f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
             )
 
+        # Fix for MuJoCo DLL loading issue on Windows with Python 3.13
+        if "MUJOCO_PLUGIN_PATH" not in env:
+            env["MUJOCO_PLUGIN_PATH"] = ""
+
         return env
 
     def _merge_explicit_env_python_paths(

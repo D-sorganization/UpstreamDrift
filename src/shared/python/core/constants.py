@@ -44,7 +44,7 @@ globals().update({name: getattr(_physics_constants, name) for name in __all__})
 # compatibility only.  New code MUST use GRAVITY_FLOAT.
 GRAVITY_FLOAT: float = float(GRAVITY_M_S2)
 # Single source of truth for gravity magnitude (#6638 F5). Previously this was a
-# separate 9.81 literal that drifted ~0.05 m/s^2 from GRAVITY_M_S2 (~9.80665),
+# separate 9.80665 literal that drifted ~0.05 m/s^2 from GRAVITY_M_S2 (~9.80665),
 # silently undercutting cross-engine parity. ``GRAVITY`` is retained as a
 # backward-compatible alias but now resolves to the canonical value.
 GRAVITY: float = GRAVITY_FLOAT

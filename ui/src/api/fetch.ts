@@ -153,13 +153,31 @@ export async function apiFetchParsed<T>(
  * @param formData - FormData payload
  * @returns Parsed JSON body typed as `T`
  */
-export async function apiFetchForm<T>(path: string, formData: FormData): Promise<T> {
+export async function apiFetchForm<T>(
+  path: string,
+  formData: FormData,
+  init?: ApiFetchInit,
+): Promise<T> {
   const url = `${getApiBase()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
+
+  const mergedInit: RequestInit = {
+    method: 'POST',
+    body: formData,
+    ...requestInit,
+    signal: buildSignal(timeoutMs, requestInit.signal),
+  };
 
   let response: Response;
   try {
-    response = await fetch(url, { method: 'POST', body: formData });
+    response = await fetch(url, mergedInit);
   } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
+    }
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error(`Request aborted — ${path}`);
+    }
     throw new Error(
       err instanceof Error ? err.message : `Network error for ${path}`,
     );
@@ -179,4 +197,54 @@ export async function apiFetchForm<T>(path: string, formData: FormData): Promise
   }
 
   return response.json() as Promise<T>;
+}
+
+/**
+ * apiFetchBlob — same as apiFetch but for blob downloads.
+ *
+ * @param path - API path
+ * @param init - Optional RequestInit
+ * @returns The Blob object
+ */
+export async function apiFetchBlob(
+  path: string,
+  init?: ApiFetchInit,
+): Promise<Blob> {
+  const url = `${getApiBase()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
+
+  const mergedInit: RequestInit = {
+    ...requestInit,
+    signal: buildSignal(timeoutMs, requestInit.signal),
+  };
+
+  let response: Response;
+  try {
+    response = await fetch(url, mergedInit);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
+    }
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error(`Request aborted — ${path}`);
+    }
+    throw new Error(
+      err instanceof Error ? err.message : `Network error for ${path}`,
+    );
+  }
+
+  if (!response.ok) {
+    let detail: string | undefined;
+    try {
+      const body = (await response.json()) as Record<string, unknown>;
+      if (typeof body.detail === 'string') {
+        detail = body.detail;
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
+  }
+
+  return response.blob();
 }

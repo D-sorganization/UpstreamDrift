@@ -8,11 +8,11 @@ from __future__ import annotations
 import logging
 import math
 
-from model_generation.converters.simscape.mdl_parser import (
+from src.shared.python.model_generation.converters.simscape.mdl_parser import (
     SimscapeBlock,
     SimscapeModel,
 )
-from model_generation.core.types import (
+from src.shared.python.model_generation.core.types import (
     Joint,
     JointDynamics,
     JointLimits,

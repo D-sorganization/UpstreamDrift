@@ -17,10 +17,10 @@ This package provides modular plotting components:
 
 For backward compatibility, the main GolfSwingPlotter class
 and MplCanvas are still available via:
-    from shared.python.plotting import GolfSwingPlotter, MplCanvas
+    from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
 
 For new code, prefer importing from specific modules:
-    from shared.python.plotting.base import RecorderInterface, MplCanvas
+    from src.shared.python.plotting.base import RecorderInterface, MplCanvas
 """
 
 # Import base components

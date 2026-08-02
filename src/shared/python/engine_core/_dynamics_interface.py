@@ -346,7 +346,7 @@ class DynamicsInterface(Protocol):
             - Pinocchio: Modal representation
 
         Example:
-            >>> from shared.python.flexible_shaft import create_standard_shaft, compute_EI_profile
+            >>> from src.shared.python.flexible_shaft import create_standard_shaft, compute_EI_profile
             >>> props = create_standard_shaft(ShaftMaterial.GRAPHITE)
             >>> EI = compute_EI_profile(props)
             >>> mass = compute_mass_profile(props)

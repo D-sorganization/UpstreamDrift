@@ -43,9 +43,9 @@ class TestPhysicsValidatorInit:
     """Tests for PhysicsValidator initialization."""
 
     def test_physics_validation_extended_default_gravity(self, validator) -> None:
-        """Default gravity vector is [0, 0, -9.81]."""
+        """Default gravity vector is [0, 0, -9.80665]."""
 
-        assert abs(validator.gravity[2] - (-9.81)) < 1e-6
+        assert abs(validator.gravity[2] - (-9.80665)) < 1e-6
 
     def test_custom_gravity(self) -> None:
         """Custom gravity vector is stored correctly."""

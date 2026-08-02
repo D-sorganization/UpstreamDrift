@@ -92,8 +92,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m ensurepip --upgrade || true
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+          if [ -f requirements.lock ]; then
+            pip install -r requirements.lock
           elif [ -f requirements.lock ]; then
             pip install -r requirements.lock
           elif [ -f pyproject.toml ]; then

@@ -9,7 +9,6 @@ from starlette.websockets import WebSocketDisconnect as StarletteWSDisconnect
 
 from src.api.routes.chat_ws import router
 
-
 pytestmark = pytest.mark.unit
 
 

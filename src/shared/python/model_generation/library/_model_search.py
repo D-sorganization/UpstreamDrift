@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from model_generation.library._model_types import (
+from src.shared.python.model_generation.library._model_types import (
     ModelCategory,
     ModelEntry,
     RepositorySource,

@@ -25,7 +25,6 @@ from src.robotics.sensing.noise_models import (
 )
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
-
 DEFAULT_IMU_GRAVITY_M_S2 = float(GRAVITY_M_S2)
 QUATERNION_NORM_EPS = 1e-12
 QUATERNION_RENORMALIZE_TOL = 1e-10
@@ -87,7 +86,7 @@ class IMUSensor:
         >>> config = IMUSensorConfig(sensor_id="body_imu")
         >>> imu = IMUSensor(config)
         >>> reading = imu.read(
-        ...     linear_accel=np.array([0, 0, 9.81]),
+        ...     linear_accel=np.array([0, 0, 9.80665]),
         ...     angular_vel=np.array([0, 0, 0.1]),
         ...     timestamp=0.001,
         ... )

@@ -19,7 +19,6 @@ from src.shared.python.theme.color_derivation import (
     with_alpha,
 )
 
-
 # ── is_dark_bg ──────────────────────────────────────────────────────────
 
 

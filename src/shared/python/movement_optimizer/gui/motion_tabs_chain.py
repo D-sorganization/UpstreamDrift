@@ -119,10 +119,22 @@ class ChainDynamicsTab(_MotionViewMixin, QWidget):
             tooltip="Number of links in the chain.",
         )
         self._add_control(
-            form, "length", "Link length m", 0.03, 1.0, 0.18, tooltip="Length of each chain link."
+            form,
+            "length",
+            "Link length m",
+            0.03,
+            1.0,
+            0.18,
+            tooltip="Length of each chain link.",
         )
         self._add_control(
-            form, "mass", "Link mass kg", 0.01, 4.0, 0.12, tooltip="Mass of each chain link."
+            form,
+            "mass",
+            "Link mass kg",
+            0.01,
+            4.0,
+            0.12,
+            tooltip="Mass of each chain link.",
         )
         self._add_control(
             form,

@@ -338,8 +338,9 @@ class PinocchioReferenceAdapter:
         state: CanonicalV2State,
         *,
         inertial_parameters: npt.ArrayLike | None = None,
-        set_inertial_parameters: Callable[[npt.NDArray[np.float64]], None]
-        | None = None,
+        set_inertial_parameters: (
+            Callable[[npt.NDArray[np.float64]], None] | None
+        ) = None,
         epsilon: float = _DEFAULT_EPS,
     ) -> InverseDynamicsGradients:
         """Return analytic gradients when supplied by backend, else finite diff."""

@@ -46,7 +46,7 @@ def test_provenance_record_inputs_must_be_dotted_ids():
 
 
 def test_provenance_record_inputs_may_be_empty_for_constants():
-    rec = _record(formula="constant 9.81", inputs=())
+    rec = _record(formula="constant 9.80665", inputs=())
     assert rec.inputs == ()
 
 
@@ -84,10 +84,10 @@ def test_provenance_value_describe_includes_formula_and_source():
 
 
 def test_provenance_value_describe_handles_constant_with_no_inputs():
-    rec = _record(formula="constant 9.81", inputs=())
-    pv = ProvenanceValue(value=9.81, record=rec, display_units="m/s^2")
+    rec = _record(formula="constant 9.80665", inputs=())
+    pv = ProvenanceValue(value=9.80665, record=rec, display_units="m/s^2")
     description = pv.describe()
-    assert "constant 9.81" in description
+    assert "constant 9.80665" in description
     assert "(no inputs)" in description
 
 

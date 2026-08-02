@@ -105,9 +105,9 @@ def _filter_keypoints(
         metadata={
             **seq.metadata,
             "filtered": True,
-            "filter_type": filter_type.value
-            if hasattr(filter_type, "value")
-            else str(filter_type),
+            "filter_type": (
+                filter_type.value if hasattr(filter_type, "value") else str(filter_type)
+            ),
         },
     )
 
@@ -157,9 +157,9 @@ def _filter_markers(
         metadata={
             **traj.metadata,
             "filtered": True,
-            "filter_type": filter_type.value
-            if hasattr(filter_type, "value")
-            else str(filter_type),
+            "filter_type": (
+                filter_type.value if hasattr(filter_type, "value") else str(filter_type)
+            ),
         },
     )
 

@@ -704,6 +704,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
             viewer_script = (
                 REPOS_ROOT
+                / "src"
                 / "engines"
                 / "physics_engines"
                 / "mujoco"
@@ -722,7 +723,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.show_toast(
                     "Viewer script missing, attempting direct launch...", "warning"
                 )
-                mujoco.viewer.launch(m, d)
+                self.launcher._passive_mjcf_viewer = mujoco.viewer.launch_passive(m, d)
 
         except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
@@ -1049,7 +1050,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         try:
             logger.info("Launching C3D Viewer: %s", c3d_script)
             process = self.process_manager.launch_script(
-                "c3d_viewer", c3d_script, c3d_script.parent
+                "c3d_viewer", c3d_script, c3d_script.parent, keep_terminal_open=True
             )
             if not process:
                 raise RuntimeError("ProcessManager returned None")
@@ -1077,7 +1078,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         try:
             logger.info("Launching Shot Tracer: %s", shot_tracer_script)
             process = self.process_manager.launch_script(
-                "shot_tracer", shot_tracer_script, REPOS_ROOT
+                "shot_tracer", shot_tracer_script, REPOS_ROOT, keep_terminal_open=True
             )
             if not process:
                 raise RuntimeError("ProcessManager returned None")

@@ -79,16 +79,16 @@ class TestSpinalLoadAnalysis:
     def test_risk_thresholds(self, analyzer, example_data) -> None:
         """Test that high loads trigger correct risk levels."""
         # Create high compression scenario
-        # Force = Compression Threshold * BodyWeight * 9.81
+        # Force = Compression Threshold * BodyWeight * 9.80665
         # Body Weight = 80kg
         # High Risk Compression > 6.0 BW
         # Let's inject a torque that causes high compression
         # Compression ~= gravity + torque/moment_arm
         # moment_arm = 0.05
-        # needed_muscle_force = (6.0 * 80 * 9.81)
+        # needed_muscle_force = (6.0 * 80 * 9.80665)
         # needed_torque = needed_muscle_force * 0.05
 
-        high_torque = (6.5 * 80 * 9.81) * 0.05
+        high_torque = (6.5 * 80 * 9.80665) * 0.05
 
         example_data["joint_torques"]["lumbar_flexion"][:] = high_torque
 

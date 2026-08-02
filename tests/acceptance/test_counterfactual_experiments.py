@@ -199,6 +199,26 @@ class TestZVCFCounterfactual:
             err_msg="ZVCF at vertical equilibrium should be ~zero",
         )
 
+    def test_zvcf_at_non_zero_state(self, pendulum_engine: PhysicsEngine) -> None:
+        """ZVCF at non-equilibrium configuration should be non-zero.
+
+        A pendulum not at vertical rest should have gravitational acceleration.
+        """
+        engine = pendulum_engine
+
+        # Non-equilibrium configuration
+        q = np.array([np.pi / 4, np.pi / 4])
+        engine.set_state(q, np.array([0.0, 0.0]))
+        engine.set_control(np.array([0.0, 0.0]))
+
+        a_zvcf = engine.compute_zvcf(q)
+
+        # At non-equilibrium, acceleration is non-zero
+        assert a_zvcf.size > 0, "ZVCF should return non-empty result"
+        assert not np.allclose(a_zvcf, 0.0, atol=1e-8), (
+            "ZVCF at non-equilibrium should be non-zero"
+        )
+
     def test_zvcf_preserves_engine_state(self, pendulum_engine: PhysicsEngine) -> None:
         """Computing ZVCF should not modify the engine's internal state."""
         engine = pendulum_engine
@@ -325,6 +345,15 @@ class TestCounterfactualCrossEngine:
             )
 
             engines.append(("Pendulum", PendulumPhysicsEngine()))
+        except ImportError:
+            pass
+
+        try:
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+                MuJoCoPhysicsEngine,
+            )
+
+            engines.append(("MuJoCo", MuJoCoPhysicsEngine()))
         except ImportError:
             pass
 

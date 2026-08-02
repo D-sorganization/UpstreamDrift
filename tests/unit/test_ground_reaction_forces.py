@@ -281,7 +281,7 @@ class TestExtractGRFFromContacts:
         if gravity is not None:
             engine.compute_gravity_forces.return_value = gravity
         else:
-            engine.compute_gravity_forces.return_value = np.array([-9.81])
+            engine.compute_gravity_forces.return_value = np.array([-9.80665])
 
         # Jacobian returns a dict with a linear key
         jac = {"linear": np.array([[0.0, 0.1], [0.0, 0.0], [0.0, 0.0]])}
@@ -451,7 +451,7 @@ class TestCrossEngineValidation:
         engine = MagicMock()
         engine.get_time.return_value = 0.5
         engine.compute_contact_forces.return_value = np.zeros(3)
-        engine.compute_gravity_forces.return_value = np.array([-9.81])
+        engine.compute_gravity_forces.return_value = np.array([-9.80665])
         jac = {"linear": np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])}
         engine.compute_jacobian.return_value = jac
 

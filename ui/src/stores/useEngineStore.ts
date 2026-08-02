@@ -276,18 +276,25 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
     }));
     try {
       await apiFetch<unknown>(`/api/engines/${engineName}/unload`, { method: 'POST' });
-    } catch {
-      // Best-effort: still update client state even if backend call fails
+      set((state) => ({
+        engines: state.engines.map((e) =>
+          e.name === engineName
+            ? { ...e, loadState: 'idle' as EngineLoadState, error: undefined }
+            : e
+        ),
+        selectedEngine:
+          selectedEngine === engineName ? null : selectedEngine,
+      }));
+    } catch (err) {
+      set((state) => ({
+        engines: state.engines.map((e) =>
+          e.name === engineName
+            ? { ...e, loadState: 'loaded' as EngineLoadState }
+            : e
+        ),
+      }));
+      throw err;
     }
-    set((state) => ({
-      engines: state.engines.map((e) =>
-        e.name === engineName
-          ? { ...e, loadState: 'idle' as EngineLoadState, error: undefined }
-          : e
-      ),
-      selectedEngine:
-        selectedEngine === engineName ? null : selectedEngine,
-    }));
   },
 
   resetEngines: () =>
