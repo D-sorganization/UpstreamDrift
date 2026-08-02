@@ -2371,6 +2371,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- `_convex_distance.py`: Optimized L2 norm calculation using `np.einsum` to avoid temporary intermediate arrays. (spec-exempt: micro-optimization)
 
 - Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
 
