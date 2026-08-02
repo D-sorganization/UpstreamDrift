@@ -126,7 +126,11 @@ def _swing_overlay_scene(
         for joint, magnitude in zip(SWING_POLICY_JOINT_NAMES, field.joint_torque_nm, strict=True):
             point = field.joint_points_m[joint]
             arcs.append(
-                TorqueArc((float(point[0]), float(point[1])), float(magnitude), VectorStyle(ARM))
+                TorqueArc(
+                    (float(point[0]), float(point[1])),
+                    float(magnitude),
+                    VectorStyle(ARM),
+                )
             )
     if com:
         markers.append(ComMarker(origin, VectorStyle(ACCENT)))
@@ -143,7 +147,10 @@ def _chain_overlay_scene(
     """Build the chain overlay scene from a per-link force field, filtered by toggles."""
     arrows: list[ForceArrow] = []
     for index in range(len(field.midpoints_m)):
-        origin = (float(field.midpoints_m[index][0]), float(field.midpoints_m[index][1]))
+        origin = (
+            float(field.midpoints_m[index][0]),
+            float(field.midpoints_m[index][1]),
+        )
         if gravity:
             vec = (float(field.gravity_n[index][0]), float(field.gravity_n[index][1]))
             arrows.append(ForceArrow(origin, vec, VectorStyle(LEG)))
@@ -151,7 +158,10 @@ def _chain_overlay_scene(
             vec = (float(field.tension_n[index][0]), float(field.tension_n[index][1]))
             arrows.append(ForceArrow(origin, vec, VectorStyle(CHAIN)))
         if net:
-            vec = (float(field.net_force_n[index][0]), float(field.net_force_n[index][1]))
+            vec = (
+                float(field.net_force_n[index][0]),
+                float(field.net_force_n[index][1]),
+            )
             arrows.append(ForceArrow(origin, vec, VectorStyle(ARM)))
     return OverlayScene(arrows=tuple(arrows))
 
@@ -647,7 +657,13 @@ class SwingsetTab(_MotionViewMixin, QWidget):
             tooltip="Rider arm segment length (upper arm and forearm).",
         )
         self._add_control(
-            form, "arm_mass", "Arm segment kg", 0.2, 10.0, 2.0, tooltip="Rider arm segment mass."
+            form,
+            "arm_mass",
+            "Arm segment kg",
+            0.2,
+            10.0,
+            2.0,
+            tooltip="Rider arm segment mass.",
         )
         return group
 
@@ -733,7 +749,14 @@ class SwingsetTab(_MotionViewMixin, QWidget):
             form, "knee_samples", "Knee samples", 1, 8, 2, integer=True, refresh=False
         )
         self._add_control(
-            form, "phase_samples", "Phase samples", 1, 12, 2, integer=True, refresh=False
+            form,
+            "phase_samples",
+            "Phase samples",
+            1,
+            12,
+            2,
+            integer=True,
+            refresh=False,
         )
         self._add_control(form, "speed", "Playback speed", 0.25, 4.0, 1.0, refresh=False)
         layout.addLayout(form)
@@ -916,7 +939,10 @@ class SwingsetTab(_MotionViewMixin, QWidget):
         return CyclicPolicyBounds(
             frequency_hz=(self._value("freq_min"), self._value("freq_max")),
             hip_rate_rad_s=(self._value("hip_rate_min"), self._value("hip_rate_max")),
-            torso_rate_rad_s=(self._value("torso_rate_min"), self._value("torso_rate_max")),
+            torso_rate_rad_s=(
+                self._value("torso_rate_min"),
+                self._value("torso_rate_max"),
+            ),
             knee_ratio=(self._value("knee_ratio_min"), self._value("knee_ratio_max")),
         )
 

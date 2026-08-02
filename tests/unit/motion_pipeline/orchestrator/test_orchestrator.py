@@ -19,7 +19,6 @@ from src.shared.python.motion_pipeline.orchestrator import (
 
 from ._local_fixtures import make_minimal_config
 
-
 pytestmark = pytest.mark.unit
 
 ORCHESTRATOR_LOGGER = "src.shared.python.motion_pipeline.orchestrator"

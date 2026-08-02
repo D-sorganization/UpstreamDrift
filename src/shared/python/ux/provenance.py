@@ -37,7 +37,7 @@ class ProvenanceRecord:
     ----------
     formula
         Human-readable derivation, e.g. ``"fps = 1.0 / timestep"`` or
-        ``"sum of joint kinetic energies"`` or ``"constant 9.81"``.
+        ``"sum of joint kinetic energies"`` or ``"constant 9.80665"``.
     inputs
         Tuple of field ids consumed by the formula, in canonical
         ``simulation.timestep`` form.  Empty for true constants.

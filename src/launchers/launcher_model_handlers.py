@@ -115,6 +115,7 @@ class ModuleHandler:
             module_name=self.module_name,
             cwd=repo_path,
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 
@@ -220,6 +221,7 @@ class ScriptHandler:
             script_path=script_path,
             cwd=cwd,
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 
@@ -330,6 +332,7 @@ class SpecialAppHandler:
                 module_name=package_module,
                 cwd=working_directory,
                 extra_python_paths=python_paths,
+                keep_terminal_open=True,
             )
         else:
             process = process_manager.launch_script(
@@ -337,6 +340,7 @@ class SpecialAppHandler:
                 script_path=script_path,
                 cwd=working_directory,
                 extra_python_paths=python_paths,
+                keep_terminal_open=True,
             )
         return process is not None
 
@@ -351,7 +355,7 @@ class SpecialAppHandler:
 
             tool = get_embeddable_tool(tool_id)
             if tool is not None:
-                return tool.create_main_widget()
+                return tool.create_main_widget(None)
 
         embed_adapter = getattr(model, "embed_adapter", None)
         if embed_adapter and "::" in embed_adapter:
@@ -486,6 +490,7 @@ class PuttingGreenHandler:
             script_path=script_path,
             cwd=get_model_working_directory(model, repo_path, script_path.parent),
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 
@@ -574,6 +579,7 @@ class BiomechExerciseHandler:
             cwd=repo_path,
             env=env,
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 
@@ -631,10 +637,19 @@ class ProviderExerciseHandler:
                 getattr(model, "id", "unknown"),
             )
             return False
-        exercise_name = Path(model_path).name
-        if not exercise_name or exercise_name in {".", ".."}:
+
+        try:
+            resolved_dir = resolve_model_artifact_path(model, repo_path)
+            if not resolved_dir.is_dir():
+                logger.error(
+                    "ProviderExerciseHandler: model path is not a directory: %s",
+                    resolved_dir,
+                )
+                return False
+            exercise_name = resolved_dir.name
+        except (ValueError, OSError) as exc:
             logger.error(
-                "ProviderExerciseHandler: invalid exercise path %s", model_path
+                "ProviderExerciseHandler: invalid exercise path %s: %s", model_path, exc
             )
             return False
 
@@ -649,6 +664,7 @@ class ProviderExerciseHandler:
             cwd=repo_path,
             env=env,
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 
@@ -706,6 +722,7 @@ class GolfSimulationSuiteHandler:
             script_path=script_path,
             cwd=repo_path,
             extra_python_paths=get_model_python_paths(model, repo_path),
+            keep_terminal_open=True,
         )
         return process is not None
 

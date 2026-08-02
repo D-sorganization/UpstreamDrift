@@ -20,7 +20,7 @@ class MockEngine:
         return np.array([0.0, 0.0]), np.array([0.0, 0.0])
 
     def compute_gravity_forces(self):
-        return [0.0, -9.81]
+        return [0.0, -9.80665]
 
     def compute_contact_forces(self):
         return [0.0, 0.0]

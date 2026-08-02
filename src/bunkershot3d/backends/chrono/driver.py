@@ -52,7 +52,7 @@ class ChronoDriver:
     def _build_system(self) -> Any:
         """Construct and return a populated ChSystemSMC."""
         system = chrono.ChSystemSMC()
-        system.SetGravitationalAcceleration(chrono.ChVector3d(0, 0, -9.81))
+        system.SetGravitationalAcceleration(chrono.ChVector3d(0, 0, -9.80665))
 
         lx, ly, lz = self.config.domain_extents()
 

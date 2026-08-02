@@ -328,7 +328,7 @@ class TestIMUSensor:
         """Test ideal IMU adds no noise."""
         imu = create_ideal_imu()
 
-        accel = np.array([0.0, 0.0, 9.81])
+        accel = np.array([0.0, 0.0, 9.80665])
         gyro = np.array([0.0, 0.0, 0.1])
 
         reading = imu.read(accel, gyro, timestamp=0.001)
@@ -341,7 +341,7 @@ class TestIMUSensor:
         imu = IMUSensor()
 
         reading = imu.read(
-            linear_accel=np.array([0.0, 0.0, 9.81]),
+            linear_accel=np.array([0.0, 0.0, 9.80665]),
             angular_vel=np.array([0.0, 0.0, 0.1]),
         )
 
@@ -427,7 +427,7 @@ class TestIMUSensor:
         """Test realistic IMU adds noise."""
         imu = create_realistic_imu(quality="mems", seed=42)
 
-        accel = np.array([0.0, 0.0, 9.81])
+        accel = np.array([0.0, 0.0, 9.80665])
         gyro = np.array([0.0, 0.0, 0.0])
 
         reading = imu.read(accel, gyro)
@@ -448,7 +448,7 @@ class TestIMUSensor:
         imu.set_orientation(q)
 
         gravity = imu.get_gravity_in_sensor_frame()
-        assert abs(gravity[0] - float(GRAVITY_M_S2)) < 0.1  # ~9.8 in x direction
+        assert abs(gravity[0] - float(GRAVITY_M_S2)) < 0.1  # ~9.80665 in x direction
 
 
 class TestSensorFactories:

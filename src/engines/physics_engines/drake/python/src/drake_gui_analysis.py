@@ -147,7 +147,7 @@ class AnalysisMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")  # type: ignore[arg-type]
             return
 
-        from shared.python.plotting import GolfSwingPlotter
+        from src.shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:  # type: ignore[attr-defined]
             QtWidgets.QMessageBox.warning(
@@ -230,7 +230,7 @@ class AnalysisMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")  # type: ignore[arg-type]
             return
 
-        from shared.python.plotting import GolfSwingPlotter
+        from src.shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:  # type: ignore[attr-defined]
             QtWidgets.QMessageBox.warning(
@@ -288,7 +288,7 @@ class AnalysisMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")  # type: ignore[arg-type]
             return
 
-        from shared.python.plotting import GolfSwingPlotter
+        from src.shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:  # type: ignore[attr-defined]
             QtWidgets.QMessageBox.warning(
@@ -309,8 +309,8 @@ class AnalysisMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")  # type: ignore[arg-type]
             return
 
-        from shared.python.plotting import GolfSwingPlotter
-        from shared.python.validation_pkg.statistical_analysis import (
+        from src.shared.python.plotting import GolfSwingPlotter
+        from src.shared.python.validation_pkg.statistical_analysis import (
             StatisticalAnalyzer,
         )
 

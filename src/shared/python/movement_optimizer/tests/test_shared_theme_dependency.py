@@ -15,14 +15,17 @@ pytest.importorskip("shared.python.theme")  # fleet theme only; skip on bare env
 
 
 def test_shared_theme_public_surface_is_importable() -> None:
-    from shared.python.theme import (
+    from src.shared.python.theme import (
         BUILTIN_THEMES,
         THEME_COLOR_KEYS,
         ThemedWindowMixin,
         generate_stylesheet,
         get_theme_manager,
     )
-    from shared.python.theme.matplotlib_style import apply_plot_theme, get_chart_color
+    from src.shared.python.theme.matplotlib_style import (
+        apply_plot_theme,
+        get_chart_color,
+    )
 
     # The names must be the real callables/objects, not None placeholders.
     assert callable(get_theme_manager)
@@ -34,13 +37,21 @@ def test_shared_theme_public_surface_is_importable() -> None:
     # The themes we map onto must exist with the keys the Palette consumes.
     assert "Dark" in BUILTIN_THEMES
     assert "Light" in BUILTIN_THEMES
-    required = {"bg", "group_bg", "input_bg", "text", "text_secondary", "accent", "button_hover"}
+    required = {
+        "bg",
+        "group_bg",
+        "input_bg",
+        "text",
+        "text_secondary",
+        "accent",
+        "button_hover",
+    }
     assert required.issubset(set(THEME_COLOR_KEYS))
     assert required.issubset(set(BUILTIN_THEMES["Dark"]))
 
 
 def test_get_chart_color_returns_hex_strings() -> None:
-    from shared.python.theme.matplotlib_style import get_chart_color
+    from src.shared.python.theme.matplotlib_style import get_chart_color
 
     for index in range(3):
         color = get_chart_color(index)

@@ -88,11 +88,11 @@ def _bootstrap_python_paths(
     root = repo_root or REPO_ROOT
     tools_src = resolve_tools_source_root(root, env_value)
     return [
+        str(root / "src"),
+        str(root / "src" / "shared" / "python"),
         str(tools_src),
         str(tools_src / "shared" / "python"),
         str(tools_src / "python" / "src"),
-        str(root / "src" / "shared" / "python"),
-        str(root / "src"),
     ]
 
 

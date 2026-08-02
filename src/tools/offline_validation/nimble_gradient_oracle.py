@@ -184,9 +184,11 @@ def compare_nimble_gradient(
         max_abs_error=max_abs_error,
         max_rel_error=max_rel_error,
         tolerance=request.tolerance,
-        reason="gradient agreement within tolerance"
-        if passed
-        else "gradient disagreement exceeds tolerance",
+        reason=(
+            "gradient agreement within tolerance"
+            if passed
+            else "gradient disagreement exceeds tolerance"
+        ),
     )
 
 

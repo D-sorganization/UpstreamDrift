@@ -35,7 +35,7 @@ class TestModelXML:
         """Test gravity constant is defined."""
         # Check that gravity constant is a reasonable value (standard Earth gravity)
         assert isinstance(GRAVITY_M_S2, int | float)
-        # Standard Earth gravity is 9.81 m/s² (source: NIST)
+        # Standard Earth gravity is 9.80665 m/s² (source: NIST)
         assert 9.0 < GRAVITY_M_S2 < 10.0
 
     def test_xml_contains_gravity(self) -> None:

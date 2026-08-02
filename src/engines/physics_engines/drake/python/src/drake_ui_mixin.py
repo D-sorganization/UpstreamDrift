@@ -43,7 +43,7 @@ if TYPE_CHECKING or HAS_QT:
 
 # Shared imports
 try:
-    from shared.python.dashboard.widgets import LivePlotWidget
+    from src.shared.python.dashboard.widgets import LivePlotWidget
 except ImportError:
     LivePlotWidget = None  # type: ignore[misc, assignment]
 

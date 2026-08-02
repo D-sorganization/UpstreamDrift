@@ -275,6 +275,15 @@
       "issue": 7829,
       "reason": "Issue #7829: evaluate exceeded the changed-file parameter budget. Temporary exception until configuration object is extracted.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/diff_ik.py",
+      "symbol": "solve_dual_frame_ik",
+      "rule": "parameters",
+      "owner": "@bolt @D-sorganization/core-maintainers",
+      "issue": 8271,
+      "reason": "Issue #8271: Performance optimization PR modifies file which contains a function exceeding parameter budget (12 > 8).",
+      "expires_on": "2026-10-31"
     }
   ]
 }

@@ -16,9 +16,13 @@ def test_help_center_exposes_required_offline_topics(qapp) -> None:
 
     assert len(HELP_TOPICS) >= 5
     assert dialog.tabs.count() >= 5
-    assert {"getting_started", "parameters", "results", "troubleshooting", "glossary"} <= set(
-        HELP_TOPICS
-    )
+    assert {
+        "getting_started",
+        "parameters",
+        "results",
+        "troubleshooting",
+        "glossary",
+    } <= set(HELP_TOPICS)
 
 
 def test_help_center_can_select_each_topic(qapp) -> None:

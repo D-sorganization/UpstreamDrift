@@ -13,7 +13,6 @@ from src.shared.python.motion_pipeline.sources.pose2sim_adapter import (
     load_pose2sim_observations,
 )
 
-
 FIXTURE_ROOT = Path("tests/data/motion_pipeline/pose2sim/sample_session")
 
 

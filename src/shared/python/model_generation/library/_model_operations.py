@@ -9,8 +9,8 @@ import logging
 import shutil
 from pathlib import Path
 
-from model_generation.converters.urdf_parser import URDFParser
-from model_generation.library._model_types import (
+from src.shared.python.model_generation.converters.urdf_parser import URDFParser
+from src.shared.python.model_generation.library._model_types import (
     LibraryConfig,
     ModelCategory,
     ModelEntry,

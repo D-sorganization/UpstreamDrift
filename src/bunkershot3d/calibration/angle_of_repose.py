@@ -64,7 +64,7 @@ def _mujoco_angle_of_repose(
 
     xml = (
         '<mujoco model="hopper_aor">'
-        f'<option timestep="0.001" gravity="0 0 -9.81" iterations="50"/>'
+        f'<option timestep="0.001" gravity="0 0 -9.80665" iterations="50"/>'
         f'<default><geom friction="{friction:.4f} 0.005 0.0001" condim="3"/></default>'
         "<worldbody>"
         '<light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>'

@@ -33,7 +33,7 @@ def sample_data() -> dict[str, Any]:
         },
         "induced_accelerations": {
             0: np.array([0.1, 0.2, 0.3]),
-            "gravity": np.array([9.8, 9.8, 9.8]),
+            "gravity": np.array([9.80665, 9.80665, 9.80665]),
         },
     }
 

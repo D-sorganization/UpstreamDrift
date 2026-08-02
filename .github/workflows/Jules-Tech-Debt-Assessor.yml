@@ -99,7 +99,7 @@ jobs:
           python -m ensurepip --upgrade || true
           if ! pip install -e ".[dev]"; then
             python -m ensurepip --upgrade || true
-            pip install -r requirements.txt
+            pip install -r requirements.lock
           fi
           sudo apt-get install -y jq bc
 

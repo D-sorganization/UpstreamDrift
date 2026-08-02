@@ -15,7 +15,6 @@ import pytest
 # the post-init derivation.
 from src.shared.python.theme.api import ThemeColors
 
-
 _BASE_14 = {
     "bg": "#ffffff",
     "group_bg": "#f8f9fa",

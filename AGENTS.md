@@ -776,3 +776,7 @@ Use repo-local context before broad exploration:
 - To audit local fleet posture, run `python -m scripts.codemap_context_inventory --root .. --format markdown` from `Repository_Management`. This is a local, network-free inventory; it is not a substitute for repo-specific validation.
 
 <!-- END FLEET-MANAGED: repo-context-codemap -->
+
+## Where to edit
+
+- **Tools (chat/sidekick/shared)**: Edit in the upstream Tools repository. Do NOT edit in \endor/ud-tools\ or shadow it in \src/shared/python/\.

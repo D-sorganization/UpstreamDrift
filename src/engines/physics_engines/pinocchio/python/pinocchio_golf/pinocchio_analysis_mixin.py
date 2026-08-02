@@ -351,7 +351,7 @@ class PinocchioAnalysisMixin:
         self._ensure_analysis_data_populated()
 
         try:
-            from shared.python.data_io.export import export_recording_all_formats
+            from src.shared.python.data_io.export import export_recording_all_formats
 
             data_dict = self.recorder.export_to_dict()
             results = export_recording_all_formats(filename, data_dict)

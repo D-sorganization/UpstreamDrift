@@ -157,7 +157,7 @@ def compute_ztcf_forces(
     joint_positions: np.ndarray,
     segment_masses: np.ndarray,
     segment_lengths: np.ndarray,
-    gravity_acceleration: float = 9.81,
+    gravity_acceleration: float = 9.80665,
 ) -> ZTCFResult:
     """Compute ZTCF joint forces from dynamics matrices and kinematics.
 
@@ -177,7 +177,7 @@ def compute_ztcf_forces(
     segment_lengths : np.ndarray
         Length of each segment, shape ``(n_joints,)``.
     gravity_acceleration : float
-        Scalar gravitational acceleration (default 9.81 m/s²).
+        Scalar gravitational acceleration (default 9.80665 m/s²).
 
     Returns
     -------

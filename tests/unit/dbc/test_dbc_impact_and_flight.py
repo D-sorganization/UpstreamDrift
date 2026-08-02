@@ -293,7 +293,7 @@ class TestBallFlightSimulatorInvariants(unittest.TestCase):
         )
 
         with self.assertRaises((InvariantError, ValueError)):
-            BallFlightSimulator(env=EnvironmentalConditions(gravity=-9.81))
+            BallFlightSimulator(env=EnvironmentalConditions(gravity=-9.80665))
 
     def test_valid_construction_ok(self) -> None:
         from src.shared.python.physics.ball_flight_physics import BallFlightSimulator

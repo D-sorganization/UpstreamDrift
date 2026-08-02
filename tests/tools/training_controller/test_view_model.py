@@ -23,7 +23,6 @@ from src.tools.training_controller.view_model import (
     job_row_from_training_job,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

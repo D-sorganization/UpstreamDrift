@@ -1,14 +1,42 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useAnalysisTools } from './useAnalysisTools';
+import { apiFetch } from './fetch';
 
-describe('useAnalysisTools lifecycle guard', () => {
-  it('clears the mounted ref on unmount before async completions can set state', () => {
-    const source = readFileSync(join(__dirname, 'useAnalysisTools.ts'), 'utf-8');
+vi.mock('./fetch', () => ({
+  apiFetch: vi.fn(),
+}));
 
-    expect(source).toMatch(/import\s+\{[^}]*useEffect[^}]*\}\s+from 'react';/);
-    expect(source).toMatch(
-      /useEffect\(\(\) => \{\s*isMountedRef\.current = true;\s*return \(\) => \{\s*isMountedRef\.current = false;\s*\};\s*\}, \[\]\);/,
+describe('useAnalysisTools lifecycle', () => {
+  it('does not update state if unmounted before fetch completes', async () => {
+    let resolveFetch: (value: unknown) => void;
+    vi.mocked(apiFetch).mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
     );
+
+    const { result, unmount } = renderHook(() => useAnalysisTools());
+
+    act(() => {
+      result.current.fetchMetrics();
+    });
+
+    // State is 'loading'
+    expect(result.current.loadState).toBe('loading');
+
+    // Unmount before the fetch resolves
+    unmount();
+
+    // Resolve the fetch
+    await act(async () => {
+      resolveFetch({ status: 'ok', metrics: {} });
+      // wait a tick for promise
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // Since the component unmounted before the promise resolved,
+    // the state update was guarded against and the stale result remains 'loading'
+    expect(result.current.loadState).toBe('loading');
   });
 });

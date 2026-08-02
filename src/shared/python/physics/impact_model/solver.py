@@ -314,7 +314,7 @@ class ImpactSolverAPI:
             Dictionary with energy analysis for all impacts
         """
         if not self.recorder.events:
-            return {"error": "No impacts recorded"}
+            raise RuntimeError("No impacts recorded")
 
         reports = [
             {
@@ -359,7 +359,7 @@ class ImpactSolverAPI:
         if tolerance is None:
             raise ValueError("tolerance must be provided")
         if not self.recorder.events:
-            return {"valid": False, "error": "No impacts recorded"}
+            raise RuntimeError("No impacts recorded")
 
         expected_cor = self.params.cor
         measured_cors = []
@@ -379,7 +379,7 @@ class ImpactSolverAPI:
                 measured_cors.append(measured_cor)
 
         if not measured_cors:
-            return {"valid": False, "error": "Could not compute COR"}
+            raise RuntimeError("Could not compute COR")
 
         mean_cor = float(np.mean(measured_cors))
         deviation = abs(mean_cor - expected_cor)
@@ -409,7 +409,7 @@ class ImpactSolverAPI:
         if max_spin_rpm is None:
             raise ValueError("max_spin_rpm must be provided")
         if not self.recorder.events:
-            return {"valid": False, "error": "No impacts recorded"}
+            raise RuntimeError("No impacts recorded")
 
         max_spin_rad = max_spin_rpm * 2 * np.pi / 60  # Convert to rad/s
 

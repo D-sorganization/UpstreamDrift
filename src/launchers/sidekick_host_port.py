@@ -29,14 +29,14 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
-from shared.python.sidekick.agent.subtab_adapter import (
+from src.shared.python.sidekick.agent.subtab_adapter import (
     CalculatorRun,
     StateProfile,
     SubtabAdapter,
     WorkspaceSnapshot,
 )
-from shared.python.sidekick.agent.action_service import SidekickActionService
-from shared.python.sidekick.agent.host_adapter import (
+from src.shared.python.sidekick.agent.action_service import SidekickActionService
+from src.shared.python.sidekick.agent.host_adapter import (
     HostAdapter,
     HostCapability,
     HostInvocationResult,
@@ -118,8 +118,9 @@ class LauncherSubtabPort:
         host: TabHost,
         *,
         workspace: Any | None = None,
-        calculators: Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]]
-        | None = None,
+        calculators: (
+            Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]] | None
+        ) = None,
         profile_path: str | Path | None = None,
     ) -> None:
         if not isinstance(host, TabHost):
@@ -347,8 +348,9 @@ def create_launcher_subtab_adapter(
     host: TabHost,
     *,
     workspace: Any | None = None,
-    calculators: Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]]
-    | None = None,
+    calculators: (
+        Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]] | None
+    ) = None,
     profile_path: str | Path | None = None,
 ) -> SubtabAdapter:
     """Build the ready-to-register ``SidekickActionHandler`` for a host.
@@ -380,8 +382,9 @@ def create_launcher_action_service(
     launcher: Any,
     embedded_host: TabHost | None = None,
     workspace: Any | None = None,
-    calculators: Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]]
-    | None = None,
+    calculators: (
+        Mapping[str, Callable[[Mapping[str, Any]], CalculatorRun]] | None
+    ) = None,
     profile_path: str | Path | None = None,
 ) -> SidekickActionService:
     """Create the launcher window's Sidekick action service.

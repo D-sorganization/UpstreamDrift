@@ -73,13 +73,17 @@ def validate_terrain(  # noqa: C901
     if elev.resolution <= 0:
         messages.append("Terrain resolution must be positive")
 
+    n_rows, n_cols = elev.data.shape
+    max_x = elev.origin_x + (n_cols - 1) * elev.resolution
+    max_y = elev.origin_y + (n_rows - 1) * elev.resolution
+
     # Check patches within bounds
     for i, patch in enumerate(terrain.patches):
-        if patch.x_min < elev.origin_x or patch.x_max > elev.origin_x + elev.width:
+        if patch.x_min < elev.origin_x or patch.x_max > max_x:
             messages.append(
                 f"Patch {i} ({patch.terrain_type.name}) X bounds exceed terrain bounds"
             )
-        if patch.y_min < elev.origin_y or patch.y_max > elev.origin_y + elev.length:
+        if patch.y_min < elev.origin_y or patch.y_max > max_y:
             messages.append(
                 f"Patch {i} ({patch.terrain_type.name}) Y bounds exceed terrain bounds"
             )

@@ -14,7 +14,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 SCHEMA = "upstreamdrift.cross_engine_differential.v1"
 DEFAULT_JSON = Path("docs/validation/cross_engine_v1.json")
 DEFAULT_MARKDOWN = Path("docs/validation/cross_engine_v1.md")

@@ -219,7 +219,10 @@ class TestInputDevices:
     def test_spacemouse_reports_no_hardware_and_refuses_state_queries(self) -> None:
         d = SpaceMouseInput(0)
 
-        assert d.connect() is False
+        with pytest.raises(
+            NotImplementedError, match="Hardware driver not implemented"
+        ):
+            d.connect()
 
         for operation in (d.update, d.get_twist, d.get_pose, d.get_buttons):
             with pytest.raises(StateError):
@@ -231,7 +234,10 @@ class TestInputDevices:
     def test_vr_controller_reports_no_hardware_and_refuses_state_queries(self) -> None:
         d = VRControllerInput("right", "steamvr")
 
-        assert d.connect() is False
+        with pytest.raises(
+            NotImplementedError, match="Hardware driver not implemented"
+        ):
+            d.connect()
 
         with pytest.raises(StateError):
             d.update()
@@ -243,7 +249,10 @@ class TestInputDevices:
     def test_haptic_reports_no_hardware_and_refuses_state_queries(self) -> None:
         d = HapticDeviceInput("phantom")
 
-        assert d.connect() is False
+        with pytest.raises(
+            NotImplementedError, match="Hardware driver not implemented"
+        ):
+            d.connect()
 
         with pytest.raises(StateError):
             d.update()

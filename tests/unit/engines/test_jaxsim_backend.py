@@ -114,7 +114,7 @@ class _FakeModelApi:
 
     @staticmethod
     def free_floating_gravity_forces(model: _FakeModel, data: _FakeData) -> np.ndarray:
-        return np.array([0.0, 0.0, 0.0, 0.0, 0.0, -9.81, 1.0])
+        return np.array([0.0, 0.0, 0.0, 0.0, 0.0, -9.80665, 1.0])
 
     @staticmethod
     def free_floating_coriolis_matrix(model: _FakeModel, data: _FakeData) -> np.ndarray:

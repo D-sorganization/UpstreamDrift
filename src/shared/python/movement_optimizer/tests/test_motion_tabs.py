@@ -25,7 +25,10 @@ from PyQt6.QtWidgets import (
 )
 
 from movement_optimizer.gui import motion_tabs, motion_tabs_chain, policy_worker
-from movement_optimizer.gui.app_icon import movement_optimizer_icon, movement_optimizer_icon_path
+from movement_optimizer.gui.app_icon import (
+    movement_optimizer_icon,
+    movement_optimizer_icon_path,
+)
 from movement_optimizer.gui.main_window import MainWindow
 from movement_optimizer.gui.motion_tabs import (
     ChainDynamicsTab,

@@ -160,6 +160,7 @@ models:
     description: "Double/triple pendulum golf swing dynamics simulator"
     type: "special_app"
     path: "src/shared/python/pendulum_simulator/__main__.py"
+    embed_adapter: "src/shared/python/pendulum_simulator/__main__.py::get_dockable_ui"
     launcher:
       category: "simulation"
       logo: "pendulum.svg"

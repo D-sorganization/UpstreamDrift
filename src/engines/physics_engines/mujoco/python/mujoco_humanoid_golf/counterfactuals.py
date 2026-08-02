@@ -130,9 +130,11 @@ class CounterfactualAnalyzer:
         # 1. Compute OBSERVED acceleration (with control)
         if qpos is None:
             raise ValueError("qpos must be provided")
+        if len(ctrl) != self.model.nu:
+            raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
         self._data_observed.qpos[:] = qpos
         self._data_observed.qvel[:] = qvel
-        self._data_observed.ctrl[: len(ctrl)] = ctrl
+        self._data_observed.ctrl[:] = ctrl
 
         mujoco.mj_forward(self.model, self._data_observed)
 
@@ -171,9 +173,16 @@ class CounterfactualAnalyzer:
 
         if compute_trajectories:
             # Simple Euler integration for one step
-            qpos_obs = qpos + qvel * dt + 0.5 * qacc_observed * dt**2
-            qpos_cf = qpos + qvel * dt + 0.5 * qacc_counterfactual * dt**2
-            delta_qpos = qpos_obs - qpos_cf
+            qpos_obs = qpos.copy()
+            mujoco.mj_integratePos(
+                self.model, qpos_obs, qvel + 0.5 * qacc_observed * dt, dt
+            )
+            qpos_cf = qpos.copy()
+            mujoco.mj_integratePos(
+                self.model, qpos_cf, qvel + 0.5 * qacc_counterfactual * dt, dt
+            )
+            delta_qpos = np.zeros(self.model.nv)
+            mujoco.mj_differentiatePos(self.model, delta_qpos, 1.0, qpos_cf, qpos_obs)
 
         return CounterfactualResult(
             type="ztcf",
@@ -253,13 +262,20 @@ class CounterfactualAnalyzer:
 
         if compute_trajectories:
             # Observed: continues with momentum
-            qpos_obs = qpos + qvel * dt + 0.5 * qacc_observed * dt**2
+            qpos_obs = qpos.copy()
+            mujoco.mj_integratePos(
+                self.model, qpos_obs, qvel + 0.5 * qacc_observed * dt, dt
+            )
 
             # Counterfactual: starts from rest
             # (zero initial velocity, only driven by gravity/constraints)
-            qpos_cf = qpos + 0.5 * qacc_counterfactual * dt**2
+            qpos_cf = qpos.copy()
+            mujoco.mj_integratePos(
+                self.model, qpos_cf, 0.5 * qacc_counterfactual * dt, dt
+            )
 
-            delta_qpos = qpos_obs - qpos_cf
+            delta_qpos = np.zeros(self.model.nv)
+            mujoco.mj_differentiatePos(self.model, delta_qpos, 1.0, qpos_cf, qpos_obs)
 
         return CounterfactualResult(
             type="zvcf",

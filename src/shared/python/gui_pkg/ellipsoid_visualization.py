@@ -33,7 +33,7 @@ from src.shared.python.data_io.io_utils import ensure_directory
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.engine_core.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 LOGGER = get_logger(__name__)
 

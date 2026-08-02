@@ -25,13 +25,13 @@ import structlog
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from bunkershot3d.calibration.angle_of_repose import (  # noqa: E402
+from src.bunkershot3d.calibration.angle_of_repose import (  # noqa: E402
     AngleOfReposeExperiment,
 )
-from bunkershot3d.calibration.drained_shear_cell import (  # noqa: E402
+from src.bunkershot3d.calibration.drained_shear_cell import (  # noqa: E402
     DrainedShearCellExperiment,
 )
-from bunkershot3d.calibration.optimizer import CalibrationOptimizer  # noqa: E402
+from src.bunkershot3d.calibration.optimizer import CalibrationOptimizer  # noqa: E402
 
 logger = structlog.get_logger()
 

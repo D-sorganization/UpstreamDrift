@@ -47,7 +47,6 @@ from src.shared.python.sg_optimizer.mdp.value_iteration import HoleMDP
 from src.shared.python.sg_optimizer.shot_model.baseline import load_baseline
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
 
-
 _CONDITION_PRESETS = {
     "benign": CourseConditions.benign,
     "tournament": CourseConditions.tournament,
@@ -85,7 +84,9 @@ def _classic_to_synthetic(slug: str) -> SyntheticHole:
 
     Coordinate frame: tee at (0, 0), pin at (yardage, 0).
     """
-    from src.shared.python.sg_optimizer.course.library import load_classic  # noqa: PLC0415
+    from src.shared.python.sg_optimizer.course.library import (
+        load_classic,
+    )  # noqa: PLC0415
 
     geom = load_classic(slug)
     length = float(geom.yardage)
@@ -175,7 +176,9 @@ def main(argv: list[str] | None = None) -> int:
         return _legacy_main(argv)
 
     if args.command == "list-classics":
-        from src.shared.python.sg_optimizer.course.library import list_classics  # noqa: PLC0415
+        from src.shared.python.sg_optimizer.course.library import (
+            list_classics,
+        )  # noqa: PLC0415
 
         for slug in list_classics():
             sys.stdout.write(slug + "\n")

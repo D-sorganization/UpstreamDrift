@@ -17,7 +17,6 @@ from src.engines.common.state import (
 )
 from src.shared.python.core.contracts import PreconditionError
 
-
 pytestmark = pytest.mark.unit
 
 
@@ -51,8 +50,7 @@ class TestStateManagerOptimizedRuntimeGuards:
     def test_constructor_rejects_non_positive_dimensions_under_optimized_python(
         self,
     ) -> None:
-        result = _run_optimized_state_contract(
-            """
+        result = _run_optimized_state_contract("""
 from src.shared.python.core.contracts import ContractLevel, set_contract_level
 from src.engines.common.state import StateManager
 set_contract_level(ContractLevel.OFF)
@@ -62,15 +60,13 @@ for nq, nv in ((0, 6), (-1, 6), (6, 0), (6, -1)):
     except ValueError:
         continue
     raise AssertionError(f"accepted nq={nq}, nv={nv}")
-"""
-        )
+""")
         assert result.returncode == 0, result.stderr
 
     def test_advance_time_rejects_non_positive_dt_under_optimized_python(
         self,
     ) -> None:
-        result = _run_optimized_state_contract(
-            """
+        result = _run_optimized_state_contract("""
 from src.shared.python.core.contracts import ContractLevel, set_contract_level
 from src.engines.common.state import StateManager
 set_contract_level(ContractLevel.OFF)
@@ -81,13 +77,11 @@ for dt in (0.0, -0.01):
     except ValueError:
         continue
     raise AssertionError(f"accepted dt={dt}")
-"""
-        )
+""")
         assert result.returncode == 0, result.stderr
 
     def test_add_force_rejects_invalid_names_under_optimized_python(self) -> None:
-        result = _run_optimized_state_contract(
-            """
+        result = _run_optimized_state_contract("""
 import numpy as np
 from src.shared.python.core.contracts import ContractLevel, set_contract_level
 from src.engines.common.state import ForceAccumulator
@@ -101,8 +95,7 @@ for name in ("", 123):
     except ValueError:
         continue
     raise AssertionError(f"accepted name={name!r}")
-"""
-        )
+""")
         assert result.returncode == 0, result.stderr
 
 

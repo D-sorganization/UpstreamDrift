@@ -9,7 +9,6 @@ Tests:
 
 from __future__ import annotations
 
-
 # ── Route Registry Tests ─────────────────────────────────────────
 
 

@@ -335,7 +335,16 @@ class TestConstructorPreconditions:
         dyn, qs, qe, qb = make_squat_config(body, 60.0)
         with pytest.raises(ValueError, match=r">= 4 waypoints"):
             TrajectoryOptimizer(
-                body, dyn, "squat", 60.0, qs, qe, qb, n_waypoints=3, n_eval=20, n_starts=1
+                body,
+                dyn,
+                "squat",
+                60.0,
+                qs,
+                qe,
+                qb,
+                n_waypoints=3,
+                n_eval=20,
+                n_starts=1,
             )
 
     def test_minimum_waypoints_accepted(self) -> None:

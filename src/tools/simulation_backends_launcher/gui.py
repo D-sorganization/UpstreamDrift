@@ -315,7 +315,7 @@ class MainWidget(QtWidgets.QWidget):
     def _apply_theme_best_effort(self) -> None:
         """Apply the app theme if available; never fatal when absent."""
         try:
-            from shared.python.sidekick.theme import apply_theme_to_window
+            from src.shared.python.sidekick.theme import apply_theme_to_window
         except ImportError:
             return
         try:

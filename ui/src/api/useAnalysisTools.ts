@@ -12,8 +12,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { apiFetch } from './fetch';
-import { getApiBase } from './backend';
+import { apiFetch, apiFetchBlob } from './fetch';
 
 // ── Types (matching src/api/models/responses.py) ───────────────────────
 
@@ -113,7 +112,7 @@ export function useAnalysisTools() {
     setLoadState('loading');
     setError(null);
     try {
-      const response = await fetch(`${getApiBase()}/api/analysis/export`, {
+      const blob = await apiFetchBlob('/api/analysis/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,17 +121,6 @@ export function useAnalysisTools() {
           include_time_series: true,
         }),
       });
-      if (!response.ok) {
-        let detail = `Export failed: HTTP ${response.status}`;
-        try {
-          const body = (await response.json()) as Record<string, unknown>;
-          if (typeof body.detail === 'string') detail = body.detail;
-        } catch {
-          // non-JSON error body — keep generic message
-        }
-        throw new Error(detail);
-      }
-      const blob = await response.blob();
       const filename = `analysis_export.${format}`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

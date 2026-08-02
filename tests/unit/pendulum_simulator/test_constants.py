@@ -15,7 +15,7 @@ from src.shared.python.pendulum_simulator.constants import (
 
 class TestGravityConstants:
     def test_gravity_mss_approx_9_81(self) -> None:
-        assert pytest.approx(9.81) == GRAVITY_MSS
+        assert pytest.approx(9.80665) == GRAVITY_MSS
 
     def test_gravity_standard_approx_9_80665(self) -> None:
         assert pytest.approx(9.80665) == GRAVITY_STANDARD

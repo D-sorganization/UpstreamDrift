@@ -103,7 +103,7 @@ class TestPendulumPhysicsProperties:
 
         freq_hz = result.metadata.get("natural_frequency_approx_hz", 0)
 
-        # For arm_length=0.4m: f ≈ (1/2π) * sqrt(9.81/0.4) ≈ 0.79 Hz
+        # For arm_length=0.4m: f ≈ (1/2π) * sqrt(9.80665/0.4) ≈ 0.79 Hz
         assert 0.3 < freq_hz < 2.0, f"Natural frequency {freq_hz} Hz seems unreasonable"
 
     def test_pendulum_period_depends_on_arm_length(self) -> None:

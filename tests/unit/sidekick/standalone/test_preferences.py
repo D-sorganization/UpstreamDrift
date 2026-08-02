@@ -17,7 +17,6 @@ from sidekick.standalone.preferences import (
 )
 from sidekick.standalone.session_store import InMemorySessionStore
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

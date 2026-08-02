@@ -84,7 +84,7 @@ class SimOptions:
             the canonical timegrid from cross-engine §2.2.
         time_step_s: Inner solver time step (seconds). Default 1 ms.
         gravity: World-frame gravity vector (m/s^2). Default
-            ``(0, 0, -9.81)``.
+            ``(0, 0, -9.80665)``.
         urdf_path: Override the URDF source. ``None`` resolves to the
             canonical humanoid URDF (which is regenerated from the shared
             YAML on demand by :func:`load_humanoid_into_plant`).
@@ -100,7 +100,7 @@ class SimOptions:
     simulation_time_s: float = 0.3
     sample_rate_hz: float = 1000.0
     time_step_s: float = 1.0e-3
-    gravity: tuple[float, float, float] = (0.0, 0.0, -9.81)
+    gravity: tuple[float, float, float] = (0.0, 0.0, -9.80665)
     urdf_path: Path | None = None
     grip_body_name: str = "club_grip"
     clubhead_body_name: str = "clubhead"

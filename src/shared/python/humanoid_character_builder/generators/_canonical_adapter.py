@@ -29,7 +29,7 @@ from __future__ import annotations
 from typing import Any
 
 from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
-from model_generation.core.types import (
+from src.shared.python.model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,

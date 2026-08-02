@@ -30,7 +30,7 @@ from src.shared.python.core.physics_constants import (
 
 class TestPhysicalConstant:
     def test_is_float_subclass(self) -> None:
-        c = PhysicalConstant(9.81, "m/s^2", "Test", "gravity")
+        c = PhysicalConstant(9.80665, "m/s^2", "Test", "gravity")
         assert isinstance(c, float)
 
     def test_float_value(self) -> None:
@@ -54,7 +54,7 @@ class TestPhysicalConstant:
         assert c.description == ""
 
     def test_repr_shows_unit(self) -> None:
-        c = PhysicalConstant(9.81, "m/s^2", "Test")
+        c = PhysicalConstant(9.80665, "m/s^2", "Test")
         r = repr(c)
         assert "m/s^2" in r
 

@@ -164,10 +164,12 @@ class TestAdapterLoading:
     def test_fallback_to_ollama(self, chat_service) -> None:
         """Fallback creates an OllamaAdapter when settings fail."""
         chat_service._adapter = None
-        with patch("src.api.services.chat_service.ChatService._fallback_to_ollama"):
+        with patch(
+            "src.api.services.chat_service.ChatService._fallback_to_ollama"
+        ) as mock_fallback:
             # Just verify fallback is callable
             chat_service._fallback_to_ollama()
-        assert True  # No exception raised
+        mock_fallback.assert_called_once()
 
     def test_service_works_without_adapter(self, chat_service) -> None:
         """ChatService functions for session management even without adapter."""

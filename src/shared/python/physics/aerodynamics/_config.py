@@ -48,7 +48,7 @@ class AerodynamicsConfig:
     # Master and individual toggles
     enabled: bool = True
     drag_enabled: bool = True
-    lift_enabled: bool = True
+    lift_enabled: bool = False
     magnus_enabled: bool = True
 
     # Tunable coefficients
