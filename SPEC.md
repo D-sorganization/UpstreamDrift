@@ -2371,6 +2371,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
+*   (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` via `DataProcessorEngine` by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 * Replaced `np.linalg.norm` with `np.einsum` in `grasp_analysis.py` to bypass array allocation overhead for norm calculations. (spec-exempt: micro-optimization)
 - `_convex_distance.py`: Optimized L2 norm calculation using `np.einsum` to avoid temporary intermediate arrays. (spec-exempt: micro-optimization)
 
