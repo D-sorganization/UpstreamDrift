@@ -292,7 +292,7 @@ def compute_cost_drake(sim_out, target, options=None, *,
     """
     j = _shared_cost(sim_out, target, options)
     if constraint_residuals:
-        j = j + sum(np.sum(r ** 2) for r in constraint_residuals)
+        j = j + sum(np.vdot(arr := np.asarray(r), arr) for r in constraint_residuals)
     return j
 ```
 
