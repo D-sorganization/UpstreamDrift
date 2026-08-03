@@ -2371,6 +2371,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- Replaced `np.sum` with `np.vdot` and `mask.sum()` in `trendline.py` to optimize R-squared calculation. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm` with `math.hypot` for explicitly unpacked 3D vectors in physics grip and spatial algebra modules to bypass numpy dispatch overhead, yielding a ~5x speedup. (spec-exempt: micro-optimization)
 
 * Replaced `np.linalg.norm` with `np.einsum` in `grasp_analysis.py` to bypass array allocation overhead for norm calculations. (spec-exempt: micro-optimization)
