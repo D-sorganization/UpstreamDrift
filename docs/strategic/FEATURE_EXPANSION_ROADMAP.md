@@ -864,6 +864,14 @@ class SwingVariabilityAnalyzer:
 
 ### 9.1 Launch Monitor Integration
 
+**Implementation status (2026-08-04):** The vendor-neutral import, project,
+treatment, statistical-analysis, monitor-comparison, dispersion, trend, and
+PyQt6 workbench foundation is implemented under
+`src/shared/python/launch_monitor/` and
+`src/tools/launch_monitor_analytics/` (epic #8342). Header profiles are
+version-tolerant mapping aids; the generic mapping workflow remains the safety
+net for localized or newly changed exports.
+
 **Purpose**: Import data from popular launch monitors for validation and analysis.
 
 **Supported Formats**:

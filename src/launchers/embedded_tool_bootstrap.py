@@ -46,6 +46,7 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.terrain_engine._embed_adapter",
     "src.tools.golf_simulation_suite._embed_adapter",
     "src.tools.simulation_backends_launcher._embed_adapter",
+    "src.tools.launch_monitor_analytics._embed_adapter",
     "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
 )
 

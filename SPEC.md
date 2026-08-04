@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.479 |
-| **Last Spec Update** | 2026-07-27 |
+| **Spec Version** | 1.0.480 |
+| **Last Spec Update** | 2026-08-04 |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +71,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-04** - Added the vendor-neutral Launch Monitor Analytics workbench
+  (#8342). A canonical, unit-normalized shot schema and provenance-preserving
+  import pipeline aggregate common TrackMan, Foresight, FlightScope, Garmin,
+  SkyTrak, Uneekor, Full Swing, Rapsodo, and GSPro/Open Connect exports, with a
+  generic mapping fallback. The PyQt6 workbench provides auditable treatment,
+  correlation and partial-correlation mapping, regularized regression and an
+  optional shallow neural network, matched-monitor agreement, dispersion, and
+  actual-time longitudinal trend analysis. Associations and predictions are
+  explicitly non-causal; unmatched monitor comparisons are descriptive only.
 - **2026-07-27** - Corrected classic PyQt6 Diagnostics provider-manifest
   validation (#8121). The parent `models.yaml` check now validates only its 46
   directly declared tiles, while the separate runtime registry check retains
@@ -1409,6 +1418,7 @@ UpstreamDrift/
 │   ├── tools/                      # Embeddable tool tabs (model_explorer,
 │   │                               # ball_flight_gui, putting_green_gui,
 │   │                               # swing_flight_pipeline, pose_studio,
+│   │                               # launch_monitor_analytics,
 │   │                               # video_analyzer, sidekick, …) plus
 │   │                               # headless analysis CLIs (drift_control,
 │   │                               # contraction)
@@ -1416,6 +1426,7 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── launch_monitor/         # Canonical shot import, treatment, and analytics
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
 │       ├── sidekick/               # Shared tools library + agent layer (VENDORED)
@@ -1456,6 +1467,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6 and headless vendor-neutral launch-monitor import, dependency, model, agreement, dispersion, and trend analysis |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
 | Workspace Metadata       | `src/shared/python/workspace/`           | Project/session/dataset metadata store and CC-4 HDF5 result browser view models            |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
@@ -1578,6 +1590,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | ------------------------ | ------------- | ------------------------------- | -------------------------------------------------------- |
 | Biomechanical Models     | URDF          | `shared/models/`                | URDF 1.0 standard with custom muscle actuator extensions |
 | Motion Capture Data      | C3D, BVH, TRC | External mocap systems or files | Standard formats with marker sets and frame data         |
+| Launch Monitor Sessions  | CSV, TSV, TXT, XLS, XLSX, JSON | Common launch-monitor exports or user-mapped files | Canonical shot schema with source columns, unit/status metadata, and import manifest |
 | Optimization Constraints | JSON          | User input or configuration     | Custom constraint schema in `src/config/`                |
 | Control Parameters       | YAML/JSON     | Configuration files or API      | Engine-specific parameter maps validated against schemas |
 
@@ -1590,6 +1603,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | IK/ID Solutions          | JSON/MATLAB            | API response or file        | Joint angles (IK) and joint torques (ID) with confidence metrics   |
 | Optimized Trajectories   | URDF/MATLAB            | File export                 | Trajectory-optimized model definitions with optimal control inputs |
 | Visualization Data       | JSON (Three.js format) | GUI or web client           | 3D geometry, animation keyframes, and rendering parameters         |
+| Launch Monitor Analytics | CSV/JSON/project bundle | GUI or file export | Treated observations, provenance manifests, association/model results, dispersion, and trend summaries |
 
 ### Configuration
 
