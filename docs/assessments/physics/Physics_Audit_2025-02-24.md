@@ -7,10 +7,10 @@
 ## Executive Summary
 
 - **Overall Physics Fidelity Score**: 6/10
-- **Critical Issues Count**: 2 (GRF Fallback, Patent Infringement)
+- **Critical Issues Count**: 2 (GRF Fallback, Misnamed Efficiency Metric)
 - **Confidence in Results**: Moderate. While the framework is sound and "Pragmatic" modules show promise, core legacy implementations (ball flight, impact) rely on simplified or hardcoded models that limit high-fidelity simulation.
 
-The codebase is in a transitional state. Newer modules like `aerodynamics.py` demonstrate sophisticated, citation-backed physics with toggleable complexity. However, older core modules like `ball_flight_physics.py` and `impact_model.py` rely on hardcoded coefficients and 1D approximations. A critical physical error exists in the ground reaction force fallback logic, and a potential patent infringement risk was identified in the kinematic sequence scoring.
+The codebase is in a transitional state. Newer modules like `aerodynamics.py` demonstrate sophisticated, citation-backed physics with toggleable complexity. However, older core modules like `ball_flight_physics.py` and `impact_model.py` rely on hardcoded coefficients and 1D approximations. A critical physical error exists in the ground reaction force fallback logic, and the kinematic sequence scoring reports a metric that does not measure what its name claims.
 
 ## Findings by Category
 
@@ -31,7 +31,7 @@ The codebase is in a transitional state. Newer modules like `aerodynamics.py` de
 - **Description**: `BallProperties` uses hardcoded, uncited coefficients (`cd0=0.21`, `cl1=0.38`, etc.).
 - **Expected Physics**: Drag and lift coefficients are functions of Reynolds number and Spin Ratio. They vary significantly between ball models.
 - **Actual Implementation**: Fixed polynomial model `cd = cd0 + s * ...`.
-- **Impact**: Trajectory accuracy is limited to a "generic" ball. Legal risk if these specific numbers match a competitor's confidential data.
+- **Impact**: Trajectory accuracy is limited to a "generic" ball. The coefficients are uncited, so their provenance and validity cannot be checked.
 - **Recommendation**: Migrate fully to `aerodynamics.py` which implements Reynolds correction, and externalize coefficients to configuration files. See `ISSUE_P001_AERODYNAMICS_COEFFICIENTS.md`.
 
 - **File**: `src/shared/python/physics/impact_model.py` (Line 135)
@@ -50,15 +50,15 @@ The codebase is in a transitional state. Newer modules like `aerodynamics.py` de
 - **Impact**: Cannot model "torque" (torsional stiffness) effects, a key shaft specification.
 - **Recommendation**: Add torsional degree of freedom to `BeamElement`. See `ISSUE_P003_SHAFT_TORSION.md`.
 
-### 3. Biomechanics Accuracy & Legal
+### 3. Biomechanics Accuracy
 
 - **File**: `src/shared/python/analysis/pca_analysis.py` (Line 135)
-- **Issue**: **Patent Risk in Efficiency Score** (Critical Legal)
+- **Issue**: Misnamed metric — `efficiency_score` does not measure efficiency
 - **Description**: `efficiency_score = matches / len(expected_order)`.
 - **Expected Physics**: "Efficiency" is a complex biomechanical concept (energy transfer).
-- **Actual Implementation**: Defines efficiency solely as adherence to a specific kinematic sequence (e.g., 1-2-3-4). This specific correlation is often patented (e.g., by TPI or others).
-- **Impact**: Potential patent infringement.
-- **Recommendation**: Rename to `sequence_adherence` and remove claims of "efficiency". See `ISSUE_P004_EFFICIENCY_SCORE_PATENT.md`.
+- **Actual Implementation**: Defines efficiency solely as adherence to a fixed segment ordering. This measures sequence adherence, not energy transfer, and reports a value that is insensitive to how much energy actually reaches the club.
+- **Impact**: The reported metric does not support the biomechanical conclusion users will draw from a field named "efficiency".
+- **Recommendation**: Rename to `sequence_adherence` and drop the "efficiency" framing; if an efficiency metric is wanted, derive it from energy transfer.
 
 ### 4. Statistical Methods
 

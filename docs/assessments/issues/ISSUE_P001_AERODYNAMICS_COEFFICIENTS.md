@@ -1,17 +1,17 @@
 # Physics Issue: Hardcoded Aerodynamic Coefficients
 
 **ID**: ISSUE_P001
-**Category**: Physics Accuracy / Legal Risk
+**Category**: Physics Accuracy / Data Provenance
 **Status**: Open
 **Severity**: High
 
 ## Description
 
-The file `src/shared/python/physics/ball_flight_physics.py` contains hardcoded aerodynamic coefficients (`cd0=0.21`, `cd1=0.05`, `cl1=0.38`) within the `BallProperties` class. These values are uncited and may correspond to specific ball models, creating a legal risk if they match competitor confidential data. Furthermore, using fixed coefficients limits the simulation's ability to model different ball types (e.g., tour vs. distance balls).
+The file `src/shared/python/physics/ball_flight_physics.py` contains hardcoded aerodynamic coefficients (`cd0=0.21`, `cd1=0.05`, `cl1=0.38`) within the `BallProperties` class. These values are uncited, so it is not possible to tell which ball model, Reynolds range, or measurement campaign they came from, or whether they are still appropriate. Furthermore, using fixed coefficients limits the simulation's ability to model different ball types (e.g., tour vs. distance balls).
 
 ## Impact
 
-- **Legal**: Potential infringement if coefficients match proprietary data.
+- **Provenance**: Results cannot be reproduced or defended because the coefficients have no traceable source.
 - **Accuracy**: Inability to simulate modern ball aerodynamics which have complex drag/lift dependencies on Reynolds number.
 
 ## Recommended Fix
