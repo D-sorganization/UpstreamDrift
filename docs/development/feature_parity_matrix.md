@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 16 parity · 9 gap · 12 exempt (11 pending decision in #7460).
+**Summary:** 16 parity · 9 gap · 13 exempt (11 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -47,6 +47,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
+| `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (clubhead impact-point delivery analysis) | ⚪ exempt | — | — | — | Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift. |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 
 ## Launcher tile coverage
@@ -90,6 +91,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `pose_studio` | `tools.pose_editing` |
 | `project_map` | `docs.document_library` |
 | `putting_green` | `tools.putting_green` |
+| `rate_of_closure` | `tools.rate_of_closure` |
 | `realtime_ws` | `simulation.realtime_ws_stream` |
 | `robotics_module` | `launcher.tile_web_reachability` |
 | `shot_tracer` | `simulation.shot_tracer` |

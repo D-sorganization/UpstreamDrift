@@ -353,6 +353,32 @@
       }
     },
     {
+      "id": "rate_of_closure",
+      "name": "Rate of Closure Impact Explorer",
+      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/rate_of_closure/launch_pyqt6.py",
+      "provider": "tools",
+      "source_root": "../Tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "rate_of_closure.svg",
+      "status": "external",
+      "capabilities": [
+        "rate_of_closure",
+        "impact_analysis",
+        "clubhead_kinematics",
+        "attack_angle",
+        "face_rotation",
+        "3d_visualization"
+      ],
+      "order": 46,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
       "id": "project_map",
       "name": "Project Map",
       "description": "Complete map of all features, modules, and hidden gems in the suite",
