@@ -246,6 +246,15 @@
       "tiles": ["data_explorer"],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
+    "tools.rate_of_closure": {
+      "title": "Rate of Closure Impact Explorer (clubhead impact-point delivery analysis)",
+      "pyqt": null,
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift.",
+      "tiles": ["rate_of_closure"]
+    },
     "analysis.analysis_tools_api": {
       "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
       "pyqt": null,

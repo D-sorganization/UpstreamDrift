@@ -418,6 +418,32 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "rate_of_closure"
+    name: "Rate of Closure Impact Explorer"
+    description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)"
+    type: "special_app"
+    path: "src/rate_of_closure/launch_pyqt6.py"
+    provider: "tools"
+    source_root: "../Tools"
+    working_dir: "."
+    python_paths:
+      - "src"
+      - "src/shared/python"
+    capabilities:
+      [
+        "rate_of_closure",
+        "impact_analysis",
+        "clubhead_kinematics",
+        "attack_angle",
+        "face_rotation",
+        "3d_visualization",
+      ]
+    launcher:
+      category: "biomechanics"
+      logo: "rate_of_closure.svg"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "sidekick"
     name: "Sidekick"
     description: "AI assistant chat panel — embed as a dock or tab"
