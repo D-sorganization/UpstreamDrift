@@ -4,11 +4,11 @@
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
 
-## Significant Market Changes & Attention Flags
+## Scope
 
-- **IP/Patent Risks (Biofeedback & Scoring):** High-risk overlap with methodologies patented by K-Motion Interactive and Zepp Labs (Blast Motion) regarding the use of Dynamic Time Warping (DTW) distance and time-warped comparison for swing evaluation scoring.
-- **Trademark Infringement Risk (Swing Profile):** Active use of the "Swing DNA" terminology conflicts with Mizuno Corporation's trademarked performance fitting system. Our metrics (Speed, Sequence, Stability, Efficiency, Power) structurally mimic their 5-axis fitting system.
-- **IP/Patent Risks (Kinematic Sequence):** Scoring methodologies for Kinematic Sequence efficiency may infringe upon core claims held by the Titleist Performance Institute (TPI) and K-Motion.
+This document covers market and product positioning only. Intellectual-property
+considerations are tracked privately and are deliberately out of scope here; see
+`D-sorganization/Copyright-and-Legal-Review`.
 
 ## Competitor Categories
 

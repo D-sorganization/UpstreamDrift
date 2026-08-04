@@ -3,11 +3,11 @@
 **Date:** 2026-02-28
 **Status:** Open
 **Severity:** Critical
-**Labels:** incomplete-implementation, critical, technical-debt, physics-fidelity, patent-risk
+**Labels:** incomplete-implementation, critical, technical-debt, physics-fidelity
 
 ## Executive Summary
 
-This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 28, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified. Additionally, widespread use of `pass` blocks across unit, integration, and deployment tests presents a severe gap in testing assurance.
+This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 28, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and metric-naming problems have also been identified. Additionally, widespread use of `pass` blocks across unit, integration, and deployment tests presents a severe gap in testing assurance.
 
 ## 1. Critical Implementation Gaps (Blocking)
 
@@ -104,20 +104,20 @@ Missing implementations in utility scripts.
 - **Issue:** `convert` function raises `NotImplementedError` for conversions other than URDF<->MJCF.
 - **Impact:** Limited model format interoperability.
 
-## 6. Technical Debt and Legal Risks
+## 6. Technical Debt
 
-Implementation choices that pose legal or maintenance risks.
+Implementation choices that pose maintenance or correctness risks.
 
-### Patent Risks
+### Metric naming and citation
 
 - **File:** `src/shared/python/analysis/pca_analysis.py`
-  - **Issue:** `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents (Zepp/Blast Motion).
+  - **Issue:** `efficiency_score` (`matches / len(expected_order)`) measures ordering, not efficiency; the name overstates the computation.
 - **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
-  - **Issue:** `efficiency_score` calculation flagged as potential patent infringement risk.
+  - **Issue:** Carries the same `efficiency_score` naming problem.
 - **File:** `src/deployment/teleoperation/devices.py`
-  - **Issue:** `HapticDeviceInput.set_force_feedback` poses patent risk (Immersion Corp) if complex effects are implemented. Currently safe (clipping only), but future enhancements require legal review.
+  - **Issue:** `HapticDeviceInput.set_force_feedback` currently only clips force values. Any richer effect should be derived from the physics simulation rather than hand-tuned.
 - **File:** `src/shared/python/injury/injury_risk.py`
-  - **Issue:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
+  - **Issue:** "X-Factor Stretch" thresholds (e.g., > 55 degrees) are hardcoded without a citation to their source literature.
 
 ### Testing Gaps
 
@@ -129,8 +129,8 @@ Implementation choices that pose legal or maintenance risks.
 
 1.  **Immediate Priority:** Implement the missing connection methods in `RealTimeController` to unblock hardware testing.
 2.  **High Priority:** Address physics fidelity gaps in `ball_flight_physics.py` and `flexible_shaft.py`.
-3.  **High Priority:** Refactor `pca_analysis.py`, `kinematic_sequence.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
-4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py` and ensure Haptic feedback remains physics-based to avoid patent infringement.
+3.  **High Priority:** Refactor `pca_analysis.py`, `kinematic_sequence.py` and `injury_risk.py` so metric names match what is computed, and cite the source of every hardcoded threshold.
+4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py` and keep haptic feedback derived from the physics simulation.
 5.  **Low Priority:** Complete tooling utilities and remaining TODOs.
 
 ## Update: 2026-02-26
@@ -168,7 +168,7 @@ An updated automated analysis of implementation gaps generated [Completist_Repor
 - **404** empty `pass` blocks, particularly concentrated in test files, indicating widespread gaps in test coverage and assertions.
 - **5** `NotImplementedError` stubs blocking functionality in core utility modules.
 - **46** `TRACKED_TASK` markers indicating missing feature implementations or incomplete logic.
-- **19** `TRACKED_DEFECT` markers denoting technical debt, inaccurate physics approximations, and potential legal risks.
+- **19** `TRACKED_DEFECT` markers denoting technical debt and inaccurate physics approximations.
 
 These widespread placeholders must be systematically addressed to ensure system reliability and fidelity.
 
