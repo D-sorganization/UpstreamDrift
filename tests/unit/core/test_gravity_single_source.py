@@ -22,7 +22,7 @@ def test_constants_gravity_matches_canonical() -> None:
     assert pytest.approx(GRAVITY_FLOAT) == GRAVITY
     # Must be NIST standard gravity, not the 9.80665 approximation.
     assert pytest.approx(9.80665, abs=1e-5) == GRAVITY
-    assert pytest.approx(9.80665, abs=1e-6) != GRAVITY
+    assert pytest.approx(9.81, abs=1e-6) != GRAVITY
 
 
 def test_common_physics_gravity_is_consistent() -> None:

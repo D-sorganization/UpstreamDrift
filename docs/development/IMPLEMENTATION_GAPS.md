@@ -21,11 +21,11 @@
 
 ### CRITICAL-001: Kinematic Sequence Analyzer Is Golf-Specific and Over-Narrow
 
-| Field           | Value                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------- |
+| Field           | Value                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------- |
 | **Issue Title** | `refactor(analysis): Generalize kinematic sequence into a segment-agnostic SegmentTimingAnalyzer` |
-| **Severity**    | CRITICAL                                                                                  |
-| **Labels**      | `refactor`, `breaking-change`                                                             |
+| **Severity**    | CRITICAL                                                                                          |
+| **Labels**      | `refactor`, `breaking-change`                                                                     |
 
 **Affected Files/Modules:**
 
