@@ -131,3 +131,9 @@
 **Vulnerability:** Missing Content-Security-Policy (CSP) header in the FastAPI application.
 **Learning:** CSP is an important defense-in-depth layer to mitigate XSS attacks by restricting the sources from which content can be loaded. It was missing from the standard security headers middleware.
 **Prevention:** Always include a baseline CSP (like `default-src 'self'`) in the security headers middleware and test for its presence.
+
+## 2024-04-06 - Command Injection in pandas query() via filter_data
+
+**Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.filter_data()` and `DataProcessorEngine.query()` where user-provided column and operator strings were concatenated and passed directly to `pandas.DataFrame.query()` without validation.
+**Learning:** `DataFrame.query()` evaluates string expressions and is vulnerable to injection if the concatenated string isn't validated, even if parts of it are formatted dynamically.
+**Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.

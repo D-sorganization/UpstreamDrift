@@ -573,7 +573,14 @@ class DataProcessorEngine(BaseCalculationEngine):
                     )
                 ]
             else:
-                self.data = self.data.query(f"{column} {operator} @value")
+                expr = f"{column} {operator} @value"
+                try:
+                    validate_pandas_formula(expr, allowed_columns=self.data.columns)
+                except ValueError as error:
+                    log_formula_rejected(expr, error)
+                    raise FilterError(str(error)) from error
+                self.data = self.data.query(expr)
+
             return ProcessingResult(success=True, message="Filtered", data=self.data)
         except (KeyError, ValueError, TypeError, SyntaxError) as e:
             self._undo()
@@ -592,7 +599,13 @@ class DataProcessorEngine(BaseCalculationEngine):
             raise FilterError("Query expression must not be empty")
         self._save_undo_state()
         try:
+            try:
+                validate_pandas_formula(expression, allowed_columns=self.data.columns)
+            except ValueError as error:
+                log_formula_rejected(expression, error)
+                raise FilterError(str(error)) from error
             self.data = self.data.query(expression)
+
             return ProcessingResult(
                 success=True, message="Query applied", data=self.data
             )

@@ -2371,18 +2371,22 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
-- Replaced `np.linalg.norm` with `math.hypot` for explicitly unpacked 3D vectors in physics grip and spatial algebra modules to bypass numpy dispatch overhead, yielding a ~5x speedup. (spec-exempt: micro-optimization)
 
-* Replaced `np.linalg.norm` with `np.einsum` in `grasp_analysis.py` to bypass array allocation overhead for norm calculations. (spec-exempt: micro-optimization)
-- `_convex_distance.py`: Optimized L2 norm calculation using `np.einsum` to avoid temporary intermediate arrays. (spec-exempt: micro-optimization)
+- (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` via `DataProcessorEngine` by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
-- Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
+* Replaced `np.linalg.norm` with `math.hypot` for explicitly unpacked 3D vectors in physics grip and spatial algebra modules to bypass numpy dispatch overhead, yielding a ~5x speedup. (spec-exempt: micro-optimization)
 
-- **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
-- Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
-- Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
-- Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
-- Cached `np.abs(torques)` in the biomechanics metrics route so peak and total
+- Replaced `np.linalg.norm` with `np.einsum` in `grasp_analysis.py` to bypass array allocation overhead for norm calculations. (spec-exempt: micro-optimization)
+
+* `_convex_distance.py`: Optimized L2 norm calculation using `np.einsum` to avoid temporary intermediate arrays. (spec-exempt: micro-optimization)
+
+* Optimized `compute_jacobian_diagnostics` and `compute_constraint_diagnostics` by replacing `np.sum(sigma > tol)` with `(sigma > tol).sum()` to avoid NumPy's array conversion checks for a ~2x speedup on boolean arrays.
+
+* **Performance:** Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for 2D distance calculations in `flight_models.py` and `geometry.py`, avoiding python bytecode overhead.
+* Replaced `math.sqrt(x**2 + y**2)` with `math.hypot(x, y)` for explicit vector components to reduce overhead and improve execution speed by ~1.5-2x.
+* Optimized boolean mask reduction in `trendline.py` by replacing `np.sum(mask)` with `mask.sum()`, achieving ~1.8x speedup by avoiding array conversion checks.
+* Replaced `np.sum(..., axis=1)` with `np.einsum('ij->i', ...)` for array reductions in critical pathways in data input and plotting.
+* Cached `np.abs(torques)` in the biomechanics metrics route so peak and total
   torque calculations reuse one temporary array.
 
 ### 2026-06-23
@@ -2395,6 +2399,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   vector RMSE calculations after the axis RMSE and torque-diagnostic optimizations
   had already landed.
 
-
 ## Refactoring & Optimization Notes
+
 - `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
