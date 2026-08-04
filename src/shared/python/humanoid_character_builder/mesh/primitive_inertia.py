@@ -16,9 +16,6 @@ from dataclasses import dataclass
 from enum import Enum
 
 from model_generation.inertia.primitives import (
-    box_inertia,
-    cylinder_inertia,
-    ellipsoid_inertia,
     sphere_inertia,
 )
 
