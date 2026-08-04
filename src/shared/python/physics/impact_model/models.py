@@ -119,7 +119,14 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
-        spin_axis = np.cross(n, tangent_dir)
+        # Spin axis: friction drags the ball's contact surface along the
+        # face's relative tangential motion t; the impulse J_f·t acts at
+        # the ball contact point -R·n, so torque = (-R n) × (J_f t) and the
+        # axis is t × n. (The prior n × t spun a lofted strike toward
+        # topspin, contradicting the pre-existing-spin slip reduction
+        # below, which assumes positive spin about this axis reduces
+        # contact-point sliding.)
+        spin_axis = np.cross(tangent_dir, n)
         # Rolling cap relative to contact-point speed (pre-existing spin reduces sliding).
         omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
         v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))
