@@ -945,6 +945,30 @@
       }
     },
     {
+      "id": "launch_monitor_analytics",
+      "name": "Launch Monitor Analytics",
+      "description": "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/launch_monitor_analytics/__main__.py",
+      "logo": "data_explorer.svg",
+      "status": "ready",
+      "capabilities": [
+        "launch_monitor_import",
+        "session_aggregation",
+        "correlation_network",
+        "regression",
+        "neural_network",
+        "monitor_comparison",
+        "dispersion",
+        "longitudinal_trends"
+      ],
+      "order": 47,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
       "id": "starting_pose_matcher",
       "name": "Starting-Pose Matcher (legacy)",
       "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",

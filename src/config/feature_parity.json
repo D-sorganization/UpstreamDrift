@@ -255,6 +255,16 @@
       "reason": "Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift.",
       "tiles": ["rate_of_closure"]
     },
+    "tools.launch_monitor_analytics": {
+      "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
+      "pyqt": "src/tools/launch_monitor_analytics/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 8342,
+      "tiles": ["launch_monitor_analytics"],
+      "notes": "The PyQt6 research workbench is canonical; API and React/Tauri parity are tracked in epic #8342."
+    },
     "analysis.analysis_tools_api": {
       "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
       "pyqt": null,

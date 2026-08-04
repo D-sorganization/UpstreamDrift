@@ -418,6 +418,26 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "launch_monitor_analytics"
+    name: "Launch Monitor Analytics"
+    description: "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends"
+    type: "special_app"
+    path: "src/tools/launch_monitor_analytics/__main__.py"
+    capabilities:
+      - "launch_monitor_import"
+      - "session_aggregation"
+      - "correlation_network"
+      - "regression"
+      - "neural_network"
+      - "monitor_comparison"
+      - "dispersion"
+      - "longitudinal_trends"
+    launcher:
+      category: "tool"
+      logo: "assets/data_explorer_modern.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "rate_of_closure"
     name: "Rate of Closure Impact Explorer"
     description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)"
