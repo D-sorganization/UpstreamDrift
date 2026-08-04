@@ -26,11 +26,11 @@ This audit reviewed the core physics engine implementation, focusing on Ball Fli
 - **Missing Spin Decay:** `src/shared/python/ball_flight_physics.py` does not model spin decay. (Ref: `Issue_008_Physics_Ball_Spin_Decay.md`)
 - **Impact MOI Ignored:** `RigidBodyImpactModel` treats clubhead as point mass. (Ref: `ISSUE_PHYSICS_001_IMPACT_MOI.md`)
 - **Heuristic Gear Effect:** Gear effect is based on empirical scaling rather than physics. (Ref: `Issue_011_Physics_Gear_Effect_Heuristic.md`)
-- **Kinematic Sequence Risk:** Hardcoded segment order poses patent risk. (Ref: `ISSUE_PHYSICS_003_KINEMATIC_ORDER.md`)
+- **Kinematic Sequence Rigidity:** Hardcoded segment order limits generality and diagnostic utility. (Ref: `ISSUE_PHYSICS_003_KINEMATIC_ORDER.md`)
 
 ## Recommendations
 
 1.  **Prioritize Fixing GRF Extraction:** Without valid GRF, power and efficiency metrics are meaningless.
 2.  **Implement Spin Decay:** Essential for accurate carry distance and trajectory shape.
 3.  **Refactor Impact Model:** Move to full rigid body dynamics (6-DOF) for accurate off-center hit modeling.
-4.  **Generalize Kinematic Sequence:** Remove hardcoded order to mitigate legal risk and improve flexibility.
+4.  **Generalize Kinematic Sequence:** Remove the hardcoded order so the analyzer accepts an arbitrary segment chain.

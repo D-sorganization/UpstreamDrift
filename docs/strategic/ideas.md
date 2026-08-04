@@ -220,7 +220,7 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: High-speed strain gauge telemetry aligned with full-body 3D motion capture.
   - _Outcome_: A quantifiable matching metric linking golfer timing to shaft natural frequency.
 
-- **Non-infringing Efficiency Scoring Models**: Research pure physics and energy-conservation-based formulations for evaluating swing efficiency that avoid overlapping with patented statistical sequence-matching methodologies (e.g., PCA or DTW).
+- **Physics-Based Efficiency Scoring Models**: Research pure physics and energy-conservation-based formulations for evaluating swing efficiency, so that "efficiency" is grounded in measured energy transfer rather than statistical sequence-matching (e.g., PCA or DTW).
 
   - _Data Needed_: Comprehensive clubhead delivery energetics and segment mass approximations.
   - _Outcome_: Legally safe, physics-driven efficiency metrics for performance comparison.
@@ -417,7 +417,7 @@ This document serves as the central registry for scientific research topics, tec
 
 ### Physics Engine
 
-- **Non-Infringing Photometric Tracking Emulation**: Research novel computer vision synthesis approaches to simulate camera-based tracking without relying on patented stroboscopic or sequential contrast methods.
+- **Novel Photometric Tracking Emulation**: Research computer vision synthesis approaches to simulate camera-based tracking, developed independently from published commercial implementations.
 
   - _Data Needed_: Rendered synthetic high-speed camera frames under variable lighting.
   - _Outcome_: Development of legally safe tracking algorithms that avoid overlap with Foresight or TrackMan method claims.
