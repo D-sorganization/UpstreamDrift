@@ -2371,6 +2371,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- Replaced `np.sum` with `np.vdot` in sidekick data processing to avoid intermediate array allocations and speed up curve fitting `(spec-exempt: micro-optimization)`
 
 - Replaced `np.sum` with `np.vdot` and `mask.sum()` in `trendline.py` to optimize R-squared calculation. (spec-exempt: micro-optimization)
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` via `DataProcessorEngine` by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
