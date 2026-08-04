@@ -94,7 +94,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 
 | Report                                                              | Date       | Focus                                                                          |
 | ------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------ |
-| `docs/assessments/completist/Completist_Report_2026-02-26.md`       | 2026-02-26 | Critical Controller I/O, Physics Gaps, Patent Risks                            |
+| `docs/assessments/completist/Completist_Report_2026-02-26.md`       | 2026-02-26 | Critical Controller I/O, Physics Gaps                                          |
 | `docs/assessments/completist/Completist_Report_2026-02-19.md`       | 2026-02-19 | Critical Controller Connectivity, Feature Gaps, Technical Debt                 |
 | `docs/assessments/completist/Completist_Report_2026-02-15.md`       | 2026-02-15 | Critical backend gaps (PyVista/Unreal) & False Positive Filtering              |
 | `docs/assessments/completist/Completist_Report_2026-02-21.md`       | 2026-02-21 | Critical Teleoperation & Test Gaps                                             |
@@ -140,12 +140,12 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-02-19 | Critical Implementation Gaps             | `docs/assessments/implementation_gaps_report.md` (Updated)                    |
 | 2026-02-21 | Identified Gaps and Inaccuracies         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md`           |
 | 2026-02-24 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-02-24.md`                        |
-| 2026-02-25 | Data Copyright Risk                      | `docs/assessments/issues/ISSUE_047_DATA_COPYRIGHT_TRACKMAN.md`                |
+| 2026-02-25 | Data Copyright Risk                      | Moved — see `D-sorganization/Copyright-and-Legal-Review` (private)            |
 | 2026-02-26 | Consolidated Implementation Gaps         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md` (Updated) |
-| 2026-02-25 | Patent Risk: Kinematic Sequence          | `docs/assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md`                     |
+| 2026-02-25 | Patent Risk: Kinematic Sequence          | Moved — see `D-sorganization/Copyright-and-Legal-Review` (private)            |
 | 2026-02-25 | Comprehensive Gaps Report                | `docs/assessments/completist/issues/ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md`   |
 | 2026-02-26 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-02-26.md`                        |
-| 2026-02-26 | Patent Risk: Haptic Feedback             | `docs/assessments/completist/issues/ISSUE_HAPTICS_PATENT_RISK.md`             |
+| 2026-02-26 | Patent Risk: Haptic Feedback             | Moved — see `D-sorganization/Copyright-and-Legal-Review` (private)            |
 | 2026-02-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-02-26.md`                 |
 | 2026-02-28 | Widespread Testing Gaps Issue            | `docs/assessments/completist/issues/ISSUE_TESTING_GAPS_2026_02_28.md`         |
 | 2026-02-28 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-02-28.md`                 |
@@ -160,8 +160,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-07 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-07.md`                 |
 | 2026-03-07 | Consolidated Implementation Gaps         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md`           |
 | 2026-03-08 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-08.md`                 |
-| 2026-03-08 | Patent Risk: TrackMan Radar              | `docs/assessments/issues/ISSUE_TRACKMAN_RADAR_PATENT_RISK.md`                 |
-| 2026-03-08 | Patent Risk: Foresight Camera            | `docs/assessments/issues/ISSUE_FORESIGHT_CAMERA_PATENT_RISK.md`               |
+| 2026-03-08 | Patent Risk: TrackMan Radar              | Moved — see `D-sorganization/Copyright-and-Legal-Review` (private)            |
+| 2026-03-08 | Patent Risk: Foresight Camera            | Moved — see `D-sorganization/Copyright-and-Legal-Review` (private)            |
 | 2026-03-09 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-09.md`                 |
 | 2026-03-10 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-10.md`                 |
 | 2026-03-10 | Consolidated Implementation Gaps         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md`           |

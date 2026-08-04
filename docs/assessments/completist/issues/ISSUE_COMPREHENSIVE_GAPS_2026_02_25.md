@@ -68,18 +68,18 @@ Missing or simplified physics models that reduce simulation accuracy.
 
 ## 3. Biomechanical Metric Gaps
 
-Missing metrics required for advanced swing analysis and potential legal risks.
+Missing metrics required for advanced swing analysis.
 
-### Kinematic Sequence & Patent Risks
+### Kinematic Sequence
 
 - **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
   - **Gaps:**
     - **Proximal Braking Efficiency:** Not calculated (TRACKED_TASK).
     - **X-Factor Stretch:** Not computed as a kinematic sequence metric (TRACKED_TASK).
     - **Inter-segmental Power Flow:** No implementation for power transfer (TRACKED_TASK).
-  - **Status:** This module uses a pairwise consistency check (`sequence_consistency`) which is generally safer, but contains a `TRACKED_DEFECT` warning about patent risks.
+  - **Status:** This module uses a pairwise consistency check (`sequence_consistency`), which is a better-posed measure than a fixed-order match, but it carries a `TRACKED_DEFECT` marker.
 - **File:** `src/shared/python/analysis/pca_analysis.py`
-  - **Patent Risk:** The `efficiency_score` calculation (`matches / len(expected_order)`) directly overlaps with Zepp/Blast Motion patents (Issue P004) and requires remediation.
+  - **Gap:** The `efficiency_score` calculation (`matches / len(expected_order)`) reports ordering agreement under an "efficiency" name and needs renaming or reformulation in energy terms.
 
 ## 4. Teleoperation Device Gaps
 
@@ -164,6 +164,6 @@ Widespread use of placeholder tests reduces confidence in system reliability.
 1.  **Immediate Priority:** Implement the missing connection methods in `RealTimeController` (`src/deployment/realtime/controller.py`) to unblock hardware testing.
 2.  **Immediate Priority:** Replace `pass` blocks in critical integration tests (`tests/integration/`) with actual assertions or fail the tests if implementation is missing.
 3.  **High Priority:** Address physics fidelity gaps in `ball_flight_physics.py` and `flexible_shaft.py` to meet simulation accuracy requirements.
-4.  **High Priority:** Refactor `pca_analysis.py` to remove the patent-infringing `efficiency_score` calculation.
+4.  **High Priority:** Refactor `pca_analysis.py` so the `efficiency_score` calculation either measures energy transfer or is renamed to reflect the ordering check it actually performs.
 5.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py`.
 6.  **Low Priority:** Complete tooling utilities and remaining TODOs.

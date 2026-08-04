@@ -6,11 +6,11 @@
 
 ## Executive Summary
 
-The physics engine demonstrates a solid foundation in basic projectile motion and rigid body dynamics but suffers from critical oversimplifications in impact mechanics and ground reaction force modeling. The implementation of shaft dynamics lacks essential torsional components required for accurate dispersion analysis. Additionally, kinematic sequence scoring presents a high patent infringement risk.
+The physics engine demonstrates a solid foundation in basic projectile motion and rigid body dynamics but suffers from critical oversimplifications in impact mechanics and ground reaction force modeling. The implementation of shaft dynamics lacks essential torsional components required for accurate dispersion analysis. Additionally, the kinematic sequence "efficiency" score measures ordering rather than energy transfer, so its name overstates what it computes.
 
 - **Overall Physics Fidelity Score:** 6/10
 - **Critical Issues Count:** 2 (Impact Model, GRF Fallback)
-- **High Priority Gaps:** 2 (Shaft Torsion, Patent Risk)
+- **High Priority Gaps:** 2 (Shaft Torsion, Misnamed Efficiency Metric)
 - **Confidence in Results:** Medium (simulation is directionally correct but lacks precision for pro-level analysis)
 
 ## Findings by Category
@@ -62,12 +62,12 @@ The physics engine demonstrates a solid foundation in basic projectile motion an
 - **Impact:** Misses out-of-plane rotations which are critical for injury risk assessment (e.g., "early extension").
 - **Recommended Fix:** Implement quaternion-based angular velocity analysis.
 
-**Finding 3.2: Patent Infringement Risk in Efficiency Score**
+**Finding 3.2: Efficiency Score Does Not Measure Efficiency**
 
 - **File:** `src/shared/python/analysis/pca_analysis.py` (Line 160)
 - **Issue:** The `efficiency_score` is calculated as `matches / len(expected_order)`.
-- **Impact:** This metric and its nomenclature overlap with patent claims from Zepp Labs and Blast Motion regarding "kinematic sequence scoring."
-- **Recommended Fix:** Rename metric to "Sequence Adherence" and consult legal counsel.
+- **Impact:** The metric counts how many segments peak in the expected order. It carries no energy or work term, so a swing that sequences correctly but transfers energy poorly scores identically to one that does both well. The name overstates what is computed.
+- **Recommended Fix:** Rename the metric to "Sequence Adherence"; derive any true efficiency measure from energy transfer.
 
 ### 4. Ball Flight Physics
 
