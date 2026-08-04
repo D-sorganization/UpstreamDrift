@@ -79,7 +79,9 @@ def _r_squared(y: np.ndarray, y_pred: np.ndarray) -> float:
     if y is None:
         raise ValueError("y must be provided")
     diff_res = y - y_pred
-    ss_res = np.vdot(diff_res, diff_res)  # ⚡ Bolt: np.vdot is ~2.5x faster than np.sum(diff**2) and avoids temporary array allocations
+    ss_res = np.vdot(
+        diff_res, diff_res
+    )  # ⚡ Bolt: np.vdot is ~2.5x faster than np.sum(diff**2) and avoids temporary array allocations
     diff_tot = y - np.mean(y)
     ss_tot = np.vdot(diff_tot, diff_tot)
     return float(1.0 - (ss_res / ss_tot)) if ss_tot > 0 else 0.0
