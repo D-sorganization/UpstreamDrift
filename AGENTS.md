@@ -288,6 +288,32 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
   (`load_club_target_excel.m` line 53: `CM_TO_METRES = 0.01`) is the
   source of truth — see `MATLAB_GOLF_MODEL_GUIDE.md`.
 
+### Launch Monitor Analytics
+
+`src/shared/python/launch_monitor/` is the canonical vendor-neutral shot-data
+stack. Use it for TrackMan, Foresight, FlightScope, Garmin, SkyTrak, Uneekor,
+Full Swing, Rapsodo, GSPro/Open Connect, or generic tabular imports instead of
+adding a one-off CSV reader.
+
+- `import_session` and `detect_profile` — format/header discovery, unit
+  normalization, raw-column retention, and SHA-256 provenance.
+- `LaunchMonitorProject` — multi-session aggregation, portable persistence,
+  and durable treatment audit records.
+- `apply_treatment` — structured filters, missing/duplicate/outlier flags, and
+  explicitly labeled identity-derived metrics.
+- `compute_correlations`, `compute_pca`, `compute_vif`, and
+  `fit_predictive_model` — interdependency and predictive analysis with
+  leakage warnings and reproducible splits.
+- `compare_monitors`, `analyze_dispersion`, and `analyze_trend` — matched or
+  descriptive monitor comparison, shot-pattern ellipses, and longitudinal
+  change analysis.
+- `src/tools/launch_monitor_analytics/` — the PyQt6 workbench; keep new
+  analysis logic in the headless shared package.
+
+See ADR 0031 and `docs/user_guide/launch_monitor_analytics.md`. Correlation and
+predictive performance do not establish causality; unmatched monitor
+comparisons are not calibration evidence.
+
 ### Logging / config
 
 - `src/shared/python/logging_pkg/logging_config.get_logger(__name__)`
