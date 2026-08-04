@@ -54,21 +54,21 @@ Several modules contain placeholders or are missing key functionality described 
   - **Issue:** The `RigidBodyImpactModel` uses a simplified scalar effective mass formula (`1 / (1/m + r^2/I)`).
   - **Impact:** This ignores the full 3D inertia tensor and the direction of the impact vector, leading to potential inaccuracies in off-center impact outcomes.
 
-## 3. Patent and Legal Risks
+## 3. Uncited and Under-Specified Methodology
 
 - **`src/shared/python/analysis/pca_analysis.py`**:
 
-  - **Risk:** The `efficiency_score` is calculated as `matches / len(expected_order)`.
-  - **Context:** This simplistic implementation may be an attempt to mimic a patented "efficiency" metric (e.g., from K-Motion or similar) without a robust, unique methodology (Issue P004).
+  - **Gap:** The `efficiency_score` is calculated as `matches / len(expected_order)`.
+  - **Context:** The metric counts ordering matches and contains no energy or work term, so the name "efficiency" is not supported by the computation. No source is cited for the choice of metric.
 
 - **`src/shared/python/injury/injury_risk.py`**:
 
-  - **Risk:** The module explicitly uses terms like "X-Factor Stretch" and specific thresholds (e.g., > 55 degrees).
-  - **Context:** These terms and thresholds are closely associated with TPI (Titleist Performance Institute) and McLean methodologies. Using them directly creates a "Medium Risk" for patent/trademark infringement.
+  - **Gap:** The module uses the term "X-Factor Stretch" with hardcoded thresholds (e.g., > 55 degrees) and no citation.
+  - **Context:** The thresholds are presented as established without a reference. They should be traced to specific published literature and cited, or replaced with values the project can defend.
 
 - **`src/shared/python/validation_pkg/comparative_analysis.py`**:
-  - **Risk:** The use of Dynamic Time Warping (DTW) for motion comparison.
-  - **Context:** This approach is similar to methods used by Zepp and Blast Motion, posing a potential infringement risk if the implementation too closely mirrors their patented comparison logic.
+  - **Gap:** Dynamic Time Warping is used for motion comparison without documented justification.
+  - **Context:** DTW's suitability for swing comparison is asserted rather than argued. Document why time-warping is appropriate here, or evaluate keyframe/spatial alternatives.
 
 ## 4. Minor Implementation Gaps
 
@@ -79,9 +79,9 @@ Several modules contain placeholders or are missing key functionality described 
 ## Recommendations
 
 1.  **Prioritize Physics Accuracy:** Address the hardcoded aerodynamic coefficients and the simplified effective mass model in `impact_model.py`.
-2.  **Mitigate Legal Risks:**
-    - Rename and redefine "efficiency_score" and "X-Factor Stretch" to use generic, non-infringing terminology and methodologies.
-    - Review the DTW implementation in `comparative_analysis.py` against relevant patents.
+2.  **Fix Naming and Citation Gaps:**
+    - Rename `efficiency_score` to reflect what it computes, and cite a source for "X-Factor Stretch" thresholds or replace them.
+    - Document the justification for the DTW approach in `comparative_analysis.py`.
 3.  **Complete Missing Features:**
     - Implement `RealTimeController` connectivity methods for hardware integration.
     - Implement the missing environmental models for ball flight and torsional dynamics for the shaft to meet simulation fidelity requirements.

@@ -19,13 +19,13 @@
 
 ## Critical Issues (Must Fix)
 
-### CRITICAL-001: Kinematic Sequence Patent Risk
+### CRITICAL-001: Kinematic Sequence Analyzer Is Golf-Specific and Over-Narrow
 
-| Field           | Value                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------ |
-| **Issue Title** | `refactor(analysis): Replace TPI-patented kinematic sequence with neutral SegmentTimingAnalyzer` |
-| **Severity**    | CRITICAL                                                                                         |
-| **Labels**      | `legal`, `refactor`, `breaking-change`                                                           |
+| Field           | Value                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| **Issue Title** | `refactor(analysis): Generalize kinematic sequence into a segment-agnostic SegmentTimingAnalyzer` |
+| **Severity**    | CRITICAL                                                                                  |
+| **Labels**      | `refactor`, `breaking-change`                                                             |
 
 **Affected Files/Modules:**
 
@@ -39,18 +39,18 @@
 
 **Description:**
 
-The current `KinematicSequenceAnalyzer` class implements analysis methods that closely mirror TPI (Titleist Performance Institute) patented "kinematic sequence" analysis. Key concerns:
+The current `KinematicSequenceAnalyzer` hardcodes a golf-specific four-segment model, which limits the analysis to one motion and one segment count. Key concerns:
 
-- Uses exact terminology ("Pelvis", "Torso", "Arm", "Club" ordering)
-- Implements peak velocity detection with TPI-style timing analysis
-- Speed gain ratios match patented methodology
+- Segment names are hardcoded ("Pelvis", "Torso", "Arm", "Club"), so the analyzer cannot be applied to any other movement or to a different segment decomposition
+- Peak velocity detection assumes exactly this chain, so partial or instrumented-subset data cannot be analyzed
+- Speed gain ratios are defined only pairwise along the fixed chain, with no general formulation
 
 **Recommended Fix:**
 
 1. Rename class to `SegmentTimingAnalyzer`
 2. Use generic terminology: "proximal_segment", "intermediate_segment", "distal_segment"
-3. Document as "general biomechanical segment timing analysis" without golf-specific claims
-4. Remove any references to "kinematic sequence" as a branded term
+3. Document as "general biomechanical segment timing analysis", parameterized by an arbitrary segment chain
+4. Accept the segment chain as configuration rather than hardcoding it
 5. Implement as generic proximal-to-distal timing analysis applicable to any multi-segment motion
 
 **Estimated Effort:** 3-5 days (includes test updates and documentation)
