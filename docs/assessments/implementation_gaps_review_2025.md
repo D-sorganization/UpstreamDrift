@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This review identifies critical implementation gaps, placeholder code, physics inaccuracies, and legal/patent risks within the codebase. Several modules contain `TRACKED_TASK`, `TRACKED_DEFECT`, or `NotImplementedError` markers that indicate features were started but not completed.
+This review identifies critical implementation gaps, placeholder code, physics inaccuracies, and naming/citation gaps within the codebase. Several modules contain `TRACKED_TASK`, `TRACKED_DEFECT`, or `NotImplementedError` markers that indicate features were started but not completed.
 
 ## 1. Critical Implementation Gaps (Blocking)
 
@@ -96,25 +96,25 @@ Missing metrics required for advanced swing analysis.
   - Missing "Inter-segmental Power Flow" calculation (TRACKED_TASK).
 - **Impact:** Incomplete biomechanical analysis capabilities.
 
-## 4. Legal and Patent Risks
+## 4. Naming, Citation, and Provenance Gaps
 
-Implementation choices that pose legal or maintenance risks.
+Implementation choices where the code asserts more than it can support.
 
-### Patent Risks
+### Metrics that overstate what they compute
 
 - **File:** `src/shared/python/analysis/pca_analysis.py`
-- **Risk:** The `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents.
+- **Gap:** `efficiency_score` (`matches / len(expected_order)`) measures segment ordering only; it has no energy term and should not be called efficiency.
 - **File:** `src/shared/python/injury/injury_risk.py`
-- **Risk:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
+- **Gap:** "X-Factor Stretch" thresholds (e.g., > 55 degrees) are hardcoded with no citation to the literature they came from.
 - **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
-- **Risk:** TRACKED_DEFECT explicitly states "The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation."
+- **Gap:** Carries a TRACKED_DEFECT marker for the same `efficiency_score` naming problem.
 
-### Data Copyright
+### Data provenance
 
 - **File:** `src/shared/python/validation_pkg/validation_data.py`
-- **Risk:** Hardcoded "PGA Tour TrackMan Averages" attributed to "trackman.com".
-- **Details:** This may violate Database Rights or Terms of Service.
-- **Impact:** Legal exposure regarding data usage.
+- **Gap:** Hardcoded "PGA Tour TrackMan Averages" with a bare "trackman.com" attribution.
+- **Details:** The retrieval date, the exact source page, and the sample definition are all unrecorded, so the numbers cannot be verified or refreshed.
+- **Impact:** Validation baselines that cannot be reproduced.
 
 ## 5. Tooling Gaps
 
