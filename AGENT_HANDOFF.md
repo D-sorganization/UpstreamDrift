@@ -8,8 +8,9 @@ Update this file with every PR and every push to main.
 - **Repository_Management#1390** ("EPIC: Fleet-wide Agent Handoff & PR Policy") —
   UpstreamDrift rollout merged as #8351; this file and the `AGENTS.md` policy section
   are now binding on `main`.
-- **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented on
-  `feat/putting-dynamics`: an advanced surface/friction/mode-machine package,
+- **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented in
+  full PR **#8352** (`feat/putting-dynamics`): an advanced
+  surface/friction/mode-machine package,
   finite-mass collision with loft and adjustable-hosel wrench/twist outputs, and the
   public-data review in `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
   Local evidence: 70 focused pytest tests, Ruff clean, and Python 3.12 mypy clean.
@@ -39,8 +40,8 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
-- `feat/putting-dynamics` — #8345 P2/P3/P4; two checkpoint commits, ready for a
-  full PR to `main`. P1 should branch from this interface until the PR merges.
+- `feat/putting-dynamics` — #8345 P2/P3/P4, full PR **#8352** to `main`.
+  P1 should branch from this interface until the PR merges.
 - `fix/impact-friction-spin-axis-and-gear-offset` (#8344) — off `main`.
 - `bolt-vdot-optimization-*`, `bolt/trendline-boolean-sum-optimization-*`,
   `bolt/ndarray-sum-optimization-*`, `bolt/optimize-rsquared-vdot-*` — each off `main`,
@@ -98,7 +99,8 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
    squash-merge commit (not the old branch-head SHA).
 3. Clear the small independent queue: `bolt-*` perf PRs, #8344 physics fix, dependabot
    bumps.
-4. Review and merge `feat/putting-dynamics` for #8345 P2/P3/P4. Important audit
+4. Review and merge PR **#8352** (`feat/putting-dynamics`) for #8345 P2/P3/P4.
+   Important audit
    corrections include the 1.64 m/s full-chord capture bound, signed overspin settling,
    down-grain friction semantics, immutable field ownership, and consistent tangential
    impulse/backspin vector recomposition.
