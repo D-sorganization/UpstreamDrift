@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 /* Typography scale (#7422): one enforced set of heading/label classes so
  * identical-rank headings look the same on every page and screen-reader
