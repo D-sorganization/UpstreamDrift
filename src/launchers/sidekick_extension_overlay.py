@@ -30,6 +30,10 @@ _REQUIRED_PARENT_RUNTIME = (
 )
 
 
+class IncompleteParentSidekickRuntimeError(RuntimeError):
+    """The selected Tools source does not provide the required runtime."""
+
+
 @dataclass(frozen=True)
 class _ExtensionSource:
     """An exact local module approved by the ownership manifest."""
@@ -283,13 +287,14 @@ def validate_parent_sidekick_runtime(parent_python_root: Path) -> None:
         if not (parent_root / relative).is_file()
     ]
     if missing:
-        raise RuntimeError(
+        raise IncompleteParentSidekickRuntimeError(
             "The canonical Sidekick runtime is incomplete in the selected "
             f"Tools source: {', '.join(missing)}"
         )
 
 
 __all__ = [
+    "IncompleteParentSidekickRuntimeError",
     "ManifestGatedSidekickFinder",
     "install_manifest_gated_sidekick_extensions",
     "validate_parent_sidekick_runtime",
