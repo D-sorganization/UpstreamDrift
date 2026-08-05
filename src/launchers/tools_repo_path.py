@@ -49,9 +49,13 @@ def resolve_tools_source_root(repo_root: Path, env_value: str | None) -> Path:
     if vendor_source.is_dir():
         return vendor_source
 
-    sibling_root = repo_root.parent / "Tools"
-    if sibling_root.is_dir():
-        return sibling_root / "src"
+    # Normal clones sit directly beside Tools. Agent worktrees commonly sit
+    # below ``UpstreamDrift/.codex-worktrees/<branch>``; walk upward so those
+    # source checkouts still find the same workspace-level sibling.
+    for workspace_root in repo_root.parents:
+        sibling_source = workspace_root / "Tools" / "src"
+        if sibling_source.is_dir():
+            return sibling_source
 
     # Match the existing last-resort import contract. The missing path is
     # harmless in PYTHONPATH and produces the normal import error downstream.
