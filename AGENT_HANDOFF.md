@@ -14,7 +14,7 @@ Update this file with every PR and every push to main.
   finite-mass collision with loft and adjustable-hosel wrench/twist outputs, and the
   public-data review in `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
   Local evidence: 70 focused pytest tests, Ruff clean, and Python 3.12 mypy clean.
-  P1 is implemented on stacked branch `feat/putting-3d-scene`: canonical FastAPI
+  P1 is implemented in full stacked PR **#8354** (`feat/putting-3d-scene`): canonical FastAPI
   playback DTOs, generated TypeScript types, Zustand/TanStack state, theme-token R3F
   scene, visible ball spin and putter slowdown, orbit/playback controls, adjustable
   hosel/CG view, and desktop/mobile rendered QA. P5 public sharing remains.
@@ -45,8 +45,8 @@ The active branches are independent topic branches off `main` unless noted:
 
 - `feat/putting-dynamics` — #8345 P2/P3/P4, full PR **#8352** to `main`.
   P1 should branch from this interface until the PR merges.
-- `feat/putting-3d-scene` — #8345 P1, stacked on `feat/putting-dynamics`/PR
-  **#8352**. Scoped evidence: 80 Python tests and 17 UI/theme tests pass; strict
+- `feat/putting-3d-scene` — #8345 P1, full PR **#8354** stacked on
+  `feat/putting-dynamics`/PR **#8352**. Scoped evidence: 80 Python tests and 17 UI/theme tests pass; strict
   API mypy, Ruff, generated-type freshness, ESLint, TypeScript, color guard, and
   production build pass. The full UI baseline remains 781 passed / 2 unrelated
   `useEngineStore` unload failures, reproduced on the parent checkout.
@@ -112,6 +112,6 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
    corrections include the 1.64 m/s full-chord capture bound, signed overspin settling,
    down-grain friction semantics, immutable field ownership, and consistent tangential
    impulse/backspin vector recomposition.
-5. Review the stacked #8345 P1 branch `feat/putting-3d-scene`; it consumes the
+5. Review full stacked PR **#8354** for #8345 P1; it consumes the
    curated `putting_dynamics` façade without duplicating physics in React. Then
    complete P5 public sharing and parity registration.
