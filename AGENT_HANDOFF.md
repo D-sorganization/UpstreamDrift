@@ -18,7 +18,7 @@ Update this file with every PR and every push to main.
 - **#8339** ("Rate of Closure Impact Explorer") — merged. `vendor/ud-tools` submodule
   pin was provisional pending Tools#4092; confirm the submodule now points at the
   squash-merge commit on Tools `main`, not the old branch-head SHA, before relying on it.
-- `fix/classic-launcher-missing-tools` — PR pending. Fixes classic-launcher startup
+- **#8353** (`fix/classic-launcher-missing-tools`) — full PR. Fixes classic-launcher startup
   from nested worktrees by locating the workspace-level Tools checkout. If no valid
   implicit Tools runtime exists, only the optional Sidekick sidebar is disabled;
   explicit `TOOLS_REPO_PATH` selections remain fail-closed. Commit `6699380d9` has
@@ -47,8 +47,9 @@ The active branches are independent topic branches off `main` unless noted:
 
 - `feat/putting-dynamics` — #8345 P2/P3/P4, full PR **#8352** to `main`.
   P1 should branch from this interface until the PR merges.
-- `fix/classic-launcher-missing-tools` — classic PyQt6 nested-worktree discovery and
-  optional Sidekick fallback; independent of the putting stack.
+- `fix/classic-launcher-missing-tools` — full PR **#8353**; classic PyQt6
+  nested-worktree discovery and optional Sidekick fallback, independent of the
+  putting stack.
 - `fix/impact-friction-spin-axis-and-gear-offset` (#8344) — off `main`.
 - `bolt-vdot-optimization-*`, `bolt/trendline-boolean-sum-optimization-*`,
   `bolt/ndarray-sum-optimization-*`, `bolt/optimize-rsquared-vdot-*` — each off `main`,
