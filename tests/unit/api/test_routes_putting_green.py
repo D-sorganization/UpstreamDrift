@@ -100,3 +100,42 @@ def test_simulate_putt(client: TestClient) -> None:
     data = response.json()
     assert "positions" in data
     assert "holed" in data
+
+
+def test_simulate_putt_3d_exposes_collision_and_motion_modes(
+    client: TestClient,
+) -> None:
+    """The R3F endpoint returns one self-contained playback payload."""
+    response = client.post(
+        "/tools/putting-green/simulate-3d",
+        json={
+            "putter_speed_mps": 1.8,
+            "loft_deg": 3.0,
+            "stimp_rating": 10.0,
+            "hole_x_m": 3.0,
+            "hole_y_m": 0.0,
+            "hosel_toe_m": -0.025,
+            "hosel_forward_m": 0.005,
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["samples"][0]["mode"] in {"airborne", "slide"}
+    assert data["samples"][-1]["mode"] in {"rest", "roll"}
+    assert data["collision"]["ball_speed_mps"] > 0
+    assert data["collision"]["putter_speed_after_mps"] < 1.8
+    assert data["collision"]["contact_time_proxy_s"] > 0
+    assert data["surface"]["width_m"] > 0
+    assert data["surface"]["height_m"] > 0
+
+
+def test_simulate_putt_3d_rejects_hosel_outside_head(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/tools/putting-green/simulate-3d",
+        json={"hosel_toe_m": 0.081},
+    )
+
+    assert response.status_code == 422

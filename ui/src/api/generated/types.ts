@@ -475,6 +475,37 @@ export interface CameraPresetResponse {
 }
 
 /**
+ * Availability report for one canonical-core workspace.
+ */
+export interface CanonicalCoreStatus {
+  /** Registry id, e.g. canonical_core_estimation */
+  tool_id: string;
+  /** Workspace mode: estimation or comparison */
+  mode: string;
+  /** Human-readable workspace name */
+  name: string;
+  /** Workspace description from the registry */
+  description: string;
+  /** React route that renders this workspace */
+  web_route: string;
+  /** Capability tags declared by the registry descriptor */
+  capabilities?: string[];
+  /** True once a compute service backs this workspace */
+  available: boolean;
+  /** Why the workspace is unavailable; empty when available */
+  reason: string;
+  /** Actionable guidance for the user; empty when available */
+  next_step: string;
+}
+
+/**
+ * Availability report for every canonical-core workspace.
+ */
+export interface CanonicalCoreStatusList {
+  workspaces?: CanonicalCoreStatus[];
+}
+
+/**
  * Response model for a single capability level.
  */
 export interface CapabilityLevelResponse {
@@ -1386,6 +1417,85 @@ export interface PublishRequest {
   /** Channel name (scope/topic pattern) */
   channel: string;
   payload?: Record<string, unknown>;
+}
+
+/**
+ * Impact quantities displayed beside the slow-motion collision.
+ */
+export interface Putt3DCollisionResponse {
+  ball_speed_mps: number;
+  putter_speed_before_mps: number;
+  putter_speed_after_mps: number;
+  launch_angle_deg: number;
+  spin_rad_s: number;
+  impulse_n_s: number;
+  contact_time_proxy_s: number;
+  kinetic_energy_loss_j: number;
+  face_twist_rad_s: number;
+  twist_moment_n_m_s: number;
+}
+
+/**
+ * One frame in the three-dimensional playback trajectory.
+ */
+export interface Putt3DSampleResponse {
+  t_s: number;
+  x_m: number;
+  y_m: number;
+  z_m: number;
+  speed_mps: number;
+  spin_rad_s: number;
+  mode: "airborne" | "slide" | "roll" | "rest";
+}
+
+/**
+ * Physics and visualization inputs for one three-dimensional putt.
+ */
+export interface Putt3DSimulationRequest {
+  putter_speed_mps: number;
+  loft_deg: number;
+  head_mass_kg: number;
+  head_moi_kg_m2: number;
+  coefficient_of_restitution: number;
+  hosel_toe_m: number;
+  hosel_forward_m: number;
+  impact_toe_m: number;
+  stimp_rating: number;
+  grade_percent: number;
+  downhill_aspect_deg: number;
+  grain_strength: number;
+  grain_direction_deg: number;
+  rolling_velocity_coefficient: number;
+  bump_height_m: number;
+  friction_variation: number;
+  random_seed: number;
+  hole_x_m: number;
+  hole_y_m: number;
+}
+
+/**
+ * Complete deterministic playback payload for the R3F client.
+ */
+export interface Putt3DSimulationResponse {
+  samples: Putt3DSampleResponse[];
+  collision: Putt3DCollisionResponse;
+  surface: Putt3DSurfaceResponse;
+  holed: boolean;
+  total_distance_m: number;
+  duration_s: number;
+  skid_distance_m: number;
+}
+
+/**
+ * Surface geometry metadata required by the R3F scene.
+ */
+export interface Putt3DSurfaceResponse {
+  width_m: number;
+  height_m: number;
+  grade_percent: number;
+  downhill_aspect_deg: number;
+  hole_x_m: number;
+  hole_y_m: number;
 }
 
 /**
