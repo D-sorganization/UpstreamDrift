@@ -5,12 +5,16 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **Repository_Management#1390** ("EPIC: Fleet-wide Agent Handoff & PR Policy") — this PR
-  adds this file plus the `AGENTS.md` policy section. Status: in progress (this PR).
-- **#8345** ("EPIC: 3-D Putt Simulation") — open, labeled `claim:claude`. Five phases (P1–P5):
-  R3F 3-D putt scene/collision viz, advanced surface+friction model
-  (`src/shared/python/putting_dynamics/`), two-body putter/ball collision model,
-  a public research-data review doc, and a public-sharing build. Not started yet.
+- **Repository_Management#1390** ("EPIC: Fleet-wide Agent Handoff & PR Policy") —
+  UpstreamDrift rollout merged as #8351; this file and the `AGENTS.md` policy section
+  are now binding on `main`.
+- **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented in
+  full PR **#8352** (`feat/putting-dynamics`): an advanced
+  surface/friction/mode-machine package,
+  finite-mass collision with loft and adjustable-hosel wrench/twist outputs, and the
+  public-data review in `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
+  Local evidence: 70 focused pytest tests, Ruff clean, and Python 3.12 mypy clean.
+  P1 (R3F 3-D scene and controls) and P5 (public sharing/parity registration) remain.
 - **#8339** ("Rate of Closure Impact Explorer") — merged. `vendor/ud-tools` submodule
   pin was provisional pending Tools#4092; confirm the submodule now points at the
   squash-merge commit on Tools `main`, not the old branch-head SHA, before relying on it.
@@ -34,10 +38,10 @@ Update this file with every PR and every push to main.
 
 ## In-flight branches (what stacks on what)
 
-None of the currently open branches stack on each other — all are independent topic
-branches off `main`:
+The active branches are independent topic branches off `main` unless noted:
 
-- `docs/agent-handoff-1390` (this branch) — off `origin/main`.
+- `feat/putting-dynamics` — #8345 P2/P3/P4, full PR **#8352** to `main`.
+  P1 should branch from this interface until the PR merges.
 - `fix/impact-friction-spin-axis-and-gear-offset` (#8344) — off `main`.
 - `bolt-vdot-optimization-*`, `bolt/trendline-boolean-sum-optimization-*`,
   `bolt/ndarray-sum-optimization-*`, `bolt/optimize-rsquared-vdot-*` — each off `main`,
@@ -95,6 +99,10 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
    squash-merge commit (not the old branch-head SHA).
 3. Clear the small independent queue: `bolt-*` perf PRs, #8344 physics fix, dependabot
    bumps.
-4. Begin #8345 EPIC phase P1 (3-D putt scene & collision visualization) once claimed
-   work is scheduled — see the phase breakdown in the issue for P2–P5 ordering
-   (surface/friction model → collision model → data-review doc → public sharing).
+4. Review and merge PR **#8352** (`feat/putting-dynamics`) for #8345 P2/P3/P4.
+   Important audit
+   corrections include the 1.64 m/s full-chord capture bound, signed overspin settling,
+   down-grain friction semantics, immutable field ownership, and consistent tangential
+   impulse/backspin vector recomposition.
+5. Build #8345 P1 against the curated `putting_dynamics` façade, then complete P5
+   public sharing and parity registration. Do not duplicate the Python physics in React.

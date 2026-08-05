@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.480 |
+| **Spec Version** | 1.0.481 |
 | **Last Spec Update** | 2026-08-04 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-04** - Added the headless putting-dynamics foundation for #8345
+  P2/P3/P4. `src/shared/python/putting_dynamics/` provides DbC-validated
+  heterogeneous height/friction fields, seeded bumpiness, signed skid/overspin
+  transition, rolling/rest modes, full-chord hole capture, and finite-mass
+  putter-ball collision outputs including dynamic loft, slowdown, adjustable
+  hosel position, and an attachment-point impulse wrench. The public-data
+  review records verified sources, explicit assumptions, discrepancies, model
+  defaults, and validation bands. Seventy focused unit tests pin analytic
+  limits, determinism, symmetry, conservation, and the public façade.
 - **2026-08-04** - Added the vendor-neutral Launch Monitor Analytics workbench
   (#8342). A canonical, unit-normalized shot schema and provenance-preserving
   import pipeline aggregate common TrackMan, Foresight, FlightScope, Garmin,
@@ -1426,6 +1435,7 @@ UpstreamDrift/
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
+│       ├── putting_dynamics/       # Surface-aware putt collision and roll physics
 │       ├── launch_monitor/         # Canonical shot import, treatment, and analytics
 │       ├── motion_pipeline/        # Mocap ingestion (C3D/TRC/BVH), IK backends
 │       ├── model_generation/       # URDF/MJCF parsing, Frankenstein editor (VENDORED)
@@ -1468,6 +1478,7 @@ UpstreamDrift/
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
 | Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6 and headless vendor-neutral launch-monitor import, dependency, model, agreement, dispersion, and trend analysis |
+| Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
 | Workspace Metadata       | `src/shared/python/workspace/`           | Project/session/dataset metadata store and CC-4 HDF5 result browser view models            |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
@@ -1934,6 +1945,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-04 | 1.0.481 | Added #8345 P2/P3/P4 putting dynamics and public-data review: heterogeneous and seeded green fields, advanced friction, signed skid/overspin settling, full-chord capture, finite-mass lofted collision, putter slowdown, adjustable-hosel impulse wrench and pinned-shaft twist proxy, 70 focused tests, and an explicit provenance/assumption ledger. |
 | 2026-08-01 | 1.1.0   | Bolt: Optimized `np.sum(arr * arr)` and `np.sum(arr ** 2)` to `np.vdot(arr, arr)` in drake compute cost and PARITY_SPEC to avoid intermediate array allocations and improve performance. |
 | 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
 | 2026-07-27 | 1.0.478 | Ensured the classic PyQt6 background API child inherits the sidebar's validated Tools authority and orders its package roots ahead of UpstreamDrift partial copies, preventing `chat.websocket_protocol` import failure (#8120). Recorded the Tools #3950 deprecations-as-errors Units repair and visible `100 °C` to `212 °F` retest, plus dynamic-port API-tree recovery and close cleanup that preserved the unrelated port-8000 blocker. |
