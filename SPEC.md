@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.481 |
-| **Last Spec Update** | 2026-08-04 |
+| **Spec Version** | 1.0.482 |
+| **Last Spec Update** | 2026-08-05 |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +71,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-05** - Hardened classic PyQt6 startup from nested worktrees.
+  Tools-source discovery now walks workspace ancestors after honoring explicit
+  and initialized vendored sources, so a worktree can locate the canonical
+  sibling `Tools/src` checkout. An unavailable implicit Sidekick runtime
+  disables only the optional sidebar; an explicitly configured incomplete
+  `TOOLS_REPO_PATH` remains fail-closed. Focused regressions pin nested
+  discovery and both fallback contracts.
 - **2026-08-04** - Added the headless putting-dynamics foundation for #8345
   P2/P3/P4. `src/shared/python/putting_dynamics/` provides DbC-validated
   heterogeneous height/friction fields, seeded bumpiness, signed skid/overspin
@@ -1945,6 +1952,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-05 | 1.0.482 | Fixed classic PyQt6 startup from nested worktrees by discovering the workspace-level Tools checkout, degrading only the optional Sidekick sidebar for an unavailable implicit runtime, and preserving fail-closed behavior for explicit `TOOLS_REPO_PATH`; 28 focused launcher/overlay tests pass. |
 | 2026-08-04 | 1.0.481 | Added #8345 P2/P3/P4 putting dynamics and public-data review: heterogeneous and seeded green fields, advanced friction, signed skid/overspin settling, full-chord capture, finite-mass lofted collision, putter slowdown, adjustable-hosel impulse wrench and pinned-shaft twist proxy, 70 focused tests, and an explicit provenance/assumption ledger. |
 | 2026-08-01 | 1.1.0   | Bolt: Optimized `np.sum(arr * arr)` and `np.sum(arr ** 2)` to `np.vdot(arr, arr)` in drake compute cost and PARITY_SPEC to avoid intermediate array allocations and improve performance. |
 | 2026-07-27 | 1.0.479 | Separated classic PyQt6 Diagnostics validation of the 46 directly declared parent `models.yaml` tiles from validation of the 75-entry provider-expanded runtime registry (#8121). Added hermetic provider regressions and recorded the computer-controlled transition from a false 29-model `DEGRADED` result to `Status: HEALTHY` with zero failed checks. |
