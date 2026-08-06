@@ -9,10 +9,10 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Protocol
+import math
 from collections.abc import Iterable, Mapping
 
 import numpy as np
-import math
 
 from ..contracts import JointTrajectory, SkeletonRig
 
@@ -109,7 +109,7 @@ class FlatGroundContact:
             forces[i, 2] = f_n
 
             v_tan = velocities[i, :2]
-            v_tan_norm = math.hypot(v_tan[0], v_tan[1])  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small 2D arrays
+            v_tan_norm = math.hypot(v_tan[0], v_tan[1])
             if v_tan_norm > 1e-9 and f_n > 0:
                 f_t = -self.friction * f_n * v_tan / v_tan_norm
                 forces[i, 0] = f_t[0]
