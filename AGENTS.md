@@ -786,6 +786,23 @@ When implementing an issue:
 
 ---
 
+## Agent Handoff & PR Policy
+
+Fleet-wide policy from `Repository_Management#1390`:
+
+1. **Full PRs, never drafts.** Every PR must open ready-for-review — do not use
+   `gh pr create --draft` or the GitHub UI draft toggle.
+2. **Commit frequently.** Use small, conventional commits that save progress as you go;
+   never batch a day's work into a single commit.
+3. **Agent handoff document.** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) at the repo root
+   tracks current-state-only info (active epics/PRs, must-read architecture pointers,
+   in-flight branch stacking, gate commands, a do-not list, and the short-term roadmap).
+   Update it as part of **every PR you open** and **every push that lands on `main`**.
+   It is not a changelog — history lives in git; keep it current-state only and under
+   150 lines.
+
+---
+
 <!-- BEGIN FLEET-MANAGED: repo-context-codemap -->
 
 ## 🧭 Repo Context & Codemap Freshness

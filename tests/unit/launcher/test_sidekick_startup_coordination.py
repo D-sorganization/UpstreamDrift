@@ -19,6 +19,9 @@ import pytest
 
 from src.launchers import launcher_sidekick_sidebar as sidebar_module
 from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+from src.launchers.sidekick_extension_overlay import (
+    IncompleteParentSidekickRuntimeError,
+)
 from src.launchers.upstream_drift_launcher import (
     SIDEKICK_API_HEALTHCHECK_MS,
     SIDEKICK_API_MAX_RESTARTS,
@@ -258,6 +261,73 @@ def test_vendored_tools_precedes_mutable_sibling_checkout(
         str(vendor_src),
         str(vendor_src / "shared" / "python"),
     ]
+
+
+def test_nested_worktree_finds_workspace_sibling_tools_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An uninitialized worktree vendor falls back to workspace Tools."""
+    monkeypatch.delenv("TOOLS_REPO_PATH", raising=False)
+    workspace = tmp_path / "Repositories"
+    repo_root = workspace / "UpstreamDrift" / ".codex-worktrees" / "feature"
+    sibling_src = workspace / "Tools" / "src"
+    (repo_root / "vendor" / "ud-tools").mkdir(parents=True)
+    (sibling_src / "shared" / "python").mkdir(parents=True)
+    manager = SidekickSidebarManager(SimpleNamespace())
+    installed: list[str] = []
+
+    with (
+        patch.object(sidebar_module, "REPOS_ROOT", repo_root),
+        patch.object(
+            SidekickSidebarManager,
+            "_prepend_sys_path",
+            side_effect=lambda path: installed.append(str(path)),
+        ),
+        patch.object(sidebar_module, "_activate_source_extensions"),
+    ):
+        manager._install_sidekick_import_paths()
+
+    assert installed == [
+        str(sibling_src),
+        str(sibling_src / "shared" / "python"),
+    ]
+
+
+def test_implicit_incomplete_tools_runtime_disables_optional_sidebar(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A missing implicit Tools checkout must not abort the main launcher."""
+    monkeypatch.delenv("TOOLS_REPO_PATH", raising=False)
+    manager = SidekickSidebarManager(SimpleNamespace())
+
+    with patch.object(
+        SidekickSidebarManager,
+        "_install_sidekick_import_paths",
+        side_effect=IncompleteParentSidekickRuntimeError("missing runtime"),
+    ):
+        assert manager._get_sidekick_module() is None
+
+
+def test_explicit_incomplete_tools_runtime_remains_fail_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An explicitly selected but incomplete Tools checkout is an error."""
+    tools_root = tmp_path / "Tools"
+    (tools_root / "src").mkdir(parents=True)
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(tools_root))
+    manager = SidekickSidebarManager(SimpleNamespace())
+
+    with (
+        patch.object(
+            SidekickSidebarManager,
+            "_install_sidekick_import_paths",
+            side_effect=IncompleteParentSidekickRuntimeError("missing runtime"),
+        ),
+        pytest.raises(IncompleteParentSidekickRuntimeError, match="missing runtime"),
+    ):
+        manager._get_sidekick_module()
 
 
 def test_explicit_tools_checkout_precedes_initialized_fallbacks(
