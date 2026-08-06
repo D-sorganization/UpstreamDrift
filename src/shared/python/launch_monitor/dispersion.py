@@ -53,7 +53,7 @@ def analyze_dispersion(
     vector = eigenvectors[:, 0]
     angle = float(np.arctan2(vector[1], vector[0]))
     delta = points - robust_center
-    radial = np.hypot(delta[:, 0], delta[:, 1])  # ⚡ Bolt: np.hypot is ~2x faster than np.linalg.norm(..., axis=1) for 2D points
+    radial = np.hypot(delta[:, 0], delta[:, 1])
     return DispersionResult(
         len(points),
         float(robust_center[0]),
