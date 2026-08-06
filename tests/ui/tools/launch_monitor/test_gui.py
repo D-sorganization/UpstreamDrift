@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 pytest.importorskip("PyQt6")
@@ -26,6 +28,7 @@ def test_workbench_exposes_all_analysis_workspaces(widget) -> None:  # noqa: ANN
         "Sessions",
         "Data Treatment",
         "Relationships",
+        "Flexible Analysis",
         "Models",
         "Monitor Comparison",
         "Dispersion",
@@ -33,6 +36,52 @@ def test_workbench_exposes_all_analysis_workspaces(widget) -> None:  # noqa: ANN
         "Reports",
     ]
     assert widget.windowTitle() == "Launch Monitor Analytics"
+
+
+def test_flexible_analysis_uses_arbitrary_numeric_source_fields(widget) -> None:  # noqa: ANN001
+    count = 30
+    speed = np.linspace(40.0, 50.0, count)
+    frame = pd.DataFrame(
+        {
+            "shot_id": [f"shot-{index}" for index in range(count)],
+            "session_id": "session-a",
+            "monitor_vendor": "TrackMan",
+            "ball_speed": speed * 1.48,
+            "source::temperature": np.linspace(15.0, 25.0, count),
+        }
+    )
+    widget.analysis_frame = frame
+    widget._refresh_all()
+    panel = widget.flexible_analysis
+    panel.outcome_combo.setCurrentText("ball_speed")
+    for index in range(panel.predictor_list.count()):
+        item = panel.predictor_list.item(index)
+        item.setSelected(item.text() == "source::temperature")
+    panel.min_samples_spin.setValue(10)
+
+    result = panel.run_analysis()
+
+    assert result.request.predictors == ("source::temperature",)
+    assert result.dataset.monitor_vendors == ("TrackMan",)
+    assert panel.summary_table.rowCount() >= 1
+    assert result.dataset.fingerprint_sha256 in panel.details.toPlainText()
+
+
+def test_flexible_analysis_controls_are_accessibly_named(widget) -> None:  # noqa: ANN001
+    panel = widget.flexible_analysis
+    controls = (
+        panel.outcome_combo,
+        panel.predictor_list,
+        panel.mode_combo,
+        panel.method_combo,
+        panel.missing_combo,
+        panel.group_combo,
+        panel.min_samples_spin,
+        panel.confidence_spin,
+        panel.run_button,
+    )
+    assert all(control.accessibleName() for control in controls)
+    assert all(control.toolTip() for control in controls)
 
 
 def test_import_refreshes_sessions_data_and_metric_controls(widget) -> None:  # noqa: ANN001
