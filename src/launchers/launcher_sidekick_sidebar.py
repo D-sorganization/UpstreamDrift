@@ -14,6 +14,7 @@ from typing import Any
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
 from src.launchers.sidekick_extension_overlay import (
+    IncompleteParentSidekickRuntimeError,
     ManifestGatedSidekickFinder,
     install_manifest_gated_sidekick_extensions,
     validate_parent_sidekick_runtime,
@@ -105,7 +106,17 @@ class SidekickSidebarManager:
 
     def _get_sidekick_module(self) -> Any | None:
         """Import the Sidekick sidebar module, trying multiple fallback paths."""
-        SidekickSidebarManager._install_sidekick_import_paths(self)
+        try:
+            SidekickSidebarManager._install_sidekick_import_paths(self)
+        except IncompleteParentSidekickRuntimeError as exc:
+            if os.environ.get("TOOLS_REPO_PATH"):
+                raise
+            logger.warning(
+                "Sidekick sidebar disabled because the implicit Tools runtime "
+                "is unavailable: %s",
+                exc,
+            )
+            return None
         try:
             return importlib.import_module("sidekick.ui.tools_sidebar.api")
         except ImportError:

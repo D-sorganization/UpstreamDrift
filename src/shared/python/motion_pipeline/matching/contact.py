@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Protocol
+import math
 from collections.abc import Iterable, Mapping
 
 import numpy as np
@@ -108,7 +109,7 @@ class FlatGroundContact:
             forces[i, 2] = f_n
 
             v_tan = velocities[i, :2]
-            v_tan_norm = float(np.linalg.norm(v_tan))
+            v_tan_norm = math.hypot(v_tan[0], v_tan[1])
             if v_tan_norm > 1e-9 and f_n > 0:
                 f_t = -self.friction * f_n * v_tan / v_tan_norm
                 forces[i, 0] = f_t[0]

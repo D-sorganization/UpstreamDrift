@@ -12,6 +12,7 @@ See issue #1206
 from __future__ import annotations
 
 import math
+from typing import Literal
 
 import numpy as np
 from fastapi import APIRouter, Request
@@ -19,7 +20,7 @@ from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
-from src.shared.python.core.contracts import precondition
+from src.shared.python.core.contracts import PostconditionError, precondition
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
@@ -119,7 +120,199 @@ class GreenContourResponse(BaseModel):
     hole_position: list[float]
 
 
+class Putt3DSimulationRequest(BaseModel):
+    """Physics and visualization inputs for one three-dimensional putt."""
+
+    putter_speed_mps: float = Field(1.8, gt=0.0, le=10.0)
+    loft_deg: float = Field(3.0, ge=-6.0, le=10.0)
+    head_mass_kg: float = Field(0.35, ge=0.1, le=1.0)
+    head_moi_kg_m2: float = Field(4.5e-4, ge=1e-5, le=1e-2)
+    coefficient_of_restitution: float = Field(0.78, gt=0.0, lt=1.0)
+    hosel_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
+    hosel_forward_m: float = Field(0.0, ge=-0.05, le=0.05)
+    impact_toe_m: float = Field(0.0, ge=-0.08, le=0.08)
+    stimp_rating: float = Field(10.0, ge=6.0, le=15.0)
+    grade_percent: float = Field(0.0, ge=0.0, le=10.0)
+    downhill_aspect_deg: float = Field(0.0, ge=-180.0, le=180.0)
+    grain_strength: float = Field(0.0, ge=0.0, lt=0.9)
+    grain_direction_deg: float = Field(0.0, ge=-180.0, le=180.0)
+    rolling_velocity_coefficient: float = Field(0.0, ge=0.0, le=1.0)
+    bump_height_m: float = Field(0.0, ge=0.0, le=0.01)
+    friction_variation: float = Field(0.0, ge=0.0, le=0.9)
+    random_seed: int = Field(8345, ge=0, le=2**31 - 1)
+    hole_x_m: float = Field(3.0, ge=-9.0, le=9.0)
+    hole_y_m: float = Field(0.0, ge=-9.0, le=9.0)
+
+
+class Putt3DSampleResponse(BaseModel):
+    """One frame in the three-dimensional playback trajectory."""
+
+    t_s: float
+    x_m: float
+    y_m: float
+    z_m: float
+    speed_mps: float
+    spin_rad_s: float
+    mode: Literal["airborne", "slide", "roll", "rest"]
+
+
+class Putt3DCollisionResponse(BaseModel):
+    """Impact quantities displayed beside the slow-motion collision."""
+
+    ball_speed_mps: float
+    putter_speed_before_mps: float
+    putter_speed_after_mps: float
+    launch_angle_deg: float
+    spin_rad_s: float
+    impulse_n_s: float
+    contact_time_proxy_s: float
+    kinetic_energy_loss_j: float
+    face_twist_rad_s: float
+    twist_moment_n_m_s: float
+
+
+class Putt3DSurfaceResponse(BaseModel):
+    """Surface geometry metadata required by the R3F scene."""
+
+    width_m: float
+    height_m: float
+    grade_percent: float
+    downhill_aspect_deg: float
+    hole_x_m: float
+    hole_y_m: float
+
+
+class Putt3DSimulationResponse(BaseModel):
+    """Complete deterministic playback payload for the R3F client."""
+
+    samples: list[Putt3DSampleResponse]
+    collision: Putt3DCollisionResponse
+    surface: Putt3DSurfaceResponse
+    holed: bool
+    total_distance_m: float
+    duration_s: float
+    skid_distance_m: float
+
+
 # -- Endpoints --
+
+
+@router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def simulate_putt_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> Putt3DSimulationResponse:
+    """Run the canonical surface-aware strike model for R3F playback."""
+    del request
+    from src.shared.python.putting_dynamics import (
+        FrictionField,
+        FrictionParams,
+        HeightField,
+        PutterState,
+        SurfaceSpec,
+        bumpy_friction_field,
+        bumpy_height_field,
+        simulate_strike,
+        stimp_to_rolling_mu,
+    )
+
+    extent_m = 20.0
+    height = HeightField.planar(
+        grade_percent=payload.grade_percent,
+        aspect_deg=payload.downhill_aspect_deg,
+        extent_m=extent_m,
+    )
+    if payload.bump_height_m > 0.0:
+        height = bumpy_height_field(
+            seed=payload.random_seed,
+            amplitude_m=payload.bump_height_m,
+            correlation_length_m=0.5,
+            base=height,
+        )
+
+    friction_field = FrictionField.uniform(extent_m=extent_m)
+    if payload.friction_variation > 0.0:
+        friction_field = bumpy_friction_field(
+            seed=payload.random_seed,
+            amplitude=payload.friction_variation,
+            correlation_length_m=0.5,
+            base=friction_field,
+        )
+    friction = FrictionParams(
+        mu_roll0=stimp_to_rolling_mu(payload.stimp_rating),
+        k_v_per_mps=payload.rolling_velocity_coefficient,
+        grain_strength=payload.grain_strength,
+        grain_direction_rad=math.radians(payload.grain_direction_deg),
+    )
+    surface = SurfaceSpec(
+        height=height,
+        friction_field=friction_field,
+        friction=friction,
+    )
+    putter = PutterState(
+        head_mass_kg=payload.head_mass_kg,
+        moi_kg_m2=payload.head_moi_kg_m2,
+        loft_deg=payload.loft_deg,
+        speed_mps=payload.putter_speed_mps,
+        cor=payload.coefficient_of_restitution,
+        hosel_toe_m=payload.hosel_toe_m,
+        hosel_forward_m=payload.hosel_forward_m,
+    )
+    result = simulate_strike(
+        putter,
+        surface,
+        impact_toe_m=payload.impact_toe_m,
+        hole_x_m=payload.hole_x_m,
+        hole_y_m=payload.hole_y_m,
+    )
+    collision = result.collision
+    if collision is None:
+        raise PostconditionError(
+            "strike simulation must return a collision report",
+            function_name="simulate_putt_3d",
+            result=result,
+        )
+
+    samples = [
+        Putt3DSampleResponse(
+            t_s=sample.t_s,
+            x_m=sample.x_m,
+            y_m=sample.y_m,
+            z_m=height.elevation(sample.x_m, sample.y_m) + sample.height_m,
+            speed_mps=sample.speed_mps,
+            spin_rad_s=sample.spin_rad_s,
+            mode=sample.mode.value,
+        )
+        for sample in result.samples
+    ]
+    return Putt3DSimulationResponse(
+        samples=samples,
+        collision=Putt3DCollisionResponse(
+            ball_speed_mps=collision.ball_speed_mps,
+            putter_speed_before_mps=payload.putter_speed_mps,
+            putter_speed_after_mps=(payload.putter_speed_mps - collision.putter_dv_mps),
+            launch_angle_deg=collision.launch_angle_deg,
+            spin_rad_s=collision.spin_rad_s,
+            impulse_n_s=collision.impulse_n_s,
+            contact_time_proxy_s=collision.contact_time_proxy_s,
+            kinetic_energy_loss_j=collision.kinetic_energy_loss_j,
+            face_twist_rad_s=collision.face_twist_rad_s,
+            twist_moment_n_m_s=collision.twist_moment_n_m_s,
+        ),
+        surface=Putt3DSurfaceResponse(
+            width_m=extent_m,
+            height_m=extent_m,
+            grade_percent=payload.grade_percent,
+            downhill_aspect_deg=payload.downhill_aspect_deg,
+            hole_x_m=payload.hole_x_m,
+            hole_y_m=payload.hole_y_m,
+        ),
+        holed=result.holed,
+        total_distance_m=result.total_distance_m,
+        duration_s=result.time_s,
+        skid_distance_m=result.skid_distance_m,
+    )
 
 
 @router.post("/simulate", response_model=PuttSimulationResponse)
@@ -337,7 +530,7 @@ async def get_green_contours(
         for j in range(resolution):
             elevations[i, j] = green.get_elevation_at(
                 np.array([grid_x[i, j], grid_y[i, j]])
-            )  # type: ignore[attr-defined]
+            )
 
     return GreenContourResponse(
         width=width,
