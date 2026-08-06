@@ -223,9 +223,12 @@ def potential_energy_chain(
     # But for pendulums, the contribution is the total mass that passes
     # through segment i times the height change of that segment.
     V = 0.0
+    # ⚡ Bolt: Vectorized cumulative sum is O(n) instead of O(n^2) loop sum
+    masses_arr = np.asarray(masses)
+    mass_below = np.cumsum(masses_arr[::-1])[::-1]
+
     for i in range(n):
-        mass_below = float(np.sum(masses[i:]))
-        V -= mass_below * g * lengths[i] * np.cos(absolute_angles[i])
+        V -= float(mass_below[i]) * g * lengths[i] * np.cos(absolute_angles[i])
 
     require(bool(np.isfinite(V)), f"Potential energy non-finite: {V}")
     return V
