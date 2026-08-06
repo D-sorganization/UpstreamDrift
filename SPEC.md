@@ -2422,6 +2422,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
+- Replaced `np.linalg.norm(v_tan)` with `math.hypot(v_tan[0], v_tan[1])` in `FlatGroundContact.contact_forces` for 2D tangent vector to bypass NumPy dispatching and improve performance. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm(..., axis=1)` with `np.hypot(...)` for batched 2D vectors in `src/shared/python/launch_monitor/dispersion.py` to optimize dispersion analysis and reduce intermediate array allocation overhead. (spec-exempt: micro-optimization)
 - Replaced `np.sum` with `np.vdot` and `mask.sum()` in `trendline.py` to optimize R-squared calculation. (spec-exempt: micro-optimization)
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` via `DataProcessorEngine` by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
