@@ -32,7 +32,7 @@ The reusable Rate of Closure and launch-monitor work is being integrated in:
   [Tools #4217](https://github.com/D-sorganization/Tools/pull/4217)
 
 The current combined Tools head is
-`6578d3fcbe18c68e61002eb6127f73561242e78e`. The Tools analytics hardening
+`a6e1ae1a13378a556c3edaa712952ef148c7ceac`. The Tools analytics hardening
 head remains `4b22e79cf`; it preserves the public facades while keeping every
 new production module at or below 361 lines. The convention registry hardening
 head remains `3d899c8e9`; it compares sign rules explicitly and represents the
@@ -77,9 +77,12 @@ consume their contracts through adapters rather than reproduce their physics.
 
 - The Tools ball-flight campaign is still a draft integration stack, not a
   production release.
-- New protected checks are running on Tools head `6578d3fcb`; queued work is
-  not passing evidence. The prior PR quality-gate failure was traced to two
-  Ruff 0.14.10 formatting differences and corrected at `282b1a4d3`.
+- New protected checks are running on Tools head `a6e1ae1a1`; queued work is
+  not passing evidence. The prior PR quality-gate failures were traced to two
+  Ruff 0.14.10 formatting differences (fixed at `282b1a4d3`) and mypy 1.13
+  compatibility errors (fixed without blanket ignores at `1bc7f567c`). The
+  PR-equivalent 58-file set passes mypy 1.13 and 1.15, and 189 affected-domain
+  tests pass locally.
 - Rust/WASM trajectory parity, installed-package verification, worker/thread
   responsiveness, full persistence/export wiring, and independent scientific
   validation remain open in Tools issue #4201.
