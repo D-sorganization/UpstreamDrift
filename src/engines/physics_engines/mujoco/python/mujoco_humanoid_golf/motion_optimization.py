@@ -321,7 +321,7 @@ class SwingOptimizer:
 
         # Torque (minimize)
         if self.objectives.minimize_torque:
-            total_torque = np.sum(np.abs(controls))
+            total_torque = np.abs(controls).sum()
             objective += self.objectives.weight_torque * total_torque
 
         # Accuracy (hit target)
@@ -499,7 +499,7 @@ class SwingOptimizer:
         # Third derivative (jerk)
         jerk = np.diff(accel, axis=0) / dt
 
-        return float(np.sum(np.abs(jerk)))
+        return float(np.abs(jerk).sum())
 
     def optimize_swing_for_speed(
         self,
