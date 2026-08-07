@@ -70,6 +70,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+- (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
+
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
   after the headless dynamics foundation merged. The FastAPI route executes the
