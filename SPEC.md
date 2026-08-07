@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.483 |
-| **Last Spec Update** | 2026-08-05 |
+| **Spec Version** | 1.0.484 |
+| **Last Spec Update** | 2026-08-06 |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +71,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-06** - Extended Launch Monitor Analytics with a UI-neutral,
+  versioned flexible-analysis contract and matched PyQt/FastAPI surfaces.
+  Users may select arbitrary numeric outcomes and predictors, Pearson,
+  Spearman, or Kendall association, pairwise/listwise/fail missingness,
+  Benjamini-Hochberg correction, grouped analysis, and OLS regression with
+  confidence intervals, residual diagnostics, and deterministic dataset
+  lineage. Aggregate observations remain excluded from regression; explicit
+  aggregate correlations are labeled descriptive with an ecological-bias
+  warning. Vendor-specific fields cannot be pooled across monitor vendors, and
+  association or predictive fit is never presented as causal evidence.
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
   after the headless dynamics foundation merged. The FastAPI route executes the
   canonical Python collision/surface solver and returns a complete playback DTO;
@@ -1497,7 +1507,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6 and headless vendor-neutral launch-monitor import, dependency, model, agreement, dispersion, and trend analysis |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -1966,6 +1976,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-06 | 1.0.484 | Extended Launch Monitor Analytics with a versioned arbitrary-field analysis contract, PyQt and FastAPI surfaces, configurable association/missingness/multiplicity/grouping, OLS uncertainty and residual diagnostics, deterministic lineage, and fail-closed aggregate/vendor-pooling boundaries for #8364-#8366. |
 | 2026-08-05 | 1.0.483 | Retargeted #8345 P1 to `main` after the headless putting dynamics foundation merged, preserving the generated-contract R3F playback route/client/scene integration and Tailwind v4 entry-point repair. |
 | 2026-08-04 | 1.0.482 | Added #8345 P1: canonical 3D putting API DTOs and generated TypeScript types, Zustand/TanStack client state, theme-token R3F green/ball/putter rendering, visible spin and putter slowdown, adjustable hosel controls, collision/roll readouts, responsive playback, and a Tailwind v4 entry-point repair with regression coverage and rendered desktop/mobile QA. |
 | 2026-08-05 | 1.0.482 | Fixed classic PyQt6 startup from nested worktrees by discovering the workspace-level Tools checkout, degrading only the optional Sidekick sidebar for an unavailable implicit runtime, and preserving fail-closed behavior for explicit `TOOLS_REPO_PATH`; 28 focused launcher/overlay tests pass. |
@@ -2421,6 +2432,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
 - Replace $O(n^2)$ loop sum calculation with an $O(n)$ vectorized `np.cumsum` approach for computing cumulative mass in `physics_base.py` (spec-exempt: micro-optimization)
 
 - Replaced `np.linalg.norm(v_tan)` with `math.hypot(v_tan[0], v_tan[1])` in `FlatGroundContact.contact_forces` for 2D tangent vector to bypass NumPy dispatching and improve performance. (spec-exempt: micro-optimization)

@@ -90,6 +90,13 @@ consume their contracts through adapters rather than reproduce their physics.
   embed tests pass, Ruff and format pass, and Python 3.11 mypy 2.1 reports no
   issue in the changed source file. New protected checks must run on the
   resulting published head.
+- The following run passed the corrected Quality Gate and then failed only the
+  SPEC freshness policy because the feature branch changed public analytics
+  behavior without updating the canonical specification. `SPEC.md` is now
+  version `1.0.484` (2026-08-06) and records the flexible contract, matched
+  PyQt/FastAPI surfaces, statistical options, lineage, and aggregate/vendor/
+  causality boundaries. No `spec-exempt` label is used. Protected SPEC checks
+  must confirm the update after publication.
 - Rust/WASM trajectory parity, installed-package verification, worker/thread
   responsiveness, full persistence/export wiring, and independent scientific
   validation remain open in Tools issue #4201.
