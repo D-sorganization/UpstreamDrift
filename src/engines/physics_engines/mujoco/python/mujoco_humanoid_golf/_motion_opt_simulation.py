@@ -199,7 +199,7 @@ def evaluate_objective(
         objective += objectives.weight_jerk * jerk
 
     if objectives.minimize_torque:
-        total_torque = np.sum(np.abs(controls))
+        total_torque = np.abs(controls).sum()
         objective += objectives.weight_torque * total_torque
 
     if objectives.target_ball_position is not None:
