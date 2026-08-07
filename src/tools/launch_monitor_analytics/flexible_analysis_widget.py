@@ -160,8 +160,10 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
             }
             for item in result.correlations
         ]
-        if result.regression:
-            for name, item in result.regression.coefficients.items():
+        regression = result.regression
+        if regression:
+            coefficients = regression.coefficients
+            for name, item in coefficients.items():
                 rows.append(
                     {
                         "predictor": f"OLS: {name}",
@@ -169,7 +171,7 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
                         "p_value": item.p_value,
                         "ci_lower": item.ci_lower,
                         "ci_upper": item.ci_upper,
-                        "sample_count": result.regression.sample_count,
+                        "sample_count": regression.sample_count,
                     }
                 )
         self.summary_table.set_frame(pd.DataFrame(rows))
