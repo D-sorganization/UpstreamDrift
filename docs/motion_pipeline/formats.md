@@ -14,6 +14,7 @@
 | **AlphaPose**       | `.json`        | `AlphaPoseJSONAdapter`  | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 multi-frame                            |
 | **HRNet**           | `.json`        | `HRNetJSONAdapter`      | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 single-person                          |
 | **MediaPipe**       | `.json`        | `MediaPipeJSONAdapter`  | partial 3D (relative depth) | ✅ Yes     | ✅ Yes   | 33 landmarks, normalized coords                |
+| **DeepLabCut**      | `.h5`, `.hdf5`, `.csv` | `DeepLabCutAdapter` | ❌ 2D only              | ✅ Yes     | ✅ Yes   | Custom bodyparts (`schema="custom"`), `fps` option (default 30) |
 | **CSV**             | `.csv`         | `CSVAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | columns: `frame, time, x_*/y_*/z_*`            |
 | **C3D**             | `.c3d`         | `C3DAdapter`            | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Binary, requires `ezc3d`                       |
 | **FBX**             | `.fbx`         | _planned_               | ✅ Yes                      | ❌ No      | ✅ Yes   | Proprietary, Blender conversion                |
@@ -86,6 +87,27 @@
   converter = MediaPipeConverter()
   motion = converter.load("mediapipe_output.json")
   motion.denormalize(image_width=1920, image_height=1080)
+  ```
+
+### DeepLabCut
+
+- **Column Layout**: pandas DataFrame with a 3-level column MultiIndex
+  `(scorer, bodyparts, coords)` where `coords` is `x` / `y` / `likelihood`.
+  Stored as HDF5 (`DataFrame.to_hdf`, key usually `df_with_missing`, either
+  pandas "fixed" or "table" layout) or as CSV with 3 header rows.
+- **Custom Keypoints**: bodyparts are arbitrary user-defined names (e.g.
+  `clubhead`, `hosel`, `ball`); the adapter emits `schema_name="custom"` with
+  names preserved verbatim and `likelihood` mapped to keypoint confidence.
+- **Timestamps**: DLC files are frame-indexed with no time column; timestamps
+  are synthesized from the adapter's `fps` option (default 30.0).
+- **Dependencies**: the HDF5 reader runs on `h5py` directly — neither
+  PyTables nor the `deeplabcut` package is required.
+- **Not Supported**: multi-animal DLC output (extra `individuals` column
+  level) is rejected with a descriptive error.
+- **Example**:
+  ```python
+  from src.shared.python.motion_pipeline.sources import DeepLabCutAdapter
+  sequence = DeepLabCutAdapter(fps=120.0).load_checked("videoDLC_resnet50.h5")
   ```
 
 ### BVH

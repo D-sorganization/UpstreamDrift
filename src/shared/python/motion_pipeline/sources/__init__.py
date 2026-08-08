@@ -48,6 +48,15 @@ from src.shared.python.motion_pipeline.sources.pose2sim_adapter import (
     load_pose2sim_calibration,
     load_pose2sim_observations,
 )
+
+# DeepLabCut must register BEFORE the generic CSV adapter: both claim
+# ``.csv``, and first-match-wins ordering ensures the DLC 3-row-header
+# sniffer sees DLC files first. (The generic adapter requires
+# frame/timestamp columns, so neither can steal the other's files, but
+# the explicit ordering keeps the more-specific sniffer in front.)
+from src.shared.python.motion_pipeline.sources.deeplabcut_adapter import (
+    DeepLabCutAdapter,
+)
 from src.shared.python.motion_pipeline.sources.csv_adapter import CSVAdapter
 from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
 
@@ -57,6 +66,7 @@ __all__ = [
     "BVHAdapter",
     "C3DAdapter",
     "CSVAdapter",
+    "DeepLabCutAdapter",
     "HRNetJSONAdapter",
     "LoadedPayload",
     "MediaPipeJSONAdapter",
