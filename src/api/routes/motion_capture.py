@@ -23,6 +23,11 @@ from pydantic import BaseModel, Field
 
 from src.api.middleware.upload_limits import write_upload_file_to_path
 from src.shared.python.core.contracts import precondition
+from src.shared.python.pose_estimation.registry import (
+    estimator_availability,
+    get_estimator_info,
+    list_estimators,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -130,44 +135,20 @@ class C3DUploadResponse(BaseModel):
 
 
 # ── Skeleton definitions ──
+# Estimator skeletons are registry-driven (epic #8390, C2/#8402): a newly
+# registered estimator surfaces in /sources, /skeleton, and recordings
+# without edits here. The module-level aliases remain for internal helpers.
 
-_MEDIAPIPE_SKELETON: list[dict[str, Any]] = [
-    {"name": "nose", "parent": None},
-    {"name": "left_eye", "parent": "nose"},
-    {"name": "right_eye", "parent": "nose"},
-    {"name": "left_ear", "parent": "left_eye"},
-    {"name": "right_ear", "parent": "right_eye"},
-    {"name": "left_shoulder", "parent": "nose"},
-    {"name": "right_shoulder", "parent": "nose"},
-    {"name": "left_elbow", "parent": "left_shoulder"},
-    {"name": "right_elbow", "parent": "right_shoulder"},
-    {"name": "left_wrist", "parent": "left_elbow"},
-    {"name": "right_wrist", "parent": "right_elbow"},
-    {"name": "left_hip", "parent": "left_shoulder"},
-    {"name": "right_hip", "parent": "right_shoulder"},
-    {"name": "left_knee", "parent": "left_hip"},
-    {"name": "right_knee", "parent": "right_hip"},
-    {"name": "left_ankle", "parent": "left_knee"},
-    {"name": "right_ankle", "parent": "right_knee"},
-]
 
-_OPENPOSE_SKELETON: list[dict[str, Any]] = [
-    {"name": "head", "parent": None},
-    {"name": "neck", "parent": "head"},
-    {"name": "right_shoulder", "parent": "neck"},
-    {"name": "right_elbow", "parent": "right_shoulder"},
-    {"name": "right_wrist", "parent": "right_elbow"},
-    {"name": "left_shoulder", "parent": "neck"},
-    {"name": "left_elbow", "parent": "left_shoulder"},
-    {"name": "left_wrist", "parent": "left_elbow"},
-    {"name": "mid_hip", "parent": "neck"},
-    {"name": "right_hip", "parent": "mid_hip"},
-    {"name": "right_knee", "parent": "right_hip"},
-    {"name": "right_ankle", "parent": "right_knee"},
-    {"name": "left_hip", "parent": "mid_hip"},
-    {"name": "left_knee", "parent": "left_hip"},
-    {"name": "left_ankle", "parent": "left_knee"},
-]
+def _estimator_skeleton(source_type: str) -> list[dict[str, Any]] | None:
+    try:
+        return list(get_estimator_info(source_type).skeleton)
+    except ValueError:
+        return None
+
+
+_MEDIAPIPE_SKELETON: list[dict[str, Any]] = _estimator_skeleton("mediapipe") or []
+_OPENPOSE_SKELETON: list[dict[str, Any]] = _estimator_skeleton("openpose") or []
 
 # ── In-memory session state (mutable holder avoids 'global') ──
 
@@ -190,23 +171,13 @@ async def list_capture_sources() -> list[CaptureSource]:
     See issues #1206, #7454
     """
     sources = []
-    for source_id, name, description in (
-        (
-            "mediapipe",
-            "MediaPipe Pose",
-            "Real-time pose estimation using Google MediaPipe",
-        ),
-        (
-            "openpose",
-            "OpenPose",
-            "Multi-person pose estimation using OpenPose",
-        ),
-        (
-            "c3d",
-            "C3D File Import",
-            "Import motion capture data from C3D files",
-        ),
-    ):
+    listing = [
+        (info.name, info.display_name, info.description) for info in list_estimators()
+    ]
+    listing.append(
+        ("c3d", "C3D File Import", "Import motion capture data from C3D files")
+    )
+    for source_id, name, description in listing:
         available, reason = _source_availability(source_id)
         sources.append(
             CaptureSource(
@@ -231,19 +202,19 @@ async def get_skeleton_template(source_type: str) -> list[JointData]:
 
     See issue #1206
     """
-    if source_type == "mediapipe":
-        skeleton = _MEDIAPIPE_SKELETON
-    elif source_type == "openpose":
-        skeleton = _OPENPOSE_SKELETON
+    registry_skeleton = _estimator_skeleton(source_type)
+    if registry_skeleton is not None:
+        skeleton = registry_skeleton
     elif source_type == "c3d":
         # C3D has no fixed skeleton: marker sets are defined per-file and
         # become available after upload (issue #7454). An empty template is
         # honest — clients must not assume a MediaPipe-shaped joint set.
         skeleton = []
     else:
+        valid = ", ".join(sorted([info.name for info in list_estimators()] + ["c3d"]))
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown source type: {source_type}. Use mediapipe, openpose, or c3d",
+            detail=f"Unknown source type: {source_type}. Use one of: {valid}",
         )
 
     return [
@@ -518,15 +489,9 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
 
 # ── Helpers ──
 
+# Non-estimator sources keep a local probe table; estimator sources are
+# probed through the registry (C2/#8402).
 _UNAVAILABLE_REASONS = {
-    "mediapipe": (
-        "mediapipe",
-        "MediaPipe is not installed on the server (pip install mediapipe)",
-    ),
-    "openpose": (
-        "openpose",
-        "OpenPose Python bindings are not installed on the server",
-    ),
     "c3d": (
         "ezc3d",
         "ezc3d is not installed on the server (pip install ezc3d)",
@@ -540,6 +505,8 @@ def _source_availability(source_id: str) -> tuple[bool, str | None]:
     Returns ``(available, reason)`` where ``reason`` is ``None`` when the
     source is available and a human-readable explanation otherwise.
     """
+    if source_id not in _UNAVAILABLE_REASONS:
+        return estimator_availability(source_id)
     module_name, reason = _UNAVAILABLE_REASONS[source_id]
     try:
         if importlib.util.find_spec(module_name) is not None:
@@ -554,20 +521,14 @@ def _recording_joint_names(recording: dict[str, Any]) -> list[str]:
     stored = recording.get("joint_names")
     if stored:
         return list(stored)
-    if recording["source_type"] == "openpose":
-        skeleton = _OPENPOSE_SKELETON
-    else:
-        skeleton = _MEDIAPIPE_SKELETON
+    skeleton = _estimator_skeleton(recording["source_type"]) or _MEDIAPIPE_SKELETON
     return [j["name"] for j in skeleton]
 
 
 def _skeleton_parent_for(source_type: str, joint_name: str) -> str | None:
     """Parent joint from the source's skeleton template (None for C3D markers)."""
-    if source_type == "openpose":
-        skeleton = _OPENPOSE_SKELETON
-    elif source_type == "mediapipe":
-        skeleton = _MEDIAPIPE_SKELETON
-    else:
+    skeleton = _estimator_skeleton(source_type)
+    if skeleton is None:
         return None
     for joint in skeleton:
         if joint["name"] == joint_name:

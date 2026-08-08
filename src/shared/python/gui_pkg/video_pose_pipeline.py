@@ -34,6 +34,7 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
+from src.shared.python.pose_estimation.registry import create_estimator
 
 logger = get_logger(__name__)
 
@@ -95,34 +96,20 @@ class VideoPosePipeline:
         self._load_estimator()
 
     def _load_estimator(self) -> None:
-        """Load the specified pose estimator.
+        """Load the configured pose estimator from the registry.
 
-        Estimators constructable here must match IMPLEMENTED_ESTIMATOR_TYPES
-        (and the API's VALID_ESTIMATOR_TYPES) — see
-        tests/unit/test_estimator_type_consistency.py.
+        Estimator construction is registry-driven (epic #8390, C2/#8402):
+        registering an estimator in
+        ``pose_estimation.registry`` makes it constructable here, valid at
+        the API layer, and listed by the motion-capture routes — no
+        per-consumer edits.
         """
         try:
-            if self.config.estimator_type == "mediapipe":
-                from src.shared.python.pose_estimation.mediapipe_estimator import (
-                    MediaPipeEstimator,
-                )
-
-                self.estimator = MediaPipeEstimator(
-                    min_detection_confidence=self.config.min_confidence,
-                    min_tracking_confidence=self.config.min_confidence,
-                    enable_temporal_smoothing=self.config.enable_temporal_smoothing,
-                )
-            elif self.config.estimator_type == "openpose":
-                from src.shared.python.pose_estimation.openpose_estimator import (
-                    OpenPoseEstimator,
-                )
-
-                self.estimator = OpenPoseEstimator()
-            else:
-                raise ValueError(
-                    f"Unknown estimator type: {self.config.estimator_type}"
-                )
-
+            self.estimator = create_estimator(
+                self.config.estimator_type,
+                min_confidence=self.config.min_confidence,
+                enable_temporal_smoothing=self.config.enable_temporal_smoothing,
+            )
             if self.estimator is not None:
                 self.estimator.load_model()
             logger.info(f"Loaded {self.config.estimator_type} estimator")
