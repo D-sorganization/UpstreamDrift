@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.483 |
-| **Last Spec Update** | 2026-08-05 |
+| **Spec Version** | 1.0.484 |
+| **Last Spec Update** | 2026-08-08 |
 
 ## 2. Purpose & Mission
 
@@ -1968,6 +1968,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-08 | 1.0.484 | Epic #8390 Workstream A (hygiene): motion-pipeline default IK backend now `geometric` (the previous `mujoco` default raised NotImplementedError, #8391); estimator types reconciled across API/UI/pipeline with a consistency test, removing phantom `movenet`/`blazepose` options (#8392); ezc3d promoted from dev-only to a runtime `c3d` extra with corrected C3D format docs (#8393); `pin-pink` declared in the `pinocchio` extra with license-ledger row (#8394); optimal-control capability-claim drift corrected — swing_optimizer/swing_bridge docstrings, CasADi checklist entry, and the hollow `test_pinocchio_ecosystem.py` replaced with real import-gated availability tests (#8395). |
 | 2026-08-05 | 1.0.483 | Retargeted #8345 P1 to `main` after the headless putting dynamics foundation merged, preserving the generated-contract R3F playback route/client/scene integration and Tailwind v4 entry-point repair. |
 | 2026-08-04 | 1.0.482 | Added #8345 P1: canonical 3D putting API DTOs and generated TypeScript types, Zustand/TanStack client state, theme-token R3F green/ball/putter rendering, visible spin and putter slowdown, adjustable hosel controls, collision/roll readouts, responsive playback, and a Tailwind v4 entry-point repair with regression coverage and rendered desktop/mobile QA. |
 | 2026-08-05 | 1.0.482 | Fixed classic PyQt6 startup from nested worktrees by discovering the workspace-level Tools checkout, degrading only the optional Sidekick sidebar for an unavailable implicit runtime, and preserving fail-closed behavior for explicit `TOOLS_REPO_PATH`; 28 focused launcher/overlay tests pass. |

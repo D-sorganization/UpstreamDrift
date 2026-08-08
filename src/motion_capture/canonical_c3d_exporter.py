@@ -115,7 +115,8 @@ def export_markers_to_c3d(
     except ImportError as exc:
         raise ImportError(
             "ezc3d is required for C3D export. "
-            "Install it with: pip install 'ezc3d>=1.5.0'"
+            "Install it with: pip install 'upstream-drift[c3d]' "
+            "(or: pip install 'ezc3d>=1.5.0')"
         ) from exc
 
     # Build the C3D object
