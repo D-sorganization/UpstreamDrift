@@ -288,6 +288,30 @@ overhead. Use `[mjx]` when you need rollout gradients. For Docker GPU
 invocation and CUDA environment variables, see
 [`docs/operations/docker-gpu.md`](../operations/docker-gpu.md).
 
+## Batch swing optimization (the first production batch consumer)
+
+`src/shared/python/optimization/batch_swing_optimizer.py` (epic #8390,
+B5/#8400) runs CEM or MPPI over torque histories, scoring whole candidate
+populations per iteration through this module's batch path:
+
+```python
+from src.shared.python.optimization.batch_swing_optimizer import BatchSwingOptimizer
+
+result = BatchSwingOptimizer("mujoco", n_candidates=256, n_iterations=4).optimize(
+    horizon=60, dt=0.005
+)
+print(result.best_score, result.backend)
+```
+
+Backends with `rollout_batch` (MJX, MJWarp) evaluate each population in one
+batched launch via `run_batched` (honoring `max_batch` chunking); single-env
+backends fall back to `cpu_batch_rollout`. Correctness is identical on the
+CPU path — accelerators only change throughput. Honest reference numbers on
+a CPU-only container: ~1,000 sixty-step `mujoco` rollouts score in ~2.5 s
+through the CPU fallback; MJX/MJWarp move that population to a single
+device launch per iteration (see the perf caveats above before assuming
+speedups at small batch sizes).
+
 ## Troubleshooting
 
 ### "mjwarp not available" (this is expected without a GPU)
