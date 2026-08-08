@@ -142,7 +142,8 @@
         "motion_target_preview",
         "starting_pose_matcher",
         "motion_pipeline"
-      ]
+      ],
+      "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
     "analysis.cross_engine_robustness": {
       "title": "Cross-engine robustness dashboard (perturbation/CV)",

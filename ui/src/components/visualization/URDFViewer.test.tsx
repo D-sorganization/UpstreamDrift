@@ -7,6 +7,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 
+// Mock react-three/drei (useGLTF backs the glTF mesh path, #8406)
+const { mockUseGLTF } = vi.hoisted(() => ({
+  mockUseGLTF: vi.fn(() => ({
+    scene: { clone: vi.fn(() => ({ isObject3D: true })) },
+  })),
+}));
+vi.mock('@react-three/drei', () => ({
+  useGLTF: mockUseGLTF,
+}));
+
 // Mock react-three/fiber
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
@@ -70,6 +80,7 @@ vi.mock('three', () => ({
 
 import { URDFViewer } from './URDFViewer';
 import type { URDFModel } from './URDFViewer';
+import { isGltfMeshPath, meshAssetUrl } from './urdfMeshAsset';
 
 describe('URDFViewer', () => {
   beforeEach(() => {
@@ -226,7 +237,7 @@ describe('URDFViewer', () => {
       expect(container.innerHTML).not.toBe('');
     });
 
-    it('handles model with mesh type (fallback)', () => {
+    it('handles model with non-glTF mesh type (primitive fallback, no loader)', () => {
       const model: URDFModel = {
         model_name: 'mesh_model',
         links: [
@@ -245,6 +256,9 @@ describe('URDFViewer', () => {
       };
       const { container } = render(<URDFViewer model={model} />);
       expect(container.innerHTML).not.toBe('');
+      // .stl is not browser-loadable; the glTF loader must not be invoked.
+      expect(mockUseGLTF).not.toHaveBeenCalled();
+      expect(container.querySelector('primitive')).toBeNull();
     });
 
     it('handles model with no visual links (empty)', () => {
@@ -257,6 +271,70 @@ describe('URDFViewer', () => {
       // Should render but with no visible geometry
       const { container } = render(<URDFViewer model={model} />);
       expect(container.innerHTML).not.toBe('');
+    });
+  });
+
+  describe('glTF meshes (#8406)', () => {
+    const gltfModel = (meshPath: string): URDFModel => ({
+      model_name: 'gltf_model',
+      links: [
+        {
+          link_name: 'club_head',
+          geometry_type: 'mesh',
+          dimensions: { scale_x: 2, scale_y: 2, scale_z: 2 },
+          origin: [0, 0, 0.1] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          color: [0.5, 0.5, 0.5, 1] as [number, number, number, number],
+          mesh_path: meshPath,
+        },
+      ],
+      joints: [],
+      root_link: 'club_head',
+    });
+
+    it('loads .glb mesh paths through useGLTF against the mesh-asset endpoint', () => {
+      const { container } = render(
+        <URDFViewer model={gltfModel('meshes/driver.glb')} />,
+      );
+
+      expect(mockUseGLTF).toHaveBeenCalledTimes(1);
+      expect(mockUseGLTF).toHaveBeenCalledWith(
+        expect.stringContaining('/api/models/mesh-asset?path=meshes%2Fdriver.glb'),
+      );
+      // The loaded scene is mounted via <primitive>
+      expect(container.querySelector('primitive')).not.toBeNull();
+    });
+
+    it('loads .gltf mesh paths through useGLTF', () => {
+      render(<URDFViewer model={gltfModel('meshes/scene.gltf')} />);
+
+      expect(mockUseGLTF).toHaveBeenCalledWith(
+        expect.stringContaining('path=meshes%2Fscene.gltf'),
+      );
+    });
+
+    it('does not invoke useGLTF for primitive geometry', () => {
+      const model = createTestModel();
+      render(<URDFViewer model={model} />);
+      expect(mockUseGLTF).not.toHaveBeenCalled();
+    });
+
+    it('isGltfMeshPath detects loadable mesh paths', () => {
+      expect(isGltfMeshPath('meshes/a.glb')).toBe(true);
+      expect(isGltfMeshPath('meshes/a.GLTF')).toBe(true);
+      expect(isGltfMeshPath('meshes/a.glb?v=2')).toBe(true);
+      expect(isGltfMeshPath('meshes/a.stl')).toBe(false);
+      expect(isGltfMeshPath('meshes/a.dae')).toBe(false);
+      expect(isGltfMeshPath('')).toBe(false);
+      expect(isGltfMeshPath(null)).toBe(false);
+      expect(isGltfMeshPath(undefined)).toBe(false);
+    });
+
+    it('meshAssetUrl encodes the mesh path and rejects empty input', () => {
+      expect(meshAssetUrl('meshes/club head.glb')).toContain(
+        '/api/models/mesh-asset?path=meshes%2Fclub%20head.glb',
+      );
+      expect(() => meshAssetUrl('')).toThrow();
     });
   });
 });

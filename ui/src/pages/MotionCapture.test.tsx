@@ -1,18 +1,33 @@
 /**
  * Tests for MotionCapture page.
  *
- * See issues #1206, #7454
+ * See issues #1206, #7454, #8406
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 vi.mock('@/api/fetch', () => ({
   apiFetch: vi.fn(),
   apiFetchForm: vi.fn(),
 }));
 
+// #8406: the live pose channel is mocked so no real WebSocket is opened.
+vi.mock('@/hooks/useRealtimeChannel', () => ({
+  useRealtimeChannel: vi.fn(() => ({ message: null, status: 'connecting' })),
+}));
+
+// #8406: the 3D skeleton is lazy-loaded (keeps three.js out of the route
+// chunk); mock the module so the toggle can be tested without WebGL.
+vi.mock('@/components/visualization/MocapSkeleton3D', () => ({
+  default: ({ joints }: { joints: unknown[] }) => (
+    <div data-testid="mocap-skeleton-3d-mock" data-joint-count={joints.length} />
+  ),
+}));
+
 import { apiFetch } from '@/api/fetch';
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel';
+import { extractSkeletonJoints } from '@/utils/skeletonJoints';
 import { MotionCapturePage } from './MotionCapture';
 import type {
   CaptureSource,
@@ -23,11 +38,12 @@ import type {
 } from './MotionCapture';
 
 const mockedApiFetch = vi.mocked(apiFetch);
+const mockedUseRealtimeChannel = vi.mocked(useRealtimeChannel);
 
-function mockApi(sources: CaptureSource[]) {
+function mockApi(sources: CaptureSource[], skeleton: JointData[] = []) {
   mockedApiFetch.mockImplementation(async (path: string) => {
     if (path.endsWith('/sources')) return sources as unknown;
-    if (path.includes('/skeleton/')) return [] as unknown;
+    if (path.includes('/skeleton/')) return skeleton as unknown;
     if (path.endsWith('/recordings')) return [] as unknown;
     throw new Error(`unexpected path ${path}`);
   });
@@ -109,6 +125,171 @@ describe('MotionCapturePage source-driven UI (#7454)', () => {
     mockedApiFetch.mockImplementation(() => new Promise(() => {}));
     render(<MotionCapturePage />);
     expect(screen.getByText('Loading sources...')).toBeInTheDocument();
+  });
+});
+
+const FLAT_JOINTS: JointData[] = [
+  { name: 'hips', position: [0, 0.5, 0], confidence: 0.9, parent: null },
+  { name: 'head', position: [0, 0.9, 0], confidence: 0.8, parent: 'hips' },
+];
+
+const DEPTH_JOINTS: JointData[] = [
+  { name: 'hips', position: [0, 0.5, 0.3], confidence: 0.9, parent: null },
+  { name: 'head', position: [0, 0.9, 0.35], confidence: 0.8, parent: 'hips' },
+];
+
+describe('MotionCapturePage 2D/3D skeleton views (#8406)', () => {
+  beforeEach(() => {
+    mockedApiFetch.mockReset();
+    mockedUseRealtimeChannel.mockReset();
+    mockedUseRealtimeChannel.mockReturnValue({
+      message: null,
+      status: 'connecting',
+    });
+  });
+
+  it('defaults to the 2D SVG view when frame data has no z values', async () => {
+    mockApi(API_SOURCES, FLAT_JOINTS);
+    render(<MotionCapturePage />);
+
+    // Wait for the skeleton template to load into the page
+    await screen.findByText('2 joints detected');
+
+    expect(screen.getByTestId('skeleton-renderer')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocap-skeleton-3d-mock')).toBeNull();
+  });
+
+  it('defaults to the 3D view when frame data carries z values', async () => {
+    mockApi(API_SOURCES, DEPTH_JOINTS);
+    render(<MotionCapturePage />);
+
+    const view3d = await screen.findByTestId('mocap-skeleton-3d-mock');
+    expect(view3d).toHaveAttribute('data-joint-count', '2');
+    expect(screen.queryByTestId('skeleton-renderer')).toBeNull();
+  });
+
+  it('toggles between 2D and 3D views', async () => {
+    mockApi(API_SOURCES, DEPTH_JOINTS);
+    render(<MotionCapturePage />);
+
+    await screen.findByTestId('mocap-skeleton-3d-mock');
+
+    fireEvent.click(screen.getByTestId('view-toggle-2d'));
+    expect(screen.getByTestId('skeleton-renderer')).toBeInTheDocument();
+    expect(screen.queryByTestId('mocap-skeleton-3d-mock')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('view-toggle-3d'));
+    await waitFor(() => {
+      expect(screen.getByTestId('mocap-skeleton-3d-mock')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('skeleton-renderer')).toBeNull();
+  });
+
+  it('a manual 2D override wins over depth-based auto-selection', async () => {
+    mockApi(API_SOURCES, FLAT_JOINTS);
+    render(<MotionCapturePage />);
+    await screen.findByText('2 joints detected');
+
+    fireEvent.click(screen.getByTestId('view-toggle-3d'));
+    await waitFor(() => {
+      expect(screen.getByTestId('mocap-skeleton-3d-mock')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('MotionCapturePage live pose streaming (#8406)', () => {
+  beforeEach(() => {
+    mockedApiFetch.mockReset();
+    mockedUseRealtimeChannel.mockReset();
+  });
+
+  it('subscribes to the pose/canonical channel', async () => {
+    mockedUseRealtimeChannel.mockReturnValue({
+      message: null,
+      status: 'connecting',
+    });
+    mockApi(API_SOURCES);
+    render(<MotionCapturePage />);
+    await screen.findByTestId('source-c3d');
+
+    expect(mockedUseRealtimeChannel).toHaveBeenCalledWith('pose/canonical');
+  });
+
+  it('live joint messages drive the skeleton view instead of polled data', async () => {
+    mockedUseRealtimeChannel.mockReturnValue({
+      message: {
+        joints: [
+          {
+            name: 'live_hip',
+            position: [0, 0.5, 0.2],
+            confidence: 0.7,
+            parent: null,
+          },
+        ],
+      },
+      status: 'connected',
+    });
+    mockApi(API_SOURCES, FLAT_JOINTS);
+    render(<MotionCapturePage />);
+
+    // Live frame carries depth -> 3D view with the single live joint
+    const view3d = await screen.findByTestId('mocap-skeleton-3d-mock');
+    expect(view3d).toHaveAttribute('data-joint-count', '1');
+    expect(screen.getByTestId('live-pose-indicator')).toBeInTheDocument();
+    // Right panel lists the live joint
+    expect(screen.getByText('live_hip')).toBeInTheDocument();
+  });
+
+  it('falls back to polled joints when the channel payload has no joints', async () => {
+    mockedUseRealtimeChannel.mockReturnValue({
+      // Pose Studio publishes joint angles, not positions — not renderable
+      message: { joint_angles_deg: { hip: 12 } },
+      status: 'connected',
+    });
+    mockApi(API_SOURCES, FLAT_JOINTS);
+    render(<MotionCapturePage />);
+
+    await screen.findByText('2 joints detected');
+    expect(screen.queryByTestId('live-pose-indicator')).toBeNull();
+    expect(screen.getByTestId('skeleton-renderer')).toBeInTheDocument();
+  });
+});
+
+describe('extractSkeletonJoints (#8406)', () => {
+  it('accepts a SkeletonFrame-shaped payload', () => {
+    const joints = extractSkeletonJoints({
+      frame_index: 3,
+      joints: [
+        { name: 'hips', position: [0, 1, 0.2], confidence: 0.9, parent: null },
+        { name: 'head', position: [0, 1.6, 0.2], parent: 'hips' },
+      ],
+    });
+    expect(joints).toHaveLength(2);
+    expect(joints?.[1]).toEqual({
+      name: 'head',
+      position: [0, 1.6, 0.2],
+      confidence: 1.0,
+      parent: 'hips',
+    });
+  });
+
+  it('accepts a bare joint array', () => {
+    const joints = extractSkeletonJoints([
+      { name: 'hips', position: [0, 1, 0] },
+    ]);
+    expect(joints).toHaveLength(1);
+  });
+
+  it('rejects payloads without positional joints', () => {
+    expect(extractSkeletonJoints(null)).toBeNull();
+    expect(extractSkeletonJoints(undefined)).toBeNull();
+    expect(extractSkeletonJoints({ joint_angles_deg: { hip: 5 } })).toBeNull();
+    expect(extractSkeletonJoints({ joints: [] })).toBeNull();
+    expect(extractSkeletonJoints({ joints: [{ name: 'x' }] })).toBeNull();
+    expect(
+      extractSkeletonJoints({ joints: [{ name: 'x', position: ['a'] }] }),
+    ).toBeNull();
+    expect(extractSkeletonJoints('nope')).toBeNull();
   });
 });
 
