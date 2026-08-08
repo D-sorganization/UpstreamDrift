@@ -6,8 +6,8 @@ flight internals.
 """
 
 from __future__ import annotations
-
 import math
+
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
