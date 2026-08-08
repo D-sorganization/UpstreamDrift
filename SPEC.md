@@ -2423,6 +2423,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- Replaced `np.linalg.norm` with `math.hypot` in `screw_theory/exponential.py` to bypass numpy overhead for 3D vectors. (spec-exempt: micro-optimization)
 - Optimized array reduction by replacing `np.sum(np.abs(...))` with `np.abs(...).sum()` in `motion_optimization.py` to bypass overhead. (spec-exempt: micro-optimization)
 - Replace $O(n^2)$ loop sum calculation with an $O(n)$ vectorized `np.cumsum` approach for computing cumulative mass in `physics_base.py` (spec-exempt: micro-optimization)
 
