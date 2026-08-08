@@ -108,4 +108,4 @@ def compute_jerk(
     accel = np.diff(trajectory, n=2, axis=0) / dt**2
     jerk = np.diff(accel, axis=0) / dt
 
-    return float(np.sum(np.abs(jerk)))
+    return float(np.abs(jerk).sum())
