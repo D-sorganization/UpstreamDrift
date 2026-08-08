@@ -32,7 +32,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0024](0024-differentiable-backend.md)               | Differentiable backend — MJX (JAX) vs custom Warp kernels       | Accepted | 2026-05-29 |
 | [0025](0025-jaxsim-backend-home.md)                  | JaxSim Backend Home                                             | Accepted | 2026-05-30 |
 | [0026](0026-canonical-dynamic-state-v2.md)           | Canonical Dynamic State v2                                      | Accepted | 2026-05-31 |
-| [0027](0027-canonical-viewport-backend.md)           | Canonical 3D Viewport Backend                                   | Accepted | 2026-05-31 |
+| [0027](0027-canonical-viewport-backend.md)           | Canonical 3D Viewport Backend (Rerun export follow-up executed 2026-08-08, #8405) | Accepted | 2026-05-31 |
 | [0028](0028-react-tauri-launcher-parity.md)          | React/Tauri launcher parity model                               | Accepted | 2026-06-10 |
 | [0030](0030-c3d-viewer-renderer-backend.md)          | C3D Viewer Renderer Backend                                     | Accepted | 2026-06-10 |
 | [0031](0031-launch-monitor-canonical-shot-schema.md) | Canonical Launch Monitor Shot Schema                            | Accepted | 2026-08-04 |
