@@ -63,7 +63,8 @@ class PipelineRequest(BaseModel):
 
     # Backend selection
     ik_backend: str = Field(
-        default="mujoco", description="IK backend (mujoco, drake, pinocchio, opensim)"
+        default="geometric",
+        description="IK backend (geometric, mujoco, drake, pinocchio, opensim)",
     )
     matching_backend: str = Field(
         default="mujoco", description="Motion matching backend"
@@ -212,7 +213,7 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
     async def run_pipeline(
         file: UploadFile = File(..., description="Motion capture file"),
         source_format: str = Form(..., description="Source format"),
-        ik_backend: str = Form(default="mujoco", description="IK backend"),
+        ik_backend: str = Form(default="geometric", description="IK backend"),
         matching_backend: str = Form(default="mujoco", description="Matching backend"),
         matching_model_urdf: str | None = Form(
             default=None,
