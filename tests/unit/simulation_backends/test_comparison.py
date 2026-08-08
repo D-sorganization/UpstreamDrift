@@ -217,3 +217,51 @@ def test_cli_single_command_writes_markdown_report(tmp_path: Path) -> None:
     content = output.read_text(encoding="utf-8")
     assert "Cross-Engine Comparison Report" in content
     assert "`ode#2`" in content
+
+
+def test_cli_export_rrd_writes_artifact(tmp_path: Path) -> None:
+    """--export-rrd persists the baseline trace as a .rrd (epic #8390, D1)."""
+    pytest.importorskip("rerun")
+    output = tmp_path / "cc27.md"
+    rrd = tmp_path / "baseline.rrd"
+
+    exit_code = compare_cli_main(
+        [
+            "--engines",
+            "ode,ode",
+            "--horizon",
+            "2",
+            "--dt",
+            "0.01",
+            "--output",
+            str(output),
+            "--export-rrd",
+            str(rrd),
+        ]
+    )
+
+    assert exit_code == 0
+    assert rrd.exists()
+    assert rrd.stat().st_size > 0
+
+
+def test_cli_export_rrd_without_sdk_reports_hint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    from src.shared.python.visualization import rerun_renderer
+
+    monkeypatch.setattr(rerun_renderer, "rerun_available", lambda: False)
+    exit_code = compare_cli_main(
+        [
+            "--engines",
+            "ode,ode",
+            "--horizon",
+            "2",
+            "--dt",
+            "0.01",
+            "--export-rrd",
+            str(tmp_path / "x.rrd"),
+        ]
+    )
+    assert exit_code == 2
+    assert "visualization" in capsys.readouterr().err

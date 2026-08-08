@@ -56,8 +56,13 @@ own embedding and lifecycle wiring.
   Drake/Pinocchio-native workflows, and can be embedded through web views.
 - Negative: MeshCat is less durable than Rerun as a persisted analysis log.
 - Follow-ups: add the concrete MeshCat renderer after #6805 settles the app
-  shell host; add Rerun export if recorded review artifacts become a first-class
-  workflow; keep VTK/PyVista behind opt-in tool environments.
+  shell host; keep VTK/PyVista behind opt-in tool environments.
+- Follow-up executed (epic #8390, D1/#8405): Rerun export landed as
+  `visualization/rerun_renderer.py` — an opt-in `visualization` extra
+  (`rerun-sdk`) consuming `ViewportOverlayPayload` and persisting `.rrd`
+  review artifacts; first consumer is `simulation_backends/compare_cli.py
+  --export-rrd`. Rerun remains a recorded-diagnostics lane, not the embedded
+  app-shell viewport (`supports_embedding=False` still stands).
 
 ## Validation
 

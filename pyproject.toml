@@ -120,6 +120,10 @@ mjx = ["mujoco-mjx>=3.6.0", "jax>=0.4.30", "jaxlib>=0.4.30"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
+# Recorded 3D diagnostics via Rerun (ADR-0027 follow-up, epic #8390 D1/#8405).
+# Opt-in: the renderer degrades with an install hint when absent.
+visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
+
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
 
@@ -602,6 +606,7 @@ markers = [
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
     "requires_nimble: offline Nimble gradient-oracle tests (skipped when `import nimblephysics` fails)",
+    "requires_rerun: tests that require the optional rerun-sdk visualization stack (skipped when `import rerun` fails)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",

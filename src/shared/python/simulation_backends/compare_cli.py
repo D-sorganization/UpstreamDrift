@@ -78,6 +78,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Report path. Omit to write the report to stdout.",
     )
+    parser.add_argument(
+        "--export-rrd",
+        type=Path,
+        help=(
+            "Optional path to export the baseline engine's trace as a Rerun "
+            ".rrd review artifact (requires the visualization extra)."
+        ),
+    )
     return parser
 
 
@@ -100,6 +108,24 @@ def main(argv: list[str] | None = None) -> int:
         ),
         labels=engine_names,
     )
+    if args.export_rrd is not None:
+        from src.shared.python.visualization.rerun_renderer import (
+            RerunNotAvailableError,
+            export_trace_rrd,
+        )
+
+        baseline = make_backend(engine_names[0], params)
+        if initial_state is not None:
+            baseline.reset(initial_state.copy())
+        else:
+            baseline.reset(None)
+        baseline_trace = baseline.rollout(controls, args.horizon, args.dt)
+        try:
+            export_trace_rrd(baseline_trace, args.export_rrd)
+        except RerunNotAvailableError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 2
+        sys.stdout.write(f"rrd written: {args.export_rrd}\n")
     if args.output is not None:
         write_report(report, args.output, format=args.format)
         sys.stdout.write(f"report written: {args.output}\n")
