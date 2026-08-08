@@ -256,7 +256,8 @@ class NonlinearDynamicsMixin:
         if N < 2:
             return None
 
-        n_recurrence_points = np.sum(recurrence_matrix) - N
+        # ⚡ Bolt: .sum() is faster than np.sum() for boolean/integer arrays by avoiding dispatcher overhead
+        n_recurrence_points = int(recurrence_matrix.sum()) - N
         rr = n_recurrence_points / (N * N - N) if N > 1 else 0.0
 
         diagonal_lengths: list[int] = []
