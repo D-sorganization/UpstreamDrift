@@ -33,6 +33,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
+from src.shared.python.safe_pandas_eval import validate_pandas_formula
+
 
 logger = logging.getLogger(__name__)
 
@@ -403,6 +405,10 @@ def filter_export(
     df = pd.read_csv(p) if fmt == "csv" else pd.read_parquet(p)
 
     df = _select_columns(df, columns)
+    try:
+        validate_pandas_formula(predicate, allowed_columns=df.columns)
+    except ValueError as e:
+        raise ValueError(f"Invalid predicate: {e}") from e
     filtered = df.query(predicate)
 
     Path(p_dst).parent.mkdir(parents=True, exist_ok=True)
