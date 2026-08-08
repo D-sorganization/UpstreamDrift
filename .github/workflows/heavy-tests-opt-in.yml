@@ -150,7 +150,7 @@ jobs:
         run: |
           python -c "
           import sys
-          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'c3d', 'ezdxf']
+          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'ezc3d', 'ezdxf']
           failures = []
           for pkg in deps:
               try:

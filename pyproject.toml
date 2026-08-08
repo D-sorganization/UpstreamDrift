@@ -90,10 +90,20 @@ dependencies = [
 rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
+# C3D read/write at runtime (epic #8390, A3/#8393). ezc3d backs the canonical
+# C3DDataReader, the motion_pipeline fallback parser, and the only C3D writer
+# (canonical_c3d_exporter); it was previously declared dev-only even though
+# runtime modules import it. Consumers keep their guarded imports, so absence
+# still degrades gracefully.
+c3d = ["ezc3d>=1.5.0,<2.0.0"]
 # Upper bounds added per issue #5914 to prevent silent breakage on
 # upstream major releases of these physics engines.
 drake = ["drake>=1.22.0,<2.0.0"]
-pinocchio = ["pin>=2.6.0,<5.0.0", "meshcat>=0.3.0,<1.0.0"]
+# pin-pink is imported by four production modules in the Pinocchio engine
+# (dtack/ik, dtack/backends, motion_training) and was declared only in the
+# engine's requirements.txt (epic #8390, A4/#8394). Guarded imports keep the
+# PINK-free diff_ik fallback (#4138) load-bearing when pink is absent.
+pinocchio = ["pin>=2.6.0,<5.0.0", "meshcat>=0.3.0,<1.0.0", "pin-pink>=1.0.0,<4.0.0"]
 chrono = ["pychrono>=8.0,<10.0"]
 # JaxSim is isolated from all-engines until the Linux Pinocchio/JaxSim
 # coexistence gate is proven. The base wheel resolves on Windows with CPU JAX,

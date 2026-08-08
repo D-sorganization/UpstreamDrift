@@ -102,18 +102,19 @@
 
 ### C3D
 
-- **Binary Format**: Requires `c3d` Python package
+- **Binary Format**: Parsed by the Rust `upstream_mocap_io` wheel when the
+  `mocap-io` extra is installed, with an `ezc3d` fallback (the `c3d` extra).
+  The unrelated `py-c3d` package is **not** used.
 - **Contains**: Analog data (force plates) + point data (markers)
 - **Confidence**: Stored as residuals (lower = better)
 - **Example**:
   ```python
-  import c3d
-  with open("capture.c3d", "rb") as f:
-      reader = c3d.Reader(f)
-      for points, analog in reader.read_frames():
-          # points.shape = (markers, 4, frames) - 4th dim is residual
-          pass
+  from src.shared.python.motion_pipeline.sources import load_any
+  sequence = load_any("capture.c3d")  # Rust parser first, ezc3d fallback
   ```
+- **Writing**: `src.motion_capture.canonical_c3d_exporter` (ezc3d-backed) is
+  the only supported C3D writer; C3D is an output format, never a lossy
+  intermediate inside the pipeline.
 
 ---
 
