@@ -5,7 +5,7 @@
 %
 \documentclass[
   letterpaper,
-]{article}
+]{report}
 
 \usepackage{amsmath,amssymb}
 \usepackage{iftex}
@@ -66,6 +66,46 @@
 \fi
 \makeatother
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
@@ -190,10 +230,11 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Proximal-to-Distal Energy Transfer in the Golf Swing: Where It Occurs, How It Differs with Skill, and When It Should Happen},
+  pdftitle={Proximal-to-Distal Energy Transfer in the Golf Swing},
   pdfauthor={Dieter Olson},
   pdfkeywords={golf swing, proximal-to-distal sequencing, kinematic
-sequence, energy transfer, counterfactual dynamics, ZTCF, ZVCF},
+sequence, energy transfer, counterfactual dynamics, ZTCF, ZVCF, double
+pendulum},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -202,98 +243,115 @@ sequence, energy transfer, counterfactual dynamics, ZTCF, ZVCF},
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{Proximal-to-Distal Energy Transfer in the Golf Swing: Where It
-Occurs, How It Differs with Skill, and When It Should Happen}
+\title{Proximal-to-Distal Energy Transfer in the Golf Swing}
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
   \apptocmd{\@title}{\par {\large #1 \par}}{}{}
 }
 \makeatother
-\subtitle{A literature synthesis and modeling perspective grounded in
-the UpstreamDrift ZTCF/ZVCF counterfactual framework}
+\subtitle{Where It Occurs, How It Differs with Skill, and When It Should
+Happen: A Thesis-Length Synthesis with an Executed Counterfactual
+Modeling Pathway in UpstreamDrift}
 \author{Dieter Olson}
-\date{2026-08-07}
+\date{2026-08-08}
 
 \begin{document}
 \maketitle
 \begin{abstract}
 Proximal-to-distal (P→D) sequencing --- the ordered peaking of pelvis,
 thorax, arm, and club rotational speeds --- is the most widely reported
-organizing principle of the golf downswing. It is usually interpreted as
-evidence that mechanical energy flows outward along the kinetic chain,
-and it is often translated into the coaching prescription that energy
-should be passed distally as early and as completely as possible. This
-article reviews the mechanics and the empirical literature behind that
-interpretation and asks a sharper question: \emph{when} during the
-downswing should the P→D transfer occur? Double-pendulum analyses,
-delayed-release simulations, and optimal-control results consistently
-favor accumulating energy proximally first (the arms-plus-club system
-rotating as a quasi-rigid body), with the transfer to the club
-deliberately \emph{restrained} early in the downswing and
-\emph{accelerated} late. Skill-level comparisons show that experts
-differ from amateurs more in transition timing, segment-speed
-magnitudes, and transfer efficiency than in the mere presence of a P→D
-order, and methodological work cautions that peak-ordering alone is a
-weak proxy for energy flow. We connect this literature to the
-zero-torque counterfactual (ZTCF) and zero-velocity counterfactual
-(ZVCF) decompositions implemented in the UpstreamDrift platform, which
-separate, at every instant of a measured swing, the acceleration
-attributable to accumulated motion (the drift term) from the
-acceleration attributable to the applied joint torques (the control
-term). We formalize the ``retain-early / release-late'' hypothesis in
-counterfactual terms, inventory the repository's models and
-energy-transfer computations, identify the measurement gaps (notably
-segmental energy-flow accounting), and specify falsifiable simulation
-experiments --- torque-timing sweeps, counterfactual energy budgets,
-re-simulation parity --- that can decide the question quantitatively. No
-new experimental data are reported; every quantitative claim is sourced
-to the cited literature or to inspectable code.
+organizing principle of the golf downswing, and it is usually read as
+evidence that mechanical energy should be passed outward along the
+kinetic chain as early and as completely as possible. This thesis
+reviews the mechanics and the empirical literature behind that reading
+and asks the sharper question: \emph{when} during the downswing should
+the P→D transfer occur? Across double-pendulum mechanics,
+delayed-release simulation, optimal control, and the segmental
+kinetic-energy literature, the evidence favors a strategy that
+\emph{retains} energy in the proximal system early in the downswing and
+\emph{accelerates} the handoff late. We formalize this
+retain-early/release-late hypothesis in the language of the zero-torque
+counterfactual (ZTCF) and zero-velocity counterfactual (ZVCF)
+decompositions implemented in the UpstreamDrift platform, and we execute
+a first quantitative test on the platform's backend-neutral two-segment
+golf model: a wrist-torque timing sweep (92 torque programs), pointwise
+drift/control counterfactual decompositions, and Robertson-Winter style
+wrist-interface power accounting, all generated by committed,
+reproducible scripts. In this model, driving the wrist from the top
+costs 15\% of clubhead speed relative to a fully passive wrist, delaying
+the wrist drive to the optimal onset gains 12\%, and a program that
+actively restrains the wrist early and drives it late is best of all at
+both shoulder-torque levels tested. The energy accounting shows the
+winning programs move \emph{less} energy into the club early and far
+more late, with the best program performing \emph{negative} wrist work
+early --- active retention. We interpret these results against the
+literature, state their limitations honestly (a planar 2-DOF model with
+a fixed hub and rigid shaft), and lay out the validated pathway ---
+re-simulation parity, segmental energy-flow metrics, full-body engines,
+and motion-capture replication --- by which the platform can carry the
+question to thesis-grade generality. No fabricated data or sources are
+used anywhere in this document: every reference is verified against a
+publication record, and every number in the results chapters is produced
+by code committed alongside this text.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
 {
 \hypersetup{linkcolor=}
-\setcounter{tocdepth}{3}
+\setcounter{tocdepth}{1}
 \tableofcontents
 }
+\listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, toprule=.15mm, breakable, toptitle=1mm, opacityback=0, coltitle=black, bottomrule=.15mm, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Provenance and scope}, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, leftrule=.75mm, opacitybacktitle=0.6, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, opacitybacktitle=0.6, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Provenance and scope}, rightrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomrule=.15mm, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, toptitle=1mm]
 
-Deliverable of UpstreamDrift epic
+This document is the deliverable of UpstreamDrift epics
 \href{https://github.com/D-sorganization/UpstreamDrift/issues/8373}{\#8373}
-(sub-issues \#8374--\#8379). A \emph{review and modeling-perspective}
-paper: no new experimental data are reported; the experiments of
-Section~\ref{sec-proposed-experiments} are planned work tracked in issue
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}.
-All references were verified against publication records at the time of
-writing; repository links point to the \texttt{main} branch of
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8383}{\#8383}
+(thesis expansion with executed modeling pathway). Chapters 1--5 are
+synthesis: they report the literature and the platform, with every
+reference verified against a publication record. Chapters 6--8 report
+\emph{simulation results generated by committed scripts in this
+repository} (\texttt{scripts/research/proximal\_distal\_energy/}), with
+parameters and provenance recorded alongside the data. Remaining
+generalization work is tracked in issues
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}.
+Repository links point to the \texttt{main} branch of
 \href{https://github.com/D-sorganization/UpstreamDrift}{D-sorganization/UpstreamDrift}.
 
 \end{tcolorbox}
 
-\section{Introduction}\label{sec-intro}
+\chapter{Introduction}\label{sec-intro}
+
+\section{Motivation}\label{motivation}
 
 Clubhead speed at impact is the dominant controllable determinant of
-drive distance, and the golf downswing is one of the most-studied
-examples of a \emph{sequenced} multi-segment rotation in sport
-biomechanics (\citeproc{ref-hume2005}{Hume, Keogh, and Reid 2005};
-\citeproc{ref-mcphee2022}{McPhee 2022}). Across measurement systems and
-populations, the downswing of a skilled golfer shows a characteristic
-order: the pelvis reaches its peak angular speed first, then the thorax,
-then the lead arm, and finally the club, with each successive segment
-reaching a higher peak speed than the one before it
+drive distance, and it correlates strongly with playing standard
+(\citeproc{ref-fradkin2004}{Fradkin, Sherman, and Finch 2004};
+\citeproc{ref-hellstrom2009}{Hellström 2009};
+\citeproc{ref-hume2005}{Hume, Keogh, and Reid 2005}). The golf downswing
+is among the most-studied examples of a \emph{sequenced} multi-segment
+rotation in sport biomechanics (\citeproc{ref-mcphee2022}{McPhee 2022};
+\citeproc{ref-dillman1994}{Dillman and Lange 1994}). Across measurement
+systems and populations, the downswing of a skilled golfer shows a
+characteristic order: the pelvis reaches its peak angular speed first,
+then the thorax, then the lead arm, and finally the club, with each
+successive segment peaking faster than the one before
 (\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
 \citeproc{ref-tinmark2010}{Tinmark et al. 2010}). This pattern --- the
 \emph{kinematic sequence}, an instance of the general proximal-to-distal
 (P→D) sequencing observed in throwing and striking skills
 (\citeproc{ref-putnam1993}{Putnam 1993}) --- is routinely interpreted as
-the visible signature of mechanical energy being generated in the large
+the visible signature of mechanical energy generated in the large
 proximal segments and transferred outward to the small, fast distal
-ones.
+ones, and it has been translated into coaching doctrine accordingly
+(\citeproc{ref-smith2015}{Smith et al. 2015}).
 
-That interpretation immediately raises a question that the descriptive
-literature does not settle:
+That interpretation leaves a first-order question unanswered:
 
 \begin{quote}
 \textbf{Should a golfer attempt to transfer energy from proximal to
@@ -302,148 +360,237 @@ distal segments \emph{early} in the downswing, or should energy be
 deliberately \emph{accelerated} late?}
 \end{quote}
 
-The question is not academic. The two strategies imply opposite coaching
-cues (``fire the club from the top'' versus ``hold the lag and let it
-release''), opposite torque programs, and different predictions for what
-counterfactual decompositions of a measured swing should show. It also
-connects to a long-standing puzzle: double-pendulum analyses have argued
-since the 1960s that the highest clubhead speeds arise when the distal
-joint is \emph{not} driven early --- when release is passively or
-actively delayed (\citeproc{ref-cochran1968}{Cochran and Stobbs 1968};
+The two strategies imply opposite coaching cues (``fire the club from
+the top'' versus ``hold the lag and let it release''), opposite torque
+programs at the wrists and torso, and different predictions for what
+counterfactual decompositions of a measured swing should show. The
+question also connects to a long-standing thread in the modeling
+literature: double-pendulum analyses have argued since the 1960s that
+the highest clubhead speeds arise when the distal joint is \emph{not}
+driven early --- when release is passively or actively delayed
+(\citeproc{ref-cochran1968}{Cochran and Stobbs 1968};
 \citeproc{ref-jorgensen1970}{T. Jorgensen 1970};
 \citeproc{ref-milburn1982}{Milburn 1982};
 \citeproc{ref-pickering1999}{Pickering and Vickers 1999}) --- while the
 coaching translation of the kinematic sequence often emphasizes
 initiating distal motion promptly after transition.
 
-The UpstreamDrift project approaches this question with
-\emph{counterfactual dynamics}. Two decompositions are implemented
-across its physics engines:
+UpstreamDrift approaches this question with \emph{counterfactual
+dynamics}. Two decompositions are implemented across its physics
+engines: the \textbf{zero-torque counterfactual (ZTCF)} --- the
+acceleration the system would exhibit at the current instant if all
+applied joint torques were removed, isolating what accumulated motion,
+gravity, and inter-segment coupling produce on their own --- and the
+\textbf{zero-velocity counterfactual (ZVCF)} --- the acceleration the
+applied torques, together with gravity, would produce at the current
+pose from rest, removing all motion-dependent effects. Preliminary
+ZTCF/ZVCF analyses with the platform's MATLAB pipeline motivated the
+hypothesis examined throughout this document: that \emph{restraining}
+the P→D handoff early in the downswing and accelerating it late may be
+the more effective strategy.
+
+\section{Research questions}\label{research-questions}
+
+The document is organized around four questions:
 
 \begin{itemize}
 \tightlist
 \item
-  the \textbf{zero-torque counterfactual (ZTCF)} --- the acceleration
-  the system would exhibit at the current instant if all applied joint
-  torques were removed, isolating what accumulated motion, gravity, and
-  inter-segment coupling produce on their own; and
+  \textbf{RQ1 --- Mechanism.} By what mechanical pathways does energy
+  generated proximally reach the club, and what does each pathway imply
+  about the \emph{timing} of the handoff? (Section~\ref{sec-mechanics})
 \item
-  the \textbf{zero-velocity counterfactual (ZVCF)} --- the acceleration
-  the applied torques, together with gravity, would produce at the
-  current pose if the system were momentarily at rest, removing all
-  motion-dependent effects (the pure torque contribution is the control
-  term of the drift-control split defined in Section~\ref{sec-ztcf}).
+  \textbf{RQ2 --- Evidence.} Where does the P→D transfer occur in
+  measured swings, and how do skilled and less-skilled players differ
+  --- in sequence order, in magnitudes, or in transfer efficiency?
+
+  \begin{enumerate}
+  \def\labelenumi{(\arabic{enumi})}
+  \tightlist
+  \item
+  \end{enumerate}
+\item
+  \textbf{RQ3 --- Formalization.} How can ``transfer early'' versus
+  ``retain-early/release-late'' be stated as falsifiable claims about
+  measurable quantities, and what do the ZTCF/ZVCF counterfactuals
+  predict under each? (Section~\ref{sec-timing-framework})
+\item
+  \textbf{RQ4 --- Demonstration.} What do the platform's own models show
+  when the timing of the distal handoff is manipulated directly, with
+  the energy accounting and counterfactual decompositions computed along
+  every trajectory? (Section~\ref{sec-methods},
+  Section~\ref{sec-results}, Section~\ref{sec-discussion})
 \end{itemize}
 
-Preliminary ZTCF/ZVCF analyses with the repository's MATLAB pipeline
-(Section~\ref{sec-ztcf}) motivated the hypothesis examined here: that
-\emph{restraining} the P→D handoff early in the downswing --- keeping
-kinetic energy in the proximal segments and in the arms-plus-club system
-rotating as a quasi-rigid unit --- and accelerating the handoff late may
-be the more effective strategy. This article evaluates that hypothesis
-against the published literature and specifies how to test it
-quantitatively with the tools already in the repository.
+\section{Approach and contributions}\label{approach-and-contributions}
 
-\textbf{Contributions.}
+The document makes six contributions:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   a synthesis of the mechanics of sequenced swings, from the
-  summation-of-speed principle to segment-interaction dynamics and
-  parametric energy transfer (Section~\ref{sec-mechanics});
+  summation-of-speed principle through segment-interaction dynamics,
+  parametric energy transfer, and optimal control
+  (Section~\ref{sec-mechanics});
 \item
   a methodological account of what ``energy transfer'' means
   operationally --- joint power, joint-force power, segmental energy
-  accounting, and induced accelerations (Section~\ref{sec-energyflow});
+  accounting, induced accelerations --- and where the popular
+  kinematic-sequence proxy fails (Section~\ref{sec-energyflow});
 \item
-  a critical review of the empirical evidence on where P→D transfer
-  occurs and how it differs between skilled and less-skilled players
-  (Section~\ref{sec-evidence});
+  a critical review of the empirical evidence, including the directly
+  relevant segmental kinetic-energy sequencing studies
+  (\citeproc{ref-kenny2008}{Kenny et al. 2008};
+  \citeproc{ref-anderson2006}{Anderson, Wright, and Stefanyshyn 2006})
+  and the skill-level literature (1);
 \item
-  a formalization of the early-versus-late transfer question, including
-  the ZTCF/ZVCF counterfactual framework and the specific predictions
-  the ``retain-early / release-late'' hypothesis makes
-  (Section~\ref{sec-timing}, Section~\ref{sec-ztcf}); and
+  a formalization of the timing question and of the ZTCF/ZVCF
+  counterfactual framework, including the distinction between pointwise
+  and re-simulation counterfactuals
+  (Section~\ref{sec-timing-framework});
 \item
-  an inventory of the models and computations available in UpstreamDrift
-  today, an honest gap analysis, and a set of falsifiable simulation
-  experiments that would decide the question (Section~\ref{sec-repo},
-  Section~\ref{sec-proposed-experiments}).
+  an \textbf{executed modeling pathway}: a reproducible experiment suite
+  on the platform's backend-neutral double-pendulum golf model --- 92
+  torque programs swept over wrist-drive onset time and profile, scored
+  at a consistently defined impact, with pointwise drift/control
+  decompositions and Robertson-Winter wrist-interface power accounting
+  computed along every representative trajectory
+  (Section~\ref{sec-methods}, Section~\ref{sec-results}); and
+\item
+  an honest bridge from these 2-DOF results to full generality: what the
+  simplified model can and cannot establish, and the concrete,
+  already-tracked steps that extend the pathway to re-simulation parity,
+  full-body engines, and motion-capture replication
+  (Section~\ref{sec-discussion}, Section~\ref{sec-conclusions}).
 \end{enumerate}
 
-\section{Mechanics of sequenced swings}\label{sec-mechanics}
+\section{Reading guide}\label{reading-guide}
 
-\subsection{The summation-of-speed principle and its
+Readers interested only in the new quantitative material can read
+Section~\ref{sec-timing-framework} for the hypothesis,
+Section~\ref{sec-methods} for the setup, and Section~\ref{sec-results}
+and Section~\ref{sec-discussion} for the outcome. Readers using this
+document as a literature resource will find the review chapters
+(Section~\ref{sec-mechanics}, 1) and the verified bibliography
+self-contained. Appendices inventory the platform (4), document
+reproducibility (\textbf{?@sec-appendix-repro}), collect validation
+evidence (\textbf{?@sec-appendix-validation}), and tabulate model
+parameters (\textbf{?@sec-appendix-params}).
+
+\chapter{Mechanics of Sequenced Swings}\label{sec-mechanics}
+
+This chapter assembles the mechanical foundations the rest of the
+document builds on: the dynamics formalism
+(Section~\ref{sec-formalism}), the summation-of-speed principle and its
+dynamical correction (Section~\ref{sec-summation}), the double-pendulum
+tradition that made release timing an explicit variable
+(Section~\ref{sec-doublependulum}), the optimal-control literature
+(Section~\ref{sec-optimalcontrol}), and the operational meanings of
+``energy transfer'' (Section~\ref{sec-energyflow}).
+
+\section{Dynamics formalism}\label{sec-formalism}
+
+Write the equation of motion of an articulated chain in standard
+manipulator form (\citeproc{ref-featherstone2008}{Featherstone 2008}):
+
+\begin{equation}\phantomsection\label{eq-eom}{
+M(q)\,\ddot q \;=\; \tau \;-\; b(q, \dot q),
+\qquad
+b(q,\dot q) \;=\; C(q,\dot q)\,\dot q \;+\; g(q) \;+\; d(\dot q),
+}\end{equation}
+
+with configuration \(q\), inertia matrix \(M\), applied generalized
+torques \(\tau\), Coriolis/centripetal terms \(C\dot q\), gravity \(g\),
+and velocity-dependent dissipation \(d\). Two structural facts drive
+everything that follows. First, the system is \emph{coupled}: \(M\) is
+not diagonal, so torque at any joint induces acceleration at every joint
+--- the basis of induced-acceleration analysis
+(\citeproc{ref-zajac1989}{Zajac and Gordon 1989}) and of the
+counterfactual decompositions of Section~\ref{sec-timing-framework}.
+Second, the equation is \emph{affine in} \(\tau\): the acceleration
+splits exactly into a drift part (what accumulated motion and gravity
+produce alone) and a control part (\(M^{-1}\tau\)), a property the
+UpstreamDrift test suite enforces to numerical tolerance
+(\textbf{?@sec-appendix-validation}).
+
+\section{The summation-of-speed principle and its
 limits}\label{sec-summation}
 
 The oldest formalization of P→D sequencing is the \emph{summation of
 speed} principle: in skills demanding high end-point speed, each segment
 should begin its motion at the moment of peak speed of the segment
-proximal to it, so that distal speed is ``built on top of'' proximal
-speed (\citeproc{ref-bunn1972}{Bunn 1972}). Milburn applied the
-principle directly to golf with a double-pendulum analysis of the
-downswing and found the characteristic pattern of an initially dominant
-proximal (arm) rotation followed by rapid distal (club) rotation, noting
-that \emph{``an initial delay in the uncocking of the wrist''} allows
-the arm to reach greater acceleration and the club's acceleration to be
-summed with the proximal segment's maximum
-(\citeproc{ref-milburn1982}{Milburn 1982}). Note the structure of that
-finding: the summation principle, taken naively, prescribes
-\emph{sequential initiation}; Milburn's analysis showed the benefit
-comes specifically from \emph{delaying} the distal contribution.
+proximal to it, so that distal speed is built on top of proximal speed
+(\citeproc{ref-bunn1972}{Bunn 1972}). Milburn applied the principle to
+golf with a double-pendulum analysis of the downswing and found the
+characteristic pattern of an initially dominant proximal (arm) rotation
+followed by rapid distal (club) rotation, noting that \emph{``an initial
+delay in the uncocking of the wrist''} allows the arm to reach greater
+acceleration and the club's acceleration to be summed with the proximal
+segment's maximum (\citeproc{ref-milburn1982}{Milburn 1982}). Note the
+structure of that finding: the summation principle, taken naively,
+prescribes \emph{sequential initiation}; Milburn's analysis showed the
+benefit comes specifically from \emph{delaying} the distal contribution.
 
 Putnam's segment-interaction analyses put the principle on a dynamical
 footing and exposed its limits (\citeproc{ref-putnam1991}{Putnam 1991},
 \citeproc{ref-putnam1993}{1993}). In a linked chain, each segment's
 angular acceleration depends not only on joint torques but on
 \emph{motion-dependent interaction torques} --- centripetal and Coriolis
-terms proportional to squares and products of segment angular
-velocities. Putnam showed the P→D pattern in striking and throwing
-arises substantially from these interaction torques: proximal
-deceleration and distal acceleration late in the motion are coupled
-through the joint force and occur even without a distal joint torque.
-Two implications matter for golf. First, kinematic order does not reveal
-\emph{which} torques produced it: an identical peak sequence can arise
-from different mixes of muscular and interaction torques. Second, the
-proximal deceleration observed in experts need not be an active
-``braking'' strategy --- it can be the dynamical \emph{consequence} of
-the distal segment accelerating and back-reacting on the chain. Marshall
-and Elliott further cautioned that planar peak-ordering analyses miss
-long-axis rotations, which peak very late in racquet skills and
-contribute substantially to end-point speed
+terms proportional to squares and products of segment angular velocities
+(the \(C\dot q\) term of Equation~\ref{eq-eom}). Putnam showed the P→D
+pattern in striking and throwing arises substantially from these
+interaction torques: proximal deceleration and distal acceleration late
+in the motion are coupled through the joint force and occur even without
+a distal joint torque. Feltner and Dapena's classic analysis of the
+baseball pitch quantified the same interplay at the shoulder and elbow
+(\citeproc{ref-feltner1986}{Feltner and Dapena 1986}), and Herring and
+Chapman showed in simulated throws that the \emph{timing} of torque
+onsets and torque reversals --- including deliberately reversed
+(restraining) torques --- materially changes end-point speed
+(\citeproc{ref-herring1992}{Herring and Chapman 1992}). Two implications
+matter for golf. First, kinematic order does not reveal \emph{which}
+torques produced it: an identical peak sequence can arise from different
+mixes of muscular and interaction torques. Second, the proximal
+deceleration observed in experts need not be an active ``braking''
+strategy --- it can be the dynamical \emph{consequence} of the distal
+segment accelerating and back-reacting on the chain.
+
+Marshall and Elliott added a measurement caution: planar peak-ordering
+analyses miss long-axis rotations, which peak very late in racquet
+skills and contribute substantially to end-point speed
 (\citeproc{ref-marshall2000}{Marshall and Elliott 2000}); the golf
 analogue is forearm rotation and wrist action in the final phase of the
 downswing.
 
-\subsection{Double-pendulum mechanics of the golf
+\section{Double-pendulum mechanics of the golf
 downswing}\label{sec-doublependulum}
 
 The two-lever, one-hinge model of the downswing --- an ``arm'' link
-rotating about a fixed or moving hub, connected by a wrist hinge to a
-``club'' link --- has been the workhorse of golf mechanics since Cochran
-and Stobbs' \emph{Search for the Perfect Swing}
-(\citeproc{ref-cochran1968}{Cochran and Stobbs 1968}) and Jorgensen's
-dynamical analysis fitted to stroboscopic photographs of a professional
-swing (\citeproc{ref-jorgensen1970}{T. Jorgensen 1970};
-\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999}). Its enduring value
-here is that it makes the \emph{timing} of the P→D handoff an explicit
-variable (the ``release'': the point at which the wrist angle is
-allowed, or driven, to open) and exposes the mechanism by which delay
-pays. Three results anchor the analysis:
+rotating about a hub, connected by a wrist hinge to a ``club'' link ---
+has been the workhorse of golf mechanics since Cochran and Stobbs'
+\emph{Search for the Perfect Swing} (\citeproc{ref-cochran1968}{Cochran
+and Stobbs 1968}) and Jorgensen's dynamical analysis fitted to
+stroboscopic photographs of a professional swing
+(\citeproc{ref-jorgensen1970}{T. Jorgensen 1970};
+\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999}); Penner's review
+surveys the tradition (\citeproc{ref-penner2003}{Penner 2003}). Its
+enduring value here is that it makes the \emph{timing} of the P→D
+handoff an explicit variable (the ``release'': the point at which the
+wrist angle is allowed, or driven, to open) and exposes the mechanism by
+which delay pays. Three results anchor the analysis:
 
 \textbf{Delayed release increases clubhead speed.} Pickering and
 Vickers, sweeping release angles in a driven double-pendulum model,
 found clubhead velocity at impact increases as release is delayed ---
 the classical ``late hit'' (\citeproc{ref-pickering1999}{Pickering and
-Vickers 1999}). Jorgensen's fitted model similarly reproduced the expert
-swing only with a substantially delayed opening of the wrist angle
+Vickers 1999}). Jorgensen's fitted model reproduced the expert swing
+only with a substantially delayed opening of the wrist angle
 (\citeproc{ref-jorgensen1970}{T. Jorgensen 1970};
 \citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999}). In these models an
-\emph{early} release (early P→D handoff) is strictly inferior: club
-kinetic energy purchased early is paid for with arm speed that never
-develops.
+early release (early P→D handoff) is strictly inferior: club kinetic
+energy purchased early is paid for with arm speed that never develops.
 
 \textbf{Late wrist torque helps; early wrist torque is the wrong tool.}
 Sprigings and Neal, using a torque-driven three-segment model with
@@ -452,25 +599,24 @@ applied \emph{during the latter stages of the downswing} increased
 clubhead speed by approximately 4\%
 (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}); Sprigings and
 MacKenzie confirmed the delayed-release benefit in a follow-up
-simulation focused specifically on the timing of release
+simulation focused on release timing
 (\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}). The point
 is not that distal effort is useless, but that its productive window is
 late.
 
-\textbf{Energy transfer to the club can be largely passive --- and is
-governed by the changing geometry.} White analyzed an \emph{undriven}
-double pendulum and showed that the transfer of kinetic energy from arms
-to club late in the downswing is a parametric-transfer phenomenon: as
-the club swings out, the effective moment of inertia of the system
-changes, and conservation of energy and angular momentum move kinetic
-energy distally without any wrist torque at all
-(\citeproc{ref-white2006}{White 2006}). The efficiency of this transfer
-is controlled principally by the wrist-cock angle maintained before
-release (\citeproc{ref-white2006}{White 2006}). Miura's analysis of the
-``inward pull'' complements this: an expert's hands moving toward the
-body near impact --- equivalent to shrinking the hub radius when
-centrifugal loading is fully developed --- performs work against the
-centrifugal force that appears as additional clubhead kinetic energy
+\textbf{Energy transfer to the club can be largely passive --- governed
+by the changing geometry.} White analyzed an \emph{undriven} double
+pendulum and showed that the transfer of kinetic energy from arms to
+club late in the downswing is a parametric-transfer phenomenon: as the
+club swings out, the effective moment of inertia of the system changes,
+and conservation of energy and angular momentum move kinetic energy
+distally without any wrist torque at all; the wrist-cock angle
+maintained before release is the principal efficiency-determining
+parameter (\citeproc{ref-white2006}{White 2006}). Miura's analysis of
+the ``inward pull'' complements this: an expert's hands moving toward
+the body near impact --- shrinking the hub radius when centrifugal
+loading is fully developed --- performs work against the centrifugal
+force that appears as additional clubhead kinetic energy
 (\citeproc{ref-miura2001}{Miura 2001}). Nesbit and McGinnis' hub-path
 analyses generalize the same idea: the non-circular hand path of skilled
 golfers, including its late-downswing tightening, is a mechanism for
@@ -484,23 +630,25 @@ Together these results describe a machine whose highest-output mode is:
 geometry and --- in the last phase --- modest distal torque move the
 energy outward rapidly}. The double-pendulum literature is already an
 argument for \textbf{retain-early / release-late}.
+Section~\ref{sec-results} tests exactly this proposition on the
+UpstreamDrift implementation of the model.
 
-\subsection{Optimal control and torque
+\section{Optimal control and torque
 sequencing}\label{sec-optimalcontrol}
 
 If the timing question is posed as an optimization --- what torque
-program maximizes clubhead speed (or carry) subject to actuator limits?
---- the answer has been studied repeatedly. Lampsa's early
-optimal-control study of a driven double pendulum computed torque
-histories maximizing drive distance, and notably found the
-\emph{optimal} torques differed in structure from those measured (via
-inverse dynamics) in his own swing (\citeproc{ref-lampsa1975}{Lampsa
-1975}) --- early evidence that human swings need not be optimal and that
-the optimum is a meaningful target rather than a redescription of expert
-behavior. Sharp, fitting shoulder-arm-club models to expert swing data
-and then optimizing torque programs, established a pattern for the best
-use of the available driving torques across the downswing phases, with
-the distal contribution structured late rather than distributed evenly
+program maximizes clubhead speed subject to actuator limits? --- the
+answer has been studied repeatedly. Lampsa's early optimal-control study
+of a driven double pendulum computed torque histories maximizing drive
+distance, and notably found the \emph{optimal} torques differed in
+structure from those measured (via inverse dynamics) in his own swing
+(\citeproc{ref-lampsa1975}{Lampsa 1975}) --- early evidence that human
+swings need not be optimal and that the optimum is a meaningful target
+rather than a redescription of expert behavior. Sharp, fitting
+shoulder-arm-club models to expert swing data and then optimizing torque
+programs, established a pattern for the best use of the available
+driving torques across the downswing phases, with the distal
+contribution structured late rather than distributed evenly
 (\citeproc{ref-sharp2009}{Sharp 2009}). Three-dimensional
 forward-dynamics models extended the approach with anatomically
 meaningful actuators and flexible shafts: MacKenzie and Sprigings' 3D
@@ -515,10 +663,11 @@ act late in the downswing. McPhee's review surveys this modeling lineage
 
 A caution cuts the other way: optimal control optimizes \emph{within a
 model}, and the sensitivity of optimal timing to model structure (hub
-mobility, shaft flexibility, actuator rate limits) is exactly why a
-multi-engine platform with cross-engine validation
-(Section~\ref{sec-repo}) is the right instrument for revisiting the
-question.
+mobility, shaft flexibility (\citeproc{ref-betzler2012}{Betzler et al.
+2012}; \citeproc{ref-osis2012}{Osis and Stefanyshyn 2012}), actuator
+rate limits) is exactly why a multi-engine platform with cross-engine
+validation (Section~\ref{sec-platform}) is the right instrument for
+revisiting the question.
 
 \section{What ``energy transfer'' means
 operationally}\label{sec-energyflow}
@@ -533,11 +682,10 @@ For a joint spanning segments \(i\) and \(i{+}1\) with net joint torque
 \(\tau\) and relative angular velocity \(\omega\), the \emph{joint
 (moment) power} is \(P_m = \tau\,\omega\); its time integral over a
 phase is the mechanical work done by the net moment. Positive work
-indicates generation (or concentric action), negative work absorption.
-This is the quantity most golf studies report, and it is the basis of
-the work-power budget of Nesbit and Serrano
-(Section~\ref{sec-workbudget}) (\citeproc{ref-nesbit2005work}{Nesbit and
-Serrano 2005}).
+indicates generation, negative work absorption. This is the quantity
+most golf studies report, and it is the basis of the work-power budget
+of Nesbit and Serrano (Section~\ref{sec-workbudget})
+(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}).
 
 \subsection{Joint-force power and segmental energy
 accounting}\label{sec-rw}
@@ -551,14 +699,13 @@ the rate of change of segment mechanical energy against the sum of
 joint-force powers and moment powers at its proximal and distal ends,
 distinguishing energy \emph{transferred between} segments from energy
 \emph{generated or absorbed} at joints
-(\citeproc{ref-robertson1980}{Robertson and Winter 1980}). This is the
-correct level of analysis for the question posed here, because the
-``retain-early / release-late'' hypothesis is precisely a claim about
-the \emph{time course of inter-segment transfer terms}, not about peak
-angular velocities. As Section~\ref{sec-repo-gaps} notes, this
-accounting is the principal measurement gap in the UpstreamDrift Python
-stack today (the MATLAB pipeline's per-joint linear-plus-angular work
-decomposition is its closest existing realization).
+(\citeproc{ref-robertson1980}{Robertson and Winter 1980};
+\citeproc{ref-winter2009}{Winter 2009}). This is the correct level of
+analysis for the timing question, because ``retain-early /
+release-late'' is precisely a claim about the \emph{time course of
+inter-segment transfer terms}, not about peak angular velocities.
+Section~\ref{sec-methods} implements exactly this accounting at the
+model's wrist interface, including the energy-balance residual check.
 
 \subsection{Induced accelerations and dynamic
 coupling}\label{induced-accelerations-and-dynamic-coupling}
@@ -573,11 +720,9 @@ fail in coupled systems. For golf this matters because a torso torque
 early in the downswing partly accelerates the \emph{club} (through
 coupling), and a wrist torque late in the downswing back-reacts on the
 torso; the net energy routing is an emergent property of the whole
-chain. The ZTCF/ZVCF decompositions of Section~\ref{sec-ztcf} are the
-counterfactual cousins of this analysis: rather than attributing
-acceleration to individual torques, they split the total acceleration
-into a motion-dependent (drift) part and a control part, instant by
-instant.
+chain. The ZTCF/ZVCF decompositions of
+Section~\ref{sec-timing-framework} are the counterfactual cousins of
+this analysis.
 
 \subsection{Kinematic sequence as a proxy --- and its failure
 modes}\label{kinematic-sequence-as-a-proxy-and-its-failure-modes}
@@ -590,15 +735,17 @@ thirteen golfers analyzed with seven component-selection methods yielded
 different sequences (\citeproc{ref-marsan2019}{Marsan et al. 2019}).
 Marshall and Elliott's long-axis-rotation caution
 (\citeproc{ref-marshall2000}{Marshall and Elliott 2000}) is a special
-case of the same problem. Any serious test of the timing hypothesis must
-therefore be run at the level of energy and power accounting
-(Section~\ref{sec-rw}), with the kinematic sequence reported as
-corroborating description only.
+case of the same problem, and the near-planarity of the downswing is
+itself only an approximation (\citeproc{ref-coleman2005}{Coleman and
+Rankin 2005}; \citeproc{ref-kwon2012}{Kwon et al. 2012}). Any serious
+test of the timing hypothesis must therefore run at the level of energy
+and power accounting (Section~\ref{sec-rw}), with the kinematic sequence
+reported as corroborating description only --- which is how
+Section~\ref{sec-results} uses it.
 
-\section{Empirical evidence in golfers}\label{sec-evidence}
+\chapter{Empirical Evidence in Golfers}\label{sec-evidence}
 
-\subsection{The work and power budget of the
-swing}\label{sec-workbudget}
+\section{The work and power budget of the swing}\label{sec-workbudget}
 
 Nesbit's full-body kinematic-kinetic study and the companion work-power
 analysis of Nesbit and Serrano remain the most complete published energy
@@ -609,14 +756,13 @@ skill, they report that the trunk complex (lumbar and thoracic spine
 plus hips) contributes 68.7--72.2\% of total swing work, the shoulder
 and arm joints 24.3--28\%, and the legs only 3.3--3.8\%
 (\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}). Two further
-observations from the same study bear directly on this article's
-question. First, power generation and clubhead speed decreased
-systematically with increasing handicap. Second, the authors' phase
-analysis locates the \emph{generation} of energy predominantly in the
-earlier downswing (torso-dominated) and the \emph{conversion} into
-clubhead speed late (shoulder/arm and club interface) --- i.e.,
-generation and transfer are temporally separated, which is a
-precondition for the retain-early / release-late strategy to even be
+observations bear directly on the timing question. First, power
+generation and clubhead speed decreased systematically with increasing
+handicap. Second, the phase analysis locates the \emph{generation} of
+energy predominantly in the earlier downswing (torso-dominated) and the
+\emph{conversion} into clubhead speed late (shoulder/arm and club
+interface) --- generation and transfer are temporally separated, which
+is a precondition for the retain-early/release-late strategy to even be
 possible.
 
 The ground is the ultimate source of the external impulse. Han and
@@ -634,11 +780,30 @@ dominant indirect pathway to transfer efficiency rather than to
 sequencing per se
 (\citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
 Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
-the Golf Swing''} 2026}). That last distinction --- transfer
+the Golf Swing''} 2026}). That distinction --- transfer
 \emph{efficiency} mattering where sequence \emph{order} alone does not
---- is a recurring theme of the skill-level literature reviewed next.
+--- recurs throughout the skill-level literature below.
 
-\subsection{Kinematic-sequence evidence and skill-level
+\section{Segmental kinetic-energy sequencing}\label{sec-ke-sequencing}
+
+Two studies measured the quantity this document cares most about ---
+segment \emph{kinetic energy}, not merely angular speed --- and both
+found the P→D structure at the energetic level. Anderson, Wright and
+Stefanyshyn computed segmental kinetic energies in the golf swing and
+documented the sequenced build-up and outward migration of energy along
+the chain (\citeproc{ref-anderson2006}{Anderson, Wright, and Stefanyshyn
+2006}). Kenny, McCloy, Wallace and Otto reproduced segmental
+kinetic-energy sequencing in a large-scale computer-simulated golf
+swing, confirming the ordered energetic handoff in a full
+forward-dynamic setting (\citeproc{ref-kenny2008}{Kenny et al. 2008}).
+These studies matter here for two reasons. First, they validate the
+segment-energy time course as a practical observable (the same
+observable computed in Section~\ref{sec-results} for the UpstreamDrift
+model). Second, they show the energetic sequence is not an artifact of
+angular-velocity bookkeeping: energy itself arrives late in the club,
+after the proximal segments have peaked.
+
+\section{Kinematic-sequence evidence and skill-level
 differences}\label{sec-skill}
 
 The descriptive P→D findings are robust in skilled populations. Tinmark
@@ -650,7 +815,7 @@ speed at every level of effort, in both men and women
 colleagues compared amateur recreational players with touring
 professionals on transition- and downswing-phase kinematic sequence
 parameters and found professionals showed higher peak-speed magnitudes
-and more consistent sequencing/timing characteristics
+and more consistent sequencing and timing characteristics
 (\citeproc{ref-cheetham2008}{Cheetham et al. 2008}). Zheng and
 colleagues' three-dimensional comparison of professional and amateur
 swings found systematic temporal and spatial differences, with amateurs
@@ -662,6 +827,22 @@ and its timing) against which amateurs can be compared
 and Vandervoort review the broader catalogue of skill-level
 biomechanical differences (\citeproc{ref-lindsay2008}{Lindsay, Mantrop,
 and Vandervoort 2008}).
+
+Torso-pelvis interaction variables predict performance. Myers and
+colleagues found upper-torso and pelvis rotation (and their separation)
+associated with ball speed in golfers across skill levels
+(\citeproc{ref-myers2008}{Myers et al. 2008}); Chu, Sell and Lephart
+identified a small set of biomechanical variables --- among them trunk
+and pelvis kinematics at specific downswing events --- explaining a
+large share of driving-performance variance (\citeproc{ref-chu2010}{Chu,
+Sell, and Lephart 2010}); Joyce and colleagues related three-dimensional
+trunk kinematics to clubhead speed across clubs
+(\citeproc{ref-joyce2013}{Joyce et al. 2013}). On the widely coached
+``X-factor'' specifically, Kwon and colleagues showed the computed
+values depend materially on methodology and that, in skilled golfers,
+X-factor parameters were not straightforwardly associated with clubhead
+velocity (\citeproc{ref-kwon2013}{Kwon et al. 2013}) --- another
+instance of a popular proxy dissolving under measurement scrutiny.
 
 Three refinements prevent an overly tidy reading:
 
@@ -684,37 +865,48 @@ Three refinements prevent an overly tidy reading:
   significant differences in the timing lags between peak angular speeds
   of contiguous segments (\citeproc{ref-neal2007}{Neal et al. 2007}) ---
   the felt sense of ``timing'' lives somewhere other than the inter-peak
-  lags of a five-segment model.
+  lags of a five-segment model. Movement variability is itself
+  structured and functional in golf
+  (\citeproc{ref-langdown2012}{Langdown, Bridge, and Li 2012};
+  \citeproc{ref-glazier2011}{Glazier 2011}), so single-trial sequence
+  snapshots carry limited information.
 \item
-  \textbf{Method sensitivity.} As noted in Section~\ref{sec-energyflow},
+  \textbf{Method sensitivity.} As Section~\ref{sec-energyflow} noted,
   the identified sequence depends on component-selection methodology
   (\citeproc{ref-marsan2019}{Marsan et al. 2019}), so cross-study
-  comparisons of ordering statistics carry real uncertainty.
+  comparisons of ordering statistics carry real uncertainty. Historical
+  measurements with specialized instrumentation reached compatible
+  conclusions about trunk-pelvis motion but with their own method
+  dependence (\citeproc{ref-mcteigue1994}{McTeigue et al. 1994}).
 \end{enumerate}
 
 What survives these refinements: \emph{skilled golfers generate larger
 proximal speeds, separate transition from release more distinctly, and
-transmit impulse/energy to the club more efficiently; merely exhibiting
-a P→D peak order is neither unique to skill nor sufficient for it}
-(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
+transmit impulse and energy to the club more efficiently; merely
+exhibiting a P→D peak order is neither unique to skill nor sufficient
+for it} (\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
 \citeproc{ref-zheng2008}{Zheng et al. 2008};
 \citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
 Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
 the Golf Swing''} 2026}; \citeproc{ref-lee2026}{Lee, Ehrlich, and Cain
-2026}).
+2026}). Coaching perception has partly internalized this: when surveyed
+systematically, coaches' key swing parameters overlap with, but do not
+coincide with, the parameters the biomechanical literature supports
+(\citeproc{ref-smith2015}{Smith et al. 2015}).
 
-\subsection{Where the transfer occurs}\label{where-the-transfer-occurs}
+\section{Where the transfer occurs}\label{sec-where}
 
-Synthesizing Section~\ref{sec-workbudget} and Section~\ref{sec-skill}
-with Section~\ref{sec-mechanics}: in a skilled swing, the dominant
-energy \emph{generation} occurs in the trunk-hip complex during the
-first two-thirds of the downswing (\citeproc{ref-nesbit2005work}{Nesbit
-and Serrano 2005}); the dominant \emph{transfer to the club} occurs in
-the final phase, through the wrist interface, by a mechanism that is
-substantially parametric/geometric (wrist-cock release under centrifugal
-loading, hub-path tightening) with a modest late active wrist
-contribution (\citeproc{ref-white2006}{White 2006};
-\citeproc{ref-miura2001}{Miura 2001};
+Synthesizing Section~\ref{sec-workbudget},
+Section~\ref{sec-ke-sequencing} and Section~\ref{sec-skill} with the
+mechanics of Section~\ref{sec-mechanics}: in a skilled swing, the
+dominant energy \emph{generation} occurs in the trunk-hip complex during
+the first two-thirds of the downswing
+(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}); the dominant
+\emph{transfer to the club} occurs in the final phase, through the wrist
+interface, by a mechanism that is substantially parametric/geometric
+(wrist-cock release under centrifugal loading, hub-path tightening) with
+a modest late active wrist contribution (\citeproc{ref-white2006}{White
+2006}; \citeproc{ref-miura2001}{Miura 2001};
 \citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
 \citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009}). Less-skilled
 players truncate exactly this separation: early release (``casting'')
@@ -722,18 +914,22 @@ moves energy into the club before proximal speed has peaked, producing
 the lower distal peak speeds and transfer ratios observed in amateur
 cohorts (\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
 \citeproc{ref-zheng2008}{Zheng et al. 2008};
-\citeproc{ref-milburn1982}{Milburn 1982}).
+\citeproc{ref-milburn1982}{Milburn 1982}). Chapter
+Section~\ref{sec-results} reproduces this entire pattern --- including
+the casting failure mode --- inside a fully instrumented model where
+every energy pathway is measurable exactly.
 
-\section{The timing question, stated precisely}\label{sec-timing}
+\chapter{The Timing Question and the Counterfactual
+Framework}\label{sec-timing-framework}
 
-\subsection{Two strategies}\label{two-strategies}
+\section{Two strategies, stated precisely}\label{sec-strategies}
 
 Let \(E_p(t)\) be the kinetic energy of the proximal subsystem (trunk
 and arms, with the club riding folded) over a downswing
 \(t \in [t_0, t_{\mathrm{imp}}]\), and define the transfer functional
 \(P_{\mathrm{w}}(t)\) as the inter-segment power crossing the wrist
-interface (joint-force power plus moment power, in the sense of
-Section~\ref{sec-rw}). The two strategies are:
+interface --- joint-force power plus moment power, in the sense of
+Section~\ref{sec-rw}. The two strategies are:
 
 \begin{itemize}
 \tightlist
@@ -744,7 +940,7 @@ Section~\ref{sec-rw}). The two strategies are:
 \item
   \textbf{S2 (retain early, release late):} keep \(P_{\mathrm{w}}(t)\)
   small early (the wrist transmits centripetal force but little power)
-  while proximal torques maximize \(E_p\); then allow/drive a large
+  while proximal torques maximize \(E_p\); then allow or drive a large
   \(P_{\mathrm{w}}\) concentrated in the final phase.
 \end{itemize}
 
@@ -784,7 +980,8 @@ model classes (\citeproc{ref-milburn1982}{Milburn 1982};
   Motion-dependent torques accelerate the distal segment and decelerate
   the proximal one automatically once release begins; the golfer's job
   is to \emph{time} this cascade, not to muscle it
-  (\citeproc{ref-putnam1993}{Putnam 1993}).
+  (\citeproc{ref-putnam1993}{Putnam 1993};
+  \citeproc{ref-herring1992}{Herring and Chapman 1992}).
 \end{enumerate}
 
 Empirically, S2-like signatures separate skill groups
@@ -795,7 +992,7 @@ finer variables (release profile shape, hub-path geometry,
 impulse-transfer efficiency) --- exactly what the counterfactual
 framework below is designed to expose.
 
-\subsection{What would falsify S2?}\label{what-would-falsify-s2}
+\section{What would falsify S2?}\label{sec-falsify}
 
 To keep the question scientific rather than rhetorical, we state what
 evidence would count against the retain-early/release-late hypothesis:
@@ -813,29 +1010,19 @@ evidence would count against the retain-early/release-late hypothesis:
 \item
   counterfactual (ZTCF/ZVCF) analyses showing that in faster swings the
   control term dominates club acceleration \emph{early} rather than
-  late.
+  late;
+\item
+  \textbf{or, in the direct manipulation of Section~\ref{sec-methods}:
+  torque programs that drive the wrist early outperforming programs that
+  retain early and drive late, under matched proximal effort.}
 \end{itemize}
 
-The proposed experiments of Section~\ref{sec-proposed-experiments}
-operationalize these tests.
+The last test is executed in Section~\ref{sec-results}.
 
-\section{Counterfactual decompositions: ZTCF and ZVCF}\label{sec-ztcf}
+\section{ZTCF and ZVCF: definitions}\label{sec-ztcf-defs}
 
-\subsection{Definitions}\label{definitions}
-
-Write the chain's equation of motion in standard manipulator form:
-
-\begin{equation}\phantomsection\label{eq-eom}{
-M(q)\,\ddot q \;=\; \tau \;-\; b(q, \dot q),
-\qquad
-b(q,\dot q) \;=\; C(q,\dot q)\,\dot q \;+\; g(q) \;+\; d(\dot q),
-}\end{equation}
-
-with inertia matrix \(M\), applied generalized torques \(\tau\),
-Coriolis and centripetal terms \(C\dot q\), gravity \(g\), and
-velocity-dependent dissipation \(d\). Two counterfactual accelerations
-are defined \emph{pointwise} at each measured state
-\((q, \dot q, \tau)\) of a swing:
+Two counterfactual accelerations are defined \emph{pointwise} at each
+measured state \((q, \dot q, \tau)\) of a swing:
 
 \begin{equation}\phantomsection\label{eq-ztcf}{
 \ddot q_{\mathrm{ZTCF}}
@@ -869,13 +1056,13 @@ affine in \(\tau\), the actual acceleration superposes exactly:
 \underbrace{M^{-1}\tau}_{\text{control}},
 }\end{equation}
 
-an identity enforced to numerical tolerance by the repository's test
-suite (Section~\ref{sec-repo-validation}).
+an identity enforced to numerical tolerance by the platform's test suite
+(\textbf{?@sec-appendix-validation}).
 
-\subsection{Two operational variants}\label{two-operational-variants}
+\section{Two operational variants}\label{sec-ztcf-variants}
 
-The repository implements two distinct operationalizations, and the
-difference matters for interpretation:
+The platform implements two distinct operationalizations, and the
+difference matters for interpretation.
 
 \textbf{Pointwise (instantaneous) counterfactuals.} The engine-agnostic
 Python implementation
@@ -884,7 +1071,7 @@ evaluates Equation~\ref{eq-ztcf} and Equation~\ref{eq-zvcf} at each
 sample of an already-measured trajectory --- explicitly \emph{not} a
 forward-integrated rollout. Each sample answers a local ``what if'';
 this is the right tool for drift/control \emph{time profiles} along a
-real swing.
+real swing, and it is the tool used in Section~\ref{sec-results}.
 
 \textbf{Re-simulation counterfactuals.} The original MATLAB/Simscape
 pipeline
@@ -900,7 +1087,7 @@ same pose with velocities zeroed
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model\%20Output/Scripts/SCRIPT_ZVCF_GENERATOR.m}{\texttt{SCRIPT\_ZVCF\_GENERATOR.m}});
 the ZVCF model is run without gravity so that, when its samples are set
 against the ZTCF (which retains gravity), the gravitational contribution
-is not double-counted. Note that this decomposition is meaningful
+is not double-counted. This decomposition is meaningful
 \emph{pointwise}, at matched states, in the sense of
 Equation~\ref{eq-superposition}: the ZVCF script records one sample per
 zero-velocity pose, and separately integrated counterfactual rollouts do
@@ -913,14 +1100,13 @@ every table (BASE, ZTCF, DELTA), the linear work
 power, and the fractional contributions ZTCF/BASE and DELTA/BASE
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m}{\texttt{calculate\_work\_impulse.m}},
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_total_work_power.m}{\texttt{calculate\_total\_work\_power.m}})
---- precisely the Robertson-Winter-style joint-interface accounting
-(Section~\ref{sec-rw}) that the timing question needs, including a
-kinematic-sequence plot computed \emph{separately for the BASE, ZTCF and
-DELTA components}
+--- precisely the Robertson-Winter-style joint-interface accounting of
+Section~\ref{sec-rw}, including a kinematic-sequence plot computed
+\emph{separately for the BASE, ZTCF and DELTA components}
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF\%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m}{\texttt{SCRIPT\_324\_PLOT\_ZTCF\_KinematicSequence.m}}).
 
-\subsection{The counterfactual form of the timing
-hypothesis}\label{the-counterfactual-form-of-the-timing-hypothesis}
+\section{The counterfactual form of the timing
+hypothesis}\label{sec-hypothesis}
 
 The ZTCF/ZVCF language makes the S2 hypothesis crisp. Along a measured
 downswing, project the drift and control accelerations onto the club's
@@ -940,25 +1126,30 @@ predicts, for high-performing swings:
   \textbf{Late downswing:} the \emph{drift} term (parametric transfer,
   centrifugal release) should dominate club acceleration, with a brief
   late window of positive wrist control power
-  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). The DELTA
-  (active) share of club-side work should concentrate before release;
-  the ZTCF (passive) share should account for most club energy gain
-  after release (\citeproc{ref-white2006}{White 2006}).
+  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). The active
+  share of club-side work should concentrate before release; the passive
+  share should account for most club energy gain after release
+  (\citeproc{ref-white2006}{White 2006}).
 \end{itemize}
 
-This pattern is stated here as a \emph{hypothesis to be quantified}, not
-a result: the substantiating figures and tables are the deliverable of
-issue
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}.
-Conversely, if high-performing swings show early-dominant wrist control
-power, S2 is falsified in exactly the terms of Section~\ref{sec-timing}.
+Before this thesis, this pattern was a hypothesis motivated by the
+platform's preliminary MATLAB analyses. Section~\ref{sec-results} now
+provides the first committed, reproducible quantitative test on the
+platform's two-segment model; conversely, had the early-drive programs
+won the sweep, S2 would have been falsified in exactly the terms of 3.
+The remaining generality --- re-simulation parity, 3D full-body models,
+and measured swings --- is future work tracked in issues
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}.
 
-\section{What UpstreamDrift computes today}\label{sec-repo}
+\chapter{The UpstreamDrift Platform}\label{sec-platform}
 
-This section inventories the repository's relevant capabilities; links
-point to the \texttt{main} branch.
+This chapter summarizes the platform capabilities the modeling pathway
+builds on; the complete hot-linked inventory, including known gaps, is
+in 4.
 
-\subsection{Models}\label{models}
+\section{Models}\label{models}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -992,16 +1183,16 @@ Double pendulum (arms + club, clubhead tip mass) &
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics.py}{\texttt{pendulum\_simulator/physics.py}}
 & Lagrangian dynamics; viscous + Coulomb friction; analytic \(M\),
 \(C\), \(g\) \\
+Backend-neutral golf model (ODE / MuJoCo / MJX / Warp) &
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/README.md}{\texttt{simulation\_backends/}}
+& One parameter set rendered to every backend; shared trace schema;
+\textbf{used in Section~\ref{sec-methods}} \\
 Triple pendulum &
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics_triple.py}{\texttt{pendulum\_simulator/physics\_triple.py}}
 & Three-segment planar chain \\
 8-DOF closed-loop golfer (two arms + shared club) &
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics_golfer.py}{\texttt{pendulum\_simulator/physics\_golfer.py}}
-& Holonomic loop constraints, constraint-consistent dynamics; JAX
-variant \\
-Backend-neutral golf model (ODE / MuJoCo / MJX / Warp) &
-\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/README.md}{\texttt{simulation\_backends/}}
-& One parameter set rendered to every backend; shared trace schema \\
+& Holonomic loop constraints; JAX variant \\
 MuJoCo humanoid golfer &
 \href{https://github.com/D-sorganization/UpstreamDrift/tree/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf}{\texttt{mujoco\_humanoid\_golf/}}
 & Full-body model with club \\
@@ -1013,7 +1204,8 @@ Flexible shaft (FEM) &
 & Beam model; strain energy not yet in the energy budget \\
 \end{longtable}
 
-\subsection{Counterfactual stack}\label{counterfactual-stack}
+\section{The counterfactual and energetics
+stack}\label{the-counterfactual-and-energetics-stack}
 
 The normative contract lives in the engine-core dynamics interface
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/engine_core/_dynamics_interface.py}{\texttt{\_dynamics\_interface.py}}):
@@ -1022,99 +1214,843 @@ The normative contract lives in the engine-core dynamics interface
 \texttt{compute\_zvcf}, with the superposition identity
 (Equation~\ref{eq-superposition}) stated as a contract. Engine
 implementations exist for MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite,
-the analytic pendulum engines, and the Simscape bridge; the capability
-matrix is documented in
-\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/engines/engine_capabilities.md}{\texttt{engine\_capabilities.md}}.
-On top of these sit:
+the analytic pendulum engines, and the Simscape bridge
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/engines/engine_capabilities.md}{\texttt{engine\_capabilities.md}}).
+On top of these sit the pointwise engine-agnostic evaluator with HDF5
+persistence
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py}{\texttt{ztcf\_zvcf.py}}),
+a MuJoCo delta-based counterfactual analyzer
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/counterfactuals.py}{\texttt{counterfactuals.py}}),
+induced-acceleration analyzers, MuJoCo inter-segment power flow
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/power_flow.py}{\texttt{power\_flow.py}}),
+engine-agnostic work/power/impulse metrics
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/power_work_metrics.py}{\texttt{power\_work\_metrics.py}}),
+kinematic-sequence and coordination analytics
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/kinematic_sequence.py}{\texttt{kinematic\_sequence.py}},
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/coordination_metrics.py}{\texttt{coordination\_metrics.py}}),
+and the MATLAB BASE/ZTCF/DELTA/ZVCF pipeline of
+Section~\ref{sec-ztcf-variants}.
+
+\section{Why this platform is the right
+instrument}\label{why-this-platform-is-the-right-instrument}
+
+Three properties make UpstreamDrift suited to the timing question.
+First, \textbf{one model, many engines}: the same
+\texttt{GolfModelParams} specification renders to an analytic CPU
+reference backend and to MuJoCo-family backends, so results can be
+cross-validated between independent dynamics implementations
+(\textbf{?@sec-appendix-validation}). Second, \textbf{counterfactuals as
+first-class citizens}: the drift/control split is a tested contract, not
+an ad-hoc analysis, so the S2 hypothesis of Section~\ref{sec-hypothesis}
+can be evaluated with the same code on every engine. Third,
+\textbf{reproducibility discipline}: the experiments in
+Section~\ref{sec-methods} are committed modules with recorded
+provenance, run by two commands (\textbf{?@sec-appendix-repro}), and
+their outputs are the only source of every number in
+Section~\ref{sec-results}.
+
+\chapter{Methods: The Executed Modeling Pathway}\label{sec-methods}
+
+This chapter specifies the simulation experiments whose results appear
+in Section~\ref{sec-results}. Everything described here is implemented
+in three committed modules under
+\href{https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy}{\texttt{scripts/research/proximal\_distal\_energy/}}
+(\texttt{swing\_model.py}, \texttt{torque\_programs.py},
+\texttt{run\_experiments.py}, with figures from
+\texttt{make\_figures.py}), and every output carries a provenance record
+(git SHA, integrator settings, parameter values). The reproduction
+commands are in \textbf{?@sec-appendix-repro}.
+
+\section{Model}\label{sec-methods-model}
+
+The plant is the platform's backend-neutral two-segment golf model
+(Section~\ref{sec-platform}): an arm segment rotating about a fixed hub,
+hinged at the wrist to a club segment consisting of a distributed shaft
+plus a clubhead point mass at the tip, moving in an inclined swing plane
+with projected gravity. Parameters are the repository defaults
+(\texttt{GolfModelParams.default()}; full table in
+\textbf{?@sec-appendix-params}): arm length 0.75 m and mass 7.5 kg; club
+length 1.0 m with 0.15 kg shaft and 0.20 kg clubhead; plane inclination
+35°; viscous damping 0.4 and 0.25 N·m·s/rad at shoulder and wrist.
+Angles follow the platform convention: \(\theta_1\) is the arm angle
+from the downward vertical in the swing plane, \(\theta_2\) the wrist
+angle of the club relative to the arm, and the club's absolute angle is
+\(\theta_{\mathrm{club}} = \theta_1 + \theta_2\).
+
+Rollouts use the ODE reference backend (analytic dynamics, fixed-step
+RK4) with \(\Delta t = 1\) ms over a 0.9 s horizon. Every rollout starts
+from the same top-of-backswing state, \(\theta_1(0) = -2.2\) rad,
+\(\theta_2(0) = -1.57\) rad (a 90° wrist cock), \(\dot q(0) = 0\) --- an
+arm carried well past horizontal with the club folded over the shoulder,
+comparable to the classical two-lever setups
+(\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999};
+\citeproc{ref-pickering1999}{Pickering and Vickers 1999}).
+
+\section{Torque programs}\label{sec-methods-programs}
+
+All programs share a constant shoulder torque \(\tau_s\) active from
+\(t=0\) (two levels: 60 and 100 N·m), so the sweep isolates the wrist
+channel. The wrist torque follows one of three profiles, parameterized
+by an onset time \(t_{\mathrm{on}}\):
 
 \begin{itemize}
 \tightlist
 \item
-  the pointwise engine-agnostic evaluator with HDF5 persistence
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py}{\texttt{ztcf\_zvcf.py}});
+  \textbf{passive}: \(\tau_w(t) = 0\) throughout (free hinge) --- the
+  White limit (\citeproc{ref-white2006}{White 2006});
 \item
-  a MuJoCo delta-based counterfactual analyzer reporting
-  torque-attributed and velocity-attributed acceleration effects
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/counterfactuals.py}{\texttt{counterfactuals.py}});
+  \textbf{drive-only}: \(\tau_w(t) = 0\) for \(t < t_{\mathrm{on}}\),
+  then \(\tau_w = +15\) N·m (opening);
 \item
-  a Newton-Euler ZTCF force module with an analytic single-pendulum
-  validation identity
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ztcf.py}{\texttt{biomechanics/ztcf.py}});
-\item
-  induced-acceleration analyzers (gravity / drift / control / total
-  components)
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/induced_acceleration.py}{\texttt{induced\_acceleration.py}});
-\item
-  an orchestration layer with capability gating and a REST/UI surface
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/orchestrator.py}{\texttt{analysis/orchestrator.py}});
-\item
-  the MATLAB re-simulation pipeline described in Section~\ref{sec-ztcf}.
+  \textbf{restrain-then-drive}: \(\tau_w(t) = -R\) (cock-retaining) for
+  \(t < t_{\mathrm{on}}\) with \(R \in \{5, 10\}\) N·m, then
+  \(\tau_w = +15\) N·m.
 \end{itemize}
 
-\subsection{Energy and power
-computations}\label{energy-and-power-computations}
+The onset grid is \(t_{\mathrm{on}} \in \{0, 0.025, \dots, 0.35\}\) s
+(15 values). With both shoulder-torque levels this yields 92 distinct
+programs; \texttt{drive-only} at \(t_{\mathrm{on}} = 0\) is the S1
+(``transfer early'') pole of the design and \texttt{restrain-then-drive}
+with late onset is the S2 pole. Torque magnitudes sit inside the ranges
+used by comparable two- and three-segment studies
+(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
+\citeproc{ref-pickering1999}{Pickering and Vickers 1999}), scaled to
+this model's inertias.
+
+\section{Impact definition and validity}\label{sec-methods-impact}
+
+Impact is the first upward crossing of \(\theta_{\mathrm{club}} = 0\)
+(club pointing straight down in the swing plane), linearly interpolated
+between samples; the score of a program is the clubhead (distal tip)
+speed at that instant. Because the shoulder torque is constant, a
+program that keeps the club folded through the bottom of the swing can
+postpone the crossing into a second rotation while the shoulder keeps
+pumping energy --- an artifact, not a swing. A trial is therefore
+\textbf{invalid} unless the arm angle at the crossing satisfies
+\(\theta_1 \le 2.0\) rad (a first-pass delivery); 29 of the 92 programs
+were excluded by this rule, all of them heavy-restraint or
+very-late-onset programs. This constraint is conservative \emph{against}
+the S2 hypothesis: it discards only trials that would otherwise have
+inflated the restraint arm of the sweep.
+
+\section{Recorded quantities}\label{sec-methods-quantities}
+
+For every program: the full state trajectory, applied controls, impact
+time and clubhead speed. For four representative programs at
+\(\tau_s = 60\) N·m (passive; drive-only at \(t_{\mathrm{on}}=0\); the
+best drive-only; the best restrain-then-drive), additionally:
+
+\textbf{Segment energies.} Arm kinetic energy
+\(\tfrac12 I_1^{\mathrm{hub}}\dot\theta_1^2\); club kinetic energy
+\(\tfrac12 m_2 \lVert \mathbf v_{c2} \rVert^2 + \tfrac12 I_2^{\mathrm{com}}
+(\dot\theta_1+\dot\theta_2)^2\) with the club centre-of-mass velocity
+\(\mathbf v_{c2}\) computed analytically from the state.
+
+\textbf{Wrist-interface power accounting (E4).} Following
+Section~\ref{sec-rw}: the joint-force power
+\(P_f = \mathbf F \cdot \mathbf v_{\mathrm{wrist}}\), with the joint
+reaction force recovered from Newton's second law for the club segment,
+\(\mathbf F = m_2 \mathbf a_{c2} - m_2 \mathbf g\) (centre-of-mass
+acceleration by central differences of the analytic velocity); the net
+wrist moment power on the club
+\((\tau_w - b_w\dot\theta_2)(\dot\theta_1+\dot\theta_2)\); the wrist
+actuator power \(\tau_w \dot\theta_2\); and the residual check that the
+club's total mechanical energy rate equals joint-force power plus moment
+power (reported as a figure in Section~\ref{sec-results}; gravity is not
+added separately because potential energy is included in the club's
+mechanical energy).
+
+\textbf{Pointwise counterfactual split (E2).} At every sample, the
+platform's \texttt{drift\_and\_control\_split}
+(Equation~\ref{eq-superposition}) evaluated with the applied torques,
+yielding drift and control components of both joint accelerations; the
+club's absolute angular-acceleration split is the row sum.
+
+\textbf{Phase budgets.} With the downswing divided at
+\(t_{\mathrm{imp}}/2\): club kinetic-energy gain, wrist actuator work,
+shoulder work, and integrated joint-force transfer, per half.
+
+\section{Design rationale and scope}\label{sec-methods-scope}
+
+This is deliberately the \emph{simplest} member of the platform's model
+family (Table~\ref{tbl-models}): a planar 2-DOF chain with a fixed hub
+and rigid shaft. That choice is the point, not a compromise: the
+classical timing results were established in exactly this model class
+(Section~\ref{sec-doublependulum}), so the pathway first reproduces the
+class's behavior under the platform's instrumentation --- where every
+energy pathway is exactly measurable and the counterfactual contract is
+tested --- before scaling to models where the same questions are harder
+to instrument. What the 2-DOF results can and cannot establish is taken
+up explicitly in Section~\ref{sec-discussion}; the extension pathway
+(re-simulation parity, 8-DOF golfer, full-body engines, motion capture)
+is specified in Section~\ref{sec-conclusions} and tracked in issues
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}.
+
+\chapter{Results}\label{sec-results}
+
+All numbers in this chapter are computed by the committed experiment
+suite (Section~\ref{sec-methods}) from the recorded outputs in
+\href{https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer/data}{\texttt{data/}}
+(\texttt{e1\_sweep.json}, \texttt{representative\_traces.npz},
+\texttt{results\_summary.json}); figures are generated by
+\texttt{make\_figures.py}. Speeds are quoted to 0.1 m/s and times to 1
+ms.
+
+\section{E1 --- Timing of the distal handoff}\label{sec-results-e1}
+
+Figure~\ref{fig-sweep} shows clubhead speed at impact as a function of
+wrist-drive onset time for both shoulder-torque levels.
+Table~\ref{tbl-representatives} lists the representative programs.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_e1_onset_sweep.pdf}}
+
+}
+
+\caption{\label{fig-sweep}E1 sweep: clubhead speed at impact versus
+wrist-drive onset time, for drive-only and restrain-then-drive profiles
+at two shoulder-torque levels. Dashed line: fully passive wrist
+baseline.}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\caption{Representative programs at \(\tau_s = 60\)
+N·m.}\label{tbl-representatives}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Program (\(\tau_s = 60\) N·m)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(t_{\mathrm{on}}\) {[}s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(t_{\mathrm{imp}}\) {[}s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Clubhead speed {[}m/s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+vs passive
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Program (\(\tau_s = 60\) N·m)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(t_{\mathrm{on}}\) {[}s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(t_{\mathrm{imp}}\) {[}s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Clubhead speed {[}m/s{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+vs passive
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Passive wrist & --- & 0.370 & 34.2 & --- \\
+Early drive (S1 pole) & 0.000 & 0.327 & 28.9 & \textbf{−15.3\%} \\
+Best drive-only & 0.200 & 0.352 & 38.4 & \textbf{+12.4\%} \\
+Best restrain-then-drive (\(R=10\)) & 0.100 & 0.349 & 38.9 &
+\textbf{+13.8\%} \\
+\end{longtable}
+
+Three findings, consistent across both torque levels:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Driving the wrist from the top is the worst valid strategy.}
+  At \(\tau_s = 60\) N·m the early-drive program reaches 28.9 m/s versus
+  34.2 m/s for a completely passive wrist --- active early distal effort
+  \emph{destroys} 15\% of the speed a free hinge would have delivered.
+  The early-drive program is the worst valid trial in the entire
+  92-program sweep. At \(\tau_s = 100\) N·m the pattern repeats (early
+  drive is the minimum of its profile curve; passive baseline 43.1 m/s).
+\item
+  \textbf{The same wrist torque, applied late, is worth +12\%.} Clubhead
+  speed rises monotonically with onset time until an interior optimum
+  (\(t_{\mathrm{on}} = 0.200\) s at 60 N·m, 0.175 s at 100 N·m ---
+  roughly the middle of the downswing, with drive active through the
+  final \textasciitilde40\%), reaching 38.4 and 46.5 m/s respectively.
+\item
+  \textbf{Retain-early-then-drive is best of all.} Programs that apply a
+  \emph{negative} (cock-retaining) wrist torque early and the identical
+  positive drive late beat the best drive-only programs at both torque
+  levels: 38.9 m/s (\(R = 10\) N·m until 0.100 s) at \(\tau_s = 60\),
+  and 46.9 m/s (\(R = 5\) N·m until 0.125 s) at \(\tau_s = 100\). The
+  margin over the best drive-only program is modest (+0.5 m/s at both
+  levels), consistent with most of the retention benefit being
+  achievable passively; but the ordering is strict, and heavy or
+  over-long restraint fails the first-pass validity rule
+
+  \begin{enumerate}
+  \def\labelenumii{(\arabic{enumii})}
+  \setcounter{enumii}{1}
+  \tightlist
+  \item
+    rather than winning --- the benefit is a \emph{timed} retention, not
+    maximal retention.
+  \end{enumerate}
+\end{enumerate}
+
+\section{Kinematic sequence}\label{sec-results-sequence}
+
+Figure~\ref{fig-kinseq} shows arm and club angular-speed traces. All
+four programs produce the qualitative P→D pattern --- arm speed peaks,
+then club speed peaks higher --- as expected from interaction dynamics
+alone (Section~\ref{sec-summation}). The programs differ exactly where
+the skill literature says they should (Section~\ref{sec-skill}): the
+early-drive swing opens the club immediately, its arm peak is depressed,
+and its club peak is the lowest of the four; the retain-then-drive swing
+holds the club folded longest, achieves the highest arm speed before
+release, and converts it into the highest club peak. Impact in the
+early-drive swing occurs with the arm still 0.36 rad \emph{short} of
+vertical --- the clubhead has overtaken the hands before the arm
+arrives, the model's version of ``casting'' / premature release ---
+whereas the two best programs deliver impact with the arm 0.7--0.8 rad
+\emph{past} vertical (hands ahead of the clubhead, forward shaft lean),
+matching the geometry of skilled impact.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_kinematic_sequence.pdf}}
+
+}
+
+\caption{\label{fig-kinseq}Kinematic sequence (arm and club angular
+speeds) for the four representative programs at \(\tau_s = 60\) N·m.
+Dotted vertical line: impact.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_swing_montage.pdf}}
+
+}
+
+\caption{\label{fig-montage}Stick-figure montage of the best
+restrain-then-drive swing in the swing plane (address of the downswing,
+equal time steps).}
+
+\end{figure}%
+
+\section{Segment energies}\label{sec-results-energies}
+
+Figure~\ref{fig-energies} shows arm and club kinetic-energy time
+courses, and Figure~\ref{fig-budget} the early-half/late-half budget.
+The energetic story is unambiguous:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Inter-segment power flow (MuJoCo):}
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/power_flow.py}{\texttt{power\_flow.py}}
-  computes per-DOF joint powers \(\tau\omega\), work decomposed into
-  drift and control shares, per-body kinetic and potential energies via
-  center-of-mass Jacobians, per-body parent/child transfer bookkeeping,
-  and an energy-conservation residual derived from the equations of
-  motion.
+  \textbf{Early half.} The winning programs put the \emph{least} energy
+  into the club early: 5.0 J (best restrain) and 7.3 J (best drive-only)
+  versus 22.9 J for the early-drive program (passive: 7.8 J). Meanwhile
+  they bank more energy in the arm: early-half shoulder work is 54.7 J
+  (best restrain) and 51.9 J (best drive) versus 33.9 J (early drive)
+  --- the early-driven club back-reacts on the arm and \emph{steals its
+  runway}.
 \item
-  \textbf{Joint work/power/impulse metrics (engine-agnostic):}
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/power_work_metrics.py}{\texttt{power\_work\_metrics.py}}
-  (positive/negative/net work, generation-absorption splits, impulse,
-  quasi-stiffness);
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/energy_metrics.py}{\texttt{energy\_metrics.py}}
-  (system energy summaries).
+  \textbf{Late half.} The ordering inverts: late club kinetic-energy
+  gain is 180.5 J (best restrain) and 174.2 J (best drive) versus 84.4 J
+  (early drive) and 136.4 J (passive).
 \item
-  \textbf{Conservation monitoring:}
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/physics/energy_monitor.py}{\texttt{energy\_monitor.py}}
-  enforces drift bounds on total energy during integration (note: its
-  potential-energy term is a documented first-order approximation,
-  adequate for drift detection only).
-\item
-  \textbf{MATLAB energetics:} the per-joint linear/angular work and
-  power decomposition across BASE/ZTCF/DELTA tables
-  (Section~\ref{sec-ztcf}) --- currently the richest joint-interface
-  energy accounting in the repository.
+  \textbf{Active retention is measurable.} The best restrain program's
+  early-half wrist actuator work is \emph{negative} (−1.9 J) and its
+  early-half joint-force transfer is likewise slightly negative (−1.0
+  J): the wrist interface is momentarily a net energy \emph{withdrawer}
+  from the club while the proximal system loads --- the literal,
+  quantitative meaning of ``retaining energy proximally''.
 \end{itemize}
 
-\subsection{Sequencing analytics}\label{sequencing-analytics}
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_segment_energies.pdf}}
+
+}
+
+\caption{\label{fig-energies}Segmental kinetic energies up to impact for
+the four representative programs.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_energy_budget.pdf}}
+
+}
+
+\caption{\label{fig-budget}Early-half versus late-half energy budget
+(club kinetic-energy gain, wrist actuator work, integrated joint-force
+transfer) for the representative programs.}
+
+\end{figure}%
+
+\section{E4 --- Wrist-interface power accounting}\label{sec-results-e4}
+
+Figure~\ref{fig-wristpower} (left) shows the Robertson-Winter interface
+powers for the best restrain-then-drive swing. The joint-force power ---
+energy carried into the club \emph{through the joint force}, the pathway
+that requires no wrist torque at all --- is small and briefly negative
+early, then surges in the final \textasciitilde0.1 s to dominate the
+club's energy supply (late-half integral 131.7 J versus 25.7 J of late
+wrist actuator work). The wrist moment channel contributes a brief late
+pulse, exactly the ``latter stages'' window identified by Sprigings and
+Neal (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). The right
+panel verifies the accounting: the club's mechanical-energy rate tracks
+the sum of joint-force and moment power across the swing (residual at
+the level of the finite-difference approximation), confirming the
+implementation of the segmental balance of Section~\ref{sec-rw}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_wrist_interface_power.pdf}}
+
+}
+
+\caption{\label{fig-wristpower}Left: wrist-interface powers for the best
+restrain-then-drive swing. Right: segmental energy-balance check ---
+club mechanical-energy rate versus the sum of interface powers.}
+
+\end{figure}%
+
+\section{E2 --- Counterfactual drift/control
+split}\label{sec-results-e2}
+
+Figure~\ref{fig-ztcf} shows the pointwise drift/control decomposition
+(Equation~\ref{eq-superposition}) of the club's absolute angular
+acceleration for the S1 pole (early drive) and the S2 winner
+(restrain-then-drive). In the early-drive swing, the control term
+supplies a large share of club acceleration from the first instant ---
+the S1 signature --- and the drift term never develops the late surge
+seen elsewhere. In the restrain-then-drive swing the picture reverses:
+early, the control term \emph{opposes} the drift term at the club
+(restraint holding back a drift field that already wants to release);
+late, the drift term --- the ZTCF, i.e.~what the accumulated motion
+would do with every actuator switched off --- dominates the club's
+acceleration entirely, with the control term a small additive assist.
+This is, instant by instant, the counterfactual signature that
+Section~\ref{sec-hypothesis} predicted for high-performing swings:
+\textbf{early control retains; late drift delivers.}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_ztcf_drift_control.pdf}}
+
+}
+
+\caption{\label{fig-ztcf}Pointwise drift (ZTCF) versus control
+decomposition of club absolute angular acceleration, for the early-drive
+(left) and best restrain-then-drive (right) programs.}
+
+\end{figure}%
+
+\section{Summary of findings}\label{sec-results-summary}
+
+Within this model class, under matched proximal effort and a
+consistently defined first-pass impact: (i) early distal drive is
+strictly and substantially harmful (−15\% versus doing nothing at all);
+(ii) identical distal effort applied late is worth +12\%; (iii) timed
+active retention followed by late drive is best at both effort levels,
+with its early-phase wrist work measurably negative; (iv) the late club
+energy supply is dominated by the passive joint-force/parametric
+pathway, not the wrist actuator; and (v) the counterfactual split shows
+control acting early as restraint and drift delivering late --- the S2
+pattern of Section~\ref{sec-hypothesis} in full.
+
+\chapter{Discussion}\label{sec-discussion}
+
+\section{Agreement with the literature}\label{sec-discussion-agreement}
+
+Every headline result of Section~\ref{sec-results} has an antecedent in
+the literature of Section~\ref{sec-mechanics}, and the quantitative
+agreement is close enough to be meaningful rather than merely
+directional. The harm of early release reproduces the delayed-release
+results of Pickering and Vickers and of Sprigings and MacKenzie
+(\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
+\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}) and
+Milburn's original observation that early uncocking truncates arm
+acceleration (\citeproc{ref-milburn1982}{Milburn 1982}). The +12\% value
+of late wrist drive brackets Sprigings and Neal's ≈4\% gain from a
+physiologically bounded late wrist torque
+(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}) --- our
+unbounded constant 15 N·m torque and longer active window make a larger
+gain expected. The dominance of the passive late energy pathway
+(joint-force transfer of 131.7 J versus 25.7 J of late wrist work in the
+best swing) is White's parametric transfer made explicit in
+Robertson-Winter accounting (\citeproc{ref-white2006}{White 2006};
+\citeproc{ref-robertson1980}{Robertson and Winter 1980}). The casting
+geometry of the early-drive swing --- clubhead overtaking the hands
+before the arm reaches vertical --- is the model's rendering of the
+amateur release failure documented across skill-level studies
+(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
+\citeproc{ref-zheng2008}{Zheng et al. 2008}), and the impact geometry of
+the winning programs (hands ahead, arm 0.7--0.8 rad past vertical)
+matches the skilled pattern. Finally, the drift/control time signature
+--- control as early restraint, drift as late delivery --- is the
+counterfactual pattern the platform's ZTCF work hypothesized
+(Section~\ref{sec-hypothesis}), now exhibited by the model itself.
+
+\section{Why retention wins: a mechanistic
+reading}\label{sec-discussion-mechanism}
+
+The energy budgets localize the causal structure. Early wrist drive
+fails through \emph{two} simultaneous channels: it raises the system's
+moment of inertia about the hub while the shoulder is still accelerating
+(so the same shoulder torque buys less arm speed --- the early-drive
+program banks 21 J less early shoulder work than the retain program
+despite identical \(\tau_s\)), and it spends the wrist's work budget at
+a time when the joint-force/parametric channel cannot yet amplify it
+(\citeproc{ref-white2006}{White 2006}). Timed restraint wins through the
+mirror mechanisms: it holds the compact configuration slightly longer
+than a free hinge would (the drift field already wants to open the wrist
+--- the restraint is fighting centrifugal release, not gravity), banks
+that margin as arm speed, and then releases into a fully developed
+centrifugal field where the passive channel converts arm energy to club
+energy at the maximum rate. The negative early wrist work (−1.9 J) is
+small in absolute terms but diagnostic: retention is an \emph{energetic
+withdrawal}, not merely an absence of drive --- precisely the
+``restraining torque'' role that appears in Jorgensen's fitted expert
+swing and in Sprigings-Neal-type actuator solutions
+(\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999};
+\citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
+\citeproc{ref-herring1992}{Herring and Chapman 1992}).
+
+Two honest qualifications temper the S2 reading. First, the margin of
+active restraint over the best \emph{passive-then-drive} program is
+small (+0.5 m/s at both effort levels): in this model most of the
+retention benefit is available from simply \emph{not driving} the wrist,
+with active holding adding a final increment. Second, retention is only
+valuable \emph{timed}: heavier or longer restraint programs failed the
+first-pass validity rule rather than winning --- over-retention
+postpones delivery past the useful window. ``Retain early, release
+late'' is therefore not ``retain maximally''; it is \emph{retain until
+the drift field can pay, then stop retaining}.
+
+\section{What the 2-DOF model cannot
+establish}\label{sec-discussion-limits}
+
+The results chapter demonstrates the S2 pattern in the model class where
+the classical timing literature lives; it does not yet demonstrate it
+for a golfer. The specific gaps, each with a tracked remediation:
 
 \begin{itemize}
 \tightlist
 \item
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/kinematic_sequence.py}{\texttt{kinematic\_sequence.py}}:
-  peak detection, ordering consistency against a caller-supplied
-  expected order, timing gaps, distal/proximal speed-gain ratios,
-  post-peak deceleration rates. (Deliberately method-neutral; the
-  expected order is user-defined.)
+  \textbf{Fixed hub, rigid shaft, planar chain.} The hub-path and
+  inward-pull mechanisms (\citeproc{ref-miura2001}{Miura 2001};
+  \citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009};
+  \citeproc{ref-nesbit2014hub}{Nesbit and McGinnis 2014}), shaft
+  dynamics (\citeproc{ref-mackenzie2009}{MacKenzie and Sprigings 2009};
+  \citeproc{ref-betzler2012}{Betzler et al. 2012};
+  \citeproc{ref-osis2012}{Osis and Stefanyshyn 2012}), and long-axis
+  rotations (\citeproc{ref-marshall2000}{Marshall and Elliott 2000}) are
+  all outside this model. The platform's 8-DOF closed-loop golfer,
+  flexible-shaft FEM model, and full-body engines
+  (Table~\ref{tbl-models}) are the staged extensions (issue
+  \href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}).
 \item
-  \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/coordination_metrics.py}{\texttt{coordination\_metrics.py}}:
-  vector-coding coupling angles, continuous relative phase, pairwise lag
-  matrices --- quantitative sequencing measures less brittle than
-  peak-ordering.
+  \textbf{Constant, unbounded torque programs.} Real actuators have
+  torque-velocity and rate limits that shrink the late-drive window
+  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000});
+  optimal-control treatments with bounded actuators are the appropriate
+  refinement (\citeproc{ref-sharp2009}{Sharp 2009};
+  \citeproc{ref-mcnally2018}{McNally and McPhee 2018}).
 \item
-  Plot renderers for sequence traces, peak-timing Gantt charts, and lag
-  matrices
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/plotting/renderers/_coordination_sequence.py}{\texttt{\_coordination\_sequence.py}}).
+  \textbf{One impact definition.} Scoring at club-vertical with a
+  first-pass validity bound is principled but not unique; alternatives
+  (fixed hand position, ball-position sweep as in Pickering and Vickers
+  (\citeproc{ref-pickering1999}{Pickering and Vickers 1999})) should be
+  checked for ordering robustness.
 \item
-  An approved internal research review of the kinematic-sequence metric,
-  including literature benchmarks and uncertainty-reporting guidance
-  (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/assessments/research_reviews/kinematic_sequence.md}{\texttt{kinematic\_sequence.md}}).
+  \textbf{Pointwise counterfactuals only.} The Python pathway evaluates
+  instantaneous ZTCF profiles; the MATLAB re-simulation variant
+  (killswitch rollouts, DELTA tables) has not yet been reproduced in
+  Python, so the two operationalizations have never been formally
+  compared on matched trajectories (issue
+  \href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}).
+\item
+  \textbf{No human data yet.} The decisive observational test --- wrist
+  interface power time courses across skill levels from motion capture
+
+  \begin{enumerate}
+  \def\labelenumi{(\arabic{enumi})}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    --- awaits the platform's mocap pipeline experiments.
+  \end{enumerate}
 \end{itemize}
 
-\subsection{Validation evidence}\label{sec-repo-validation}
+\section{Implications, cautiously
+stated}\label{sec-discussion-implications}
 
-The counterfactual stack is contract-tested: the pointwise evaluator
-reproduces the analytic double-pendulum ground truth to \(10^{-9}\) via
-the ODE and analytical providers, and agrees with the independent MuJoCo
-backend to \(10^{-7}\) when that engine is available
+For modeling practice, the pathway shows that the timing question is
+tractable with the platform's existing counterfactual stack, and that
+energy-level accounting (not peak ordering) is the observable that
+separates strategies --- supporting the methodological argument of
+Section~\ref{sec-energyflow} and the transfer-efficiency findings in
+recent human data
+(\citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
+Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
+the Golf Swing''} 2026}). For coaching interpretation, the results align
+with instruction that discourages ``hitting from the top'' and
+encourages retained lag with late release
+(\citeproc{ref-cochran1968}{Cochran and Stobbs 1968};
+\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999}) --- but a 2-DOF
+torque-program result is evidence about mechanism, not a prescription
+for any individual player, whose constraints (mobility, strength,
+consistency, injury history (\citeproc{ref-cole2016}{Cole and Grimshaw
+2016}; \citeproc{ref-hume2005}{Hume, Keogh, and Reid 2005})) sit outside
+this model. Any coaching translation should also respect that
+within-player timing variability in experts is real and partly
+functional (\citeproc{ref-neal2007}{Neal et al. 2007};
+\citeproc{ref-langdown2012}{Langdown, Bridge, and Li 2012};
+\citeproc{ref-glazier2011}{Glazier 2011}).
+
+\chapter{Conclusions and Future Work}\label{sec-conclusions}
+
+\section{Conclusions}\label{conclusions}
+
+Proximal-to-distal sequencing in the golf swing is real, robust, and ---
+as a coaching target --- chronically over-interpreted. The mechanical
+literature, from Cochran and Stobbs through modern optimal control, does
+not support ``pass the energy along as soon as possible''; it supports a
+subtler program: \emph{build the energy proximally with the club held
+folded, defer the handoff, and let the transfer run --- mostly
+parametrically, with a brief late assist --- when the centrifugal field
+can pay for it}. Skilled players differ from amateurs along exactly this
+axis: not in whether their segments peak in order, but in how much
+energy the proximal system holds at transition and how late and how
+efficiently it is handed to the club.
+
+This document adds the first committed, reproducible quantitative test
+of that proposition inside UpstreamDrift. On the platform's two-segment
+golf model, under matched proximal effort and a consistently defined
+first-pass impact: driving the wrist from the top cost 15.3\% of
+clubhead speed relative to a fully passive wrist; the identical wrist
+torque applied at its optimal late onset gained 12.4\%; and a program
+that actively restrained the wrist early (performing measurably negative
+early wrist work) and drove it late was best of all at both
+shoulder-torque levels. The energy accounting located the mechanism ---
+early restraint banks arm energy that the passive joint-force channel
+converts to club energy late --- and the pointwise counterfactual
+decomposition exhibited the predicted signature: \textbf{control acts
+early as retention; drift delivers late.} Within its model class, the
+retain-early/release-late hypothesis is not merely consistent with the
+evidence; it is what the model does when allowed to.
+
+The claim is deliberately bounded: a planar 2-DOF chain with a fixed
+hub, rigid shaft, and unbounded constant torques demonstrates mechanism,
+not generality. The document's contribution is a \emph{pathway}:
+hypotheses stated in falsifiable counterfactual terms, an instrumented
+model family of increasing fidelity, tested decomposition contracts, and
+reproducible experiment infrastructure that the remaining steps can
+reuse unchanged.
+
+\section{Future work}\label{sec-future}
+
+Tracked in issues
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378},
+in dependency order:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{E3 --- Re-simulation parity.} Implement the killswitch
+  re-simulation ZTCF in Python on the backend-neutral model; compare
+  pointwise and re-simulation profiles and the MATLAB pipeline on
+  matched trajectories; document agreement and divergence.
+\item
+  \textbf{Bounded actuators and optimal control.} Replace constant
+  torques with torque-velocity-limited profiles and re-run E1; then pose
+  the onset question as an optimal-control problem and compare the
+  optimizer's wrist-power time course against the S2 prediction.
+\item
+  \textbf{Model-fidelity ladder.} Repeat E1/E2/E4 on the triple pendulum
+  (adding a torso link), the 8-DOF closed-loop golfer (two arms, shared
+  club), and the MuJoCo humanoid, with cross-engine validation at each
+  rung; add mobile-hub and flexible-shaft variants to expose the
+  Miura/Nesbit and shaft mechanisms (\citeproc{ref-miura2001}{Miura
+  2001}; \citeproc{ref-nesbit2014hub}{Nesbit and McGinnis 2014};
+  \citeproc{ref-mackenzie2009}{MacKenzie and Sprigings 2009}).
+\item
+  \textbf{Segmental energy-flow metrics in the shared layer.} Promote
+  the experiment package's Robertson-Winter accounting into the
+  engine-agnostic analysis library (full wrench-twist transfer, proximal
+  braking efficiency), closing the platform gaps of
+
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \setcounter{enumii}{3}
+  \tightlist
+  \item
+  \end{enumerate}
+\item
+  \textbf{E5 --- Human-data replication.} Run the counterfactual and
+  interface-power analyses on measured swings ingested through the
+  platform's motion pipeline, across skill levels, testing the
+  predictions of Section~\ref{sec-hypothesis} observationally.
+\item
+  \textbf{Publication.} On completion, migrate this document to the
+  affinedrift repository (issue
+  \href{https://github.com/D-sorganization/UpstreamDrift/issues/8379}{\#8379}),
+  converting repository-relative links to absolute URLs.
+\end{enumerate}
+
+\chapter*{Acknowledgments}\label{acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+
+Prepared within the UpstreamDrift project for eventual publication in
+the affinedrift repository. The platform inventory reflects the codebase
+at the commit referenced by the pull request introducing this document;
+simulation data provenance (git SHA, parameters, integrator settings) is
+recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json}{\texttt{data/results\_summary.json}}.
+
+\chapter*{Appendix A: Platform Capability
+Inventory}\label{sec-appendix-inventory}
+\addcontentsline{toc}{chapter}{Appendix A: Platform Capability
+Inventory}
+
+Beyond the summary of Section~\ref{sec-platform}, the counterfactual and
+energetics stack comprises: per-engine \texttt{compute\_ztcf} /
+\texttt{compute\_zvcf} / drift-control implementations (MuJoCo, Drake,
+Pinocchio, OpenSim, MyoSuite, analytic pendulum engines, Simscape
+bridge) behind the engine-core contract
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/engine_core/_dynamics_interface.py}{\texttt{\_dynamics\_interface.py}});
+the pointwise evaluator with canonical-v2 trajectory input and HDF5
+persistence
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py}{\texttt{ztcf\_zvcf.py}});
+a Newton-Euler ZTCF force module with an analytic single-pendulum
+validation identity
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ztcf.py}{\texttt{biomechanics/ztcf.py}});
+induced-acceleration analyzers
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/induced_acceleration.py}{\texttt{induced\_acceleration.py}});
+an orchestration layer with capability gating and REST/UI surfaces
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/orchestrator.py}{\texttt{analysis/orchestrator.py}});
+MuJoCo inter-segment power flow with per-body energies and drift/control
+work decomposition
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/power_flow.py}{\texttt{power\_flow.py}});
+engine-agnostic work/power/impulse and system-energy metrics
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/power_work_metrics.py}{\texttt{power\_work\_metrics.py}},
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/energy_metrics.py}{\texttt{energy\_metrics.py}});
+conservation monitoring
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/physics/energy_monitor.py}{\texttt{energy\_monitor.py}});
+kinematic-sequence and coordination analytics with plot renderers
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/kinematic_sequence.py}{\texttt{kinematic\_sequence.py}},
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/coordination_metrics.py}{\texttt{coordination\_metrics.py}},
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/plotting/renderers/_coordination_sequence.py}{\texttt{\_coordination\_sequence.py}});
+an approved internal research review of the kinematic-sequence metric
+(\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/assessments/research_reviews/kinematic_sequence.md}{\texttt{kinematic\_sequence.md}});
+and the MATLAB BASE/ZTCF/DELTA/ZVCF pipeline with per-joint
+linear/angular work and power decompositions
+(Section~\ref{sec-ztcf-variants}).
+
+\section*{Known gaps}\label{sec-appendix-gaps}
+\addcontentsline{toc}{section}{Known gaps}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\caption{Known platform gaps (tracked in issue
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}).}\label{tbl-gaps}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Gap
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Consequence for this document
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Gap
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Consequence for this document
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Two ZTCF operationalizations (pointwise vs re-simulation) coexist; no
+Python re-simulation ZTCF & Section~\ref{sec-results} uses the pointwise
+variant only; parity untested (issue \#8377) \\
+Inter-segment power transfer in the shared layer is joint-power only
+(MuJoCo) & The Robertson-Winter accounting of Section~\ref{sec-methods}
+lives in the experiment package, pending promotion (issue \#8378) \\
+\texttt{ConservationMonitor} potential energy is first-order approximate
+& Not used for any number here; energies computed analytically \\
+Flexible-shaft strain energy absent from the energy budget & Shaft
+recoil energy invisible until the shaft rung of
+Section~\ref{sec-future} \\
+Proximal-braking-efficiency metric is an open TODO & Deceleration claims
+here rely on directly computed energies instead \\
+\end{longtable}
+
+\chapter*{Appendix B: Reproducibility Guide}\label{sec-appendix-repro}
+\addcontentsline{toc}{chapter}{Appendix B: Reproducibility Guide}
+
+From the repository root (Python 3.11+, with \texttt{numpy},
+\texttt{matplotlib}, \texttt{pydantic}, \texttt{simpleeval},
+\texttt{pandas} installed):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Run all experiments (E1 sweep, E2 counterfactuals, E4 powers)}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_experiments}
+
+\CommentTok{\# 2. Regenerate every figure in this document}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_figures}
+
+\CommentTok{\# 3. Rebuild this document (Quarto + LaTeX)}
+\BuiltInTok{cd}\NormalTok{ docs/research/proximal\_distal\_energy\_transfer}
+\ExtensionTok{quarto}\NormalTok{ render proximal\_distal\_energy\_transfer.qmd }\AttributeTok{{-}{-}to}\NormalTok{ pdf}
+\end{Highlighting}
+\end{Shaded}
+
+Outputs land in \texttt{data/} (JSON + NPZ, with provenance: git SHA,
+integrator settings, full parameter values) and \texttt{figures/} (PDF).
+The experiments are deterministic (fixed-step RK4, no stochastic
+elements), so re-running reproduces every number in
+Section~\ref{sec-results} exactly, up to floating-point environment
+differences.
+
+\chapter*{Appendix C: Validation
+Evidence}\label{sec-appendix-validation}
+\addcontentsline{toc}{chapter}{Appendix C: Validation Evidence}
+
+The counterfactual stack this document relies on is contract-tested in
+CI: the pointwise evaluator reproduces the analytic double-pendulum
+ground truth to \(10^{-9}\) via the ODE and analytical providers, and
+agrees with the independent MuJoCo backend to \(10^{-7}\) when that
+engine is available
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/tests/unit/simulation_backends/test_ztcf_zvcf.py}{\texttt{test\_ztcf\_zvcf.py}});
 drift-plus-control reconstructs the measured acceleration
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/tests/acceptance/test_counterfactual_experiments.py}{\texttt{test\_counterfactual\_experiments.py}});
@@ -1123,221 +2059,109 @@ work-energy-theorem and conservation-law property tests run in CI
 and a cross-engine comparison service produces divergence-annotated
 ZTCF/ZVCF panels between backends
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/simulation_backends/cross_engine_comparison.md}{\texttt{cross\_engine\_comparison.md}}).
-The project's design guidelines make the drift-control decomposition and
-ZTCF/ZVCF availability normative across engines
+The design guidelines make the drift-control decomposition and ZTCF/ZVCF
+availability normative across engines
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/project_design_guidelines.qmd}{\texttt{project\_design\_guidelines.qmd}}).
+Within this document, the wrist-interface accounting carries its own
+internal check: the club's mechanical-energy rate matches the summed
+interface powers along the full trajectory (Figure~\ref{fig-wristpower},
+right).
 
-\subsection{Gaps relevant to this article}\label{sec-repo-gaps}
+\chapter*{Appendix D: Model Parameters and Program
+Definitions}\label{sec-appendix-params}
+\addcontentsline{toc}{chapter}{Appendix D: Model Parameters and Program
+Definitions}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
-\caption{Known gaps (tracked in issue
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}).}\label{tbl-gaps}\tabularnewline
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\caption{Model parameters and experiment constants
+(\texttt{scripts/research/proximal\_distal\_energy/}).}\label{tbl-params}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Gap
+Parameter
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Consequence for the timing question
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Notes
 \end{minipage} \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Gap
+Parameter
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Consequence for the timing question
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Notes
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Two ZTCF operationalizations (pointwise vs re-simulation) coexist; no
-Python re-simulation ZTCF & Analyses must state which variant they use;
-parity between variants is untested \\
-Inter-segment power transfer implemented only for MuJoCo, as joint power
-\(\tau\omega\) & Wrist-interface \emph{force} power
-\(\mathbf F \cdot \mathbf v\) --- central to S1/S2 --- is not yet
-computed in Python \\
-No Robertson-Winter segmental energy-flow accounting in Python & The
-transfer functional \(P_{\mathrm w}(t)\) must currently come from the
-MATLAB tables \\
-\texttt{ConservationMonitor} potential energy is first-order approximate
-& Do not report absolute PE from it; use engine energy accessors \\
-Flexible-shaft strain energy absent from the energy budget &
-Late-downswing shaft recoil energy is invisible to current accounting \\
-Proximal-braking-efficiency metric is an open TODO & Deceleration-side
-claims must rely on generic post-peak deceleration rates \\
+Arm length \(l_1\) & 0.75 m & \texttt{GolfModelParams.default()} \\
+Arm mass \(m_1\) & 7.5 kg & both arms lumped \\
+Arm COM ratio & 0.45 & \(l_{c1} = 0.3375\) m \\
+Arm inertia about COM & 0.3516 kg·m² & about hub: 1.2059 kg·m² \\
+Club length \(l_2\) & 1.0 m & \\
+Shaft mass & 0.15 kg & COM ratio 0.43 \\
+Clubhead mass & 0.20 kg & point mass at tip \\
+Club composite mass \(m_2\) & 0.35 kg & \(l_{c2} = 0.7557\) m \\
+Club inertia about COM & 0.0403 kg·m² & about wrist: 0.2402 kg·m² \\
+Plane inclination & 35° & projected gravity 8.033 m/s² \\
+Damping (shoulder, wrist) & 0.4, 0.25 N·m·s/rad & viscous \\
+Integrator & RK4, \(\Delta t = 1\) ms & ODE reference backend \\
+Initial state & \(\theta_1=-2.2\), \(\theta_2=-1.57\) rad,
+\(\dot q = 0\) & top of backswing \\
+Shoulder torque \(\tau_s\) & 60 / 100 N·m & constant from \(t=0\) \\
+Wrist drive & +15 N·m from \(t_{\mathrm{on}}\) & onset grid 0--0.35 s,
+step 0.025 \\
+Wrist restraint \(R\) & 5 / 10 N·m before \(t_{\mathrm{on}}\) &
+restrain-then-drive only \\
+Impact & first \(\theta_1+\theta_2 = 0\) crossing & valid iff
+\(\theta_1 \le 2.0\) rad \\
 \end{longtable}
 
-\section{Synthesis: early or late?}\label{sec-synthesis}
+Data dictionary for the recorded outputs:
 
-\textbf{What is established.} (i) Skilled swings exhibit P→D ordering
-with successive speed amplification across shot types and populations
-(\citeproc{ref-tinmark2010}{Tinmark et al. 2010};
-\citeproc{ref-cheetham2008}{Cheetham et al. 2008}). (ii) The trunk-hip
-complex does most of the work; the club acquires most of its energy
-late, through the wrist interface (\citeproc{ref-nesbit2005work}{Nesbit
-and Serrano 2005}; \citeproc{ref-nesbit2005kinematic}{Nesbit 2005}).
-(iii) In every published double-pendulum, delayed-release, and
-optimal-control analysis, delaying the distal handoff increases clubhead
-speed, and productive distal torque is late
-(\citeproc{ref-milburn1982}{Milburn 1982};
-\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
-\citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
-\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002};
-\citeproc{ref-sharp2009}{Sharp 2009}). (iv) The late transfer is
-substantially passive --- parametric/geometric --- once proximal
-rotation has established the centrifugal field
-(\citeproc{ref-white2006}{White 2006}; \citeproc{ref-miura2001}{Miura
-2001}). (v) Skill differences appear in magnitudes, transition timing,
-and transfer efficiency more than in gross order
-(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
-\citeproc{ref-zheng2008}{Zheng et al. 2008};
-\citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
-Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
-the Golf Swing''} 2026}).
+\begin{itemize}
+\tightlist
+\item
+  \texttt{data/e1\_sweep.json} --- one row per program: profile,
+  torques, onset, impact time, clubhead speed, arm angle at impact (null
+  = invalid), plus a provenance block.
+\item
+  \texttt{data/representative\_traces.npz} --- per representative
+  program: \texttt{t,\ q,\ v,\ u}, drift/control splits, segment
+  energies, clubhead-speed trace, and all interface-power series.
+\item
+  \texttt{data/results\_summary.json} --- program definitions, impact
+  tuples, phase budgets, passive baselines, best/worst rows, provenance.
+\end{itemize}
 
-\textbf{What this implies for the question.} The weight of evidence
-supports \textbf{S2: retain energy proximally early in the downswing and
-accelerate the transfer late.} The phrase ``retain energy proximally''
-deserves precision: it does not mean suppressing proximal motion ---
-proximal segments should be accelerated as hard as the movement budget
-allows --- it means \emph{deferring the handoff}: keeping the wrist
-interface transmitting force but little power (club folded, riding with
-the arms) until late, so that the energy pool is large and the
-centrifugal field strong when the parametric transfer is allowed to run.
-In counterfactual terms: early control effort should appear at proximal
-joints and, at the wrist, partly as \emph{restraint} of the drift
-field's tendency to release; late club energy gain should be
-drift-dominated with a brief late window of positive wrist control power
-(Section~\ref{sec-ztcf}).
-
-\textbf{What remains genuinely open.} (a) The published S2 evidence is
-model-based or observational; a \emph{direct} energetic accounting of
-the wrist interface across skill levels (the \(P_{\mathrm w}(t)\) time
-course) has not been reported in the literature reviewed here --- the
-closest is the impulse-transfer-efficiency result of
-(\citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
-Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
-the Golf Swing''} 2026}), which is consistent with, but does not
-resolve, the timing profile. (b) Optimal timing is plausibly equipment-
-and anthropometry-dependent, and model sensitivity is untested across
-engines. (c) Whether \emph{actively} restraining release (negative wrist
-torque early) outperforms merely \emph{not driving} it is unresolved in
-3D models with realistic actuators --- 2D analyses suggest passive
-holding suffices (\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999};
-\citeproc{ref-white2006}{White 2006}), while actuator-based models leave
-room for an active-restraint benefit
-(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). These are the
-questions the repository's toolchain can answer.
-
-\section{Proposed experiments}\label{sec-proposed-experiments}
-
-Each design below has a pre-registered, falsifiable outcome measure. All
-are tracked in issue
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377};
-no results exist yet, and none are reported here.
-
-\textbf{E1 --- Torque-timing sweep (double pendulum and 8-DOF golfer).}
-Drive the models of Table~\ref{tbl-models} with parameterized torque
-programs: proximal torque fixed; wrist-torque onset time
-\(t_{\mathrm{on}}\), sign profile (restrain-then-drive vs drive-only),
-and magnitude swept on a grid. Outcome: clubhead speed at impact versus
-\(t_{\mathrm{on}}\) and profile. S2 predicts a late-interior optimum of
-\(t_{\mathrm{on}}\) and a non-inferior restrain-then-drive profile. The
-MJX/Warp batched backends make the sweep cheap; the ODE backend is the
-reference.
-
-\textbf{E2 --- Counterfactual energy budget along swept trajectories.}
-For each E1 trajectory, evaluate the pointwise ZTCF/ZVCF and
-drift/control split (Equation~\ref{eq-superposition}) and integrate
-drift-side and control-side club power. Outcome: the drift-vs-control
-share of final club kinetic energy in early vs late downswing halves, as
-a function of performance. S2 predicts the drift share of late club
-energy gain rises with clubhead speed.
-
-\textbf{E3 --- Re-simulation parity.} Implement the killswitch
-re-simulation ZTCF in Python on the backend-neutral model; compare
-against the pointwise ZTCF profiles and the MATLAB pipeline on matched
-trajectories. Outcome: documented agreement/divergence between the two
-ZTCF operationalizations, closing the top gap of Table~\ref{tbl-gaps}.
-
-\textbf{E4 --- Wrist-interface power accounting.} Implement
-Robertson-Winter segmental energy flow (joint force power plus moment
-power per interface; issue
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8378}{\#8378}),
-then compute \(P_{\mathrm w}(t)\) for E1's best and worst performers.
-Outcome: the direct time course of the transfer functional defined in
-Section~\ref{sec-timing} --- the primary evidence either strategy needs.
-
-\textbf{E5 --- Mocap replication.} Run the E2/E4 analyses on measured
-swings ingested through the motion pipeline (C3D → tracked motion)
-across skill levels. Outcome: observational test of the counterfactual
-predictions of Section~\ref{sec-ztcf} against human data, using the
-uncertainty-reporting conventions of the internal research review.
-
-\section{Limitations}\label{sec-limitations}
-
-This article synthesizes literature and specifies methodology; it
-reports no new data, and the S2 hypothesis remains unquantified in the
-repository's own terms until the experiments of
-Section~\ref{sec-proposed-experiments} are executed. The
-kinematic-sequence evidence base carries methodological sensitivity
-(\citeproc{ref-marsan2019}{Marsan et al. 2019}); several classical
-results rest on planar models whose generalization to 3D swings with
-mobile hubs is a live question (\citeproc{ref-mcphee2022}{McPhee 2022});
-and the work-budget percentages cited from
-(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}) derive from
-four subjects. One recent source
-(\citeproc{ref-frontiers2026footground}{{``Foot--Ground Interaction and
-Clubhead Speed: Impulse-Based Energy Transfer as the Key Mechanism in
-the Golf Swing''} 2026}) is cited without its author list because the
-publisher's site was unreachable through this environment's network
-proxy; resolve the DOI for full details. Finally, the arguments here
-concern clubhead \emph{speed}; accuracy, consistency, and injury-risk
-trade-offs of late-transfer strategies (\citeproc{ref-hume2005}{Hume,
-Keogh, and Reid 2005}; \citeproc{ref-lindsay2008}{Lindsay, Mantrop, and
-Vandervoort 2008}) are outside scope.
-
-\section{Conclusion}\label{sec-conclusion}
-
-Proximal-to-distal sequencing in the golf swing is real, robust, and ---
-as a coaching target --- chronically over-interpreted. The mechanical
-literature, from Cochran and Stobbs through modern optimal control, does
-not support ``pass the energy along as soon as possible.'' It supports a
-subtler program: \emph{build the energy proximally with the club held
-folded, defer the handoff, and let the transfer run --- mostly
-parametrically, with a brief late assist --- when the centrifugal field
-can pay for it}. Skilled players differ from amateurs along exactly this
-axis: not in whether their segments peak in order, but in how much
-energy the proximal system holds at transition and how late and how
-efficiently it is handed to the club. The ZTCF/ZVCF framework turns this
-qualitative account into measurable time profiles --- drift versus
-control, early versus late --- and the experiment suite specified here
-(epic
-\href{https://github.com/D-sorganization/UpstreamDrift/issues/8373}{\#8373})
-is designed to quantify the retain-early/release-late advantage or
-falsify it. Either outcome would be a contribution.
-
-\section*{Acknowledgments}\label{acknowledgments}
-\addcontentsline{toc}{section}{Acknowledgments}
-
-Prepared within the UpstreamDrift project for eventual publication in
-the affinedrift repository. The inventory in Section~\ref{sec-repo}
-reflects the codebase at the commit referenced by the pull request
-introducing this document.
-
-\section*{References}\label{references}
-\addcontentsline{toc}{section}{References}
+\chapter*{References}\label{references}
+\addcontentsline{toc}{chapter}{References}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-anderson2006}
+Anderson, Brady C., Ian C. Wright, and Darren J. Stefanyshyn. 2006.
+{``Segmental Sequencing of Kinetic Energy in the Golf Swing.''} In
+\emph{The Engineering of Sport 6}, 1:167--72. New York, NY: Springer.
+\url{https://doi.org/10.1007/978-0-387-46050-5_30}.
+
 \bibitem[\citeproctext]{ref-balzerson2016}
 Balzerson, Daniel, Joydeep Banerjee, and John McPhee. 2016. {``A
 Three-Dimensional Forward Dynamic Model of the Golf Swing Optimized for
 Ball Carry Distance.''} \emph{Sports Engineering} 19: 237--50.
 \url{https://doi.org/10.1007/s12283-016-0197-7}.
+
+\bibitem[\citeproctext]{ref-betzler2012}
+Betzler, Nils F., Stuart A. Monk, Eric S. Wallace, and Steve R. Otto.
+2012. {``Effects of Golf Shaft Stiffness on Strain, Clubhead
+Presentation and Wrist Kinematics.''} \emph{Sports Biomechanics} 11 (2):
+223--38. \url{https://doi.org/10.1080/14763141.2012.681796}.
 
 \bibitem[\citeproctext]{ref-bunn1972}
 Bunn, John W. 1972. \emph{Scientific Principles of Coaching}. 2nd ed.
@@ -1352,9 +2176,44 @@ World Scientific Congress of Golf}, edited by Debbie Crews and Rafer
 Lutz. Mesa, AZ: Energy in Motion.
 \url{https://www.researchgate.net/publication/252236426}.
 
+\bibitem[\citeproctext]{ref-chu2010}
+Chu, Yungchien, Timothy C. Sell, and Scott M. Lephart. 2010. {``The
+Relationship Between Biomechanical Variables and Driving Performance
+During the Golf Swing.''} \emph{Journal of Sports Sciences} 28 (11):
+1251--59. \url{https://doi.org/10.1080/02640414.2010.507249}.
+
 \bibitem[\citeproctext]{ref-cochran1968}
 Cochran, Alastair, and John Stobbs. 1968. \emph{Search for the Perfect
 Swing}. Philadelphia: J.~B. Lippincott.
+
+\bibitem[\citeproctext]{ref-cole2016}
+Cole, Michael H., and Paul N. Grimshaw. 2016. {``The Biomechanics of the
+Modern Golf Swing: Implications for Lower Back Injuries.''} \emph{Sports
+Medicine} 46 (3): 339--51.
+\url{https://doi.org/10.1007/s40279-015-0429-1}.
+
+\bibitem[\citeproctext]{ref-coleman2005}
+Coleman, Simon, and Alan J. Rankin. 2005. {``A Three-Dimensional
+Examination of the Planar Nature of the Golf Swing.''} \emph{Journal of
+Sports Sciences} 23 (3): 227--34.
+\url{https://doi.org/10.1080/02640410410001730179}.
+
+\bibitem[\citeproctext]{ref-dillman1994}
+Dillman, Charles J., and Gregory W. Lange. 1994. {``How Has Biomechanics
+Contributed to the Understanding of the Golf Swing?''} In \emph{Science
+and Golf II: Proceedings of the World Scientific Congress of Golf},
+edited by Alastair J. Cochran and Martin R. Farrally. London: E \& FN
+Spon. \url{https://doi.org/10.4324/9780203474709-2}.
+
+\bibitem[\citeproctext]{ref-featherstone2008}
+Featherstone, Roy. 2008. \emph{Rigid Body Dynamics Algorithms}. New
+York, NY: Springer. \url{https://doi.org/10.1007/978-1-4899-7560-7}.
+
+\bibitem[\citeproctext]{ref-feltner1986}
+Feltner, Michael E., and Jesús Dapena. 1986. {``Dynamics of the Shoulder
+and Elbow Joints of the Throwing Arm During a Baseball Pitch.''}
+\emph{International Journal of Sport Biomechanics} 2 (4): 235--59.
+\url{https://journals.humankinetics.com/view/journals/jab/2/4/article-p235.xml}.
 
 \bibitem[\citeproctext]{ref-frontiers2026footground}
 {``Foot--Ground Interaction and Clubhead Speed: Impulse-Based Energy
@@ -1362,12 +2221,36 @@ Transfer as the Key Mechanism in the Golf Swing.''} 2026.
 \emph{Frontiers in Sports and Active Living} 8.
 \url{https://doi.org/10.3389/fspor.2026.1790645}.
 
+\bibitem[\citeproctext]{ref-fradkin2004}
+Fradkin, Andrea J., Caroline A. Sherman, and Caroline F. Finch. 2004.
+{``How Well Does Club Head Speed Correlate with Golf Handicaps?''}
+\emph{Journal of Science and Medicine in Sport} 7 (4): 465--72.
+\url{https://doi.org/10.1016/S1440-2440(04)80265-2}.
+
+\bibitem[\citeproctext]{ref-glazier2011}
+Glazier, Paul S. 2011. {``Movement Variability in the Golf Swing:
+Theoretical, Methodological, and Practical Issues.''} \emph{Research
+Quarterly for Exercise and Sport} 82 (2): 157--61.
+\url{https://doi.org/10.1080/02701367.2011.10599742}.
+
 \bibitem[\citeproctext]{ref-han2019}
 Han, Ki Hoon, Christopher Como, Jemin Kim, Sangwoo Lee, Jaewoong Kim,
 Dae Kyoo Kim, and Young-Hoo Kwon. 2019. {``Effects of the Golfer--Ground
 Interaction on Clubhead Speed in Skilled Male Golfers.''} \emph{Sports
 Biomechanics} 18 (2): 115--34.
 \url{https://pubmed.ncbi.nlm.nih.gov/31042142/}.
+
+\bibitem[\citeproctext]{ref-hellstrom2009}
+Hellström, John. 2009. {``Competitive Elite Golf: A Review of the
+Relationships Between Playing Results, Technique and Physique.''}
+\emph{Sports Medicine} 39 (9): 723--41.
+\url{https://doi.org/10.2165/11315200-000000000-00000}.
+
+\bibitem[\citeproctext]{ref-herring1992}
+Herring, R. M., and A. E. Chapman. 1992. {``Effects of Changes in
+Segmental Values and Timing of Both Torque and Torque Reversal in
+Simulated Throws.''} \emph{Journal of Biomechanics} 25 (10): 1173--84.
+\url{https://doi.org/10.1016/0021-9290(92)90073-A}.
 
 \bibitem[\citeproctext]{ref-hume2005}
 Hume, Patria A., Justin Keogh, and Duncan Reid. 2005. {``The Role of
@@ -1384,11 +2267,42 @@ Club.''} \emph{American Journal of Physics} 38 (5): 644--51.
 Jorgensen, Theodore P. 1999. \emph{The Physics of Golf}. 2nd ed. New
 York: Springer / AIP Press.
 
+\bibitem[\citeproctext]{ref-joyce2013}
+Joyce, Christopher, Angus Burnett, Jodie Cochrane, and Kevin Ball. 2013.
+{``Three-Dimensional Trunk Kinematics in Golf: Between-Club Differences
+and Relationships to Clubhead Speed.''} \emph{Sports Biomechanics} 12
+(2): 108--20. \url{https://doi.org/10.1080/14763141.2012.728244}.
+
+\bibitem[\citeproctext]{ref-kenny2008}
+Kenny, Ian C., Adam J. McCloy, Eric S. Wallace, and Steve R. Otto. 2008.
+{``Segmental Sequencing of Kinetic Energy in a Computer-Simulated Golf
+Swing.''} \emph{Sports Engineering} 11 (1): 37--45.
+\url{https://doi.org/10.1007/s12283-008-0005-0}.
+
+\bibitem[\citeproctext]{ref-kwon2012}
+Kwon, Young-Hoo, Christopher S. Como, Kunal Singhal, Sangwoo Lee, and Ki
+Hoon Han. 2012. {``Assessment of Planarity of the Golf Swing Based on
+the Functional Swing Plane of the Clubhead and Motion Planes of the Body
+Points.''} \emph{Sports Biomechanics} 11 (2): 127--48.
+\url{https://doi.org/10.1080/14763141.2012.660799}.
+
+\bibitem[\citeproctext]{ref-kwon2013}
+Kwon, Young-Hoo, Ki Hoon Han, Christopher S. Como, Sangwoo Lee, and
+Kunal Singhal. 2013. {``Validity of the {X}-Factor Computation Methods
+and Relationship Between the {X}-Factor Parameters and Clubhead Velocity
+in Skilled Golfers.''} \emph{Sports Biomechanics} 12 (3): 231--46.
+\url{https://www.researchgate.net/publication/258639892}.
+
 \bibitem[\citeproctext]{ref-lampsa1975}
 Lampsa, Michael A. 1975. {``Maximizing Distance of the Golf Drive: An
 Optimal Control Study.''} \emph{Journal of Dynamic Systems, Measurement,
 and Control} 97 (4): 362--67.
 \url{https://asmedigitalcollection.asme.org/dynamicsystems/article-abstract/97/4/362/400950}.
+
+\bibitem[\citeproctext]{ref-langdown2012}
+Langdown, Ben L., Matthew Bridge, and François-Xavier Li. 2012.
+{``Movement Variability in the Golf Swing.''} \emph{Sports Biomechanics}
+11 (2): 273--87. \url{https://doi.org/10.1080/14763141.2011.650187}.
 
 \bibitem[\citeproctext]{ref-lee2026}
 Lee, Junghoon, Justin Ehrlich, and Christopher Cain. 2026. {``The
@@ -1439,6 +2353,14 @@ McPhee, John. 2022. {``A Review of Dynamic Models and Measurements in
 Golf.''} \emph{Sports Engineering} 25.
 \url{https://doi.org/10.1007/s12283-022-00387-0}.
 
+\bibitem[\citeproctext]{ref-mcteigue1994}
+McTeigue, Michael, Steven R. Lamb, Robert Mottram, and Francis
+Pirozzolo. 1994. {``Spine and Hip Motion Analysis During the Golf
+Swing.''} In \emph{Science and Golf II: Proceedings of the World
+Scientific Congress of Golf}, edited by Alastair J. Cochran and Martin
+R. Farrally, 50--58. London: E \& FN Spon.
+\url{https://doi.org/10.4324/9780203474709-9}.
+
 \bibitem[\citeproctext]{ref-meister2011}
 Meister, David W., Amy L. Ladd, Erin E. Butler, Betty Zhao, Andrew P.
 Rogers, Conrad J. Ray, and Jessica Rose. 2011. {``Rotational
@@ -1455,6 +2377,13 @@ Swing.''} \emph{Medicine and Science in Sports and Exercise} 14 (1):
 Miura, Ken. 2001. {``Parametric Acceleration --- the Effect of Inward
 Pull of the Golf Club at Impact Stage.''} \emph{Sports Engineering} 4
 (2): 75--86. \url{https://doi.org/10.1046/j.1460-2687.2001.00071.x}.
+
+\bibitem[\citeproctext]{ref-myers2008}
+Myers, Joseph, Scott Lephart, Yung-Shen Tsai, Timothy Sell, James
+Smoliga, and John Jolly. 2008. {``The Role of Upper Torso and Pelvis
+Rotation in Driving Performance During the Golf Swing.''} \emph{Journal
+of Sports Sciences} 26 (2): 181--88.
+\url{https://doi.org/10.1080/02640410701373543}.
 
 \bibitem[\citeproctext]{ref-neal2007}
 Neal, Robert J., Ryan Lumsden, Mark Holland, and Bruce Mason. 2007.
@@ -1477,13 +2406,25 @@ Golf Swing Hub Path and Its Role in Golfer/Club Kinetic Transfers.''}
 \bibitem[\citeproctext]{ref-nesbit2014hub}
 Nesbit, Steven M., and Ryan S. McGinnis. 2014. {``Kinetic Constrained
 Optimization of the Golf Swing Hub Path.''} \emph{Journal of Sports
-Science and Medicine}. \url{https://pubmed.ncbi.nlm.nih.gov/25435779/}.
+Science and Medicine} 13 (4): 859--73.
+\url{https://pmc.ncbi.nlm.nih.gov/articles/PMC4234956/}.
 
 \bibitem[\citeproctext]{ref-nesbit2005work}
 Nesbit, Steven M., and Monika Serrano. 2005. {``Work and Power Analysis
 of the Golf Swing.''} \emph{Journal of Sports Science and Medicine} 4
 (4): 520--33.
 \url{https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf}.
+
+\bibitem[\citeproctext]{ref-osis2012}
+Osis, Sean T., and Darren J. Stefanyshyn. 2012. {``Golf Players Exhibit
+Changes to Grip Speed Parameters During Club Release in Response to
+Changes in Club Stiffness.''} \emph{Human Movement Science} 31 (1):
+91--100. \url{https://doi.org/10.1016/j.humov.2011.02.006}.
+
+\bibitem[\citeproctext]{ref-penner2003}
+Penner, A. Raymond. 2003. {``The Physics of Golf.''} \emph{Reports on
+Progress in Physics} 66 (2): 131--71.
+\url{https://doi.org/10.1088/0034-4885/66/2/202}.
 
 \bibitem[\citeproctext]{ref-pickering1999}
 Pickering, W. M., and G. T. Vickers. 1999. {``On the Double Pendulum
@@ -1514,11 +2455,18 @@ Sharp, Robin S. 2009. {``On the Mechanics of the Golf Swing.''}
 Engineering Sciences} 465 (2102): 551--70.
 \url{https://doi.org/10.1098/rspa.2008.0304}.
 
+\bibitem[\citeproctext]{ref-smith2015}
+Smith, Aimée, Jonathan Roberts, Eric S. Wallace, Pui Wah Kong, and Steph
+Forrester. 2015. {``Golf Coaches' Perceptions of Key Technical Swing
+Parameters Compared to Biomechanical Literature.''} \emph{International
+Journal of Sports Science \& Coaching} 10 (4): 739--55.
+\url{https://doi.org/10.1260/1747-9541.10.4.739}.
+
 \bibitem[\citeproctext]{ref-sprigings2002}
 Sprigings, Eric J., and Sasho J. MacKenzie. 2002. {``Examining the
 Delayed Release in the Golf Swing Using Computer Simulation.''}
-\emph{Sports Engineering} 5 (1): 23--32.
-\url{http://sashomackenzie.com/publications/delayedrelease.pdf}.
+\emph{Sports Engineering} 5: 23--32.
+\url{https://doi.org/10.1046/j.1460-2687.2002.00094.x}.
 
 \bibitem[\citeproctext]{ref-sprigings2000}
 Sprigings, Eric J., and Robert J. Neal. 2000. {``An Insight into the
@@ -1536,6 +2484,10 @@ and Partial-Swing Shots.''} \emph{Sports Biomechanics} 9 (4): 236--44.
 White, Rod. 2006. {``On the Efficiency of the Golf Swing.''}
 \emph{American Journal of Physics} 74 (12): 1088--94.
 \url{https://doi.org/10.1119/1.2346688}.
+
+\bibitem[\citeproctext]{ref-winter2009}
+Winter, David A. 2009. \emph{Biomechanics and Motor Control of Human
+Movement}. 4th ed. Hoboken, NJ: John Wiley \& Sons.
 
 \bibitem[\citeproctext]{ref-zajac1989}
 Zajac, Felix E., and Michael E. Gordon. 1989. {``Determining Muscle's
