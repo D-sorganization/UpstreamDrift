@@ -13,11 +13,14 @@ Approach:
 1. Define the golfer model (anthropometrics, strength limits, flexibility)
 2. Define optimization objectives (clubhead speed, accuracy, injury risk)
 3. Define constraints (joint limits, force limits, kinematic feasibility)
-4. Solve trajectory optimization using direct collocation
+4. Optimize joint angles at waypoint nodes with scipy.optimize
 5. Return optimal joint trajectories and predicted outcomes
 
-This uses the Drake engine for trajectory optimization when available,
-falling back to scipy.optimize for simpler optimization problems.
+Backend: scipy.optimize.minimize over a lumped-inertia closed-form model.
+There is currently no Drake code path and no transcription-based trajectory
+optimization (no direct collocation) in this module; engine-backed solvers
+are tracked under epic #8390 (#8397 Drake DirectCollocation, #8398 CasADi,
+#8399 Crocoddyl), building on the shared multibody model from #8396.
 
 References:
 - Sharp (2009) Kinetic Constrained Optimization of the Golf Swing Hub Path

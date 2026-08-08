@@ -1,26 +1,23 @@
 """
 Swing Optimization Bridge Module
 
-Bridges UpstreamDrift with AffineDrift's DDP-based (Differential Dynamic
-Programming) swing optimization.  This provides a high-level interface for
-running iterative trajectory optimization on a golf-humanoid model.
+High-level interface for running a heuristic, gradient-descent-style torque
+refinement on a golf-humanoid model.
 
 The bridge:
 1. Accepts an initial joint state and optimization configuration.
 2. Constructs quadratic cost matrices (Q for state, R for control).
-3. Runs gradient-based iterative optimization to minimise control effort
-   while maximising terminal clubhead velocity.
-4. Returns an ``SwingOptimizationResult`` containing the optimal torque
+3. Runs a fixed-step heuristic refinement of the terminal portion of the
+   torque sequence toward a target clubhead speed.
+4. Returns an ``SwingOptimizationResult`` containing the refined torque
    sequence, state trajectory, and convergence diagnostics.
+
+This is **not** Differential Dynamic Programming: there is no backward pass,
+no value-function expansion, and the Q matrix is not used by the update rule.
+A real DDP/FDDP backend (Crocoddyl) is tracked as #8399 under epic #8390.
 
 Design-by-Contract (DbC) is used throughout: all public entry points
 validate their inputs via preconditions.
-
-References:
-    - Mayne (1966)  A Second-order Gradient Method for Determining Optimal
-      Trajectories of Non-linear Discrete-time Systems.
-    - Tassa, Erez & Todorov (2012) Synthesis and Stabilization of Complex
-      Behaviors through Online Trajectory Optimization.
 """
 
 from __future__ import annotations
