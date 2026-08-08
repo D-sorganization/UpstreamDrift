@@ -56,6 +56,7 @@ navigation should start with the rendered documentation URL.
 | `portfolio/`            | @developer-experience | stable    | Reviewer-facing demonstrations and concise project showcase material.                                                               |
 | `proposals/`            | @product-team         | draft     | Proposed changes and design alternatives pending acceptance or archival.                                                            |
 | `references/`           | @research-team        | stable    | External references, source maps, and supporting research material.                                                                 |
+| `research/`             | @research-team        | draft     | Long-form research articles (Quarto/LaTeX/PDF) produced from repository analyses, with verified bibliographies.                     |
 | `review_archive/`       | @quality-team         | archived  | Older review records retained until consolidated into `reviews/archive/`.                                                           |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                                                    |
 | `sg_optimizer/`         | @physics-team         | draft     | Strokes Gained Optimizer spec, data sources, and documentation.                                                                     |
