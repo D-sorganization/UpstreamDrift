@@ -3,6 +3,7 @@ Exponential and logarithmic maps between se(3) and SE(3).
 """
 
 import numpy as np
+import math
 
 from ..spatial_algebra.spatial_vectors import skew
 
@@ -51,7 +52,7 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
     omega = s_screw[:3]
     v = s_screw[3:]
 
-    omega_norm = np.linalg.norm(omega)
+    omega_norm = math.hypot(omega[0], omega[1], omega[2])
 
     if omega_norm < np.finfo(float).eps:
         # Pure translation (prismatic motion)
@@ -127,7 +128,7 @@ def logarithmic_map(T: np.ndarray) -> tuple[np.ndarray, float]:  # noqa: PLR0911
     # Check if rotation is identity (pure translation or identity)
     if np.linalg.norm(r_rot - np.eye(3), "fro") < 1e-10:
         # Pure translation or identity transformation
-        p_norm = np.linalg.norm(p)
+        p_norm = math.hypot(p[0], p[1], p[2])
         if p_norm < np.finfo(float).eps:
             # Identity transformation: zero rotation and zero translation
             return np.zeros(6), 0.0
@@ -145,7 +146,7 @@ def logarithmic_map(T: np.ndarray) -> tuple[np.ndarray, float]:  # noqa: PLR0911
     # Handle special cases
     if abs(theta) < np.finfo(float).eps:
         # No rotation, pure translation or identity
-        p_norm = np.linalg.norm(p)
+        p_norm = math.hypot(p[0], p[1], p[2])
         if p_norm < np.finfo(float).eps:
             # Identity transformation: zero rotation and zero translation
             return np.zeros(6), 0.0
@@ -159,7 +160,7 @@ def logarithmic_map(T: np.ndarray) -> tuple[np.ndarray, float]:  # noqa: PLR0911
         eigvals, eigvecs = np.linalg.eig(r_rot)
         idx = np.argmin(np.abs(eigvals - 1))
         omega = np.real(eigvecs[:, idx])
-        omega = omega / np.linalg.norm(omega)
+        omega = omega / math.hypot(omega[0], omega[1], omega[2])
     else:
         # General case: extract axis from skew-symmetric part
         # omega_hat = (R - R.T) / (2*sin(theta))
