@@ -1,0 +1,35 @@
+name: Fetch pinned Tools packages
+description: >-
+  Populate vendor/ud-tools at the superproject's pinned gitlink revision.
+  build_hooks.py refuses editable/CI installs unless the pinned Tools package
+  roots (src/shared, src/sidekick, src/chat, src/python/src/utils,
+  src/contracts.py) are present and match the gitlink, so every job that runs
+  `pip install -e .` needs this. CI checkouts skip submodules (the other
+  submodules are large model repositories), and relying on leftover submodule
+  content from other workflows in a reused runner workspace breaks whenever a
+  workspace is recreated from scratch.
+runs:
+  using: composite
+  steps:
+    - name: Resolve pinned Tools revision
+      id: pin
+      shell: bash
+      run: |
+        tools_sha=$(git ls-tree HEAD -- vendor/ud-tools | awk '{print $3}')
+        test -n "$tools_sha"
+        echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
+    - name: Checkout pinned Tools source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: ${{ format('{0}/Tools', github.repository_owner) }}
+        ref: ${{ steps.pin.outputs.sha }}
+        path: vendor/ud-tools
+        fetch-depth: 1
+        sparse-checkout: |
+          src
+        persist-credentials: false
+    - name: Verify pinned Tools checkout
+      shell: bash
+      run: |
+        actual_tools_sha=$(git -C vendor/ud-tools rev-parse HEAD)
+        test "$actual_tools_sha" = "${{ steps.pin.outputs.sha }}"

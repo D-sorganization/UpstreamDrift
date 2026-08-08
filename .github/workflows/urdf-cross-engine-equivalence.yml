@@ -81,6 +81,8 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install equivalence-test dependencies
         # Per spec §2.2, the gate is meaningful only when at least two engines
         # can simulate. We install every Python-installable engine and let the
