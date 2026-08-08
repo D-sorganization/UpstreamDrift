@@ -126,3 +126,34 @@ def rig_to_urdf(rig: SkeletonRig, *, model_name: str | None = None) -> str:
 def rig_root_link_name(rig: SkeletonRig) -> str:
     """Name of the URDF root link produced by :func:`rig_to_urdf`."""
     return f"{rig.id}_root"
+
+
+def rig_joint_link_name(joint_name: str) -> str:
+    """URDF link name carrying the body of rig joint ``joint_name``."""
+    return f"{joint_name}_link"
+
+
+def rig_to_pinocchio_model(rig: SkeletonRig):
+    """Build a ``pin.Model`` from ``rig`` via the URDF bridge.
+
+    The Pinocchio model has a fixed base at the rig root, one revolute DOF
+    per rig DOF in rig order, and a frame named
+    ``rig_joint_link_name(joint)`` for every rig joint.
+
+    Raises:
+        RuntimeError: When the pinocchio bindings are not installed.
+    """
+    try:
+        from importlib.util import find_spec
+
+        available = find_spec("pinocchio") is not None
+    except (ValueError, ModuleNotFoundError):
+        available = False
+    if not available:
+        raise RuntimeError(
+            "pinocchio is not installed. Install the pinocchio extra: "
+            "pip install 'upstream-drift[pinocchio]'"
+        )
+    import pinocchio as pin
+
+    return pin.buildModelFromXML(rig_to_urdf(rig))
