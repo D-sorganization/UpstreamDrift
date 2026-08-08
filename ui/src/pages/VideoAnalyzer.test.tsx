@@ -98,7 +98,8 @@ describe('VideoAnalyzer data structures', () => {
   });
 
   it('should validate estimator types', () => {
-    const validTypes = ['mediapipe', 'openpose', 'blazepose'];
+    // Must mirror the API's VALID_ESTIMATOR_TYPES (src/api/config.py, #8392).
+    const validTypes = ['mediapipe', 'openpose'];
     const invalidType = 'unknown_estimator';
 
     for (const t of validTypes) {

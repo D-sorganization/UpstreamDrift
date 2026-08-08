@@ -232,8 +232,7 @@ Select an engine based on your primary analysis goals.`,
 
 **Pose Estimation Systems**
 - OpenPose: 25-body keypoints from video
-- MediaPipe: 33 landmarks, runs locally
-- MoveNet: Lightning/Thunder models
+- MediaPipe (BlazePose): 33 landmarks, runs locally
 
 **Importing Data**
 1. Click "Import Motion Capture" or use File menu

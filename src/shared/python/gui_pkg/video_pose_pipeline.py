@@ -34,6 +34,10 @@ from src.shared.python.pose_estimation.interface import (
 
 logger = get_logger(__name__)
 
+# Estimator types _load_estimator can actually construct. The API's
+# VALID_ESTIMATOR_TYPES must be a mirror of this set (epic #8390, A2/#8392).
+IMPLEMENTED_ESTIMATOR_TYPES: frozenset[str] = frozenset({"mediapipe", "openpose"})
+
 
 @dataclass
 class VideoProcessingConfig:
@@ -92,7 +96,12 @@ class VideoPosePipeline:
         self._load_estimator()
 
     def _load_estimator(self) -> None:
-        """Load the specified pose estimator."""
+        """Load the specified pose estimator.
+
+        Estimators constructable here must match IMPLEMENTED_ESTIMATOR_TYPES
+        (and the API's VALID_ESTIMATOR_TYPES) — see
+        tests/unit/test_estimator_type_consistency.py.
+        """
         try:
             if self.config.estimator_type == "mediapipe":
                 from src.shared.python.pose_estimation.mediapipe_estimator import (
