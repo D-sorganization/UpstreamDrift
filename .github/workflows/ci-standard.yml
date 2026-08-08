@@ -927,7 +927,7 @@ jobs:
           set +e
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
-            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             -n 4 \
             --timeout=60 \
             --timeout-method=thread \

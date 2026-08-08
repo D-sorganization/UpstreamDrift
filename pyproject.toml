@@ -124,6 +124,12 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 # Opt-in: the renderer degrades with an install hint when absent.
 visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
 
+# Trajectory optimization backends (epic #8390 B3/#8398). Opt-in: the
+# CasADi swing backend degrades with an install hint when absent. Crocoddyl
+# (B4/#8399) joins this extra when its wheel coverage allows; today it is
+# conda-forge/WSL-only and stays a documented manual install.
+optimal-control = ["casadi>=3.6.0,<4.0.0"]
+
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
 
@@ -607,6 +613,8 @@ markers = [
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
     "requires_nimble: offline Nimble gradient-oracle tests (skipped when `import nimblephysics` fails)",
     "requires_rerun: tests that require the optional rerun-sdk visualization stack (skipped when `import rerun` fails)",
+    "requires_casadi: tests that require the optional casadi stack (skipped when `import casadi` fails)",
+    "requires_crocoddyl: tests that require the optional crocoddyl stack (skipped when `import crocoddyl` fails)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",
