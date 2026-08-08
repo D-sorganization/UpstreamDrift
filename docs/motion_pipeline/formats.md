@@ -15,6 +15,7 @@
 | **HRNet**           | `.json`        | `HRNetJSONAdapter`      | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 single-person                          |
 | **MediaPipe**       | `.json`        | `MediaPipeJSONAdapter`  | partial 3D (relative depth) | ✅ Yes     | ✅ Yes   | 33 landmarks, normalized coords                |
 | **DeepLabCut**      | `.h5`, `.hdf5`, `.csv` | `DeepLabCutAdapter` | ❌ 2D only              | ✅ Yes     | ✅ Yes   | Custom bodyparts (`schema="custom"`), `fps` option (default 30) |
+| **4D-Humans/HMR2**  | `.csv` (sidecar) | `HMR2Adapter`         | ✅ Yes                      | ❌ No      | ✅ Yes   | 22 SMPL body joints in meters (`schema="custom"`), sidecar `joints3d.csv` |
 | **CSV**             | `.csv`         | `CSVAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | columns: `frame, time, x_*/y_*/z_*`            |
 | **C3D**             | `.c3d`         | `C3DAdapter`            | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Binary, requires `ezc3d`                       |
 | **FBX**             | `.fbx`         | _planned_               | ✅ Yes                      | ❌ No      | ✅ Yes   | Proprietary, Blender conversion                |
@@ -108,6 +109,32 @@
   ```python
   from src.shared.python.motion_pipeline.sources import DeepLabCutAdapter
   sequence = DeepLabCutAdapter(fps=120.0).load_checked("videoDLC_resnet50.h5")
+  ```
+
+### 4D-Humans / HMR 2.0 (monocular 3D)
+
+- **Sidecar Output**: the adapter reads `joints3d.csv` written by the
+  HMR2 sidecar (`src/tools/hmr2_sidecar/run_hmr2.py`) — columns
+  `frame,time` then `<joint>_x,<joint>_y,<joint>_z` for the 22 SMPL body
+  joints, positions in **meters**, timestamps from the `time` column.
+- **Conservative Sniffing**: a CSV is claimed only when its header matches
+  the sidecar column contract exactly, or when it has the joint-triplet
+  shape *and* a sibling `metadata.json` names the 4D-Humans tool; generic
+  `frame,timestamp,x_*` trajectory CSVs stay with `CSVAdapter`.
+- **Schema**: SMPL is not a `SchemaName` literal member, so the sequence
+  uses `schema_name="custom"` with joint names preserved verbatim.
+- **Shape Betas**: the sidecar also writes `betas.json` (10 SMPL shape
+  coefficients + gender); `src.tools.hmr2_sidecar.betas_bridge` converts
+  it into the character builder's `BodyParameters(smplx_betas=...)`.
+- **Licensing**: 4D-Humans is CC-BY-NC and SMPL model files are
+  research-restricted — the sidecar only ever invokes a user-installed
+  external tool (`HMR2_COMMAND` env var) as a subprocess; no CC-BY-NC
+  code is imported or vendored, and stub artifacts keep contract tests
+  stable when the tool is absent.
+- **Example**:
+  ```python
+  from src.shared.python.motion_pipeline.sources import load_any
+  sequence = load_any("out/joints3d.csv")  # routed to HMR2Adapter
   ```
 
 ### BVH
