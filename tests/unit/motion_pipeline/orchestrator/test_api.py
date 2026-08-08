@@ -27,7 +27,7 @@ def test_health_endpoint(client: TestClient) -> None:
 
 def test_pipeline_request_default_backends() -> None:
     req = PipelineRequest(source_format="c3d")
-    assert req.ik_backend == "mujoco"
+    assert req.ik_backend == "geometric"
     assert req.matching_backend == "mujoco"
 
 

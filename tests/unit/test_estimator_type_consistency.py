@@ -10,7 +10,7 @@ two Python surfaces to a single set; the UI list is pinned by
 from __future__ import annotations
 
 from src.api.config import VALID_ESTIMATOR_TYPES
-from src.shared.python.gui_pkg.video_pose_pipeline import IMPLEMENTED_ESTIMATOR_TYPES
+from src.shared.python.pose_estimation.interface import IMPLEMENTED_ESTIMATOR_TYPES
 
 
 def test_api_estimator_set_matches_pipeline_implementations() -> None:

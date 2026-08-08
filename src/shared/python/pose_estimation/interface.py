@@ -6,6 +6,14 @@ from pathlib import Path
 
 import numpy as np
 
+# Estimator types the runtime pipeline can actually construct
+# (VideoPosePipeline._load_estimator). The API's VALID_ESTIMATOR_TYPES must
+# mirror this set — enforced by tests/unit/test_estimator_type_consistency.py
+# (epic #8390, A2/#8392). Lives here rather than in gui_pkg so that
+# dependency-light consumers (API config, tests) can import it without
+# pulling the GUI stack (matplotlib, cv2).
+IMPLEMENTED_ESTIMATOR_TYPES: frozenset[str] = frozenset({"mediapipe", "openpose"})
+
 
 @dataclass
 class PoseEstimationResult:

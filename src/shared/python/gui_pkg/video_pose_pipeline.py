@@ -28,15 +28,14 @@ from src.shared.python.data_io.marker_mapping import (
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pose_estimation.interface import (
+    IMPLEMENTED_ESTIMATOR_TYPES as IMPLEMENTED_ESTIMATOR_TYPES,
+)
+from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
 
 logger = get_logger(__name__)
-
-# Estimator types _load_estimator can actually construct. The API's
-# VALID_ESTIMATOR_TYPES must be a mirror of this set (epic #8390, A2/#8392).
-IMPLEMENTED_ESTIMATOR_TYPES: frozenset[str] = frozenset({"mediapipe", "openpose"})
 
 
 @dataclass

@@ -13,9 +13,23 @@ import importlib.util
 
 import pytest
 
-_HAS_PINOCCHIO = importlib.util.find_spec("pinocchio") is not None
-_HAS_PINK = importlib.util.find_spec("pink") is not None
-_HAS_CROCODDYL = importlib.util.find_spec("crocoddyl") is not None
+
+def _module_available(name: str) -> bool:
+    """find_spec that tolerates mock modules other suites place in
+    sys.modules without a __spec__ (find_spec raises ValueError there).
+
+    A spec-less entry is a test mock, not a usable install, so it counts
+    as unavailable — these tests exercise real engine behavior.
+    """
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ValueError, ModuleNotFoundError):
+        return False
+
+
+_HAS_PINOCCHIO = _module_available("pinocchio")
+_HAS_PINK = _module_available("pink")
+_HAS_CROCODDYL = _module_available("crocoddyl")
 
 
 @pytest.mark.skipif(not _HAS_PINOCCHIO, reason="pinocchio not installed")
