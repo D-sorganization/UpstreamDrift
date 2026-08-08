@@ -125,10 +125,15 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
 
 # Trajectory optimization backends (epic #8390 B3/#8398). Opt-in: the
-# CasADi swing backend degrades with an install hint when absent. Crocoddyl
-# (B4/#8399) joins this extra when its wheel coverage allows; today it is
-# conda-forge/WSL-only and stays a documented manual install.
+# CasADi swing backend degrades with an install hint when absent.
 optimal-control = ["casadi>=3.6.0,<4.0.0"]
+# Crocoddyl DDP backend (epic #8390 B4/#8399): separate extra because wheel
+# coverage is platform-uneven, and PyPI's cmeel-based crocoddyl wheel must
+# NOT be mixed with the PyPI pin wheel in one process (bundled libpinocchio
+# duplication corrupts derivatives / segfaults). The backend probes the
+# binary stack in a subprocess and degrades with conda-forge guidance —
+# prefer `conda install -c conda-forge crocoddyl pinocchio`.
+crocoddyl = ["crocoddyl>=2.0.0,<4.0.0"]
 
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
