@@ -312,7 +312,7 @@ def fig_montage(traces: dict[str, np.ndarray], summary: dict) -> None:
         ax.plot([hand[0], head[0]], [hand[1], head[1]], color=color, lw=1.4)
         ax.plot(*head, marker="o", ms=4, color=color)
     ax.set_aspect("equal")
-    ax.set_title(f"{REP_LABELS[label]}: address of the downswing in the swing plane")
+    ax.set_title(f"{REP_LABELS[label]}: downswing progression in the swing plane")
     ax.set_xlabel("x [m] (target side)")
     ax.set_ylabel("y [m]")
     ax.grid(alpha=0.3)

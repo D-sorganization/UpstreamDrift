@@ -56,6 +56,18 @@ late onset is the S2 pole. Torque magnitudes sit inside the ranges used
 by comparable two- and three-segment studies
 [@sprigings2000; @pickering1999], scaled to this model's inertias.
 
+**E1b (actuator-bound sensitivity).** Because constant torques overstate
+what muscle can deliver at speed, a companion sweep
+(`e1b_bounded_torque.py`) replaces both concentric drives with a linear
+torque-velocity bound,
+$\tau(\omega) = \tau_{\mathrm{iso}}\,\mathrm{clip}(1 - \omega/\omega_{\max}, 0, 1)$
+(shoulder: $\tau_{\mathrm{iso}} = 100$ N·m, $\omega_{\max} = 20$ rad/s
+against arm speed; wrist: 20 N·m, 30 rad/s against opening speed;
+restraint constant, since eccentric torque does not taper with
+shortening velocity). State-dependent torques require closed-loop
+integration, done with the backend's own `mass_matrix`/`bias_forces`
+primitives under the identical RK4 settings.
+
 ## Impact definition and validity {#sec-methods-impact}
 
 Impact is the first upward crossing of

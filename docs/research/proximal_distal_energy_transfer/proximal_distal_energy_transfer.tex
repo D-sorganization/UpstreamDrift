@@ -304,7 +304,7 @@ by code committed alongside this text.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, opacitybacktitle=0.6, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Provenance and scope}, rightrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomrule=.15mm, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, toptitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Provenance and scope}, left=2mm, toptitle=1mm, breakable, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, titlerule=0mm, colback=white, arc=.35mm, rightrule=.15mm, bottomrule=.15mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 This document is the deliverable of UpstreamDrift epics
 \href{https://github.com/D-sorganization/UpstreamDrift/issues/8373}{\#8373}
@@ -1317,6 +1317,19 @@ used by comparable two- and three-segment studies
 \citeproc{ref-pickering1999}{Pickering and Vickers 1999}), scaled to
 this model's inertias.
 
+\textbf{E1b (actuator-bound sensitivity).} Because constant torques
+overstate what muscle can deliver at speed, a companion sweep
+(\texttt{e1b\_bounded\_torque.py}) replaces both concentric drives with
+a linear torque-velocity bound,
+\(\tau(\omega) = \tau_{\mathrm{iso}}\,\mathrm{clip}(1 - \omega/\omega_{\max}, 0, 1)\)
+(shoulder: \(\tau_{\mathrm{iso}} = 100\) N·m, \(\omega_{\max} = 20\)
+rad/s against arm speed; wrist: 20 N·m, 30 rad/s against opening speed;
+restraint constant, since eccentric torque does not taper with
+shortening velocity). State-dependent torques require closed-loop
+integration, done with the backend's own
+\texttt{mass\_matrix}/\texttt{bias\_forces} primitives under the
+identical RK4 settings.
+
 \section{Impact definition and validity}\label{sec-methods-impact}
 
 Impact is the first upward crossing of \(\theta_{\mathrm{club}} = 0\)
@@ -1503,6 +1516,41 @@ Three findings, consistent across both torque levels:
   \end{enumerate}
 \end{enumerate}
 
+\section{E1b --- Sensitivity to actuator torque-velocity
+bounds}\label{sec-results-e1b}
+
+A standing objection to constant-torque sweeps is that real muscle
+torque falls with shortening velocity, shrinking the late-drive window
+(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). E1b re-runs the
+sweep with a linear torque-velocity bound on both concentric drives
+(shoulder: 100 N·m isometric, zero at 20 rad/s of arm speed; wrist: 20
+N·m isometric, zero at 30 rad/s of opening speed; restraint left
+constant, as eccentric torque does not taper with shortening velocity),
+integrated closed-loop with the same RK4 settings
+(Figure~\ref{fig-e1b}). The ordering survives intact: early drive 28.8
+m/s \textless{} passive 30.8 \textless{} best late drive 34.6 (onset
+0.175 s) \textless{} best restrain-then-drive 34.8 (R = 10 N·m until
+0.100 s). Effect sizes compress --- late drive is worth +12.2\% over
+passive and the restraint margin narrows to +0.2 m/s --- precisely the
+compression bounded-actuator theory predicts, while the optimal onsets
+move slightly \emph{earlier} (0.175--0.100 s versus 0.200--0.100 s),
+since a velocity-limited wrist needs a slightly longer window to deliver
+its work. The S2 ordering is therefore not an artifact of unbounded
+actuators.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig_e1b_bounded_sweep.pdf}}
+
+}
+
+\caption{\label{fig-e1b}E1b: the timing sweep repeated with linear
+torque-velocity bounds on the shoulder and wrist drives.}
+
+\end{figure}%
+
 \section{Kinematic sequence}\label{sec-results-sequence}
 
 Figure~\ref{fig-kinseq} shows arm and club angular-speed traces. All
@@ -1544,7 +1592,7 @@ Dotted vertical line: impact.}
 }
 
 \caption{\label{fig-montage}Stick-figure montage of the best
-restrain-then-drive swing in the swing plane (address of the downswing,
+restrain-then-drive swing in the swing plane (downswing progression at
 equal time steps).}
 
 \end{figure}%
@@ -1677,9 +1725,12 @@ strictly and substantially harmful (−15\% versus doing nothing at all);
 active retention followed by late drive is best at both effort levels,
 with its early-phase wrist work measurably negative; (iv) the late club
 energy supply is dominated by the passive joint-force/parametric
-pathway, not the wrist actuator; and (v) the counterfactual split shows
+pathway, not the wrist actuator; (v) the counterfactual split shows
 control acting early as restraint and drift delivering late --- the S2
-pattern of Section~\ref{sec-hypothesis} in full.
+pattern of Section~\ref{sec-hypothesis} in full; and (vi) the entire
+ordering survives linear torque-velocity bounds on the drives, with
+compressed effect sizes and slightly earlier optima
+(Section~\ref{sec-results-e1b}).
 
 \chapter{Discussion}\label{sec-discussion}
 
@@ -1773,11 +1824,13 @@ for a golfer. The specific gaps, each with a tracked remediation:
   (Table~\ref{tbl-models}) are the staged extensions (issue
   \href{https://github.com/D-sorganization/UpstreamDrift/issues/8377}{\#8377}).
 \item
-  \textbf{Constant, unbounded torque programs.} Real actuators have
-  torque-velocity and rate limits that shrink the late-drive window
-  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000});
-  optimal-control treatments with bounded actuators are the appropriate
-  refinement (\citeproc{ref-sharp2009}{Sharp 2009};
+  \textbf{Simplified actuator models.} E1b shows the S2 ordering
+  survives a linear torque-velocity bound on the drives with compressed
+  margins (Section~\ref{sec-results-e1b}), but activation-rate limits,
+  history dependence, and eccentric-side detail remain unmodeled; full
+  optimal-control treatments with physiological actuators are the
+  appropriate refinement (\citeproc{ref-sprigings2000}{Sprigings and
+  Neal 2000}; \citeproc{ref-sharp2009}{Sharp 2009};
   \citeproc{ref-mcnally2018}{McNally and McPhee 2018}).
 \item
   \textbf{One impact definition.} Scoring at club-vertical with a
@@ -2026,10 +2079,13 @@ From the repository root (Python 3.11+, with \texttt{numpy},
 \CommentTok{\# 1. Run all experiments (E1 sweep, E2 counterfactuals, E4 powers)}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_experiments}
 
-\CommentTok{\# 2. Regenerate every figure in this document}
+\CommentTok{\# 2. Bounded{-}actuator sensitivity sweep (E1b, incl. its figure)}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.e1b\_bounded\_torque}
+
+\CommentTok{\# 3. Regenerate the remaining figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_figures}
 
-\CommentTok{\# 3. Rebuild this document (Quarto + LaTeX)}
+\CommentTok{\# 4. Rebuild this document (Quarto + LaTeX)}
 \BuiltInTok{cd}\NormalTok{ docs/research/proximal\_distal\_energy\_transfer}
 \ExtensionTok{quarto}\NormalTok{ render proximal\_distal\_energy\_transfer.qmd }\AttributeTok{{-}{-}to}\NormalTok{ pdf}
 \end{Highlighting}
@@ -2138,6 +2194,10 @@ Data dictionary for the recorded outputs:
 \item
   \texttt{data/results\_summary.json} --- program definitions, impact
   tuples, phase budgets, passive baselines, best/worst rows, provenance.
+\item
+  \texttt{data/e1b\_bounded\_sweep.json} --- the bounded-actuator sweep
+  rows with their own provenance block (isometric torques,
+  \(\omega_{\max}\) values).
 \end{itemize}
 
 \chapter*{References}\label{references}

@@ -71,10 +71,12 @@ for a golfer. The specific gaps, each with a tracked remediation:
   8-DOF closed-loop golfer, flexible-shaft FEM model, and full-body
   engines (@tbl-models) are the staged extensions (issue
   [#8377](https://github.com/D-sorganization/UpstreamDrift/issues/8377)).
-- **Constant, unbounded torque programs.** Real actuators have
-  torque-velocity and rate limits that shrink the late-drive window
-  [@sprigings2000]; optimal-control treatments with bounded actuators
-  are the appropriate refinement [@sharp2009; @mcnally2018].
+- **Simplified actuator models.** E1b shows the S2 ordering survives a
+  linear torque-velocity bound on the drives with compressed margins
+  (@sec-results-e1b), but activation-rate limits, history dependence,
+  and eccentric-side detail remain unmodeled; full optimal-control
+  treatments with physiological actuators are the appropriate
+  refinement [@sprigings2000; @sharp2009; @mcnally2018].
 - **One impact definition.** Scoring at club-vertical with a first-pass
   validity bound is principled but not unique; alternatives (fixed hand
   position, ball-position sweep as in Pickering and Vickers

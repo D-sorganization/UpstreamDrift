@@ -55,10 +55,13 @@ From the repository root (Python 3.11+, with `numpy`, `matplotlib`,
 # 1. Run all experiments (E1 sweep, E2 counterfactuals, E4 powers)
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 
-# 2. Regenerate every figure in this document
+# 2. Bounded-actuator sensitivity sweep (E1b, incl. its figure)
+python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
+
+# 3. Regenerate the remaining figures
 python3 -m scripts.research.proximal_distal_energy.make_figures
 
-# 3. Rebuild this document (Quarto + LaTeX)
+# 4. Rebuild this document (Quarto + LaTeX)
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
@@ -126,3 +129,6 @@ Data dictionary for the recorded outputs:
   trace, and all interface-power series.
 - `data/results_summary.json` — program definitions, impact tuples,
   phase budgets, passive baselines, best/worst rows, provenance.
+- `data/e1b_bounded_sweep.json` — the bounded-actuator sweep rows with
+  their own provenance block (isometric torques, $\omega_{\max}$
+  values).
