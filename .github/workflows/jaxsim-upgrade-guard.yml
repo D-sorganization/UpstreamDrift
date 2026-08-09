@@ -53,6 +53,13 @@ jobs:
             pyproject.toml
             requirements*.txt
 
+      # Re-materialize vendor/ud-tools at the pinned SHA with a full worktree:
+      # `submodules: recursive` adopts whatever clone already sits in the
+      # reused workspace (including stale sparse clones), which can fail the
+      # build hook's pinned-roots check during the editable install below.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
       - name: Install pinned JaxSim guard dependencies
         shell: bash
         run: |

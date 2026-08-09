@@ -73,6 +73,11 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      # Guard against stale sparse vendor/ud-tools clones in reused
+      # workspaces failing the build hook's pinned-roots check (see
+      # .github/actions/fetch-pinned-tools).
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install minimal deps
         # Only what the leaderboard report code itself needs - we skip the
         # heavy engine extras intentionally so this job stays fast and
