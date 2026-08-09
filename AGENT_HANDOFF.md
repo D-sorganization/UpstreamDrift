@@ -48,9 +48,10 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
-- `fix/8429-private-launch-data` — issue #8429. Removes the public 832-shot
-  launch-monitor CSV and resolves it through the authenticated private data
-  authority. Focused validation: `tests/unit/validation_pkg/test_kaggle_validation.py`.
+- `fix/8429-private-launch-data` — issue #8429, full PR **#8430**. Removes the
+  public 832-shot launch-monitor CSV and resolves it through the authenticated
+  private data authority. Focused validation:
+  `tests/unit/validation_pkg/test_kaggle_validation.py`.
 - `feat/putting-3d-scene` — #8345 P1, full PR **#8354** to `main`
   after #8352 merged. Scoped evidence: 80 Python tests and 17 UI/theme tests pass; strict
   API mypy, Ruff, generated-type freshness, ESLint, TypeScript, color guard, and
