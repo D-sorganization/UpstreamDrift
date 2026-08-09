@@ -194,6 +194,7 @@ def main() -> None:
     fig.tight_layout()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG_DIR / "fig_e1b_bounded_sweep.pdf")
+    fig.savefig(FIG_DIR / "fig_e1b_bounded_sweep.svg")
     plt.close(fig)
     logger.info("wrote e1b outputs")
 
