@@ -1,7 +1,35 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-04
+Last updated: 2026-08-09
 Update this file with every PR and every push to main.
+
+## Active launch-monitor consumer continuation
+
+- Draft PR **#8369** remains open on remote head
+  `0dfdab1f211bf007739b2737625bc7c4db5239b1`, based on
+  `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`. It has no submitted
+  reviews or unresolved review threads.
+- Use the clean exact-head worktree
+  `UpstreamDrift-worktrees/launch-monitor-handoff-publish`. The older
+  `launch-monitor-showtime` worktree has a divergent local branch at
+  `aee026373` and must not be treated as the PR head.
+- The local continuation aligns the deterministic dataset fingerprint with
+  the Tools `rate_of_closure.launch_monitor_analysis` v1 record contract,
+  centralizes the v1 contract version, validates API option enums at the
+  Pydantic boundary, and catches user-selection errors at the Qt signal
+  boundary with accessible inline feedback.
+- The current Tools campaign carrier is draft PR **#4282** at
+  `de49580a3c0888b44f66dcc09bba2ab2fa33914a`; its quality gate passed, but
+  remaining protected checks are queued. UpstreamDrift does not have an
+  immutable pin to that carrier, and this continuation does not claim one.
+- PR #8369's old full CI run failed in checkout, package-download, or Docker
+  download infrastructure before the affected feature lanes ran. Local
+  feature evidence must not be represented as protected CI evidence.
+- Local continuation evidence: **92** launch-monitor/API/PyQt/embed/parity
+  tests pass; focused Ruff, Ruff format, Python 3.11/mypy 2.1 with imported
+  modules skipped, the error-handling ratchet, and docs governance pass. The
+  repository-wide size scan remains blocked only by the pre-existing expired
+  exception for `src/shared/python/chat/_chat_dock_widget_qt.py` (1,490 lines).
 
 ## Where the repo is heading
 

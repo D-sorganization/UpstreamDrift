@@ -81,3 +81,29 @@ def test_analyze_rejects_aggregate_regression(client: TestClient) -> None:
     )
     assert response.status_code == 400
     assert "Aggregate observations cannot enter regression" in response.json()["detail"]
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("analysis_mode", "forecast"),
+        ("correlation_method", "distance"),
+        ("missing_policy", "discard"),
+    ],
+)
+def test_analyze_rejects_unsupported_contract_options_at_schema_boundary(
+    client: TestClient, field: str, value: str
+) -> None:
+    analysis: dict[str, object] = {
+        "outcome": "ball_speed",
+        "predictors": ["club_speed"],
+    }
+    analysis[field] = value
+
+    response = client.post(
+        "/tools/launch-monitor-analytics/analyze",
+        json={"records": _records(), "analysis": analysis},
+    )
+
+    assert response.status_code == 422
+    assert any(field in tuple(error["loc"]) for error in response.json()["detail"])

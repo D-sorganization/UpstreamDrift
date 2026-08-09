@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.484 |
-| **Last Spec Update** | 2026-08-06 |
+| **Spec Version** | 1.0.485 |
+| **Last Spec Update** | 2026-08-09 |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +71,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-09** - Stabilized the Launch Monitor Analytics v1 consumer
+  contract against the current Tools record contract. Dataset fingerprints
+  now hash canonical ordered record content and ignore transient pandas index
+  labels; the shared domain owns the single `1.0.0` version constant; FastAPI
+  validates analysis mode, correlation method, and missing-data policy as
+  closed enums; and the PyQt signal boundary converts user-correctable
+  selection failures into accessible inline status. The parity fixture pins
+  the observed Tools v1 fingerprint but does not claim an immutable Tools
+  release or dependency pin.
 - **2026-08-06** - Extended Launch Monitor Analytics with a UI-neutral,
   versioned flexible-analysis contract and matched PyQt/FastAPI surfaces.
   Users may select arbitrary numeric outcomes and predictors, Pearson,

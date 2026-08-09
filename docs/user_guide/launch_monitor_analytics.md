@@ -117,6 +117,13 @@ a deterministic SHA-256 dataset fingerprint. Choose pairwise, listwise, or
 fail-on-missing behavior explicitly. Use **Group By** to retain monitor,
 session, player, club, or other strata instead of silently pooling them.
 
+The v1 fingerprint hashes ordered record content and explicit shot/session/
+source-row/monitor identity fields. It deliberately ignores the transient
+pandas row index, so loading the same records with a different in-memory index
+does not change lineage. Unsupported analysis options are rejected by the API
+schema. In the desktop panel, user-correctable selection errors appear in the
+accessible status region instead of escaping the Qt click handler.
+
 Vendor-specific `source::` fields are blocked from cross-monitor pooling because
 matching header text does not establish matching measurement semantics.
 Aggregate reference observations are never permitted in regression. Explicitly

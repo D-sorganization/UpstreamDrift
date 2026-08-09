@@ -92,6 +92,35 @@ def test_pairwise_missing_policy_preserves_per_relationship_counts() -> None:
     assert result.dataset.complete_row_count == 32
 
 
+def test_dataset_fingerprint_matches_tools_contract_and_ignores_frame_index() -> None:
+    frame = pd.DataFrame(
+        {
+            "shot_id": ["a", "b", "c"],
+            "session_id": ["s", "s", "s"],
+            "monitor_vendor": ["TrackMan", "TrackMan", "TrackMan"],
+            "x": [1.0, 2.0, 3.0],
+            "y": [2.0, 4.0, 6.1],
+        },
+        index=[10, 20, 30],
+    )
+    request = FlexibleAnalysisRequest(
+        outcome="y",
+        predictors=("x",),
+        analysis_mode="correlation",
+        min_samples=3,
+    )
+
+    indexed = analyze_variables(frame, request)
+    reset = analyze_variables(frame.reset_index(drop=True), request)
+
+    expected_tools_fingerprint = (
+        "6bdb2a22ab06a0fac0b7b0a085f099783759a109d1c38d49eb23f3473c9efff9"
+    )
+    assert indexed.dataset.fingerprint_sha256 == expected_tools_fingerprint
+    assert reset.dataset.fingerprint_sha256 == expected_tools_fingerprint
+    assert indexed.to_dict()["contract_version"] == "1.0.0"
+
+
 def test_grouped_analysis_keeps_monitor_results_separate() -> None:
     result = analyze_variables(
         _shots(),

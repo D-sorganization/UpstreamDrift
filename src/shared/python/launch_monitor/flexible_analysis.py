@@ -6,10 +6,11 @@ web, notebooks, and API adapters can present the same numerical result.
 
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, dataclass, replace
 from hashlib import sha256
 from math import sqrt
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 import pandas as pd
@@ -21,6 +22,7 @@ from src.shared.python.launch_monitor.schema import METRICS
 AnalysisMode = Literal["correlation", "regression", "comprehensive"]
 MissingPolicy = Literal["pairwise", "listwise", "fail"]
 CorrelationMethod = Literal["pearson", "spearman", "kendall"]
+CONTRACT_VERSION = "1.0.0"
 
 
 @dataclass(frozen=True)
@@ -140,7 +142,9 @@ class FlexibleAnalysisResult:
                 return None
             return value
 
-        return clean(asdict(self))
+        payload = cast(dict[str, Any], clean(asdict(self)))
+        payload["contract_version"] = CONTRACT_VERSION
+        return payload
 
 
 def _string_values(frame: pd.DataFrame, column: str) -> tuple[str, ...]:
@@ -156,9 +160,22 @@ def _fingerprint(frame: pd.DataFrame, columns: tuple[str, ...]) -> str:
         for column in ("shot_id", "session_id", "source_row", "monitor_vendor")
         if column in frame and column not in columns
     )
-    selected = frame[list(identity + columns)].copy()
-    hashed = pd.util.hash_pandas_object(selected, index=True).to_numpy(np.uint64)
-    return sha256(hashed.tobytes()).hexdigest()
+    selected = identity + columns
+    records = [
+        {
+            column: (
+                None
+                if pd.isna(value)
+                else value.item()
+                if hasattr(value, "item")
+                else value
+            )
+            for column, value in row.items()
+        }
+        for row in frame[list(selected)].to_dict(orient="records")
+    ]
+    serialized = json.dumps(records, ensure_ascii=False, separators=(",", ":"))
+    return sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _adjust_p_values(values: list[float]) -> list[float]:

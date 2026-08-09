@@ -84,6 +84,31 @@ def test_flexible_analysis_controls_are_accessibly_named(widget) -> None:  # noq
     assert all(control.toolTip() for control in controls)
 
 
+def test_flexible_analysis_button_reports_invalid_selection_inline(
+    widget, qapp
+) -> None:  # noqa: ANN001
+    frame = pd.DataFrame(
+        {
+            "shot_id": [f"shot-{index}" for index in range(12)],
+            "ball_speed": np.linspace(50.0, 60.0, 12),
+            "club_speed": np.linspace(35.0, 45.0, 12),
+        }
+    )
+    panel = widget.flexible_analysis
+    panel.set_frame(frame)
+    panel.outcome_combo.setCurrentText("ball_speed")
+    for index in range(panel.predictor_list.count()):
+        item = panel.predictor_list.item(index)
+        item.setSelected(item.text() == "ball_speed")
+
+    panel.run_button.click()
+    qapp.processEvents()
+
+    assert panel.last_result is None
+    assert "outcome cannot also be a predictor" in panel.status_label.text()
+    assert panel.status_label.accessibleName() == "Flexible Analysis Status"
+
+
 def test_import_refreshes_sessions_data_and_metric_controls(widget) -> None:  # noqa: ANN001
     session = widget.import_file(FIXTURES / "trackman.csv")
     assert session.manifest.profile_id == "trackman"

@@ -1,28 +1,35 @@
 # Launch Monitor Campaign Handoff
 
-Last verified: 2026-08-06
+Last verified: 2026-08-09
 
 ## Active UpstreamDrift Work
 
 - Repository: `D-sorganization/UpstreamDrift`
-- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\launch-monitor-showtime`
+- Exact-head worktree:
+  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\launch-monitor-handoff-publish`
 - Branch: `feat/launch-monitor-showtime-8364`
 - Draft PR: [#8369](https://github.com/D-sorganization/UpstreamDrift/pull/8369)
-- Latest verified implementation head before this handoff update: `59d84d554`
+- Published PR head: `0dfdab1f211bf007739b2737625bc7c4db5239b1`
+- Base: `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`
 - Feature commit: `feat(launch-monitor): add flexible traceable analytics (#8364)`
 
 This branch provides the UpstreamDrift Launch Monitor Analytics surface. Keep
 its public tab/route and adapter boundaries stable while the reusable contracts
 in Tools are reviewed. Do not copy calculator logic between repositories.
 
+The similarly named `launch-monitor-showtime` worktree is stale and divergent
+at local head `aee026373`; do not run release validation or make continuation
+commits there. PR #8369 has no submitted reviews or unresolved review threads.
+
 ## Shared Tools Dependency
 
 The reusable Rate of Closure and launch-monitor work is being integrated in:
 
 - Repository: `D-sorganization/Tools`
-- Integration worktree:
-  `C:\Users\diete\Repositories\Tools-worktrees\ballflight-campaign-integration`
-- Integration branch: `codex/ballflight-campaign-integration`
+- Current carrier worktree:
+  `C:\Users\diete\Repositories\Tools-worktrees\toolstrip-workspace`
+- Current carrier branch: `feat/4199-wind-workflow`
+- Current carrier PR: [Tools #4282](https://github.com/D-sorganization/Tools/pull/4282)
 - Shared analytics PR: [Tools #4212](https://github.com/D-sorganization/Tools/pull/4212)
 - Shared convention registry PR:
   [Tools #4203](https://github.com/D-sorganization/Tools/pull/4203)
@@ -31,21 +38,20 @@ The reusable Rate of Closure and launch-monitor work is being integrated in:
 - Combined Tools integration PR:
   [Tools #4217](https://github.com/D-sorganization/Tools/pull/4217)
 
-The current combined Tools head is
-`a6e1ae1a13378a556c3edaa712952ef148c7ceac`. The Tools analytics hardening
-head remains `4b22e79cf`; it preserves the public facades while keeping every
-new production module at or below 361 lines. The convention registry hardening
-head remains `3d899c8e9`; it compares sign rules explicitly and represents the
-unsupported general Foresight Launch Direction sign as `unspecified`.
+The exact published Tools carrier head is
+`de49580a3c0888b44f66dcc09bba2ab2fa33914a`. Its quality gate passed on
+2026-08-09; the rest of the protected suite was still queued when observed.
+The checked-in Tools campaign authority explicitly records that no protected
+`main` release or immutable UpstreamDrift dependency pin exists. UpstreamDrift's
+current `vendor/ud-tools` gitlink is `ff4240217005e1415ca409fd124e50b64ee642d2`,
+not the draft carrier head.
 
-The combined Tools continuation has also verified the canonical variation
-workspace: `120` focused Python tests and `21` focused React tests passed, and a
-live 24-trial pendulum study rendered all `36,024` swing vertices with linked
-scatter/matrix/arc selection, positional RMS/quiet zones, and typed impact/
-landing cohorts. The wedge worked example now pins the 30 mph, -10-degree AoA
-decomposition and explicitly identifies the 1,307 deg/s rate as driver-derived,
-not wedge-typical. These capabilities remain Tools-owned; UpstreamDrift should
-consume their contracts through adapters rather than reproduce their physics.
+The local UpstreamDrift continuation pins a parity fixture to the existing
+Tools launch-monitor statistics v1 record fingerprint. The fingerprint excludes
+the transient pandas index and hashes ordered record content plus explicit shot,
+session, source-row, and monitor identity fields. This is a compatibility
+fixture, not an immutable Tools release pin. Rate physics, flight, variation,
+wedge, wind, ground, and playback behavior remain Tools-owned.
 
 ## Integration Rules
 
@@ -58,11 +64,17 @@ consume their contracts through adapters rather than reproduce their physics.
 4. Verify PyQt import without optional GUI dependencies at package-import time.
 5. Preserve explicit modeled/derived/measured-comparable status and provenance
    in UI rows and exports.
+6. Keep unsupported analysis modes, correlation methods, and missing-data
+   policies outside the domain by validating them at the API schema boundary.
+7. Catch user-correctable selection errors at the Qt signal boundary and show
+   accessible inline status; direct domain calls continue to fail closed.
 
 ## Required Verification Before Merge
 
 - Reconcile the UpstreamDrift analytics implementation with the final Tools
   public facade and remove any duplicated calculation logic.
+- Re-run the cross-contract fingerprint fixture after any Tools v1 contract
+  change; do not silently change the fingerprint algorithm under version 1.0.0.
 - Run the focused UpstreamDrift analytics, navigation, lazy-import, manifest,
   feature-parity, and adapter tests.
 - Run Ruff, Ruff format, mypy, file/module-size gates, and the applicable web
@@ -73,30 +85,32 @@ consume their contracts through adapters rather than reproduce their physics.
 - Observe required protected checks and reviews; do not merge or close the
   release gate based only on local test results.
 
+## Local Continuation Evidence
+
+- **92 passed** across unit launch-monitor, FastAPI route, PyQt/embed, and
+  feature-parity tests on the exact-head continuation.
+- Focused Ruff and Ruff format pass.
+- Python 3.11 with mypy 2.1 passes on all three changed production modules
+  using the PR-delta `--ignore-missing-imports --follow-imports=skip` boundary.
+- Error-handling ratchet and docs-governance checks pass.
+- Repository-wide file-size scanning is blocked only by the pre-existing
+  expired exception for `src/shared/python/chat/_chat_dock_widget_qt.py`
+  (1,490 lines); no changed file approaches the 1,200-line limit.
+
 ## Current Blockers
 
-- The Tools ball-flight campaign is still a draft integration stack, not a
-  production release.
-- New protected checks are running on Tools head `a6e1ae1a1`; queued work is
-  not passing evidence. The prior PR quality-gate failures were traced to two
-  Ruff 0.14.10 formatting differences (fixed at `282b1a4d3`) and mypy 1.13
-  compatibility errors (fixed without blanket ignores at `1bc7f567c`). The
-  PR-equivalent 58-file set passes mypy 1.13 and 1.15, and 189 affected-domain
-  tests pass locally.
-- UpstreamDrift run `31136728911` found one new Law-of-Demeter chain in the
-  flexible analytics table renderer. Commit `59d84d554` introduces local
-  regression/coefficient boundaries and removes that chain. The full LoD scan
-  is clean (`2769` source files, no growth), `21` focused API/analysis/GUI/
-  embed tests pass, Ruff and format pass, and Python 3.11 mypy 2.1 reports no
-  issue in the changed source file. New protected checks must run on the
-  resulting published head.
-- The following run passed the corrected Quality Gate and then failed only the
-  SPEC freshness policy because the feature branch changed public analytics
-  behavior without updating the canonical specification. `SPEC.md` is now
-  version `1.0.484` (2026-08-06) and records the flexible contract, matched
-  PyQt/FastAPI surfaces, statistical options, lineage, and aggregate/vendor/
-  causality boundaries. No `spec-exempt` label is used. Protected SPEC checks
-  must confirm the update after publication.
+- The Tools Rate campaign is still a draft feature stack, not a production
+  release. Quality-gate success on `de49580a3` is positive, but queued checks
+  are not passing evidence.
+- UpstreamDrift PR #8369's old full CI run `31137536924` failed across lanes
+  because the self-hosted runners could not reliably fetch the repository,
+  PyPI packages, or `postgres:16`. These are infrastructure failures; no code
+  fix or repeated rerun storm is justified from those logs.
+- The exact published UpstreamDrift head predates the local fingerprint/API/UI
+  continuation. Protected checks remain required after an authorized normal
+  push.
+- React/Vite remains an honest parity gap under issue #8364. The versioned API
+  is not itself a native React surface.
 - Rust/WASM trajectory parity, installed-package verification, worker/thread
   responsiveness, full persistence/export wiring, and independent scientific
   validation remain open in Tools issue #4201.

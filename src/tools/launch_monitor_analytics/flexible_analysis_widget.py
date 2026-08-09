@@ -46,7 +46,7 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
         self.confidence_spin.setSingleStep(0.01)
         self.confidence_spin.setValue(0.95)
         self.run_button = QtWidgets.QPushButton("Run Flexible Analysis")
-        self.run_button.clicked.connect(self.run_analysis)
+        self.run_button.clicked.connect(self._run_from_ui)
 
         controls = (
             (self.outcome_combo, "Outcome Variable"),
@@ -81,6 +81,11 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
         )
         boundary.setWordWrap(True)
         boundary.setAccessibleName("Flexible Analysis Scientific Boundary")
+        self.status_label = QtWidgets.QLabel(
+            "Select an outcome and one or more predictors, then run the analysis."
+        )
+        self.status_label.setWordWrap(True)
+        self.status_label.setAccessibleName("Flexible Analysis Status")
         self.summary_table = DataFrameTable()
         self.summary_table.setAccessibleName("Flexible Analysis Results")
         self.details = QtWidgets.QPlainTextEdit()
@@ -97,6 +102,7 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout(self)
         left = QtWidgets.QVBoxLayout()
         left.addWidget(boundary)
+        left.addWidget(self.status_label)
         left.addLayout(form)
         left.addStretch(1)
         layout.addLayout(left, 1)
@@ -129,9 +135,25 @@ class FlexibleAnalysisWidget(QtWidgets.QWidget):
         self.last_result = None
         self.summary_table.set_frame(pd.DataFrame())
         self.details.clear()
+        self.status_label.setText(
+            "Select an outcome and one or more predictors, then run the analysis."
+        )
 
     def selected_predictors(self) -> tuple[str, ...]:
         return tuple(item.text() for item in self.predictor_list.selectedItems())
+
+    def _run_from_ui(self) -> None:
+        """Run from the Qt signal boundary without leaking validation errors."""
+
+        try:
+            result = self.run_analysis()
+        except ValueError as error:
+            self.last_result = None
+            self.status_label.setText(f"Analysis could not run: {error}")
+            return
+        self.status_label.setText(
+            f"Analysis complete for {result.dataset.row_count} observation(s)."
+        )
 
     def run_analysis(self) -> FlexibleAnalysisResult:
         """Execute the shared analysis contract and render its complete evidence."""

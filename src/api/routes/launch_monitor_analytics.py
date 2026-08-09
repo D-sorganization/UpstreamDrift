@@ -9,13 +9,18 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
-from src.shared.python.launch_monitor import FlexibleAnalysisRequest, analyze_variables
+from src.shared.python.launch_monitor import (
+    CONTRACT_VERSION,
+    AnalysisMode,
+    CorrelationMethod,
+    FlexibleAnalysisRequest,
+    MissingPolicy,
+    analyze_variables,
+)
 
 router = APIRouter(
     prefix="/tools/launch-monitor-analytics", tags=["launch-monitor-analytics"]
 )
-
-CONTRACT_VERSION = "1.0.0"
 
 
 class FlexibleAnalysisPayload(BaseModel):
@@ -23,9 +28,9 @@ class FlexibleAnalysisPayload(BaseModel):
 
     outcome: str = Field(min_length=1)
     predictors: list[str] = Field(min_length=1)
-    analysis_mode: str = "comprehensive"
-    correlation_method: str = "pearson"
-    missing_policy: str = "pairwise"
+    analysis_mode: AnalysisMode = "comprehensive"
+    correlation_method: CorrelationMethod = "pearson"
+    missing_policy: MissingPolicy = "pairwise"
     group_by: str | None = None
     confidence_level: float = Field(0.95, gt=0.5, lt=1.0)
     min_samples: int = Field(10, ge=3)
@@ -35,9 +40,9 @@ class FlexibleAnalysisPayload(BaseModel):
         return FlexibleAnalysisRequest(
             outcome=self.outcome,
             predictors=tuple(self.predictors),
-            analysis_mode=self.analysis_mode,  # type: ignore[arg-type]
-            correlation_method=self.correlation_method,  # type: ignore[arg-type]
-            missing_policy=self.missing_policy,  # type: ignore[arg-type]
+            analysis_mode=self.analysis_mode,
+            correlation_method=self.correlation_method,
+            missing_policy=self.missing_policy,
             group_by=self.group_by,
             confidence_level=self.confidence_level,
             min_samples=self.min_samples,
