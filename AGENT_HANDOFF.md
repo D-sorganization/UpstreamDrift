@@ -3,6 +3,18 @@
 Last updated: 2026-08-09
 Update this file with every PR and every push to main.
 
+## Pre-push formatting normalization
+
+The first guarded push attempt of local merge `23e7014f6` stopped before any
+remote write because the mandatory Prettier hook normalized two JSON research
+artifacts introduced by the merged `main` ancestry:
+`e1_sweep.json` and `results_summary.json`. Parsed JSON comparison proves both
+working-tree documents are semantically identical to the merge commit; only
+deterministic indentation and compact-array layout changed. This follow-up
+records no material launch-monitor contract or runtime change. Commit the two
+formatter outputs with this handoff note, then rerun the complete pre-push
+hook normally; do not bypass it.
+
 ## Active launch-monitor consumer continuation
 
 - Draft PR **#8369** remains open on remote head

@@ -2,6 +2,13 @@
 
 Last verified: 2026-08-09
 
+The first guarded push after the normal `main` merge was correctly blocked by
+the repository's Prettier hook. It normalized only indentation and compact
+array layout in the newly inherited `e1_sweep.json` and
+`results_summary.json`; parsed before/after values are exactly equal. This is
+a formatter-only follow-up with no material launch-monitor handoff or contract
+change. The hook must be rerun, not bypassed.
+
 ## Active UpstreamDrift Work
 
 - Repository: `D-sorganization/UpstreamDrift`
