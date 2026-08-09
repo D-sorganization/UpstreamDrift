@@ -1,83 +1,67 @@
-# Conclusions and Future Work {#sec-conclusions}
+# Conclusions and Research Priorities {#sec-conclusions}
 
 ## Conclusions
 
-Proximal-to-distal sequencing in the golf swing is real, robust, and —
-as a coaching target — chronically over-interpreted. The mechanical
-literature, from Cochran and Stobbs through modern optimal control, does
-not support "pass the energy along as soon as possible"; it supports a
-subtler program: *build the energy proximally with the club held folded,
-defer the handoff, and let the transfer run — mostly parametrically,
-with a brief late assist — when the centrifugal field can pay for it*.
-Skilled players differ from amateurs along exactly this axis: not in
-whether their segments peak in order, but in how much energy the
-proximal system holds at transition and how late and how efficiently it
-is handed to the club.
+The literature does not support equating proximal-to-distal peak order
+with a requirement to transfer mechanical energy outward as early as
+possible. Interaction dynamics, optimal-control studies, and segmental
+energy measurements instead motivate a timing hypothesis: retain a compact
+proximal configuration while proximal speed develops, then accelerate the
+distal handoff later in the downswing.
 
-This document adds the first committed, reproducible quantitative test
-of that proposition inside UpstreamDrift. On the platform's two-segment
-golf model, under matched proximal effort and a consistently defined
-first-pass impact: driving the wrist from the top cost 15.3% of clubhead
-speed relative to a fully passive wrist; the identical wrist torque
-applied at its optimal late onset gained 12.4%; and a program that
-actively restrained the wrist early (performing measurably negative
-early wrist work) and drove it late was best of all at both
-shoulder-torque levels. The energy accounting located the mechanism —
-early restraint banks arm energy that the passive joint-force channel
-converts to club energy late — and the pointwise counterfactual
-decomposition exhibited the predicted signature: **control acts early as
-retention; drift delivers late.** Within its model class, the
-retain-early/release-late hypothesis is not merely consistent with the
-evidence; it is what the model does when allowed to.
+The present simulations provide model-derived support for that mechanism.
+Under matched shoulder torque in a planar two-link model, early wrist drive
+reduced clubhead speed relative to a passive wrist, whereas optimized late
+drive increased it. A small early restraining torque followed by late drive
+was best among the tested programs. Energy and counterfactual accounting
+located the modeled mechanism in early arm-energy retention and late
+joint-force transfer rather than in early active wrist work.
 
-The claim is deliberately bounded: a planar 2-DOF chain with a fixed
-hub, rigid shaft, and unbounded constant torques demonstrates mechanism,
-not generality. The document's contribution is a *pathway*: hypotheses
-stated in falsifiable counterfactual terms, an instrumented model family
-of increasing fidelity, tested decomposition contracts, and reproducible
-experiment infrastructure that the remaining steps can reuse unchanged.
+This conclusion is conditional. The result survived torque-velocity bounds,
+alternative scoring rules, and 13 one-at-a-time parameter cases, but the
+optimal onset shifted across cases. The study therefore supports a robust
+ordering within a local model neighborhood, not a universal timing value or
+an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
+simplified actuators, and absence of human data remain material limitations.
 
-## Future work {#sec-future}
+## Research priorities {#sec-future}
 
-Tracked in issues
-[#8377](https://github.com/D-sorganization/UpstreamDrift/issues/8377)
-and
-[#8378](https://github.com/D-sorganization/UpstreamDrift/issues/8378),
-in dependency order:
+The next work should reduce the largest inferential risks in dependency
+order:
 
-1. **E3 — Re-simulation parity.** Implement the killswitch
-   re-simulation ZTCF in Python on the backend-neutral model; compare
-   pointwise and re-simulation profiles and the MATLAB pipeline on
-   matched trajectories; document agreement and divergence.
-2. **Bounded actuators and optimal control.** Replace constant torques
-   with torque-velocity-limited profiles and re-run E1; then pose the
-   onset question as an optimal-control problem and compare the
-   optimizer's wrist-power time course against the S2 prediction.
-3. **Model-fidelity ladder.** Repeat E1/E2/E4 on the triple pendulum
-   (adding a torso link), the 8-DOF closed-loop golfer (two arms,
-   shared club), and the MuJoCo humanoid, with cross-engine validation
-   at each rung; add mobile-hub and flexible-shaft variants to expose
-   the Miura/Nesbit and shaft mechanisms
-   [@miura2001; @nesbit2014hub; @mackenzie2009].
-4. **Segmental energy-flow metrics in the shared layer.** Promote the
-   experiment package's Robertson-Winter accounting into the
-   engine-agnostic analysis library (full wrench-twist transfer,
-   proximal braking efficiency), closing the platform gaps of
-   @sec-appendix-inventory.
-5. **E5 — Human-data replication.** Run the counterfactual and
-   interface-power analyses on measured swings ingested through the
-   platform's motion pipeline, across skill levels, testing the
-   predictions of @sec-hypothesis observationally.
-6. **Publication.** On completion, migrate this document to the
-   affinedrift repository (issue
-   [#8379](https://github.com/D-sorganization/UpstreamDrift/issues/8379)),
-   converting repository-relative links to absolute URLs.
+1. **Counterfactual-method parity.** Implement torque-killswitch
+   re-simulation in Python, compare it with the pointwise decomposition on
+   matched trajectories, and cross-check the existing MATLAB pathway.
+   Pointwise attribution and forward divergence answer different questions;
+   agreement should not be assumed.
+2. **Coupled sensitivity and constrained control.** Replace
+   one-at-a-time perturbations with a declared multivariable design, add
+   activation-rate and history-dependent actuator limits, and compare
+   preselected torque programs with a constrained optimal-control solution.
+3. **Model-fidelity ladder.** Repeat the primary comparisons in a
+   torso--arm--club chain, then add mobile-hub and flexible-shaft energy
+   terms before moving to closed-loop and full-body models. Each rung should
+   carry conservation checks and cross-engine tolerance gates.
+4. **Human-data protocol.** Predefine inclusion criteria, outcomes,
+   uncertainty treatment, and inverse-dynamics sensitivity before analyzing
+   appropriately licensed or consented motion and force data. Sequence order
+   alone must not be treated as evidence of energy transfer.
+5. **Open-resource release.** Maintain deterministic commands,
+   machine-readable results, data dictionaries, checksums, citation metadata,
+   and explicit license boundaries. Archive validated releases with a
+   persistent identifier.
 
-# Acknowledgments {.unnumbered}
+The implementation roadmap and acceptance criteria are tracked in
+[the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
-Prepared within the UpstreamDrift project for eventual publication in
-the affinedrift repository. The platform inventory reflects the
-codebase at the commit referenced by the pull request introducing this
-document; simulation data provenance (git SHA, parameters, integrator
-settings) is recorded in
-[`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json).
+# Code and Data Availability {.unnumbered}
+
+Analysis code, tests, figures, machine-readable outputs, and parameter
+records are available in the
+[open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer).
+The repository name identifies provenance only; none of the scientific
+claims depend on adoption of the broader software project. The principal
+summary is recorded in
+[`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json),
+and the parameter-sensitivity results are recorded in
+[`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).

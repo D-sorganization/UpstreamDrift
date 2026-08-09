@@ -1,4 +1,4 @@
-# Methods: The Executed Modeling Pathway {#sec-methods}
+# Computational Methods {#sec-methods}
 
 This chapter specifies the simulation experiments whose results appear
 in @sec-results. Everything described here is implemented in three
@@ -11,15 +11,15 @@ reproduction commands are in @sec-appendix-repro.
 
 ## Model {#sec-methods-model}
 
-The plant is the platform's backend-neutral two-segment golf model
+The simulated plant is a backend-neutral two-segment golf model
 (@sec-platform): an arm segment rotating about a fixed hub, hinged at
 the wrist to a club segment consisting of a distributed shaft plus a
 clubhead point mass at the tip, moving in an inclined swing plane with
-projected gravity. Parameters are the repository defaults
+projected gravity. Baseline parameters are
 (`GolfModelParams.default()`; full table in @sec-appendix-params):
 arm length 0.75 m and mass 7.5 kg; club length 1.0 m with 0.15 kg shaft
 and 0.20 kg clubhead; plane inclination 35°; viscous damping 0.4 and
-0.25 N·m·s/rad at shoulder and wrist. Angles follow the platform
+0.25 N·m·s/rad at shoulder and wrist. Angles follow the declared
 convention: $\theta_1$ is the arm angle from the downward vertical in
 the swing plane, $\theta_2$ the wrist angle of the club relative to the
 arm, and the club's absolute angle is
@@ -111,7 +111,7 @@ moment power (reported as a figure in @sec-results; gravity is not
 added separately because potential energy is included in the club's
 mechanical energy).
 
-**Pointwise counterfactual split (E2).** At every sample, the platform's
+**Pointwise counterfactual split (E2).** At every sample, the
 `drift_and_control_split` (@eq-superposition) evaluated with the
 applied torques, yielding drift and control components of both joint
 accelerations; the club's absolute angular-acceleration split is the
@@ -121,20 +121,27 @@ row sum.
 club kinetic-energy gain, wrist actuator work, shoulder work, and
 integrated joint-force transfer, per half.
 
+**Robustness analyses (E1c and E1d).** E1c re-scores the same 92
+trajectories using fixed arm positions, peak horizontal clubhead velocity,
+peak first-pass speed, a matched arm angle, and five validity bounds. E1d
+repeats the four-strategy comparison after changing one model input at a
+time: arm length (±10%), arm mass (±15%), club length (±10%), clubhead mass
+(±20%), swing-plane inclination (25° and 45° versus 35°), and both damping
+coefficients (0.5× and 1.5×). For each E1d case, late-drive and
+restrain-then-drive onset are re-optimized on the original onset grid.
+These ranges test local structural sensitivity; they are not population
+percentiles or confidence intervals.
+
 ## Design rationale and scope {#sec-methods-scope}
 
-This is deliberately the *simplest* member of the platform's model
-family (@tbl-models): a planar 2-DOF chain with a fixed hub and rigid
+This deliberately simple model is a planar 2-DOF chain with a fixed hub and rigid
 shaft. That choice is the point, not a compromise: the classical timing
 results were established in exactly this model class
-(@sec-doublependulum), so the pathway first reproduces the class's
-behavior under the platform's instrumentation — where every energy
+(@sec-doublependulum), so the analysis first reproduces the class's
+behavior under explicit instrumentation — where every energy
 pathway is exactly measurable and the counterfactual contract is tested
 — before scaling to models where the same questions are harder to
 instrument. What the 2-DOF results can and cannot establish is taken up
 explicitly in @sec-discussion; the extension pathway (re-simulation
-parity, 8-DOF golfer, full-body engines, motion capture) is specified
-in @sec-conclusions and tracked in issues
-[#8377](https://github.com/D-sorganization/UpstreamDrift/issues/8377)
-and
-[#8378](https://github.com/D-sorganization/UpstreamDrift/issues/8378).
+parity, higher-fidelity models, and motion capture) is specified in
+@sec-conclusions.

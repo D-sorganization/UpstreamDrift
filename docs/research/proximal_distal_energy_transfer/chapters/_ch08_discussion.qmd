@@ -22,8 +22,8 @@ across skill-level studies [@cheetham2008; @zheng2008], and the
 impact geometry of the winning programs (hands ahead, arm 0.7–0.8 rad
 past vertical) matches the skilled pattern. Finally, the drift/control
 time signature — control as early restraint, drift as late delivery —
-is the counterfactual pattern the platform's ZTCF work hypothesized
-(@sec-hypothesis), now exhibited by the model itself.
+is the counterfactual pattern proposed in @sec-hypothesis, now exhibited
+by this model.
 
 ## Why retention wins: a mechanistic reading {#sec-discussion-mechanism}
 
@@ -67,34 +67,31 @@ for a golfer. The specific gaps, each with a tracked remediation:
 - **Fixed hub, rigid shaft, planar chain.** The hub-path and inward-pull
   mechanisms [@miura2001; @nesbit2009hub; @nesbit2014hub], shaft
   dynamics [@mackenzie2009; @betzler2012; @osis2012], and long-axis
-  rotations [@marshall2000] are all outside this model. The platform's
-  8-DOF closed-loop golfer, flexible-shaft FEM model, and full-body
-  engines (@tbl-models) are the staged extensions (issue
-  [#8377](https://github.com/D-sorganization/UpstreamDrift/issues/8377)).
+  rotations [@marshall2000] are all outside this model. Closed-loop,
+  flexible-shaft, and full-body models are appropriate staged extensions.
 - **Simplified actuator models.** E1b shows the S2 ordering survives a
   linear torque-velocity bound on the drives with compressed margins
   (@sec-results-e1b), but activation-rate limits, history dependence,
   and eccentric-side detail remain unmodeled; full optimal-control
   treatments with physiological actuators are the appropriate
   refinement [@sprigings2000; @sharp2009; @mcnally2018].
-- **One impact definition.** Scoring at club-vertical with a first-pass
-  validity bound is principled but not unique; alternatives (fixed hand
-  position, ball-position sweep as in Pickering and Vickers
-  [@pickering1999]) should be checked for ordering robustness.
+- **Local, one-at-a-time sensitivity.** Alternative impact definitions and
+  single-parameter perturbations preserved the ordering
+  (@sec-results-robustness), but coupled parameter variation, measurement
+  uncertainty, and population variability were not modeled.
 - **Pointwise counterfactuals only.** The Python pathway evaluates
   instantaneous ZTCF profiles; the MATLAB re-simulation variant
   (killswitch rollouts, DELTA tables) has not yet been reproduced in
   Python, so the two operationalizations have never been formally
-  compared on matched trajectories (issue
-  [#8378](https://github.com/D-sorganization/UpstreamDrift/issues/8378)).
+  compared on matched trajectories.
 - **No human data yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
-  (@sec-falsify) — awaits the platform's mocap pipeline experiments.
+  (@sec-falsify) — awaits an appropriately governed motion-capture study.
 
 ## Implications, cautiously stated {#sec-discussion-implications}
 
-For modeling practice, the pathway shows that the timing question is
-tractable with the platform's existing counterfactual stack, and that
+For modeling practice, the analysis shows that the timing question is
+tractable with counterfactual decomposition, and that
 energy-level accounting (not peak ordering) is the observable that
 separates strategies — supporting the methodological argument of
 @sec-energyflow and the transfer-efficiency findings in recent human
