@@ -413,7 +413,17 @@ class LauncherTile:
     @property
     def logo_path(self) -> Path:
         """Absolute path to the logo file."""
-        return ASSETS_DIR / self.logo
+        direct = ASSETS_DIR / self.logo
+        if direct.exists():
+            return direct
+        basename_direct = ASSETS_DIR / Path(self.logo).name
+        if basename_direct.exists():
+            return basename_direct
+        if self.source_root:
+            sr_candidate = Path(self.source_root) / self.logo
+            if sr_candidate.exists():
+                return sr_candidate
+        return direct
 
     @property
     def logo_exists(self) -> bool:
