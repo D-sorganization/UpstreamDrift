@@ -6,8 +6,8 @@ flight internals.
 """
 
 from __future__ import annotations
-import math
 
+import math
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -19,10 +19,7 @@ from scipy.optimize import minimize
 from src.shared.python.contracts import ensure, require
 from src.shared.python.physics.ball_launch_conditions import LaunchConditions
 from src.shared.python.physics.swing_ball_flight_pipeline import (
-    PipelineResult,
-    SwingBallFlightPipeline,
-    SwingState,
-)
+    PipelineResult, SwingBallFlightPipeline, SwingState)
 
 
 @dataclass(frozen=True)
