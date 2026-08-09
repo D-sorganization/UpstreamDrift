@@ -1,6 +1,6 @@
-"""Unit and regression tests for the proximal-to-distal timing experiments (issue #8416).
+"""Unit and regression tests for the proximal-to-distal timing analyses.
 
-Pins headline numbers published in the thesis and on affinedrift.com,
+Pins reported values published on affinedrift.com,
 enforces ordering invariants, and verifies internal energy-balance and
 superposition checks.
 """
@@ -14,6 +14,10 @@ from scripts.research.proximal_distal_energy.run_experiments import (
     _phase_energy_budget,
     counterfactual_split,
     rollout_program,
+)
+from scripts.research.proximal_distal_energy.e1d_parameter_sensitivity import (
+    build_parameter_cases,
+    evaluate_parameter_case,
 )
 from scripts.research.proximal_distal_energy.swing_model import (
     PlanarInertials,
@@ -170,3 +174,51 @@ def test_determinism(params: GolfModelParams) -> None:
     np.testing.assert_array_equal(q1, q2)
     np.testing.assert_array_equal(v1, v2)
     np.testing.assert_array_equal(u1, u2)
+
+
+@pytest.mark.unit
+def test_parameter_sensitivity_case_contract() -> None:
+    """Parameter cases cover each declared source of model uncertainty."""
+    cases = build_parameter_cases()
+    names = {case.name for case in cases}
+
+    assert len(names) == len(cases)
+    assert {
+        "baseline",
+        "arm_length_low",
+        "arm_length_high",
+        "arm_mass_low",
+        "arm_mass_high",
+        "club_length_low",
+        "club_length_high",
+        "clubhead_mass_low",
+        "clubhead_mass_high",
+        "plane_inclination_low",
+        "plane_inclination_high",
+        "joint_damping_low",
+        "joint_damping_high",
+    } == names
+
+
+@pytest.mark.unit
+def test_parameter_sensitivity_evaluates_ordering() -> None:
+    """Each case reports comparable strategies and an explicit ordering test."""
+    baseline = next(case for case in build_parameter_cases() if case.name == "baseline")
+    result = evaluate_parameter_case(baseline)
+
+    assert result["ordering"] == [
+        "early_drive",
+        "passive",
+        "best_drive",
+        "best_restrain",
+    ]
+    assert result["ordering_confirmed"] is True
+    assert (
+        result["strategies"]["early_drive"]["clubhead_speed_mps"]
+        < result["strategies"]["passive"]["clubhead_speed_mps"]
+    )
+    assert result["strategies"]["best_drive"]["onset_s"] is not None
+    assert result["strategies"]["best_restrain"]["wrist_restrain_nm"] in {
+        5.0,
+        10.0,
+    }
