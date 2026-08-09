@@ -18,6 +18,13 @@ runs:
         tools_sha=$(git ls-tree HEAD -- vendor/ud-tools | awk '{print $3}')
         test -n "$tools_sha"
         echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
+    # No sparse-checkout: it would not reduce the fetch (the packfile is the
+    # same either way at fetch-depth 1) but it WOULD leave a sparse worktree
+    # behind in the reused runner workspace, which poisons later jobs that
+    # materialize vendor/ud-tools via `submodules: recursive` (git adopts the
+    # existing clone and its sparse config, yielding a partial Tools tree).
+    # A full worktree also lets checkout heal previously-sparsed clones,
+    # since it disables sparse-checkout on reuse when none is requested.
     - name: Checkout pinned Tools source
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with:
@@ -25,8 +32,6 @@ runs:
         ref: ${{ steps.pin.outputs.sha }}
         path: vendor/ud-tools
         fetch-depth: 1
-        sparse-checkout: |
-          src
         persist-credentials: false
     - name: Verify pinned Tools checkout
       shell: bash

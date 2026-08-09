@@ -41,6 +41,14 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
+      # Re-materialize vendor/ud-tools at the pinned SHA with a FULL worktree.
+      # `submodules: recursive` adopts whatever clone already sits in the
+      # reused runner workspace — including standalone sparse clones left by
+      # other jobs — which can yield a partial Tools tree and fail the build
+      # hook's pinned-roots check during sdist/wheel builds.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
