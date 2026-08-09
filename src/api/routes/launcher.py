@@ -6,6 +6,7 @@ enabling both launchers to derive their tile lists from a single source.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -19,6 +20,7 @@ from ..models.responses import LauncherManifestResponse
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/launcher", tags=["launcher"])
+
 
 # Cache the manifest in memory (singleton holder avoids 'global')
 _launcher_state: dict[str, LauncherManifest | None] = {"manifest": None}
@@ -146,7 +148,7 @@ async def validate_logos() -> dict[str, Any]:
     }
 
 
-@router.get("/logos/{filename}")
+@router.get("/logos/{filename:path}")
 @precondition(
     lambda filename: filename is not None and len(filename.strip()) > 0,
     "Logo filename must be a non-empty string",
@@ -155,7 +157,7 @@ async def get_logo(filename: str) -> FileResponse:
     """Serve a tile logo file.
 
     Args:
-        filename: Logo filename (e.g., 'mujoco_humanoid.svg').
+        filename: Logo filename (e.g., 'mujoco_humanoid.svg' or relative logo path).
 
     Returns:
         The logo file as an image response.
@@ -164,10 +166,21 @@ async def get_logo(filename: str) -> FileResponse:
         HTTPException: If logo not found or invalid filename.
     """
     # DBC Precondition: prevent path traversal
-    if ".." in filename or "/" in filename or "\\" in filename:
+    if ".." in filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     logo_path = ASSETS_DIR / filename
+    if not logo_path.exists():
+        manifest = _get_manifest()
+        for tile in manifest.tiles:
+            if (
+                tile.logo == filename
+                or Path(tile.logo).name == filename
+                or tile.logo_path.name == filename
+            ) and tile.logo_exists:
+                logo_path = tile.logo_path
+                break
+
     if not logo_path.exists():
         raise HTTPException(status_code=404, detail=f"Logo not found: {filename}")
 
@@ -184,7 +197,7 @@ async def get_logo(filename: str) -> FileResponse:
     return FileResponse(
         path=str(logo_path),
         media_type=media_type,
-        filename=filename,
+        filename=logo_path.name,
     )
 
 
