@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.483 |
-| **Last Spec Update** | 2026-08-05 |
+| **Spec Version** | 1.0.484 |
+| **Last Spec Update** | 2026-08-09 |
 
 ## 2. Purpose & Mission
 
@@ -70,8 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
-- (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
+- **2026-08-09** - Removed the real 832-shot launch-monitor trajectory CSV
+  from the public repository. The historical validation loader now resolves its
+  default dataset only from the authenticated private data authority named by
+  `LAUNCH_MONITOR_DATA_ROOT`, and fails closed when that authority or its pinned
+  source snapshot is unavailable. Explicit caller-provided paths remain
+  supported for tests and user-owned data.
+
+- (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
   after the headless dynamics foundation merged. The FastAPI route executes the
@@ -2423,6 +2430,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
 - Optimized array reduction by replacing `np.sum(np.abs(...))` with `np.abs(...).sum()` in `motion_optimization.py` to bypass overhead. (spec-exempt: micro-optimization)
 - Replace $O(n^2)$ loop sum calculation with an $O(n)$ vectorized `np.cumsum` approach for computing cumulative mass in `physics_base.py` (spec-exempt: micro-optimization)
 
