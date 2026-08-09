@@ -1,0 +1,67 @@
+# Conclusions and Research Priorities {#sec-conclusions}
+
+## Conclusions
+
+The literature does not support equating proximal-to-distal peak order
+with a requirement to transfer mechanical energy outward as early as
+possible. Interaction dynamics, optimal-control studies, and segmental
+energy measurements instead motivate a timing hypothesis: retain a compact
+proximal configuration while proximal speed develops, then accelerate the
+distal handoff later in the downswing.
+
+The present simulations provide model-derived support for that mechanism.
+Under matched shoulder torque in a planar two-link model, early wrist drive
+reduced clubhead speed relative to a passive wrist, whereas optimized late
+drive increased it. A small early restraining torque followed by late drive
+was best among the tested programs. Energy and counterfactual accounting
+located the modeled mechanism in early arm-energy retention and late
+joint-force transfer rather than in early active wrist work.
+
+This conclusion is conditional. The result survived torque-velocity bounds,
+alternative scoring rules, and 13 one-at-a-time parameter cases, but the
+optimal onset shifted across cases. The study therefore supports a robust
+ordering within a local model neighborhood, not a universal timing value or
+an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
+simplified actuators, and absence of human data remain material limitations.
+
+## Research priorities {#sec-future}
+
+The next work should reduce the largest inferential risks in dependency
+order:
+
+1. **Counterfactual-method parity.** Implement torque-killswitch
+   re-simulation in Python, compare it with the pointwise decomposition on
+   matched trajectories, and cross-check the existing MATLAB pathway.
+   Pointwise attribution and forward divergence answer different questions;
+   agreement should not be assumed.
+2. **Coupled sensitivity and constrained control.** Replace
+   one-at-a-time perturbations with a declared multivariable design, add
+   activation-rate and history-dependent actuator limits, and compare
+   preselected torque programs with a constrained optimal-control solution.
+3. **Model-fidelity ladder.** Repeat the primary comparisons in a
+   torso--arm--club chain, then add mobile-hub and flexible-shaft energy
+   terms before moving to closed-loop and full-body models. Each rung should
+   carry conservation checks and cross-engine tolerance gates.
+4. **Human-data protocol.** Predefine inclusion criteria, outcomes,
+   uncertainty treatment, and inverse-dynamics sensitivity before analyzing
+   appropriately licensed or consented motion and force data. Sequence order
+   alone must not be treated as evidence of energy transfer.
+5. **Open-resource release.** Maintain deterministic commands,
+   machine-readable results, data dictionaries, checksums, citation metadata,
+   and explicit license boundaries. Archive validated releases with a
+   persistent identifier.
+
+The implementation roadmap and acceptance criteria are tracked in
+[the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
+
+# Code and Data Availability {.unnumbered}
+
+Analysis code, tests, figures, machine-readable outputs, and parameter
+records are available in the
+[open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer).
+The repository name identifies provenance only; none of the scientific
+claims depend on adoption of the broader software project. The principal
+summary is recorded in
+[`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json),
+and the parameter-sensitivity results are recorded in
+[`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).

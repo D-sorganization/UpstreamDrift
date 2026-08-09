@@ -6,9 +6,22 @@ Update this file with every PR and every push to main.
 ## Active launch-monitor consumer continuation
 
 - Draft PR **#8369** remains open on remote head
-  `0dfdab1f211bf007739b2737625bc7c4db5239b1`, based on
-  `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`. It has no submitted
-  reviews or unresolved review threads.
+  `85322ff8a836705a90c51335131ab017c50f3374`. Its recorded merge base is
+  `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`, while the exact live
+  protected `main` head incorporated by this local continuation is
+  `1bb634b6e45dea4ebc360d6db973236549009e40`.
+- This local merge commit has exact first parent
+  `85322ff8a836705a90c51335131ab017c50f3374` and exact second parent
+  `1bb634b6e45dea4ebc360d6db973236549009e40`. Before reconciliation the
+  branch was nine commits ahead and six behind live `main`; `SPEC.md` was the
+  sole content conflict and `AGENT_HANDOFF.md` merged automatically. The spec
+  history now preserves both lines of work and advances monotonically to
+  version `1.0.486`.
+- At the pre-merge read-only audit, PR #8369 had no submitted reviews,
+  requested reviewers, or review threads. GitHub reported zero check runs,
+  commit statuses, and Actions runs for `85322ff8a8`; the strict required
+  `quality-gate` context was absent. Local evidence is not protected CI
+  evidence, and no GitHub push or write is part of this continuation.
 - Use the clean exact-head worktree
   `UpstreamDrift-worktrees/launch-monitor-handoff-publish`. The older
   `launch-monitor-showtime` worktree has a divergent local branch at
@@ -22,20 +35,25 @@ Update this file with every PR and every push to main.
   `de49580a3c0888b44f66dcc09bba2ab2fa33914a`; its quality gate passed, but
   remaining protected checks are queued. UpstreamDrift does not have an
   immutable pin to that carrier, and this continuation does not claim one.
-- PR #8369's old full CI run failed in checkout, package-download, or Docker
+- PR #8369's previous-head full CI run failed in checkout, package-download, or Docker
   download infrastructure before the affected feature lanes ran. Local
   feature evidence must not be represented as protected CI evidence.
-- Local continuation evidence: **92** launch-monitor/API/PyQt/embed/parity
-  tests pass; focused Ruff, Ruff format, Python 3.11/mypy 2.1 with imported
-  modules skipped, the error-handling ratchet, and docs governance pass. The
-  repository-wide size scan remains blocked only by the pre-existing expired
-  exception for `src/shared/python/chat/_chat_dock_widget_qt.py` (1,490 lines).
+- Post-merge local evidence: **92** launch-monitor/API/PyQt/embed/parity tests
+  and **39** representative merged-main research/launcher tests pass. Ruff and
+  Ruff format pass over all 28 Python files in the combined feature/main delta;
+  Python 3.11/mypy 2.1 passes over the three consumer production modules with
+  imported modules skipped. Docs governance, its 10 tests, doc catalog, doc
+  size, and the error-handling ratchet pass. A repository-wide Ruff probe still
+  reports 85 unrelated baseline findings, and the repository-wide size scan
+  remains blocked only by the pre-existing expired exception for
+  `src/shared/python/chat/_chat_dock_widget_qt.py` (1,490 lines).
 
 ## Where the repo is heading
 
-- **Repository_Management#1390** ("EPIC: Fleet-wide Agent Handoff & PR Policy") —
-  UpstreamDrift rollout merged as #8351; this file and the `AGENTS.md` policy section
-  are now binding on `main`.
+- **#8426** ("Proximal-to-distal swing mechanics — validation and open resource
+  roadmap") — open. Full PR **#8428** neutralizes the reader-facing report, adds
+  a 13-case model-parameter sensitivity analysis, and updates the rendered PDF.
+  Remaining counterfactual-parity, model-fidelity, and human-data work stays open.
 - **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented in
   full PR **#8352** (`feat/putting-dynamics`): an advanced
   surface/friction/mode-machine package,

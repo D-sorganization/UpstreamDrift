@@ -9,8 +9,13 @@ Last verified: 2026-08-09
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\launch-monitor-handoff-publish`
 - Branch: `feat/launch-monitor-showtime-8364`
 - Draft PR: [#8369](https://github.com/D-sorganization/UpstreamDrift/pull/8369)
-- Published PR head: `0dfdab1f211bf007739b2737625bc7c4db5239b1`
-- Base: `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`
+- Published PR head: `85322ff8a836705a90c51335131ab017c50f3374`
+- Recorded merge base: `main@2c37d663b05c49a0c72647ce2e254214953ce2d2`
+- Exact live `main` incorporated locally:
+  `1bb634b6e45dea4ebc360d6db973236549009e40`
+- Local merge parents, in order:
+  `85322ff8a836705a90c51335131ab017c50f3374` and
+  `1bb634b6e45dea4ebc360d6db973236549009e40`
 - Feature commit: `feat(launch-monitor): add flexible traceable analytics (#8364)`
 
 This branch provides the UpstreamDrift Launch Monitor Analytics surface. Keep
@@ -20,6 +25,13 @@ in Tools are reviewed. Do not copy calculator logic between repositories.
 The similarly named `launch-monitor-showtime` worktree is stale and divergent
 at local head `aee026373`; do not run release validation or make continuation
 commits there. PR #8369 has no submitted reviews or unresolved review threads.
+
+The pre-merge release audit found the published branch nine commits ahead and
+six commits behind live `main`, with `SPEC.md` as the only content conflict.
+The local normal merge preserves the launch-monitor contract work and the
+research, security, launcher, and optimization history from `main`.
+`SPEC.md` retains both update streams and advances from the feature-side
+`1.0.485` and main-side `1.0.484` records to monotonic version `1.0.486`.
 
 ## Shared Tools Dependency
 
@@ -88,11 +100,16 @@ wedge, wind, ground, and playback behavior remain Tools-owned.
 ## Local Continuation Evidence
 
 - **92 passed** across unit launch-monitor, FastAPI route, PyQt/embed, and
-  feature-parity tests on the exact-head continuation.
-- Focused Ruff and Ruff format pass.
+  feature-parity tests after merging exact live `main`.
+- **39 passed** across the merged proximal-distal research and launcher API
+  tests.
+- Ruff and Ruff format pass over all 28 Python files in the combined
+  feature/main delta. A repository-wide Ruff probe reports 85 unrelated
+  baseline findings outside that delta.
 - Python 3.11 with mypy 2.1 passes on all three changed production modules
   using the PR-delta `--ignore-missing-imports --follow-imports=skip` boundary.
-- Error-handling ratchet and docs-governance checks pass.
+- Error-handling ratchet, docs governance and its 10 tests, doc catalog, and
+  doc-size checks pass.
 - Repository-wide file-size scanning is blocked only by the pre-existing
   expired exception for `src/shared/python/chat/_chat_dock_widget_qt.py`
   (1,490 lines); no changed file approaches the 1,200-line limit.
@@ -102,13 +119,15 @@ wedge, wind, ground, and playback behavior remain Tools-owned.
 - The Tools Rate campaign is still a draft feature stack, not a production
   release. Quality-gate success on `de49580a3` is positive, but queued checks
   are not passing evidence.
-- UpstreamDrift PR #8369's old full CI run `31137536924` failed across lanes
+- UpstreamDrift PR #8369's previous-head full CI run `31137536924` failed across lanes
   because the self-hosted runners could not reliably fetch the repository,
   PyPI packages, or `postgres:16`. These are infrastructure failures; no code
   fix or repeated rerun storm is justified from those logs.
-- The exact published UpstreamDrift head predates the local fingerprint/API/UI
-  continuation. Protected checks remain required after an authorized normal
-  push.
+- The exact published head `85322ff8a8` had zero check runs, commit statuses,
+  or Actions workflow runs while the PR was conflicting with live `main`; the
+  required `quality-gate` context therefore remains absent. This local merge
+  resolves the sole content conflict, but protected checks remain required
+  after an authorized normal push.
 - React/Vite remains an honest parity gap under issue #8364. The versioned API
   is not itself a native React surface.
 - Rust/WASM trajectory parity, installed-package verification, worker/thread
