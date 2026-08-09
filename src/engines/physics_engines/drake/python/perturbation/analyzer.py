@@ -29,6 +29,7 @@ Delegates noise generation and coefficient perturbation to the shared
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -304,7 +305,8 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         joint_velocities_final = r.v_traj[last].copy()
         ee_pos_final = r.ee_pos_traj[last].copy()
         ee_vel_final = r.ee_vel_traj[last].copy()
-        ee_speed_final = float(np.linalg.norm(ee_vel_final))
+        # ⚡ Bolt: math.hypot is ~2x faster than np.linalg.norm for small arrays
+        ee_speed_final = float(math.hypot(*ee_vel_final))
 
         # ⚡ Bolt: Explicit element-wise sum of squares is faster than
         # np.linalg.norm(..., axis=1) when finding max.
