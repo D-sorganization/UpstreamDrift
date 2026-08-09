@@ -99,6 +99,7 @@ def fig_sweep(sweep: dict) -> None:
     )
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_e1_onset_sweep.pdf")
+    fig.savefig(FIG_DIR / "fig_e1_onset_sweep.svg")
     plt.close(fig)
 
 
@@ -126,6 +127,7 @@ def fig_kinematic_sequence(traces: dict[str, np.ndarray], summary: dict) -> None
     fig.suptitle("Kinematic sequence by torque program (dotted line: impact)")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_kinematic_sequence.pdf")
+    fig.savefig(FIG_DIR / "fig_kinematic_sequence.svg")
     plt.close(fig)
 
 
@@ -160,6 +162,7 @@ def fig_segment_energies(traces: dict[str, np.ndarray], summary: dict) -> None:
     fig.suptitle("Segmental kinetic energy up to impact")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_segment_energies.pdf")
+    fig.savefig(FIG_DIR / "fig_segment_energies.svg")
     plt.close(fig)
 
 
@@ -219,6 +222,7 @@ def fig_wrist_power(traces: dict[str, np.ndarray], summary: dict) -> None:
     ax2.legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_wrist_interface_power.pdf")
+    fig.savefig(FIG_DIR / "fig_wrist_interface_power.svg")
     plt.close(fig)
 
 
@@ -253,6 +257,7 @@ def fig_ztcf_split(traces: dict[str, np.ndarray], summary: dict) -> None:
     )
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_ztcf_drift_control.pdf")
+    fig.savefig(FIG_DIR / "fig_ztcf_drift_control.svg")
     plt.close(fig)
 
 
@@ -288,6 +293,7 @@ def fig_energy_budget(summary: dict) -> None:
     ax.set_title("E2/E4 — Early-half vs late-half energy budget (to impact)")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_energy_budget.pdf")
+    fig.savefig(FIG_DIR / "fig_energy_budget.svg")
     plt.close(fig)
 
 
@@ -318,6 +324,7 @@ def fig_montage(traces: dict[str, np.ndarray], summary: dict) -> None:
     ax.grid(alpha=0.3)
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_swing_montage.pdf")
+    fig.savefig(FIG_DIR / "fig_swing_montage.svg")
     plt.close(fig)
 
 
