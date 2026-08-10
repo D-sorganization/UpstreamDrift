@@ -28,7 +28,7 @@ Update this file with every PR and every push to main.
   explicit `TOOLS_REPO_PATH` selections remain fail-closed. Commit `6699380d9` has
   28 focused launcher/overlay tests plus clean Ruff checks.
 - `chore/consolidate-open-pr-backlog` (full PR **#8431**) consolidates the still-applicable changes from
-  micro-optimization PRs #8335, #8371, and #8408-#8411 together with the
+  micro-optimization PRs #8335, #8371, #8408-#8411, and #8424 together with the
   GitHub Actions updates from #8329-#8332. Superseded or duplicate PRs are closed
   only after their exact replacement is linked.
 - #8344 — physics fix (impact friction spin axis / gear-effect offset), independent.

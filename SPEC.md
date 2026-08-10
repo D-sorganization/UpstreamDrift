@@ -2435,7 +2435,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Consolidated focused ndarray reductions and small-vector norm calculations in
   recurrence analysis, terrain and pendulum geometry, screw-theory transforms,
-  clubhead diagnostics, and convex-distance validation. The
+  trajectory end-effector speed, clubhead diagnostics, and convex-distance
+  validation. The
   implementations avoid general NumPy dispatch or temporary allocations while
   retaining the existing numerical contracts. (spec-exempt: micro-optimizations)
 - Optimized array reduction by replacing `np.sum(np.abs(...))` with `np.abs(...).sum()` in `motion_optimization.py` to bypass overhead. (spec-exempt: micro-optimization)
