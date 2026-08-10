@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+import pytest
 from src.shared.python.validation_pkg.kaggle_validation import (
     ShotRecord,
     get_clean_shots,
     get_dataset_statistics,
+    load_kaggle_dataset,
 )
 
 # ---------------------------------------------------------------------------
@@ -90,6 +94,39 @@ class TestGetCleanShots:
         result = get_clean_shots(df)
         if "ball_speed_mph" in result.columns:
             assert (result["ball_speed_mph"] >= 0).all()
+
+
+class TestPrivateAuthorityLoading:
+    def test_public_repository_has_no_real_trajectory_dataset(self) -> None:
+        repository_root = Path(__file__).resolve().parents[3]
+        assert not (repository_root / "data" / "golf_trajectory.csv").exists()
+
+    def test_default_load_uses_private_authority(self, tmp_path, monkeypatch) -> None:
+        source = (
+            tmp_path
+            / "data"
+            / "authority"
+            / "source_archive"
+            / "edwardxiong_832_trajectory"
+            / "data"
+            / "golf_trajectory.csv"
+        )
+        source.parent.mkdir(parents=True)
+        source.write_text("Ball Speed (mph),Carry Distance (yards)\n150,250\n")
+        monkeypatch.setenv("LAUNCH_MONITOR_DATA_ROOT", str(tmp_path))
+
+        result = load_kaggle_dataset()
+
+        assert result.loc[0, "ball_speed_mph"] == 150
+        assert result.loc[0, "carry_distance_yards"] == 250
+
+    def test_default_load_fails_closed_without_private_authority(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        monkeypatch.setenv("LAUNCH_MONITOR_DATA_ROOT", str(tmp_path))
+
+        with pytest.raises(FileNotFoundError, match="private launch-monitor authority"):
+            load_kaggle_dataset()
 
 
 # ---------------------------------------------------------------------------

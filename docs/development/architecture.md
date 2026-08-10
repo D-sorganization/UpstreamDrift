@@ -43,8 +43,8 @@ The Golf Modeling Suite is a professional-grade biomechanical analysis and physi
 ├─────────────────────────────────────────────────────────────┤
 │                      DATA LAYER                              │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐│
-│  │ C3D Files   │ │ URDF/MJCF   │ │ Kaggle Trajectory      ││
-│  │ Processing  │ │ Models      │ │ Validation Data        ││
+│  │ C3D Files   │ │ URDF/MJCF   │ │ Private Data Authority ││
+│  │ Processing  │ │ Models      │ │ (optional, authorized) ││
 │  └─────────────┘ └─────────────┘ └─────────────────────────┘│
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -65,9 +65,6 @@ Golf_Modeling_Suite/
 │
 ├── src/config/                   # Launcher manifests and YAML defaults
 │   └── interim_config.yaml       # Server/auth/quota defaults
-│
-├── data/                         # Validation datasets
-│   └── golf_trajectory.csv       # Kaggle launch monitor data (832 shots)
 │
 ├── docs/                         # Documentation
 │   ├── assessments/              # Quality assessments

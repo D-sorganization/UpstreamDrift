@@ -71,6 +71,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-09** - Removed the real 832-shot launch-monitor trajectory CSV
+  from the public repository. The historical validation loader now resolves its
+  default dataset only from the authenticated private data authority named by
+  `LAUNCH_MONITOR_DATA_ROOT`, and fails closed when that authority or its pinned
+  source snapshot is unavailable. Explicit caller-provided paths remain
+  supported for tests and user-owned data.
+
 - **2026-08-09** - Refined the proximal-to-distal energy-transfer research
   package as a neutral, reproducible open resource. The report now distinguishes
   empirical evidence, model-derived results, and hypotheses; documents its
