@@ -5,7 +5,7 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8443 / #8444 interaction-force mechanisms** — branch
+- **#8443 / #8444 interaction-force mechanisms** — full PR **#8452** on branch
   `research/interaction-force-transfer` adds an exact and tested
   double-pendulum wrist-force/power decomposition, matched-state torque
   killswitch, seven vector/mechanism figures, hash-registered WSCG 2024 source
@@ -76,8 +76,9 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
-- `research/interaction-force-transfer` — #8444 under epic #8443; exact
-  interaction-force mechanics and first detailed article treatment.
+- `research/interaction-force-transfer` — full PR **#8452** for #8444 under
+  epic #8443; exact interaction-force mechanics and first detailed article
+  treatment.
 - `fix/8429-private-launch-data` — issue #8429, full PR **#8430**. Removes the
   public 832-shot launch-monitor CSV and resolves it through the authenticated
   private data authority. Focused validation:
