@@ -5,6 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy.extract_wscg_charts import (
+    extract_series,
+    verify_sources,
+)
 from scripts.research.proximal_distal_energy.interaction_forces import (
     force_power_decomposition,
     matched_state_killswitch,
@@ -160,3 +164,16 @@ def test_force_contract_rejects_nonfinite_input(
             np.zeros((1, 2)),
             np.zeros((1, 2)),
         )
+
+
+@pytest.mark.unit
+def test_wscg_source_package_is_hash_verified_and_complete() -> None:
+    hashes = verify_sources()
+    rows = extract_series()
+    names = {str(row["series"]) for row in rows}
+
+    assert len(hashes) == 2
+    assert len(rows) == 1625
+    assert len(names) == 13
+    assert "Wrist Torque" in names
+    assert "LeadHandCFAxial" in names
