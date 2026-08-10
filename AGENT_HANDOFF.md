@@ -5,7 +5,7 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8446 two-hand passive-couple reproduction** — active full slice on branch
+- **#8446 two-hand passive-couple reproduction** — full PR **#8454** on branch
   `research/two-hand-passive-couple`. The archived 2,801-sample
   BASE/ZTCF/DELTA tables now have hash-traceable portable exports, a tested
   frame-explicit wrench and power audit, reversal/downsampling sensitivity,
@@ -92,7 +92,7 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
-- `research/two-hand-passive-couple` — active full slice for #8446 under epic
+- `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
   #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445
   under epic #8443; multi-phase persistence and numerical/physics sensitivity.
