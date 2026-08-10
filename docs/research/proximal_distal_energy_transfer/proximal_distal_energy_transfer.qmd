@@ -50,7 +50,11 @@ abstract: |
   accounting. In its reference case, flex changes delivery speed by +0.108 m/s,
   while gravity and joint-damping ablations are substantially larger; broad
   stiffness, damping, torque-cut, endpoint-window, and timestep sweeps bound the
-  result. References, analysis code,
+  result. A common-observable model ladder then carries reference-explicit
+  force, couple, velocity, angular velocity, and power through a third
+  coordinate, prescribed hub motion, two-hand constraint geometry, and proper
+  3-D frame transformations, while explicitly leaving full-body cross-engine
+  dynamics unexecuted. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -65,6 +69,8 @@ keywords:
   - two-hand wrench
   - shaft flexibility
   - work-energy accounting
+  - multibody constraints
+  - wrench transport
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -94,6 +100,8 @@ format:
 {{< include chapters/_ch05_two_hand_wrench.qmd >}}
 
 {{< include chapters/_ch06_shaft_contributions.qmd >}}
+
+{{< include chapters/_ch07_model_ladder.qmd >}}
 
 {{< include chapters/_ch03_evidence.qmd >}}
 

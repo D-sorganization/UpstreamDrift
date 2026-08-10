@@ -28,6 +28,9 @@ The current evidence boundary includes these known limitations:
   distributions are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
+- The model ladder does not execute full-body cross-engine dynamics. Its 3-D
+  tier is a proper-frame transformation audit of a planar trace, and its
+  mobile-hub tier is a prescribed-motion inverse-dynamics comparison.
 
 # Reproducibility Guide {#sec-appendix-repro}
 
@@ -43,6 +46,7 @@ python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
 python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
+python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -55,6 +59,7 @@ python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figure
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
+python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
@@ -130,3 +135,8 @@ Recorded outputs:
   endpoint windows, timestep convergence, and interpretation boundaries.
 - `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state,
   speed, force, acceleration-contribution, power, work, and energy traces.
+- `data/mechanism_ladder_study.json` — common-schema invariance residuals,
+  prescribed mobile-hub cases, closed-loop constraint diagnostics, and the
+  fail-closed model-discrepancy table.
+- `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and
+  closed-loop conditioning arrays used by the higher-order figures.

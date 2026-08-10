@@ -1,0 +1,112 @@
+{
+  "provenance": {
+    "git_sha": "5098fb086e",
+    "source_trace": "shaft_contribution_traces.npz:flexible_reference",
+    "common_schema": "InteractionSample v1",
+    "interpretation_boundary": "The three-link, prescribed mobile-hub, closed-loop geometry, and rigid-frame audits are executed mechanism tests. Full-body cross-engine dynamics are explicitly not executed here."
+  },
+  "three_link_reference": {
+    "delivery_time_s": 0.4272523530885576,
+    "nearest_recorded_sample_time_s": 0.4275,
+    "interface_force_at_delivery_n": 56.37089718637489,
+    "interface_couple_at_delivery_nm": 4.914207966764519,
+    "interface_force_power_at_delivery_w": 32.094184380523444,
+    "interface_couple_power_at_delivery_w": 74.59782671600279,
+    "interface_total_power_at_delivery_w": 106.69201109652623
+  },
+  "frame_and_transport_audits": {
+    "maximum_rotation_power_residual_w": 2.4158453015843406e-13,
+    "maximum_transport_power_residual_w": 5.684341886080802e-14,
+    "maximum_rotation_force_norm_residual_n": 7.105427357601002e-15,
+    "maximum_rotation_couple_norm_residual_nm": 8.881784197001252e-16
+  },
+  "mobile_hub_cases": [
+    {
+      "amplitude_m": 0.0,
+      "frequency_hz": 1.25,
+      "supported_mass_kg": 0.2,
+      "maximum_force_shift_n": 0.0,
+      "maximum_power_difference_w": 0.0,
+      "signed_power_difference_integral_j": 0.0
+    },
+    {
+      "amplitude_m": 0.025,
+      "frequency_hz": 1.25,
+      "supported_mass_kg": 0.2,
+      "maximum_force_shift_n": 0.6675779223012418,
+      "maximum_power_difference_w": 9.787244547216574,
+      "signed_power_difference_integral_j": -0.02893495287639436
+    },
+    {
+      "amplitude_m": 0.05,
+      "frequency_hz": 1.25,
+      "supported_mass_kg": 0.2,
+      "maximum_force_shift_n": 1.3351558446024836,
+      "maximum_power_difference_w": 19.397953004088663,
+      "signed_power_difference_integral_j": -0.06762249281292876
+    },
+    {
+      "amplitude_m": 0.1,
+      "frequency_hz": 1.25,
+      "supported_mass_kg": 0.2,
+      "maximum_force_shift_n": 2.670311689204967,
+      "maximum_power_difference_w": 38.0897616467995,
+      "signed_power_difference_integral_j": -0.17425533386641456
+    }
+  ],
+  "closed_loop_diagnostics": {
+    "sample_count": 201,
+    "minimum_rank": 4,
+    "maximum_rank": 4,
+    "minimum_nullspace_dimension": 1,
+    "maximum_nullspace_dimension": 1,
+    "minimum_condition_number": 9.052293552169415,
+    "maximum_condition_number": 9.464777995504267,
+    "maximum_constraint_velocity_residual": 6.7932984062127e-16,
+    "interpretation": "Rank and conditioning describe kinematic constraint transmission; they do not determine contact-force magnitude without dynamics."
+  },
+  "model_discrepancy_table": [
+    {
+      "tier": "double_pendulum_planar",
+      "status": "executed_in_prior_chapter",
+      "added_mechanism": "single wrist interaction force and power",
+      "surviving_result": "force magnitude alone does not determine transfer",
+      "boundary": "fixed hub, rigid links, one distal interface"
+    },
+    {
+      "tier": "three_link_planar",
+      "status": "executed",
+      "added_mechanism": "second internal interface and elastic coordinate",
+      "surviving_result": "reference-explicit force and couple power remain additive",
+      "boundary": "point masses and one linear torsional mode"
+    },
+    {
+      "tier": "mobile_hub_inverse_dynamics",
+      "status": "executed",
+      "added_mechanism": "prescribed hub translation",
+      "surviving_result": "hub acceleration changes reaction force through supported mass",
+      "boundary": "prescribed motion comparison, not a forward torso model"
+    },
+    {
+      "tier": "two_hand_closed_loop_geometry",
+      "status": "executed",
+      "added_mechanism": "four grip constraints and one feasible nullspace coordinate",
+      "surviving_result": "constraint rank organizes admissible motion, not force magnitude",
+      "boundary": "geometry/rank audit; archived forces remain the dynamic evidence"
+    },
+    {
+      "tier": "rotated_3d_wrench_audit",
+      "status": "executed",
+      "added_mechanism": "arbitrary proper 3-D frame rotations and wrench transport",
+      "surviving_result": "force norm, couple norm, and total power are frame invariant",
+      "boundary": "3-D representation of a planar trajectory, not out-of-plane dynamics"
+    },
+    {
+      "tier": "full_body_cross_engine_dynamics",
+      "status": "not_executed",
+      "added_mechanism": "moving anatomy, muscle actuation, and engine contact solvers",
+      "surviving_result": "undetermined",
+      "boundary": "must not be inferred from the lower-order mechanism audits"
+    }
+  ]
+}

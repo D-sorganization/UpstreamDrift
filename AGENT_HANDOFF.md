@@ -5,6 +5,14 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **#8448 higher-order mechanism ladder** — active on
+  `research/higher-order-mechanism-ladder`. The first executed slice adds a
+  common frame/reference-explicit wrench-power schema, exact frame and
+  reference-transport audits, prescribed mobile-hub inverse dynamics, planar
+  two-hand constraint rank/nullspace diagnostics, seven figures, and a model
+  discrepancy table. The evidence record deliberately marks full-body
+  cross-engine dynamics `not_executed`; capability is not reported as a result.
+
 - **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
   **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
   surrogate now has an exact matched rigid reduction, termwise acceleration and
