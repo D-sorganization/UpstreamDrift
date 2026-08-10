@@ -141,7 +141,8 @@ def _affine_projection_weights(points: np.ndarray) -> np.ndarray | None:
     weights = solution[:k]
     if not np.all(np.isfinite(weights)):
         return None
-    if abs(float(np.sum(weights)) - 1.0) > 1e-6:
+    # Use the ndarray reduction directly to avoid general dispatch overhead.
+    if abs(float(weights.sum()) - 1.0) > 1e-6:
         return None
     return weights
 
@@ -296,10 +297,10 @@ def _orthonormal_bases(directions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
     first = np.cross(directions, reference)
     # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-    first /= np.sqrt(np.einsum('...i,...i->...', first, first))[..., None]
+    first /= np.sqrt(np.einsum("...i,...i->...", first, first))[..., None]
     second = np.cross(directions, first)
     # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-    second /= np.sqrt(np.einsum('...i,...i->...', second, second))[..., None]
+    second /= np.sqrt(np.einsum("...i,...i->...", second, second))[..., None]
     return first, second
 
 
@@ -337,7 +338,9 @@ def _penetration_depth(
         axis_u, axis_v = _orthonormal_bases(directions)
         offsets = np.stack([axis_u, -axis_u, axis_v, -axis_v], axis=1)
         candidates = directions[:, None, :] + steps[:, None, None] * offsets
-        candidates /= np.sqrt(np.einsum('...i,...i->...', candidates, candidates))[..., None]
+        candidates /= np.sqrt(np.einsum("...i,...i->...", candidates, candidates))[
+            ..., None
+        ]
 
         candidate_values = _support_widths(
             prim_a, prim_b, candidates.reshape(-1, 3)

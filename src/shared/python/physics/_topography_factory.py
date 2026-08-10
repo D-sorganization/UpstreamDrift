@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 
 import numpy as np
 
@@ -56,7 +57,7 @@ def create_sloped_terrain(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
     )
 
-    slope_dir = slope_direction / np.linalg.norm(slope_direction)
+    slope_dir = slope_direction / float(math.hypot(*slope_direction))
 
     resolution = 50
     x = np.linspace(0, width, resolution)

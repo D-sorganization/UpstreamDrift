@@ -343,7 +343,7 @@ jobs:
       # UI Security and Quality Checks (only when ui/ files change)
       - name: Setup Node for UI audit
         if: steps.ui_changes.outputs.changed == 'true'
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "24"
           cache: "npm"
@@ -1946,7 +1946,7 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         if: steps.frontend-changes.outputs.skip != 'true'
         with:
           node-version: "24"
@@ -2001,7 +2001,7 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
+      - uses: matlab-actions/setup-matlab@2323adb8243827ea460b0def4c413545aaec46a9
       - uses: matlab-actions/run-command@bcd446a219949c24051c1d04a4b4e0274c42f23b
         with:
           command: |
