@@ -2433,7 +2433,14 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
-- Optimized array reduction by replacing `np.sum(distances)` with `distances.sum()` in `ground_reaction_forces.py` to bypass overhead. (spec-exempt: micro-optimization)
+- Consolidated focused ndarray reductions and small-vector norm calculations in
+  recurrence analysis, terrain and pendulum geometry, screw-theory transforms,
+  trajectory end-effector speed, clubhead diagnostics, and convex-distance
+  validation. The
+  implementations avoid general NumPy dispatch or temporary allocations while
+  retaining the existing numerical contracts. (spec-exempt: micro-optimizations)
+- Replaced `np.sum(distances)` with the equivalent ndarray reduction in
+  `ground_reaction_forces.py`. (spec-exempt: micro-optimization)
 - Optimized array reduction by replacing `np.sum(np.abs(...))` with `np.abs(...).sum()` in `motion_optimization.py` to bypass overhead. (spec-exempt: micro-optimization)
 - Replace $O(n^2)$ loop sum calculation with an $O(n)$ vectorized `np.cumsum` approach for computing cumulative mass in `physics_base.py` (spec-exempt: micro-optimization)
 
