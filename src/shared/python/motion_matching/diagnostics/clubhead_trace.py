@@ -20,6 +20,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
+import math
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -190,13 +192,12 @@ def _clubhead_speed_mph(
         dt = time[i + 1] - time[i - 1]
         if dt > 0:
             v = (clubhead[i + 1] - clubhead[i - 1]) / dt
-            speeds[i] = float(np.linalg.norm(v))
-    speeds[0] = float(
-        np.linalg.norm((clubhead[1] - clubhead[0]) / max(time[1] - time[0], 1e-12))
-    )
-    speeds[-1] = float(
-        np.linalg.norm((clubhead[-1] - clubhead[-2]) / max(time[-1] - time[-2], 1e-12))
-    )
+            # The dot product avoids a general norm dispatch in this inner loop.
+            speeds[i] = float(math.sqrt(np.vdot(v, v)))
+    v_start = (clubhead[1] - clubhead[0]) / max(time[1] - time[0], 1e-12)
+    speeds[0] = float(math.sqrt(np.vdot(v_start, v_start)))
+    v_end = (clubhead[-1] - clubhead[-2]) / max(time[-1] - time[-2], 1e-12)
+    speeds[-1] = float(math.sqrt(np.vdot(v_end, v_end)))
     return speeds * _MPS_TO_MPH
 
 
