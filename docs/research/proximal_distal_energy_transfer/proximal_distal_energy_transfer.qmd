@@ -44,7 +44,13 @@ abstract: |
   2,801 stored samples and shows that a -19.63 N m pointwise zero-command
   midpoint couple is generated entirely by separated contact forces. It also
   distinguishes couple sign from power sign and verifies the predicted linear
-  grip-separation and relative-orientation geometry. References, analysis code,
+  grip-separation and relative-orientation geometry. A matched rigid/flexible
+  three-coordinate surrogate then separates control, momentum, gravity, joint
+  damping, shaft elasticity, and shaft damping with closed work--energy
+  accounting. In its reference case, flex changes delivery speed by +0.108 m/s,
+  while gravity and joint-damping ablations are substantially larger; broad
+  stiffness, damping, torque-cut, endpoint-window, and timestep sweeps bound the
+  result. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -57,6 +63,8 @@ keywords:
   - ZVCF
   - double pendulum
   - two-hand wrench
+  - shaft flexibility
+  - work-energy accounting
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -84,6 +92,8 @@ format:
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 
 {{< include chapters/_ch05_two_hand_wrench.qmd >}}
+
+{{< include chapters/_ch06_shaft_contributions.qmd >}}
 
 {{< include chapters/_ch03_evidence.qmd >}}
 

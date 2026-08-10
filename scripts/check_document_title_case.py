@@ -213,7 +213,13 @@ def findings_for_pdf(path: Path, shown: Path) -> list[Finding]:
 
 def tracked_paths(root: Path) -> list[Path]:
     result = subprocess.run(
-        ["git", "ls-files"], cwd=root, capture_output=True, text=True, check=False
+        ["git", "ls-files"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
     return [
         root / name
@@ -246,7 +252,13 @@ def changed_lines_for_path(
         command.append(f"{ref}..HEAD")
     command.extend(["--", path.relative_to(root).as_posix()])
     result = subprocess.run(
-        command, cwd=root, capture_output=True, text=True, check=False
+        command,
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
     return _added_lines_from_diff(result.stdout)
 
@@ -285,6 +297,8 @@ def main(argv: list[str] | None = None) -> int:
             cwd=root,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
         paths = [
