@@ -28,8 +28,8 @@ the basis of induced-acceleration analysis [@zajac1989] and of the
 counterfactual decompositions of @sec-timing-framework. Second, the
 equation is *affine in* $\tau$: the acceleration splits exactly into a
 drift part (what accumulated motion and gravity produce alone) and a
-control part ($M^{-1}\tau$), a property the UpstreamDrift test suite
-enforces to numerical tolerance (@sec-appendix-validation).
+control part ($M^{-1}\tau$), a property enforced to numerical tolerance
+by the accompanying tests (@sec-appendix-validation).
 
 ## The summation-of-speed principle and its limits {#sec-summation}
 
@@ -129,7 +129,7 @@ Together these results describe a machine whose highest-output mode is:
 geometry and — in the last phase — modest distal torque move the energy
 outward rapidly*. The double-pendulum literature is already an argument
 for **retain-early / release-late**. @sec-results tests exactly this
-proposition on the UpstreamDrift implementation of the model.
+proposition in the numerical implementation used here.
 
 ## Optimal control and torque sequencing {#sec-optimalcontrol}
 
@@ -157,9 +157,8 @@ review surveys this modeling lineage [@mcphee2022].
 A caution cuts the other way: optimal control optimizes *within a
 model*, and the sensitivity of optimal timing to model structure (hub
 mobility, shaft flexibility [@betzler2012; @osis2012], actuator rate
-limits) is exactly why a multi-engine platform with cross-engine
-validation (@sec-platform) is the right instrument for revisiting the
-question.
+limits) is why cross-engine validation (@sec-platform) is valuable when
+revisiting the question.
 
 ## What "energy transfer" means operationally {#sec-energyflow}
 

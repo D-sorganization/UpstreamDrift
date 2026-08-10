@@ -1,4 +1,4 @@
-"""Impact-criterion robustness analysis (issue #8418).
+"""Impact-criterion robustness analysis.
 
 Re-scores the E1 timing sweep trajectories under 5 alternative impact criteria:
 1. Fixed hand position (score when arm theta1 reaches a fixed angle, e.g., 0.0 or 0.5 rad)

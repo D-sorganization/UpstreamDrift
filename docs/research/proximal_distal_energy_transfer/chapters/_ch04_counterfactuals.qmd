@@ -102,13 +102,13 @@ $$
 \underbrace{M^{-1}\tau}_{\text{control}},
 $$ {#eq-superposition}
 
-an identity enforced to numerical tolerance by the platform's test suite
+an identity enforced to numerical tolerance by the accompanying tests
 (@sec-appendix-validation).
 
 ## Two operational variants {#sec-ztcf-variants}
 
-The platform implements two distinct operationalizations, and the
-difference matters for interpretation.
+Two distinct operationalizations are available, and the difference
+matters for interpretation.
 
 **Pointwise (instantaneous) counterfactuals.** The engine-agnostic
 Python implementation
@@ -168,13 +168,10 @@ predicts, for high-performing swings:
   club-side work should concentrate before release; the passive share
   should account for most club energy gain after release [@white2006].
 
-Before this thesis, this pattern was a hypothesis motivated by the
-platform's preliminary MATLAB analyses. @sec-results now provides the
-first committed, reproducible quantitative test on the platform's
-two-segment model; conversely, had the early-drive programs won the
+This pattern was initially motivated by torque-removal analyses.
+@sec-results provides a reproducible quantitative test in a two-segment
+model; conversely, had the early-drive programs won the
 sweep, S2 would have been falsified in exactly the terms of
-@sec-falsify. The remaining generality — re-simulation parity, 3D
-full-body models, and measured swings — is future work tracked in issues
-[#8377](https://github.com/D-sorganization/UpstreamDrift/issues/8377)
-and
-[#8378](https://github.com/D-sorganization/UpstreamDrift/issues/8378).
+@sec-falsify. Bounded-actuator, impact-definition, and model-parameter
+sensitivity checks are reported here; re-simulation parity, 3D full-body
+models, and measured swings remain future work.

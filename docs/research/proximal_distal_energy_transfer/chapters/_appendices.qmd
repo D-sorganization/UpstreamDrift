@@ -1,134 +1,92 @@
-# Appendix A: Platform Capability Inventory {#sec-appendix-inventory .unnumbered}
+# Software and Data Availability {#sec-appendix-inventory}
 
-Beyond the summary of @sec-platform, the counterfactual and energetics
-stack comprises: per-engine `compute_ztcf` / `compute_zvcf` /
-drift-control implementations (MuJoCo, Drake, Pinocchio, OpenSim,
-MyoSuite, analytic pendulum engines, Simscape bridge) behind the
-engine-core contract
-([`_dynamics_interface.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/engine_core/_dynamics_interface.py));
-the pointwise evaluator with canonical-v2 trajectory input and HDF5
-persistence
-([`ztcf_zvcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py));
-a Newton-Euler ZTCF force module with an analytic single-pendulum
-validation identity
-([`biomechanics/ztcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ztcf.py));
-induced-acceleration analyzers
-([`induced_acceleration.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/induced_acceleration.py));
-an orchestration layer with capability gating and REST/UI surfaces
-([`analysis/orchestrator.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/orchestrator.py));
-MuJoCo inter-segment power flow with per-body energies and
-drift/control work decomposition
-([`power_flow.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/power_flow.py));
-engine-agnostic work/power/impulse and system-energy metrics
-([`power_work_metrics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/power_work_metrics.py),
-[`energy_metrics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/energy_metrics.py));
-conservation monitoring
-([`energy_monitor.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/physics/energy_monitor.py));
-kinematic-sequence and coordination analytics with plot renderers
-([`kinematic_sequence.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/kinematic_sequence.py),
-[`coordination_metrics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/coordination_metrics.py),
-[`_coordination_sequence.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/plotting/renderers/_coordination_sequence.py));
-an approved internal research review of the kinematic-sequence metric
-([`kinematic_sequence.md`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/assessments/research_reviews/kinematic_sequence.md));
-and the MATLAB BASE/ZTCF/DELTA/ZVCF pipeline with per-joint
-linear/angular work and power decompositions (@sec-ztcf-variants).
+The open-source implementation separates the analytical model, torque
+programs, counterfactual evaluation, energy accounting, robustness analyses,
+and figure generation. The scientific entry points are collected under
+[`scripts/research/proximal_distal_energy/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy),
+with shared model parameters and dynamics under
+[`simulation_backends/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/src/shared/python/simulation_backends).
+This is a provenance statement, not a capability claim about the surrounding
+software.
 
-## Known gaps {#sec-appendix-gaps .unnumbered}
+The current evidence boundary includes these known limitations:
 
-| Gap | Consequence for this document |
-|---|---|
-| Two ZTCF operationalizations (pointwise vs re-simulation) coexist; no Python re-simulation ZTCF | @sec-results uses the pointwise variant only; parity untested (issue #8377) |
-| Inter-segment power transfer in the shared layer is joint-power only (MuJoCo) | The Robertson-Winter accounting of @sec-methods lives in the experiment package, pending promotion (issue #8378) |
-| `ConservationMonitor` potential energy is first-order approximate | Not used for any number here; energies computed analytically |
-| Flexible-shaft strain energy absent from the energy budget | Shaft recoil energy invisible until the shaft rung of @sec-future |
-| Proximal-braking-efficiency metric is an open TODO | Deceleration claims here rely on directly computed energies instead |
+- Pointwise and re-simulation counterfactuals have not been compared on
+  matched trajectories; @sec-results supports instantaneous attribution only.
+- The model has two planar links and a fixed hub; torso, hub-path, long-axis
+  rotation, and closed-loop arm effects are absent.
+- The shaft is rigid, so strain-energy storage and recoil are absent.
+- Actuator bounds are simplified; muscle activation and history effects are
+  not represented.
+- Parameter sensitivity is one-at-a-time; coupled uncertainty and population
+  distributions are not estimated.
+- No human motion or force data are analyzed; the result is mechanistic and
+  model-derived, not a skill-group effect.
 
-: Known platform gaps (tracked in issue
-[#8378](https://github.com/D-sorganization/UpstreamDrift/issues/8378)). {#tbl-gaps}
+# Reproducibility Guide {#sec-appendix-repro}
 
-# Appendix B: Reproducibility Guide {#sec-appendix-repro .unnumbered}
-
-From the repository root (Python 3.11+, with `numpy`, `matplotlib`,
-`pydantic`, `simpleeval`, `pandas` installed):
+From the repository root (Python 3.11+ with the project dependencies):
 
 ```bash
-# 1. Run all experiments (E1 sweep, E2 counterfactuals, E4 powers)
+# Primary sweep, counterfactuals, and interface-power analysis
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 
-# 2. Bounded-actuator sensitivity sweep (E1b, incl. its figure)
+# Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
+python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
+python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 
-# 3. Regenerate the remaining figures
+# Figures and document
 python3 -m scripts.research.proximal_distal_energy.make_figures
-
-# 4. Rebuild this document (Quarto + LaTeX)
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
 
-Outputs land in `data/` (JSON + NPZ, with provenance: git SHA,
-integrator settings, full parameter values) and `figures/` (PDF). The
-experiments are deterministic (fixed-step RK4, no stochastic elements),
-so re-running reproduces every number in @sec-results exactly, up to
-floating-point environment differences.
+Outputs land in `data/` (JSON and NPZ with commit, integrator, and parameter
+provenance) and `figures/` (PDF and SVG). The analyses use fixed-step RK4 and
+contain no stochastic elements. Re-runs should reproduce the recorded values
+up to floating-point environment differences.
 
-# Appendix C: Validation Evidence {#sec-appendix-validation .unnumbered}
+# Validation Evidence {#sec-appendix-validation}
 
-The counterfactual stack this document relies on is contract-tested in
-CI: the pointwise evaluator reproduces the analytic double-pendulum
-ground truth to $10^{-9}$ via the ODE and analytical providers, and
-agrees with the independent MuJoCo backend to $10^{-7}$ when that engine
-is available
-([`test_ztcf_zvcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/tests/unit/simulation_backends/test_ztcf_zvcf.py));
-drift-plus-control reconstructs the measured acceleration
-([`test_counterfactual_experiments.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/tests/acceptance/test_counterfactual_experiments.py));
-work-energy-theorem and conservation-law property tests run in CI
-([`tests/integration/conservation_laws/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/tests/integration/conservation_laws));
-and a cross-engine comparison service produces divergence-annotated
-ZTCF/ZVCF panels between backends
-([`cross_engine_comparison.md`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/simulation_backends/cross_engine_comparison.md)).
-The design guidelines make the drift-control decomposition and
-ZTCF/ZVCF availability normative across engines
-([`project_design_guidelines.qmd`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/project_design_guidelines.qmd)).
-Within this document, the wrist-interface accounting carries its own
-internal check: the club's mechanical-energy rate matches the summed
-interface powers along the full trajectory (@fig-wristpower, right).
+Tests exercise analytical double-pendulum ground truth, optional
+cross-backend agreement, drift-plus-control reconstruction, work--energy
+consistency, deterministic replay, impact edge cases, headline values, and
+the parameter-case contract. The wrist-interface balance also checks that
+the club mechanical-energy rate matches the summed interface powers to the
+finite-difference tolerance. These checks reduce numerical and
+implementation error; they do not validate the structural model assumptions.
 
-# Appendix D: Model Parameters and Program Definitions {#sec-appendix-params .unnumbered}
+# Model Parameters and Program Definitions {#sec-appendix-params}
 
 | Parameter | Value | Notes |
 |---|---|---|
-| Arm length $l_1$ | 0.75 m | `GolfModelParams.default()` |
+| Arm length $l_1$ | 0.75 m | baseline |
 | Arm mass $m_1$ | 7.5 kg | both arms lumped |
 | Arm COM ratio | 0.45 | $l_{c1} = 0.3375$ m |
 | Arm inertia about COM | 0.3516 kg·m² | about hub: 1.2059 kg·m² |
-| Club length $l_2$ | 1.0 m | |
+| Club length $l_2$ | 1.0 m | grip to clubhead |
 | Shaft mass | 0.15 kg | COM ratio 0.43 |
 | Clubhead mass | 0.20 kg | point mass at tip |
 | Club composite mass $m_2$ | 0.35 kg | $l_{c2} = 0.7557$ m |
 | Club inertia about COM | 0.0403 kg·m² | about wrist: 0.2402 kg·m² |
 | Plane inclination | 35° | projected gravity 8.033 m/s² |
 | Damping (shoulder, wrist) | 0.4, 0.25 N·m·s/rad | viscous |
-| Integrator | RK4, $\Delta t = 1$ ms | ODE reference backend |
+| Integrator | RK4, $\Delta t = 1$ ms | analytical ODE backend |
 | Initial state | $\theta_1=-2.2$, $\theta_2=-1.57$ rad, $\dot q = 0$ | top of backswing |
 | Shoulder torque $\tau_s$ | 60 / 100 N·m | constant from $t=0$ |
 | Wrist drive | +15 N·m from $t_{\mathrm{on}}$ | onset grid 0–0.35 s, step 0.025 |
 | Wrist restraint $R$ | 5 / 10 N·m before $t_{\mathrm{on}}$ | restrain-then-drive only |
 | Impact | first $\theta_1+\theta_2 = 0$ crossing | valid iff $\theta_1 \le 2.0$ rad |
 
-: Model parameters and experiment constants
-(`scripts/research/proximal_distal_energy/`). {#tbl-params}
+: Baseline model parameters and experiment constants. {#tbl-params}
 
-Data dictionary for the recorded outputs:
+Recorded outputs:
 
-- `data/e1_sweep.json` — one row per program: profile, torques, onset,
-  impact time, clubhead speed, arm angle at impact (null = invalid),
-  plus a provenance block.
-- `data/representative_traces.npz` — per representative program:
-  `t, q, v, u`, drift/control splits, segment energies, clubhead-speed
-  trace, and all interface-power series.
-- `data/results_summary.json` — program definitions, impact tuples,
-  phase budgets, passive baselines, best/worst rows, provenance.
-- `data/e1b_bounded_sweep.json` — the bounded-actuator sweep rows with
-  their own provenance block (isometric torques, $\omega_{\max}$
-  values).
+- `data/e1_sweep.json` — one row per torque program plus provenance.
+- `data/representative_traces.npz` — representative state, control,
+  counterfactual, energy, speed, and interface-power traces.
+- `data/results_summary.json` — representative impacts and phase budgets.
+- `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep.
+- `data/e1c_sensitivity.json` — alternative impact-definition results.
+- `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases.

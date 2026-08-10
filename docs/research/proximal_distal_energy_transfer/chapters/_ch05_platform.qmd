@@ -1,58 +1,40 @@
-# The UpstreamDrift Platform {#sec-platform}
+# Computational Framework {#sec-platform}
 
-This chapter summarizes the platform capabilities the modeling pathway
-builds on; the complete hot-linked inventory, including known gaps, is
-in @sec-appendix-inventory.
+The numerical work uses an open-source, backend-neutral implementation
+of a planar two-segment golf model. Model parameters are represented once
+and rendered to the analytical equations of motion and optional simulation
+backends. The present results use the deterministic analytical ODE backend;
+they do not depend on a proprietary solver or graphical interface.
 
-## Models
+## Analysis components
 
-| Model | Location | Notes |
-|---|---|---|
-| Double pendulum (arms + club, clubhead tip mass) | [`pendulum_simulator/physics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics.py) | Lagrangian dynamics; viscous + Coulomb friction; analytic $M$, $C$, $g$ |
-| Backend-neutral golf model (ODE / MuJoCo / MJX / Warp) | [`simulation_backends/`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/README.md) | One parameter set rendered to every backend; shared trace schema; **used in @sec-methods** |
-| Triple pendulum | [`pendulum_simulator/physics_triple.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics_triple.py) | Three-segment planar chain |
-| 8-DOF closed-loop golfer (two arms + shared club) | [`pendulum_simulator/physics_golfer.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/pendulum_simulator/physics_golfer.py) | Holonomic loop constraints; JAX variant |
-| MuJoCo humanoid golfer | [`mujoco_humanoid_golf/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf) | Full-body model with club |
-| Simscape 2D/3D golf models | [`Simscape_Multibody_Models/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/src/engines/Simscape_Multibody_Models) | Source of the original ZTCF/ZVCF methodology |
-| Flexible shaft (FEM) | [`physics/flexible_shaft.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/physics/flexible_shaft.py) | Beam model; strain energy not yet in the energy budget |
+The workflow separates four responsibilities:
 
-: Golf swing models available in the repository. {#tbl-models}
+1. **Dynamics.** A validated mass matrix and bias-force provider advances
+   the two generalized coordinates under specified shoulder and wrist
+   torques.
+2. **Counterfactual decomposition.** At each sampled state, acceleration is
+   split into passive drift and applied-control components. These pointwise
+   quantities are not presented as alternative forward trajectories.
+3. **Energy accounting.** Segment kinetic and potential energies, actuator
+   work, and wrist-interface force and moment power are evaluated with a
+   Robertson--Winter balance check [@robertson1980].
+4. **Reproducibility.** Fixed-step integration, explicit parameter records,
+   machine-readable outputs, and regression tests connect every reported
+   number to a declared computation.
 
-## The counterfactual and energetics stack
+The source implementation and versioned data are linked once in the code
+and data availability statement (@sec-appendix-inventory). Repository names
+are omitted from the scientific argument because software provenance is not
+evidence for the physical claims.
 
-The normative contract lives in the engine-core dynamics interface
-([`_dynamics_interface.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/engine_core/_dynamics_interface.py)):
-`compute_drift_acceleration`, `compute_control_acceleration`,
-`compute_ztcf`, `compute_zvcf`, with the superposition identity
-(@eq-superposition) stated as a contract. Engine implementations exist
-for MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite, the analytic pendulum
-engines, and the Simscape bridge
-([`engine_capabilities.md`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/engines/engine_capabilities.md)).
-On top of these sit the pointwise engine-agnostic evaluator with HDF5
-persistence
-([`ztcf_zvcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py)),
-a MuJoCo delta-based counterfactual analyzer
-([`counterfactuals.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/counterfactuals.py)),
-induced-acceleration analyzers, MuJoCo inter-segment power flow
-([`power_flow.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/power_flow.py)),
-engine-agnostic work/power/impulse metrics
-([`power_work_metrics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/power_work_metrics.py)),
-kinematic-sequence and coordination analytics
-([`kinematic_sequence.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/kinematic_sequence.py),
-[`coordination_metrics.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/analysis/coordination_metrics.py)),
-and the MATLAB BASE/ZTCF/DELTA/ZVCF pipeline of @sec-ztcf-variants.
+## Validation boundary
 
-## Why this platform is the right instrument
-
-Three properties make UpstreamDrift suited to the timing question.
-First, **one model, many engines**: the same `GolfModelParams`
-specification renders to an analytic CPU reference backend and to
-MuJoCo-family backends, so results can be cross-validated between
-independent dynamics implementations (@sec-appendix-validation).
-Second, **counterfactuals as first-class citizens**: the drift/control
-split is a tested contract, not an ad-hoc analysis, so the S2
-hypothesis of @sec-hypothesis can be evaluated with the same code on
-every engine. Third, **reproducibility discipline**: the experiments in
-@sec-methods are committed modules with recorded provenance, run by two
-commands (@sec-appendix-repro), and their outputs are the only source of
-every number in @sec-results.
+The implementation includes unit tests for drift-plus-control
+reconstruction, work--energy consistency, deterministic replay, impact
+detection, and headline ordering. Independent simulation backends provide a
+route to cross-engine validation, but the results in this document should be
+read as one validated implementation of one model class. Cross-engine
+agreement would reduce implementation risk; it would not remove structural
+limitations such as the fixed hub, rigid shaft, planar motion, or simplified
+actuators.

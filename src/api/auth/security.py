@@ -151,8 +151,10 @@ def _log_bcrypt_verification_failure(
         failure_label,
         operation_label,
         exc_info=(type(exc), exc, exc.__traceback__),
-        operation=operation,
-        exception_type=type(exc).__name__,
+        extra={
+            "operation": operation,
+            "exception_type": type(exc).__name__,
+        },
     )
 
 

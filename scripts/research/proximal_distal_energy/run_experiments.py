@@ -1,4 +1,4 @@
-"""Run the proximal-to-distal timing experiments (epic #8383 / issue #8386).
+"""Run the proximal-to-distal timing analyses.
 
 Drives the backend-neutral double-pendulum golf model (ODE reference
 backend) with parameterized torque programs, and records:
@@ -14,7 +14,7 @@ Outputs (all under ``docs/research/proximal_distal_energy_transfer/``):
 - ``data/e1_sweep.json`` — every sweep row plus provenance
 - ``data/representative_traces.npz`` — full traces for the representative
   swings used by the figure generator
-- ``data/results_summary.json`` — headline numbers cited in the thesis
+- ``data/results_summary.json`` — headline numbers cited in the report
 
 Usage::
 

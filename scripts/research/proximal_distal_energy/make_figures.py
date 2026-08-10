@@ -1,8 +1,8 @@
-"""Generate thesis figures from the recorded experiment data.
+"""Generate report figures from the recorded experiment data.
 
 Reads ``data/e1_sweep.json`` and ``data/representative_traces.npz``
 produced by :mod:`run_experiments` and writes publication figures (PDF)
-into the thesis ``figures/`` directory. Run after the experiments::
+into the report ``figures/`` directory. Run after the experiments::
 
     python3 -m scripts.research.proximal_distal_energy.make_figures
 """
@@ -329,7 +329,7 @@ def fig_montage(traces: dict[str, np.ndarray], summary: dict) -> None:
 
 
 def main() -> None:
-    """Render all thesis figures from the recorded experiment data."""
+    """Render all report figures from the recorded experiment data."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     sweep, traces = _load()
