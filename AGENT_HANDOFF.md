@@ -5,7 +5,8 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8369** (`feat/launch-monitor-showtime-8364`) adds a versioned,
+- **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
+  adds a versioned,
   vendor-neutral flexible-analysis contract with matched FastAPI and PyQt
   surfaces. It keeps aggregate observations out of regression, labels
   association as non-causal, validates option enums at the API boundary, and
