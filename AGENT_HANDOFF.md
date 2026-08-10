@@ -5,6 +5,13 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **#8445 counterfactual persistence** — full PR **#8453** on branch
+  `research/counterfactual-killswitch-ensemble` adds a deterministic
+  matched-state API; 96 cut/horizon/timestep cases; gravity, damping, and
+  torque-switch audits; WSCG DELTA convention checks; four figures; and a
+  visually verified 58-page article. Pointwise ZTCF is explicitly limited to
+  instantaneous attribution; killswitch claims always state a forward horizon.
+
 - **#8443 / #8444 interaction-force mechanisms** — full PR **#8452** on branch
   `research/interaction-force-transfer` adds an exact and tested
   double-pendulum wrist-force/power decomposition, matched-state torque
@@ -76,6 +83,8 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
+- `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445
+  under epic #8443; multi-phase persistence and numerical/physics sensitivity.
 - `research/interaction-force-transfer` — full PR **#8452** for #8444 under
   epic #8443; exact interaction-force mechanics and first detailed article
   treatment.

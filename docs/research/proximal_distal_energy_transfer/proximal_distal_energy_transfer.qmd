@@ -77,6 +77,8 @@ format:
 
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
+{{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
+
 {{< include chapters/_ch03_evidence.qmd >}}
 
 {{< include chapters/_ch04_counterfactuals.qmd >}}
