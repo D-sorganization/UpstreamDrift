@@ -2465,6 +2465,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
+- Replaced `np.sum(weights)` with `weights.sum()` in `keypoint_offsets.py` to bypass array conversion checks and improve execution speed. (spec-exempt: micro-optimization)
 - Consolidated focused ndarray reductions and small-vector norm calculations in
   recurrence analysis, terrain and pendulum geometry, screw-theory transforms,
   trajectory end-effector speed, clubhead diagnostics, and convex-distance
