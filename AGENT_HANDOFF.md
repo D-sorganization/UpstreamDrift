@@ -1,9 +1,14 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 Update this file with every PR and every push to main.
 
 ## Where the repo is heading
+
+- **Tools #4276** — local `feat/4276-ground-consumer-adapter` adds a headless,
+  fail-closed consumer for the canonical Tools ground v1 façade while preserving
+  Tools records/provenance. Final pins and UI/release gates await the reviewed
+  Tools merge; current `main` pins gitlink `ff4240217` and Cargo `ea2690362`.
 
 - **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
   adds a versioned,
@@ -73,6 +78,8 @@ The active branches are independent topic branches off `main` unless noted:
 - `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
+- `feat/4276-ground-consumer-adapter` — local, unpushed partial Tools #4276
+  consumer slice from `main`; no vendor pin or release claim until Tools lands.
 
 ## Gate commands (run these before opening/updating a PR)
 
@@ -87,6 +94,8 @@ python3 scripts/ci/check_error_handling_ratchet.py  # error-handling anti-patter
 python3 scripts/check_docs_governance.py            # docs-only PR gate (docs-ci.yml)
 python3 -m scripts.generate_feature_parity_matrix   # after editing feature_parity.json
 maturin develop                                     # build Rust extensions locally
+# Ground consumer focus:
+python3 -m pytest tests/unit/ground_model/test_consumer_gateway.py -q
 ```
 
 CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality`,
@@ -133,3 +142,5 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 5. Review full PR **#8354** for #8345 P1; it consumes the
    curated `putting_dynamics` façade without duplicating physics in React. Then
    complete P5 public sharing and parity registration.
+6. After Tools ground merges, repin its exact commit and finish #4276 UI/release
+   gates. Closed draft #8369 is not a parent; replacement #8432 already merged.

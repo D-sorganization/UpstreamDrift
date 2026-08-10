@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.489 |
+| **Spec Version** | 1.0.490 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-10** - Added the first UpstreamDrift consumer boundary for the
+  canonical Tools ground-model contracts (Tools #4276). The headless gateway
+  validates the exact flight-to-ground request/result and reference-execution
+  v1 schemas before binding Tools parsers or execution, stays import-safe when
+  the optional authority is absent, and preserves returned records and
+  provenance unchanged. This is not a dependency pin or UI parity claim: the
+  exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
+  protected-release gates remain blocked on the reviewed Tools ground merge.
 
 - **2026-08-09** - Stabilized the Launch Monitor Analytics v1 consumer
   contract against the current Tools record contract. Dataset fingerprints
@@ -1491,6 +1500,7 @@ UpstreamDrift/
 │   │                               # contraction)
 │   └── shared/python/              # Cross-cutting libraries; highlights:
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
+│       ├── ground_model/            # Fail-closed consumer of Tools ground v1
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
 │       ├── putting_dynamics/       # Surface-aware putt collision and roll physics
@@ -1536,6 +1546,7 @@ UpstreamDrift/
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
 | Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
+| Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -1576,6 +1587,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
 | F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
+| F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
 
 ### API / Interface Contract
 
@@ -1913,7 +1925,7 @@ Beyond standard tools, CI enforces custom checks:
 
 | Repo             | Relationship | Description                                              |
 | ---------------- | ------------ | -------------------------------------------------------- |
-| (none currently) | —            | UpstreamDrift is currently a standalone fleet repository |
+| Tools            | Vendored Python and pinned Rust authority | `vendor/ud-tools` plus the Cargo `tools-core` revision provide reviewed shared contracts and kernels. Ground-model release pins remain pending Tools #4276. |
 
 ## 10. Deployment & Operations
 
@@ -1999,11 +2011,15 @@ blocks Python package publication on the built-wheel smoke matrix.
 - RL integration currently supports basic Gym environments; no hierarchical or multi-agent support
 - Tauri app Windows builds require MSVC toolchain (no MinGW support)
 - Performance scaling beyond 100-muscle models not yet tested
+- Ground-model execution is not yet available from the clean UpstreamDrift
+  release: the headless consumer gateway exists, but exact Tools pins and
+  FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-10 | 1.0.490 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
 | 2026-08-10 | 1.0.489 | Extended Launch Monitor Analytics with a versioned arbitrary-field analysis contract, PyQt and FastAPI surfaces, configurable association/missingness/multiplicity/grouping, OLS uncertainty and residual diagnostics, deterministic lineage, and fail-closed aggregate/vendor-pooling boundaries for #8364-#8366. |
 | 2026-08-08 | 1.0.487 | Epic #8390 B5/C2/C4 (completing all 16 sub-issues): CEM/MPPI batch swing optimizer as the first production consumer of the ADR-0023/0024 batch infrastructure, ~1k mujoco rollouts scored in ~2.5s on the CPU fallback (#8400); pose-estimator registry replacing the 5-place estimator edit tax, with API/pipeline/motion-capture routes deriving from one seam (#8402); 4D-Humans/HMR2 sidecar (FreeMoCap-pattern subprocess isolation for CC-BY-NC tooling) with a registered 3D adapter and SMPL-betas plumbing into the character builder (#8404). |
 | 2026-08-08 | 1.0.486 | Epic #8390 B1/B3/B4/C1/C3/D2: shared 7-DOF swing multibody model + smooth cost surrogates (`optimization/model_provider.py`, `smooth_costs.py`, #8396); CasADi direct-transcription swing backend with symbolic RNEA validated against pin.rnea, new `optimal-control` extra, `solver='casadi'` dispatch (#8398); Crocoddyl FDDP backend with subprocess stack-health probe and graceful mixed-wheel degradation, new `crocoddyl` extra (#8399); real Pinocchio IK backend (diff_ik-style LM + optional PINK path) with SkeletonRig→pin.Model bridge (#8401); DeepLabCut import adapter with custom keypoints (#8403); web UI 3D mocap skeleton, URDF glTF mesh loading with a hardened mesh-asset endpoint, and live pose streaming over the realtime WebSocket (#8406). |
