@@ -10,7 +10,10 @@ counterfactual ensemble with gravity and damping ablations, and a direct
 two-hand wrench audit of the archived WSCG BASE/ZTCF/DELTA model tables. A
 matched rigid/flexible three-coordinate study separately accounts for control,
 momentum, gravity, joint damping, shaft elasticity, and shaft damping, with
-closed energy bookkeeping and a 120-case robustness grid.
+closed energy bookkeeping and a 120-case robustness grid. A common-observable
+model ladder then tests wrench transport, prescribed mobile-hub reactions,
+two-hand constraint rank, and proper 3-D frame invariance without representing
+the still-open full-body cross-engine comparison as complete.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -42,6 +45,7 @@ python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
 python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
+python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -52,6 +56,7 @@ python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figure
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
+python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -78,6 +83,10 @@ Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
   model and a separate three-coordinate point-mass shaft-flex surrogate;
   neither establishes a universal coaching prescription, equipment effect, or
   population-level result.
+- The higher-order ladder executes a three-coordinate interface audit,
+  prescribed mobile-hub inverse dynamics, planar closed-loop constraint
+  geometry, and 3-D frame transformations. Full-body cross-engine dynamics are
+  explicitly recorded as unexecuted.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
