@@ -5,13 +5,17 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8448 higher-order mechanism ladder** — active on
-  `research/higher-order-mechanism-ladder`. The first executed slice adds a
+- **#8448 higher-order mechanism ladder** — first slice merged in full PR
+  **#8456** at remote-main commit `85eae6a8ef1b132f93eda87bef2a2d6d51280c49`.
+  The executed slice adds a
   common frame/reference-explicit wrench-power schema, exact frame and
   reference-transport audits, prescribed mobile-hub inverse dynamics, planar
   two-hand constraint rank/nullspace diagnostics, seven figures, and a model
   discrepancy table. The evidence record deliberately marks full-body
   cross-engine dynamics `not_executed`; capability is not reported as a result.
+  Follow-up full PR **#8457** losslessly compacts the 90-page PDF below the
+  repository's 1 MiB guard with page, link, outline, and visual-equivalence
+  checks.
 
 - **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
   **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
