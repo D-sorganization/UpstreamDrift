@@ -5,8 +5,8 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8447 gravity, momentum, damping, and shaft-flex separation** — active on
-  `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
+- **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
+  **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
   surrogate now has an exact matched rigid reduction, termwise acceleration and
   power attribution, interface force/moment accounting, closed work--energy
   balance, gravity and damping ablations, a 120-case
