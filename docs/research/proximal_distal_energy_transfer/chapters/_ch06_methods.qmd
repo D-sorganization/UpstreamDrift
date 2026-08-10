@@ -33,7 +33,7 @@ $\dot q(0) = 0$ — an arm carried well past horizontal with the club
 folded over the shoulder, comparable to the classical two-lever setups
 [@jorgensen1999; @pickering1999].
 
-## Torque programs {#sec-methods-programs}
+## Torque Programs {#sec-methods-programs}
 
 All programs share a constant shoulder torque $\tau_s$ active from $t=0$
 (two levels: 60 and 100 N·m), so the sweep isolates the wrist channel.
@@ -68,7 +68,7 @@ shortening velocity). State-dependent torques require closed-loop
 integration, done with the backend's own `mass_matrix`/`bias_forces`
 primitives under the identical RK4 settings.
 
-## Impact definition and validity {#sec-methods-impact}
+## Impact Definition and Validity {#sec-methods-impact}
 
 Impact is the first upward crossing of
 $\theta_{\mathrm{club}} = 0$ (club pointing straight down in the swing
@@ -84,7 +84,7 @@ very-late-onset programs. This constraint is conservative *against* the
 S2 hypothesis: it discards only trials that would otherwise have
 inflated the restraint arm of the sweep.
 
-## Recorded quantities {#sec-methods-quantities}
+## Recorded Quantities {#sec-methods-quantities}
 
 For every program: the full state trajectory, applied controls, impact
 time and clubhead speed. For four representative programs at
@@ -132,7 +132,7 @@ restrain-then-drive onset are re-optimized on the original onset grid.
 These ranges test local structural sensitivity; they are not population
 percentiles or confidence intervals.
 
-## Design rationale and scope {#sec-methods-scope}
+## Design Rationale and Scope {#sec-methods-scope}
 
 This deliberately simple model is a planar 2-DOF chain with a fixed hub and rigid
 shaft. That choice is the point, not a compromise: the classical timing

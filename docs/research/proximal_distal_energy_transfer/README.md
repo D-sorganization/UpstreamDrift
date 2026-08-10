@@ -21,9 +21,9 @@ Ongoing validation and extension work is tracked in
 | [`figures/`](figures/)                                                       | Figures generated from the recorded analyses (PDF and SVG)                           |
 | [`data/`](data/)                                                             | Recorded experiment outputs with provenance (JSON + NPZ)                             |
 | [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex) | LaTeX generated from the Quarto source (`keep-tex: true`)                            |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf) | Rendered PDF (40 pp.)                                                                |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf) | Rendered PDF (42 pp.)                                                                |
 
-## Reproducing everything
+## Reproducing Everything
 
 ```bash
 # primary analyses (E1 sweep, E2 counterfactuals, E4 interface powers)
@@ -44,7 +44,7 @@ Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
 `pandas`. Experiments are deterministic (fixed-step RK4); provenance
 (git SHA, parameters) is stamped into `data/*.json`.
 
-## Evidence boundaries
+## Evidence Boundaries
 
 - Every reference is verified; two candidate sources that could not be
   confirmed were rejected rather than cited.

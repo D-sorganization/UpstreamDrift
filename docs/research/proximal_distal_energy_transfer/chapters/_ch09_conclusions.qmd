@@ -24,7 +24,7 @@ ordering within a local model neighborhood, not a universal timing value or
 an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
 simplified actuators, and absence of human data remain material limitations.
 
-## Research priorities {#sec-future}
+## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:

@@ -5,6 +5,12 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **Document title capitalization** — this branch normalizes the
+  Proximal-to-Distal article headings and regenerated PDF/LaTeX, adds a
+  changed-document gate to pre-commit and Docs Governance CI, and records the
+  fleet convention in `AGENTS.md`. The full tracked-document audit command is
+  `python scripts/check_document_title_case.py`.
+
 - **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
   adds a versioned,
   vendor-neutral flexible-analysis contract with matched FastAPI and PyQt
