@@ -39,6 +39,21 @@ columns are retained rather than discarded.
 The repository fixtures are synthetic and vendor-shaped. They are not vendor
 validation data and cannot establish measurement accuracy or equivalence.
 
+### Private Reference Corpus
+
+Real source rows and generated launch-monitor databases are maintained in the
+private D-sorganization data authority, not in this public repository. An
+authorized checkout must be pinned to an approved commit. Set
+`LAUNCH_MONITOR_DATA_ROOT` to the root of that private
+`Launch-Monitor-Flight-Model-Campaign` checkout.
+
+The historical `load_kaggle_dataset()` API then resolves the 832-shot
+Garmin-schema reference file under `data/authority/source_archive/`. Its source
+metadata contains conflicting monitor descriptions, so UpstreamDrift does not
+infer monitor identity from headers, filename, or directory layout. Missing
+access or a missing pinned file fails closed; there is no public download
+fallback.
+
 ## Workflow
 
 ### 1. Import and Review
