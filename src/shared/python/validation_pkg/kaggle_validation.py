@@ -1,15 +1,18 @@
-"""Kaggle Golf Trajectory Dataset Loader and Validator.
+"""Private-authority golf trajectory dataset loader and validator.
 
-Loads the Garmin R50 launch monitor data from Kaggle for validation
-of ball flight models against real-world measurements.
+Loads a Garmin-schema public-source dataset from the private D-sorganization
+data authority for internal validation of ball-flight models.
 
-Dataset source: Kaggle "Golf Swing and Trajectory Data" (MIT License)
+The producing monitor identity is disputed in the source record and is not
+inferred from its file layout. The historical public API name is retained for
+compatibility.
 Columns:
 - Ball Speed (mph), Launch Angle (deg), Spin Rate (rpm)
 - Carry Distance (yards), Apex Height (ft), Total Distance (yards)
 - Atmospheric: Air Density (g/L), Temperature (F), Air Pressure (kPA)
 """
 
+import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -74,17 +77,37 @@ class ShotRecord:
 def load_kaggle_dataset(
     csv_path: Path | str | None = None,
 ) -> pd.DataFrame:
-    """Load the Kaggle golf trajectory dataset.
+    """Load the private-authority golf trajectory dataset.
 
     Args:
-        csv_path: Path to CSV file. Defaults to data/golf_trajectory.csv
+        csv_path: Explicit authorized CSV path. When omitted, resolves the
+            commit-pinned private authority through LAUNCH_MONITOR_DATA_ROOT.
 
     Returns:
         DataFrame with shot data
     """
     if csv_path is None:
-        # Default path relative to this file
-        csv_path = Path(__file__).parent.parent.parent / "data" / "golf_trajectory.csv"
+        private_root = os.environ.get("LAUNCH_MONITOR_DATA_ROOT")
+        if not private_root:
+            raise FileNotFoundError(
+                "private launch-monitor authority is unavailable; set "
+                "LAUNCH_MONITOR_DATA_ROOT to an authorized, commit-pinned "
+                "Launch-Monitor-Flight-Model-Campaign checkout"
+            )
+        csv_path = (
+            Path(private_root)
+            / "data"
+            / "authority"
+            / "source_archive"
+            / "edwardxiong_832_trajectory"
+            / "data"
+            / "golf_trajectory.csv"
+        )
+        if not csv_path.is_file():
+            raise FileNotFoundError(
+                "private launch-monitor authority dataset is missing at "
+                f"{csv_path}; verify the pinned authority checkout"
+            )
 
     df = pd.read_csv(csv_path)
 
