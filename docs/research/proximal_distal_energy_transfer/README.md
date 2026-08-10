@@ -60,11 +60,15 @@ python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
+cd ../../..
+python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
 ```
 
 Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
 Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
-`pandas`. Experiments are deterministic (fixed-step RK4); provenance
+`pandas`, and `pymupdf`. The final command performs lossless PDF object/stream
+compaction and fails if the page, URI-link, or outline contract changes.
+Experiments are deterministic (fixed-step RK4); provenance
 (git SHA, parameters) is stamped into `data/*.json`.
 
 ## Evidence Boundaries
