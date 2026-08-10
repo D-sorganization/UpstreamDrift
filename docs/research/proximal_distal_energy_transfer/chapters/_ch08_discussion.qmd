@@ -1,6 +1,6 @@
 # Discussion {#sec-discussion}
 
-## Agreement with the literature {#sec-discussion-agreement}
+## Agreement With the Literature {#sec-discussion-agreement}
 
 Every headline result of @sec-results has an antecedent in the
 literature of @sec-mechanics, and the quantitative agreement is close
@@ -25,7 +25,7 @@ time signature — control as early restraint, drift as late delivery —
 is the counterfactual pattern proposed in @sec-hypothesis, now exhibited
 by this model.
 
-## Why retention wins: a mechanistic reading {#sec-discussion-mechanism}
+## Why Retention Wins: A Mechanistic Reading {#sec-discussion-mechanism}
 
 The energy budgets localize the causal structure. Early wrist drive
 fails through *two* simultaneous channels: it raises the system's
@@ -58,7 +58,7 @@ past the useful window. "Retain early, release late" is therefore not
 "retain maximally"; it is *retain until the drift field can pay, then
 stop retaining*.
 
-## What the 2-DOF model cannot establish {#sec-discussion-limits}
+## What the 2-DOF Model Cannot Establish {#sec-discussion-limits}
 
 The results chapter demonstrates the S2 pattern in the model class where
 the classical timing literature lives; it does not yet demonstrate it
@@ -88,7 +88,7 @@ for a golfer. The specific gaps, each with a tracked remediation:
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.
 
-## Implications, cautiously stated {#sec-discussion-implications}
+## Implications, Cautiously Stated {#sec-discussion-implications}
 
 For modeling practice, the analysis shows that the timing question is
 tractable with counterfactual decomposition, and that

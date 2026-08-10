@@ -13,6 +13,17 @@ historical agent-workflow notes see
 This file is narrower: a **discovery workflow** for agents and a
 **directory of shared infrastructure** so we stop duplicating work.
 
+## Document Title Capitalization
+
+Use title case for every document title, subtitle, section heading, navigation
+label, figure caption, and chart title: capitalize the first letter of every
+significant word. Keep articles, coordinating conjunctions, and short
+prepositions lowercase unless they begin or end a title or follow a colon.
+Preserve acronyms, mathematical notation, units, filenames, and product names.
+This convention applies to Markdown, Quarto, LaTeX, Word, and PDF outputs; edit
+the canonical source and regenerate rendered artifacts. Run
+`python scripts/check_document_title_case.py` for a full tracked-document audit.
+
 ---
 
 ## A. Before you write new code — discovery workflow

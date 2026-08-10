@@ -76,6 +76,13 @@ repos:
         files: ^src/
         exclude: ^(src/.*/__main__\.py|tests/|\.github/|src/shared/python/codemap/(cli|watcher|mcp_server)\.py$)
 
+      - id: document-title-capitalization
+        name: "document title capitalization"
+        entry: python scripts/check_document_title_case.py --staged
+        language: python
+        additional_dependencies: [pypdf>=5.0]
+        files: '\.(md|qmd|tex|docx|pdf)$'
+
   # -------------------------------------------------------------------------
   # Stage 3: Config File Formatting - ALWAYS RUNS
   # -------------------------------------------------------------------------

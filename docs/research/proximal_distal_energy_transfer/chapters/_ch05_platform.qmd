@@ -6,7 +6,7 @@ and rendered to the analytical equations of motion and optional simulation
 backends. The present results use the deterministic analytical ODE backend;
 they do not depend on a proprietary solver or graphical interface.
 
-## Analysis components
+## Analysis Components
 
 The workflow separates four responsibilities:
 
@@ -28,7 +28,7 @@ and data availability statement (@sec-appendix-inventory). Repository names
 are omitted from the scientific argument because software provenance is not
 evidence for the physical claims.
 
-## Validation boundary
+## Validation Boundary
 
 The implementation includes unit tests for drift-plus-control
 reconstruction, work--energy consistency, deterministic replay, impact

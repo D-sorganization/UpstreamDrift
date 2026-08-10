@@ -1,6 +1,6 @@
 # Empirical Evidence in Golfers {#sec-evidence}
 
-## The work and power budget of the swing {#sec-workbudget}
+## The Work and Power Budget of the Swing {#sec-workbudget}
 
 Nesbit's full-body kinematic-kinetic study and the companion work-power
 analysis of Nesbit and Serrano remain the most complete published energy
@@ -33,7 +33,7 @@ rather than to sequencing per se [@frontiers2026footground]. That
 distinction — transfer *efficiency* mattering where sequence *order*
 alone does not — recurs throughout the skill-level literature below.
 
-## Segmental kinetic-energy sequencing {#sec-ke-sequencing}
+## Segmental Kinetic-Energy Sequencing {#sec-ke-sequencing}
 
 Two studies measured the quantity this document cares most about —
 segment *kinetic energy*, not merely angular speed — and both found the
@@ -50,7 +50,7 @@ they show the energetic sequence is not an artifact of
 angular-velocity bookkeeping: energy itself arrives late in the club,
 after the proximal segments have peaked.
 
-## Kinematic-sequence evidence and skill-level differences {#sec-skill}
+## Kinematic-Sequence Evidence and Skill-Level Differences {#sec-skill}
 
 The descriptive P→D findings are robust in skilled populations. Tinmark
 and colleagues, studying elite golfers across full and partial shots,
@@ -122,7 +122,7 @@ systematically, coaches' key swing parameters overlap with, but do not
 coincide with, the parameters the biomechanical literature supports
 [@smith2015].
 
-## Where the transfer occurs {#sec-where}
+## Where the Transfer Occurs {#sec-where}
 
 Synthesizing @sec-workbudget, @sec-ke-sequencing and @sec-skill with the
 mechanics of @sec-mechanics: in a skilled swing, the dominant energy

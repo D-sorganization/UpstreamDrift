@@ -309,7 +309,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, rightrule=.15mm, titlerule=0mm, coltitle=black, opacityback=0, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, left=2mm, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and evidence categories}, toprule=.15mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, breakable, bottomrule=.15mm, titlerule=0mm, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, toprule=.15mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, rightrule=.15mm, leftrule=.75mm, opacityback=0, arc=.35mm, colframe=quarto-callout-note-color-frame]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -385,7 +385,7 @@ throughout this document: that \emph{restraining} the P→D handoff early
 in the downswing and accelerating it late may be the more effective
 strategy.
 
-\section{Research questions}\label{research-questions}
+\section{Research Questions}\label{research-questions}
 
 The document is organized around four questions:
 
@@ -418,7 +418,7 @@ The document is organized around four questions:
   Section~\ref{sec-discussion})
 \end{itemize}
 
-\section{Approach and contributions}\label{approach-and-contributions}
+\section{Approach and Contributions}\label{approach-and-contributions}
 
 The document makes six contributions:
 
@@ -461,7 +461,7 @@ The document makes six contributions:
   Section~\ref{sec-conclusions}).
 \end{enumerate}
 
-\section{Reading guide}\label{reading-guide}
+\section{Reading Guide}\label{reading-guide}
 
 Readers interested only in the new quantitative material can read
 Section~\ref{sec-timing-framework} for the hypothesis,
@@ -486,7 +486,7 @@ tradition that made release timing an explicit variable
 (Section~\ref{sec-optimalcontrol}), and the operational meanings of
 ``energy transfer'' (Section~\ref{sec-energyflow}).
 
-\section{Dynamics formalism}\label{sec-formalism}
+\section{Dynamics Formalism}\label{sec-formalism}
 
 Write the equation of motion of an articulated chain in standard
 manipulator form (\citeproc{ref-featherstone2008}{Featherstone 2008}):
@@ -511,8 +511,8 @@ produce alone) and a control part (\(M^{-1}\tau\)), a property enforced
 to numerical tolerance by the accompanying tests
 (Section~\ref{sec-appendix-validation}).
 
-\section{The summation-of-speed principle and its
-limits}\label{sec-summation}
+\section{The Summation-of-Speed Principle and Its
+Limits}\label{sec-summation}
 
 The oldest formalization of P→D sequencing is the \emph{summation of
 speed} principle: in skills demanding high end-point speed, each segment
@@ -560,8 +560,8 @@ skills and contribute substantially to end-point speed
 analogue is forearm rotation and wrist action in the final phase of the
 downswing.
 
-\section{Double-pendulum mechanics of the golf
-downswing}\label{sec-doublependulum}
+\section{Double-Pendulum Mechanics of the Golf
+Downswing}\label{sec-doublependulum}
 
 The two-lever, one-hinge model of the downswing --- an ``arm'' link
 rotating about a hub, connected by a wrist hinge to a ``club'' link ---
@@ -629,8 +629,8 @@ argument for \textbf{retain-early / release-late}.
 Section~\ref{sec-results} tests exactly this proposition in the
 numerical implementation used here.
 
-\section{Optimal control and torque
-sequencing}\label{sec-optimalcontrol}
+\section{Optimal Control and Torque
+Sequencing}\label{sec-optimalcontrol}
 
 If the timing question is posed as an optimization --- what torque
 program maximizes clubhead speed subject to actuator limits? --- the
@@ -664,14 +664,14 @@ mobility, shaft flexibility (\citeproc{ref-betzler2012}{Betzler et al.
 rate limits) is why cross-engine validation (Section~\ref{sec-platform})
 is valuable when revisiting the question.
 
-\section{What ``energy transfer'' means
-operationally}\label{sec-energyflow}
+\section{What ``Energy Transfer'' Means
+Operationally}\label{sec-energyflow}
 
 Claims about energy transfer require an accounting framework. Four
 levels of analysis appear in the literature, and they are not
 interchangeable.
 
-\subsection{Joint power and work}\label{joint-power-and-work}
+\subsection{Joint Power and Work}\label{joint-power-and-work}
 
 For a joint spanning segments \(i\) and \(i{+}1\) with net joint torque
 \(\tau\) and relative angular velocity \(\omega\), the \emph{joint
@@ -682,8 +682,8 @@ most golf studies report, and it is the basis of the work-power budget
 of Nesbit and Serrano (Section~\ref{sec-workbudget})
 (\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}).
 
-\subsection{Joint-force power and segmental energy
-accounting}\label{sec-rw}
+\subsection{Joint-Force Power and Segmental Energy
+Accounting}\label{sec-rw}
 
 Joint moments are not the only conduit of mechanical energy: the joint
 reaction force \(\mathbf{F}\) acting at a joint moving with velocity
@@ -702,8 +702,8 @@ inter-segment transfer terms}, not about peak angular velocities.
 Section~\ref{sec-methods} implements exactly this accounting at the
 model's wrist interface, including the energy-balance residual check.
 
-\subsection{Induced accelerations and dynamic
-coupling}\label{induced-accelerations-and-dynamic-coupling}
+\subsection{Induced Accelerations and Dynamic
+Coupling}\label{induced-accelerations-and-dynamic-coupling}
 
 In a coupled chain, any single torque induces accelerations at
 \emph{every} joint --- including joints it does not span --- through the
@@ -719,8 +719,8 @@ chain. The ZTCF/ZVCF decompositions of
 Section~\ref{sec-timing-framework} are the counterfactual cousins of
 this analysis.
 
-\subsection{Kinematic sequence as a proxy --- and its failure
-modes}\label{kinematic-sequence-as-a-proxy-and-its-failure-modes}
+\subsection{Kinematic Sequence as a Proxy --- And Its Failure
+Modes}\label{kinematic-sequence-as-a-proxy-and-its-failure-modes}
 
 Peak-ordering of segment angular speeds is a \emph{proxy} for energy
 flow, not a measurement of it. Marsan and colleagues showed that the
@@ -740,7 +740,7 @@ Section~\ref{sec-results} uses it.
 
 \chapter{Empirical Evidence in Golfers}\label{sec-evidence}
 
-\section{The work and power budget of the swing}\label{sec-workbudget}
+\section{The Work and Power Budget of the Swing}\label{sec-workbudget}
 
 Nesbit's full-body kinematic-kinetic study and the companion work-power
 analysis of Nesbit and Serrano remain the most complete published energy
@@ -777,7 +777,7 @@ al. 2026}). That distinction --- transfer \emph{efficiency} mattering
 where sequence \emph{order} alone does not --- recurs throughout the
 skill-level literature below.
 
-\section{Segmental kinetic-energy sequencing}\label{sec-ke-sequencing}
+\section{Segmental Kinetic-Energy Sequencing}\label{sec-ke-sequencing}
 
 Two studies measured the quantity this document cares most about ---
 segment \emph{kinetic energy}, not merely angular speed --- and both
@@ -796,8 +796,8 @@ they show the energetic sequence is not an artifact of angular-velocity
 bookkeeping: energy itself arrives late in the club, after the proximal
 segments have peaked.
 
-\section{Kinematic-sequence evidence and skill-level
-differences}\label{sec-skill}
+\section{Kinematic-Sequence Evidence and Skill-Level
+Differences}\label{sec-skill}
 
 The descriptive P→D findings are robust in skilled populations. Tinmark
 and colleagues, studying elite golfers across full and partial shots,
@@ -886,7 +886,7 @@ coaches' key swing parameters overlap with, but do not coincide with,
 the parameters the biomechanical literature supports
 (\citeproc{ref-smith2015}{Smith et al. 2015}).
 
-\section{Where the transfer occurs}\label{sec-where}
+\section{Where the Transfer Occurs}\label{sec-where}
 
 Synthesizing Section~\ref{sec-workbudget},
 Section~\ref{sec-ke-sequencing} and Section~\ref{sec-skill} with the
@@ -914,7 +914,7 @@ every energy pathway is measurable exactly.
 \chapter{The Timing Question and the Counterfactual
 Framework}\label{sec-timing-framework}
 
-\section{Two strategies, stated precisely}\label{sec-strategies}
+\section{Two Strategies, Stated Precisely}\label{sec-strategies}
 
 Let \(E_p(t)\) be the kinetic energy of the proximal subsystem (trunk
 and arms, with the club riding folded) over a downswing
@@ -984,7 +984,7 @@ finer variables (release profile shape, hub-path geometry,
 impulse-transfer efficiency) --- exactly what the counterfactual
 framework below is designed to expose.
 
-\section{What would falsify S2?}\label{sec-falsify}
+\section{What Would Falsify S2?}\label{sec-falsify}
 
 To keep the question scientific rather than rhetorical, we state what
 evidence would count against the retain-early/release-late hypothesis:
@@ -1011,7 +1011,7 @@ evidence would count against the retain-early/release-late hypothesis:
 
 The last test is executed in Section~\ref{sec-results}.
 
-\section{ZTCF and ZVCF: definitions}\label{sec-ztcf-defs}
+\section{ZTCF and ZVCF: Definitions}\label{sec-ztcf-defs}
 
 Two counterfactual accelerations are defined \emph{pointwise} at each
 measured state \((q, \dot q, \tau)\) of a swing:
@@ -1051,7 +1051,7 @@ affine in \(\tau\), the actual acceleration superposes exactly:
 an identity enforced to numerical tolerance by the accompanying tests
 (Section~\ref{sec-appendix-validation}).
 
-\section{Two operational variants}\label{sec-ztcf-variants}
+\section{Two Operational Variants}\label{sec-ztcf-variants}
 
 Two distinct operationalizations are available, and the difference
 matters for interpretation.
@@ -1097,8 +1097,8 @@ Section~\ref{sec-rw}, including a kinematic-sequence plot computed
 \emph{separately for the BASE, ZTCF and DELTA components}
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF\%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m}{\texttt{SCRIPT\_324\_PLOT\_ZTCF\_KinematicSequence.m}}).
 
-\section{The counterfactual form of the timing
-hypothesis}\label{sec-hypothesis}
+\section{The Counterfactual Form of the Timing
+Hypothesis}\label{sec-hypothesis}
 
 The ZTCF/ZVCF language makes the S2 hypothesis crisp. Along a measured
 downswing, project the drift and control accelerations onto the club's
@@ -1141,7 +1141,7 @@ simulation backends. The present results use the deterministic
 analytical ODE backend; they do not depend on a proprietary solver or
 graphical interface.
 
-\section{Analysis components}\label{analysis-components}
+\section{Analysis Components}\label{analysis-components}
 
 The workflow separates four responsibilities:
 
@@ -1173,7 +1173,7 @@ and data availability statement (Section~\ref{sec-appendix-inventory}).
 Repository names are omitted from the scientific argument because
 software provenance is not evidence for the physical claims.
 
-\section{Validation boundary}\label{validation-boundary}
+\section{Validation Boundary}\label{validation-boundary}
 
 The implementation includes unit tests for drift-plus-control
 reconstruction, work--energy consistency, deterministic replay, impact
@@ -1221,7 +1221,7 @@ comparable to the classical two-lever setups
 (\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999};
 \citeproc{ref-pickering1999}{Pickering and Vickers 1999}).
 
-\section{Torque programs}\label{sec-methods-programs}
+\section{Torque Programs}\label{sec-methods-programs}
 
 All programs share a constant shoulder torque \(\tau_s\) active from
 \(t=0\) (two levels: 60 and 100 N·m), so the sweep isolates the wrist
@@ -1265,7 +1265,7 @@ integration, done with the backend's own
 \texttt{mass\_matrix}/\texttt{bias\_forces} primitives under the
 identical RK4 settings.
 
-\section{Impact definition and validity}\label{sec-methods-impact}
+\section{Impact Definition and Validity}\label{sec-methods-impact}
 
 Impact is the first upward crossing of \(\theta_{\mathrm{club}} = 0\)
 (club pointing straight down in the swing plane), linearly interpolated
@@ -1281,7 +1281,7 @@ very-late-onset programs. This constraint is conservative \emph{against}
 the S2 hypothesis: it discards only trials that would otherwise have
 inflated the restraint arm of the sweep.
 
-\section{Recorded quantities}\label{sec-methods-quantities}
+\section{Recorded Quantities}\label{sec-methods-quantities}
 
 For every program: the full state trajectory, applied controls, impact
 time and clubhead speed. For four representative programs at
@@ -1329,7 +1329,7 @@ case, late-drive and restrain-then-drive onset are re-optimized on the
 original onset grid. These ranges test local structural sensitivity;
 they are not population percentiles or confidence intervals.
 
-\section{Design rationale and scope}\label{sec-methods-scope}
+\section{Design Rationale and Scope}\label{sec-methods-scope}
 
 This deliberately simple model is a planar 2-DOF chain with a fixed hub
 and rigid shaft. That choice is the point, not a compromise: the
@@ -1353,7 +1353,7 @@ suite (Section~\ref{sec-methods}) from the recorded outputs in
 \texttt{make\_figures.py}. Speeds are quoted to 0.1 m/s and times to 1
 ms.
 
-\section{E1 --- Timing of the distal handoff}\label{sec-results-e1}
+\section{E1 --- Timing of the Distal Handoff}\label{sec-results-e1}
 
 Figure~\ref{fig-sweep} shows clubhead speed at impact as a function of
 wrist-drive onset time for both shoulder-torque levels.
@@ -1458,8 +1458,8 @@ Three findings, consistent across both torque levels:
   \end{enumerate}
 \end{enumerate}
 
-\section{E1b --- Sensitivity to actuator torque-velocity
-bounds}\label{sec-results-e1b}
+\section{E1b --- Sensitivity to Actuator Torque-Velocity
+Bounds}\label{sec-results-e1b}
 
 A standing objection to constant-torque sweeps is that real muscle
 torque falls with shortening velocity, shrinking the late-drive window
@@ -1493,7 +1493,7 @@ torque-velocity bounds on the shoulder and wrist drives.}
 
 \end{figure}%
 
-\section{Kinematic sequence}\label{sec-results-sequence}
+\section{Kinematic Sequence}\label{sec-results-sequence}
 
 Figure~\ref{fig-kinseq} shows arm and club angular-speed traces. All
 four programs produce the qualitative P→D pattern --- arm speed peaks,
@@ -1539,7 +1539,7 @@ equal time steps).}
 
 \end{figure}%
 
-\section{Segment energies}\label{sec-results-energies}
+\section{Segment Energies}\label{sec-results-energies}
 
 Figure~\ref{fig-energies} shows arm and club kinetic-energy time
 courses, and Figure~\ref{fig-budget} the early-half/late-half budget.
@@ -1595,7 +1595,7 @@ transfer) for the representative programs.}
 
 \end{figure}%
 
-\section{E4 --- Wrist-interface power accounting}\label{sec-results-e4}
+\section{E4 --- Wrist-Interface Power Accounting}\label{sec-results-e4}
 
 Figure~\ref{fig-wristpower} (left) shows the Robertson-Winter interface
 powers for the best restrain-then-drive swing. The joint-force power ---
@@ -1625,8 +1625,8 @@ club mechanical-energy rate versus the sum of interface powers.}
 
 \end{figure}%
 
-\section{E2 --- Counterfactual drift/control
-split}\label{sec-results-e2}
+\section{E2 --- Counterfactual Drift/Control
+Split}\label{sec-results-e2}
 
 Figure~\ref{fig-ztcf} shows the pointwise drift/control decomposition
 (Equation~\ref{eq-superposition}) of the club's absolute angular
@@ -1679,7 +1679,7 @@ treating one onset time as a general prescription. Because parameters
 were varied individually, the study does not characterize interaction
 effects or a population distribution.
 
-\section{Summary of findings}\label{sec-results-summary}
+\section{Summary of Findings}\label{sec-results-summary}
 
 Within this model class, under matched proximal effort and a
 consistently defined first-pass impact: (i) early distal drive is lower
@@ -1698,7 +1698,7 @@ Section~\ref{sec-results-robustness}).
 
 \chapter{Discussion}\label{sec-discussion}
 
-\section{Agreement with the literature}\label{sec-discussion-agreement}
+\section{Agreement With the Literature}\label{sec-discussion-agreement}
 
 Every headline result of Section~\ref{sec-results} has an antecedent in
 the literature of Section~\ref{sec-mechanics}, and the quantitative
@@ -1729,8 +1729,8 @@ matches the skilled pattern. Finally, the drift/control time signature
 counterfactual pattern proposed in Section~\ref{sec-hypothesis}, now
 exhibited by this model.
 
-\section{Why retention wins: a mechanistic
-reading}\label{sec-discussion-mechanism}
+\section{Why Retention Wins: A Mechanistic
+Reading}\label{sec-discussion-mechanism}
 
 The energy budgets localize the causal structure. Early wrist drive
 fails through \emph{two} simultaneous channels: it raises the system's
@@ -1765,8 +1765,8 @@ postpones delivery past the useful window. ``Retain early, release
 late'' is therefore not ``retain maximally''; it is \emph{retain until
 the drift field can pay, then stop retaining}.
 
-\section{What the 2-DOF model cannot
-establish}\label{sec-discussion-limits}
+\section{What the 2-DOF Model Cannot
+Establish}\label{sec-discussion-limits}
 
 The results chapter demonstrates the S2 pattern in the model class where
 the classical timing literature lives; it does not yet demonstrate it
@@ -1819,8 +1819,8 @@ for a golfer. The specific gaps, each with a tracked remediation:
   \end{enumerate}
 \end{itemize}
 
-\section{Implications, cautiously
-stated}\label{sec-discussion-implications}
+\section{Implications, Cautiously
+Stated}\label{sec-discussion-implications}
 
 For modeling practice, the analysis shows that the timing question is
 tractable with counterfactual decomposition, and that energy-level
@@ -1870,7 +1870,7 @@ timing value or an individual coaching prescription. A fixed hub, rigid
 shaft, planar chain, simplified actuators, and absence of human data
 remain material limitations.
 
-\section{Research priorities}\label{sec-future}
+\section{Research Priorities}\label{sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:

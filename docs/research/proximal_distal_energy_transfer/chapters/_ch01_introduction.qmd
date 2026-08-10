@@ -1,5 +1,5 @@
 ::: {.callout-note}
-## Scope and evidence categories
+## Scope and Evidence Categories
 
 This document distinguishes three kinds of statement. **Empirical
 findings** summarize published measurements of golfers. **Model-derived
@@ -63,7 +63,7 @@ the hypothesis examined throughout
 this document: that *restraining* the P→D handoff early in the downswing
 and accelerating it late may be the more effective strategy.
 
-## Research questions
+## Research Questions
 
 The document is organized around four questions:
 
@@ -83,7 +83,7 @@ The document is organized around four questions:
   energy accounting and counterfactual decompositions computed along
   every trajectory? (@sec-methods, @sec-results, @sec-discussion)
 
-## Approach and contributions
+## Approach and Contributions
 
 The document makes six contributions:
 
@@ -113,7 +113,7 @@ The document makes six contributions:
    parity, full-body engines, and motion-capture replication
    (@sec-discussion, @sec-conclusions).
 
-## Reading guide
+## Reading Guide
 
 Readers interested only in the new quantitative material can read
 @sec-timing-framework for the hypothesis, @sec-methods for the setup,
