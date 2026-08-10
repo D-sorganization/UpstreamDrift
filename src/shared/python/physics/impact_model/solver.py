@@ -163,13 +163,13 @@ class ImpactSolverAPI:
 
     # fmt: off
     @precondition(  # fmt: skip
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None: (
             clubhead_mass > 0
         ),
         "Clubhead mass must be positive",
     )
     @precondition(  # fmt: skip
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None: (
             timestamp >= 0
         ),
         "Timestamp must be non-negative",
@@ -183,6 +183,7 @@ class ImpactSolverAPI:
         ball_angular_velocity: np.ndarray | None = None,
         clubhead_mass: float = 0.200,
         record: bool = True,
+        impact_offset: np.ndarray | None = None,
     ) -> PostImpactState:
     # fmt: on
         """Solve impact and optionally record event.
@@ -197,6 +198,9 @@ class ImpactSolverAPI:
             ball_angular_velocity: Ball spin (default: zero) [rad/s] (3,)
             clubhead_mass: Clubhead mass [kg]
             record: Whether to record this impact
+            impact_offset: Impact offset from face center [m] (2,)
+                [horizontal, vertical]; enables the MOI effective-mass
+                reduction for off-center strikes
 
         Returns:
             Post-impact state
@@ -216,6 +220,9 @@ class ImpactSolverAPI:
             ball_velocity=np.asarray(ball_velocity),
             ball_angular_velocity=np.asarray(ball_angular_velocity),
             clubhead_mass=clubhead_mass,
+            impact_offset=(
+                np.asarray(impact_offset) if impact_offset is not None else None
+            ),
         )
 
         post_state = self.model.solve(pre_state, self.params)
@@ -251,7 +258,8 @@ class ImpactSolverAPI:
         Returns:
             Post-impact state with gear effect spin added
         """
-        # Solve base impact
+        # Solve base impact WITH the offset so the MOI effective-mass
+        # reduction applies (previously the offset was silently dropped).
         if timestamp is None:
             raise ValueError("timestamp must be provided")
         post_state = self.solve_impact(
@@ -262,6 +270,7 @@ class ImpactSolverAPI:
             None,
             clubhead_mass,
             record=False,  # Record after adding gear effect
+            impact_offset=np.asarray(impact_offset),
         )
 
         # Add gear effect spin
@@ -298,6 +307,7 @@ class ImpactSolverAPI:
                 ),
                 ball_angular_velocity=np.zeros(3),
                 clubhead_mass=clubhead_mass,
+                impact_offset=np.asarray(impact_offset),
             )
             self.recorder.record_impact(
                 timestamp, pre_state, modified_post, self.params, self.model_type
