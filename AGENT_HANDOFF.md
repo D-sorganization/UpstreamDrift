@@ -5,9 +5,10 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **Repository_Management#1390** ("EPIC: Fleet-wide Agent Handoff & PR Policy") —
-  UpstreamDrift rollout merged as #8351; this file and the `AGENTS.md` policy section
-  are now binding on `main`.
+- **#8426** ("Proximal-to-distal swing mechanics — validation and open resource
+  roadmap") — open. Full PR **#8428** neutralizes the reader-facing report, adds
+  a 13-case model-parameter sensitivity analysis, and updates the rendered PDF.
+  Remaining counterfactual-parity, model-fidelity, and human-data work stays open.
 - **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented in
   full PR **#8352** (`feat/putting-dynamics`): an advanced
   surface/friction/mode-machine package,

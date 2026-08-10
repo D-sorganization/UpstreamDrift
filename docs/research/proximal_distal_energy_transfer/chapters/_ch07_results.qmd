@@ -175,11 +175,31 @@ angular acceleration, for the early-drive (left) and best
 restrain-then-drive (right)
 programs.](figures/fig_ztcf_drift_control.pdf){#fig-ztcf}
 
+## E1c and E1d — Robustness to Scoring and Model Parameters {#sec-results-robustness}
+
+Re-scoring all trajectories under five alternative families of impact
+criteria preserved the qualitative strategy ordering. This rules out the
+specific concern that the result was created by the club-vertical impact
+definition, but it does not test unmodeled impact physics.
+
+The one-at-a-time parameter study also preserved the ordering in all 13
+cases. Across those cases, clubhead-speed ranges were 26.4–31.3 m/s for
+early drive, 32.9–35.6 m/s for the passive wrist, 36.5–40.6 m/s for the
+best late drive, and 36.8–41.3 m/s for the best
+restrain-then-drive program. The best drive onset shifted from 0.175 to
+0.225 s, while the best restrained onset shifted from 0.100 to 0.150 s.
+
+The stable ordering supports a mechanism-level interpretation within the
+local parameter neighborhood. The shifting optimum argues against treating
+one onset time as a general prescription. Because parameters were varied
+individually, the study does not characterize interaction effects or a
+population distribution.
+
 ## Summary of findings {#sec-results-summary}
 
 Within this model class, under matched proximal effort and a
-consistently defined first-pass impact: (i) early distal drive is
-strictly and substantially harmful (−15% versus doing nothing at all);
+consistently defined first-pass impact: (i) early distal drive is lower
+than the passive condition (−15% in the baseline case);
 (ii) identical distal effort applied late is worth +12%; (iii) timed
 active retention followed by late drive is best at both effort levels,
 with its early-phase wrist work measurably negative; (iv) the late club
@@ -187,5 +207,7 @@ energy supply is dominated by the passive joint-force/parametric
 pathway, not the wrist actuator; (v) the counterfactual split shows
 control acting early as restraint and drift delivering late — the S2
 pattern of @sec-hypothesis in full; and (vi) the entire ordering
-survives linear torque-velocity bounds on the drives, with compressed
-effect sizes and slightly earlier optima (@sec-results-e1b).
+survives linear torque-velocity bounds, alternative scoring definitions,
+and the declared one-at-a-time parameter perturbations, although effect
+sizes and optimal onset times change (@sec-results-e1b,
+@sec-results-robustness).
