@@ -5,6 +5,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy.counterfactual_ensemble import (
+    controls_at_times,
+    evaluate_killswitch_case,
+    evaluate_killswitch_ensemble,
+)
 from scripts.research.proximal_distal_energy.extract_wscg_charts import (
     extract_series,
     verify_sources,
@@ -194,3 +199,110 @@ def test_interaction_force_evidence_pins_mechanism_metrics() -> None:
         131.7204, abs=0.01
     )
     assert summary["killswitch"]["terminal_q_separation_rad"] > 0.5
+
+
+@pytest.mark.unit
+def test_controls_are_sampled_in_absolute_source_time() -> None:
+    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
+    controls = controls_at_times(program, np.array([0.099, 0.100, 0.101]))
+
+    np.testing.assert_array_equal(controls[:, 0], np.full(3, 60.0))
+    np.testing.assert_array_equal(controls[:, 1], np.array([-10.0, 15.0, 15.0]))
+
+
+@pytest.mark.unit
+def test_killswitch_case_reports_all_divergence_channels(
+    params: GolfModelParams, inertials: PlanarInertials
+) -> None:
+    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
+    t, q, v, _ = rollout_program(params, program)
+    cut = 220
+    case = evaluate_killswitch_case(
+        params,
+        inertials,
+        program,
+        source_time_s=float(t[cut]),
+        source_q=q[cut],
+        source_v=v[cut],
+        horizon_s=0.08,
+        dt_s=0.001,
+    )
+
+    np.testing.assert_array_equal(case.commanded.q[0], case.zero_torque.q[0])
+    np.testing.assert_array_equal(case.commanded.v[0], case.zero_torque.v[0])
+    assert set(case.metrics) >= {
+        "terminal_state_distance",
+        "terminal_force_distance_n",
+        "terminal_power_difference_w",
+        "force_work_difference_j",
+        "terminal_clubhead_speed_difference_m_s",
+    }
+    assert case.metrics["terminal_state_distance"] > 0.0
+
+
+@pytest.mark.unit
+def test_killswitch_timestep_sensitivity_converges(
+    params: GolfModelParams, inertials: PlanarInertials
+) -> None:
+    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
+    t, q, v, _ = rollout_program(params, program)
+    cut = 250
+    fine = evaluate_killswitch_case(
+        params,
+        inertials,
+        program,
+        source_time_s=float(t[cut]),
+        source_q=q[cut],
+        source_v=v[cut],
+        horizon_s=0.08,
+        dt_s=0.0005,
+    )
+    baseline = evaluate_killswitch_case(
+        params,
+        inertials,
+        program,
+        source_time_s=float(t[cut]),
+        source_q=q[cut],
+        source_v=v[cut],
+        horizon_s=0.08,
+        dt_s=0.001,
+    )
+
+    assert (
+        abs(
+            fine.metrics["terminal_state_distance"]
+            - baseline.metrics["terminal_state_distance"]
+        )
+        < 1e-5
+    )
+    assert (
+        abs(
+            fine.metrics["force_work_difference_j"]
+            - baseline.metrics["force_work_difference_j"]
+        )
+        < 0.05
+    )
+
+
+@pytest.mark.unit
+def test_killswitch_ensemble_covers_cut_time_and_timestep_grid(
+    params: GolfModelParams, inertials: PlanarInertials
+) -> None:
+    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
+    t, q, v, _ = rollout_program(params, program)
+    rows = evaluate_killswitch_ensemble(
+        params,
+        inertials,
+        program,
+        t,
+        q,
+        v,
+        cut_times_s=(0.12, 0.20, 0.28),
+        horizons_s=(0.04, 0.08),
+        timesteps_s=(0.0005, 0.001, 0.002),
+    )
+
+    assert len(rows) == 18
+    assert {row["cut_time_s"] for row in rows} == {0.12, 0.20, 0.28}
+    assert {row["dt_s"] for row in rows} == {0.0005, 0.001, 0.002}
+    assert all(row["matched_initial_state_error"] == 0.0 for row in rows)
