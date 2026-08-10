@@ -60,7 +60,7 @@ DATA_DIR = OUTPUT_ROOT / "data"
 FIG_DIR = OUTPUT_ROOT / "figures"
 
 #: Isometric (zero-velocity) torque levels and torque-velocity intercepts.
-#: Model-scale choices, documented in the thesis Methods; the shoulder
+#: Model-scale choices, documented in the report Methods; the shoulder
 #: bound is chosen so peak arm speeds in E1 (~15-18 rad/s) sit deep in
 #: the tapering region, making the bound genuinely restrictive.
 SHOULDER_TAU_ISO = 100.0
