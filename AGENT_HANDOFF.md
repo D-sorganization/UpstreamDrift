@@ -5,6 +5,15 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **#8446 two-hand passive-couple reproduction** — full PR **#8454** on branch
+  `research/two-hand-passive-couple`. The archived 2,801-sample
+  BASE/ZTCF/DELTA tables now have hash-traceable portable exports, a tested
+  frame-explicit wrench and power audit, reversal/downsampling sensitivity,
+  grip-separation and relative-orientation counterfactuals, eight figures, and
+  a publication chapter. The key bounded finding is a -19.63 N m pointwise ZTCF
+  midpoint couple generated entirely by separated contact forces; it is not yet
+  a forward two-hand killswitch or human validation result.
+
 - **#8445 counterfactual persistence** — full PR **#8453** on branch
   `research/counterfactual-killswitch-ensemble` adds a deterministic
   matched-state API; 96 cut/horizon/timestep cases; gravity, damping, and
@@ -83,6 +92,8 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
+- `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
+  #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445
   under epic #8443; multi-phase persistence and numerical/physics sensitivity.
 - `research/interaction-force-transfer` — full PR **#8452** for #8444 under

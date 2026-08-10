@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.491 |
+| **Spec Version** | 1.0.492 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-10** - Added #8446 two-hand passive-couple reproduction: a
+  frame-explicit and tested wrench API, hash-traceable BASE/ZTCF/DELTA table
+  exports, all-sample resultant/couple/power reconstruction, reversal and
+  resampling analysis, grip-separation/orientation counterfactuals, eight
+  publication figures, and a neutral chapter separating contact-force moment,
+  free torque, resultant force, and power.
 - **2026-08-10** - Added #8445 matched-state counterfactual persistence:
   deterministic commanded/zero-torque futures, 96 cut-time/horizon/timestep
   cases, state/force/power/work/speed divergence, torque-switch bracketing,
@@ -2016,6 +2022,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-10 | 1.0.492 | Reconstructed the archived WSCG two-hand BASE/ZTCF/DELTA force systems; added frame, wrench-transport, force-mode, power, reversal-sensitivity, and geometry contracts; and expanded the scientific article with eight reproducible figures and explicit pointwise/passive limits. |
 | 2026-08-10 | 1.0.490 | Normalized the Proximal-to-Distal article's canonical headings and regenerated PDF/LaTeX bookmarks, then added a repository document-title gate for Markdown, Quarto, LaTeX, Word title styles, and PDF metadata/outlines in pre-commit and documentation CI. |
 | 2026-08-10 | 1.0.489 | Extended Launch Monitor Analytics with a versioned arbitrary-field analysis contract, PyQt and FastAPI surfaces, configurable association/missingness/multiplicity/grouping, OLS uncertainty and residual diagnostics, deterministic lineage, and fail-closed aggregate/vendor-pooling boundaries for #8364-#8366. |
 | 2026-08-08 | 1.0.487 | Epic #8390 B5/C2/C4 (completing all 16 sub-issues): CEM/MPPI batch swing optimizer as the first production consumer of the ADR-0023/0024 batch infrastructure, ~1k mujoco rollouts scored in ~2.5s on the CPU fallback (#8400); pose-estimator registry replacing the 5-place estimator edit tax, with API/pipeline/motion-capture routes deriving from one seam (#8402); 4D-Humans/HMR2 sidecar (FreeMoCap-pattern subprocess isolation for CC-BY-NC tooling) with a registered 3D adapter and SMPL-betas plumbing into the character builder (#8404). |
