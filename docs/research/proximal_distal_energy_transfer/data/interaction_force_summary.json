@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "git_sha": "e7441d3b4",
+    "backend": "ode",
+    "integrator": "fixed-step RK4",
+    "dt_s": 0.001,
+    "model": "GolfModelParams.default()",
+    "program": "restrain_then_drive@0.100s",
+    "force_frame": "swing-plane Cartesian: x target-side, y upward",
+    "counterfactual_contract": {
+      "pointwise": "state held fixed; acceleration recomputed at zero torque",
+      "killswitch": "commanded and zero-torque futures integrated from one matched state"
+    }
+  },
+  "impact": {
+    "time_s": 0.3492558238610142,
+    "clubhead_speed_m_s": 38.85378591434185,
+    "index_before_crossing": 349
+  },
+  "force": {
+    "peak_total_n_to_impact": 315.39151444078186,
+    "peak_drift_n_to_impact": 310.63923221340946,
+    "rms_control_fraction_to_impact": 0.16258519038573438
+  },
+  "transfer": {
+    "net_work_to_impact_j": 130.65060731522905,
+    "net_work_late_half_j": 131.72038138985312,
+    "positive_work_to_impact_j": 136.76371236931647,
+    "negative_work_to_impact_j": -6.113105054087401,
+    "drift_work_to_impact_j": 132.16321977767151
+  },
+  "killswitch": {
+    "cut_time_s": 0.251,
+    "cut_index": 251,
+    "horizon_s": 0.12,
+    "terminal_q_separation_rad": 0.5402234279041389,
+    "terminal_v_separation_rad_s": 8.48809728011824
+  }
+}

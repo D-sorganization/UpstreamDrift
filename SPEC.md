@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.489 |
+| **Spec Version** | 1.0.490 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-10** - Added the first interaction-force mechanisms slice for
+  epic #8443 / issue #8444: exact double-pendulum wrist-force and force-power
+  decomposition, tested Newton and moment balances, a matched-state
+  torque-killswitch distinct from pointwise ZTCF, hash-registered WSCG source
+  decks and chart extraction, seven publication figures, machine-readable
+  evidence, and an expanded scientific chapter with explicit nonclaims and
+  falsification tests.
 - **2026-08-09** - Stabilized the Launch Monitor Analytics v1 consumer
   contract against the current Tools record contract. Dataset fingerprints
   now hash canonical ordered record content and ignore transient pandas index
