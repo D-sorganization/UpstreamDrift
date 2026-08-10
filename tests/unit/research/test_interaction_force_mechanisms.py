@@ -15,6 +15,9 @@ from scripts.research.proximal_distal_energy.interaction_forces import (
     reaction_force_decomposition,
 )
 from scripts.research.proximal_distal_energy.run_experiments import rollout_program
+from scripts.research.proximal_distal_energy.run_interaction_force_study import (
+    build_evidence,
+)
 from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
 from scripts.research.proximal_distal_energy.torque_programs import (
     restrain_then_drive_program,
@@ -177,3 +180,17 @@ def test_wscg_source_package_is_hash_verified_and_complete() -> None:
     assert len(names) == 13
     assert "Wrist Torque" in names
     assert "LeadHandCFAxial" in names
+
+
+@pytest.mark.unit
+def test_interaction_force_evidence_pins_mechanism_metrics() -> None:
+    arrays, summary = build_evidence()
+
+    assert arrays["force_total"].shape == arrays["q"].shape
+    assert summary["force"]["peak_total_n_to_impact"] == pytest.approx(
+        315.3915, abs=0.01
+    )
+    assert summary["transfer"]["net_work_late_half_j"] == pytest.approx(
+        131.7204, abs=0.01
+    )
+    assert summary["killswitch"]["terminal_q_separation_rad"] > 0.5
