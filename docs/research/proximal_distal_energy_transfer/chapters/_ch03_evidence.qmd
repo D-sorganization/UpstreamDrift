@@ -45,8 +45,8 @@ kinetic-energy sequencing in a large-scale computer-simulated golf
 swing, confirming the ordered energetic handoff in a full forward-dynamic
 setting [@kenny2008]. These studies matter here for two reasons. First,
 they validate the segment-energy time course as a practical observable
-(the same observable computed in @sec-results for the UpstreamDrift
-model). Second, they show the energetic sequence is not an artifact of
+(the same observable computed for the model in @sec-results). Second,
+they show the energetic sequence is not an artifact of
 angular-velocity bookkeeping: energy itself arrives late in the club,
 after the proximal segments have peaked.
 
