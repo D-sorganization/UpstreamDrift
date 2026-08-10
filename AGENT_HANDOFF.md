@@ -5,10 +5,12 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **Tools #4276** — local `feat/4276-ground-consumer-adapter` adds a headless,
-  fail-closed consumer for the canonical Tools ground v1 façade while preserving
-  Tools records/provenance. Final pins and UI/release gates await the reviewed
-  Tools merge; current `main` pins gitlink `ff4240217` and Cargo `ea2690362`.
+- **Tools #4276** — ready-for-review PR **#8440** adds a headless, fail-closed
+  consumer for the canonical Tools ground v1 façade while preserving Tools
+  records/provenance. Independent review is READY at implementation commit
+  `c60cbce9f5e7fb3baffb7859bbf3e9ea8966589a`. Final pins and UI/release gates
+  await the reviewed Tools merge; current `main` pins gitlink `ff4240217` and
+  Cargo `ea2690362`.
 
 - **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
   adds a versioned,
@@ -78,8 +80,9 @@ The active branches are independent topic branches off `main` unless noted:
 - `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
-- `feat/4276-ground-consumer-adapter` — local, unpushed partial Tools #4276
-  consumer slice from `main`; no vendor pin or release claim until Tools lands.
+- `feat/4276-ground-consumer-adapter` — ready-for-review PR **#8440**, a partial
+  Tools #4276 consumer slice from `main`; no vendor pin or release claim until
+  Tools lands.
 
 ## Gate commands (run these before opening/updating a PR)
 
