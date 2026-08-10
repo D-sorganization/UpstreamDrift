@@ -109,13 +109,15 @@ class TestPublicFrictionRollingCap:
             ball_angular_velocity=np.zeros(3),
             clubhead_mass=m_club,
         )
+        # v_tangent along +Y, n along +X → spin_axis = tangent × n = -Z, so
+        # pre-spin about -Z is aligned with rolling and reduces the impulse.
         state_with_spin = PreImpactState(
             clubhead_velocity=np.array([45.0, 5.0, 0.0]),
             clubhead_angular_velocity=np.zeros(3),
             clubhead_orientation=np.array([1.0, 0.0, 0.0]),
             ball_position=np.array([R_BALL, 0.0, 0.0]),
             ball_velocity=np.zeros(3),
-            ball_angular_velocity=np.array([0.0, 0.0, 100.0]),
+            ball_angular_velocity=np.array([0.0, 0.0, -100.0]),
             clubhead_mass=m_club,
         )
 
@@ -123,6 +125,6 @@ class TestPublicFrictionRollingCap:
         post_no_spin = model.solve(state_no_spin, params)
         post_with_spin = model.solve(state_with_spin, params)
 
-        added_z_no_spin = float(post_no_spin.ball_angular_velocity[2])
-        added_z_with_spin = float(post_with_spin.ball_angular_velocity[2]) - 100.0
-        assert added_z_with_spin < added_z_no_spin
+        added_no_spin = abs(float(post_no_spin.ball_angular_velocity[2]))
+        added_with_spin = abs(float(post_with_spin.ball_angular_velocity[2]) + 100.0)
+        assert added_with_spin < added_no_spin

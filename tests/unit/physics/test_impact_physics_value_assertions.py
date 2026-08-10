@@ -412,15 +412,15 @@ class TestFrictionRollingCapWithSpin:
         )
 
         # Same but ball has backspin aligned with the rolling-without-slip axis
-        # v_tangent along +Y, n along +X → spin_axis = n × tangent = +Z
-        # Positive Z spin contributes positively to rolling → reduces needed impulse
+        # v_tangent along +Y, n along +X → spin_axis = tangent × n = -Z
+        # Spin about -Z contributes positively to rolling → reduces needed impulse
         state_with_spin = PreImpactState(
             clubhead_velocity=np.array([45.0, 5.0, 0.0]),
             clubhead_angular_velocity=np.zeros(3),
             clubhead_orientation=np.array([1.0, 0.0, 0.0]),
             ball_position=np.array([R_BALL, 0.0, 0.0]),
             ball_velocity=np.zeros(3),
-            ball_angular_velocity=np.array([0.0, 0.0, 100.0]),  # pre-existing +Z spin
+            ball_angular_velocity=np.array([0.0, 0.0, -100.0]),  # aligned pre-spin
             clubhead_mass=M,
         )
 
@@ -429,10 +429,10 @@ class TestFrictionRollingCapWithSpin:
         post_with_spin = model.solve(state_with_spin, params)
 
         # With pre-existing spin aligned in rolling direction, less friction needed
-        # → less ADDITIONAL spin is generated
-        added_z_no_spin = float(post_no_spin.ball_angular_velocity[2])
-        added_z_with_spin = float(post_with_spin.ball_angular_velocity[2]) - 100.0
-        assert added_z_with_spin < added_z_no_spin
+        # → less ADDITIONAL spin is generated (spin is added about -Z)
+        added_no_spin = abs(float(post_no_spin.ball_angular_velocity[2]))
+        added_with_spin = abs(float(post_with_spin.ball_angular_velocity[2]) + 100.0)
+        assert added_with_spin < added_no_spin
 
 
 # ---------------------------------------------------------------------------
