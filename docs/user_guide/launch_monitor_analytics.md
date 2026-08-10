@@ -115,6 +115,47 @@ identity-derived predictor. A high score shows prediction within the tested
 split; it does not show causation or guarantee transport to a new player,
 monitor, environment, or club.
 
+### 4A. Run Flexible Analysis
+
+Use **Flexible Analysis** when the question is not covered by a fixed chart.
+Any numeric canonical field or retained `source::<header>` field can be selected
+as the outcome or as one or more predictors. The same versioned contract is
+available to headless and web clients at:
+
+- `GET /tools/launch-monitor-analytics/capabilities`
+- `POST /tools/launch-monitor-analytics/analyze`
+
+The result includes pair-specific sample counts, Benjamini-Hochberg-adjusted
+p-values, Pearson confidence intervals, OLS coefficient uncertainty, R² and
+adjusted R², residual diagnostics, selected units, group-specific results, and
+a deterministic SHA-256 dataset fingerprint. Choose pairwise, listwise, or
+fail-on-missing behavior explicitly. Use **Group By** to retain monitor,
+session, player, club, or other strata instead of silently pooling them.
+
+The v1 fingerprint hashes ordered record content and explicit shot/session/
+source-row/monitor identity fields. It deliberately ignores the transient
+pandas row index, so loading the same records with a different in-memory index
+does not change lineage. Unsupported analysis options are rejected by the API
+schema. In the desktop panel, user-correctable selection errors appear in the
+accessible status region instead of escaping the Qt click handler.
+
+Vendor-specific `source::` fields are blocked from cross-monitor pooling because
+matching header text does not establish matching measurement semantics.
+Aggregate reference observations are never permitted in regression. Explicitly
+enabled aggregate correlations are labeled descriptive and warn about
+ecological bias.
+
+### Public Reference Data
+
+The source-traceable public dataset is maintained in the separate
+[Launch-Monitor-Data repository](https://github.com/D-sorganization/Launch-Monitor-Data).
+Its releases preserve source IDs, URLs, monitor identity, environment,
+measurement status, reported and canonical units, aggregation level, and
+verification checks. Keep that repository as the immutable evidence layer;
+import shot-level exports into `.lmproject` files for regression. Published
+aggregate means and standard deviations are reference observations, not
+synthetic shots, and must not be expanded into fabricated row-level data.
+
 ### 5. Compare Monitors
 
 For defensible bias, scale, and agreement analysis, import paired measurements

@@ -5,6 +5,14 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **#8369** (`feat/launch-monitor-showtime-8364`) adds a versioned,
+  vendor-neutral flexible-analysis contract with matched FastAPI and PyQt
+  surfaces. It keeps aggregate observations out of regression, labels
+  association as non-causal, validates option enums at the API boundary, and
+  records deterministic dataset lineage. React/Vite parity and the final
+  canonical Tools dependency pin remain tracked work rather than implied
+  capabilities.
+
 - **#8426** ("Proximal-to-distal swing mechanics — validation and open resource
   roadmap") — open. Full PR **#8428** neutralizes the reader-facing report, adds
   a 13-case model-parameter sensitivity analysis, and updates the rendered PDF.

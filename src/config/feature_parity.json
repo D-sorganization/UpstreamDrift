@@ -259,12 +259,12 @@
     "tools.launch_monitor_analytics": {
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
-      "api": null,
+      "api": "src/api/routes/launch_monitor_analytics.py",
       "web": null,
       "status": "gap",
-      "issue": 8342,
+      "issue": 8364,
       "tiles": ["launch_monitor_analytics"],
-      "notes": "The PyQt6 research workbench is canonical; API and React/Tauri parity are tracked in epic #8342."
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. React/Vite parity in the authoritative Tools Rate of Closure app is tracked cross-repository in Tools #4205 under epic #8364."
     },
     "analysis.analysis_tools_api": {
       "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
