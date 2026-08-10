@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.490 |
+| **Spec Version** | 1.0.491 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,11 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-10** - Added #8445 matched-state counterfactual persistence:
+  deterministic commanded/zero-torque futures, 96 cut-time/horizon/timestep
+  cases, state/force/power/work/speed divergence, torque-switch bracketing,
+  gravity and damping ablations, a WSCG BASE-minus-counterfactual convention
+  check, four publication figures, and a visually verified 58-page article.
 - **2026-08-10** - Added the first interaction-force mechanisms slice for
   epic #8443 / issue #8444: exact double-pendulum wrist-force and force-power
   decomposition, tested Newton and moment balances, a matched-state
