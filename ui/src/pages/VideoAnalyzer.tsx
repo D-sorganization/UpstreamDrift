@@ -249,9 +249,8 @@ export function VideoAnalyzerPage() {
               onChange={(e) => setEstimatorType(e.target.value)}
               className="w-full bg-gray-700 text-gray-200 rounded px-2 py-1.5 text-sm border-none focus:ring-1 focus:ring-blue-400"
             >
-              <option value="mediapipe">MediaPipe</option>
+              <option value="mediapipe">MediaPipe (BlazePose)</option>
               <option value="openpose">OpenPose</option>
-              <option value="blazepose">BlazePose</option>
             </select>
           </div>
 

@@ -8,9 +8,25 @@
  * See issue #1206
  */
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  lazy,
+  Suspense,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { apiFetch, apiFetchForm } from '@/api/fetch';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel';
+import { extractSkeletonJoints, frameHasDepth } from '@/utils/skeletonJoints';
+
+// Lazy so three.js stays out of this route's chunk until the 3D view is
+// actually rendered (issue #8406; same code-splitting rationale as #7433).
+const MocapSkeleton3D = lazy(
+  () => import('@/components/visualization/MocapSkeleton3D'),
+);
 
 /**
  * Load state for the capture-source catalogue (issue #8080).
@@ -83,6 +99,9 @@ export interface PlaybackState {
   current_frame: number;
   total_frames: number;
 }
+
+/** Skeleton view mode: 2D SVG or 3D R3F canvas. See issue #8406 */
+export type SkeletonViewMode = '2d' | '3d';
 
 /**
  * SkeletonRenderer - 2D SVG skeleton visualization.
@@ -226,6 +245,24 @@ export function MotionCapturePage() {
   const [uploadResult, setUploadResult] = useState<C3DUploadResult | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // #8406: 2D/3D skeleton view. Null = auto (3D when frames carry depth).
+  const [viewModeOverride, setViewModeOverride] =
+    useState<SkeletonViewMode | null>(null);
+
+  // #8406: live pose streaming. When `pose/canonical` messages carrying joint
+  // positions arrive over the realtime WebSocket they drive the skeleton
+  // views; otherwise the polled frame data below is used unchanged.
+  const { message: livePoseMessage } = useRealtimeChannel<unknown>(
+    'pose/canonical',
+  );
+  const liveJoints = useMemo(
+    () => extractSkeletonJoints(livePoseMessage),
+    [livePoseMessage],
+  );
+  const displayJoints = liveJoints ?? joints;
+
+  const viewMode: SkeletonViewMode =
+    viewModeOverride ?? (frameHasDepth(displayJoints) ? '3d' : '2d');
 
   // Fetch available sources; default-select the first available one.
   //
@@ -743,7 +780,22 @@ export function MotionCapturePage() {
         {/* #7417: constrain the square by width AND height so it never
             overflows narrow or short windows. */}
         <div className="w-full aspect-square max-w-[min(42rem,90vw,calc(100vh-8rem))]">
-          <SkeletonRenderer joints={joints} width={500} height={500} />
+          {viewMode === '3d' ? (
+            <Suspense
+              fallback={
+                <div
+                  className="w-full h-full flex items-center justify-center text-xs text-gray-400"
+                  data-testid="skeleton-3d-loading"
+                >
+                  Loading 3D view…
+                </div>
+              }
+            >
+              <MocapSkeleton3D joints={displayJoints} />
+            </Suspense>
+          ) : (
+            <SkeletonRenderer joints={displayJoints} width={500} height={500} />
+          )}
         </div>
 
         {/* Source type overlay */}
@@ -751,10 +803,44 @@ export function MotionCapturePage() {
           <span className="text-sm text-gray-200 font-mono">
             {selectedSource}
           </span>
+          {liveJoints && (
+            <span
+              className="ml-2 text-xs text-green-400 font-semibold"
+              data-testid="live-pose-indicator"
+            >
+              LIVE
+            </span>
+          )}
+        </div>
+
+        {/* 2D/3D view toggle (#8406) */}
+        <div className="absolute top-4 right-4 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-white/10">
+          <button
+            data-testid="view-toggle-2d"
+            onClick={() => setViewModeOverride('2d')}
+            className={`px-2 py-0.5 text-xs rounded transition-colors ${
+              viewMode === '2d'
+                ? 'bg-blue-600 text-white font-semibold'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            2D
+          </button>
+          <button
+            data-testid="view-toggle-3d"
+            onClick={() => setViewModeOverride('3d')}
+            className={`px-2 py-0.5 text-xs rounded transition-colors ${
+              viewMode === '3d'
+                ? 'bg-blue-600 text-white font-semibold'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            3D
+          </button>
         </div>
 
         {/* No data overlay */}
-        {joints.length === 0 && (
+        {displayJoints.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-400 mb-2">
@@ -778,12 +864,12 @@ export function MotionCapturePage() {
           </h3>
 
           <div className="text-xs text-gray-400 mb-2">
-            {joints.length} joints detected
+            {displayJoints.length} joints detected
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-1">
-          {joints.map((joint) => (
+          {displayJoints.map((joint) => (
             <div
               key={joint.name}
               className="bg-gray-700/30 p-1.5 rounded flex items-center gap-2"
@@ -806,7 +892,7 @@ export function MotionCapturePage() {
             </div>
           ))}
 
-          {joints.length === 0 && (
+          {displayJoints.length === 0 && (
             <div className="text-xs text-gray-400 italic text-center py-4">
               No joints loaded
             </div>

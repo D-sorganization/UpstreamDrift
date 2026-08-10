@@ -235,6 +235,8 @@ jobs:
       - run: |
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
       - run: |
@@ -827,28 +829,10 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-      - name: Resolve pinned Tools ownership revision
-        id: tools-ownership-pin
-        shell: bash
-        run: |
-          tools_sha=$(git ls-tree HEAD vendor/ud-tools | awk '{print $3}')
-          test -n "$tools_sha"
-          echo "sha=$tools_sha" >> "$GITHUB_OUTPUT"
-      - name: Checkout pinned Tools ownership source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: D-sorganization/Tools
-          ref: ${{ steps.tools-ownership-pin.outputs.sha }}
-          path: vendor/ud-tools
-          fetch-depth: 1
-          sparse-checkout: |
-            src/shared/python
-          persist-credentials: false
-      - name: Verify pinned Tools ownership source
-        shell: bash
-        run: |
-          actual_tools_sha=$(git -C vendor/ud-tools rev-parse HEAD)
-          test "$actual_tools_sha" = "${{ steps.tools-ownership-pin.outputs.sha }}"
+      # Also satisfies the ownership guards below, which read the pinned
+      # Tools sources out of vendor/ud-tools.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install System Dependencies
         run: |
           apt_retry() {
@@ -927,7 +911,7 @@ jobs:
           set +e
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
-            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             -n 4 \
             --timeout=60 \
             --timeout-method=thread \
@@ -1035,6 +1019,8 @@ jobs:
             requirements*.lock
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Create isolated core install
         shell: bash
         run: |
@@ -1152,6 +1138,8 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Check for core test relevant changes
         id: core-test-changes
         shell: bash
@@ -1675,6 +1663,8 @@ jobs:
         run: python -m pip cache purge || true
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install parity smoke dependencies
         run: |
           python -m ensurepip --upgrade || true
@@ -1753,6 +1743,8 @@ jobs:
           python -m pip install --upgrade pip
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install migration test dependencies
         run: |
           python -m ensurepip --upgrade || true
@@ -1816,6 +1808,8 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Checkout Tools Hub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -2278,6 +2272,9 @@ jobs:
           echo "Wheels built successfully"
           ls target/wheels/
 
+      - name: Fetch pinned Tools packages
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Verify Python Bindings
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
         run: |
@@ -2693,6 +2690,9 @@ jobs:
           cargo build --release -p upstream-codemap --bin upstream-codemap
           ls -l target/release/upstream-codemap
 
+      - name: Fetch pinned Tools packages
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install project + built wheels
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |

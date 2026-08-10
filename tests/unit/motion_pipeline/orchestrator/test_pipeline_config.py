@@ -16,7 +16,7 @@ from src.shared.python.motion_pipeline.orchestrator import (
 def test_pipeline_config_minimal_valid() -> None:
     cfg = PipelineConfig(adapter=AdapterOverride(format="c3d"))
     assert cfg.adapter.format == "c3d"
-    assert cfg.ik_backend == "mujoco"
+    assert cfg.ik_backend == "geometric"
     assert cfg.matching_backend == "mujoco"
     assert cfg.output_format == "json"
     assert cfg.preprocessing == []
@@ -83,6 +83,6 @@ def test_pipeline_config_serializes_to_dict() -> None:
     cfg = PipelineConfig(adapter=AdapterOverride(format="c3d"))
     d = cfg.model_dump()
     assert d["adapter"]["format"] == "c3d"
-    assert d["ik_backend"] == "mujoco"
+    assert d["ik_backend"] == "geometric"
     assert d["strict_hooks"] is False
     assert d["matching_model_urdf"] is None

@@ -8,6 +8,7 @@ including overall build, individual segment scaling, and appearance.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -237,6 +238,12 @@ class BodyParameters:
     # Foot size relative to leg length
     foot_scale_factor: float = 1.0
 
+    # === SMPL-X Shape Coefficients (optional, measured) ===
+    # When set (e.g. from the 4D-Humans/HMR2 sidecar's betas.json), the
+    # SMPL-X mesh generator uses these betas verbatim instead of its
+    # heuristic anthropometric mapping. None preserves legacy behavior.
+    smplx_betas: list[float] | None = None
+
     # === Individual Segment Overrides ===
     # Keys are segment names from HUMANOID_SEGMENTS
     segment_overrides: dict[str, SegmentParameters] = field(default_factory=dict)
@@ -254,6 +261,23 @@ class BodyParameters:
             raise PreconditionError("height_m must be positive", self.height_m)
         if self.mass_kg <= 0:
             raise PreconditionError("mass_kg must be positive", self.mass_kg)
+        if self.smplx_betas is not None:
+            if not isinstance(self.smplx_betas, list | tuple) or not self.smplx_betas:
+                raise PreconditionError(
+                    "smplx_betas must be a non-empty sequence of floats or None",
+                    self.smplx_betas,
+                )
+            try:
+                betas = [float(b) for b in self.smplx_betas]
+            except (TypeError, ValueError) as e:
+                raise PreconditionError(
+                    f"smplx_betas entries must be numbers: {e}", self.smplx_betas
+                ) from e
+            if not all(math.isfinite(b) for b in betas):
+                raise PreconditionError(
+                    "smplx_betas entries must be finite", self.smplx_betas
+                )
+            self.smplx_betas = betas
 
     def get_segment_params(self, segment_name: str) -> SegmentParameters:
         """
@@ -299,6 +323,9 @@ class BodyParameters:
             "neck_length_factor": self.neck_length_factor,
             "hand_scale_factor": self.hand_scale_factor,
             "foot_scale_factor": self.foot_scale_factor,
+            "smplx_betas": list(self.smplx_betas)
+            if self.smplx_betas is not None
+            else None,
             "name": self.name,
             "description": self.description,
         }
@@ -331,6 +358,7 @@ class BodyParameters:
             "neck_length_factor",
             "hand_scale_factor",
             "foot_scale_factor",
+            "smplx_betas",
             "name",
             "description",
         }

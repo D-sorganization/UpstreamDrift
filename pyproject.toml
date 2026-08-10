@@ -90,10 +90,20 @@ dependencies = [
 rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
+# C3D read/write at runtime (epic #8390, A3/#8393). ezc3d backs the canonical
+# C3DDataReader, the motion_pipeline fallback parser, and the only C3D writer
+# (canonical_c3d_exporter); it was previously declared dev-only even though
+# runtime modules import it. Consumers keep their guarded imports, so absence
+# still degrades gracefully.
+c3d = ["ezc3d>=1.5.0,<2.0.0"]
 # Upper bounds added per issue #5914 to prevent silent breakage on
 # upstream major releases of these physics engines.
 drake = ["drake>=1.22.0,<2.0.0"]
-pinocchio = ["pin>=2.6.0,<5.0.0", "meshcat>=0.3.0,<1.0.0", "pin-pink>=1.0.0,<2.0.0"]
+# pin-pink is imported by four production modules in the Pinocchio engine
+# (dtack/ik, dtack/backends, motion_training) and was declared only in the
+# engine's requirements.txt (epic #8390, A4/#8394). Guarded imports keep the
+# PINK-free diff_ik fallback (#4138) load-bearing when pink is absent.
+pinocchio = ["pin>=2.6.0,<5.0.0", "meshcat>=0.3.0,<1.0.0", "pin-pink>=1.0.0,<4.0.0"]
 chrono = ["pychrono>=8.0,<10.0"]
 # JaxSim is isolated from all-engines until the Linux Pinocchio/JaxSim
 # coexistence gate is proven. The base wheel resolves on Windows with CPU JAX,
@@ -109,6 +119,21 @@ nimble-oracle = ["nimblephysics==0.10.52.2", "torch>=2.0.0"]
 mjx = ["mujoco-mjx>=3.6.0", "jax>=0.4.30", "jaxlib>=0.4.30"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
+
+# Recorded 3D diagnostics via Rerun (ADR-0027 follow-up, epic #8390 D1/#8405).
+# Opt-in: the renderer degrades with an install hint when absent.
+visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
+
+# Trajectory optimization backends (epic #8390 B3/#8398). Opt-in: the
+# CasADi swing backend degrades with an install hint when absent.
+optimal-control = ["casadi>=3.6.0,<4.0.0"]
+# Crocoddyl DDP backend (epic #8390 B4/#8399): separate extra because wheel
+# coverage is platform-uneven, and PyPI's cmeel-based crocoddyl wheel must
+# NOT be mixed with the PyPI pin wheel in one process (bundled libpinocchio
+# duplication corrupts derivatives / segfaults). The backend probes the
+# binary stack in a subprocess and degrades with conda-forge guidance —
+# prefer `conda install -c conda-forge crocoddyl pinocchio`.
+crocoddyl = ["crocoddyl>=2.0.0,<4.0.0"]
 
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
@@ -592,6 +617,9 @@ markers = [
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
     "requires_nimble: offline Nimble gradient-oracle tests (skipped when `import nimblephysics` fails)",
+    "requires_rerun: tests that require the optional rerun-sdk visualization stack (skipped when `import rerun` fails)",
+    "requires_casadi: tests that require the optional casadi stack (skipped when `import casadi` fails)",
+    "requires_crocoddyl: tests that require the optional crocoddyl stack (skipped when `import crocoddyl` fails)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",

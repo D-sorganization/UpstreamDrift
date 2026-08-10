@@ -12,6 +12,13 @@ from src.shared.python.visualization.fsp_renderer import (
     FspRenderer,
     Viewport,
 )
+from src.shared.python.visualization.rerun_renderer import (
+    RerunNotAvailableError,
+    RerunRenderConfig,
+    export_trace_rrd,
+    render_overlay_payload,
+    rerun_available,
+)
 from src.shared.python.visualization.viewport import (
     PROVIDER_METADATA,
     ProviderAvailability,
@@ -30,7 +37,12 @@ __all__ = [
     "FspRenderer",
     "PROVIDER_METADATA",
     "ProviderAvailability",
+    "RerunNotAvailableError",
+    "RerunRenderConfig",
     "Viewport",
+    "export_trace_rrd",
+    "render_overlay_payload",
+    "rerun_available",
     "ViewportOverlayPayload",
     "ViewportProvider",
     "ViewportProviderMetadata",

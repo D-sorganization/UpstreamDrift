@@ -191,6 +191,8 @@ jobs:
           echo "Tests that are skipped in the core CI lane due to missing optional dependencies" >> "$GITHUB_STEP_SUMMARY"
           echo "are exercised here, providing full confidence in optional integration paths." >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install Core Project Dependencies
         # Force-reinstall sortedcontainers + hypothesis first: the shared
         # toolcache can carry a half-installed sortedcontainers that is missing

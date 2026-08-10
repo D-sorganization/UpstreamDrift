@@ -13,11 +13,14 @@ Approach:
 1. Define the golfer model (anthropometrics, strength limits, flexibility)
 2. Define optimization objectives (clubhead speed, accuracy, injury risk)
 3. Define constraints (joint limits, force limits, kinematic feasibility)
-4. Solve trajectory optimization using direct collocation
+4. Optimize joint angles at waypoint nodes with scipy.optimize
 5. Return optimal joint trajectories and predicted outcomes
 
-This uses the Drake engine for trajectory optimization when available,
-falling back to scipy.optimize for simpler optimization problems.
+Backend: scipy.optimize.minimize over a lumped-inertia closed-form model.
+There is currently no Drake code path and no transcription-based trajectory
+optimization (no direct collocation) in this module; engine-backed solvers
+are tracked under epic #8390 (#8397 Drake DirectCollocation, #8398 CasADi,
+#8399 Crocoddyl), building on the shared multibody model from #8396.
 
 References:
 - Sharp (2009) Kinetic Constrained Optimization of the Golf Swing Hub Path
@@ -218,7 +221,10 @@ class SwingOptimizer(ContractChecker):
         start_time = time.time()
 
         x0 = self._prepare_initial_guess(initial_swing)
-        result, iteration_count = self._run_scipy_optimization(x0, callback)
+        if self.config.solver == "casadi":
+            result, iteration_count = self._run_casadi_optimization(x0)
+        else:
+            result, iteration_count = self._run_scipy_optimization(x0, callback)
 
         computation_time = time.time() - start_time
 
@@ -233,6 +239,32 @@ class SwingOptimizer(ContractChecker):
         if initial_swing is not None:
             return trajectory_to_vector(initial_swing)
         return generate_initial_guess(self.golfer, self.config, self.joint_limits)
+
+    def _run_casadi_optimization(self, x0: np.ndarray) -> tuple[Any, int]:
+        """Solve via the CasADi direct-transcription backend (#8398).
+
+        Returns a scipy-``OptimizeResult``-shaped shim so the shared
+        result builders work unchanged.
+        """
+        from src.shared.python.optimization.casadi_backend import (
+            solve_swing_casadi,
+        )
+
+        outcome = solve_swing_casadi(
+            self.golfer,
+            self.club,
+            self.config,
+            self.torque_limits,
+            self.joint_limits,
+            x0,
+        )
+        shim = optimize.OptimizeResult(
+            x=outcome.x,
+            success=outcome.success,
+            message=outcome.message,
+            fun=outcome.fun,
+        )
+        return shim, outcome.iterations
 
     def _run_scipy_optimization(
         self,

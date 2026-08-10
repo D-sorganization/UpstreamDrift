@@ -164,6 +164,11 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """
         if params is None:
             raise ValueError("params must be provided")
+        if params.smplx_betas is not None:
+            # Measured betas (e.g. from the 4D-Humans/HMR2 sidecar's
+            # betas.json via src.tools.hmr2_sidecar.betas_bridge) take
+            # precedence over the heuristic anthropometric mapping below.
+            return [float(b) for b in params.smplx_betas]
         import numpy as np
 
         betas = np.zeros(10)

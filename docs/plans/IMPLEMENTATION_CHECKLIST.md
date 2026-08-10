@@ -4,8 +4,8 @@
 
 **Goal:** Establish optimization and data processing infrastructure.
 
-- [x] **Week 1: CasADi + Pinocchio Setup**
-  - [x] Add dependencies (`casadi` in `pyproject.toml`)
+- [ ] **Week 1: CasADi + Pinocchio Setup**
+  - [ ] Add dependencies (`casadi` in `pyproject.toml`) — not done; tracked as #8398
   - [x] Create `shared/python/optimization` module
   - [x] Create 2-link arm URDF for validation
   - [x] Implement CasADi+Pinocchio trajectory optimization example

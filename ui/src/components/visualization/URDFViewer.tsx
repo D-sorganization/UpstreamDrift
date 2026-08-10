@@ -8,9 +8,11 @@
  * See issue #1201
  */
 
-import { useRef, useMemo } from 'react';
+import { Suspense, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { isGltfMeshPath, meshAssetUrl } from './urdfMeshAsset';
 
 /** Geometry descriptor from the backend URDF parser. */
 export interface URDFLinkGeometry {
@@ -65,18 +67,59 @@ function rpyToEuler(rpy: [number, number, number]): THREE.Euler {
   return new THREE.Euler(rpy[0], rpy[1], rpy[2], 'XYZ');
 }
 
-/**
- * Renders a single URDF link geometry as a Three.js mesh.
- */
-function LinkMesh({
-  link,
-  isSelected,
-  onClick,
-}: {
+interface LinkMeshProps {
   link: URDFLinkGeometry;
   isSelected: boolean;
   onClick?: (e: { stopPropagation: () => void }) => void;
-}) {
+}
+
+/**
+ * Renders a link's glTF mesh via drei's `useGLTF`. Suspends while the asset
+ * loads (the caller provides the primitive fallback). See issue #8406.
+ */
+function GLTFLinkMesh({ link, isSelected, onClick }: LinkMeshProps) {
+  const gltf = useGLTF(meshAssetUrl(link.mesh_path as string));
+  // Clone so multiple links referencing the same asset don't fight over one
+  // scene graph instance (useGLTF caches per URL).
+  const scene = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  const position = useMemo(
+    () => new THREE.Vector3(...link.origin),
+    [link.origin],
+  );
+  const rotation = useMemo(() => rpyToEuler(link.rotation), [link.rotation]);
+  const scale = useMemo<[number, number, number]>(() => {
+    const dims = link.dimensions;
+    return [dims.scale_x ?? 1, dims.scale_y ?? 1, dims.scale_z ?? 1];
+  }, [link.dimensions]);
+
+  return (
+    <group
+      position={position}
+      rotation={rotation}
+      scale={scale}
+      name={link.link_name}
+      onClick={onClick}
+    >
+      {isSelected && (
+        <mesh>
+          {/* Selection cue: small highlight marker at the link origin */}
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshStandardMaterial color="#ffcc00" />
+        </mesh>
+      )}
+      <primitive object={scene} />
+    </group>
+  );
+}
+
+/**
+ * Renders a single URDF link geometry as a Three.js primitive mesh.
+ */
+function PrimitiveLinkMesh({
+  link,
+  isSelected,
+  onClick,
+}: LinkMeshProps) {
   const color = useMemo(
     () => (isSelected ? new THREE.Color('#ffcc00') : new THREE.Color(link.color[0], link.color[1], link.color[2])),
     [link.color, isSelected],
@@ -134,6 +177,23 @@ function LinkMesh({
       />
     </mesh>
   );
+}
+
+/**
+ * Dispatches a link to the glTF loader when its mesh path is loadable,
+ * otherwise renders the primitive representation. While the glTF asset is
+ * loading (Suspense), the primitive rendering stands in as the fallback.
+ */
+function LinkMesh(props: LinkMeshProps) {
+  const { link } = props;
+  if (link.geometry_type === 'mesh' && isGltfMeshPath(link.mesh_path)) {
+    return (
+      <Suspense fallback={<PrimitiveLinkMesh {...props} />}>
+        <GLTFLinkMesh {...props} />
+      </Suspense>
+    );
+  }
+  return <PrimitiveLinkMesh {...props} />;
 }
 
 /**

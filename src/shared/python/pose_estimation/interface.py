@@ -6,6 +6,18 @@ from pathlib import Path
 
 import numpy as np
 
+# Estimator types the runtime pipeline can actually construct, derived
+# from the estimator registry (epic #8390, C2/#8402 — one seam instead of
+# the historical 5-place edit tax). The API's VALID_ESTIMATOR_TYPES must
+# mirror this set — enforced by tests/unit/test_estimator_type_consistency.py
+# (A2/#8392). Import stays dependency-light: the registry only imports
+# heavy estimator modules inside factories.
+from src.shared.python.pose_estimation.registry import (  # noqa: E402
+    implemented_estimator_types as _implemented_estimator_types,
+)
+
+IMPLEMENTED_ESTIMATOR_TYPES: frozenset[str] = _implemented_estimator_types()
+
 
 @dataclass
 class PoseEstimationResult:

@@ -10,7 +10,8 @@ sympy>=1.12
 
 # Pinocchio and robotics
 pin>=2.6.0
-pin-pink
+# Bounded to match the pinocchio extra in the top-level pyproject.toml (#8394).
+pin-pink>=1.0.0,<4.0.0
 meshcat>=0.3.0
 qpsolvers
 osqp

@@ -21,6 +21,11 @@ vi.mock('@/api/fetch', () => ({
   apiFetchForm: vi.fn(),
 }));
 
+// #8406: keep the live pose channel inert so no real WebSocket is opened.
+vi.mock('@/hooks/useRealtimeChannel', () => ({
+  useRealtimeChannel: vi.fn(() => ({ message: null, status: 'connecting' })),
+}));
+
 import { apiFetch } from '@/api/fetch';
 import { MotionCapturePage } from './MotionCapture';
 import type { CaptureSource } from './MotionCapture';

@@ -41,7 +41,15 @@ HSTS_MAX_AGE_SECONDS = 31536000
 DEFAULT_PAGINATION_LIMIT = 100
 MAX_POSE_DATA_ENTRIES = 100
 
-VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
+# Derived from the estimator registry (epic #8390, C2/#8402), so an
+# estimator registered in one place is valid here automatically. History:
+# a hand-maintained set here once advertised "movenet", which had no
+# implementation, so requests 500'd inside the pipeline (A2/#8392).
+from src.shared.python.pose_estimation.registry import (
+    implemented_estimator_types as _implemented_estimator_types,
+)
+
+VALID_ESTIMATOR_TYPES = set(_implemented_estimator_types())
 VALID_EXPORT_FORMATS = {"json"}
 
 MIN_CONFIDENCE = 0.0

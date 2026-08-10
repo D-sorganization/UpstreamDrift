@@ -130,10 +130,12 @@ def test_production_matching_backends_exclude_unimplemented_placeholders() -> No
     assert production_matching_backends() == {
         MatchingBackendType.TORQUE_MUJOCO,
         MatchingBackendType.INVERSE_DYN_PINOCCHIO,
+        MatchingBackendType.TRAJOPT_DRAKE,
     }
     assert is_production_matching_backend(MatchingBackendType.CMC) is False
     assert is_production_matching_backend("rra") is False
-    assert is_production_matching_backend(MatchingBackendType.TRAJOPT_DRAKE) is False
+    # Re-exposed after the direct-collocation solver landed (#8397/#8131).
+    assert is_production_matching_backend(MatchingBackendType.TRAJOPT_DRAKE) is True
 
 
 @pytest.mark.parametrize(
@@ -141,7 +143,6 @@ def test_production_matching_backends_exclude_unimplemented_placeholders() -> No
     [
         MatchingBackendType.CMC,
         MatchingBackendType.RRA,
-        MatchingBackendType.TRAJOPT_DRAKE,
     ],
 )
 def test_make_matching_solver_rejects_unimplemented_backends_by_default(
@@ -156,13 +157,17 @@ def test_make_matching_solver_rejects_unimplemented_backends_by_default(
     [
         MatchingBackendType.CMC,
         MatchingBackendType.RRA,
-        MatchingBackendType.TRAJOPT_DRAKE,
     ],
 )
 def test_make_matching_solver_requires_explicit_experimental_opt_in(
     backend: MatchingBackendType,
 ) -> None:
     solver = make_matching_solver(backend, allow_experimental=True)
+    assert hasattr(solver, "match")
+
+
+def test_make_matching_solver_exposes_drake_trajopt_by_default() -> None:
+    solver = make_matching_solver(MatchingBackendType.TRAJOPT_DRAKE)
     assert hasattr(solver, "match")
 
 

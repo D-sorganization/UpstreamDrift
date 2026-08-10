@@ -16,6 +16,7 @@ from typing import Any
 
 import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 
 from ..dependencies import get_logger
 from ..models.responses import (
@@ -480,6 +481,108 @@ async def list_models(
         raise HTTPException(
             status_code=500, detail=f"Failed to list models: {str(exc)}"
         ) from exc
+
+
+# Mesh asset types servable via /models/mesh-asset (issue #8406). glTF is the
+# browser-loadable format; .bin and image types cover external .gltf buffers
+# and textures referenced from the same directory.
+_MESH_ASSET_MEDIA_TYPES = {
+    ".glb": "model/gltf-binary",
+    ".gltf": "model/gltf+json",
+    ".bin": "application/octet-stream",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+}
+
+
+def _normalize_mesh_asset_path(path: str) -> Path:
+    """Validate and normalize a URDF mesh-asset path into a relative Path.
+
+    Preconditions enforced (DbC): the path must be non-empty, relative (after
+    stripping an optional ``package://`` prefix), and must not contain parent
+    (``..``) components. Containment inside the allowed model directories is
+    enforced separately by :func:`resolve_contained_path`.
+
+    Args:
+        path: Raw ``path`` query parameter (a URDF ``mesh_path`` value).
+
+    Returns:
+        The normalized relative path.
+
+    Raises:
+        HTTPException: 400 for empty/absolute/traversing paths or unsupported
+            file extensions.
+    """
+    if not path or not path.strip():
+        raise HTTPException(status_code=400, detail="path must be non-empty")
+
+    cleaned = path.strip()
+    cleaned = cleaned.removeprefix("package://")
+    if "\x00" in cleaned:
+        raise HTTPException(status_code=400, detail="Invalid path format")
+
+    rel = Path(cleaned)
+    if rel.is_absolute() or cleaned.startswith(("/", "\\")):
+        raise HTTPException(
+            status_code=400, detail="path must be relative to the models directory"
+        )
+    if ".." in rel.parts:
+        raise HTTPException(status_code=400, detail="path traversal is not permitted")
+
+    if rel.suffix.lower() not in _MESH_ASSET_MEDIA_TYPES:
+        allowed = ", ".join(sorted(_MESH_ASSET_MEDIA_TYPES))
+        raise HTTPException(
+            status_code=400,
+            detail=f"unsupported mesh asset type {rel.suffix!r}; allowed: {allowed}",
+        )
+    return rel
+
+
+@router.get("/models/mesh-asset")
+async def get_model_mesh_asset(path: str) -> FileResponse:
+    """Serve a mesh asset file referenced by a URDF ``mesh_path``.
+
+    The relative ``path`` (optionally prefixed with ``package://``) is
+    resolved against each allowed model directory in turn; the first existing
+    match that stays inside its allowed root (symlink-traversal rejected via
+    :func:`resolve_contained_path`) is served. Used by the frontend
+    ``URDFViewer`` glTF loader (issue #8406).
+
+    Args:
+        path: Relative mesh path, e.g. ``meshes/club.glb``.
+
+    Returns:
+        FileResponse with the correct glTF/binary/image content type.
+
+    Raises:
+        HTTPException: 400 for invalid or escaping paths, 404 when no asset
+            matches.
+    """
+    rel = _normalize_mesh_asset_path(path)
+    root = _find_project_root()
+
+    model_roots = [
+        (root / model_dir) for model_dir in _MODEL_DIRS if (root / model_dir).exists()
+    ]
+
+    # Candidate locations: relative to each model root, and relative to the
+    # project root (for mesh paths already carrying the model-dir prefix).
+    candidates = [model_root / rel for model_root in model_roots]
+    candidates.append(root / rel)
+
+    for candidate in candidates:
+        if not candidate.is_file():
+            continue
+        try:
+            resolved = resolve_contained_path(candidate, model_roots)
+        except HTTPException:
+            # Outside every allowed root (or symlink traversal) — never serve.
+            continue
+        media_type = _MESH_ASSET_MEDIA_TYPES[rel.suffix.lower()]
+        return FileResponse(resolved, media_type=media_type)
+
+    raise HTTPException(status_code=404, detail=f"Mesh asset not found: {path}")
 
 
 @router.get("/models/{model_name}/urdf", response_model=URDFModelResponse)

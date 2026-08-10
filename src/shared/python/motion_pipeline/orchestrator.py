@@ -10,7 +10,7 @@ Usage:
 
     config = PipelineConfig(
         source_format="c3d",
-        ik_backend="mujoco",
+        ik_backend="geometric",
         matching_backend="mujoco",
     )
     pipeline = MotionPipeline(config)
@@ -166,7 +166,8 @@ class PipelineConfig(BaseModel):
 
     # Backend selection
     ik_backend: str = Field(
-        default="mujoco", description="IK backend (mujoco, drake, pinocchio, opensim)"
+        default="geometric",
+        description="IK backend (geometric, mujoco, drake, pinocchio, opensim)",
     )
     matching_backend: str = Field(
         default="mujoco", description="Motion matching backend"
