@@ -5,7 +5,8 @@ transfer in the golf swing. The study combines a literature synthesis
 with reproducible two-link simulations, counterfactual acceleration
 decomposition, exact interaction-force and force-power accounting, a
 matched-state torque-killswitch, actuator-bound checks, impact-definition
-sensitivity, and model-parameter sensitivity.
+sensitivity, model-parameter sensitivity, and a 96-case cut-time/horizon/step
+counterfactual ensemble with gravity and damping ablations.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -34,6 +35,7 @@ python3 -m scripts.research.proximal_distal_energy.run_experiments
 # registered source extraction and exact interaction-force study
 python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
 python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
+python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -41,6 +43,7 @@ python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 # figures
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
+python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf

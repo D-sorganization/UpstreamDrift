@@ -129,6 +129,16 @@ explicitly distinguishing a trajectory-level killswitch from pointwise ZTCF
 power reconstruction, matched initial state, and initial ZTCF equivalence are
 unit-tested.
 
+**Matched-state counterfactual ensemble (E6).** Eight cut times, including
+three samples bracketing the 0.100 s wrist-command switch, are crossed with four
+forward horizons and three fixed timesteps. Commanded and zero-torque futures
+share the exact interpolated source state. Divergence is recorded in generalized
+position and velocity, wrist force, force power, integrated force work, and
+terminal clubhead speed. The 80 ms subset is repeated with gravity disabled and
+with damping disabled. The 0.5 ms grid is the timestep reference, and the
+registered WSCG chart's stored DELTA series are independently reconstructed as
+BASE minus counterfactual after time alignment (@sec-killswitch-ensemble).
+
 **Phase budgets.** With the downswing divided at $t_{\mathrm{imp}}/2$:
 club kinetic-energy gain, wrist actuator work, shoulder work, and
 integrated joint-force transfer, per half.
