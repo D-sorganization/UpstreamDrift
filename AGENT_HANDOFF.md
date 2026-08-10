@@ -27,7 +27,7 @@ Update this file with every PR and every push to main.
   implicit Tools runtime exists, only the optional Sidekick sidebar is disabled;
   explicit `TOOLS_REPO_PATH` selections remain fail-closed. Commit `6699380d9` has
   28 focused launcher/overlay tests plus clean Ruff checks.
-- `chore/consolidate-open-pr-backlog` consolidates the still-applicable changes from
+- `chore/consolidate-open-pr-backlog` (full PR **#8431**) consolidates the still-applicable changes from
   micro-optimization PRs #8335, #8371, and #8408-#8411 together with the
   GitHub Actions updates from #8329-#8332. Superseded or duplicate PRs are closed
   only after their exact replacement is linked.
@@ -57,7 +57,7 @@ The active branches are independent topic branches off `main` unless noted:
   production build pass. The full UI baseline remains 781 passed / 2 unrelated
   `useEngineStore` unload failures, reproduced on the parent checkout.
 - `fix/impact-friction-spin-axis-and-gear-offset` (#8344) — off `main`.
-- `chore/consolidate-open-pr-backlog` — clean branch from current `main`; replaces
+- `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
 
