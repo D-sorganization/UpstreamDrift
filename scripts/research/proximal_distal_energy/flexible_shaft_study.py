@@ -144,7 +144,7 @@ def control_torque(time_s: float, params: FlexibleShaftParams) -> np.ndarray:
     return np.array([params.shoulder_torque_nm, wrist, 0.0])
 
 
-def _generalized_terms(
+def generalized_terms(
     state: np.ndarray, time_s: float, params: FlexibleShaftParams
 ) -> dict[str, np.ndarray]:
     if state.shape != (6,) or not np.all(np.isfinite(state)):
@@ -176,7 +176,7 @@ def acceleration_decomposition(
     state: np.ndarray, time_s: float, params: FlexibleShaftParams
 ) -> dict[str, np.ndarray]:
     """Return additive generalized-acceleration contributions and their sum."""
-    terms = _generalized_terms(state, time_s, params)
+    terms = generalized_terms(state, time_s, params)
     matrix = mass_matrix(state[1], state[2], params.triple())
     contributions = {
         name: np.linalg.solve(matrix, torque) for name, torque in terms.items()
@@ -259,7 +259,7 @@ def _rigid_acceleration_decomposition(
     if state.shape != (4,) or not np.all(np.isfinite(state)):
         raise ValueError("rigid state must be a finite four-vector")
     embedded = np.array([state[0], state[1], 0.0, state[2], state[3], 0.0])
-    terms = _generalized_terms(embedded, time_s, params)
+    terms = generalized_terms(embedded, time_s, params)
     matrix = mass_matrix(state[1], 0.0, params.triple())[:2, :2]
     contributions = {
         name: np.linalg.solve(matrix, torque[:2])
