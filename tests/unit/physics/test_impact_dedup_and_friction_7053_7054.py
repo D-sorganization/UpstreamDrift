@@ -136,6 +136,7 @@ class TestSphereRollingCapFactor:
         v_t = 6.0
         # Rolling-without-slip ceiling for a uniform solid sphere.
         expected_omega = (5.0 / 7.0) * v_t / R_BALL
-        # spin_axis = n x tangent_dir = +X x +Y = +Z.
+        # spin_axis = tangent_dir x n = +Y x +X = -Z (friction torque about
+        # the ball center: (-R n) x (J_f t)).
         omega_z = float(post.ball_angular_velocity[2])
-        assert omega_z == pytest.approx(expected_omega, rel=1e-9)
+        assert omega_z == pytest.approx(-expected_omega, rel=1e-9)
