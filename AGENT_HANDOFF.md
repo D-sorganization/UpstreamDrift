@@ -1,9 +1,19 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 Update this file with every PR and every push to main.
 
 ## Where the repo is heading
+
+- **#8443 / #8444 interaction-force mechanisms** — full PR **#8452** on branch
+  `research/interaction-force-transfer` adds an exact and tested
+  double-pendulum wrist-force/power decomposition, matched-state torque
+  killswitch, seven vector/mechanism figures, hash-registered WSCG 2024 source
+  decks, and a 52-page rendered article. The source presentation is treated as
+  project-originated hypothesis evidence, not independent validation. Follow-on
+  issues #8445–#8451 cover counterfactual ensembles, two-hand equivalent-couple
+  reproduction, gravity/flex separation, higher-order models, optimization,
+  human validation, and the 90–110-page open monograph release.
 
 - **Document title capitalization** — this branch normalizes the
   Proximal-to-Distal article headings and regenerated PDF/LaTeX, adds a
@@ -66,6 +76,9 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
+- `research/interaction-force-transfer` — full PR **#8452** for #8444 under
+  epic #8443; exact interaction-force mechanics and first detailed article
+  treatment.
 - `fix/8429-private-launch-data` — issue #8429, full PR **#8430**. Removes the
   public 832-shot launch-monitor CSV and resolves it through the authenticated
   private data authority. Focused validation:

@@ -11,8 +11,9 @@ software.
 
 The current evidence boundary includes these known limitations:
 
-- Pointwise and re-simulation counterfactuals have not been compared on
-  matched trajectories; @sec-results supports instantaneous attribution only.
+- One representative pointwise and matched-state torque-killswitch comparison
+  is complete; a multi-phase, multi-program ensemble with uncertainty analysis
+  remains necessary before making general persistence claims.
 - The model has two planar links and a fixed hub; torso, hub-path, long-axis
   rotation, and closed-loop arm effects are absent.
 - The shaft is rigid, so strain-energy storage and recoil are absent.
@@ -31,6 +32,10 @@ From the repository root (Python 3.11+ with the project dependencies):
 # Primary sweep, counterfactuals, and interface-power analysis
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 
+# Registered WSCG source extraction and interaction-force analysis
+python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
+python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
+
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -38,6 +43,7 @@ python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 
 # Figures and document
 python3 -m scripts.research.proximal_distal_energy.make_figures
+python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
@@ -90,3 +96,11 @@ Recorded outputs:
 - `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep.
 - `data/e1c_sensitivity.json` — alternative impact-definition results.
 - `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases.
+- `data/interaction_force_mechanisms.npz` — exact force, power, geometry, and
+  matched-state killswitch arrays.
+- `data/interaction_force_summary.json` — headline force, work, and divergence
+  metrics with counterfactual contracts.
+- `data/wscg_2024_hand_force_series.csv` — hash-verified values from the source
+  presentation's embedded chart cache.
+- `data/wscg_2024_source_provenance.json` — source hashes, series inventory, and
+  interpretation boundary.

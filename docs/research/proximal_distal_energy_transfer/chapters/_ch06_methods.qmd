@@ -4,8 +4,9 @@ This chapter specifies the simulation experiments whose results appear
 in @sec-results. Everything described here is implemented in three
 committed modules under
 [`scripts/research/proximal_distal_energy/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy)
-(`swing_model.py`, `torque_programs.py`, `run_experiments.py`, with
-figures from `make_figures.py`), and every output carries a provenance
+(`swing_model.py`, `interaction_forces.py`, `torque_programs.py`,
+`run_experiments.py`, and `run_interaction_force_study.py`, with figures from
+the paired figure scripts), and every output carries a provenance
 record (git SHA, integrator settings, parameter values). The
 reproduction commands are in @sec-appendix-repro.
 
@@ -116,6 +117,17 @@ mechanical energy).
 applied torques, yielding drift and control components of both joint
 accelerations; the club's absolute angular-acceleration split is the
 row sum.
+
+**Exact interaction-force audit (E5).** Analytic club-centre-of-mass
+acceleration replaces finite differentiation and separates the wrist reaction
+force into proximal and distal tangential and centripetal terms plus gravity
+reaction (@sec-force-decomposition). Each vector is projected onto the analytic
+wrist velocity to obtain a signed power pathway. A late-downswing matched-state
+experiment then integrates the commanded and zero-torque futures for 120 ms,
+explicitly distinguishing a trajectory-level killswitch from pointwise ZTCF
+(@sec-counterfactual-contracts). Newton balance, club moment balance, force and
+power reconstruction, matched initial state, and initial ZTCF equivalence are
+unit-tested.
 
 **Phase budgets.** With the downswing divided at $t_{\mathrm{imp}}/2$:
 club kinetic-energy gain, wrist actuator work, shoulder work, and
