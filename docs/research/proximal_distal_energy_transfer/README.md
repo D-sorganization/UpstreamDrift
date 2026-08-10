@@ -6,7 +6,8 @@ with reproducible two-link simulations, counterfactual acceleration
 decomposition, exact interaction-force and force-power accounting, a
 matched-state torque-killswitch, actuator-bound checks, impact-definition
 sensitivity, model-parameter sensitivity, and a 96-case cut-time/horizon/step
-counterfactual ensemble with gravity and damping ablations.
+counterfactual ensemble with gravity and damping ablations, and a direct
+two-hand wrench audit of the archived WSCG BASE/ZTCF/DELTA model tables.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -36,6 +37,7 @@ python3 -m scripts.research.proximal_distal_energy.run_experiments
 python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
 python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
 python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
+python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -44,6 +46,7 @@ python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
+python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -63,6 +66,9 @@ Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
   scripts in `scripts/research/proximal_distal_energy/` from the
   recorded data in `data/`.
 - Model-derived findings are labeled separately from empirical findings.
+- The archived two-hand tables can optionally be re-exported with MATLAB by
+  running `export_two_hand_wscg_tables`; committed CSV caches allow the audit
+  and figures to run without MATLAB or Simscape.
 - The simulation demonstrates a mechanism within a planar 2-DOF,
   fixed-hub, rigid-shaft model; it does not establish a universal
   coaching prescription or population-level effect.

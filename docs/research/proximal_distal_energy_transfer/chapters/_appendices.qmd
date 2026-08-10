@@ -14,6 +14,9 @@ The current evidence boundary includes these known limitations:
 - A multi-phase matched-state torque-killswitch ensemble is complete for one
   declared torque program; other torque programs, model classes, and uncertainty
   distributions remain necessary before making general persistence claims.
+- The archived two-hand ZTCF is pointwise along the BASE state history. Its
+  force-generated negative couple is reproduced, but a two-hand forward
+  killswitch and matched solver/shaft variants remain open validation steps.
 - The model has two planar links and a fixed hub; torso, hub-path, long-axis
   rotation, and closed-loop arm effects are absent.
 - The shaft is rigid, so strain-energy storage and recoil are absent.
@@ -36,6 +39,7 @@ python3 -m scripts.research.proximal_distal_energy.run_experiments
 python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
 python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
 python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
+python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -46,6 +50,7 @@ python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
+python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
@@ -110,3 +115,9 @@ Recorded outputs:
   gravity and damping ablations, convergence metrics, and WSCG DELTA checks.
 - `data/counterfactual_selected_traces.npz` — commanded and zero-torque state,
   force, and power traces for three representative cuts.
+- `data/wscg_two_hand_raw/*.csv` — portable, column-labeled exports of the
+  archived BASE, ZTCF, and DELTA two-hand tables.
+- `data/two_hand_wscg_analysis.json` — source hashes, wrench-reconstruction
+  residuals, reversal times, sensitivity results, and interpretation boundary.
+- `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
+  decompositions, poses, and geometry-counterfactual arrays.

@@ -39,9 +39,12 @@ abstract: |
   the strategy ordering but shifts the optimal onset, showing that the
   modeled mechanism is more robust than any single timing prescription.
   The force analysis resolves the geometric sine and cosine projections that
-  determine whether distal centripetal and tangential forces transfer power,
-  and uses the author's prior two-hand WSCG model as a registered hypothesis
-  source for the next level of validation. References, analysis code,
+  determine whether distal centripetal and tangential forces transfer power.
+  A separate audit of the author's prior two-hand WSCG model reconstructs all
+  2,801 stored samples and shows that a -19.63 N m pointwise zero-command
+  midpoint couple is generated entirely by separated contact forces. It also
+  distinguishes couple sign from power sign and verifies the predicted linear
+  grip-separation and relative-orientation geometry. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -53,6 +56,7 @@ keywords:
   - ZTCF
   - ZVCF
   - double pendulum
+  - two-hand wrench
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -78,6 +82,8 @@ format:
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
+
+{{< include chapters/_ch05_two_hand_wrench.qmd >}}
 
 {{< include chapters/_ch03_evidence.qmd >}}
 
