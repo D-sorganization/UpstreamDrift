@@ -17,9 +17,11 @@ The current evidence boundary includes these known limitations:
 - The archived two-hand ZTCF is pointwise along the BASE state history. Its
   force-generated negative couple is reproduced, but a two-hand forward
   killswitch and matched solver/shaft variants remain open validation steps.
-- The model has two planar links and a fixed hub; torso, hub-path, long-axis
-  rotation, and closed-loop arm effects are absent.
-- The shaft is rigid, so strain-energy storage and recoil are absent.
+- The primary model has two planar links and a fixed hub; torso, hub-path,
+  long-axis rotation, and closed-loop arm effects are absent.
+- The shaft extension is a three-coordinate point-mass surrogate with one
+  linear torsional mode. It is not a calibrated distributed-beam or equipment
+  model, and extreme low-stiffness deflections exceed its linear premise.
 - Actuator bounds are simplified; muscle activation and history effects are
   not represented.
 - Parameter sensitivity is one-at-a-time; coupled uncertainty and population
@@ -40,6 +42,7 @@ python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
 python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
 python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
+python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -51,6 +54,7 @@ python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 ```
@@ -121,3 +125,8 @@ Recorded outputs:
   residuals, reversal times, sensitivity results, and interpretation boundary.
 - `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
   decompositions, poses, and geometry-counterfactual arrays.
+- `data/shaft_contribution_study.json` — matched rigid/flexible results,
+  termwise acceleration and power summaries, ablations, 120 robustness cases,
+  endpoint windows, timestep convergence, and interpretation boundaries.
+- `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state,
+  speed, force, acceleration-contribution, power, work, and energy traces.

@@ -5,6 +5,17 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
+- **#8447 gravity, momentum, damping, and shaft-flex separation** — active on
+  `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
+  surrogate now has an exact matched rigid reduction, termwise acceleration and
+  power attribution, interface force/moment accounting, closed work--energy
+  balance, gravity and damping ablations, a 120-case
+  stiffness/damping/torque-cut grid, impact-window and timestep sensitivity,
+  eight figures, and a new publication chapter. The bounded reference result is
+  +0.108 m/s flexible-minus-rigid delivery speed with 0.720 J peak shaft strain
+  energy; gravity and joint-damping ablations are substantially larger. This is
+  not a calibrated shaft or human-subject model.
+
 - **#8446 two-hand passive-couple reproduction** — full PR **#8454** on branch
   `research/two-hand-passive-couple`. The archived 2,801-sample
   BASE/ZTCF/DELTA tables now have hash-traceable portable exports, a tested
