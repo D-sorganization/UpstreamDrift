@@ -5,7 +5,7 @@ Update this file with every PR and every push to main.
 
 ## Where the repo is heading
 
-- **#8448 higher-order mechanism ladder** — active on
+- **#8448 higher-order mechanism ladder** — full PR **#8456** on
   `research/higher-order-mechanism-ladder`. The first executed slice adds a
   common frame/reference-explicit wrench-power schema, exact frame and
   reference-transport audits, prescribed mobile-hub inverse dynamics, planar
