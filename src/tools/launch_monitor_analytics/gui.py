@@ -34,6 +34,9 @@ from src.shared.python.launch_monitor import (
     numeric_metric_columns,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.tools.launch_monitor_analytics.flexible_analysis_widget import (
+    FlexibleAnalysisWidget,
+)
 from src.tools.launch_monitor_analytics.widgets import (
     DataFrameTable,
     ImportMappingDialog,
@@ -122,6 +125,8 @@ class MainWidget(QtWidgets.QWidget):
         self.tabs.addTab(self._build_sessions_tab(), "Sessions")
         self.tabs.addTab(self._build_treatment_tab(), "Data Treatment")
         self.tabs.addTab(self._build_relationships_tab(), "Relationships")
+        self.flexible_analysis = FlexibleAnalysisWidget()
+        self.tabs.addTab(self.flexible_analysis, "Flexible Analysis")
         self.tabs.addTab(self._build_models_tab(), "Models")
         self.tabs.addTab(self._build_comparison_tab(), "Monitor Comparison")
         self.tabs.addTab(self._build_dispersion_tab(), "Dispersion")
@@ -489,6 +494,7 @@ class MainWidget(QtWidgets.QWidget):
     def _refresh_all(self) -> None:
         self._refresh_session_tree()
         self.data_table.set_frame(self.analysis_frame)
+        self.flexible_analysis.set_frame(self.analysis_frame)
         metrics = numeric_metric_columns(self.analysis_frame)
         for widget in (
             self.relationship_metrics,

@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.488 |
+| **Spec Version** | 1.0.489 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,26 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-09** - Stabilized the Launch Monitor Analytics v1 consumer
+  contract against the current Tools record contract. Dataset fingerprints
+  now hash canonical ordered record content and ignore transient pandas index
+  labels; the shared domain owns the single `1.0.0` version constant; FastAPI
+  validates analysis mode, correlation method, and missing-data policy as
+  closed enums; and the PyQt signal boundary converts user-correctable
+  selection failures into accessible inline status. The parity fixture pins
+  the observed Tools v1 fingerprint but does not claim an immutable Tools
+  release or dependency pin.
+- **2026-08-06** - Extended Launch Monitor Analytics with a UI-neutral,
+  versioned flexible-analysis contract and matched PyQt/FastAPI surfaces.
+  Users may select arbitrary numeric outcomes and predictors, Pearson,
+  Spearman, or Kendall association, pairwise/listwise/fail missingness,
+  Benjamini-Hochberg correction, grouped analysis, and OLS regression with
+  confidence intervals, residual diagnostics, and deterministic dataset
+  lineage. Aggregate observations remain excluded from regression; explicit
+  aggregate correlations are labeled descriptive with an ecological-bias
+  warning. Vendor-specific fields cannot be pooled across monitor vendors, and
+  association or predictive fit is never presented as causal evidence.
 
 - **2026-08-09** - Removed the real 832-shot launch-monitor trajectory CSV
   from the public repository. The historical validation loader now resolves its
@@ -1515,7 +1535,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6 and headless vendor-neutral launch-monitor import, dependency, model, agreement, dispersion, and trend analysis |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -1984,6 +2004,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-10 | 1.0.489 | Extended Launch Monitor Analytics with a versioned arbitrary-field analysis contract, PyQt and FastAPI surfaces, configurable association/missingness/multiplicity/grouping, OLS uncertainty and residual diagnostics, deterministic lineage, and fail-closed aggregate/vendor-pooling boundaries for #8364-#8366. |
 | 2026-08-08 | 1.0.487 | Epic #8390 B5/C2/C4 (completing all 16 sub-issues): CEM/MPPI batch swing optimizer as the first production consumer of the ADR-0023/0024 batch infrastructure, ~1k mujoco rollouts scored in ~2.5s on the CPU fallback (#8400); pose-estimator registry replacing the 5-place estimator edit tax, with API/pipeline/motion-capture routes deriving from one seam (#8402); 4D-Humans/HMR2 sidecar (FreeMoCap-pattern subprocess isolation for CC-BY-NC tooling) with a registered 3D adapter and SMPL-betas plumbing into the character builder (#8404). |
 | 2026-08-08 | 1.0.486 | Epic #8390 B1/B3/B4/C1/C3/D2: shared 7-DOF swing multibody model + smooth cost surrogates (`optimization/model_provider.py`, `smooth_costs.py`, #8396); CasADi direct-transcription swing backend with symbolic RNEA validated against pin.rnea, new `optimal-control` extra, `solver='casadi'` dispatch (#8398); Crocoddyl FDDP backend with subprocess stack-health probe and graceful mixed-wheel degradation, new `crocoddyl` extra (#8399); real Pinocchio IK backend (diff_ik-style LM + optional PINK path) with SkeletonRig→pin.Model bridge (#8401); DeepLabCut import adapter with custom keypoints (#8403); web UI 3D mocap skeleton, URDF glTF mesh loading with a hardened mesh-asset endpoint, and live pose streaming over the realtime WebSocket (#8406). |
 | 2026-08-08 | 1.0.485 | Epic #8390 B2+D1: implemented the Drake DirectCollocation motion-matching solver over a new SkeletonRig→URDF model bridge (`motion_pipeline/model_bridge.py`), re-exposed `drake_trajopt` as a production matching backend per #8131's criteria with live acceptance tests under `requires_drake` (#8397); added the Rerun recording adapter (`visualization/rerun_renderer.py`, opt-in `visualization` extra, `.rrd` export via `compare_cli --export-rrd`), executing ADR-0027's named follow-up (#8405). |
