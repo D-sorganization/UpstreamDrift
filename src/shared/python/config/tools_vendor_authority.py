@@ -60,6 +60,131 @@ def _is_within(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
+def _tracked_gitlink_error(canonical_repo: Path) -> str | None:
+    """Return an error unless the index contains the one declared gitlink."""
+    index_code, index_output = _run_git_command(
+        ("ls-files", "--stage", "--", _TOOLS_GITLINK_PATH.as_posix()),
+        cwd=canonical_repo,
+    )
+    if index_code != 0 or len(index_output.splitlines()) != 1:
+        return "tracked Tools gitlink entry is missing"
+    index_fields = index_output.split(maxsplit=3)
+    if len(index_fields) != 4:
+        return "tracked Tools gitlink entry is missing"
+    mode, tracked_sha, stage, tracked_path = index_fields
+    if (
+        mode != "160000"
+        or stage != "0"
+        or tracked_path != _TOOLS_GITLINK_PATH.as_posix()
+    ):
+        return "tracked Tools entry is not the declared gitlink"
+    if tracked_sha != TOOLS_GITLINK_SHA:
+        return "tracked Tools gitlink SHA does not match the declared pin"
+    return None
+
+
+def _resolve_checkout(vendor_root: Path) -> tuple[Path | None, str | None]:
+    """Resolve and validate the initialized, non-reparse checkout layout."""
+
+    if not vendor_root.is_dir() or _is_reparse_point(vendor_root):
+        return None, "Tools gitlink checkout is missing or replaced"
+    try:
+        canonical_vendor = vendor_root.resolve(strict=True)
+    except OSError:
+        return None, "Tools gitlink checkout cannot be resolved"
+    if canonical_vendor != vendor_root:
+        return None, "Tools gitlink checkout escapes its canonical path"
+
+    git_marker = canonical_vendor / ".git"
+    if not git_marker.is_file() or _is_reparse_point(git_marker):
+        return None, "Tools checkout is not an initialized gitlink worktree"
+
+    src_root = canonical_vendor / "src"
+    try:
+        canonical_src = src_root.resolve(strict=True)
+    except OSError:
+        return None, "Tools gitlink src directory is missing"
+    if not canonical_src.is_dir() or not _is_within(canonical_src, canonical_vendor):
+        return None, "Tools gitlink src directory escapes vendor authority"
+    return canonical_vendor, None
+
+
+def _checkout_identity_error(
+    canonical_repo: Path, canonical_vendor: Path
+) -> str | None:
+    """Return an error unless checkout identity matches the superproject pin."""
+
+    submodule_code, submodule_output = _run_git_command(
+        ("submodule", "status", "--", _TOOLS_GITLINK_PATH.as_posix()),
+        cwd=canonical_repo,
+    )
+    expected_status = f" {TOOLS_GITLINK_SHA} {_TOOLS_GITLINK_PATH.as_posix()}"
+    status_matches = submodule_output == expected_status or submodule_output.startswith(
+        f"{expected_status} "
+    )
+    if submodule_code != 0 or not status_matches:
+        return "Tools checkout is not synchronized to the tracked gitlink"
+
+    head_code, checked_out_sha = _run_git_command(
+        ("rev-parse", "--verify", "HEAD"), cwd=canonical_vendor
+    )
+    if head_code != 0 or checked_out_sha != TOOLS_GITLINK_SHA:
+        return "Tools checkout HEAD does not match the declared pin"
+
+    top_code, top_level = _run_git_command(
+        ("rev-parse", "--show-toplevel"), cwd=canonical_vendor
+    )
+    if top_code != 0 or Path(top_level).resolve(strict=False) != canonical_vendor:
+        return "Tools checkout is not rooted at the gitlink path"
+
+    parent_code, superproject = _run_git_command(
+        ("rev-parse", "--show-superproject-working-tree"), cwd=canonical_vendor
+    )
+    if (
+        parent_code != 0
+        or not superproject
+        or Path(superproject).resolve(strict=False) != canonical_repo
+    ):
+        return "Tools checkout is not attached to this superproject"
+    return None
+
+
+def _checkout_cleanliness_error(
+    canonical_repo: Path, canonical_vendor: Path
+) -> str | None:
+    """Return an error when either Git view reports mutable Tools state."""
+
+    dirty_code, dirty_output = _run_git_command(
+        ("status", "--porcelain=v1", "--untracked-files=all"), cwd=canonical_vendor
+    )
+    if dirty_code != 0 or dirty_output:
+        return "Tools gitlink checkout is dirty"
+
+    parent_dirty_code, parent_dirty_output = _run_git_command(
+        (
+            "status",
+            "--porcelain=v1",
+            "--ignore-submodules=none",
+            "--",
+            _TOOLS_GITLINK_PATH.as_posix(),
+        ),
+        cwd=canonical_repo,
+    )
+    if parent_dirty_code != 0 or parent_dirty_output:
+        return "superproject reports a modified Tools gitlink"
+    return None
+
+
+def _unavailable(vendor_root: Path, reason: str) -> ToolsVendorAuthority:
+    """Build one normalized fail-closed authority result."""
+    return ToolsVendorAuthority(
+        root=vendor_root,
+        expected_sha=TOOLS_GITLINK_SHA,
+        available=False,
+        reason=reason,
+    )
+
+
 def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
     """Validate the exact clean Tools gitlink checkout used in production.
 
@@ -73,109 +198,21 @@ def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
 
     canonical_repo = repo_root.resolve(strict=False)
     vendor_root = canonical_repo / _TOOLS_GITLINK_PATH
-
-    def unavailable(reason: str) -> ToolsVendorAuthority:
-        return ToolsVendorAuthority(
-            root=vendor_root,
-            expected_sha=TOOLS_GITLINK_SHA,
-            available=False,
-            reason=reason,
-        )
-
     if not canonical_repo.is_dir():
-        return unavailable("UpstreamDrift repository root is unavailable")
+        return _unavailable(vendor_root, "UpstreamDrift repository root is unavailable")
 
-    index_code, index_output = _run_git_command(
-        ("ls-files", "--stage", "--", _TOOLS_GITLINK_PATH.as_posix()),
-        cwd=canonical_repo,
-    )
-    if index_code != 0 or len(index_output.splitlines()) != 1:
-        return unavailable("tracked Tools gitlink entry is missing")
-    index_fields = index_output.split(maxsplit=3)
-    if len(index_fields) != 4:
-        return unavailable("tracked Tools gitlink entry is missing")
-    mode, tracked_sha, stage, tracked_path = index_fields
-    if (
-        mode != "160000"
-        or stage != "0"
-        or tracked_path != _TOOLS_GITLINK_PATH.as_posix()
-    ):
-        return unavailable("tracked Tools entry is not the declared gitlink")
-    if tracked_sha != TOOLS_GITLINK_SHA:
-        return unavailable("tracked Tools gitlink SHA does not match the declared pin")
-
-    if not vendor_root.is_dir() or _is_reparse_point(vendor_root):
-        return unavailable("Tools gitlink checkout is missing or replaced")
-    try:
-        canonical_vendor = vendor_root.resolve(strict=True)
-    except OSError:
-        return unavailable("Tools gitlink checkout cannot be resolved")
-    if canonical_vendor != vendor_root:
-        return unavailable("Tools gitlink checkout escapes its canonical path")
-
-    git_marker = canonical_vendor / ".git"
-    if not git_marker.is_file() or _is_reparse_point(git_marker):
-        return unavailable("Tools checkout is not an initialized gitlink worktree")
-
-    src_root = canonical_vendor / "src"
-    try:
-        canonical_src = src_root.resolve(strict=True)
-    except OSError:
-        return unavailable("Tools gitlink src directory is missing")
-    if not canonical_src.is_dir() or not _is_within(canonical_src, canonical_vendor):
-        return unavailable("Tools gitlink src directory escapes vendor authority")
-
-    submodule_code, submodule_output = _run_git_command(
-        ("submodule", "status", "--", _TOOLS_GITLINK_PATH.as_posix()),
-        cwd=canonical_repo,
-    )
-    expected_status = f" {TOOLS_GITLINK_SHA} {_TOOLS_GITLINK_PATH.as_posix()}"
-    status_matches = submodule_output == expected_status or submodule_output.startswith(
-        f"{expected_status} "
-    )
-    if submodule_code != 0 or not status_matches:
-        return unavailable("Tools checkout is not synchronized to the tracked gitlink")
-
-    head_code, checked_out_sha = _run_git_command(
-        ("rev-parse", "--verify", "HEAD"), cwd=canonical_vendor
-    )
-    if head_code != 0 or checked_out_sha != TOOLS_GITLINK_SHA:
-        return unavailable("Tools checkout HEAD does not match the declared pin")
-
-    top_code, top_level = _run_git_command(
-        ("rev-parse", "--show-toplevel"), cwd=canonical_vendor
-    )
-    if top_code != 0 or Path(top_level).resolve(strict=False) != canonical_vendor:
-        return unavailable("Tools checkout is not rooted at the gitlink path")
-
-    parent_code, superproject = _run_git_command(
-        ("rev-parse", "--show-superproject-working-tree"), cwd=canonical_vendor
-    )
-    if (
-        parent_code != 0
-        or not superproject
-        or Path(superproject).resolve(strict=False) != canonical_repo
-    ):
-        return unavailable("Tools checkout is not attached to this superproject")
-
-    dirty_code, dirty_output = _run_git_command(
-        ("status", "--porcelain=v1", "--untracked-files=all"), cwd=canonical_vendor
-    )
-    if dirty_code != 0 or dirty_output:
-        return unavailable("Tools gitlink checkout is dirty")
-
-    parent_dirty_code, parent_dirty_output = _run_git_command(
-        (
-            "status",
-            "--porcelain=v1",
-            "--ignore-submodules=none",
-            "--",
-            _TOOLS_GITLINK_PATH.as_posix(),
-        ),
-        cwd=canonical_repo,
-    )
-    if parent_dirty_code != 0 or parent_dirty_output:
-        return unavailable("superproject reports a modified Tools gitlink")
+    error = _tracked_gitlink_error(canonical_repo)
+    if error is not None:
+        return _unavailable(vendor_root, error)
+    canonical_vendor, error = _resolve_checkout(vendor_root)
+    if error is not None or canonical_vendor is None:
+        return _unavailable(vendor_root, error or "Tools checkout cannot be resolved")
+    error = _checkout_identity_error(canonical_repo, canonical_vendor)
+    if error is not None:
+        return _unavailable(vendor_root, error)
+    error = _checkout_cleanliness_error(canonical_repo, canonical_vendor)
+    if error is not None:
+        return _unavailable(vendor_root, error)
 
     return ToolsVendorAuthority(
         root=canonical_vendor,

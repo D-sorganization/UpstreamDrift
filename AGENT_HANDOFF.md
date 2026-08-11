@@ -13,7 +13,10 @@ Update this file with every PR and every push to main.
   Tools provider win over conflicting installed-package or sibling metadata,
   requires an initialized, exact-HEAD, clean gitlink attached to this
   superproject, rejects reparse-point replacements and all resolved path
-  escapes, and normalizes failure to `provider_unavailable`. Mutable
+  escapes, and normalizes failure to `provider_unavailable`. The authority
+  inspection is decomposed into bounded index, checkout-layout, identity, and
+  cleanliness checks so it satisfies the changed-file architecture budget.
+  Canonical SPEC version `1.0.497` now matches the changelog. Mutable
   `../Tools` roots are no longer serialized and unrelated sibling providers
   retain their existing resolution. The branch deliberately does not change
   the gitlink pin or add `TOOLS_REPO_PATH`. #4262 remains open for any future
