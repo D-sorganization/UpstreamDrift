@@ -5,6 +5,25 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **Main-launcher size slice (local, no publish)** — branch
+  `fix/upstream-launcher-module-size-decomposition` starts at exact draft PR
+  #8482 head `73dd11df09a2f37ea150835930134ae4354ee5a7`. It moves the
+  Sidekick API-readiness state machine, terminal degradation report, and
+  workspace-registry seeding into the existing `SidekickSidebarManager`, while
+  preserving the historical `UpstreamDriftLauncher` methods as thin delegates
+  and keeping the clock, readiness probe, and Qt scheduler injectable. The
+  launcher facade is now 1,198 lines (down from 1,315), and its file-size
+  exception is removed without renewal. The module-size gate now reports three
+  inherited oversized modules rather than four. Do not publish until accurate
+  issue tracking exists: the exception cited #7399, which is a closed,
+  unrelated body-part-visualization PR, while the older generic #5922 is also
+  closed. Remaining module-size failures are `launcher_ui_setup.py`,
+  `settings_dialog.py`, and `viewer_3d_tab.py` with expired exceptions. The 24
+  focused Sidekick-startup tests pass. The broader launcher selection remains
+  blocked by the parent-identical Tools ownership mismatch for the already
+  present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
+  3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
+
 - **Launcher-diagnostics size slice (local, no publish)** — branch
   `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
   head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local

@@ -43,6 +43,64 @@ def test_sidebar_uses_canonical_tools_source_resolver() -> None:
     )
 
 
+def test_sidebar_manager_owns_api_readiness_state_machine() -> None:
+    """The sidebar manager should own retries while preserving host state."""
+    runtime = SimpleNamespace(instance_id="current-instance")
+    running_process = MagicMock()
+    running_process.poll.return_value = None
+    callback = MagicMock()
+    launcher = SimpleNamespace(
+        _sidekick_runtime_config=runtime,
+        _sidekick_api_wait_started_at=None,
+        _sidekick_api_restart_count=0,
+        _sidekick_api_monitoring=True,
+        _sidekick_api_was_ready=False,
+        background_api_process=running_process,
+        _monitor_sidekick_api_readiness=callback,
+        _report_sidekick_api_failure=MagicMock(),
+    )
+    readiness_check = MagicMock(
+        return_value=SimpleNamespace(
+            ready=False,
+            url="http://127.0.0.1:8123/readyz",
+            status_code=None,
+            detail="connection refused",
+        )
+    )
+    schedule_once = MagicMock()
+
+    SidekickSidebarManager(launcher)._monitor_sidekick_api_readiness(
+        readiness_check=readiness_check,
+        schedule_once=schedule_once,
+        monotonic=lambda: 10.0,
+    )
+
+    readiness_check.assert_called_once_with(expected_instance_id="current-instance")
+    assert launcher._sidekick_api_wait_started_at == 10.0
+    schedule_once.assert_called_once_with(SIDEKICK_API_READY_RETRY_MS, callback)
+    launcher._report_sidekick_api_failure.assert_not_called()
+
+
+def test_sidebar_manager_seeds_launcher_workspace_registry() -> None:
+    """Workspace seeding belongs with the sidebar integration boundary."""
+    registry = SimpleNamespace(set_variable=MagicMock())
+    engine_manager = object()
+    model_registry = object()
+    launcher = SimpleNamespace(
+        sidekick_sidebar=SimpleNamespace(registry=registry),
+        orchestrator=SimpleNamespace(
+            engine_manager=engine_manager,
+            registry=model_registry,
+        ),
+    )
+
+    SidekickSidebarManager(launcher)._seed_sidekick_workspace()
+
+    calls = registry.set_variable.call_args_list
+    assert calls[0].args == ("engine_manager", engine_manager)
+    assert calls[1].args == ("model_registry", model_registry)
+
+
 def test_direct_launcher_imports_critical_sidekick_modules_from_pinned_tools() -> None:
     """Production bootstrap must never resolve critical modules from child copies."""
     repo_root = Path(__file__).resolve().parents[3]

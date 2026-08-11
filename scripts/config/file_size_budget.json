@@ -31,12 +31,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #5922 temporary exception while settings dialog tabs are decomposed into focused UI components.",
       "expires_on": "2027-01-31"
-    },
-    {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher decomposition: upstream_drift_launcher.py exceeds the file size budget until decomposed into smaller managers.",
-      "expires_on": "2026-10-31"
     }
   ]
 }

@@ -1,7 +1,3 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
-
 #!/usr/bin/env python3
 """UpstreamDrift Launcher (PyQt6)
 
@@ -61,10 +57,16 @@ from src.launchers.launcher_simulation import (
 )
 from src.launchers.launcher_ui.frameless_window import configure_frameless_window
 from src.launchers.launcher_simulation import SimulationManager
-from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+from src.launchers.launcher_sidekick_sidebar import (
+    SIDEKICK_API_HEALTHCHECK_MS as SIDEKICK_API_HEALTHCHECK_MS,
+    SIDEKICK_API_MAX_RESTARTS as SIDEKICK_API_MAX_RESTARTS,
+    SIDEKICK_API_READY_RETRY_MS as SIDEKICK_API_READY_RETRY_MS,
+    SIDEKICK_API_READY_TIMEOUT_SEC as SIDEKICK_API_READY_TIMEOUT_SEC,
+    SIDEKICK_API_RESTART_DELAY_MS as SIDEKICK_API_RESTART_DELAY_MS,
+    SidekickSidebarManager,
+)
 from src.launchers.sidekick_readiness import (
     check_sidekick_api_readiness,
-    readiness_detail_for_log,
 )
 from src.launchers.sidekick_runtime import (
     SidekickRuntimeConfig,
@@ -113,12 +115,6 @@ STARTUP_TIMEOUT_SEC: int = 30
 assert STARTUP_TIMEOUT_SEC > 0, (
     "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 )
-
-SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
-SIDEKICK_API_READY_RETRY_MS: int = 500
-SIDEKICK_API_RESTART_DELAY_MS: int = 1_000
-SIDEKICK_API_HEALTHCHECK_MS: int = 3_000
-SIDEKICK_API_MAX_RESTARTS: int = 2
 
 
 class UpstreamDriftLauncher(QMainWindow):
@@ -628,133 +624,20 @@ class UpstreamDriftLauncher(QMainWindow):
         self._monitor_sidekick_api_readiness()
 
     def _monitor_sidekick_api_readiness(self) -> None:
-        """Monitor the API child without gating the local Sidekick tools."""
-        if not getattr(self, "_sidekick_api_monitoring", True):
-            return
-
-        runtime = self._sidekick_runtime_config
-        expected_instance_id = runtime.instance_id if runtime is not None else None
-        readiness = check_sidekick_api_readiness(
-            expected_instance_id=expected_instance_id
+        """Delegate API readiness monitoring to the Sidekick owner."""
+        SidekickSidebarManager(self)._monitor_sidekick_api_readiness(
+            readiness_check=check_sidekick_api_readiness,
+            schedule_once=QTimer.singleShot,
+            monotonic=time.monotonic,
         )
-        if runtime is None:
-            self._report_sidekick_api_failure(readiness)
-            return
-        if readiness.ready:
-            self._sidekick_api_wait_started_at = None
-            self._sidekick_api_restart_count = 0
-            if not getattr(self, "_sidekick_api_was_ready", False):
-                logger.info("Sidekick API is ready: %s", readiness.url)
-            self._sidekick_api_was_ready = True
-            QTimer.singleShot(
-                SIDEKICK_API_HEALTHCHECK_MS,
-                self._monitor_sidekick_api_readiness,
-            )
-            return
-
-        self._sidekick_api_was_ready = False
-        now = time.monotonic()
-        if self._sidekick_api_wait_started_at is None:
-            self._sidekick_api_wait_started_at = now
-
-        elapsed = now - self._sidekick_api_wait_started_at
-        process = getattr(self, "background_api_process", None)
-        process_running = process is not None and process.poll() is None
-        if elapsed < SIDEKICK_API_READY_TIMEOUT_SEC and process_running:
-            logger.info(
-                "Waiting for Sidekick Chat API readiness: %s",
-                readiness_detail_for_log(readiness),
-            )
-            QTimer.singleShot(
-                SIDEKICK_API_READY_RETRY_MS, self._monitor_sidekick_api_readiness
-            )
-            return
-
-        if (
-            not process_running
-            and self._sidekick_runtime_config is not None
-            and self._sidekick_api_restart_count < SIDEKICK_API_MAX_RESTARTS
-        ):
-            self._sidekick_api_restart_count += 1
-            logger.warning(
-                "Restarting failed Sidekick API child (%s/%s): %s",
-                self._sidekick_api_restart_count,
-                SIDEKICK_API_MAX_RESTARTS,
-                readiness_detail_for_log(readiness),
-            )
-            self.background_api_process = self._restart_sidekick_background_api()
-            self._sidekick_api_wait_started_at = now
-            QTimer.singleShot(
-                SIDEKICK_API_RESTART_DELAY_MS,
-                self._monitor_sidekick_api_readiness,
-            )
-            return
-
-        self._report_sidekick_api_failure(readiness)
 
     def _report_sidekick_api_failure(self, readiness: Any) -> None:
-        """Surface a terminal API startup failure while keeping tools usable."""
-        logger.warning(
-            "Sidekick Chat remains degraded after API startup failed: %s",
-            readiness_detail_for_log(readiness),
-        )
-        show_toast = getattr(self, "show_toast", None)
-        if callable(show_toast):
-            configuration_detail = (
-                f" Configuration error: {self._sidekick_runtime_error}"
-                if self._sidekick_runtime_error
-                else ""
-            )
-            show_toast(
-                "Sidekick tools are available, but Chat could not connect to "
-                f"its local API at {readiness.url}.{configuration_detail}",
-                "warning",
-            )
+        """Delegate terminal readiness reporting to the Sidekick owner."""
+        SidekickSidebarManager(self)._report_sidekick_api_failure(readiness)
 
     def _seed_sidekick_workspace(self) -> None:
-        """Push launcher state into any active Sidekick workspace registry.
-
-        Called after startup results are applied so the Sidekick workspace
-        tab shows live state (engine manager, model registry, current scenario)
-        rather than an empty inspector.
-
-        Issue #5616 — seed the registry from the launcher.
-
-        Postcondition: if a sidebar with a WorkspaceRegistry is reachable,
-        its registry contains 'engine_manager' and 'model_registry' keys.
-        LOD: reaches only one level deep (sidebar.registry).
-        """
-        sidebar = self.sidekick_sidebar
-        if sidebar is None:
-            # Try the tools-sidebar integration hook if present
-            try:
-                from src.shared.python.gui_launcher import tools_sidebar_integration
-
-                get_active_sidebar = getattr(
-                    tools_sidebar_integration, "get_active_sidebar", None
-                )
-                if callable(get_active_sidebar):
-                    sidebar = get_active_sidebar()
-            except ImportError:
-                pass
-
-        if sidebar is None:
-            logger.debug("No sidekick sidebar found; workspace seed skipped")
-            return
-
-        registry = getattr(sidebar, "registry", None)
-        set_variable = getattr(registry, "set_variable", None)
-        if not callable(set_variable):
-            logger.debug(
-                "sidebar.registry has no callable set_variable; workspace seed skipped"
-            )
-            return
-
-        if self.orchestrator.engine_manager is not None:
-            set_variable("engine_manager", self.orchestrator.engine_manager)
-        if self.orchestrator.registry is not None:
-            set_variable("model_registry", self.orchestrator.registry)
-        logger.info("Sidekick workspace seeded with engine_manager and model_registry")
+        """Delegate workspace seeding to the Sidekick owner."""
+        SidekickSidebarManager(self)._seed_sidekick_workspace()
 
     def _handle_startup_timeout(self) -> None:
         """Recover from a hung async-startup worker (issue #5490).
