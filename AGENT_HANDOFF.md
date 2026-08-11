@@ -5,9 +5,11 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#4262 immutable Tools provider source** — local branch
-  `feat/4262-pinned-tools-provider-resolution` is a bounded first slice from
-  exact `main` `69eb7e9d`. The five `provider: tools` launcher entries resolve
+- **#4262 immutable Tools provider source** — draft UpstreamDrift PR
+  [#8475](https://github.com/D-sorganization/UpstreamDrift/pull/8475) publishes
+  branch `feat/4262-pinned-tools-provider-resolution` from independently
+  reviewed implementation head `93350cc03649b411403814911f6fb6a1620297e8`
+  on exact `main` `69eb7e9d`. The five `provider: tools` launcher entries resolve
   exclusively to `vendor/ud-tools` at the already-declared gitlink SHA
   `ff4240217005e1415ca409fd124e50b64ee642d2`. Follow-up hardening makes the
   Tools provider win over conflicting installed-package or sibling metadata,
@@ -21,7 +23,7 @@ Update this file with every PR and every push to main.
   retain their existing resolution. The branch deliberately does not change
   the gitlink pin or add `TOOLS_REPO_PATH`. #4262 remains open for any future
   pin update, an identity-validated development override, broader consumer
-  migration, and protected integration.
+  migration, protected current-head CI/review, and integration.
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
   ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and
