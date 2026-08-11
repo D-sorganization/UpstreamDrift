@@ -12,6 +12,7 @@ from scripts.research.proximal_distal_energy.two_arm_closed_loop import (
     TwoArmParams,
     contact_wrench,
     control_generalized_force,
+    coriolis_vector,
     decompose_contact_forces,
     drift_control_attribution,
     mass_matrix,
@@ -43,6 +44,25 @@ def test_mass_matrix_is_symmetric_positive_definite() -> None:
 
     np.testing.assert_allclose(matrix, matrix.T, atol=1e-12)
     assert np.min(np.linalg.eigvalsh(matrix)) > 1e-8
+
+
+def test_coriolis_vector_matches_exact_two_link_arm_terms() -> None:
+    params, q, _ = _state()
+    qdot = np.array([1.2, -0.7, -0.9, 0.4, 0.3, -0.2, 1.1])
+    coupling = (
+        0.5 * params.forearm_mass_kg * params.upper_length_m * params.forearm_length_m
+    )
+    expected = np.zeros(7)
+    for shoulder_index, elbow_index in ((0, 1), (2, 3)):
+        sine = np.sin(q[elbow_index])
+        shoulder_speed = qdot[shoulder_index]
+        elbow_speed = qdot[elbow_index]
+        expected[shoulder_index] = (
+            -coupling * sine * (2.0 * shoulder_speed * elbow_speed + elbow_speed**2)
+        )
+        expected[elbow_index] = coupling * sine * shoulder_speed**2
+
+    np.testing.assert_allclose(coriolis_vector(q, qdot, params), expected, atol=1e-8)
 
 
 def test_independent_hand_constraints_have_full_row_rank() -> None:

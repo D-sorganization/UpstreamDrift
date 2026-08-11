@@ -220,20 +220,42 @@ def rollout_forward_two_arm(
     for index in range(intervals):
         control = control_law(float(time[index]), q[index].copy(), qdot[index].copy())
         solution = solve_constrained_dynamics(q[index], qdot[index], control, params)
-        trial_velocity = qdot[index] + config.step_s * solution.qddot
-        trial_position = q[index] + config.step_s * trial_velocity
-        energy_before_projection = mechanical_energy(
-            trial_position, trial_velocity, params
+        half_velocity = qdot[index] + 0.5 * config.step_s * solution.qddot
+        trial_position = q[index] + config.step_s * half_velocity
+        energy_before_position_projection = mechanical_energy(
+            trial_position, half_velocity, params
         )
         q[index + 1], correction_norm[index + 1] = _project_configuration(
             trial_position, params, config
+        )
+        projected_half_velocity = _project_velocity(
+            q[index + 1], half_velocity, params, config
+        )
+        position_projection_energy = (
+            mechanical_energy(q[index + 1], projected_half_velocity, params)
+            - energy_before_position_projection
+        )
+        next_control = control_law(
+            float(time[index + 1]),
+            q[index + 1].copy(),
+            projected_half_velocity.copy(),
+        )
+        next_solution = solve_constrained_dynamics(
+            q[index + 1], projected_half_velocity, next_control, params
+        )
+        trial_velocity = (
+            projected_half_velocity + 0.5 * config.step_s * next_solution.qddot
+        )
+        energy_before_velocity_projection = mechanical_energy(
+            q[index + 1], trial_velocity, params
         )
         qdot[index + 1] = _project_velocity(
             q[index + 1], trial_velocity, params, config
         )
         projection_energy_change[index + 1] = (
             mechanical_energy(q[index + 1], qdot[index + 1], params)
-            - energy_before_projection
+            - energy_before_velocity_projection
+            + position_projection_energy
         )
 
     controls = tuple(

@@ -369,12 +369,15 @@ class SpatialWrenchTrajectory:
         )
         offset = new_positions - self.reference_position_m
 
-        def move_wrench(wrench: FloatArray | None) -> FloatArray | None:
-            if wrench is None:
-                return None
+        def move_required_wrench(wrench: FloatArray) -> FloatArray:
             moved = wrench.copy()
             moved[..., 3:] = wrench[..., 3:] - np.cross(offset, wrench[..., :3])
             return moved
+
+        def move_optional_wrench(wrench: FloatArray | None) -> FloatArray | None:
+            if wrench is None:
+                return None
+            return move_required_wrench(wrench)
 
         moved_twist = self.twist.copy()
         moved_twist[..., :3] = self.twist[..., :3] + np.cross(
@@ -388,10 +391,10 @@ class SpatialWrenchTrajectory:
             self,
             interfaces=interfaces,
             reference_position_m=new_positions,
-            wrench_total=move_wrench(self.wrench_total),
-            wrench_drift=move_wrench(self.wrench_drift),
-            wrench_control=move_wrench(self.wrench_control),
-            wrench_zvcf=move_wrench(self.wrench_zvcf),
+            wrench_total=move_required_wrench(self.wrench_total),
+            wrench_drift=move_required_wrench(self.wrench_drift),
+            wrench_control=move_required_wrench(self.wrench_control),
+            wrench_zvcf=move_optional_wrench(self.wrench_zvcf),
             twist=moved_twist,
         )
 
