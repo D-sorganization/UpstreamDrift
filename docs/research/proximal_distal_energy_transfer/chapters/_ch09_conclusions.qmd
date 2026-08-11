@@ -49,6 +49,15 @@ Because the forces are prescribed and the state is shared, this supports
 spatial inverse-dynamics and geometry transport but leaves passive forward
 contact explicitly inconclusive.
 
+The coupled uncertainty/control phase rejects two additional shortcuts. A net
+planar wrench cannot uniquely identify both hand forces, and six summary
+observables cannot identify the complete 12-parameter vector. Separate
+training and held-out ensembles leave objective-dependent tradeoffs among all
+eight command programs. Early restraint improves held-out lower-tail speed
+relative to late drive but increases the planar face/path error, so the result
+supports a conditional model mechanism rather than a universal or
+physiological strategy.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
@@ -58,10 +67,10 @@ order:
    common-state reference with independently solved compliant two-hand contact,
    then carry the planar same-state torque-killswitch into both forward
    formulations. Preserve force, couple, power, work, and closure observables.
-2. **Coupled Sensitivity and Constrained Control.** Replace
-   one-at-a-time perturbations with a declared multivariable design, add
-   activation-rate and history-dependent actuator limits, and compare
-   preselected torque programs with a constrained optimal-control solution.
+2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
+   multivariable screen with population-informed distributions, measurement
+   error, profile-likelihood or Bayesian calibration, larger held-out
+   ensembles, and a constrained optimal-control comparator.
 3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
    club, ground pathways, and distributed or modal shaft behavior without
    changing the registered interface observables. Each rung should carry
@@ -91,3 +100,5 @@ and the parameter-sensitivity results are recorded in
 [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).
 The spatial common-state evidence is recorded in
 [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).
+The uncertainty, identifiability, and control evidence is recorded in
+[`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json).

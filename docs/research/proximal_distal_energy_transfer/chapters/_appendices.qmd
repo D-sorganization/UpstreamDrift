@@ -24,10 +24,11 @@ The current evidence boundary includes these known limitations:
 - The shaft extension is a three-coordinate point-mass surrogate with one
   linear torsional mode. It is not a calibrated distributed-beam or equipment
   model, and extreme low-stiffness deflections exceed its linear premise.
-- Actuator bounds are simplified; muscle activation and history effects are
-  not represented.
-- Parameter sensitivity is one-at-a-time; coupled uncertainty and population
-  distributions are not estimated.
+- The coupled actuator adds delay, first-order activation, rate and
+  torque--velocity limits, and impedance, but it remains a nonphysiological
+  command surrogate.
+- Coupled uncertainty is screened over declared engineering envelopes;
+  population distributions and measurement uncertainty are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
 - The model ladder now executes reduced full-body common-state inverse dynamics
@@ -53,6 +54,7 @@ python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -69,6 +71,7 @@ python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..
@@ -159,3 +162,10 @@ Recorded outputs:
   closure, killswitch ensemble, negative control, and numerical sensitivities.
 - `data/forward_two_arm_study.npz` — baseline and representative branch states,
   contact forces, force modes, moments, power, energy, and solver residuals.
+- `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch,
+  negative control, parameter screen, convergence, states, forces, and energy.
+- `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed
+  wrench interventions, two-formulation inverse dynamics, and spatial states.
+- `data/uncertainty_control_study.{json,npz}` — declared design, actuator
+  contract, uncertainty intervals, PRCC screen, identifiability audit,
+  training/held-out program comparison, closure, and rollout arrays.

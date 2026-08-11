@@ -34,6 +34,13 @@ club in one forward solve. It records base and shaft energy, a same-state
 zero-command branch, a coincident-grip geometric control, parameter
 sensitivity, and timestep convergence without prescribing base motion or
 shaft flex.
+A coupled uncertainty, identifiability, and delayed-control phase now varies
+12 inputs simultaneously in that same forward model. It publishes deterministic
+Latin-hypercube/PRCC screening, rank and null-space audits, and separate
+training/held-out comparisons of eight preselected programs across five
+objectives. The result exposes non-identifiability and strategy tradeoffs; it
+does not claim a population distribution, physiological actuator, universal
+optimum, or coaching prescription.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -77,6 +84,7 @@ python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypoth
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -91,6 +99,7 @@ python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -150,6 +159,10 @@ recorded in `data/*.json`.
   spherical inertia elements shared by MuJoCo and an independent analytical
   implementation. Its same-state agreement is an implementation-transport
   result, not anatomical validation or a forward-contact simulation.
+- The uncertainty/control study uses declared engineering envelopes and small
+  deterministic model ensembles. PRCC is a screening statistic; the effort
+  and face/path quantities are proxies; and held-out model performance is not
+  participant validation.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

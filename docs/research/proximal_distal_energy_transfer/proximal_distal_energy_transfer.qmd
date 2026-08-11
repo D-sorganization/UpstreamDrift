@@ -71,7 +71,16 @@ abstract: |
   $2.14\times10^{-11}$; reversing the hand moment arm reverses a $-4.32$ N m
   force-generated couple, and coincident hands remove it exactly. Because
   contact loads are prescribed, passive spatial contact remains inconclusive
-  and forward cross-engine contact remains untested. A separate hand-path
+  and forward cross-engine contact remains untested. A coupled uncertainty and
+  control experiment then varies 12 inputs simultaneously, audits structural
+  and practical identifiability, and compares eight preselected delayed-command
+  programs on separate training and held-out ensembles. The net planar wrench
+  leaves one individual-hand-force mode unidentified, the six summary
+  observables cannot identify the full 12-parameter vector, and all eight
+  programs are nondominated on held-out samples. An early opposing command
+  improves lower-tail speed relative to late drive but worsens the planar
+  face/path proxy, rejecting a universal optimum and any direct physiological
+  interpretation. A separate hand-path
   attribution study evaluates the
   MacKenzie force-work-per-path-length estimand in an impact-truncated double
   pendulum, a forward-simulated one-arm model, and a mechanically closed
@@ -136,6 +145,8 @@ format:
 {{< include chapters/_ch06b_coupled_base_flex.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
+
+{{< include chapters/_ch06d_uncertainty_control.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}
 

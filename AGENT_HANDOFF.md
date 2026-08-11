@@ -49,7 +49,8 @@ under 150 lines; use Git history and linked issues for completed chronology.
   validation.
 - **Phase 2 gate:** the 121-page PDF, focused and dependent tests, Ruff, mypy,
   title, governance, size, and visual checks passed before `ea335ee59`.
-- **Phase 3:** branch `feat/8426-phase-3-spatial-cross-engine` adds one canonical
+- **Phase 3:** branch `feat/8426-phase-3-spatial-cross-engine`, commit
+  `cc77898b6`, adds one canonical
   reduced full-body 3D model evaluated by native MuJoCo inverse dynamics and an
   independently assembled Lagrange--Christoffel formulation. It is a
   cross-formulation common-state experiment, not yet a two-engine forward
@@ -61,12 +62,30 @@ under 150 lines; use Git history and linked issues for completed chronology.
   formulations differ by at most `1.26e-9` generalized-force units and
   `2.14e-11` relative. This supports common-state implementation transport,
   not passive load origin, forward spatial contact, or human inference.
-- **Phase 3 local gate so far:** 18 focused/dependent tests, Ruff, mypy, and
-  generated-figure visual checks pass. Finish source hashes, full render,
-  complete article visual QA, and repository gates before committing.
-- **Next action:** finish and commit Phase 3 locally. When #8491 capacity-only
-  jobs settle, push/open/merge Phase 2 against integration; then rebase the
-  unpushed Phase 3 branch onto integration and publish it as the next full PR.
+- **Phase 3 gate:** 67 adjacent scientific tests, Ruff, mypy, title,
+  governance, size, error-ratchet, source-hash, and visual gates passed. The
+  optimized 129-page PDF preserves 115 URI links and 150 outlines.
+- **Phase 4:** branch `feat/8426-phase-4-uncertainty-control` adds a deterministic
+  12-input global screen and separate six-case training and held-out ensembles
+  to the coupled moving-base/flexible-club model. It includes pure delay,
+  first-order activation, torque-rate and torque--velocity limits, an impedance
+  proxy, eight preselected command programs, five objectives, PRCC screening,
+  and rank/null-space identifiability audits.
+- **Phase 4 bounded result:** global delivery speed spans 4.005/5.188/5.840 m/s
+  at the 5th/median/95th percentiles. Net planar wrench has rank 3 for four hand-
+  force components (nullity 1), while six summary observables leave a lower-
+  bound nullity of six for 12 parameters. Early restraint improves held-out
+  lower-tail speed over late drive (4.706 vs 4.417 m/s) but worsens the planar
+  face/path proxy (5.44 vs 1.58 degrees). All eight programs are held-out
+  nondominated: no universal optimum, physiological, human, or coaching claim.
+- **Phase 4 gate:** 19 focused tests and 308 other research tests, Ruff, mypy,
+  title, governance, size, error-ratchet, source-hash, and visual gates pass.
+  The optimized 135-page PDF preserves 120 URI links and 158 outlines. One
+  unrelated legacy Wave 6 test remains at its baseline smoothing-factor
+  assertion; do not mix that engine repair into this scientific phase.
+- **Next action:** finish and commit Phase 4 locally. When #8491 capacity-only
+  jobs settle, publish and merge Phase 2 against integration; then rebase and
+  publish the unpushed Phase 3 and Phase 4 branches sequentially.
 
 ## Scientific Architecture Pointers
 
@@ -85,19 +104,21 @@ under 150 lines; use Git history and linked issues for completed chronology.
 7. `scripts/research/proximal_distal_energy/spatial_full_body.py` — common
    reduced spatial model, wrench intervention, and two-formulation inverse
    dynamics comparison.
-8. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
+8. `scripts/research/proximal_distal_energy/uncertainty_control.py` — coupled
+   design, delayed actuator, PRCC, identifiability, and control comparison.
+9. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
    planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
-9. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
-   — registered source claims and pointwise/forward interpretation boundary.
-10. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
+10. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+    — registered source claims and pointwise/forward interpretation boundary.
+11. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
     infrastructure rules.
 
 ## Remaining Epic Order
 
 1. Full-body forward cross-engine contact remains an explicit open tier.
-2. Identifiability, coupled uncertainty, delayed actuation, and robust control.
-3. Preregistered experimental falsification and held-out evaluation protocol.
-4. Research workbench, AffineDrift publication integration, archival release,
+2. Preregistered experimental falsification and human held-out evaluation
+   protocol.
+3. Research workbench, AffineDrift publication integration, archival release,
    complete visual QA, and protected merges.
 
 ## Other Current Repository Context

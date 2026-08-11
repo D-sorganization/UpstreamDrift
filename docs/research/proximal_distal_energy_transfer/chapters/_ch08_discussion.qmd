@@ -76,13 +76,17 @@ for a golfer. The specific gaps, each with a tracked remediation:
 - **Simplified Actuator Models.** E1b shows the S2 ordering survives a
   linear torque-velocity bound on the drives with compressed margins
   (@sec-results-e1b), but activation-rate limits, history dependence,
-  and eccentric-side detail remain unmodeled; full optimal-control
+  and eccentric-side detail remain unmodeled. The coupled study adds pure
+  delay, first-order activation, rate limits, torque--velocity bounds, and an
+  impedance proxy, but these remain command-level surrogates; full optimal-control
   treatments with physiological actuators are the appropriate
   refinement [@sprigings2000; @sharp2009; @mcnally2018].
-- **Local, One-at-a-Time Sensitivity.** Alternative impact definitions and
+- **Coupled Sensitivity Is a Screening Tier.** Alternative impact definitions and
   single-parameter perturbations preserved the ordering
-  (@sec-results-robustness), but coupled parameter variation, measurement
-  uncertainty, and population variability were not modeled.
+  (@sec-results-robustness). The 12-input Latin-hypercube study now exposes
+  coupled effects, parameter non-identifiability, and held-out strategy
+  tradeoffs. Its ranges are engineering envelopes and its sample is small;
+  measurement uncertainty and population distributions remain unmodeled.
 - **Counterfactuals Remain Model-Tier Specific.** The Python pathway now
   includes both pointwise ZTCF profiles and forward same-state killswitches in
   the double-pendulum and constrained two-hand tiers. The coupled extension now

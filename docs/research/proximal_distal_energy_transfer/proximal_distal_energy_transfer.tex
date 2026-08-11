@@ -336,10 +336,19 @@ coordinates and 61 states, the maximum relative discrepancy is
 \(-4.32\) N m force-generated couple, and coincident hands remove it
 exactly. Because contact loads are prescribed, passive spatial contact
 remains inconclusive and forward cross-engine contact remains untested.
-A separate hand-path attribution study evaluates the MacKenzie
-force-work-per-path-length estimand in an impact-truncated double
-pendulum, a forward-simulated one-arm model, and a mechanically closed
-two-arm local sweep. Drift supplies 101.2\% and 103.5\% of signed
+A coupled uncertainty and control experiment then varies 12 inputs
+simultaneously, audits structural and practical identifiability, and
+compares eight preselected delayed-command programs on separate training
+and held-out ensembles. The net planar wrench leaves one
+individual-hand-force mode unidentified, the six summary observables
+cannot identify the full 12-parameter vector, and all eight programs are
+nondominated on held-out samples. An early opposing command improves
+lower-tail speed relative to late drive but worsens the planar face/path
+proxy, rejecting a universal optimum and any direct physiological
+interpretation. A separate hand-path attribution study evaluates the
+MacKenzie force-work-per-path-length estimand in an impact-truncated
+double pendulum, a forward-simulated one-arm model, and a mechanically
+closed two-arm local sweep. Drift supplies 101.2\% and 103.5\% of signed
 hand-path force work in the two forward cases because the
 contemporaneous control contribution is slightly opposing; in the
 two-arm sweep, drift and control instead cancel with an index of 0.962.
@@ -359,7 +368,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, opacityback=0, leftrule=.75mm, colback=white, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, colback=white, leftrule=.75mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, breakable, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, coltitle=black, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4648,6 +4657,272 @@ control claims. Parameter compensation can otherwise make a structurally
 inadequate model reproduce one output while assigning the wrong
 contribution to contact, base motion, passive tissue, or actuation.
 
+\chapter{Coupled Uncertainty, Identifiability, and
+Control}\label{sec-uncertainty-control}
+
+\section{Questions and Evidential
+Boundary}\label{questions-and-evidential-boundary}
+
+The preceding studies isolate feasible transfer mechanisms. They do not
+imply that a single parameter set is representative, that internal hand
+forces can be recovered from a net wrench, or that the fastest nominal
+command is robust. This chapter therefore asks three narrower questions
+in the coupled moving-base/flexible-club model:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Which uncertain inputs are associated with the largest changes in
+  declared delivery observables?
+\item
+  Which internal quantities and parameters are identifiable from the
+  chosen observations?
+\item
+  Do preselected delayed-actuation programs retain their advantages on
+  an independently generated held-out ensemble?
+\end{enumerate}
+
+The answers are model-screening results. Parameter ranges are
+engineering envelopes, not fitted population distributions; the actuator
+is a bounded command surrogate, not muscle physiology; and delivery is
+evaluated at a fixed registered time rather than at a simulated ball
+collision.
+
+\section{Registered Coupled Model and
+Design}\label{registered-coupled-model-and-design}
+
+Every rollout uses the ten-coordinate forward KKT model of
+Section~\ref{sec-coupled-base-flex}. Base translation, both two-link
+arms, four grip constraints, two solved hand reactions, and one
+compliant shaft mode evolve in the same solve. This matters: uncertainty
+is propagated through the mechanism and its constraint reactions rather
+than through a disconnected response surface.
+
+A deterministic Latin hypercube distributes samples across each declared
+range (\citeproc{ref-mckay1979}{McKay, Beckman, and Conover 1979}). The
+global screen contains 24 points (seed 8426). Control programs are
+compared on a separate six-point training ensemble (seed 8449) and a
+six-point held-out ensemble (seed 8450). All runs use 0.24 s duration
+and a 4 ms step. The design varies 12 quantities simultaneously:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Range
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Anthropometric scale & 0.95--1.05 & Common arm-length scale \\
+Limb-mass scale & 0.90--1.10 & Common arm-mass scale \\
+Inertia-distribution scale & 0.85--1.15 & Segment inertia about its
+center \\
+Base-mass scale & 0.85--1.15 & Translating-base inertia \\
+Base-stiffness scale & 0.75--1.25 & Translational restoring stiffness \\
+Joint-damping scale & 0.60--1.40 & Passive rotary damping \\
+Grip-separation scale & 0.85--1.15 & Two-hand geometric lever arm \\
+Shaft-stiffness scale & 0.70--1.30 & Lumped flex stiffness \\
+Shaft-damping scale & 0.60--1.40 & Lumped flex damping \\
+Activation delay & 0.015--0.055 s & Pure command delay \\
+Activation time constant & 0.020--0.055 s & First-order command lag \\
+Impedance scale & 0.70--1.30 & Linear joint-impedance proxy \\
+\end{longtable}
+
+These ranges were declared before selecting a preferred program. They
+bound a computational experiment; they do not encode prevalence or
+correlations in a golfer population.
+
+\section{Actuator and Outcome
+Contract}\label{actuator-and-outcome-contract}
+
+For commanded joint torque \(u(t)\), the applied drive uses a delayed
+target and first-order state \(a\),
+
+\[
+\dot a = \frac{u(t-t_d)-a}{T_a},
+\]
+
+followed by a torque-rate limit, asymmetric torque--velocity saturation,
+and a linear impedance term. The delivered torque is therefore history
+dependent and authority limited. No state is labeled as neural
+activation, muscle force, tendon force, reflex response, or
+co-contraction.
+
+The registered outputs are delivery speed at 0.24 s; a planar face/path
+proxy; peak individual solved hand force; integrated squared delivered
+joint torque (the \emph{effort proxy}); minimum force-generated grip
+couple; and peak shaft flex. The effort proxy has units associated with
+squared torque integrated over time; it is not metabolic or muscular
+cost. The face/path quantity is a planar orientation proxy, not a
+three-dimensional clubface measurement.
+
+\section{Global Sensitivity and
+Identifiability}\label{global-sensitivity-and-identifiability}
+
+Partial rank correlation coefficients (PRCCs) screen monotonic
+multivariable associations after ranking inputs and outputs and
+residualizing each variable against the remaining inputs
+(\citeproc{ref-marino2008}{Marino et al. 2008}). PRCC is useful for
+prioritization, but it is not causal attribution, a variance
+decomposition, or proof that the response is globally monotonic. With 24
+samples for 12 inputs, the estimates are deliberately reported as a
+compact screening tier rather than precise population sensitivities.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_uncertainty_intervals_and_prcc.pdf}
+
+}
+
+\caption{\label{fig-uncertainty-prcc}Uncertainty Intervals and PRCC
+Screening. Left: 5th--95th percentile ranges, normalized only for visual
+comparison. Right: partial rank correlations for the six registered
+outputs.}
+
+\end{figure}%
+
+Across the global ensemble, the 5th/median/95th percentiles are
+4.005/5.188/ 5.840 m/s for delivery speed, 5.45/8.98/12.14 degrees for
+the face/path proxy, 140.7/162.3/200.0 N for peak individual hand force,
+and 66.0/82.0/94.4 for the effort proxy. Peak shaft flex spans
+3.36/4.17/5.50 degrees. The signed minimum force couple spans
+-0.00478/-0.00035/approximately 0 N m in this particular global program;
+its small magnitude warns against transporting the much larger
+negative-couple values from different branch protocols without matching
+state and command.
+
+The largest absolute PRCC is activation delay for delivery speed and
+effort, activation time constant for face/path error, limb mass for hand
+force, grip separation for minimum force couple, and shaft stiffness for
+peak flex. These rankings are hypotheses for larger designs, not settled
+parameter importance.
+
+Identifiability is assessed separately from sensitivity
+(\citeproc{ref-raue2009}{Raue et al. 2009}). At a single planar instant,
+the two hand forces contain four scalar components, but their
+transported net force and scalar couple provide only three independent
+equations. The wrench map therefore has rank 3 and nullity 1: individual
+hand forces are structurally non-identifiable from the net planar wrench
+alone. Independent contact measurements or an additional constitutive
+assumption are required.
+
+For the 12 uncertain parameters, a standardized sensitivity matrix is
+formed from the six summary observables. Its six singular values are
+1.785, 1.146, 1.039, 0.863, 0.379, and 0.239. The effective rank at the
+registered 5\% rule is six, so the full parameter vector has a nullity
+lower bound of six under this summary observation set. This is a local
+practical-identifiability screen, not a profile-likelihood analysis and
+not proof that every six-parameter subset is estimable.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.94\linewidth,height=\textheight,keepaspectratio]{figures/fig_identifiability_audit.pdf}
+
+}
+
+\caption{\label{fig-identifiability-audit}Identifiability Audit. The net
+planar wrench cannot uniquely allocate both hand forces, and six summary
+observables cannot identify the full 12-parameter vector.}
+
+\end{figure}%
+
+\section{Preselected Programs and Held-Out
+Evaluation}\label{preselected-programs-and-held-out-evaluation}
+
+Eight programs were fixed before comparing results: passive wrist, early
+drive, late drive, restrain-then-drive, higher impedance, later release,
+lower drive, and early restrain. Five objectives are retained rather
+than collapsed prematurely: maximize the 10th-percentile delivery speed;
+minimize mean face/path error; minimize the 90th-percentile
+individual-hand force; minimize the effort proxy; and minimize
+delivery-speed dispersion.
+
+Seven programs are nondominated on the training ensemble; all eight are
+nondominated on held-out samples. That instability is substantive
+evidence against a universal optimum: even the poor-speed early-drive
+program retains a held-out tradeoff in another objective. A balanced
+equal-range Chebyshev rule selects later release, a speed-priority rule
+selects early restrain, and a load-priority rule selects higher
+impedance. These are objective-specific selections, not interchangeable
+recommendations.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_control_pareto_train_holdout.pdf}
+
+}
+
+\caption{\label{fig-control-pareto}Training and Independently Held-Out
+Pareto Comparisons. Membership changes across ensembles, so no program
+is promoted as universally optimal.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_control_strategy_tradeoffs.pdf}
+
+}
+
+\caption{\label{fig-control-tradeoffs}Held-Out Strategy Tradeoffs Across
+Speed, Planar Delivery Error, Hand Load, Effort Proxy, and Dispersion.}
+
+\end{figure}%
+
+\section{Bounded Test of Delayed Opposing
+Command}\label{bounded-test-of-delayed-opposing-command}
+
+Hypothesis H4 asks whether a delayed actuator can benefit from an
+anticipatory opposing command. In the held-out ensemble, early restrain
+raises the 10th-percentile delivery speed to 4.706 m/s compared with
+4.417 m/s for late drive, but worsens mean face/path error from 1.58 to
+5.44 degrees. Thus H4 is supported only as a conditional lower-tail
+speed result for these bounded model schedules. It does not demonstrate
+human preactivation, neural timing, or a generally superior strategy.
+
+Numerical closure remains materially below the reported effects across
+all rollouts: the maximum position-constraint residual is
+\(9.99\times10^{-11}\) m, velocity-constraint residual
+\(2.40\times10^{-15}\) m/s, KKT residual \(1.90\times10^{-13}\), and
+contact-power residual \(6.40\times10^{-14}\) W.
+
+\section{Claims, Falsifiers, and Next
+Measurements}\label{claims-falsifiers-and-next-measurements}
+
+This phase supports four bounded conclusions: coupled uncertainty can
+change delivery materially; the chosen summaries cannot identify all 12
+parameters; net wrench cannot identify individual planar hand forces;
+and command selection depends on the objective and evaluation ensemble.
+It does \textbf{not} support a universal program, physiological effort
+inference, human preactivation, or a coaching prescription.
+
+The results would be challenged by a larger registered ensemble that
+reverses the H4 lower-tail speed ordering, a direct two-hand measurement
+that uniquely resolves the wrench null mode without extra assumptions,
+or an independently implemented model in which the declared tradeoffs
+disappear under the same observables and actuator bounds. The next
+experimental protocol should measure both hand wrenches, club
+kinematics, ground reaction, and synchronization uncertainty; estimating
+all internal forces from club motion alone is not an acceptable
+substitute.
+
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
 
@@ -6299,17 +6574,22 @@ for a golfer. The specific gaps, each with a tracked remediation:
   \textbf{Simplified Actuator Models.} E1b shows the S2 ordering
   survives a linear torque-velocity bound on the drives with compressed
   margins (Section~\ref{sec-results-e1b}), but activation-rate limits,
-  history dependence, and eccentric-side detail remain unmodeled; full
-  optimal-control treatments with physiological actuators are the
-  appropriate refinement (\citeproc{ref-sprigings2000}{Sprigings and
-  Neal 2000}; \citeproc{ref-sharp2009}{Sharp 2009};
+  history dependence, and eccentric-side detail remain unmodeled. The
+  coupled study adds pure delay, first-order activation, rate limits,
+  torque--velocity bounds, and an impedance proxy, but these remain
+  command-level surrogates; full optimal-control treatments with
+  physiological actuators are the appropriate refinement
+  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
+  \citeproc{ref-sharp2009}{Sharp 2009};
   \citeproc{ref-mcnally2018}{McNally and McPhee 2018}).
 \item
-  \textbf{Local, One-at-a-Time Sensitivity.} Alternative impact
+  \textbf{Coupled Sensitivity Is a Screening Tier.} Alternative impact
   definitions and single-parameter perturbations preserved the ordering
-  (Section~\ref{sec-results-robustness}), but coupled parameter
-  variation, measurement uncertainty, and population variability were
-  not modeled.
+  (Section~\ref{sec-results-robustness}). The 12-input Latin-hypercube
+  study now exposes coupled effects, parameter non-identifiability, and
+  held-out strategy tradeoffs. Its ranges are engineering envelopes and
+  its sample is small; measurement uncertainty and population
+  distributions remain unmodeled.
 \item
   \textbf{Counterfactuals Remain Model-Tier Specific.} The Python
   pathway now includes both pointwise ZTCF profiles and forward
@@ -6412,6 +6692,15 @@ points remove it exactly. Because the forces are prescribed and the
 state is shared, this supports spatial inverse-dynamics and geometry
 transport but leaves passive forward contact explicitly inconclusive.
 
+The coupled uncertainty/control phase rejects two additional shortcuts.
+A net planar wrench cannot uniquely identify both hand forces, and six
+summary observables cannot identify the complete 12-parameter vector.
+Separate training and held-out ensembles leave objective-dependent
+tradeoffs among all eight command programs. Early restraint improves
+held-out lower-tail speed relative to late drive but increases the
+planar face/path error, so the result supports a conditional model
+mechanism rather than a universal or physiological strategy.
+
 \section{Research Priorities}\label{sec-future}
 
 The next work should reduce the largest inferential risks in dependency
@@ -6427,11 +6716,10 @@ order:
   into both forward formulations. Preserve force, couple, power, work,
   and closure observables.
 \item
-  \textbf{Coupled Sensitivity and Constrained Control.} Replace
-  one-at-a-time perturbations with a declared multivariable design, add
-  activation-rate and history-dependent actuator limits, and compare
-  preselected torque programs with a constrained optimal-control
-  solution.
+  \textbf{Calibrated Uncertainty and Constrained Control.} Extend the
+  executed multivariable screen with population-informed distributions,
+  measurement error, profile-likelihood or Bayesian calibration, larger
+  held-out ensembles, and a constrained optimal-control comparator.
 \item
   \textbf{Spatial Model-Fidelity Ladder.} Add base rotation, a
   three-dimensional club, ground pathways, and distributed or modal
@@ -6469,6 +6757,8 @@ and the parameter-sensitivity results are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json}{\texttt{data/e1d\_parameter\_sensitivity.json}}.
 The spatial common-state evidence is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json}{\texttt{data/spatial\_full\_body\_study.json}}.
+The uncertainty, identifiability, and control evidence is recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json}{\texttt{data/uncertainty\_control\_study.json}}.
 
 \chapter{Software and Data Availability}\label{sec-appendix-inventory}
 
@@ -6507,11 +6797,13 @@ The current evidence boundary includes these known limitations:
   equipment model, and extreme low-stiffness deflections exceed its
   linear premise.
 \item
-  Actuator bounds are simplified; muscle activation and history effects
-  are not represented.
+  The coupled actuator adds delay, first-order activation, rate and
+  torque--velocity limits, and impedance, but it remains a
+  nonphysiological command surrogate.
 \item
-  Parameter sensitivity is one-at-a-time; coupled uncertainty and
-  population distributions are not estimated.
+  Coupled uncertainty is screened over declared engineering envelopes;
+  population distributions and measurement uncertainty are not
+  estimated.
 \item
   No human motion or force data are analyzed; the result is mechanistic
   and model-derived, not a skill-group effect.
@@ -6541,6 +6833,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_forward\_two\_arm\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_moving\_base\_flexible\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_uncertainty\_control\_study}
 
 \CommentTok{\# Robustness analyses}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.e1b\_bounded\_torque}
@@ -6557,6 +6850,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_forward\_two\_arm\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_moving\_base\_flexible\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_spatial\_full\_body\_figures}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_uncertainty\_control\_figures}
 \BuiltInTok{cd}\NormalTok{ docs/research/proximal\_distal\_energy\_transfer}
 \ExtensionTok{quarto}\NormalTok{ render proximal\_distal\_energy\_transfer.qmd }\AttributeTok{{-}{-}to}\NormalTok{ pdf}
 \BuiltInTok{cd}\NormalTok{ ../../..}
@@ -6717,6 +7011,19 @@ Recorded outputs:
   \texttt{data/forward\_two\_arm\_study.npz} --- baseline and
   representative branch states, contact forces, force modes, moments,
   power, energy, and solver residuals.
+\item
+  \texttt{data/moving\_base\_flexible\_study.\{json,npz\}} --- coupled
+  base/flex branch, negative control, parameter screen, convergence,
+  states, forces, and energy.
+\item
+  \texttt{data/spatial\_full\_body\_study.\{json,npz\}} --- common-model
+  hashes, prescribed wrench interventions, two-formulation inverse
+  dynamics, and spatial states.
+\item
+  \texttt{data/uncertainty\_control\_study.\{json,npz\}} --- declared
+  design, actuator contract, uncertainty intervals, PRCC screen,
+  identifiability audit, training/held-out program comparison, closure,
+  and rollout arrays.
 \end{itemize}
 
 \chapter*{References}\label{references}
@@ -6907,6 +7214,13 @@ on-Plane Angular Motions of the Axle-Chain System and Clubhead Speed in
 Skilled Male Golfers.''} \emph{Applied Sciences} 10 (17): 5728.
 \url{https://doi.org/10.3390/app10175728}.
 
+\bibitem[\citeproctext]{ref-marino2008}
+Marino, Simeone, Ian B. Hogue, Christian J. Ray, and Denise E.
+Kirschner. 2008. {``A Methodology for Performing Global Uncertainty and
+Sensitivity Analysis in Systems Biology.''} \emph{Journal of Theoretical
+Biology} 254 (1): 178--96.
+\url{https://doi.org/10.1016/j.jtbi.2008.04.011}.
+
 \bibitem[\citeproctext]{ref-marsan2019}
 Marsan, Thibault, Maxime Bourgain, Patricia Thoreux, Christophe Sauret,
 and Philippe Rouch. 2019. {``Biomechanical Analysis of the Golf Swing:
@@ -6920,6 +7234,12 @@ Marshall, Robert N., and Bruce C. Elliott. 2000. {``Long-Axis Rotation:
 The Missing Link in Proximal-to-Distal Segmental Sequencing.''}
 \emph{Journal of Sports Sciences} 18 (4): 247--54.
 \url{https://doi.org/10.1080/026404100364983}.
+
+\bibitem[\citeproctext]{ref-mckay1979}
+McKay, M. D., R. J. Beckman, and W. J. Conover. 1979. {``A Comparison of
+Three Methods for Selecting Values of Input Variables in the Analysis of
+Output from a Computer Code.''} \emph{Technometrics} 21 (2): 239--45.
+\url{https://doi.org/10.1080/00401706.1979.10489755}.
 
 \bibitem[\citeproctext]{ref-mcnally2018}
 McNally, William, and John McPhee. 2018. {``Dynamic Optimization of the
@@ -7035,6 +7355,13 @@ Pojprapai, Hathairat Rachnavy, and Thanomsak Senakam. 2026.
 Transfer as the Key Mechanism in the Golf Swing.''} \emph{Frontiers in
 Sports and Active Living} 8.
 \url{https://doi.org/10.3389/fspor.2026.1790645}.
+
+\bibitem[\citeproctext]{ref-raue2009}
+Raue, Andreas, Clemens Kreutz, Thomas Maiwald, Julie Bachmann, Marcel
+Schilling, Ursula Klingmüller, and Jens Timmer. 2009. {``Structural and
+Practical Identifiability Analysis of Partially Observed Dynamical
+Models by Exploiting the Profile Likelihood.''} \emph{Bioinformatics} 25
+(15): 1923--29. \url{https://doi.org/10.1093/bioinformatics/btp358}.
 
 \bibitem[\citeproctext]{ref-reinkensmeyer1992}
 Reinkensmeyer, David J., Peter S. Lum, and Steven L. Lehman. 1992.

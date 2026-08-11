@@ -1,0 +1,175 @@
+# Coupled Uncertainty, Identifiability, and Control {#sec-uncertainty-control}
+
+## Questions and Evidential Boundary
+
+The preceding studies isolate feasible transfer mechanisms. They do not imply
+that a single parameter set is representative, that internal hand forces can
+be recovered from a net wrench, or that the fastest nominal command is robust.
+This chapter therefore asks three narrower questions in the coupled
+moving-base/flexible-club model:
+
+1. Which uncertain inputs are associated with the largest changes in declared
+   delivery observables?
+2. Which internal quantities and parameters are identifiable from the chosen
+   observations?
+3. Do preselected delayed-actuation programs retain their advantages on an
+   independently generated held-out ensemble?
+
+The answers are model-screening results. Parameter ranges are engineering
+envelopes, not fitted population distributions; the actuator is a bounded
+command surrogate, not muscle physiology; and delivery is evaluated at a
+fixed registered time rather than at a simulated ball collision.
+
+## Registered Coupled Model and Design
+
+Every rollout uses the ten-coordinate forward KKT model of
+@sec-coupled-base-flex. Base translation, both two-link arms, four grip
+constraints, two solved hand reactions, and one compliant shaft mode evolve in
+the same solve. This matters: uncertainty is propagated through the mechanism
+and its constraint reactions rather than through a disconnected response
+surface.
+
+A deterministic Latin hypercube distributes samples across each declared
+range [@mckay1979]. The global screen contains 24 points (seed 8426). Control
+programs are compared on a separate six-point training ensemble (seed 8449)
+and a six-point held-out ensemble (seed 8450). All runs use 0.24 s duration and
+a 4 ms step. The design varies 12 quantities simultaneously:
+
+| Parameter | Range | Interpretation |
+|---|---:|---|
+| Anthropometric scale | 0.95--1.05 | Common arm-length scale |
+| Limb-mass scale | 0.90--1.10 | Common arm-mass scale |
+| Inertia-distribution scale | 0.85--1.15 | Segment inertia about its center |
+| Base-mass scale | 0.85--1.15 | Translating-base inertia |
+| Base-stiffness scale | 0.75--1.25 | Translational restoring stiffness |
+| Joint-damping scale | 0.60--1.40 | Passive rotary damping |
+| Grip-separation scale | 0.85--1.15 | Two-hand geometric lever arm |
+| Shaft-stiffness scale | 0.70--1.30 | Lumped flex stiffness |
+| Shaft-damping scale | 0.60--1.40 | Lumped flex damping |
+| Activation delay | 0.015--0.055 s | Pure command delay |
+| Activation time constant | 0.020--0.055 s | First-order command lag |
+| Impedance scale | 0.70--1.30 | Linear joint-impedance proxy |
+
+These ranges were declared before selecting a preferred program. They bound a
+computational experiment; they do not encode prevalence or correlations in a
+golfer population.
+
+## Actuator and Outcome Contract
+
+For commanded joint torque $u(t)$, the applied drive uses a delayed target and
+first-order state $a$,
+
+$$
+\dot a = \frac{u(t-t_d)-a}{T_a},
+$$
+
+followed by a torque-rate limit, asymmetric torque--velocity saturation, and a
+linear impedance term. The delivered torque is therefore history dependent
+and authority limited. No state is labeled as neural activation, muscle force,
+tendon force, reflex response, or co-contraction.
+
+The registered outputs are delivery speed at 0.24 s; a planar face/path proxy;
+peak individual solved hand force; integrated squared delivered joint torque
+(the *effort proxy*); minimum force-generated grip couple; and peak shaft flex.
+The effort proxy has units associated with squared torque integrated over time;
+it is not metabolic or muscular cost. The face/path quantity is a planar
+orientation proxy, not a three-dimensional clubface measurement.
+
+## Global Sensitivity and Identifiability
+
+Partial rank correlation coefficients (PRCCs) screen monotonic multivariable
+associations after ranking inputs and outputs and residualizing each variable
+against the remaining inputs [@marino2008]. PRCC is useful for prioritization,
+but it is not causal attribution, a variance decomposition, or proof that the
+response is globally monotonic. With 24 samples for 12 inputs, the estimates
+are deliberately reported as a compact screening tier rather than precise
+population sensitivities.
+
+![Uncertainty Intervals and PRCC Screening. Left: 5th--95th percentile ranges, normalized only for visual comparison. Right: partial rank correlations for the six registered outputs.](figures/fig_uncertainty_intervals_and_prcc.pdf){#fig-uncertainty-prcc width=100%}
+
+Across the global ensemble, the 5th/median/95th percentiles are 4.005/5.188/
+5.840 m/s for delivery speed, 5.45/8.98/12.14 degrees for the face/path proxy,
+140.7/162.3/200.0 N for peak individual hand force, and 66.0/82.0/94.4 for the
+effort proxy. Peak shaft flex spans 3.36/4.17/5.50 degrees. The signed minimum
+force couple spans -0.00478/-0.00035/approximately 0 N m in this particular
+global program; its small magnitude warns against transporting the much larger
+negative-couple values from different branch protocols without matching state
+and command.
+
+The largest absolute PRCC is activation delay for delivery speed and effort,
+activation time constant for face/path error, limb mass for hand force, grip
+separation for minimum force couple, and shaft stiffness for peak flex. These
+rankings are hypotheses for larger designs, not settled parameter importance.
+
+Identifiability is assessed separately from sensitivity [@raue2009]. At a
+single planar instant, the two hand forces contain four scalar components, but
+their transported net force and scalar couple provide only three independent
+equations. The wrench map therefore has rank 3 and nullity 1: individual hand
+forces are structurally non-identifiable from the net planar wrench alone.
+Independent contact measurements or an additional constitutive assumption are
+required.
+
+For the 12 uncertain parameters, a standardized sensitivity matrix is formed
+from the six summary observables. Its six singular values are 1.785, 1.146,
+1.039, 0.863, 0.379, and 0.239. The effective rank at the registered 5% rule is
+six, so the full parameter vector has a nullity lower bound of six under this
+summary observation set. This is a local practical-identifiability screen, not
+a profile-likelihood analysis and not proof that every six-parameter subset is
+estimable.
+
+![Identifiability Audit. The net planar wrench cannot uniquely allocate both hand forces, and six summary observables cannot identify the full 12-parameter vector.](figures/fig_identifiability_audit.pdf){#fig-identifiability-audit width=94%}
+
+## Preselected Programs and Held-Out Evaluation
+
+Eight programs were fixed before comparing results: passive wrist, early
+drive, late drive, restrain-then-drive, higher impedance, later release, lower
+drive, and early restrain. Five objectives are retained rather than collapsed
+prematurely: maximize the 10th-percentile delivery speed; minimize mean
+face/path error; minimize the 90th-percentile individual-hand force; minimize
+the effort proxy; and minimize delivery-speed dispersion.
+
+Seven programs are nondominated on the training ensemble; all eight are
+nondominated on held-out samples. That instability is substantive evidence
+against a universal optimum: even the poor-speed early-drive program retains a
+held-out tradeoff in another objective. A balanced equal-range Chebyshev rule
+selects later release, a speed-priority rule selects early restrain, and a
+load-priority rule selects higher impedance. These are objective-specific
+selections, not interchangeable recommendations.
+
+![Training and Independently Held-Out Pareto Comparisons. Membership changes across ensembles, so no program is promoted as universally optimal.](figures/fig_control_pareto_train_holdout.pdf){#fig-control-pareto width=100%}
+
+![Held-Out Strategy Tradeoffs Across Speed, Planar Delivery Error, Hand Load, Effort Proxy, and Dispersion.](figures/fig_control_strategy_tradeoffs.pdf){#fig-control-tradeoffs width=100%}
+
+## Bounded Test of Delayed Opposing Command
+
+Hypothesis H4 asks whether a delayed actuator can benefit from an anticipatory
+opposing command. In the held-out ensemble, early restrain raises the
+10th-percentile delivery speed to 4.706 m/s compared with 4.417 m/s for late
+drive, but worsens mean face/path error from 1.58 to 5.44 degrees. Thus H4 is
+supported only as a conditional lower-tail speed result for these bounded
+model schedules. It does not demonstrate human preactivation, neural timing,
+or a generally superior strategy.
+
+Numerical closure remains materially below the reported effects across all
+rollouts: the maximum position-constraint residual is
+$9.99\times10^{-11}$ m, velocity-constraint residual
+$2.40\times10^{-15}$ m/s, KKT residual $1.90\times10^{-13}$, and
+contact-power residual $6.40\times10^{-14}$ W.
+
+## Claims, Falsifiers, and Next Measurements
+
+This phase supports four bounded conclusions: coupled uncertainty can change
+delivery materially; the chosen summaries cannot identify all 12 parameters;
+net wrench cannot identify individual planar hand forces; and command
+selection depends on the objective and evaluation ensemble. It does **not**
+support a universal program, physiological effort inference, human
+preactivation, or a coaching prescription.
+
+The results would be challenged by a larger registered ensemble that reverses
+the H4 lower-tail speed ordering, a direct two-hand measurement that uniquely
+resolves the wrench null mode without extra assumptions, or an independently
+implemented model in which the declared tradeoffs disappear under the same
+observables and actuator bounds. The next experimental protocol should measure
+both hand wrenches, club kinematics, ground reaction, and synchronization
+uncertainty; estimating all internal forces from club motion alone is not an
+acceptable substitute.

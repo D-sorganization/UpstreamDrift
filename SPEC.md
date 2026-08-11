@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.498 |
+| **Spec Version** | 1.0.499 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -1994,16 +1994,16 @@ Beyond standard tools, CI enforces custom checks:
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
 python -m pip install -e ".[dev]"  # Include dev dependencies
-# For desktop app: cargo install tauri-cli
+# For Desktop App: Cargo Install Tauri-Cli
 
 # Running the FastAPI Server
 uvicorn src.api.server:app --host 127.0.0.1 --port 8000 --reload
-# ...or, equivalently, through the launcher:
+# ...Or, Equivalently, Through the Launcher:
 upstream-drift --api-only --port 8000
 
 # Running the PyQt6 GUI
 upstream-drift --classic
-# ...or directly:
+# ...Or Directly:
 python launch_upstream_drift.py --classic
 
 # Running the CLI
@@ -2068,6 +2068,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.499 | Added coupled uncertainty, identifiability, and delayed-control evaluation in the moving-base/flexible-club model; added deterministic 12-input Latin-hypercube and PRCC screening, individual-hand-wrench and parameter sensitivity-rank audits, eight preselected command programs, separate training and held-out ensembles, five-objective Pareto reporting, deterministic JSON/NPZ evidence, four paired publication figures, and explicit prohibitions on population, physiological, universal-strategy, and coaching inference. |
 | 2026-08-11 | 1.0.498 | Added a reduced full-body 3D common-state inverse-dynamics experiment using one canonical 20-coordinate, 32-inertia model in native MuJoCo and an independent Lagrange--Christoffel formulation; added registered action--reaction hand loads, moment-arm reversal and coincidence controls, model hashes, power closure, finite-difference convergence, predeclared tolerance classification, deterministic JSON/NPZ evidence, three paired publication figures, and an explicit boundary that forward spatial contact, passive load origin, calibration, physiology, and coaching inference remain untested. |
 | 2026-08-11 | 1.0.497 | Added a forward constrained two-arm/floating-club reference model with exact same-state zero-command branching; separated contact-force couple, direct wrist torque, common/differential forces, and power; added a zero-moment-arm negative control plus timestep, projection, constraint, KKT, and work--energy audits; committed deterministic JSON/NPZ evidence and three paired publication figures; and expanded the scientific report while preserving explicit planar-model and non-physiological boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
