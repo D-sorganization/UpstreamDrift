@@ -12,12 +12,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy launcher UI setup module (2105 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy 3D viewer tab (1422 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
     }
   ]
 }

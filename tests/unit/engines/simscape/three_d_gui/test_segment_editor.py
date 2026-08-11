@@ -73,6 +73,16 @@ def test_geometry_switch_swaps_artist_kind(qt_app) -> None:
     assert viewer.user_cylinder_count >= 1
 
 
+def test_viewer_rejects_invalid_user_segment_inputs(qt_app) -> None:
+    from src.apps.ui.tabs.viewer_3d_tab import Viewer3DTab  # type: ignore
+
+    viewer = Viewer3DTab()
+    with pytest.raises(ValueError, match="segments must be provided"):
+        viewer.set_user_segments(None)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="SegmentSpec or SegmentVizSpec"):
+        viewer.set_user_segments((object(),))  # type: ignore[arg-type]
+
+
 def test_visibility_toggle(qt_app) -> None:
     from src.apps.services.segment_set_io import SegmentSpec  # type: ignore
     from src.apps.ui.tabs.segments_tab import SegmentsTab  # type: ignore

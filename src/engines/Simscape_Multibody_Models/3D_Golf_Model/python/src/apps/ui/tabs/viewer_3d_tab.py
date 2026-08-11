@@ -29,24 +29,7 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer
 
-from src.shared.python.body_part_viz import (
-    SegmentVizSpec,
-    ShapeTheme,
-)
-from src.shared.python.body_part_viz.asset_library import ShapeLibrary
-from src.shared.python.body_part_viz.fitters import (
-    BetweenTwoMarkersFitter,
-    ClusterKabschFitter,
-    ProcrustesAnisotropicFitter,
-)
-from src.shared.python.body_part_viz.renderers import MatplotlibRenderer
-from src.shared.python.body_part_viz.shapes import (
-    CapsuleShape,
-    CylinderShape,
-    EllipsoidShape,
-    LineShape,
-    MeshShape,
-)
+from src.shared.python.body_part_viz import SegmentVizSpec
 from src.shared.python.motion_matching.body_skeleton import (
     default_body_segments,
 )
@@ -61,39 +44,14 @@ from src.shared.python.plot_style import (
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 from ...core.models import C3DDataModel
-from ...services.segment_set_io import SegmentSpec, spec_v1_to_v2
+from ...services.segment_set_io import SegmentSpec
 from ..widgets.mpl_canvas import MplCanvas
 from ._plot_style_helpers import StylePersistence, default_style_for
+from ._viewer_3d_segments import UserSegmentRenderer
 from .marker_plot_tab import _open_style_dialog
 from .overview_tab import _scalar_value
 
 _LOGGER = logging.getLogger(__name__)
-
-# Anatomical-region colour map (generic, source-agnostic).
-_GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
-    "pelvis": (0.20, 0.55, 0.85, 1.0),
-    "torso": (0.45, 0.30, 0.75, 1.0),
-    "head": (0.85, 0.60, 0.20, 1.0),
-    "left_arm": (0.30, 0.75, 0.40, 1.0),
-    "right_arm": (0.20, 0.50, 0.30, 1.0),
-    "left_leg": (0.85, 0.30, 0.30, 1.0),
-    "right_leg": (0.65, 0.20, 0.20, 1.0),
-    "auto": (0.30, 0.30, 0.30, 1.0),
-    "default": (0.30, 0.30, 0.30, 1.0),
-}
-
-
-def _color_for_group(group: str) -> tuple[float, float, float, float]:
-    return _GROUP_COLORS.get(group, _GROUP_COLORS["auto"])
-
-
-def _rgba_to_hex(rgba: tuple[float, float, float, float]) -> str:
-    r, g, b, _a = rgba
-    rh = int(round(r * 255))
-    gh = int(round(g * 255))
-    bh = int(round(b * 255))
-    return f"#{rh:02x}{gh:02x}{bh:02x}"
-
 
 # View-angle presets: (elev, azim) tuned to match issue spec.
 _VIEW_PRESETS: dict[str, tuple[float, float]] = {
@@ -135,76 +93,6 @@ def _validate_frame(frame: int, n_frames: int) -> int:
     return frame
 
 
-def _build_shape_from_spec(
-    spec: SegmentVizSpec,
-    *,
-    library: ShapeLibrary | None,
-) -> Any:
-    """Construct a :class:`BodyPartShape` from a v2 spec.
-
-    Returns ``None`` when the shape cannot be constructed (e.g. mesh file
-    missing, unknown library entry). The viewer then skips that segment
-    rather than crashing the whole frame.
-    """
-    kind = spec.shape_kind
-    params = spec.shape_params
-    if kind == "line":
-        length = float(params.get("length", 1.0))
-        return LineShape(length=length)
-    if kind == "cylinder":
-        return CylinderShape(
-            length=float(params.get("length", 1.0)),
-            radius=float(params.get("radius", 0.015)),
-            n_facets=int(params.get("n_facets", 16)),
-        )
-    if kind == "ellipsoid":
-        return EllipsoidShape(
-            a=float(params["a"]),
-            b=float(params["b"]),
-            c=float(params["c"]),
-            n_lon=int(params.get("n_lon", 16)),
-            n_lat=int(params.get("n_lat", 8)),
-        )
-    if kind == "capsule":
-        return CapsuleShape(
-            length=float(params.get("length", 1.0)),
-            radius=float(params.get("radius", 0.015)),
-            n_facets=int(params.get("n_facets", 16)),
-            n_lat=int(params.get("n_lat", 8)),
-        )
-    if kind == "mesh_file":
-        try:
-            return MeshShape.load(
-                str(params["path"]),
-                max_vertices=int(params.get("max_vertices", 5000)),
-            )
-        except (FileNotFoundError, ValueError, OSError) as exc:
-            _LOGGER.warning("could not load mesh %s: %s", params.get("path"), exc)
-            return None
-    if kind == "library_shape":
-        if library is None:
-            return None
-        try:
-            return library.get(str(params["shape_id"]))
-        except (KeyError, FileNotFoundError, ValueError) as exc:
-            _LOGGER.warning(
-                "library shape %s not available: %s", params.get("shape_id"), exc
-            )
-            return None
-    # Composite is out-of-scope for the C3D viewer integration.
-    return None
-
-
-def _fitter_for_kind(kind: str) -> Any:
-    if kind == "between_two":
-        return BetweenTwoMarkersFitter()
-    if kind == "cluster_kabsch":
-        return ClusterKabschFitter()
-    if kind == "procrustes_anisotropic":
-        return ProcrustesAnisotropicFitter()
-    raise ValueError(f"unknown fitter_kind {kind!r}")
-
-
 class Viewer3DTab(QtWidgets.QWidget):
     """3D marker trajectory viewer tab with playback and skeleton overlay."""
 
@@ -226,15 +114,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._skeleton_segments: tuple[tuple[str, str], ...] = ()
         self._event_buttons: list[QtWidgets.QToolButton] = []
 
-        # User-defined segments (Segments tab -> here). v2 store.
-        self._user_viz_segments: tuple[SegmentVizSpec, ...] = ()
-        # MatplotlibRenderer + per-segment handles. Each entry is
-        # (handle_or_None, shape_kind). A None handle means the segment
-        # could not be built (e.g. missing markers, missing mesh file)
-        # and should be skipped on frame updates.
-        self._renderer: MatplotlibRenderer | None = None
-        self._render_entries: list[tuple[str | None, str, np.ndarray | None]] = []
-        self._shape_library: ShapeLibrary | None = None
+        self._user_segment_renderer = UserSegmentRenderer(self._transform_positions)
 
         # Playback timer.
         self._timer = QTimer(self)
@@ -763,7 +643,9 @@ class Viewer3DTab(QtWidgets.QWidget):
         # Cache positions: shape (M, N, 3); pad missing with NaN.
         if self._n_frames <= 0:
             return
-        positions = np.full((len(selected), self._n_frames, 3), np.nan, dtype=float)
+        positions: np.ndarray = np.full(
+            (len(selected), self._n_frames, 3), np.nan, dtype=float
+        )
         for i, name in enumerate(selected):
             m = self.model.markers.get(name)
             if m is None or m.position.size == 0:
@@ -858,7 +740,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         if len(selected) <= 12:
             ax.legend(loc="upper right", fontsize=8)
 
-        self._rebuild_user_segment_artists()
+        self._user_segment_renderer.rebuild(self._ax, self.model, self._n_frames)
 
         self.canvas_3d.fig.tight_layout()
         self._render_current_frame()
@@ -869,10 +751,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._label_texts = []
         self._skeleton_collection = None
         self._skeleton_segments = ()
-        if self._renderer is not None:
-            self._renderer.clear()
-        self._renderer = None
-        self._render_entries = []
+        self._user_segment_renderer.clear()
         # plot_style renderer is recreated per scene rebuild — drop the
         # handle so update_style/update_frame don't mis-reference the
         # previous axes.
@@ -1060,22 +939,9 @@ class Viewer3DTab(QtWidgets.QWidget):
         :class:`SegmentVizSpec` tuple. v1 entries are converted to v2 in
         place; the underlying renderer always operates on v2.
         """
-        if segments is None:
-            raise ValueError("segments must be provided (use () for an empty set)")
-        viz_specs: list[SegmentVizSpec] = []
-        for spec in segments:
-            if isinstance(spec, SegmentVizSpec):
-                viz_specs.append(spec)
-            elif isinstance(spec, SegmentSpec):
-                viz_specs.append(spec_v1_to_v2(spec))
-            else:
-                raise TypeError(
-                    "segments entries must be SegmentSpec or SegmentVizSpec; "
-                    f"got {type(spec).__name__}"
-                )
-        self._user_viz_segments = tuple(viz_specs)
+        self._user_segment_renderer.set_segments(segments)
         if self._ax is not None:
-            self._rebuild_user_segment_artists()
+            self._user_segment_renderer.rebuild(self._ax, self.model, self._n_frames)
             self._render_current_frame()
 
     @property
@@ -1085,164 +951,12 @@ class Viewer3DTab(QtWidgets.QWidget):
         Includes cylinders, ellipsoids, capsules, meshes, and library
         shapes. Excludes line shapes (which use ``Line3DCollection``).
         """
-        return sum(
-            1
-            for handle, kind, _valid in self._render_entries
-            if handle is not None and kind != "line"
-        )
+        return self._user_segment_renderer.cylinder_count
 
     @property
     def user_line_segment_count(self) -> int:
         """Number of line-shape user segments currently rendered."""
-        return sum(
-            1
-            for handle, kind, _valid in self._render_entries
-            if handle is not None and kind == "line"
-        )
-
-    def _resolve_library(self) -> ShapeLibrary | None:
-        if self._shape_library is None:
-            try:
-                self._shape_library = ShapeLibrary.default()
-            except (FileNotFoundError, ValueError) as exc:
-                _LOGGER.warning("default shape library unavailable: %s", exc)
-                return None
-        return self._shape_library
-
-    def _markers_xyz(self, names: tuple[str, ...]) -> dict[str, np.ndarray] | None:
-        """Build a ``{name: (T, 3)}`` mapping for the segment's markers.
-
-        Returns ``None`` when any required marker is missing or empty so
-        the caller can skip the segment cleanly.
-        """
-        if self.model is None or self._n_frames <= 0:
-            return None
-        out: dict[str, np.ndarray] = {}
-        for name in names:
-            md = self.model.markers.get(name)
-            if md is None or md.position.size == 0:
-                return None
-            arr = np.asarray(md.position, dtype=float)
-            if arr.shape[0] < self._n_frames:
-                padded = np.full((self._n_frames, 3), np.nan, dtype=float)
-                padded[: arr.shape[0]] = arr
-                arr = padded
-            elif arr.shape[0] > self._n_frames:
-                arr = arr[: self._n_frames]
-            out[name] = self._transform_positions(arr)
-        return out
-
-    def _theme_for_spec(self, spec: SegmentVizSpec) -> ShapeTheme:
-        """Prefer the spec's theme; fall back to anatomical-group color."""
-        rgba = _color_for_group(spec.theme.group)
-        # If the theme color is the v2 default (#1f77b4) and we have a
-        # group-specific color, override it for visual continuity with the
-        # legacy viewer.
-        if spec.theme.color == "#1f77b4" and spec.theme.group in _GROUP_COLORS:
-            return ShapeTheme(
-                color=_rgba_to_hex(rgba),
-                opacity=spec.theme.opacity,
-                edge_color=_rgba_to_hex(rgba),
-                edge_width=spec.theme.edge_width,
-                flat_shaded=spec.theme.flat_shaded,
-                group=spec.theme.group,
-            )
-        return spec.theme
-
-    def _rebuild_user_segment_artists(self) -> None:
-        ax = self._ax
-        if ax is None:
-            return
-        # Drop the previous renderer (if any) and start fresh.
-        if self._renderer is not None:
-            self._renderer.clear()
-        self._renderer = MatplotlibRenderer(ax)
-        self._render_entries = []
-
-        if not self._user_viz_segments or self._n_frames <= 0:
-            return
-
-        library = self._resolve_library()
-
-        for spec in self._user_viz_segments:
-            shape = _build_shape_from_spec(spec, library=library)
-            if shape is None:
-                self._render_entries.append((None, spec.shape_kind, None))
-                continue
-            markers_xyz = self._markers_xyz(spec.binding.marker_names)
-            if markers_xyz is None:
-                self._render_entries.append((None, spec.shape_kind, None))
-                continue
-            try:
-                fitter = _fitter_for_kind(spec.fitter_kind)
-            except ValueError:
-                self._render_entries.append((None, spec.shape_kind, None))
-                continue
-            try:
-                # Library-shape mesh has its own shape_id; rebind the binding
-                # to the shape for the fitter to find a rest-length.
-                effective_binding = spec.binding
-                if not effective_binding.rest_dimensions and shape.rest_dimensions:
-                    # Fitter expects a rest length on the binding for
-                    # between_two; sourcing it from the shape's first axis
-                    # is the canonical pattern.
-                    effective_binding = type(spec.binding)(
-                        kind=spec.binding.kind,
-                        marker_names=spec.binding.marker_names,
-                        rest_dimensions=(float(shape.rest_dimensions[0]),),
-                        rest_orientation_quat=spec.binding.rest_orientation_quat,
-                    )
-                fitted = fitter.fit(shape, effective_binding, markers_xyz)
-            except (KeyError, TypeError, ValueError) as exc:
-                _LOGGER.warning(
-                    "fit failed for segment %s: %s",
-                    spec.binding.marker_names,
-                    exc,
-                )
-                self._render_entries.append((None, spec.shape_kind, None))
-                continue
-            theme = self._theme_for_spec(spec)
-            try:
-                handle = self._renderer.add_shape(shape, fitted, theme)
-            except (TypeError, ValueError) as exc:
-                _LOGGER.warning(
-                    "renderer.add_shape failed for %s: %s", spec.shape_kind, exc
-                )
-                self._render_entries.append((None, spec.shape_kind, None))
-                continue
-            if not spec.visible:
-                self._renderer.set_visible(handle, False)
-            # Capture the per-frame valid mask so the per-frame update path
-            # can hide segments on invalid frames (e.g. NaN-filled occluded
-            # markers) instead of drawing them at the origin. See #4835.
-            valid_mask = getattr(fitted, "valid_mask", None)
-            self._render_entries.append((handle, spec.shape_kind, valid_mask))
-
-    def _update_user_segment_artists(self) -> None:
-        if self._renderer is None or not self._user_viz_segments or self._n_frames <= 0:
-            return
-        frame = int(self.slider_frame.value())
-        if not 0 <= frame < self._n_frames:
-            return
-        for entry, spec in zip(
-            self._render_entries, self._user_viz_segments, strict=False
-        ):
-            handle, _kind, valid_mask = entry
-            if handle is None:
-                continue
-            # If the fitter flagged this frame invalid (e.g. occluded marker
-            # NaNs), hide the segment for the frame instead of drawing it at
-            # the origin via the NaN->0 coercion in the renderer (#4835).
-            frame_valid = True
-            if valid_mask is not None and 0 <= frame < len(valid_mask):
-                frame_valid = bool(valid_mask[frame])
-            visible = bool(spec.visible) and frame_valid
-            try:
-                self._renderer.set_visible(handle, visible)
-                if visible:
-                    self._renderer.update_frame(handle, frame)
-            except (KeyError, IndexError, TypeError) as exc:
-                _LOGGER.warning("renderer.update_frame failed: %s", exc)
+        return self._user_segment_renderer.line_segment_count
 
     # -------------------------------------------------- Per-frame render
 
@@ -1311,7 +1025,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._update_skeleton_segments()
 
         # Update user-defined segments via the body_part_viz renderer.
-        self._update_user_segment_artists()
+        self._user_segment_renderer.update_frame(frame, self._n_frames)
 
         self.canvas_3d.draw_idle()
 
@@ -1407,7 +1121,7 @@ class Viewer3DTab(QtWidgets.QWidget):
 
     # -------------------------------------------------- Show/Hide events
 
-    def hideEvent(self, event: QtGui.QHideEvent) -> None:  # noqa: N802 (Qt)
+    def hideEvent(self, event: QtGui.QHideEvent | None) -> None:  # noqa: N802 (Qt)
         """Pause playback when the tab is hidden."""
         self.pause()
         super().hideEvent(event)

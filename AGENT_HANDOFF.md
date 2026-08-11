@@ -5,6 +5,20 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **Simscape 3D-viewer size slice (local, no publish)** — branch
+  `fix/viewer-3d-module-size-decomposition` starts at exact draft PR #8484
+  head `89f87590981f789755c2b45e1b03ed2ee57247a3`. It moves user-defined
+  body-segment shape construction, fitting, library/theme resolution, artist
+  lifecycle, and per-frame updates into the private
+  `_viewer_3d_segments.UserSegmentRenderer`; `Viewer3DTab` retains its existing
+  public segment methods as thin delegates. The viewer facade is now 1,127
+  lines (down from 1,413), and both its file-size and expired module-size
+  exceptions are removed without renewal. All 71 focused viewer/UI tests pass
+  after initializing the repository's pinned `vendor/ud-tools` gitlink. The
+  module-size gate now reports only the inherited `launcher_ui_setup.py` and
+  `settings_dialog.py` violations. The retired exception cites closed umbrella
+  issue #5922; obtain a truthful open issue before publishing this candidate.
+
 - **#8483 main-launcher size slice (local, no publish)** — branch
   `fix/upstream-launcher-module-size-decomposition` starts at exact draft PR
   #8482 head `73dd11df09a2f37ea150835930134ae4354ee5a7`. It moves the
