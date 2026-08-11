@@ -1,5 +1,12 @@
 """Physics engines, aerodynamics, terrain, and impact models."""
 
+from src.shared.python.physics.contact_reaction_decomposition import (
+    ContactReactionDecomposition,
+    ContactReactionInputs,
+    ReactionPredictionMetrics,
+    decompose_contact_reaction,
+    evaluate_reaction_prediction,
+)
 from src.shared.python.physics.dimple_geometry import DimpleGeometry, dimple_adjusted_cd
 from src.shared.python.physics.mud_ball import (
     MudBallAdjustment,
@@ -25,6 +32,11 @@ from src.shared.python.physics.water_hazard import (
 )
 
 __all__: list[str] = [
+    "ContactReactionDecomposition",
+    "ContactReactionInputs",
+    "ReactionPredictionMetrics",
+    "decompose_contact_reaction",
+    "evaluate_reaction_prediction",
     "mud_ball_aero_adjustments",
     "MudBallAdjustment",
     "water_entry_kinematics",
