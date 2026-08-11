@@ -3,7 +3,17 @@
 Last updated: 2026-08-10
 Update this file with every PR and every push to main.
 
-## Where the repo is heading
+## Where the Repo Is Heading
+
+- **#8461 WSCG 2024 legacy-evidence audit** — both archived source decks were
+  hash-matched to the user-supplied originals and all 12 slides were inspected.
+  `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+  records the exact claims, pointwise ZTCF construction, two-hand couple
+  mechanism, OOXML chart-cache provenance, and publication boundaries. The
+  evidence supports passive late-downswing negative-torque plausibility in the
+  planar model, not momentum isolation or human validation. No legacy image was
+  reused: slides 7–10 are static JPEGs, the chart's source workbook is absent,
+  and the slide-3 composite has no license note.
 
 - **#8448 higher-order mechanism ladder** — first slice merged in full PR
   **#8456** at remote-main commit `85eae6a8ef1b132f93eda87bef2a2d6d51280c49`.
@@ -99,7 +109,7 @@ Update this file with every PR and every push to main.
 - PR #8422 is independently synchronized to current `main` and retains only its
   focused ground-reaction-force reduction change plus the required SPEC entry.
 
-## Must-read architecture pointers
+## Must-Read Architecture Pointers
 
 1. `CLAUDE.md` — authoritative contributor/agent policy: gate commands, CI requirements,
    error-handling ratchet, feature-parity registry, physics-engine gotchas.
@@ -111,7 +121,7 @@ Update this file with every PR and every push to main.
 5. `docs/adr/0016-*` (error handling) — see `scripts/ci/check_error_handling_ratchet.py`
    and `scripts/config/error_handling_baseline.json`.
 
-## In-flight branches (what stacks on what)
+## In-Flight Branches (What Stacks on What)
 
 The active branches are independent topic branches off `main` unless noted:
 
@@ -136,7 +146,7 @@ The active branches are independent topic branches off `main` unless noted:
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
 
-## Gate commands (run these before opening/updating a PR)
+## Gate Commands (Run These Before Opening/Updating a PR)
 
 ```bash
 python3 -m ruff check .                            # lint
@@ -156,7 +166,7 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 `rust-quality-gate`, etc.) and `.github/workflows/docs-ci.yml` (docs-only PRs, requires
 `quality-gate` + SPEC.md freshness).
 
-## Do-not list
+## Do-Not List
 
 - **Do not edit `vendor/ud-tools/`** — it is vendored from Tools; changes are erased on
   the next `git submodule update`/vendor bump. Fix upstream in Tools instead.
@@ -180,7 +190,7 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 - **Do not batch a day's work into one commit** — commit small, frequent, conventional
   commits.
 
-## Short-term roadmap (ordered)
+## Short-Term Roadmap (Ordered)
 
 1. Land this handoff-policy PR (Repository_Management#1390 rollout for UpstreamDrift).
 2. Confirm `vendor/ud-tools` submodule pin from #8339 points at the Tools `main`

@@ -59,8 +59,10 @@ $$
 +\underbrace{M^{-1}Bu}_{\ddot q_{\mathrm{control}}}.
 $$ {#eq-hand-path-drift-control}
 
-The **pointwise ZTCF** is the first term evaluated at the achieved state after
-the declared applied controls are set to zero. In the analyses here, its
+The **pointwise ZTCF sample** is the first term evaluated at the achieved state
+after the declared applied controls are set to zero. Repeating this operation
+along the achieved history produces a **stitched pointwise ZTCF trace**, not a
+single forward trajectory. In the analyses here, its
 inventory includes gravity and motion-dependent terms and includes a passive
 element only when that element belongs to the declared model. The **control
 increment** is total minus ZTCF at that identical state. The two close exactly
@@ -75,11 +77,11 @@ control increment. It answers which reactions and accelerations would remain
 at this configuration if the generalized velocity vanished under its stated
 protocol.
 
-Finally, a **forward killswitch** starts a new trajectory after removing a
-command. It ceases to share the achieved state as soon as it is integrated.
-Pointwise ZTCF can attribute an instantaneous reaction; only a forward
-killswitch can test persistence. Results from one experiment are not silently
-promoted into claims about the other.
+Finally, a **forward** or **branched ZTCF** starts a new trajectory after
+removing a command. It ceases to share the achieved state as soon as it is
+integrated. A pointwise ZTCF sample can attribute an instantaneous reaction;
+only a forward experiment can test persistence. Results from one experiment
+are not silently promoted into claims about the other.
 
 For a constrained two-hand model, the same distinction applies to the complete
 Karush--Kuhn--Tucker solve,
@@ -314,6 +316,48 @@ under timestep, event-boundary, geometry, and parameter perturbations; if it
 depends on a rank-deficient contact configuration; if equal-effort actuator
 models remove the apparent benefit; or if measured two-hand forces and muscle
 activity do not exhibit the predicted phase relation.
+
+### A Bounded Residual-Couple Preview Test {#sec-preactivation-preview-test}
+
+The archived WSCG traces permit one limited part of the hypothesis to be tested
+without inventing a muscle model. Treat the archived BASE equivalent midpoint
+couple as a reference, the stitched pointwise ZTCF couple as the reaction
+available at each achieved state, and their registered DELTA as the required
+control residual. At the pointwise ZTCF minimum (0.2148 s), the reaction is
+$-19.63$ N m while BASE is $-22.78$ N m. Thus 86.2% of the negative BASE
+couple at that instant is present in the declared zero-applied-control solve;
+the required residual is only $-3.15$ N m. Across the 0.16--0.25 s analysis
+window, the residual's peak magnitude is 3.18 N m compared with 23.17 N m for
+BASE.
+
+Those values suggest a control-management rule within this archived model:
+control the residual, not the net couple. Commanding the entire BASE couple on
+top of the already-present drift reaction double-counts the mechanical action.
+To examine timing, a unit-gain first-order actuator was used solely as a signal
+model,
+
+$$
+T_a\dot C_a+C_a=C_{\mathrm{cmd}},
+$$ {#eq-preactivation-actuator}
+
+with the archived BASE and pointwise ZTCF traces held fixed. For the reference
+$T_a=30$ ms case, commanding the instantaneous residual produced a late-window
+tracking RMSE of 1.252 N m. Previewing that same residual by 24 ms reduced the
+RMSE to 0.531 N m, a 57.6% reduction. By contrast, sending the net BASE couple
+through the actuator and then adding the drift reaction produced 19.06 N m
+RMSE. Across assumed time constants from 10 to 50 ms, the best preview ranged
+from 9 to 35 ms and reduced residual-tracking error by 46.1% to 79.4%.
+
+![Residual-Couple Preview Test for the Archived Two-Hand Model](figures/fig_two_hand_preactivation_hypothesis.pdf){#fig-two-hand-preactivation-hypothesis width=100%}
+
+Figure @fig-two-hand-preactivation-hypothesis establishes a narrow signal-
+tracking result: anticipation can compensate a declared first-order delay when
+the command targets BASE minus drift. It does not evaluate clubhead speed,
+muscle activation, metabolic cost, or a forward coupled golfer trajectory. The
+best preview is conditional on the assumed time constant and known future
+residual; it is not a recommended physiological timing value. The study turns
+preactivation into a reproducible hypothesis with explicit failure conditions
+rather than presenting it as an observed human mechanism.
 
 ## Phase-Resolved Reporting Protocol {#sec-attribution-phases}
 

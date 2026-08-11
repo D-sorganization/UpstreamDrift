@@ -102,10 +102,20 @@ $$
 +\underbrace{M^{-1}Bu}_{\ddot q_{\mathrm{control}}}.
 $$
 
-The zero-torque counterfactual (ZTCF) is the drift term at the achieved state.
-Its declared drift inventory may include gravity, Coriolis and centrifugal
+A **pointwise ZTCF sample** is the zero-applied-control acceleration and
+reaction evaluation at one achieved state. Repeating that evaluation along the
+achieved history produces a **stitched pointwise ZTCF trace**; it is not one
+forward trajectory. The associated acceleration is the drift vector at each
+sample. Its declared inventory may include gravity, Coriolis and centrifugal
 effects, passive stiffness, damping, and prescribed-base effects. The inventory
 must be fixed before comparing models.
+
+A **forward** or **branched ZTCF trajectory** instead integrates the
+zero-applied-control equations from one declared initial state. It shares the
+achieved state only at the branch time and can support persistence questions
+that the stitched pointwise trace cannot. Every use of _ZTCF_ in the article,
+figures, data, and software is qualified as pointwise, stitched, forward, or
+branched on first use.
 
 The zero-velocity counterfactual (ZVCF) instead evaluates the model with
 $\dot q=0$. Unless gravity and every other configuration-dependent term are
@@ -211,10 +221,11 @@ such as actuator torque or stress, positive and negative actuator work,
 activation, metabolic cost, electromyography, or an instrumented force measure.
 The selected estimator and its limitations must accompany the claim.
 
-A nonzero ZTCF reaction is not free energy and does not show that the state was
-reached without prior effort. It shows only that the reaction persists at the
-achieved state when the declared instantaneous controls are removed. Stored
-energy, momentum, passive impedance, and earlier active work may all contribute.
+A nonzero pointwise ZTCF reaction is not free energy and does not show that the
+state was reached without prior effort. It shows only that the reaction is
+present in the zero-applied-control solve at the achieved state. Stored energy,
+momentum, passive impedance, and earlier active work may all contribute. Only a
+forward or branched ZTCF can test how long a response persists.
 
 The proposed late-downswing preactivation benefit remains a model-only,
 falsifiable hypothesis until tested with activation dynamics,

@@ -405,7 +405,6 @@ tests could overturn or materially qualify the framework:
 - synchronized human motion and force estimates inconsistent with the modeled
   timing and sign structure.
 
-Stating those failure conditions is part of the scientific result. The present
-double-pendulum treatment identifies a mechanism and supplies reproducible
-tests; it does not promote a software package or convert model behavior into a
-coaching prescription.
+These failure conditions bound the inference. The double-pendulum evidence
+identifies a reproducible mechanism; it does not convert behavior in one model
+into a population estimate or coaching prescription.
