@@ -1,0 +1,66 @@
+{
+  "calibration_status": "not_equipment_calibration",
+  "claim_status": "synthetic_structural_comparison_only",
+  "closure": {
+    "maximum_reduced_work_energy_residual_j": 2.761115265332431e-8,
+    "maximum_reference_work_energy_residual_j": 2.874184996315074e-7
+  },
+  "comparison": {
+    "high_frequency_tip_rms_discrepancy_m": 4.133692722463994e-5,
+    "low_frequency_tip_rms_discrepancy_m": 6.8667282414814e-7,
+    "reduced_mode_count": 1,
+    "reduced_peak_tip_deflection_m": 0.005286746693053236,
+    "reference_mode_count": 6,
+    "reference_peak_tip_deflection_m": 0.0053385427491477845
+  },
+  "configuration": {
+    "butt_diameter_m": 0.015,
+    "damping_ratio": 0.018,
+    "density_kg_m3": 1600.0,
+    "duration_s": 0.18,
+    "element_count": 24,
+    "head_mass_kg": 0.205,
+    "head_rotary_inertia_kg_m2": 0.00048,
+    "high_frequency_pulse_s": 0.004,
+    "length_m": 1.0,
+    "low_frequency_pulse_s": 0.08,
+    "mode_count": 6,
+    "peak_tip_force_n": 8.0,
+    "peak_tip_moment_nm": 4.0,
+    "step_s": 1.25e-5,
+    "tip_diameter_m": 0.0085,
+    "wall_thickness_m": 0.001,
+    "youngs_modulus_pa": 112000000000.0
+  },
+  "convergence": {
+    "frequencies_hz_48_elements": [
+      5.2404459711287465, 62.930928572467, 137.90944785076599
+    ],
+    "maximum_relative_change_24_to_48": 0.000896287117648928
+  },
+  "identification": {
+    "converged": true,
+    "declared_truth_head_mass_kg": 0.205,
+    "declared_truth_youngs_modulus_pa": 112000000000.0,
+    "fitted_frequencies_hz": [5.2398973206336885, 62.94572427588197],
+    "head_mass_interval_kg": [0.1970228907057747, 0.21330007759394431],
+    "head_mass_kg": 0.20499999481786566,
+    "interval_basis": "local_linear_assumed_frequency_noise",
+    "maximum_frequency_residual_hz": 9.932520583788573e-9,
+    "target_frequencies_hz": [5.239897330566209, 62.945724269876315],
+    "youngs_modulus_interval_pa": [111650788193.7418, 112350304090.2628],
+    "youngs_modulus_pa": 112000000024.484
+  },
+  "identification_data_status": "declared_synthetic_modal_frequencies",
+  "interpretation": {
+    "not_supported": [
+      "equipment-specific shaft calibration",
+      "human shaft-loading inference",
+      "transport of the beam result through the constrained two-hand solve"
+    ],
+    "supported": "a first-mode reduction agrees best for slowly varying loading and misses higher-mode content under a short force-and-moment pulse"
+  },
+  "open_gate": "couple_distributed_beam_into_forward_two_hand_solve",
+  "schema_version": "proximal-distal-shaft-beam-v1",
+  "shared_fe_authority": "src.shared.python.physics.flexible_shaft"
+}

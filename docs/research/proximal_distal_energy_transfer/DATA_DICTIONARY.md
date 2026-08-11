@@ -18,6 +18,7 @@ not be promoted to a human or physiological result.
 | `shaft_contribution_study.json`         | Rigid/flexible, termwise, ablation, robustness, and convergence summaries      | One lumped flex surrogate                  |
 | `forward_two_arm_study.{json,npz}`      | Forward constrained states, grip reactions, force modes, branches, closure     | Fixed-shoulder planar model                |
 | `moving_base_flexible_study.{json,npz}` | Coupled base/flex states, reactions, energy, branches, and convergence         | Translating-base planar model              |
+| `shaft_beam_reference.{json,npz}`       | Modal identification, mesh convergence, reduced/reference response, and energy | Synthetic isolated beam comparison         |
 | `spatial_full_body_study.{json,npz}`    | Nonplanar common states, prescribed wrenches, two-formulation inverse dynamics | No solved forward spatial contact          |
 | `uncertainty_control_study.{json,npz}`  | Parameter ensembles, PRCC, identifiability, programs, Pareto metrics, rollouts | Engineering envelopes and actuator proxies |
 | `experimental_protocol_v1.json`         | Frozen modalities, outcomes, split, residuals, and inference rules             | Protocol, not participant evidence         |

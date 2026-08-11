@@ -61,7 +61,14 @@ abstract: |
   force-generated couple for 50 ms, the coincident-grip control removes it
   exactly, and work--energy and contact-power identities close under timestep
   refinement. These are planar model-feasibility results, not physiological or
-  human evidence. A common-observable model ladder then carries
+  human evidence. A separate distributed-shaft study then reuses the shared
+  Euler--Bernoulli finite-element model to compare a first-mode reduction with
+  a six-mode reference. Synthetic modal identification recovers its declared
+  modulus and tip mass, mesh and work--energy gates close, and a short load
+  pulse exposes sixty times more RMS response discrepancy than a slow pulse.
+  This is structural verification, not equipment calibration, and the beam is
+  not yet coupled into the two-hand forward solve. A common-observable model
+  ladder then carries
   reference-explicit force, couple, velocity, angular velocity, and power
   through a third coordinate, prescribed hub motion, two-hand constraint
   geometry, and proper 3-D frame transformations. A reduced full-body
@@ -148,6 +155,8 @@ format:
 {{< include chapters/_ch06_shaft_contributions.qmd >}}
 
 {{< include chapters/_ch06b_coupled_base_flex.qmd >}}
+
+{{< include chapters/_ch06bb_shaft_beam_reference.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
 

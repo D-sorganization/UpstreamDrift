@@ -34,6 +34,12 @@ club in one forward solve. It records base and shaft energy, a same-state
 zero-command branch, a coincident-grip geometric control, parameter
 sensitivity, and timestep convergence without prescribing base motion or
 shaft flex.
+A distributed-shaft structural study now reuses the shared Euler--Bernoulli
+finite-element model, adds declared head inertia, identifies a synthetic
+two-parameter modal case, and compares one-mode and six-mode responses under
+slow and short-duration loads. It exposes higher-mode discrepancy while
+remaining explicitly separate from equipment calibration and from the coupled
+two-hand solve.
 A coupled uncertainty, identifiability, and delayed-control phase now varies
 12 inputs simultaneously in that same forward model. It publishes deterministic
 Latin-hypercube/PRCC screening, rank and null-space audits, and separate
@@ -87,6 +93,7 @@ python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_stu
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
@@ -104,6 +111,7 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 # document
@@ -161,6 +169,10 @@ recorded in `data/*.json`.
   Its planar point contacts, linear springs and dampers, and declared
   mechanism-study parameters are not a calibrated body, distributed shaft, or
   equipment comparison.
+- The distributed-shaft comparison identifies only a declared synthetic modal
+  truth. Its finite-element convergence and work--energy closure do not
+  constitute equipment calibration, measured shaft validation, or proof that
+  the result survives coupling into the constrained two-hand solve.
 - The reduced full-body spatial study uses 20 generalized coordinates and
   spherical inertia elements shared by MuJoCo and an independent analytical
   implementation. Its same-state agreement is an implementation-transport

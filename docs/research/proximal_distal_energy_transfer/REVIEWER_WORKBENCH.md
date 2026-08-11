@@ -30,6 +30,20 @@ commands; the [data dictionary](DATA_DICTIONARY.md) defines recurring fields.
   [`forward_two_arm_study.json`](data/forward_two_arm_study.json) and
   [`moving_base_flexible_study.json`](data/moving_base_flexible_study.json)
 
+## Distributed-Shaft Structural Reference
+
+- Synthetic identification and convergence:
+  [`fig_shaft_beam_identification.svg`](figures/fig_shaft_beam_identification.svg)
+- Reduced and six-mode responses:
+  [`fig_shaft_beam_response.svg`](figures/fig_shaft_beam_response.svg)
+- Input, damping, and energy closure:
+  [`fig_shaft_beam_energy.svg`](figures/fig_shaft_beam_energy.svg)
+- Evidence:
+  [`shaft_beam_reference.json`](data/shaft_beam_reference.json)
+
+This tier is a synthetic structural comparison. It is not an equipment
+calibration and is not yet coupled into the constrained two-hand rollout.
+
 ## Spatial Common-State Tier
 
 - Model and force geometry:

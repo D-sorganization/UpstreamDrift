@@ -325,45 +325,51 @@ zero-command branch retains a negative force-generated couple for 50 ms,
 the coincident-grip control removes it exactly, and work--energy and
 contact-power identities close under timestep refinement. These are
 planar model-feasibility results, not physiological or human evidence. A
-common-observable model ladder then carries reference-explicit force,
-couple, velocity, angular velocity, and power through a third
-coordinate, prescribed hub motion, two-hand constraint geometry, and
-proper 3-D frame transformations. A reduced full-body extension executes
-nonplanar common-state inverse dynamics through MuJoCo and an
-independent Lagrange--Christoffel formulation. Across 20 generalized
-coordinates and 61 states, the maximum relative discrepancy is
-\(2.14\times10^{-11}\); reversing the hand moment arm reverses a
-\(-4.32\) N m force-generated couple, and coincident hands remove it
-exactly. Because contact loads are prescribed, passive spatial contact
-remains inconclusive and forward cross-engine contact remains untested.
-A coupled uncertainty and control experiment then varies 12 inputs
-simultaneously, audits structural and practical identifiability, and
-compares eight preselected delayed-command programs on separate training
-and held-out ensembles. The net planar wrench leaves one
-individual-hand-force mode unidentified, the six summary observables
-cannot identify the full 12-parameter vector, and all eight programs are
-nondominated on held-out samples. An early opposing command improves
-lower-tail speed relative to late drive but worsens the planar face/path
-proxy, rejecting a universal optimum and any direct physiological
-interpretation. A preregistered experimental protocol then fixes
-synchronized motion, bilateral hand-wrench, club, ground-reaction,
-launch, and activation measurements; participant-level holdout;
-filtering; calibration; residuals; identity protection; and four outcome
-falsifiers. Its synthetic dry run qualifies only the fail-closed
-pipeline. No human outcome is analyzed, and every experimental
-prediction remains untested. A separate hand-path attribution study
-evaluates the MacKenzie force-work-per-path-length estimand in an
-impact-truncated double pendulum, a forward-simulated one-arm model, and
-a mechanically closed two-arm local sweep. Drift supplies 101.2\% and
-103.5\% of signed hand-path force work in the two forward cases because
-the contemporaneous control contribution is slightly opposing; in the
-two-arm sweep, drift and control instead cancel with an index of 0.962.
-Joint- and time-resolved impulse, power, work, force-vector, and
-common/differential-mode results show why a large net hand-path force is
-a mechanical transfer observable rather than a direct measure of
-biological effort. References, analysis code, machine-readable results,
-and provenance are available with the document for independent
-inspection and reuse.
+separate distributed-shaft study then reuses the shared Euler--Bernoulli
+finite-element model to compare a first-mode reduction with a six-mode
+reference. Synthetic modal identification recovers its declared modulus
+and tip mass, mesh and work--energy gates close, and a short load pulse
+exposes sixty times more RMS response discrepancy than a slow pulse.
+This is structural verification, not equipment calibration, and the beam
+is not yet coupled into the two-hand forward solve. A common-observable
+model ladder then carries reference-explicit force, couple, velocity,
+angular velocity, and power through a third coordinate, prescribed hub
+motion, two-hand constraint geometry, and proper 3-D frame
+transformations. A reduced full-body extension executes nonplanar
+common-state inverse dynamics through MuJoCo and an independent
+Lagrange--Christoffel formulation. Across 20 generalized coordinates and
+61 states, the maximum relative discrepancy is \(2.14\times10^{-11}\);
+reversing the hand moment arm reverses a \(-4.32\) N m force-generated
+couple, and coincident hands remove it exactly. Because contact loads
+are prescribed, passive spatial contact remains inconclusive and forward
+cross-engine contact remains untested. A coupled uncertainty and control
+experiment then varies 12 inputs simultaneously, audits structural and
+practical identifiability, and compares eight preselected
+delayed-command programs on separate training and held-out ensembles.
+The net planar wrench leaves one individual-hand-force mode
+unidentified, the six summary observables cannot identify the full
+12-parameter vector, and all eight programs are nondominated on held-out
+samples. An early opposing command improves lower-tail speed relative to
+late drive but worsens the planar face/path proxy, rejecting a universal
+optimum and any direct physiological interpretation. A preregistered
+experimental protocol then fixes synchronized motion, bilateral
+hand-wrench, club, ground-reaction, launch, and activation measurements;
+participant-level holdout; filtering; calibration; residuals; identity
+protection; and four outcome falsifiers. Its synthetic dry run qualifies
+only the fail-closed pipeline. No human outcome is analyzed, and every
+experimental prediction remains untested. A separate hand-path
+attribution study evaluates the MacKenzie force-work-per-path-length
+estimand in an impact-truncated double pendulum, a forward-simulated
+one-arm model, and a mechanically closed two-arm local sweep. Drift
+supplies 101.2\% and 103.5\% of signed hand-path force work in the two
+forward cases because the contemporaneous control contribution is
+slightly opposing; in the two-arm sweep, drift and control instead
+cancel with an index of 0.962. Joint- and time-resolved impulse, power,
+work, force-vector, and common/differential-mode results show why a
+large net hand-path force is a mechanical transfer observable rather
+than a direct measure of biological effort. References, analysis code,
+machine-readable results, and provenance are available with the document
+for independent inspection and reuse.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -374,7 +380,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, opacityback=0, opacitybacktitle=0.6, breakable, leftrule=.75mm, arc=.35mm, colframe=quarto-callout-note-color-frame, left=2mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, rightrule=.15mm, bottomtitle=1mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, colback=white, breakable, bottomtitle=1mm, leftrule=.75mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, bottomrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4303,6 +4309,166 @@ statement only. The next fidelity gate is a spatial full-body experiment
 that preserves the same wrench, intervention, energy, and discrepancy
 observables in two independent dynamics engines.
 
+\chapter{Distributed-Shaft Reference and Modal
+Reduction}\label{sec-shaft-beam-reference}
+
+\section{Structural Question and Evidence
+Boundary}\label{structural-question-and-evidence-boundary}
+
+The coupled model in Section~\ref{sec-coupled-base-flex} admits one
+linear torsional flex coordinate. That coordinate is sufficient to test
+whether stored elastic energy can coexist with the two-hand
+negative-couple mechanism, but it cannot represent a distributed bending
+field or decide when higher shaft modes matter. This section therefore
+compares a one-mode reduction with a higher-order Euler--Bernoulli
+reference assembled by the repository's shared finite-element shaft
+implementation. The exact analysis and evidence are in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/shaft_beam_reference.py}{\texttt{shaft\_beam\_reference.py}},
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_shaft_beam_reference.py}{\texttt{run\_shaft\_beam\_reference.py}},
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json}{\texttt{shaft\_beam\_reference.json}}.
+
+This is a structural verification experiment, not an equipment
+calibration. The modal observations used for identification are
+generated from a declared synthetic truth. No measured shaft
+frequencies, EI profile, clubhead inertia, or human loading data enter
+the result.
+
+\section{Distributed Beam and Tip
+Inertia}\label{distributed-beam-and-tip-inertia}
+
+Each tapered beam element carries transverse displacement and section
+rotation at both nodes. Its standard consistent mass and
+bending-stiffness matrices are assembled into \(M_b\) and \(K_b\), the
+butt displacement and rotation are clamped, and declared clubhead
+translation and rotary inertia are added at the free-end degrees of
+freedom. The generalized eigenproblem is
+
+\begin{equation}\phantomsection\label{eq-beam-eigenproblem}{
+\mathbf K_b\boldsymbol\phi_i
+=\omega_i^2\mathbf M_b\boldsymbol\phi_i,
+\qquad
+\boldsymbol\phi_i^\mathsf T\mathbf M_b\boldsymbol\phi_j=\delta_{ij}.
+}\end{equation}
+
+The reference shaft is 1.0 m long with a 15.0 mm butt diameter, 8.5 mm
+tip diameter, 1.0 mm wall, 1,600 kg/m\^{}3 density, 112 GPa elastic
+modulus, 0.205 kg tip mass, and \(4.8\times10^{-4}\) kg m\^{}2 tip
+rotary inertia. These values define the synthetic test article only.
+Twenty-four elements form the executed reference; comparison against 48
+elements changes the first three frequencies by at most 0.0896\%. The
+converged first three frequencies are 5.240, 62.931, and 137.909 Hz.
+
+\section{Synthetic Identification and
+Uncertainty}\label{synthetic-identification-and-uncertainty}
+
+Two parameters---the elastic modulus and clubhead mass---are identified
+from the first two synthetic modal frequencies. Optimization occurs in
+log-parameter space to enforce positivity. With an assumed independent
+frequency uncertainty of 0.05 Hz, local covariance is propagated from
+the residual Jacobian. The fit recovers 112.000 GPa and 0.2050 kg with a
+maximum modal residual of \(9.94\times10^{-9}\) Hz. The corresponding
+assumed-noise 95\% intervals are 111.651--112.350 GPa and 0.1970--0.2133
+kg.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.94\linewidth,height=\textheight,keepaspectratio]{figures/fig_shaft_beam_identification.pdf}
+
+}
+
+\caption{\label{fig-shaft-beam-identification}Synthetic Identification
+and Beam Convergence}
+
+\end{figure}%
+
+Figure~\ref{fig-shaft-beam-identification} verifies that the inference
+path can recover an identifiable synthetic truth. It does not show that
+real equipment follows the uniform-modulus, axisymmetric,
+Euler--Bernoulli assumptions. Practical equipment identification still
+requires measured modal frequencies, boundary conditions, mass
+properties, and their uncertainties.
+
+\section{Matched Reduced and Higher-Order
+Responses}\label{matched-reduced-and-higher-order-responses}
+
+The mass-normalized modal coordinates satisfy
+
+\begin{equation}\phantomsection\label{eq-beam-modal-response}{
+\ddot\eta_i+2\zeta\omega_i\dot\eta_i+\omega_i^2\eta_i
+=\boldsymbol\phi_i^\mathsf T\mathbf f(t),
+}\end{equation}
+
+with a damping ratio of 0.018. The reduced model retains only the first
+mode. The higher-order reference retains six modes. Both receive exactly
+the same load history and use fixed-step fourth-order Runge--Kutta
+integration at 12.5 \(\mu\)s. A slow 80 ms tip-force pulse probes
+first-mode behavior; a short 4 ms tip-force-and-moment pulse
+deliberately introduces higher-frequency content.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_shaft_beam_response.pdf}
+
+}
+
+\caption{\label{fig-shaft-beam-response}Reduced and Higher-Order Tip
+Responses}
+
+\end{figure}%
+
+Under the slow pulse, the tip-deflection RMS discrepancy is 0.000687 mm.
+Under the short pulse it grows to 0.0413 mm, sixty times larger, even
+though the peak values remain close (5.287 mm reduced and 5.339 mm
+reference). Peak-only agreement therefore conceals a structural
+discrepancy in the response history. The one-mode model is a useful
+low-frequency surrogate, not a general replacement for the distributed
+beam.
+
+\section{Work--Energy Closure and Remaining Coupling
+Gate}\label{workenergy-closure-and-remaining-coupling-gate}
+
+For either modal truncation,
+
+\begin{equation}\phantomsection\label{eq-beam-energy}{
+E=\tfrac12\sum_i(\dot\eta_i^2+\omega_i^2\eta_i^2),
+\qquad
+\dot E=P_{\mathrm{tip}}-
+\sum_i2\zeta\omega_i\dot\eta_i^2.
+}\end{equation}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_shaft_beam_energy.pdf}
+
+}
+
+\caption{\label{fig-shaft-beam-energy}Beam Input, Damping, and Energy
+Closure}
+
+\end{figure}%
+
+The maximum absolute integrated work--energy residual is
+\(2.87\times10^{-7}\) J for the six-mode reference and
+\(2.77\times10^{-8}\) J for the one-mode reduction. This closes the
+isolated beam comparison and makes damping loss explicit.
+
+The experiment narrows, but does not close, the Phase 2 structural gap.
+The distributed reference is not yet a coordinate inside the
+moving-base, two-hand KKT solve, so it cannot show whether the late
+grip-couple reversal survives coupled higher-mode shaft motion. The next
+falsification gate is to replace the lumped flex coordinate in that
+forward solve with a calibrated modal beam interface and repeat the
+contact, constraint, and whole-system energy interventions.
+Equipment-specific language remains prohibited until measured modal and
+inertia data are supplied.
+
 \chapter{Spatial Full-Body Common-State
 Dynamics}\label{sec-spatial-full-body}
 
@@ -5070,12 +5236,12 @@ Qualification}\label{sec-open-release}
 \section{Release Contract}\label{release-contract}
 
 The scientific product is distributed as an open research resource
-rather than as evidence for a software platform. Six presets identify
+rather than as evidence for a software platform. Seven presets identify
 reproducible entry points: analytical double pendulum, forward two-hand,
-coupled moving-base/flexible-club, reduced spatial common state,
-uncertainty/control, and experimental readiness. Preset names preserve
-the model ladder and never imply that a higher unexecuted tier is
-available.
+coupled moving-base/flexible-club, synthetic distributed shaft, reduced
+spatial common state, uncertainty/control, and experimental readiness.
+Preset names preserve the model ladder and never imply that a higher
+unexecuted tier is available.
 
 The release manifest hashes the report source and PDF, chapter source,
 linked bibliography, evidence JSON/NPZ/CSV, publication PDF/SVG figures,
@@ -5124,18 +5290,19 @@ documentation are final.
 \section{Qualified and Open Claims}\label{qualified-and-open-claims}
 
 The release records planar interaction dynamics and negative-couple
-feasibility as supported at their declared tiers, and geometry response
-as supported through reduced spatial common-state inverse dynamics. It
-records forward passive spatial contact and human predictions as
-untested, and a universal controller as unsupported.
+feasibility as supported at their declared tiers, geometry response as
+supported through reduced spatial common-state inverse dynamics, and
+modal reduction behavior as supported on a synthetic structural shaft
+case. It records forward passive spatial contact and human predictions
+as untested, and a universal controller as unsupported.
 
 Four release-level completion gates remain visible: independently solved
-forward spatial contact in two engines; calibrated distributed-shaft
-comparison against a higher-order beam; governed held-out human
-evaluation; and external archive deposit with a persistent identifier.
-Archive deposition changes external state and has not been performed. A
-reproducible local bundle is not described as a permanently archived
-release until that deposit is verified.
+forward spatial contact in two engines; an equipment-calibrated
+distributed beam coupled into the forward two-hand solve; governed
+held-out human evaluation; and external archive deposit with a
+persistent identifier. Archive deposition changes external state and has
+not been performed. A reproducible local bundle is not described as a
+permanently archived release until that deposit is verified.
 
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
@@ -6897,6 +7064,16 @@ timestep refinement. This transports the mechanism beyond a fixed base
 and rigid club without promoting it to a spatial or physiological
 result.
 
+The distributed-shaft comparison closes a narrower structural gate. A
+one-mode reduction and six-mode Euler--Bernoulli reference share the
+same assembled mass, stiffness, damping, tip inertia, and loads. The
+reduced model closely follows slow loading but misses higher-mode
+history under a short force-and-moment pulse, even when their peak
+deflections are similar. Synthetic modal identification, mesh
+convergence, and work--energy closure pass. This does not calibrate
+equipment or show that the result survives coupling the beam into the
+two-hand constrained solve.
+
 The reduced full-body common-state extension resolves implementation
 transport for a narrower spatial estimand. MuJoCo and an independent
 Lagrange--Christoffel formulation agree across 20 coordinates and 61
@@ -6927,8 +7104,8 @@ release manifest, standard checksums, a data dictionary, citation
 metadata, and a claim-first reviewer workbench. Validation fails closed
 on artifact drift. The bundle remains a qualified local release
 candidate rather than a persistent archive: cross-engine forward
-contact, calibrated beam comparison, governed human evaluation, and
-external identifier deposit remain open.
+contact, equipment-calibrated beam coupling, governed human evaluation,
+and external identifier deposit remain open.
 
 \section{Research Priorities}\label{sec-future}
 
@@ -6951,10 +7128,10 @@ order:
   held-out ensembles, and a constrained optimal-control comparator.
 \item
   \textbf{Spatial Model-Fidelity Ladder.} Add base rotation, a
-  three-dimensional club, ground pathways, and distributed or modal
-  shaft behavior without changing the registered interface observables.
-  Each rung should carry conservation checks and cross-engine tolerance
-  gates.
+  three-dimensional club, ground pathways, and couple the executed
+  distributed/modal shaft reference into the forward constrained solve
+  without changing the registered interface observables. Each rung
+  should carry conservation checks and cross-engine tolerance gates.
 \item
   \textbf{Execute the Frozen Human-Data Protocol.} Acquire governed
   synchronized measurements that pass the fixed inclusion, residual,
@@ -6987,6 +7164,8 @@ The spatial common-state evidence is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json}{\texttt{data/spatial\_full\_body\_study.json}}.
 The uncertainty, identifiability, and control evidence is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json}{\texttt{data/uncertainty\_control\_study.json}}.
+The distributed-shaft structural evidence is recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json}{\texttt{data/shaft\_beam\_reference.json}}.
 The frozen experimental protocol and synthetic readiness classification
 are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json}{\texttt{data/experimental\_protocol\_v1.json}}
@@ -7065,6 +7244,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_mechanism\_ladder\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_forward\_two\_arm\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_moving\_base\_flexible\_study}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_shaft\_beam\_reference}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_uncertainty\_control\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_experimental\_protocol\_dry\_run}
@@ -7084,6 +7264,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_mechanism\_ladder\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_forward\_two\_arm\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_moving\_base\_flexible\_figures}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_shaft\_beam\_reference\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_spatial\_full\_body\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_uncertainty\_control\_figures}
 \BuiltInTok{cd}\NormalTok{ docs/research/proximal\_distal\_energy\_transfer}
@@ -7250,6 +7431,10 @@ Recorded outputs:
   \texttt{data/moving\_base\_flexible\_study.\{json,npz\}} --- coupled
   base/flex branch, negative control, parameter screen, convergence,
   states, forces, and energy.
+\item
+  \texttt{data/shaft\_beam\_reference.\{json,npz\}} --- synthetic modal
+  identification, finite-element convergence, paired one/six-mode
+  responses, and work--energy closure; not equipment calibration.
 \item
   \texttt{data/spatial\_full\_body\_study.\{json,npz\}} --- common-model
   hashes, prescribed wrench interventions, two-formulation inverse

@@ -4,8 +4,9 @@
 
 The release bundle provides a deterministic model ladder from the analytical
 double pendulum through forward planar two-hand, moving-base/flexible-club,
-reduced spatial common-state, coupled uncertainty/control, and synthetic
-experimental-readiness tiers. The CLI lists the canonical command for each
+synthetic distributed-shaft, reduced spatial common-state, coupled
+uncertainty/control, and synthetic experimental-readiness tiers. The CLI lists
+the canonical command for each
 preset, and the manifest hashes source, data, figures, chapters, and the
 rendered article.
 
@@ -26,6 +27,8 @@ visual gates pass; validation never silently updates expected hashes.
   their declared tiers.
 - Geometry response is supported through reduced spatial common-state inverse
   dynamics.
+- Reduced/distributed shaft response is supported for a synthetic structural
+  case, not calibrated equipment.
 - Passive forward spatial contact remains untested.
 - A universal control strategy is unsupported.
 - Human experimental predictions remain untested.
@@ -41,7 +44,7 @@ participant data are included or authorized for public release.
 ## Open Completion Gates
 
 The manifest records, rather than conceals, four open gates: independently
-solved forward spatial contact in two engines; a calibrated distributed shaft
-and higher-order beam reference; governed held-out human evaluation; and
-external archival deposit with a persistent identifier. The last item requires
+solved forward spatial contact in two engines; an equipment-calibrated
+distributed beam coupled into the forward two-hand solve; governed held-out
+human evaluation; and external archival deposit with a persistent identifier. The last item requires
 an external publication action and is not represented as complete.

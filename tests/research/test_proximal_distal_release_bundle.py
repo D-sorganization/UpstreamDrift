@@ -22,11 +22,16 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "double_pendulum",
         "forward_two_hand",
         "moving_base_flexible_club",
+        "shaft_beam_reference",
         "spatial_common_state",
         "uncertainty_control",
         "experimental_readiness",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
+    assert (
+        manifest["claims"]["distributed_shaft_modal_reduction"]
+        == "supported_on_synthetic_structural_case"
+    )
     assert (
         manifest["archive"]["persistent_identifier_status"]
         == "pending_external_archive"

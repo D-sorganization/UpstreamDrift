@@ -53,6 +53,7 @@ python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
@@ -72,6 +73,7 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 cd docs/research/proximal_distal_energy_transfer
@@ -166,6 +168,9 @@ Recorded outputs:
   contact forces, force modes, moments, power, energy, and solver residuals.
 - `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch,
   negative control, parameter screen, convergence, states, forces, and energy.
+- `data/shaft_beam_reference.{json,npz}` — synthetic modal identification,
+  finite-element convergence, paired one/six-mode responses, and work--energy
+  closure; not equipment calibration.
 - `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed
   wrench interventions, two-formulation inverse dynamics, and spatial states.
 - `data/uncertainty_control_study.{json,npz}` — declared design, actuator

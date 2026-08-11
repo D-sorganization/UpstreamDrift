@@ -40,6 +40,15 @@ remove it exactly; constraint, contact-power, and work--energy residuals close
 under timestep refinement. This transports the mechanism beyond a fixed base
 and rigid club without promoting it to a spatial or physiological result.
 
+The distributed-shaft comparison closes a narrower structural gate. A
+one-mode reduction and six-mode Euler--Bernoulli reference share the same
+assembled mass, stiffness, damping, tip inertia, and loads. The reduced model
+closely follows slow loading but misses higher-mode history under a short
+force-and-moment pulse, even when their peak deflections are similar. Synthetic
+modal identification, mesh convergence, and work--energy closure pass. This
+does not calibrate equipment or show that the result survives coupling the
+beam into the two-hand constrained solve.
+
 The reduced full-body common-state extension resolves implementation transport
 for a narrower spatial estimand. MuJoCo and an independent
 Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
@@ -69,8 +78,8 @@ The open-resource layer now supplies model-tier presets, a hash-pinned release
 manifest, standard checksums, a data dictionary, citation metadata, and a
 claim-first reviewer workbench. Validation fails closed on artifact drift. The
 bundle remains a qualified local release candidate rather than a persistent
-archive: cross-engine forward contact, calibrated beam comparison, governed
-human evaluation, and external identifier deposit remain open.
+archive: cross-engine forward contact, equipment-calibrated beam coupling,
+governed human evaluation, and external identifier deposit remain open.
 
 ## Research Priorities {#sec-future}
 
@@ -86,8 +95,9 @@ order:
    error, profile-likelihood or Bayesian calibration, larger held-out
    ensembles, and a constrained optimal-control comparator.
 3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
-   club, ground pathways, and distributed or modal shaft behavior without
-   changing the registered interface observables. Each rung should carry
+   club, ground pathways, and couple the executed distributed/modal shaft
+   reference into the forward constrained solve without changing the
+   registered interface observables. Each rung should carry
    conservation checks and cross-engine tolerance gates.
 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
    measurements that pass the fixed inclusion, residual, missingness,
@@ -116,6 +126,8 @@ The spatial common-state evidence is recorded in
 [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).
 The uncertainty, identifiability, and control evidence is recorded in
 [`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json).
+The distributed-shaft structural evidence is recorded in
+[`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json).
 The frozen experimental protocol and synthetic readiness classification are
 recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
 and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).
