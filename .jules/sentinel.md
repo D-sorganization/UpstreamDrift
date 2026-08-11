@@ -137,3 +137,8 @@
 **Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.filter_data()` and `DataProcessorEngine.query()` where user-provided column and operator strings were concatenated and passed directly to `pandas.DataFrame.query()` without validation.
 **Learning:** `DataFrame.query()` evaluates string expressions and is vulnerable to injection if the concatenated string isn't validated, even if parts of it are formatted dynamically.
 **Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.
+
+## 2024-05-18 - [Fix user enumeration via timing attack in login endpoint]
+**Vulnerability:** The `/login` endpoint returned 401 immediately if the user email was not found, but took hundreds of milliseconds to compute bcrypt hashes if the user was found (even if the password was wrong). This allowed an attacker to enumerate registered emails via timing analysis.
+**Learning:** Bcrypt's intentional slowness is a security feature to slow down brute force attacks, but it introduces a side-channel timing leak if it's only executed for valid users. This is a common pattern in authentication endpoints.
+**Prevention:** Always perform a dummy password verification using a valid bcrypt hash with the same work factor (e.g. 12) if the user is not found, to ensure the authentication endpoint takes roughly the same time regardless of whether the user exists.
