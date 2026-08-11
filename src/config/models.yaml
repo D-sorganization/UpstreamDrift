@@ -318,7 +318,6 @@ models:
     type: "special_app"
     path: "src/video_analyzer/launch_video_analyzer.py"
     provider: "tools"
-    source_root: "../Tools"
     working_dir: "."
     python_paths:
       - "src"
@@ -335,7 +334,6 @@ models:
     type: "special_app"
     path: "src/media_processing/video_processor/apps/web/launch_platform.py"
     provider: "tools"
-    source_root: "../Tools"
     working_dir: "src/media_processing/video_processor/apps/web"
     python_paths:
       - "src"
@@ -387,7 +385,6 @@ models:
     type: "special_app"
     path: "src/data_explorer/data_explorer_app.py"
     provider: "tools"
-    source_root: "../Tools"
     working_dir: "."
     python_paths:
       - "src"
@@ -405,7 +402,6 @@ models:
     type: "special_app"
     path: "src/data_processing/data_processor/launch_pyqt6.py"
     provider: "tools"
-    source_root: "../Tools"
     working_dir: "."
     python_paths:
       - "src"
@@ -444,7 +440,6 @@ models:
     type: "special_app"
     path: "src/rate_of_closure/launch_pyqt6.py"
     provider: "tools"
-    source_root: "../Tools"
     working_dir: "."
     python_paths:
       - "src"

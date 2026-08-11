@@ -336,6 +336,7 @@ models:
 
         tools_root = workspace_root / "Tools"
         tools_root.mkdir(parents=True)
+        (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
         (tools_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"
@@ -654,14 +655,15 @@ class TestParity:
             "video_processor",
             "data_explorer",
             "data_processor",
+            "rate_of_closure",
         }
 
         for tile_id in shared_ids:
             tile = manifest.get_tile(tile_id)
             assert tile is not None, f"Missing shared Tools tile: {tile_id}"
             assert tile.provider == "tools", f"{tile_id} must declare Tools as provider"
-            assert tile.source_root == "../Tools", (
-                f"{tile_id} must resolve from the sibling Tools repo"
+            assert tile.source_root is None, (
+                f"{tile_id} must not serialize a mutable Tools checkout path"
             )
             assert not tile.path.startswith("src/tools/"), (
                 f"{tile_id} must not point at UpstreamDrift-local tool source"

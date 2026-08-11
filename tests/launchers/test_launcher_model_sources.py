@@ -13,6 +13,15 @@ from src.shared.python.config.model_registry import ModelRegistry
 from src.shared.python.config.model_source_providers import resolve_model_source
 
 
+TOOLS_MODEL_IDS = (
+    "video_analyzer",
+    "video_processor",
+    "data_explorer",
+    "data_processor",
+    "rate_of_closure",
+)
+
+
 class ProviderBackedModel:
     path = "models/humanoid.urdf"
     source_root = "../Drake_Models"
@@ -73,6 +82,77 @@ def test_resolve_model_source_preserves_local_provider_parity(tmp_path: Path) ->
         == (tmp_path / "src/engines/physics_engines/mujoco/python/main.py").resolve()
     )
     assert resolved.working_directory == tmp_path.resolve()
+
+
+def test_tools_provider_prefers_pinned_vendor_over_mutable_sibling(
+    tmp_path: Path,
+) -> None:
+    class ToolsModel:
+        provider = "tools"
+        source_root = "../Tools"
+        path = "src/tool.py"
+
+    vendor_root = tmp_path / "vendor" / "ud-tools"
+    sibling_root = tmp_path.parent / "Tools"
+    (vendor_root / "src").mkdir(parents=True)
+    (sibling_root / "src").mkdir(parents=True, exist_ok=True)
+
+    resolved = resolve_model_source(ToolsModel(), tmp_path)
+
+    assert resolved.provider_id == "tools-vendor"
+    assert resolved.source_root == vendor_root.resolve()
+    assert resolved.artifact_path == (vendor_root / "src" / "tool.py").resolve()
+
+
+def test_tools_provider_missing_vendor_does_not_fall_back_to_sibling(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class ToolsModel:
+        provider = "tools"
+        path = "src/tool.py"
+
+    sibling_root = tmp_path.parent / "Tools"
+    (sibling_root / "src").mkdir(parents=True, exist_ok=True)
+    override_root = tmp_path.parent / "ExplicitTools"
+    (override_root / "src").mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("TOOLS_REPO_PATH", str(override_root))
+
+    resolved = resolve_model_source(ToolsModel(), tmp_path)
+
+    assert resolved.provider_id == "tools-vendor"
+    assert resolved.source_root == (tmp_path / "vendor" / "ud-tools").resolve()
+    assert not resolved.source_root.exists()
+
+
+def test_all_tools_launchers_resolve_from_pinned_vendor(tmp_path: Path) -> None:
+    vendor_root = tmp_path / "vendor" / "ud-tools"
+    sibling_root = tmp_path.parent / "Tools"
+    (vendor_root / "src").mkdir(parents=True)
+    (sibling_root / "src").mkdir(parents=True, exist_ok=True)
+    registry = ModelRegistry()
+
+    for model_id in TOOLS_MODEL_IDS:
+        model = registry.get_model(model_id)
+        assert model is not None
+        resolved = resolve_model_source(model, tmp_path)
+        assert resolved.provider_id == "tools-vendor"
+        assert resolved.source_root == vendor_root.resolve()
+
+
+def test_generic_sibling_provider_resolution_is_unchanged(tmp_path: Path) -> None:
+    class GenericSiblingModel:
+        provider = "custom"
+        source_root = "SiblingModels"
+        path = "models/model.urdf"
+
+    sibling_root = tmp_path.parent / "SiblingModels"
+    sibling_root.mkdir(parents=True, exist_ok=True)
+
+    resolved = resolve_model_source(GenericSiblingModel(), tmp_path)
+
+    assert resolved.provider_id == "sibling-repo"
+    assert resolved.source_root == sibling_root.resolve()
 
 
 def test_resolve_model_source_rejects_paths_outside_approved_roots() -> None:

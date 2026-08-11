@@ -247,6 +247,58 @@ class LocalRepoModelSourceProvider:
         )
 
 
+class ToolsVendorModelSourceProvider:
+    """Provider for Tools launchers pinned by the ``vendor/ud-tools`` gitlink.
+
+    The provider identity is authoritative: mutable sibling paths declared by
+    legacy manifests are deliberately ignored. An uninitialized or absent
+    gitlink therefore remains unavailable instead of silently selecting a
+    different Tools revision from the surrounding workspace.
+    """
+
+    provider_id = "tools-vendor"
+
+    def can_resolve(self, model: Any) -> bool:
+        return _get_optional_string_attr(model, "provider") == "tools"
+
+    def source_root(self, path_policy: ModelSourcePathPolicy) -> Path:
+        """Return the canonical pinned Tools root.
+
+        Postcondition:
+            The result is always the ``vendor/ud-tools`` path under the
+            supplied UpstreamDrift checkout, whether or not the gitlink has
+            been initialized.
+        """
+        return path_policy.resolve_source_root("vendor/ud-tools")
+
+    def resolve(
+        self,
+        model: Any,
+        path_policy: ModelSourcePathPolicy,
+        fallback_relative: str | Path | None = None,
+    ) -> ResolvedModelSource:
+        source_root = self.source_root(path_policy)
+        return ResolvedModelSource(
+            provider_id=self.provider_id,
+            source_root=source_root,
+            artifact_path=path_policy.resolve_path(
+                source_root,
+                _get_optional_string_attr(model, "path"),
+                field_name="path",
+            ),
+            working_directory=path_policy.resolve_optional_path(
+                source_root,
+                _get_optional_string_attr(model, "working_dir"),
+                fallback_path=fallback_relative,
+                field_name="working_dir",
+            ),
+            python_paths=path_policy.resolve_python_paths(
+                source_root,
+                _iter_python_path_values(model),
+            ),
+        )
+
+
 class SiblingRepoModelSourceProvider:
     """Provider for sibling/local external repos declared via source_root."""
 
@@ -332,6 +384,7 @@ class InstalledPackageModelSourceProvider:
 
 _PROVIDERS: tuple[ModelSourceProvider, ...] = (
     InstalledPackageModelSourceProvider(),
+    ToolsVendorModelSourceProvider(),
     SiblingRepoModelSourceProvider(),
     LocalRepoModelSourceProvider(),
 )
@@ -356,6 +409,8 @@ def resolve_model_source_root(
             package_name=package_name,
         )
         return _resolve_package_root(spec, package_name)
+    if isinstance(provider, ToolsVendorModelSourceProvider):
+        return provider.source_root(path_policy)
     return path_policy.resolve_source_root(
         _get_optional_string_attr(model, "source_root")
     )

@@ -333,6 +333,7 @@ models:
 
         tools_root = workspace_root / "Tools"
         tools_root.mkdir(parents=True)
+        (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
         (tools_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"
@@ -387,6 +388,7 @@ models:
         tools_root = workspace_root / "Tools"
         pendulum_root = tools_root / "src" / "pendulum_simulator"
         pendulum_root.mkdir(parents=True)
+        (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
         (pendulum_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"
@@ -419,7 +421,7 @@ models:
         assert tile is not None, "Assertion failed: tile is not None"
         assert tile.status == "provider_ready"
         assert tile.web_route == "/tools/pendulum-simulator"
-        assert tile.source_root == str(pendulum_root)
+        assert tile.source_root is None
 
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
