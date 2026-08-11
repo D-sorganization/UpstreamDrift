@@ -1,0 +1,191 @@
+{
+  "baseline": {
+    "closure": {
+      "acceleration_constraint_residual_max": 2.308990589380062e-13,
+      "applied_control_work_j": 203.61772109603413,
+      "constraint_rank_min": 4,
+      "contact_wrench_power_equivalence_max_w": 7.958078640513122e-13,
+      "kkt_residual_max": 2.97370123240998e-13,
+      "mechanical_energy_change_j": 203.71396586293437,
+      "position_constraint_max_m": 9.505881135224637e-11,
+      "projection_correction_max_m": 3.8735985968399257e-7,
+      "projection_energy_change_sum_j": -0.7776518562568562,
+      "velocity_constraint_max_m_s": 4.070144838902081e-15,
+      "work_energy_residual_abs_j": 0.09624476690024153
+    },
+    "direct_wrist_torque": {
+      "maximum_nm": 0.0,
+      "minimum_nm": -1.0
+    },
+    "force_generated_couple": {
+      "definition": "sum of grip-force moments about the declared club center; direct wrist torque excluded",
+      "first_negative_time_s": 0.19825,
+      "maximum_nm": 23.679772594754922,
+      "minimum_nm": -32.846517065362605
+    },
+    "sample_count": 1601
+  },
+  "claim_boundary": "The result demonstrates a mechanically feasible passive force-generated negative club couple in this planar constrained model. It does not identify muscle strategy, prove human use, or establish optimal coaching advice.",
+  "command_intervention": {
+    "definition": {
+      "left_elbow_nm": "6 - t/0.4",
+      "left_shoulder_nm": "16 + 3 t/0.4",
+      "left_wrist_nm": "2 - t/0.4",
+      "right_elbow_nm": "7 - 1.5 t/0.4",
+      "right_shoulder_nm": "18 + 4 t/0.4",
+      "right_wrist_nm": "-3 + 2 t/0.4"
+    },
+    "duration_s": 0.4,
+    "kind": "smooth_open_loop_joint_torque",
+    "step_s": 0.00025
+  },
+  "falsifiers": [
+    "constraint rank below four or closure residual above tolerance",
+    "work-energy residual that does not converge with timestep",
+    "negative-couple onset that is not stable to timestep refinement",
+    "nonzero force-generated couple after both grip moment arms are removed",
+    "loss of negative-couple persistence immediately after zero-command branching"
+  ],
+  "human_validation": false,
+  "integrator": "velocity-verlet-with-mass-metric-rattle-projection",
+  "killswitch_ensemble": [
+    {
+      "cut_index": 720,
+      "cut_time_s": 0.18,
+      "first_negative_time_s": 0.185,
+      "minimum_force_generated_couple_nm": -4.627137834403035,
+      "negative_persistence_s": 0.0
+    },
+    {
+      "cut_index": 760,
+      "cut_time_s": 0.19,
+      "first_negative_time_s": 0.19,
+      "minimum_force_generated_couple_nm": -6.617785970518572,
+      "negative_persistence_s": 0.04999999999999999
+    },
+    {
+      "cut_index": 800,
+      "cut_time_s": 0.2,
+      "first_negative_time_s": 0.2,
+      "minimum_force_generated_couple_nm": -7.4324516603503525,
+      "negative_persistence_s": 0.04999999999999999
+    },
+    {
+      "cut_index": 840,
+      "cut_time_s": 0.21,
+      "first_negative_time_s": 0.21,
+      "minimum_force_generated_couple_nm": -8.112887543331816,
+      "negative_persistence_s": 0.05000000000000002
+    },
+    {
+      "cut_index": 880,
+      "cut_time_s": 0.22,
+      "first_negative_time_s": 0.22,
+      "minimum_force_generated_couple_nm": -9.26061354690783,
+      "negative_persistence_s": 0.05000000000000002
+    },
+    {
+      "cut_index": 960,
+      "cut_time_s": 0.24,
+      "first_negative_time_s": 0.24,
+      "minimum_force_generated_couple_nm": -12.392020749207884,
+      "negative_persistence_s": 0.037250000000000005
+    }
+  ],
+  "parameters": {
+    "club_inertia_kg_m2": 0.055,
+    "club_mass_kg": 0.45,
+    "constraint_tolerance_m": 1e-8,
+    "forearm_inertia_kg_m2": 0.010125,
+    "forearm_length_m": 0.3,
+    "forearm_mass_kg": 1.35,
+    "gravity_m_s2": 9.80665,
+    "kkt_tolerance": 1e-9,
+    "left_grip_offset_m": -0.065,
+    "left_shoulder_m": [-0.19, 0.0],
+    "rank_tolerance": 1e-10,
+    "right_grip_offset_m": 0.065,
+    "right_shoulder_m": [0.19, 0.0],
+    "upper_inertia_kg_m2": 0.016213333333333333,
+    "upper_length_m": 0.32,
+    "upper_mass_kg": 1.9
+  },
+  "physiological_evidence": false,
+  "prescribed_kinematics": false,
+  "projection_sensitivity": [
+    {
+      "first_negative_time_s": 0.198,
+      "minimum_force_generated_couple_nm": -33.027960423916234,
+      "position_constraint_max_m": 9.178263303142395e-9,
+      "projection_correction_max_m": 2.438321345371056e-5,
+      "projection_energy_change_sum_j": -3.091371248903396,
+      "projection_tolerance_m": 1e-8,
+      "step_s": 0.001,
+      "work_energy_residual_abs_j": 0.3731082045304106
+    },
+    {
+      "first_negative_time_s": 0.198,
+      "minimum_force_generated_couple_nm": -33.027960427774275,
+      "position_constraint_max_m": 3.1695528509352496e-11,
+      "projection_correction_max_m": 2.4383213942205772e-5,
+      "projection_energy_change_sum_j": -3.0913712439095313,
+      "projection_tolerance_m": 1e-10,
+      "step_s": 0.001,
+      "work_energy_residual_abs_j": 0.37310820555856594
+    }
+  ],
+  "representative_killswitch": {
+    "applied_command_after_cut": "zero",
+    "cut_index": 800,
+    "cut_time_s": 0.2,
+    "horizon_s": 0.05,
+    "initial_force_generated_couple_nm": -2.5715540663706795,
+    "initial_state_exactly_inherited": true,
+    "minimum_force_generated_couple_nm": -7.4324516603503525,
+    "negative_persistence_s": 0.04999999999999999
+  },
+  "schema_version": "forward-two-arm-evidence-v1",
+  "source_files": {
+    "scripts/research/proximal_distal_energy/forward_two_arm.py": "1668f88d47d2c7b9d59b3a9344e995031c1c2ea2c745b49ae0febc4bf4cc342c",
+    "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py": "da4a11cac52ef4347b9b4d17aff55f1a37808b86a219f7c7dfd708c8e78ade03",
+    "scripts/research/proximal_distal_energy/two_arm_closed_loop.py": "bd322833baee73319a8f5c9a3ae0d14c150cc9fbcd062a7a2594b946f6065302"
+  },
+  "study_id": "forward-constrained-two-hand-v1",
+  "timestep_convergence": [
+    {
+      "first_negative_time_s": 0.198,
+      "minimum_force_generated_couple_nm": -33.321708250892655,
+      "position_constraint_max_m": 8.332839012515116e-11,
+      "projection_correction_max_m": 0.0001895812882644359,
+      "projection_energy_change_sum_j": -6.158619129694953,
+      "projection_tolerance_m": 1e-10,
+      "step_s": 0.002,
+      "work_energy_residual_abs_j": 0.6951355072782235
+    },
+    {
+      "first_negative_time_s": 0.198,
+      "minimum_force_generated_couple_nm": -33.027960427774275,
+      "position_constraint_max_m": 3.1695528509352496e-11,
+      "projection_correction_max_m": 2.4383213942205772e-5,
+      "projection_energy_change_sum_j": -3.0913712439095313,
+      "projection_tolerance_m": 1e-10,
+      "step_s": 0.001,
+      "work_energy_residual_abs_j": 0.37310820555856594
+    },
+    {
+      "first_negative_time_s": 0.1985,
+      "minimum_force_generated_couple_nm": -32.92009505144417,
+      "position_constraint_max_m": 3.3809273244737105e-11,
+      "projection_correction_max_m": 3.081285996453562e-6,
+      "projection_energy_change_sum_j": -1.551832400825914,
+      "projection_tolerance_m": 1e-10,
+      "step_s": 0.0005,
+      "work_energy_residual_abs_j": 0.1908144462200312
+    }
+  ],
+  "trajectory_kind": "forward_constrained_dynamics",
+  "zero_contact_moment_arm_control": {
+    "intervention": "set both grip offsets to zero and recompute a consistent state",
+    "maximum_abs_force_generated_couple_nm": 0.0
+  }
+}

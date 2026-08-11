@@ -71,6 +71,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Added the forward constrained two-hand reference tier for
+  #8426. The seven-coordinate planar model evolves both two-link arms and a
+  floating club under four independent grip constraints, with fail-closed KKT
+  and mass-metric projection contracts. Deterministic evidence separates the
+  contact-force couple from direct wrist torque, branches exact same-state
+  zero-command futures, removes both moment arms as a negative control, and
+  records constraint, power, work--energy, timestep, and projection closure.
+  The observed 50 ms negative-couple persistence is bounded to this rigid,
+  fixed-shoulder planar model and is not physiological or human evidence.
 - **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
   ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
   two-arm adapters; deterministic force-vector, impulse, power, work,
@@ -2039,6 +2048,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.497 | Added a forward constrained two-arm/floating-club reference model with exact same-state zero-command branching; separated contact-force couple, direct wrist torque, common/differential forces, and power; added a zero-moment-arm negative control plus timestep, projection, constraint, KKT, and work--energy audits; committed deterministic JSON/NPZ evidence and three paired publication figures; and expanded the scientific report while preserving explicit planar-model and non-physiological boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |

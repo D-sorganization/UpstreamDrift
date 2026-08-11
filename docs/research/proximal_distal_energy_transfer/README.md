@@ -19,6 +19,12 @@ same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
 bounded first-order residual-couple preview study records the late two-hand
 preactivation hypothesis without promoting it to a physiological finding.
+A forward constrained two-arm study now evolves the floating club and both arm
+chains under four independent grip constraints. It records exact same-state
+zero-command branches, separated force-generated and direct-wrist moments,
+contact modes and power, a zero-moment-arm negative control, and timestep and
+projection sensitivity. The result establishes finite passive-couple
+persistence in the declared planar model only.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -59,6 +65,7 @@ python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
+python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -70,6 +77,7 @@ python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
+python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -81,8 +89,10 @@ Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
 Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
 `pandas`, and `pymupdf`. The final command performs lossless PDF object/stream
 compaction and fails if the page, URI-link, or outline contract changes.
-Experiments are deterministic (fixed-step RK4); provenance
-(git SHA, parameters) is stamped into `data/*.json`.
+Experiments are deterministic. The open-chain studies use fixed-step RK4; the
+forward constrained two-hand study uses velocity Verlet with mass-metric
+position and velocity projection. Parameters and numerical contracts are
+recorded in `data/*.json`.
 
 ## Evidence Boundaries
 
@@ -112,6 +122,10 @@ Experiments are deterministic (fixed-step RK4); provenance
 - The residual-couple preview test holds archived BASE and pointwise ZTCF
   traces fixed. It tests a signal-delay hypothesis, not muscle activation,
   metabolic effort, clubhead-speed improvement, or a human timing prescription.
+- The forward two-hand study uses a fixed shoulder base, rigid club, planar
+  point constraints, and one declared command/parameter set. Its zero-command
+  branch demonstrates mechanical persistence, not muscle passivity, human use,
+  or an optimal speed strategy.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

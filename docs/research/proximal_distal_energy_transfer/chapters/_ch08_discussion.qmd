@@ -79,11 +79,12 @@ for a golfer. The specific gaps, each with a tracked remediation:
   single-parameter perturbations preserved the ordering
   (@sec-results-robustness), but coupled parameter variation, measurement
   uncertainty, and population variability were not modeled.
-- **Pointwise counterfactuals only.** The Python pathway evaluates
-  instantaneous ZTCF profiles; the MATLAB re-simulation variant
-  (killswitch rollouts, DELTA tables) has not yet been reproduced in
-  Python, so the two operationalizations have never been formally
-  compared on matched trajectories.
+- **Counterfactuals remain model-tier specific.** The Python pathway now
+  includes both pointwise ZTCF profiles and forward same-state killswitches in
+  the double-pendulum and constrained two-hand tiers. The two-hand forward
+  result still uses a fixed shoulder base, rigid club, and planar constraints;
+  it does not establish persistence under moving-base, compliant, or spatial
+  dynamics.
 - **No human data yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.
