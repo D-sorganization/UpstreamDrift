@@ -404,7 +404,7 @@ def test_sidebar_includes_biomechanics_button(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),
@@ -463,11 +463,11 @@ def test_sidebar_biomechanics_button_registered_with_id_two(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", _spy_builder),
         patch(
-            "src.launchers.launcher_ui_setup.QButtonGroup",
+            "src.launchers._launcher_navigation_ui.QButtonGroup",
             new=_RecordingGroup,
         ),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),
@@ -611,7 +611,7 @@ def test_sidebar_includes_condensed_buttons(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),

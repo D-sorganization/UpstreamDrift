@@ -23,7 +23,12 @@ pytest.importorskip("PyQt6")
 from PyQt6.QtCore import QObject, QTimer  # noqa: E402
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
-from src.launchers import launcher_ui_setup, upstream_drift_launcher  # noqa: E402
+from src.launchers import (  # noqa: E402
+    _launcher_navigation_ui,
+    _launcher_top_bar_ui,
+    launcher_ui_setup,
+    upstream_drift_launcher,
+)
 from src.launchers.launcher_ui_setup import (  # noqa: E402
     ProcessOutputRelay,
     UISetupManager,
@@ -49,7 +54,13 @@ class TestEditLayoutModeAction:
         """No launcher module may dereference the phantom attribute."""
         from src.launchers import settings_dialog
 
-        for module in (upstream_drift_launcher, launcher_ui_setup, settings_dialog):
+        for module in (
+            upstream_drift_launcher,
+            launcher_ui_setup,
+            _launcher_navigation_ui,
+            _launcher_top_bar_ui,
+            settings_dialog,
+        ):
             source = module.__file__
             assert source is not None
             with open(source, encoding="utf-8") as handle:

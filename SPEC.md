@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.502 |
+| **Spec Version** | 1.0.504 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,21 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Prepared the local launcher UI-setup decomposition tracked by
+  [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490) from
+  exact PR #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`.
+  Navigation/sidebar/menu construction now lives in the private
+  `_launcher_navigation_ui.py` mixin, while status/search/runtime/view/zoom
+  construction and the historical top-bar widgets live in the private
+  `_launcher_top_bar_ui.py` mixin. `UISetupManager` retains every historical
+  method through inheritance or its compatibility facade, including dynamic
+  manager-to-launcher rebinding and monkeypatch-sensitive exports. The facade
+  is 983 lines (down from 2,263), both launcher size exceptions and four moved
+  long-function exceptions are retired without renewal, and the module-size
+  gate is green. Focused launcher contracts and changed-file quality gates pass;
+  the 15 broader launcher failures, suite-marker baseline drift, and duplication
+  baseline drift are exactly parent-identical. This candidate remains local and
+  unpublished pending independent review.
 - **2026-08-11** - Published the independently reviewed launcher-settings
   decomposition as ready PR #8489 at exact head
   `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486
@@ -2065,6 +2080,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.504 | Prepared issue #8490's local launcher UI-setup decomposition from exact PR #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`. Split navigation/sidebar/menu construction into `_launcher_navigation_ui.py` and status/search/runtime/view/zoom construction into `_launcher_top_bar_ui.py`, while preserving `UISetupManager` compatibility exports, historical methods, dynamic launcher rebinding, and monkeypatch seams. Reduced `launcher_ui_setup.py` from 2,263 to 983 lines; removed its file-size and module-size exceptions plus four moved long-function exceptions without renewal. Focused contracts and changed-file gates pass; the 15 broader launcher failures, suite-marker drift, and duplication drift are exact-parent-identical. The candidate remains local pending independent review. |
 | 2026-08-11 | 1.0.503 | Published the independently reviewed launcher-settings decomposition as ready PR #8489 at exact head `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The independent reviewer found no actionable compatibility, MRO, behavior-parity, or Qt worker-lifecycle regression and reran all 44 focused tests successfully. Protected CI, approval, parent dependency, issue completion, and release state remain unresolved. |
 | 2026-08-11 | 1.0.502 | Registered #8487 as the truthful tracker for local candidate `e63e6908db6a1caa113a57f43a44fc0ecc00dc17`, based on exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The 44 focused settings contracts and changed-file quality gates pass. The 18 wider launcher failures, unrestricted launcher-suite Windows access violation, and remaining oversized `launcher_ui_setup.py` module are parent-identical. Publication remains gated on independent review and normal protected repository behavior. |
 | 2026-08-11 | 1.0.501 | Decomposed the launcher settings surface from exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`: runtime dependency checks and the WSL setup dialog now live in `settings_runtime.py`, while diagnostics, log synchronization, and process-management behavior live in the private `_settings_auxiliary_tabs.py` mixin. Preserved the `SettingsWidget`/`SettingsDialog` constructor, signals, tab constants, controls, methods, and compatibility imports. Reduced `settings_dialog.py` from 2,190 to 1,124 lines; removed its file-size and expired module-size exceptions plus the obsolete `WslScriptDialog._setup_ui` long-function exception without renewal. The remaining global module-size violation is the parent-identical `launcher_ui_setup.py`; accurate open issue tracking is still required before publication because the retired exceptions cite closed or unrelated issues. |

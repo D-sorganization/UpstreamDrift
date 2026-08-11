@@ -3,12 +3,6 @@
   "max_exceptions": 10,
   "exceptions": [
     {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while launcher UI bootstrap logic is split by responsibility.",
-      "expires_on": "2026-08-31"
-    },
-    {
       "path": "scripts/_urdf_campaign_issues.py",
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",

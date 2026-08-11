@@ -16,6 +16,11 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+LAUNCHER_UI_PATHS = (
+    "src/launchers/launcher_ui_setup.py",
+    "src/launchers/_launcher_navigation_ui.py",
+    "src/launchers/_launcher_top_bar_ui.py",
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -32,6 +37,11 @@ def _read_source(rel_path: str) -> str:
     src_path = REPO_ROOT / rel_path
     assert src_path.exists(), f"Expected source file at {src_path}"
     return src_path.read_text(encoding="utf-8")
+
+
+def _read_launcher_ui_sources() -> str:
+    """Return every module that participates in launcher UI setup."""
+    return "\n".join(_read_source(path) for path in LAUNCHER_UI_PATHS)
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +61,7 @@ class TestNoSplitterAiPanel:
         *why* the panel was removed.  An actual ``AIAssistantPanel(`` call
         means the old pattern has been re-introduced — that is the regression.
         """
-        src = _read_source("src/launchers/launcher_ui_setup.py")
+        src = _read_launcher_ui_sources()
         # Strip comment lines before checking, so the explanatory NOTE comment
         # that documents the removal does not cause a false positive.
         non_comment_lines = [
@@ -70,7 +80,7 @@ class TestNoSplitterAiPanel:
         The method was deleted as part of the #5620 cleanup.  A def for it
         would mean the legacy instantiation path has been brought back.
         """
-        src = _read_source("src/launchers/launcher_ui_setup.py")
+        src = _read_launcher_ui_sources()
         non_comment_lines = [
             line for line in src.splitlines() if not line.lstrip().startswith("#")
         ]
@@ -95,7 +105,7 @@ class TestNoSplitterAiPanel:
         ``from ... import AIAssistantPanel`` or ``import AIAssistantPanel``
         would re-couple the UI setup to the deprecated panel.
         """
-        src_raw = _read_source("src/launchers/launcher_ui_setup.py")
+        src_raw = _read_launcher_ui_sources()
         lines = src_raw.splitlines()
         # Consider only lines before the first ``class`` or ``def`` statement
         # that are not inside a comment block — i.e., module-level imports.
@@ -118,7 +128,7 @@ class TestNoSplitterAiPanel:
         Check that the source does not contain a pattern that both references
         ``content_splitter`` and ``ai_panel`` together in non-comment code.
         """
-        src = _read_source("src/launchers/launcher_ui_setup.py")
+        src = _read_launcher_ui_sources()
         non_comment_lines = [
             line for line in src.splitlines() if not line.lstrip().startswith("#")
         ]

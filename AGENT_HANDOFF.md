@@ -5,6 +5,31 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8490 launcher UI-setup size slice (local, no publish)** — branch
+  `codex/launcher-ui-setup-decomposition` starts at exact PR #8489 head
+  `2f664d2beaddf7444b12f90080ae9897aea24fcc`. It moves
+  sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and
+  top-bar status/search/runtime/view/zoom construction plus the historical
+  widget types into `_launcher_top_bar_ui.py`. `UISetupManager` keeps all 62
+  historical methods exactly once across the facade and two inherited mixins;
+  the public widget exports, dynamic manager-to-launcher method rebinding,
+  monkeypatch-sensitive zoom description/window-control seams, and zero-argument
+  `super()` behavior remain compatible. The facade is now 983 lines (down from
+  2,263), and its file-size/module-size exceptions plus four moved
+  long-function exceptions are removed without renewal. The module-size,
+  file-size, architecture, error-handling, suppression, TODO, and LoD gates are
+  green, as are the focused decomposition and launcher source-contract tests.
+  The broader launcher contract selection has the same 15 failures as the exact
+  parent, all caused by pre-existing shared theme/style export drift. The
+  suite-marker and DRY duplication gates also fail identically to that exact
+  parent. The suite-marker output is 275 lines with identical SHA-256
+  `a47813dfc45d70ebf231c1a4fd5a9dd89d9b5931f2fe563c275ed614b4dfa391`;
+  the duplication output is 1,571 lines with identical SHA-256
+  `73efdb450b2dadcd6261ab27b91d01c7bdf44c2f053e703ceda49bbc24a44fb3`.
+  This candidate has no push or PR and requires independent review before
+  publication. Issue [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490)
+  is its truthful open tracker; do not reuse closed #5922 or #7399.
+
 - **Launcher-settings size slice — ready PR
   [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
   `codex/settings-dialog-size-decomposition` starts at exact PR #8486 head

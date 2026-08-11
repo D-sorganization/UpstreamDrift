@@ -9,6 +9,10 @@ Verifies:
 from __future__ import annotations
 
 import re
+from pathlib import Path
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def _styles():
@@ -48,12 +52,11 @@ def test_margin_page_constant_exists():
 
 def test_sidebar_widget_minimum_width_uses_constant():
     """_setup_global_sidebar must call setMinimumWidth(Styles.SIDEBAR_MIN_WIDTH)."""
-    source_path = "src/launchers/launcher_ui_setup.py"
-    with open(source_path, encoding="utf-8") as fh:
-        source = fh.read()
+    source_path = _REPO_ROOT / "src" / "launchers" / "_launcher_navigation_ui.py"
+    source = source_path.read_text(encoding="utf-8")
 
     assert "Styles.SIDEBAR_MIN_WIDTH" in source, (
-        "launcher_ui_setup.py must use Styles.SIDEBAR_MIN_WIDTH "
+        "_launcher_navigation_ui.py must use Styles.SIDEBAR_MIN_WIDTH "
         "instead of a hard-coded pixel value"
     )
     assert not re.search(r"setMinimumWidth\(85\)", source), (
@@ -63,9 +66,8 @@ def test_sidebar_widget_minimum_width_uses_constant():
 
 def test_main_splitter_uses_stretch_factors_not_fixed_sizes():
     """_setup_main_layout must use 1:5 stretch factors and drop setSizes([85,...])."""
-    source_path = "src/launchers/launcher_ui_setup.py"
-    with open(source_path, encoding="utf-8") as fh:
-        source = fh.read()
+    source_path = _REPO_ROOT / "src" / "launchers" / "launcher_ui_setup.py"
+    source = source_path.read_text(encoding="utf-8")
 
     assert not re.search(r"setSizes\(\s*\[85", source), (
         "Hard-coded setSizes([85, ...]) still present; replace with setStretchFactor"
