@@ -8,7 +8,7 @@ an explicit variable (@sec-doublependulum), the optimal-control
 literature (@sec-optimalcontrol), and the operational meanings of
 "energy transfer" (@sec-energyflow).
 
-## Dynamics formalism {#sec-formalism}
+## Dynamics Formalism {#sec-formalism}
 
 Write the equation of motion of an articulated chain in standard
 manipulator form [@featherstone2008]:
@@ -31,7 +31,7 @@ drift part (what accumulated motion and gravity produce alone) and a
 control part ($M^{-1}\tau$), a property enforced to numerical tolerance
 by the accompanying tests (@sec-appendix-validation).
 
-## The summation-of-speed principle and its limits {#sec-summation}
+## The Summation-of-Speed Principle and Its Limits {#sec-summation}
 
 The oldest formalization of P→D sequencing is the *summation of speed*
 principle: in skills demanding high end-point speed, each segment should
@@ -75,7 +75,7 @@ skills and contribute substantially to end-point speed [@marshall2000];
 the golf analogue is forearm rotation and wrist action in the final
 phase of the downswing.
 
-## Double-pendulum mechanics of the golf downswing {#sec-doublependulum}
+## Double-Pendulum Mechanics of the Golf Downswing {#sec-doublependulum}
 
 The two-lever, one-hinge model of the downswing — an "arm" link rotating
 about a hub, connected by a wrist hinge to a "club" link — has been the
@@ -131,7 +131,7 @@ outward rapidly*. The double-pendulum literature is already an argument
 for **retain-early / release-late**. @sec-results tests exactly this
 proposition in the numerical implementation used here.
 
-## Optimal control and torque sequencing {#sec-optimalcontrol}
+## Optimal Control and Torque Sequencing {#sec-optimalcontrol}
 
 If the timing question is posed as an optimization — what torque program
 maximizes clubhead speed subject to actuator limits? — the answer has
@@ -160,13 +160,13 @@ mobility, shaft flexibility [@betzler2012; @osis2012], actuator rate
 limits) is why cross-engine validation (@sec-platform) is valuable when
 revisiting the question.
 
-## What "energy transfer" means operationally {#sec-energyflow}
+## What "Energy Transfer" Means Operationally {#sec-energyflow}
 
 Claims about energy transfer require an accounting framework. Four
 levels of analysis appear in the literature, and they are not
 interchangeable.
 
-### Joint power and work
+### Joint Power and Work
 
 For a joint spanning segments $i$ and $i{+}1$ with net joint torque
 $\tau$ and relative angular velocity $\omega$, the *joint (moment)
@@ -176,7 +176,7 @@ generation, negative work absorption. This is the quantity most golf
 studies report, and it is the basis of the work-power budget of Nesbit
 and Serrano (@sec-workbudget) [@nesbit2005work].
 
-### Joint-force power and segmental energy accounting {#sec-rw}
+### Joint-Force Power and Segmental Energy Accounting {#sec-rw}
 
 Joint moments are not the only conduit of mechanical energy: the joint
 reaction force $\mathbf{F}$ acting at a joint moving with velocity
@@ -193,7 +193,7 @@ course of inter-segment transfer terms*, not about peak angular
 velocities. @sec-methods implements exactly this accounting at the
 model's wrist interface, including the energy-balance residual check.
 
-### Induced accelerations and dynamic coupling
+### Induced Accelerations and Dynamic Coupling
 
 In a coupled chain, any single torque induces accelerations at *every*
 joint — including joints it does not span — through the inverse inertia
@@ -206,7 +206,7 @@ the downswing back-reacts on the torso; the net energy routing is an
 emergent property of the whole chain. The ZTCF/ZVCF decompositions of
 @sec-timing-framework are the counterfactual cousins of this analysis.
 
-### Kinematic sequence as a proxy — and its failure modes
+### Kinematic Sequence as a Proxy — And Its Failure Modes
 
 Peak-ordering of segment angular speeds is a *proxy* for energy flow,
 not a measurement of it. Marsan and colleagues showed that the

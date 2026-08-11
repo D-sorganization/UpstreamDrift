@@ -3,14 +3,101 @@
 Last updated: 2026-08-10
 Update this file with every PR and every push to main.
 
-## Where the repo is heading
+## Where the Repo Is Heading
 
-- **Tools #4276** — ready-for-review PR **#8440** adds a headless, fail-closed
+- **#8458 hand-path drift/control attribution** — consolidated branch
+  `feat/hand-path-drift-control-attribution` defines the canonical same-state
+  ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and
+  mechanically closed two-arm adapters; and generates a deterministic
+  joint/time-resolved evidence package with force vectors, impulse, power,
+  work, cancellation-safe shares, common/differential two-hand modes, source
+  hashes, and numerical closure. The two forward cases attribute 101.2% and
+  103.5% of signed primary force work to drift because control is opposing. The
+  prescribed two-arm local sweep instead has a 0.962 drift/control cancellation
+  index. A separate bounded residual-couple preview test reduces the declared
+  30 ms actuator RMSE by 57.6%; it is a signal-delay hypothesis, not evidence
+  of muscle preactivation or human performance. The seven generated evidence
+  figures and all pages of the final 106-page PDF have been visually inspected.
+  Lossless object-stream compaction yields 792,985 bytes while preserving 110
+  URI links and 122 outline entries. Remaining handoff: run the final repository
+  gates, merge the protected PR, then pin the compact consumer snapshot and
+  SVGs in AffineDrift to the actual merged commit. The unrelated chat-dock size
+  exception had expired on `main`; #8472 now owns a final renewal through
+  2026-08-31 so the all-files CI gate remains truthful and operational.
+
+- **#8461 WSCG 2024 legacy-evidence audit** — both archived source decks were
+  hash-matched to the user-supplied originals and all 12 slides were inspected.
+  `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+  records the exact claims, pointwise ZTCF construction, two-hand couple
+  mechanism, OOXML chart-cache provenance, and publication boundaries. The
+  evidence supports passive late-downswing negative-torque plausibility in the
+  planar model, not momentum isolation or human validation. No legacy image was
+  reused: slides 7–10 are static JPEGs, the chart's source workbook is absent,
+  and the slide-3 composite has no license note.
+
+- **#8448 higher-order mechanism ladder** — first slice merged in full PR
+  **#8456** at remote-main commit `85eae6a8ef1b132f93eda87bef2a2d6d51280c49`.
+  The executed slice adds a
+  common frame/reference-explicit wrench-power schema, exact frame and
+  reference-transport audits, prescribed mobile-hub inverse dynamics, planar
+  two-hand constraint rank/nullspace diagnostics, seven figures, and a model
+  discrepancy table. The evidence record deliberately marks full-body
+  cross-engine dynamics `not_executed`; capability is not reported as a result.
+  Follow-up full PR **#8457** losslessly compacts the 90-page PDF below the
+  repository's 1 MiB guard with page, link, outline, and visual-equivalence
+  checks.
+
+- **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
+  **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
+  surrogate now has an exact matched rigid reduction, termwise acceleration and
+  power attribution, interface force/moment accounting, closed work--energy
+  balance, gravity and damping ablations, a 120-case
+  stiffness/damping/torque-cut grid, impact-window and timestep sensitivity,
+  eight figures, and a new publication chapter. The bounded reference result is
+  +0.108 m/s flexible-minus-rigid delivery speed with 0.720 J peak shaft strain
+  energy; gravity and joint-damping ablations are substantially larger. This is
+  not a calibrated shaft or human-subject model.
+
+- **#8446 two-hand passive-couple reproduction** — full PR **#8454** on branch
+  `research/two-hand-passive-couple`. The archived 2,801-sample
+  BASE/ZTCF/DELTA tables now have hash-traceable portable exports, a tested
+  frame-explicit wrench and power audit, reversal/downsampling sensitivity,
+  grip-separation and relative-orientation counterfactuals, eight figures, and
+  a publication chapter. The key bounded finding is a -19.63 N m pointwise ZTCF
+  midpoint couple generated entirely by separated contact forces; it is not yet
+  a forward two-hand killswitch or human validation result.
+
+- **#8445 counterfactual persistence** — full PR **#8453** on branch
+  `research/counterfactual-killswitch-ensemble` adds a deterministic
+  matched-state API; 96 cut/horizon/timestep cases; gravity, damping, and
+  torque-switch audits; WSCG DELTA convention checks; four figures; and a
+  visually verified 58-page article. Pointwise ZTCF is explicitly limited to
+  instantaneous attribution; killswitch claims always state a forward horizon.
+
+- **#8443 / #8444 interaction-force mechanisms** — full PR **#8452** on branch
+  `research/interaction-force-transfer` adds an exact and tested
+  double-pendulum wrist-force/power decomposition, matched-state torque
+  killswitch, seven vector/mechanism figures, hash-registered WSCG 2024 source
+  decks, and a 52-page rendered article. The source presentation is treated as
+  project-originated hypothesis evidence, not independent validation. Follow-on
+  issues #8445–#8451 cover counterfactual ensembles, two-hand equivalent-couple
+  reproduction, gravity/flex separation, higher-order models, optimization,
+  human validation, and the 90–110-page open monograph release.
+
+- **Document title capitalization** — this branch normalizes the
+  Proximal-to-Distal article headings and regenerated PDF/LaTeX, adds a
+  changed-document gate to pre-commit and Docs Governance CI, and records the
+  fleet convention in `AGENTS.md`. The full tracked-document audit command is
+  `python scripts/check_document_title_case.py`.
+
+- **Tools #4276** — PR **#8440** remains a partial, headless, fail-closed
   consumer for the canonical Tools ground v1 façade while preserving Tools
-  records/provenance. Independent review is READY at implementation commit
-  `c60cbce9f5e7fb3baffb7859bbf3e9ea8966589a`. Final pins and UI/release gates
-  await the reviewed Tools merge; current `main` pins gitlink `ff4240217` and
-  Cargo `ea2690362`.
+  records/provenance. Its exact published head `e2f436beebc3c2739dcc5f06b5efe5e130513c65`
+  has been reconciled locally by a normal merge of current `main`
+  `69eb7e9db32ccd17e45824619315b1d04b400c27`; the resulting local candidate is
+  not published or release-qualified. Final Tools merges and exact vendor/Cargo
+  pins, FastAPI/PyQt/React parity, clean-install smokes, protected CI, and
+  independent current-head review remain open.
 
 - **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
   adds a versioned,
@@ -51,7 +138,7 @@ Update this file with every PR and every push to main.
 - PR #8422 is independently synchronized to current `main` and retains only its
   focused ground-reaction-force reduction change plus the required SPEC entry.
 
-## Must-read architecture pointers
+## Must-Read Architecture Pointers
 
 1. `CLAUDE.md` — authoritative contributor/agent policy: gate commands, CI requirements,
    error-handling ratchet, feature-parity registry, physics-engine gotchas.
@@ -63,10 +150,19 @@ Update this file with every PR and every push to main.
 5. `docs/adr/0016-*` (error handling) — see `scripts/ci/check_error_handling_ratchet.py`
    and `scripts/config/error_handling_baseline.json`.
 
-## In-flight branches (what stacks on what)
+## In-Flight Branches (What Stacks on What)
 
 The active branches are independent topic branches off `main` unless noted:
 
+- `feat/hand-path-drift-control-attribution` — consolidated implementation for
+  epic #8458 and children #8459–#8471; target `main` after local render/gates.
+- `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
+  #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
+- `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445
+  under epic #8443; multi-phase persistence and numerical/physics sensitivity.
+- `research/interaction-force-transfer` — full PR **#8452** for #8444 under
+  epic #8443; exact interaction-force mechanics and first detailed article
+  treatment.
 - `fix/8429-private-launch-data` — issue #8429, full PR **#8430**. Removes the
   public 832-shot launch-monitor CSV and resolves it through the authenticated
   private data authority. Focused validation:
@@ -80,11 +176,12 @@ The active branches are independent topic branches off `main` unless noted:
 - `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
-- `feat/4276-ground-consumer-adapter` — ready-for-review PR **#8440**, a partial
-  Tools #4276 consumer slice from `main`; no vendor pin or release claim until
-  Tools lands.
+- `feat/4276-ground-consumer-adapter` — PR **#8440**, a partial Tools #4276
+  consumer slice locally reconciled onto `main` `69eb7e9d`; no vendor pin,
+  current-head review, or release claim until the protected Tools ground stack
+  lands and the remaining consumer surfaces are qualified.
 
-## Gate commands (run these before opening/updating a PR)
+## Gate Commands (Run These Before Opening/Updating a PR)
 
 ```bash
 python3 -m ruff check .                            # lint
@@ -106,7 +203,7 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 `rust-quality-gate`, etc.) and `.github/workflows/docs-ci.yml` (docs-only PRs, requires
 `quality-gate` + SPEC.md freshness).
 
-## Do-not list
+## Do-Not List
 
 - **Do not edit `vendor/ud-tools/`** — it is vendored from Tools; changes are erased on
   the next `git submodule update`/vendor bump. Fix upstream in Tools instead.
@@ -130,7 +227,7 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 - **Do not batch a day's work into one commit** — commit small, frequent, conventional
   commits.
 
-## Short-term roadmap (ordered)
+## Short-Term Roadmap (Ordered)
 
 1. Land this handoff-policy PR (Repository_Management#1390 rollout for UpstreamDrift).
 2. Confirm `vendor/ud-tools` submodule pin from #8339 points at the Tools `main`

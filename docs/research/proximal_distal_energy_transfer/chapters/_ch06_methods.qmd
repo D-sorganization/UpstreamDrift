@@ -4,8 +4,9 @@ This chapter specifies the simulation experiments whose results appear
 in @sec-results. Everything described here is implemented in three
 committed modules under
 [`scripts/research/proximal_distal_energy/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy)
-(`swing_model.py`, `torque_programs.py`, `run_experiments.py`, with
-figures from `make_figures.py`), and every output carries a provenance
+(`swing_model.py`, `interaction_forces.py`, `torque_programs.py`,
+`run_experiments.py`, and `run_interaction_force_study.py`, with figures from
+the paired figure scripts), and every output carries a provenance
 record (git SHA, integrator settings, parameter values). The
 reproduction commands are in @sec-appendix-repro.
 
@@ -33,7 +34,7 @@ $\dot q(0) = 0$ — an arm carried well past horizontal with the club
 folded over the shoulder, comparable to the classical two-lever setups
 [@jorgensen1999; @pickering1999].
 
-## Torque programs {#sec-methods-programs}
+## Torque Programs {#sec-methods-programs}
 
 All programs share a constant shoulder torque $\tau_s$ active from $t=0$
 (two levels: 60 and 100 N·m), so the sweep isolates the wrist channel.
@@ -68,7 +69,7 @@ shortening velocity). State-dependent torques require closed-loop
 integration, done with the backend's own `mass_matrix`/`bias_forces`
 primitives under the identical RK4 settings.
 
-## Impact definition and validity {#sec-methods-impact}
+## Impact Definition and Validity {#sec-methods-impact}
 
 Impact is the first upward crossing of
 $\theta_{\mathrm{club}} = 0$ (club pointing straight down in the swing
@@ -84,7 +85,7 @@ very-late-onset programs. This constraint is conservative *against* the
 S2 hypothesis: it discards only trials that would otherwise have
 inflated the restraint arm of the sweep.
 
-## Recorded quantities {#sec-methods-quantities}
+## Recorded Quantities {#sec-methods-quantities}
 
 For every program: the full state trajectory, applied controls, impact
 time and clubhead speed. For four representative programs at
@@ -117,6 +118,27 @@ applied torques, yielding drift and control components of both joint
 accelerations; the club's absolute angular-acceleration split is the
 row sum.
 
+**Exact interaction-force audit (E5).** Analytic club-centre-of-mass
+acceleration replaces finite differentiation and separates the wrist reaction
+force into proximal and distal tangential and centripetal terms plus gravity
+reaction (@sec-force-decomposition). Each vector is projected onto the analytic
+wrist velocity to obtain a signed power pathway. A late-downswing matched-state
+experiment then integrates the commanded and zero-torque futures for 120 ms,
+explicitly distinguishing a trajectory-level killswitch from pointwise ZTCF
+(@sec-counterfactual-contracts). Newton balance, club moment balance, force and
+power reconstruction, matched initial state, and initial ZTCF equivalence are
+unit-tested.
+
+**Matched-state counterfactual ensemble (E6).** Eight cut times, including
+three samples bracketing the 0.100 s wrist-command switch, are crossed with four
+forward horizons and three fixed timesteps. Commanded and zero-torque futures
+share the exact interpolated source state. Divergence is recorded in generalized
+position and velocity, wrist force, force power, integrated force work, and
+terminal clubhead speed. The 80 ms subset is repeated with gravity disabled and
+with damping disabled. The 0.5 ms grid is the timestep reference, and the
+registered WSCG chart's stored DELTA series are independently reconstructed as
+BASE minus counterfactual after time alignment (@sec-killswitch-ensemble).
+
 **Phase budgets.** With the downswing divided at $t_{\mathrm{imp}}/2$:
 club kinetic-energy gain, wrist actuator work, shoulder work, and
 integrated joint-force transfer, per half.
@@ -132,7 +154,7 @@ restrain-then-drive onset are re-optimized on the original onset grid.
 These ranges test local structural sensitivity; they are not population
 percentiles or confidence intervals.
 
-## Design rationale and scope {#sec-methods-scope}
+## Design Rationale and Scope {#sec-methods-scope}
 
 This deliberately simple model is a planar 2-DOF chain with a fixed hub and rigid
 shaft. That choice is the point, not a compromise: the classical timing

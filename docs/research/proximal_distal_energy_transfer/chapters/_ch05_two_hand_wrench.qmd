@@ -1,0 +1,449 @@
+# Two-Hand Wrench Mechanics and Passive Couple Reversal {#sec-two-hand-wrench}
+
+## The Question Made Testable {#sec-two-hand-question}
+
+The double-pendulum analysis established that a distal segment can receive a
+large reaction force even when the corresponding joint torque is zero. A
+two-hand grip adds a second mechanism: the two contact forces can form a
+substantial *couple* even when their vector sum is comparatively modest. The
+mechanical question is therefore not simply whether a wrist torque trace turns
+negative. It is whether the negative action on the club is attributable to
+commanded free torque, to the moment created by separated hand forces, or to a
+mixture of both.
+
+The distinction matters because the three statements below are not
+interchangeable:
+
+1. the resultant hand force is small;
+2. the equivalent couple about the grip midpoint is negative; and
+3. the golfer actively commands a negative wrist torque.
+
+The first statement concerns translation, the second concerns rotation about a
+declared point, and only the third is an actuation claim. Two large and nearly
+opposing hand forces can satisfy the first two statements without satisfying
+the third. Conversely, a commanded free torque can be present even when the
+force-generated moment is zero.
+
+This chapter tests the distinction against the archived output tables behind
+the WSCG presentation [@olson2024wscg]. It does not digitize a picture. It
+reconstructs the force system from the stored contact positions, global hand
+forces, and free torques at all 2,801 time samples. The analysis is executable
+through the linked
+[`run_two_hand_wscg_analysis.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py),
+and its mechanics are isolated in the backend-independent
+[`two_hand_wrench.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/two_hand_wrench.py).
+
+## Source Cases and Evidentiary Boundary {#sec-two-hand-source-cases}
+
+The archived simulation supplies three synchronized tables:
+
+- **BASE** is the commanded model solution;
+- **ZTCF** evaluates the reactions after commanded joint torques and the
+  designated damping terms are set to zero at each achieved BASE state; and
+- **DELTA** is the stored operational difference, BASE minus ZTCF.
+
+The ZTCF table is an instantaneous, state-matched attribution. It is not a
+single torque-free forward swing. This distinction is the same one developed in
+@sec-killswitch-ensemble: a pointwise counterfactual can identify which part of
+the acceleration or reaction is present without current command, but it cannot
+by itself state how long that behavior would persist after commands were
+removed. Accordingly, the present result uses *passive* in the narrow
+actuation sense: the ZTCF contact moment exists while the evaluated command
+torques are exactly zero. It does not mean that the state was reached without
+earlier active work.
+
+The binary input tables are registered by SHA-256 and exported to ordinary CSV
+by
+[`export_two_hand_wscg_tables.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/export_two_hand_wscg_tables.m).
+The exported cache makes the audit usable without MATLAB; the MATLAB function
+exists to prove where every column came from. The original MAT files and source
+presentations remain unchanged. Because these are project-originated model
+records, agreement with them is a reproduction of the author's prior
+simulation, not independent empirical validation.
+
+## Frames, Directions, and Signs {#sec-two-hand-frames}
+
+The archived right-handed model labels the left wrist as the lead contact and
+the right wrist as the trail contact. In this chapter:
+
+- $\mathbf r_L$ and $\mathbf r_T$ are the lead- and trail-contact positions;
+- $\mathbf F_L$ and $\mathbf F_T$ are forces exerted **by the wrists on the
+  club**;
+- $\boldsymbol{\tau}_L$ and $\boldsymbol{\tau}_T$ are free torques exerted on
+  the club;
+- $O$ is the grip midpoint; and
+- positive moment follows the right-hand rule about the model's $+z$ axis.
+
+The local $+x$ axis points from the lead contact toward the trail contact. The
+fixed model-plane normal is
+
+$$
+\mathbf e_z = \frac{1}{\sqrt{2}}(0,-1,1),
+$$ {#eq-model-plane-normal}
+
+and $\mathbf e_y=\mathbf e_z\times\mathbf e_x$. Projection of the stored global
+forces onto this basis reproduces the stored local axial and normal components.
+The maximum out-of-plane hand-force component is 1.78 N, small relative to
+in-plane peaks of several hundred newtons. Thus the archived result is
+numerically planar even though its vectors are stored in three coordinates.
+
+Changing any one of force direction, hand labeling, axis direction, or moment
+sign reverses part of the interpretation. Those conventions are therefore data,
+not cosmetic plotting choices. They are written into the machine-readable
+provenance record and tested.
+
+## Reduction of Two Contacts to an Equivalent Wrench {#sec-two-hand-reduction}
+
+About an arbitrary reference point $O$, the two-hand action reduces to
+
+$$
+\mathbf R = \mathbf F_L + \mathbf F_T,
+$$ {#eq-two-hand-resultant}
+
+and
+
+$$
+\mathbf M_O =
+(\mathbf r_L-\mathbf r_O)\times\mathbf F_L
++(\mathbf r_T-\mathbf r_O)\times\mathbf F_T
++\boldsymbol\tau_L+\boldsymbol\tau_T.
+$$ {#eq-two-hand-total-moment}
+
+The scalar planar couple is $C_O=\mathbf M_O\cdot\mathbf e_z$. This is the
+quantity called the equivalent midpoint couple when $O$ is the grip midpoint.
+The first two terms in @eq-two-hand-total-moment are the **contact-force
+moment**; the last two are the **applied free torque**. Their sum, rather than
+either contribution alone, is the equivalent couple.
+
+### What Is and Is Not Reference Invariant {#sec-reference-transport}
+
+A useful correction is necessary here. The physical force system is invariant
+under a change of bookkeeping point, but the reported moment number generally
+is not. If the reference is moved from $A$ to $B$,
+
+$$
+\mathbf M_B = \mathbf M_A
+-(\mathbf r_B-\mathbf r_A)\times\mathbf R.
+$$ {#eq-wrench-transport}
+
+Only a pure couple ($\mathbf R=0$) has the same moment about every point. A
+nonzero two-hand resultant requires the transport term in
+@eq-wrench-transport. Thus an audit should demand *wrench equivalence under
+reference transport*, not invariance of the scalar midpoint moment. The test
+suite evaluates @eq-wrench-transport directly and also verifies invariance to a
+rigid translation and co-rotation of the complete force system.
+
+![Reference Transport Changes the Moment but Preserves the Wrench](figures/fig_two_hand_reference_transport.pdf){#fig-two-hand-reference-transport width=92%}
+
+@fig-two-hand-reference-transport illustrates the distinction. The resultant
+arrow is unchanged, while its associated moment changes exactly enough to
+preserve the action of the original two forces. This prevents a common error:
+comparing couples calculated about different grip points as if they were the
+same physical observable.
+
+## Common and Opposed Force Modes {#sec-two-hand-force-modes}
+
+Let the grip midpoint be
+$\mathbf r_M=(\mathbf r_L+\mathbf r_T)/2$, define the contact-separation vector
+$\mathbf d=\mathbf r_T-\mathbf r_L$, and introduce common and differential
+force modes,
+
+$$
+\mathbf F_c=\frac{\mathbf F_L+\mathbf F_T}{2},
+\qquad
+\mathbf F_d=\frac{\mathbf F_L-\mathbf F_T}{2}.
+$$ {#eq-common-differential-forces}
+
+Then $\mathbf R=2\mathbf F_c$, while the force-generated midpoint moment is
+
+$$
+\mathbf M_{F,M}
+=-\mathbf d\times\mathbf F_d.
+$$ {#eq-differential-force-couple}
+
+Equation @eq-differential-force-couple is the central two-hand mechanism. The
+common mode controls the resultant. The differential, or opposed, mode controls
+the couple. A large $\lVert\mathbf F_d\rVert$ may therefore be nearly invisible
+in $\lVert\mathbf R\rVert$.
+
+If $\mathbf d=s\mathbf e_x$, only the differential normal component contributes
+to the planar force moment:
+
+$$
+C_{F,M}=-s F_{d,y}.
+$$ {#eq-normal-force-couple}
+
+Axial forces can be very large without directly producing a midpoint moment
+when their lines of action remain collinear with the grip. They still matter to
+constraint loading, deformation, and power. Normal-force imbalance, contact
+separation, and their signed relative orientation set the moment.
+
+![A Large Opposed-Force Mode Can Coexist With a Modest Resultant](figures/fig_two_hand_force_cancellation.pdf){#fig-two-hand-force-cancellation width=100%}
+
+In @fig-two-hand-force-cancellation, the opposed mode greatly exceeds the
+resultant over much of the early and middle trace. BASE and ZTCF resultants are
+nearly coincident, while their opposed modes differ more visibly. This is why a
+net-force plot alone cannot diagnose the rotational action of a two-hand grip.
+
+## Reconstruction and Verification Methods {#sec-two-hand-methods}
+
+Each of the 2,801 samples is evaluated by the same sequence:
+
+1. read the two contact positions, forces, free torques, velocities, midpoint,
+   and stored equivalent wrench;
+2. compute the resultant with @eq-two-hand-resultant;
+3. compute the midpoint contact-force moment and add the free torques with
+   @eq-two-hand-total-moment;
+4. project global quantities onto the declared local axes;
+5. locate every sign crossing by linear interpolation inside its adjacent
+   0.1 ms sample bracket; and
+6. repeat the crossing estimate after downsampling by factors through 20, using
+   every possible sample offset.
+
+The reconstruction tolerances are absolute and deliberately much tighter than
+the signal magnitudes. Across BASE, ZTCF, and DELTA, the largest resultant
+residual is $1.1\times10^{-12}$ N. The largest global couple residual is 0.057
+N·m, or less than 0.1% of the approximately 59 N·m peak. BASE minus ZTCF minus
+DELTA closes to $1.2\times10^{-13}$ N·m for the local equivalent couple.
+
+The small nonzero couple reconstruction residual is consistent with archived
+table interpolation and coordinate-transform precision. It is not used to
+infer a physical torque. The test limit is 0.1 N·m, more than an order of
+magnitude above floating-point noise but far below the negative-couple peak.
+
+## Results: Where the Negative Couple Comes From {#sec-two-hand-results}
+
+![The Negative ZTCF Couple Is Generated by Contact Forces](figures/fig_two_hand_couple_decomposition.pdf){#fig-two-hand-couple-decomposition width=100%}
+
+@fig-two-hand-couple-decomposition provides the decisive decomposition. In
+BASE, the equivalent couple reaches a minimum of -22.79 N·m at 0.2151 s. At
+that instant, -18.60 N·m comes from separated contact forces and -4.22 N·m
+comes from applied free torque. In pointwise ZTCF, all command torque and kill
+damping are zero, yet the equivalent couple reaches -19.63 N·m at 0.2148 s.
+The reconstructed free-torque contribution there is below
+$3.1\times10^{-13}$ N·m; the negative couple is therefore entirely a contact
+force moment to the resolution of the archive.
+
+At the time of the BASE minimum, the ZTCF couple retains 86.1% of the BASE
+magnitude. DELTA is exact by construction, but its peak negative couple is only
+-3.18 N·m. These comparisons support a narrow conclusion: *within the achieved
+states of this model, most of the late negative midpoint couple does not require
+instantaneous commanded wrist torque*.
+
+They do not support the stronger claim that wrist torque is irrelevant. Active
+torques helped create the state history on which ZTCF is evaluated, and BASE
+free torque contributes measurably to the total. Nor do they prove the same
+partition in a human swing.
+
+### Timing of the Two Sign Changes {#sec-two-hand-crossings}
+
+All three cases contain an early positive-to-negative crossing and a later
+negative-to-positive crossing. For BASE, the negative interval begins at
+0.180172 s and ends at 0.270824 s. For ZTCF, it begins at 0.181823 s and ends at
+0.270016 s. Thus the late BASE and ZTCF reversals differ by 0.808 ms. Their
+respective negative intervals last approximately 90.7 and 88.2 ms.
+
+The archived sample interval is 0.1 ms. After downsampling to effective steps
+as large as 2 ms and repeating every phase offset, the largest shift in the
+late crossing is 7.95 microseconds for BASE and 7.41 microseconds for ZTCF.
+This demonstrates interpolation and sampling stability for the stored smooth
+curves. It is not a new Simscape solver-tolerance study; changing solver,
+constraint stabilization, or shaft discretization remains a separate model
+sensitivity question.
+
+![Late Equivalent-Couple Reversal Timing](figures/fig_two_hand_reversal_sensitivity.pdf){#fig-two-hand-reversal-sensitivity width=100%}
+
+The DELTA late crossing occurs later, at 0.276634 s. Treating the DELTA crossing
+as the onset of the passive mechanism would therefore be incorrect. DELTA asks
+how BASE differs from the pointwise zero-command reaction. The ZTCF curve itself
+is the relevant evidence for a moment that remains without current command.
+
+## Local Force Geometry Through the Downswing {#sec-two-hand-local-forces}
+
+![Opposing Local Hand Forces Persist in Pointwise ZTCF](figures/fig_two_hand_local_force_components.pdf){#fig-two-hand-local-forces width=100%}
+
+The local force histories in @fig-two-hand-local-forces expose the mechanism
+hidden by the resultant. Near the ZTCF minimum, the lead and trail normal forces
+are +249.8 N and -266.2 N. Their opposition makes the differential normal mode
+large and negative under @eq-normal-force-couple. At the same instant, the lead
+and trail axial forces are -497.5 N and +30.4 N. Those axial loads influence the
+resultant and internal loading, but their direct midpoint moment is suppressed
+by the small perpendicular lever arm.
+
+The sign evolution is geometric. A force does not carry an intrinsic
+"accelerating" or "decelerating" label. Its moment depends on the cross product
+between its lever arm and direction, while its power depends on its dot product
+with contact velocity. During the downswing, both the grip direction and the
+contact-force directions rotate. The same anatomical hand can therefore move
+from one moment quadrant to another without an abrupt change in force
+magnitude.
+
+![Three-Dimensional View of the Archived Two-Hand Force System](figures/fig_two_hand_force_pose_montage.pdf){#fig-two-hand-pose-montage width=100%}
+
+@fig-two-hand-pose-montage shows six global poses. The view is three-dimensional
+because the archive stores global vectors in three coordinates, while the
+nearly equal global $y$ and $z$ coordinates reveal the declared oblique model
+plane. The force arrows change relative to the short grip segment: the visual
+transition from positive couple, through the negative minimum, and back through
+the late reversal is a cross-product change, not evidence of an invisible
+command.
+
+## Geometry Counterfactuals {#sec-two-hand-geometry-counterfactuals}
+
+The force-generated couple can be perturbed without changing the force values.
+At the peak-negative ZTCF sample, two deterministic counterfactuals were
+applied:
+
+1. scale both contact offsets from the midpoint while holding their directions
+   and forces fixed; and
+2. rotate the grip/contact offsets within the model plane while holding the
+   global force directions fixed.
+
+The first experiment produces an exactly linear response, as required by
+@eq-normal-force-couple. Doubling the separation doubles the contact-force
+moment; collapsing the contacts to one point removes it. This is a mechanics
+identity, not a recommendation to alter grip width without regard to anatomy or
+control.
+
+The second experiment produces the expected sinusoidal orientation gate. At
+some relative orientations the same forces create a positive moment; at others
+they create a negative one. When the contacts and forces are rigidly co-rotated
+together, the moment is invariant to $1.5\times10^{-14}$ N·m. Therefore global
+pose alone does not set the sign. The sign is controlled by the *relative*
+orientation of the contact-separation vector and differential force.
+
+![Geometric Counterfactuals at Peak Negative ZTCF](figures/fig_two_hand_geometry_sweep.pdf){#fig-two-hand-geometry-sweep width=100%}
+
+The practical implication is a constraint on strategy language. "Create more
+negative torque" is under-specified. A controller can change the moment by
+changing contact separation, force opposition, force direction relative to the
+grip, or a true applied free torque. Those routes have different effects on
+joint loading, net force, power, and robustness. They must not be collapsed
+into one scalar cue.
+
+## Couple Sign, Power, and Clubhead Speed {#sec-two-hand-power}
+
+Moment sign is not energy-transfer sign. For a rigid body reduced at midpoint
+$M$, wrench power would be
+
+$$
+P=\mathbf R\cdot\mathbf v_M + C_M\omega.
+$$ {#eq-two-hand-rigid-power}
+
+The archived model contains two distinct moving contacts. An exact two-point
+force-power identity is therefore more informative. With
+$\Delta\mathbf v=\mathbf v_T-\mathbf v_L$ and
+$\Delta\mathbf F=(\mathbf F_T-\mathbf F_L)/2$,
+
+$$
+P_F=\mathbf F_L\cdot\mathbf v_L+\mathbf F_T\cdot\mathbf v_T
+=\mathbf R\cdot\mathbf v_M+\Delta\mathbf F\cdot\Delta\mathbf v.
+$$ {#eq-two-contact-power}
+
+The relative-velocity term can be separated into rigid rotation and a small
+contact-deformation remainder. The implemented identity closes within
+$2.0\times10^{-11}$ W. In ZTCF, the maximum magnitude of the relative-contact
+remainder is only 0.188 W, compared with contact-force power peaks above 4 kW;
+the grip-contact kinematics are effectively rigid for this calculation.
+
+![Negative Couple Sign Does Not Alone Determine Energy-Transfer Sign](figures/fig_two_hand_power_decomposition.pdf){#fig-two-hand-power width=100%}
+
+At the ZTCF negative-couple minimum, the reconstructed grip angular velocity is
+36.21 rad/s and the total contact-force power is -2.08 kW. Clubhead speed is
+already about 110.0 mph, close to the archived 115.1 mph maximum at 0.1925 s.
+Across the entire negative-couple interval, contact-force power is negative for
+approximately 85% of samples and integrates to about -149 J. In this particular
+trace, the passive negative couple is principally associated with late
+redirection and deceleration after peak speed, not with a direct positive-power
+boost to the club.
+
+That finding sharpens, rather than rejects, the proposed mechanism. Passive
+negative torquing can be a consequence of momentum and constraint geometry
+without being the source of positive club work. Its strategic value, if any,
+would be indirect: allowing the system to reach a favorable high-speed state,
+controlling orientation, and avoiding unnecessary active opposition to the
+natural late reaction. Whether that improves impact delivery requires an
+optimization with impact timing, face orientation, actuator limits, and shaft
+stress—not inspection of the torque sign alone.
+
+## Mechanistic Interpretation by Phase {#sec-two-hand-phases}
+
+The archived trace can be read in four phases without assigning intent to the
+model:
+
+**Positive-Couple Formation (0–0.180 s).** The two-hand force system initially
+creates a positive midpoint couple. Both BASE and ZTCF rise rapidly, showing
+that constraint reactions dominate even before the sign reversal.
+
+**Passive Negative-Couple Entry (approximately 0.180 s).** BASE and ZTCF cross
+zero within 1.7 ms of one another. The similarity of their force-generated
+moments indicates that the sign transition is largely encoded in the achieved
+positions and velocities rather than the instantaneous wrist command.
+
+**Peak Negative Reaction (approximately 0.215 s).** Opposed normal forces form
+the dominant negative couple while clubhead speed is near its maximum. BASE
+free torque augments the negative action by about 4.2 N·m, but ZTCF demonstrates
+that the larger contact-force contribution remains with command removed.
+
+**Late Recovery and Reversal (approximately 0.270 s).** Relative geometry and
+contact forces evolve until the couple returns positive. BASE and ZTCF reverse
+at nearly the same time; DELTA reverses later and should not be mistaken for the
+passive timing signal.
+
+This phase description is mechanical, not anatomical. The model does not
+resolve muscle coordination, grip-pressure distributions, tendon elasticity,
+or neural control. It identifies a candidate force-system pathway that future
+measurements can attempt to confirm or falsify.
+
+## Implications for Speed-Creation Strategy {#sec-two-hand-strategy}
+
+The present evidence supports constraints on a strategy rather than a universal
+instruction:
+
+- **Build the state before judging the late reaction.** ZTCF is large because
+  earlier motion has created large velocities and a particular geometry.
+- **Track differential normal force, not net force alone.** The opposed mode is
+  the direct geometric source of the two-hand couple.
+- **Separate speed production from impact management.** Positive power earlier
+  in the downswing creates speed; the late passive negative couple in this trace
+  mostly accompanies energy removal and orientation control after peak speed.
+- **Do not fight a passive reaction by default.** Adding positive command solely
+  to cancel a negative measured couple could increase loading or disrupt impact
+  orientation. The appropriate response is an optimization question.
+- **Constrain the endpoint.** A credible optimization must evaluate clubhead
+  speed at impact together with face/path orientation, grip loads, shaft stress,
+  actuator work, and sensitivity to timing errors.
+
+This framework rejects two simple slogans: neither "negative torque creates
+speed" nor "negative torque wastes speed" is generally valid. Power, timing,
+and endpoint constraints decide the effect.
+
+## Limitations and Falsification Tests {#sec-two-hand-limitations}
+
+The strongest current result is internal: the archived model's negative ZTCF
+couple reconstructs from separated contact forces with zero current command.
+Several limitations bound external interpretation:
+
+- ZTCF is pointwise along the commanded state history, not a forward
+  two-hand killswitch rollout.
+- The source is one deterministic planar simulation and one parameter set.
+- The model uses idealized wrist contacts and does not resolve pressure across
+  the hands or grip.
+- Shaft and grip compliance are present in the source architecture but have not
+  yet been separated by matched rigid/flexible reruns.
+- Downsampling verifies interpolation stability, not solver-tolerance or
+  constraint-stabilization independence.
+- No synchronized human hand-force and full-body kinematic data are used.
+
+The mechanism would be materially weakened if a like-for-like rerun showed any
+of the following: the ZTCF negative couple disappears under solver refinement;
+the sign is caused by a frame or action-reaction error; rigid/flexible variants
+reverse the attribution; a forward killswitch leaves the negative region too
+quickly to matter; or measured human contact forces fail to exhibit the
+predicted differential-normal pattern.
+
+The next model layer should therefore separate gravity, momentum-dependent
+terms, damping, and shaft elasticity while preserving the same wrench and power
+contracts. Higher-order and human-data studies should retain the distinction
+between resultant force, force-generated moment, free torque, and power. That
+shared vocabulary is the main reusable product of the present analysis.

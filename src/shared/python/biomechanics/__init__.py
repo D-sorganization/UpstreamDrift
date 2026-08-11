@@ -4,6 +4,25 @@ from __future__ import annotations
 
 from .activation_dynamics import ActivationDynamics
 from .biomechanics_data import BiomechanicalData
+from .drift_control_transfer import (
+    AttributionShares,
+    ForcePathProjection,
+    ImpulseDecomposition,
+    JointTransferTrajectory,
+    PathFrame,
+    PathWeightedMeanForce,
+    PhaseTransferSummary,
+    PowerWorkDecomposition,
+    SwingPhase,
+    attribution_shares,
+    build_phase_masks,
+    compute_impulses,
+    compute_path_frame,
+    compute_path_weighted_mean_force,
+    compute_power_and_work,
+    project_forces_onto_path,
+    summarize_phases,
+)
 from .fsp_integration import (
     FspResult,
     compute_swing_fsp,
@@ -74,6 +93,24 @@ __all__: list[str] = [
     "ActivationDynamics",
     # biomechanics_data
     "BiomechanicalData",
+    # drift_control_transfer
+    "AttributionShares",
+    "ForcePathProjection",
+    "ImpulseDecomposition",
+    "JointTransferTrajectory",
+    "PathFrame",
+    "PathWeightedMeanForce",
+    "PhaseTransferSummary",
+    "PowerWorkDecomposition",
+    "SwingPhase",
+    "attribution_shares",
+    "build_phase_masks",
+    "compute_impulses",
+    "compute_path_frame",
+    "compute_path_weighted_mean_force",
+    "compute_power_and_work",
+    "project_forces_onto_path",
+    "summarize_phases",
     # hill_muscle
     "HillMuscleModel",
     "MuscleParameters",

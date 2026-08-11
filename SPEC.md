@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.490 |
+| **Spec Version** | 1.0.497 |
 | **Last Spec Update** | 2026-08-10 |
 
 ## 2. Purpose & Mission
@@ -79,7 +79,31 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   provenance unchanged. This is not a dependency pin or UI parity claim: the
   exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
   protected-release gates remain blocked on the reviewed Tools ground merge.
-
+- **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
+  ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
+  two-arm adapters; deterministic force-vector, impulse, power, work,
+  joint/time-window, common/differential-mode, sensitivity, and closure
+  evidence; and a bounded residual-couple preview hypothesis with explicit
+  physiological limits. The final 106-page PDF uses contract-checked lossless
+  object-stream compaction and preserves 110 URI links plus 122 outline entries.
+- **2026-08-10** - Added #8446 two-hand passive-couple reproduction: a
+  frame-explicit and tested wrench API, hash-traceable BASE/ZTCF/DELTA table
+  exports, all-sample resultant/couple/power reconstruction, reversal and
+  resampling analysis, grip-separation/orientation counterfactuals, eight
+  publication figures, and a neutral chapter separating contact-force moment,
+  free torque, resultant force, and power.
+- **2026-08-10** - Added #8445 matched-state counterfactual persistence:
+  deterministic commanded/zero-torque futures, 96 cut-time/horizon/timestep
+  cases, state/force/power/work/speed divergence, torque-switch bracketing,
+  gravity and damping ablations, a WSCG BASE-minus-counterfactual convention
+  check, four publication figures, and a visually verified 58-page article.
+- **2026-08-10** - Added the first interaction-force mechanisms slice for
+  epic #8443 / issue #8444: exact double-pendulum wrist-force and force-power
+  decomposition, tested Newton and moment balances, a matched-state
+  torque-killswitch distinct from pointwise ZTCF, hash-registered WSCG source
+  decks and chart extraction, seven publication figures, machine-readable
+  evidence, and an expanded scientific chapter with explicit nonclaims and
+  falsification tests.
 - **2026-08-09** - Stabilized the Launch Monitor Analytics v1 consumer
   contract against the current Tools record contract. Dataset fingerprints
   now hash canonical ordered record content and ignore transient pandas index
@@ -1731,7 +1755,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
 - **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
 - **Dependency Source Contracts**: Validate generated dependency artifacts against `pyproject.toml` and fail CI when lockfiles or `environment.yml` drift
-- **Documentation Governance Contracts**: Validate the canonical `docs/index.md` directory catalog, rendered documentation hub link, and Markdown/Quarto size budget.
+- **Documentation Governance Contracts**: Validate the canonical `docs/index.md` directory catalog, rendered documentation hub link, Markdown/Quarto size budget, and significant-word title capitalization for changed Markdown, Quarto, LaTeX, Word, and PDF documents.
 - **Benchmark Tests**: Performance regression detection and optimization validation
 - **Property-Based Tests**: Hypothesis-driven fuzzing for robustness
 
@@ -2019,7 +2043,13 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-10 | 1.0.490 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
+| 2026-08-10 | 1.0.497 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
+| 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
+| 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
+| 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |
+| 2026-08-10 | 1.0.493 | Added a tested three-coordinate point-mass shaft-flex surrogate with an exact matched rigid reduction; separated control, momentum, gravity, joint damping, shaft elasticity, and shaft damping; closed the work--energy balance; evaluated gravity/damping ablations plus a 120-case stiffness/damping/torque-cut grid; expanded the scientific article with eight reproducible figures and explicit calibration limits; and made the title-case Git-diff reader explicitly UTF-8-safe on Windows. |
+| 2026-08-10 | 1.0.492 | Reconstructed the archived WSCG two-hand BASE/ZTCF/DELTA force systems; added frame, wrench-transport, force-mode, power, reversal-sensitivity, and geometry contracts; and expanded the scientific article with eight reproducible figures and explicit pointwise/passive limits. |
+| 2026-08-10 | 1.0.490 | Normalized the Proximal-to-Distal article's canonical headings and regenerated PDF/LaTeX bookmarks, then added a repository document-title gate for Markdown, Quarto, LaTeX, Word title styles, and PDF metadata/outlines in pre-commit and documentation CI. |
 | 2026-08-10 | 1.0.489 | Extended Launch Monitor Analytics with a versioned arbitrary-field analysis contract, PyQt and FastAPI surfaces, configurable association/missingness/multiplicity/grouping, OLS uncertainty and residual diagnostics, deterministic lineage, and fail-closed aggregate/vendor-pooling boundaries for #8364-#8366. |
 | 2026-08-08 | 1.0.487 | Epic #8390 B5/C2/C4 (completing all 16 sub-issues): CEM/MPPI batch swing optimizer as the first production consumer of the ADR-0023/0024 batch infrastructure, ~1k mujoco rollouts scored in ~2.5s on the CPU fallback (#8400); pose-estimator registry replacing the 5-place estimator edit tax, with API/pipeline/motion-capture routes deriving from one seam (#8402); 4D-Humans/HMR2 sidecar (FreeMoCap-pattern subprocess isolation for CC-BY-NC tooling) with a registered 3D adapter and SMPL-betas plumbing into the character builder (#8404). |
 | 2026-08-08 | 1.0.486 | Epic #8390 B1/B3/B4/C1/C3/D2: shared 7-DOF swing multibody model + smooth cost surrogates (`optimization/model_provider.py`, `smooth_costs.py`, #8396); CasADi direct-transcription swing backend with symbolic RNEA validated against pin.rnea, new `optimal-control` extra, `solver='casadi'` dispatch (#8398); Crocoddyl FDDP backend with subprocess stack-health probe and graceful mixed-wheel degradation, new `crocoddyl` extra (#8399); real Pinocchio IK backend (diff_ik-style LM + optional PINK path) with SkeletonRig→pin.Model bridge (#8401); DeepLabCut import adapter with custom keypoints (#8403); web UI 3D mocap skeleton, URDF glTF mesh loading with a hardened mesh-asset endpoint, and live pose streaming over the realtime WebSocket (#8406). |

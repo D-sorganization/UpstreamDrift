@@ -1,6 +1,6 @@
 # The Timing Question and the Counterfactual Framework {#sec-timing-framework}
 
-## Two strategies, stated precisely {#sec-strategies}
+## Two Strategies, Stated Precisely {#sec-strategies}
 
 Let $E_p(t)$ be the kinetic energy of the proximal subsystem (trunk and
 arms, with the club riding folded) over a downswing
@@ -47,7 +47,7 @@ lives in finer variables (release profile shape, hub-path geometry,
 impulse-transfer efficiency) — exactly what the counterfactual framework
 below is designed to expose.
 
-## What would falsify S2? {#sec-falsify}
+## What Would Falsify S2? {#sec-falsify}
 
 To keep the question scientific rather than rhetorical, we state what
 evidence would count against the retain-early/release-late hypothesis:
@@ -66,7 +66,7 @@ evidence would count against the retain-early/release-late hypothesis:
 
 The last test is executed in @sec-results.
 
-## ZTCF and ZVCF: definitions {#sec-ztcf-defs}
+## ZTCF and ZVCF: Definitions {#sec-ztcf-defs}
 
 Two counterfactual accelerations are defined *pointwise* at each
 measured state $(q, \dot q, \tau)$ of a swing:
@@ -105,7 +105,7 @@ $$ {#eq-superposition}
 an identity enforced to numerical tolerance by the accompanying tests
 (@sec-appendix-validation).
 
-## Two operational variants {#sec-ztcf-variants}
+## Two Operational Variants {#sec-ztcf-variants}
 
 Two distinct operationalizations are available, and the difference
 matters for interpretation.
@@ -149,7 +149,7 @@ and the fractional contributions ZTCF/BASE and DELTA/BASE
 the BASE, ZTCF and DELTA components*
 ([`SCRIPT_324_PLOT_ZTCF_KinematicSequence.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m)).
 
-## The counterfactual form of the timing hypothesis {#sec-hypothesis}
+## The Counterfactual Form of the Timing Hypothesis {#sec-hypothesis}
 
 The ZTCF/ZVCF language makes the S2 hypothesis crisp. Along a measured
 downswing, project the drift and control accelerations onto the club's

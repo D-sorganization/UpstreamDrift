@@ -1,0 +1,864 @@
+{
+  "provenance": {
+    "git_sha": "8a20ac207",
+    "source": "Archived WSCG/Simscape output tables",
+    "source_table_sha256": {
+      "BASE": "6FEF9C72649C235231BC53BAA8DDEBF227841DA7F7284C584C5F2740524AA814",
+      "ZTCF": "0C7335217404D773439220ED1B504A6542A36CCEBBE8DF0CAE86C6EC377008F8",
+      "DELTA": "635C1FB7E70510782988E1DE98E7D2F8AC98040EA6FA35C15ACEC081D06E7336"
+    },
+    "force_direction": "Force exerted by each wrist on the club",
+    "lead_hand": "left wrist in the archived right-handed model",
+    "local_axes": "+x from lead to trail contact; +z out of the declared model plane; +y = +z cross +x",
+    "moment_sign": "positive about +z by the right-hand rule",
+    "counterfactual_contract": "ZTCF recomputes reactions on the BASE state history with commanded joint torques and kill damping set to zero; it is pointwise, not a new forward rollout."
+  },
+  "cases": {
+    "base": {
+      "sample_count": 2801,
+      "time_step_s": 9.99999999999994e-5,
+      "grip_separation_mean_m": 0.07619924603392705,
+      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "maximum_resultant_reconstruction_residual_n": 1.0800249583553523e-12,
+      "maximum_couple_reconstruction_residual_nm": 0.020482864623058816,
+      "maximum_out_of_plane_hand_force_n": 1.7725162908596785,
+      "maximum_force_power_identity_residual_w": 2.000888343900442e-11,
+      "maximum_source_linear_power_residual_w": 76.8950515316944,
+      "maximum_abs_deformation_power_w": 0.2542045520864039,
+      "minimum_equivalent_couple_nm": -22.7859885550925,
+      "minimum_couple_time_s": 0.2151,
+      "force_moment_at_minimum_nm": -18.59590761443272,
+      "free_torque_at_minimum_nm": -4.218858051730776,
+      "negative_duration_s": 0.09069999999999945,
+      "negative_angular_impulse_nm_s": -1.2712258171125448,
+      "crossings": {
+        "all": [
+          {
+            "time_s": 0.18017236655255112,
+            "direction": "positive_to_negative",
+            "left_time_s": 0.1801,
+            "right_time_s": 0.1802,
+            "bracket_width_s": 9.999999999998899e-5
+          },
+          {
+            "time_s": 0.2708239208821296,
+            "direction": "negative_to_positive",
+            "left_time_s": 0.2708,
+            "right_time_s": 0.2709,
+            "bracket_width_s": 9.999999999998899e-5
+          }
+        ],
+        "late": {
+          "time_s": 0.2708239208821296,
+          "direction": "negative_to_positive",
+          "left_time_s": 0.2708,
+          "right_time_s": 0.2709,
+          "bracket_width_s": 9.999999999998899e-5
+        }
+      },
+      "late_crossing_resampling": {
+        "estimates": [
+          {
+            "stride": 1,
+            "offset": 0,
+            "effective_step_s": 9.99999999999994e-5,
+            "late_crossing_s": 0.2708239208821296
+          },
+          {
+            "stride": 2,
+            "offset": 0,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.27082393999939713
+          },
+          {
+            "stride": 2,
+            "offset": 1,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.2708239814625093
+          },
+          {
+            "stride": 5,
+            "offset": 0,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2708243599588919
+          },
+          {
+            "stride": 5,
+            "offset": 1,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2708243994380275
+          },
+          {
+            "stride": 5,
+            "offset": 2,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2708242791573274
+          },
+          {
+            "stride": 5,
+            "offset": 3,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2708239976922663
+          },
+          {
+            "stride": 5,
+            "offset": 4,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2708241621322622
+          },
+          {
+            "stride": 10,
+            "offset": 0,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2708250516679884
+          },
+          {
+            "stride": 10,
+            "offset": 1,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082548876971596
+          },
+          {
+            "stride": 10,
+            "offset": 2,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2708257696370336
+          },
+          {
+            "stride": 10,
+            "offset": 3,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082589287571857
+          },
+          {
+            "stride": 10,
+            "offset": 4,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2708258570795788
+          },
+          {
+            "stride": 10,
+            "offset": 5,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082566083031095
+          },
+          {
+            "stride": 10,
+            "offset": 6,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082530269735683
+          },
+          {
+            "stride": 10,
+            "offset": 7,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082478123775816
+          },
+          {
+            "stride": 10,
+            "offset": 8,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27082409499600874
+          },
+          {
+            "stride": 10,
+            "offset": 9,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2708244597142433
+          },
+          {
+            "stride": 20,
+            "offset": 0,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270831669809581
+          },
+          {
+            "stride": 20,
+            "offset": 1,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708313295273611
+          },
+          {
+            "stride": 20,
+            "offset": 2,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270830825989167
+          },
+          {
+            "stride": 20,
+            "offset": 3,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708301577399524
+          },
+          {
+            "stride": 20,
+            "offset": 4,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27082932331197757
+          },
+          {
+            "stride": 20,
+            "offset": 5,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27082832122465794
+          },
+          {
+            "stride": 20,
+            "offset": 6,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27082714998440965
+          },
+          {
+            "stride": 20,
+            "offset": 7,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27082580808449447
+          },
+          {
+            "stride": 20,
+            "offset": 8,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708242940048611
+          },
+          {
+            "stride": 20,
+            "offset": 9,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270825041895761
+          },
+          {
+            "stride": 20,
+            "offset": 10,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270826404880861
+          },
+          {
+            "stride": 20,
+            "offset": 11,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270827619819069
+          },
+          {
+            "stride": 20,
+            "offset": 12,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27082868538553295
+          },
+          {
+            "stride": 20,
+            "offset": 13,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708296002442444
+          },
+          {
+            "stride": 20,
+            "offset": 14,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27083036304790853
+          },
+          {
+            "stride": 20,
+            "offset": 15,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27083097243781185
+          },
+          {
+            "stride": 20,
+            "offset": 16,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708314270436877
+          },
+          {
+            "stride": 20,
+            "offset": 17,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708317254835811
+          },
+          {
+            "stride": 20,
+            "offset": 18,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708318663637106
+          },
+          {
+            "stride": 20,
+            "offset": 19,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2708318482783288
+          }
+        ],
+        "maximum_absolute_shift_s": 7.945481581006497e-6,
+        "maximum_effective_step_s": 0.0020000000000000018
+      },
+      "maximum_abs_command_torque_nm": 21.96042681666677
+    },
+    "ztcf": {
+      "sample_count": 2801,
+      "time_step_s": 9.99999999999994e-5,
+      "grip_separation_mean_m": 0.07619924603392705,
+      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "maximum_resultant_reconstruction_residual_n": 1.0800249583553523e-12,
+      "maximum_couple_reconstruction_residual_nm": 0.04330086725192217,
+      "maximum_out_of_plane_hand_force_n": 1.7724527975857796,
+      "maximum_force_power_identity_residual_w": 1.9554136088117957e-11,
+      "maximum_source_linear_power_residual_w": 72.83368719676218,
+      "maximum_abs_deformation_power_w": 0.18782350292918154,
+      "minimum_equivalent_couple_nm": -19.6304815091102,
+      "minimum_couple_time_s": 0.2148,
+      "force_moment_at_minimum_nm": -19.659083055822055,
+      "free_torque_at_minimum_nm": -2.1633291254252906e-13,
+      "negative_duration_s": 0.08819999999999947,
+      "negative_angular_impulse_nm_s": -1.0584792755112524,
+      "crossings": {
+        "all": [
+          {
+            "time_s": 0.1818941780768366,
+            "direction": "positive_to_negative",
+            "left_time_s": 0.1818,
+            "right_time_s": 0.1819,
+            "bracket_width_s": 0.00010000000000001674
+          },
+          {
+            "time_s": 0.27001592205391867,
+            "direction": "negative_to_positive",
+            "left_time_s": 0.27,
+            "right_time_s": 0.2701,
+            "bracket_width_s": 9.999999999998899e-5
+          }
+        ],
+        "late": {
+          "time_s": 0.27001592205391867,
+          "direction": "negative_to_positive",
+          "left_time_s": 0.27,
+          "right_time_s": 0.2701,
+          "bracket_width_s": 9.999999999998899e-5
+        }
+      },
+      "late_crossing_resampling": {
+        "estimates": [
+          {
+            "stride": 1,
+            "offset": 0,
+            "effective_step_s": 9.99999999999994e-5,
+            "late_crossing_s": 0.27001592205391867
+          },
+          {
+            "stride": 2,
+            "offset": 0,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.2700159339182229
+          },
+          {
+            "stride": 2,
+            "offset": 1,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.27001598446397224
+          },
+          {
+            "stride": 5,
+            "offset": 0,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2700159697298928
+          },
+          {
+            "stride": 5,
+            "offset": 1,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2700161705527708
+          },
+          {
+            "stride": 5,
+            "offset": 2,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.27001634318325246
+          },
+          {
+            "stride": 5,
+            "offset": 3,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2700163681659944
+          },
+          {
+            "stride": 5,
+            "offset": 4,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2700162441392234
+          },
+          {
+            "stride": 10,
+            "offset": 0,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2700160301526818
+          },
+          {
+            "stride": 10,
+            "offset": 1,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27001647693431186
+          },
+          {
+            "stride": 10,
+            "offset": 2,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27001701700290964
+          },
+          {
+            "stride": 10,
+            "offset": 3,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27001741279533636
+          },
+          {
+            "stride": 10,
+            "offset": 4,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2700176629775326
+          },
+          {
+            "stride": 10,
+            "offset": 5,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2700177662044903
+          },
+          {
+            "stride": 10,
+            "offset": 6,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.270017721120124
+          },
+          {
+            "stride": 10,
+            "offset": 7,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2700175263571413
+          },
+          {
+            "stride": 10,
+            "offset": 8,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27001718053691076
+          },
+          {
+            "stride": 10,
+            "offset": 9,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27001668226932823
+          },
+          {
+            "stride": 20,
+            "offset": 0,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27001615381827027
+          },
+          {
+            "stride": 20,
+            "offset": 1,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27001707585210905
+          },
+          {
+            "stride": 20,
+            "offset": 2,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27001833417504856
+          },
+          {
+            "stride": 20,
+            "offset": 3,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700194547927493
+          },
+          {
+            "stride": 20,
+            "offset": 4,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700204364244087
+          },
+          {
+            "stride": 20,
+            "offset": 5,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270021277778895
+          },
+          {
+            "stride": 20,
+            "offset": 6,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700219775546273
+          },
+          {
+            "stride": 20,
+            "offset": 7,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700225344394541
+          },
+          {
+            "stride": 20,
+            "offset": 8,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700229471105299
+          },
+          {
+            "stride": 20,
+            "offset": 9,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27002321423419
+          },
+          {
+            "stride": 20,
+            "offset": 10,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700233344658245
+          },
+          {
+            "stride": 20,
+            "offset": 11,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700233064497492
+          },
+          {
+            "stride": 20,
+            "offset": 12,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700231288190763
+          },
+          {
+            "stride": 20,
+            "offset": 13,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.270022800195582
+          },
+          {
+            "stride": 20,
+            "offset": 14,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27002231918957337
+          },
+          {
+            "stride": 20,
+            "offset": 15,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700216843997528
+          },
+          {
+            "stride": 20,
+            "offset": 16,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27002089441308047
+          },
+          {
+            "stride": 20,
+            "offset": 17,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27001994780463584
+          },
+          {
+            "stride": 20,
+            "offset": 18,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27001884313747604
+          },
+          {
+            "stride": 20,
+            "offset": 19,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2700175789624934
+          }
+        ],
+        "maximum_absolute_shift_s": 7.412411905827199e-6,
+        "maximum_effective_step_s": 0.0020000000000000018
+      },
+      "maximum_abs_command_torque_nm": 0.0
+    },
+    "delta": {
+      "sample_count": 2801,
+      "time_step_s": 9.99999999999994e-5,
+      "grip_separation_mean_m": 0.07619924603392705,
+      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "maximum_resultant_reconstruction_residual_n": 1.0788037130282646e-12,
+      "maximum_couple_reconstruction_residual_nm": 0.05657230583626616,
+      "maximum_out_of_plane_hand_force_n": 6.407693110209414e-5,
+      "maximum_force_power_identity_residual_w": 1.3010426069826053e-18,
+      "maximum_source_linear_power_residual_w": 404.20857778801326,
+      "maximum_abs_deformation_power_w": 0.00023362780829871066,
+      "minimum_equivalent_couple_nm": -3.18025176979525,
+      "minimum_couple_time_s": 0.2196,
+      "force_moment_at_minimum_nm": 0.948842425142445,
+      "free_torque_at_minimum_nm": -4.129327969193272,
+      "negative_duration_s": 0.12059999999999926,
+      "negative_angular_impulse_nm_s": -0.23625617576972086,
+      "crossings": {
+        "all": [
+          {
+            "time_s": 0.15607668897501192,
+            "direction": "positive_to_negative",
+            "left_time_s": 0.156,
+            "right_time_s": 0.1561,
+            "bracket_width_s": 9.999999999998899e-5
+          },
+          {
+            "time_s": 0.27663421759721885,
+            "direction": "negative_to_positive",
+            "left_time_s": 0.2766,
+            "right_time_s": 0.2767,
+            "bracket_width_s": 9.999999999998899e-5
+          }
+        ],
+        "late": {
+          "time_s": 0.27663421759721885,
+          "direction": "negative_to_positive",
+          "left_time_s": 0.2766,
+          "right_time_s": 0.2767,
+          "bracket_width_s": 9.999999999998899e-5
+        }
+      },
+      "late_crossing_resampling": {
+        "estimates": [
+          {
+            "stride": 1,
+            "offset": 0,
+            "effective_step_s": 9.99999999999994e-5,
+            "late_crossing_s": 0.27663421759721885
+          },
+          {
+            "stride": 2,
+            "offset": 0,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.27663425818421333
+          },
+          {
+            "stride": 2,
+            "offset": 1,
+            "effective_step_s": 0.00020000000000000573,
+            "late_crossing_s": 0.2766342953898543
+          },
+          {
+            "stride": 5,
+            "offset": 0,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.27663477394182723
+          },
+          {
+            "stride": 5,
+            "offset": 1,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.27663438063044016
+          },
+          {
+            "stride": 5,
+            "offset": 2,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2766345274687469
+          },
+          {
+            "stride": 5,
+            "offset": 3,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.2766348453708111
+          },
+          {
+            "stride": 5,
+            "offset": 4,
+            "effective_step_s": 0.0005000000000000004,
+            "late_crossing_s": 0.27663492818838964
+          },
+          {
+            "stride": 10,
+            "offset": 0,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27663692700828624
+          },
+          {
+            "stride": 10,
+            "offset": 1,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.276637133796732
+          },
+          {
+            "stride": 10,
+            "offset": 2,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766371045450518
+          },
+          {
+            "stride": 10,
+            "offset": 3,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766368372633553
+          },
+          {
+            "stride": 10,
+            "offset": 4,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766363299405864
+          },
+          {
+            "stride": 10,
+            "offset": 5,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766355805442391
+          },
+          {
+            "stride": 10,
+            "offset": 6,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27663458702006877
+          },
+          {
+            "stride": 10,
+            "offset": 7,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766349099894434
+          },
+          {
+            "stride": 10,
+            "offset": 8,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.2766358131664201
+          },
+          {
+            "stride": 10,
+            "offset": 9,
+            "effective_step_s": 0.0010000000000000009,
+            "late_crossing_s": 0.27663648614871816
+          },
+          {
+            "stride": 20,
+            "offset": 0,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664455098574764
+          },
+          {
+            "stride": 20,
+            "offset": 1,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664358283398716
+          },
+          {
+            "stride": 20,
+            "offset": 2,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664236860942876
+          },
+          {
+            "stride": 20,
+            "offset": 3,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766409062144959
+          },
+          {
+            "stride": 20,
+            "offset": 4,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766391935289906
+          },
+          {
+            "stride": 20,
+            "offset": 5,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766372284097863
+          },
+          {
+            "stride": 20,
+            "offset": 6,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766350086905144
+          },
+          {
+            "stride": 20,
+            "offset": 7,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766356593747658
+          },
+          {
+            "stride": 20,
+            "offset": 8,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27663770905234153
+          },
+          {
+            "stride": 20,
+            "offset": 9,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.276639537998408
+          },
+          {
+            "stride": 20,
+            "offset": 10,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664114438360526
+          },
+          {
+            "stride": 20,
+            "offset": 11,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766425263595324
+          },
+          {
+            "stride": 20,
+            "offset": 12,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766436820584981
+          },
+          {
+            "stride": 20,
+            "offset": 13,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664460959326603
+          },
+          {
+            "stride": 20,
+            "offset": 14,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664530705679735
+          },
+          {
+            "stride": 20,
+            "offset": 15,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766457725219883
+          },
+          {
+            "stride": 20,
+            "offset": 16,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664600404140366
+          },
+          {
+            "stride": 20,
+            "offset": 17,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766459996470069
+          },
+          {
+            "stride": 20,
+            "offset": 18,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.27664575734988467
+          },
+          {
+            "stride": 20,
+            "offset": 19,
+            "effective_step_s": 0.0020000000000000018,
+            "late_crossing_s": 0.2766452751399678
+          }
+        ],
+        "maximum_absolute_shift_s": 1.1786444184813671e-5,
+        "maximum_effective_step_s": 0.0020000000000000018
+      },
+      "maximum_abs_command_torque_nm": 21.96042681666677
+    }
+  },
+  "decomposition": {
+    "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": 1.1546319456101628e-13,
+    "minimum_ztcf_to_base_couple_ratio_at_base_minimum": 0.8614691207424822,
+    "interpretation": "The nonzero ZTCF equivalent couple is a constraint-reaction wrench at the achieved BASE states. It is passive in the pointwise actuation sense, but it is not an unforced future trajectory."
+  },
+  "geometry_sweep": {
+    "source_case": "ztcf",
+    "source_time_s": 0.2148,
+    "spacing_scale_range": [0.0, 2.0],
+    "orientation_range_deg": [-120.0, 120.0],
+    "maximum_co_rotation_residual_nm": 1.4210854715202004e-14
+  }
+}

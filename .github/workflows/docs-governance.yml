@@ -7,8 +7,10 @@ on:
       - "scripts/check_docs_governance.py"
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
+      - "scripts/check_document_title_case.py"
       - "scripts/config/doc_size_budget.json"
       - "tests/scripts/test_doc_governance_checks.py"
+      - "tests/scripts/test_document_title_case.py"
       - ".github/workflows/docs-governance.yml"
   push:
     branches: [main]
@@ -17,8 +19,10 @@ on:
       - "scripts/check_docs_governance.py"
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
+      - "scripts/check_document_title_case.py"
       - "scripts/config/doc_size_budget.json"
       - "tests/scripts/test_doc_governance_checks.py"
+      - "tests/scripts/test_document_title_case.py"
       - ".github/workflows/docs-governance.yml"
 
 concurrency:
@@ -58,7 +62,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
           echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
-          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout
+          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout pypdf
 
       - name: Test documentation governance files
         run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
@@ -69,5 +73,8 @@ jobs:
       - name: Validate documentation size budget
         run: python3 scripts/check_doc_size_budget.py
 
+      - name: Validate document title capitalization
+        run: python3 scripts/check_document_title_case.py --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
+
       - name: Run documentation governance tests
-        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_document_title_case.py -q

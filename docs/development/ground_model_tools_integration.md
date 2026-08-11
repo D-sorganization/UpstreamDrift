@@ -17,7 +17,7 @@ UpstreamDrift does not copy the ground physics, wire records, schema builders,
 or reference executor. The consumer gateway binds only the Tools public façade
 and returns its records unchanged, preserving its validation and provenance.
 
-## Supported contract
+## Supported Contract
 
 The first consumer slice requires these exact Tools exports:
 
@@ -47,7 +47,7 @@ response_json = gateway.serialize_result(result)
 The gateway does not convert units, frames, enums, warnings, calibration, or
 provenance. Those values remain governed by the Tools v1 contracts.
 
-## Release boundary
+## Release Boundary
 
 This adapter is only a partial delivery of Tools issue #4276. It does not make
 the ground model available in a clean UpstreamDrift install by itself.
@@ -66,7 +66,7 @@ used for clean-clone Python and any compiled ground-result consumers.
 UpstreamDrift PR #8369 is not a release parent. It was closed unmerged on
 2026-08-10 as superseded by the clean, merged launch-monitor PR #8432.
 
-## Remaining acceptance gates
+## Remaining Acceptance Gates
 
 1. Merge the Tools ground stack through ordinary protected behavior.
 2. Repin `vendor/ud-tools` to the exact reviewed Tools merge; update the Cargo
@@ -79,7 +79,7 @@ UpstreamDrift PR #8369 is not a release parent. It was closed unmerged on
    outcomes, UI error presentation, generated frontend contracts, and protected
    CI before release.
 
-## Local verification
+## Local Verification
 
 ```bash
 python3 -m pytest tests/unit/ground_model/test_consumer_gateway.py -q

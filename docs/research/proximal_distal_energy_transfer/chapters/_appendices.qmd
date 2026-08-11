@@ -11,17 +11,26 @@ software.
 
 The current evidence boundary includes these known limitations:
 
-- Pointwise and re-simulation counterfactuals have not been compared on
-  matched trajectories; @sec-results supports instantaneous attribution only.
-- The model has two planar links and a fixed hub; torso, hub-path, long-axis
-  rotation, and closed-loop arm effects are absent.
-- The shaft is rigid, so strain-energy storage and recoil are absent.
+- A multi-phase matched-state torque-killswitch ensemble is complete for one
+  declared torque program; other torque programs, model classes, and uncertainty
+  distributions remain necessary before making general persistence claims.
+- The archived two-hand ZTCF is pointwise along the BASE state history. Its
+  force-generated negative couple is reproduced, but a two-hand forward
+  killswitch and matched solver/shaft variants remain open validation steps.
+- The primary model has two planar links and a fixed hub; torso, hub-path,
+  long-axis rotation, and closed-loop arm effects are absent.
+- The shaft extension is a three-coordinate point-mass surrogate with one
+  linear torsional mode. It is not a calibrated distributed-beam or equipment
+  model, and extreme low-stiffness deflections exceed its linear premise.
 - Actuator bounds are simplified; muscle activation and history effects are
   not represented.
 - Parameter sensitivity is one-at-a-time; coupled uncertainty and population
   distributions are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
+- The model ladder does not execute full-body cross-engine dynamics. Its 3-D
+  tier is a proper-frame transformation audit of a planar trace, and its
+  mobile-hub tier is a prescribed-motion inverse-dynamics comparison.
 
 # Reproducibility Guide {#sec-appendix-repro}
 
@@ -31,6 +40,14 @@ From the repository root (Python 3.11+ with the project dependencies):
 # Primary sweep, counterfactuals, and interface-power analysis
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 
+# Registered WSCG source extraction and interaction-force analysis
+python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
+python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
+python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
+python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
+python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
+python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
+
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -38,14 +55,23 @@ python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 
 # Figures and document
 python3 -m scripts.research.proximal_distal_energy.make_figures
+python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
+python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
+python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
+python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
+cd ../../..
+python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
 ```
 
 Outputs land in `data/` (JSON and NPZ with commit, integrator, and parameter
 provenance) and `figures/` (PDF and SVG). The analyses use fixed-step RK4 and
 contain no stochastic elements. Re-runs should reproduce the recorded values
-up to floating-point environment differences.
+up to floating-point environment differences. The final optimizer requires
+PyMuPDF, performs lossless object/stream compaction, and refuses an artifact
+that changes the page count, URI-link count, or outline-entry count.
 
 # Validation Evidence {#sec-appendix-validation}
 
@@ -90,3 +116,31 @@ Recorded outputs:
 - `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep.
 - `data/e1c_sensitivity.json` — alternative impact-definition results.
 - `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases.
+- `data/interaction_force_mechanisms.npz` — exact force, power, geometry, and
+  matched-state killswitch arrays.
+- `data/interaction_force_summary.json` — headline force, work, and divergence
+  metrics with counterfactual contracts.
+- `data/wscg_2024_hand_force_series.csv` — hash-verified values from the source
+  presentation's embedded chart cache.
+- `data/wscg_2024_source_provenance.json` — source hashes, series inventory, and
+  interpretation boundary.
+- `data/counterfactual_ensemble.json` — 96 baseline cut/horizon/timestep rows,
+  gravity and damping ablations, convergence metrics, and WSCG DELTA checks.
+- `data/counterfactual_selected_traces.npz` — commanded and zero-torque state,
+  force, and power traces for three representative cuts.
+- `data/wscg_two_hand_raw/*.csv` — portable, column-labeled exports of the
+  archived BASE, ZTCF, and DELTA two-hand tables.
+- `data/two_hand_wscg_analysis.json` — source hashes, wrench-reconstruction
+  residuals, reversal times, sensitivity results, and interpretation boundary.
+- `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
+  decompositions, poses, and geometry-counterfactual arrays.
+- `data/shaft_contribution_study.json` — matched rigid/flexible results,
+  termwise acceleration and power summaries, ablations, 120 robustness cases,
+  endpoint windows, timestep convergence, and interpretation boundaries.
+- `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state,
+  speed, force, acceleration-contribution, power, work, and energy traces.
+- `data/mechanism_ladder_study.json` — common-schema invariance residuals,
+  prescribed mobile-hub cases, closed-loop constraint diagnostics, and the
+  fail-closed model-discrepancy table.
+- `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and
+  closed-loop conditioning arrays used by the higher-order figures.
