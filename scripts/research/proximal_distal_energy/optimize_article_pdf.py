@@ -63,6 +63,8 @@ def optimize_pdf(
             deflate=True,
             deflate_images=True,
             deflate_fonts=True,
+            use_objstms=1,
+            compression_effort=100,
         )
     after = _pdf_contract(temporary)
     if after != before:
