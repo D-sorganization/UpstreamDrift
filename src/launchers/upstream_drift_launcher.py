@@ -625,7 +625,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _monitor_sidekick_api_readiness(self) -> None:
         """Delegate API readiness monitoring to the Sidekick owner."""
-        SidekickSidebarManager(self)._monitor_sidekick_api_readiness(
+        self.sidekick_sidebar_manager._monitor_sidekick_api_readiness(
             readiness_check=check_sidekick_api_readiness,
             schedule_once=QTimer.singleShot,
             monotonic=time.monotonic,
@@ -633,11 +633,11 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _report_sidekick_api_failure(self, readiness: Any) -> None:
         """Delegate terminal readiness reporting to the Sidekick owner."""
-        SidekickSidebarManager(self)._report_sidekick_api_failure(readiness)
+        self.sidekick_sidebar_manager._report_sidekick_api_failure(readiness)
 
     def _seed_sidekick_workspace(self) -> None:
         """Delegate workspace seeding to the Sidekick owner."""
-        SidekickSidebarManager(self)._seed_sidekick_workspace()
+        self.sidekick_sidebar_manager._seed_sidekick_workspace()
 
     def _handle_startup_timeout(self) -> None:
         """Recover from a hung async-startup worker (issue #5490).

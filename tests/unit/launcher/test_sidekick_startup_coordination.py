@@ -101,6 +101,32 @@ def test_sidebar_manager_seeds_launcher_workspace_registry() -> None:
     assert calls[1].args == ("model_registry", model_registry)
 
 
+def test_launcher_sidekick_delegates_use_owned_manager() -> None:
+    """Compatibility hooks must reuse the manager created during startup."""
+    manager = MagicMock(spec=SidekickSidebarManager)
+    launcher = SimpleNamespace(sidekick_sidebar_manager=manager)
+    readiness = object()
+
+    with (
+        patch(
+            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
+        ) as readiness_check,
+        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
+        patch("src.launchers.upstream_drift_launcher.time.monotonic") as monotonic,
+    ):
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+        UpstreamDriftLauncher._report_sidekick_api_failure(launcher, readiness)
+        UpstreamDriftLauncher._seed_sidekick_workspace(launcher)
+
+    manager._monitor_sidekick_api_readiness.assert_called_once_with(
+        readiness_check=readiness_check,
+        schedule_once=schedule,
+        monotonic=monotonic,
+    )
+    manager._report_sidekick_api_failure.assert_called_once_with(readiness)
+    manager._seed_sidekick_workspace.assert_called_once_with()
+
+
 def test_direct_launcher_imports_critical_sidekick_modules_from_pinned_tools() -> None:
     """Production bootstrap must never resolve critical modules from child copies."""
     repo_root = Path(__file__).resolve().parents[3]
@@ -502,6 +528,7 @@ def test_readiness_monitor_passes_current_instance_identity() -> None:
         background_api_process=MagicMock(),
         _monitor_sidekick_api_readiness=MagicMock(),
     )
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
     launcher.background_api_process.poll.return_value = None
 
     with (
@@ -530,6 +557,7 @@ def test_readiness_monitor_passes_current_instance_identity() -> None:
 def test_closed_launcher_stops_sidekick_liveness_monitor() -> None:
     """A queued callback must become inert once host shutdown begins."""
     launcher = SimpleNamespace(_sidekick_api_monitoring=False)
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
     with (
         patch(
@@ -553,6 +581,7 @@ def test_missing_runtime_contract_cannot_accept_unrelated_api() -> None:
         background_api_process=None,
         _report_sidekick_api_failure=MagicMock(),
     )
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
     stale_readiness = SimpleNamespace(
         ready=True,
@@ -584,6 +613,7 @@ def test_dead_api_process_receives_bounded_restart() -> None:
         _monitor_sidekick_api_readiness=MagicMock(),
         _report_sidekick_api_failure=MagicMock(),
     )
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
     with (
         patch(
@@ -622,6 +652,7 @@ def test_delayed_readiness_rechecks_running_child_without_relaunch() -> None:
         _monitor_sidekick_api_readiness=MagicMock(),
         _report_sidekick_api_failure=MagicMock(),
     )
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
     with (
         patch(
@@ -667,6 +698,7 @@ def test_child_launch_failure_exhausts_retry_budget_observably() -> None:
         _monitor_sidekick_api_readiness=MagicMock(),
         _report_sidekick_api_failure=MagicMock(),
     )
+    launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
     unavailable = SimpleNamespace(
         ready=False,
         url="http://127.0.0.1:8123/readyz",

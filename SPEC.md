@@ -2543,7 +2543,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ## Refactoring & Optimization Notes
 
 - `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
-- `spec-exempt`: Moved Sidekick readiness monitoring, degradation reporting,
+- `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting,
   and workspace seeding from the main launcher facade into the existing
-  `SidekickSidebarManager`, preserving launcher compatibility delegates while
-  retiring the facade's file-size exception.
+  launcher-owned `SidekickSidebarManager`, preserving compatibility delegates
+  while retiring the facade's file-size exception.
