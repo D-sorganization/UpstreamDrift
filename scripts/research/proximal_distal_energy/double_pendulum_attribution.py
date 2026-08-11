@@ -8,6 +8,8 @@ counterfactual.  Joint forces use the proximal-on-distal convention.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from scripts.research.proximal_distal_energy.interaction_forces import (
@@ -86,6 +88,104 @@ def _joint_forces(
     return np.stack((shoulder, wrist), axis=1)
 
 
+@dataclass(frozen=True)
+class SupportReactionDecomposition:
+    """Pointwise support-reaction attribution for the fixed-base mechanism.
+
+    The planar support force is a model demonstration, not a bilateral human
+    force-plate prediction.  ZTCF and ZVCF are evaluated at the achieved
+    configuration; neither is a forward counterfactual trajectory.
+    """
+
+    time: np.ndarray
+    total: np.ndarray
+    configuration: np.ndarray
+    velocity: np.ndarray
+    control: np.ndarray
+    ztcf: np.ndarray
+    zvcf: np.ndarray
+    force_direction: str = "support_on_mechanism"
+    frame: str = "inclined_swing_plane_cartesian_x_target_y_up"
+    units: str = "SI"
+    model_scope: str = "fixed_base_support_reaction_proxy"
+
+    def __post_init__(self) -> None:
+        time = np.asarray(self.time, dtype=float).reshape(-1)
+        arrays = {
+            name: np.asarray(getattr(self, name), dtype=float)
+            for name in (
+                "total",
+                "configuration",
+                "velocity",
+                "control",
+                "ztcf",
+                "zvcf",
+            )
+        }
+        if time.size < 2 or np.any(np.diff(time) <= 0.0):
+            raise ValueError("time must contain at least two increasing samples")
+        for name, value in arrays.items():
+            if value.shape != (time.size, 2) or not np.all(np.isfinite(value)):
+                raise ValueError(f"{name} must be finite with shape {(time.size, 2)}")
+            object.__setattr__(self, name, value)
+        object.__setattr__(self, "time", time)
+
+
+def double_pendulum_support_reaction_decomposition(
+    time: np.ndarray,
+    q: np.ndarray,
+    v: np.ndarray,
+    controls: np.ndarray,
+    params: GolfModelParams,
+) -> SupportReactionDecomposition:
+    """Decompose the fixed shoulder's planar support reaction pointwise.
+
+    The velocity component is ``ZTCF - configuration`` and the control
+    component is ``total - ZTCF``.  The independently evaluated ZVCF provides
+    a falsification check: it must equal ``configuration + control`` for this
+    control-affine rigid mechanism.
+    """
+    time_array, q_array, v_array, control_array = _trace_arrays(time, q, v, controls)
+    inertials = PlanarInertials.from_params(params)
+    backend = make_backend("ode", params)
+    zero_velocity = np.zeros_like(v_array)
+    zero_control = np.zeros_like(control_array)
+
+    def accelerations(velocity: np.ndarray, control: np.ndarray) -> np.ndarray:
+        return np.vstack(
+            [
+                backend.forward_dynamics(q_sample, v_sample, u_sample)
+                for q_sample, v_sample, u_sample in zip(
+                    q_array, velocity, control, strict=True
+                )
+            ]
+        )
+
+    total_qdd = accelerations(v_array, control_array)
+    ztcf_qdd = accelerations(v_array, zero_control)
+    zvcf_qdd = accelerations(zero_velocity, control_array)
+    configuration_qdd = accelerations(zero_velocity, zero_control)
+    total = _joint_forces(inertials, q_array, v_array, total_qdd)[:, 0]
+    ztcf = _joint_forces(inertials, q_array, v_array, ztcf_qdd)[:, 0]
+    zvcf = _joint_forces(inertials, q_array, zero_velocity, zvcf_qdd)[:, 0]
+    configuration = _joint_forces(inertials, q_array, zero_velocity, configuration_qdd)[
+        :, 0
+    ]
+    velocity = ztcf - configuration
+    control = total - ztcf
+    if not np.allclose(zvcf, configuration + control, atol=1e-10, rtol=1e-10):
+        raise RuntimeError("support-reaction ZVCF closure failed")
+    return SupportReactionDecomposition(
+        time=time_array,
+        total=total,
+        configuration=configuration,
+        velocity=velocity,
+        control=control,
+        ztcf=ztcf,
+        zvcf=zvcf,
+    )
+
+
 def double_pendulum_joint_transfer_trajectory(
     time: np.ndarray,
     q: np.ndarray,
@@ -159,4 +259,8 @@ def double_pendulum_joint_transfer_trajectory(
     )
 
 
-__all__ = ["double_pendulum_joint_transfer_trajectory"]
+__all__ = [
+    "SupportReactionDecomposition",
+    "double_pendulum_joint_transfer_trajectory",
+    "double_pendulum_support_reaction_decomposition",
+]

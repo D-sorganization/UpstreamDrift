@@ -19,6 +19,12 @@ same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
 bounded first-order residual-couple preview study records the late two-hand
 preactivation hypothesis without promoting it to a physiological finding.
+A constrained-contact extension now separates configuration, velocity,
+control, and other-external contributions to a uniquely determined reaction;
+the fixed-support double-pendulum benchmark adds pointwise GRF-analogue ZTCF
+and ZVCF traces, closure tests, prediction metrics, vector figures, and an
+explicit human force-plate falsification protocol. It does not infer bilateral
+foot forces from a resultant wrench.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -28,6 +34,8 @@ Ongoing validation and extension work is tracked in
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
+Ground-reaction drift attribution and human validation requirements are tracked
+in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
 
 ## Layout
 
@@ -56,6 +64,7 @@ python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
+python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -110,6 +119,10 @@ Experiments are deterministic (fixed-step RK4); provenance
 - The residual-couple preview test holds archived BASE and pointwise ZTCF
   traces fixed. It tests a signal-delay hypothesis, not muscle activation,
   metabolic effort, clubhead-speed improvement, or a human timing prescription.
+- The ground-reaction extension demonstrates constrained-reaction algebra and a
+  fixed-support planar benchmark. Human drift fractions, bilateral foot-force
+  allocation, COP, and free moment remain unvalidated without synchronized
+  force-plate, whole-body, and club data.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

@@ -1,9 +1,23 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
+
+- **#8493 ground-reaction drift attribution** — isolated branch
+  `feat/grf-drift-decomposition` adds a strict constrained-contact solve for
+  configuration, velocity, control, and external-load reaction components;
+  pointwise reaction ZTCF/ZVCF definitions; componentwise RMSE, normalized
+  RMSE, R-squared, bias, and impulse-error metrics; and a deterministic
+  fixed-support double-pendulum benchmark. The benchmark closes below
+  `2e-13 N`; ZTCF yields componentwise R-squared values of 0.871 and 0.814 but
+  large amplitude errors, and its vertical impulse exceeds the total because
+  control is opposing. The new chapter maps the quantities to GRF, COP, and
+  free-moment measurements and specifies a held-out human falsification
+  protocol. It explicitly does not claim bilateral allocation or human
+  validation. NotebookLM corpus review is still blocked by expired local
+  authentication; independently verified primary sources are linked directly.
 
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
