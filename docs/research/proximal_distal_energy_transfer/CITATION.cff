@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this open research resource, please cite the article and the exact release commit."
+title: "Proximal-to-Distal Energy Transfer in the Golf Swing"
+type: article
+authors:
+  - family-names: Olson
+    given-names: Dieter
+date-released: 2026-08-11
+license: MIT
+repository-code: "https://github.com/D-sorganization/UpstreamDrift"
+url: "https://affinedrift.com/articles/proximal-distal-energy-transfer.html"
+abstract: "Mechanism, counterfactual, model-ladder, uncertainty, and falsification resources for proximal-to-distal energy transfer."

@@ -374,7 +374,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, breakable, arc=.35mm, opacitybacktitle=0.6, left=2mm, toptitle=1mm, bottomtitle=1mm, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, titlerule=0mm, leftrule=.75mm, toprule=.15mm, bottomrule=.15mm, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, opacitybacktitle=0.6, breakable, leftrule=.75mm, arc=.35mm, colframe=quarto-callout-note-color-frame, left=2mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, rightrule=.15mm, bottomtitle=1mm, titlerule=0mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -5064,6 +5064,79 @@ participant split, and analysis-release authorization pass the same
 validator. The protocol removes analytical discretion; it does not
 remove the need for measurements.
 
+\chapter{Open-Resource Release and Reviewer
+Qualification}\label{sec-open-release}
+
+\section{Release Contract}\label{release-contract}
+
+The scientific product is distributed as an open research resource
+rather than as evidence for a software platform. Six presets identify
+reproducible entry points: analytical double pendulum, forward two-hand,
+coupled moving-base/flexible-club, reduced spatial common state,
+uncertainty/control, and experimental readiness. Preset names preserve
+the model ladder and never imply that a higher unexecuted tier is
+available.
+
+The release manifest hashes the report source and PDF, chapter source,
+linked bibliography, evidence JSON/NPZ/CSV, publication PDF/SVG figures,
+analysis scripts, evidence schema, data dictionary, citation metadata,
+and reviewer guide. A separate \texttt{CHECKSUMS.sha256} is sorted by
+path for standard tooling. Validation is read-only and fails on missing
+or changed bytes, unsafe paths, and malformed records. Updating expected
+hashes requires a separate explicit write command after analysis,
+render, and visual gates pass.
+
+\section{Reviewer Path}\label{reviewer-path}
+
+The reviewer workbench begins with the
+claim--evidence--alternative--falsifier matrix, then groups static
+SVG/PDF figures and downloadable data by model tier. It distinguishes
+analytical attribution, branched forward counterfactuals, common-state
+inverse dynamics, uncertainty/control screening, and experimental
+readiness. This is a deliberately static, link-stable review surface; it
+does not recompute results in a browser or introduce a second scientific
+code path.
+
+The data dictionary defines common units, state and wrench fields,
+power/work terms, residuals, provenance, ensemble partitions, and
+interpretation boundaries. Citation metadata points to the article and
+requests the exact release commit. Code and repository-authored
+documentation use the repository's MIT license; linked papers, external
+archives, and the registered WSCG source retain their own boundaries.
+
+\section{Qualification Commands}\label{qualification-commands}
+
+From the repository root:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.qualify\_open\_release list{-}presets}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.qualify\_open\_release validate}
+\end{Highlighting}
+\end{Shaded}
+
+The first command exposes canonical deterministic entry points. The
+second validates the pinned bundle but never changes it. Maintainers
+regenerate the manifest only through the explicit \texttt{write} action
+after all source data, figures, article source, rendered PDF, and
+documentation are final.
+
+\section{Qualified and Open Claims}\label{qualified-and-open-claims}
+
+The release records planar interaction dynamics and negative-couple
+feasibility as supported at their declared tiers, and geometry response
+as supported through reduced spatial common-state inverse dynamics. It
+records forward passive spatial contact and human predictions as
+untested, and a universal controller as unsupported.
+
+Four release-level completion gates remain visible: independently solved
+forward spatial contact in two engines; calibrated distributed-shaft
+comparison against a higher-order beam; governed held-out human
+evaluation; and external archive deposit with a persistent identifier.
+Archive deposition changes external state and has not been performed. A
+reproducible local bundle is not described as a permanently archived
+release until that deposit is verified.
+
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
 
@@ -6849,6 +6922,14 @@ residual sensitivities, and four prediction-specific falsifiers. The
 synthetic dry run passes all intake and fail-closed controls, but it
 cannot advance H1--H4. Governed human data are still required.
 
+The open-resource layer now supplies model-tier presets, a hash-pinned
+release manifest, standard checksums, a data dictionary, citation
+metadata, and a claim-first reviewer workbench. Validation fails closed
+on artifact drift. The bundle remains a qualified local release
+candidate rather than a persistent archive: cross-engine forward
+contact, calibrated beam comparison, governed human evaluation, and
+external identifier deposit remain open.
+
 \section{Research Priorities}\label{sec-future}
 
 The next work should reduce the largest inferential risks in dependency
@@ -6987,6 +7068,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_uncertainty\_control\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_experimental\_protocol\_dry\_run}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.qualify\_open\_release validate}
 
 \CommentTok{\# Robustness analyses}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.e1b\_bounded\_torque}
@@ -7185,6 +7267,10 @@ Recorded outputs:
   \texttt{data/experimental\_protocol\_\{dry\_run,readiness\}.json} ---
   synthetic-only intake fixture and fail-closed readiness
   classification; no human observations.
+\item
+  \texttt{release\_manifest.json} and \texttt{CHECKSUMS.sha256} ---
+  exact release artifact inventory, model-tier presets, claim status,
+  open gates, hashes, and sizes.
 \end{itemize}
 
 \chapter*{References}\label{references}

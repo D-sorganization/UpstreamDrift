@@ -98,7 +98,21 @@ under 150 lines; use Git history and linked issues for completed chronology.
 - **Phase 5 readiness gate:** seven protocol tests, Ruff, mypy, title,
   governance, source-hash, and visual gates pass. The optimized 137-page PDF
   remains below 1 MiB with 122 URI links and 166 outlines.
-- **Next action:** finish and commit Phase 5 readiness locally. When #8491 capacity-only
+- **Phase 6 complete locally:** branch `feat/8426-phase-6-open-release` adds
+  six model-tier CLI presets, deterministic manifest/checksums, read-only
+  fail-closed validation, data dictionary, citation metadata, license/source
+  boundaries, and a claim-first reviewer workbench. It records untested and
+  unsupported claims instead of hiding them.
+- **Phase 6 local gate:** four marked unit tests, Ruff, mypy, title,
+  governance, manifest, checksum, link, and visual gates pass. The optimized
+  139-page PDF is 1,012,137 bytes with 122 URI links and 171 outlines; rendered
+  release, conclusion, reproducibility, and parameter pages have no observed
+  clipping, overlap, broken glyphs, or unreadable content.
+- **Phase 6 external gates:** forward spatial contact in two engines, calibrated
+  distributed-shaft/beam comparison, governed human evaluation, and persistent
+  archive deposition are not complete. The bundle is a qualified local release
+  candidate, not yet a fully archived final scientific release.
+- **Next action:** commit Phase 6 release qualification locally. When #8491 capacity-only
   jobs settle, publish and merge Phase 2 against integration; then rebase and
   publish the unpushed Phase 3--Phase 5 branches sequentially. Continue Phase 6
   release qualification locally without promoting the synthetic dry run.
@@ -124,11 +138,13 @@ under 150 lines; use Git history and linked issues for completed chronology.
    design, delayed actuator, PRCC, identifiability, and control comparison.
 9. `scripts/research/proximal_distal_energy/experimental_protocol.py` — frozen
    experimental manifest and fail-closed governed-data readiness validator.
-10. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
+10. `scripts/research/proximal_distal_energy/release_bundle.py` — model-tier
+    presets, artifact hashing, checksum export, and release validation.
+11. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
     planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
-11. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+12. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
     — registered source claims and pointwise/forward interpretation boundary.
-12. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
+13. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
     infrastructure rules.
 
 ## Remaining Epic Order

@@ -61,6 +61,9 @@ program is tracked in
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
+| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
+| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                             | Artifact and recurring-field definitions with interpretation boundaries           |
+| [`release_manifest.json`](release_manifest.json)                                       | Hash-pinned presets, claim status, artifacts, and open release gates              |
 | [`references.bib`](references.bib)                                                     | Linked bibliography plus a clearly labeled project-originated presentation source |
 | [`figures/`](figures/)                                                                 | Figures generated from the recorded analyses (PDF and SVG)                        |
 | [`data/`](data/)                                                                       | Recorded experiment outputs with provenance (JSON + NPZ)                          |
@@ -87,6 +90,7 @@ python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_stud
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity

@@ -65,6 +65,13 @@ four prediction-specific falsifiers. The synthetic dry run passes all intake
 and fail-closed controls, but it cannot advance H1--H4. Governed human data are
 still required.
 
+The open-resource layer now supplies model-tier presets, a hash-pinned release
+manifest, standard checksums, a data dictionary, citation metadata, and a
+claim-first reviewer workbench. Validation fails closed on artifact drift. The
+bundle remains a qualified local release candidate rather than a persistent
+archive: cross-engine forward contact, calibrated beam comparison, governed
+human evaluation, and external identifier deposit remain open.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
