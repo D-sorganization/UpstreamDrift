@@ -155,3 +155,11 @@ def test_writer_emits_machine_readable_evidence_and_vector_figures(
         assert svg.stat().st_size > 1_000
         assert pdf.stat().st_size > 1_000
         assert "<svg" in svg.read_text(encoding="utf-8")[:1_000]
+
+    repeated_root = tmp_path / "repeated"
+    write_study(repeated_root)
+    for stem in FIGURE_STEMS:
+        for suffix in ("svg", "pdf"):
+            first = tmp_path / "figures" / f"{stem}.{suffix}"
+            repeated = repeated_root / "figures" / f"{stem}.{suffix}"
+            assert first.read_bytes() == repeated.read_bytes()

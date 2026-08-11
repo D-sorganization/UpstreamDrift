@@ -17,10 +17,13 @@ Update this file with every PR and every push to main.
   index. A separate bounded residual-couple preview test reduces the declared
   30 ms actuator RMSE by 57.6%; it is a signal-delay hypothesis, not evidence
   of muscle preactivation or human performance. The seven generated evidence
-  figures have been visually inspected. Remaining handoff: render and inspect
-  the complete PDF, run repository gates, merge the protected PR, then pin the
-  compact consumer snapshot and SVGs in AffineDrift to the actual merged
-  commit.
+  figures and all pages of the final 106-page PDF have been visually inspected.
+  Lossless object-stream compaction yields 792,985 bytes while preserving 110
+  URI links and 122 outline entries. Remaining handoff: run the final repository
+  gates, merge the protected PR, then pin the compact consumer snapshot and
+  SVGs in AffineDrift to the actual merged commit. The unrelated chat-dock size
+  exception had expired on `main`; #8472 now owns a final renewal through
+  2026-08-31 so the all-files CI gate remains truthful and operational.
 
 - **#8461 WSCG 2024 legacy-evidence audit** — both archived source decks were
   hash-matched to the user-supplied originals and all 12 slides were inspected.

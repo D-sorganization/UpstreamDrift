@@ -660,15 +660,29 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
 
 
 def _save_figure(figure: plt.Figure, output: Path, stem: str) -> None:
+    svg_path = output / f"{stem}.svg"
     figure.savefig(
-        output / f"{stem}.svg",
+        svg_path,
         bbox_inches="tight",
-        metadata={"Creator": "UpstreamDrift"},
+        metadata={"Creator": "Independent Open Research", "Date": None},
+    )
+    # Matplotlib leaves insignificant spaces at the end of multiline path
+    # definitions. Normalize those bytes so generated SVGs satisfy the same
+    # whitespace gate as hand-authored sources.
+    svg_text = svg_path.read_text(encoding="utf-8")
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     figure.savefig(
         output / f"{stem}.pdf",
         bbox_inches="tight",
-        metadata={"Creator": "UpstreamDrift"},
+        metadata={
+            "Creator": "Independent Open Research",
+            "CreationDate": None,
+            "ModDate": None,
+        },
     )
     plt.close(figure)
 
@@ -683,6 +697,12 @@ def _make_figures(
             "axes.titlesize": 9,
             "figure.titlesize": 12,
             "svg.fonttype": "none",
+            "svg.hashsalt": "hand-path-attribution-v1",
+            # Reuse PDF core fonts instead of embedding seven duplicate subsets.
+            # This keeps text as vectors while satisfying the lossless article
+            # size guard without reducing figure content or resolution.
+            "pdf.use14corefonts": True,
+            "pdf.compression": 9,
         }
     )
 

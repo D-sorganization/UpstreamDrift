@@ -10,13 +10,13 @@ without knowing how any concrete model generated those arrays.
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
-FloatArray = npt.NDArray[np.float64]
-BoolArray = npt.NDArray[np.bool_]
+FloatArray: TypeAlias = npt.NDArray[np.float64]
+BoolArray: TypeAlias = npt.NDArray[np.bool_]
 
 _DEFAULT_EPSILON = 1e-12
 _CLOSURE_RTOL = 1e-9
