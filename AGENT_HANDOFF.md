@@ -5,10 +5,11 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **Launcher-settings size slice (local, no publish)** — branch
-  `codex/settings-dialog-size-decomposition` starts at exact draft PR #8486 head
-  `624043537a5ab10aa7ef56dc61685a004b872c0c`; local candidate
-  `e63e6908db6a1caa113a57f43a44fc0ecc00dc17` is tracked by
+- **Launcher-settings size slice — ready PR
+  [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
+  `codex/settings-dialog-size-decomposition` starts at exact PR #8486 head
+  `624043537a5ab10aa7ef56dc61685a004b872c0c`; published head
+  `832969ebbd6c58c9892dc16f82638e67a05b20dc` is tracked by
   [#8487](https://github.com/D-sorganization/UpstreamDrift/issues/8487). It
   extracts runtime dependency probes and the WSL setup dialog into
   `settings_runtime.py`, and extracts
@@ -28,9 +29,11 @@ Update this file with every PR and every push to main.
   3.12 MyPy wrapper excludes all three launcher modules by repository policy.
   The only remaining global module-size failure is the parent-identical expired
   `launcher_ui_setup.py` exception. The cited #5922 and #7341/#7342 issues are
-  closed or unrelated; #8487 is now the truthful tracker. Keep this candidate
-  local until it receives independent review, and do not claim issue completion
-  or publication before that review and normal protected repository behavior.
+  closed or unrelated; #8487 is now the truthful tracker. Independent review
+  found no actionable regression and reran all 44 focused tests successfully.
+  PR #8489 is ready for review, but required protected CI, approval, parent
+  dependency, issue completion, and release state remain unresolved; do not
+  claim any of them before normal protected repository behavior confirms them.
 
 - **#8485 Simscape 3D-viewer size slice — draft PR
   [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
