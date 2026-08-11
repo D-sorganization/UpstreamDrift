@@ -71,13 +71,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-08-11** - Decomposed the Simscape C3D viewer without changing its
-  public UI contract. User-defined segment shape construction, fitting,
-  library/theme resolution, artist lifecycle, and frame updates now live in a
-  private controller, while `Viewer3DTab` keeps its historical segment methods
-  as delegates. The facade is 1,127 lines (from 1,413), and its file-size and
-  expired module-size exceptions are removed. The global module-size gate still
-  reports the unrelated launcher UI and settings modules.
+- **2026-08-11** - Decomposed the Simscape C3D viewer for #8485 without
+  changing its public UI contract. User-defined segment shape construction,
+  fitting, library/theme resolution, artist lifecycle, and frame updates now
+  live in a private controller, while `Viewer3DTab` keeps its historical
+  segment methods as delegates. The facade is 1,127 lines (from 1,413), and its
+  file-size and expired module-size exceptions are removed. The global
+  module-size gate still reports the unrelated launcher UI and settings
+  modules.
 - **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
   ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
   two-arm adapters; deterministic force-vector, impulse, power, work,
